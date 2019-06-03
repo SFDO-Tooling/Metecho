@@ -9,8 +9,68 @@ Cloning the project
     git clone git@github.com:SFDO-Tooling/metashare
     cd metashare
 
+Docker-based development (preferred)
+------------------------------------
+
+1. Install `Docker Desktop (Community Edition)`_ and make sure it is running.
+
+2. Create an ``.env`` file with the required environment variables, set
+   per "Making a virtual env" below::
+
+   DJANGO_SECRET_KEY=...
+   DJANGO_HASHID_SALT=...
+   DB_ENCRYPTION_KEY=...
+   BUCKETEER_AWS_ACCESS_KEY_ID=...
+   BUCKETEER_AWS_SECRET_ACCESS_KEY=...
+   BUCKETEER_BUCKET_NAME=...
+
+3. Run ``docker-compose build`` to build/re-build all the container images.
+
+4. Run ``docker-compose up`` to start the server(s).
+
+5. Visit http://localhost:8000 in your browser.
+
+6. When you're done with that, just Ctrl-C in the terminal where the
+   containers are running. You can also ``docker-compose down`` to clean
+   up all running containers. (``docker-compose ps`` will tell you what
+   containers are currently running.)
+
+.. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
+
+Docker development tasks
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To run any development tasks (such as changing Python or JS
+dependencies, or generating or running migrations, or running a Django
+shell), you will need to run them inside the appropriate Docker image.
+This takes the general form ``docker-compose run --no-deps [web or
+client] [command]``. In some cases, such as for migrations or a Django
+shell, you will want to omit the ``--no-deps`` flag.
+
+You shouldn't need to run any of the setup tasks you need in the
+locally-running variant; the Docker images will take care of setting up
+a database and installing Python and JS dependencies for you.
+
+When you change Python or JS dependencies, you will need to rebuild the
+Docker images, as we store dependencies in the images for speed. This
+requires running ``docker-compose build [web or client]``.
+
+Tests and linting can be run similarly::
+
+    docker-compose run --no-deps client yarn prettier
+    docker-compose run --no-deps client yarn eslint
+    docker-compose run --no-deps client yarn test
+
+    docker-compose run --no-deps web black manage.py metashare/ config/
+    docker-compose run --no-deps web isort -rc manage.py metashare/ config/
+    docker-compose run --no-deps web flake8 manage.py metashare/ config/
+    docker-compose run web pytest
+
+Locally-running development (dispreferred)
+------------------------------------------
+
 Making a virtual env
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 MetaShare development requires Python v3.7. If ``which python3.7`` returns a
 non-empty path, it's already installed and you can continue to the next step. If
@@ -29,7 +89,8 @@ create a virtualenv (once you have `virtualenvwrapper`_ installed locally)::
 
 Install Python requirements::
 
-    pip install -Ur requirements/local.txt
+    pip install pipenv
+    pipenv install --dev
 
 Copy the ``.env`` file somewhere that will be sourced when you need it::
 
@@ -38,7 +99,7 @@ Copy the ``.env`` file somewhere that will be sourced when you need it::
 Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to any
 two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
 
-    python manage.py shell
+    python
     from cryptography.fernet import Fernet
     Fernet.generate_key()
 
@@ -64,7 +125,7 @@ instead of any system-wide Node you may have.
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.io/en/latest/
 
 Installing JavaScript requirements
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The project-local version of `Node.js`_ can be downloaded and unpacked locally
 (in the git-ignored ``node/`` directory), so you don't have to install it
@@ -86,7 +147,7 @@ Then use ``yarn`` to install dependencies::
 .. _yarn: https://yarnpkg.com/
 
 Setting up the database
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Assuming you have `Postgres <https://www.postgresql.org/download/>`_ installed
 and running locally::
@@ -98,7 +159,7 @@ Then run the initial migrations::
     python manage.py migrate
 
 Running the server
-------------------
+~~~~~~~~~~~~~~~~~~
 
 The local development server requires `Redis <https://redis.io/>`_ to manage
 background worker tasks. If you can successfully run ``redis-cli ping`` and see
@@ -115,7 +176,7 @@ The running server will be available at `<http://localhost:8080/>`_.
 .. _Redis Quick Start: https://redis.io/topics/quickstart
 
 Logging in with Salesforce
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To setup the Salesforce OAuth integration, run the ``populate_social_apps``
 management command. The values to use in place of the ``XXX`` and ``YYY`` flags
@@ -134,7 +195,7 @@ command::
     python manage.py promote_superuser <your email>
 
 Development Tasks
------------------
+~~~~~~~~~~~~~~~~~
 
 - ``yarn serve``: starts development server (with watcher) at
   `<http://localhost:8080/>`_ (assets are served from ``dist/`` dir)
@@ -157,12 +218,12 @@ In commit messages or pull request titles, we use the following emojis to label
 which development commands need to be run before serving locally (these are
 automatically prepended to commit messages):
 
-- 📦 (``:package:``) -> ``pip install -r requirements/local.txt``
+- 📦 (``:package:``) -> ``pipenv install --dev``
 - 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
-- 🐈 (``:cat2:``) -> ``yarn``
+- 🧶 (``:yarn:``) -> ``yarn``
 
 Internationalization
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 To build and compile ``.mo`` and ``.po`` files for the backend, run::
 

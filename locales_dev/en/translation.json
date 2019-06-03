@@ -1,5 +1,4 @@
 {
-  "MetaShare": "MetaShare",
   "404": "404",
   "Authentication Error": "Authentication Error",
   "Cancel": "Cancel",
@@ -9,6 +8,7 @@
   "Log In": "Log In",
   "Log In With a Different Org": "Log In With a Different Org",
   "Log Out": "Log Out",
+  "MetaShare": "MetaShare",
   "Production or Developer Org": "Production or Developer Org",
   "Sandbox or Scratch Org": "Sandbox or Scratch Org",
   "This is sample intro text, where your content might live.": "This is sample intro text, where your content might live.",
