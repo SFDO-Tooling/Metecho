@@ -1,0 +1,233 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/metashare
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+            - v1-metashare-py-3.7-
+      - restore_cache:
+          keys:
+            - v1-metashare-npm-{{ checksum "yarn.lock" }}
+            - v1-metashare-npm-
+      - run:
+          name: Install Node & Yarn
+          command: ./bin/unpack-node
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metashare/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metashare/node/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Install Dependencies
+          command: |
+            yarn
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -Ur requirements/local.txt
+      - run:
+          name: Check that yarn.lock matches package.json
+          command: |
+            if [[ ! "${CIRCLE_BRANCH}" =~ greenkeeper\/.* ]]; then
+              [[ $(git diff --name-only yarn.lock) == "" ]] && exit 0
+              echo ">> yarn.lock is out of date, run \"yarn\""
+              git diff --no-pager yarn.lock
+              exit 1
+            fi
+      - run:
+          name: Compile Front-End Assets
+          command: yarn prod
+      - save_cache:
+          key: v1-metashare-node-{{ checksum "package.json" }}
+          paths:
+            - '~/metashare/node'
+      - save_cache:
+          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          paths:
+            - '~/.cache/pip'
+            - ./venv
+      - save_cache:
+          key: v1-metashare-npm-{{ checksum "yarn.lock" }}
+          paths:
+            - '~/.cache/yarn'
+            - '~/metashare/node_modules'
+
+  lint:
+    working_directory: ~/metashare
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-metashare-node-{{ checksum "package.json" }}
+      - restore_cache:
+          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - restore_cache:
+          keys:
+            - v1-metashare-npm-{{ checksum "yarn.lock" }}
+            - v1-metashare-npm-
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metashare/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metashare/node/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Lint
+          command: |
+            . venv/bin/activate
+            yarn lint
+
+  test-client:
+    working_directory: ~/metashare
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-metashare-node-{{ checksum "package.json" }}
+      - restore_cache:
+          keys:
+            - v1-metashare-npm-{{ checksum "yarn.lock" }}
+            - v1-metashare-npm-
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metashare/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metashare/node/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Test JS
+          command: yarn test:coverage
+      - store_artifacts:
+          path: coverage
+          destination: js-reports
+      - store_test_results:
+          path: coverage
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage
+
+  test-python:
+    working_directory: ~/metashare
+    docker:
+      - image: circleci/python:3.7
+      - image: circleci/redis:latest
+      - image: circleci/postgres:latest
+        environment:
+          POSTGRES_USER: ubuntu
+          POSTGRES_DB: circle_test
+          POSTGRES_PASSWORD: circle_test
+          AWS_BUCKET_NAME: None
+          AWS_SECRET_ACCESS_KEY: None
+          AWS_ACCESS_KEY_ID: None
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - run:
+          name: Install Dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.6.1
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Run Database Migrations
+          command: |
+            . venv/bin/activate
+            python ./manage.py migrate --no-input
+      - run:
+          name: Test Python
+          command: |
+            . venv/bin/activate
+            pytest --junitxml=pycov/pytest-junit.xml
+      - store_artifacts:
+          path: htmlcov
+          destination: py-reports
+      - store_test_results:
+          path: pycov
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .coverage
+
+  report-test-coverage:
+    working_directory: ~/metashare
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: v1-metashare-node-{{ checksum "package.json" }}
+      - restore_cache:
+          keys:
+            - v1-metashare-npm-{{ checksum "yarn.lock" }}
+            - v1-metashare-npm-
+      - restore_cache:
+          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - run:
+          name: Set $PATH
+          command: |
+            echo 'export PATH=~/metashare/node_modules/.bin:$PATH' >> $BASH_ENV
+            echo 'export PATH=~/metashare/node/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Report Test Coverage
+          command: |
+            . venv/bin/activate
+            yarn pytest:report-coverage
+            yarn test:report-coverage
+            curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+      - run:
+          name: Check Test Coverage
+          command: |
+            . venv/bin/activate
+            yarn pytest:check-coverage
+            yarn test:check-coverage
+
+  build-docs:
+    working_directory: ~/metashare
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+      - run:
+          name: Build Documentation
+          command: |
+            . venv/bin/activate
+            cd docs
+            make html
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - lint:
+          requires:
+            - build
+      - test-client:
+          requires:
+            - build
+      - test-python:
+          requires:
+            - build
+      - build-docs:
+          requires:
+            - build
+      - report-test-coverage:
+          requires:
+            - test-client
+            - test-python

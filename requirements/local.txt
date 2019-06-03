@@ -1,0 +1,6 @@
+# Local development dependencies go here
+
+-r test.txt
+
+django-extensions==2.1.7
+ipython==7.5.0

@@ -1,0 +1,6 @@
+[run]
+omit =
+    metashare/*/migrations/*
+
+[report]
+show_missing = True
