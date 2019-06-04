@@ -127,7 +127,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
-      "prepare-commit-msg": "./bin/prepare-commit-msg"
+      "prepare-commit-msg": "./hooks/prepare-commit-msg"
     }
   },
   "lint-staged": {
