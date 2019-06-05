@@ -36,7 +36,7 @@ services:
       - .:/app
       - /app/node_modules
     ports:
-      - "0.0.0.0:3000:3000"
+      - "0.0.0.0:8080:8080"
 
   # Sets up git hooks for local development:
   githooks:

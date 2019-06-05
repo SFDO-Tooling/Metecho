@@ -8,6 +8,4 @@ TEMPLATES[0]["DIRS"] = [
     str(PROJECT_ROOT / "templates"),
 ]
 
-RQ = {
-    "WORKER_CLASS": "metashare.rq_worker.ConnectionClosingHerokuWorker"
-}
+RQ = {"WORKER_CLASS": "metashare.rq_worker.ConnectionClosingHerokuWorker"}

@@ -40,13 +40,14 @@ do
 done
 
 if [ ${#JS[@]} -ne 0 ]; then
-    dcr client yarn lint:js ${JS[@]}
+    dcr client ./node_modules/.bin/prettier --write ${JS[@]}
+    dcr client ./node_modules/.bin/eslint ${JS[@]}
     git add ${JS[@]}
 fi
 
 if [ ${#SCSS[@]} -ne 0 ]; then
-    dcr client prettier --write ${SCSS[@]}
-    dcr client stylelint ${SCSS[@]}
+    dcr client ./node_modules/.bin/prettier --write ${SCSS[@]}
+    dcr client ./node_modules/.bin/stylelint ${SCSS[@]}
     git add ${SCSS[@]}
 fi
 
@@ -54,17 +55,5 @@ if [ ${#PY[@]} -ne 0 ]; then
     dcr web isort ${PY[@]}
     dcr web black ${PY[@]}
     dcr web flake8 ${PY[@]}
-    dcr web mypy books
     git add ${PY[@]}
-fi
-
-if [ ${#PYI[@]} -ne 0 ]; then
-    dcr web isort ${PYI[@]}
-    dcr web black ${PYI[@]}
-    dcr web mypy books
-    git add ${PYI[@]}
-fi
-
-if [ ${#OTHER[@]} -ne 0 ]; then
-    git add ${OTHER[@]}
 fi

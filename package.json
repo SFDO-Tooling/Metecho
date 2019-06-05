@@ -1,17 +1,11 @@
 {
   "name": "metashare",
   "version": "0.1.0",
-  "description": "A tagline to end all taglines.",
-  "homepage": "metashare.org",
   "private": true,
-  "license": "BSD",
-  "author": {
-    "name": "Salesforce.org",
-    "email": "kit@oddbird.net"
-  },
+  "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SFDO-Tooling/metashare.git"
+    "url": "https://github.com/SFDO-Tooling/MetaShare.git"
   },
   "engines": {
     "node": "10.16.0",

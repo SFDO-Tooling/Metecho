@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from django.core.exceptions import SuspiciousOperation
+
 from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from ..views import (
@@ -71,12 +72,8 @@ class TestSalesforceOAuth2Mixin:
 
 class TestLoggingOAuth2LoginView:
     def test_dispatch(self, rf, mocker):
-        mocker.patch(
-            "metashare.multisalesforce.views.OAuth2LoginView.dispatch"
-        )
-        logger = mocker.patch(
-            "metashare.multisalesforce.views.logger.info"
-        )
+        mocker.patch("metashare.multisalesforce.views.OAuth2LoginView.dispatch")
+        logger = mocker.patch("metashare.multisalesforce.views.logger.info")
         request = rf.get("/")
         request.session = {"socialaccount_state": (None, "some-verifier")}
 
@@ -87,12 +84,8 @@ class TestLoggingOAuth2LoginView:
 
 class TestLoggingOAuth2CallbackView:
     def test_dispatch(self, rf, mocker):
-        mocker.patch(
-            "metashare.multisalesforce.views.OAuth2CallbackView.dispatch"
-        )
-        logger = mocker.patch(
-            "metashare.multisalesforce.views.logger.info"
-        )
+        mocker.patch("metashare.multisalesforce.views.OAuth2CallbackView.dispatch")
+        logger = mocker.patch("metashare.multisalesforce.views.logger.info")
         request = rf.get("/")
         request.session = {"state": "some-verifier"}
 

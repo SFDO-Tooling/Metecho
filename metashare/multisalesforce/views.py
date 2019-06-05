@@ -11,10 +11,10 @@ from allauth.socialaccount.providers.salesforce.views import (
 )
 from allauth.utils import get_request_param
 from django.core.exceptions import SuspiciousOperation
+
 from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from ..api.constants import ORGANIZATION_DETAILS
-
 from .provider import (
     SalesforceCustomProvider,
     SalesforceProductionProvider,

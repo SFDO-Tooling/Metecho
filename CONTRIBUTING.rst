@@ -6,61 +6,69 @@ Cloning the project
 
 ::
 
-    git clone git@github.com:SFDO-Tooling/metashare
-    cd metashare
+    git clone git@github.com:SFDO-Tooling/MetaShare
+    cd MetaShare
 
 Docker-based development (preferred)
 ------------------------------------
 
 1. Install `Docker Desktop (Community Edition)`_ and make sure it is running.
 
-2. Create an ``.env`` file with the required environment variables, set
-   per "Making a virtual env" below::
+2. Create an ``.env`` file with the required environment variables::
 
-      DJANGO_SECRET_KEY=...
-      DJANGO_HASHID_SALT=...
-      DB_ENCRYPTION_KEY=...
-      BUCKETEER_AWS_ACCESS_KEY_ID=...
-      BUCKETEER_AWS_SECRET_ACCESS_KEY=...
-      BUCKETEER_BUCKET_NAME=...
+    cp env.docker.example .env
 
-   It's important that these *not* have ``export`` before them.
+Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to any
+two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
+
+    python
+    from cryptography.fernet import Fernet
+    Fernet.generate_key()
+
+This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents of
+``'...'``, e.g. ``DB_ENCRYPTION_KEY="mystring="``.
+
+Finally, set the following environment variables (if you're an OddBird, you can
+find these values in the shared Keybase team folder -- ``metashare/env``)::
+
+    BUCKETEER_AWS_ACCESS_KEY_ID=...
+    BUCKETEER_AWS_SECRET_ACCESS_KEY=...
+    BUCKETEER_BUCKET_NAME=...
 
 3. Run ``docker-compose build`` to build/re-build all the container images.
 
 4. Run ``docker-compose up`` to start the server(s).
 
-5. Visit http://localhost:8000 in your browser.
+5. Visit `<http://localhost:8080/>`_ in your browser.
 
-6. When you're done with that, just Ctrl-C in the terminal where the
-   containers are running. You can also ``docker-compose down`` to clean
-   up all running containers. (``docker-compose ps`` will tell you what
-   containers are currently running.)
+6. When you're done working on MetaShare, Ctrl-C in the terminal where the
+   containers are running. You can also ``docker-compose down`` to clean up all
+   running containers. (``docker-compose ps`` will tell you what containers are
+   currently running.)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
 
 Docker development tasks
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-To run any development tasks (such as changing Python or JS
-dependencies, or generating or running migrations, or running a Django
-shell), you will need to run them inside the appropriate Docker image.
-This takes the general form ``docker-compose run --no-deps [web or
-client] [command]``. In some cases, such as for migrations or a Django
-shell, you will want to omit the ``--no-deps`` flag.
+To run any development tasks (such as changing Python or JS dependencies, or
+generating or running migrations, or running a Django shell), you will need to
+run them inside the appropriate Docker image. This takes the general form
+``docker-compose run --no-deps [web or client] [command]``. In some cases, such
+as for migrations or a Django shell, you will want to omit the ``--no-deps``
+flag.
 
-You shouldn't need to run any of the setup tasks you need in the
-locally-running variant; the Docker images will take care of setting up
-a database and installing Python and JS dependencies for you.
+You shouldn't need to run any of the setup tasks; the Docker images will take
+care of setting up a database and installing Python and JS dependencies for you.
 
-When you change Python or JS dependencies, you will need to rebuild the
-Docker images, as we store dependencies in the images for speed. This
-requires running ``docker-compose build [web or client]``.
+When you change Python or JS dependencies, you will need to rebuild the Docker
+images, as we store dependencies in the images for speed. This requires running
+``docker-compose build [web or client]``.
 
 Tests and linting can be run similarly::
 
-    docker-compose run --no-deps client yarn prettier
-    docker-compose run --no-deps client yarn eslint
+    docker-compose run --no-deps client yarn lintjs
+    docker-compose run --no-deps client yarn stylelint
     docker-compose run --no-deps client yarn test
 
     docker-compose run --no-deps web black manage.py metashare/ config/
@@ -68,8 +76,8 @@ Tests and linting can be run similarly::
     docker-compose run --no-deps web flake8 manage.py metashare/ config/
     docker-compose run web pytest
 
-Locally-running development (dispreferred)
-------------------------------------------
+Locally-running development (not recommended)
+---------------------------------------------
 
 Making a virtual env
 ~~~~~~~~~~~~~~~~~~~~
@@ -96,7 +104,7 @@ Install Python requirements::
 
 Copy the ``.env`` file somewhere that will be sourced when you need it::
 
-    cp env.example $VIRTUAL_ENV/bin/postactivate
+    cp env.local.example $VIRTUAL_ENV/bin/postactivate
 
 Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to any
 two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
@@ -105,8 +113,8 @@ two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
     from cryptography.fernet import Fernet
     Fernet.generate_key()
 
-This will output a bytestring, e.g. ``b'mystring='``. Copy just the contents of
-``'...'``, e.g. ``export DB_ENCRYPTION_KEY='mystring='``.
+This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents of
+``'...'``, e.g. ``export DB_ENCRYPTION_KEY="mystring="``.
 
 Finally, add the following environment variables::
 
@@ -116,10 +124,10 @@ Finally, add the following environment variables::
 
 Now run ``workon metashare`` again to set those environment variables.
 
-Your ``PATH`` (and environment variables) will be updated when you
-``workon metashare`` and restored when you ``deactivate``. This will make sure
-that whenever you are working on the project, you use the project-specific version of Node
-instead of any system-wide Node you may have.
+Your ``PATH`` (and environment variables) will be updated when you ``workon
+metashare`` and restored when you ``deactivate``. This will make sure that
+whenever you are working on the project, you use the project-specific version of
+Node instead of any system-wide Node you may have.
 
 **All of the remaining steps assume that you have the virtualenv activated.**
 (``workon metashare``)
@@ -138,8 +146,9 @@ To download and install the project-local version of Node (and `yarn`_)::
 
     bin/unpack-node
 
-If you can run ``which node`` and see a path inside your project directory ending with
-``.../node/bin/node``, then you've got it set up right and can move on.
+If you can run ``which node`` and see a path inside your project directory
+ending with ``.../node/bin/node``, then you've got it set up right and can move
+on.
 
 Then use ``yarn`` to install dependencies::
 
@@ -182,17 +191,18 @@ Logging in with Salesforce
 
 To setup the Salesforce OAuth integration, run the ``populate_social_apps``
 management command. The values to use in place of the ``XXX`` and ``YYY`` flags
-can be found on the Connected App you've made in your Salesforce configuration::
+can be found on the Connected App you've made in your Salesforce configuration,
+or if you're an OddBird, you can find these values in the shared Keybase team
+folder (``metashare/prod.db``)::
 
     python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
 
-You can also run it with ``--test-id`` and ``--test-secret``, or
-``--cust-id`` and ``--cust-secret``, or all three sets at once, to
-populate all three providers.
+You can also run it with ``--test-id`` and ``--test-secret``, or ``--cust-id``
+and ``--cust-secret``, or all three sets at once, to populate all three
+providers.
 
-Once you've logged in, you probably want to make your user a superuser.
-You can do that easily via the ``promote_superuser`` management
-command::
+Once you've logged in, you probably want to make your user a superuser. You can
+do that easily via the ``promote_superuser`` management command::
 
     python manage.py promote_superuser <your email>
 

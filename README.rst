@@ -14,4 +14,4 @@ Got feedback?
 -------------
 
 Please open a new `GitHub Issue
-<https://github.com/SFDO-Tooling/metashare/issues>`_.
+<https://github.com/SFDO-Tooling/MetaShare/issues>`_.
