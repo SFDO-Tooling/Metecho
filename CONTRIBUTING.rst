@@ -18,18 +18,19 @@ Docker-based development (preferred)
 
     cp env.docker.example .env
 
-Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to any
-two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
+   Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to
+   any two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
 
     python
     from cryptography.fernet import Fernet
     Fernet.generate_key()
 
-This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents of
-``'...'``, e.g. ``DB_ENCRYPTION_KEY="mystring="``.
+   This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents
+   of ``'...'``, e.g. ``DB_ENCRYPTION_KEY="mystring="``.
 
-Finally, set the following environment variables (if you're an OddBird, you can
-find these values in the shared Keybase team folder -- ``metashare/env``)::
+   Finally, set the following environment variables (if you're an OddBird, you
+   can find these values in the shared Keybase team folder --
+   ``metashare/env``)::
 
     BUCKETEER_AWS_ACCESS_KEY_ID=...
     BUCKETEER_AWS_SECRET_ACCESS_KEY=...
@@ -41,10 +42,10 @@ find these values in the shared Keybase team folder -- ``metashare/env``)::
 
 5. Visit `<http://localhost:8080/>`_ in your browser.
 
-6. When you're done working on MetaShare, Ctrl-C in the terminal where the
-   containers are running. You can also ``docker-compose down`` to clean up all
-   running containers. (``docker-compose ps`` will tell you what containers are
-   currently running.)
+6. When you're done working on MetaShare, ``Ctrl-C`` in the terminal where the
+   containers are running to exit. You can also ``docker-compose down`` to clean
+   up all running containers. (``docker-compose ps`` will tell you what
+   containers are currently running.)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
 
