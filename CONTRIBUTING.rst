@@ -6,8 +6,8 @@ Cloning the project
 
 ::
 
-    git clone git@github.com:SFDO-Tooling/MetaShare
-    cd MetaShare
+    $ git clone git@github.com:SFDO-Tooling/MetaShare
+    $ cd MetaShare
 
 Docker-based development (preferred)
 ------------------------------------
@@ -16,14 +16,14 @@ Docker-based development (preferred)
 
 2. Create an ``.env`` file with the required environment variables::
 
-    cp env.docker.example .env
+    $ cp env.docker.example .env
 
    Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to
    any two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
 
-    python
-    from cryptography.fernet import Fernet
-    Fernet.generate_key()
+    $ python
+    >>> from cryptography.fernet import Fernet
+    >>> Fernet.generate_key()
 
    This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents
    of ``'...'``, e.g. ``DB_ENCRYPTION_KEY="mystring="``.
@@ -68,14 +68,14 @@ images, as we store dependencies in the images for speed. This requires running
 
 Tests and linting can be run similarly::
 
-    docker-compose run --no-deps client yarn lintjs
-    docker-compose run --no-deps client yarn stylelint
-    docker-compose run --no-deps client yarn test
+    $ docker-compose run --no-deps client yarn lintjs
+    $ docker-compose run --no-deps client yarn stylelint
+    $ docker-compose run --no-deps client yarn test
 
-    docker-compose run --no-deps web black manage.py metashare/ config/
-    docker-compose run --no-deps web isort -rc manage.py metashare/ config/
-    docker-compose run --no-deps web flake8 manage.py metashare/ config/
-    docker-compose run web pytest
+    $ docker-compose run --no-deps web black manage.py metashare/ config/
+    $ docker-compose run --no-deps web isort -rc manage.py metashare/ config/
+    $ docker-compose run --no-deps web flake8 manage.py metashare/ config/
+    $ docker-compose run web pytest
 
 Locally-running development (not recommended)
 ---------------------------------------------
@@ -95,24 +95,24 @@ temporarily for a particular "environment" or directory. We use
 `virtualenvwrapper`_. Assuming you're in the repo root, do the following to
 create a virtualenv (once you have `virtualenvwrapper`_ installed locally)::
 
-    mkvirtualenv metashare --python=$(which python3.7)
-    setvirtualenvproject
+    $ mkvirtualenv metashare --python=$(which python3.7)
+    $ setvirtualenvproject
 
 Install Python requirements::
 
-    pip install pipenv
-    pipenv install --dev
+    $ pip install pipenv
+    $ pipenv install --dev
 
 Copy the ``.env`` file somewhere that will be sourced when you need it::
 
-    cp env.local.example $VIRTUAL_ENV/bin/postactivate
+    $ cp env.local.example $VIRTUAL_ENV/bin/postactivate
 
 Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to any
 two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
 
-    python
-    from cryptography.fernet import Fernet
-    Fernet.generate_key()
+    $ python
+    >>> from cryptography.fernet import Fernet
+    >>> Fernet.generate_key()
 
 This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents of
 ``'...'``, e.g. ``export DB_ENCRYPTION_KEY="mystring="``.
@@ -145,7 +145,7 @@ versions).
 
 To download and install the project-local version of Node (and `yarn`_)::
 
-    bin/unpack-node
+    $ bin/unpack-node
 
 If you can run ``which node`` and see a path inside your project directory
 ending with ``.../node/bin/node``, then you've got it set up right and can move
@@ -153,7 +153,7 @@ on.
 
 Then use ``yarn`` to install dependencies::
 
-    yarn
+    $ yarn
 
 .. _Node.js: http://nodejs.org
 .. _yarn: https://yarnpkg.com/
@@ -164,11 +164,11 @@ Setting up the database
 Assuming you have `Postgres <https://www.postgresql.org/download/>`_ installed
 and running locally::
 
-    createdb metashare
+    $ createdb metashare
 
 Then run the initial migrations::
 
-    python manage.py migrate
+    $ python manage.py migrate
 
 Running the server
 ~~~~~~~~~~~~~~~~~~
@@ -181,31 +181,11 @@ the `Redis Quick Start`_.
 
 To run the local development server::
 
-    yarn serve
+    $ yarn serve
 
 The running server will be available at `<http://localhost:8080/>`_.
 
 .. _Redis Quick Start: https://redis.io/topics/quickstart
-
-Logging in with Salesforce
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To setup the Salesforce OAuth integration, run the ``populate_social_apps``
-management command. The values to use in place of the ``XXX`` and ``YYY`` flags
-can be found on the Connected App you've made in your Salesforce configuration,
-or if you're an OddBird, you can find these values in the shared Keybase team
-folder (``metashare/prod.db``)::
-
-    python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
-
-You can also run it with ``--test-id`` and ``--test-secret``, or ``--cust-id``
-and ``--cust-secret``, or all three sets at once, to populate all three
-providers.
-
-Once you've logged in, you probably want to make your user a superuser. You can
-do that easily via the ``promote_superuser`` management command::
-
-    python manage.py promote_superuser <your email>
 
 Development Tasks
 ~~~~~~~~~~~~~~~~~
@@ -235,13 +215,37 @@ automatically prepended to commit messages):
 - 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
 - 🧶 (``:yarn:``) -> ``yarn``
 
+Logging in with Salesforce
+--------------------------
+
+To setup the Salesforce OAuth integration, run the ``populate_social_apps``
+management command. The values to use in place of the ``XXX`` and ``YYY`` flags
+can be found on the Connected App you've made in your Salesforce configuration,
+or if you're an OddBird, you can find these values in the shared Keybase team
+folder (``metashare/prod.db``)::
+
+    $ docker-compose run web python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
+
+(If you are using local development, simply omit the ``docker-composse run web``.)
+
+You can also run it with ``--test-id`` and ``--test-secret``, or ``--cust-id``
+and ``--cust-secret``, or all three sets at once, to populate all three
+providers.
+
+Once you've logged in, you probably want to make your user a superuser. You can
+do that easily via the ``promote_superuser`` management command::
+
+    $ docker-compose run web python manage.py promote_superuser <your email>
+
 Internationalization
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 To build and compile ``.mo`` and ``.po`` files for the backend, run::
 
-   $ python manage.py makemessages --locale <locale>
-   $ python manage.py compilemessages
+   $ docker-compose run web python manage.py makemessages --locale <locale>
+   $ docker-compose run web python manage.py compilemessages
+
+(If you are using local development, simply omit the ``docker-composse run web``.)
 
 These commands require the `GNU gettext toolset`_ (``brew install gettext``).
 
