@@ -77,6 +77,58 @@ Tests and linting can be run similarly::
     $ docker-compose run --no-deps web flake8 manage.py metashare/ config/
     $ docker-compose run web pytest
 
+Logging in with Salesforce
+--------------------------
+
+To setup the Salesforce OAuth integration, run the ``populate_social_apps``
+management command. The values to use in place of the ``XXX`` and ``YYY`` flags
+can be found on the Connected App you've made in your Salesforce configuration,
+or if you're an OddBird, you can find these values in the shared Keybase team
+folder (``metashare/prod.db``)::
+
+    $ docker-compose run web python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
+
+(If you are using local development, omit the ``docker-compose run web``.)
+
+You can also run it with ``--test-id`` and ``--test-secret``, or ``--cust-id``
+and ``--cust-secret``, or all three sets at once, to populate all three
+providers.
+
+Once you've logged in, you probably want to make your user a superuser. You can
+do that easily via the ``promote_superuser`` management command::
+
+    $ docker-compose run web python manage.py promote_superuser <your email>
+
+Internationalization
+--------------------
+
+To build and compile ``.mo`` and ``.po`` files for the backend, run::
+
+   $ docker-compose run web python manage.py makemessages --locale <locale>
+   $ docker-compose run web python manage.py compilemessages
+
+(If you are using local development, omit the ``docker-compose run web``.)
+
+These commands require the `GNU gettext toolset`_ (``brew install gettext``).
+
+For the front-end, translation JSON files are served from
+``locales/<language>/`` directories, and the `user language is auto-detected at
+runtime`_.
+
+During development, strings are parsed automatically from the JS, and an English
+translation file is auto-generated to ``locales_dev/en/translation.json`` on
+every build (``yarn build`` or ``yarn serve``). When this file changes,
+translations must be copied over to the ``locales/en/translation.json`` file in
+order to have any effect.
+
+Strings with dynamic content (i.e. known only at runtime) cannot be
+automatically parsed, but will log errors while the app is running if they're
+missing from the served translation files. To resolve, add the missing key:value
+translations to ``locales/<language>/translation.json``.
+
+.. _GNU gettext toolset: https://www.gnu.org/software/gettext/
+.. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector
+
 Locally-running development (not recommended)
 ---------------------------------------------
 
@@ -214,55 +266,3 @@ automatically prepended to commit messages):
 - 📦 (``:package:``) -> ``pipenv install --dev``
 - 🛢 (``:oil_drum:``) -> ``python manage.py migrate``
 - 🧶 (``:yarn:``) -> ``yarn``
-
-Logging in with Salesforce
---------------------------
-
-To setup the Salesforce OAuth integration, run the ``populate_social_apps``
-management command. The values to use in place of the ``XXX`` and ``YYY`` flags
-can be found on the Connected App you've made in your Salesforce configuration,
-or if you're an OddBird, you can find these values in the shared Keybase team
-folder (``metashare/prod.db``)::
-
-    $ docker-compose run web python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
-
-(If you are using local development, simply omit the ``docker-composse run web``.)
-
-You can also run it with ``--test-id`` and ``--test-secret``, or ``--cust-id``
-and ``--cust-secret``, or all three sets at once, to populate all three
-providers.
-
-Once you've logged in, you probably want to make your user a superuser. You can
-do that easily via the ``promote_superuser`` management command::
-
-    $ docker-compose run web python manage.py promote_superuser <your email>
-
-Internationalization
---------------------
-
-To build and compile ``.mo`` and ``.po`` files for the backend, run::
-
-   $ docker-compose run web python manage.py makemessages --locale <locale>
-   $ docker-compose run web python manage.py compilemessages
-
-(If you are using local development, simply omit the ``docker-composse run web``.)
-
-These commands require the `GNU gettext toolset`_ (``brew install gettext``).
-
-For the front-end, translation JSON files are served from
-``locales/<language>/`` directories, and the `user language is auto-detected at
-runtime`_.
-
-During development, strings are parsed automatically from the JS, and an English
-translation file is auto-generated to ``locales_dev/en/translation.json`` on
-every build (``yarn build`` or ``yarn serve``). When this file changes,
-translations must be copied over to the ``locales/en/translation.json`` file in
-order to have any effect.
-
-Strings with dynamic content (i.e. known only at runtime) cannot be
-automatically parsed, but will log errors while the app is running if they're
-missing from the served translation files. To resolve, add the missing key:value
-translations to ``locales/<language>/translation.json``.
-
-.. _GNU gettext toolset: https://www.gnu.org/software/gettext/
-.. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector
