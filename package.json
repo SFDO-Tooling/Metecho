@@ -1,5 +1,6 @@
 {
   "name": "metashare",
+  "description": "Web-based tool for collaborating on Salesforce projects",
   "version": "0.1.0",
   "private": true,
   "license": "BSD-3-Clause",

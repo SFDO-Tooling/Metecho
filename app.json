@@ -1,6 +1,6 @@
 {
   "name": "MetaShare",
-  "description": "A tagline to end all taglines.",
+  "description": "Web-based tool for collaborating on Salesforce projects",
   "repository": "https://github.com/SFDO-Tooling/MetaShare",
   "keywords": ["ci", "python", "django", "salesforce", "github"],
   "env": {
