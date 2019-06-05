@@ -25,12 +25,14 @@ module.exports = merge(common, {
   devServer: {
     index: '',
     proxy: {
-      '**': 'http://localhost:8000',
+      '**': 'http://backend:8000',
       '/ws': {
-        target: 'http://localhost:8000',
+        target: 'http://backend:8000',
         ws: true,
       },
     },
+    host: '0.0.0.0',
+    port: 8080,
     hot: false,
     writeToDisk: true,
   },

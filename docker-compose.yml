@@ -7,6 +7,10 @@ services:
     environment:
       - POSTGRES_USER=metashare
 
+  # Runs the queue process:
+  redis:
+    image: redis:5.0
+
   # Runs the Python server process:
   web:
     build:
@@ -14,9 +18,13 @@ services:
       dockerfile: ./compose/web/Dockerfile
     depends_on:
       - postgres
+      - redis
     links:
       - "postgres:db"
+      - redis
     env_file: .env
+    environment:
+      - REDIS_URL=redis://redis:6379
     volumes:
       - .:/app
     ports:
