@@ -39,20 +39,13 @@
   },
   "formation": {
     "web": {
-      "quantity": 1,
-      "size": "free"
-    },
-    "dev_worker": {
-      "quantity": 1,
-      "size": "free"
+      "quantity": 1
     },
     "worker": {
-      "quantity": 0,
-      "size": "free"
+      "quantity": 1
     },
     "scheduler": {
-      "quantity": 0,
-      "size": "free"
+      "quantity": 1
     }
   },
   "image": "heroku/python",

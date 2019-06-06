@@ -107,9 +107,9 @@ To build and compile ``.mo`` and ``.po`` files for the backend, run::
    $ docker-compose run web python manage.py makemessages --locale <locale>
    $ docker-compose run web python manage.py compilemessages
 
-(If you are using local development, omit the ``docker-compose run web``.)
-
-These commands require the `GNU gettext toolset`_ (``brew install gettext``).
+(If you are using local development, omit the ``docker-compose run web``. This
+will require the `GNU gettext toolset`_ to be installed: ``brew install
+gettext``.)
 
 For the front-end, translation JSON files are served from
 ``locales/<language>/`` directories, and the `user language is auto-detected at
