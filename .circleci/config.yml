@@ -9,11 +9,9 @@ jobs:
       - restore_cache:
           keys:
             - v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
-            - v1-metashare-py-3.7-
       - restore_cache:
           keys:
             - v1-metashare-npm-{{ checksum "yarn.lock" }}
-            - v1-metashare-npm-
       - run:
           name: Install Dependencies
           command: |
@@ -34,15 +32,18 @@ jobs:
       - run:
           name: Compile Front-End Assets
           command: yarn prod
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./venv
+            - '~/metashare/node_modules'
       - save_cache:
           key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
           paths:
-            - '~/.cache/pip'
             - ./venv
       - save_cache:
           key: v1-metashare-npm-{{ checksum "yarn.lock" }}
           paths:
-            - '~/.cache/yarn'
             - '~/metashare/node_modules'
 
   lint:
@@ -51,12 +52,8 @@ jobs:
       - image: circleci/python:3.7.3-node
     steps:
       - checkout
-      - restore_cache:
-          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
-      - restore_cache:
-          keys:
-            - v1-metashare-npm-{{ checksum "yarn.lock" }}
-            - v1-metashare-npm-
+      - attach_workspace:
+          at: .
       - run:
           name: Lint
           command: |
@@ -69,10 +66,8 @@ jobs:
       - image: circleci/python:3.7.3-node
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-metashare-npm-{{ checksum "yarn.lock" }}
-            - v1-metashare-npm-
+      - attach_workspace:
+          at: .
       - run:
           name: Test JS
           command: yarn test:coverage
@@ -101,8 +96,8 @@ jobs:
           AWS_ACCESS_KEY_ID: None
     steps:
       - checkout
-      - restore_cache:
-          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
+      - attach_workspace:
+          at: .
       - run:
           name: Install Dockerize
           command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -139,12 +134,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - restore_cache:
-          keys:
-            - v1-metashare-npm-{{ checksum "yarn.lock" }}
-            - v1-metashare-npm-
-      - restore_cache:
-          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
       - run:
           name: Report Test Coverage
           command: |
@@ -165,8 +154,8 @@ jobs:
       - image: circleci/python:3.7.3-node
     steps:
       - checkout
-      - restore_cache:
-          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
+      - attach_workspace:
+          at: .
       - run:
           name: Build Documentation
           command: |
