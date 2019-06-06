@@ -1,0 +1,59 @@
+#!/bin/sh
+
+function dcr {
+  docker-compose run --no-deps $@
+}
+
+STAGED_FILES=$(git diff --name-only --cached --diff-filter=d)
+
+JS=()
+SCSS=()
+PY=()
+PYI=()
+OTHER=()
+
+for FILENAME in $STAGED_FILES
+do
+    EXTENSION="${FILENAME##*.}"
+
+    case $EXTENSION in
+        js|ts|vue)
+            JS+=($FILENAME)
+            ;;
+        scss)
+            SCSS+=($FILENAME)
+            ;;
+        py)
+            if [[ "$FILENAME" =~ mypy-stubs/.*\.py$ ]]; then
+                printf "Do not commit .py files in mypy-stubs, only .pyi: ${FILENAME}\n"
+                exit 1
+            fi
+            PY+=($FILENAME)
+            ;;
+        pyi)
+            PYI+=($FILENAME)
+            ;;
+        *)
+            OTHER+=($FILENAME)
+            ;;
+    esac
+done
+
+if [ ${#JS[@]} -ne 0 ]; then
+    dcr client ./node_modules/.bin/prettier --write ${JS[@]}
+    dcr client ./node_modules/.bin/eslint ${JS[@]}
+    git add ${JS[@]}
+fi
+
+if [ ${#SCSS[@]} -ne 0 ]; then
+    dcr client ./node_modules/.bin/prettier --write ${SCSS[@]}
+    dcr client ./node_modules/.bin/stylelint ${SCSS[@]}
+    git add ${SCSS[@]}
+fi
+
+if [ ${#PY[@]} -ne 0 ]; then
+    dcr web isort ${PY[@]}
+    dcr web black ${PY[@]}
+    dcr web flake8 ${PY[@]}
+    git add ${PY[@]}
+fi

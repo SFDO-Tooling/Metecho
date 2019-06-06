@@ -1,0 +1,81 @@
+{
+  "name": "MetaShare",
+  "description": "Web-based tool for collaborating on Salesforce projects",
+  "repository": "https://github.com/SFDO-Tooling/MetaShare",
+  "keywords": ["ci", "python", "django", "salesforce", "github"],
+  "env": {
+    "DJANGO_ALLOWED_HOSTS": {
+      "description": "Heroku proxies web requests and Django needs to be configured to allow the forwards",
+      "value": ".herokuapp.com"
+    },
+    "DJANGO_ADMIN_URL": {
+      "description": "The url path to the admin section of the site",
+      "value": "admin"
+    },
+    "DJANGO_SECRET_KEY": {
+      "description": "A secret key used to provide cryptographic signing",
+      "generator": "secret"
+    },
+    "DJANGO_HASHID_SALT": {
+      "description": "Salt used to hash IDs that get exposed publicly",
+      "generator": "secret"
+    },
+    "DJANGO_SETTINGS_MODULE": {
+      "description": "The site settings to use",
+      "value": "config.settings.production"
+    },
+    "DB_ENCRYPTION_KEY": {
+      "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "description": "The AWS Access Key ID for S3 storages."
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "The AWS Secret Access Key for S3 storages."
+    },
+    "AWS_BUCKET_NAME": {
+      "description": "The S3 bucket name to use for S3 storages."
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    },
+    "worker": {
+      "quantity": 1
+    },
+    "scheduler": {
+      "quantity": 1
+    }
+  },
+  "image": "heroku/python",
+  "addons": [
+    "heroku-postgresql",
+    "heroku-redis",
+    "bucketeer",
+    "newrelic",
+    "sentry"
+  ],
+  "buildpacks": [
+      {"url": "heroku/nodejs"},
+      {"url": "heroku/python"}
+  ],
+  "environments": {
+    "test": {
+      "scripts": {
+        "test-setup": "pip install --upgrade -r requirements/test.txt",
+        "test": "pytest"
+      },
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "config.settings.test",
+        "DATABASE_URL": "sqlite:///test.db",
+        "AWS_ACCESS_KEY_ID": "None",
+        "AWS_SECRET_ACCESS_KEY": "None",
+        "AWS_BUCKET_NAME": "None"
+      }
+    }
+  },
+  "scripts": {
+    "postdeploy": "python manage.py migrate --noinput"
+  }
+}

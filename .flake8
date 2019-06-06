@@ -1,0 +1,12 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    docs,
+    dist,
+    coverage,
+    node,
+    node_modules,
+    requirements
+max-line-length=88 

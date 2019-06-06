@@ -1,0 +1,111 @@
+/* eslint-disable no-process-env */
+
+'use strict';
+
+process.env.NODE_ENV = 'development';
+
+const fs = require('fs');
+
+const I18nextWebpackPlugin = require('i18next-scanner-webpack');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const babel = require('@babel/core');
+const merge = require('webpack-merge');
+const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+const common = require('./webpack.common.js');
+
+module.exports = merge(common, {
+  mode: 'development',
+  output: {
+    filename: '[name].js',
+    path: path.join(__dirname, 'dist'),
+  },
+  devtool: 'cheap-module-inline-source-map',
+  devServer: {
+    index: '',
+    proxy: {
+      '**':
+        process.env.DEVELOPMENT_ENV === 'docker'
+          ? 'http://backend:8000'
+          : 'http://localhost:8000',
+      '/ws': {
+        target:
+          process.env.DEVELOPMENT_ENV === 'docker'
+            ? 'http://backend:8000'
+            : 'http://localhost:8000',
+        ws: true,
+      },
+    },
+    host: process.env.DEVELOPMENT_ENV === 'docker' ? '0.0.0.0' : 'localhost',
+    port: 8080,
+    hot: false,
+    writeToDisk: true,
+  },
+  plugins: [
+    new CleanWebpackPlugin(),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
+    // Parse for translatable text strings
+    new I18nextWebpackPlugin({
+      src: ['./src/js/'],
+      options: {
+        sort: true,
+        attr: false,
+        func: {
+          list: ['t', 'i18next.t', 'i18n.t', 'translate'],
+          extensions: ['.js'],
+        },
+        nsSeparator: false,
+        keySeparator: false,
+        lngs: ['en'],
+        // See custom transform below for <Trans> components
+        trans: {
+          extensions: [],
+        },
+        resource: {
+          savePath: '../locales_dev/{{lng}}/{{ns}}.json',
+        },
+        defaultValue(lng, ns, key) {
+          if (lng === 'en') {
+            // Return key as the default value for English language
+            return key;
+          }
+          // Return the string '__NOT_TRANSLATED__' for other languages
+          return '__NOT_TRANSLATED__';
+        },
+      },
+      // Custom transform to allow parsing Js with Flow types
+      // https://github.com/i18next/i18next-scanner/issues/88
+      transform(file, enc, done) {
+        const extname = path.extname(file.path);
+        if (['.js'].includes(extname)) {
+          const parser = this.parser;
+          fs.readFile(file.path, enc, (err, data) => {
+            if (err) {
+              done(err);
+            } else {
+              const options = {
+                presets: ['@babel/preset-flow'],
+                plugins: [
+                  '@babel/plugin-syntax-jsx',
+                  '@babel/plugin-proposal-class-properties',
+                  '@babel/plugin-proposal-object-rest-spread',
+                ],
+                configFile: false,
+              };
+
+              const code = babel.transform(data, options).code;
+
+              parser.parseTransFromString(code);
+              done();
+            }
+          });
+        } else {
+          done();
+        }
+      },
+    }),
+  ],
+});
