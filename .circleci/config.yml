@@ -36,7 +36,7 @@ jobs:
           root: .
           paths:
             - ./venv
-            - '~/metashare/node_modules'
+            - ./node_modules
       - save_cache:
           key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
           paths:
@@ -44,7 +44,7 @@ jobs:
       - save_cache:
           key: v1-metashare-npm-{{ checksum "yarn.lock" }}
           paths:
-            - '~/metashare/node_modules'
+            - ./node_modules
 
   lint:
     working_directory: ~/metashare
