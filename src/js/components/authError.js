@@ -2,10 +2,10 @@
 
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
+import i18n from 'i18next';
 import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
-import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import { selectUserState } from 'store/user/selectors';
@@ -16,7 +16,9 @@ import type { InitialProps } from 'components/utils';
 import type { User as UserType } from 'store/user/reducer';
 
 const AuthError = ({ user }: { user: UserType }) => (
-  <DocumentTitle title={`${t('Authentication Error')} | ${t('MetaShare')}`}>
+  <DocumentTitle
+    title={`${i18n.t('Authentication Error')} | ${i18n.t('MetaShare')}`}
+  >
     <>
       <EmptyIllustration
         message={
@@ -29,7 +31,9 @@ const AuthError = ({ user }: { user: UserType }) => (
       <div className="slds-align_absolute-center">
         <Login
           id="auth-error-login"
-          label={user ? t('Log In With a Different Org') : t('Log In')}
+          label={
+            user ? i18n.t('Log In With a Different Org') : i18n.t('Log In')
+          }
           buttonClassName="slds-p-horizontal_xxx-small"
           buttonVariant="base"
         />

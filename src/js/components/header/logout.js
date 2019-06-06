@@ -5,7 +5,7 @@ import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import DropdownTrigger from '@salesforce/design-system-react/components/menu-dropdown/button-trigger';
-import { t } from 'i18next';
+import i18n from 'i18next';
 
 import type { User } from 'store/user/reducer';
 import typeof { logout as LogoutType } from 'store/user/actions';
@@ -26,7 +26,7 @@ const Logout = ({
       },
       { type: 'divider' },
       {
-        label: t('Log Out'),
+        label: i18n.t('Log Out'),
         leftIcon: {
           name: 'logout',
           category: 'utility',

@@ -3,9 +3,9 @@
 import * as React from 'react';
 import DocumentTitle from 'react-document-title';
 import Illustration from '@salesforce/design-system-react/components/illustration';
+import i18n from 'i18next';
 import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
-import { t } from 'i18next';
 
 import routes from 'utils/routes';
 import svgPath from 'images/desert.svg';
@@ -21,7 +21,7 @@ export const EmptyIllustration = ({ message }: { message: React.Node }) => (
 );
 
 const FourOhFour = ({ message }: { message?: React.Node }) => (
-  <DocumentTitle title={`${t('404')} | ${t('MetaShare')}`}>
+  <DocumentTitle title={`${i18n.t('404')} | ${i18n.t('MetaShare')}`}>
     <EmptyIllustration
       message={
         message === undefined ? (

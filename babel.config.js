@@ -9,9 +9,8 @@ module.exports = {
       '@babel/preset-env',
       {
         modules: false,
-        corejs: '2',
+        corejs: '3',
         useBuiltIns: 'usage',
-        exclude: ['transform-regenerator'],
       },
     ],
   ],
