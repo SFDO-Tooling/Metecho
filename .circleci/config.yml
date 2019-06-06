@@ -128,6 +128,7 @@ jobs:
           AWS_BUCKET_NAME: None
           AWS_SECRET_ACCESS_KEY: None
           AWS_ACCESS_KEY_ID: None
+          DJANGO_SECRET_KEY: 'some test key'
     steps:
       - checkout
       - restore_cache:
