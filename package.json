@@ -41,12 +41,10 @@
     "flow-bin": "^0.98.1",
     "flow-typed": "^2.5.2",
     "html-webpack-plugin": "^3.2.0",
-    "husky": "^2.4.0",
     "i18next-scanner-webpack": "^0.4.0",
     "jest": "^24.8.0",
     "jest-dom": "^3.3.0",
     "jest-junit": "^6.4.0",
-    "lint-staged": "^8.2.0",
     "mini-css-extract-plugin": "^0.7.0",
     "node-fetch": "^2.6.0",
     "node-sass": "^4.12.0",
@@ -117,34 +115,5 @@
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
     "heroku-postbuild": "yarn prod"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "prepare-commit-msg": "./hooks/prepare-commit-msg"
-    }
-  },
-  "lint-staged": {
-    "linters": {
-      "*.js": [
-        "prettier --write",
-        "eslint --plugin flowtype-errors --rule 'flowtype-errors/show-errors: 2' --rule 'flowtype-errors/show-warnings: 1'",
-        "git add"
-      ],
-      "*.scss": [
-        "prettier --write",
-        "stylelint",
-        "git add"
-      ],
-      "*.py": [
-        "isort",
-        "black",
-        "flake8",
-        "git add"
-      ]
-    },
-    "ignore": [
-      "flow-typed/**/*"
-    ]
   }
 }
