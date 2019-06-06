@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   build:
     working_directory: ~/metashare
@@ -8,7 +8,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+            - v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
             - v1-metashare-py-3.7-
       - restore_cache:
           keys:
@@ -29,7 +29,8 @@ jobs:
             yarn
             python3 -m venv venv
             . venv/bin/activate
-            pip install -Ur requirements/local.txt
+            pip install pipenv
+            pipenv install --dev
       - run:
           name: Check that yarn.lock matches package.json
           command: |
@@ -47,7 +48,7 @@ jobs:
           paths:
             - '~/metashare/node'
       - save_cache:
-          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
           paths:
             - '~/.cache/pip'
             - ./venv
@@ -66,7 +67,7 @@ jobs:
       - restore_cache:
           key: v1-metashare-node-{{ checksum "package.json" }}
       - restore_cache:
-          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
       - restore_cache:
           keys:
             - v1-metashare-npm-{{ checksum "yarn.lock" }}
@@ -130,7 +131,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
       - run:
           name: Install Dockerize
           command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -174,7 +175,7 @@ jobs:
             - v1-metashare-npm-{{ checksum "yarn.lock" }}
             - v1-metashare-npm-
       - restore_cache:
-          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
       - run:
           name: Set $PATH
           command: |
@@ -202,7 +203,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-metashare-py-3.7-{{ checksum "requirements/base.txt" }}-{{ checksum "requirements/test.txt" }}-{{ checksum "requirements/local.txt" }}
+          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
       - run:
           name: Build Documentation
           command: |
