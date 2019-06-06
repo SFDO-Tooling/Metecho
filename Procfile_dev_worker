@@ -1,2 +1,2 @@
-worker_dev: newrelic-admin run-python manage.py rqworker default short
-worker_scheduler: newrelic-admin run-python manage.py rqscheduler default short
+worker_dev: newrelic-admin run-python manage.py rqworker default
+worker_scheduler: newrelic-admin run-python manage.py rqscheduler default
