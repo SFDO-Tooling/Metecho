@@ -8,10 +8,10 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
+            - v2-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
       - restore_cache:
           keys:
-            - v1-metashare-npm-{{ checksum "yarn.lock" }}
+            - v2-metashare-npm-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
           command: |
@@ -38,11 +38,11 @@ jobs:
             - ./venv
             - ./node_modules
       - save_cache:
-          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
+          key: v2-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
           paths:
             - ./venv
       - save_cache:
-          key: v1-metashare-npm-{{ checksum "yarn.lock" }}
+          key: v2-metashare-npm-{{ checksum "yarn.lock" }}
           paths:
             - ./node_modules
 
