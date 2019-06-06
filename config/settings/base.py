@@ -195,7 +195,9 @@ ROOT_URLCONF = "metashare.urls"
 ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin/", type_=url_prefix)
 
 ADMIN_API_ALLOWED_SUBNETS = env(
-    "ADMIN_API_ALLOWED_SUBNETS", default="127.0.0.1/32", type_=ipv4_networks
+    "ADMIN_API_ALLOWED_SUBNETS",
+    default="127.0.0.1/32,172.16.0.0/12",
+    type_=ipv4_networks,
 )
 
 # Password validation
