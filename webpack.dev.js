@@ -25,13 +25,19 @@ module.exports = merge(common, {
   devServer: {
     index: '',
     proxy: {
-      '**': 'http://backend:8000',
+      '**':
+        process.env.DEVELOPMENT_ENV === 'docker'
+          ? 'http://backend:8000'
+          : 'http://localhost:8000',
       '/ws': {
-        target: 'http://backend:8000',
+        target:
+          process.env.DEVELOPMENT_ENV === 'docker'
+            ? 'http://backend:8000'
+            : 'http://localhost:8000',
         ws: true,
       },
     },
-    host: '0.0.0.0',
+    host: process.env.DEVELOPMENT_ENV === 'docker' ? '0.0.0.0' : 'localhost',
     port: 8080,
     hot: false,
     writeToDisk: true,

@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
       - restore_cache:
@@ -14,15 +14,6 @@ jobs:
           keys:
             - v1-metashare-npm-{{ checksum "yarn.lock" }}
             - v1-metashare-npm-
-      - run:
-          name: Install Node & Yarn
-          command: ./bin/unpack-node
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metashare/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metashare/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Install Dependencies
           command: |
@@ -44,10 +35,6 @@ jobs:
           name: Compile Front-End Assets
           command: yarn prod
       - save_cache:
-          key: v1-metashare-node-{{ checksum "package.json" }}
-          paths:
-            - '~/metashare/node'
-      - save_cache:
           key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
           paths:
             - '~/.cache/pip'
@@ -61,23 +48,15 @@ jobs:
   lint:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
-      - restore_cache:
-          key: v1-metashare-node-{{ checksum "package.json" }}
       - restore_cache:
           key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
       - restore_cache:
           keys:
             - v1-metashare-npm-{{ checksum "yarn.lock" }}
             - v1-metashare-npm-
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metashare/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metashare/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Lint
           command: |
@@ -87,21 +66,13 @@ jobs:
   test-client:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
-      - restore_cache:
-          key: v1-metashare-node-{{ checksum "package.json" }}
       - restore_cache:
           keys:
             - v1-metashare-npm-{{ checksum "yarn.lock" }}
             - v1-metashare-npm-
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metashare/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metashare/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Test JS
           command: yarn test:coverage
@@ -118,7 +89,7 @@ jobs:
   test-python:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
@@ -163,25 +134,17 @@ jobs:
   report-test-coverage:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
       - attach_workspace:
           at: .
-      - restore_cache:
-          key: v1-metashare-node-{{ checksum "package.json" }}
       - restore_cache:
           keys:
             - v1-metashare-npm-{{ checksum "yarn.lock" }}
             - v1-metashare-npm-
       - restore_cache:
           key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
-      - run:
-          name: Set $PATH
-          command: |
-            echo 'export PATH=~/metashare/node_modules/.bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=~/metashare/node/bin:$PATH' >> $BASH_ENV
-            source $BASH_ENV
       - run:
           name: Report Test Coverage
           command: |
@@ -199,7 +162,7 @@ jobs:
   build-docs:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.7.3-node
     steps:
       - checkout
       - restore_cache:

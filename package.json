@@ -9,8 +9,7 @@
     "url": "https://github.com/SFDO-Tooling/MetaShare.git"
   },
   "engines": {
-    "node": "10.16.0",
-    "yarn": "1.16.0"
+    "node": "10.16.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",

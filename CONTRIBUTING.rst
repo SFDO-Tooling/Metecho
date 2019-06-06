@@ -177,11 +177,6 @@ Finally, add the following environment variables::
 
 Now run ``workon metashare`` again to set those environment variables.
 
-Your ``PATH`` (and environment variables) will be updated when you ``workon
-metashare`` and restored when you ``deactivate``. This will make sure that
-whenever you are working on the project, you use the project-specific version of
-Node instead of any system-wide Node you may have.
-
 **All of the remaining steps assume that you have the virtualenv activated.**
 (``workon metashare``)
 
@@ -190,20 +185,9 @@ Node instead of any system-wide Node you may have.
 Installing JavaScript requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The project-local version of `Node.js`_ can be downloaded and unpacked locally
-(in the git-ignored ``node/`` directory), so you don't have to install it
-system-wide (and possibly conflict with other projects wanting other Node
-versions).
+MetaShare requires `Node.js`_ version 10.16.0 and `yarn`_ for local development.
 
-To download and install the project-local version of Node (and `yarn`_)::
-
-    $ bin/unpack-node
-
-If you can run ``which node`` and see a path inside your project directory
-ending with ``.../node/bin/node``, then you've got it set up right and can move
-on.
-
-Then use ``yarn`` to install dependencies::
+Use ``yarn`` to install dependencies::
 
     $ yarn
 
