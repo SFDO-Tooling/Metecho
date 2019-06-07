@@ -103,7 +103,7 @@
     "black": "black manage.py metashare/ config/",
     "lintpy": "run-s isort black flake8",
     "lintjs": "run-s prettier eslint",
-    "lint": "npm-run-all -p lintpy lintjs -s stylelint flow",
+    "lint": "npm-run-all -p lintpy lintjs -s stylelint",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "JEST_JUNIT_OUTPUT='./coverage/junit.xml' jest --ci --runInBand --reporters=default --reporters=jest-junit",
