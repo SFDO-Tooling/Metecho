@@ -52,6 +52,9 @@ Docker-based development (preferred)
 Docker development tasks
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+Most tasks are defined in the ``Makefile``; take a look in there and you
+will see you can run ``make up``, ``make lint``, ``make test`` etc.
+
 To run any development tasks (such as changing Python or JS dependencies, or
 generating or running migrations, or running a Django shell), you will need to
 run them inside the appropriate Docker image. This takes the general form
