@@ -46,7 +46,7 @@ master_doc = "index"
 
 # General information about the project.
 project = u"MetaShare"
-copyright = u'2019, Salesforce.org'
+copyright = u"2019, Salesforce.org"
 author = u"Salesforce.org"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -137,15 +137,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (
-        master_doc,
-        "MetaShare",
-        u"MetaShare Documentation",
-        [author],
-        1,
-    )
-]
+man_pages = [(master_doc, "MetaShare", u"MetaShare Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -160,7 +152,7 @@ texinfo_documents = [
         u"MetaShare Documentation",
         author,
         "cookiecutterproject_name",
-        """A tagline to end all taglines.""",
+        """Web-based tool for collaborating on Salesforce projects""",
         "Miscellaneous",
     )
 ]
