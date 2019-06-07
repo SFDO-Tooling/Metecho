@@ -916,10 +916,10 @@
     universal-user-agent "^2.0.0"
     url-template "^2.0.8"
 
-"@salesforce-ux/design-system@2.8.3":
-  version "2.8.3"
-  resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.8.3.tgz#8dafc0319a85150889920487ebcbba550b565823"
-  integrity sha512-ILar52PYftf+ShMh4mnu/4Y6F3bLgZOEn2RfX4EpzH9uD044LGGZCNbM24TCMNw4mJjnv7cK9ArhkRx/xYIp7w==
+"@salesforce-ux/design-system@2.9.3":
+  version "2.9.3"
+  resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.9.3.tgz#fed5a1fcbad046576ecc7ea6bf88f986f2dfca86"
+  integrity sha512-cNqLRE5vza4W8F0IGi/bkBYes+fbvo96lBzVCCWQVmBAvzs818W2GAGgmZa1xIbFfRovtGvij+MLP57M5PFQGQ==
 
 "@salesforce/babel-preset-design-system-react@^1.0.0":
   version "1.0.0"
@@ -4780,10 +4780,10 @@ flatted@^2.0.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-2.0.0.tgz#55122b6536ea496b4b44893ee2608141d10d9916"
   integrity sha512-R+H8IZclI8AAkSBRQJLVOsxwAoHd6WC40b4QTNWIjzAa6BXOBfQcM587MXDTVPeYaopFNWHUFLx7eNmHDSxMWg==
 
-flow-bin@^0.98.1:
-  version "0.98.1"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.98.1.tgz#a8d781621c91703df69928acc83c9777e2fcbb49"
-  integrity sha512-y1YzQgbFUX4EG6h2EO8PhyJeS0VxNgER8XsTwU8IXw4KozfneSmGVgw8y3TwAOza7rVhTlHEoli1xNuNW1rhPw==
+flow-bin@^0.100.0:
+  version "0.100.0"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.100.0.tgz#729902726658cfa0a81425d6401f9625cf9f5534"
+  integrity sha512-jcethhgrslBJukH7Z7883ohFFpzLrdsOEwHxvn5NwuTWbNaE71GAl55/PEBRJwYpDvYkRlqgcNkANTv0x5XjqA==
 
 flow-typed@^2.5.2:
   version "2.5.2"
