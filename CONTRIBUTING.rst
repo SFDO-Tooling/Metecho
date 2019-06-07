@@ -55,7 +55,7 @@ Docker development tasks
 To run any development tasks (such as changing Python or JS dependencies, or
 generating or running migrations, or running a Django shell), you will need to
 run them inside the appropriate Docker image. This takes the general form
-``docker-compose run --no-deps [web or client] [command]``. In some cases, such
+``docker-compose run --no-deps web [command]``. In some cases, such
 as for migrations or a Django shell, you will want to omit the ``--no-deps``
 flag.
 
@@ -64,14 +64,13 @@ care of setting up a database and installing Python and JS dependencies for you.
 
 When you change Python or JS dependencies, you will need to rebuild the Docker
 images, as we store dependencies in the images for speed. This requires running
-``docker-compose build [web or client]``.
+``docker-compose build web``.
 
 Tests and linting can be run similarly::
 
-    $ docker-compose run --no-deps client yarn lintjs
-    $ docker-compose run --no-deps client yarn stylelint
-    $ docker-compose run --no-deps client yarn test
-
+    $ docker-compose run --no-deps web yarn lintjs
+    $ docker-compose run --no-deps web yarn stylelint
+    $ docker-compose run --no-deps web yarn test
     $ docker-compose run --no-deps web black manage.py metashare/ config/
     $ docker-compose run --no-deps web isort -rc manage.py metashare/ config/
     $ docker-compose run --no-deps web flake8 manage.py metashare/ config/

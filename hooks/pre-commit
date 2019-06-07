@@ -40,14 +40,14 @@ do
 done
 
 if [ ${#JS[@]} -ne 0 ]; then
-    dcr client ./node_modules/.bin/prettier --write ${JS[@]}
-    dcr client ./node_modules/.bin/eslint ${JS[@]}
+    dcr web ./node_modules/.bin/prettier --write ${JS[@]}
+    dcr web ./node_modules/.bin/eslint ${JS[@]}
     git add ${JS[@]}
 fi
 
 if [ ${#SCSS[@]} -ne 0 ]; then
-    dcr client ./node_modules/.bin/prettier --write ${SCSS[@]}
-    dcr client ./node_modules/.bin/stylelint ${SCSS[@]}
+    dcr web ./node_modules/.bin/prettier --write ${SCSS[@]}
+    dcr web ./node_modules/.bin/stylelint ${SCSS[@]}
     git add ${SCSS[@]}
 fi
 
