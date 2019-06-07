@@ -1,7 +1,7 @@
 FROM python:3.7
 
 # System setup:
-RUN apt-get update && apt-get install -y gettext
+RUN apt-get update && apt-get install -y gettext redis-tools
 # The following taken from https://github.com/nodejs/docker-node/blob/master/10/stretch/Dockerfile
 RUN groupadd --gid 1000 node \
   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node
