@@ -2,3 +2,6 @@
 update: all
 schedule: every week
 label_prs: update
+requirements:
+  - Pipfile
+  - Pipfile.lock
