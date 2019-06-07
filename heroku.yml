@@ -1,0 +1,7 @@
+build:
+  docker:
+    web: ./compose/web/Dockerfile
+release:
+  command:
+    - python manage.py migrate --noinput
+  image: web
