@@ -6,7 +6,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./compose/web/Dockerfile
+      dockerfile: Dockerfile
     depends_on:
       - postgres
       - redis
