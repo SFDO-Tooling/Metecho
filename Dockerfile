@@ -80,6 +80,7 @@ COPY ./Pipfile /Pipfile
 COPY ./compose/web/start-dev.sh /start-dev.sh
 
 RUN chmod +x /start-dev.sh
+RUN pipenv lock
 RUN pipenv install --dev --system --deploy --ignore-pipfile
 
 # JS client setup:
