@@ -1,21 +1,12 @@
 version: '3'
 
 services:
-  # Runs the database process:
-  postgres:
-    image: postgres:10.6
-    environment:
-      - POSTGRES_USER=metashare
-
-  # Runs the queue process:
-  redis:
-    image: redis:5.0
-
   # Runs the Python server process:
+  # Runs the JS client build and serve process:
   web:
     build:
       context: .
-      dockerfile: ./compose/web/Dockerfile
+      dockerfile: Dockerfile
     depends_on:
       - postgres
       - redis
@@ -27,24 +18,19 @@ services:
       - REDIS_URL=redis://redis:6379
     volumes:
       - .:/app
-    ports:
-      - "0.0.0.0:8000:8000"
-
-  # Runs the JS client build and serve process:
-  client:
-    build:
-      context: .
-      dockerfile: ./compose/client/Dockerfile
-    depends_on:
-      - web
-    links:
-      - "web:backend"
-    env_file: .env
-    volumes:
-      - .:/app
       - /app/node_modules
     ports:
       - "0.0.0.0:8080:8080"
+
+  # Runs the database process:
+  postgres:
+    image: postgres:10.6
+    environment:
+      - POSTGRES_USER=metashare
+
+  # Runs the queue process:
+  redis:
+    image: redis:5.0
 
   # Sets up git hooks for local development:
   githooks:

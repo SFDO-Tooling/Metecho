@@ -88,8 +88,8 @@
   },
   "scripts": {
     "webpack:serve": "webpack-dev-server --config webpack.dev.js",
-    "django:serve": "python manage.py runserver",
-    "redis:clear": "redis-cli FLUSHALL",
+    "django:serve": "python manage.py runserver 0.0.0.0:8000",
+    "redis:clear": "redis-cli -h redis FLUSHALL",
     "worker:serve": "python manage.py rqworker default short",
     "scheduler:serve": "python manage.py rqscheduler default short",
     "rq:serve": "npm-run-all redis:clear -p worker:serve scheduler:serve",
@@ -112,6 +112,7 @@
     "pytest": "pytest",
     "pytest:report-coverage": "$VIRTUAL_ENV/bin/coveralls",
     "pytest:check-coverage": "coverage3 report --fail-under=100",
+    "test:all": "run-s test pytest",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
     "heroku-postbuild": "yarn prod"
