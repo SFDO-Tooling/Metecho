@@ -13,7 +13,7 @@ lint:
 	docker-compose run --no-deps web yarn lint
 
 test:
-	docker-compose run --no-deps web yarn test:all
+	docker-compose run web yarn test:all
 
 # Django management:
 migrate:
