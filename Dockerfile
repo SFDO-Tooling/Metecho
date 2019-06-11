@@ -70,7 +70,6 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONPATH /app
 ENV DJANGO_SETTINGS_MODULE config.settings.local
 ENV DATABASE_URL postgres://metashare@db:5432/metashare
-ENV DEVELOPMENT_ENV docker
 
 # Python server setup:
 RUN pip install --upgrade pip

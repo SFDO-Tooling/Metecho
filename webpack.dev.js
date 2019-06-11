@@ -31,7 +31,7 @@ module.exports = merge(common, {
         ws: true,
       },
     },
-    host: process.env.DEVELOPMENT_ENV === 'docker' ? '0.0.0.0' : 'localhost',
+    host: '0.0.0.0',
     port: 8080,
     hot: false,
     writeToDisk: true,
