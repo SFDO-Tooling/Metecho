@@ -40,7 +40,7 @@ async def push_message_about_instance(instance, message):
 async def report_error(user):
     message = {
         "type": "BACKEND_ERROR",
-        # We don't pass the message through to the frontend in case it
+        # We don't pass the message through to the front end in case it
         # contains sensitive material:
         "payload": {"message": str(_("There was an error"))},
     }
