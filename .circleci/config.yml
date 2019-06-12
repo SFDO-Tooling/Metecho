@@ -61,7 +61,6 @@ jobs:
       - run:
           name: Lint
           command: |
-            pipenv shell
             yarn lint
 
   test-client:
@@ -111,12 +110,12 @@ jobs:
       - run:
           name: Run Database Migrations
           command: |
-            pipenv shell
+            . venv/bin/activate
             python manage.py migrate --no-input
       - run:
           name: Test Python
           command: |
-            pipenv shell
+            . venv/bin/activate
             pytest --junitxml=pycov/pytest-junit.xml
       - store_artifacts:
           path: htmlcov
@@ -139,12 +138,14 @@ jobs:
       - run:
           name: Report Test Coverage
           command: |
+            . venv/bin/activate
             yarn pytest:report-coverage
             yarn test:report-coverage
             curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
       - run:
           name: Check Test Coverage
           command: |
+            . venv/bin/activate
             yarn pytest:check-coverage
             yarn test:check-coverage
 
@@ -159,7 +160,7 @@ jobs:
       - run:
           name: Build Documentation
           command: |
-            pipenv shell
+            . venv/bin/activate
             cd docs
             make html
 
