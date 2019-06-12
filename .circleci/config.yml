@@ -16,8 +16,7 @@ jobs:
           name: Install Dependencies
           command: |
             yarn
-            pip install pipenv
-            pipenv install --dev
+            pipenv install --dev --system 
       - run:
           name: Check that yarn.lock matches package.json
           command: |
@@ -33,12 +32,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - ./venv
             - ./node_modules
-      - save_cache:
-          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
-          paths:
-            - ./venv
       - save_cache:
           key: v1-metashare-npm-{{ checksum "yarn.lock" }}
           paths:
@@ -55,7 +49,6 @@ jobs:
       - run:
           name: Lint
           command: |
-            . venv/bin/activate
             yarn lint
 
   test-client:
@@ -99,7 +92,7 @@ jobs:
       - run:
           name: Run Database Migrations
           command: |
-            pipenv run python ./manage.py migrate --no-input
+            pipenv run python manage.py migrate --no-input
       - run:
           name: Test Python
           command: |
@@ -125,14 +118,12 @@ jobs:
       - run:
           name: Report Test Coverage
           command: |
-            . venv/bin/activate
             yarn pytest:report-coverage
             yarn test:report-coverage
             curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
       - run:
           name: Check Test Coverage
           command: |
-            . venv/bin/activate
             yarn pytest:check-coverage
             yarn test:check-coverage
 
@@ -147,7 +138,6 @@ jobs:
       - run:
           name: Build Documentation
           command: |
-            . venv/bin/activate
             cd docs
             make html
 
