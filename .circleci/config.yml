@@ -16,8 +16,6 @@ jobs:
           name: Install Dependencies
           command: |
             yarn
-            python3 -m venv venv
-            . venv/bin/activate
             pip install pipenv
             pipenv install --dev
       - run:
@@ -99,23 +97,13 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: Install Dockerize
-          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-          environment:
-            DOCKERIZE_VERSION: v0.6.1
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://localhost:5432 -timeout 1m
-      - run:
           name: Run Database Migrations
           command: |
-            . venv/bin/activate
-            python ./manage.py migrate --no-input
+            pipenv run python ./manage.py migrate --no-input
       - run:
           name: Test Python
           command: |
-            . venv/bin/activate
-            pytest --junitxml=pycov/pytest-junit.xml
+            pipenv run pytest --junitxml=pycov/pytest-junit.xml
       - store_artifacts:
           path: htmlcov
           destination: py-reports
