@@ -97,11 +97,11 @@ jobs:
       - run:
           name: Run Database Migrations
           command: |
-            VIRTUAL_ENV=./venv pipenv run python manage.py migrate --no-input
+            pipenv run python manage.py migrate --no-input
       - run:
           name: Test Python
           command: |
-            VIRTUAL_ENV=./venv pipenv run pytest --junitxml=pycov/pytest-junit.xml
+            pipenv run pytest --junitxml=pycov/pytest-junit.xml
       - store_artifacts:
           path: htmlcov
           destination: py-reports
