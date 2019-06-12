@@ -16,7 +16,8 @@ jobs:
           name: Install Dependencies
           command: |
             yarn
-            VIRTUAL_ENV=./venv pipenv install --dev --system 
+            mkdir venv
+            VIRTUAL_ENV=./venv pipenv install --dev
       - run:
           name: Check that yarn.lock matches package.json
           command: |
