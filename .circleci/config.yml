@@ -61,6 +61,7 @@ jobs:
       - run:
           name: Lint
           command: |
+            pipenv shell
             yarn lint
 
   test-client:
@@ -110,11 +111,13 @@ jobs:
       - run:
           name: Run Database Migrations
           command: |
-            pipenv run python manage.py migrate --no-input
+            pipenv shell
+            python manage.py migrate --no-input
       - run:
           name: Test Python
           command: |
-            pipenv run pytest --junitxml=pycov/pytest-junit.xml
+            pipenv shell
+            pytest --junitxml=pycov/pytest-junit.xml
       - store_artifacts:
           path: htmlcov
           destination: py-reports
