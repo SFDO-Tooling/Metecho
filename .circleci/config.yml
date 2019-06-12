@@ -16,7 +16,7 @@ jobs:
           name: Install Dependencies
           command: |
             yarn
-            VIRTUAL_ENV=/home/venv pipenv install --dev --system 
+            VIRTUAL_ENV=./venv pipenv install --dev --system 
       - run:
           name: Check that yarn.lock matches package.json
           command: |
@@ -32,7 +32,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - /home/venv
+            - ./venv
             - ./node_modules
       - save_cache:
           key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
@@ -98,11 +98,11 @@ jobs:
       - run:
           name: Run Database Migrations
           command: |
-            VIRTUAL_ENV=/home/venv pipenv run python manage.py migrate --no-input
+            VIRTUAL_ENV=./venv pipenv run python manage.py migrate --no-input
       - run:
           name: Test Python
           command: |
-            VIRTUAL_ENV=/home/venv pipenv run pytest --junitxml=pycov/pytest-junit.xml
+            VIRTUAL_ENV=./venv pipenv run pytest --junitxml=pycov/pytest-junit.xml
       - store_artifacts:
           path: htmlcov
           destination: py-reports
