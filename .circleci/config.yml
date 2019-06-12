@@ -4,6 +4,9 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: wlonk/oddbird
+    environment:
+      PIPENV_IGNORE_VIRTUALENVS: 1
+      VIRTUAL_ENV: ./venv
     steps:
       - checkout
       - restore_cache:
@@ -17,7 +20,7 @@ jobs:
           command: |
             yarn
             mkdir venv
-            VIRTUAL_ENV=./venv pipenv install --dev
+            pipenv install --dev
       - run:
           name: Check that yarn.lock matches package.json
           command: |
@@ -48,6 +51,9 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: wlonk/oddbird
+    environment:
+      PIPENV_IGNORE_VIRTUALENVS: 1
+      VIRTUAL_ENV: ./venv
     steps:
       - checkout
       - attach_workspace:
@@ -61,6 +67,9 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: wlonk/oddbird
+    environment:
+      PIPENV_IGNORE_VIRTUALENVS: 1
+      VIRTUAL_ENV: ./venv
     steps:
       - checkout
       - attach_workspace:
@@ -91,6 +100,9 @@ jobs:
           AWS_BUCKET_NAME: None
           AWS_SECRET_ACCESS_KEY: None
           AWS_ACCESS_KEY_ID: None
+    environment:
+      PIPENV_IGNORE_VIRTUALENVS: 1
+      VIRTUAL_ENV: ./venv
     steps:
       - checkout
       - attach_workspace:
@@ -144,6 +156,7 @@ jobs:
       - run:
           name: Build Documentation
           command: |
+            pipenv shell
             cd docs
             make html
 
