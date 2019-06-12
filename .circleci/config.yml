@@ -32,7 +32,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - /root/.local/share/virtualenvs/metashare-TT4bhZxn
+            - /home/venv
             - ./node_modules
       - save_cache:
           key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
