@@ -19,7 +19,7 @@ jobs:
           name: Install Dependencies
           command: |
             yarn
-            mkdir venv
+            python3 -m venv venv 
             pipenv install --dev
       - run:
           name: Check that yarn.lock matches package.json
