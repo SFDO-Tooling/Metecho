@@ -61,7 +61,6 @@ jobs:
       - run:
           name: Lint
           command: |
-            . venv/bin/activate
             yarn lint
 
   test-client:
