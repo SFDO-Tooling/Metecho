@@ -77,7 +77,9 @@ jobs:
           at: .
       - run:
           name: Test JS
-          command: yarn test:coverage
+          command: |
+            . venv/bin/activate
+            yarn test:coverage
       - store_artifacts:
           path: coverage
           destination: js-reports
