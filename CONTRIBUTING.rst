@@ -21,6 +21,7 @@ Docker-based development (preferred)
    Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to
    any two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
 
+    $ pip install cryptography
     $ python
     >>> from cryptography.fernet import Fernet
     >>> Fernet.generate_key()
