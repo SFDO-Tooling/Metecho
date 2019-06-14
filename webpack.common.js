@@ -5,6 +5,7 @@
 process.env.BROWSERSLIST_CONFIG = './.browserslistrc';
 
 const path = require('path');
+
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -16,7 +17,7 @@ module.exports = {
   },
   resolve: {
     modules: ['src/js', 'src/sass', 'static', 'node_modules'],
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
   },
   output: {
     publicPath: '/static/',
@@ -42,7 +43,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.(j|t)sx?$/,
         include: [
           path.join(__dirname, 'src/js'),
           path.join(__dirname, 'node_modules/@salesforce/design-system-react'),

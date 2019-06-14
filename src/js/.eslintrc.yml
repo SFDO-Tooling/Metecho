@@ -9,3 +9,12 @@ env:
   browser: true
   commonjs: true
   node: false
+plugins:
+  - '@typescript-eslint'
+extends:
+  - plugin:@typescript-eslint/eslint-recommended
+  - plugin:@typescript-eslint/recommended
+  - prettier/@typescript-eslint
+rules:
+  '@typescript-eslint/no-explicit-any': 0
+  '@typescript-eslint/explicit-function-return-type': 0

@@ -19,6 +19,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - ~/.gitconfig:/root/.gitconfig
     ports:
       - "0.0.0.0:8080:8080"
 

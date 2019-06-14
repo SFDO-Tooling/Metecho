@@ -92,6 +92,9 @@ the Docker container. If you do not see the prompt, run the "Remote-Containers:
 Open Folder in Container..." command from the VS Code Command Palette to start
 the Docker container.
 
+The first build will take a number of minutes, but subsequent builds will be
+significantly faster.
+
 By running ``docker-compose up``, VS Code starts the development server/watcher
 as well, available at `<http://localhost:8080/>`_ in your browser.
 

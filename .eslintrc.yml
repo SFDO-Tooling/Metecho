@@ -1,8 +1,9 @@
 # http://eslint.org/docs/rules/
 
 root: true
-parser: babel-eslint
+parser: '@typescript-eslint/parser'
 parserOptions:
+  project: ./tsconfig.json
   sourceType: script
   ecmaVersion: 2015
   allowImportExportEverywhere: true
@@ -17,25 +18,24 @@ settings:
           extensions:
             - .js
             - .jsx
+            - .ts
+            - .tsx
           modules:
             - src/js
             - static
             - node_modules
   react:
     version: 'detect'
-    flowVersion: '0.93.0'
 plugins:
-  - react
   - prettier
-  - flowtype
+  - react
 extends:
   - eslint:recommended
-  - plugin:flowtype/recommended
-  - plugin:react/recommended
   - plugin:import/recommended
-  - plugin:prettier/recommended
-  - prettier/flowtype
+  - plugin:import/typescript
   - prettier/react
+  - plugin:prettier/recommended
+  - plugin:react/recommended
 rules:
   # Prettier
   prettier/prettier:
