@@ -1,0 +1,125 @@
+// See https://aka.ms/vscode-remote/devcontainer.json for format details.
+{
+  "name": "MetaShare",
+  "dockerComposeFile": "./docker-compose.yml",
+  "service": "web",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+  "extensions": [
+    "bibhasdn.django-html",
+    "coenraads.bracket-pair-colorizer-2",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "formulahendry.auto-rename-tag",
+    "joshpeng.sublime-babel-vscode",
+    "lextudio.restructuredtext",
+    "ms-python.python",
+    "ms-vscode.sublime-keybindings",
+    "naumovs.color-highlight",
+    "peterjausovec.vscode-docker",
+    "robinbentley.sass-indented",
+    "shinnn.stylelint",
+    "stkb.rewrap",
+    "tyriar.sort-lines",
+    "wholroyd.jinja",
+    "xabikos.javascriptsnippets"
+  ],
+  "settings": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "search.usePCRE2": true,
+    "javascript.suggestionActions.enabled": false,
+    "eslint.autoFixOnSave": true,
+    "eslint.validate": [
+      "javascript",
+      "javascriptreact",
+      {
+        "language": "vue",
+        "autoFix": true
+      },
+      "typescript"
+    ],
+    "prettier.singleQuote": true,
+    "prettier.trailingComma": "all",
+    "typescript.preferences.quoteStyle": "single",
+    "python.linting.flake8Enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.formatting.provider": "black",
+    "python.pythonPath": "/usr/local/bin/python",
+    "restructuredtext.linter.extraArgs": ["--max-line-length 80"],
+    "[javascript]": {
+      "editor.formatOnSave": true,
+      "editor.rulers": [80]
+    },
+    "[restructuredtext]": {
+      "editor.rulers": [80]
+    },
+    "[markdown]": {
+      "editor.rulers": [80]
+    },
+    "[javascriptreact]": {
+      "editor.formatOnSave": true,
+      "editor.rulers": [80],
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[vue]": {
+      "editor.formatOnSave": true,
+      "editor.rulers": [80]
+    },
+    "[typescript]": {
+      "editor.formatOnSave": true,
+      "editor.rulers": [80]
+    },
+    "[scss]": {
+      "editor.formatOnSave": true
+    },
+    "[nunjucks]": {
+      "editor.wordWrap": "on"
+    },
+    "files.associations": {
+      "*.js": "javascript"
+    },
+    "files.exclude": {
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/*.pyc": true,
+      "**/*.pyo": true,
+      "jscov_temp": true,
+      "jscache": true,
+      "__pycache__": true,
+      ".coverage": true,
+      "htmlcov": true,
+      "pycov": true,
+      ".tags": true,
+      ".cache": true,
+      ".pytest_cache": true,
+      ".vscode": true,
+      "jscov": true,
+      ".nyc_output": true,
+      "collected-assets": true,
+      "staticfiles": true,
+      "**/*.egg-info": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/bower_components": true,
+      "**/*.css.map": true,
+      "**/*.js.map": true,
+      "npm-shrinkwrap.json": true,
+      "yarn.lock": true,
+      "package-lock.json": true,
+      "npm-debug.log": true,
+      "yarn-debug.log": true,
+      "yarn-error.log": true
+    }
+  }
+}

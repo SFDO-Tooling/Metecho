@@ -76,6 +76,35 @@ care of setting up a database and installing Python and JS dependencies for you.
 When you change Python or JS dependencies, you will need to rebuild the Docker
 images, as we store dependencies in the images for speed: ``make build``.
 
+Docker development using VS Code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Because front-end and back-end dependencies are installed in a Docker container
+instead of locally, text editors that rely on locally-installed packages (e.g.
+for code formatting/linting on save) need access to the running Docker
+container. `VS Code`_ supports this using the `Remote Development`_ extension
+pack.
+
+Once you have the extension pack installed, when you open the MetaShare folder
+in VS Code, you will be prompted to "Reopen in Container". Doing so will
+effectively run ``docker-compose up`` and reload your window, now running inside
+the Docker container. If you do not see the prompt, run the "Remote-Containers:
+Open Folder in Container..." command from the VS Code Command Palette to start
+the Docker container.
+
+By running ``docker-compose up``, VS Code starts the development server/watcher
+as well, available at `<http://localhost:8080/>`_ in your browser.
+
+A number of project-specific VS Code extensions will be automatically installed
+for you within the Docker container. See `.devcontainer.json
+<.devcontainer.json>`_ for the Docker-specific VS Code settings.
+
+For more detailed instructions and options, see the `VS Code documentation`_.
+
+.. _VS Code: https://code.visualstudio.com/
+.. _Remote Development: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
+.. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
+
 Logging in with Salesforce
 --------------------------
 
@@ -99,12 +128,12 @@ do that easily via the ``promote_superuser`` management command::
 Internationalization
 --------------------
 
-To build and compile ``.mo`` and ``.po`` files for the backend, run::
+To build and compile ``.mo`` and ``.po`` files for the back end, run::
 
    $ docker-compose run web python manage.py makemessages --locale <locale>
    $ docker-compose run web python manage.py compilemessages
 
-For the front-end, translation JSON files are served from
+For the front end, translation JSON files are served from
 ``locales/<language>/`` directories, and the `user language is auto-detected at
 runtime`_.
 
