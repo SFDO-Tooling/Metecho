@@ -78,6 +78,9 @@ docs/_build/
 # pyenv
 .python-version
 
+# nvm
+.nvmrc
+
 # celery beat schedule file
 celerybeat-schedule
 

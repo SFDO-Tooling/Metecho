@@ -17,7 +17,7 @@ do
     EXTENSION="${FILENAME##*.}"
 
     case $EXTENSION in
-        js|ts|vue)
+        js|ts|jsx|tsx)
             JS+=($FILENAME)
             ;;
         scss)

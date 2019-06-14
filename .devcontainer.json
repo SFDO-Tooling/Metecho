@@ -27,6 +27,7 @@
   "settings": {
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
@@ -37,10 +38,13 @@
       "javascript",
       "javascriptreact",
       {
-        "language": "vue",
+        "language": "typescript",
         "autoFix": true
       },
-      "typescript"
+      {
+        "language": "typescriptreact",
+        "autoFix": true
+      }
     ],
     "prettier.singleQuote": true,
     "prettier.trailingComma": "all",
@@ -51,39 +55,34 @@
     "python.pythonPath": "/usr/local/bin/python",
     "restructuredtext.linter.extraArgs": ["--max-line-length 80"],
     "[javascript]": {
-      "editor.formatOnSave": true,
+      "editor.formatOnSave": false,
       "editor.rulers": [80]
     },
     "[restructuredtext]": {
+      "editor.formatOnSave": true,
       "editor.rulers": [80]
     },
     "[markdown]": {
+      "editor.formatOnSave": true,
       "editor.rulers": [80]
     },
     "[javascriptreact]": {
-      "editor.formatOnSave": true,
-      "editor.rulers": [80],
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[jsonc]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[vue]": {
-      "editor.formatOnSave": true,
+      "editor.formatOnSave": false,
       "editor.rulers": [80]
     },
+    "[jsonc]": {
+      "editor.formatOnSave": true
+    },
     "[typescript]": {
-      "editor.formatOnSave": true,
+      "editor.formatOnSave": false,
+      "editor.rulers": [80]
+    },
+    "[typescriptreact]": {
+      "editor.formatOnSave": false,
       "editor.rulers": [80]
     },
     "[scss]": {
       "editor.formatOnSave": true
-    },
-    "[nunjucks]": {
-      "editor.wordWrap": "on"
-    },
-    "files.associations": {
-      "*.js": "javascript"
     },
     "files.exclude": {
       "**/.git": true,

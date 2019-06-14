@@ -93,6 +93,12 @@ the Docker container. If you do not see the prompt, run the "Remote-Containers:
 Open Folder in Container..." command from the VS Code Command Palette to start
 the Docker container.
 
+The first build will take a number of minutes, but subsequent builds will be
+significantly faster. Docker caches each command in the `Dockerfile
+<Dockerfile>`_ as its own layer. If you change the Dockerfile, changing earlier
+layers will bust the cache on the lower layers and make your next build slow
+again.
+
 By running ``docker-compose up``, VS Code starts the development server/watcher
 as well, available at `<http://localhost:8080/>`_ in your browser.
 
