@@ -91,6 +91,9 @@ jobs:
   test-python:
     working_directory: ~/metashare
     docker:
+      - image: wlonk/oddbird
+        environment:
+          VIRTUAL_ENV: ./venv
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
@@ -100,9 +103,6 @@ jobs:
           AWS_BUCKET_NAME: None
           AWS_SECRET_ACCESS_KEY: None
           AWS_ACCESS_KEY_ID: None
-      - image: wlonk/oddbird
-    environment:
-      VIRTUAL_ENV: ./venv
     steps:
       - checkout
       - attach_workspace:
