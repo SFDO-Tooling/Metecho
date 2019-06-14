@@ -3,23 +3,22 @@ jobs:
   build:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: wlonk/oddbird
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
+            - metashare-py-{{ checksum "Pipfile.lock" }}
       - restore_cache:
           keys:
-            - v1-metashare-npm-{{ checksum "yarn.lock" }}
+            - metashare-npm-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
           command: |
             yarn
             python3 -m venv venv
             . venv/bin/activate
-            pip install pipenv
-            pipenv install --dev
+            pipenv install --dev --deploy --ignore-pipfile
       - run:
           name: Check that yarn.lock matches package.json
           command: |
@@ -38,18 +37,18 @@ jobs:
             - ./venv
             - ./node_modules
       - save_cache:
-          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
+          key: metashare-py-{{ checksum "Pipfile.lock" }}
           paths:
             - ./venv
       - save_cache:
-          key: v1-metashare-npm-{{ checksum "yarn.lock" }}
+          key: metashare-npm-{{ checksum "yarn.lock" }}
           paths:
             - ./node_modules
 
   lint:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: wlonk/oddbird
     steps:
       - checkout
       - attach_workspace:
@@ -63,7 +62,7 @@ jobs:
   test-client:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: wlonk/oddbird
     steps:
       - checkout
       - attach_workspace:
@@ -84,33 +83,36 @@ jobs:
   test-python:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: wlonk/oddbird
+        environment:
+          BUCKETEER_AWS_ACCESS_KEY_ID: circle_test
+          BUCKETEER_AWS_SECRET_ACCESS_KEY: circle_test
+          BUCKETEER_BUCKET_NAME: circle_test
+          DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
+          DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
+          DJANGO_DEBUG: False
+          DJANGO_HASHID_SALT: test_hash_id
+          DJANGO_SECRET_KEY: test_secret_key
+          DJANGO_SETTINGS_MODULE: config.settings.test
+          SECURE_SSL_REDIRECT: False
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: circle_test
-          POSTGRES_PASSWORD: circle_test
+          AWS_ACCESS_KEY_ID: None
           AWS_BUCKET_NAME: None
           AWS_SECRET_ACCESS_KEY: None
-          AWS_ACCESS_KEY_ID: None
+          POSTGRES_DB: circle_test
+          POSTGRES_PASSWORD: circle_test
+          POSTGRES_USER: ubuntu
     steps:
       - checkout
       - attach_workspace:
           at: .
       - run:
-          name: Install Dockerize
-          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-          environment:
-            DOCKERIZE_VERSION: v0.6.1
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://localhost:5432 -timeout 1m
-      - run:
           name: Run Database Migrations
           command: |
             . venv/bin/activate
-            python ./manage.py migrate --no-input
+            python manage.py migrate --no-input
       - run:
           name: Test Python
           command: |
@@ -129,7 +131,9 @@ jobs:
   report-test-coverage:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: wlonk/oddbird
+    environment:
+      COVERALLS_PARALLEL: true
     steps:
       - checkout
       - attach_workspace:
@@ -151,7 +155,7 @@ jobs:
   build-docs:
     working_directory: ~/metashare
     docker:
-      - image: circleci/python:3.7.3-node
+      - image: wlonk/oddbird
     steps:
       - checkout
       - attach_workspace:
