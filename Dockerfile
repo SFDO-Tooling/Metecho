@@ -6,9 +6,6 @@ ENV DJANGO_SETTINGS_MODULE config.settings.local
 ENV DATABASE_URL postgres://metashare@db:5432/metashare
 
 # Python server setup:
-RUN pip install --upgrade pip
-RUN pip install pipenv
-
 COPY ./Pipfile.lock /Pipfile.lock
 COPY ./Pipfile /Pipfile
 COPY ./compose/web/start-dev.sh /start-dev.sh
