@@ -20,7 +20,7 @@ jobs:
             yarn
             python3 -m venv venv 
             . venv/bin/activate
-            pipenv install --dev
+            pipenv install --dev --ignore-pipfile
       - run:
           name: Check that yarn.lock matches package.json
           command: |
@@ -36,8 +36,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - venv
-            - node_modules
+            - ./venv
+            - ./node_modules
       - save_cache:
           key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
           paths:
@@ -76,7 +76,6 @@ jobs:
       - run:
           name: Test JS
           command: |
-            . venv/bin/activate
             yarn test:coverage
       - store_artifacts:
           path: coverage
