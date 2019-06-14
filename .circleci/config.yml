@@ -4,23 +4,21 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: wlonk/oddbird
-    environment:
-      VIRTUAL_ENV: ./venv
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
+            - metashare-py-{{ checksum "Pipfile.lock" }}
       - restore_cache:
           keys:
-            - v1-metashare-npm-{{ checksum "yarn.lock" }}
+            - metashare-npm-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
           command: |
             yarn
-            python3 -m venv venv 
+            python3 -m venv venv
             . venv/bin/activate
-            pipenv install --dev --ignore-pipfile
+            pipenv install --dev --deploy --ignore-pipfile
       - run:
           name: Check that yarn.lock matches package.json
           command: |
@@ -39,11 +37,11 @@ jobs:
             - ./venv
             - ./node_modules
       - save_cache:
-          key: v1-metashare-py-3.7-{{ checksum "Pipfile.lock" }}
+          key: metashare-py-{{ checksum "Pipfile.lock" }}
           paths:
             - ./venv
       - save_cache:
-          key: v1-metashare-npm-{{ checksum "yarn.lock" }}
+          key: metashare-npm-{{ checksum "yarn.lock" }}
           paths:
             - ./node_modules
 
@@ -51,8 +49,6 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: wlonk/oddbird
-    environment:
-      VIRTUAL_ENV: ./venv
     steps:
       - checkout
       - attach_workspace:
@@ -67,16 +63,13 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: wlonk/oddbird
-    environment:
-      VIRTUAL_ENV: ./venv
     steps:
       - checkout
       - attach_workspace:
           at: .
       - run:
           name: Test JS
-          command: |
-            yarn test:coverage
+          command: yarn test:coverage
       - store_artifacts:
           path: coverage
           destination: js-reports
@@ -92,16 +85,25 @@ jobs:
     docker:
       - image: wlonk/oddbird
         environment:
-          VIRTUAL_ENV: ./venv
+          BUCKETEER_AWS_ACCESS_KEY_ID: circle_test
+          BUCKETEER_AWS_SECRET_ACCESS_KEY: circle_test
+          BUCKETEER_BUCKET_NAME: circle_test
+          DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
+          DB_ENCRYPTION_KEY: test_encryption_key
+          DJANGO_DEBUG: False
+          DJANGO_HASHID_SALT: test_hash_id
+          DJANGO_SECRET_KEY: test_secret_key
+          DJANGO_SETTINGS_MODULE: config.settings.test
+          SECURE_SSL_REDIRECT: False
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: circle_test
-          POSTGRES_PASSWORD: circle_test
+          AWS_ACCESS_KEY_ID: None
           AWS_BUCKET_NAME: None
           AWS_SECRET_ACCESS_KEY: None
-          AWS_ACCESS_KEY_ID: None
+          POSTGRES_DB: circle_test
+          POSTGRES_PASSWORD: circle_test
+          POSTGRES_USER: ubuntu
     steps:
       - checkout
       - attach_workspace:
@@ -130,6 +132,8 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: wlonk/oddbird
+    environment:
+      COVERALLS_PARALLEL: true
     steps:
       - checkout
       - attach_workspace:
