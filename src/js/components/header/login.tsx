@@ -58,6 +58,7 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   };
 
   private handleSelect = (opt: MenuOption | Divider) => {
+    /* istanbul ignore else */
     if (!isDivider(opt)) {
       if (opt.modal) {
         this.toggleModal(true);
