@@ -81,6 +81,7 @@ module.exports = merge(common, {
               done(err);
             } else {
               const options = {
+                filename: file.path,
                 presets: ['@babel/preset-typescript'],
                 plugins: [
                   '@babel/plugin-syntax-jsx',

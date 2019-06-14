@@ -1,11 +1,11 @@
 /* eslint-disable one-var */
 
 declare module '*.svg' {
-  const value: string;
-  export default value;
+  const svgVal: string;
+  export default svgVal;
 }
 
 declare module '*.png' {
-  const value: string;
-  export default value;
+  const pngVal: string;
+  export default pngVal;
 }
