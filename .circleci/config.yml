@@ -5,7 +5,6 @@ jobs:
     docker:
       - image: wlonk/oddbird
     environment:
-      PIPENV_IGNORE_VIRTUALENVS: 1
       VIRTUAL_ENV: ./venv
     steps:
       - checkout
@@ -20,6 +19,7 @@ jobs:
           command: |
             yarn
             python3 -m venv venv 
+            . venv/bin/activate
             pipenv install --dev
       - run:
           name: Check that yarn.lock matches package.json
@@ -52,7 +52,6 @@ jobs:
     docker:
       - image: wlonk/oddbird
     environment:
-      PIPENV_IGNORE_VIRTUALENVS: 1
       VIRTUAL_ENV: ./venv
     steps:
       - checkout
@@ -69,7 +68,6 @@ jobs:
     docker:
       - image: wlonk/oddbird
     environment:
-      PIPENV_IGNORE_VIRTUALENVS: 1
       VIRTUAL_ENV: ./venv
     steps:
       - checkout
@@ -104,7 +102,6 @@ jobs:
           AWS_ACCESS_KEY_ID: None
       - image: wlonk/oddbird
     environment:
-      PIPENV_IGNORE_VIRTUALENVS: 1
       VIRTUAL_ENV: ./venv
     steps:
       - checkout
