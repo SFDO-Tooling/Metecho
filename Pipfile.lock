@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ab3c579e83f90be14350c8f4993794fdf7d3c6c15701edf891246a53aab0e606"
+            "sha256": "01892afa7a9a8a7b0ef0e54625008cb7fe606fb727d7257dfadd59572458e80e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -77,6 +77,7 @@
                 "sha256:c24644352e90b2942aa16c0fd2fd06d7ab40718f6afd8226fde1c836640a95c3",
                 "sha256:db851eaac9808f431f77bf062d44d954233266e35da72b60143bd54de3567988"
             ],
+            "index": "pypi",
             "version": "==1.9.170"
         },
         "botocore": {
@@ -287,6 +288,7 @@
                 "sha256:1eda0efe0ad1638c5671412edc28a3574a9a69fdc567be56dc86a7a0a8687343",
                 "sha256:d9377e851336430676e5fb52c5efae379348355be84d5fc0ece70c0479dc0600"
             ],
+            "index": "pypi",
             "version": "==2.1.0"
         },
         "django-rq-scheduler": {
@@ -502,6 +504,7 @@
                 "sha256:f0d43828003c82dbc9269de87aa449e9896077a71954fbbb10a614c017e65737",
                 "sha256:f78e8b487de4d92640105c1389e5b90be3496b1d75c90a666edd8737cc2dbab7"
             ],
+            "index": "pypi",
             "version": "==2.8.3"
         },
         "pyasn1": {
@@ -734,14 +737,6 @@
             ],
             "version": "==1.4.3"
         },
-        "appnope": {
-            "hashes": [
-                "sha256:5b26757dc6f79a3b7dc9fab95359328d5747fcb2409d331ea66d0272b90ab2a0",
-                "sha256:8b995ffe925347a2138d7ac0fe77155e4311a0ea6d6da4f5128fe4b3cbe5ed71"
-            ],
-            "markers": "sys_platform == 'darwin'",
-            "version": "==0.1.0"
-        },
         "atomicwrites": {
             "hashes": [
                 "sha256:03472c30eb2c5d1ba9227e4c2ca66ab8287fbfbbda3888aa93dc2e28fc6811b4",
@@ -840,6 +835,7 @@
                 "sha256:d3d49234bffd41e91b241a69f0ebb9f64d7f0515711a76134d53d4647e7eb509",
                 "sha256:dafabcff87425fa2ab3122dee21229afbb4d6692cfdacc6bb895f7dfa8b2c849"
             ],
+            "index": "pypi",
             "version": "==1.8.1"
         },
         "decorator": {
@@ -854,6 +850,7 @@
                 "sha256:097450a56fcfdef36bb4dd731b113d1b3e9a9de715fc8775e5e84ab3be50dd96",
                 "sha256:a1799a7eb4cf0f7aa0d111bac79047227b55a74d11741f387708023a012662f9"
             ],
+            "index": "pypi",
             "version": "==2.1.9"
         },
         "docopt": {
@@ -1103,6 +1100,7 @@
                 "sha256:4a784f1d4f2ef198fe9b7aef793e9fa1a3b2f84e822d9b3a64a181293a572d45",
                 "sha256:926855726d8ae8371803f7b2e6ec0a69953d9c6311fa7c3b6c1b929ff92d27da"
             ],
+            "index": "pypi",
             "version": "==4.6.3"
         },
         "pytest-asyncio": {
