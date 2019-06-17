@@ -125,6 +125,7 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "allauth.socialaccount.providers.github",
     "rest_framework",
     "rest_framework.authtoken",
     "parler",
@@ -216,6 +217,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_REDIRECT_URL = "/"
+
+SOCIALACCOUNT_PROVIDERS = {"github": {"SCOPE": ["read:user", "repo", "read:org"]}}
 
 # Use HTTPS:
 SECURE_PROXY_SSL_HEADER = env(

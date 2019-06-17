@@ -75,6 +75,11 @@ class Login extends React.Component<Props, { modalOpen: boolean }> {
   private static getMenuOpts(): (MenuOption | Divider)[] {
     return [
       {
+        label: i18n.t('GitHub'),
+        href: window.api_urls.github_login && window.api_urls.github_login(),
+        disabled: !window.api_urls.github_login,
+      },
+      {
         label: i18n.t('Production or Developer Org'),
         href:
           window.api_urls.salesforce_production_login &&
