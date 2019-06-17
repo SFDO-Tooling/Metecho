@@ -15,7 +15,7 @@ services:
       - redis
     env_file: .env
     environment:
-      - REDIS_URL=redis://redis:6379
+      REDIS_URL: redis://redis:6379
     volumes:
       - .:/app
       - /app/node_modules

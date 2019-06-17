@@ -1,4 +1,4 @@
-FROM wlonk/oddbird
+FROM wlonk/oddbird:latest
 
 # Env setup:
 ENV PYTHONPATH /app
@@ -17,6 +17,10 @@ RUN pipenv install --dev --system --deploy --ignore-pipfile
 # JS client setup:
 COPY ./package.json /app/package.json
 COPY ./yarn.lock /app/yarn.lock
+
+COPY . /app
+
+EXPOSE 8000
 
 # Actually run things:
 WORKDIR /app
