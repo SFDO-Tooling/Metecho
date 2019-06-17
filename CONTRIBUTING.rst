@@ -112,20 +112,17 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 .. _Remote Development: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
 
-Logging in with Salesforce
---------------------------
+Logging in with GitHub and Salesforce
+-------------------------------------
 
-To setup the Salesforce OAuth integration, run the ``populate_social_apps``
-management command. The values to use in place of the ``XXX`` and ``YYY`` flags
-can be found on the Connected App you've made in your Salesforce configuration,
-or if you're an OddBird, you can find these values in the shared Keybase team
-folder (``metashare/prod.db``)::
+To setup the GitHub and Salesforce OAuth integrations, run the
+``populate_social_apps`` management command. The values to use in place of the
+``XXX`` and ``YYY`` flags can be found on the GitHub App or Connected App you've
+made in your Salesforce configuration, or if you're an OddBird, you can find
+these values in the shared Keybase team folder (``metashare/prod.db``)::
 
-    $ docker-compose run web python manage.py populate_social_apps --prod-id XXX --prod-secret YYY
-
-You can also run it with ``--test-id`` and ``--test-secret``, or ``--cust-id``
-and ``--cust-secret``, or all three sets at once, to populate all three
-providers.
+    $ docker-compose run web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
+    $ docker-compose run web python manage.py populate_social_apps --sf-id XXX --sf-secret YYY
 
 Once you've logged in, you probably want to make your user a superuser. You can
 do that easily via the ``promote_superuser`` management command::
