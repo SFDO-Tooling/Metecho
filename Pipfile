@@ -9,7 +9,7 @@ verify_ssl = true
 
 Sphinx = "==2.1.1"
 black = "==19.3b0"
-coveralls = "==1.8.0"
+coveralls = "==1.8.1"
 django-extensions = "==2.1.7"
 factory_boy = "==2.12.0"
 flake8 = "==3.7.7"
