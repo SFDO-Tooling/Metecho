@@ -1,5 +1,6 @@
 {% load api_bootstrap %}
 {% load js_reverse %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -10,6 +11,7 @@
     <meta name="author" content="Salesforce.org" />
     <meta name="keywords" content="{% block keywords %}{% endblock keywords %}" />
     <meta name="language" content="en-us" />
+    <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" />
 
     <!-- Page Info -->
     <title>{% block title %}MetaShare{% endblock %}</title>
