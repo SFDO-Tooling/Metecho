@@ -9,18 +9,6 @@ MetaShare
      :target: https://coveralls.io/github/SFDO-Tooling/MetaShare?branch=master
      :alt: Test Coverage
 
-.. image:: https://badges.greenkeeper.io/SFDO-Tooling/MetaShare.svg
-     :target: https://greenkeeper.io/
-     :alt: Greenkeeper Status
-
-.. image:: https://pyup.io/repos/github/SFDO-Tooling/MetaShare/shield.svg
-     :target: https://pyup.io/repos/github/SFDO-Tooling/MetaShare/
-     :alt: Python Updates
-
-.. image:: https://pyup.io/repos/github/SFDO-Tooling/MetaShare/python-3-shield.svg
-     :target: https://pyup.io/repos/github/SFDO-Tooling/MetaShare/
-     :alt: Python 3 Status
-
 Development
 -----------
 
