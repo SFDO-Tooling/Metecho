@@ -1,6 +1,5 @@
 import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import i18n from 'i18next';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
@@ -39,11 +38,11 @@ class Header extends React.Component<Props> {
           title={
             <Link
               to={routes.home()}
-              className="slds-page-header__title
-                slds-text-heading_large
+              className="slds-text-heading_large
                 slds-text-link_reset"
             >
-              <span>{i18n.t('MetaShare')}</span>
+              <span data-logo-bit="start">meta</span>
+              <span data-logo-bit="end">share</span>
             </Link>
           }
           onRenderControls={this.controls}
