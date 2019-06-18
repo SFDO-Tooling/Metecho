@@ -1,5 +1,6 @@
 {% load api_bootstrap %}
 {% load js_reverse %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -10,6 +11,10 @@
     <meta name="author" content="Salesforce.org" />
     <meta name="keywords" content="{% block keywords %}{% endblock keywords %}" />
     <meta name="language" content="en-us" />
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}" />
 
     <!-- Page Info -->
     <title>{% block title %}MetaShare{% endblock %}</title>

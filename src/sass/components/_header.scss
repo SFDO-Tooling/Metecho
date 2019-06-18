@@ -6,3 +6,9 @@
   border-radius: 0;
   background: $color-background-alt;
 }
+
+[data-logo-bit='end'] {
+  color: $color-text-brand;
+  font-weight: $font-weight-regular;
+  text-transform: uppercase;
+}
