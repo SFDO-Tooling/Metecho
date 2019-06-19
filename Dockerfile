@@ -20,9 +20,8 @@ COPY ./yarn.lock /app/yarn.lock
 
 COPY . /app
 
-EXPOSE 8000
-
 # Actually run things:
 WORKDIR /app
 RUN yarn install
+RUN yarn prod
 CMD /start-dev.sh
