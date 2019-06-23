@@ -2,8 +2,14 @@ FROM wlonk/oddbird:latest
 
 # Env setup:
 ENV PYTHONPATH /app
-ENV DJANGO_SETTINGS_MODULE config.settings.local
+
 ENV DATABASE_URL postgres://metashare@db:5432/metashare
+# A sample key, not to be used for realsies:
+ENV DB_ENCRYPTION_KEY 'IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE='
+ENV DJANGO_ALLOWED_HOSTS localhost
+ENV DJANGO_HASHID_SALT 'sample hashid salt'
+ENV DJANGO_SECRET_KEY 'sample secret key'
+ENV DJANGO_SETTINGS_MODULE config.settings.production
 
 # Python server setup:
 COPY ./Pipfile.lock /Pipfile.lock
@@ -24,4 +30,5 @@ COPY . /app
 WORKDIR /app
 RUN yarn install
 RUN yarn prod
+RUN python manage.py collectstatic --noinput
 CMD /start-dev.sh
