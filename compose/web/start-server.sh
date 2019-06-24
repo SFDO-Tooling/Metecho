@@ -1,7 +1,4 @@
 #!/bin/sh
-# Can this be in the Dockerfile?
-python manage.py migrate
-
 # Use the presence of $PORT as a proxy for "are we local or Heroku?"
 if [ -z ${PORT+x} ];
 then
