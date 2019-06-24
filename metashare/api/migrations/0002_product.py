@@ -6,6 +6,8 @@ from django.db import migrations, models
 
 import sfdo_template_helpers.fields
 
+ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+
 
 class Migration(migrations.Migration):
 
@@ -18,7 +20,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     hashid_field.field.HashidAutoField(
-                        alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                        alphabet=ALPHABET,
                         min_length=7,
                         primary_key=True,
                         serialize=False,
