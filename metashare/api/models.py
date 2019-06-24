@@ -1,14 +1,19 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from hashid_field import HashidAutoField
 from model_utils import Choices
 
 from sfdo_template_helpers.crypto import fernet_decrypt
+from sfdo_template_helpers.fields import MarkdownField
 
 from .constants import ORGANIZATION_DETAILS
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
+LICENSES = Choices(
+    "mit", "lgpl-3.0", "mpl-2.0", "agpl-3.0", "unlicense", "apache-2.0", "gpl-3.0"
+)
 
 
 class HashIdMixin(models.Model):
@@ -90,3 +95,14 @@ class User(HashIdMixin, AbstractUser):
         if all(self.token) and self.org_id:
             return self.org_id
         return None
+
+
+class Product(HashIdMixin):
+    name = models.CharField(max_length=50, unique=True)
+    repo_name = models.SlugField(unique=True)
+    version_number = models.CharField(max_length=50)
+    description = MarkdownField()
+    is_managed = models.BooleanField(default=False)
+    license = ArrayField(
+        models.CharField(max_length=64, choices=LICENSES), blank=True, default=list
+    )

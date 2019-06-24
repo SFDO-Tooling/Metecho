@@ -1,4 +1,4 @@
-.PHONY: up down build run migrate shell lint test prune
+.PHONY: up down build run migrate migrations shell lint test prune
 
 up:
 	docker-compose up
@@ -18,6 +18,10 @@ test:
 # Django management:
 migrate:
 	docker-compose run web python manage.py migrate
+
+migrations:
+	# call as `make migrations APP=api` etc.
+	docker-compose run web python manage.py makemigrations $(APP)
 
 shell:
 	docker-compose run web python manage.py shell
