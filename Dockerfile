@@ -26,9 +26,15 @@ COPY ./yarn.lock /app/yarn.lock
 
 COPY . /app
 
-# Actually run things:
+# === Actually run things:
 WORKDIR /app
 RUN yarn install
+
+# These next two lines, combined with the default use of production settings
+# above, mean we'll always have assets in static/dist/prod in this image, but
+# if we override settings at runtime to be the local-dev settings, we'll build
+# and use local-dev assets.
 RUN yarn prod
 RUN python manage.py collectstatic --noinput
-CMD /start-dev.sh
+
+CMD /start-server.sh
