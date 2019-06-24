@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import FullUserSerializer
+from .models import Product
+from .serializers import FullUserSerializer, ProductSerializer
 
 User = get_user_model()
 
@@ -17,3 +18,8 @@ class UserView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.get_queryset().get()
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
