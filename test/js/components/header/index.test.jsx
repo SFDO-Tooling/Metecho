@@ -7,7 +7,9 @@ import { renderWithRedux } from './../../utils';
 import Header from 'components/header';
 
 describe('<Header />', () => {
-  const setup = (initialState = { user: null, socket: false }) => {
+  const setup = (
+    initialState = { user: { username: 'Test User' }, socket: false },
+  ) => {
     const {
       container,
       getByLabelText,
@@ -23,23 +25,16 @@ describe('<Header />', () => {
   };
 
   describe('logged out', () => {
-    test('renders login dropdown', () => {
-      const { getByText } = setup();
-      const btn = getByText('Log In');
+    test('renders nothing', () => {
+      const { queryByText } = setup({ user: null, socket: true });
 
-      expect(btn).toBeVisible();
-
-      fireEvent.click(btn);
-
-      expect(getByText('Production or Developer Org')).toBeVisible();
-      expect(getByText('Sandbox or Scratch Org')).toBeVisible();
+      expect(queryByText('Log In')).toBeNull();
     });
   });
 
   describe('logged in', () => {
     test('renders profile dropdown (with logout)', () => {
-      const initialState = { user: { username: 'Test User' } };
-      const { container, getByText } = setup(initialState);
+      const { container, getByText } = setup();
       const btn = container.querySelector('#logout');
 
       expect(btn).toBeVisible();
@@ -58,7 +53,7 @@ describe('<Header />', () => {
     });
 
     test('does not render OfflineAlert if websocket connected', () => {
-      const initialState = { user: null, socket: true };
+      const initialState = { user: {}, socket: true };
       const { queryByText } = setup(initialState);
 
       expect(queryByText('reload the page.')).toBeNull();

@@ -11,15 +11,7 @@ class FullUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = (
-            "id",
-            "username",
-            "email",
-            "valid_token_for",
-            "org_name",
-            "org_type",
-            "is_staff",
-        )
+        fields = ("id", "username", "email", "is_staff")
 
 
 class ProductSerializer(serializers.ModelSerializer):

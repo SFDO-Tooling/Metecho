@@ -11,32 +11,23 @@ def test_populate_social_apps__success():
     call_command(
         "populate_social_apps",
         stdout=out,
-        prod_id="prod-id",
-        prod_secret="prod-secret",
-        test_id="test-id",
-        test_secret="test-secret",
-        cust_id="cust-id",
-        cust_secret="cust-secret",
+        gh_id="gh-id",
+        gh_secret="gh-secret",
+        sf_id="sf-id",
+        sf_secret="sf-secret",
     )
 
-    prod = SocialApp.objects.get(name="Salesforce Production")
-    test = SocialApp.objects.get(name="Salesforce Test")
-    cust = SocialApp.objects.get(name="Salesforce Custom")
+    gh = SocialApp.objects.get(name="GitHub")
+    sf = SocialApp.objects.get(name="Salesforce Production")
 
-    assert prod.provider == "salesforce-production"
-    assert prod.client_id == "prod-id"
-    assert prod.secret == "prod-secret"
-    assert prod.key == "https://login.salesforce.com/"
-    assert prod.sites.exists()
+    assert sf.provider == "salesforce-production"
+    assert sf.client_id == "sf-id"
+    assert sf.secret == "sf-secret"
+    assert sf.key == "https://login.salesforce.com/"
+    assert sf.sites.exists()
 
-    assert test.provider == "salesforce-test"
-    assert test.client_id == "test-id"
-    assert test.secret == "test-secret"
-    assert test.key == "https://test.salesforce.com/"
-    assert test.sites.exists()
-
-    assert cust.provider == "salesforce-custom"
-    assert cust.client_id == "cust-id"
-    assert cust.secret == "cust-secret"
-    assert cust.key == ""
-    assert cust.sites.exists()
+    assert gh.provider == "github"
+    assert gh.client_id == "gh-id"
+    assert gh.secret == "gh-secret"
+    assert gh.key == ""
+    assert gh.sites.exists()
