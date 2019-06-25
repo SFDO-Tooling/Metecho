@@ -1,25 +1,20 @@
 import routes, { routePatterns } from 'utils/routes';
 
 describe('routes', () => {
-  [{ name: 'home', args: [], expected: '/' }].forEach(
-    ({ name, args, expected }) => {
-      test(`${name} returns path with args: ${args.join(', ')}`, () => {
-        expect(routes[name](...args)).toBe(expected);
-      });
+  test.each([['home', [], '/'], ['login', [], '/login']])(
+    '%s returns path with args: %o',
+    (name, args, expected) => {
+      expect(routes[name](...args)).toBe(expected);
     },
   );
 });
 
 describe('routePatterns', () => {
-  [
-    { name: 'home', expected: '/' },
-    {
-      name: 'auth_error',
-      expected: '/accounts/*',
-    },
-  ].forEach(({ name, expected }) => {
-    test(`${name} returns path`, () => {
-      expect(routePatterns[name]()).toBe(expected);
-    });
+  test.each([
+    ['home', '/'],
+    ['login', '/login'],
+    ['auth_error', '/accounts/*'],
+  ])('%s returns path', (name, expected) => {
+    expect(routePatterns[name]()).toBe(expected);
   });
 });

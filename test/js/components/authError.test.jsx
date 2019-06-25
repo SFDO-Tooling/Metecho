@@ -25,7 +25,7 @@ describe('<AuthError />', () => {
         { user: {} },
       );
 
-      expect(getByText('Log In With a Different Org')).toBeVisible();
+      expect(getByText('Log In With a Different Account')).toBeVisible();
     });
   });
 });

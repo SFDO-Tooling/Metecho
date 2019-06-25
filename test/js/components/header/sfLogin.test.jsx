@@ -2,7 +2,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
 import { addUrlParams } from 'utils/api';
-import Login from 'components/header/login';
+import Login from 'components/header/sfLogin';
 
 describe('<Login />', () => {
   describe('login click', () => {
@@ -20,8 +20,8 @@ describe('<Login />', () => {
 
   describe('custom domain click', () => {
     test('opens modal', () => {
-      const { getByText, getByLabelText } = render(<Login />);
-      fireEvent.click(getByText('Log In'));
+      const { getByText, getByLabelText } = render(<Login label="Hi" />);
+      fireEvent.click(getByText('Hi'));
       fireEvent.click(getByText('Use Custom Domain'));
 
       expect(getByLabelText('Custom Domain')).toBeVisible();

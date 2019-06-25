@@ -21,6 +21,7 @@ import ErrorBoundary from 'components/error';
 import Footer from 'components/footer';
 import FourOhFour from 'components/404';
 import Header from 'components/header';
+import Login from 'components/login';
 import SFLogo from 'images/salesforce-logo.png';
 import initializeI18n from 'i18n';
 import reducer from 'store';
@@ -28,6 +29,7 @@ import { createSocket } from 'utils/websockets';
 import { log, logError } from 'utils/logging';
 import { login, refetchAllData } from 'store/user/actions';
 import { routePatterns } from 'utils/routes';
+import { PrivateRoute } from 'components/utils';
 
 const Home = () => (
   <div
@@ -56,7 +58,12 @@ const App = () => (
         >
           <ErrorBoundary>
             <Switch>
-              <Route exact path={routePatterns.home()} component={Home} />
+              <Route exact path={routePatterns.login()} component={Login} />
+              <PrivateRoute
+                exact
+                path={routePatterns.home()}
+                component={Home}
+              />
               <Route path={routePatterns.auth_error()} component={AuthError} />
               <Route component={FourOhFour} />
             </Switch>

@@ -3,11 +3,11 @@ import PageHeader from '@salesforce/design-system-react/components/page-header';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import Login from 'components/header/login';
 import Logout from 'components/header/logout';
 import OfflineAlert from 'components/offlineAlert';
 import routes from 'utils/routes';
 import { AppState } from 'store';
+import { LoginButton } from 'components/login';
 import { Socket } from 'store/socket/reducer';
 import { User } from 'store/user/reducer';
 import { logout } from 'store/user/actions';
@@ -23,12 +23,13 @@ interface Props {
 class Header extends React.Component<Props> {
   private controls = () => {
     const { user, doLogout } = this.props;
-    return user ? <Logout user={user} doLogout={doLogout} /> : <Login />;
+    /* istanbul ignore next */
+    return user ? <Logout user={user} doLogout={doLogout} /> : <LoginButton />;
   };
 
   public render() {
-    const { socket } = this.props;
-    return (
+    const { socket, user } = this.props;
+    return user ? (
       <>
         {socket ? null : <OfflineAlert />}
         <PageHeader
@@ -49,7 +50,7 @@ class Header extends React.Component<Props> {
           variant="object-home"
         />
       </>
-    );
+    ) : null;
   }
 }
 
