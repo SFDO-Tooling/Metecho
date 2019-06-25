@@ -3,5 +3,5 @@ build:
     web: Dockerfile
 release:
   command:
-    - python manage.py migrate --noinput
+    - python /app/manage.py migrate --noinput
   image: web
