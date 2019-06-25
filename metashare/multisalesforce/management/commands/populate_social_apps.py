@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = "Adds necessary database entries for GitHub OAuth."
+    help = "Adds necessary database entries for GitHub and Salesforce OAuth."
 
     def add_arguments(self, parser):
         parser.add_argument("--gh-id")
