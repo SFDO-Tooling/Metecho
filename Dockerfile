@@ -14,9 +14,9 @@ ENV DJANGO_SETTINGS_MODULE config.settings.production
 # Python server setup:
 COPY ./Pipfile.lock /Pipfile.lock
 COPY ./Pipfile /Pipfile
-COPY ./compose/web/start-dev.sh /start-dev.sh
+COPY ./compose/web/start-server.sh /start-server.sh
 
-RUN chmod +x /start-dev.sh
+RUN chmod +x /start-server.sh
 RUN pipenv lock
 RUN pipenv install --dev --system --deploy --ignore-pipfile
 
