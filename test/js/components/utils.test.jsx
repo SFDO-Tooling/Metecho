@@ -1,7 +1,11 @@
 import React from 'react';
+import { StaticRouter } from 'react-router-dom';
 import { render, fireEvent } from '@testing-library/react';
 
-import { withTransientMessage } from 'components/utils';
+import { renderWithRedux } from './../utils';
+
+import routes from 'utils/routes';
+import { PrivateRoute, withTransientMessage } from 'components/utils';
 
 describe('withTransientMessage', () => {
   /* eslint-disable react/prop-types */
@@ -51,5 +55,34 @@ describe('withTransientMessage', () => {
     fireEvent.click(getByText('Hide'));
 
     expect(queryByText('My Message')).toBeNull();
+  });
+});
+
+describe('<PrivateRoute />', () => {
+  const Component = () => <div>Hi!</div>;
+
+  const setup = (state = { user: null }) => {
+    const context = {};
+    const { getByText, queryByText } = renderWithRedux(
+      <StaticRouter context={context}>
+        <PrivateRoute path="/" component={Component} />
+      </StaticRouter>,
+      state,
+    );
+    return { getByText, queryByText, context };
+  };
+
+  test('renders component if logged in', () => {
+    const { getByText } = setup({ user: {} });
+
+    expect(getByText('Hi!')).toBeVisible();
+  });
+
+  test('redirects if not logged in', () => {
+    const { context, queryByText } = setup();
+
+    expect(context.action).toEqual('REPLACE');
+    expect(context.url).toEqual(routes.login());
+    expect(queryByText('Hi!')).toBeNull();
   });
 });

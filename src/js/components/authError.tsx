@@ -5,10 +5,10 @@ import { Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 
-import Login from 'components/header/login';
 import routes from 'utils/routes';
 import { AppState } from 'store';
 import { EmptyIllustration } from 'components/404';
+import { LoginButton } from 'components/login';
 import { User as UserType } from 'store/user/reducer';
 import { selectUserState } from 'store/user/selectors';
 
@@ -26,13 +26,10 @@ const AuthError = ({ user }: { user: UserType | null }) => (
         }
       />
       <div className="slds-align_absolute-center">
-        <Login
+        <LoginButton
           id="auth-error-login"
-          label={
-            user ? i18n.t('Log In With a Different Org') : i18n.t('Log In')
-          }
-          buttonClassName="slds-p-horizontal_xxx-small"
-          buttonVariant="base"
+          label={user ? i18n.t('Log In With a Different Account') : undefined}
+          from={{ pathname: '/' }}
         />
       </div>
     </>
