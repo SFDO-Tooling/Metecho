@@ -218,8 +218,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LOGIN_REDIRECT_URL = "/"
 
-SOCIALACCOUNT_PROVIDERS = {"github": {"SCOPE": ["read:user", "repo", "read:org"]}}
-
 # Use HTTPS:
 SECURE_PROXY_SSL_HEADER = env(
     "SECURE_PROXY_SSL_HEADER",
@@ -297,11 +295,12 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
-SOCIALACCOUNT_PROVIDERS = {
-    "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
-    "salesforce-test": {"SCOPE": ["web", "full", "refresh_token"]},
-    "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
-}
+SOCIALACCOUNT_PROVIDERS = {"github": {"SCOPE": ["read:user", "repo", "read:org"]}}
+# SOCIALACCOUNT_PROVIDERS = {
+#     "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
+#     "salesforce-test": {"SCOPE": ["web", "full", "refresh_token"]},
+#     "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
+# }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
