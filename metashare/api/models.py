@@ -1,7 +1,5 @@
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from hashid_field import HashidAutoField
 from model_utils import Choices
