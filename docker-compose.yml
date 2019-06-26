@@ -15,7 +15,8 @@ services:
       - redis
     env_file: .env
     environment:
-      - REDIS_URL=redis://redis:6379
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      REDIS_URL: redis://redis:6379
     volumes:
       - .:/app
       - /app/node_modules
