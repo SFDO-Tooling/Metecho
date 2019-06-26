@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import ArrayField
@@ -11,9 +12,7 @@ from sfdo_template_helpers.fields import MarkdownField
 from .constants import ORGANIZATION_DETAILS
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
-LICENSES = Choices(
-    "mit", "lgpl-3.0", "mpl-2.0", "agpl-3.0", "unlicense", "apache-2.0", "gpl-3.0"
-)
+LICENSES = Choices(*settings.LICENSES)
 
 
 class HashIdMixin(models.Model):
@@ -106,3 +105,13 @@ class Product(HashIdMixin):
     license = ArrayField(
         models.CharField(max_length=64, choices=LICENSES), blank=True, default=list
     )
+
+
+class ProductDependency(HashIdMixin):
+    url = models.URLField()
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="dependencies"
+    )
+
+    def __str__(self):
+        return self.url

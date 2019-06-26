@@ -109,3 +109,10 @@ class TestUser:
 
         user = user_factory(socialaccount_set=[])
         assert user.full_org_type is None
+
+
+@pytest.mark.django_db
+class TestProductDependency:
+    def test_str(self, product_dependency_factory):
+        dependency = product_dependency_factory(url="https://example.com/repo.git")
+        assert str(dependency) == "https://example.com/repo.git"

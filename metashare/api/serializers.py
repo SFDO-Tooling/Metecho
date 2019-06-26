@@ -16,6 +16,7 @@ class FullUserSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    dependencies = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Product
@@ -27,4 +28,5 @@ class ProductSerializer(serializers.ModelSerializer):
             "description",
             "is_managed",
             "license",
+            "dependencies",
         )

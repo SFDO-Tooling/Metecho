@@ -451,3 +451,14 @@ if SENTRY_DSN:
             "propagate": False,
         }
         LOGGING["loggers"]["rq.worker"]["handlers"].append("sentry")
+
+# App-specific settings
+LICENSES = [
+    el.strip()
+    for el in env(
+        "METASHARE_LICENSES",
+        default="mit,lgpl-3.0,mpl-2.0,agpl-3.0,unlicense,apache-2.0,gpl-3.0",
+        type_=lambda x: x.split(","),
+    )
+    if el.strip()
+]

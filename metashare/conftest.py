@@ -7,6 +7,8 @@ from rest_framework.test import APIClient
 
 from sfdo_template_helpers.crypto import fernet_encrypt
 
+from .api.models import Product, ProductDependency
+
 User = get_user_model()
 
 
@@ -59,6 +61,20 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence("user_{}@example.com".format)
     password = factory.PostGenerationMethodCall("set_password", "foobar")
     socialaccount_set = factory.RelatedFactory(SocialAccountFactory, "user")
+
+
+@register
+class ProductFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Product
+
+
+@register
+class ProductDependencyFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ProductDependency
+
+    product = factory.SubFactory(ProductFactory)
 
 
 @pytest.fixture
