@@ -12,7 +12,6 @@ from sfdo_template_helpers.fields import MarkdownField
 from .constants import ORGANIZATION_DETAILS
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
-LICENSES = Choices(*settings.LICENSES)
 
 
 class HashIdMixin(models.Model):
@@ -102,16 +101,3 @@ class Product(HashIdMixin):
     version_number = models.CharField(max_length=50)
     description = MarkdownField()
     is_managed = models.BooleanField(default=False)
-    license = ArrayField(
-        models.CharField(max_length=64, choices=LICENSES), blank=True, default=list
-    )
-
-
-class ProductDependency(HashIdMixin):
-    url = models.URLField()
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="dependencies"
-    )
-
-    def __str__(self):
-        return self.url

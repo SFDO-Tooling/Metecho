@@ -121,21 +121,21 @@ To setup the GitHub and Salesforce OAuth integrations, run the
 made in your Salesforce configuration, or if you're an OddBird, you can find
 these values in the shared Keybase team folder (``metashare/prod.db``)::
 
-    $ docker-compose run web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
-    $ docker-compose run web python manage.py populate_social_apps --sf-id XXX --sf-secret YYY
+    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
+    $ docker-compose run --rm web python manage.py populate_social_apps --sf-id XXX --sf-secret YYY
 
 Once you've logged in, you probably want to make your user a superuser. You can
 do that easily via the ``promote_superuser`` management command::
 
-    $ docker-compose run web python manage.py promote_superuser <your email>
+    $ docker-compose run --rm web python manage.py promote_superuser <your email>
 
 Internationalization
 --------------------
 
 To build and compile ``.mo`` and ``.po`` files for the back end, run::
 
-   $ docker-compose run web python manage.py makemessages --locale <locale>
-   $ docker-compose run web python manage.py compilemessages
+   $ docker-compose run --rm web python manage.py makemessages --locale <locale>
+   $ docker-compose run --rm web python manage.py compilemessages
 
 For the front end, translation JSON files are served from
 ``locales/<language>/`` directories, and the `user language is auto-detected at

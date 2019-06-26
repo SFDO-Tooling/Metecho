@@ -10,23 +10,24 @@ build:
 	docker-compose build
 
 lint:
-	docker-compose run --no-deps web yarn lint
+	docker-compose run --rm --no-deps web yarn lint
 
 test:
-	docker-compose run web yarn test:all
+	docker-compose run --rm web yarn test:all
 
 # Django management:
 migrate:
-	docker-compose run web python manage.py migrate
+	# call as `make migrate APP=api PREF=0001` etc.
+	docker-compose run --rm web python manage.py migrate $(APP) $(PREF)
 
 migrations:
 	# call as `make migrations APP=api` etc.
-	docker-compose run web python manage.py makemigrations $(APP)
+	docker-compose run --rm web python manage.py makemigrations $(APP)
 
 shell:
-	docker-compose run web python manage.py shell
+	docker-compose run --rm web python manage.py shell
 
 # See https://docs.docker.com/config/pruning/ for more detail.
 prune:
-	docker image prune
-	docker container prune
+	docker image prune -f
+	docker container prune -f

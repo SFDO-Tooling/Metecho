@@ -23,6 +23,5 @@ Retrieve
         "version_number": "v0.1.0",
         "description": "<p>This is safely rendered markdown</p>",
         "is_managed": false,
-        "license": ["mit"],
       }
    ]

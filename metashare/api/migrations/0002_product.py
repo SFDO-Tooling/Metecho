@@ -31,26 +31,6 @@ class Migration(migrations.Migration):
                 ("version_number", models.CharField(max_length=50)),
                 ("description", sfdo_template_helpers.fields.MarkdownField()),
                 ("is_managed", models.BooleanField(default=False)),
-                (
-                    "license",
-                    django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(
-                            choices=[
-                                ("mit", "mit"),
-                                ("lgpl-3.0", "lgpl-3.0"),
-                                ("mpl-2.0", "mpl-2.0"),
-                                ("agpl-3.0", "agpl-3.0"),
-                                ("unlicense", "unlicense"),
-                                ("apache-2.0", "apache-2.0"),
-                                ("gpl-3.0", "gpl-3.0"),
-                            ],
-                            max_length=64,
-                        ),
-                        blank=True,
-                        default=list,
-                        size=None,
-                    ),
-                ),
             ],
             options={"abstract": False},
         )
