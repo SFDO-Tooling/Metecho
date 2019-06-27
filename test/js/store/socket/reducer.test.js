@@ -1,4 +1,4 @@
-import reducer from 'store/socket/reducer';
+import reducer from '@/store/socket/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {

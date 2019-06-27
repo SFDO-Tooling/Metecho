@@ -1,16 +1,16 @@
-import * as React from 'react';
-import DocumentTitle from 'react-document-title';
 import i18n from 'i18next';
-import { Link } from 'react-router-dom';
+import React, { ComponentType } from 'react';
+import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
-import routes from 'utils/routes';
-import { AppState } from 'store';
-import { EmptyIllustration } from 'components/404';
-import { LoginButton } from 'components/login';
-import { User as UserType } from 'store/user/reducer';
-import { selectUserState } from 'store/user/selectors';
+import { EmptyIllustration } from '@/components/404';
+import { LoginButton } from '@/components/login';
+import { AppState } from '@/store';
+import { User as UserType } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
+import routes from '@/utils/routes';
 
 const AuthError = ({ user }: { user: UserType | null }) => (
   <DocumentTitle
@@ -40,6 +40,6 @@ const select = (appState: AppState) => ({
   user: selectUserState(appState),
 });
 
-const WrappedAuthError: React.ComponentType = connect(select)(AuthError);
+const WrappedAuthError: ComponentType = connect(select)(AuthError);
 
 export default WrappedAuthError;

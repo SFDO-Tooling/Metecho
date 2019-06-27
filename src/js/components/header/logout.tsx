@@ -1,11 +1,11 @@
-import * as React from 'react';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import DropdownTrigger from '@salesforce/design-system-react/components/menu-dropdown/button-trigger';
 import i18n from 'i18next';
+import React from 'react';
 
-import { User } from 'store/user/reducer';
+import { User } from '@/store/user/reducer';
 
 const Logout = ({
   user,

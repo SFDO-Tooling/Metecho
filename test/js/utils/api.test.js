@@ -1,6 +1,10 @@
 import fetchMock from 'fetch-mock';
 
-import apiFetch, { addUrlParams, getUrlParam, removeUrlParam } from 'utils/api';
+import apiFetch, {
+  addUrlParams,
+  getUrlParam,
+  removeUrlParam,
+} from '@/utils/api';
 
 describe('apiFetch', () => {
   test('200: returns response', () => {

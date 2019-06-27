@@ -1,7 +1,7 @@
 import Sockette from 'sockette';
 
-import * as sockets from 'utils/websockets';
-import { connectSocket, disconnectSocket } from 'store/socket/actions';
+import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import * as sockets from '@/utils/websockets';
 
 const mockJson = jest.fn();
 const mockClose = jest.fn();

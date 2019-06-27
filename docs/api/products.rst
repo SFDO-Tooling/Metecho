@@ -15,13 +15,19 @@ Retrieve
 
    HTTP/1.1 200 OK
 
-   [
-      {
-        "id": "3Lw7OwK",
-        "name": "Test Product",
-        "repo_name": "test-product",
-        "version_number": "v0.1.0",
-        "description": "<p>This is safely rendered markdown</p>",
-        "is_managed": false,
-      }
-   ]
+    {
+      "count": 150,
+      "next": "https://.../api/products/?page=2",
+      "previous": null,
+      "results": [
+        {
+          "id": "3Lw7OwK",
+          "name": "Test Product",
+          "repo_name": "test-product",
+          "version_number": "v0.1.0",
+          "description": "<p>This is safely rendered markdown</p>",
+          "is_managed": false,
+        }
+        ...
+      ]
+    }

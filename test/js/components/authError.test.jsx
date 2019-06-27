@@ -1,9 +1,9 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { renderWithRedux } from './../utils';
+import AuthError from '@/components/authError';
 
-import AuthError from 'components/authError';
+import { renderWithRedux } from './../utils';
 
 describe('<AuthError />', () => {
   test('renders msg with link', () => {

@@ -1,6 +1,7 @@
+import '@testing-library/react/cleanup-after-each';
 import 'isomorphic-fetch';
 import 'jest-dom/extend-expect';
-import '@testing-library/react/cleanup-after-each';
+
 import fetchMock from 'fetch-mock';
 
 beforeAll(() => {

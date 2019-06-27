@@ -1,18 +1,18 @@
-import * as React from 'react';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import { Link } from 'react-router-dom';
+import React, { ComponentType } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
-import Logout from 'components/header/logout';
-import OfflineAlert from 'components/offlineAlert';
-import routes from 'utils/routes';
-import { AppState } from 'store';
-import { LoginButton } from 'components/login';
-import { Socket } from 'store/socket/reducer';
-import { User } from 'store/user/reducer';
-import { logout } from 'store/user/actions';
-import { selectSocketState } from 'store/socket/selectors';
-import { selectUserState } from 'store/user/selectors';
+import Logout from '@/components/header/logout';
+import { LoginButton } from '@/components/login';
+import OfflineAlert from '@/components/offlineAlert';
+import { AppState } from '@/store';
+import { Socket } from '@/store/socket/reducer';
+import { selectSocketState } from '@/store/socket/selectors';
+import { logout } from '@/store/user/actions';
+import { User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
+import routes from '@/utils/routes';
 
 interface Props {
   user: User | null;
@@ -20,39 +20,32 @@ interface Props {
   doLogout: () => Promise<any>;
 }
 
-class Header extends React.Component<Props> {
-  private controls = () => {
-    const { user, doLogout } = this.props;
-    /* istanbul ignore next */
-    return user ? <Logout user={user} doLogout={doLogout} /> : <LoginButton />;
-  };
+const Header = ({ user, socket, doLogout }: Props) => {
+  const controls = () =>
+    user ? <Logout user={user} doLogout={doLogout} /> : <LoginButton />;
 
-  public render() {
-    const { socket, user } = this.props;
-    return user ? (
-      <>
-        {socket ? null : <OfflineAlert />}
-        <PageHeader
-          className="global-header
-            slds-p-horizontal_x-large
-            slds-p-vertical_medium"
-          title={
-            <Link
-              to={routes.home()}
-              className="slds-text-heading_large
-                slds-text-link_reset"
-            >
-              <span data-logo-bit="start">meta</span>
-              <span data-logo-bit="end">share</span>
-            </Link>
-          }
-          onRenderControls={this.controls}
-          variant="object-home"
-        />
-      </>
-    ) : null;
-  }
-}
+  return user ? (
+    <>
+      {socket ? null : <OfflineAlert />}
+      <PageHeader
+        className="global-header
+          slds-p-horizontal_x-large
+          slds-p-vertical_medium"
+        title={
+          <Link
+            to={routes.home()}
+            className="slds-text-heading_large slds-text-link_reset"
+          >
+            <span data-logo-bit="start">meta</span>
+            <span data-logo-bit="end">share</span>
+          </Link>
+        }
+        onRenderControls={controls}
+        variant="object-home"
+      />
+    </>
+  ) : null;
+};
 
 const select = (appState: AppState) => ({
   user: selectUserState(appState),
@@ -63,7 +56,7 @@ const actions = {
   doLogout: logout,
 };
 
-const WrappedHeader: React.ComponentType = connect(
+const WrappedHeader: ComponentType = connect(
   select,
   actions,
 )(Header);

@@ -1,18 +1,14 @@
-import * as React from 'react';
-import DocumentTitle from 'react-document-title';
 import Illustration from '@salesforce/design-system-react/components/illustration';
 import i18n from 'i18next';
-import { Link } from 'react-router-dom';
+import React, { ReactNode } from 'react';
+import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
-import routes from 'utils/routes';
-import svgPath from 'images/desert.svg';
+import routes from '@/utils/routes';
+import svgPath from '#/desert.svg';
 
-export const EmptyIllustration = ({
-  message,
-}: {
-  message: React.ReactNode;
-}) => (
+export const EmptyIllustration = ({ message }: { message: ReactNode }) => (
   <Illustration
     heading="¯\_(ツ)_/¯"
     messageBody={message}
@@ -22,7 +18,7 @@ export const EmptyIllustration = ({
   />
 );
 
-const FourOhFour = ({ message }: { message?: React.ReactNode }) => (
+const FourOhFour = ({ message }: { message?: ReactNode }) => (
   <DocumentTitle title={`${i18n.t('404')} | ${i18n.t('MetaShare')}`}>
     <EmptyIllustration
       message={

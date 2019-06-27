@@ -21,14 +21,19 @@ settings:
             - .ts
             - .tsx
           modules:
-            - src/js
+            - src
             - static
             - node_modules
+          alias:
+            '@': js
+            '#': images
   react:
     version: 'detect'
 plugins:
   - prettier
+  - import
   - react
+  - react-hooks
 extends:
   - eslint:recommended
   - plugin:import/recommended
@@ -37,6 +42,10 @@ extends:
   - plugin:prettier/recommended
   - plugin:react/recommended
 rules:
+  # React Hooks
+  react-hooks/rules-of-hooks: 2
+  react-hooks/exhaustive-deps: 1
+
   # Prettier
   prettier/prettier:
     - 2
@@ -47,6 +56,8 @@ rules:
   import/order:
     - 1
     - newlines-between: always
+  # @@@ disable until bugs are fixed
+  import/named: 0
 
   # Possible Errors
   getter-return: 2

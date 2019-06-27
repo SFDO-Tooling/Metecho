@@ -1,68 +1,56 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import DocumentTitle from 'react-document-title';
-import IconSettings from '@salesforce/design-system-react/components/icon-settings';
-import i18n from 'i18next';
-import logger from 'redux-logger';
-import settings from '@salesforce/design-system-react/components/settings';
-import thunk from 'redux-thunk';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { applyMiddleware, createStore, Action } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
 import actionSprite from '@salesforce-ux/design-system/assets/icons/action-sprite/svg/symbols.svg';
 import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprite/svg/symbols.svg';
 import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-sprite/svg/symbols.svg';
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
+import IconSettings from '@salesforce/design-system-react/components/icon-settings';
+import settings from '@salesforce/design-system-react/components/settings';
+import i18n from 'i18next';
+import React from 'react';
+import DocumentTitle from 'react-document-title';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { AnyAction, applyMiddleware, createStore } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import logger from 'redux-logger';
+import thunk, { ThunkDispatch } from 'redux-thunk';
 
-import AuthError from 'components/authError';
-import ErrorBoundary from 'components/error';
-import Footer from 'components/footer';
-import FourOhFour from 'components/404';
-import Header from 'components/header';
-import Login from 'components/login';
-import SFLogo from 'images/salesforce-logo.png';
-import initializeI18n from 'i18n';
-import reducer from 'store';
-import { createSocket } from 'utils/websockets';
-import { log, logError } from 'utils/logging';
-import { login, refetchAllData } from 'store/user/actions';
-import { routePatterns } from 'utils/routes';
-import { PrivateRoute } from 'components/utils';
-
-const Home = () => (
-  <div
-    className="slds-text-longform
-      slds-p-around_x-large"
-  >
-    <h1 className="slds-text-heading_large">
-      {i18n.t('Welcome to MetaShare!')}
-    </h1>
-    <p>{i18n.t('This is sample intro text, where your content might live.')}</p>
-  </div>
-);
+import FourOhFour from '@/components/404';
+import AuthError from '@/components/authError';
+import ErrorBoundary from '@/components/error';
+import Footer from '@/components/footer';
+import Header from '@/components/header';
+import Login from '@/components/login';
+import ProductsList from '@/components/products/list';
+import { PrivateRoute } from '@/components/utils';
+import initializeI18n from '@/i18n';
+import reducer from '@/store';
+import { fetchProducts } from '@/store/products/actions';
+import { login, refetchAllData } from '@/store/user/actions';
+import { log, logError } from '@/utils/logging';
+import routes, { routePatterns } from '@/utils/routes';
+import { createSocket } from '@/utils/websockets';
+import SFLogo from '#/salesforce-logo.png';
 
 const App = () => (
   <DocumentTitle title={i18n.t('MetaShare')}>
-    <div
-      className="slds-grid
-        slds-grid_frame
-        slds-grid_vertical"
-    >
+    <div className="slds-grid slds-grid_frame slds-grid_vertical">
       <ErrorBoundary>
         <Header />
-        <div
-          className="slds-grow
-            slds-shrink-none"
-        >
+        <div className="slds-grow slds-shrink-none">
           <ErrorBoundary>
             <Switch>
               <Route exact path={routePatterns.login()} component={Login} />
-              <PrivateRoute
+              <Route
                 exact
                 path={routePatterns.home()}
-                component={Home}
+                render={() => <Redirect to={routes.product_list()} />}
+              />
+              <PrivateRoute
+                exact
+                path={routePatterns.product_list()}
+                component={ProductsList}
               />
               <Route path={routePatterns.auth_error()} component={AuthError} />
               <Route component={FourOhFour} />
@@ -96,7 +84,9 @@ initializeI18n((i18nError?: string) => {
       dispatch: appStore.dispatch,
       options: {
         onreconnect: () => {
-          appStore.dispatch((refetchAllData() as any) as Action);
+          (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
+            refetchAllData(),
+          );
         },
       },
     });
@@ -114,9 +104,9 @@ initializeI18n((i18nError?: string) => {
     window.GLOBALS = GLOBALS;
 
     // Get logged-in/out status
+    let user;
     const userString = el.getAttribute('data-user');
     if (userString) {
-      let user;
       try {
         user = JSON.parse(userString);
       } catch (err) {
@@ -132,21 +122,32 @@ initializeI18n((i18nError?: string) => {
     // Set App element (used for react-SLDS modals)
     settings.setAppElement(el);
 
-    ReactDOM.render(
-      <Provider store={appStore}>
-        <BrowserRouter>
-          <IconSettings
-            actionSprite={actionSprite}
-            customSprite={customSprite}
-            doctypeSprite={doctypeSprite}
-            standardSprite={standardSprite}
-            utilitySprite={utilitySprite}
-          >
-            <App />
-          </IconSettings>
-        </BrowserRouter>
-      </Provider>,
-      el,
-    );
+    const renderApp = () => {
+      ReactDOM.render(
+        <Provider store={appStore}>
+          <BrowserRouter>
+            <IconSettings
+              actionSprite={actionSprite}
+              customSprite={customSprite}
+              doctypeSprite={doctypeSprite}
+              standardSprite={standardSprite}
+              utilitySprite={utilitySprite}
+            >
+              <App />
+            </IconSettings>
+          </BrowserRouter>
+        </Provider>,
+        el,
+      );
+    };
+
+    // If logged in, fetch products before rendering App
+    if (user) {
+      (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
+        fetchProducts(),
+      ).finally(renderApp);
+    } else {
+      renderApp();
+    }
   }
 });

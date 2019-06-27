@@ -19,7 +19,9 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "*": ["*", "src/js/*"]
+      "*": ["*", "src/*"],
+      "@/*": ["src/js/*"],
+      "#/*": ["static/images/*"]
     }
   },
   "include": ["src/js/**/*.ts", "src/js/**/*.tsx"],

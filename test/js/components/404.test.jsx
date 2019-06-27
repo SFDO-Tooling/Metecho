@@ -1,8 +1,8 @@
+import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render } from '@testing-library/react';
 
-import FourOhFour from 'components/404';
+import FourOhFour from '@/components/404';
 
 describe('<404 />', () => {
   test('renders default msg with link', () => {

@@ -1,30 +1,27 @@
-import * as React from 'react';
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
+import React, { useState } from 'react';
 
-import { addUrlParams } from 'utils/api';
+import { addUrlParams } from '@/utils/api';
 
 interface Props {
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
 }
 
-class CustomDomainModal extends React.Component<Props, { url: string }> {
-  public constructor(props: Props) {
-    super(props);
-    this.state = { url: '' };
-  }
+const CustomDomainModal = ({ isOpen, toggleModal }: Props) => {
+  const [url, setUrl] = useState('');
 
-  private handleClose = () => {
-    this.props.toggleModal(false);
-    this.setState({ url: '' });
+  const handleClose = () => {
+    toggleModal(false);
+    setUrl('');
   };
 
-  private handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const val = this.state.url.trim();
+    const val = url.trim();
     if (!val) {
       return;
     }
@@ -37,63 +34,51 @@ class CustomDomainModal extends React.Component<Props, { url: string }> {
     );
   };
 
-  private handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ url: event.target.value });
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUrl(event.target.value);
   };
 
-  public render() {
-    const footer = [
-      <Button
-        key="cancel"
-        label={i18n.t('Cancel')}
-        onClick={this.handleClose}
-      />,
-      <Button
-        key="submit"
-        label={i18n.t('Continue')}
-        variant="brand"
-        onClick={this.handleSubmit}
-      />,
-    ];
-    return (
-      <Modal
-        isOpen={this.props.isOpen}
-        heading={i18n.t('Use Custom Domain')}
-        onRequestClose={this.handleClose}
-        footer={footer}
-      >
-        <form className="slds-p-around_large" onSubmit={this.handleSubmit}>
+  return (
+    <Modal
+      isOpen={isOpen}
+      heading={i18n.t('Use Custom Domain')}
+      onRequestClose={handleClose}
+      footer={[
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
+        <Button
+          key="submit"
+          label={i18n.t('Continue')}
+          variant="brand"
+          onClick={handleSubmit}
+        />,
+      ]}
+    >
+      <form className="slds-p-around_large" onSubmit={handleSubmit}>
+        <div className="slds-form-element__help slds-p-bottom_small">
+          {i18n.t(
+            'To go to your company’s login page, enter the custom domain name.',
+          )}
+        </div>
+        <Input
+          id="login-custom-domain"
+          label={i18n.t('Custom Domain')}
+          value={url}
+          onChange={handleChange}
+          aria-describedby="login-custom-domain-help"
+        >
           <div
-            className="slds-form-element__help
-              slds-p-bottom_small"
+            id="login-custom-domain-help"
+            className="slds-form-element__help slds-truncate slds-p-top_small"
+            data-testid="custom-domain"
           >
-            {i18n.t(
-              'To go to your company’s login page, enter the custom domain name.',
-            )}
+            https://
+            {url.trim() ? url.trim() : <em>domain</em>}
+            .my.salesforce.com
           </div>
-          <Input
-            id="login-custom-domain"
-            label={i18n.t('Custom Domain')}
-            value={this.state.url}
-            onChange={this.handleChange}
-            aria-describedby="login-custom-domain-help"
-          >
-            <div
-              id="login-custom-domain-help"
-              className="slds-form-element__help
-                slds-truncate
-                slds-p-top_small"
-              data-testid="custom-domain"
-            >
-              https://
-              {this.state.url.trim() ? this.state.url.trim() : <em>domain</em>}
-              .my.salesforce.com
-            </div>
-          </Input>
-        </form>
-      </Modal>
-    );
-  }
-}
+        </Input>
+      </form>
+    </Modal>
+  );
+};
 
 export default CustomDomainModal;

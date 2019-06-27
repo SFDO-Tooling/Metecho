@@ -1,8 +1,8 @@
-import Sockette from 'sockette';
 import { ThunkDispatch } from 'redux-thunk';
+import Sockette from 'sockette';
 
-import { connectSocket, disconnectSocket } from 'store/socket/actions';
-import { log } from 'utils/logging';
+import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { log } from '@/utils/logging';
 
 export interface Socket {
   subscribe: (payload: Subscription) => void;

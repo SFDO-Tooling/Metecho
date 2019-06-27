@@ -1,10 +1,10 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { fireEvent } from '@testing-library/react';
+
+import Header from '@/components/header';
 
 import { renderWithRedux } from './../../utils';
-
-import Header from 'components/header';
 
 describe('<Header />', () => {
   const setup = (

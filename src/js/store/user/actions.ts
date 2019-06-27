@@ -1,13 +1,12 @@
-import { Dispatch } from 'redux';
-
-import apiFetch from 'utils/api';
-import { User } from 'store/user/reducer';
+import { ThunkResult } from '@/store';
+import { User } from '@/store/user/reducer';
+import apiFetch from '@/utils/api';
 
 interface LoginAction {
   type: 'USER_LOGGED_IN';
   payload: User;
 }
-interface LogoutAction {
+export interface LogoutAction {
   type: 'USER_LOGGED_OUT';
 }
 interface RefecthDataAction {
@@ -35,7 +34,7 @@ export const login = (payload: User): LoginAction => {
   };
 };
 
-export const logout = () => (dispatch: Dispatch): Promise<any> =>
+export const logout = (): ThunkResult => dispatch =>
   apiFetch(window.api_urls.account_logout(), {
     method: 'POST',
   }).then(() => {
@@ -49,9 +48,7 @@ export const logout = () => (dispatch: Dispatch): Promise<any> =>
     return dispatch({ type: 'USER_LOGGED_OUT' });
   });
 
-export const refetchAllData = () => async (
-  dispatch: Dispatch,
-): Promise<any> => {
+export const refetchAllData = (): ThunkResult => async dispatch => {
   dispatch({ type: 'REFETCH_DATA_STARTED' });
   try {
     const payload = await apiFetch(window.api_urls.user());

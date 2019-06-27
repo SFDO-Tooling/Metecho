@@ -1,9 +1,9 @@
 import i18n from 'i18next';
-import i18nBackend from 'i18next-xhr-backend';
 import i18nDetector from 'i18next-browser-languagedetector';
+import i18nBackend from 'i18next-xhr-backend';
 import { initReactI18next } from 'react-i18next';
 
-import { logError } from 'utils/logging';
+import { logError } from '@/utils/logging';
 
 // Note: The `t` function should only be used inside Component lifecycle
 // handlers, not in code executed immediately at runtime (before translations

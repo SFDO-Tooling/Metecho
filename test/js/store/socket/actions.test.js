@@ -1,4 +1,4 @@
-import * as actions from 'store/socket/actions';
+import * as actions from '@/store/socket/actions';
 
 describe('connectSocket', () => {
   test('returns SocketConnected', () => {

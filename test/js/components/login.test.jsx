@@ -1,9 +1,9 @@
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { fireEvent, render } from '@testing-library/react';
 
-import { addUrlParams } from 'utils/api';
-import Login, { LoginButton } from 'components/login';
+import Login, { LoginButton } from '@/components/login';
+import { addUrlParams } from '@/utils/api';
 
 describe('<Login />', () => {
   describe('login click', () => {
