@@ -51,6 +51,7 @@ pyOpenSSL = "==19.0.0"
 service_identity = "==18.1.0"
 Werkzeug = "==0.15.4"
 github3-py = "*"
+purl = "*"
 
 [requires]
 python_version = "3.7"

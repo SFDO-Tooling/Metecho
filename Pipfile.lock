@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9274a01ad4adec37d618252b88f568361e6a15c5eac0a684e2174d74d961abcb"
+            "sha256": "e8dbafae9169fa0815e90cd2e31e1d896ee5ebce5931722f7ee16798048ae72c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -82,10 +82,10 @@
         },
         "botocore": {
             "hashes": [
-                "sha256:9010ba5240cb85cdba0a280c054607a432d4ee1484b6d17d056b76f326141bde",
-                "sha256:bc64583e25823764da3603048bd7664e5736aea06c26d4e9e3722876689fbc6a"
+                "sha256:0bcab3d6ee49f348169fe93744feae09aae1445f1e0cb1109caccbec487fbeb0",
+                "sha256:adbc569149432143a0d6f578c0a16417a24f7a579116d086d5cecbb70d848ddb"
             ],
-            "version": "==1.12.176"
+            "version": "==1.12.179"
         },
         "certifi": {
             "hashes": [
@@ -521,6 +521,14 @@
             "index": "pypi",
             "version": "==2.8.3"
         },
+        "purl": {
+            "hashes": [
+                "sha256:5ac0e85979da0172d80156701cb3eb9b1eff31f3b43e981ef6dc06251c53a3a4",
+                "sha256:75141bef1e7fce943afda671663a97c792af01c81648026cd5b5c0dcc3b72b96"
+            ],
+            "index": "pypi",
+            "version": "==1.5"
+        },
         "pyasn1": {
             "hashes": [
                 "sha256:da2420fe13a9452d8ae97a0e478adde1dee153b11ba832a95b223a2ba01c10f7",
@@ -758,6 +766,14 @@
                 "sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"
             ],
             "version": "==1.4.3"
+        },
+        "appnope": {
+            "hashes": [
+                "sha256:5b26757dc6f79a3b7dc9fab95359328d5747fcb2409d331ea66d0272b90ab2a0",
+                "sha256:8b995ffe925347a2138d7ac0fe77155e4311a0ea6d6da4f5128fe4b3cbe5ed71"
+            ],
+            "markers": "sys_platform == 'darwin'",
+            "version": "==0.1.0"
         },
         "atomicwrites": {
             "hashes": [
@@ -1025,11 +1041,11 @@
         },
         "more-itertools": {
             "hashes": [
-                "sha256:2112d2ca570bb7c3e53ea1a35cd5df42bb0fd10c45f0fb97178679c3c03d64c7",
-                "sha256:c3e4748ba1aad8dba30a4886b0b1a2004f9a863837b8654e7059eebf727afa5a"
+                "sha256:3ad685ff8512bf6dc5a8b82ebf73543999b657eded8c11803d9ba6b648986f4d",
+                "sha256:8bb43d1f51ecef60d81854af61a3a880555a14643691cc4b64a6ee269c78f09a"
             ],
             "markers": "python_version > '2.7'",
-            "version": "==7.0.0"
+            "version": "==7.1.0"
         },
         "packaging": {
             "hashes": [

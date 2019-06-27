@@ -98,7 +98,7 @@ class User(HashIdMixin, AbstractUser):
 
 class Product(HashIdMixin):
     name = models.CharField(max_length=50, unique=True)
-    repo_url = models.URLField(unique=True)
+    repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
 
