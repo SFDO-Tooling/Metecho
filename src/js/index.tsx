@@ -53,7 +53,7 @@ const App = () => (
                 component={ProductsList}
               />
               <Route path={routePatterns.auth_error()} component={AuthError} />
-              <Route component={FourOhFour} />
+              <PrivateRoute component={FourOhFour} />
             </Switch>
           </ErrorBoundary>
         </div>

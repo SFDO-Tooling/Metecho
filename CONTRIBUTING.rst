@@ -19,7 +19,9 @@ Docker-based development (preferred)
     $ cp env.example .env
 
    Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to
-   any two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
+   any two different arbitrary string values.
+
+   Next, run the following commands to generate a database encryption key::
 
     $ pip install cryptography
     $ python
@@ -27,7 +29,12 @@ Docker-based development (preferred)
     >>> Fernet.generate_key()
 
    This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents
-   of ``'...'``, e.g. ``DB_ENCRYPTION_KEY="mystring="``.
+   of ``'...'``, and add it to your ``.env`` file as ``DB_ENCRYPTION_KEY``, e.g.
+   ``DB_ENCRYPTION_KEY="mystring="``.
+
+   To exit the Python shell, press ``Ctrl-Z`` and then ``Enter`` on Windows, or
+   ``Ctrl-D`` on OS X or Linux. Alternatively, you could also type the Python
+   command ``exit()`` and press ``Enter``.
 
    Finally, set the following environment variables (if you're an OddBird, you
    can find these values in the shared Keybase team folder --
@@ -62,6 +69,7 @@ you will see you can run e.g.::
     $ make lint  # format and lint JS, Sass, Python
     $ make test  # run JS and Python tests
     $ make migrate  # run Django migrations
+    $ make migrations  # add new Django migrations (``makemigrations``)
     $ make shell  # open Python shell
     $ make prune  # clean up unused Docker images and containers
 
@@ -112,20 +120,19 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 .. _Remote Development: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
 
-Logging in with GitHub and Salesforce
--------------------------------------
+Logging in with GitHub
+----------------------
 
-To setup the GitHub and Salesforce OAuth integrations, run the
-``populate_social_apps`` management command. The values to use in place of the
-``XXX`` and ``YYY`` flags can be found on the GitHub App or Connected App you've
-made in your Salesforce configuration, or if you're an OddBird, you can find
-these values in the shared Keybase team folder (``metashare/prod.db``)::
+To setup the GitHub OAuth integration, run the ``populate_social_apps``
+management command. The values to use in place of the ``XXX`` and ``YYY`` flags
+can be found in the GitHub App, or if you're an OddBird you can find these
+values in the shared Keybase team folder (``metashare/prod.db``)::
 
     $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
-    $ docker-compose run --rm web python manage.py populate_social_apps --sf-id XXX --sf-secret YYY
 
-Once you've logged in, you probably want to make your user a superuser. You can
-do that easily via the ``promote_superuser`` management command::
+Once you've done that and successfully logged in, you probably want to make your
+user a superuser. You can do that easily via the ``promote_superuser``
+management command::
 
     $ docker-compose run --rm web python manage.py promote_superuser <your email>
 
