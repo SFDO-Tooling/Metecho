@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Logout from '@/components/header/logout';
-import { LoginButton } from '@/components/login';
 import OfflineAlert from '@/components/offlineAlert';
 import { AppState } from '@/store';
 import { Socket } from '@/store/socket/reducer';
@@ -21,8 +20,7 @@ interface Props {
 }
 
 const Header = ({ user, socket, doLogout }: Props) => {
-  const controls = () =>
-    user ? <Logout user={user} doLogout={doLogout} /> : <LoginButton />;
+  const controls = () => <Logout user={user} doLogout={doLogout} />;
 
   return user ? (
     <>

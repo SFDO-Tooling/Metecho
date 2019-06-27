@@ -17,7 +17,7 @@ const ProductListItem = ({ product }: { product: Product }) => (
     <Card heading={product.name} bodyClassName="slds-card__body_inner">
       {product.description ? (
         <div
-          className="md-truncate-children slds-p-top_x-small"
+          className="truncate-children slds-p-top_x-small"
           // This description is pre-cleaned by the API
           dangerouslySetInnerHTML={{ __html: product.description }}
         />

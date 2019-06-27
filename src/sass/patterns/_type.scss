@@ -1,0 +1,36 @@
+// Type
+// ====
+
+// setting defaults
+.markdown {
+  h1 {
+    font-size: $font-size-6;
+  }
+
+  h2 {
+    font-size: $font-size-5;
+  }
+
+  h3 {
+    font-size: $font-size-4;
+  }
+
+  // no size variation or these headings would be smaller than body
+  // also assuming most people won't use these often
+  h4,
+  h5,
+  h6 {
+    font-size: $font-size-3;
+  }
+
+  // h1-h3 has bottom margin in slds, but let's be explicit here
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: $line-height-heading;
+    margin-bottom: $spacing-small;
+  }
+}
