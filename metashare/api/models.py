@@ -98,7 +98,7 @@ class User(HashIdMixin, AbstractUser):
 
 class Product(HashIdMixin):
     name = models.CharField(max_length=50, unique=True)
-    repo_name = models.SlugField(unique=True)
+    repo_url = models.URLField(unique=True)
     version_number = models.CharField(max_length=50)
     description = MarkdownField()
     is_managed = models.BooleanField(default=False)

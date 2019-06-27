@@ -23,7 +23,7 @@ Retrieve
         {
           "id": "3Lw7OwK",
           "name": "Test Product",
-          "repo_name": "test-product",
+          "repo_url": "https://github.com/sfdo/test-product",
           "version_number": "v0.1.0",
           "description": "<p>This is safely rendered markdown</p>",
           "is_managed": false,

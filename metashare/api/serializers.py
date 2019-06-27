@@ -22,7 +22,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
-            "repo_name",
+            "repo_url",
             "version_number",
             "description",
             "is_managed",

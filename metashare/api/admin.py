@@ -12,4 +12,4 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("name", "description")
-    prepopulated_fields = {"repo_name": ("name",)}
+    prepopulated_fields = {"repo_url": ("name",)}

@@ -32,8 +32,8 @@ def test_product_view(client, product_factory, git_hub_repository_factory):
     git_hub_repository_factory(
         user=client.user, url="https://example.com/test-repo.git"
     )
-    product = product_factory(repo_name="https://example.com/test-repo.git")
-    product_factory(repo_name="https://example.com/test-repo2.git")
+    product = product_factory(repo_url="https://example.com/test-repo.git")
+    product_factory(repo_url="https://example.com/test-repo2.git")
     response = client.get(reverse("product-list"))
 
     assert response.status_code == 200
@@ -47,7 +47,7 @@ def test_product_view(client, product_factory, git_hub_repository_factory):
                 "description": "",
                 "is_managed": False,
                 "name": str(product.name),
-                "repo_name": "https://example.com/test-repo.git",
+                "repo_url": "https://example.com/test-repo.git",
                 "version_number": "",
             }
         ],

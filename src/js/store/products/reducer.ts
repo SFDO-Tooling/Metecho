@@ -4,7 +4,7 @@ import { LogoutAction } from '@/store/user/actions';
 export interface Product {
   id: string;
   name: string;
-  repo_name: string;
+  repo_url: string;
   version_number: string;
   description: string | null;
   is_managed: boolean;

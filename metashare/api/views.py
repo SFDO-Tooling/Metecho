@@ -51,4 +51,4 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         repositories = self.request.user.repositories.values_list("url", flat=True)
-        return Product.objects.filter(repo_name__in=repositories)
+        return Product.objects.filter(repo_url__in=repositories)
