@@ -29,8 +29,12 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.CharField(max_length=50, unique=True)),
                 ("repo_url", models.URLField(unique=True)),
-                ("version_number", models.CharField(max_length=50)),
-                ("description", sfdo_template_helpers.fields.MarkdownField()),
+                (
+                    "description",
+                    sfdo_template_helpers.fields.MarkdownField(
+                        blank=True, property_suffix="_markdown"
+                    ),
+                ),
                 ("is_managed", models.BooleanField(default=False)),
             ],
             options={"abstract": False},

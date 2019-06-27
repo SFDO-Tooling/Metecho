@@ -16,14 +16,8 @@ class FullUserSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    description = serializers.CharField(source="description_markdown")
 
     class Meta:
         model = Product
-        fields = (
-            "id",
-            "name",
-            "repo_url",
-            "version_number",
-            "description",
-            "is_managed",
-        )
+        fields = ("id", "name", "repo_url", "description", "is_managed")

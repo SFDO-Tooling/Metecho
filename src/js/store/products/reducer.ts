@@ -5,16 +5,8 @@ export interface Product {
   id: string;
   name: string;
   repo_url: string;
-  version_number: string;
   description: string | null;
   is_managed: boolean;
-  color: string;
-  icon: {
-    type: 'url' | 'slds';
-    category?: 'action' | 'custom' | 'doctype' | 'standard' | 'utility';
-    name?: string;
-    url?: string;
-  } | null;
 }
 export interface ProductsState {
   products: Product[];
