@@ -1,4 +1,4 @@
-.PHONY: up down build run migrate migrations shell lint test prune
+.PHONY: build down jstest lint migrate migrations prune pyinstall pytest run shell test up
 
 up:
 	docker-compose up
@@ -14,6 +14,16 @@ lint:
 
 test:
 	docker-compose run --rm web yarn test:all
+
+pytest:
+	docker-compose run --rm web yarn pytest
+
+jstest:
+	docker-compose run --rm web yarn test
+
+pyinstall:
+	# call as `make pyinstall P=requests` etc.
+	docker-compose run --rm --no-deps web pipenv install $(P)
 
 # Django management:
 migrate:
@@ -31,3 +41,4 @@ shell:
 prune:
 	docker image prune -f
 	docker container prune -f
+	docker volume rm $(docker volume ls -qf dangling=true)

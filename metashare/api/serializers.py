@@ -8,10 +8,11 @@ User = get_user_model()
 
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    repositories = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "is_staff")
+        fields = ("id", "username", "email", "is_staff", "repositories")
 
 
 class ProductSerializer(serializers.ModelSerializer):

@@ -1,12 +1,15 @@
+from allauth.account.signals import user_logged_in
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
+from django.dispatch import receiver
 from hashid_field import HashidAutoField
 from model_utils import Choices
 
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField
 
+from . import gh
 from .constants import ORGANIZATION_DETAILS
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
@@ -99,3 +102,24 @@ class Product(HashIdMixin):
     version_number = models.CharField(max_length=50)
     description = MarkdownField()
     is_managed = models.BooleanField(default=False)
+
+
+class GitHubRepository(HashIdMixin):
+    url = models.URLField()
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="repositories"
+    )
+
+    def __str__(self):
+        return self.url
+
+
+@receiver(user_logged_in)
+def handler(sender, **kwargs):
+    # request, user
+    user = kwargs.pop("user")
+    repos = gh.get_all_org_repos(user)
+    GitHubRepository.objects.filter(user=user).delete()
+    GitHubRepository.objects.bulk_create(
+        [GitHubRepository(user=user, url=repo) for repo in repos]
+    )

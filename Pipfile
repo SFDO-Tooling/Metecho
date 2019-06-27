@@ -1,12 +1,9 @@
 [[source]]
-
 name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
-
 [dev-packages]
-
 Sphinx = "==2.1.2"
 black = "==19.3b0"
 coveralls = "==1.8.1"
@@ -23,9 +20,7 @@ pytest-mock = "==1.10.4"
 pytest = "==4.6.3"
 sphinxcontrib-httpdomain = "==1.7.0"
 
-
 [packages]
-
 sfdo-template-helpers = {editable = true,git = "https://github.com/SFDO-Tooling/sfdo-template-helpers.git",ref = "v0.7.0"}
 boto3 = "==1.9.174"
 channels-redis = "==2.4.0"
@@ -55,8 +50,7 @@ Pillow = "==6.0.0"
 pyOpenSSL = "==19.0.0"
 service_identity = "==18.1.0"
 Werkzeug = "==0.15.4"
-
+github3-py = "*"
 
 [requires]
-
 python_version = "3.7"
