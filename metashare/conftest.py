@@ -67,6 +67,8 @@ class ProductFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Product
 
+    name = factory.Sequence("Product {}".format)
+
 
 @register
 class GitHubRepositoryFactory(factory.django.DjangoModelFactory):

@@ -19,7 +19,6 @@ def test_serialize(user_factory):
                 "username": "template_tags@example.com",
                 "email": "template_tags@example.com",
                 "is_staff": False,
-                "repositories": [],
             }
         )
     )

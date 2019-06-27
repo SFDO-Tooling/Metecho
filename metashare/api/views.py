@@ -39,10 +39,16 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
             [GitHubRepository(user=user, url=repo) for repo in repos]
         )
         serializer = FullUserSerializer(user)
+        # TODO: this _should_ return the new list of products for the user, but that
+        # feels wrong for this endpoint. Merits thought.
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    permission_classes = (IsAuthenticated,)
     serializer_class = ProductSerializer
     pagination_class = ProductPaginator
+
+    def get_queryset(self):
+        repositories = self.request.user.repositories.values_list("url", flat=True)
+        return Product.objects.filter(repo_name__in=repositories)
