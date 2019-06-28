@@ -19,7 +19,7 @@ def get_all_org_repos(user):
     except (ObjectDoesNotExist, MultipleObjectsReturned):
         return []
     gh = login(token=token)
-    return [repo.url for repo in gh.repositories()]
+    return [normalize_github_url(repo.url) for repo in gh.repositories()]
 
 
 def normalize_github_url(url):
