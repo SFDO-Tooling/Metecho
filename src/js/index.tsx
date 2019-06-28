@@ -22,7 +22,7 @@ import ErrorBoundary from '@/components/error';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import Login from '@/components/login';
-import ProductsList from '@/components/products/list';
+import ProductList from '@/components/products/list';
 import { PrivateRoute } from '@/components/utils';
 import initializeI18n from '@/i18n';
 import reducer from '@/store';
@@ -50,7 +50,7 @@ const App = () => (
               <PrivateRoute
                 exact
                 path={routePatterns.product_list()}
-                component={ProductsList}
+                component={ProductList}
               />
               <Route path={routePatterns.auth_error()} component={AuthError} />
               <PrivateRoute component={FourOhFour} />

@@ -23,7 +23,7 @@ interface Props {
   doFetchMoreProducts({ url }: { url: string }): Promise<any>;
 }
 
-const ProductsList = withScroll(
+const ProductList = withScroll(
   ({ y, products, next, doFetchMoreProducts }: Props) => {
     const [fetchingProducts, setFetchingProducts] = useState(false);
 
@@ -33,6 +33,7 @@ const ProductsList = withScroll(
       }
 
       const maybeFetchMoreProducts = () => {
+        /* istanbul ignore else */
         if (next && !fetchingProducts) {
           setFetchingProducts(true);
           doFetchMoreProducts({ url: next }).finally(() => {
@@ -139,9 +140,9 @@ const actions = {
   doFetchMoreProducts: fetchMoreProducts,
 };
 
-const WrappedProductsList = connect(
+const WrappedProductList = connect(
   select,
   actions,
-)(ProductsList);
+)(ProductList);
 
-export default WrappedProductsList;
+export default WrappedProductList;

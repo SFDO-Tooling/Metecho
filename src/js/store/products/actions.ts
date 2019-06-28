@@ -25,7 +25,7 @@ interface FetchMoreProductsFailed {
   payload: { url: string };
 }
 interface ProductFilters {
-  slug: string;
+  id: string;
 }
 interface FetchProductStarted {
   type: 'FETCH_PRODUCT_STARTED';

@@ -49,9 +49,9 @@ const reducer = (
       };
     }
     case 'FETCH_PRODUCT_SUCCEEDED': {
-      const { product, slug } = action.payload;
+      const { product, id } = action.payload;
       if (!product) {
-        return { ...products, notFound: [...products.notFound, slug] };
+        return { ...products, notFound: [...products.notFound, id] };
       }
       if (!products.products.find(p => p.id === product.id)) {
         return { ...products, products: [...products.products, product] };

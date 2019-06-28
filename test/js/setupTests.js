@@ -20,6 +20,8 @@ beforeAll(() => {
     salesforce_production_login: () => '/accounts/salesforce-production/login/',
     salesforce_test_login: () => '/accounts/salesforce-test/login/',
     user: () => '/api/user/',
+    product_list: () => '/api/products/',
+    product_detail: id => `/api/products/${id}/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();
