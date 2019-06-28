@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .gh import validate_gh_url
 from .models import Product
 
 User = get_user_model()
