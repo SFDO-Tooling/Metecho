@@ -17,9 +17,17 @@ def get_all_org_repos(user):
             user.socialaccount_set.get(provider="github").socialtoken_set.get().token
         )
     except (ObjectDoesNotExist, MultipleObjectsReturned):
-        return []
+        return set()
     gh = login(token=token)
-    return [normalize_github_url(repo.url) for repo in gh.repositories()]
+    repos = set(
+        [
+            normalize_github_url(repo.url)
+            for org in gh.organizations()
+            for repo in org.repositories()
+        ]
+        + [normalize_github_url(repo.url) for repo in gh.repositories()]
+    )
+    return repos
 
 
 def normalize_github_url(url):
