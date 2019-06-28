@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .gh import normalize_github_url
+from .gh import validate_gh_url
 from .models import Product
 
 User = get_user_model()
@@ -21,7 +21,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ("id", "name", "repo_url", "description", "is_managed")
-
-    def validate_repo_url(self, value):
-        return normalize_github_url(value)
+        fields = (
+            "id",
+            "name",
+            "repo_url",
+            "description",
+            "is_managed",
+            "slug",
+            "old_slugs",
+        )

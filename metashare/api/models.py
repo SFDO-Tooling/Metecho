@@ -3,23 +3,17 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
 from django.dispatch import receiver
-from hashid_field import HashidAutoField
+from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField
 
 from . import gh
+from . import model_mixins as mixins
 from .constants import ORGANIZATION_DETAILS
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
-
-
-class HashIdMixin(models.Model):
-    class Meta:
-        abstract = True
-
-    id = HashidAutoField(primary_key=True)
 
 
 class UserQuerySet(models.QuerySet):
@@ -30,7 +24,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
     pass
 
 
-class User(HashIdMixin, AbstractUser):
+class User(mixins.HashIdMixin, AbstractUser):
     objects = UserManager()
 
     def subscribable_by(self, user):
@@ -96,14 +90,47 @@ class User(HashIdMixin, AbstractUser):
         return None
 
 
-class Product(HashIdMixin):
+class ProductSlug(models.Model):
+    """
+    Rather than have a slugfield directly on the Product model, we have
+    a related model. That way, we can have a bunch of slugs that pertain
+    to a particular model, and even if the slug changes and someone uses
+    an old slug, we can redirect them appropriately.
+    """
+
+    slug = models.SlugField(unique=True)
+    parent = models.ForeignKey(
+        "Product", on_delete=models.PROTECT, related_name="slugs"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text=_(
+            "If multiple slugs are active, we will default to the most recent."
+        ),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return self.slug
+
+
+class Product(mixins.HashIdMixin, mixins.TimestampsMixin, mixins.SlugMixin):
     name = models.CharField(max_length=50, unique=True)
     repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
 
+    slug_class = ProductSlug
 
-class GitHubRepository(HashIdMixin):
+    @property
+    def slug_queryset(self):
+        return self.slugs
+
+
+class GitHubRepository(mixins.HashIdMixin):
     url = models.URLField()
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"

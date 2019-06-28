@@ -48,6 +48,8 @@ def test_product_view(client, product_factory, git_hub_repository_factory):
                 "is_managed": False,
                 "name": str(product.name),
                 "repo_url": "https://example.com/test-repo.git",
+                "slug": None,
+                "old_slugs": [],
             }
         ],
     }

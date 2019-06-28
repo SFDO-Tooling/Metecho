@@ -31,11 +31,17 @@ def get_all_org_repos(user):
 
 
 def normalize_github_url(url):
+    # Stupid variable assignment to help Black and the linter get along:
+    prefix = "/repos"
+    prefix_len = len(prefix)
+    suffix = ".git"
+    suffix_len = len(suffix)
+
     url = URL(url).scheme("https").host("www.github.com")
-    if url.path().endswith(".git"):
-        url = url.path(url.path()[: -len(".git")])
-    if url.path().startswith("/repos"):
-        url = url.path(url.path()[len("/repos") :])
+    if url.path().startswith(prefix):
+        url = url.path(url.path()[prefix_len:])
+    if url.path().endswith(suffix):
+        url = url.path(url.path()[:-suffix_len])
     return str(url)
 
 
