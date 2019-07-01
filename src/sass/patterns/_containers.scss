@@ -4,16 +4,13 @@
 // Restrict fixed/absolute containers to half the viewport
 // ie. used on toast containers to unblock header links
 .half-container {
-  max-width: 31rem;
+  @include restrict-container;
   left: 50%;
   transform: translateX(-50%);
+}
 
-  @media (min-width: $mq-large) {
-    max-width: 50vw;
-  }
-
-  // let it grow more at extra wide screens
-  @media (min-width: 80em) {
-    max-width: 65vw;
-  }
+// Restrict fixed/absolute containers to half the viewport
+// ie. used on toast containers to unblock header links
+.restricted-container {
+  @include restrict-container;
 }
