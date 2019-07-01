@@ -100,8 +100,8 @@ const ProductList = withScroll(
             title={i18n.t('Select a Product')}
           />
           <div className="slds-p-around_x-large">
-            <div className="slds-m-bottom_medium">
-              <p className="slds-p-bottom_small restricted-container">
+            <div className="slds-m-bottom_medium restricted-container">
+              <p className="slds-p-bottom_small">
                 <Trans i18nKey="productListHelper">
                   Contributor access on GitHub is required to view products. If
                   you do not see the product you’re looking for below, confirm
