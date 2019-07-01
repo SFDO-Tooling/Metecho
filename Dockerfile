@@ -28,7 +28,7 @@ COPY . /app
 
 # === Actually run things:
 WORKDIR /app
-RUN yarn install
+RUN yarn install --check-files
 
 # These next two lines, combined with the default use of production settings
 # above, mean we'll always have assets in static/dist/prod in this image, but
