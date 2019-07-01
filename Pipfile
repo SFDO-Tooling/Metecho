@@ -27,7 +27,7 @@ sphinxcontrib-httpdomain = "==1.7.0"
 [packages]
 
 sfdo-template-helpers = {editable = true,git = "https://github.com/SFDO-Tooling/sfdo-template-helpers.git",ref = "v0.7.0"}
-boto3 = "==1.9.174"
+boto3 = "==1.9.180"
 channels-redis = "==2.4.0"
 channels = "==2.2.0"
 dj-database-url = "==0.5.0"
