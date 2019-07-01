@@ -82,7 +82,7 @@ const ProductList = withScroll(
       }
       default: {
         contents = (
-          <div className="slds-grid slds-wrap">
+          <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
             {products.map(product => (
               <ProductListItem product={product} key={product.id} />
             ))}
@@ -100,8 +100,8 @@ const ProductList = withScroll(
             title={i18n.t('Select a Product')}
           />
           <div className="slds-p-around_x-large">
-            <div className="slds-p-bottom_x-large">
-              <p>
+            <div className="slds-m-bottom_medium">
+              <p className="slds-p-bottom_small restricted-container">
                 <Trans i18nKey="productListHelper">
                   Contributor access on GitHub is required to view products. If
                   you do not see the product you’re looking for below, confirm
