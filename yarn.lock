@@ -910,10 +910,10 @@
     babel-preset-react "^6.23.0"
     lodash.assign "^4.0.9"
 
-"@salesforce/design-system-react@^0.10.5":
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/@salesforce/design-system-react/-/design-system-react-0.10.5.tgz#07e86440756fcd1e2a7674f839f7a50556458203"
-  integrity sha512-MC194iYEmUBB3dDVRMrb2yurDBgpRob+W76KLZKzbMkSgED+fJtuqJmcTtc8dY2trbGHaRdwM+dj7OeA+uXFRQ==
+"@salesforce/design-system-react@^0.10.7":
+  version "0.10.7"
+  resolved "https://registry.yarnpkg.com/@salesforce/design-system-react/-/design-system-react-0.10.7.tgz#e223b5923d856db93c686ce9b7ae981bc099040c"
+  integrity sha512-PN8JlGCKFkUVnNb7Ta9yIArhHgPufL6qzc4Sp3laKGtaS6W+l3jegAO/89QUPgs1C7ukvjt6HxtEscTsqO8oOw==
   dependencies:
     "@salesforce/babel-preset-design-system-react" "^1.0.0"
     classnames "^2.2.5"
@@ -930,11 +930,11 @@
     popper.js "^1.10.8"
     prop-types ">=15.5.8"
     react-highlighter "^0.4.0"
-    react-modal "3.4.4"
+    react-modal "3.8.1"
     react-onclickoutside "^6.5.0"
     react-required-if "^1.0.3"
-    react-text-truncate "^0.12.0"
-    shortid "^2.2.6"
+    react-text-truncate "^0.14.1"
+    shortid "^2.2.14"
     warning "^3.0.0"
 
 "@sheerun/mutationobserver-shim@^0.3.2":
@@ -9045,10 +9045,10 @@ react-lifecycles-compat@^3.0.0:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-modal@3.4.4:
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/react-modal/-/react-modal-3.4.4.tgz#e9dde25e9e85a59c76831f2a2b468712a546aded"
-  integrity sha512-5VYNvy301Z0xxGBQhPmDdzOcyEkUG8sU7bpRsAPI4OHgEUkbBFrpjzs/ocNI0m824/lOqTxddXzwgmDJXx3s3Q==
+react-modal@3.8.1:
+  version "3.8.1"
+  resolved "https://registry.yarnpkg.com/react-modal/-/react-modal-3.8.1.tgz#7300f94a6f92a2e17994de0be6ccb61734464c9e"
+  integrity sha512-aLKeZM9pgXpIKVwopRHMuvqKWiBajkqisDA8UzocdCF6S4fyKVfLWmZR5G1Q0ODBxxxxf2XIwiCP8G/11GJAuw==
   dependencies:
     exenv "^1.2.0"
     prop-types "^15.5.10"
@@ -9114,10 +9114,10 @@ react-side-effect@^1.0.2:
     exenv "^1.2.1"
     shallowequal "^1.0.1"
 
-react-text-truncate@^0.12.0:
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/react-text-truncate/-/react-text-truncate-0.12.1.tgz#b977002113aee86fc5f6e0db135c3d6186b84e34"
-  integrity sha1-uXcAIROu6G/F9uDbE1w9YYa4TjQ=
+react-text-truncate@^0.14.1:
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/react-text-truncate/-/react-text-truncate-0.14.1.tgz#1bdf420d22c3fc2ff740ebc84f8c659e7f2b5e9f"
+  integrity sha512-4sqxw0H+E4xu9zqSD9IEJAEaBfhfu01DgV3WPS+YAT88/YLAemh1kJDL8448KJ2EqAs5i3C3/14o1/XYsr5Bxw==
   dependencies:
     prop-types "^15.5.7"
 
@@ -9958,7 +9958,7 @@ shellwords@^0.1.1:
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
   integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
 
-shortid@^2.2.6:
+shortid@^2.2.14:
   version "2.2.14"
   resolved "https://registry.yarnpkg.com/shortid/-/shortid-2.2.14.tgz#80db6aafcbc3e3a46850b3c88d39e051b84c8d18"
   integrity sha512-4UnZgr9gDdA1kaKj/38IiudfC3KHKhDc1zi/HSxd9FQDR0VLwH3/y79tZJLsVYPsJgIjeHjqIWaWVRJUj9qZOQ==

@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.8.3",
-    "@salesforce/design-system-react": "^0.10.5",
+    "@salesforce/design-system-react": "^0.10.7",
     "classnames": "^2.2.6",
     "i18next": "^17.0.4",
     "i18next-browser-languagedetector": "^3.0.1",
