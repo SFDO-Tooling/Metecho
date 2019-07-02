@@ -9,8 +9,8 @@ Cloning the project
     $ git clone git@github.com:SFDO-Tooling/MetaShare
     $ cd MetaShare
 
-Docker-based development (preferred)
-------------------------------------
+Docker-based development
+------------------------
 
 1. Install `Docker Desktop (Community Edition)`_ and make sure it is running.
 
@@ -56,6 +56,17 @@ Docker-based development (preferred)
    (``docker-compose ps`` will tell you what containers are currently running.)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
+
+Setting up the database
+-----------------------
+
+To populate the database with sample data for development, run::
+
+    $ docker-compose run --rm web python manage.py populate_data
+
+If your database has outdated sample data for development, remove it with::
+
+    $ docker-compose run --rm web python manage.py truncate_data
 
 Docker development tasks
 ~~~~~~~~~~~~~~~~~~~~~~~~

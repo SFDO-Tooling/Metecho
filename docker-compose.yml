@@ -11,7 +11,7 @@ services:
       - postgres
       - redis
     links:
-      - "postgres:db"
+      - 'postgres:db'
       - redis
     env_file: .env
     environment:
@@ -21,8 +21,9 @@ services:
       - .:/app
       - /app/node_modules
       - ~/.gitconfig:/root/.gitconfig
+      - vscode-server:/root/.vscode-server
     ports:
-      - "0.0.0.0:8080:8080"
+      - '0.0.0.0:8080:8080'
 
   # Runs the database process:
   postgres:
@@ -42,3 +43,6 @@ services:
     volumes:
       - ./.git:/tmp/.git
       - ./hooks:/tmp/hooks
+
+volumes:
+  vscode-server:
