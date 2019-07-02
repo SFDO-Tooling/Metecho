@@ -1,4 +1,4 @@
-.PHONY: build down jstest lint migrate migrations prune pyinstall pytest shell test up
+.PHONY: build down jstest lint migrate migrations populate prune pyinstall pytest shell test truncate up
 
 up:
 	docker-compose up
@@ -8,6 +8,12 @@ down:
 
 build:
 	docker-compose build
+
+populate:
+	docker-compose run --rm web python manage.py populate_data
+
+truncate:
+	docker-compose run --rm web python manage.py truncate_data
 
 lint:
 	docker-compose run --rm --no-deps web yarn lint
