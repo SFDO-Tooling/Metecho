@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -7,4 +8,4 @@ class ProductPaginator(PageNumberPagination):
     # While the front end gracefully ignores duplicate products, this may result
     # in a product being missed (until a browser-reload) if it was added to an
     # already-fetched page.
-    page_size = 25
+    page_size = settings.API_PRODUCT_PAGE_SIZE

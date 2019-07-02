@@ -65,7 +65,6 @@ describe('fetchMoreProducts', () => {
   describe('success', () => {
     test('GETs next products page', () => {
       const store = storeWithApi({});
-      const id = 30;
       const nextProducts = [{ id: 'p2', name: 'Product 2', slug: 'product-2' }];
       const mockResponse = {
         next: null,
