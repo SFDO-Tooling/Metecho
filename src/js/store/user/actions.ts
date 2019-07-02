@@ -35,7 +35,7 @@ export const login = (payload: User): LoginAction => {
 };
 
 export const logout = (): ThunkResult => dispatch =>
-  apiFetch(window.api_urls.account_logout(), {
+  apiFetch(window.api_urls.account_logout(), dispatch, {
     method: 'POST',
   }).then(() => {
     /* istanbul ignore else */
@@ -51,7 +51,11 @@ export const logout = (): ThunkResult => dispatch =>
 export const refetchAllData = (): ThunkResult => async dispatch => {
   dispatch({ type: 'REFETCH_DATA_STARTED' });
   try {
-    const payload = await apiFetch(window.api_urls.user());
+    const payload = await apiFetch(window.api_urls.user(), dispatch, {}, [
+      401,
+      403,
+      404,
+    ]);
     dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
     dispatch({ type: 'USER_LOGGED_OUT' });
     if (!payload) {

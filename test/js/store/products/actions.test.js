@@ -179,3 +179,59 @@ describe('fetchProduct', () => {
     });
   });
 });
+
+describe('syncRepos', () => {
+  test('dispatches SyncRepos action and fetches products', () => {
+    const store = storeWithApi({});
+    fetchMock.getOnce(window.api_urls.product_list(), {
+      next: null,
+      results: [],
+    });
+    fetchMock.postOnce(window.api_urls.user_refresh(), {
+      status: 204,
+      body: {},
+    });
+    const syncReposStarted = {
+      type: 'SYNC_REPOS_STARTED',
+    };
+    const syncReposSucceeded = {
+      type: 'SYNC_REPOS_SUCCEEDED',
+    };
+    const started = {
+      type: 'FETCH_PRODUCTS_STARTED',
+    };
+    const succeeded = {
+      type: 'FETCH_PRODUCTS_SUCCEEDED',
+      payload: { next: null, results: [] },
+    };
+
+    expect.assertions(1);
+    return store.dispatch(actions.syncRepos()).then(() => {
+      expect(store.getActions()).toEqual([
+        syncReposStarted,
+        syncReposSucceeded,
+        started,
+        succeeded,
+      ]);
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches FETCH_PRODUCT_FAILED action', () => {
+      const store = storeWithApi({});
+      fetchMock.postOnce(window.api_urls.user_refresh(), 500);
+      const started = {
+        type: 'SYNC_REPOS_STARTED',
+      };
+      const failed = {
+        type: 'SYNC_REPOS_FAILED',
+      };
+
+      expect.assertions(2);
+      return store.dispatch(actions.syncRepos()).catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});

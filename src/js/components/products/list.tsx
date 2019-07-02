@@ -11,8 +11,9 @@ import { connect } from 'react-redux';
 import { EmptyIllustration } from '@/components/404';
 import { LoginButton } from '@/components/login';
 import ProductListItem from '@/components/products/listItem';
+import { LabelWithSpinner } from '@/components/utils';
 import { AppState } from '@/store';
-import { fetchMoreProducts } from '@/store/products/actions';
+import { fetchMoreProducts, syncRepos } from '@/store/products/actions';
 import { Product } from '@/store/products/reducer';
 import { selectNextUrl, selectProducts } from '@/store/products/selectors';
 
@@ -21,11 +22,20 @@ interface Props {
   products: Product[];
   next: string | null;
   doFetchMoreProducts({ url }: { url: string }): Promise<any>;
+  doSyncRepos(): Promise<any>;
 }
 
 const ProductList = withScroll(
-  ({ y, products, next, doFetchMoreProducts }: Props) => {
+  ({ y, products, next, doFetchMoreProducts, doSyncRepos }: Props) => {
     const [fetchingProducts, setFetchingProducts] = useState(false);
+    const [syncingRepos, setSyncingRepos] = useState(false);
+
+    const syncReposClicked = () => {
+      setSyncingRepos(true);
+      doSyncRepos().finally(() => {
+        setSyncingRepos(false);
+      });
+    };
 
     useEffect(() => {
       if (fetchingProducts || !next) {
@@ -115,6 +125,28 @@ const ProductList = withScroll(
                 disabled
               />
             </div>
+            {syncingRepos ? (
+              <Button
+                label={
+                  <LabelWithSpinner
+                    label={i18n.t('Syncing GitHub Repos…')}
+                    variant="base"
+                    size="x-small"
+                  />
+                }
+                variant="outline-brand"
+                disabled
+              />
+            ) : (
+              <Button
+                label={i18n.t('Sync GitHub Repositories')}
+                variant="outline-brand"
+                iconCategory="utility"
+                iconName="refresh"
+                iconPosition="left"
+                onClick={syncReposClicked}
+              />
+            )}
             {contents}
             {fetchingProducts ? (
               <div className="slds-align_absolute-center slds-m-top_x-large">
@@ -138,6 +170,7 @@ const select = (appState: AppState) => ({
 
 const actions = {
   doFetchMoreProducts: fetchMoreProducts,
+  doSyncRepos: syncRepos,
 };
 
 const WrappedProductList = connect(

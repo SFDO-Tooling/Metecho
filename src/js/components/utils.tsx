@@ -1,3 +1,4 @@
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import React, { ComponentType } from 'react';
 import { connect } from 'react-redux';
 import { Redirect, Route } from 'react-router-dom';
@@ -38,3 +39,21 @@ const select = (appState: AppState) => ({
 });
 
 export const PrivateRoute = connect(select)(UnwrappedPrivateRoute);
+
+// For use as a "loading" button label
+export const LabelWithSpinner = ({
+  label,
+  variant = 'inverse',
+  size = 'small',
+}: {
+  label: string;
+  variant?: string;
+  size?: string;
+}) => (
+  <>
+    <span className="slds-is-relative slds-m-right_large">
+      <Spinner variant={variant} size={size} />
+    </span>
+    {label}
+  </>
+);

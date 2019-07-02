@@ -20,6 +20,7 @@ beforeAll(() => {
     salesforce_production_login: () => '/accounts/salesforce-production/login/',
     salesforce_test_login: () => '/accounts/salesforce-test/login/',
     user: () => '/api/user/',
+    user_refresh: () => '/api/user/refresh/',
     product_list: () => '/api/products/',
     product_detail: slug => `/api/products/${slug}/`,
   };

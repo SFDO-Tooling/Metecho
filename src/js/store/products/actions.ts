@@ -39,6 +39,15 @@ interface FetchProductFailed {
   type: 'FETCH_PRODUCT_FAILED';
   payload: ProductFilters;
 }
+interface SyncReposStarted {
+  type: 'SYNC_REPOS_STARTED';
+}
+interface SyncReposSucceeded {
+  type: 'SYNC_REPOS_SUCCEEDED';
+}
+interface SyncReposFailed {
+  type: 'SYNC_REPOS_FAILED';
+}
 
 export type ProductsAction =
   | FetchProductsStarted
@@ -49,7 +58,10 @@ export type ProductsAction =
   | FetchMoreProductsFailed
   | FetchProductStarted
   | FetchProductSucceeded
-  | FetchProductFailed;
+  | FetchProductFailed
+  | SyncReposStarted
+  | SyncReposSucceeded
+  | SyncReposFailed;
 
 export const fetchProducts = (): ThunkResult => async dispatch => {
   dispatch({ type: 'FETCH_PRODUCTS_STARTED' });
@@ -100,6 +112,20 @@ export const fetchProduct = (
     });
   } catch (err) {
     dispatch({ type: 'FETCH_PRODUCT_FAILED', payload: filters });
+    throw err;
+  }
+};
+
+export const syncRepos = (): ThunkResult => async dispatch => {
+  dispatch({ type: 'SYNC_REPOS_STARTED' });
+  try {
+    await apiFetch(window.api_urls.user_refresh(), dispatch, {
+      method: 'POST',
+    });
+    dispatch({ type: 'SYNC_REPOS_SUCCEEDED' });
+    return dispatch(fetchProducts());
+  } catch (err) {
+    dispatch({ type: 'SYNC_REPOS_FAILED' });
     throw err;
   }
 };
