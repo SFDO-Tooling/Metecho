@@ -21,7 +21,7 @@ beforeAll(() => {
     salesforce_test_login: () => '/accounts/salesforce-test/login/',
     user: () => '/api/user/',
     product_list: () => '/api/products/',
-    product_detail: id => `/api/products/${id}/`,
+    product_detail: slug => `/api/products/${slug}/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();

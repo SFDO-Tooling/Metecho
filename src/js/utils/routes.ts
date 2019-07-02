@@ -4,7 +4,7 @@ const routes = {
   home: () => '/',
   login: () => '/login',
   product_list: () => '/products',
-  product_detail: (productId: string) => `/products/${productId}`,
+  product_detail: (productSlug: string) => `/products/${productSlug}`,
 };
 
 export const routePatterns = {
@@ -12,6 +12,7 @@ export const routePatterns = {
   login: () => '/login',
   auth_error: () => '/accounts/*',
   product_list: () => '/products',
+  product_detail: () => '/products/:productSlug',
 };
 
 export default routes;

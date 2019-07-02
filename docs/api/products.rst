@@ -23,8 +23,10 @@ Retrieve
         {
           "id": "3Lw7OwK",
           "name": "Test Product",
+          "slug": "test-product",
+          "old_slugs": [],
           "repo_url": "https://github.com/sfdo/test-product",
-          "description": "<p>This is safely rendered markdown</p>",
+          "description": "<p>This is safely rendered Markdown.</p>",
           "is_managed": false,
         }
         ...

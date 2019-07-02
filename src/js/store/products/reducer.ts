@@ -4,6 +4,8 @@ import { LogoutAction } from '@/store/user/actions';
 export interface Product {
   id: string;
   name: string;
+  slug: string;
+  old_slugs: string[];
   repo_url: string;
   description: string | null;
   is_managed: boolean;
@@ -49,9 +51,9 @@ const reducer = (
       };
     }
     case 'FETCH_PRODUCT_SUCCEEDED': {
-      const { product, id } = action.payload;
+      const { product, slug } = action.payload;
       if (!product) {
-        return { ...products, notFound: [...products.notFound, id] };
+        return { ...products, notFound: [...products.notFound, slug] };
       }
       if (!products.products.find(p => p.id === product.id)) {
         return { ...products, products: [...products.products, product] };

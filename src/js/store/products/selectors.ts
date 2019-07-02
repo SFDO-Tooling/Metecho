@@ -1,3 +1,4 @@
+// import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
@@ -16,30 +17,20 @@ export const selectNextUrl = createSelector(
   (products: ProductsState): string | null => products.next,
 );
 
-// const selectProductSlug = (
+// export const selectProductSlug = (
 //   appState: AppState,
-//   { match: { params } }: InitialProps,
-// ): ?string => params.productSlug;
+//   { match: { params } }: RouteComponentProps<{ productSlug?: string }>,
+// ) => params.productSlug;
 
-// const selectProductNotFound: (
-//   AppState,
-//   InitialProps,
-// ) => boolean = createSelector(
+// export const selectProductNotFound = createSelector(
 //   [selectProductsState, selectProductSlug],
-//   (products: ProductsState, productSlug: ?string): boolean =>
+//   (products, productSlug): boolean =>
 //     Boolean(productSlug && products.notFound.includes(productSlug)),
 // );
 
-// const selectProduct: (
-//   AppState,
-//   InitialProps,
-// ) => Product | null | void = createSelector(
+// export const selectProduct = createSelector(
 //   [selectProducts, selectProductSlug, selectProductNotFound],
-//   (
-//     products: Array<Product>,
-//     productSlug: ?string,
-//     notFound: boolean,
-//   ): Product | null | void => {
+//   (products, productSlug, notFound): Product | null | void => {
 //     if (!productSlug) {
 //       return undefined;
 //     }

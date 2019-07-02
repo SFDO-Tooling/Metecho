@@ -12,6 +12,7 @@ describe('fetchProducts', () => {
       const product = {
         id: 'p1',
         name: 'Product 1',
+        slug: 'product-1',
         description: 'This is a test product.',
         repo_url: 'http://www.test.test',
       };
@@ -65,7 +66,7 @@ describe('fetchMoreProducts', () => {
     test('GETs next products page', () => {
       const store = storeWithApi({});
       const id = 30;
-      const nextProducts = [{ id: 'p2', name: 'product-2' }];
+      const nextProducts = [{ id: 'p2', name: 'Product 2', slug: 'product-2' }];
       const mockResponse = {
         next: null,
         results: nextProducts,
@@ -81,7 +82,7 @@ describe('fetchMoreProducts', () => {
       };
 
       expect.assertions(1);
-      return store.dispatch(actions.fetchMoreProducts({ url, id })).then(() => {
+      return store.dispatch(actions.fetchMoreProducts({ url })).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
@@ -119,8 +120,8 @@ describe('fetchProduct', () => {
   describe('success', () => {
     test('GETs product from api', () => {
       const store = storeWithApi({});
-      const filters = { id: 'p1' };
-      const product = { id: 'p1', name: 'Product 1' };
+      const filters = { slug: 'product-1' };
+      const product = { id: 'p1', name: 'Product 1', slug: 'product-1' };
       fetchMock.getOnce(addUrlParams(baseUrl, filters), product);
       const started = {
         type: 'FETCH_PRODUCT_STARTED',
@@ -139,7 +140,7 @@ describe('fetchProduct', () => {
 
     test('stores null if no product returned from api', () => {
       const store = storeWithApi({});
-      const filters = { id: 'p1' };
+      const filters = { slug: 'product-1' };
       fetchMock.getOnce(addUrlParams(baseUrl, filters), 404);
       const started = {
         type: 'FETCH_PRODUCT_STARTED',
@@ -160,7 +161,7 @@ describe('fetchProduct', () => {
   describe('error', () => {
     test('dispatches FETCH_PRODUCT_FAILED action', () => {
       const store = storeWithApi({});
-      const filters = { id: 'p1' };
+      const filters = { slug: 'product-1' };
       fetchMock.getOnce(addUrlParams(baseUrl, filters), 500);
       const started = {
         type: 'FETCH_PRODUCT_STARTED',

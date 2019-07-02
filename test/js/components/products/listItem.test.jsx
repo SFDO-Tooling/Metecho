@@ -25,12 +25,14 @@ describe('<ProductListItem />', () => {
           {
             id: 'p1',
             name: 'Product 1',
+            slug: 'product-1',
             description: 'This is a test product.',
             repo_url: 'https://www.github.com/test/test-repo',
           },
           {
             id: 'p2',
             name: 'Product 2',
+            slug: 'product-2',
             repo_url: 'https://www.github.com/test/another-test-repo',
           },
         ],

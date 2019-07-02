@@ -7,7 +7,7 @@ import routes from '@/utils/routes';
 
 const ProductListItem = ({ product }: { product: Product }) => (
   <Link
-    to={routes.product_detail(product.id)}
+    to={routes.product_detail(product.slug)}
     className="slds-text-link_reset
       slds-p-around_small
       slds-size_1-of-1
