@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from ..models import ProductSlug, handler
+from ..models import Product, ProductSlug, user_logged_in_handler
 
 
 @pytest.mark.django_db
@@ -10,6 +10,14 @@ class TestProductSlug:
     def test_str(self):
         slug = ProductSlug(slug="test-slug")
         assert str(slug) == "test-slug"
+
+
+@pytest.mark.django_db
+class TestProduct:
+    def test_signal(self):
+        product = Product(name="Test Product")
+        product.save()
+        assert product.slug == "test-product"
 
 
 @pytest.mark.django_db
@@ -133,5 +141,5 @@ class TestGitHubRepository:
 def test_login_handler(user_factory):
     user = user_factory()
     with patch("metashare.api.models.gh") as gh:
-        handler(None, user=user)
+        user_logged_in_handler(None, user=user)
         gh.get_all_org_repos.assert_called_with(user)

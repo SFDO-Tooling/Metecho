@@ -2,6 +2,7 @@ from allauth.account.signals import user_logged_in
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
@@ -141,11 +142,15 @@ class GitHubRepository(mixins.HashIdMixin):
 
 
 @receiver(user_logged_in)
-def handler(sender, **kwargs):
-    # request, user
-    user = kwargs.pop("user")
+def user_logged_in_handler(sender, *, user, **kwargs):
     repos = gh.get_all_org_repos(user)
     GitHubRepository.objects.filter(user=user).delete()
     GitHubRepository.objects.bulk_create(
         [GitHubRepository(user=user, url=repo) for repo in repos]
     )
+
+
+@receiver(post_save, sender=Product)
+def product_save_handler(sender, *, created, instance, **kwargs):
+    if created:
+        instance.ensure_slug()
