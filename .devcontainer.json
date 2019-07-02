@@ -54,6 +54,7 @@
     "python.formatting.provider": "black",
     "python.pythonPath": "/usr/local/bin/python",
     "restructuredtext.linter.extraArgs": ["--max-line-length 80"],
+    "restructuredtext.confPath": "${workspaceFolder}/docs",
     "[javascript]": {
       "editor.formatOnSave": false,
       "editor.rulers": [80]
