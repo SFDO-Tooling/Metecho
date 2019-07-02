@@ -23,6 +23,7 @@ import Footer from '@/components/footer';
 import Header from '@/components/header';
 import Login from '@/components/login';
 import ProductList from '@/components/products/list';
+import ProductDetail from '@/components/products/detail';
 import { PrivateRoute } from '@/components/utils';
 import initializeI18n from '@/i18n';
 import reducer from '@/store';
@@ -54,6 +55,11 @@ const App = () => (
               />
               <Route path={routePatterns.auth_error()} component={AuthError} />
               <PrivateRoute component={FourOhFour} />
+              <PrivateRoute
+                exact
+                path={routePatterns.product_detail()}
+                component={ProductDetail}
+              />
             </Switch>
           </ErrorBoundary>
         </div>
