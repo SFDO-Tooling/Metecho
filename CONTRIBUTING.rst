@@ -62,11 +62,11 @@ Setting up the database
 
 To populate the database with sample data for development, run::
 
-    $ docker-compose run --rm web python manage.py populate_data
+    $ make populate
 
 If your database has outdated sample data for development, remove it with::
 
-    $ docker-compose run --rm web python manage.py truncate_data
+    $ make truncate
 
 Docker development tasks
 ~~~~~~~~~~~~~~~~~~~~~~~~
