@@ -111,7 +111,7 @@ const ProductList = withScroll(
           />
           <div className="slds-p-around_x-large">
             <div className="slds-grid slds-grid_vertical-align-start">
-              <div className="slds-grid slds-wrap slds-shrink slds-m-bottom_medium restricted-container slds-p-right_x-large">
+              <div className="slds-grid slds-wrap slds-shrink slds-m-bottom_medium slds-p-right_x-large restricted-container">
                 <p className="slds-p-bottom_small">
                   <Trans i18nKey="productListHelper">
                     Contributor access on GitHub is required to view products. If
