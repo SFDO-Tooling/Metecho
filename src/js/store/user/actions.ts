@@ -1,4 +1,5 @@
 import { ThunkResult } from '@/store';
+import { fetchProducts } from '@/store/products/actions';
 import { User } from '@/store/user/reducer';
 import apiFetch from '@/utils/api';
 
@@ -57,11 +58,11 @@ export const refetchAllData = (): ThunkResult => async dispatch => {
       404,
     ]);
     dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
-    dispatch({ type: 'USER_LOGGED_OUT' });
     if (!payload) {
-      return null;
+      return dispatch({ type: 'USER_LOGGED_OUT' });
     }
-    return dispatch(login(payload));
+    dispatch(login(payload));
+    return dispatch(fetchProducts());
   } catch (err) {
     dispatch({ type: 'REFETCH_DATA_FAILED' });
     throw err;
