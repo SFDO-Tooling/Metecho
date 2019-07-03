@@ -1,6 +1,7 @@
 import cookies from 'js-cookie';
 import { ThunkDispatch } from 'redux-thunk';
 
+import { addError } from '@/store/errors/actions';
 import { logError } from '@/utils/logging';
 
 export interface UrlParams {
@@ -71,7 +72,7 @@ const apiFetch = async (
     throw error;
   } catch (err) {
     logError(err);
-    // dispatch(addError(err.message));
+    dispatch(addError(err.message));
     throw err;
   }
 };

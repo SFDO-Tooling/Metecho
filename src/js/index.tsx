@@ -6,12 +6,19 @@ import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-spr
 import IconSettings from '@salesforce/design-system-react/components/icon-settings';
 import settings from '@salesforce/design-system-react/components/settings';
 import i18n from 'i18next';
-import React from 'react';
+import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
-import { AnyAction, applyMiddleware, createStore } from 'redux';
+import {
+  BrowserRouter,
+  Redirect,
+  Route,
+  RouteComponentProps,
+  Switch,
+  withRouter,
+} from 'react-router-dom';
+import { AnyAction, applyMiddleware, createStore, Dispatch } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
 import thunk, { ThunkDispatch } from 'redux-thunk';
@@ -26,6 +33,7 @@ import ProductList from '@/components/products/list';
 import { PrivateRoute } from '@/components/utils';
 import initializeI18n from '@/i18n';
 import reducer from '@/store';
+import { clearErrors } from '@/store/errors/actions';
 import { fetchProducts } from '@/store/products/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { log, logError } from '@/utils/logging';
@@ -33,34 +41,51 @@ import routes, { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
 import SFLogo from '#/salesforce-logo.png';
 
-const App = () => (
-  <DocumentTitle title={i18n.t('MetaShare')}>
-    <div className="slds-grid slds-grid_frame slds-grid_vertical">
-      <ErrorBoundary>
-        <Header />
-        <div className="slds-grow slds-shrink-none">
+const App = withRouter(
+  ({
+    dispatch,
+    location: { pathname },
+  }: { dispatch: Dispatch } & RouteComponentProps) => {
+    useEffect(
+      () => () => {
+        dispatch(clearErrors());
+      },
+      [dispatch, pathname],
+    );
+
+    return (
+      <DocumentTitle title={i18n.t('MetaShare')}>
+        <div className="slds-grid slds-grid_frame slds-grid_vertical">
           <ErrorBoundary>
-            <Switch>
-              <Route exact path={routePatterns.login()} component={Login} />
-              <Route
-                exact
-                path={routePatterns.home()}
-                render={() => <Redirect to={routes.product_list()} />}
-              />
-              <PrivateRoute
-                exact
-                path={routePatterns.product_list()}
-                component={ProductList}
-              />
-              <Route path={routePatterns.auth_error()} component={AuthError} />
-              <PrivateRoute component={FourOhFour} />
-            </Switch>
+            <Header />
+            <div className="slds-grow slds-shrink-none">
+              <ErrorBoundary>
+                <Switch>
+                  <Route exact path={routePatterns.login()} component={Login} />
+                  <Route
+                    exact
+                    path={routePatterns.home()}
+                    render={() => <Redirect to={routes.product_list()} />}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.product_list()}
+                    component={ProductList}
+                  />
+                  <Route
+                    path={routePatterns.auth_error()}
+                    component={AuthError}
+                  />
+                  <PrivateRoute component={FourOhFour} />
+                </Switch>
+              </ErrorBoundary>
+            </div>
+            <Footer logoSrc={SFLogo} />
           </ErrorBoundary>
         </div>
-        <Footer logoSrc={SFLogo} />
-      </ErrorBoundary>
-    </div>
-  </DocumentTitle>
+      </DocumentTitle>
+    );
+  },
 );
 
 initializeI18n((i18nError?: string) => {
@@ -133,7 +158,7 @@ initializeI18n((i18nError?: string) => {
               standardSprite={standardSprite}
               utilitySprite={utilitySprite}
             >
-              <App />
+              <App dispatch={appStore.dispatch} />
             </IconSettings>
           </BrowserRouter>
         </Provider>,

@@ -8,7 +8,11 @@ import { renderWithRedux } from './../../utils';
 
 describe('<Header />', () => {
   const setup = (
-    initialState = { user: { username: 'Test User' }, socket: false },
+    initialState = {
+      user: { username: 'Test User' },
+      socket: false,
+      errors: [],
+    },
   ) => {
     const {
       container,

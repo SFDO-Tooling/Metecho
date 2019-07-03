@@ -166,9 +166,14 @@ describe('refetchAllData', () => {
       const started = { type: 'REFETCH_DATA_STARTED' };
       const failed = { type: 'REFETCH_DATA_FAILED' };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.refetchAllData()).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });
