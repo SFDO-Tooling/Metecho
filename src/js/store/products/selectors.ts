@@ -30,7 +30,7 @@ export const selectProductNotFound = createSelector(
 
 export const selectProduct = createSelector(
   [selectProducts, selectProductSlug, selectProductNotFound],
-  (products, productSlug, notFound): Product | null | void => {
+  (products, productSlug, notFound): Product | null | undefined => {
     if (!productSlug) {
       return undefined;
     }
