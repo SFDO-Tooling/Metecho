@@ -53,13 +53,13 @@ const App = () => (
                 path={routePatterns.product_list()}
                 component={ProductList}
               />
-              <Route path={routePatterns.auth_error()} component={AuthError} />
-              <PrivateRoute component={FourOhFour} />
               <PrivateRoute
                 exact
                 path={routePatterns.product_detail()}
                 component={ProductDetail}
               />
+              <Route path={routePatterns.auth_error()} component={AuthError} />
+              <PrivateRoute component={FourOhFour} />
             </Switch>
           </ErrorBoundary>
         </div>

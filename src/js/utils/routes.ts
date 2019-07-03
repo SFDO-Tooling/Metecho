@@ -12,7 +12,7 @@ export const routePatterns = {
   login: () => '/login',
   auth_error: () => '/accounts/*',
   product_list: () => '/products',
-  product_detail: () => '/products/:productId',
+  product_detail: () => '/products/:productSlug',
 };
 
 export default routes;
