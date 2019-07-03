@@ -295,7 +295,9 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
-SOCIALACCOUNT_PROVIDERS = {"github": {"SCOPE": ["read:user", "repo", "read:org"]}}
+SOCIALACCOUNT_PROVIDERS = {
+    "github": {"SCOPE": ["read:user", "user:email", "repo", "read:org"]}
+}
 # SOCIALACCOUNT_PROVIDERS = {
 #     "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
 #     "salesforce-test": {"SCOPE": ["web", "full", "refresh_token"]},
