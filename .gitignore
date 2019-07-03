@@ -18,6 +18,7 @@ yarn-error.log
 staticfiles/
 dump.rdb
 /env
+/postgres
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -5,7 +5,7 @@ describe('reducer', () => {
     const actual = reducer(undefined, {});
 
     expect(Object.keys(actual).sort()).toEqual(
-      ['products', 'user', 'socket'].sort(),
+      ['products', 'user', 'socket', 'errors'].sort(),
     );
   });
 });

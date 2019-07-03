@@ -1,8 +1,9 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import ProductList from '@/components/products/list';
-import { fetchMoreProducts } from '@/store/products/actions';
+import { fetchMoreProducts, syncRepos } from '@/store/products/actions';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
@@ -14,9 +15,11 @@ jest.mock('react-fns', () => ({
 }));
 jest.mock('@/store/products/actions');
 fetchMoreProducts.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+syncRepos.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchMoreProducts.mockClear();
+  syncRepos.mockClear();
 });
 
 describe('<ProductList />', () => {
@@ -117,6 +120,20 @@ describe('<ProductList />', () => {
 
       expect(queryByText('Loading…')).toBeNull();
       expect(fetchMoreProducts).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sync repos clicked', () => {
+    test('sync repos', () => {
+      const { getByText } = setup();
+      const btn = getByText('Sync GitHub Repositories');
+
+      expect(btn).toBeVisible();
+
+      fireEvent.click(btn);
+
+      expect(getByText('Syncing GitHub Repos…')).toBeVisible();
+      expect(syncRepos).toHaveBeenCalledTimes(1);
     });
   });
 });

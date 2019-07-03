@@ -6,39 +6,45 @@ import apiFetch, {
   removeUrlParam,
 } from '@/utils/api';
 
+const dispatch = jest.fn();
+
+afterEach(() => {
+  dispatch.mockClear();
+});
+
 describe('apiFetch', () => {
   test('200: returns response', () => {
     const expected = { foo: 'bar' };
     fetchMock.getOnce('/test/url/', expected);
 
-    return expect(apiFetch('/test/url/')).resolves.toEqual(expected);
+    return expect(apiFetch('/test/url/', dispatch)).resolves.toEqual(expected);
   });
 
   test('404: returns null', () => {
     fetchMock.getOnce('/test/url/', 404);
 
-    return expect(apiFetch('/test/url/')).resolves.toBeNull();
+    return expect(apiFetch('/test/url/', dispatch)).resolves.toBeNull();
   });
 
   test('500: throws Error', () => {
     fetchMock.getOnce('/test/url/', 500);
 
     expect.assertions(1);
-    return expect(apiFetch('/test/url/')).rejects.toThrow();
+    return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow();
   });
 
   test('network error: throws Error', () => {
     fetchMock.getOnce('/test/url/', { throws: new Error('not cool') });
 
     expect.assertions(1);
-    return expect(apiFetch('/test/url/')).rejects.toThrow('not cool');
+    return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow('not cool');
   });
 
   test('string response: returns response', () => {
     const expected = 'foobar';
     fetchMock.getOnce('/test/url/', expected);
 
-    return expect(apiFetch('/test/url/')).resolves.toEqual(expected);
+    return expect(apiFetch('/test/url/', dispatch)).resolves.toEqual(expected);
   });
 });
 

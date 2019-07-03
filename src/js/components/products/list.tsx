@@ -11,8 +11,9 @@ import { connect } from 'react-redux';
 import { EmptyIllustration } from '@/components/404';
 import { LoginButton } from '@/components/login';
 import ProductListItem from '@/components/products/listItem';
+import { LabelWithSpinner } from '@/components/utils';
 import { AppState } from '@/store';
-import { fetchMoreProducts } from '@/store/products/actions';
+import { fetchMoreProducts, syncRepos } from '@/store/products/actions';
 import { Product } from '@/store/products/reducer';
 import { selectNextUrl, selectProducts } from '@/store/products/selectors';
 
@@ -21,11 +22,20 @@ interface Props {
   products: Product[];
   next: string | null;
   doFetchMoreProducts({ url }: { url: string }): Promise<any>;
+  doSyncRepos(): Promise<any>;
 }
 
 const ProductList = withScroll(
-  ({ y, products, next, doFetchMoreProducts }: Props) => {
+  ({ y, products, next, doFetchMoreProducts, doSyncRepos }: Props) => {
     const [fetchingProducts, setFetchingProducts] = useState(false);
+    const [syncingRepos, setSyncingRepos] = useState(false);
+
+    const syncReposClicked = () => {
+      setSyncingRepos(true);
+      doSyncRepos().finally(() => {
+        setSyncingRepos(false);
+      });
+    };
 
     useEffect(() => {
       if (fetchingProducts || !next) {
@@ -100,20 +110,46 @@ const ProductList = withScroll(
             title={i18n.t('Select a Product')}
           />
           <div className="slds-p-around_x-large">
-            <div className="slds-m-bottom_medium restricted-container">
-              <p className="slds-p-bottom_small">
-                <Trans i18nKey="productListHelper">
-                  Contributor access on GitHub is required to view products. If
-                  you do not see the product you’re looking for below, confirm
-                  that you are logged into the correct account or contact an
-                  admin on GitHub.
-                </Trans>
-              </p>
-              <Button
-                label={i18n.t('Create Product')}
-                variant="brand"
-                disabled
-              />
+            <div className="slds-grid slds-grid_vertical-align-start">
+              <div className="slds-grid slds-wrap slds-shrink slds-m-bottom_medium slds-p-right_x-large restricted-container">
+                <p className="slds-p-bottom_small">
+                  <Trans i18nKey="productListHelper">
+                    Contributor access on GitHub is required to view products.
+                    If you do not see the product you’re looking for below,
+                    confirm that you are logged into the correct account or
+                    contact an admin on GitHub.
+                  </Trans>
+                </p>
+                <Button
+                  label={i18n.t('Create Product')}
+                  variant="brand"
+                  disabled
+                />
+              </div>
+              <div className="slds-grid slds-grow slds-shrink-none slds-grid_align-end">
+                {syncingRepos ? (
+                  <Button
+                    label={
+                      <LabelWithSpinner
+                        label={i18n.t('Syncing GitHub Repos…')}
+                        variant="base"
+                        size="x-small"
+                      />
+                    }
+                    variant="outline-brand"
+                    disabled
+                  />
+                ) : (
+                  <Button
+                    label={i18n.t('Sync GitHub Repositories')}
+                    variant="outline-brand"
+                    iconCategory="utility"
+                    iconName="refresh"
+                    iconPosition="left"
+                    onClick={syncReposClicked}
+                  />
+                )}
+              </div>
             </div>
             {contents}
             {fetchingProducts ? (
@@ -138,6 +174,7 @@ const select = (appState: AppState) => ({
 
 const actions = {
   doFetchMoreProducts: fetchMoreProducts,
+  doSyncRepos: syncRepos,
 };
 
 const WrappedProductList = connect(

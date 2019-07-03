@@ -119,7 +119,9 @@ layers will bust the cache on the lower layers and make your next build slow
 again.
 
 By running ``docker-compose up``, VS Code starts the development server/watcher
-as well, available at `<http://localhost:8080/>`_ in your browser.
+as well, available at `<http://localhost:8080/>`_ in your browser. To view the
+running logs from the server processes, run the "Docker: Show Logs" command from
+the VS Code Command Palette and select "metashare_web".
 
 A number of project-specific VS Code extensions will be automatically installed
 for you within the Docker container. See `.devcontainer.json
