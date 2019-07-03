@@ -110,43 +110,47 @@ const ProductList = withScroll(
             title={i18n.t('Select a Product')}
           />
           <div className="slds-p-around_x-large">
-            <div className="slds-m-bottom_medium restricted-container">
-              <p className="slds-p-bottom_small">
-                <Trans i18nKey="productListHelper">
-                  Contributor access on GitHub is required to view products. If
-                  you do not see the product you’re looking for below, confirm
-                  that you are logged into the correct account or contact an
-                  admin on GitHub.
-                </Trans>
-              </p>
-              <Button
-                label={i18n.t('Create Product')}
-                variant="brand"
-                disabled
-              />
-            </div>
-            {syncingRepos ? (
-              <Button
-                label={
-                  <LabelWithSpinner
-                    label={i18n.t('Syncing GitHub Repos…')}
-                    variant="base"
-                    size="x-small"
+            <div className="slds-grid slds-grid_vertical-align-start">
+              <div className="slds-grid slds-wrap slds-shrink slds-m-bottom_medium restricted-container slds-p-right_x-large">
+                <p className="slds-p-bottom_small">
+                  <Trans i18nKey="productListHelper">
+                    Contributor access on GitHub is required to view products. If
+                    you do not see the product you’re looking for below, confirm
+                    that you are logged into the correct account or contact an
+                    admin on GitHub.
+                  </Trans>
+                </p>
+                <Button
+                  label={i18n.t('Create Product')}
+                  variant="brand"
+                  disabled
+                />
+              </div>
+              <div className="slds-grid slds-grow slds-shrink-none slds-grid_align-end">
+                {syncingRepos ? (
+                  <Button
+                    label={
+                      <LabelWithSpinner
+                        label={i18n.t('Syncing GitHub Repos…')}
+                        variant="base"
+                        size="x-small"
+                      />
+                    }
+                    variant="outline-brand"
+                    disabled
                   />
-                }
-                variant="outline-brand"
-                disabled
-              />
-            ) : (
-              <Button
-                label={i18n.t('Sync GitHub Repositories')}
-                variant="outline-brand"
-                iconCategory="utility"
-                iconName="refresh"
-                iconPosition="left"
-                onClick={syncReposClicked}
-              />
-            )}
+                ) : (
+                  <Button
+                    label={i18n.t('Sync GitHub Repositories')}
+                    variant="outline-brand"
+                    iconCategory="utility"
+                    iconName="refresh"
+                    iconPosition="left"
+                    onClick={syncReposClicked}
+                  />
+                )}
+              </div>
+            </div>
             {contents}
             {fetchingProducts ? (
               <div className="slds-align_absolute-center slds-m-top_x-large">
