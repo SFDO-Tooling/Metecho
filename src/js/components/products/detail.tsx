@@ -3,7 +3,8 @@ import DocumentTitle from 'react-document-title';
 import i18n from 'i18next';
 import { connect } from 'react-redux';
 import { AppState } from '@/store';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
+import { Trans } from 'react-i18next';
 
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
@@ -17,10 +18,11 @@ import {
   // selectProductNotFound,
 } from '@/store/products/selectors';
 
-interface Props {
+type Props = {
   product: Product;
   productSlug: string;
-}
+} & RouteComponentProps;
+
 const ProductDetail = ({ product, productSlug }: Props) => {
   console.log();
   return (
@@ -28,10 +30,7 @@ const ProductDetail = ({ product, productSlug }: Props) => {
       <>
         <PageHeader
           className="page-header slds-p-around_x-large"
-          iconAssistiveText={{ icon: 'User' }}
-          iconCategory="standard"
-          title={product.name}
-          label="Erica Mitchell"
+          title={i18n.t(product.name)}
         />
         <div className="slds-p-around_large">
           <div className="slds-grid slds-gutters">
@@ -40,25 +39,27 @@ const ProductDetail = ({ product, productSlug }: Props) => {
               <BreadCrumb
                 assistiveText={{ label: 'Two item breadcrumb' }}
                 trail={[
-                  <Link to={routes.home()}>Home</Link>,
+                  <Link to={routes.home()}>{i18n.t('Home')}</Link>,
                   <Link
                     className="slds-text-link_reset"
                     to={routes.product_detail(productSlug)}
                   >
-                    {product.name}
+                    {i18n.t(product.name)}
                   </Link>,
                 ]}
               />
             </div>
             <div className="slds-col slds-size_1-of-3">
               <h2 className="slds-m-top_large slds-m-bottom_small slds-text-heading_small">
-                [{product.name}]
+                [{i18n.t(product.name)}]
               </h2>
               <p
                 className="markdown slds-p-bottom_small"
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
-              <a href={product.repo_url}>Link to Github Repo</a>
+              <a href={product.repo_url}>
+                <Trans i18nKey="githubRepoLink">Link to Github Repo</Trans>
+              </a>
             </div>
           </div>
         </div>
