@@ -1,10 +1,12 @@
+import Avatar from '@salesforce/design-system-react/components/avatar';
+import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import i18n from 'i18next';
 import React, { ComponentType } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Errors from '@/components/apiErrors';
-import Logout from '@/components/header/logout';
 import OfflineAlert from '@/components/offlineAlert';
 import { AppState } from '@/store';
 import { removeError, RemoveErrorAction } from '@/store/errors/actions';
@@ -25,8 +27,31 @@ interface Props {
   doRemoveError(id: string): RemoveErrorAction;
 }
 
+interface ControlProps {
+  user: User | null;
+  doLogout(): Promise<any>;
+}
+
+const Controls = ({ user, doLogout }: ControlProps) => (
+  <>
+    <Avatar />
+    <div className="slds-p-left_x-small slds-p-top_x-small">
+      {user && user.username}
+    </div>
+    <Button
+      label={i18n.t('Log Out')}
+      variant="link"
+      className="slds-p-left_x-large"
+      iconCategory="utility"
+      iconName="logout"
+      iconPosition="left"
+      onClick={doLogout}
+    />
+  </>
+);
+
 const Header = ({ user, socket, errors, doLogout, doRemoveError }: Props) => {
-  const controls = () => <Logout user={user} doLogout={doLogout} />;
+  const controls = () => <Controls user={user} doLogout={doLogout} />;
 
   return user ? (
     <>

@@ -1,4 +1,3 @@
-import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -37,14 +36,10 @@ describe('<Header />', () => {
   });
 
   describe('logged in', () => {
-    test('renders profile dropdown (with logout)', () => {
-      const { container, getByText } = setup();
-      const btn = container.querySelector('#logout');
+    test('renders profile info and logout', () => {
+      const { getByText } = setup();
 
-      expect(btn).toBeVisible();
-
-      fireEvent.click(btn);
-
+      expect(getByText('Test User')).toBeVisible();
       expect(getByText('Log Out')).toBeVisible();
     });
   });
