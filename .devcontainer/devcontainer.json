@@ -1,10 +1,11 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
   "name": "MetaShare",
-  "dockerComposeFile": "./docker-compose.yml",
+  "dockerComposeFile": ["../docker-compose.yml", "./docker-compose.dev.yml"],
   "service": "web",
   "workspaceFolder": "/app",
   "shutdownAction": "stopCompose",
+  "postCreateCommand": "bash ./.devcontainer/install-dev-tools.sh",
   "extensions": [
     "bibhasdn.django-html",
     "coenraads.bracket-pair-colorizer-2",
@@ -13,10 +14,10 @@
     "formulahendry.auto-rename-tag",
     "joshpeng.sublime-babel-vscode",
     "lextudio.restructuredtext",
+    "ms-azuretools.vscode-docker",
     "ms-python.python",
     "ms-vscode.sublime-keybindings",
     "naumovs.color-highlight",
-    "peterjausovec.vscode-docker",
     "robinbentley.sass-indented",
     "shinnn.stylelint",
     "stkb.rewrap",
@@ -53,6 +54,9 @@
     "python.linting.pylintEnabled": false,
     "python.formatting.provider": "black",
     "python.pythonPath": "/usr/local/bin/python",
+    "remote.extensionKind": {
+      "ms-azuretools.vscode-docker": "workspace"
+    },
     "restructuredtext.linter.extraArgs": ["--max-line-length 80"],
     "restructuredtext.confPath": "${workspaceFolder}/docs",
     "[javascript]": {
