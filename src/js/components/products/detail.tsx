@@ -3,7 +3,6 @@ import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
 import React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 
@@ -22,11 +21,11 @@ type Props = {
 } & RouteComponentProps;
 
 const ProductDetail = ({ product, productSlug }: Props) => (
-  <DocumentTitle title={`${i18n.t(productSlug)} | ${i18n.t('MetaShare')}`}>
+  <DocumentTitle title={`${productSlug} | ${i18n.t('MetaShare')}`}>
     <>
       <PageHeader
         className="page-header slds-p-around_x-large"
-        title={i18n.t(product.name)}
+        title={product.name}
       />
       <div className="slds-p-around_large">
         <div className="slds-grid slds-gutters">
@@ -43,14 +42,14 @@ const ProductDetail = ({ product, productSlug }: Props) => (
                   to={routes.product_detail(productSlug)}
                   key={productSlug}
                 >
-                  {i18n.t(product.name)}
+                  {product.name}
                 </Link>,
               ]}
             />
           </div>
           <div className="slds-col slds-size_1-of-3">
             <h2 className="slds-m-top_large slds-m-bottom_small slds-text-heading_small">
-              [{i18n.t(product.name)}]
+              [{product.name}]
             </h2>
             {/* This description is pre-cleaned by the API */}
             {product.description && (
@@ -59,9 +58,7 @@ const ProductDetail = ({ product, productSlug }: Props) => (
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
             )}
-            <a href={product.repo_url}>
-              <Trans i18nKey="githubRepoLink">Link to Github Repo</Trans>
-            </a>
+            <a href={product.repo_url}>{i18n.t('Link to Github Repo')}</a>
           </div>
         </div>
       </div>
