@@ -9,6 +9,7 @@ from model_utils import Choices
 
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField
+from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from . import gh
 from . import model_mixins as mixins
@@ -91,34 +92,13 @@ class User(mixins.HashIdMixin, AbstractUser):
         return None
 
 
-class ProductSlug(models.Model):
-    """
-    Rather than have a slugfield directly on the Product model, we have
-    a related model. That way, we can have a bunch of slugs that pertain
-    to a particular model, and even if the slug changes and someone uses
-    an old slug, we can redirect them appropriately.
-    """
-
-    slug = models.SlugField(unique=True)
+class ProductSlug(AbstractSlug):
     parent = models.ForeignKey(
         "Product", on_delete=models.PROTECT, related_name="slugs"
     )
-    is_active = models.BooleanField(
-        default=True,
-        help_text=_(
-            "If multiple slugs are active, we will default to the most recent."
-        ),
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self):
-        return self.slug
 
 
-class Product(mixins.HashIdMixin, mixins.TimestampsMixin, mixins.SlugMixin):
+class Product(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     name = models.CharField(max_length=50, unique=True)
     repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
@@ -126,12 +106,8 @@ class Product(mixins.HashIdMixin, mixins.TimestampsMixin, mixins.SlugMixin):
 
     slug_class = ProductSlug
 
-    @property
-    def slug_queryset(self):
-        return self.slugs
 
-
-class GitHubRepository(mixins.HashIdMixin):
+class GitHubRepository(mixins.HashIdMixin, models.Model):
     url = models.URLField()
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
