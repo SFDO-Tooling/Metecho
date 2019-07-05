@@ -2,19 +2,18 @@ import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
 import React from 'react';
-import { Trans } from 'react-i18next';
 import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
 
 import { EmptyIllustration } from '@/components/404';
-
 import { AppState } from '@/store';
 import { Product } from '@/store/products/reducer';
 import {
   selectProduct,
-  selectProductSlug,
   selectProductNotFound,
+  selectProductSlug,
 } from '@/store/products/selectors';
 import routes from '@/utils/routes';
 
@@ -25,10 +24,7 @@ type Props = {
 } & RouteComponentProps;
 
 const ProductDetail = ({ product, productSlug, productNotFound }: Props) => {
-  const pageTitle = !productNotFound
-    ? productSlug
-    : `${i18n.t('Product Not Found')}`;
-
+  const pageTitle = productNotFound ? i18n.t('Product Not Found') : productSlug;
   return (
     <DocumentTitle title={`${pageTitle} | ${i18n.t('MetaShare')}`}>
       {product && productSlug && !productNotFound ? (
