@@ -14,6 +14,7 @@
   "Log In With a Different Account": "Log In With a Different Account",
   "Log Out": "Log Out",
   "MetaShare": "MetaShare",
+  "Product Not Found": "Product Not Found",
   "Production or Developer Org": "Production or Developer Org",
   "Products": "Products",
   "Sandbox or Scratch Org": "Sandbox or Scratch Org",
@@ -29,6 +30,7 @@
   "anErrorOccurred": "An error occurred. Try the <1>home page</1>?",
   "errorWithAccount": "An error occurred with your account. Try the <2>home page</2>?",
   "pageCannotBeFound": "That page cannot be found. Try the <2>home page</2>?",
+  "productCannotBeFound": "That product cannot be found. Try the <2>home page</2>?",
   "productListHelper": "Contributor access on GitHub is required to view products. If you do not see the product you’re looking for below, confirm that you are logged into the correct account or contact an admin on GitHub.",
   "reload the page.": "reload the page."
 }
