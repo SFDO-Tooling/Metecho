@@ -37,10 +37,9 @@ const ProductDetail = ({ product, productSlug, productNotFound }: Props) => {
             className="page-header slds-p-around_x-large"
             title={product.name}
           />
-          <div className="slds-p-around_large">
+          <div className="slds-p-around_x-large">
             <div className="slds-grid slds-gutters">
               <div className="slds-col slds-size_2-of-3 ">
-                {/* @todo make into reusable component?  */}
                 <BreadCrumb
                   assistiveText={{ label: 'Two item breadcrumb' }}
                   trail={[
