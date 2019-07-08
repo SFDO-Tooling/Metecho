@@ -3,13 +3,14 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React from 'react';
+import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProductNotFound from '@/components/products/product404';
 import { AppState } from '@/store';
+import { fetchProduct } from '@/store/products/actions';
 import { Product } from '@/store/products/reducer';
 import { selectProduct, selectProductSlug } from '@/store/products/selectors';
 import routes from '@/utils/routes';
@@ -17,9 +18,17 @@ import routes from '@/utils/routes';
 type Props = {
   product?: Product | null;
   productSlug?: string;
+  doFetchProduct({ slug }: { slug: string }): Promise<any>;
 } & RouteComponentProps;
 
-const ProductDetail = ({ product, productSlug }: Props) => {
+const ProductDetail = ({ product, productSlug, doFetchProduct }: Props) => {
+  useEffect(() => {
+    if (productSlug && product === undefined) {
+      // Fetch product from API
+      doFetchProduct({ slug: productSlug });
+    }
+  }, [product, productSlug, doFetchProduct]);
+
   if (!product) {
     if (!productSlug || product === null) {
       return <ProductNotFound />;
@@ -27,10 +36,12 @@ const ProductDetail = ({ product, productSlug }: Props) => {
     // Fetching product from API
     return <Spinner />;
   }
+
   if (productSlug && productSlug !== product.slug) {
     // Redirect to most recent product slug
     return <Redirect to={routes.product_detail(product.slug)} />;
   }
+
   const productDescriptionHasTitle =
     product.description &&
     (product.description.startsWith('<h1>') ||
@@ -102,6 +113,12 @@ const select = (appState: AppState, props: Props) => ({
   productSlug: selectProductSlug(appState, props),
   product: selectProduct(appState, props),
 });
-const WrappedProductDetail = connect(select)(ProductDetail);
+const actions = {
+  doFetchProduct: fetchProduct,
+};
+const WrappedProductDetail = connect(
+  select,
+  actions,
+)(ProductDetail);
 
 export default WrappedProductDetail;

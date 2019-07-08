@@ -1,10 +1,12 @@
 from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import gh
+from .filters import ProductFilter
 from .models import GitHubRepository, Product
 from .paginators import ProductPaginator
 from .serializers import FullUserSerializer, ProductSerializer
@@ -46,7 +48,10 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
 class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProductSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ProductFilter
     pagination_class = ProductPaginator
+    model = Product
 
     def get_queryset(self):
         repositories = self.request.user.repositories.values_list("url", flat=True)

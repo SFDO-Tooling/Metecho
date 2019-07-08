@@ -106,9 +106,13 @@ export const fetchProduct = (
       addUrlParams(baseUrl, { ...filters }),
       dispatch,
     );
+    const product =
+      response && response.results && response.results.length
+        ? response.results[0]
+        : null;
     return dispatch({
       type: 'FETCH_PRODUCT_SUCCEEDED',
-      payload: { ...filters, product: response || null },
+      payload: { ...filters, product },
     });
   } catch (err) {
     dispatch({ type: 'FETCH_PRODUCT_FAILED', payload: filters });
