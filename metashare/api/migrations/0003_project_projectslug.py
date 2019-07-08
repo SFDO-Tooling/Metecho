@@ -70,7 +70,10 @@ class Migration(migrations.Migration):
                     "is_active",
                     models.BooleanField(
                         default=True,
-                        help_text="If multiple slugs are active, we will default to the most recent.",
+                        help_text=(
+                            "If multiple slugs are active, we will default to the most "
+                            "recent."
+                        ),
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
