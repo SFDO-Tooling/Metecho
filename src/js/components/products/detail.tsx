@@ -32,8 +32,9 @@ const ProductDetail = ({ product, productSlug }: Props) => {
     return <Redirect to={routes.product_detail(product.slug)} />;
   }
   const productDescriptionHasTitle =
-    (product.description && product.description.startsWith('<h1>')) ||
-    (product.description && product.description.startsWith('<h2>'));
+    product.description &&
+    (product.description.startsWith('<h1>') ||
+      product.description.startsWith('<h2>'));
   return (
     <DocumentTitle title={`${product.name} | ${i18n.t('MetaShare')}`}>
       <>
@@ -63,6 +64,7 @@ const ProductDetail = ({ product, productSlug }: Props) => {
             className="slds-col
               slds-size_1-of-1
               slds-medium-size_2-of-3
+              slds-p-bottom_x-large
               slds-text-longform"
           >
             <Button
