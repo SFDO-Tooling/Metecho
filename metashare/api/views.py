@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import gh
-from .models import GitHubRepository, Product
-from .paginators import ProductPaginator
-from .serializers import FullUserSerializer, ProductSerializer
+from .models import GitHubRepository, Product, Project
+from .paginators import CustomPaginator
+from .serializers import FullUserSerializer, ProductSerializer, ProjectSerializer
 
 User = get_user_model()
 
@@ -46,8 +46,15 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
 class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProductSerializer
-    pagination_class = ProductPaginator
+    pagination_class = CustomPaginator
 
     def get_queryset(self):
         repositories = self.request.user.repositories.values_list("url", flat=True)
         return Product.objects.filter(repo_url__in=repositories)
+
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ProjectSerializer
+    pagination_class = CustomPaginator
+    queryset = Project.objects.all()

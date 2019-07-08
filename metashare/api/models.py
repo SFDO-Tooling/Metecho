@@ -116,6 +116,22 @@ class GitHubRepository(mixins.HashIdMixin, models.Model):
         return self.url
 
 
+class ProjectSlug(AbstractSlug):
+    parent = models.ForeignKey(
+        "Project", on_delete=models.PROTECT, related_name="slugs"
+    )
+
+
+class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    description = MarkdownField(blank=True, property_suffix="_markdown")
+    pr_url = models.URLField(unique=True)
+    commit_message = MarkdownField(blank=True, property_suffix="_markdown")
+    release_notes = MarkdownField(blank=True, property_suffix="_markdown")
+
+    slug_class = ProjectSlug
+
+
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
     repos = gh.get_all_org_repos(user)
