@@ -35,13 +35,13 @@ interface ControlProps {
 const Controls = ({ user, doLogout }: ControlProps) => (
   <>
     <Avatar />
-    <div className="slds-p-left_x-small slds-p-top_x-small">
+    <div className="username">
       {user && user.username}
     </div>
     <Button
       label={i18n.t('Log Out')}
       variant="link"
-      className="slds-p-left_x-large"
+      className="slds-m-left_x-large"
       iconCategory="utility"
       iconName="logout"
       iconPosition="left"
