@@ -19,6 +19,10 @@ class TestProduct:
         product.save()
         assert product.slug == "test-product"
 
+    def test_str(product_factory):
+        product = Product(name="Test Product")
+        assert str(product) == "Test Product"
+
 
 @pytest.mark.django_db
 class TestUser:
