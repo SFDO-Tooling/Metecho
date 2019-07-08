@@ -10,17 +10,17 @@ build:
 	docker-compose build
 
 lint:
-	docker-compose run --no-deps web yarn lint
+	docker-compose run --rm --no-deps web yarn lint
 
 test:
-	docker-compose run web yarn test:all
+	docker-compose run --rm web yarn test:all
 
 # Django management:
 migrate:
-	docker-compose run web python manage.py migrate
+	docker-compose run --rm web python manage.py migrate
 
 shell:
-	docker-compose run web python manage.py shell
+	docker-compose run --rm web python manage.py shell
 
 # See https://docs.docker.com/config/pruning/ for more detail.
 prune:
