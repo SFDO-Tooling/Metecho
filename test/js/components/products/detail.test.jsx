@@ -1,7 +1,17 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 
 import ProductDetail from '@/components/products/detail';
+import { fetchProduct } from '@/store/products/actions';
+import routes from '@/utils/routes';
+
+jest.mock('@/store/products/actions');
+
+fetchProduct.mockReturnValue({ type: 'TEST' });
+
+afterEach(() => {
+  fetchProduct.mockClear();
+});
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
@@ -12,15 +22,16 @@ const defaultState = {
         id: 'p1',
         name: 'Product 1',
         slug: 'product-1',
+        old_slugs: ['old-slug'],
         description: 'This is a test product.',
         repo_url: 'https://www.github.com/test/test-repo',
-        old_slugs: [],
       },
     ],
-    notFound: [],
+    notFound: ['yet-another-product'],
     next: null,
   },
 };
+
 describe('<ProductList />', () => {
   const setup = options => {
     const defaults = {
@@ -29,29 +40,61 @@ describe('<ProductList />', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const { initialState, productSlug } = opts;
-    const { debug, getByTitle, getByText } = renderWithRedux(
-      <MemoryRouter>
+    const context = {};
+    const { getByText, getByTitle, queryByText } = renderWithRedux(
+      <StaticRouter context={context}>
         <ProductDetail match={{ params: { productSlug } }} />
-      </MemoryRouter>,
+      </StaticRouter>,
       initialState,
       storeWithApi,
     );
-    return { debug, getByTitle, getByText };
+    return { getByText, getByTitle, queryByText, context };
   };
 
   test('renders product detail', () => {
-    const { getByText } = setup();
+    const { getByText, getByTitle } = setup();
 
-    expect(getByText('[Product 1]')).toBeVisible();
+    expect(getByTitle('Product 1')).toBeVisible();
     expect(getByText('This is a test product.')).toBeVisible();
   });
 
-  test('product not found', () => {
-    const state = {
-      products: defaultState,
-      productSlug: 'Product 2',
-    };
-    const { debug } = setup(state);
-    debug();
+  describe('product not found', () => {
+    test('fetches product from API', () => {
+      const { queryByText } = setup({ productSlug: 'other-product' });
+
+      expect(queryByText('Product 1')).toBeNull();
+      expect(fetchProduct).toHaveBeenCalledWith({
+        slug: 'other-product',
+      });
+    });
+  });
+
+  describe('product does not exist', () => {
+    test('renders <ProductNotFound />', () => {
+      const { getByText, queryByText } = setup({
+        productSlug: 'yet-another-product',
+      });
+
+      expect(queryByText('Product 1')).toBeNull();
+      expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('old product slug', () => {
+    test('redirects to product_detail with new slug', () => {
+      const { context } = setup({ productSlug: 'old-slug' });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(routes.product_detail('product-1'));
+    });
+  });
+
+  describe('no product slug', () => {
+    test('renders <ProductNotFound />', () => {
+      const { getByText, queryByText } = setup({ productSlug: '' });
+
+      expect(queryByText('Product 1')).toBeNull();
+      expect(getByText('list of all products')).toBeVisible();
+    });
   });
 });

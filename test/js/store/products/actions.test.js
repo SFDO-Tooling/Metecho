@@ -134,7 +134,7 @@ describe('fetchProduct', () => {
       const store = storeWithApi({});
       const filters = { slug: 'product-1' };
       const product = { id: 'p1', name: 'Product 1', slug: 'product-1' };
-      fetchMock.getOnce(addUrlParams(baseUrl, filters), product);
+      fetchMock.getOnce(addUrlParams(baseUrl, filters), { results: [product] });
       const started = {
         type: 'FETCH_PRODUCT_STARTED',
         payload: filters,
