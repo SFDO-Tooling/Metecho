@@ -9,6 +9,10 @@ MetaShare
      :target: https://coveralls.io/github/SFDO-Tooling/MetaShare?branch=master
      :alt: Test Coverage
 
+.. image:: https://api.dependabot.com/badges/status?host=github&repo=SFDO-Tooling/MetaShare
+     :target: https://dependabot.com
+     :alt: Dependabot Status
+
 Development
 -----------
 

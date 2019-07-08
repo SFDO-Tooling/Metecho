@@ -114,10 +114,10 @@ const ProductList = withScroll(
               <div className="slds-grid slds-wrap slds-shrink slds-m-bottom_medium slds-p-right_x-large restricted-container">
                 <p className="slds-p-bottom_small">
                   <Trans i18nKey="productListHelper">
-                    Contributor access on GitHub is required to view products. If
-                    you do not see the product you’re looking for below, confirm
-                    that you are logged into the correct account or contact an
-                    admin on GitHub.
+                    Contributor access on GitHub is required to view products.
+                    If you do not see the product you’re looking for below,
+                    confirm that you are logged into the correct account or
+                    contact an admin on GitHub.
                   </Trans>
                 </p>
                 <Button
