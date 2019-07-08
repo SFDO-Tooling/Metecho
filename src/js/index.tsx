@@ -116,12 +116,6 @@ initializeI18n((i18nError?: string) => {
       },
     });
 
-    setTimeout(() => {
-      (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-        refetchAllData(),
-      );
-    }, 5000);
-
     // Get JS globals
     let GLOBALS = {};
     try {

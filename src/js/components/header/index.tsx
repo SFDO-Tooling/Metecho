@@ -71,7 +71,6 @@ const Header = ({ user, socket, errors, doLogout, doRemoveError }: Props) => {
           </Link>
         }
         onRenderControls={controls}
-        variant="object-home"
       />
     </>
   ) : null;
