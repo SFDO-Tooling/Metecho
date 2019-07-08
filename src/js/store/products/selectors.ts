@@ -16,7 +16,7 @@ export const selectNextUrl = createSelector(
   selectProductsState,
   (products: ProductsState): string | null => products.next,
 );
-// new stuff here:
+
 export const selectProductSlug = (
   appState: AppState,
   { match: { params } }: RouteComponentProps<{ productSlug?: string }>,
@@ -31,7 +31,6 @@ export const selectProductNotFound = createSelector(
 export const selectProduct = createSelector(
   [selectProducts, selectProductSlug, selectProductNotFound],
   (products, productSlug, notFound): Product | null | undefined => {
-    /* istanbul ignore if */
     if (!productSlug) {
       return undefined;
     }
@@ -41,7 +40,6 @@ export const selectProduct = createSelector(
     if (product) {
       return product;
     }
-    /* istanbul ignore next */
     return notFound ? null : undefined;
   },
 );

@@ -1,85 +1,97 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
+import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import React from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
-import { Link, RouteComponentProps } from 'react-router-dom';
+import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { EmptyIllustration } from '@/components/404';
+import ProductNotFound from '@/components/products/product404';
 import { AppState } from '@/store';
 import { Product } from '@/store/products/reducer';
-import {
-  selectProduct,
-  selectProductNotFound,
-  selectProductSlug,
-} from '@/store/products/selectors';
+import { selectProduct, selectProductSlug } from '@/store/products/selectors';
 import routes from '@/utils/routes';
 
 type Props = {
   product?: Product | null;
   productSlug?: string;
-  productNotFound: boolean;
 } & RouteComponentProps;
 
-const ProductDetail = ({ product, productSlug, productNotFound }: Props) => {
-  const pageTitle = productNotFound ? i18n.t('Product Not Found') : productSlug;
+const ProductDetail = ({ product, productSlug }: Props) => {
+  if (!product) {
+    if (!productSlug || product === null) {
+      return <ProductNotFound />;
+    }
+    // Fetching product from API
+    return <Spinner />;
+  }
+  if (productSlug && productSlug !== product.slug) {
+    // Redirect to most recent product slug
+    return <Redirect to={routes.product_detail(product.slug)} />;
+  }
+  const productDescriptionHasTitle =
+    (product.description && product.description.startsWith('<h1>')) ||
+    (product.description && product.description.startsWith('<h2>'));
   return (
-    <DocumentTitle title={`${pageTitle} | ${i18n.t('MetaShare')}`}>
-      {product && productSlug && !productNotFound ? (
-        <>
-          <PageHeader
-            className="page-header slds-p-around_x-large"
-            title={product.name}
+    <DocumentTitle title={`${product.name} | ${i18n.t('MetaShare')}`}>
+      <>
+        <PageHeader
+          className="page-header slds-p-around_x-large"
+          title={product.name}
+        />
+        <div className="slds-p-horizontal_x-large slds-p-top_x-small">
+          <BreadCrumb
+            trail={[
+              <Link to={routes.home()} key="home">
+                {i18n.t('Home')}
+              </Link>,
+              <div className="slds-p-horizontal_x-small" key={product.slug}>
+                {product.name}
+              </div>,
+            ]}
           />
-          <div className="slds-p-around_x-large">
-            <div className="slds-grid slds-gutters">
-              <div className="slds-col slds-size_2-of-3 ">
-                <BreadCrumb
-                  assistiveText={{ label: 'Two item breadcrumb' }}
-                  trail={[
-                    <Link to={routes.home()} key="home">
-                      {i18n.t('Home')}
-                    </Link>,
-                    <Link
-                      className="slds-text-link_reset"
-                      to={routes.product_detail(productSlug)}
-                      key={productSlug}
-                    >
-                      {product.name}
-                    </Link>,
-                  ]}
-                />
-              </div>
-              <div className="slds-col slds-size_1-of-3">
-                <h2 className="slds-m-top_large slds-m-bottom_small slds-text-heading_small">
-                  [{product.name}]
-                </h2>
-                {/* This description is pre-cleaned by the API */}
-                {product.description && (
-                  <p
-                    className="markdown slds-p-bottom_small"
-                    dangerouslySetInnerHTML={{ __html: product.description }}
-                  />
-                )}
-                <a href={product.repo_url}>{i18n.t('Link to Github Repo')}</a>
-              </div>
-            </div>
+        </div>
+        <div
+          className="slds-p-around_x-large
+            slds-grid
+            slds-gutters
+            slds-wrap"
+        >
+          <div
+            className="slds-col
+              slds-size_1-of-1
+              slds-medium-size_2-of-3
+              slds-text-longform"
+          >
+            <Button
+              label={i18n.t('Create a Project')}
+              className="slds-size_full slds-p-vertical_xx-small"
+              variant="brand"
+              disabled
+            />
           </div>
-        </>
-      ) : (
-        <>
-          <EmptyIllustration
-            message={
-              <Trans i18nKey="productCannotBeFound">
-                That product cannot be found. Try the{' '}
-                <Link to={routes.home()}>home page</Link>?
-              </Trans>
-            }
-          />
-        </>
-      )}
+          <div
+            className="slds-col
+              slds-size_1-of-1
+              slds-medium-size_1-of-3
+              slds-text-longform"
+          >
+            {!productDescriptionHasTitle && (
+              <h2 className="slds-text-heading_medium">{product.name}</h2>
+            )}
+            {/* This description is pre-cleaned by the API */}
+            {product.description && (
+              <p
+                className="markdown"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+            )}
+            <a href={product.repo_url}>{i18n.t('Link to GitHub Repo')}</a>
+          </div>
+        </div>
+      </>
     </DocumentTitle>
   );
 };
@@ -87,7 +99,6 @@ const ProductDetail = ({ product, productSlug, productNotFound }: Props) => {
 const select = (appState: AppState, props: Props) => ({
   productSlug: selectProductSlug(appState, props),
   product: selectProduct(appState, props),
-  productNotFound: selectProductNotFound(appState, props),
 });
 const WrappedProductDetail = connect(select)(ProductDetail);
 
