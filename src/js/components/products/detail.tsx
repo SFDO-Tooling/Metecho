@@ -1,5 +1,4 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
-import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
@@ -9,6 +8,7 @@ import { connect } from 'react-redux';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProductNotFound from '@/components/products/product404';
+import ProjectForm from '@/components/projects/projectForm';
 import { AppState } from '@/store';
 import { fetchProduct } from '@/store/products/actions';
 import { Product } from '@/store/products/reducer';
@@ -78,12 +78,9 @@ const ProductDetail = ({ product, productSlug, doFetchProduct }: Props) => {
               slds-p-bottom_x-large
               slds-text-longform"
           >
-            <Button
-              label={i18n.t('Create a Project')}
-              className="slds-size_full slds-p-vertical_xx-small"
-              variant="brand"
-              disabled
-            />
+            <ProjectForm productName={product.name} />
+            <div>project list header</div>
+            <div>project list item</div>
           </div>
           <div
             className="slds-col
