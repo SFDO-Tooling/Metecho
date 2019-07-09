@@ -117,7 +117,7 @@ const ProductDetail = ({ product, productSlug, doFetchProduct }: Props) => {
                 name="new_window"
                 size="xx-small"
                 className="slds-m-bottom_xx-small"
-                containerClassName="slds-m-left_xx-small"
+                containerClassName="slds-m-left_xx-small slds-current-color"
               />
             </a>
           </div>

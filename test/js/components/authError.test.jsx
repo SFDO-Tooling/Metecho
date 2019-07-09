@@ -1,7 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import AuthError from '@/components/authError';
+import AuthError from '@/components/user/authError';
 
 import { renderWithRedux } from './../utils';
 

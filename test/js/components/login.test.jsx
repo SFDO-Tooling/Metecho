@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, StaticRouter } from 'react-router-dom';
 
-import Login, { LoginButton } from '@/components/login';
+import Login, { LoginButton } from '@/components/user/login';
 import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
 
