@@ -1,11 +1,16 @@
-import { combineReducers, Reducer } from 'redux';
+import { AnyAction, combineReducers, Reducer } from 'redux';
+import { ThunkAction } from 'redux-thunk';
 
-import socketReducer, { Socket } from 'store/socket/reducer';
-import userReducer, { User } from 'store/user/reducer';
+import errorsReducer, { ErrorType } from '@/store/errors/reducer';
+import productsReducer, { ProductsState } from '@/store/products/reducer';
+import socketReducer, { Socket } from '@/store/socket/reducer';
+import userReducer, { User } from '@/store/user/reducer';
 
 export interface AppState {
-  user: User | null;
+  errors: ErrorType[];
+  products: ProductsState;
   socket: Socket;
+  user: User | null;
 }
 
 export interface Action {
@@ -13,9 +18,13 @@ export interface Action {
   payload?: any;
 }
 
+export type ThunkResult = ThunkAction<Promise<any>, AppState, void, AnyAction>;
+
 const reducer: Reducer<AppState, Action> = combineReducers({
-  user: userReducer,
+  errors: errorsReducer,
+  products: productsReducer,
   socket: socketReducer,
+  user: userReducer,
 });
 
 export default reducer;

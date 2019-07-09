@@ -1,0 +1,19 @@
+// Size
+// =======
+
+// Restrict Container [mixin]
+// ---------------
+/// Snippet for re-use in multiple selectors
+/// @group size
+@mixin restrict-container {
+  max-width: 31rem;
+
+  @media (min-width: $mq-large) {
+    max-width: 50vw;
+  }
+
+  // let it grow more at extra wide screens
+  @media (min-width: 80em) {
+    max-width: 65vw;
+  }
+}

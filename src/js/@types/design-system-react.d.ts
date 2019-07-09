@@ -1,9 +1,9 @@
 /* eslint-disable one-var */
 
 declare module '@salesforce/design-system-react/components/*' {
-  import * as React from 'react';
+  import { ComponentType } from 'react';
 
-  const value: React.ComponentType<any>;
+  const value: ComponentType<any>;
   export default value;
 }
 

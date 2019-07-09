@@ -6,3 +6,4 @@ API Reference
    :caption: Contents:
 
    user
+   products

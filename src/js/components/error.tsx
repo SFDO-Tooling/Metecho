@@ -1,15 +1,15 @@
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
-import routes from 'utils/routes';
-import { EmptyIllustration } from 'components/404';
-import { logError } from 'utils/logging';
+import { EmptyIllustration } from '@/components/404';
+import { logError } from '@/utils/logging';
+import routes from '@/utils/routes';
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
+class ErrorBoundary extends Component<Props, { hasError: boolean }> {
   public constructor(props: Props) {
     super(props);
     this.state = { hasError: false };

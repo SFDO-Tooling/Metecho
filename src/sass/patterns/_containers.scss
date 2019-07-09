@@ -1,0 +1,16 @@
+// Containers
+// ==========
+
+// Restrict fixed/absolute containers to half the viewport
+// ie. used on toast containers to unblock header links
+.half-container {
+  @include restrict-container;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+// Restrict fixed/absolute containers to half the viewport
+// ie. used on toast containers to unblock header links
+.restricted-container {
+  @include restrict-container;
+}

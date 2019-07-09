@@ -1,14 +1,17 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { fireEvent } from '@testing-library/react';
+
+import Header from '@/components/header';
 
 import { renderWithRedux } from './../../utils';
 
-import Header from 'components/header';
-
 describe('<Header />', () => {
   const setup = (
-    initialState = { user: { username: 'Test User' }, socket: false },
+    initialState = {
+      user: { username: 'Test User' },
+      socket: false,
+      errors: [],
+    },
   ) => {
     const {
       container,
@@ -33,14 +36,10 @@ describe('<Header />', () => {
   });
 
   describe('logged in', () => {
-    test('renders profile dropdown (with logout)', () => {
-      const { container, getByText } = setup();
-      const btn = container.querySelector('#logout');
+    test('renders profile info and logout', () => {
+      const { getByText } = setup();
 
-      expect(btn).toBeVisible();
-
-      fireEvent.click(btn);
-
+      expect(getByText('Test User')).toBeVisible();
       expect(getByText('Log Out')).toBeVisible();
     });
   });

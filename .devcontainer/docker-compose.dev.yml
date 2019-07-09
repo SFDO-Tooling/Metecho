@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  web:
+    volumes:
+      - vscode-server:/root/.vscode-server
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  vscode-server: {}

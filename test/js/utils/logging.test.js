@@ -1,4 +1,4 @@
-import * as logging from 'utils/logging';
+import * as logging from '@/utils/logging';
 
 describe('logError', () => {
   describe('with Raven', () => {

@@ -9,8 +9,8 @@ Cloning the project
     $ git clone git@github.com:SFDO-Tooling/MetaShare
     $ cd MetaShare
 
-Docker-based development (preferred)
-------------------------------------
+Docker-based development
+------------------------
 
 1. Install `Docker Desktop (Community Edition)`_ and make sure it is running.
 
@@ -19,7 +19,9 @@ Docker-based development (preferred)
     $ cp env.example .env
 
    Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to
-   any two different arbitrary string values. Also set ``DB_ENCRYPTION_KEY``::
+   any two different arbitrary string values.
+
+   Next, run the following commands to generate a database encryption key::
 
     $ pip install cryptography
     $ python
@@ -27,7 +29,12 @@ Docker-based development (preferred)
     >>> Fernet.generate_key()
 
    This will output a bytestring, e.g. ``b'mystring='``. Copy only the contents
-   of ``'...'``, e.g. ``DB_ENCRYPTION_KEY="mystring="``.
+   of ``'...'``, and add it to your ``.env`` file as ``DB_ENCRYPTION_KEY``, e.g.
+   ``DB_ENCRYPTION_KEY="mystring="``.
+
+   To exit the Python shell, press ``Ctrl-Z`` and then ``Enter`` on Windows, or
+   ``Ctrl-D`` on OS X or Linux. Alternatively, you could also type the Python
+   command ``exit()`` and press ``Enter``.
 
    Finally, set the following environment variables (if you're an OddBird, you
    can find these values in the shared Keybase team folder --
@@ -50,6 +57,17 @@ Docker-based development (preferred)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
 
+Setting up the database
+-----------------------
+
+To populate the database with sample data for development, run::
+
+    $ make populate
+
+If your database has outdated sample data for development, remove it with::
+
+    $ make truncate
+
 Docker development tasks
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -62,6 +80,7 @@ you will see you can run e.g.::
     $ make lint  # format and lint JS, Sass, Python
     $ make test  # run JS and Python tests
     $ make migrate  # run Django migrations
+    $ make migrations  # add new Django migrations (``makemigrations``)
     $ make shell  # open Python shell
     $ make prune  # clean up unused Docker images and containers
 
@@ -100,7 +119,9 @@ layers will bust the cache on the lower layers and make your next build slow
 again.
 
 By running ``docker-compose up``, VS Code starts the development server/watcher
-as well, available at `<http://localhost:8080/>`_ in your browser.
+as well, available at `<http://localhost:8080/>`_ in your browser. To view the
+running logs from the server processes, run the "Docker: Show Logs" command from
+the VS Code Command Palette and select "metashare_web".
 
 A number of project-specific VS Code extensions will be automatically installed
 for you within the Docker container. See `.devcontainer.json
@@ -112,30 +133,29 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 .. _Remote Development: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
 
-Logging in with GitHub and Salesforce
--------------------------------------
+Logging in with GitHub
+----------------------
 
-To setup the GitHub and Salesforce OAuth integrations, run the
-``populate_social_apps`` management command. The values to use in place of the
-``XXX`` and ``YYY`` flags can be found on the GitHub App or Connected App you've
-made in your Salesforce configuration, or if you're an OddBird, you can find
-these values in the shared Keybase team folder (``metashare/prod.db``)::
+To setup the GitHub OAuth integration, run the ``populate_social_apps``
+management command. The values to use in place of the ``XXX`` and ``YYY`` flags
+can be found in the GitHub App, or if you're an OddBird you can find these
+values in the shared Keybase team folder (``metashare/prod.db``)::
 
-    $ docker-compose run web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
-    $ docker-compose run web python manage.py populate_social_apps --sf-id XXX --sf-secret YYY
+    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
 
-Once you've logged in, you probably want to make your user a superuser. You can
-do that easily via the ``promote_superuser`` management command::
+Once you've done that and successfully logged in, you probably want to make your
+user a superuser. You can do that easily via the ``promote_superuser``
+management command::
 
-    $ docker-compose run web python manage.py promote_superuser <your email>
+    $ docker-compose run --rm web python manage.py promote_superuser <your email>
 
 Internationalization
 --------------------
 
 To build and compile ``.mo`` and ``.po`` files for the back end, run::
 
-   $ docker-compose run web python manage.py makemessages --locale <locale>
-   $ docker-compose run web python manage.py compilemessages
+   $ docker-compose run --rm web python manage.py makemessages --locale <locale>
+   $ docker-compose run --rm web python manage.py compilemessages
 
 For the front end, translation JSON files are served from
 ``locales/<language>/`` directories, and the `user language is auto-detected at

@@ -1,8 +1,8 @@
 import fetchMock from 'fetch-mock';
 
-import { storeWithApi } from './../../utils';
+import * as actions from '@/store/user/actions';
 
-import * as actions from 'store/user/actions';
+import { storeWithApi } from './../../utils';
 
 describe('login', () => {
   beforeEach(() => {
@@ -128,10 +128,25 @@ describe('refetchAllData', () => {
       fetchMock.getOnce(window.api_urls.user(), user);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
-      const loggedOut = { type: 'USER_LOGGED_OUT' };
       const loggedIn = {
         type: 'USER_LOGGED_IN',
         payload: user,
+      };
+      const product = {
+        id: 'p1',
+        name: 'Product 1',
+        slug: 'product-1',
+        description: 'This is a test product.',
+        repo_url: 'http://www.test.test',
+      };
+      const response = { next: null, results: [product] };
+      fetchMock.getOnce(window.api_urls.product_list(), response);
+      const productsStarted = {
+        type: 'FETCH_PRODUCTS_STARTED',
+      };
+      const productsSucceeded = {
+        type: 'FETCH_PRODUCTS_SUCCEEDED',
+        payload: response,
       };
 
       expect.assertions(1);
@@ -139,8 +154,9 @@ describe('refetchAllData', () => {
         expect(store.getActions()).toEqual([
           started,
           succeeded,
-          loggedOut,
           loggedIn,
+          productsStarted,
+          productsSucceeded,
         ]);
       });
     });
@@ -166,9 +182,14 @@ describe('refetchAllData', () => {
       const started = { type: 'REFETCH_DATA_STARTED' };
       const failed = { type: 'REFETCH_DATA_FAILED' };
 
-      expect.assertions(2);
+      expect.assertions(5);
       return store.dispatch(actions.refetchAllData()).catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
         expect(window.console.error).toHaveBeenCalled();
       });
     });

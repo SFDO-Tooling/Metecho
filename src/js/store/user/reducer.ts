@@ -1,4 +1,4 @@
-import { UserAction } from 'store/user/actions';
+import { UserAction } from '@/store/user/actions';
 
 export interface User {
   id: string;

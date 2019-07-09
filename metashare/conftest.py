@@ -7,6 +7,8 @@ from rest_framework.test import APIClient
 
 from sfdo_template_helpers.crypto import fernet_encrypt
 
+from .api.models import GitHubRepository, Product
+
 User = get_user_model()
 
 
@@ -16,9 +18,8 @@ class SocialAppFactory(factory.django.DjangoModelFactory):
         model = SocialApp
         django_get_or_create = ("provider",)
 
-    name = "Salesforce Production"
-    provider = "salesforce-production"
-    key = "https://login.salesforce.com/"
+    name = "GitHub"
+    provider = "github"
 
 
 @register
@@ -36,7 +37,7 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SocialAccount
 
-    provider = "salesforce-production"
+    provider = "github"
     uid = factory.Sequence("https://example.com/{}".format)
     socialtoken_set = factory.RelatedFactory(SocialTokenFactory, "account")
     extra_data = {
@@ -59,6 +60,23 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence("user_{}@example.com".format)
     password = factory.PostGenerationMethodCall("set_password", "foobar")
     socialaccount_set = factory.RelatedFactory(SocialAccountFactory, "user")
+
+
+@register
+class ProductFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Product
+
+    name = factory.Sequence("Product {}".format)
+
+
+@register
+class GitHubRepositoryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = GitHubRepository
+
+    url = "https://example.com/repo.git"
+    user = factory.SubFactory(UserFactory)
 
 
 @pytest.fixture

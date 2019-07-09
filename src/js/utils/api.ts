@@ -1,6 +1,8 @@
 import cookies from 'js-cookie';
+import { ThunkDispatch } from 'redux-thunk';
 
-import { logError } from 'utils/logging';
+import { addError } from '@/store/errors/actions';
+import { logError } from '@/utils/logging';
 
 export interface UrlParams {
   [key: string]: string | number | boolean;
@@ -19,11 +21,11 @@ const getResponse = (resp: Response): Promise<any> =>
     .text()
     .then(text => {
       try {
-        return JSON.parse(text);
+        return { response: resp, body: JSON.parse(text) };
       } catch (err) {
         // swallow error
       }
-      return text;
+      return { response: resp, body: text };
     })
     .catch(
       /* istanbul ignore next */
@@ -33,7 +35,12 @@ const getResponse = (resp: Response): Promise<any> =>
       },
     );
 
-const apiFetch = (url: string, opts: { [key: string]: any } = {}) => {
+const apiFetch = async (
+  url: string,
+  dispatch: ThunkDispatch<any, any, any>,
+  opts: { [key: string]: any } = {},
+  suppressErrorsOn: number[] = [404],
+) => {
   const options = Object.assign({}, { headers: {} }, opts);
   const method = options.method || 'GET';
   if (!csrfSafeMethod(method)) {
@@ -41,28 +48,33 @@ const apiFetch = (url: string, opts: { [key: string]: any } = {}) => {
       cookies.get('csrftoken') || '';
   }
 
-  return fetch(url, options)
-    .then(
-      response => {
-        if (response.ok) {
-          return getResponse(response);
-        }
-        if (response.status >= 400 && response.status < 500) {
-          return null;
-        }
-        const error: ApiError = new Error(response.statusText);
-        error.response = response;
-        throw error;
-      },
-      err => {
-        logError(err);
-        throw err;
-      },
-    )
-    .catch(err => {
-      logError(err);
-      throw err;
-    });
+  try {
+    const resp = await fetch(url, options);
+    const { response, body } = await getResponse(resp);
+    if (response.ok) {
+      return body;
+    }
+    if (suppressErrorsOn.includes(response.status)) {
+      return null;
+    }
+    let msg = response.statusText;
+    if (body) {
+      if (typeof body === 'string') {
+        msg = body;
+      } else if (body.detail) {
+        msg = body.detail;
+      } else if (body.non_field_errors) {
+        msg = body.non_field_errors;
+      }
+    }
+    const error: ApiError = new Error(msg);
+    error.response = response;
+    throw error;
+  } catch (err) {
+    logError(err);
+    dispatch(addError(err.message));
+    throw err;
+  }
 };
 
 // Based on https://fetch.spec.whatwg.org/#fetch-api

@@ -11,7 +11,7 @@ services:
       - postgres
       - redis
     links:
-      - "postgres:db"
+      - 'postgres:db'
       - redis
     env_file: .env
     environment:
@@ -22,7 +22,7 @@ services:
       - /app/node_modules
       - ~/.gitconfig:/root/.gitconfig
     ports:
-      - "0.0.0.0:8080:8080"
+      - '0.0.0.0:8080:8080'
 
   # Runs the database process:
   postgres:

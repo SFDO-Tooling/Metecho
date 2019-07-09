@@ -1,7 +1,7 @@
 #!/bin/sh
 
 function dcr {
-  docker-compose run --no-deps $@
+  docker-compose run --rm --no-deps $@
 }
 
 STAGED_FILES=$(git diff --name-only --cached --diff-filter=d)

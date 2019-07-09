@@ -1,0 +1,15 @@
+// Truncate
+// ========
+
+.truncate-children {
+  > :first-child {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  > :not(:first-child) {
+    display: none;
+  }
+}

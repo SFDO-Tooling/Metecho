@@ -1,6 +1,6 @@
 import { RavenStatic } from 'raven-js';
 
-import { Socket } from 'utils/websockets';
+import { Socket } from '@/utils/websockets';
 
 declare global {
   interface Window {

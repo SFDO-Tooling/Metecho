@@ -1,4 +1,20 @@
+from unittest.mock import patch
+
 import pytest
+
+from ..models import Product, user_logged_in_handler
+
+
+@pytest.mark.django_db
+class TestProduct:
+    def test_signal(self):
+        product = Product(name="Test Product")
+        product.save()
+        assert product.slug == "test-product"
+
+    def test_str(product_factory):
+        product = Product(name="Test Product")
+        assert str(product) == "Test Product"
 
 
 @pytest.mark.django_db
@@ -109,3 +125,18 @@ class TestUser:
 
         user = user_factory(socialaccount_set=[])
         assert user.full_org_type is None
+
+
+@pytest.mark.django_db
+class TestGitHubRepository:
+    def test_str(self, git_hub_repository_factory):
+        gh_repo = git_hub_repository_factory()
+        assert str(gh_repo) == "https://example.com/repo.git"
+
+
+@pytest.mark.django_db
+def test_login_handler(user_factory):
+    user = user_factory()
+    with patch("metashare.api.models.gh") as gh:
+        user_logged_in_handler(None, user=user)
+        gh.get_all_org_repos.assert_called_with(user)

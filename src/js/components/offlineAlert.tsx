@@ -1,7 +1,7 @@
-import * as React from 'react';
 import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
 import i18n from 'i18next';
+import React from 'react';
 
 const reloadPage = () => {
   window.location.reload();
