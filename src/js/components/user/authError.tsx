@@ -6,13 +6,20 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { EmptyIllustration } from '@/components/404';
-import { LoginButton } from '@/components/login';
+import { LoginButton } from '@/components/user/login';
+import Logout from '@/components/user/logout';
 import { AppState } from '@/store';
+import { logout } from '@/store/user/actions';
 import { User as UserType } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
-const AuthError = ({ user }: { user: UserType | null }) => (
+interface Props {
+  user: UserType | null;
+  doLogout(): Promise<any>;
+}
+
+const AuthError = ({ user, doLogout }: Props) => (
   <DocumentTitle
     title={`${i18n.t('Authentication Error')} | ${i18n.t('MetaShare')}`}
   >
@@ -26,11 +33,11 @@ const AuthError = ({ user }: { user: UserType | null }) => (
         }
       />
       <div className="slds-align_absolute-center">
-        <LoginButton
-          id="auth-error-login"
-          label={user ? i18n.t('Log In With a Different Account') : undefined}
-          from={{ pathname: '/' }}
-        />
+        {user ? (
+          <Logout doLogout={doLogout} />
+        ) : (
+          <LoginButton id="auth-error-login" from={{ pathname: '/' }} />
+        )}
       </div>
     </>
   </DocumentTitle>
@@ -40,6 +47,13 @@ const select = (appState: AppState) => ({
   user: selectUserState(appState),
 });
 
-const WrappedAuthError: ComponentType = connect(select)(AuthError);
+const actions = {
+  doLogout: logout,
+};
+
+const WrappedAuthError: ComponentType = connect(
+  select,
+  actions,
+)(AuthError);
 
 export default WrappedAuthError;

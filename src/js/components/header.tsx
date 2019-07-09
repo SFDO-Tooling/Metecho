@@ -1,13 +1,12 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
-import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import i18n from 'i18next';
 import React, { ComponentType } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import Errors from '@/components/apiErrors';
 import OfflineAlert from '@/components/offlineAlert';
+import Logout from '@/components/user/logout';
 import { AppState } from '@/store';
 import { removeError, RemoveErrorAction } from '@/store/errors/actions';
 import { ErrorType } from '@/store/errors/reducer';
@@ -36,15 +35,7 @@ const Controls = ({ user, doLogout }: ControlProps) => (
   <>
     <Avatar />
     <div className="username">{user && user.username}</div>
-    <Button
-      label={i18n.t('Log Out')}
-      variant="link"
-      className="slds-m-left_x-large"
-      iconCategory="utility"
-      iconName="logout"
-      iconPosition="left"
-      onClick={doLogout}
-    />
+    <Logout doLogout={doLogout} />
   </>
 );
 

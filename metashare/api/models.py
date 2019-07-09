@@ -28,6 +28,13 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(mixins.HashIdMixin, AbstractUser):
     objects = UserManager()
 
+    def refresh_repositories(self):
+        repos = gh.get_all_org_repos(self)
+        GitHubRepository.objects.filter(user=self).delete()
+        GitHubRepository.objects.bulk_create(
+            [GitHubRepository(user=self, url=repo) for repo in repos]
+        )
+
     def subscribable_by(self, user):
         return self == user
 
@@ -140,11 +147,7 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
-    repos = gh.get_all_org_repos(user)
-    GitHubRepository.objects.filter(user=user).delete()
-    GitHubRepository.objects.bulk_create(
-        [GitHubRepository(user=user, url=repo) for repo in repos]
-    )
+    user.refresh_repositories()
 
 
 @receiver(post_save, sender=Product)

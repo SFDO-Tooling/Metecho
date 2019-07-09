@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
-import CustomDomainModal from '@/components/header/customDomainModal';
+import CustomDomainModal from '@/components/user/customDomainModal';
 import { addUrlParams } from '@/utils/api';
 
 describe('<CustomDomainModal />', () => {

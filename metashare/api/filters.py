@@ -9,5 +9,3 @@ class ProductFilter(filters.FilterSet):
     class Meta:
         model = Product
         fields = ("slug",)
-
-    required_fields = {"slug"}

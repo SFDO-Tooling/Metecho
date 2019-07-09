@@ -9,7 +9,6 @@ import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 
 import { EmptyIllustration } from '@/components/404';
-import { LoginButton } from '@/components/login';
 import ProductListItem from '@/components/products/listItem';
 import { LabelWithSpinner } from '@/components/utils';
 import { AppState } from '@/store';
@@ -74,20 +73,14 @@ const ProductList = withScroll(
     switch (products.length) {
       case 0: {
         // No products; show empty message
-        const msg = i18n.t(
-          'We couldn’t find any products you have access to on GitHub. Are you logged into the correct account?',
+        const msg = (
+          <Trans i18nKey="noProductsHelper">
+            We couldn’t find any products you have access to on GitHub. Confirm
+            that you are logged into the correct account or contact an admin on
+            GitHub.
+          </Trans>
         );
-        contents = (
-          <>
-            <EmptyIllustration message={msg} />{' '}
-            <div className="slds-align_absolute-center">
-              <LoginButton
-                id="auth-error-login"
-                label={i18n.t('Log In With a Different Account')}
-              />
-            </div>
-          </>
-        );
+        contents = <EmptyIllustration message={msg} />;
         break;
       }
       default: {

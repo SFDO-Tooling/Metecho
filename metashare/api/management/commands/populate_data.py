@@ -29,7 +29,13 @@ class Command(BaseCommand):
             name="MetaDeploy", repo_url="https://www.github.com/SFDO-Tooling/MetaDeploy"
         )
         self.create_product(
-            name="MetaShare", repo_url="https://www.github.com/SFDO-Tooling/MetaShare"
+            name="MetaShare",
+            repo_url="https://www.github.com/SFDO-Tooling/MetaShare",
+            description=(
+                f"# Welcome to Meta(Meta)Share!\n\n"
+                "This is a description of the product. "
+                "It might contain [links](https://install.salesforce.org)."
+            ),
         )
         self.create_product(
             name="CumulusCI", repo_url="https://www.github.com/SFDO-Tooling/CumulusCI"
