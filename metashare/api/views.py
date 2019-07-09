@@ -39,10 +39,7 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
         GitHubRepository.objects.bulk_create(
             [GitHubRepository(user=user, url=repo) for repo in repos]
         )
-        serializer = FullUserSerializer(user)
-        # TODO: this _should_ return the new list of products for the user, but that
-        # feels wrong for this endpoint. Merits thought.
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProductViewSet(viewsets.ModelViewSet):

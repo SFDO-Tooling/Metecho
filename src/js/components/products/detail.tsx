@@ -1,5 +1,6 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import Button from '@salesforce/design-system-react/components/button';
+import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
@@ -53,7 +54,11 @@ const ProductDetail = ({ product, productSlug, doFetchProduct }: Props) => {
           className="page-header slds-p-around_x-large"
           title={product.name}
         />
-        <div className="slds-p-horizontal_x-large slds-p-top_x-small">
+        <div
+          className="slds-p-horizontal_x-large
+            slds-p-top_x-small
+            ms-breadcrumb"
+        >
           <BreadCrumb
             trail={[
               <Link to={routes.home()} key="home">
@@ -101,7 +106,20 @@ const ProductDetail = ({ product, productSlug, doFetchProduct }: Props) => {
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
             )}
-            <a href={product.repo_url}>{i18n.t('Link to GitHub Repo')}</a>
+            <a
+              href={product.repo_url}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {i18n.t('GitHub Repo')}
+              <Icon
+                category="utility"
+                name="new_window"
+                size="xx-small"
+                className="slds-m-bottom_xx-small"
+                containerClassName="slds-m-left_xx-small"
+              />
+            </a>
           </div>
         </div>
       </>

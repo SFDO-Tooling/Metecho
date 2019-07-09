@@ -2,14 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from ..models import Product, ProductSlug, user_logged_in_handler
-
-
-@pytest.mark.django_db
-class TestProductSlug:
-    def test_str(self):
-        slug = ProductSlug(slug="test-slug")
-        assert str(slug) == "test-slug"
+from ..models import Product, user_logged_in_handler
 
 
 @pytest.mark.django_db
