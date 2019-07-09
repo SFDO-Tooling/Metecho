@@ -5,9 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from . import gh
 from .filters import ProductFilter
-from .models import GitHubRepository, Product
+from .models import Product
 from .paginators import ProductPaginator
 from .serializers import FullUserSerializer, ProductSerializer
 
@@ -34,11 +33,7 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
 
     def post(self, request):
         user = self.get_object()
-        repos = gh.get_all_org_repos(user)
-        GitHubRepository.objects.filter(user=user).delete()
-        GitHubRepository.objects.bulk_create(
-            [GitHubRepository(user=user, url=repo) for repo in repos]
-        )
+        user.refresh_repositories()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
