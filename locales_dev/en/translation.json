@@ -5,7 +5,10 @@
   "Continue": "Continue",
   "Copyright 2019 Salesforce.org. All rights reserved.": "Copyright 2019 Salesforce.org. All rights reserved.",
   "Create Product": "Create Product",
+  "Create a Project": "Create a Project",
   "Custom Domain": "Custom Domain",
+  "Home": "Home",
+  "Link to GitHub Repo": "Link to GitHub Repo",
   "Loading…": "Loading…",
   "Log In": "Log In",
   "Log In With GitHub": "Log In With GitHub",
@@ -28,5 +31,6 @@
   "errorWithAccount": "An error occurred with your account. Try the <2>home page</2>?",
   "pageCannotBeFound": "That page cannot be found. Try the <2>home page</2>?",
   "productListHelper": "Contributor access on GitHub is required to view products. If you do not see the product you’re looking for below, confirm that you are logged into the correct account or contact an admin on GitHub.",
+  "productNotFound": "We can’t find the product you’re looking for. Try the <2>list of all products</2>?",
   "reload the page.": "reload the page."
 }

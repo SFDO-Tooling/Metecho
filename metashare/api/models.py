@@ -105,12 +105,18 @@ class Product(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     slug_class = ProductSlug
 
+    def __str__(self):
+        return self.name
+
 
 class GitHubRepository(mixins.HashIdMixin, models.Model):
     url = models.URLField()
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
+
+    class Meta:
+        verbose_name_plural = "GitHub repositories"
 
     def __str__(self):
         return self.url

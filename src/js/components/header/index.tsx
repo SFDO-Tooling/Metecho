@@ -35,13 +35,11 @@ interface ControlProps {
 const Controls = ({ user, doLogout }: ControlProps) => (
   <>
     <Avatar />
-    <div className="slds-p-left_x-small slds-p-top_x-small">
-      {user && user.username}
-    </div>
+    <div className="username">{user && user.username}</div>
     <Button
       label={i18n.t('Log Out')}
       variant="link"
-      className="slds-p-left_x-large"
+      className="slds-m-left_x-large"
       iconCategory="utility"
       iconName="logout"
       iconPosition="left"
@@ -71,7 +69,6 @@ const Header = ({ user, socket, errors, doLogout, doRemoveError }: Props) => {
           </Link>
         }
         onRenderControls={controls}
-        variant="object-home"
       />
     </>
   ) : null;

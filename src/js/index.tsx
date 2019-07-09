@@ -29,6 +29,7 @@ import ErrorBoundary from '@/components/error';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import Login from '@/components/login';
+import ProductDetail from '@/components/products/detail';
 import ProductList from '@/components/products/list';
 import { PrivateRoute } from '@/components/utils';
 import initializeI18n from '@/i18n';
@@ -71,6 +72,11 @@ const App = withRouter(
                     exact
                     path={routePatterns.product_list()}
                     component={ProductList}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.product_detail()}
+                    component={ProductDetail}
                   />
                   <Route
                     path={routePatterns.auth_error()}
@@ -115,12 +121,6 @@ initializeI18n((i18nError?: string) => {
         },
       },
     });
-
-    setTimeout(() => {
-      (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-        refetchAllData(),
-      );
-    }, 5000);
 
     // Get JS globals
     let GLOBALS = {};
