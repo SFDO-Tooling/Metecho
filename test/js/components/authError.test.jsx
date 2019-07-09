@@ -14,10 +14,11 @@ describe('<AuthError />', () => {
     );
 
     expect(getByText('home page')).toBeVisible();
+    expect(getByText('Log In With GitHub')).toBeVisible();
   });
 
   describe('logged in', () => {
-    test('renders log in btn', () => {
+    test('renders log out btn', () => {
       const { getByText } = renderWithRedux(
         <MemoryRouter>
           <AuthError />
@@ -25,7 +26,7 @@ describe('<AuthError />', () => {
         { user: {} },
       );
 
-      expect(getByText('Log In With a Different Account')).toBeVisible();
+      expect(getByText('Log Out')).toBeVisible();
     });
   });
 });
