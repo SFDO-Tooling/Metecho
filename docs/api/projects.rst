@@ -25,7 +25,7 @@ Retrieve
           "name": "Test Project",
           "slug": "test-project",
           "old_slugs": [],
-          "pr_url": "https://github.com/sfdo/test-project",
+          "pr_url": "https://github.com/sfdo/test-project/pull/42",
           "description": "<p>This is safely rendered Markdown.</p>",
           "commit_message": "<p>This is safely rendered Markdown.</p>",
           "release_notes": "<p>This is safely rendered Markdown.</p>",
