@@ -3,7 +3,8 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import ProductList from '@/components/products/list';
-import { fetchMoreProducts, syncRepos } from '@/store/products/actions';
+import { fetchObjects } from '@/store/actions';
+import { syncRepos } from '@/store/products/actions';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
@@ -13,12 +14,13 @@ jest.mock('react-fns', () => ({
     return props => <Component x={0} y={0} {...props} />;
   },
 }));
+jest.mock('@/store/actions');
 jest.mock('@/store/products/actions');
-fetchMoreProducts.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 syncRepos.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
-  fetchMoreProducts.mockClear();
+  fetchObjects.mockClear();
   syncRepos.mockClear();
 });
 
@@ -101,8 +103,9 @@ describe('<ProductList />', () => {
       setup(initialState, { y: 1000 }, rerender);
 
       expect(getByText('Loading…')).toBeVisible();
-      expect(fetchMoreProducts).toHaveBeenCalledWith({
+      expect(fetchObjects).toHaveBeenCalledWith({
         url: 'next-url',
+        objectType: 'product',
       });
     });
 
@@ -119,7 +122,7 @@ describe('<ProductList />', () => {
       setup(state, { y: 1000 }, rerender);
 
       expect(queryByText('Loading…')).toBeNull();
-      expect(fetchMoreProducts).not.toHaveBeenCalled();
+      expect(fetchObjects).not.toHaveBeenCalled();
     });
   });
 

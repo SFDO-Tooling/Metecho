@@ -34,9 +34,10 @@ import Login from '@/components/user/login';
 import { PrivateRoute } from '@/components/utils';
 import initializeI18n from '@/i18n';
 import reducer from '@/store';
+import { fetchObjects } from '@/store/actions';
 import { clearErrors } from '@/store/errors/actions';
-import { fetchProducts } from '@/store/products/actions';
 import { login, refetchAllData } from '@/store/user/actions';
+import { OBJECT_TYPES } from '@/utils/constants';
 import { log, logError } from '@/utils/logging';
 import routes, { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
@@ -175,7 +176,7 @@ initializeI18n((i18nError?: string) => {
     // If logged in, fetch products before rendering App
     if (user) {
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-        fetchProducts(),
+        fetchObjects({ objectType: OBJECT_TYPES.PRODUCT, reset: true }),
       ).finally(renderApp);
     } else {
       renderApp();
