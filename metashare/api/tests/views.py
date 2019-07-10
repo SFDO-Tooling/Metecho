@@ -23,8 +23,7 @@ def test_user_refresh_view(client):
 
         response = client.post(reverse("user-refresh"))
 
-    assert response.status_code == 200
-    assert response.json()["username"].endswith("@example.com")
+    assert response.status_code == 204
 
 
 @pytest.mark.django_db

@@ -2,7 +2,7 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
-import CustomDomainModal from '@/components/header/customDomainModal';
+import CustomDomainModal from '@/components/user/customDomainModal';
 import { addUrlParams } from '@/utils/api';
 
 interface Props {

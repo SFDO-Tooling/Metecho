@@ -106,6 +106,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False},
+            options={"abstract": False, "verbose_name_plural": "GitHub repositories"},
         ),
     ]

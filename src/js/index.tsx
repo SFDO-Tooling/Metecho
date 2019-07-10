@@ -24,13 +24,13 @@ import logger from 'redux-logger';
 import thunk, { ThunkDispatch } from 'redux-thunk';
 
 import FourOhFour from '@/components/404';
-import AuthError from '@/components/authError';
 import ErrorBoundary from '@/components/error';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
-import Login from '@/components/login';
 import ProductDetail from '@/components/products/detail';
 import ProductList from '@/components/products/list';
+import AuthError from '@/components/user/authError';
+import Login from '@/components/user/login';
 import { PrivateRoute } from '@/components/utils';
 import initializeI18n from '@/i18n';
 import reducer from '@/store';

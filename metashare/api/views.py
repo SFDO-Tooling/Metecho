@@ -5,9 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from . import gh
 from .filters import ProductFilter
-from .models import GitHubRepository, Product, Project
+from .models import Product, Project
 from .paginators import CustomPaginator
 from .serializers import FullUserSerializer, ProductSerializer, ProjectSerializer
 
@@ -34,15 +33,8 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
 
     def post(self, request):
         user = self.get_object()
-        repos = gh.get_all_org_repos(user)
-        GitHubRepository.objects.filter(user=user).delete()
-        GitHubRepository.objects.bulk_create(
-            [GitHubRepository(user=user, url=repo) for repo in repos]
-        )
-        serializer = FullUserSerializer(user)
-        # TODO: this _should_ return the new list of products for the user, but that
-        # feels wrong for this endpoint. Merits thought.
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        user.refresh_repositories()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProductViewSet(viewsets.ModelViewSet):

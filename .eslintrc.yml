@@ -12,6 +12,7 @@ env:
   node: true
 settings:
   import/resolver:
+    typescript: {}
     webpack:
       config:
         resolve:
@@ -56,8 +57,7 @@ rules:
   import/order:
     - 1
     - newlines-between: always
-  # @@@ disable until bugs are fixed
-  import/named: 0
+  import/named: 1
 
   # Possible Errors
   getter-return: 2
