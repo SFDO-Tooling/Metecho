@@ -120,8 +120,8 @@ again.
 
 By running ``docker-compose up``, VS Code starts the development server/watcher
 as well, available at `<http://localhost:8080/>`_ in your browser. To view the
-running logs from the server processes, run the "Docker: Show Logs" command from
-the VS Code Command Palette and select "metashare_web".
+running logs from the server processes, run the "Docker Containers: View Logs"
+command from the VS Code Command Palette and select "metashare_web".
 
 A number of project-specific VS Code extensions will be automatically installed
 for you within the Docker container. See `.devcontainer.json
