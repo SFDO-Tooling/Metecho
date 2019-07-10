@@ -3,15 +3,42 @@ import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import { Redirect } from 'react-router';
 
-const ProjectForm = ({ productName }) => {
+// import { Project } from '@/store/projects/reducer'; @todo here
+import { createProject } from '@/store/projects/actions';
+import routes from '@/utils/routes';
+
+// productName type
+interface Props {
+  productName: string;
+  productSlug: string;
+  doCreateProject({ name, description }): Promise<any>; // @todo here
+}
+// handleSubmit fn
+// make api call to create project
+const ProjectForm = ({ productName, doCreateProject }: Props) => {
   const [description, setDescription] = useState('');
   const [name, setName] = useState('');
-
   const [projectCreateActive, setprojectCreateActive] = useState(false);
 
   const handleSubmit = () => {
-    console.log({ name, description });
+    //   @todo once api changes are made... //
+    const newProject = {
+      name,
+      description,
+      commit_message: '',
+      pr_url: 'https://www.google.com',
+      release_notes: 'release',
+      slug: '84jfw',
+      old_slugs: [],
+    };
+
+    doCreateProject(newProject).finally(() => {
+      // when project creation is successful...
+      return <Redirect to={routes.project_detail(productName)} />;
+    });
   };
   const formControl = () => {
     if (projectCreateActive) {
@@ -27,7 +54,7 @@ const ProjectForm = ({ productName }) => {
         <>
           <h1>Create a Project for {productName}</h1>
 
-          <form onSumit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <Input
               id="base-id"
               label="Project Name"
@@ -57,4 +84,17 @@ const ProjectForm = ({ productName }) => {
   );
 };
 
-export default ProjectForm;
+// @todo can i use connect if I dont need the state?  just to create an action.
+// const select = (appState: AppState) => ({
+//   state: appState,
+// });
+
+const actions = {
+  doCreateProject: createProject,
+};
+const WrappedProjectForm = connect(
+  () => {},
+  actions,
+)(ProjectForm);
+
+export default WrappedProjectForm;
