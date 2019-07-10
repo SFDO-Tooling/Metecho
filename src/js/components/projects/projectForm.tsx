@@ -1,20 +1,19 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { Redirect } from 'react-router';
 
-// import { Project } from '@/store/projects/reducer'; @todo here
 import { createProject } from '@/store/projects/actions';
-import routes from '@/utils/routes';
+import { Project } from '@/store/projects/reducer';
 
 // productName type
 interface Props {
   productName: string;
   productSlug: string;
-  doCreateProject({ name, description }): Promise<any>; // @todo here
+  doCreateProject({ name, description }: Project): Promise<any>; // @todo here
 }
 // handleSubmit fn
 // make api call to create project
@@ -35,10 +34,8 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
       old_slugs: [],
     };
 
-    doCreateProject(newProject).finally(() => {
-      // when project creation is successful...
-      return <Redirect to={routes.project_detail(productName)} />;
-    });
+    doCreateProject(newProject);
+    // @todo validate fields, redirect on success ?
   };
   const formControl = () => {
     if (projectCreateActive) {
@@ -59,7 +56,9 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
               id="base-id"
               label="Project Name"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setName(e.target.value)
+              }
             />
             <Textarea
               aria-describedby="error-1"
@@ -67,7 +66,9 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
               name="required-textarea-error"
               label="Description"
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setDescription(e.target.value)
+              }
               required
             />
           </form>
