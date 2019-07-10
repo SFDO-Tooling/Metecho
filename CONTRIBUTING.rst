@@ -126,7 +126,7 @@ significantly faster.
 
 In contrast to ``docker-compose up``, VS Code does not automatically run
 database migrations or start the development server/watcher. To do so, open an
-`integrated terminal`_ in VS Code (``Ctrl-\```) and use any of the development
+`integrated terminal`_ in VS Code (``Ctrl-```) and use any of the development
 commands (this terminal runs inside the Docker container)::
 
     $ python manage.py migrate  # run database migrations
