@@ -69,7 +69,7 @@ If your database has outdated sample data for development, remove it with::
     $ make truncate
 
 Docker development tasks
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Most tasks are defined in the `Makefile <Makefile>`_; take a look in there and
 you will see you can run e.g.::
@@ -101,7 +101,7 @@ If you change the Dockerfile, changing earlier layers will bust the cache on the
 lower layers and make your next build slow again.
 
 Docker development using VS Code
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 Because front-end and back-end dependencies are installed in a Docker container
 instead of locally, text editors that rely on locally-installed packages (e.g.
@@ -137,6 +137,8 @@ Docker container, omit any ``docker-compose run --rm web...`` prefix, e.g.::
 
     $ python manage.py promote_superuser <your email>
     $ yarn test
+    $ python manage.py truncate_data
+    $ python manage.py populate_data
 
 After running ``yarn serve``, view the running app at
 `<http://localhost:8080/>`_ in your browser.
