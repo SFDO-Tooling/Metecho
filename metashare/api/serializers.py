@@ -50,3 +50,4 @@ class ProjectSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
         )
+        extra_kwargs = {"pr_url": {"allow_blank": True}}

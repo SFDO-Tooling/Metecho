@@ -138,7 +138,7 @@ class ProjectSlug(AbstractSlug):
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    pr_url = models.URLField(unique=True)
+    pr_url = models.URLField(unique=True, null=True)
     commit_message = MarkdownField(blank=True, property_suffix="_markdown")
     release_notes = MarkdownField(blank=True, property_suffix="_markdown")
 
