@@ -96,6 +96,10 @@ care of setting up a database and installing Python and JS dependencies for you.
 When you change Python or JS dependencies, you will need to rebuild the Docker
 images, as we store dependencies in the images for speed: ``make build``.
 
+Docker caches each command in the `Dockerfile <Dockerfile>`_ as its own layer.
+If you change the Dockerfile, changing earlier layers will bust the cache on the
+lower layers and make your next build slow again.
+
 Docker development using VS Code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -112,25 +116,40 @@ the Docker container. If you do not see the prompt, run the "Remote-Containers:
 Open Folder in Container..." command from the VS Code Command Palette to start
 the Docker container.
 
-The first build will take a number of minutes, but subsequent builds will be
-significantly faster. Docker caches each command in the `Dockerfile
-<Dockerfile>`_ as its own layer. If you change the Dockerfile, changing earlier
-layers will bust the cache on the lower layers and make your next build slow
-again.
-
-By running ``docker-compose up``, VS Code starts the development server/watcher
-as well, available at `<http://localhost:8080/>`_ in your browser. To view the
-running logs from the server processes, run the "Docker Containers: View Logs"
-command from the VS Code Command Palette and select "metashare_web".
-
 A number of project-specific VS Code extensions will be automatically installed
-for you within the Docker container. See `.devcontainer.json
-<.devcontainer.json>`_ for the Docker-specific VS Code settings.
+for you within the Docker container. See `.devcontainer/devcontainer.json
+<.devcontainer/devcontainer.json>`_ and `.devcontainer/docker-compose.dev.yml
+<.devcontainer/docker-compose.dev.yml>`_ for Docker-specific VS Code settings.
+
+The first build will take a number of minutes, but subsequent builds will be
+significantly faster.
+
+In contrast to ``docker-compose up``, VS Code does not automatically run
+database migrations or start the development server/watcher. To do so, open an
+`integrated terminal`_ in VS Code (``Ctrl-\```) and use any of the development
+commands (this terminal runs inside the Docker container)::
+
+    $ python manage.py migrate  # run database migrations
+    $ yarn serve  # start the development server/watcher
+
+For any commands, when using the VS Code integrated terminal inside the
+Docker container, omit any ``docker-compose run --rm web...`` prefix, e.g.::
+
+    $ python manage.py promote_superuser <your email>
+    $ yarn test
+
+After running ``yarn serve``, view the running app at
+`<http://localhost:8080/>`_ in your browser.
+
+To view logs from other Docker containers (e.g. redis or postgres), run the
+"Docker Containers: View Logs" command from the VS Code Command Palette and
+select the desired container.
 
 For more detailed instructions and options, see the `VS Code documentation`_.
 
 .. _VS Code: https://code.visualstudio.com/
 .. _Remote Development: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
+.. _integrated terminal: https://code.visualstudio.com/docs/editor/integrated-terminal
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
 
 Logging in with GitHub
