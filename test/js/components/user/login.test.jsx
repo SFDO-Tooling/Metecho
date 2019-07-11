@@ -6,7 +6,7 @@ import Login, { LoginButton } from '@/components/user/login';
 import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
 
-import { renderWithRedux } from './../utils';
+import { renderWithRedux } from './../../utils';
 
 describe('<Login />', () => {
   describe('login click', () => {
