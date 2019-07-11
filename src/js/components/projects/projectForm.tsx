@@ -9,33 +9,25 @@ import { connect } from 'react-redux';
 import { createProject } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
 
-// productName type
 interface Props {
   productName: string;
   productSlug: string;
-  doCreateProject({ name, description }: Project): Promise<any>; // @todo here
+  doCreateProject(newProject: Project): Promise<any>;
 }
-// handleSubmit fn
-// make api call to create project
+
 const ProjectForm = ({ productName, doCreateProject }: Props) => {
   const [description, setDescription] = useState('');
   const [name, setName] = useState('');
   const [projectCreateActive, setprojectCreateActive] = useState(false);
+  const [hasName, setHasName] = useState(true);
 
   const handleSubmit = () => {
-    //   @todo once api changes are made... //
-    const newProject = {
-      name,
-      description,
-      commit_message: '',
-      pr_url: 'https://www.google.com',
-      release_notes: 'release',
-      slug: '84jfw',
-      old_slugs: [],
-    };
-
-    doCreateProject(newProject);
-    // @todo validate fields, redirect on success ?
+    if (name === '' && hasName) {
+      setHasName(false);
+      return;
+    }
+    // check if project (name) exists?
+    doCreateProject({ name, description });
   };
   const formControl = () => {
     if (projectCreateActive) {
@@ -55,6 +47,8 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
             <Input
               id="base-id"
               label="Project Name"
+              required
+              errorText={hasName ? null : 'Project name is required.'}
               value={name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setName(e.target.value)
@@ -69,7 +63,6 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setDescription(e.target.value)
               }
-              required
             />
           </form>
         </>

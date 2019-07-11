@@ -1,5 +1,5 @@
 import { ThunkResult } from '@/store';
-// import { Product } from '@/store/products/reducer';
+import { Project } from '@/store/projects/reducer';
 import apiFetch from '@/utils/api';
 
 interface CreateProjectStarted {
@@ -7,6 +7,7 @@ interface CreateProjectStarted {
 }
 interface CreateProjectSucceeded {
   type: 'SYNC_REPOS_SUCCEEDED';
+  payload: { project: Project };
 }
 interface CreateProjectFailed {
   type: 'SYNC_REPOS_FAILED';
@@ -17,12 +18,14 @@ export type ProjectAction =
   | CreateProjectSucceeded
   | CreateProjectFailed;
 
-export const createProject = (filters): ThunkResult => async dispatch => {
+export const createProject = (
+  newProject: Project,
+): ThunkResult => async dispatch => {
   dispatch({ type: 'CREATE_PROJECT_STARTED' });
   try {
     const response = await apiFetch(window.api_urls.project_list(), dispatch, {
       method: 'POST',
-      body: JSON.stringify(filters),
+      body: JSON.stringify(newProject),
       headers: {
         'Content-Type': 'application/json',
       },
