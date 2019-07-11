@@ -23,14 +23,13 @@ export const createProject = (
 ): ThunkResult => async dispatch => {
   dispatch({ type: 'CREATE_PROJECT_STARTED' });
   try {
-    const response = await apiFetch(window.api_urls.project_list(), dispatch, {
+    await apiFetch(window.api_urls.project_list(), dispatch, {
       method: 'POST',
       body: JSON.stringify(newProject),
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    console.log(response);
     return dispatch({ type: 'CREATE_PROJECT_SUCCEEDED' });
   } catch (err) {
     dispatch({ type: 'CREATE_PROJECT_FAILED' });

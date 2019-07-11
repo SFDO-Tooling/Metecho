@@ -1,19 +1,24 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProductDetail from '@/components/products/detail';
 import { fetchObject } from '@/store/actions';
+import { createProject } from '@/store/projects/actions';
 import routes from '@/utils/routes';
 
+import { renderWithRedux, storeWithApi } from './../../utils';
+
 jest.mock('@/store/actions');
+jest.mock('@/store/projects/actions');
 
 fetchObject.mockReturnValue({ type: 'TEST' });
+createProject.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
   fetchObject.mockClear();
+  createProject.mockClear();
 });
-
-import { renderWithRedux, storeWithApi } from './../../utils';
 
 const defaultState = {
   products: {
@@ -32,7 +37,7 @@ const defaultState = {
   },
 };
 
-describe('<ProductList />', () => {
+describe('<ProductDetail />', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
@@ -41,14 +46,20 @@ describe('<ProductList />', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, productSlug } = opts;
     const context = {};
-    const { getByText, getByTitle, queryByText } = renderWithRedux(
+    const {
+      debug,
+      container,
+      getByText,
+      getByTitle,
+      queryByText,
+    } = renderWithRedux(
       <StaticRouter context={context}>
         <ProductDetail match={{ params: { productSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithApi,
     );
-    return { getByText, getByTitle, queryByText, context };
+    return { debug, container, getByText, getByTitle, queryByText, context };
   };
 
   test('renders product detail', () => {
@@ -96,6 +107,52 @@ describe('<ProductList />', () => {
 
       expect(queryByText('Product 1')).toBeNull();
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('<ProjectForm/>', () => {
+    describe('create a project', () => {
+      test('creates a new project', () => {
+        const { container, getByText } = setup();
+        let nameInput, descriptionInput;
+        const button = getByText('Create a Project');
+        nameInput = container.querySelector('#project-name');
+        descriptionInput = container.querySelector('#project-description');
+
+        expect(nameInput).toBeNull();
+        expect(button).toBeVisible();
+
+        fireEvent.click(button);
+
+        expect(getByText('Create a Project for Product 1')).toBeVisible();
+
+        nameInput = container.querySelector('#project-name');
+        descriptionInput = container.querySelector('#project-description');
+
+        expect(nameInput).toBeVisible();
+
+        fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
+        fireEvent.change(descriptionInput, {
+          target: { value: '<p>This is the description</p>' },
+        });
+        fireEvent.click(button);
+
+        const name = nameInput.value;
+        const description = descriptionInput.value;
+
+        expect(createProject).toHaveBeenCalledWith({ name, description });
+      });
+
+      test('validates name field', () => {
+        const { getByText } = setup();
+        const button = getByText('Create a Project');
+
+        fireEvent.click(button);
+        fireEvent.click(button);
+
+        expect(getByText('Project name is required.')).toBeVisible();
+        expect(createProject).not.toHaveBeenCalled();
+      });
     });
   });
 });

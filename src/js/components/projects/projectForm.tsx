@@ -45,7 +45,7 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
 
           <form onSubmit={handleSubmit}>
             <Input
-              id="base-id"
+              id="project-name"
               label="Project Name"
               required
               errorText={hasName ? null : 'Project name is required.'}
@@ -56,7 +56,7 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
             />
             <Textarea
               aria-describedby="error-1"
-              id="text-area-error"
+              id="project-description"
               name="required-textarea-error"
               label="Description"
               value={description}

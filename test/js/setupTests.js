@@ -23,6 +23,7 @@ beforeAll(() => {
     user_refresh: () => '/api/user/refresh/',
     product_list: () => '/api/products/',
     product_detail: slug => `/api/products/${slug}/`,
+    project_list: () => '/api/projects/',
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();
