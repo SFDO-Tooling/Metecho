@@ -44,7 +44,7 @@
     "heroku-postbuild": "yarn prod"
   },
   "dependencies": {
-    "@salesforce-ux/design-system": "2.8.3",
+    "@salesforce-ux/design-system": "^2.9.4",
     "@salesforce/design-system-react": "^0.10.7",
     "classnames": "^2.2.6",
     "i18next": "^17.0.6",
@@ -58,7 +58,7 @@
     "react-fns": "^1.4.0",
     "react-i18next": "^10.11.4",
     "react-redux": "^7.1.0",
-    "react-router-dom": "5.0.1",
+    "react-router-dom": "^5.0.1",
     "redux": "^4.0.4",
     "redux-devtools-extension": "^2.13.8",
     "redux-logger": "^3.0.6",
