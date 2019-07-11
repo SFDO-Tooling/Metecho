@@ -12,20 +12,22 @@ import { EmptyIllustration } from '@/components/404';
 import ProductListItem from '@/components/products/listItem';
 import { LabelWithSpinner } from '@/components/utils';
 import { AppState } from '@/store';
-import { fetchMoreProducts, syncRepos } from '@/store/products/actions';
+import { fetchObjects, ObjectsActionType } from '@/store/actions';
+import { syncRepos } from '@/store/products/actions';
 import { Product } from '@/store/products/reducer';
 import { selectNextUrl, selectProducts } from '@/store/products/selectors';
+import { OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
   y: number;
   products: Product[];
   next: string | null;
-  doFetchMoreProducts({ url }: { url: string }): Promise<any>;
+  doFetchObjects: ObjectsActionType;
   doSyncRepos(): Promise<any>;
 }
 
 const ProductList = withScroll(
-  ({ y, products, next, doFetchMoreProducts, doSyncRepos }: Props) => {
+  ({ y, products, next, doFetchObjects, doSyncRepos }: Props) => {
     const [fetchingProducts, setFetchingProducts] = useState(false);
     const [syncingRepos, setSyncingRepos] = useState(false);
 
@@ -45,7 +47,10 @@ const ProductList = withScroll(
         /* istanbul ignore else */
         if (next && !fetchingProducts) {
           setFetchingProducts(true);
-          doFetchMoreProducts({ url: next }).finally(() => {
+          doFetchObjects({
+            objectType: OBJECT_TYPES.PRODUCT,
+            url: next,
+          }).finally(() => {
             setFetchingProducts(false);
           });
         }
@@ -67,7 +72,7 @@ const ProductList = withScroll(
       if (scrolledToBottom) {
         maybeFetchMoreProducts();
       }
-    }, [y, next, fetchingProducts, doFetchMoreProducts]);
+    }, [y, next, fetchingProducts, doFetchObjects]);
 
     let contents;
     switch (products.length) {
@@ -178,7 +183,7 @@ const select = (appState: AppState) => ({
 });
 
 const actions = {
-  doFetchMoreProducts: fetchMoreProducts,
+  doFetchObjects: fetchObjects,
   doSyncRepos: syncRepos,
 };
 
