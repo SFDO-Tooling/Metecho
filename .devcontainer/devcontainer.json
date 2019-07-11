@@ -5,7 +5,6 @@
   "service": "web",
   "workspaceFolder": "/app",
   "shutdownAction": "stopCompose",
-  "postCreateCommand": "bash ./.devcontainer/install-dev-tools.sh",
   "extensions": [
     "bibhasdn.django-html",
     "coenraads.bracket-pair-colorizer-2",
