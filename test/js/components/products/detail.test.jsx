@@ -2,15 +2,15 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProductDetail from '@/components/products/detail';
-import { fetchProduct } from '@/store/products/actions';
+import { fetchObject } from '@/store/actions';
 import routes from '@/utils/routes';
 
-jest.mock('@/store/products/actions');
+jest.mock('@/store/actions');
 
-fetchProduct.mockReturnValue({ type: 'TEST' });
+fetchObject.mockReturnValue({ type: 'TEST' });
 
 afterEach(() => {
-  fetchProduct.mockClear();
+  fetchObject.mockClear();
 });
 
 import { renderWithRedux, storeWithApi } from './../../utils';
@@ -63,8 +63,9 @@ describe('<ProductList />', () => {
       const { queryByText } = setup({ productSlug: 'other-product' });
 
       expect(queryByText('Product 1')).toBeNull();
-      expect(fetchProduct).toHaveBeenCalledWith({
-        slug: 'other-product',
+      expect(fetchObject).toHaveBeenCalledWith({
+        filters: { slug: 'other-product' },
+        objectType: 'product',
       });
     });
   });

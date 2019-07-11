@@ -121,6 +121,17 @@ describe('logout', () => {
 });
 
 describe('refetchAllData', () => {
+  let url, objectPayload;
+
+  beforeAll(() => {
+    url = window.api_urls.product_list();
+    objectPayload = {
+      objectType: 'product',
+      url,
+      reset: true,
+    };
+  });
+
   describe('success', () => {
     test('GETs user from api', () => {
       const store = storeWithApi({});
@@ -140,13 +151,17 @@ describe('refetchAllData', () => {
         repo_url: 'http://www.test.test',
       };
       const response = { next: null, results: [product] };
-      fetchMock.getOnce(window.api_urls.product_list(), response);
+      fetchMock.getOnce(url, response);
       const productsStarted = {
-        type: 'FETCH_PRODUCTS_STARTED',
+        type: 'FETCH_OBJECTS_STARTED',
+        payload: objectPayload,
       };
       const productsSucceeded = {
-        type: 'FETCH_PRODUCTS_SUCCEEDED',
-        payload: response,
+        type: 'FETCH_OBJECTS_SUCCEEDED',
+        payload: {
+          response,
+          ...objectPayload,
+        },
       };
 
       expect.assertions(1);

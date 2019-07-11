@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Configure apt and install packages
 apt-get update

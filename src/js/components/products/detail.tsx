@@ -11,24 +11,28 @@ import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/projectForm';
 import { AppState } from '@/store';
-import { fetchProduct } from '@/store/products/actions';
+import { fetchObject, ObjectsActionType } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
 import { selectProduct, selectProductSlug } from '@/store/products/selectors';
+import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 type Props = {
   product?: Product | null;
   productSlug?: string;
-  doFetchProduct({ slug }: { slug: string }): Promise<any>;
+  doFetchObject: ObjectsActionType;
 } & RouteComponentProps;
 
-const ProductDetail = ({ product, productSlug, doFetchProduct }: Props) => {
+const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
   useEffect(() => {
     if (productSlug && product === undefined) {
       // Fetch product from API
-      doFetchProduct({ slug: productSlug });
+      doFetchObject({
+        objectType: OBJECT_TYPES.PRODUCT,
+        filters: { slug: productSlug },
+      });
     }
-  }, [product, productSlug, doFetchProduct]);
+  }, [product, productSlug, doFetchObject]);
 
   if (!product) {
     if (!productSlug || product === null) {
@@ -132,7 +136,7 @@ const select = (appState: AppState, props: Props) => ({
   product: selectProduct(appState, props),
 });
 const actions = {
-  doFetchProduct: fetchProduct,
+  doFetchObject: fetchObject,
 };
 const WrappedProductDetail = connect(
   select,

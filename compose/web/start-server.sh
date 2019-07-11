@@ -4,7 +4,7 @@ if [ -z ${PORT+x} ];
 then
     # PORT unset, we presume this is local dev:
     python manage.py migrate
-    PORT=8000 yarn serve
+    yarn serve
 else
     # PORT set, we presume this is Heroku:
     yarn django:serve:prod

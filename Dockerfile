@@ -1,5 +1,10 @@
 FROM wlonk/oddbird:latest
 
+# Install local development tools (git, docker-cli used for viewing logs):
+COPY ./compose/web/install-dev-tools.sh /install-dev-tools.sh
+RUN chmod +x /install-dev-tools.sh
+RUN /install-dev-tools.sh
+
 # Env setup:
 ENV PYTHONPATH /app
 
