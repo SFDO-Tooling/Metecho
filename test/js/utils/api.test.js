@@ -20,31 +20,70 @@ describe('apiFetch', () => {
     return expect(apiFetch('/test/url/', dispatch)).resolves.toEqual(expected);
   });
 
+  test('string response: returns response', () => {
+    const expected = 'foobar';
+    fetchMock.getOnce('/test/url/', expected);
+
+    return expect(apiFetch('/test/url/', dispatch)).resolves.toEqual(expected);
+  });
+
   test('404: returns null', () => {
     fetchMock.getOnce('/test/url/', 404);
 
     return expect(apiFetch('/test/url/', dispatch)).resolves.toBeNull();
   });
 
-  test('500: throws Error', () => {
-    fetchMock.getOnce('/test/url/', 500);
+  describe('error', () => {
+    test('throws Error without response', () => {
+      fetchMock.getOnce('/test/url/', { status: 500, body: {} });
 
-    expect.assertions(1);
-    return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow();
-  });
+      expect.assertions(1);
+      return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow(
+        'Internal Server Error',
+      );
+    });
 
-  test('network error: throws Error', () => {
-    fetchMock.getOnce('/test/url/', { throws: new Error('not cool') });
+    test('throws Error with string response', () => {
+      fetchMock.getOnce('/test/url/', { status: 500, body: 'not cool' });
 
-    expect.assertions(1);
-    return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow('not cool');
-  });
+      expect.assertions(1);
+      return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow(
+        'not cool',
+      );
+    });
 
-  test('string response: returns response', () => {
-    const expected = 'foobar';
-    fetchMock.getOnce('/test/url/', expected);
+    test('throws Error with `detail` response', () => {
+      fetchMock.getOnce('/test/url/', {
+        status: 500,
+        body: { detail: 'not cool' },
+      });
 
-    return expect(apiFetch('/test/url/', dispatch)).resolves.toEqual(expected);
+      expect.assertions(1);
+      return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow(
+        'not cool',
+      );
+    });
+
+    test('throws Error with `non_field_errors` response', () => {
+      fetchMock.getOnce('/test/url/', {
+        status: 500,
+        body: { non_field_errors: 'not cool' },
+      });
+
+      expect.assertions(1);
+      return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow(
+        'not cool',
+      );
+    });
+
+    test('throws network error', () => {
+      fetchMock.getOnce('/test/url/', { throws: new Error('not cool') });
+
+      expect.assertions(1);
+      return expect(apiFetch('/test/url/', dispatch)).rejects.toThrow(
+        'not cool',
+      );
+    });
   });
 });
 

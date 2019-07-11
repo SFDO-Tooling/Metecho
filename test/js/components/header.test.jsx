@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import Header from '@/components/header';
 
-import { renderWithRedux } from './../../utils';
+import { renderWithRedux } from './../utils';
 
 describe('<Header />', () => {
   const setup = (
