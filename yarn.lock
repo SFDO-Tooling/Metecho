@@ -914,7 +914,7 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
-"@salesforce-ux/design-system@2.9.4":
+"@salesforce-ux/design-system@^2.9.4":
   version "2.9.4"
   resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.9.4.tgz#52f23650cad7ced6116913d7b634fc585e974599"
   integrity sha512-CDEjw/C2ymzNtBNnX/C62i7Lq8BmdmueTNIkrru2PU87NHOBTx5oP1Eo+buX8+qpnrODKgM8hiqQ+yqBOH7DjA==
@@ -9197,7 +9197,7 @@ react-required-if@^1.0.3:
   resolved "https://registry.yarnpkg.com/react-required-if/-/react-required-if-1.0.3.tgz#6a40a761b1d54815c1d4e6610910cbf92b5aa987"
   integrity sha1-akCnYbHVSBXB1OZhCRDL+StaqYc=
 
-react-router-dom@5.0.1:
+react-router-dom@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-5.0.1.tgz#ee66f4a5d18b6089c361958e443489d6bab714be"
   integrity sha512-zaVHSy7NN0G91/Bz9GD4owex5+eop+KvgbxXsP/O+iW1/Ln+BrJ8QiIR5a6xNPtrdTvLkxqlDClx13QO1uB8CA==
