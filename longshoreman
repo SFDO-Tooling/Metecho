@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function dcr {
+  docker-compose run --rm web $@
+}
+
+function dcrq {
+  docker-compose run --rm --no-deps web $@
+}
+
+case "$1" in
+    "up")
+        dcr up
+        ;;
+    "down")
+        dcr down
+        ;;
+    "build")
+        dcr build
+        ;;
+    "populate")
+        dcr python manage.py populate_data
+        ;;
+    "truncate")
+        dcr python manage.py truncate_data
+        ;;
+    "lint")
+        dcrq yarn lint
+        ;;
+    "test")
+        dcr yarn test:all
+        ;;
+    "test:py")
+        dcr yarn pytest
+        ;;
+    "test:js")
+        dcr yarn test
+        ;;
+    "add:py")
+        dcrq pipenv install "${@:2}"
+        ;;
+    "migrate")
+        dcr python manage.py migrate "${@:2}"
+        ;;
+    "migrations")
+        dcr python manage.py makemigrations "${@:2}"
+        ;;
+    "messages")
+        dcr python manage.py makemessages --locale "${@:2}"
+        dcr python manage.py compilemessages
+        ;;
+    "shell")
+        dcr python manage.py shell
+        ;;
+    "prune")
+        # See https://docs.docker.com/config/pruning/ for more detail.
+        docker image prune -f
+        docker container prune -f
+        docker volume rm $(docker volume ls -qf dangling=true)
+        ;;
+    "*" | "help")
+        echo "Sorry, I don't know that command."
+        ;;
+esac
