@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Script modified from:
+# https://github.com/microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker-compose
+
 # Configure apt and install packages
 apt-get update
 apt-get -y install --no-install-recommends apt-utils 2>&1

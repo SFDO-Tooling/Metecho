@@ -1,31 +1,38 @@
 import * as logging from '@/utils/logging';
 
 describe('logError', () => {
-  describe('with Raven', () => {
+  describe('with Sentry', () => {
+    let scope;
+
     beforeEach(() => {
-      window.Raven = {
-        isSetup: () => true,
+      scope = {
+        setExtras: jest.fn(),
+      };
+      window.Sentry = {
+        withScope: cb => cb(scope),
         captureException: jest.fn(),
         captureMessage: jest.fn(),
       };
     });
 
     afterEach(() => {
-      Reflect.deleteProperty(window, 'Raven');
+      Reflect.deleteProperty(window, 'Sentry');
     });
 
     test('captures Error', () => {
       const err = new Error('foobar');
       logging.logError(err);
 
-      expect(window.Raven.captureException).toHaveBeenCalledWith(err, {});
+      expect(scope.setExtras).toHaveBeenCalledWith({});
+      expect(window.Sentry.captureException).toHaveBeenCalledWith(err);
     });
 
     test('captures message', () => {
       const extra = { foo: 'bar' };
       logging.logError('foobar', extra);
 
-      expect(window.Raven.captureMessage).toHaveBeenCalledWith('foobar', extra);
+      expect(scope.setExtras).toHaveBeenCalledWith(extra);
+      expect(window.Sentry.captureMessage).toHaveBeenCalledWith('foobar');
     });
   });
 

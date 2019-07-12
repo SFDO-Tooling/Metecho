@@ -67,12 +67,12 @@ const apiFetch = async (
         msg = body.non_field_errors;
       }
     }
+    dispatch(addError(msg));
     const error: ApiError = new Error(msg);
     error.response = response;
     throw error;
   } catch (err) {
     logError(err);
-    dispatch(addError(err.message));
     throw err;
   }
 };

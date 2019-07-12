@@ -28,7 +28,7 @@ module.exports = {
   collectCoverageFrom: [
     'src/js/**/*.{js,jsx,ts,tsx}',
     '!src/js/index.tsx',
-    '!src/js/raven.ts',
+    '!src/js/sentry.ts',
     '!src/js/i18n.ts',
   ],
 

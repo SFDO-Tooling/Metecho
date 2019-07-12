@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 
 import { EmptyIllustration } from '@/components/404';
 import ProductListItem from '@/components/products/listItem';
-import { LabelWithSpinner } from '@/components/utils';
+import { LabelWithSpinner, useIsMounted } from '@/components/utils';
 import { AppState } from '@/store';
 import { fetchObjects, ObjectsActionType } from '@/store/actions';
 import { syncRepos } from '@/store/products/actions';
@@ -30,11 +30,15 @@ const ProductList = withScroll(
   ({ y, products, next, doFetchObjects, doSyncRepos }: Props) => {
     const [fetchingProducts, setFetchingProducts] = useState(false);
     const [syncingRepos, setSyncingRepos] = useState(false);
+    const isMounted = useIsMounted();
 
     const syncReposClicked = () => {
       setSyncingRepos(true);
       doSyncRepos().finally(() => {
-        setSyncingRepos(false);
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setSyncingRepos(false);
+        }
       });
     };
 
@@ -46,12 +50,17 @@ const ProductList = withScroll(
       const maybeFetchMoreProducts = () => {
         /* istanbul ignore else */
         if (next && !fetchingProducts) {
-          setFetchingProducts(true);
+          /* istanbul ignore else */
+          if (isMounted.current) {
+            setFetchingProducts(true);
+          }
           doFetchObjects({
             objectType: OBJECT_TYPES.PRODUCT,
             url: next,
           }).finally(() => {
-            setFetchingProducts(false);
+            if (isMounted.current) {
+              setFetchingProducts(false);
+            }
           });
         }
       };
@@ -72,7 +81,7 @@ const ProductList = withScroll(
       if (scrolledToBottom) {
         maybeFetchMoreProducts();
       }
-    }, [y, next, fetchingProducts, doFetchObjects]);
+    }, [y, next, fetchingProducts, doFetchObjects, isMounted]);
 
     let contents;
     switch (products.length) {
