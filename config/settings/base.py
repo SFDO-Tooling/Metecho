@@ -16,7 +16,9 @@ from pathlib import Path
 from typing import List
 
 import dj_database_url
+import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
+from sentry_sdk.integrations.django import DjangoIntegration
 
 BOOLS = ("True", "true", "T", "t", "1", 1)
 
@@ -326,12 +328,7 @@ RQ_QUEUES = {
         "USE_REDIS_CACHE": "default",
         "DEFAULT_TIMEOUT": env("REDIS_JOB_TIMEOUT", type_=int, default=3600),
         "DEFAULT_RESULT_TTL": 720,
-    },
-    "short": {
-        "USE_REDIS_CACHE": "default",
-        "DEFAULT_TIMEOUT": 10,
-        "DEFAULT_RESULT_TTL": 300,
-    },
+    }
 }
 RQ = {"WORKER_CLASS": "metashare.rq_worker.ConnectionClosingWorker"}
 CHANNEL_LAYERS = {
@@ -425,29 +422,8 @@ LOGGING = {
 
 API_PRODUCT_PAGE_SIZE = env("API_PRODUCT_PAGE_SIZE", type_=int, default=25)
 
-# Raven / Sentry
+# Sentry
 SENTRY_DSN = env("SENTRY_DSN", default="")
 
 if SENTRY_DSN:
-    INSTALLED_APPS += ["raven.contrib.django.raven_compat"]
-    RAVEN_CONFIG = {"dsn": SENTRY_DSN}
-    MIDDLEWARE = [
-        (
-            "raven.contrib.django.raven_compat.middleware."
-            "SentryResponseErrorIdMiddleware"
-        )
-    ] + MIDDLEWARE
-    if not DEBUG:
-        # Extend the logging dict with Sentry settings:
-        LOGGING["root"] = {"level": "WARNING", "handlers": ["sentry"]}
-        LOGGING["handlers"]["sentry"] = {
-            "level": "ERROR",
-            "class": ("raven.contrib.django.raven_compat.handlers." "SentryHandler"),
-            "tags": {"custom-tag": "x"},
-        }
-        LOGGING["loggers"]["raven"] = {
-            "level": "DEBUG",
-            "handlers": ["console"],
-            "propagate": False,
-        }
-        LOGGING["loggers"]["rq.worker"]["handlers"].append("sentry")
+    sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])

@@ -71,8 +71,6 @@ these are small enough to simply put behind an additional environment variable.
 # MetaShare Proctypes
 
 - `web`: the asgi server that handles HTTP and WebSockets
-- `worker_default`: the main worker type
-- `worker_short`: a queue dedicated to very fast jobs
+- `worker`: the main worker type
 - `scheduler`: the town clock, that implements cron scheduling for jobs on any
   work queue
-- `worker`: a combined worker process that works all queues

@@ -8,4 +8,4 @@ def test_env(rf):
     result = env(rf.get("/"))
 
     assert "GLOBALS" in result
-    assert "SENTRY_DSN_PUBLIC" in result["GLOBALS"]
+    assert "SENTRY_DSN" in result["GLOBALS"]

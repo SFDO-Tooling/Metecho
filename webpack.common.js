@@ -13,7 +13,7 @@ module.exports = {
   context: path.join(__dirname, 'src', 'js'),
   entry: {
     app: ['whatwg-fetch', 'js/index', 'sass/app.scss'],
-    raven: 'js/raven',
+    sentry: 'js/sentry',
   },
   resolve: {
     modules: ['src', 'static', 'node_modules'],
@@ -32,7 +32,7 @@ module.exports = {
       cacheGroups: {
         vendor: {
           name: 'vendors',
-          test: /[\\/]node_modules[\\/](?!raven-js)/,
+          test: /[\\/]node_modules[\\/](?!@sentry)/,
           chunks: 'all',
         },
         styles: {

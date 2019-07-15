@@ -36,14 +36,14 @@
     <!-- JavaScript -->
     <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.runtime.entry %>"></script>
     <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.vendors.entry %>"></script>
-    {% if GLOBALS.SENTRY_DSN_PUBLIC %}
-      <!-- Insert Raven JS -->
-      <script id="js-raven-setup" type="application/json">
+    {% if GLOBALS.SENTRY_DSN %}
+      <!-- Insert Sentry JS -->
+      <script id="js-sentry-setup" type="application/json">
         {
-          "dsn": "{{ GLOBALS.SENTRY_DSN_PUBLIC }}"
+          "dsn": "{{ GLOBALS.SENTRY_DSN }}"
         }
       </script>
-      <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.raven.entry %>"></script>
+      <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.sentry.entry %>"></script>
     {% endif %}
     {{ GLOBALS|json_script:"js-globals" }}
     <script type="text/javascript" charset="utf-8">

@@ -20,8 +20,8 @@ interface RefecthDataAction {
 export type UserAction = LoginAction | LogoutAction | RefecthDataAction;
 
 export const login = (payload: User): LoginAction => {
-  if (window.Raven && window.Raven.isSetup()) {
-    window.Raven.setUserContext(payload);
+  if (window.Sentry) {
+    window.Sentry.setUser(payload);
   }
   /* istanbul ignore else */
   if (payload && window.socket) {
@@ -44,8 +44,8 @@ export const logout = (): ThunkResult => dispatch =>
     if (window.socket) {
       window.socket.reconnect();
     }
-    if (window.Raven && window.Raven.isSetup()) {
-      window.Raven.setUserContext();
+    if (window.Sentry) {
+      window.Sentry.configureScope(scope => scope.clear());
     }
     return dispatch({ type: 'USER_LOGGED_OUT' });
   });
