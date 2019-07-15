@@ -116,7 +116,7 @@ class Product(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
         return self.name
 
     class Meta:
-        ordering = ("name", "-created_at")
+        ordering = ("name",)
 
 
 class GitHubRepository(mixins.HashIdMixin, models.Model):
@@ -146,6 +146,9 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     release_notes = MarkdownField(blank=True, property_suffix="_markdown")
 
     slug_class = ProjectSlug
+
+    class Meta:
+        ordering = ("-created_at", "name")
 
 
 @receiver(user_logged_in)
