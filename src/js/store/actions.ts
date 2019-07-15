@@ -37,21 +37,38 @@ interface FetchObjectFailed {
   payload: { filters: ObjectFilters } & ObjectPayload;
 }
 
+interface PostObjectStarted {
+  type: 'POST_OBJECT_STARTED';
+}
+
+interface PostObjectSucceeded {
+  type: 'POST_OBJECT_SUCCEEDED';
+}
+
+interface PostObjectfailed {
+  type: 'POST_OBJECT_FAILED';
+}
+
 export type ObjectsAction =
   | FetchObjectsStarted
   | FetchObjectsSucceeded
   | FetchObjectsFailed
   | FetchObjectStarted
   | FetchObjectSucceeded
-  | FetchObjectFailed;
+  | FetchObjectFailed
+  | PostObjectStarted
+  | PostObjectSucceeded
+  | PostObjectfailed;
 
 export type ObjectsActionType = ({
   objectType,
+  content,
   url,
   reset,
   filters,
 }: {
   objectType: ObjectTypes;
+  content?: {}; // the posted content
   url?: string;
   reset?: boolean;
   filters?: ObjectFilters;
@@ -117,6 +134,50 @@ export const fetchObject = ({
     dispatch({
       type: 'FETCH_OBJECT_FAILED',
       payload: { filters, objectType, url: baseUrl },
+    });
+    throw err;
+  }
+};
+
+export const postObject = ({
+  objectType,
+  content,
+  filters,
+}: {
+  objectType: ObjectTypes;
+  url?: string;
+  filters?: ObjectFilters;
+}): ThunkResult => async dispatch => {
+  const baseUrl = window.api_urls[`${objectType}_list`]();
+  dispatch({
+    type: 'POST_OBJECT_STARTED',
+    payload: { objectType, content: baseUrl, filters },
+  });
+  try {
+    const response = await apiFetch(
+      addUrlParams(baseUrl, { ...filters }),
+      dispatch,
+      {
+        method: 'POST',
+        body: JSON.stringify(content),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    console.log(response);
+    // const object =
+    //   response && response.results && response.results.length
+    //     ? response.results[0]
+    //     : null;
+    return dispatch({
+      type: 'POST_OBJECT_SUCCEEDED',
+      // payload: { object, filters, objectType, url: baseUrl },
+    });
+  } catch (err) {
+    dispatch({
+      type: 'POST_OBJECT_FAILED',
+      // payload: { filters, objectType, url: baseUrl },
     });
     throw err;
   }

@@ -6,16 +6,16 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 
-import { createProject } from '@/store/projects/actions';
-import { Project } from '@/store/projects/reducer';
+import { ObjectsActionType, postObject } from '@/store/actions';
+import { OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
   productName: string;
   productSlug: string;
-  doCreateProject(newProject: Project): Promise<any>;
+  doPostObject: ObjectsActionType;
 }
 
-const ProjectForm = ({ productName, doCreateProject }: Props) => {
+const ProjectForm = ({ productName, doPostObject }: Props) => {
   const [description, setDescription] = useState('');
   const [name, setName] = useState('');
   const [projectCreateActive, setprojectCreateActive] = useState(false);
@@ -27,7 +27,10 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
       return;
     }
     // check if project (name) exists?
-    doCreateProject({ name, description });
+    doPostObject({
+      objectType: OBJECT_TYPES.PROJECT,
+      content: { name, description, commit_message: '', release_notes: '' },
+    });
   };
   const formControl = () => {
     if (projectCreateActive) {
@@ -84,7 +87,7 @@ const ProjectForm = ({ productName, doCreateProject }: Props) => {
 // });
 
 const actions = {
-  doCreateProject: createProject,
+  doPostObject: postObject,
 };
 const WrappedProjectForm = connect(
   () => {},
