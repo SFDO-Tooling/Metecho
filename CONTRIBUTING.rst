@@ -44,16 +44,17 @@ Docker-based development
     BUCKETEER_AWS_SECRET_ACCESS_KEY=...
     BUCKETEER_BUCKET_NAME=...
 
-3. Run ``make build`` to build/re-build all the container images.
+3. Run ``./derrick build`` to build/re-build all the container images.
 
-4. Run ``make up`` to start the server(s).
+4. Run ``./derrick up`` to start the server(s).
 
 5. Visit `<http://localhost:8080/>`_ in your browser.
 
 6. When you're done working on MetaShare, ``Ctrl-C`` in the terminal where the
-   containers are running to exit. You can also ``make down`` to stop all
-   running containers, or ``make prune`` to clean up unused images/containers.
-   (``docker-compose ps`` will tell you what containers are currently running.)
+   containers are running to exit. You can also ``./derrick down`` to stop
+   all running containers, or ``./derrick prune`` to clean up unused
+   images/containers. (``docker-compose ps`` will tell you what containers are
+   currently running.)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
 
@@ -62,27 +63,33 @@ Setting up the database
 
 To populate the database with sample data for development, run::
 
-    $ make populate
+    $ ./derrick populate
 
 If your database has outdated sample data for development, remove it with::
 
-    $ make truncate
+    $ ./derrick truncate
 
 Docker development tasks
 ------------------------
 
-Most tasks are defined in the `Makefile <Makefile>`_; take a look in there and
-you will see you can run e.g.::
+Most tasks are defined in ``derrick``; take a look in there and you
+will see you can run e.g.::
 
-    $ make up  # start containers and servers
-    $ make down  # shut down running containers
-    $ make build  # rebuild all containers
-    $ make lint  # format and lint JS, Sass, Python
-    $ make test  # run JS and Python tests
-    $ make migrate  # run Django migrations
-    $ make migrations  # add new Django migrations (``makemigrations``)
-    $ make shell  # open Python shell
-    $ make prune  # clean up unused Docker images and containers
+    $ ./derrick up  # start containers and servers
+    $ ./derrick down  # shut down running containers
+    $ ./derrick build  # rebuild all containers
+    $ ./derrick lint  # format and lint JS, Sass, Python
+    $ ./derrick test  # run JS and Python tests
+    $ ./derrick test:watch  # run JS tests and watches for changes
+    $ ./derrick test:py  # run Python tests
+    $ ./derrick test:js  # run JS tests
+    $ ./derrick add:js <package>  # add a yarn/npm package to dependencies
+    $ ./derrick add:py <package>  # add a Python package to dependencies
+    $ ./derrick migrate <app> <prefix>  # run Django migrations
+    $ ./derrick migrations <app>  # add new Django migrations (``makemigrations``)
+    $ ./derrick messages <locale>  # build messages for i18n
+    $ ./derrick shell  # open Python shell
+    $ ./derrick prune  # clean up unused Docker images and containers
 
 To run any development tasks (such as changing Python or JS dependencies, or
 generating or running migrations, or running a Django shell), you will need to
@@ -94,7 +101,8 @@ You shouldn't need to run any other setup tasks; the Docker images will take
 care of setting up a database and installing Python and JS dependencies for you.
 
 When you change Python or JS dependencies, you will need to rebuild the Docker
-images, as we store dependencies in the images for speed: ``make build``.
+images, as we store dependencies in the images for speed: ``./derrick
+build``.
 
 Docker caches each command in the `Dockerfile <Dockerfile>`_ as its own layer.
 If you change the Dockerfile, changing earlier layers will bust the cache on the
@@ -175,8 +183,7 @@ Internationalization
 
 To build and compile ``.mo`` and ``.po`` files for the back end, run::
 
-   $ docker-compose run --rm web python manage.py makemessages --locale <locale>
-   $ docker-compose run --rm web python manage.py compilemessages
+   $ ./derrick messages <locale>
 
 For the front end, translation JSON files are served from
 ``locales/<language>/`` directories, and the `user language is auto-detected at

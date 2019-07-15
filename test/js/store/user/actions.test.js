@@ -41,16 +41,15 @@ describe('login', () => {
     expect(window.socket.subscribe).toHaveBeenCalledWith(userSubscription);
   });
 
-  describe('with Raven', () => {
+  describe('with Sentry', () => {
     beforeEach(() => {
-      window.Raven = {
-        isSetup: () => true,
-        setUserContext: jest.fn(),
+      window.Sentry = {
+        setUser: jest.fn(),
       };
     });
 
     afterEach(() => {
-      Reflect.deleteProperty(window, 'Raven');
+      Reflect.deleteProperty(window, 'Sentry');
     });
 
     test('sets user context', () => {
@@ -60,7 +59,7 @@ describe('login', () => {
       };
       actions.login(user);
 
-      expect(window.Raven.setUserContext).toHaveBeenCalledWith(user);
+      expect(window.Sentry.setUser).toHaveBeenCalledWith(user);
     });
   });
 });
@@ -99,22 +98,26 @@ describe('logout', () => {
     });
   });
 
-  describe('with Raven', () => {
+  describe('with Sentry', () => {
+    let scope;
+
     beforeEach(() => {
-      window.Raven = {
-        isSetup: () => true,
-        setUserContext: jest.fn(),
+      scope = {
+        clear: jest.fn(),
+      };
+      window.Sentry = {
+        configureScope: cb => cb(scope),
       };
     });
 
     afterEach(() => {
-      Reflect.deleteProperty(window, 'Raven');
+      Reflect.deleteProperty(window, 'Sentry');
     });
 
     test('resets user context', () => {
       expect.assertions(1);
       return store.dispatch(actions.logout()).then(() => {
-        expect(window.Raven.setUserContext).toHaveBeenCalledWith();
+        expect(scope.clear).toHaveBeenCalled();
       });
     });
   });

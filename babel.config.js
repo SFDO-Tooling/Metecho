@@ -20,7 +20,10 @@ module.exports = {
   ],
   env: {
     test: {
-      presets: [...presets, ['@babel/preset-env', { targets: { node: '10' } }]],
+      presets: [
+        ...presets,
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+      ],
     },
   },
 };

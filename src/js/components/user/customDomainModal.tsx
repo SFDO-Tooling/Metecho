@@ -15,8 +15,8 @@ const CustomDomainModal = ({ isOpen, toggleModal }: Props) => {
   const [url, setUrl] = useState('');
 
   const handleClose = () => {
-    toggleModal(false);
     setUrl('');
+    toggleModal(false);
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
