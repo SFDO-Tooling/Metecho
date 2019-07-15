@@ -115,6 +115,9 @@ class Product(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ("name", "-created_at")
+
 
 class GitHubRepository(mixins.HashIdMixin, models.Model):
     url = models.URLField()
