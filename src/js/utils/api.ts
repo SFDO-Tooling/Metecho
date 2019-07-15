@@ -10,6 +10,8 @@ export interface UrlParams {
 
 class ApiError extends Error {
   public response?: Response;
+
+  public body?: string | { [key: string]: any };
 }
 
 // these HTTP methods do not require CSRF protection
@@ -70,6 +72,7 @@ const apiFetch = async (
     dispatch(addError(msg));
     const error: ApiError = new Error(msg);
     error.response = response;
+    error.body = body;
     throw error;
   } catch (err) {
     logError(err);

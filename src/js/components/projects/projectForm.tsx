@@ -31,10 +31,14 @@ const ProjectForm = ({ productName, productSlug, doPostObject }: Props) => {
     doPostObject({
       objectType: OBJECT_TYPES.PROJECT,
       content: { name, description, commit_message: '', release_notes: '' },
-    }).finally(() => (
-      // display errors i.e. if project (name) exists?
-      <Redirect to={routes.project_detail(productSlug, productName)} /> // @todo, this isn't redirecting...
-    ));
+    })
+      .then(() => {
+        // @todo - do the success-redirect
+      })
+      .catch(err => {
+        console.log(err.body);
+        // @todo - store error in component state for per-field inline display
+      });
   };
   const formControl = () => {
     if (projectCreateActive) {
