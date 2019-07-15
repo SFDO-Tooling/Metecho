@@ -5,9 +5,11 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import { Redirect, withRouter } from 'react-router-dom';
 
 import { ObjectsActionType, postObject } from '@/store/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
+import routes from '@/utils/routes';
 
 interface Props {
   productName: string;
@@ -15,7 +17,7 @@ interface Props {
   doPostObject: ObjectsActionType;
 }
 
-const ProjectForm = ({ productName, doPostObject }: Props) => {
+const ProjectForm = ({ productName, productSlug, doPostObject }: Props) => {
   const [description, setDescription] = useState('');
   const [name, setName] = useState('');
   const [projectCreateActive, setprojectCreateActive] = useState(false);
@@ -26,11 +28,13 @@ const ProjectForm = ({ productName, doPostObject }: Props) => {
       setHasName(false);
       return;
     }
-    // check if project (name) exists?
     doPostObject({
       objectType: OBJECT_TYPES.PROJECT,
       content: { name, description, commit_message: '', release_notes: '' },
-    });
+    }).finally(() => (
+      // display errors i.e. if project (name) exists?
+      <Redirect to={routes.project_detail(productSlug, productName)} /> // @todo, this isn't redirecting...
+    ));
   };
   const formControl = () => {
     if (projectCreateActive) {
@@ -94,4 +98,4 @@ const WrappedProjectForm = connect(
   actions,
 )(ProjectForm);
 
-export default WrappedProjectForm;
+export default withRouter(WrappedProjectForm);

@@ -5,6 +5,8 @@ const routes = {
   login: () => '/login',
   product_list: () => '/products',
   product_detail: (productSlug: string) => `/products/${productSlug}`,
+  project_detail: (productSlug: string, projectName: string) =>
+    `/products/${productSlug}/${projectName}`, // using projectname for now
 };
 
 export const routePatterns = {
