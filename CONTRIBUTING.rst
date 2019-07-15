@@ -51,9 +51,10 @@ Docker-based development
 5. Visit `<http://localhost:8080/>`_ in your browser.
 
 6. When you're done working on MetaShare, ``Ctrl-C`` in the terminal where the
-   containers are running to exit. You can also ``./longshoreman down`` to stop all
-   running containers, or ``./longshoreman prune`` to clean up unused images/containers.
-   (``docker-compose ps`` will tell you what containers are currently running.)
+   containers are running to exit. You can also ``./longshoreman down`` to stop
+   all running containers, or ``./longshoreman prune`` to clean up unused
+   images/containers. (``docker-compose ps`` will tell you what containers are
+   currently running.)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
 
@@ -79,9 +80,11 @@ will see you can run e.g.::
     $ ./longshoreman build  # rebuild all containers
     $ ./longshoreman lint  # format and lint JS, Sass, Python
     $ ./longshoreman test  # run JS and Python tests
+    $ ./longshoreman test:watch  # run JS tests and watches for changes
     $ ./longshoreman test:py  # run Python tests
     $ ./longshoreman test:js  # run JS tests
-    $ ./longshoreman add:py <app>  # add a Python package to dependencies
+    $ ./longshoreman add:js <package>  # add a yarn/npm package to dependencies
+    $ ./longshoreman add:py <package>  # add a Python package to dependencies
     $ ./longshoreman migrate <app> <prefix>  # run Django migrations
     $ ./longshoreman migrations <app>  # add new Django migrations (``makemigrations``)
     $ ./longshoreman messages <locale>  # build messages for i18n
@@ -98,8 +101,8 @@ You shouldn't need to run any other setup tasks; the Docker images will take
 care of setting up a database and installing Python and JS dependencies for you.
 
 When you change Python or JS dependencies, you will need to rebuild the Docker
-images, as we store dependencies in the images for speed:
-``./longshoreman build``.
+images, as we store dependencies in the images for speed: ``./longshoreman
+build``.
 
 Docker caches each command in the `Dockerfile <Dockerfile>`_ as its own layer.
 If you change the Dockerfile, changing earlier layers will bust the cache on the

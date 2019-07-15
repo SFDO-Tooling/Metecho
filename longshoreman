@@ -10,13 +10,13 @@ function dcrq {
 
 case "$1" in
     "up")
-        dcr up
+        docker-compose up
         ;;
     "down")
-        dcr down
+        docker-compose down
         ;;
     "build")
-        dcr build
+        docker-compose build
         ;;
     "populate")
         dcr python manage.py populate_data
@@ -30,11 +30,17 @@ case "$1" in
     "test")
         dcr yarn test:all
         ;;
+    "test:watch")
+        dcr yarn test:watch
+        ;;
     "test:py")
         dcr yarn pytest
         ;;
     "test:js")
-        dcr yarn test
+        dcrq yarn test
+        ;;
+    "add:js")
+        dcrq yarn add "${@:2}"
         ;;
     "add:py")
         dcrq pipenv install "${@:2}"
