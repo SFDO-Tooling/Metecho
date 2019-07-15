@@ -153,7 +153,10 @@ def user_logged_in_handler(sender, *, user, **kwargs):
     user.refresh_repositories()
 
 
-@receiver(post_save, sender=Product)
-def product_save_handler(sender, *, created, instance, **kwargs):
+def ensure_slug_handler(sender, *, created, instance, **kwargs):
     if created:
         instance.ensure_slug()
+
+
+post_save.connect(ensure_slug_handler, sender=Product)
+post_save.connect(ensure_slug_handler, sender=Project)

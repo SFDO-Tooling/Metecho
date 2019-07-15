@@ -35,8 +35,8 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description = MarkdownField(allow_blank=True)
-    commit_message = MarkdownField(allow_blank=True)
-    release_notes = MarkdownField(allow_blank=True)
+    commit_message = MarkdownField(allow_blank=True, required=False)
+    release_notes = MarkdownField(allow_blank=True, required=False)
 
     class Meta:
         model = Project

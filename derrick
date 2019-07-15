@@ -51,6 +51,9 @@ case "$1" in
     "migrations")
         dcr python manage.py makemigrations "${@:2}"
         ;;
+    "showmigrations")
+        dcr python manage.py showmigrations "${@:2}"
+        ;;
     "messages")
         dcr python manage.py makemessages --locale "${@:2}"
         dcr python manage.py compilemessages
