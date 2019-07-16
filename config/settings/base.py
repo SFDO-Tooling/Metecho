@@ -126,6 +126,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.github",
     "rest_framework",
     "rest_framework.authtoken",
+    "django_filters",
     "parler",
     "metashare",
     "metashare.multisalesforce",

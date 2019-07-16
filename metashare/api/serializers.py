@@ -17,7 +17,7 @@ class FullUserSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    description = serializers.CharField(source="description_markdown", allow_blank=True)
+    description = MarkdownField(allow_blank=True)
 
     class Meta:
         model = Product
@@ -35,8 +35,23 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description = MarkdownField(allow_blank=True)
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), pk_field=serializers.CharField()
+    )
+    branch_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
-        fields = ("id", "name", "description", "slug", "old_slugs", "product")
+        fields = (
+            "id",
+            "name",
+            "description",
+            "slug",
+            "old_slugs",
+            "product",
+            "branch_name",
+            "branch_url",
+        )
+
+    def get_branch_url(self, obj):
+        return f"{obj.product.repo_url}/tree/{obj.branch_name}"

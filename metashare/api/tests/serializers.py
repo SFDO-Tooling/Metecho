@@ -26,6 +26,7 @@ class TestProjectSerializer:
             data={
                 "name": "Test project",
                 "description": "Test `project`",
+                "branch_name": "some-branch",
                 "product": str(product.id),
             }
         )
@@ -37,3 +38,15 @@ class TestProjectSerializer:
         project = project_factory(name="Test project", description="Test `project`")
         serializer = ProjectSerializer(project)
         assert serializer.data["description"] == "<p>Test <code>project</code></p>"
+
+    def test_branchUrl(self, project_factory):
+        project = project_factory(
+            name="Test project",
+            description="Test `project`",
+            branch_name="test-project",
+        )
+        serializer = ProjectSerializer(project)
+        assert (
+            serializer.data["branch_url"]
+            == "https://www.github.com/test/repo/tree/test-project"
+        )

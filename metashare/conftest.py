@@ -68,6 +68,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
         model = Product
 
     name = factory.Sequence("Product {}".format)
+    repo_url = "https://www.github.com/test/repo"
 
 
 @register
@@ -86,6 +87,7 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence("Project {}".format)
     product = factory.SubFactory(ProductFactory)
+    branch_name = factory.Sequence("branch-name-{}".format)
 
 
 @pytest.fixture
