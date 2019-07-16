@@ -22,6 +22,7 @@ Retrieve
       "results": [
         {
           "id": "3Lw7OwK",
+          "product": "zVQYrye",
           "name": "Test Project",
           "slug": "test-project",
           "old_slugs": [],
