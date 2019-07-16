@@ -27,6 +27,12 @@ case "$1" in
     "lint")
         dcrq yarn lint
         ;;
+    "lint:py")
+        dcrq yarn lintpy
+        ;;
+    "lint:js")
+        dcrq yarn lintjs
+        ;;
     "test")
         dcr yarn test:all
         ;;
