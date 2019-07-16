@@ -1,4 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Icon from '@salesforce/design-system-react/components/icon';
+import WelcomeMatTile from '@salesforce/design-system-react/components/welcome-mat/tile';
 import i18n from 'i18next';
 import React, { ComponentType, ReactElement } from 'react';
 import { connect } from 'react-redux';
@@ -10,6 +12,7 @@ import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
+import welcomeMatBG from '#/welcome-mat-bg.png';
 
 interface Props extends RouteComponentProps {
   id?: string;
@@ -50,23 +53,67 @@ const Login = ({ user }: { user: User | null }) =>
   user ? (
     <Redirect to={routes.home()} />
   ) : (
-    <div className="slds-align_absolute-center">
-      <div className="slds-text-longform slds-p-around_x-large">
-        <h1 className="slds-text-heading_large">
-          {i18n.t('Welcome to MetaShare!')}
-        </h1>
-        <p>
-          This is a stub. It will eventually be replaced with an{' '}
-          <a href="https://www.lightningdesignsystem.com/components/welcome-mat/">
-            SLDS Welcome Mat Component
-          </a>{' '}
-          once the{' '}
-          <a href="https://github.com/salesforce/design-system-react/issues/1876">
-            React implementation
-          </a>{' '}
-          is complete.
-        </p>
-        <LoginButton />
+    <div className="slds-welcome-mat slds-welcome-mat_info-only">
+      <div className="slds-welcome-mat__content slds-grid">
+        <div
+          className="slds-welcome-mat__info slds-size_1-of-2"
+          style={{ backgroundImage: `url(${welcomeMatBG})` }}
+        >
+          <div className="slds-welcome-mat__info-content">
+            <h2 className="slds-welcome-mat__info-title">
+              {i18n.t('Welcome to MetaShare!')}
+            </h2>
+            <div
+              className="slds-welcome-mat__info-description
+                slds-text-longform"
+            >
+              <p>
+                {i18n.t(
+                  'Welcome to MetaShare, the web-based tool for collaborating on Salesforce projects.',
+                )}
+              </p>
+            </div>
+            <div className="slds-welcome-mat__info-actions">
+              <LoginButton />
+            </div>
+          </div>
+        </div>
+        <div
+          className="slds-welcome-mat__tiles
+            slds-size_1-of-2
+            slds-welcome-mat__tiles_info-only"
+        >
+          <WelcomeMatTile
+            title={i18n.t('Welcome to MetaShare!')}
+            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            icon={<Icon category="utility" name="animal_and_nature" />}
+            variant="info-only"
+          />
+          <WelcomeMatTile
+            title="Something about MetaShare"
+            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            icon={<Icon category="utility" name="call" />}
+            variant="info-only"
+          />
+          <WelcomeMatTile
+            title="Something about MetaShare"
+            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            icon={<Icon category="utility" name="upload" />}
+            variant="info-only"
+          />
+          <WelcomeMatTile
+            title="Something about MetaShare"
+            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            icon={<Icon category="utility" name="magicwand" />}
+            variant="info-only"
+          />
+          <WelcomeMatTile
+            title="Something about MetaShare"
+            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            icon={<Icon category="utility" name="knowledge_base" />}
+            variant="info-only"
+          />
+        </div>
       </div>
     </div>
   );
