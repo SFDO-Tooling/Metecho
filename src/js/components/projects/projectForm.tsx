@@ -5,19 +5,19 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { Redirect, withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { ObjectsActionType, postObject } from '@/store/actions';
+import { Product } from '@/store/products/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
-interface Props {
-  productName: string;
-  productSlug: string;
+interface Props extends RouteComponentProps {
+  product: Product;
   doPostObject: ObjectsActionType;
 }
 
-const ProjectForm = ({ productName, productSlug, doPostObject }: Props) => {
+const ProjectForm = ({ product, doPostObject }: Props) => {
   const [description, setDescription] = useState('');
   const [name, setName] = useState('');
   const [projectCreateActive, setprojectCreateActive] = useState(false);
@@ -30,7 +30,7 @@ const ProjectForm = ({ productName, productSlug, doPostObject }: Props) => {
     }
     doPostObject({
       objectType: OBJECT_TYPES.PROJECT,
-      content: { name, description, commit_message: '', release_notes: '' },
+      content: { name, description, product: product.id },
     })
       .then(() => {
         // @todo - do the success-redirect
@@ -52,7 +52,7 @@ const ProjectForm = ({ productName, productSlug, doPostObject }: Props) => {
     <>
       {projectCreateActive && (
         <>
-          <h1>Create a Project for {productName}</h1>
+          <h1>Create a Project for {product.name}</h1>
 
           <form onSubmit={handleSubmit}>
             <Input
@@ -89,16 +89,11 @@ const ProjectForm = ({ productName, productSlug, doPostObject }: Props) => {
   );
 };
 
-// @todo can i use connect if I dont need the state?  just to create an action.
-// const select = (appState: AppState) => ({
-//   state: appState,
-// });
-
 const actions = {
   doPostObject: postObject,
 };
 const WrappedProjectForm = connect(
-  () => {},
+  null,
   actions,
 )(ProjectForm);
 

@@ -87,10 +87,7 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
               slds-p-bottom_x-large
               slds-text-longform"
           >
-            <ProjectForm
-              productName={product.name}
-              productSlug={product.slug}
-            />
+            <ProjectForm product={product} />
             <div>project list header</div>
             <div>project list item</div>
           </div>
