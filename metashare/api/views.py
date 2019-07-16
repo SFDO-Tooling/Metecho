@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import ProductFilter
+from .filters import ProductFilter, ProjectFilter
 from .models import Product, Project
 from .paginators import CustomPaginator
 from .serializers import FullUserSerializer, ProductSerializer, ProjectSerializer
@@ -55,3 +55,5 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     pagination_class = CustomPaginator
     queryset = Project.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ProjectFilter

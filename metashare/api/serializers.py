@@ -37,6 +37,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     description = MarkdownField(allow_blank=True)
     commit_message = MarkdownField(allow_blank=True, required=False)
     release_notes = MarkdownField(allow_blank=True, required=False)
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
 
     class Meta:
         model = Project
