@@ -35,21 +35,8 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description = MarkdownField(allow_blank=True)
-    commit_message = MarkdownField(allow_blank=True, required=False)
-    release_notes = MarkdownField(allow_blank=True, required=False)
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
 
     class Meta:
         model = Project
-        fields = (
-            "id",
-            "name",
-            "pr_url",
-            "description",
-            "commit_message",
-            "release_notes",
-            "slug",
-            "old_slugs",
-            "product",
-        )
-        extra_kwargs = {"pr_url": {"allow_blank": True}}
+        fields = ("id", "name", "description", "slug", "old_slugs", "product")

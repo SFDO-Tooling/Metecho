@@ -25,28 +25,15 @@ class TestProjectSerializer:
         serializer = ProjectSerializer(
             data={
                 "name": "Test project",
-                "pr_url": "https://github.com/test/repo/pull/1",
                 "description": "Test `project`",
-                "commit_message": "Test _project_",
-                "release_notes": "Test *project*",
                 "product": str(product.id),
             }
         )
         assert serializer.is_valid()
         project = serializer.save()
         assert project.description_markdown == "<p>Test <code>project</code></p>"
-        assert project.commit_message_markdown == "<p>Test <em>project</em></p>"
-        assert project.release_notes_markdown == "<p>Test <em>project</em></p>"
 
     def test_markdown_fields_output(self, project_factory):
-        project = project_factory(
-            name="Test project",
-            pr_url="https://github.com/test/repo/pull/1",
-            description="Test `project`",
-            commit_message="Test _project_",
-            release_notes="Test *project*",
-        )
+        project = project_factory(name="Test project", description="Test `project`")
         serializer = ProjectSerializer(project)
         assert serializer.data["description"] == "<p>Test <code>project</code></p>"
-        assert serializer.data["commit_message"] == "<p>Test <em>project</em></p>"
-        assert serializer.data["release_notes"] == "<p>Test <em>project</em></p>"
