@@ -4,11 +4,12 @@ import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useState } from 'react';
+import useForm from 'react-hook-form';
 import { connect } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
-import { ObjectsActionType, postObject } from '@/store/actions';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
 import { Product } from '@/store/products/reducer';
+import { ObjectsActionType, postObject } from '@/store/actions';
+import { Project } from '@/store/projects/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
@@ -18,77 +19,82 @@ interface Props extends RouteComponentProps {
 }
 
 const ProjectForm = ({ product, doPostObject }: Props) => {
-  const [description, setDescription] = useState('');
-  const [name, setName] = useState('');
   const [projectCreateActive, setprojectCreateActive] = useState(false);
-  const [hasName, setHasName] = useState(true);
+  const { register, handleSubmit, setError, errors } = useForm({
+    mode: 'onBlur',
+  });
+  const [postSucess, handleSuccess] = useState(false);
 
-  const handleSubmit = () => {
-    if (name === '' && hasName) {
-      setHasName(false);
-      return;
-    }
+  const onSubmit = data => {
     doPostObject({
       objectType: OBJECT_TYPES.PROJECT,
-      content: { name, description, product: product.id },
+      content: {
+        name: data.name,
+        description: data.description,
+        product: product.id,
+      },
     })
       .then(() => {
-        // @todo - do the success-redirect
+        handleSuccess(true);
       })
       .catch(err => {
-        console.log(err.body);
-        // @todo - store error in component state for per-field inline display
+        if ('name' in err.body) {
+          setError('name', 'postError', err.body.name[0]);
+        }
       });
   };
-  const formControl = () => {
+
+  const formControl = (data: Project) => {
     if (projectCreateActive) {
-      handleSubmit();
+      if (data.name !== '') {
+        setError('name', 'invalidName', 'This field is required.');
+      }
       return;
     }
-    setprojectCreateActive(!projectCreateActive);
+
+    setprojectCreateActive(true);
   };
 
+  if (postSucess) {
+    return <Redirect to={routes.project_detail(product.slug, name)} />;
+  }
   return (
     <>
-      {projectCreateActive && (
+      {projectCreateActive && <h1>Create a Project for {product.name}</h1>}
+      <form onSubmit={handleSubmit(onSubmit)}>
         <>
-          <h1>Create a Project for {product.name}</h1>
-
-          <form onSubmit={handleSubmit}>
-            <Input
-              id="project-name"
-              label="Project Name"
-              required
-              errorText={hasName ? null : 'Project name is required.'}
-              value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setName(e.target.value)
-              }
-            />
-            <Textarea
-              aria-describedby="error-1"
-              id="project-description"
-              name="required-textarea-error"
-              label="Description"
-              value={description}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setDescription(e.target.value)
-              }
-            />
-          </form>
+          {projectCreateActive && (
+            <>
+              <Input
+                id="project-name"
+                label="Project Name"
+                name="name"
+                required
+                errorText={errors.name && errors.name.message}
+                inputRef={register({
+                  required: true,
+                })}
+              />
+              <Textarea
+                id="project-description"
+                label="Description"
+                name="description"
+                textareaRef={register}
+              />
+            </>
+          )}
         </>
-      )}
-
-      <Button
-        label={i18n.t('Create a Project')}
-        className="slds-size_full slds-p-vertical_xx-small"
-        variant="brand"
-        onClick={formControl}
-      />
+        <Button
+          label={i18n.t('Create a Project')}
+          className="slds-size_full slds-p-vertical_xx-small"
+          variant="brand"
+          type="submit"
+          onClick={formControl}
+        />
+      </form>
     </>
   );
 };
-
 const actions = {
   doPostObject: postObject,
 };
@@ -97,4 +103,4 @@ const WrappedProjectForm = connect(
   actions,
 )(ProjectForm);
 
-export default withRouter(WrappedProjectForm);
+export default WrappedProjectForm;
