@@ -20,7 +20,8 @@ class TestProductSerializer:
 
 @pytest.mark.django_db
 class TestProjectSerializer:
-    def test_markdown_fields_input(self):
+    def test_markdown_fields_input(self, product_factory):
+        product = product_factory()
         serializer = ProjectSerializer(
             data={
                 "name": "Test project",
@@ -28,6 +29,7 @@ class TestProjectSerializer:
                 "description": "Test `project`",
                 "commit_message": "Test _project_",
                 "release_notes": "Test *project*",
+                "product": str(product.id),
             }
         )
         assert serializer.is_valid()

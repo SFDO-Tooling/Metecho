@@ -85,6 +85,7 @@ class ProjectFactory(factory.django.DjangoModelFactory):
         model = Project
 
     name = factory.Sequence("Project {}".format)
+    product = factory.SubFactory(ProductFactory)
 
 
 @pytest.fixture
