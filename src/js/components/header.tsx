@@ -1,5 +1,6 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import React, { ComponentType } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -40,7 +41,11 @@ const Controls = ({ user, doLogout }: ControlProps) => (
 );
 
 const Header = ({ user, socket, errors, doLogout, doRemoveError }: Props) => {
-  const controls = () => <Controls user={user} doLogout={doLogout} />;
+  const controls = () => (
+    <PageHeaderControl>
+      <Controls user={user} doLogout={doLogout} />
+    </PageHeaderControl>
+  );
 
   return user ? (
     <>

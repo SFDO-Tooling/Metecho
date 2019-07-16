@@ -5,16 +5,6 @@
   @include z-index('global-header');
   border-radius: 0;
   background: $color-background-alt;
-
-  // Unable to access markup to add slds-grid_vertical-align-center
-  //   to this generic div so we are forcing it in nested CSS
-  .slds-page-header__row {
-    > div {
-      > div:not(.slds-media) {
-        align-items: center;
-      }
-    }
-  }
 }
 
 [data-logo-bit='end'] {
