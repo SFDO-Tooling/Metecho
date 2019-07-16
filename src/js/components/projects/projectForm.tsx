@@ -1,19 +1,19 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import useForm from 'react-hook-form';
+import { DataType } from 'react-hook-form/dist/types';
 import { connect } from 'react-redux';
-import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Product } from '@/store/products/reducer';
 import { ObjectsActionType, postObject } from '@/store/actions';
 import { Project } from '@/store/projects/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
-interface Props extends RouteComponentProps {
+interface Props {
   product: Product;
   doPostObject: ObjectsActionType;
 }
@@ -25,7 +25,7 @@ const ProjectForm = ({ product, doPostObject }: Props) => {
   });
   const [postSucess, handleSuccess] = useState(false);
 
-  const onSubmit = data => {
+  const onSubmit = (data: DataType) => {
     doPostObject({
       objectType: OBJECT_TYPES.PROJECT,
       content: {
