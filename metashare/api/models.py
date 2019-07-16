@@ -145,6 +145,10 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     commit_message = MarkdownField(blank=True, property_suffix="_markdown")
     release_notes = MarkdownField(blank=True, property_suffix="_markdown")
 
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="projects"
+    )
+
     slug_class = ProjectSlug
 
     class Meta:
