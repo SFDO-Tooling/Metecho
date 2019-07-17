@@ -8,7 +8,7 @@ export interface UrlParams {
   [key: string]: string | number | boolean;
 }
 
-class ApiError extends Error {
+export class ApiError extends Error {
   public response?: Response;
 
   public body?: string | { [key: string]: any };
@@ -62,14 +62,19 @@ const apiFetch = async (
     let msg = response.statusText;
     if (body) {
       if (typeof body === 'string') {
-        msg = body;
+        msg = `${msg}: ${body}`;
       } else if (body.detail) {
         msg = body.detail;
       } else if (body.non_field_errors) {
         msg = body.non_field_errors;
+      } else {
+        msg = `${msg}: ${JSON.stringify(body)}`;
       }
     }
-    dispatch(addError(msg));
+    // If a `POST` returns `400`, suppress default error to show errors inline
+    if (options.method !== 'POST' || response.status !== 400) {
+      dispatch(addError(msg));
+    }
     const error: ApiError = new Error(msg);
     error.response = response;
     error.body = body;

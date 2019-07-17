@@ -44,19 +44,19 @@ interface FetchObjectFailed {
 }
 interface PostObjectStarted {
   type: 'POST_OBJECT_STARTED';
-  payload: { objectType: ObjectTypes; content: ObjectData };
+  payload: { objectType: ObjectTypes; data: ObjectData };
 }
 interface PostObjectSucceeded {
   type: 'POST_OBJECT_SUCCEEDED';
   payload: {
-    content: ObjectData;
+    data: ObjectData;
     response: ObjectResponse;
     objectType: ObjectTypes;
   };
 }
 interface PostObjectfailed {
   type: 'POST_OBJECT_FAILED';
-  payload: { objectType: ObjectTypes; content: ObjectData };
+  payload: { objectType: ObjectTypes; data: ObjectData };
 }
 
 export type ObjectsAction =
@@ -72,13 +72,13 @@ export type ObjectsAction =
 
 export type ObjectsActionType = ({
   objectType,
-  content,
+  data,
   url,
   reset,
   filters,
 }: {
   objectType: ObjectTypes;
-  content?: ObjectData; // the posted content
+  data?: ObjectData; // the posted data
   url?: string;
   reset?: boolean;
   filters?: ObjectFilters;
@@ -151,32 +151,32 @@ export const fetchObject = ({
 
 export const postObject = ({
   objectType,
-  content,
+  data,
 }: {
   objectType: ObjectTypes;
-  content?: ObjectData;
+  data?: ObjectData;
 }): ThunkResult => async dispatch => {
   const baseUrl = window.api_urls[`${objectType}_list`]();
   dispatch({
     type: 'POST_OBJECT_STARTED',
-    payload: { objectType, content },
+    payload: { objectType, data },
   });
   try {
     const response = await apiFetch(addUrlParams(baseUrl), dispatch, {
       method: 'POST',
-      body: JSON.stringify(content),
+      body: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
       },
     });
     return dispatch({
       type: 'POST_OBJECT_SUCCEEDED',
-      payload: { content, response, objectType },
+      payload: { data, response, objectType },
     });
   } catch (err) {
     dispatch({
       type: 'POST_OBJECT_FAILED',
-      payload: { objectType, content },
+      payload: { objectType, data },
     });
     throw err;
   }

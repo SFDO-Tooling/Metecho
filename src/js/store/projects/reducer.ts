@@ -24,12 +24,12 @@ export interface ProjectsState {
 const reducer = (projects: ProjectsState = {}, action: ObjectsAction) => {
   switch (action.type) {
     case 'POST_OBJECT_SUCCEEDED':
-      const { content, objectType } = action.payload;
+      const { data, objectType } = action.payload;
       if (objectType === OBJECT_TYPES.PROJECT) {
         return {
-          [content.product]: {
-            name: content.name,
-            description: content.description,
+          [data.product]: {
+            name: data.name,
+            description: data.description,
           },
         };
       }
