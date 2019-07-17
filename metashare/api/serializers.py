@@ -49,7 +49,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "product",
-            "branch_name",
             "branch_url",
         )
 

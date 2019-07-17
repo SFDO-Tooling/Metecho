@@ -87,7 +87,6 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence("Project {}".format)
     product = factory.SubFactory(ProductFactory)
-    branch_name = factory.Sequence("branch-name-{}".format)
 
 
 @pytest.fixture

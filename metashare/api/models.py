@@ -4,6 +4,7 @@ from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.text import slugify
 from model_utils import Choices
 
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -151,6 +152,11 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.branch_name:
+            self.branch_name = slugify(self.name)
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ("-created_at", "name")

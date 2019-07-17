@@ -40,11 +40,7 @@ class TestProjectSerializer:
         assert serializer.data["description"] == "<p>Test <code>project</code></p>"
 
     def test_branchUrl(self, project_factory):
-        project = project_factory(
-            name="Test project",
-            description="Test `project`",
-            branch_name="test-project",
-        )
+        project = project_factory(name="Test project", description="Test `project`")
         serializer = ProjectSerializer(project)
         assert (
             serializer.data["branch_url"]
