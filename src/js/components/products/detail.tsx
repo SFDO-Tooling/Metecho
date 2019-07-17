@@ -16,6 +16,7 @@ import { Product } from '@/store/products/reducer';
 import { selectProduct, selectProductSlug } from '@/store/products/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
+import ProjectListItem from '@/components/projects/projectListItem';
 
 type Props = {
   product?: Product | null;
@@ -57,6 +58,32 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
     product.description &&
     (product.description.startsWith('<h1>') ||
       product.description.startsWith('<h2>'));
+
+  // some mock data for now
+  const projects = [
+    {
+      id: 1,
+      status: 'new',
+      name: 'Project Name',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
+    },
+    {
+      id: 2,
+      status: 'new',
+      name: 'Project Name II',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
+    },
+    {
+      id: 3,
+      status: null,
+      name: 'Project Name II',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
+    },
+  ];
+
   return (
     <DocumentTitle title={`${product.name} | ${i18n.t('MetaShare')}`}>
       <>
@@ -96,8 +123,9 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
           >
             {/* @@@ `startOpen` should be `true` only when no projects exist */}
             <ProjectForm product={product} startOpen={true} />
-            <div>project list header</div>
-            <div>project list item</div>
+            {projects.map(project => (
+              <ProjectListItem project={project} product={product} />
+            ))}
           </div>
           <div
             className="slds-col

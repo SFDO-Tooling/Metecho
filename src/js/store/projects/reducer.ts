@@ -10,6 +10,7 @@ export interface Project {
   description: string;
   branch_name: string;
   branch_url: string;
+  status: string | null;
 }
 export interface ProjectsState {
   [key: string]: {
