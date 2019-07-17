@@ -3,7 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
@@ -22,6 +22,12 @@ type Props = {
   productSlug?: string;
   doFetchObject: ObjectsActionType;
 } & RouteComponentProps;
+
+const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
+  <a href={url} target="_blank" rel="noreferrer noopener">
+    {children}
+  </a>
+);
 
 const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
   useEffect(() => {
@@ -57,6 +63,7 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
         <PageHeader
           className="page-header slds-p-around_x-large"
           title={product.name}
+          info={<RepoLink url={product.repo_url}>{product.repo_url}</RepoLink>}
         />
         <div
           className="slds-p-horizontal_x-large
@@ -107,11 +114,7 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
             )}
-            <a
-              href={product.repo_url}
-              target="_blank"
-              rel="noreferrer noopener"
-            >
+            <RepoLink url={product.repo_url}>
               {i18n.t('GitHub Repo')}
               <Icon
                 category="utility"
@@ -120,7 +123,7 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
                 className="slds-m-bottom_xx-small"
                 containerClassName="slds-m-left_xx-small slds-current-color"
               />
-            </a>
+            </RepoLink>
           </div>
         </div>
       </>

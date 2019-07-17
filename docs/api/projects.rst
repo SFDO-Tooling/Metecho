@@ -22,14 +22,13 @@ Retrieve
       "results": [
         {
           "id": "3Lw7OwK",
-          "product": "zVQYrye",
           "name": "Test Project",
+          "description": "<p>This is safely rendered Markdown.</p>",
           "slug": "test-project",
           "old_slugs": [],
-          "pr_url": "https://github.com/sfdo/test-project/pull/42",
-          "description": "<p>This is safely rendered Markdown.</p>",
-          "commit_message": "<p>This is safely rendered Markdown.</p>",
-          "release_notes": "<p>This is safely rendered Markdown.</p>",
+          "product": "zVQYrye",
+          "branch_name": "test-project",
+          "branch_url": "https://www.github.com/SFDO-Tooling/test-product/tree/test-project",
         }
         ...
       ]

@@ -10,21 +10,21 @@ interface ObjectPayload {
 interface ObjectFilters {
   slug: string;
 }
-
-interface ProjectFormData {
-  name: string;
-  description: string;
-  product: string;
+interface ObjectData {
+  [key: string]: any;
 }
+interface ObjectResponse {
+  next: string | null;
+  results: any[];
+}
+
 interface FetchObjectsStarted {
   type: 'FETCH_OBJECTS_STARTED';
   payload: ObjectPayload;
 }
 interface FetchObjectsSucceeded {
   type: 'FETCH_OBJECTS_SUCCEEDED';
-  payload: {
-    response: { next: string | null; results: any[] };
-  } & ObjectPayload;
+  payload: { response: ObjectResponse } & ObjectPayload;
 }
 interface FetchObjectsFailed {
   type: 'FETCH_OBJECTS_FAILED';
@@ -42,22 +42,21 @@ interface FetchObjectFailed {
   type: 'FETCH_OBJECT_FAILED';
   payload: { filters: ObjectFilters } & ObjectPayload;
 }
-
 interface PostObjectStarted {
   type: 'POST_OBJECT_STARTED';
+  payload: { objectType: ObjectTypes; content: ObjectData };
 }
-
 interface PostObjectSucceeded {
   type: 'POST_OBJECT_SUCCEEDED';
   payload: {
-    product: string;
-    content: ProjectFormData;
+    content: ObjectData;
+    response: ObjectResponse;
     objectType: ObjectTypes;
   };
 }
-
 interface PostObjectfailed {
   type: 'POST_OBJECT_FAILED';
+  payload: { objectType: ObjectTypes; content: ObjectData };
 }
 
 export type ObjectsAction =
@@ -79,7 +78,7 @@ export type ObjectsActionType = ({
   filters,
 }: {
   objectType: ObjectTypes;
-  content?: {}; // the posted content
+  content?: ObjectData; // the posted content
   url?: string;
   reset?: boolean;
   filters?: ObjectFilters;
@@ -155,7 +154,7 @@ export const postObject = ({
   content,
 }: {
   objectType: ObjectTypes;
-  content: ProjectFormData;
+  content: ObjectData;
 }): ThunkResult => async dispatch => {
   const baseUrl = window.api_urls[`${objectType}_list`]();
   dispatch({
@@ -172,12 +171,12 @@ export const postObject = ({
     });
     return dispatch({
       type: 'POST_OBJECT_SUCCEEDED',
-      payload: { content: response, objectType },
+      payload: { content, response, objectType },
     });
   } catch (err) {
     dispatch({
       type: 'POST_OBJECT_FAILED',
-      payload: { content },
+      payload: { objectType, content },
     });
     throw err;
   }
