@@ -50,7 +50,7 @@ interface PostObjectSucceeded {
   type: 'POST_OBJECT_SUCCEEDED';
   payload: {
     data: ObjectData;
-    response: ObjectResponse;
+    response: any;
     objectType: ObjectTypes;
   };
 }

@@ -1,6 +1,4 @@
 import { ObjectsAction } from '@/store/actions';
-import { ProductsAction } from '@/store/products/actions';
-import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Project {
@@ -15,24 +13,37 @@ export interface Project {
 }
 export interface ProjectsState {
   [key: string]: {
-    projects: [];
+    projects: Project[];
     next: string | null;
     notFound: string[];
   };
 }
 
+const defaultState = {
+  projects: [],
+  next: null,
+  notFound: [],
+};
+
 const reducer = (projects: ProjectsState = {}, action: ObjectsAction) => {
   switch (action.type) {
-    case 'POST_OBJECT_SUCCEEDED':
-      const { data, objectType } = action.payload;
+    case 'POST_OBJECT_SUCCEEDED': {
+      const {
+        response,
+        objectType,
+      }: { response: Project; objectType: ObjectTypes } = action.payload;
       if (objectType === OBJECT_TYPES.PROJECT) {
+        const product = projects[response.product] || { ...defaultState };
         return {
-          [data.product]: {
-            name: data.name,
-            description: data.description,
+          ...projects,
+          [response.product]: {
+            ...product,
+            projects: [...product.projects, response],
           },
         };
       }
+      return projects;
+    }
   }
   return projects;
 };

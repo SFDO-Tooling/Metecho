@@ -56,6 +56,7 @@ const ProjectForm = ({
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrors({});
     doPostObject({
       objectType: OBJECT_TYPES.PROJECT,
       data: {
@@ -74,9 +75,13 @@ const ProjectForm = ({
       .catch((err: ApiError) => {
         const newErrors =
           err.body && typeof err.body === 'object' ? err.body : {};
-        if (fields.filter(field => newErrors[field]).length) {
+        if (
+          fields.filter(field => newErrors[field] && newErrors[field].length)
+            .length
+        ) {
           setErrors(newErrors);
         } else if (err.response && err.response.status === 400) {
+          // If no inline errors to show, fallback to default global error toast
           doAddError(err.message);
         }
       });

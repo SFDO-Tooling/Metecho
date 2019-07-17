@@ -94,6 +94,7 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
               slds-p-bottom_x-large
               slds-text-longform"
           >
+            {/* @@@ `startOpen` should be `true` only when no projects exist */}
             <ProjectForm product={product} startOpen={true} />
             <div>project list header</div>
             <div>project list item</div>
