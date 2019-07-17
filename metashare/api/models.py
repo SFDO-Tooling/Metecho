@@ -149,6 +149,9 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     slug_class = ProjectSlug
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("branch_name", "product"),)

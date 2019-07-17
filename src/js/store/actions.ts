@@ -154,7 +154,7 @@ export const postObject = ({
   content,
 }: {
   objectType: ObjectTypes;
-  content: ObjectData;
+  content?: ObjectData;
 }): ThunkResult => async dispatch => {
   const baseUrl = window.api_urls[`${objectType}_list`]();
   dispatch({
