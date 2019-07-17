@@ -9,7 +9,7 @@ export interface Product {
   slug: string;
   old_slugs: string[];
   repo_url: string;
-  description: string | null;
+  description: string;
   is_managed: boolean;
 }
 export interface ProductsState {

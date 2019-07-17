@@ -4,35 +4,24 @@ import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Project {
-  status?: string;
+  id: string;
+  product: string;
   name: string;
-  description: string | null;
-  pr_url: string;
-  commit_message: string;
-  release_notes: string;
-  tasks: [];
+  slug: string;
+  old_slugs: string[];
+  description: string;
+  branch_name: string;
+  branch_url: string;
 }
 export interface ProjectsState {
-  projects: {
-    id: {
-      projects: [];
-      next: string | null;
-    };
+  [key: string]: {
+    projects: [];
+    next: string | null;
+    notFound: string[];
   };
 }
 
-const defaultState = {
-  projects: {
-    id: {},
-    next: null,
-    notFound: [],
-  },
-};
-
-const reducer = (
-  projects: ProjectsState = defaultState,
-  action: ObjectsAction,
-) => {
+const reducer = (projects: ProjectsState = {}, action: ObjectsAction) => {
   switch (action.type) {
     case 'POST_OBJECT_SUCCEEDED':
       const { content, objectType } = action.payload;
