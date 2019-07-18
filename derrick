@@ -67,6 +67,9 @@ case "$1" in
     "shell")
         dcr python manage.py shell
         ;;
+    "dbshell")
+        dcr python manage.py dbshell
+        ;;
     "prune")
         # See https://docs.docker.com/config/pruning/ for more detail.
         docker image prune -f

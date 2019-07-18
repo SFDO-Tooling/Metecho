@@ -1,7 +1,6 @@
-from rest_framework.fields import CharField
 import bleach
 from markdown import markdown
-
+from rest_framework.fields import CharField
 
 # These two constants are duplicated from sfdo-template-helpers' MarkdownField.
 # Not the best thing, but the clearest way to render markdown out of a serializer.
