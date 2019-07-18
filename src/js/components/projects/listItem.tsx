@@ -11,21 +11,15 @@ interface Props {
 }
 
 const ProjectListItem = ({ product, project }: Props) => {
-  const { name, description, status } = project;
+  const { name, description, slug } = project;
   return (
     <div>
       <div className="slds-p-top_x-large project-list">
         <div className="slds-grid">
           {/* @todo capture slug from actual project */}
-          <Link to={routes.project_detail(product.slug, 'product-slug')}>
+          <Link to={routes.project_detail(product.slug, slug)}>
             <h2 className="slds-text-heading_medium">{name}</h2>
           </Link>
-
-          {status && (
-            <span className="slds-align-middle slds-badge">
-              {<strong>{status}</strong>}
-            </span>
-          )}
         </div>
         {description && (
           <p

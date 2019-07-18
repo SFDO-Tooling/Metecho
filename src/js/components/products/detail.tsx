@@ -12,7 +12,7 @@ import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
 import { AppState } from '@/store';
-import { fetchObject, ObjectsActionType } from '@/store/actions';
+import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
 import { selectProduct, selectProductSlug } from '@/store/products/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -22,6 +22,7 @@ type Props = {
   product?: Product | null;
   productSlug?: string;
   doFetchObject: ObjectsActionType;
+  doFetchObjects: ObjectsActionType;
 } & RouteComponentProps;
 
 const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
@@ -30,7 +31,12 @@ const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
   </a>
 );
 
-const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
+const ProductDetail = ({
+  product,
+  productSlug,
+  doFetchObject,
+  doFetchObjects,
+}: Props) => {
   useEffect(() => {
     if (productSlug && product === undefined) {
       // Fetch product from API
@@ -39,7 +45,14 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
         filters: { slug: productSlug },
       });
     }
-  }, [product, productSlug, doFetchObject]);
+
+    if (product) {
+      doFetchObjects({
+        objectType: OBJECT_TYPES.PROJECT,
+        filters: { product: product.id },
+      });
+    }
+  }, [product, productSlug, doFetchObject, doFetchObjects]);
 
   if (!product) {
     if (!productSlug || product === null) {
@@ -62,22 +75,19 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
   // some mock data for now
   const projects = [
     {
-      id: 1,
-      status: 'new',
+      id: null,
       name: 'Project Name',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
     },
     {
       id: 2,
-      status: 'new',
       name: 'Project Name II',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
     },
     {
       id: 3,
-      status: null,
       name: 'Project Name II',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
@@ -124,7 +134,11 @@ const ProductDetail = ({ product, productSlug, doFetchObject }: Props) => {
             {/* @@@ `startOpen` should be `true` only when no projects exist */}
             <ProjectForm product={product} startOpen={true} />
             {projects.map(project => (
-              <ProjectListItem project={project} product={product} />
+              <ProjectListItem
+                key={project.id}
+                project={project}
+                product={product}
+              />
             ))}
           </div>
           <div
@@ -166,6 +180,7 @@ const select = (appState: AppState, props: Props) => ({
 });
 const actions = {
   doFetchObject: fetchObject,
+  doFetchObjects: fetchObjects,
 };
 const WrappedProductDetail = connect(
   select,
