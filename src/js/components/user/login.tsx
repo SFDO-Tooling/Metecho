@@ -87,7 +87,7 @@ const Login = ({ user }: { user: User | null }) =>
             slds-grid
             slds-grid_vertical
             slds-grid_align-center
-            slds-grid_vertical-align-center"
+            slds-p-around_xx-large"
         >
           <WelcomeMatTile
             title={i18n.t('Welcome to MetaShare!')}
@@ -96,26 +96,26 @@ const Login = ({ user }: { user: User | null }) =>
             variant="info-only"
           />
           <WelcomeMatTile
-            title="Something about MetaShare"
-            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            title="What can you do with MetaShare"
+            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet. Making one just a little longer to test lengths. Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet. Chocolate bar marzipan soufflé marshmallow sugar plum tiramisu."
             icon={<Icon category="utility" name="call" />}
             variant="info-only"
           />
           <WelcomeMatTile
-            title="Something about MetaShare"
-            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            title="Who can use do with MetaShare"
+            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet. Gummi bears bear claw lemon drops tootsie roll danish ice cream sugar macaroon chocolate cookie sweet ice cream caramels. biscuit lollipop marshmallow chocolate chocolate bar biscuit."
             icon={<Icon category="utility" name="upload" />}
             variant="info-only"
           />
           <WelcomeMatTile
-            title="Something about MetaShare"
-            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            title="Where you can use MetaShare"
+            description="Lorem ipsum dolor, a shorter one. Gummi bears bear claw lemon drops tootsie roll danish ice cream sugar biscuit lollipop marshmallow."
             icon={<Icon category="utility" name="magicwand" />}
             variant="info-only"
           />
           <WelcomeMatTile
-            title="Something about MetaShare"
-            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
+            title="How to use MetaShare to its fullest potential"
+            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet and a slightly longer one that may wrap in some cases. Soufflé donut jelly beans sugar plum oat cake. muffin chocolate candy chocolate chocolate bar marzipan soufflé marshmallow sugar plum tiramisu. Cake powder licorice topping. halvah powder muffin biscuit."
             icon={<Icon category="utility" name="knowledge_base" />}
             variant="info-only"
           />
