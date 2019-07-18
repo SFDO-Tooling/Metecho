@@ -7,16 +7,16 @@ import React, { ReactNode, useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
+import ProjectForm from 'src/js/components/projects/createForm';
+import ProjectListItem from 'src/js/components/projects/listItem';
 
 import ProductNotFound from '@/components/products/product404';
-import ProjectForm from '@/components/projects/projectForm';
 import { AppState } from '@/store';
 import { fetchObject, ObjectsActionType } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
 import { selectProduct, selectProductSlug } from '@/store/products/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
-import ProjectListItem from '@/components/projects/projectListItem';
 
 type Props = {
   product?: Product | null;
