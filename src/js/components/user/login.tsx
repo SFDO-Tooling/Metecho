@@ -53,10 +53,11 @@ const Login = ({ user }: { user: User | null }) =>
   user ? (
     <Redirect to={routes.home()} />
   ) : (
-    <div className="slds-welcome-mat slds-welcome-mat_info-only">
-      <div className="slds-welcome-mat__content slds-grid">
+    <div className="slds-welcome-mat slds-welcome-mat_info-only welcome-container">
+      <div className="slds-welcome-mat__content slds-grid welcome-inner">
         <div
-          className="slds-welcome-mat__info slds-size_1-of-2"
+          className="slds-welcome-mat__info slds-size_1-of-1
+          slds-medium-size_1-of-2"
           style={{ backgroundImage: `url(${welcomeMatBG})` }}
         >
           <div className="slds-welcome-mat__info-content">
@@ -80,8 +81,13 @@ const Login = ({ user }: { user: User | null }) =>
         </div>
         <div
           className="slds-welcome-mat__tiles
-            slds-size_1-of-2
-            slds-welcome-mat__tiles_info-only"
+            slds-size_1-of-1
+            slds-medium-size_1-of-2
+            slds-welcome-mat__tiles_info-only
+            slds-grid
+            slds-grid_vertical
+            slds-grid_align-center
+            slds-grid_vertical-align-center"
         >
           <WelcomeMatTile
             title={i18n.t('Welcome to MetaShare!')}

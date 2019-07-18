@@ -1,0 +1,18 @@
+// Welcome Mat Overrides and Additions
+// ===================================
+
+.welcome-container {
+  height: 100%;
+}
+
+.welcome-inner {
+  max-height: unset;
+
+  @media (max-width: $mq-medium) {
+    flex-wrap: wrap;
+  }
+
+  .welcome-container & {
+    height: 100%;
+  }
+}
