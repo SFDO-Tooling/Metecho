@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from . import gh
 from .fields import MarkdownField
 from .models import Product, Project
 
@@ -49,9 +50,17 @@ class ProjectSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "product",
-            "branch_name",
             "branch_url",
         )
 
     def get_branch_url(self, obj):
         return f"{obj.product.repo_url}/tree/{obj.branch_name}"
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        gh.create_branch(
+            self.context["request"].user,
+            instance.product.repo_url,
+            instance.branch_name,
+        )
+        return instance
