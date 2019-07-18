@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from ..serializers import ProductSerializer, ProjectSerializer
@@ -20,7 +22,9 @@ class TestProductSerializer:
 
 @pytest.mark.django_db
 class TestProjectSerializer:
-    def test_markdown_fields_input(self, product_factory):
+    def test_markdown_fields_input(self, rf, user_factory, product_factory):
+        request = rf.post("/")
+        request.user = user_factory()
         product = product_factory()
         serializer = ProjectSerializer(
             data={
@@ -28,10 +32,19 @@ class TestProjectSerializer:
                 "description": "Test `project`",
                 "branch_name": "some-branch",
                 "product": str(product.id),
-            }
+            },
+            context={"request": request},
         )
         assert serializer.is_valid()
-        project = serializer.save()
+
+        with patch("metashare.api.gh.login") as login:
+            repo = MagicMock()
+            repo.url = "test"
+            gh = MagicMock()
+            gh.repositories.return_value = [repo]
+            login.return_value = gh
+            project = serializer.save()
+
         assert project.description_markdown == "<p>Test <code>project</code></p>"
 
     def test_markdown_fields_output(self, project_factory):
