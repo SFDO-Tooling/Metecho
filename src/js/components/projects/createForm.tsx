@@ -67,8 +67,16 @@ const ProjectForm = ({
     })
       .then(action => {
         const { type, payload } = action;
-        if (type === 'POST_OBJECT_SUCCEEDED' && payload && payload.slug) {
-          const url = routes.project_detail(product.slug, payload.slug);
+        if (
+          type === 'POST_OBJECT_SUCCEEDED' &&
+          payload &&
+          payload.response &&
+          payload.response.slug
+        ) {
+          const url = routes.project_detail(
+            product.slug,
+            payload.response.slug,
+          );
           history.push(url);
         }
       })

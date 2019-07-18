@@ -27,7 +27,6 @@ Retrieve
           "slug": "test-project",
           "old_slugs": [],
           "product": "zVQYrye",
-          "branch_name": "test-project",
           "branch_url": "https://www.github.com/SFDO-Tooling/test-product/tree/test-project",
         }
         ...

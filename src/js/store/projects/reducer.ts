@@ -8,7 +8,6 @@ export interface Project {
   slug: string;
   old_slugs: string[];
   description: string;
-  branch_name: string;
   branch_url: string;
   status: string | null;
 }
