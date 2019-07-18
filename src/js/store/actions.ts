@@ -5,10 +5,11 @@ import { ObjectTypes } from '@/utils/constants';
 interface ObjectPayload {
   objectType: ObjectTypes;
   url: string;
+  filters: ObjectFilters;
   reset?: boolean;
 }
 interface ObjectFilters {
-  slug: string;
+  [key: string]: string;
 }
 interface ObjectData {
   [key: string]: any;
@@ -32,15 +33,15 @@ interface FetchObjectsFailed {
 }
 interface FetchObjectStarted {
   type: 'FETCH_OBJECT_STARTED';
-  payload: { filters: ObjectFilters } & ObjectPayload;
+  payload: ObjectPayload;
 }
 interface FetchObjectSucceeded {
   type: 'FETCH_OBJECT_SUCCEEDED';
-  payload: { object: any; filters: ObjectFilters } & ObjectPayload;
+  payload: { object: any } & ObjectPayload;
 }
 interface FetchObjectFailed {
   type: 'FETCH_OBJECT_FAILED';
-  payload: { filters: ObjectFilters } & ObjectPayload;
+  payload: ObjectPayload;
 }
 interface PostObjectStarted {
   type: 'POST_OBJECT_STARTED';
@@ -87,27 +88,32 @@ export type ObjectsActionType = ({
 export const fetchObjects = ({
   objectType,
   url,
+  filters = {},
   reset = false,
 }: {
   objectType: ObjectTypes;
   url?: string;
+  filters?: ObjectFilters;
   reset?: boolean;
 }): ThunkResult => async dispatch => {
   const baseUrl = url || window.api_urls[`${objectType}_list`]();
   dispatch({
     type: 'FETCH_OBJECTS_STARTED',
-    payload: { objectType, url: baseUrl, reset },
+    payload: { objectType, url: baseUrl, reset, filters },
   });
   try {
-    const response = await apiFetch(baseUrl, dispatch);
+    const response = await apiFetch(
+      addUrlParams(baseUrl, { ...filters }),
+      dispatch,
+    );
     return dispatch({
       type: 'FETCH_OBJECTS_SUCCEEDED',
-      payload: { response, objectType, url: baseUrl, reset },
+      payload: { response, objectType, url: baseUrl, reset, filters },
     });
   } catch (err) {
     dispatch({
       type: 'FETCH_OBJECTS_FAILED',
-      payload: { objectType, url: baseUrl, reset },
+      payload: { objectType, url: baseUrl, reset, filters },
     });
     throw err;
   }
