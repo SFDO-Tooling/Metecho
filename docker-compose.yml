@@ -23,6 +23,9 @@ services:
       - ~/.gitconfig:/root/.gitconfig
     ports:
       - '0.0.0.0:8080:8080'
+      - '0.0.0.0:33284:33284'  # Spells "DEBUG" in phone-number
+    stdin_open: true
+    tty: true
 
   # Runs the database process:
   postgres:
