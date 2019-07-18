@@ -1,6 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
 import { Product } from '@/store/products/reducer';
 import { Project } from '@/store/projects/reducer';
+import routes from '@/utils/routes';
 
 interface Props {
   product: Product;
@@ -13,7 +16,11 @@ const ProjectListItem = ({ product, project }: Props) => {
     <div>
       <div className="slds-p-top_x-large project-list">
         <div className="slds-grid">
-          <h2 className="slds-text-heading_medium">{name}</h2>
+          {/* @todo capture slug from actual project */}
+          <Link to={routes.project_detail(product.slug, 'product-slug')}>
+            <h2 className="slds-text-heading_medium">{name}</h2>
+          </Link>
+
           {status && (
             <span className="slds-align-middle slds-badge">
               {<strong>{status}</strong>}
