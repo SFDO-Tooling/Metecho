@@ -3,21 +3,18 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProductDetail from '@/components/products/detail';
-import { fetchObject } from '@/store/actions';
-import { createProject } from '@/store/projects/actions';
+import { fetchObject, postObject } from '@/store/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithApi } from './../../utils';
 
 jest.mock('@/store/actions');
-jest.mock('@/store/projects/actions');
 
 fetchObject.mockReturnValue({ type: 'TEST' });
-createProject.mockReturnValue({ type: 'TEST' });
+postObject.mockReturnValue({ test: 'TEST' });
 
 afterEach(() => {
   fetchObject.mockClear();
-  createProject.mockClear();
 });
 
 const defaultState = {
@@ -139,8 +136,9 @@ describe('<ProductDetail />', () => {
 
         const name = nameInput.value;
         const description = descriptionInput.value;
+        const product = 'prod-1';
 
-        expect(createProject).toHaveBeenCalledWith({ name, description });
+        expect(postObject).toHaveBeenCalledWith({ name, description, product });
       });
 
       test('validates name field', () => {
@@ -151,7 +149,7 @@ describe('<ProductDetail />', () => {
         fireEvent.click(button);
 
         expect(getByText('Project name is required.')).toBeVisible();
-        expect(createProject).not.toHaveBeenCalled();
+        expect(postObject).not.toHaveBeenCalled();
       });
     });
   });
