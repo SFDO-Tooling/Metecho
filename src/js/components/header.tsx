@@ -35,19 +35,14 @@ interface ControlProps {
 const Controls = ({ user, doLogout }: ControlProps) => (
   <>
     <Avatar />
-    <span className="slds-p-left_small">
-        {user && user.username}
-    </span>
+    <span className="slds-p-left_small">{user && user.username}</span>
     <Logout doLogout={doLogout} />
   </>
 );
 
 const Header = ({ user, socket, errors, doLogout, doRemoveError }: Props) => {
   const controls = () => (
-    <PageHeaderControl
-      className="slds-grid
-        slds-grid_vertical-align-center"
-      >
+    <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
       <Controls user={user} doLogout={doLogout} />
     </PageHeaderControl>
   );

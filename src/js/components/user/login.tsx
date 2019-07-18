@@ -53,11 +53,16 @@ const Login = ({ user }: { user: User | null }) =>
   user ? (
     <Redirect to={routes.home()} />
   ) : (
-    <div className="slds-welcome-mat slds-welcome-mat_info-only welcome-container">
+    <div
+      className="slds-welcome-mat
+        slds-welcome-mat_info-only
+        welcome-container"
+    >
       <div className="slds-welcome-mat__content slds-grid welcome-inner">
         <div
-          className="slds-welcome-mat__info slds-size_1-of-1
-          slds-medium-size_1-of-2"
+          className="slds-welcome-mat__info
+            slds-size_1-of-1
+            slds-medium-size_1-of-2"
           style={{ backgroundImage: `url(${welcomeMatBG})` }}
         >
           <div className="slds-welcome-mat__info-content">
