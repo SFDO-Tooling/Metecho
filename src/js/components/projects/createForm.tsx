@@ -88,7 +88,7 @@ const ProjectForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
         <>
           <h2 className="slds-text-heading_medium">
@@ -97,6 +97,7 @@ const ProjectForm = ({
           <Input
             id="project-name"
             label={i18n.t('Project Name')}
+            className="slds-form-element_stacked"
             name="name"
             value={name}
             required
@@ -110,6 +111,7 @@ const ProjectForm = ({
           <Textarea
             id="project-description"
             label={i18n.t('Description')}
+            className="slds-form-element_stacked"
             name="description"
             value={description}
             errorText={
@@ -121,23 +123,27 @@ const ProjectForm = ({
           />
         </>
       )}
-      <Button
-        label={i18n.t('Create Project')}
-        className={classNames('slds-p-vertical_xx-small', {
-          'slds-size_full': !isOpen,
-        })}
-        variant="brand"
-        type="submit"
-        onClick={submitClicked}
-      />
-      {isOpen && (
+      <div class="slds-m-top--medium">
         <Button
-          label={i18n.t('Close Form')}
-          className="slds-p-vertical_xx-small"
-          variant="base"
-          onClick={closeForm}
+          label={i18n.t('Create Project')}
+          className={classNames({
+            'slds-size_full hide-separator': !isOpen,
+            'show-separator': isOpen,
+          })}
+          variant="brand"
+          type="submit"
+          onClick={submitClicked}
         />
-      )}
+        <span class="vertical-separator slds-m-left--large"></span>
+        {isOpen && (
+          <Button
+            label={i18n.t('Close Form')}
+            className="slds-p-left--medium slds-p-right--medium"
+            variant="base"
+            onClick={closeForm}
+          />
+        )}
+      </div>
     </form>
   );
 };
