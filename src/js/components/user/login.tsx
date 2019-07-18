@@ -87,7 +87,8 @@ const Login = ({ user }: { user: User | null }) =>
             slds-grid
             slds-grid_vertical
             slds-grid_align-center
-            slds-p-around_xx-large"
+            slds-p-left_xx-large
+            slds-p-right_xx-large"
         >
           <WelcomeMatTile
             title={i18n.t('Welcome to MetaShare!')}
