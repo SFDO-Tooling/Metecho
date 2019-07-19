@@ -44,6 +44,24 @@ const reducer = (projects: ProjectsState = {}, action: ObjectsAction) => {
       }
       return projects;
     }
+    case 'FETCH_OBJECTS_SUCCEEDED': {
+      const {
+        response: { results, next },
+        objectType,
+        reset,
+      } = action.payload;
+      if (objectType === OBJECT_TYPES.PROJECT) {
+        if (reset) {
+          /* do something here */
+        }
+        return {
+          ...projects,
+          projects: results,
+          next,
+        };
+      }
+      return projects;
+    }
   }
   return projects;
 };
