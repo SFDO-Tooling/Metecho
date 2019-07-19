@@ -15,11 +15,13 @@ import { AppState } from '@/store';
 import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
 import { selectProduct, selectProductSlug } from '@/store/products/selectors';
+import { Project } from '@/store/projects/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 type Props = {
   product?: Product | null;
+  projects?: Project[] | null;
   productSlug?: string;
   doFetchObject: ObjectsActionType;
   doFetchObjects: ObjectsActionType;
@@ -33,6 +35,7 @@ const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
 
 const ProductDetail = ({
   product,
+  projects,
   productSlug,
   doFetchObject,
   doFetchObjects,
@@ -46,13 +49,13 @@ const ProductDetail = ({
       });
     }
 
-    if (product) {
+    if (product && !projects[product.id]) {
       doFetchObjects({
         objectType: OBJECT_TYPES.PROJECT,
         filters: { product: product.id },
       });
     }
-  }, [product, productSlug, doFetchObject, doFetchObjects]);
+  }, [product, projects, productSlug, doFetchObject, doFetchObjects]);
 
   if (!product) {
     if (!productSlug || product === null) {
@@ -73,21 +76,21 @@ const ProductDetail = ({
       product.description.startsWith('<h2>'));
 
   // some mock data for now
-  const projects = [
+  projects = [
     {
-      id: null,
+      id: 'fwf',
       name: 'Project Name',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
     },
     {
-      id: 2,
+      id: 'fijwf9',
       name: 'Project Name II',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
     },
     {
-      id: 3,
+      id: 'fnjnf',
       name: 'Project Name II',
       description:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
