@@ -133,14 +133,16 @@ const ProductDetail = ({
           >
             {/* @@@ `startOpen` should be `true` only when no projects exist */}
             <ProjectForm product={product} startOpen={true} />
-            {projects &&
-              projects.map(project => (
-                <ProjectListItem
-                  key={project.id}
-                  project={project}
-                  product={product}
-                />
-              ))}
+            <ul>
+              {projects &&
+                projects.map(project => (
+                  <ProjectListItem
+                    key={project.id}
+                    project={project}
+                    product={product}
+                  />
+                ))}
+            </ul>
           </div>
           <div
             className="slds-col
