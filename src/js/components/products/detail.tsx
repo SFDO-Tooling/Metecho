@@ -131,11 +131,13 @@ const ProductDetail = ({
             className="slds-col
               slds-size_1-of-1
               slds-medium-size_2-of-3
-              slds-p-bottom_x-large
-              slds-text-longform"
+              slds-p-bottom_x-large"
           >
             <ProjectForm product={product} startOpen={Boolean(!projects)} />
-            <ul>
+            <h2 className="slds-text-heading_medium">
+              {i18n.t('Projects for')} {product.name}
+            </h2>
+            <ul className="slds-has-dividers_bottom">
               {projects &&
                 projects.map(project => (
                   <ProjectListItem

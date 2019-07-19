@@ -100,7 +100,7 @@ const ProjectForm = ({
       {isOpen && (
         <>
           <h2 className="slds-text-heading_medium">
-            {i18n.t('Create New Project for')} {product.name}
+            {i18n.t('Create a New Project for')} {product.name}
           </h2>
           <Input
             id="project-name"
@@ -133,7 +133,7 @@ const ProjectForm = ({
       )}
       <div className={classNames({ 'slds-m-top--medium': isOpen })}>
         <Button
-          label={i18n.t('Create Project')}
+          label={isOpen ? i18n.t('Create Project') : i18n.t('Create a Project')}
           className={classNames({
             'slds-size_full hide-separator': !isOpen,
             'show-separator': isOpen,
