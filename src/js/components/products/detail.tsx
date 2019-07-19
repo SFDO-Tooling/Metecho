@@ -49,7 +49,7 @@ const ProductDetail = ({
       });
     }
 
-    if (product && !projects[product.id]) {
+    if (product && projects && !projects[product.id]) {
       doFetchObjects({
         objectType: OBJECT_TYPES.PROJECT,
         filters: { product: product.id },
@@ -134,8 +134,7 @@ const ProductDetail = ({
               slds-p-bottom_x-large
               slds-text-longform"
           >
-            {/* @@@ `startOpen` should be `true` only when no projects exist */}
-            <ProjectForm product={product} startOpen={true} />
+            <ProjectForm product={product} startOpen={Boolean(!projects)} />
             <ul>
               {projects &&
                 projects.map(project => (
