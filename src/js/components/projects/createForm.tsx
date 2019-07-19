@@ -119,7 +119,7 @@ const ProjectForm = ({
           <Textarea
             id="project-description"
             label={i18n.t('Description')}
-            className="slds-form-element_stacked"
+            classNameContainer="slds-form-element_stacked"
             name="description"
             value={description}
             errorText={
@@ -131,7 +131,7 @@ const ProjectForm = ({
           />
         </>
       )}
-      <div class="slds-m-top--medium">
+      <div className={classNames({ 'slds-m-top--medium': isOpen })}>
         <Button
           label={i18n.t('Create Project')}
           className={classNames({
@@ -142,7 +142,7 @@ const ProjectForm = ({
           type="submit"
           onClick={submitClicked}
         />
-        <span class="vertical-separator slds-m-left--large"></span>
+        <span className="vertical-separator slds-m-left--large"></span>
         {isOpen && (
           <Button
             label={i18n.t('Close Form')}
