@@ -30,6 +30,8 @@ def parse_repo_url(repo_url):
     return URL(repo_url).path().split("/")[1:]
 
 
+# NOTE: not currently used, will be used once we work on stories to make
+# tasks with scratch orgs.
 def create_branch(user, repo, branch_name):
     gh = gh_given_user(user)
     owner, repo = parse_repo_url(repo)

@@ -55,12 +55,3 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_branch_url(self, obj):
         return f"{obj.product.repo_url}/tree/{obj.branch_name}"
-
-    def create(self, validated_data):
-        instance = super().create(validated_data)
-        gh.create_branch(
-            self.context["request"].user,
-            instance.product.repo_url,
-            instance.branch_name,
-        )
-        return instance
