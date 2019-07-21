@@ -10,7 +10,6 @@ export interface Project {
   old_slugs: string[];
   description: string;
   branch_url: string;
-  status: string | null;
 }
 export interface ProjectsByProductState {
   projects: Project[];

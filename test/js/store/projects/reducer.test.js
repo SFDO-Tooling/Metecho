@@ -48,18 +48,65 @@ describe('reducer', () => {
         product: 'product-1',
       };
       const expected = {
-        'product-1': { projects: [project2], next: 'next-url', notFound: [] },
-        'product-2': { projects: [], next: null, notFound: [] },
+        'product-1': {
+          projects: [project2],
+          next: 'next-url',
+          notFound: [],
+          fetched: true,
+        },
+        'product-2': { projects: [], next: null, notFound: [], fetched: false },
       };
       const actual = reducer(
         {
-          'product-1': { projects: [project1], next: null, notFound: [] },
-          'product-2': { projects: [], next: null, notFound: [] },
+          'product-1': {
+            projects: [project1],
+            next: null,
+            notFound: [],
+            fetched: false,
+          },
+          'product-2': {
+            projects: [],
+            next: null,
+            notFound: [],
+            fetched: false,
+          },
         },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
             response: { results: [project2], next: 'next-url' },
+            objectType: 'project',
+            reset: true,
+            filters: { product: 'product-1' },
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('creates product-project data if not already known', () => {
+      const project1 = {
+        id: 'p1',
+        slug: 'project-1',
+        name: 'Project 1',
+        description: 'This is a test project.',
+        product: 'product-1',
+      };
+      const expected = {
+        'product-1': {
+          projects: [project1],
+          next: 'next-url',
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'FETCH_OBJECTS_SUCCEEDED',
+          payload: {
+            response: { results: [project1], next: 'next-url' },
             objectType: 'project',
             reset: true,
             filters: { product: 'product-1' },
@@ -81,6 +128,7 @@ describe('reducer', () => {
         notFound: [],
         projects: [project1],
         next: null,
+        fetched: false,
       };
       const project2 = {
         id: 'project2',
@@ -92,6 +140,7 @@ describe('reducer', () => {
         'product-1': {
           ...mockProjects,
           projects: [...mockProjects.projects, project2],
+          fetched: true,
         },
       };
       const actual = reducer(
@@ -146,6 +195,7 @@ describe('reducer', () => {
           projects: [project1],
           next: null,
           notFound: [],
+          fetched: false,
         },
       };
       const actual = reducer(
