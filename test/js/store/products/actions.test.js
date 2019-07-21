@@ -2,7 +2,7 @@ import fetchMock from 'fetch-mock';
 
 import * as actions from '@/store/products/actions';
 
-import { storeWithApi } from './../../utils';
+import { storeWithThunk } from './../../utils';
 
 describe('syncRepos', () => {
   let url, objectPayload;
@@ -13,11 +13,12 @@ describe('syncRepos', () => {
       objectType: 'product',
       url,
       reset: true,
+      filters: {},
     };
   });
 
   test('dispatches SyncRepos action and fetches products', () => {
-    const store = storeWithApi({});
+    const store = storeWithThunk({});
     fetchMock.getOnce(url, {
       next: null,
       results: [],
@@ -57,7 +58,7 @@ describe('syncRepos', () => {
 
   describe('error', () => {
     test('dispatches SYNC_REPOS_FAILED action', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       fetchMock.postOnce(window.api_urls.user_refresh(), {
         status: 500,
         body: { non_field_errors: ['Foobar'] },

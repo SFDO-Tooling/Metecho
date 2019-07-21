@@ -3,7 +3,7 @@ import fetchMock from 'fetch-mock';
 import * as actions from '@/store/actions';
 import { addUrlParams } from '@/utils/api';
 
-import { storeWithApi } from './../utils';
+import { storeWithThunk } from './../utils';
 
 describe('fetchObjects with `reset: true`', () => {
   let url, objectPayload;
@@ -14,12 +14,13 @@ describe('fetchObjects with `reset: true`', () => {
       objectType: 'product',
       url,
       reset: true,
+      filters: {},
     };
   });
 
   describe('success', () => {
     test('GETs products from api', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       const product = {
         id: 'p1',
         name: 'Product 1',
@@ -49,7 +50,7 @@ describe('fetchObjects with `reset: true`', () => {
 
   describe('error', () => {
     test('dispatches FETCH_OBJECTS_FAILED action', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       fetchMock.getOnce(url, {
         status: 500,
         body: {},
@@ -72,7 +73,7 @@ describe('fetchObjects with `reset: true`', () => {
           expect(allActions[0]).toEqual(started);
           expect(allActions[1].type).toEqual('ERROR_ADDED');
           expect(allActions[1].payload.message).toEqual(
-            'Internal Server Error',
+            'Internal Server Error: {}',
           );
           expect(allActions[2]).toEqual(failed);
           expect(window.console.error).toHaveBeenCalled();
@@ -92,12 +93,13 @@ describe('fetchObjects with `reset: false`', () => {
       objectType: 'product',
       url,
       reset: false,
+      filters: {},
     };
   });
 
   describe('success', () => {
     test('GETs next products page', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       const nextProducts = [{ id: 'p2', name: 'Product 2', slug: 'product-2' }];
       const mockResponse = {
         next: null,
@@ -124,7 +126,7 @@ describe('fetchObjects with `reset: false`', () => {
 
   describe('error', () => {
     test('dispatches FETCH_OBJECTS_FAILED action', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       fetchMock.getOnce(url, { status: 500, body: 'Oops.' });
       const started = {
         type: 'FETCH_OBJECTS_STARTED',
@@ -143,7 +145,9 @@ describe('fetchObjects with `reset: false`', () => {
 
           expect(allActions[0]).toEqual(started);
           expect(allActions[1].type).toEqual('ERROR_ADDED');
-          expect(allActions[1].payload.message).toEqual('Oops.');
+          expect(allActions[1].payload.message).toEqual(
+            'Internal Server Error: Oops.',
+          );
           expect(allActions[2]).toEqual(failed);
           expect(window.console.error).toHaveBeenCalled();
         });
@@ -164,7 +168,7 @@ describe('fetchObject', () => {
 
   describe('success', () => {
     test('GETs product from api', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       const filters = { slug: 'product-1' };
       const product = { id: 'p1', name: 'Product 1', slug: 'product-1' };
       fetchMock.getOnce(addUrlParams(url, filters), { results: [product] });
@@ -186,7 +190,7 @@ describe('fetchObject', () => {
     });
 
     test('stores null if no product returned from api', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       const filters = { slug: 'product-1' };
       fetchMock.getOnce(addUrlParams(url, filters), 404);
       const started = {
@@ -209,7 +213,7 @@ describe('fetchObject', () => {
 
   describe('error', () => {
     test('dispatches FETCH_OBJECT_FAILED action', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       const filters = { slug: 'product-1' };
       fetchMock.getOnce(addUrlParams(url, filters), {
         status: 500,
@@ -236,6 +240,67 @@ describe('fetchObject', () => {
           expect(allActions[2]).toEqual(failed);
           expect(window.console.error).toHaveBeenCalled();
         });
+    });
+  });
+});
+
+describe('createObject', () => {
+  let url, objectPayload;
+
+  beforeAll(() => {
+    url = window.api_urls.project_list();
+    objectPayload = {
+      objectType: 'project',
+      data: {
+        name: 'Object Name',
+      },
+    };
+  });
+
+  describe('success', () => {
+    test('POSTs object to api', () => {
+      const store = storeWithThunk({});
+      const object = { id: 'o1', name: 'Object Name', slug: 'object-1' };
+      fetchMock.postOnce(url, object);
+      const started = {
+        type: 'CREATE_OBJECT_STARTED',
+        payload: objectPayload,
+      };
+      const succeeded = {
+        type: 'CREATE_OBJECT_SUCCEEDED',
+        payload: { object, ...objectPayload },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.createObject(objectPayload)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches CREATE_OBJECT_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, 500);
+      const started = {
+        type: 'CREATE_OBJECT_STARTED',
+        payload: objectPayload,
+      };
+      const failed = {
+        type: 'CREATE_OBJECT_FAILED',
+        payload: objectPayload,
+      };
+
+      expect.assertions(5);
+      return store.dispatch(actions.createObject(objectPayload)).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+        expect(window.console.error).toHaveBeenCalled();
+      });
     });
   });
 });

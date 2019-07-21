@@ -43,20 +43,20 @@ interface FetchObjectFailed {
   type: 'FETCH_OBJECT_FAILED';
   payload: ObjectPayload;
 }
-interface PostObjectStarted {
-  type: 'POST_OBJECT_STARTED';
+interface CreateObjectStarted {
+  type: 'CREATE_OBJECT_STARTED';
   payload: { objectType: ObjectTypes; data: ObjectData };
 }
-interface PostObjectSucceeded {
-  type: 'POST_OBJECT_SUCCEEDED';
+interface CreateObjectSucceeded {
+  type: 'CREATE_OBJECT_SUCCEEDED';
   payload: {
     data: ObjectData;
-    response: any;
+    object: any;
     objectType: ObjectTypes;
   };
 }
-interface PostObjectfailed {
-  type: 'POST_OBJECT_FAILED';
+interface CreateObjectFailed {
+  type: 'CREATE_OBJECT_FAILED';
   payload: { objectType: ObjectTypes; data: ObjectData };
 }
 
@@ -67,9 +67,9 @@ export type ObjectsAction =
   | FetchObjectStarted
   | FetchObjectSucceeded
   | FetchObjectFailed
-  | PostObjectStarted
-  | PostObjectSucceeded
-  | PostObjectfailed;
+  | CreateObjectStarted
+  | CreateObjectSucceeded
+  | CreateObjectFailed;
 
 export type ObjectsActionType = ({
   objectType,
@@ -155,7 +155,7 @@ export const fetchObject = ({
   }
 };
 
-export const postObject = ({
+export const createObject = ({
   objectType,
   data,
 }: {
@@ -164,11 +164,11 @@ export const postObject = ({
 }): ThunkResult => async dispatch => {
   const baseUrl = window.api_urls[`${objectType}_list`]();
   dispatch({
-    type: 'POST_OBJECT_STARTED',
+    type: 'CREATE_OBJECT_STARTED',
     payload: { objectType, data },
   });
   try {
-    const response = await apiFetch(addUrlParams(baseUrl), dispatch, {
+    const object = await apiFetch(addUrlParams(baseUrl), dispatch, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
@@ -176,12 +176,12 @@ export const postObject = ({
       },
     });
     return dispatch({
-      type: 'POST_OBJECT_SUCCEEDED',
-      payload: { data, response, objectType },
+      type: 'CREATE_OBJECT_SUCCEEDED',
+      payload: { data, object, objectType },
     });
   } catch (err) {
     dispatch({
-      type: 'POST_OBJECT_FAILED',
+      type: 'CREATE_OBJECT_FAILED',
       payload: { objectType, data },
     });
     throw err;

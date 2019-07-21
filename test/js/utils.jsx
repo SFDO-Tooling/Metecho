@@ -23,4 +23,4 @@ export const renderWithRedux = (
   };
 };
 
-export const storeWithApi = configureStore([thunk]);
+export const storeWithThunk = configureStore([thunk]);

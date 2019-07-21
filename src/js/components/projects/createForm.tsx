@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { ObjectsActionType, postObject } from '@/store/actions';
+import { createObject, ObjectsActionType } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
 import { Product } from '@/store/products/reducer';
 import { ApiError } from '@/utils/api';
@@ -17,7 +17,7 @@ import routes from '@/utils/routes';
 interface Props extends RouteComponentProps {
   product: Product;
   startOpen?: boolean;
-  doPostObject: ObjectsActionType;
+  doCreateObject: ObjectsActionType;
   doAddError: typeof addError;
 }
 
@@ -25,7 +25,7 @@ const ProjectForm = ({
   product,
   startOpen = false,
   history,
-  doPostObject,
+  doCreateObject,
   doAddError,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
@@ -57,7 +57,7 @@ const ProjectForm = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
-    doPostObject({
+    doCreateObject({
       objectType: OBJECT_TYPES.PROJECT,
       data: {
         name,
@@ -66,17 +66,17 @@ const ProjectForm = ({
       },
     })
       .then(action => {
-        const { type, payload } = action;
+        const {
+          type,
+          payload: { object, objectType },
+        } = action;
         if (
-          type === 'POST_OBJECT_SUCCEEDED' &&
-          payload &&
-          payload.response &&
-          payload.response.slug
+          type === 'CREATE_OBJECT_SUCCEEDED' &&
+          objectType === OBJECT_TYPES.PROJECT &&
+          object &&
+          object.slug
         ) {
-          const url = routes.project_detail(
-            product.slug,
-            payload.response.slug,
-          );
+          const url = routes.project_detail(product.slug, object.slug);
           history.push(url);
         }
       })
@@ -156,7 +156,7 @@ const ProjectForm = ({
   );
 };
 const actions = {
-  doPostObject: postObject,
+  doCreateObject: createObject,
   doAddError: addError,
 };
 const WrappedProjectForm = connect(
