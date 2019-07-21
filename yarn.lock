@@ -932,9 +932,9 @@
     lodash.assign "^4.0.9"
 
 "@salesforce/design-system-react@^0.10.7":
-  version "0.10.8"
-  resolved "https://registry.yarnpkg.com/@salesforce/design-system-react/-/design-system-react-0.10.8.tgz#794c1b6f6ce6c152d65c6c2e11dba5c0e47e3108"
-  integrity sha512-AYjTGkWqVp9ZFLtRaR6w6KP3E9Nqx8exib5eKeMYkUYtbiqk5O4djUOAQPTnIrhdgbD3hCa46kLfkkMTgUiTYw==
+  version "0.10.7"
+  resolved "https://registry.yarnpkg.com/@salesforce/design-system-react/-/design-system-react-0.10.7.tgz#e223b5923d856db93c686ce9b7ae981bc099040c"
+  integrity sha512-PN8JlGCKFkUVnNb7Ta9yIArhHgPufL6qzc4Sp3laKGtaS6W+l3jegAO/89QUPgs1C7ukvjt6HxtEscTsqO8oOw==
   dependencies:
     "@salesforce/babel-preset-design-system-react" "^1.0.0"
     classnames "^2.2.5"
@@ -950,13 +950,13 @@
     lodash.reject "^4.3.0"
     popper.js "^1.10.8"
     prop-types ">=15.5.8"
-    react-highlighter "^0.4.3"
+    react-highlighter "^0.4.0"
     react-modal "3.8.1"
-    react-onclickoutside "^6.8.0"
+    react-onclickoutside "^6.5.0"
     react-required-if "^1.0.3"
     react-text-truncate "^0.14.1"
     shortid "^2.2.14"
-    warning "^4.0.3"
+    warning "^3.0.0"
 
 "@sentry/browser@^5.5.0":
   version "5.5.0"
@@ -9209,7 +9209,7 @@ react-fns@^1.4.0:
     qs "^6.5.1"
     react-media "^1.6.1"
 
-react-highlighter@^0.4.3:
+react-highlighter@^0.4.0:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/react-highlighter/-/react-highlighter-0.4.3.tgz#e32c84d053259c30ca72c615aa759036d0d23048"
   integrity sha512-dwItRaGRHBceuzZd5NXeroapdmZ2JCAWZ3AdwdthRlSkdtPCY18DWrd6mPmiMCfSB6lgVwwCPQl4unZzG5sXXw==
@@ -9257,7 +9257,7 @@ react-modal@3.8.1:
     react-lifecycles-compat "^3.0.0"
     warning "^3.0.0"
 
-react-onclickoutside@^6.8.0:
+react-onclickoutside@^6.5.0:
   version "6.8.0"
   resolved "https://registry.yarnpkg.com/react-onclickoutside/-/react-onclickoutside-6.8.0.tgz#9f91b5b3ed59f4d9e43fd71620dc200773a4d569"
   integrity sha512-5Q4Rn7QLEoh7WIe66KFvYIpWJ49GeHoygP1/EtJyZjXKgrWH19Tf0Ty3lWyQzrEEDyLOwUvvmBFSE3dcDdvagA==
@@ -11576,13 +11576,6 @@ warning@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/warning/-/warning-3.0.0.tgz#32e5377cb572de4ab04753bdf8821c01ed605b7c"
   integrity sha1-MuU3fLVy3kqwR1O9+IIcAe1gW3w=
-  dependencies:
-    loose-envify "^1.0.0"
-
-warning@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/warning/-/warning-4.0.3.tgz#16e9e077eb8a86d6af7d64aa1e05fd85b4678ca3"
-  integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
   dependencies:
     loose-envify "^1.0.0"
 

@@ -79,7 +79,7 @@ export type ObjectsActionType = ({
   filters,
 }: {
   objectType: ObjectTypes;
-  data?: ObjectData; // the posted data
+  data?: ObjectData;
   url?: string;
   reset?: boolean;
   filters?: ObjectFilters;
