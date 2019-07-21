@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from . import gh
 from .fields import MarkdownField
 from .models import Product, Project
 

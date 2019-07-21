@@ -12,18 +12,21 @@ export interface Project {
   branch_url: string;
   status: string | null;
 }
+export interface ProjectsByProductState {
+  projects: Project[];
+  next: string | null;
+  notFound: string[];
+  fetched: boolean;
+}
 export interface ProjectsState {
-  [key: string]: {
-    projects: Project[];
-    next: string | null;
-    notFound: string[];
-  };
+  [key: string]: ProjectsByProductState;
 }
 
 const defaultState = {
   projects: [],
   next: null,
   notFound: [],
+  fetched: false,
 };
 
 const reducer = (
@@ -41,7 +44,7 @@ const reducer = (
         filters: { product },
       } = action.payload;
       if (objectType === OBJECT_TYPES.PROJECT && product) {
-        const productProjects = projects[product];
+        const productProjects = projects[product] || { ...defaultState };
         if (reset) {
           return {
             ...projects,
@@ -49,6 +52,7 @@ const reducer = (
               ...productProjects,
               projects: results,
               next,
+              fetched: true,
             },
           };
         }
@@ -63,6 +67,7 @@ const reducer = (
               ...results.filter(p => !ids.includes(p.id)),
             ],
             next,
+            fetched: true,
           },
         };
       }

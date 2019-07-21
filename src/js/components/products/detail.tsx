@@ -15,14 +15,15 @@ import { AppState } from '@/store';
 import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
 import { selectProduct, selectProductSlug } from '@/store/products/selectors';
-import { Project } from '@/store/projects/reducer';
+import { ProjectsByProductState } from '@/store/projects/reducer';
+import { selectProjectsByProduct } from '@/store/projects/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 type Props = {
   product?: Product | null;
-  projects?: Project[] | null;
   productSlug?: string;
+  projects: ProjectsByProductState | undefined;
   doFetchObject: ObjectsActionType;
   doFetchObjects: ObjectsActionType;
 } & RouteComponentProps;
@@ -35,8 +36,8 @@ const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
 
 const ProductDetail = ({
   product,
-  projects,
   productSlug,
+  projects,
   doFetchObject,
   doFetchObjects,
 }: Props) => {
@@ -48,14 +49,18 @@ const ProductDetail = ({
         filters: { slug: productSlug },
       });
     }
+  }, [product, productSlug, doFetchObject]);
 
-    if (product && projects && !projects[product.id]) {
+  useEffect(() => {
+    if (product && (!projects || !projects.fetched)) {
+      // Fetch projects from API
       doFetchObjects({
         objectType: OBJECT_TYPES.PROJECT,
         filters: { product: product.id },
+        reset: true,
       });
     }
-  }, [product, projects, productSlug, doFetchObject, doFetchObjects]);
+  }, [product, projects, doFetchObjects]);
 
   if (!product) {
     if (!productSlug || product === null) {
@@ -74,28 +79,6 @@ const ProductDetail = ({
     product.description &&
     (product.description.startsWith('<h1>') ||
       product.description.startsWith('<h2>'));
-
-  // some mock data for now
-  projects = [
-    {
-      id: 'fwf',
-      name: 'Project Name',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
-    },
-    {
-      id: 'fijwf9',
-      name: 'Project Name II',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
-    },
-    {
-      id: 'fnjnf',
-      name: 'Project Name II',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vel mi ante. Sed et imperdiet justo. Pellentesque maximus, odio ac laoreet condimentum, felis nunc congue turpis, ac vulputate velit justo ac nisl. Praesent ut dolor nec nisl tincidunt viverra sit ame',
-    },
-  ];
 
   return (
     <DocumentTitle title={`${product.name} | ${i18n.t('MetaShare')}`}>
@@ -133,20 +116,33 @@ const ProductDetail = ({
               slds-medium-size_2-of-3
               slds-p-bottom_x-large"
           >
-            <ProjectForm product={product} startOpen={Boolean(!projects)} />
-            <h2 className="slds-text-heading_medium">
-              {i18n.t('Projects for')} {product.name}
-            </h2>
-            <ul className="slds-has-dividers_bottom">
-              {projects &&
-                projects.map(project => (
-                  <ProjectListItem
-                    key={project.id}
-                    project={project}
-                    product={product}
-                  />
-                ))}
-            </ul>
+            {!projects || !projects.fetched ? (
+              // Fetching projects from API
+              <Spinner />
+            ) : (
+              <>
+                <ProjectForm
+                  product={product}
+                  startOpen={!projects.projects.length}
+                />
+                {Boolean(projects.projects.length) && (
+                  <>
+                    <h2 className="slds-text-heading_medium">
+                      {i18n.t('Projects for')} {product.name}
+                    </h2>
+                    <ul className="slds-has-dividers_bottom">
+                      {projects.projects.map(project => (
+                        <ProjectListItem
+                          key={project.id}
+                          project={project}
+                          product={product}
+                        />
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </>
+            )}
           </div>
           <div
             className="slds-col
@@ -184,6 +180,7 @@ const ProductDetail = ({
 const select = (appState: AppState, props: Props) => ({
   productSlug: selectProductSlug(appState, props),
   product: selectProduct(appState, props),
+  projects: selectProjectsByProduct(appState, props),
 });
 const actions = {
   doFetchObject: fetchObject,

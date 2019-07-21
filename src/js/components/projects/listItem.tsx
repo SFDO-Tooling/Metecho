@@ -14,7 +14,6 @@ const ProjectListItem = ({ product, project }: Props) => {
   const { name, description, slug } = project;
   return (
     <li className="slds-item slds-p-horizontal_none slds-p-vertical_medium">
-      {/* @todo capture slug from actual project */}
       <h3 className="slds-text-heading_small">
         <Link to={routes.project_detail(product.slug, slug)}>{name}</Link>
       </h3>
