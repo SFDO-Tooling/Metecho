@@ -38,7 +38,7 @@ const reducer = (
         reset,
       } = action.payload;
       if (objectType === OBJECT_TYPES.PRODUCT) {
-        if (!reset) {
+        if (reset) {
           return {
             ...products,
             products: results,
