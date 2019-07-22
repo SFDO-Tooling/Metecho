@@ -63,7 +63,7 @@ const ProductDetail = ({
   }, [product, projects, doFetchObjects]);
 
   if (!product) {
-    if (!productSlug || product === null) {
+    if (!productSlug || product === null || projects === null) {
       return <ProductNotFound />;
     }
     // Fetching product from API
