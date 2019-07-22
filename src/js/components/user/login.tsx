@@ -91,9 +91,9 @@ const Login = ({ user }: { user: User | null }) =>
             slds-welcome-mat__tiles_info-only
             slds-grid
             slds-grid_vertical
-            slds-grid_align-center
             slds-p-left_xx-large
-            slds-p-right_xx-large"
+            slds-p-right_xx-large
+            welcome-tile"
         >
           <WelcomeMatTile
             title={i18n.t('Welcome to MetaShare!')}
