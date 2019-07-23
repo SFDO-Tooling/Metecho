@@ -16,6 +16,7 @@ jest.mock('react-fns', () => ({
 }));
 jest.mock('@/store/actions');
 jest.mock('@/store/products/actions');
+jest.mock('@/utils/helpers');
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 syncRepos.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
