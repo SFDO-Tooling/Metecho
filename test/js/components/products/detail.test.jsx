@@ -7,6 +7,13 @@ import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
+jest.mock('react-fns', () => ({
+  withScroll(Component) {
+    // eslint-disable-next-line react/display-name
+    return props => <Component x={0} y={0} {...props} />;
+  },
+}));
+
 jest.mock('@/store/actions');
 
 fetchObject.mockReturnValue({ type: 'TEST' });
@@ -43,7 +50,7 @@ const defaultState = {
           description: 'Project Description',
         },
       ],
-      next: null,
+      next: 'next-url',
       notFound: [],
       fetched: true,
     },
@@ -56,17 +63,18 @@ describe('<ProductDetail />', () => {
       initialState: defaultState,
       productSlug: 'product-1',
     };
+    const props = {};
     const opts = Object.assign({}, defaults, options);
     const { initialState, productSlug } = opts;
     const context = {};
-    const { getByText, getByTitle, queryByText } = renderWithRedux(
+    const { rerender, getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
-        <ProductDetail match={{ params: { productSlug } }} />
+        <ProductDetail match={{ params: { productSlug } }} {...props} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { getByText, getByTitle, queryByText, context };
+    return { rerender, getByText, getByTitle, queryByText, context };
   };
 
   test('renders product detail and projects list', () => {
@@ -139,6 +147,25 @@ describe('<ProductDetail />', () => {
         filters: { product: 'p1' },
         objectType: 'project',
         reset: true,
+      });
+    });
+  });
+
+  describe('fetching more projects', () => {
+    beforeAll(() => {
+      jest
+        .spyOn(document.documentElement, 'scrollHeight', 'get')
+        .mockImplementation(() => 1100);
+    });
+
+    test('fetches next page of projects', () => {
+      const { rerender, getByText } = setup(defaultState);
+      setup(defaultState, { y: 1000 }, rerender);
+
+      // expect(getByText('Loading…')).toBeVisible();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        url: 'next-url',
+        objectType: 'project',
       });
     });
   });
