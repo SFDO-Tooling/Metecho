@@ -7,7 +7,7 @@ verify_ssl = true
 Sphinx = "==2.1.2"
 black = "==19.3b0"
 coveralls = "==1.8.1"
-django-extensions = "==2.1.9"
+django-extensions = "==2.2.1"
 factory_boy = "==2.12.0"
 flake8 = "==3.7.8"
 ipython = "==7.6.1"
