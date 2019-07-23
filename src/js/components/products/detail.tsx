@@ -74,8 +74,13 @@ const ProductDetail = withScroll(
 
     // @@@ todo: make this reusable somehow...
     useEffect(() => {
+      if (fetchingProjects || !next) {
+        return;
+      }
       const maybeFetchMoreProjects = () => {
+        /* istanbul ignore else */
         if (next && !fetchingProjects) {
+          /* istanbul ignore else */
           if (isMounted.current) {
             setFetchingProjects(true);
           }
