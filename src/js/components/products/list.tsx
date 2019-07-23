@@ -17,7 +17,6 @@ import { syncRepos } from '@/store/products/actions';
 import { Product } from '@/store/products/reducer';
 import { selectNextUrl, selectProducts } from '@/store/products/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
-import { trackPagination } from '@/utils/helpers';
 
 interface Props {
   y: number;
@@ -66,7 +65,22 @@ const ProductList = withScroll(
         }
       };
 
-      trackPagination(y, maybeFetchMoreProducts());
+      /* istanbul ignore next */
+      const scrollHeight =
+        (document.documentElement && document.documentElement.scrollHeight) ||
+        (document.body && document.body.scrollHeight) ||
+        Infinity;
+      const clientHeight =
+        (document.documentElement && document.documentElement.clientHeight) ||
+        window.innerHeight;
+      // Fetch more products if within 100px of bottom of page...
+      const scrolledToBottom =
+        scrollHeight - Math.ceil(y + clientHeight) <= 100;
+
+      /* istanbul ignore else */
+      if (scrolledToBottom) {
+        maybeFetchMoreProducts();
+      }
     }, [y, next, fetchingProducts, doFetchObjects, isMounted]);
 
     let contents;
