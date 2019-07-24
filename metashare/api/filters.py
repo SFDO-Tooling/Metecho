@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from .models import Product, Project
+from .models import Product, Project, Task
 
 
 class ProductFilter(filters.FilterSet):
@@ -15,3 +15,9 @@ class ProjectFilter(filters.FilterSet):
     class Meta:
         model = Project
         fields = ("product",)
+
+
+class TaskFilter(filters.FilterSet):
+    class Meta:
+        model = Task
+        fields = ("project",)
