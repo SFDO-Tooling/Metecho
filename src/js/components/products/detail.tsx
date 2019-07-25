@@ -162,7 +162,6 @@ const ProductDetail = ({
                     {projects && projects.next ? (
                       <div className="slds-m-top_large">
                         <Button
-                          className="slds-size_full"
                           label={
                             fetchingProjects ? (
                               <LabelWithSpinner
@@ -175,7 +174,6 @@ const ProductDetail = ({
                             )
                           }
                           onClick={maybeFetchObjects}
-                          variant="brand"
                         />
                       </div>
                     ) : null}
