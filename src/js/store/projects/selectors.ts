@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { AppState } from '@/store';
 import { Product } from '@/store/products/reducer';
@@ -21,5 +22,23 @@ export const selectProjectsByProduct = createSelector(
       return projects[product.id];
     }
     return undefined;
+  },
+);
+
+export const selectProjectSlug = (
+  appState: AppState,
+  { match: { params } }: RouteComponentProps<{ projectSlug?: string }>,
+) => params.projectSlug;
+
+export const selectProject = createSelector(
+  [selectProjectsByProduct, selectProjectSlug],
+  (projects, projectSlug) => {
+    const project =
+      projects &&
+      projects.projects.find(
+        // @todo dont forget about old_slugs, notFound projects
+        p => p.slug === projectSlug,
+      );
+    return project ? project : undefined;
   },
 );
