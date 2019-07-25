@@ -12,6 +12,7 @@ import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
+import { LabelWithSpinner } from '@/components/utils';
 import { AppState } from '@/store';
 import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
@@ -80,16 +81,16 @@ const ProductDetail = ({
     return <Redirect to={routes.product_detail(product.slug)} />;
   }
 
-  const maybeFetchObjects = (control: string | null) => {
+  const maybeFetchObjects = () => {
     /* istanbul ignore else */
-    if (control) {
+    if (projects && projects.next) {
       /* istanbul ignore else */
       setFetchingProjects(true);
+
       doFetchObjects({
         objectType: OBJECT_TYPES.PROJECT,
         filters: { product: product.id },
-        url: control,
-        reset: true,
+        url: projects.next,
       }).finally(() => setFetchingProjects(false));
     }
   };
@@ -157,32 +158,23 @@ const ProductDetail = ({
                         />
                       ))}
                     </ul>
-                    {(projects && projects.next) || projects.previous ? (
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                        }}
-                      >
+                    {projects && projects.next ? (
+                      <div className="slds-m-top_large">
                         <Button
-                          label="Previous"
-                          onClick={() => maybeFetchObjects(projects.previous)}
-                          variant="base"
-                          disabled={Boolean(!projects.previous)}
-                          iconCategory="utility"
-                          iconName="chevronleft"
-                          iconPosition="left"
-                          style={{ fontWeight: 'bold' }}
-                        />
-                        <Button
-                          label="Next"
-                          onClick={() => maybeFetchObjects(projects.next)}
-                          variant="base"
-                          disabled={Boolean(!projects.next)}
-                          style={{ fontWeight: 'bold' }}
-                          iconCategory="utility"
-                          iconName="chevronright"
-                          iconPosition="right"
+                          className="slds-size_full"
+                          label={
+                            fetchingProjects ? (
+                              <LabelWithSpinner
+                                label={i18n.t('Loading…')}
+                                variant="base"
+                                size="x-small"
+                              />
+                            ) : (
+                              'Load More'
+                            )
+                          }
+                          onClick={maybeFetchObjects}
+                          variant="brand"
                         />
                       </div>
                     ) : null}
