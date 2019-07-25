@@ -6,8 +6,6 @@
   min-height: 100%;
 
   @media (min-width: $mq-medium) {
-    // firefox works with 100%, but other browsers won't grow/extend blocks
-    // calculate 100vh minus the approximate height of the footer
     height: 100vh;
   }
 }
