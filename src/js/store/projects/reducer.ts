@@ -14,6 +14,7 @@ export interface Project {
 export interface ProjectsByProductState {
   projects: Project[];
   next: string | null;
+  previous: string | null;
   notFound: string[];
   fetched: boolean;
 }
@@ -24,6 +25,7 @@ export interface ProjectsState {
 const defaultState = {
   projects: [],
   next: null,
+  previous: null,
   notFound: [],
   fetched: false,
 };
@@ -37,7 +39,7 @@ const reducer = (
       return {};
     case 'FETCH_OBJECTS_SUCCEEDED': {
       const {
-        response: { results, next },
+        response: { results, next, previous },
         objectType,
         reset,
         filters: { product },
@@ -51,6 +53,7 @@ const reducer = (
               ...productProjects,
               projects: results,
               next,
+              previous,
               fetched: true,
             },
           };
@@ -66,6 +69,7 @@ const reducer = (
               ...results.filter(p => !ids.includes(p.id)),
             ],
             next,
+            previous,
             fetched: true,
           },
         };
