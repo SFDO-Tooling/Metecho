@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -17,7 +18,7 @@ jest.mock('react-fns', () => ({
 jest.mock('@/store/actions');
 
 fetchObject.mockReturnValue({ type: 'TEST' });
-fetchObjects.mockReturnValue({ type: 'TEST' });
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
@@ -152,21 +153,72 @@ describe('<ProductDetail />', () => {
   });
 
   describe('fetching more projects', () => {
-    beforeAll(() => {
-      jest
-        .spyOn(document.documentElement, 'scrollHeight', 'get')
-        .mockImplementation(() => 1100);
+    test('fetches next page of projects', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            p1: {
+              projects: [
+                {
+                  branch_url: 'branch-url',
+                  description: 'product description',
+                  id: 'project1',
+                  name: 'Project 1',
+                  old_slugs: [],
+                  product: 'p1',
+                  slug: 'project-1',
+                },
+              ],
+              next: 'next-url',
+              notFound: [],
+              fetched: true,
+            },
+          },
+        },
+      });
+      const btn = getByText('Load More');
+
+      expect(btn).toBeVisible();
+
+      fireEvent.click(btn);
+
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { product: 'p1' },
+        objectType: 'project',
+        reset: false,
+        url: 'next-url',
+      });
+
+      expect(getByText('Loading…')).toBeVisible();
     });
 
-    test('fetches next page of projects', () => {
-      const { rerender, getByText } = setup(defaultState);
-      setup(defaultState, { y: 1000 }, rerender);
-
-      // expect(getByText('Loading…')).toBeVisible();
-      expect(fetchObjects).toHaveBeenCalledWith({
-        url: 'next-url',
-        objectType: 'project',
+    test('hides btn when at end of list', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            p1: {
+              projects: [
+                {
+                  branch_url: 'branch-url',
+                  description: 'product description',
+                  id: 'project1',
+                  name: 'Project 1',
+                  old_slugs: [],
+                  product: 'p1',
+                  slug: 'project-1',
+                },
+              ],
+              next: null,
+              notFound: [],
+              fetched: true,
+            },
+          },
+        },
       });
+
+      expect(queryByText('Load More')).toBeNull();
     });
   });
 });

@@ -69,7 +69,7 @@ const ProductDetail = ({
   }, [product, projects, doFetchObjects]);
 
   if (!product) {
-    if (!productSlug || product === null || fetchingProjects) {
+    if (!productSlug || product === null) {
       return <ProductNotFound />;
     }
     // Fetching product from API
@@ -91,7 +91,8 @@ const ProductDetail = ({
         objectType: OBJECT_TYPES.PROJECT,
         filters: { product: product.id },
         url: projects.next,
-      }).finally(() => setFetchingProjects(false));
+        reset: false,
+      }).then(() => setFetchingProjects(false));
     }
   };
   const productDescriptionHasTitle =
