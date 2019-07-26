@@ -1,5 +1,6 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import React, { ComponentType } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -34,13 +35,17 @@ interface ControlProps {
 const Controls = ({ user, doLogout }: ControlProps) => (
   <>
     <Avatar />
-    <div className="username">{user && user.username}</div>
+    <span className="slds-p-left_small">{user && user.username}</span>
     <Logout doLogout={doLogout} />
   </>
 );
 
 const Header = ({ user, socket, errors, doLogout, doRemoveError }: Props) => {
-  const controls = () => <Controls user={user} doLogout={doLogout} />;
+  const controls = () => (
+    <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
+      <Controls user={user} doLogout={doLogout} />
+    </PageHeaderControl>
+  );
 
   return user ? (
     <>

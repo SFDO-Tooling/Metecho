@@ -1,0 +1,29 @@
+// Welcome Mat Overrides and Additions
+// ===================================
+
+.welcome-container {
+  height: 100%;
+  min-height: 100%;
+
+  @media (min-width: $mq-medium) {
+    height: 100vh;
+  }
+}
+
+.welcome-inner {
+  @media (max-width: $mq-medium) {
+    flex-wrap: wrap;
+  }
+
+  .welcome-container & {
+    height: 100%;
+    max-height: unset;
+  }
+}
+
+.welcome-tile {
+  // arbitrary height for vertically centering content in tile
+  @media (min-height: 1000px) {
+    justify-content: center;
+  }
+}
