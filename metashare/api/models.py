@@ -140,7 +140,7 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.SlugField(max_length=50)
 
@@ -160,7 +160,7 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("branch_name", "product"),)
+        unique_together = (("name", "product"), ("branch_name", "product"))
 
 
 class Task(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):

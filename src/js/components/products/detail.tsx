@@ -1,9 +1,10 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
+import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
@@ -11,6 +12,7 @@ import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
+import { LabelWithSpinner, useIsMounted } from '@/components/utils';
 import { AppState } from '@/store';
 import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
@@ -41,6 +43,9 @@ const ProductDetail = ({
   doFetchObject,
   doFetchObjects,
 }: Props) => {
+  const [fetchingProjects, setFetchingProjects] = useState(false);
+  const isMounted = useIsMounted();
+
   useEffect(() => {
     if (productSlug && product === undefined) {
       // Fetch product from API
@@ -74,6 +79,27 @@ const ProductDetail = ({
     // Redirect to most recent product slug
     return <Redirect to={routes.product_detail(product.slug)} />;
   }
+
+  const fetchMoreProjects = () => {
+    /* istanbul ignore else */
+    if (projects && projects.next) {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        setFetchingProjects(true);
+      }
+
+      doFetchObjects({
+        objectType: OBJECT_TYPES.PROJECT,
+        filters: { product: product.id },
+        url: projects.next,
+      }).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setFetchingProjects(false);
+        }
+      });
+    }
+  };
 
   const productDescriptionHasTitle =
     product.description &&
@@ -139,6 +165,24 @@ const ProductDetail = ({
                         />
                       ))}
                     </ul>
+                    {projects.next ? (
+                      <div className="slds-m-top_large">
+                        <Button
+                          label={
+                            fetchingProjects ? (
+                              <LabelWithSpinner
+                                label={i18n.t('Loading…')}
+                                variant="base"
+                                size="x-small"
+                              />
+                            ) : (
+                              i18n.t('Load More')
+                            )
+                          }
+                          onClick={fetchMoreProjects}
+                        />
+                      </div>
+                    ) : null}
                   </>
                 )}
               </>

@@ -70,10 +70,23 @@ class TestProjectSerializer:
         serializer = ProjectSerializer(project)
         assert serializer.data["description"] == "<p>Test <code>project</code></p>"
 
-    def test_branchUrl(self, project_factory):
+    def test_branch_url(self, project_factory):
         project = project_factory(name="Test project", description="Test `project`")
         serializer = ProjectSerializer(project)
-        assert (
-            serializer.data["branch_url"]
-            == "https://www.github.com/test/repo/tree/test-project"
+        expected = "https://www.github.com/test/repo/tree/test-project"
+        assert serializer.data["branch_url"] == expected
+
+    def test_unique_name_for_product(self, product_factory, project_factory):
+        product = product_factory()
+        project_factory(product=product, name="Duplicate me")
+        serializer = ProjectSerializer(
+            data={
+                "product": str(product.id),
+                "name": "Duplicate me",
+                "description": "Blorp",
+            }
         )
+        assert not serializer.is_valid()
+        assert serializer.errors["non_field_errors"] == [
+            "A project with this name already exists."
+        ]

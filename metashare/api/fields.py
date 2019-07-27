@@ -2,37 +2,11 @@ import bleach
 from markdown import markdown
 from rest_framework.fields import CharField
 
-# These two constants are duplicated from sfdo-template-helpers' MarkdownField.
-# Not the best thing, but the clearest way to render markdown out of a serializer.
-ALLOWED_TAGS = [
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "b",
-    "i",
-    "strong",
-    "em",
-    "tt",
-    "p",
-    "br",
-    "span",
-    "div",
-    "blockquote",
-    "code",
-    "hr",
-    "ul",
-    "ol",
-    "li",
-    "dd",
-    "dt",
-    "img",
-    "a",
-]
+from sfdo_template_helpers.fields.markdown import MarkdownFieldMixin
 
-ALLOWED_ATTRS = {"img": ["src", "alt", "title"], "a": ["href", "alt", "title"]}
+# Get the allowed values off the the library we use for the underpinning Model field:
+ALLOWED_TAGS = MarkdownFieldMixin.allowed_tags
+ALLOWED_ATTRS = MarkdownFieldMixin.allowed_attrs
 
 
 def render_clean_markdown(raw_md):

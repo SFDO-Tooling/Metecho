@@ -421,7 +421,7 @@ LOGGING = {
     },
 }
 
-API_PRODUCT_PAGE_SIZE = env("API_PRODUCT_PAGE_SIZE", type_=int, default=25)
+API_PAGE_SIZE = env("API_PAGE_SIZE", type_=int, default=50)
 
 # Sentry
 SENTRY_DSN = env("SENTRY_DSN", default="")

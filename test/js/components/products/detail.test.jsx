@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -10,7 +11,7 @@ import { renderWithRedux, storeWithThunk } from './../../utils';
 jest.mock('@/store/actions');
 
 fetchObject.mockReturnValue({ type: 'TEST' });
-fetchObjects.mockReturnValue({ type: 'TEST' });
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
@@ -43,7 +44,7 @@ const defaultState = {
           description: 'Project Description',
         },
       ],
-      next: null,
+      next: 'next-url',
       notFound: [],
       fetched: true,
     },
@@ -140,6 +141,75 @@ describe('<ProductDetail />', () => {
         objectType: 'project',
         reset: true,
       });
+    });
+  });
+
+  describe('fetching more projects', () => {
+    test('fetches next page of projects', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            p1: {
+              projects: [
+                {
+                  branch_url: 'branch-url',
+                  description: 'product description',
+                  id: 'project1',
+                  name: 'Project 1',
+                  old_slugs: [],
+                  product: 'p1',
+                  slug: 'project-1',
+                },
+              ],
+              next: 'next-url',
+              notFound: [],
+              fetched: true,
+            },
+          },
+        },
+      });
+      const btn = getByText('Load More');
+
+      expect(btn).toBeVisible();
+
+      fireEvent.click(btn);
+
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { product: 'p1' },
+        objectType: 'project',
+        url: 'next-url',
+      });
+
+      expect(getByText('Loading…')).toBeVisible();
+    });
+
+    test('hides btn when at end of list', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            p1: {
+              projects: [
+                {
+                  branch_url: 'branch-url',
+                  description: 'product description',
+                  id: 'project1',
+                  name: 'Project 1',
+                  old_slugs: [],
+                  product: 'p1',
+                  slug: 'project-1',
+                },
+              ],
+              next: null,
+              notFound: [],
+              fetched: true,
+            },
+          },
+        },
+      });
+
+      expect(queryByText('Load More')).toBeNull();
     });
   });
 });
