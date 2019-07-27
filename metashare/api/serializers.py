@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import MarkdownField
 from .models import Product, Project
@@ -50,6 +51,13 @@ class ProjectSerializer(serializers.ModelSerializer):
             "old_slugs",
             "product",
             "branch_url",
+        )
+        validators = (
+            UniqueTogetherValidator(
+                queryset=Project.objects.all(),
+                fields=("name", "product"),
+                message="A project with this name already exists.",
+            ),
         )
 
     def get_branch_url(self, obj):
