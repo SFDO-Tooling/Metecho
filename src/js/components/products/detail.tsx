@@ -176,7 +176,7 @@ const ProductDetail = ({
                                 size="x-small"
                               />
                             ) : (
-                              'Load More'
+                              i18n.t('Load More')
                             )
                           }
                           onClick={fetchMoreProjects}
