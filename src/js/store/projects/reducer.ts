@@ -85,7 +85,8 @@ const reducer = (
             ...projects,
             [object.product]: {
               ...product,
-              projects: [...product.projects, object],
+              // Prepend new project (projects are ordered by `-created_at`)
+              projects: [object, ...product.projects],
             },
           };
         }
