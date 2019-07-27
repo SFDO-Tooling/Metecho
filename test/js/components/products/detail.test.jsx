@@ -8,13 +8,6 @@ import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('react-fns', () => ({
-  withScroll(Component) {
-    // eslint-disable-next-line react/display-name
-    return props => <Component x={0} y={0} {...props} />;
-  },
-}));
-
 jest.mock('@/store/actions');
 
 fetchObject.mockReturnValue({ type: 'TEST' });
@@ -64,18 +57,17 @@ describe('<ProductDetail />', () => {
       initialState: defaultState,
       productSlug: 'product-1',
     };
-    const props = {};
     const opts = Object.assign({}, defaults, options);
     const { initialState, productSlug } = opts;
     const context = {};
-    const { rerender, getByText, getByTitle, queryByText } = renderWithRedux(
+    const { getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
-        <ProductDetail match={{ params: { productSlug } }} {...props} />
+        <ProductDetail match={{ params: { productSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { rerender, getByText, getByTitle, queryByText, context };
+    return { getByText, getByTitle, queryByText, context };
   };
 
   test('renders product detail and projects list', () => {
@@ -186,7 +178,6 @@ describe('<ProductDetail />', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { product: 'p1' },
         objectType: 'project',
-        reset: false,
         url: 'next-url',
       });
 

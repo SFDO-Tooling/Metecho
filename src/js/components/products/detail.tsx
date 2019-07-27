@@ -12,7 +12,7 @@ import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
-import { LabelWithSpinner } from '@/components/utils';
+import { LabelWithSpinner, useIsMounted } from '@/components/utils';
 import { AppState } from '@/store';
 import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
@@ -28,8 +28,6 @@ type Props = {
   projects: ProjectsByProductState | undefined;
   doFetchObject: ObjectsActionType;
   doFetchObjects: ObjectsActionType;
-  y: number;
-  next: string | null;
 } & RouteComponentProps;
 
 const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
@@ -46,6 +44,7 @@ const ProductDetail = ({
   doFetchObjects,
 }: Props) => {
   const [fetchingProjects, setFetchingProjects] = useState(false);
+  const isMounted = useIsMounted();
 
   useEffect(() => {
     if (productSlug && product === undefined) {
@@ -81,20 +80,27 @@ const ProductDetail = ({
     return <Redirect to={routes.product_detail(product.slug)} />;
   }
 
-  const maybeFetchObjects = () => {
+  const fetchMoreProjects = () => {
     /* istanbul ignore else */
     if (projects && projects.next) {
       /* istanbul ignore else */
-      setFetchingProjects(true);
+      if (isMounted.current) {
+        setFetchingProjects(true);
+      }
 
       doFetchObjects({
         objectType: OBJECT_TYPES.PROJECT,
         filters: { product: product.id },
         url: projects.next,
-        reset: false,
-      }).then(() => setFetchingProjects(false));
+      }).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setFetchingProjects(false);
+        }
+      });
     }
   };
+
   const productDescriptionHasTitle =
     product.description &&
     (product.description.startsWith('<h1>') ||
@@ -110,8 +116,8 @@ const ProductDetail = ({
         />
         <div
           className="slds-p-horizontal_x-large
-              slds-p-top_x-small
-              ms-breadcrumb"
+            slds-p-top_x-small
+            ms-breadcrumb"
         >
           <BreadCrumb
             trail={[
@@ -126,15 +132,15 @@ const ProductDetail = ({
         </div>
         <div
           className="slds-p-around_x-large
-              slds-grid
-              slds-gutters
-              slds-wrap"
+            slds-grid
+            slds-gutters
+            slds-wrap"
         >
           <div
             className="slds-col
-                slds-size_1-of-1
-                slds-medium-size_2-of-3
-                slds-p-bottom_x-large"
+              slds-size_1-of-1
+              slds-medium-size_2-of-3
+              slds-p-bottom_x-large"
           >
             {!projects || !projects.fetched ? (
               // Fetching projects from API
@@ -159,7 +165,7 @@ const ProductDetail = ({
                         />
                       ))}
                     </ul>
-                    {projects && projects.next ? (
+                    {projects.next ? (
                       <div className="slds-m-top_large">
                         <Button
                           label={
@@ -173,7 +179,7 @@ const ProductDetail = ({
                               'Load More'
                             )
                           }
-                          onClick={maybeFetchObjects}
+                          onClick={fetchMoreProjects}
                         />
                       </div>
                     ) : null}
@@ -184,9 +190,9 @@ const ProductDetail = ({
           </div>
           <div
             className="slds-col
-                slds-size_1-of-1
-                slds-medium-size_1-of-3
-                slds-text-longform"
+              slds-size_1-of-1
+              slds-medium-size_1-of-3
+              slds-text-longform"
           >
             {!productDescriptionHasTitle && (
               <h2 className="slds-text-heading_medium">{product.name}</h2>
