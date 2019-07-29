@@ -148,8 +148,7 @@ const ProductDetail = ({
             ) : (
               <>
                 <ProjectForm
-                  type="project"
-                  item={product}
+                  product={product}
                   startOpen={!projects.projects.length}
                 />
                 {Boolean(projects.projects.length) && (
