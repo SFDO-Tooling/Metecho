@@ -1,5 +1,5 @@
 import React from 'react';
-import ProjectForm from '@/components/projects/createForm';
+import TaskForm from '@/components/tasks/createForm';
 import DocumentTitle from 'react-document-title';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
@@ -11,11 +11,13 @@ import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
 import { AppState } from '@/store';
 import { fetchObject } from '@/store/actions';
 import { selectProduct } from '@/store/products/selectors';
+import { Product } from 'src/js/store/products/reducer';
+import { Project } from 'src/js/store/projects/reducer';
 
 export interface Props {
-  // project,
-  // product,
-  // projectSlug
+  project: Project;
+  product: Product;
+  projectSlug: string;
 }
 
 const ProjectDetail: React.SFC<Props> = ({ product, project }: Props) => {
@@ -55,10 +57,17 @@ const ProjectDetail: React.SFC<Props> = ({ product, project }: Props) => {
               className="slds-col
               slds-size_1-of-1
               slds-medium-size_2-of-3
-              slds-p-bottom_x-large"
+              slds-p-bottom_x-large
+              slds-p-top_x-large"
             >
-              {/* @@@ make projectForm reusable? */}
-              {/* <ProjectForm product={project} startOpen={true} /> */}
+              <h2 className="slds-text-heading_medium slds-p-bottom_x-large">
+                {i18n.t('Tasks for')} {project.name}
+              </h2>
+              <TaskForm
+                product={product.id}
+                project={project}
+                startOpen={true}
+              />
             </div>
             <div
               className="slds-col
