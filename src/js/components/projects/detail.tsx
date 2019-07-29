@@ -11,11 +11,13 @@ import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
 import { AppState } from '@/store';
 import { fetchObject } from '@/store/actions';
 import { selectProduct } from '@/store/products/selectors';
+import { Product } from '@/store/products/reducer';
+import { Project } from '@/store/projects/reducer';
 
 export interface Props {
-  // project,
-  // product,
-  // projectSlug
+  project: Project;
+  product: Product;
+  projectSlug: string;
 }
 
 const ProjectDetail: React.SFC<Props> = ({ product, project }: Props) => {
@@ -55,10 +57,11 @@ const ProjectDetail: React.SFC<Props> = ({ product, project }: Props) => {
               className="slds-col
               slds-size_1-of-1
               slds-medium-size_2-of-3
-              slds-p-bottom_x-large"
+              slds-p-bottom_x-large
+              slds-m-top_x-large"
             >
               {/* @@@ make projectForm reusable? */}
-              {/* <ProjectForm product={project} startOpen={true} /> */}
+              <ProjectForm type="task" item={project} startOpen={true} />
             </div>
             <div
               className="slds-col
@@ -66,7 +69,9 @@ const ProjectDetail: React.SFC<Props> = ({ product, project }: Props) => {
               slds-medium-size_1-of-3
               slds-text-longform"
             >
-              <h2 className="slds-text-heading_medium">{project.name}</h2>
+              <h2 className="slds-text-heading_medium detail-title">
+                {project.name}
+              </h2>
               <p
                 className="markdown"
                 dangerouslySetInnerHTML={{ __html: project.description }}

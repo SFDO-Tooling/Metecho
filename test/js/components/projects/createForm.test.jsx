@@ -34,15 +34,20 @@ const defaultProduct = {
 describe('<ProjectForm/>', () => {
   const setup = options => {
     const defaults = {
-      product: defaultProduct,
+      item: defaultProduct,
       startOpen: true,
+      type: 'project',
     };
     const opts = Object.assign({}, defaults, options);
-    const { product, startOpen } = opts;
+    const { item, startOpen, type } = opts;
     const context = {};
     const { getByText, getByLabelText, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectForm product={product} startOpen={startOpen} />
+        <ProjectForm
+          type="project"
+          item={defaultProduct}
+          startOpen={startOpen}
+        />
       </StaticRouter>,
       {},
       storeWithThunk,

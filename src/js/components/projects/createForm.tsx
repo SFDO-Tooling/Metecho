@@ -13,20 +13,23 @@ import { Product } from '@/store/products/reducer';
 import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
+import { Project } from '@/store/projects/reducer';
 
 interface Props extends RouteComponentProps {
-  product: Product;
+  item: Product | Project;
   startOpen?: boolean;
   doCreateObject: ObjectsActionType;
   doAddError: typeof addError;
+  type: string;
 }
 
 const ProjectForm = ({
-  product,
+  item,
   startOpen = false,
   history,
   doCreateObject,
   doAddError,
+  type,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
   const [name, setName] = useState('');
@@ -57,12 +60,19 @@ const ProjectForm = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
+
+    // to id metadata to pass to createObject //
+    const meta: any = {
+      task: 'project',
+      project: 'product',
+    };
+
     doCreateObject({
-      objectType: OBJECT_TYPES.PROJECT,
+      objectType: type,
       data: {
         name,
         description,
-        product: product.id,
+        [meta[type]]: item.id,
       },
     })
       .then(action => {
@@ -76,7 +86,7 @@ const ProjectForm = ({
           object &&
           object.slug
         ) {
-          const url = routes.project_detail(product.slug, object.slug);
+          const url = routes.project_detail(item.slug, object.slug);
           history.push(url);
         }
       })
@@ -95,13 +105,16 @@ const ProjectForm = ({
       });
   };
 
+  const title: any = {
+    project: `${i18n.t('Create a New Project for')} ${item.name}`,
+    task: null,
+  };
+
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
         <>
-          <h2 className="slds-text-heading_medium">
-            {i18n.t('Create a New Project for')} {product.name}
-          </h2>
+          <h2 className="slds-text-heading_medium">{title[type]}</h2>
           <Input
             id="project-name"
             label={i18n.t('Project Name')}
