@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -56,7 +57,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=Project.objects.all(),
                 fields=("name", "product"),
-                message="A project with this name already exists.",
+                message=_("A project with this name already exists."),
             ),
         )
 
