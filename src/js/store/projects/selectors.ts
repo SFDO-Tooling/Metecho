@@ -4,10 +4,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { AppState } from '@/store';
 import { Product } from '@/store/products/reducer';
 import { selectProduct } from '@/store/products/selectors';
-import {
-  ProjectsByProductState,
-  ProjectsState,
-} from '@/store/projects/reducer';
+import { ProjectsState } from '@/store/projects/reducer';
 
 export const selectProjectState = (appState: AppState): ProjectsState =>
   appState.projects;
@@ -17,9 +14,10 @@ export const selectProjectsByProduct = createSelector(
   (
     projects: ProjectsState,
     product: Product | null | undefined,
-  ): ProjectsByProductState | undefined => {
+  ): { [x: string]: Product } | undefined => {
     if (product) {
-      return projects[product.id];
+      const project: any = projects[product.id];
+      return project;
     }
     return undefined;
   },
@@ -30,15 +28,26 @@ export const selectProjectSlug = (
   { match: { params } }: RouteComponentProps<{ projectSlug?: string }>,
 ) => params.projectSlug;
 
-export const selectProject = createSelector(
+export const selectProjectNotFound = createSelector(
   [selectProjectsByProduct, selectProjectSlug],
-  (projects, projectSlug) => {
-    const project =
-      projects &&
-      projects.projects.find(
-        // @todo dont forget about old_slugs, notFound projects
-        p => p.slug === projectSlug,
-      );
-    return project ? project : undefined;
+  (projects, projectSlug): boolean => Boolean(projectSlug && projects),
+);
+export const selectProject = createSelector(
+  [selectProjectsByProduct, selectProjectSlug, selectProjectNotFound],
+  (projects, projectSlug, notFound) => {
+    if (!projectSlug) {
+      return undefined;
+    }
+    if (projects) {
+      for (const key in projects) {
+        if (projects.hasOwnProperty(key)) {
+          const project = projects[key];
+          if (project.slug === projectSlug) {
+            return project;
+          }
+        }
+      }
+    }
+    return notFound ? null : undefined;
   },
 );

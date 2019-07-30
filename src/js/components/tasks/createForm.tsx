@@ -138,7 +138,6 @@ const TaskForm = ({
             className="slds-form-element_stacked"
             name="assignee"
             value={assignee}
-            required
             aria-required
             maxLength="50"
             errorText={

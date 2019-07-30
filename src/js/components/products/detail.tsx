@@ -36,7 +36,7 @@ const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
   </a>
 );
 
-const ProductDetail = ({
+const ProductDetail: React.SFC<Props> = ({
   product,
   productSlug,
   projects,

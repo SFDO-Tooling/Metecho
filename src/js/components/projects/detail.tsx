@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import TaskForm from '@/components/tasks/createForm';
 import DocumentTitle from 'react-document-title';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
@@ -9,18 +9,47 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
 import { AppState } from '@/store';
-import { fetchObject } from '@/store/actions';
+import { fetchObject, ObjectsActionType } from '@/store/actions';
 import { selectProduct } from '@/store/products/selectors';
 import { Product } from 'src/js/store/products/reducer';
 import { Project } from 'src/js/store/projects/reducer';
+import { OBJECT_TYPES } from '@/utils/constants';
+import ProductNotFound from '@/components/products/product404';
+import Spinner from '@salesforce/design-system-react/components/spinner';
+import { TaskState } from '@/store/tasks/reducer';
+import { selectTasksByProject } from '@/store/tasks/selectors';
 
 export interface Props {
   project: Project;
   product: Product;
   projectSlug: string;
+  doFetchObject: ObjectsActionType;
+  tasks: TaskState;
 }
 
-const ProjectDetail: React.SFC<Props> = ({ product, project }: Props) => {
+const ProjectDetail: React.SFC<Props> = ({
+  product,
+  project,
+  projectSlug,
+  doFetchObject,
+  tasks,
+}: Props) => {
+  useEffect(() => {
+    if (!project) {
+      doFetchObject({
+        objectType: OBJECT_TYPES.PROJECT,
+        filters: { product: product.id },
+      });
+    }
+  });
+
+  if (!project) {
+    if (!projectSlug || project === null) {
+      return <ProductNotFound />;
+    }
+    // Fetching product from API
+    return <Spinner />;
+  }
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('MetaShare')}`}>
       <>
@@ -68,6 +97,13 @@ const ProjectDetail: React.SFC<Props> = ({ product, project }: Props) => {
                 project={project}
                 startOpen={true}
               />
+              {tasks && tasks[project.id] && (
+                <>
+                  {tasks[project.id].map((task, idx) => (
+                    <li key={idx}>{task.name}</li>
+                  ))}
+                </>
+              )}
             </div>
             <div
               className="slds-col
@@ -92,6 +128,7 @@ const select = (appState: AppState, props: Props) => ({
   project: selectProject(appState, props),
   product: selectProduct(appState, props),
   projectSlug: selectProjectSlug(appState, props),
+  tasks: selectTasksByProject(appState),
 });
 const actions = {
   doFetchObject: fetchObject,
