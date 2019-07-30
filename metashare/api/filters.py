@@ -12,9 +12,11 @@ class ProductFilter(filters.FilterSet):
 
 
 class ProjectFilter(filters.FilterSet):
+    slug = filters.CharFilter(field_name="slugs__slug")
+
     class Meta:
         model = Project
-        fields = ("product",)
+        fields = ("product", "slug")
 
 
 class TaskFilter(filters.FilterSet):
