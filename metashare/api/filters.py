@@ -20,6 +20,8 @@ class ProjectFilter(filters.FilterSet):
 
 
 class TaskFilter(filters.FilterSet):
+    slug = filters.CharFilter(field_name="slugs__slug")
+
     class Meta:
         model = Task
-        fields = ("project",)
+        fields = ("project", "slug")
