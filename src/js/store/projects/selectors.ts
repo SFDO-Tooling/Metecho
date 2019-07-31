@@ -40,7 +40,7 @@ export const selectProject = createSelector(
     }
     if (projects) {
       for (const key in projects) {
-        if (projects.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(projects, key)) {
           const project = projects[key];
           if (project.slug === projectSlug) {
             return project;
