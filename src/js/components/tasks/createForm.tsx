@@ -180,7 +180,7 @@ const TaskForm = ({
         )}
         {success && (
           <span className="slds-p-left--medium slds-p-right--medium form-text__success">
-            A task was successfully created
+            {i18n.t('A task was successfully created')}
           </span>
         )}
       </div>

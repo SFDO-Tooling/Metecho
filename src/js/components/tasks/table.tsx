@@ -1,6 +1,7 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import i18n from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -13,7 +14,9 @@ export interface Props {
 const TaskTable: React.SFC<Props> = ({ tasks }: Props) => {
   const StatusTableCell = () => (
     <DataTableCell title="new">
-      <span className="slds-align-middle slds-badge">new</span>
+      <span className="slds-align-middle slds-badge">
+        {i18n.t('In Progress')}
+      </span>
     </DataTableCell>
   );
   StatusTableCell.displayName = DataTableCell.displayName;
@@ -25,13 +28,17 @@ const TaskTable: React.SFC<Props> = ({ tasks }: Props) => {
   );
   LinkTableCell.displayName = DataTableCell.displayName;
   const columns = [
-    <DataTableColumn key="task" label="Task" property="name">
+    <DataTableColumn key="task" label={i18n.t('Task')} property="name">
       <LinkTableCell />
     </DataTableColumn>,
-    <DataTableColumn key="status" label="Status" property="status">
+    <DataTableColumn key="status" label={i18n.t('Status')} property="status">
       <StatusTableCell />
     </DataTableColumn>,
-    <DataTableColumn key="assignee" label="Assignee" property="assignee" />,
+    <DataTableColumn
+      key="assignee"
+      label={i18n.t('Assigned')}
+      property="assignee"
+    />,
   ];
 
   return (
