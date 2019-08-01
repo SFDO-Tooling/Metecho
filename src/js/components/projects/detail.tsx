@@ -5,7 +5,7 @@ import i18n from 'i18next';
 import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Product } from 'src/js/store/products/reducer';
 import { Project } from 'src/js/store/projects/reducer';
 
@@ -22,14 +22,14 @@ import routes from '@/utils/routes';
 
 import TaskTable from '../tasks/table';
 
-export interface Props {
+type Props = {
   project: Project;
   product: Product;
   projectSlug: string;
   doFetchObject: ObjectsActionType;
   doFetchObjects: ObjectsActionType;
   tasks: TaskState;
-}
+} & RouteComponentProps;
 
 const ProjectDetail: React.SFC<Props> = ({
   product,
@@ -66,7 +66,7 @@ const ProjectDetail: React.SFC<Props> = ({
     // Fetching product from API
     return <Spinner />;
   }
-
+  console.log(tasks && tasks[product.id]);
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('MetaShare')}`}>
       <>
@@ -112,7 +112,7 @@ const ProjectDetail: React.SFC<Props> = ({
               <TaskForm
                 product={product.id}
                 project={project}
-                startOpen={true}
+                startOpen={false}
               />
               {tasks && tasks[project.id] && (
                 <TaskTable tasks={tasks && tasks[project.id]} />

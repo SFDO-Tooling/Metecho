@@ -9,9 +9,9 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { createObject, ObjectsActionType } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
+import { Project } from '@/store/projects/reducer';
 import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
-import { Project } from '@/store/projects/reducer';
 
 interface Props extends RouteComponentProps {
   project: Project;
@@ -25,7 +25,6 @@ const TaskForm = ({
   project,
   product,
   startOpen = false,
-  history,
   doCreateObject,
   doAddError,
 }: Props) => {
@@ -35,6 +34,7 @@ const TaskForm = ({
   const [assignee, setAssignee] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
   const fields = ['name', 'description'];
+  const [success, addSuccess] = useState(false);
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
@@ -59,6 +59,16 @@ const TaskForm = ({
   const handleAssigneeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAssignee(e.target.value);
   };
+
+  const handleSuceess = () => {
+    setName('');
+    setDescription('');
+    addSuccess(true);
+    setTimeout(() => {
+      addSuccess(false);
+    }, 3000);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
@@ -73,7 +83,7 @@ const TaskForm = ({
       },
     })
       .then(action => {
-        setName(''), setDescription('');
+        handleSuceess();
         const {
           type,
           payload: { object, objectType },
@@ -167,6 +177,11 @@ const TaskForm = ({
             variant="base"
             onClick={closeForm}
           />
+        )}
+        {success && (
+          <span className="slds-p-left--medium slds-p-right--medium form-text__success">
+            A task was successfully created
+          </span>
         )}
       </div>
     </form>
