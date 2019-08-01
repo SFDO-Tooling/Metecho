@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
 import { AppState } from '@/store';
-import { fetchObject, ObjectsActionType } from '@/store/actions';
+import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
 import { selectProduct } from '@/store/products/selectors';
 import { Product } from 'src/js/store/products/reducer';
 import { Project } from 'src/js/store/projects/reducer';
@@ -24,6 +24,7 @@ export interface Props {
   product: Product;
   projectSlug: string;
   doFetchObject: ObjectsActionType;
+  doFetchObjects: ObjectsActionType;
   tasks: TaskState;
 }
 
@@ -32,16 +33,26 @@ const ProjectDetail: React.SFC<Props> = ({
   project,
   projectSlug,
   doFetchObject,
+  doFetchObjects,
   tasks,
 }: Props) => {
   useEffect(() => {
-    if (!project) {
+    if (product && !project) {
       doFetchObject({
         objectType: OBJECT_TYPES.PROJECT,
-        filters: { product: product.id },
+        filters: { product: product.id, slug: projectSlug },
       });
     }
-  });
+  }, [project, product, doFetchObject, projectSlug]);
+
+  useEffect(() => {
+    if (project && !tasks.length) {
+      doFetchObjects({
+        objectType: OBJECT_TYPES.TASK,
+        filters: { project: project.id },
+      });
+    }
+  }, [tasks, project]);
 
   if (!project) {
     if (!projectSlug || project === null) {
@@ -132,6 +143,7 @@ const select = (appState: AppState, props: Props) => ({
 });
 const actions = {
   doFetchObject: fetchObject,
+  doFetchObjects: fetchObjects,
 };
 const WrappedProjectDetail = connect(
   select,

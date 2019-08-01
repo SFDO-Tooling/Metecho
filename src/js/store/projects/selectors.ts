@@ -4,7 +4,10 @@ import { RouteComponentProps } from 'react-router-dom';
 import { AppState } from '@/store';
 import { Product } from '@/store/products/reducer';
 import { selectProduct } from '@/store/products/selectors';
-import { ProjectsState } from '@/store/projects/reducer';
+import {
+  ProjectsState,
+  ProjectsByProductState,
+} from '@/store/projects/reducer';
 
 export const selectProjectState = (appState: AppState): ProjectsState =>
   appState.projects;
@@ -14,10 +17,19 @@ export const selectProjectsByProduct = createSelector(
   (
     projects: ProjectsState,
     product: Product | null | undefined,
-  ): { [x: string]: Product } | undefined => {
+  ): ProjectsByProductState | undefined => {
     if (product) {
-      const project: any = projects[product.id];
-      return project;
+      return projects[product.id];
+    }
+    return undefined;
+  },
+);
+
+const selectProductId = createSelector(
+  [selectProduct],
+  (product: Product | null | undefined): ProjectsByProductState | undefined => {
+    if (product) {
+      return product.id;
     }
     return undefined;
   },
@@ -33,20 +45,28 @@ export const selectProjectNotFound = createSelector(
   (projects, projectSlug): boolean => Boolean(projectSlug && projects),
 );
 export const selectProject = createSelector(
-  [selectProjectsByProduct, selectProjectSlug, selectProjectNotFound],
-  (projects, projectSlug, notFound) => {
+  [
+    selectProjectsByProduct,
+    selectProjectSlug,
+    selectProjectNotFound,
+    selectProjectState,
+    selectProductId,
+  ],
+  (productProjects, projectSlug, notFound, projects, product) => {
+    let project;
     if (!projectSlug) {
       return undefined;
     }
-    if (projects) {
-      for (const key in projects) {
-        if (projects.hasOwnProperty(key)) {
-          const project = projects[key];
-          if (project.slug === projectSlug) {
-            return project;
-          }
-        }
-      }
+    if (productProjects) {
+      project = productProjects.projects.find(
+        p => p.slug === projectSlug || p.old_slugs.includes(projectSlug),
+      );
+      return project;
+    }
+    if (projects.projects && product !== undefined) {
+      // IDK what to do here...
+      project = projects.projects[product];
+      return project;
     }
     return notFound ? null : undefined;
   },

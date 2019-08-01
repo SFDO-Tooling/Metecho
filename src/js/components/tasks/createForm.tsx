@@ -73,6 +73,7 @@ const TaskForm = ({
       },
     })
       .then(action => {
+        setName(''), setDescription('');
         const {
           type,
           payload: { object, objectType },

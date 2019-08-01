@@ -104,12 +104,11 @@ const reducer = (
       const { objectType, object } = action.payload;
       const { product } = action.payload.filters;
       if (objectType === OBJECT_TYPES.PROJECT && object) {
+        const item = { [product]: { ...object } };
         return {
-          ...projects,
-          [product]: {
-            ...object,
-            // Prepend new project (projects are ordered by `-created_at`)
-          },
+          ...defaultState,
+          ...projects.projects,
+          projects: item,
         };
       }
       return projects;

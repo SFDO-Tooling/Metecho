@@ -1,6 +1,6 @@
 import { ObjectsAction } from '@/store/actions';
 import { LogoutAction } from '@/store/user/actions';
-import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import { OBJECT_TYPES } from '@/utils/constants';
 
 export interface Task {
   branch_url: string;
@@ -17,27 +17,33 @@ export interface TaskState {
   [key: string]: Task[];
 }
 
-const defaultState = {
-  tasks: {},
-};
+const defaultState = {};
 const reducer = (
-  tasks: TaskState = {},
+  taskState: TaskState = defaultState,
   action: ObjectsAction | LogoutAction,
 ) => {
   switch (action.type) {
     case 'CREATE_OBJECT_SUCCEEDED': {
-      const {
-        data,
-        objectType,
-      }: { data: Task; objectType: ObjectTypes } = action.payload;
+      const { data, objectType } = action.payload;
       if (objectType === OBJECT_TYPES.TASK) {
+        const tasks = taskState[data.project] || [];
         return {
-          [data.project]: [data],
+          ...taskState,
+          [data.project]: tasks.concat(data as Task),
         };
       }
+      return taskState;
+    }
+    case 'FETCH_OBJECTS_SUCCEEDED': {
+      const { filters, response, objectType } = action.payload;
+      const { results } = response;
+      if (objectType === OBJECT_TYPES.TASK) {
+        return { [filters.project]: [results] };
+      }
+      return taskState;
     }
   }
-  return tasks;
+  return taskState;
 };
 
 export default reducer;

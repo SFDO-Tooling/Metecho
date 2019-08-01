@@ -141,7 +141,7 @@ export const fetchObject = ({
     // @@@ is there a filter to fetch a single project?
     const object =
       response && response.results && response.results.length
-        ? response.results
+        ? response.results[0]
         : null;
     return dispatch({
       type: 'FETCH_OBJECT_SUCCEEDED',
