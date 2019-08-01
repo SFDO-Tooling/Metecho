@@ -18,6 +18,7 @@ import ProductNotFound from '@/components/products/product404';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import { TaskState } from '@/store/tasks/reducer';
 import { selectTasksByProject } from '@/store/tasks/selectors';
+import TaskTable from '../tasks/table';
 
 export interface Props {
   project: Project;
@@ -55,7 +56,7 @@ const ProjectDetail: React.SFC<Props> = ({
   }, [tasks, project]);
 
   if (!project) {
-    if (!projectSlug || project === null) {
+    if (!projectSlug || !project || project === null) {
       return <ProductNotFound />;
     }
     // Fetching product from API
@@ -108,13 +109,14 @@ const ProjectDetail: React.SFC<Props> = ({
                 project={project}
                 startOpen={true}
               />
-              {tasks && tasks[project.id] && (
+              <TaskTable />
+              {/* {tasks && tasks[project.id] && (
                 <>
                   {tasks[project.id].map((task, idx) => (
                     <li key={idx}>{task.name}</li>
                   ))}
                 </>
-              )}
+              )} */}
             </div>
             <div
               className="slds-col
