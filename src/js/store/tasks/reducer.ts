@@ -38,7 +38,10 @@ const reducer = (
       const { filters, response, objectType } = action.payload;
       const { results } = response;
       if (objectType === OBJECT_TYPES.TASK) {
-        return { [filters.project]: [results] };
+        return {
+          ...taskState,
+          [filters.project]: [...results],
+        };
       }
       return taskState;
     }

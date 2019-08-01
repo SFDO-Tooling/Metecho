@@ -1,23 +1,25 @@
-import React, { useEffect } from 'react';
-import TaskForm from '@/components/tasks/createForm';
-import DocumentTitle from 'react-document-title';
-import PageHeader from '@salesforce/design-system-react/components/page-header';
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
-import routes from '@/utils/routes';
+import PageHeader from '@salesforce/design-system-react/components/page-header';
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
-import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
+import { Link } from 'react-router-dom';
+import { Product } from 'src/js/store/products/reducer';
+import { Project } from 'src/js/store/projects/reducer';
+
+import ProductNotFound from '@/components/products/product404';
+import TaskForm from '@/components/tasks/createForm';
 import { AppState } from '@/store';
 import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
 import { selectProduct } from '@/store/products/selectors';
-import { Product } from 'src/js/store/products/reducer';
-import { Project } from 'src/js/store/projects/reducer';
-import { OBJECT_TYPES } from '@/utils/constants';
-import ProductNotFound from '@/components/products/product404';
-import Spinner from '@salesforce/design-system-react/components/spinner';
+import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
 import { TaskState } from '@/store/tasks/reducer';
 import { selectTasksByProject } from '@/store/tasks/selectors';
+import { OBJECT_TYPES } from '@/utils/constants';
+import routes from '@/utils/routes';
+
 import TaskTable from '../tasks/table';
 
 export interface Props {
@@ -44,7 +46,8 @@ const ProjectDetail: React.SFC<Props> = ({
         filters: { product: product.id, slug: projectSlug },
       });
     }
-  }, [project, product, doFetchObject, projectSlug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product, projectSlug]);
 
   useEffect(() => {
     if (project && !tasks.length) {
@@ -53,15 +56,17 @@ const ProjectDetail: React.SFC<Props> = ({
         filters: { project: project.id },
       });
     }
-  }, [tasks, project]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project]);
 
-  if (!project) {
-    if (!projectSlug || !project || project === null) {
+  if (!project && !tasks.length) {
+    if (!projectSlug || project === null) {
       return <ProductNotFound />;
     }
     // Fetching product from API
     return <Spinner />;
   }
+
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('MetaShare')}`}>
       <>
@@ -109,14 +114,9 @@ const ProjectDetail: React.SFC<Props> = ({
                 project={project}
                 startOpen={true}
               />
-              <TaskTable />
-              {/* {tasks && tasks[project.id] && (
-                <>
-                  {tasks[project.id].map((task, idx) => (
-                    <li key={idx}>{task.name}</li>
-                  ))}
-                </>
-              )} */}
+              {tasks && tasks[project.id] && (
+                <TaskTable tasks={tasks && tasks[project.id]} />
+              )}
             </div>
             <div
               className="slds-col

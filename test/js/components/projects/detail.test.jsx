@@ -2,9 +2,9 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
+
 // import { fetchObject, fetchObjects } from '@/store/actions';
 // import routes from '@/utils/routes';
-
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 const defaultState = {
@@ -37,6 +37,13 @@ const defaultState = {
       notFound: [],
       fetched: true,
     },
+  },
+  tasks: {
+    project1: [
+      {
+        name: 'task 1',
+      },
+    ],
   },
 };
 describe('<ProjectDetail/>', () => {

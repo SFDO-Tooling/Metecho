@@ -3,33 +3,13 @@ import React from 'react';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
+import { TaskState } from '@/store/tasks/reducer';
 
-export interface TaskTableProps {}
+export interface Props {
+  tasks: TaskState;
+}
 
-const TaskTable: React.SFC<TaskTableProps> = () => {
-  const tasks = {
-    0: [
-      {
-        id: '8IKZHZZV80',
-        name: 'task 1',
-        status: 'new',
-        assignee: 'duggiemitchell',
-      },
-      {
-        id: '5GJOOOPWU7',
-        name: 'task 2',
-        status: 'new',
-        assignee: 'stacy',
-      },
-      {
-        id: '8IKZHZZV81',
-        name: 'task 3',
-        status: 'in progress',
-        assignee: 'jonny',
-      },
-    ],
-  };
-
+const TaskTable: React.SFC<Props> = ({ tasks }) => {
   const StatusTableCell = () => (
     <DataTableCell title="new">
       <span className="slds-align-middle slds-badge">new</span>
@@ -46,9 +26,13 @@ const TaskTable: React.SFC<TaskTableProps> = () => {
   ];
 
   return (
-    <DataTable items={tasks[0]} id="DataTableExample-1-default">
-      {columns}
-    </DataTable>
+    <>
+      {tasks.length ? (
+        <DataTable items={tasks} id="DataTableExample-1-default">
+          {columns}
+        </DataTable>
+      ) : null}{' '}
+    </>
   );
 };
 
