@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from .models import Product
+from .models import Product, Project
 
 
 class ProductFilter(filters.FilterSet):
@@ -9,3 +9,9 @@ class ProductFilter(filters.FilterSet):
     class Meta:
         model = Product
         fields = ("slug",)
+
+
+class ProjectFilter(filters.FilterSet):
+    class Meta:
+        model = Project
+        fields = ("product",)

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from ...models import Product
+from ...models import Product, Project
 
 
 class Command(BaseCommand):
@@ -24,11 +24,28 @@ class Command(BaseCommand):
         product = Product.objects.create(name=name, description=description, **kwargs)
         return product
 
+    def create_project(self, **kwargs):
+        name = kwargs.pop("name", "Sample Project")
+        description = kwargs.pop(
+            "description",
+            (
+                f"Description for {name}: "
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
+                "sed do eiusmod tempor incididunt ut labore et dolore "
+                "magna aliqua. Tellus elementum sagittis vitae et leo "
+                "duis ut diam. Sem fringilla ut morbi tincidunt augue "
+                "interdum velit euismod. Volutpat est velit egestas dui "
+                "id ornare arcu. Viverra tellus in hac habitasse platea "
+                "dictumst. Nulla facilisi etiam dignissim diam."
+            ),
+        )
+        return Project.objects.create(name=name, description=description, **kwargs)
+
     def handle(self, *args, **options):
         self.create_product(
             name="MetaDeploy", repo_url="https://www.github.com/SFDO-Tooling/MetaDeploy"
         )
-        self.create_product(
+        metashare = self.create_product(
             name="MetaShare",
             repo_url="https://www.github.com/SFDO-Tooling/MetaShare",
             description=(
@@ -70,3 +87,6 @@ class Command(BaseCommand):
         self.create_product(
             name="Accoutrement", repo_url="https://www.github.com/oddbird/accoutrement"
         )
+
+        for i in range(30):
+            self.create_project(name=f"Sample Project {i}", product=metashare)

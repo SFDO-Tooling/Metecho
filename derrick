@@ -27,6 +27,12 @@ case "$1" in
     "lint")
         dcrq yarn lint
         ;;
+    "lint:py")
+        dcrq yarn lintpy
+        ;;
+    "lint:js")
+        dcrq yarn lintjs
+        ;;
     "test")
         dcr yarn test:all
         ;;
@@ -51,12 +57,18 @@ case "$1" in
     "migrations")
         dcr python manage.py makemigrations "${@:2}"
         ;;
+    "showmigrations")
+        dcr python manage.py showmigrations "${@:2}"
+        ;;
     "messages")
         dcr python manage.py makemessages --locale "${@:2}"
         dcr python manage.py compilemessages
         ;;
     "shell")
         dcr python manage.py shell
+        ;;
+    "dbshell")
+        dcr python manage.py dbshell
         ;;
     "prune")
         # See https://docs.docker.com/config/pruning/ for more detail.

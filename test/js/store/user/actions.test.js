@@ -2,7 +2,7 @@ import fetchMock from 'fetch-mock';
 
 import * as actions from '@/store/user/actions';
 
-import { storeWithApi } from './../../utils';
+import { storeWithThunk } from './../../utils';
 
 describe('login', () => {
   beforeEach(() => {
@@ -68,7 +68,7 @@ describe('logout', () => {
   let store;
 
   beforeEach(() => {
-    store = storeWithApi({});
+    store = storeWithThunk({});
     fetchMock.postOnce(window.api_urls.account_logout(), {
       status: 204,
       body: {},
@@ -132,12 +132,13 @@ describe('refetchAllData', () => {
       objectType: 'product',
       url,
       reset: true,
+      filters: {},
     };
   });
 
   describe('success', () => {
     test('GETs user from api', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       const user = { id: 'me' };
       fetchMock.getOnce(window.api_urls.user(), user);
       const started = { type: 'REFETCH_DATA_STARTED' };
@@ -180,7 +181,7 @@ describe('refetchAllData', () => {
     });
 
     test('handles missing user', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       fetchMock.getOnce(window.api_urls.user(), 401);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
@@ -195,7 +196,7 @@ describe('refetchAllData', () => {
 
   describe('error', () => {
     test('dispatches REFETCH_DATA_FAILED action', () => {
-      const store = storeWithApi({});
+      const store = storeWithThunk({});
       fetchMock.getOnce(window.api_urls.user(), 500);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const failed = { type: 'REFETCH_DATA_FAILED' };

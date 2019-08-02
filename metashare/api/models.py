@@ -4,6 +4,7 @@ from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.text import slugify
 from model_utils import Choices
 
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -116,7 +117,7 @@ class Product(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
         return self.name
 
     class Meta:
-        ordering = ("name", "-created_at")
+        ordering = ("name",)
 
 
 class GitHubRepository(mixins.HashIdMixin, models.Model):
@@ -132,12 +133,45 @@ class GitHubRepository(mixins.HashIdMixin, models.Model):
         return self.url
 
 
+class ProjectSlug(AbstractSlug):
+    parent = models.ForeignKey(
+        "Project", on_delete=models.PROTECT, related_name="slugs"
+    )
+
+
+class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    name = models.CharField(max_length=50)
+    description = MarkdownField(blank=True, property_suffix="_markdown")
+    branch_name = models.SlugField(max_length=50)
+
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name="projects"
+    )
+
+    slug_class = ProjectSlug
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.branch_name:
+            self.branch_name = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ("-created_at", "name")
+        unique_together = (("name", "product"), ("branch_name", "product"))
+
+
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
     user.refresh_repositories()
 
 
-@receiver(post_save, sender=Product)
-def product_save_handler(sender, *, created, instance, **kwargs):
+def ensure_slug_handler(sender, *, created, instance, **kwargs):
     if created:
         instance.ensure_slug()
+
+
+post_save.connect(ensure_slug_handler, sender=Product)
+post_save.connect(ensure_slug_handler, sender=Project)

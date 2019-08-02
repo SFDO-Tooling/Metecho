@@ -1,19 +1,22 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProductDetail from '@/components/products/detail';
-import { fetchObject } from '@/store/actions';
+import { fetchObject, fetchObjects } from '@/store/actions';
 import routes from '@/utils/routes';
+
+import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
 
 fetchObject.mockReturnValue({ type: 'TEST' });
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
+  fetchObjects.mockClear();
 });
-
-import { renderWithRedux, storeWithApi } from './../../utils';
 
 const defaultState = {
   products: {
@@ -30,9 +33,25 @@ const defaultState = {
     notFound: ['yet-another-product'],
     next: null,
   },
+  projects: {
+    p1: {
+      projects: [
+        {
+          id: 'project1',
+          slug: 'project-1',
+          name: 'Project 1',
+          product: 'p1',
+          description: 'Project Description',
+        },
+      ],
+      next: 'next-url',
+      notFound: [],
+      fetched: true,
+    },
+  },
 };
 
-describe('<ProductList />', () => {
+describe('<ProductDetail />', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
@@ -46,16 +65,17 @@ describe('<ProductList />', () => {
         <ProductDetail match={{ params: { productSlug } }} />
       </StaticRouter>,
       initialState,
-      storeWithApi,
+      storeWithThunk,
     );
     return { getByText, getByTitle, queryByText, context };
   };
 
-  test('renders product detail', () => {
+  test('renders product detail and projects list', () => {
     const { getByText, getByTitle } = setup();
 
     expect(getByTitle('Product 1')).toBeVisible();
     expect(getByText('This is a test product.')).toBeVisible();
+    expect(getByText('Project 1')).toBeVisible();
   });
 
   describe('product not found', () => {
@@ -96,6 +116,100 @@ describe('<ProductList />', () => {
 
       expect(queryByText('Product 1')).toBeNull();
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('projects have not been fetched', () => {
+    test('fetches projects from API', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            p1: {
+              projects: [],
+              next: null,
+              notFound: [],
+              fetched: false,
+            },
+          },
+        },
+      });
+
+      expect(queryByText('Projects for Product 1')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { product: 'p1' },
+        objectType: 'project',
+        reset: true,
+      });
+    });
+  });
+
+  describe('fetching more projects', () => {
+    test('fetches next page of projects', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            p1: {
+              projects: [
+                {
+                  branch_url: 'branch-url',
+                  description: 'product description',
+                  id: 'project1',
+                  name: 'Project 1',
+                  old_slugs: [],
+                  product: 'p1',
+                  slug: 'project-1',
+                },
+              ],
+              next: 'next-url',
+              notFound: [],
+              fetched: true,
+            },
+          },
+        },
+      });
+      const btn = getByText('Load More');
+
+      expect(btn).toBeVisible();
+
+      fireEvent.click(btn);
+
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { product: 'p1' },
+        objectType: 'project',
+        url: 'next-url',
+      });
+
+      expect(getByText('Loading…')).toBeVisible();
+    });
+
+    test('hides btn when at end of list', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            p1: {
+              projects: [
+                {
+                  branch_url: 'branch-url',
+                  description: 'product description',
+                  id: 'project1',
+                  name: 'Project 1',
+                  old_slugs: [],
+                  product: 'p1',
+                  slug: 'project-1',
+                },
+              ],
+              next: null,
+              notFound: [],
+              fetched: true,
+            },
+          },
+        },
+      });
+
+      expect(queryByText('Load More')).toBeNull();
     });
   });
 });

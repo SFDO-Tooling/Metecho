@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from ..models import Product, user_logged_in_handler
+from ..models import Product, Project, user_logged_in_handler
 
 
 @pytest.mark.django_db
@@ -12,9 +12,23 @@ class TestProduct:
         product.save()
         assert product.slug == "test-product"
 
-    def test_str(product_factory):
+    def test_str(self):
         product = Product(name="Test Product")
         assert str(product) == "Test Product"
+
+
+@pytest.mark.django_db
+class TestProject:
+    def test_signal(self, product_factory):
+        product = product_factory()
+        project = Project(name="Test Project", product=product)
+        project.save()
+        assert project.slug == "test-project"
+
+    def test_str(self, product_factory):
+        product = product_factory()
+        project = Project(name="Test Project", product=product)
+        assert str(project) == "Test Project"
 
 
 @pytest.mark.django_db

@@ -7,3 +7,4 @@ API Reference
 
    user
    products
+   projects

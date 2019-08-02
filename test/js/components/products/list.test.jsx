@@ -6,7 +6,7 @@ import ProductList from '@/components/products/list';
 import { fetchObjects } from '@/store/actions';
 import { syncRepos } from '@/store/products/actions';
 
-import { renderWithRedux, storeWithApi } from './../../utils';
+import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('react-fns', () => ({
   withScroll(Component) {
@@ -37,7 +37,7 @@ describe('<ProductList />', () => {
         <ProductList {...props} />
       </MemoryRouter>,
       initialState,
-      storeWithApi,
+      storeWithThunk,
       rerenderFn,
     );
     return { getByText, queryByText, rerender };

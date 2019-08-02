@@ -5,10 +5,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import ProductFilter
-from .models import Product
-from .paginators import ProductPaginator
-from .serializers import FullUserSerializer, ProductSerializer
+from .filters import ProductFilter, ProjectFilter
+from .models import Product, Project
+from .paginators import CustomPaginator
+from .serializers import FullUserSerializer, ProductSerializer, ProjectSerializer
 
 User = get_user_model()
 
@@ -42,9 +42,18 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
-    pagination_class = ProductPaginator
+    pagination_class = CustomPaginator
     model = Product
 
     def get_queryset(self):
         repositories = self.request.user.repositories.values_list("url", flat=True)
         return Product.objects.filter(repo_url__in=repositories)
+
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ProjectSerializer
+    pagination_class = CustomPaginator
+    queryset = Project.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ProjectFilter

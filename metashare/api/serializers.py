@@ -1,7 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
-from .models import Product
+from .fields import MarkdownField
+from .models import Product, Project
 
 User = get_user_model()
 
@@ -16,7 +19,7 @@ class FullUserSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    description = serializers.CharField(source="description_markdown", allow_blank=True)
+    description = MarkdownField(allow_blank=True)
 
     class Meta:
         model = Product
@@ -29,3 +32,34 @@ class ProductSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
         )
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    description = MarkdownField(allow_blank=True)
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(), pk_field=serializers.CharField()
+    )
+    branch_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = (
+            "id",
+            "name",
+            "description",
+            "slug",
+            "old_slugs",
+            "product",
+            "branch_url",
+        )
+        validators = (
+            UniqueTogetherValidator(
+                queryset=Project.objects.all(),
+                fields=("name", "product"),
+                message=_("A project with this name already exists."),
+            ),
+        )
+
+    def get_branch_url(self, obj):
+        return f"{obj.product.repo_url}/tree/{obj.branch_name}"
