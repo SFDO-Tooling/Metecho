@@ -1,12 +1,13 @@
-import { createSelector } from 'reselect';
 import { RouteComponentProps } from 'react-router-dom';
+import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
 import { Product } from '@/store/products/reducer';
 import { selectProduct } from '@/store/products/selectors';
 import {
-  ProjectsState,
+  Project,
   ProjectsByProductState,
+  ProjectsState,
 } from '@/store/projects/reducer';
 
 export const selectProjectState = (appState: AppState): ProjectsState =>
@@ -27,7 +28,7 @@ export const selectProjectsByProduct = createSelector(
 
 const selectProductId = createSelector(
   [selectProduct],
-  (product: Product | null | undefined): ProjectsByProductState | undefined => {
+  (product: Product | null | undefined): string | undefined => {
     if (product) {
       return product.id;
     }
@@ -53,7 +54,7 @@ export const selectProject = createSelector(
     selectProductId,
   ],
   (productProjects, projectSlug, notFound, projects, product) => {
-    let project;
+    let project: Project | undefined;
     if (!projectSlug) {
       return undefined;
     }
