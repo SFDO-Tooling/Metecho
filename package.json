@@ -56,7 +56,7 @@
     "react-document-title": "^2.0.3",
     "react-dom": "^16.8.6",
     "react-fns": "^1.4.0",
-    "react-i18next": "^10.11.4",
+    "react-i18next": "^10.11.5",
     "react-redux": "^7.1.0",
     "react-router-dom": "^5.0.1",
     "redux": "^4.0.4",
