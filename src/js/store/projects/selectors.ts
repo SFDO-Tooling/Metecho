@@ -66,6 +66,8 @@ export const selectProject = createSelector(
     if (projects.projects && product !== undefined) {
       // IDK what to do here...
       project = projects.projects[product];
+    }
+    if (project) {
       return project;
     }
     return notFound ? null : undefined;
