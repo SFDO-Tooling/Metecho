@@ -2,11 +2,18 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
+import { fetchObject, fetchObjects } from '@/store/actions';
 
-// import { fetchObject, fetchObjects } from '@/store/actions';
-// import routes from '@/utils/routes';
 import { renderWithRedux, storeWithThunk } from './../../utils';
+jest.mock('@/store/actions');
 
+fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+
+afterEach(() => {
+  fetchObject.mockClear();
+  fetchObjects.mockClear();
+});
 const defaultState = {
   products: {
     products: [
@@ -39,11 +46,7 @@ const defaultState = {
     },
   },
   tasks: {
-    project1: [
-      {
-        name: 'task 1',
-      },
-    ],
+    project1: [],
   },
 };
 describe('<ProjectDetail/>', () => {
@@ -56,20 +59,98 @@ describe('<ProjectDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, productSlug, projectSlug } = opts;
     const context = {};
-    const { getByText, getByTitle, queryByText } = renderWithRedux(
+    const { debug, getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
         <ProjectDetail match={{ params: { productSlug, projectSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { getByText, getByTitle, queryByText, context };
+    return { debug, getByText, getByTitle, queryByText, context };
   };
 
   test('renders project detail', () => {
     const { getByText, getByTitle } = setup();
-
     expect(getByTitle('Project 1')).toBeVisible();
     expect(getByText('Project Description')).toBeVisible();
+  });
+
+  test('fetches tasks list', () => {
+    setup();
+    expect(fetchObjects).toHaveBeenCalledWith({
+      filters: { project: 'project1' },
+      objectType: 'task',
+    });
+  });
+
+  test('renders tasks table', () => {
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        tasks: {
+          project1: [
+            {
+              id: 'task 1',
+              name: 'task 1',
+            },
+          ],
+        },
+      },
+    });
+    expect(getByText('task 1')).toBeVisible();
+  });
+
+  test('displays spinner while fetching data', () => {
+    const { getByText } = setup({
+      initialState: {
+        products: {
+          products: [
+            {
+              id: 'p1',
+              name: 'Product 1',
+              slug: 'product-1',
+              old_slugs: ['old-slug'],
+              description: 'This is a test product.',
+              repo_url: 'https://www.github.com/test/test-repo',
+            },
+          ],
+          notFound: ['yet-another-product'],
+          next: null,
+        },
+        projects: {},
+        tasks: {},
+      },
+    });
+    expect(getByText('Loading...')).toBeVisible();
+  });
+
+  describe('project does not exist', () => {
+    test('renders <ProductNotFound />', () => {
+      const { getByText, queryByText } = setup({
+        projectSlug: null,
+        initialState: {
+          products: {
+            products: [
+              {
+                id: 'p1',
+                name: 'Product 1',
+                slug: 'product-1',
+                old_slugs: ['old-slug'],
+                description: 'This is a test product.',
+                repo_url: 'https://www.github.com/test/test-repo',
+              },
+            ],
+            notFound: ['yet-another-product'],
+            next: null,
+          },
+          projects: {
+            p1: null,
+          },
+          tasks: {},
+        },
+      });
+      expect(queryByText('Product 1')).toBeNull();
+      expect(getByText('list of all products')).toBeVisible();
+    });
   });
 });

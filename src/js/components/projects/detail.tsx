@@ -66,7 +66,6 @@ const ProjectDetail: React.SFC<Props> = ({
     // Fetching product from API
     return <Spinner />;
   }
-  console.log(tasks && tasks[product.id]);
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('MetaShare')}`}>
       <>
