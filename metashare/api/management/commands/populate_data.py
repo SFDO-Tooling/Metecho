@@ -88,5 +88,5 @@ class Command(BaseCommand):
             name="Accoutrement", repo_url="https://www.github.com/oddbird/accoutrement"
         )
 
-        for i in range(30):
+        for i in range(55):
             self.create_project(name=f"Sample Project {i}", product=metashare)
