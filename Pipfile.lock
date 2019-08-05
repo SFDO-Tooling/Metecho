@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "86bc8b8cbce4d96efeb8c00607d1bac5468bef04f6f23940c7b789f4b9cc4aa1"
+            "sha256": "9630ffb8db23783779576d28a31ace49b1156f102703ae0ff6797e95a4ab427c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -25,10 +25,10 @@
         },
         "asgiref": {
             "hashes": [
-                "sha256:abfe78df4bdefdbdc6902b1900c14e60b4cd7fea2ce218b5f12d998a46a9eb18",
-                "sha256:cefcbd64acbfc9f38913566824ef070dd9a50e63f1b4cc5a7f1c44be809d7ff3"
+                "sha256:57ed0d07634a23bebfa1b02a1aa05eba09c37aab3fc93893e4039e7bc2d96d9e",
+                "sha256:ceac3968866501249712f482ae807605246cfae8293a70de29417868ddef673c"
             ],
-            "version": "==3.2.0"
+            "version": "==3.2.1"
         },
         "asn1crypto": {
             "hashes": [
@@ -597,10 +597,10 @@
         },
         "redis": {
             "hashes": [
-                "sha256:1f2493b72f669a096c59ca7cf7f4067b1ab58a0a3c6bef51d5d8fd384298c6a2",
-                "sha256:b851b0ef53b6d416f1dc692dc168f3d390b37995925bfe29351b3a869976598c"
+                "sha256:8106502b96280e8614d30766f28b4e07ca2b368a8d7896bffce9de88756dd481",
+                "sha256:95ccbec607e21fff2823e7da8b7041e0c471eb36d0672f20abcb32adb5b089ca"
             ],
-            "version": "==3.3.4"
+            "version": "==3.3.5"
         },
         "requests": {
             "hashes": [
@@ -773,14 +773,6 @@
                 "sha256:d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"
             ],
             "version": "==1.4.3"
-        },
-        "appnope": {
-            "hashes": [
-                "sha256:5b26757dc6f79a3b7dc9fab95359328d5747fcb2409d331ea66d0272b90ab2a0",
-                "sha256:8b995ffe925347a2138d7ac0fe77155e4311a0ea6d6da4f5128fe4b3cbe5ed71"
-            ],
-            "markers": "sys_platform == 'darwin'",
-            "version": "==0.1.0"
         },
         "atomicwrites": {
             "hashes": [
@@ -1220,11 +1212,11 @@
         },
         "remote-pdb": {
             "hashes": [
-                "sha256:0a5835ae6f75244bf728616f41a57b35dab4d17f51601bd5f80413ee9b4b5732",
-                "sha256:e441ddde7e74dd17c1ce924a20e998b22e560e53c404a0f9266be7f9900c1f3f"
+                "sha256:2a1602ac1ec42e4c88da73c7221ca7f5a8559405b962eb0dbb2cdf413558b156",
+                "sha256:ad38f36f539b22be820f94062618366d5d3461115c1605b11679dba75f94ee62"
             ],
             "index": "pypi",
-            "version": "==1.3.0"
+            "version": "==2.0.0"
         },
         "requests": {
             "hashes": [
