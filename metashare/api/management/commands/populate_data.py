@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from ...models import Product, Project
+from ...models import Product, Project, Task
 
 
 class Command(BaseCommand):
@@ -41,10 +41,24 @@ class Command(BaseCommand):
         )
         return Project.objects.create(name=name, description=description, **kwargs)
 
-    def handle(self, *args, **options):
-        self.create_product(
-            name="MetaDeploy", repo_url="https://www.github.com/SFDO-Tooling/MetaDeploy"
+    def create_task(self, **kwargs):
+        name = kwargs.pop("name", "Sample Task")
+        description = kwargs.pop(
+            "description",
+            (
+                f"Description for {name}: "
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
+                "sed do eiusmod tempor incididunt ut labore et dolore "
+                "magna aliqua. Tellus elementum sagittis vitae et leo "
+                "duis ut diam. Sem fringilla ut morbi tincidunt augue "
+                "interdum velit euismod. Volutpat est velit egestas dui "
+                "id ornare arcu. Viverra tellus in hac habitasse platea "
+                "dictumst. Nulla facilisi etiam dignissim diam."
+            ),
         )
+        return Task.objects.create(name=name, description=description, **kwargs)
+
+    def handle(self, *args, **options):
         metashare = self.create_product(
             name="MetaShare",
             repo_url="https://www.github.com/SFDO-Tooling/MetaShare",
@@ -53,6 +67,9 @@ class Command(BaseCommand):
                 "This is a description of the product. "
                 "It might contain [links](https://install.salesforce.org)."
             ),
+        )
+        self.create_product(
+            name="MetaDeploy", repo_url="https://www.github.com/SFDO-Tooling/MetaDeploy"
         )
         self.create_product(
             name="CumulusCI", repo_url="https://www.github.com/SFDO-Tooling/CumulusCI"
@@ -90,3 +107,10 @@ class Command(BaseCommand):
 
         for i in range(55):
             self.create_project(name=f"Sample Project {i}", product=metashare)
+
+        project = self.create_project(
+            name="Project With Tasks",
+            description="This project has a task.",
+            product=metashare,
+        )
+        self.create_task(project=project)

@@ -4,76 +4,46 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
-import { LabelWithSpinner, useIsMounted } from '@/components/utils';
-import { AppState, ThunkDispatch } from '@/store';
-import { fetchObject, fetchObjects } from '@/store/actions';
-import { selectProduct, selectProductSlug } from '@/store/products/selectors';
-import { selectProjectsByProduct } from '@/store/projects/selectors';
+import {
+  getLoadingOrNotFound,
+  LabelWithSpinner,
+  RepoLink,
+  useFetchProductIfMissing,
+  useFetchProjectsIfMissing,
+  useIsMounted,
+} from '@/components/utils';
+import { ThunkDispatch } from '@/store';
+import { fetchObjects } from '@/store/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
-
-const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
-  <a href={url} target="_blank" rel="noreferrer noopener">
-    {children}
-  </a>
-);
 
 const ProductDetail = (props: RouteComponentProps) => {
   const [fetchingProjects, setFetchingProjects] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
-  const selectProductWithProps = useCallback(selectProduct, []);
-  const selectProductSlugWithProps = useCallback(selectProductSlug, []);
-  const selectProjectsWithProps = useCallback(selectProjectsByProduct, []);
-  const product = useSelector((state: AppState) =>
-    selectProductWithProps(state, props),
-  );
-  const productSlug = useSelector((state: AppState) =>
-    selectProductSlugWithProps(state, props),
-  );
-  const projects = useSelector((state: AppState) =>
-    selectProjectsWithProps(state, props),
-  );
+  const { product, productSlug } = useFetchProductIfMissing(props);
+  const { projects } = useFetchProjectsIfMissing(product, props);
 
-  useEffect(() => {
-    if (productSlug && product === undefined) {
-      // Fetch product from API
-      dispatch(
-        fetchObject({
-          objectType: OBJECT_TYPES.PRODUCT,
-          filters: { slug: productSlug },
-        }),
-      );
-    }
-  }, [dispatch, product, productSlug]);
+  const loadingOrNotFound = getLoadingOrNotFound({
+    product,
+    productSlug,
+  });
 
-  useEffect(() => {
-    if (product && (!projects || !projects.fetched)) {
-      // Fetch projects from API
-      dispatch(
-        fetchObjects({
-          objectType: OBJECT_TYPES.PROJECT,
-          filters: { product: product.id },
-          reset: true,
-        }),
-      );
-    }
-  }, [dispatch, product, projects]);
+  if (loadingOrNotFound !== false) {
+    return loadingOrNotFound;
+  }
 
+  // This redundant check is used to satisfy TypeScript...
   if (!product) {
-    if (!productSlug || product === null) {
-      return <ProductNotFound />;
-    }
-    // Fetching product from API
-    return <Spinner />;
+    return <ProductNotFound />;
   }
 
   if (productSlug && productSlug !== product.slug) {
