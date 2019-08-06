@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import MarkdownField
-from .models import ORG_TYPES, Product, Project
+from .models import Product, Project
 
 User = get_user_model()
 
