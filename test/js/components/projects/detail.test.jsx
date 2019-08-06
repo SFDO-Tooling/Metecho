@@ -3,6 +3,7 @@ import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
 import { fetchObject, fetchObjects } from '@/store/actions';
+import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 jest.mock('@/store/actions');
@@ -38,6 +39,7 @@ const defaultState = {
           name: 'Project 1',
           product: 'p1',
           description: 'Project Description',
+          old_slugs: ['old-slug'],
         },
       ],
       next: null,
@@ -151,6 +153,20 @@ describe('<ProjectDetail/>', () => {
       });
       expect(queryByText('Product 1')).toBeNull();
       expect(getByText('list of all products')).toBeVisible();
+    });
+  });
+
+  describe('old project slug', () => {
+    test('redirects to project_detail with new slug', () => {
+      const { context } = setup({
+        productSlug: 'product-1',
+        projectSlug: 'old-slug',
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.project_detail('product-1', 'old-slug'),
+      );
     });
   });
 });

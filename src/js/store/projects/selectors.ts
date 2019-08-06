@@ -19,6 +19,7 @@ export const selectProjectsByProduct = createSelector(
     projects: ProjectsState,
     product: Product | null | undefined,
   ): ProjectsByProductState | undefined => {
+    /* istanbul ignore else */
     if (product) {
       return projects[product.id];
     }
@@ -29,6 +30,7 @@ export const selectProjectsByProduct = createSelector(
 const selectProductId = createSelector(
   [selectProduct],
   (product: Product | null | undefined): string | undefined => {
+    /* istanbul ignore else */
     if (product) {
       return product.id;
     }
