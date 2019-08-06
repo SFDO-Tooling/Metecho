@@ -42,7 +42,7 @@ class User(mixins.HashIdMixin, AbstractUser):
     def _get_org_property(self, key):
         try:
             return self.social_account.extra_data[ORGANIZATION_DETAILS][key]
-        except (AttributeError, KeyError):
+        except (AttributeError, KeyError, TypeError):
             return None
 
     @property
@@ -85,12 +85,15 @@ class User(mixins.HashIdMixin, AbstractUser):
         account = self.social_account
         if account and account.socialtoken_set.exists():
             token = self.social_account.socialtoken_set.first()
-            return (fernet_decrypt(token.token), fernet_decrypt(token.token_secret))
+            return (
+                fernet_decrypt(token.token) if token.token else None,
+                fernet_decrypt(token.token_secret) if token.token_secret else None,
+            )
         return (None, None)
 
     @property
     def social_account(self):
-        return self.socialaccount_set.first()
+        return self.socialaccount_set.filter(provider="salesforce-production").first()
 
     @property
     def valid_token_for(self):

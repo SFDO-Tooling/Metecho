@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import MarkdownField
-from .models import Product, Project
+from .models import ORG_TYPES, Product, Project
 
 User = get_user_model()
 
@@ -14,7 +14,15 @@ class FullUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "is_staff")
+        fields = (
+            "id",
+            "username",
+            "email",
+            "is_staff",
+            "valid_token_for",
+            "org_name",
+            "org_type",
+        )
 
 
 class ProductSerializer(serializers.ModelSerializer):

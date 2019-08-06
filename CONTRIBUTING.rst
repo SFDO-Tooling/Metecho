@@ -165,12 +165,12 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 Logging in with GitHub
 ----------------------
 
-To setup the GitHub OAuth integration, run the ``populate_social_apps``
-management command. The values to use in place of the ``XXX`` and ``YYY`` flags
-can be found in the GitHub App, or if you're an OddBird you can find these
+To setup OAuth integration, run the ``populate_social_apps`` management command.
+The values to use in place of ``AAA``, ``BBB``, ``XXX`` and ``YYY`` can be found
+in the GitHub App and Salesforce App, or if you're an OddBird you can find these
 values in the shared Keybase team folder (``metashare/prod.db``)::
 
-    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
+    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY --sf-id AAA --sf-secret BBB
 
 Once you've done that and successfully logged in, you probably want to make your
 user a superuser. You can do that easily via the ``promote_superuser``

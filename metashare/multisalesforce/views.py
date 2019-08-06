@@ -87,7 +87,7 @@ class SalesforceOAuth2Mixin:
 
         Called from OAuth2CallbackView"""
         data["access_token"] = fernet_encrypt(data["access_token"])
-        data["refresh_token"] = fernet_encrypt(data["refresh_token"])
+        # data["refresh_token"] = fernet_encrypt(data["refresh_token"])
         return super().parse_token(data)
 
     def _validate_org_id(self, org_id):
