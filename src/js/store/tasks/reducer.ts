@@ -29,7 +29,7 @@ const reducer = (
         const tasks = taskState[data.project] || [];
         return {
           ...taskState,
-          [data.project]: tasks.concat(data as Task),
+          [data.project]: [data, ...tasks],
         };
       }
       return taskState;
