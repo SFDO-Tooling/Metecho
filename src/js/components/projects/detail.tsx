@@ -2,68 +2,65 @@ import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, RouteComponentProps } from 'react-router-dom';
-import { Product } from 'src/js/store/products/reducer';
-import { Project } from 'src/js/store/projects/reducer';
 
 import ProductNotFound from '@/components/products/product404';
 import TaskForm from '@/components/tasks/createForm';
+import TaskTable from '@/components/tasks/table';
 import { AppState } from '@/store';
-import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
+import { fetchObject, fetchObjects } from '@/store/actions';
 import { selectProduct } from '@/store/products/selectors';
 import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
-import { TaskState } from '@/store/tasks/reducer';
 import { selectTasksByProject } from '@/store/tasks/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
-import TaskTable from '../tasks/table';
+const ProjectDetail = (props: RouteComponentProps) => {
+  const dispatch = useDispatch();
+  const selectProductWithProps = useCallback(selectProduct, []);
+  const selectProjectWithProps = useCallback(selectProject, []);
+  const selectProjectSlugWithProps = useCallback(selectProjectSlug, []);
+  const product = useSelector((state: AppState) =>
+    selectProductWithProps(state, props),
+  );
+  const projectSlug = useSelector((state: AppState) =>
+    selectProjectSlugWithProps(state, props),
+  );
+  const project = useSelector((state: AppState) =>
+    selectProjectWithProps(state, props),
+  );
+  const tasks = useSelector(selectTasksByProject);
 
-type Props = {
-  project: Project;
-  product: Product;
-  projectSlug: string;
-  doFetchObject: ObjectsActionType;
-  doFetchObjects: ObjectsActionType;
-  tasks: TaskState;
-} & RouteComponentProps;
-
-const ProjectDetail: React.SFC<Props> = ({
-  product,
-  project,
-  projectSlug,
-  doFetchObject,
-  doFetchObjects,
-  tasks,
-}: Props) => {
   useEffect(() => {
     if (product && !project) {
-      doFetchObject({
-        objectType: OBJECT_TYPES.PROJECT,
-        filters: { product: product.id, slug: projectSlug },
-      });
+      dispatch(
+        fetchObject({
+          objectType: OBJECT_TYPES.PROJECT,
+          filters: { product: product.id, slug: projectSlug },
+        }),
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product, projectSlug]);
+  }, [dispatch, product, project, projectSlug]);
 
   useEffect(() => {
     if (project && !tasks.length) {
-      doFetchObjects({
-        objectType: OBJECT_TYPES.TASK,
-        filters: { project: project.id },
-      });
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.TASK,
+          filters: { project: project.id },
+        }),
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project]);
+  }, [dispatch, project, tasks.length]);
 
   if (!project && !tasks.length) {
     if (!projectSlug || project === null) {
       return <ProductNotFound />;
     }
-    // Fetching product from API
+    // Fetching project from API
     return <Spinner />;
   }
   return (
@@ -136,18 +133,4 @@ const ProjectDetail: React.SFC<Props> = ({
   );
 };
 
-const select = (appState: AppState, props: Props) => ({
-  project: selectProject(appState, props),
-  product: selectProduct(appState, props),
-  projectSlug: selectProjectSlug(appState, props),
-  tasks: selectTasksByProject(appState),
-});
-const actions = {
-  doFetchObject: fetchObject,
-  doFetchObjects: fetchObjects,
-};
-const WrappedProjectDetail = connect(
-  select,
-  actions,
-)(ProjectDetail);
-export default WrappedProjectDetail;
+export default ProjectDetail;

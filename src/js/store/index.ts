@@ -1,12 +1,11 @@
 import { AnyAction, combineReducers, Reducer } from 'redux';
-import { ThunkAction } from 'redux-thunk';
+import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 import errorsReducer, { ErrorType } from '@/store/errors/reducer';
 import productsReducer, { ProductsState } from '@/store/products/reducer';
 import projectsReducer, { ProjectsState } from '@/store/projects/reducer';
-import taskReducer, { TaskState } from '@/store/tasks/reducer';
-
 import socketReducer, { Socket } from '@/store/socket/reducer';
+import taskReducer, { TaskState } from '@/store/tasks/reducer';
 import userReducer, { User } from '@/store/user/reducer';
 
 export interface AppState {
@@ -24,6 +23,7 @@ export interface Action {
 }
 
 export type ThunkResult = ThunkAction<Promise<any>, AppState, void, AnyAction>;
+export type ThunkDispatch = ReduxThunkDispatch<AppState, void, AnyAction>;
 
 const reducer: Reducer<AppState, Action> = combineReducers({
   errors: errorsReducer,

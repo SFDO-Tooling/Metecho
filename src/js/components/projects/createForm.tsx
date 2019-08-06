@@ -4,10 +4,11 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { createObject, ObjectsActionType } from '@/store/actions';
+import { ThunkDispatch } from '@/store';
+import { createObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
 import { Product } from '@/store/products/reducer';
 import { ApiError } from '@/utils/api';
@@ -17,22 +18,15 @@ import routes from '@/utils/routes';
 interface Props extends RouteComponentProps {
   product: Product;
   startOpen?: boolean;
-  doCreateObject: ObjectsActionType;
-  doAddError: typeof addError;
 }
 
-const ProjectForm = ({
-  product,
-  startOpen = false,
-  history,
-  doCreateObject,
-  doAddError,
-}: Props) => {
+const ProjectForm = ({ product, startOpen = false, history }: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
   const fields = ['name', 'description'];
+  const dispatch = useDispatch<ThunkDispatch>();
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
@@ -57,14 +51,16 @@ const ProjectForm = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
-    doCreateObject({
-      objectType: OBJECT_TYPES.PROJECT,
-      data: {
-        name,
-        description,
-        product: product.id,
-      },
-    })
+    dispatch(
+      createObject({
+        objectType: OBJECT_TYPES.PROJECT,
+        data: {
+          name,
+          description,
+          product: product.id,
+        },
+      }),
+    )
       .then(action => {
         const {
           type,
@@ -90,7 +86,7 @@ const ProjectForm = ({
           setErrors(newErrors);
         } else if (err.response && err.response.status === 400) {
           // If no inline errors to show, fallback to default global error toast
-          doAddError(err.message);
+          dispatch(addError(err.message));
         }
       });
   };
@@ -155,13 +151,5 @@ const ProjectForm = ({
     </form>
   );
 };
-const actions = {
-  doCreateObject: createObject,
-  doAddError: addError,
-};
-const WrappedProjectForm = connect(
-  null,
-  actions,
-)(ProjectForm);
 
-export default withRouter(WrappedProjectForm);
+export default withRouter(ProjectForm);

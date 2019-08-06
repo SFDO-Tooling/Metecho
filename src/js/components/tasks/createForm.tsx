@@ -4,37 +4,30 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import { createObject, ObjectsActionType } from '@/store/actions';
+import { ThunkDispatch } from '@/store';
+import { createObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
 import { Project } from '@/store/projects/reducer';
 import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
 
-interface Props extends RouteComponentProps {
+interface Props {
   project: Project;
   product: string;
   startOpen?: boolean;
-  doCreateObject: ObjectsActionType;
-  doAddError: typeof addError;
 }
 
-const TaskForm = ({
-  project,
-  product,
-  startOpen = false,
-  doCreateObject,
-  doAddError,
-}: Props) => {
+const TaskForm = ({ project, product, startOpen = false }: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [assignee, setAssignee] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
-  const fields = ['name', 'description'];
   const [success, addSuccess] = useState(false);
+  const fields = ['name', 'description'];
+  const dispatch = useDispatch<ThunkDispatch>();
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
@@ -61,7 +54,7 @@ const TaskForm = ({
     setAssignee(e.target.value);
   };
 
-  const handleSuceess = () => {
+  const handleSuccess = () => {
     setName('');
     setDescription('');
     addSuccess(true);
@@ -74,17 +67,19 @@ const TaskForm = ({
     e.preventDefault();
     setErrors({});
     if (project) {
-      doCreateObject({
-        objectType: OBJECT_TYPES.TASK,
-        data: {
-          name,
-          description,
-          product,
-          assignee,
-          project: project.id,
-        },
-      })
-        .then(() => handleSuceess())
+      dispatch(
+        createObject({
+          objectType: OBJECT_TYPES.TASK,
+          data: {
+            name,
+            description,
+            product,
+            assignee,
+            project: project.id,
+          },
+        }),
+      )
+        .then(() => handleSuccess())
         .catch((err: ApiError) => {
           const newErrors =
             err.body && typeof err.body === 'object' ? err.body : {};
@@ -95,7 +90,7 @@ const TaskForm = ({
             setErrors(newErrors);
           } else if (err.response && err.response.status === 400) {
             // If no inline errors to show, fallback to default global error toast
-            doAddError(err.message);
+            dispatch(addError(err.message));
           }
         });
     }
@@ -176,13 +171,5 @@ const TaskForm = ({
     </form>
   );
 };
-const actions = {
-  doCreateObject: createObject,
-  doAddError: addError,
-};
-const WrappedTaskForm = connect(
-  null,
-  actions,
-)(TaskForm);
 
-export default withRouter(WrappedTaskForm);
+export default TaskForm;

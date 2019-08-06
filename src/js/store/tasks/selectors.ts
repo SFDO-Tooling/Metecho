@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+
 import { AppState } from '@/store';
 import { TaskState } from '@/store/tasks/reducer';
 
