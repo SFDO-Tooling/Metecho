@@ -56,6 +56,7 @@ const TaskForm = ({
   ) => {
     setDescription(e.target.value);
   };
+  /* instanbul ignore next */
   const handleAssigneeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAssignee(e.target.value);
   };
@@ -72,44 +73,32 @@ const TaskForm = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
-    doCreateObject({
-      objectType: OBJECT_TYPES.TASK,
-      data: {
-        name,
-        description,
-        product,
-        assignee,
-        project: project.id,
-      },
-    })
-      .then(action => {
-        handleSuceess();
-        const {
-          type,
-          payload: { object, objectType },
-        } = action;
-        if (
-          type === 'CREATE_OBJECT_SUCCEEDED' &&
-          objectType === OBJECT_TYPES.TASK &&
-          object &&
-          object.slug
-        ) {
-          // add new task to task list (below)
-        }
+    if (project) {
+      doCreateObject({
+        objectType: OBJECT_TYPES.TASK,
+        data: {
+          name,
+          description,
+          product,
+          assignee,
+          project: project.id,
+        },
       })
-      .catch((err: ApiError) => {
-        const newErrors =
-          err.body && typeof err.body === 'object' ? err.body : {};
-        if (
-          fields.filter(field => newErrors[field] && newErrors[field].length)
-            .length
-        ) {
-          setErrors(newErrors);
-        } else if (err.response && err.response.status === 400) {
-          // If no inline errors to show, fallback to default global error toast
-          doAddError(err.message);
-        }
-      });
+        .then(() => handleSuceess())
+        .catch((err: ApiError) => {
+          const newErrors =
+            err.body && typeof err.body === 'object' ? err.body : {};
+          if (
+            fields.filter(field => newErrors[field] && newErrors[field].length)
+              .length
+          ) {
+            setErrors(newErrors);
+          } else if (err.response && err.response.status === 400) {
+            // If no inline errors to show, fallback to default global error toast
+            doAddError(err.message);
+          }
+        });
+    }
   };
 
   return (
