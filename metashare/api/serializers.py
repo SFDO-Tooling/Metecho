@@ -61,5 +61,26 @@ class ProjectSerializer(serializers.ModelSerializer):
             ),
         )
 
+    def validate(self, data):
+        if self.instance is not None:
+            attrs = {
+                "name": data.get("name", self.instance.name),
+                "product": data.get("product", self.instance.product),
+            }
+        else:
+            attrs = {
+                "name": data.get("name", None),
+                "product": data.get("product", None),
+            }
+        queryset = Project.objects.filter(
+            name__iexact=attrs["name"], product=attrs["product"]
+        )
+        if self.instance is not None:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            message = _("A project with this name already exists.")
+            raise serializers.ValidationError(message, code="unique")
+        return data
+
     def get_branch_url(self, obj):
         return f"{obj.product.repo_url}/tree/{obj.branch_name}"
