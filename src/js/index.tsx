@@ -29,6 +29,7 @@ import Footer from '@/components/footer';
 import Header from '@/components/header';
 import ProductDetail from '@/components/products/detail';
 import ProductList from '@/components/products/list';
+import ProjectDetail from '@/components/projects/detail';
 import AuthError from '@/components/user/authError';
 import Login from '@/components/user/login';
 import { PrivateRoute } from '@/components/utils';
@@ -78,6 +79,11 @@ const App = withRouter(
                     exact
                     path={routePatterns.product_detail()}
                     component={ProductDetail}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.project_detail()}
+                    component={ProjectDetail}
                   />
                   <Route
                     path={routePatterns.auth_error()}

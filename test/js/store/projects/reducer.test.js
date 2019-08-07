@@ -258,4 +258,35 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
   });
+
+  describe('FETCH_OBJECT_SUCCEEDED', () => {
+    const project = {
+      id: 'p1',
+      slug: 'project-1',
+      name: 'Project 1',
+      description: 'This is a test project.',
+      product: 'product-1',
+    };
+    const prevState = {};
+    const nextState = {
+      'product-1': {
+        projects: [project],
+        next: null,
+        notFound: [],
+        fetched: true,
+      },
+    };
+    const actual = reducer(prevState, {
+      type: 'FETCH_OBJECT_SUCEEDED',
+      payload: {
+        payload: {
+          object: project,
+          filters: { product: 'product-1' },
+          objectType: 'project',
+          url: 'url',
+        },
+      },
+    });
+    expect(actual).toEqual(nextState);
+  });
 });

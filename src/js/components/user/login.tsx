@@ -2,13 +2,11 @@ import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import WelcomeMatTile from '@salesforce/design-system-react/components/welcome-mat/tile';
 import i18n from 'i18next';
-import React, { ComponentType, ReactElement } from 'react';
-import { connect } from 'react-redux';
+import React, { ReactElement } from 'react';
+import { useSelector } from 'react-redux';
 import { withRouter } from 'react-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { AppState } from '@/store';
-import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
@@ -49,8 +47,10 @@ export const LoginButton = withRouter(
   },
 );
 
-const Login = ({ user }: { user: User | null }) =>
-  user ? (
+const Login = () => {
+  const user = useSelector(selectUserState);
+
+  return user ? (
     <Redirect to={routes.home()} />
   ) : (
     <div
@@ -129,11 +129,6 @@ const Login = ({ user }: { user: User | null }) =>
       </div>
     </div>
   );
+};
 
-const select = (appState: AppState) => ({
-  user: selectUserState(appState),
-});
-
-const WrappedLogin: ComponentType = connect(select)(Login);
-
-export default WrappedLogin;
+export default Login;

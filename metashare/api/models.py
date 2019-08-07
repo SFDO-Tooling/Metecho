@@ -166,6 +166,25 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
         unique_together = (("name", "product"), ("branch_name", "product"))
 
 
+class TaskSlug(AbstractSlug):
+    parent = models.ForeignKey("Task", on_delete=models.PROTECT, related_name="slugs")
+
+
+class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    name = models.CharField(max_length=50)
+    project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
+    description = MarkdownField(blank=True, property_suffix="_markdown")
+    assignee = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="assigned_tasks"
+    )
+
+    slug_class = TaskSlug
+
+    class Meta:
+        ordering = ("-created_at", "name")
+        unique_together = (("name", "project"),)
+
+
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
     user.refresh_repositories()
@@ -178,3 +197,4 @@ def ensure_slug_handler(sender, *, created, instance, **kwargs):
 
 post_save.connect(ensure_slug_handler, sender=Product)
 post_save.connect(ensure_slug_handler, sender=Project)
+post_save.connect(ensure_slug_handler, sender=Task)

@@ -17,6 +17,13 @@ export interface ProjectsByProductState {
   notFound: string[];
   fetched: boolean;
 }
+
+export interface Projects {
+  [key: string]: {
+    [key: string]: Project;
+  };
+}
+
 export interface ProjectsState {
   [key: string]: ProjectsByProductState;
 }
@@ -90,6 +97,19 @@ const reducer = (
             },
           };
         }
+      }
+      return projects;
+    }
+    case 'FETCH_OBJECT_SUCCEEDED': {
+      const { objectType, object } = action.payload;
+      const { product } = action.payload.filters;
+      if (objectType === OBJECT_TYPES.PROJECT && object) {
+        const item = { [product]: { ...object } };
+        return {
+          ...defaultState,
+          ...projects.projects,
+          projects: item,
+        };
       }
       return projects;
     }

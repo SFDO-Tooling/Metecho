@@ -4,75 +4,46 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
-import { LabelWithSpinner, useIsMounted } from '@/components/utils';
-import { AppState } from '@/store';
-import { fetchObject, fetchObjects, ObjectsActionType } from '@/store/actions';
-import { Product } from '@/store/products/reducer';
-import { selectProduct, selectProductSlug } from '@/store/products/selectors';
-import { ProjectsByProductState } from '@/store/projects/reducer';
-import { selectProjectsByProduct } from '@/store/projects/selectors';
+import {
+  getLoadingOrNotFound,
+  LabelWithSpinner,
+  RepoLink,
+  useFetchProductIfMissing,
+  useFetchProjectsIfMissing,
+  useIsMounted,
+} from '@/components/utils';
+import { ThunkDispatch } from '@/store';
+import { fetchObjects } from '@/store/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
-type Props = {
-  product?: Product | null;
-  productSlug?: string;
-  projects: ProjectsByProductState | undefined;
-  doFetchObject: ObjectsActionType;
-  doFetchObjects: ObjectsActionType;
-} & RouteComponentProps;
-
-const RepoLink = ({ url, children }: { url: string; children: ReactNode }) => (
-  <a href={url} target="_blank" rel="noreferrer noopener">
-    {children}
-  </a>
-);
-
-const ProductDetail = ({
-  product,
-  productSlug,
-  projects,
-  doFetchObject,
-  doFetchObjects,
-}: Props) => {
+const ProductDetail = (props: RouteComponentProps) => {
   const [fetchingProjects, setFetchingProjects] = useState(false);
   const isMounted = useIsMounted();
+  const dispatch = useDispatch<ThunkDispatch>();
+  const { product, productSlug } = useFetchProductIfMissing(props);
+  const { projects } = useFetchProjectsIfMissing(product, props);
 
-  useEffect(() => {
-    if (productSlug && product === undefined) {
-      // Fetch product from API
-      doFetchObject({
-        objectType: OBJECT_TYPES.PRODUCT,
-        filters: { slug: productSlug },
-      });
-    }
-  }, [product, productSlug, doFetchObject]);
+  const loadingOrNotFound = getLoadingOrNotFound({
+    product,
+    productSlug,
+  });
 
-  useEffect(() => {
-    if (product && (!projects || !projects.fetched)) {
-      // Fetch projects from API
-      doFetchObjects({
-        objectType: OBJECT_TYPES.PROJECT,
-        filters: { product: product.id },
-        reset: true,
-      });
-    }
-  }, [product, projects, doFetchObjects]);
+  if (loadingOrNotFound !== false) {
+    return loadingOrNotFound;
+  }
 
+  // This redundant check is used to satisfy TypeScript...
   if (!product) {
-    if (!productSlug || product === null) {
-      return <ProductNotFound />;
-    }
-    // Fetching product from API
-    return <Spinner />;
+    return <ProductNotFound />;
   }
 
   if (productSlug && productSlug !== product.slug) {
@@ -88,11 +59,13 @@ const ProductDetail = ({
         setFetchingProjects(true);
       }
 
-      doFetchObjects({
-        objectType: OBJECT_TYPES.PROJECT,
-        filters: { product: product.id },
-        url: projects.next,
-      }).finally(() => {
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.PROJECT,
+          filters: { product: product.id },
+          url: projects.next,
+        }),
+      ).finally(() => {
         /* istanbul ignore else */
         if (isMounted.current) {
           setFetchingProjects(false);
@@ -221,18 +194,4 @@ const ProductDetail = ({
   );
 };
 
-const select = (appState: AppState, props: Props) => ({
-  productSlug: selectProductSlug(appState, props),
-  product: selectProduct(appState, props),
-  projects: selectProjectsByProduct(appState, props),
-});
-const actions = {
-  doFetchObject: fetchObject,
-  doFetchObjects: fetchObjects,
-};
-const WrappedProductDetail = connect(
-  select,
-  actions,
-)(ProductDetail);
-
-export default WrappedProductDetail;
+export default ProductDetail;
