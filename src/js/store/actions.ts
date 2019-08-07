@@ -138,7 +138,6 @@ export const fetchObject = ({
       addUrlParams(baseUrl, { ...filters }),
       dispatch,
     );
-    // @@@ is there a filter to fetch a single project?
     const object =
       response && response.results && response.results.length
         ? response.results[0]

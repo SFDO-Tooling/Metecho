@@ -13,7 +13,7 @@ import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
 import {
-  getLoadingOrNotFound,
+  getProductLoadingOrNotFound,
   LabelWithSpinner,
   RepoLink,
   useFetchProductIfMissing,
@@ -32,7 +32,7 @@ const ProductDetail = (props: RouteComponentProps) => {
   const { product, productSlug } = useFetchProductIfMissing(props);
   const { projects } = useFetchProjectsIfMissing(product, props);
 
-  const loadingOrNotFound = getLoadingOrNotFound({
+  const loadingOrNotFound = getProductLoadingOrNotFound({
     product,
     productSlug,
   });
@@ -120,15 +120,15 @@ const ProductDetail = (props: RouteComponentProps) => {
               <Spinner />
             ) : (
               <>
+                <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+                  {i18n.t('Projects for')} {product.name}
+                </h2>
                 <ProjectForm
                   product={product}
                   startOpen={!projects.projects.length}
                 />
                 {Boolean(projects.projects.length) && (
                   <>
-                    <h2 className="slds-text-heading_medium">
-                      {i18n.t('Projects for')} {product.name}
-                    </h2>
                     <ul className="slds-has-dividers_bottom">
                       {projects.projects.map(project => (
                         <ProjectListItem

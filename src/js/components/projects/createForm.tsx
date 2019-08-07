@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
+import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { createObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
@@ -21,6 +22,7 @@ interface Props extends RouteComponentProps {
 }
 
 const ProjectForm = ({ product, startOpen = false, history }: Props) => {
+  const isMounted = useIsMounted();
   const [isOpen, setIsOpen] = useState(startOpen);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -28,6 +30,11 @@ const ProjectForm = ({ product, startOpen = false, history }: Props) => {
   const fields = ['name', 'description'];
   const dispatch = useDispatch<ThunkDispatch>();
 
+  const resetForm = () => {
+    setName('');
+    setDescription('');
+    setErrors({});
+  };
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
       setIsOpen(true);
@@ -36,6 +43,7 @@ const ProjectForm = ({ product, startOpen = false, history }: Props) => {
   };
   const closeForm = () => {
     setIsOpen(false);
+    resetForm();
   };
   const handleNameChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -80,6 +88,7 @@ const ProjectForm = ({ product, startOpen = false, history }: Props) => {
         const newErrors =
           err.body && typeof err.body === 'object' ? err.body : {};
         if (
+          isMounted.current &&
           fields.filter(field => newErrors[field] && newErrors[field].length)
             .length
         ) {
@@ -95,9 +104,6 @@ const ProjectForm = ({ product, startOpen = false, history }: Props) => {
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
         <>
-          <h2 className="slds-text-heading_medium">
-            {i18n.t('Create a New Project for')} {product.name}
-          </h2>
           <Input
             id="project-name"
             label={i18n.t('Project Name')}

@@ -1,16 +1,14 @@
 import { ObjectsAction } from '@/store/actions';
 import { LogoutAction } from '@/store/user/actions';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Task {
-  branch_url: string;
-  description: string;
   id: string;
   name: string;
-  old_slugs: string[];
-  product: string;
-  project: string;
   slug: string;
+  old_slugs: string[];
+  project: string;
+  description: string;
 }
 
 export interface TaskState {
@@ -18,35 +16,48 @@ export interface TaskState {
 }
 
 const defaultState = {};
+
 const reducer = (
-  taskState: TaskState = defaultState,
+  tasks: TaskState = defaultState,
   action: ObjectsAction | LogoutAction,
 ) => {
   switch (action.type) {
-    case 'CREATE_OBJECT_SUCCEEDED': {
-      const { data, objectType } = action.payload;
-      if (objectType === OBJECT_TYPES.TASK) {
-        const tasks = taskState[data.project] || [];
-        return {
-          ...taskState,
-          [data.project]: [data, ...tasks],
-        };
-      }
-      return taskState;
-    }
+    case 'USER_LOGGED_OUT':
+      return defaultState;
     case 'FETCH_OBJECTS_SUCCEEDED': {
-      const { filters, response, objectType } = action.payload;
-      const { results } = response;
-      if (objectType === OBJECT_TYPES.TASK) {
+      const {
+        response,
+        objectType,
+        filters: { project },
+      } = action.payload;
+      if (objectType === OBJECT_TYPES.TASK && project) {
         return {
-          ...taskState,
-          [filters.project]: [...results],
+          ...tasks,
+          [project]: response,
         };
       }
-      return taskState;
+      return tasks;
+    }
+    case 'CREATE_OBJECT_SUCCEEDED': {
+      const {
+        object,
+        objectType,
+      }: { object: Task; objectType: ObjectTypes } = action.payload;
+      if (objectType === OBJECT_TYPES.TASK && object) {
+        const projectTasks = tasks[object.project] || [];
+        // Do not store if (somehow) we already know about this task
+        if (!projectTasks.filter(t => object.id === t.id).length) {
+          return {
+            ...tasks,
+            // Prepend new task (tasks are ordered by `-created_at`)
+            [object.project]: [object, ...projectTasks],
+          };
+        }
+      }
+      return tasks;
     }
   }
-  return taskState;
+  return tasks;
 };
 
 export default reducer;
