@@ -103,7 +103,7 @@ const TaskForm = ({ project, product, startOpen = false }: Props) => {
           <Input
             id="task-name"
             label={i18n.t('Task Name')}
-            className="slds-form-element_stacked"
+            className="slds-form-element_stacked slds-p-left_none"
             name="name"
             value={name}
             required
@@ -117,7 +117,7 @@ const TaskForm = ({ project, product, startOpen = false }: Props) => {
           <Textarea
             id="task-description"
             label={i18n.t('Description')}
-            classNameContainer="slds-form-element_stacked"
+            classNameContainer="slds-form-element_stacked slds-p-left_none"
             name="description"
             value={description}
             errorText={
@@ -130,7 +130,7 @@ const TaskForm = ({ project, product, startOpen = false }: Props) => {
           <Input
             id="assignee-name"
             label={i18n.t('Assign Team Member')}
-            className="slds-form-element_stacked"
+            className="slds-form-element_stacked slds-p-left_none"
             name="assignee"
             value={assignee}
             aria-required
