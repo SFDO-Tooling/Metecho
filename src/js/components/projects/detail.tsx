@@ -10,6 +10,7 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import ProductNotFound from '@/components/products/product404';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
+import DevHubConnect from '@/components/user/connect';
 import { AppState } from '@/store';
 import { fetchObject, fetchObjects } from '@/store/actions';
 import { selectProduct } from '@/store/products/selectors';
@@ -120,6 +121,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               slds-medium-size_1-of-3
               slds-text-longform"
             >
+              <DevHubConnect />
               <h2 className="slds-text-heading_medium">{project.name}</h2>
               <p
                 className="markdown"

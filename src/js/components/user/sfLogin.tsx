@@ -1,4 +1,3 @@
-import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
@@ -68,40 +67,25 @@ const Login = ({
   const toggleModal = (isOpen: boolean) => {
     setModalOpen(isOpen);
   };
-
-  const handleSelect = (opt: MenuOption | Divider) => {
-    /* istanbul ignore else */
-    if (!isDivider(opt)) {
-      if (opt.modal) {
-        toggleModal(true);
-        return;
-      }
-      if (opt.href) {
-        window.location.assign(
-          addUrlParams(opt.href, { next: window.location.pathname }),
-        );
-      }
-    }
-  };
+  /* @@@ comment out in case still needed */
+  // const handleSelect = (opt: MenuOption | Divider) => {
+  //   /* istanbul ignore else */
+  //   if (!isDivider(opt)) {
+  //     if (opt.modal) {
+  //       toggleModal(true);
+  //       return;
+  //     }
+  //     if (opt.href) {
+  //       window.location.assign(
+  //         addUrlParams(opt.href, { next: window.location.pathname }),
+  //       );
+  //     }
+  //   }
+  // };
 
   return (
     <>
-      <Dropdown
-        id={id}
-        label={label === undefined ? i18n.t('Log In') : label}
-        className="slds-dropdown_actions"
-        triggerClassName={triggerClassName}
-        buttonClassName={buttonClassName}
-        buttonVariant={buttonVariant}
-        disabled={disabled}
-        menuPosition={menuPosition}
-        nubbinPosition={nubbinPosition}
-        iconCategory="utility"
-        iconName="down"
-        iconPosition="right"
-        options={getMenuOpts()}
-        onSelect={handleSelect}
-      />
+      <a onClick={() => toggleModal(true)}>Salesforce DevHub</a>
       <CustomDomainModal isOpen={modalOpen} toggleModal={toggleModal} />
     </>
   );
