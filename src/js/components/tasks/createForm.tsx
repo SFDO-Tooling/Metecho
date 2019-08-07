@@ -163,7 +163,7 @@ const TaskForm = ({ project, product, startOpen = false }: Props) => {
           />
         )}
         {success && (
-          <span className="slds-p-left--medium slds-p-right--medium form-text__success">
+          <span className="slds-p-left--medium slds-p-right--medium form-text-success">
             {i18n.t('A task was successfully created')}
           </span>
         )}
