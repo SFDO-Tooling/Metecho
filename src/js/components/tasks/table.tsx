@@ -55,7 +55,14 @@ const TaskTable: React.SFC<Props> = ({ tasks }: Props) => {
   return (
     <>
       {tasks.length ? (
-        <DataTable items={tasks} id="DataTableExample-1-default" className="minimal-th" fixedLayout unbufferedCell>
+        <DataTable
+          items={tasks}
+          id="DataTableExample-1-default"
+          className="minimal-th"
+          fixedLayout
+          noRowHover
+          unbufferedCell
+        >
           {columns}
         </DataTable>
       ) : null}{' '}
