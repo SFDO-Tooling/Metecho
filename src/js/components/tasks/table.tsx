@@ -14,7 +14,7 @@ export interface Props {
 const TaskTable: React.SFC<Props> = ({ tasks }: Props) => {
   const StatusTableCell = () => (
     <DataTableCell title="new">
-      <span className="slds-align-middle slds-badge">
+      <span className="slds-align-middle">
         {i18n.t('In Progress')}
       </span>
     </DataTableCell>
@@ -22,29 +22,40 @@ const TaskTable: React.SFC<Props> = ({ tasks }: Props) => {
   StatusTableCell.displayName = DataTableCell.displayName;
 
   const LinkTableCell = ({ children }: any) => (
-    <DataTableCell title="new">
+    <DataTableCell title="new" className="slds-p-horizontal_none">
       <Link to="#">{children}</Link>
     </DataTableCell>
   );
   LinkTableCell.displayName = DataTableCell.displayName;
   const columns = [
-    <DataTableColumn key="task" label={i18n.t('Task')} property="name">
+    <DataTableColumn
+      key="task"
+      label={i18n.t('Task')}
+      property="name"
+      width="65%"
+    >
       <LinkTableCell />
     </DataTableColumn>,
-    <DataTableColumn key="status" label={i18n.t('Status')} property="status">
+    <DataTableColumn
+      key="status"
+      label={i18n.t('Status')}
+      property="status"
+      width="20%"
+    >
       <StatusTableCell />
     </DataTableColumn>,
     <DataTableColumn
       key="assignee"
       label={i18n.t('Assigned')}
       property="assignee"
+      width="15%"
     />,
   ];
 
   return (
     <>
       {tasks.length ? (
-        <DataTable items={tasks} id="DataTableExample-1-default">
+        <DataTable items={tasks} id="DataTableExample-1-default" className="minimal-th" fixedLayout unbufferedCell>
           {columns}
         </DataTable>
       ) : null}{' '}
