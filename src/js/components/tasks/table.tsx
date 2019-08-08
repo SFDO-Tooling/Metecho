@@ -2,7 +2,6 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
-import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -21,12 +20,9 @@ const NameDataCell = ({
   projectSlug,
   item,
   children,
-  className,
   ...props
 }: any) => (
-  <DataTableCell
-    {...props}
-  >
+  <DataTableCell {...props}>
     <Link to={routes.task_detail(productSlug, projectSlug, item.slug)}>
       {children}
     </Link>
@@ -35,9 +31,7 @@ const NameDataCell = ({
 NameDataCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ ...props }: any) => (
-  <DataTableCell {...props}>
-    {i18n.t('Unchanged')}
-  </DataTableCell>
+  <DataTableCell {...props}>{i18n.t('Unchanged')}</DataTableCell>
 );
 StatusTableCell.displayName = DataTableCell.displayName;
 
