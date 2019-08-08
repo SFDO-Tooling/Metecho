@@ -45,7 +45,7 @@ StatusTableCell.displayName = DataTableCell.displayName;
 const AssigneeTableCell = ({ ...props }: any) => (
   <DataTableCell {...props}>
     <Icon
-      title={i18n.t('Assign User')}
+      title={i18n.t('Assign Team Member')}
       category="utility"
       name="adduser"
       size="x-small"
