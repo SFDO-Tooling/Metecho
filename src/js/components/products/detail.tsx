@@ -165,8 +165,7 @@ const ProductDetail = (props: RouteComponentProps) => {
             className="slds-col
               slds-size_1-of-1
               slds-medium-size_5-of-12
-              slds-text-longform
-              slds-p-top_x-large"
+              slds-text-longform"
           >
             {!productDescriptionHasTitle && (
               <h2 className="slds-text-heading_medium">{product.name}</h2>
