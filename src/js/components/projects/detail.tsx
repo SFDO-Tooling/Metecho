@@ -136,7 +136,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           <div
             className="slds-col
               slds-size_1-of-1
-              slds-medium-size_3-of-3
+              slds-medium-size_1-of-3
               slds-text-longform"
           >
             {!projectDescriptionHasTitle && (
