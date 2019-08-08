@@ -40,7 +40,7 @@ case "$1" in
         dcr yarn test:watch
         ;;
     "test:py")
-        dcr yarn pytest
+        dcr yarn pytest "${@:2}"
         ;;
     "test:js")
         dcrq yarn test
