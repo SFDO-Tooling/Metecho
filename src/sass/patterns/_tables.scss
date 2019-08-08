@@ -4,13 +4,20 @@
 .minimal-th {
   border-top-color: $color-background-alt;
 
+  // remove padding of first cell in each row
+  th {
+    padding-left: 0;
+  }
+
   thead {
     th {
       background-color: $color-background-alt;
       padding-bottom: $spacing-xx-small;
-
-      :first-child {
-        padding-left: 0;
+      // force remove left padding to first cell of header row
+      &:first-child {
+        .slds-p-horizontal_x-small {
+          padding-left: 0;
+        }
       }
     }
   }
