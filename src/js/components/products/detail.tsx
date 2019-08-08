@@ -127,7 +127,7 @@ const ProductDetail = (props: RouteComponentProps) => {
                     </>
                   ) : (
                     <>
-                      {i18n.t('Add a Project for')} {product.name}
+                      {i18n.t('Create a Project for')} {product.name}
                     </>
                   )}
                 </h2>

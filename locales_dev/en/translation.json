@@ -1,7 +1,6 @@
 {
   "404": "404",
   "A task was successfully created.": "A task was successfully created.",
-  "Add a Project for": "Add a Project for",
   "Add a Task": "Add a Task",
   "Add a Task for": "Add a Task for",
   "Assign Team Member": "Assign Team Member",
@@ -15,6 +14,7 @@
   "Create Project": "Create Project",
   "Create Task": "Create Task",
   "Create a Project": "Create a Project",
+  "Create a Project for": "Create a Project for",
   "Custom Domain": "Custom Domain",
   "Description": "Description",
   "GitHub Repo": "GitHub Repo",
