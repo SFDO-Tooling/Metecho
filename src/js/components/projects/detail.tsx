@@ -1,76 +1,77 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
+import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import DocumentTitle from 'react-document-title';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, RouteComponentProps } from 'react-router-dom';
+import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProductNotFound from '@/components/products/product404';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import DevHubConnect from '@/components/user/connect';
-import { AppState } from '@/store';
-import { fetchObject, fetchObjects } from '@/store/actions';
-import { selectProduct } from '@/store/products/selectors';
-import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
-import { selectTasksByProject } from '@/store/tasks/selectors';
-import { OBJECT_TYPES } from '@/utils/constants';
+import {
+  getProductLoadingOrNotFound,
+  getProjectLoadingOrNotFound,
+  RepoLink,
+  useFetchProductIfMissing,
+  useFetchProjectIfMissing,
+  useFetchTasksIfMissing,
+} from '@/components/utils';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
-  const dispatch = useDispatch();
-  const selectProductWithProps = useCallback(selectProduct, []);
-  const selectProjectWithProps = useCallback(selectProject, []);
-  const selectProjectSlugWithProps = useCallback(selectProjectSlug, []);
-  const product = useSelector((state: AppState) =>
-    selectProductWithProps(state, props),
-  );
-  const projectSlug = useSelector((state: AppState) =>
-    selectProjectSlugWithProps(state, props),
-  );
-  const project = useSelector((state: AppState) =>
-    selectProjectWithProps(state, props),
-  );
-  const tasks = useSelector(selectTasksByProject);
+  const { product, productSlug } = useFetchProductIfMissing(props);
+  const { project, projectSlug } = useFetchProjectIfMissing(product, props);
+  const { tasks } = useFetchTasksIfMissing(project, props);
 
-  useEffect(() => {
-    if (product && !project) {
-      dispatch(
-        fetchObject({
-          objectType: OBJECT_TYPES.PROJECT,
-          filters: { product: product.id, slug: projectSlug },
-        }),
-      );
-    }
-  }, [dispatch, product, project, projectSlug]);
-
-  useEffect(() => {
-    if (project && !tasks.length) {
-      dispatch(
-        fetchObjects({
-          objectType: OBJECT_TYPES.TASK,
-          filters: { project: project.id },
-        }),
-      );
-    }
-  }, [dispatch, project, tasks.length]);
-
-  if (!project && !tasks.length) {
-    if (!projectSlug || project === null) {
-      return <ProductNotFound />;
-    }
-    // Fetching project from API
-    return <Spinner />;
+  const productLoadingOrNotFound = getProductLoadingOrNotFound({
+    product,
+    productSlug,
+  });
+  if (productLoadingOrNotFound !== false) {
+    return productLoadingOrNotFound;
   }
+
+  const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
+    product,
+    project,
+    projectSlug,
+  });
+  if (projectLoadingOrNotFound !== false) {
+    return projectLoadingOrNotFound;
+  }
+
+  // This redundant check is used to satisfy TypeScript...
+  if (!product || !project) {
+    return <ProductNotFound />;
+  }
+
+  if (
+    (productSlug && productSlug !== product.slug) ||
+    (projectSlug && projectSlug !== project.slug)
+  ) {
+    // Redirect to most recent product slug
+    return <Redirect to={routes.project_detail(product.slug, project.slug)} />;
+  }
+
+  const projectDescriptionHasTitle =
+    project.description &&
+    (project.description.startsWith('<h1>') ||
+      project.description.startsWith('<h2>'));
+
   return (
-    <DocumentTitle title={`${project.name} | ${i18n.t('MetaShare')}`}>
+    <DocumentTitle
+      title={`${project.name} | ${product.name} | ${i18n.t('MetaShare')}`}
+    >
       <>
         <PageHeader
           className="page-header slds-p-around_x-large"
           title={project.name}
-          info={project.branch_url}
+          info={
+            <RepoLink url={project.branch_url}>{project.branch_url}</RepoLink>
+          }
         />
         <div
           className="slds-p-horizontal_x-large
@@ -90,44 +91,60 @@ const ProjectDetail = (props: RouteComponentProps) => {
               </div>,
             ]}
           />
-          <div
-            className="
+        </div>
+        <div
+          className="slds-p-around_x-large
             slds-grid
             slds-gutters
             slds-wrap"
+        >
+          <div
+            className="slds-col
+              slds-size_1-of-1
+              slds-medium-size_7-of-12
+              slds-p-bottom_x-large"
           >
-            <div
-              className="slds-col
+            <Button
+              label={i18n.t('Submit Project')}
+              className="slds-size_full slds-m-bottom_x-large"
+              variant="outline-brand"
+            />
+            {tasks ? (
+              <>
+                <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+                  {i18n.t('Tasks for')} {project.name}
+                </h2>
+                <TaskForm project={project} startOpen={!tasks.length} />
+                {Boolean(tasks.length) && (
+                  <TaskTable
+                    productSlug={product.slug}
+                    projectSlug={project.slug}
+                    tasks={tasks}
+                  />
+                )}
+              </>
+            ) : (
+              // Fetching tasks from API
+              <Spinner />
+            )}
+          </div>
+          <div
+            className="slds-col
               slds-size_1-of-1
-              slds-medium-size_2-of-3
-              slds-p-bottom_x-large
-              slds-p-top_x-large"
-            >
-              <h2 className="slds-text-heading_medium slds-p-bottom_x-large">
-                {i18n.t('Tasks for')} {project.name}
-              </h2>
-              <TaskForm
-                product={product.id}
-                project={project}
-                startOpen={false}
-              />
-              {tasks && tasks[project.id] && (
-                <TaskTable tasks={tasks && tasks[project.id]} />
-              )}
-            </div>
-            <div
-              className="slds-col
-              slds-size_1-of-1
-              slds-medium-size_1-of-3
+              slds-medium-size_5-of-12
               slds-text-longform"
-            >
-              <DevHubConnect />
+          >
+            <DevHubConnect />
+            {!projectDescriptionHasTitle && (
               <h2 className="slds-text-heading_medium">{project.name}</h2>
+            )}
+            {/* This description is pre-cleaned by the API */}
+            {project.description && (
               <p
                 className="markdown"
                 dangerouslySetInnerHTML={{ __html: project.description }}
               />
-            </div>
+            )}
           </div>
         </div>
       </>

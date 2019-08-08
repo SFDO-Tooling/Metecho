@@ -79,7 +79,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
-    pagination_class = CustomPaginator
     queryset = Task.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter

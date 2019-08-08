@@ -17,22 +17,11 @@ export const selectProjectsByProduct = createSelector(
   [selectProjectState, selectProduct],
   (
     projects: ProjectsState,
-    product: Product | null | undefined,
+    product?: Product | null,
   ): ProjectsByProductState | undefined => {
     /* istanbul ignore else */
     if (product) {
       return projects[product.id];
-    }
-    return undefined;
-  },
-);
-
-const selectProductId = createSelector(
-  [selectProduct],
-  (product: Product | null | undefined): string | undefined => {
-    /* istanbul ignore else */
-    if (product) {
-      return product.id;
     }
     return undefined;
   },
@@ -45,30 +34,19 @@ export const selectProjectSlug = (
 
 export const selectProjectNotFound = createSelector(
   [selectProjectsByProduct, selectProjectSlug],
-  (projects, projectSlug): boolean => Boolean(projectSlug && projects),
+  (projects, projectSlug): boolean =>
+    Boolean(projectSlug && projects && projects.notFound.includes(projectSlug)),
 );
+
 export const selectProject = createSelector(
-  [
-    selectProjectsByProduct,
-    selectProjectSlug,
-    selectProjectNotFound,
-    selectProjectState,
-    selectProductId,
-  ],
-  (productProjects, projectSlug, notFound, projects, product) => {
-    let project: Project | undefined;
-    if (!projectSlug) {
+  [selectProjectsByProduct, selectProjectSlug, selectProjectNotFound],
+  (projects, projectSlug, notFound): Project | null | undefined => {
+    if (!projectSlug || !projects) {
       return undefined;
     }
-    if (productProjects) {
-      project = productProjects.projects.find(
-        p => p.slug === projectSlug || p.old_slugs.includes(projectSlug),
-      );
-      return project;
-    }
-    if (projects.projects && product !== undefined) {
-      project = projects.projects[product];
-    }
+    const project = projects.projects.find(
+      p => p.slug === projectSlug || p.old_slugs.includes(projectSlug),
+    );
     if (project) {
       return project;
     }
