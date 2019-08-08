@@ -107,7 +107,7 @@ const ProjectForm = ({ product, startOpen = false, history }: Props) => {
           <Input
             id="project-name"
             label={i18n.t('Project Name')}
-            className="slds-form-element_stacked"
+            className="slds-form-element_stacked slds-p-left_none"
             name="name"
             value={name}
             required
@@ -121,7 +121,7 @@ const ProjectForm = ({ product, startOpen = false, history }: Props) => {
           <Textarea
             id="project-description"
             label={i18n.t('Description')}
-            classNameContainer="slds-form-element_stacked"
+            classNameContainer="slds-form-element_stacked slds-p-left_none"
             name="description"
             value={description}
             errorText={

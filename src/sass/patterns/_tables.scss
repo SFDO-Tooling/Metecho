@@ -1,0 +1,22 @@
+// Tables
+// ======
+
+.minimal-th {
+  border-top-color: $color-background-alt;
+
+  thead {
+    th {
+      background-color: $color-background-alt;
+      padding-bottom: $spacing-xx-small;
+
+      :first-child {
+        padding-left: 0;
+      }
+    }
+  }
+
+  td {
+    padding-bottom: $spacing-x-small;
+    padding-top: $spacing-x-small;
+  }
+}

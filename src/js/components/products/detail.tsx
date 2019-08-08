@@ -112,7 +112,7 @@ const ProductDetail = (props: RouteComponentProps) => {
           <div
             className="slds-col
               slds-size_1-of-1
-              slds-medium-size_2-of-3
+              slds-medium-size_7-of-12
               slds-p-bottom_x-large"
           >
             {!projects || !projects.fetched ? (
@@ -164,8 +164,9 @@ const ProductDetail = (props: RouteComponentProps) => {
           <div
             className="slds-col
               slds-size_1-of-1
-              slds-medium-size_1-of-3
-              slds-text-longform"
+              slds-medium-size_5-of-12
+              slds-text-longform
+              slds-p-top_x-large"
           >
             {!productDescriptionHasTitle && (
               <h2 className="slds-text-heading_medium">{product.name}</h2>
