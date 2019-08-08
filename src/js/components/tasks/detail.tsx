@@ -1,5 +1,8 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
+import Button from '@salesforce/design-system-react/components/button';
+import ButtonGroup from '@salesforce/design-system-react/components/button-group';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
+import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
 import React from 'react';
 import DocumentTitle from 'react-document-title';
@@ -35,9 +38,11 @@ const TaskDetail = (props: RouteComponentProps) => {
     project,
     projectSlug,
   });
+
   if (projectLoadingOrNotFound !== false) {
     return projectLoadingOrNotFound;
   }
+
   const taskLoadingOrNotFound = getTaskLoadingOrNotFound({
     product,
     project,
@@ -45,17 +50,41 @@ const TaskDetail = (props: RouteComponentProps) => {
     task,
     taskSlug,
   });
+
   if (taskLoadingOrNotFound !== false) {
     return taskLoadingOrNotFound;
   }
   if (!product || !project) {
     return <ProductNotFound />;
   }
+
+  if (taskSlug && taskSlug !== task.slug) {
+    // Redirect to most recent product slug
+    return (
+      <Redirect
+        to={routes.task_detail(product.slug, project.slug, task.slug)}
+      />
+    );
+  }
+
   const taskDescriptionHasTitle =
     task &&
     task.description &&
     (task.description.startsWith('<h1>') ||
       task.description.startsWith('<h2>'));
+
+  // @@@ not rendering //
+  const actions = () => (
+    <>
+      <PageHeaderControl>
+        <ButtonGroup variant="list">
+          <Button label="Delete Task" />
+          <Button label="View Branch" />
+        </ButtonGroup>
+      </PageHeaderControl>
+    </>
+  );
+
   return (
     <>
       <DocumentTitle
@@ -67,9 +96,8 @@ const TaskDetail = (props: RouteComponentProps) => {
           <PageHeader
             className="page-header slds-p-around_x-large"
             title={task.name}
-            info={
-              <RepoLink url={product.repo_url}>{product.repo_url}</RepoLink>
-            }
+            info={<RepoLink url={product.repo_url} shortenGithub />}
+            onRenderActions={actions}
           />
           <div
             className="slds-p-horizontal_x-large
