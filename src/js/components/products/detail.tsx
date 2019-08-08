@@ -85,7 +85,7 @@ const ProductDetail = (props: RouteComponentProps) => {
         <PageHeader
           className="page-header slds-p-around_x-large"
           title={product.name}
-          info={<RepoLink url={product.repo_url}>{product.repo_url}</RepoLink>}
+          info={<RepoLink url={product.repo_url} shortenGithub />}
         />
         <div
           className="slds-p-horizontal_x-large
@@ -121,7 +121,15 @@ const ProductDetail = (props: RouteComponentProps) => {
             ) : (
               <>
                 <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-                  {i18n.t('Projects for')} {product.name}
+                  {projects.projects.length ? (
+                    <>
+                      {i18n.t('Projects for')} {product.name}
+                    </>
+                  ) : (
+                    <>
+                      {i18n.t('Create a Project for')} {product.name}
+                    </>
+                  )}
                 </h2>
                 <ProjectForm
                   product={product}

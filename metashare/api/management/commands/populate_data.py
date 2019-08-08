@@ -106,11 +106,13 @@ class Command(BaseCommand):
         )
 
         for i in range(55):
-            self.create_project(name=f"Sample Project {i}", product=metashare)
+            self.create_project(name=f"Sample Project {i+1}", product=metashare)
 
         project = self.create_project(
             name="Project With Tasks",
-            description="This project has a task.",
+            description="This project has tasks.",
             product=metashare,
         )
-        self.create_task(project=project)
+
+        for i in range(5):
+            self.create_task(name=f"Sample Task {i+1}", project=project)
