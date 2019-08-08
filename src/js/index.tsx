@@ -30,6 +30,7 @@ import Header from '@/components/header';
 import ProductDetail from '@/components/products/detail';
 import ProductList from '@/components/products/list';
 import ProjectDetail from '@/components/projects/detail';
+import TaskDetail from '@/components/tasks/detail';
 import AuthError from '@/components/user/authError';
 import Login from '@/components/user/login';
 import { PrivateRoute } from '@/components/utils';
@@ -43,7 +44,6 @@ import { log, logError } from '@/utils/logging';
 import routes, { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
 import SFLogo from '#/salesforce-logo.png';
-
 const App = withRouter(
   ({
     dispatch,
@@ -84,6 +84,11 @@ const App = withRouter(
                     exact
                     path={routePatterns.project_detail()}
                     component={ProjectDetail}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.task_detail()}
+                    component={TaskDetail}
                   />
                   <Route
                     path={routePatterns.auth_error()}

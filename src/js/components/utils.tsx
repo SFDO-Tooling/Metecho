@@ -11,6 +11,7 @@ import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
 
 import ProductNotFound from '@/components/products/product404';
 import ProjectNotFound from '@/components/projects/project404';
+import TaskNotFound from '@/components/tasks/task404';
 import { AppState, ThunkDispatch } from '@/store';
 import { fetchObject, fetchObjects } from '@/store/actions';
 import { Product } from '@/store/products/reducer';
@@ -21,7 +22,12 @@ import {
   selectProjectsByProduct,
   selectProjectSlug,
 } from '@/store/projects/selectors';
-import { selectTasksByProject } from '@/store/tasks/selectors';
+import { Task } from '@/store/tasks/reducer';
+import {
+  selectTask,
+  selectTasksByProject,
+  selectTaskSlug,
+} from '@/store/tasks/selectors';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
@@ -118,6 +124,35 @@ export const getProjectLoadingOrNotFound = ({
       return <ProjectNotFound product={product} />;
     }
     // Fetching project from API
+    return <Spinner />;
+  }
+  return false;
+};
+
+export const getTaskLoadingOrNotFound = ({
+  product,
+  project,
+  projectSlug,
+  task,
+  taskSlug,
+}: {
+  product?: Product | null;
+  project?: Project | null;
+  projectSlug?: string;
+  task?: Task | null;
+  taskSlug?: string;
+}): ReactNode | false => {
+  if (!task) {
+    if (!product) {
+      return <ProductNotFound />;
+    }
+    if (!projectSlug || project === null) {
+      return <ProjectNotFound product={product} />;
+    }
+    if (!taskSlug || task === null) {
+      return <TaskNotFound product={product} project={project && project} />;
+    }
+    // Fetching task from API
     return <Spinner />;
   }
   return false;
@@ -243,4 +278,32 @@ export const useFetchTasksIfMissing = (
   }, [dispatch, project, tasks]);
 
   return { tasks };
+};
+
+export const useFetchTaskIfMissing = (
+  project: Project | null | undefined,
+  routeProps: RouteComponentProps,
+) => {
+  const dispatch = useDispatch<ThunkDispatch>();
+  const selectTaskWithProps = useCallback(selectTask, []);
+  const task = useSelector((state: AppState) =>
+    selectTaskWithProps(state, routeProps),
+  );
+  const taskSlug = useSelector((state: AppState) =>
+    selectTaskSlug(state, routeProps),
+  );
+
+  useEffect(() => {
+    if (project && !task) {
+      // Fetch tasks from API
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.TASK,
+          filters: { project: project.id },
+        }),
+      );
+    }
+  }, [dispatch, project, task]);
+
+  return { task, taskSlug };
 };
