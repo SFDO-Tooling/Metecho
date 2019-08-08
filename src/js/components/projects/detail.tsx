@@ -68,9 +68,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         <PageHeader
           className="page-header slds-p-around_x-large"
           title={project.name}
-          info={
-            <RepoLink url={project.branch_url}>{project.branch_url}</RepoLink>
-          }
+          info={<RepoLink url={product.repo_url} shortenGithub />}
         />
         <div
           className="slds-p-horizontal_x-large
@@ -111,7 +109,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
             {tasks ? (
               <>
                 <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-                  {i18n.t('Tasks for')} {project.name}
+                  {tasks.length ? (
+                    <>
+                      {i18n.t('Tasks for')} {project.name}
+                    </>
+                  ) : (
+                    <>
+                      {i18n.t('Add a Task for')} {project.name}
+                    </>
+                  )}
                 </h2>
                 <TaskForm project={project} startOpen={!tasks.length} />
                 {Boolean(tasks.length) && (

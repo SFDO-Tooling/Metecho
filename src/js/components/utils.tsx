@@ -1,3 +1,4 @@
+import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import React, {
   ComponentType,
@@ -23,8 +24,9 @@ import {
 } from '@/store/projects/selectors';
 import { selectTasksByProject } from '@/store/tasks/selectors';
 import { selectUserState } from '@/store/user/selectors';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { GITHUB_REPO_PREFIX, OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
+import githubIcon from '#/github.svg';
 
 // For use as a "loading" button label
 export const LabelWithSpinner = ({
@@ -46,13 +48,26 @@ export const LabelWithSpinner = ({
 
 export const RepoLink = ({
   url,
+  shortenGithub = false,
   children,
 }: {
   url: string;
-  children: ReactNode;
+  shortenGithub?: boolean;
+  children?: ReactNode;
 }) => (
   <a href={url} target="_blank" rel="noreferrer noopener">
-    {children}
+    {shortenGithub && url.startsWith(GITHUB_REPO_PREFIX) ? (
+      <>
+        <Icon
+          path={`${githubIcon}#github`}
+          size="xx-small"
+          className="slds-m-bottom_xx-small"
+        />
+        {url.slice(GITHUB_REPO_PREFIX.length)}
+      </>
+    ) : (
+      children
+    )}
   </a>
 );
 
