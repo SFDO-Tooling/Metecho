@@ -100,7 +100,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           <div
             className="slds-col
               slds-size_1-of-1
-              slds-medium-size_7-of-12
+              slds-medium-size_2-of-3
               slds-p-bottom_x-large"
           >
             <Button
@@ -130,7 +130,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           <div
             className="slds-col
               slds-size_1-of-1
-              slds-medium-size_5-of-12
+              slds-medium-size_3-of-3
               slds-text-longform"
           >
             {!projectDescriptionHasTitle && (
