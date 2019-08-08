@@ -25,7 +25,6 @@ const NameDataCell = ({
   ...props
 }: any) => (
   <DataTableCell
-    className={classNames(className, 'slds-p-horizontal_none')}
     {...props}
   >
     <Link to={routes.task_detail(productSlug, projectSlug, item.slug)}>
@@ -37,7 +36,7 @@ NameDataCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ ...props }: any) => (
   <DataTableCell {...props}>
-    <span className="slds-align-middle">{i18n.t('Unchanged')}</span>
+    {i18n.t('Unchanged')}
   </DataTableCell>
 );
 StatusTableCell.displayName = DataTableCell.displayName;
