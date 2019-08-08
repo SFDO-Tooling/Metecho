@@ -52,14 +52,14 @@ class TestUser:
     def test_social_account(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
-        assert user.social_account is not None
+        assert user.salesforce_account is not None
         assert (
-            user.social_account
+            user.salesforce_account
             == user.socialaccount_set.filter(provider="salesforce-production").first()
         )
 
         user.socialaccount_set.all().delete()
-        assert user.social_account is None
+        assert user.salesforce_account is None
 
     def test_instance_url(self, user_factory, social_account_factory):
         user = user_factory()

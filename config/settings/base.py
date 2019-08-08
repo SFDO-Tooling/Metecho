@@ -295,13 +295,10 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
 SOCIALACCOUNT_PROVIDERS = {
-    "github": {"SCOPE": ["read:user", "user:email", "repo", "read:org"]}
+    "github": {"SCOPE": ["read:user", "user:email", "repo", "read:org"]},
+    "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
+    # "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
 }
-# SOCIALACCOUNT_PROVIDERS = {
-#     "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
-#     "salesforce-test": {"SCOPE": ["web", "full", "refresh_token"]},
-#     "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
-# }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
