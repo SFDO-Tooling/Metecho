@@ -4,7 +4,7 @@ from rest_framework.validators import UniqueTogetherValidator, qs_filter
 class CaseInsensitiveUniqueTogetherValidator(UniqueTogetherValidator):
     def process_field_name(self, field_name):
         """
-        Right now, we presume that certain names are string-y, and cane be
+        Right now, we presume that certain names are string-y, and can be
         case-insensitive compared.
         """
         if field_name == "name":
