@@ -73,16 +73,27 @@ const TaskDetail = (props: RouteComponentProps) => {
     (task.description.startsWith('<h1>') ||
       task.description.startsWith('<h2>'));
 
-  // @@@ not rendering //
   const actions = () => (
-    <>
-      <PageHeaderControl>
-        <ButtonGroup variant="list">
-          <Button label="Delete Task" />
-          <Button label="View Branch" />
-        </ButtonGroup>
-      </PageHeaderControl>
-    </>
+    <PageHeaderControl>
+      <Button
+        iconCategory="utility"
+        iconName="delete"
+        iconPosition="left"
+        label="Delete Task"
+        variant="destructive"
+        className="slds-m-right_large"
+        style={{ backgroundColor: 'white', color: '#c23934' }}
+      />
+      <RepoLink url={project.branch_url}>
+        <Button
+          iconCategory="utility"
+          iconName="new_window"
+          iconPosition="left"
+          label="View Branch"
+          variant="outline-brand"
+        />
+      </RepoLink>
+    </PageHeaderControl>
   );
 
   return (
@@ -97,7 +108,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             className="page-header slds-p-around_x-large"
             title={task.name}
             info={<RepoLink url={product.repo_url} shortenGithub />}
-            onRenderActions={actions}
+            onRenderControls={actions}
           />
           <div
             className="slds-p-horizontal_x-large
