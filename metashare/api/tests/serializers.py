@@ -115,10 +115,7 @@ class TestProjectSerializer:
         project = project_factory(product=product, name="Duplicate me")
         serializer = ProjectSerializer(
             instance=project,
-            data={
-                "product": str(product.id),
-                "name": "duplicate me",
-                "description": "Blorp",
-            },
+            data={"product": str(product.id), "description": "Blorp"},
+            partial=True,
         )
-        assert serializer.is_valid()
+        assert serializer.is_valid(), serializer.errors
