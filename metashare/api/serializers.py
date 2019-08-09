@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import MarkdownField
 from .models import Product, Project, Task
+from .validators import CaseInsensitiveUniqueTogetherValidator
 
 User = get_user_model()
 
@@ -69,33 +69,12 @@ class ProjectSerializer(serializers.ModelSerializer):
             "branch_url",
         )
         validators = (
-            UniqueTogetherValidator(
+            CaseInsensitiveUniqueTogetherValidator(
                 queryset=Project.objects.all(),
                 fields=("name", "product"),
                 message=_("A project with this name already exists."),
             ),
         )
-
-    def validate(self, data):
-        if self.instance is not None:
-            attrs = {
-                "name": data.get("name", self.instance.name),
-                "product": data.get("product", self.instance.product),
-            }
-        else:
-            attrs = {
-                "name": data.get("name", None),
-                "product": data.get("product", None),
-            }
-        queryset = Project.objects.filter(
-            name__iexact=attrs["name"], product=attrs["product"]
-        )
-        if self.instance is not None:
-            queryset = queryset.exclude(pk=self.instance.pk)
-        if queryset.exists():
-            message = _("A project with this name already exists.")
-            raise serializers.ValidationError(message, code="unique")
-        return data
 
     def get_branch_url(self, obj):
         return f"{obj.product.repo_url}/tree/{obj.branch_name}"
@@ -123,7 +102,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "old_slugs",
         )
         validators = (
-            UniqueTogetherValidator(
+            CaseInsensitiveUniqueTogetherValidator(
                 queryset=Task.objects.all(),
                 fields=("name", "project"),
                 message=_("A task with this name already exists."),
