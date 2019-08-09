@@ -1,6 +1,5 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import Button from '@salesforce/design-system-react/components/button';
-import ButtonGroup from '@salesforce/design-system-react/components/button-group';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
@@ -54,11 +53,11 @@ const TaskDetail = (props: RouteComponentProps) => {
   if (taskLoadingOrNotFound !== false) {
     return taskLoadingOrNotFound;
   }
-  if (!product || !project) {
+  if (!product || !project || !task) {
     return <ProductNotFound />;
   }
 
-  if (taskSlug && taskSlug !== task.slug) {
+  if (task && taskSlug && taskSlug !== task.slug) {
     // Redirect to most recent product slug
     return (
       <Redirect

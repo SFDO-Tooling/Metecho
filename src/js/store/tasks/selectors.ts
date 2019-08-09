@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
 import { selectProject } from '@/store/projects/selectors';
-import { Task, TaskState } from '@/store/tasks/reducer';
+import { TaskState } from '@/store/tasks/reducer';
 
 export const selectTaskState = (appState: AppState): TaskState =>
   appState.tasks;
@@ -26,7 +26,7 @@ export const selectTaskSlug = (
 
 export const selectTask = createSelector(
   [selectTasksByProject, selectTaskSlug],
-  (tasks: Task[], slug: string) => {
+  (tasks, slug) => {
     /* istanbul ignore else */
     if (tasks) {
       return tasks.find(t => t.slug === slug);

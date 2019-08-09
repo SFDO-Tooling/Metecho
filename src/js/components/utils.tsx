@@ -164,9 +164,12 @@ export const getTaskLoadingOrNotFound = ({
     if (!projectSlug || project === null) {
       return <ProjectNotFound product={product} />;
     }
-    if (!taskSlug || task === null) {
-      return <TaskNotFound product={product} project={project && project} />;
+    if (project) {
+      if (!taskSlug || task === null) {
+        return <TaskNotFound product={product} project={project} />;
+      }
     }
+
     // Fetching task from API
     return <Spinner />;
   }
