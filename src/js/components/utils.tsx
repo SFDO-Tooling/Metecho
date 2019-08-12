@@ -14,6 +14,7 @@ import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
 
 import ProductNotFound from '@/components/products/product404';
 import ProjectNotFound from '@/components/projects/project404';
+import TaskNotFound from '@/components/tasks/task404';
 import { AppState, ThunkDispatch } from '@/store';
 import { createObject, fetchObject, fetchObjects } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
@@ -25,6 +26,7 @@ import {
   selectProjectsByProduct,
   selectProjectSlug,
 } from '@/store/projects/selectors';
+import { Task } from '@/store/tasks/reducer';
 import { selectTasksByProject } from '@/store/tasks/selectors';
 import { selectUserState } from '@/store/user/selectors';
 import { ApiError } from '@/utils/api';
@@ -142,6 +144,35 @@ export const getProjectLoadingOrNotFound = ({
       return <ProjectNotFound product={product} />;
     }
     // Fetching project from API
+    return <Spinner />;
+  }
+  return false;
+};
+
+export const getTaskLoadingOrNotFound = ({
+  product,
+  project,
+  task,
+  taskSlug,
+}: {
+  product?: Product | null;
+  project?: Project | null;
+  task?: Task | null;
+  taskSlug?: string;
+}): ReactElement | false => {
+  if (!task) {
+    /* istanbul ignore if */
+    if (!product) {
+      return <ProductNotFound />;
+    }
+    /* istanbul ignore if */
+    if (!project) {
+      return <ProjectNotFound product={product} />;
+    }
+    if (!taskSlug || task === null) {
+      return <TaskNotFound product={product} project={project} />;
+    }
+    // Fetching task from API
     return <Spinner />;
   }
   return false;

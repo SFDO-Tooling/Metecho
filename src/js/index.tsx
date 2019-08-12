@@ -30,6 +30,7 @@ import Header from '@/components/header';
 import ProductDetail from '@/components/products/detail';
 import ProductList from '@/components/products/list';
 import ProjectDetail from '@/components/projects/detail';
+import TaskDetail from '@/components/tasks/detail';
 import AuthError from '@/components/user/authError';
 import Login from '@/components/user/login';
 import { PrivateRoute } from '@/components/utils';
@@ -84,6 +85,11 @@ const App = withRouter(
                     exact
                     path={routePatterns.project_detail()}
                     component={ProjectDetail}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.task_detail()}
+                    component={TaskDetail}
                   />
                   <Route
                     path={routePatterns.auth_error()}
