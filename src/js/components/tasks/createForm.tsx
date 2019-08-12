@@ -4,15 +4,10 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { AnyAction } from 'redux';
 
-import { useIsMounted } from '@/components/utils';
-import { ThunkDispatch } from '@/store';
-import { createObject } from '@/store/actions';
-import { addError } from '@/store/errors/actions';
+import { useForm, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
-import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
@@ -23,12 +18,7 @@ interface Props {
 const TaskForm = ({ project, startOpen = false }: Props) => {
   const isMounted = useIsMounted();
   const [isOpen, setIsOpen] = useState(startOpen);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
   const [success, setSuccess] = useState(false);
-  const fields = ['name', 'description'];
-  const dispatch = useDispatch<ThunkDispatch>();
   const successTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const clearSuccessTimeout = () => {
@@ -45,12 +35,6 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     [],
   );
 
-  const resetForm = () => {
-    setName('');
-    setDescription('');
-    setErrors({});
-  };
-
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
       setIsOpen(true);
@@ -58,25 +42,7 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     }
   };
 
-  const closeForm = () => {
-    setIsOpen(false);
-    resetForm();
-  };
-
-  const handleNameChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    { value }: { value: string },
-  ) => {
-    setName(value);
-  };
-
-  const handleDescriptionChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
-    setDescription(e.target.value);
-  };
-
-  const handleSuccess = (action: AnyAction) => {
+  const onSuccess = (action: AnyAction) => {
     const {
       type,
       payload: { object, objectType },
@@ -87,7 +53,6 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
       objectType === OBJECT_TYPES.TASK &&
       object
     ) {
-      resetForm();
       setSuccess(true);
       successTimeout.current = setTimeout(() => {
         setSuccess(false);
@@ -95,35 +60,25 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-    dispatch(
-      createObject({
-        objectType: OBJECT_TYPES.TASK,
-        data: {
-          name,
-          description,
-          assignee: null,
-          project: project.id,
-        },
-      }),
-    )
-      .then(handleSuccess)
-      .catch((err: ApiError) => {
-        const newErrors =
-          err.body && typeof err.body === 'object' ? err.body : {};
-        if (
-          isMounted.current &&
-          fields.filter(field => newErrors[field] && newErrors[field].length)
-            .length
-        ) {
-          setErrors(newErrors);
-        } else if (err.response && err.response.status === 400) {
-          // If no inline errors to show, fallback to default global error toast
-          dispatch(addError(err.message));
-        }
-      });
+  const {
+    inputs,
+    errors,
+    handleInputChange,
+    handleSubmit,
+    resetForm,
+  } = useForm({
+    fields: { name: '', description: '' },
+    objectType: OBJECT_TYPES.TASK,
+    additionalData: {
+      assignee: null,
+      project: project.id,
+    },
+    onSuccess,
+  });
+
+  const closeForm = () => {
+    setIsOpen(false);
+    resetForm();
   };
 
   return (
@@ -135,27 +90,21 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
             label={i18n.t('Task Name')}
             className="slds-form-element_stacked slds-p-left_none"
             name="name"
-            value={name}
+            value={inputs.name}
             required
             aria-required
             maxLength="50"
-            errorText={
-              errors.name && errors.name.length && errors.name.join(', ')
-            }
-            onChange={handleNameChange}
+            errorText={errors.name}
+            onChange={handleInputChange}
           />
           <Textarea
             id="task-description"
             label={i18n.t('Description')}
             classNameContainer="slds-form-element_stacked slds-p-left_none"
             name="description"
-            value={description}
-            errorText={
-              errors.description &&
-              errors.description.length &&
-              errors.description[0]
-            }
-            onChange={handleDescriptionChange}
+            value={inputs.description}
+            errorText={errors.description}
+            onChange={handleInputChange}
           />
         </>
       )}

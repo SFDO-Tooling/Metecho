@@ -122,7 +122,7 @@ export const fetchObjects = ({
 export const fetchObject = ({
   objectType,
   url,
-  filters,
+  filters = {},
 }: {
   objectType: ObjectTypes;
   url?: string;

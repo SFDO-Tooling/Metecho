@@ -2,10 +2,12 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import React, {
   ComponentType,
+  ReactElement,
   ReactNode,
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
@@ -14,7 +16,8 @@ import ProductNotFound from '@/components/products/product404';
 import ProjectNotFound from '@/components/projects/project404';
 import TaskNotFound from '@/components/tasks/task404';
 import { AppState, ThunkDispatch } from '@/store';
-import { fetchObject, fetchObjects } from '@/store/actions';
+import { createObject, fetchObject, fetchObjects } from '@/store/actions';
+import { addError } from '@/store/errors/actions';
 import { Product } from '@/store/products/reducer';
 import { selectProduct, selectProductSlug } from '@/store/products/selectors';
 import { Project } from '@/store/projects/reducer';
@@ -30,7 +33,12 @@ import {
   selectTaskSlug,
 } from '@/store/tasks/selectors';
 import { selectUserState } from '@/store/user/selectors';
-import { GITHUB_REPO_PREFIX, OBJECT_TYPES } from '@/utils/constants';
+import { ApiError } from '@/utils/api';
+import {
+  GITHUB_REPO_PREFIX,
+  OBJECT_TYPES,
+  ObjectTypes,
+} from '@/utils/constants';
 import routes from '@/utils/routes';
 import githubIcon from '#/github.svg';
 
@@ -111,7 +119,7 @@ export const getProductLoadingOrNotFound = ({
 }: {
   product?: Product | null;
   productSlug?: string;
-}): ReactNode | false => {
+}): ReactElement | false => {
   if (!product) {
     if (!productSlug || product === null) {
       return <ProductNotFound />;
@@ -130,7 +138,7 @@ export const getProjectLoadingOrNotFound = ({
   product?: Product | null;
   project?: Project | null;
   projectSlug?: string;
-}): ReactNode | false => {
+}): ReactElement | false => {
   if (!project) {
     if (!product) {
       return <ProductNotFound />;
@@ -324,4 +332,75 @@ export const useFetchTaskIfMissing = (
   }, [dispatch, project, task]);
 
   return { task, taskSlug };
+};
+
+export const useForm = ({
+  fields,
+  objectType,
+  additionalData = {},
+  onSuccess = () => {},
+}: {
+  fields: { [key: string]: any };
+  objectType: ObjectTypes;
+  additionalData?: { [key: string]: any };
+  onSuccess?: (...args: any[]) => any;
+}) => {
+  const isMounted = useIsMounted();
+  const dispatch = useDispatch<ThunkDispatch>();
+  const [inputs, setInputs] = useState<{ [key: string]: any }>(fields);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const resetForm = () => {
+    setInputs(fields);
+    setErrors({});
+  };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputs({ ...inputs, [e.target.name]: e.target.value });
+  };
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrors({});
+    dispatch(
+      createObject({
+        objectType,
+        data: {
+          ...inputs,
+          ...additionalData,
+        },
+      }),
+    )
+      .then((...args) => {
+        if (isMounted.current) {
+          resetForm();
+        }
+        onSuccess(...args);
+      })
+      .catch((err: ApiError) => {
+        const allErrors =
+          err.body && typeof err.body === 'object' ? err.body : {};
+        const fieldErrors: typeof errors = {};
+        for (const field of Object.keys(allErrors)) {
+          if (
+            Object.keys(fields).includes(field) &&
+            allErrors[field] &&
+            allErrors[field].length
+          ) {
+            fieldErrors[field] = allErrors[field].join(', ');
+          }
+        }
+        if (isMounted.current && Object.keys(fieldErrors).length) {
+          setErrors(fieldErrors);
+        } else if (err.response && err.response.status === 400) {
+          // If no inline errors to show, fallback to default global error toast
+          dispatch(addError(err.message));
+        }
+      });
+  };
+
+  return {
+    inputs,
+    errors,
+    handleInputChange,
+    handleSubmit,
+    resetForm,
+  };
 };
