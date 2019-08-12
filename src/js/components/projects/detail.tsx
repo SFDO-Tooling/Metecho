@@ -43,6 +43,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   }
 
   // This redundant check is used to satisfy TypeScript...
+  /* istanbul ignore if */
   if (!product || !project) {
     return <ProductNotFound />;
   }
@@ -120,13 +121,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
                   )}
                 </h2>
                 <TaskForm project={project} startOpen={!tasks.length} />
-                {Boolean(tasks.length) && (
-                  <TaskTable
-                    productSlug={product.slug}
-                    projectSlug={project.slug}
-                    tasks={tasks}
-                  />
-                )}
+                <TaskTable
+                  productSlug={product.slug}
+                  projectSlug={project.slug}
+                  tasks={tasks}
+                />
               </>
             ) : (
               // Fetching tasks from API

@@ -53,6 +53,7 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
             url: next,
           }),
         ).finally(() => {
+          /* istanbul ignore else */
           if (isMounted.current) {
             setFetchingProducts(false);
           }
@@ -75,7 +76,8 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
     if (scrolledToBottom) {
       maybeFetchMoreProducts();
     }
-  }, [y, next, fetchingProducts, isMounted, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [y, next]);
 
   let contents;
   switch (products.length) {

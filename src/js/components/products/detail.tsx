@@ -42,6 +42,7 @@ const ProductDetail = (props: RouteComponentProps) => {
   }
 
   // This redundant check is used to satisfy TypeScript...
+  /* istanbul ignore if */
   if (!product) {
     return <ProductNotFound />;
   }

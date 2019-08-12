@@ -2,10 +2,21 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { LabelWithSpinner, PrivateRoute } from '@/components/utils';
+import { LabelWithSpinner, PrivateRoute, useForm } from '@/components/utils';
+import { createObject } from '@/store/actions';
 import routes from '@/utils/routes';
 
-import { renderWithRedux } from './../utils';
+import { renderHookWithRedux, renderWithRedux } from './../utils';
+
+jest.mock('@/store/actions');
+
+createObject.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
+
+afterEach(() => {
+  createObject.mockClear();
+});
 
 describe('<PrivateRoute />', () => {
   const Component = () => <div>Hi!</div>;
@@ -41,5 +52,21 @@ describe('<LabelWithSpinner />', () => {
     const { getByText } = render(<LabelWithSpinner label="testing" />);
 
     expect(getByText('testing')).toBeVisible();
+  });
+});
+
+describe('useForm', () => {
+  test('creates a new object', () => {
+    const { result } = renderHookWithRedux(() =>
+      useForm({ fields: { testing: '' }, objectType: 'test-type' }),
+    );
+    result.current.handleSubmit({ preventDefault: jest.fn() });
+
+    expect(createObject).toHaveBeenCalledWith({
+      objectType: 'test-type',
+      data: {
+        testing: '',
+      },
+    });
   });
 });

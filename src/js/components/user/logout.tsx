@@ -1,12 +1,15 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { logout } from '@/store/user/actions';
 
 const Logout = () => {
   const dispatch = useDispatch();
+  const doLogout = useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
   return (
     <Button
       label={i18n.t('Log Out')}
@@ -15,7 +18,7 @@ const Logout = () => {
       iconCategory="utility"
       iconName="logout"
       iconPosition="left"
-      onClick={() => dispatch(logout())}
+      onClick={doLogout}
     />
   );
 };

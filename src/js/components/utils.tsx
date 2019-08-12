@@ -134,6 +134,7 @@ export const getProjectLoadingOrNotFound = ({
   projectSlug?: string;
 }): ReactElement | false => {
   if (!project) {
+    /* istanbul ignore if */
     if (!product) {
       return <ProductNotFound />;
     }
@@ -303,6 +304,7 @@ export const useForm = ({
       }),
     )
       .then((...args) => {
+        /* istanbul ignore else */
         if (isMounted.current) {
           resetForm();
         }

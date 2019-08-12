@@ -1,7 +1,7 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
 import i18n from 'i18next';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { removeError } from '@/store/errors/actions';
@@ -14,6 +14,9 @@ const reloadPage = (): void => {
 
 const ErrorToast = ({ error }: { error: ErrorType }) => {
   const dispatch = useDispatch();
+  const closeToast = useCallback(() => {
+    dispatch(removeError(error.id));
+  }, [dispatch, error]);
   return (
     <Toast
       labels={{
@@ -23,7 +26,7 @@ const ErrorToast = ({ error }: { error: ErrorType }) => {
       }}
       variant="error"
       onClickHeadingLink={reloadPage}
-      onRequestClose={() => dispatch(removeError(error.id))}
+      onRequestClose={closeToast}
     />
   );
 };
