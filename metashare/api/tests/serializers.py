@@ -82,11 +82,40 @@ class TestProjectSerializer:
         serializer = ProjectSerializer(
             data={
                 "product": str(product.id),
-                "name": "Duplicate me",
+                "name": "Duplicate Me",
                 "description": "Blorp",
             }
         )
         assert not serializer.is_valid()
-        assert serializer.errors["non_field_errors"] == [
+        assert [str(err) for err in serializer.errors["non_field_errors"]] == [
             "A project with this name already exists."
         ]
+
+    def test_unique_name_for_product__case_insensitive(
+        self, product_factory, project_factory
+    ):
+        product = product_factory()
+        project_factory(product=product, name="Duplicate me")
+        serializer = ProjectSerializer(
+            data={
+                "product": str(product.id),
+                "name": "duplicate me",
+                "description": "Blorp",
+            }
+        )
+        assert not serializer.is_valid()
+        assert [str(err) for err in serializer.errors["non_field_errors"]] == [
+            "A project with this name already exists."
+        ]
+
+    def test_unique_name_for_product__case_insensitive__update(
+        self, product_factory, project_factory
+    ):
+        product = product_factory()
+        project = project_factory(product=product, name="Duplicate me")
+        serializer = ProjectSerializer(
+            instance=project,
+            data={"product": str(product.id), "description": "Blorp"},
+            partial=True,
+        )
+        assert serializer.is_valid(), serializer.errors

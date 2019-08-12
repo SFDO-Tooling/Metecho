@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import MarkdownField
 from .models import Product, Project, Task
+from .validators import CaseInsensitiveUniqueTogetherValidator
 
 User = get_user_model()
 
@@ -77,7 +77,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "branch_url",
         )
         validators = (
-            UniqueTogetherValidator(
+            CaseInsensitiveUniqueTogetherValidator(
                 queryset=Project.objects.all(),
                 fields=("name", "product"),
                 message=_("A project with this name already exists."),
@@ -110,7 +110,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "old_slugs",
         )
         validators = (
-            UniqueTogetherValidator(
+            CaseInsensitiveUniqueTogetherValidator(
                 queryset=Task.objects.all(),
                 fields=("name", "project"),
                 message=_("A task with this name already exists."),

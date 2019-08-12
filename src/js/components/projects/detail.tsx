@@ -44,6 +44,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   }
 
   // This redundant check is used to satisfy TypeScript...
+  /* istanbul ignore if */
   if (!product || !project) {
     return <ProductNotFound />;
   }
@@ -69,9 +70,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         <PageHeader
           className="page-header slds-p-around_x-large"
           title={project.name}
-          info={
-            <RepoLink url={project.branch_url}>{project.branch_url}</RepoLink>
-          }
+          info={<RepoLink url={product.repo_url} shortenGithub />}
         />
         <div
           className="slds-p-horizontal_x-large
@@ -101,7 +100,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           <div
             className="slds-col
               slds-size_1-of-1
-              slds-medium-size_7-of-12
+              slds-medium-size_2-of-3
               slds-p-bottom_x-large"
           >
             <Button
@@ -112,16 +111,22 @@ const ProjectDetail = (props: RouteComponentProps) => {
             {tasks ? (
               <>
                 <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-                  {i18n.t('Tasks for')} {project.name}
+                  {tasks.length ? (
+                    <>
+                      {i18n.t('Tasks for')} {project.name}
+                    </>
+                  ) : (
+                    <>
+                      {i18n.t('Add a Task for')} {project.name}
+                    </>
+                  )}
                 </h2>
                 <TaskForm project={project} startOpen={!tasks.length} />
-                {Boolean(tasks.length) && (
-                  <TaskTable
-                    productSlug={product.slug}
-                    projectSlug={project.slug}
-                    tasks={tasks}
-                  />
-                )}
+                <TaskTable
+                  productSlug={product.slug}
+                  projectSlug={project.slug}
+                  tasks={tasks}
+                />
               </>
             ) : (
               // Fetching tasks from API
@@ -131,7 +136,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           <div
             className="slds-col
               slds-size_1-of-1
-              slds-medium-size_5-of-12
+              slds-medium-size_1-of-3
               slds-text-longform"
           >
             <DevHubConnect />

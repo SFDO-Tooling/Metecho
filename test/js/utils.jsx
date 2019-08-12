@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
@@ -24,3 +25,16 @@ export const renderWithRedux = (
 };
 
 export const storeWithThunk = configureStore([thunk]);
+
+export const renderHookWithRedux = (
+  cb,
+  initialState = {},
+  customStore = storeWithThunk,
+) => {
+  const store = customStore(initialState);
+  // eslint-disable-next-line react/prop-types
+  const wrapper = ({ children }) => (
+    <Provider store={store}>{children}</Provider>
+  );
+  return renderHook(cb, { wrapper });
+};

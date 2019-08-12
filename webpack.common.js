@@ -52,9 +52,18 @@ module.exports = {
           path.join(__dirname, 'src/js'),
           path.join(__dirname, 'node_modules/@salesforce/design-system-react'),
         ],
+        exclude: [
+          path.join(
+            __dirname,
+            'node_modules/@salesforce/design-system-react/node_modules',
+          ),
+        ],
         use: [
           {
             loader: 'babel-loader',
+            options: {
+              cacheDirectory: true,
+            },
           },
         ],
       },
