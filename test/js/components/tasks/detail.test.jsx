@@ -2,17 +2,17 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import TaskDetail from '@/components/tasks/detail';
-import { fetchObject } from '@/store/actions';
+import { fetchObjects } from '@/store/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
 
-fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
-  fetchObject.mockClear();
+  fetchObjects.mockClear();
 });
 
 const defaultState = {
@@ -72,7 +72,7 @@ describe('<TaskDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, productSlug, projectSlug, taskSlug } = opts;
     const context = {};
-    const { debug, getByText, getByTitle, queryByText } = renderWithRedux(
+    const { getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
         <TaskDetail
           match={{ params: { productSlug, projectSlug, taskSlug } }}
@@ -81,60 +81,93 @@ describe('<TaskDetail/>', () => {
       initialState,
       storeWithThunk,
     );
-    return { debug, getByText, getByTitle, queryByText, context };
+    return { getByText, getByTitle, queryByText, context };
   };
 
   test('renders task detail', () => {
-    const { getByText, getByTitle } = setup();
+    const { getByText, getByTitle, queryByText } = setup();
+
     expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByText('Task Description')).toBeVisible();
+    expect(queryByText('View Branch')).toBeNull();
+  });
+
+  test('renders view branch button if branch_url exists', () => {
+    const { getByText, getByTitle } = setup({
+      initialState: {
+        ...defaultState,
+        tasks: {
+          ...defaultState.tasks,
+          project1: [
+            {
+              ...defaultState.tasks.project1[0],
+              branch_url: 'my-url',
+            },
+          ],
+        },
+      },
+    });
+
+    expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByText('View Branch')).toBeVisible();
     expect(getByText('Task Description')).toBeVisible();
   });
 
-  describe('loading tasks from api', () => {
+  describe('tasks not found', () => {
+    test('fetches tasks from API', () => {
+      const { queryByText } = setup({
+        initialState: { ...defaultState, tasks: {} },
+      });
+
+      expect(queryByText('Task 1')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { project: 'project1' },
+        objectType: 'task',
+      });
+    });
+  });
+
+  describe('product does not exist', () => {
     test('renders <ProductNotFound />', () => {
       const { getByText, queryByText } = setup({
         productSlug: 'different-product',
       });
+
       expect(queryByText('Task 1')).toBeNull();
       expect(getByText('list of all products')).toBeVisible();
     });
+  });
 
+  describe('project does not exist', () => {
     test('renders <ProjectNotFound />', () => {
       const { getByText, queryByText } = setup({
         projectSlug: 'different-project',
       });
+
       expect(queryByText('Task 1')).toBeNull();
       expect(getByText('another project')).toBeVisible();
     });
+  });
 
+  describe('task does not exist', () => {
     test('renders <TaskNotFound />', () => {
       const { getByText, queryByText } = setup({
-        taskSlug: 'different-project',
+        taskSlug: 'different-task',
       });
+
       expect(queryByText('Task 1')).toBeNull();
       expect(getByText('another task')).toBeVisible();
     });
+  });
 
-    test('renders spinner whilst task fetching', () => {
-      const { debug, getByText, queryByText } = setup({
-        initialState: {
-          ...defaultState,
-          tasks: { project1: null },
-        },
-      });
-      expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('another task')).toBeVisible();
-    });
+  describe('old task slug', () => {
+    test('redirects to task_detail with new slug', () => {
+      const { context } = setup({ taskSlug: 'old-slug' });
 
-    describe('old task slug', () => {
-      test('redirects to task_detail with new slug', () => {
-        const { context } = setup({ taskSlug: 'old-slug' });
-
-        expect(context.action).toEqual('REPLACE');
-        expect(context.url).toEqual(
-          routes.task_detail('product-1', 'project-1', 'old-slug'),
-        );
-      });
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.task_detail('product-1', 'project-1', 'task-1'),
+      );
     });
   });
 });
