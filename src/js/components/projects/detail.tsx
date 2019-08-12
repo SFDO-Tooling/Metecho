@@ -106,6 +106,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               label={i18n.t('Submit Project')}
               className="slds-size_full slds-m-bottom_x-large"
               variant="outline-brand"
+              disabled
             />
             {tasks ? (
               <>

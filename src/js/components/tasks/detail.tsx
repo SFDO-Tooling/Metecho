@@ -96,17 +96,20 @@ const TaskDetail = (props: RouteComponentProps) => {
         iconPosition="left"
         label="Delete Task"
         variant="text-destructive"
-        className="slds-m-right_large"
+        disabled
       />
-      <RepoLink url="#@@@">
-        <Button
-          iconCategory="utility"
-          iconName="new_window"
-          iconPosition="left"
-          label="View Branch"
-          variant="outline-brand"
-        />
-      </RepoLink>
+      {task.branch_url ? (
+        <RepoLink url={task.branch_url}>
+          <Button
+            iconCategory="utility"
+            iconName="new_window"
+            iconPosition="left"
+            label="View Branch"
+            variant="outline-brand"
+            className="slds-m-left_large"
+          />
+        </RepoLink>
+      ) : null}
     </PageHeaderControl>
   );
 
