@@ -10,7 +10,7 @@ describe('reducer', () => {
 
   test('handles USER_LOGGED_OUT action', () => {
     const repository1 = {
-      id: 'p1',
+      id: 'r1',
       slug: 'repository-1',
       name: 'Repository 1',
       description: 'This is a test repository.',
@@ -31,7 +31,7 @@ describe('reducer', () => {
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
     test('resets repositories list if `reset: true`', () => {
       const repository1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'repository-1',
         name: 'Repository 1',
         description: 'This is a test repository.',
@@ -93,7 +93,7 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "repository"', () => {
       const repository = {
-        id: 'p1',
+        id: 'r1',
         slug: 'repository-1',
         name: 'Repository 1',
       };
@@ -114,7 +114,7 @@ describe('reducer', () => {
   describe('FETCH_OBJECT_SUCCEEDED', () => {
     test('adds repository', () => {
       const repository1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'repository-1',
         name: 'Repository 1',
       };
@@ -141,7 +141,7 @@ describe('reducer', () => {
 
     test('stores id of missing repository', () => {
       const repository1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'repository-1',
         name: 'Repository 1',
       };
@@ -166,7 +166,7 @@ describe('reducer', () => {
 
     test('ignores duplicate repository', () => {
       const repository1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'repository-1',
         name: 'Repository 1',
       };
@@ -188,7 +188,7 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "repository"', () => {
       const repository = {
-        id: 'p1',
+        id: 'r1',
         slug: 'repository-1',
         name: 'Repository 1',
       };

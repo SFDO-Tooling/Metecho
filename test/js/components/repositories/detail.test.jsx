@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import ProductDetail from '@/components/repositories/detail';
+import RepoDetail from '@/components/repositories/detail';
 import { fetchObject, fetchObjects } from '@/store/actions';
 import routes from '@/utils/routes';
 
@@ -22,8 +22,8 @@ const defaultState = {
   repositories: {
     repositories: [
       {
-        id: 'p1',
-        name: 'Product 1',
+        id: 'r1',
+        name: 'Repository 1',
         slug: 'repository-1',
         old_slugs: ['old-slug'],
         description: 'This is a test repository.',
@@ -34,13 +34,13 @@ const defaultState = {
     next: null,
   },
   projects: {
-    p1: {
+    r1: {
       projects: [
         {
           id: 'project1',
           slug: 'project-1',
           name: 'Project 1',
-          repository: 'p1',
+          repository: 'r1',
           description: 'Project Description',
         },
       ],
@@ -51,7 +51,7 @@ const defaultState = {
   },
 };
 
-describe('<ProductDetail />', () => {
+describe('<RepoDetail />', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
@@ -62,7 +62,7 @@ describe('<ProductDetail />', () => {
     const context = {};
     const { getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
-        <ProductDetail match={{ params: { repositorySlug } }} />
+        <RepoDetail match={{ params: { repositorySlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
@@ -73,10 +73,10 @@ describe('<ProductDetail />', () => {
   test('renders repository detail and projects list', () => {
     const { getByText, getByTitle } = setup();
 
-    expect(getByTitle('Product 1')).toBeVisible();
+    expect(getByTitle('Repository 1')).toBeVisible();
     expect(getByText('This is a test repository.')).toBeVisible();
     expect(getByText('Project 1')).toBeVisible();
-    expect(getByText('Projects for Product 1')).toBeVisible();
+    expect(getByText('Projects for Repository 1')).toBeVisible();
   });
 
   test('renders with form expanded if no projects', () => {
@@ -84,7 +84,7 @@ describe('<ProductDetail />', () => {
       initialState: {
         ...defaultState,
         projects: {
-          p1: {
+          r1: {
             projects: [],
             next: null,
             notFound: [],
@@ -94,15 +94,15 @@ describe('<ProductDetail />', () => {
       },
     });
 
-    expect(getByText('Create a Project for Product 1')).toBeVisible();
-    expect(queryByText('Projects for Product 1')).toBeNull();
+    expect(getByText('Create a Project for Repository 1')).toBeVisible();
+    expect(queryByText('Projects for Repository 1')).toBeNull();
   });
 
   describe('repository not found', () => {
     test('fetches repository from API', () => {
       const { queryByText } = setup({ repositorySlug: 'other-repository' });
 
-      expect(queryByText('Product 1')).toBeNull();
+      expect(queryByText('Repository 1')).toBeNull();
       expect(fetchObject).toHaveBeenCalledWith({
         filters: { slug: 'other-repository' },
         objectType: 'repository',
@@ -111,12 +111,12 @@ describe('<ProductDetail />', () => {
   });
 
   describe('repository does not exist', () => {
-    test('renders <ProductNotFound />', () => {
+    test('renders <RepositoryNotFound />', () => {
       const { getByText, queryByText } = setup({
         repositorySlug: 'yet-another-repository',
       });
 
-      expect(queryByText('Product 1')).toBeNull();
+      expect(queryByText('Repository 1')).toBeNull();
       expect(getByText('list of all repositories')).toBeVisible();
     });
   });
@@ -131,10 +131,10 @@ describe('<ProductDetail />', () => {
   });
 
   describe('no repository slug', () => {
-    test('renders <ProductNotFound />', () => {
+    test('renders <RepositoryNotFound />', () => {
       const { getByText, queryByText } = setup({ repositorySlug: '' });
 
-      expect(queryByText('Product 1')).toBeNull();
+      expect(queryByText('Repository 1')).toBeNull();
       expect(getByText('list of all repositories')).toBeVisible();
     });
   });
@@ -145,7 +145,7 @@ describe('<ProductDetail />', () => {
         initialState: {
           ...defaultState,
           projects: {
-            p1: {
+            r1: {
               projects: [],
               next: null,
               notFound: [],
@@ -155,9 +155,9 @@ describe('<ProductDetail />', () => {
         },
       });
 
-      expect(queryByText('Projects for Product 1')).toBeNull();
+      expect(queryByText('Projects for Repository 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { repository: 'p1' },
+        filters: { repository: 'r1' },
         objectType: 'project',
         reset: true,
       });
@@ -170,7 +170,7 @@ describe('<ProductDetail />', () => {
         initialState: {
           ...defaultState,
           projects: {
-            p1: {
+            r1: {
               projects: [
                 {
                   branch_url: 'branch-url',
@@ -178,7 +178,7 @@ describe('<ProductDetail />', () => {
                   id: 'project1',
                   name: 'Project 1',
                   old_slugs: [],
-                  repository: 'p1',
+                  repository: 'r1',
                   slug: 'project-1',
                 },
               ],
@@ -196,7 +196,7 @@ describe('<ProductDetail />', () => {
       fireEvent.click(btn);
 
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { repository: 'p1' },
+        filters: { repository: 'r1' },
         objectType: 'project',
         url: 'next-url',
       });
@@ -209,7 +209,7 @@ describe('<ProductDetail />', () => {
         initialState: {
           ...defaultState,
           projects: {
-            p1: {
+            r1: {
               projects: [
                 {
                   branch_url: 'branch-url',
@@ -217,7 +217,7 @@ describe('<ProductDetail />', () => {
                   id: 'project1',
                   name: 'Project 1',
                   old_slugs: [],
-                  repository: 'p1',
+                  repository: 'r1',
                   slug: 'project-1',
                 },
               ],

@@ -10,7 +10,7 @@ describe('reducer', () => {
 
   test('handles USER_LOGGED_OUT action', () => {
     const project1 = {
-      id: 'p1',
+      id: 'r1',
       slug: 'project-1',
       name: 'Project 1',
       description: 'This is a test project.',
@@ -34,7 +34,7 @@ describe('reducer', () => {
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
     test('resets projects list for repository if `reset: true`', () => {
       const project1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
@@ -92,7 +92,7 @@ describe('reducer', () => {
 
     test('creates repository-project data if not already known', () => {
       const project1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
@@ -166,7 +166,7 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "project"', () => {
       const project = {
-        id: 'p1',
+        id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         repository: 'repository-1',
@@ -189,7 +189,7 @@ describe('reducer', () => {
   describe('CREATE_OBJECT_SUCCEEDED', () => {
     test('adds project to list', () => {
       const project1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
@@ -219,7 +219,7 @@ describe('reducer', () => {
 
     test('does not add duplicate project', () => {
       const project1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
@@ -246,7 +246,7 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "project"', () => {
       const project = {
-        id: 'p1',
+        id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         repository: 'repository-1',
@@ -267,7 +267,7 @@ describe('reducer', () => {
   describe('FETCH_OBJECT_SUCCEEDED', () => {
     test('adds project', () => {
       const project1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         repository: 'repository1',
@@ -328,7 +328,7 @@ describe('reducer', () => {
 
     test('ignores duplicate project', () => {
       const project1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         repository: 'repository1',

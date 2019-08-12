@@ -2,13 +2,13 @@ import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
-import { Repository } from '@/store/repositories/reducer';
-import { selectRepository } from '@/store/repositories/selectors';
 import {
   Project,
   ProjectsByRepositoryState,
   ProjectsState,
 } from '@/store/projects/reducer';
+import { Repository } from '@/store/repositories/reducer';
+import { selectRepository } from '@/store/repositories/selectors';
 
 export const selectProjectState = (appState: AppState): ProjectsState =>
   appState.projects;

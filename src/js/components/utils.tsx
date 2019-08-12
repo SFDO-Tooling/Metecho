@@ -1,5 +1,8 @@
+import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import Icon from '@salesforce/design-system-react/components/icon';
+import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
+import i18n from 'i18next';
 import React, {
   ComponentType,
   ReactElement,
@@ -10,24 +13,26 @@ import React, {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
+import { Link, Redirect, Route, RouteComponentProps } from 'react-router-dom';
 
-import RepositoryNotFound from '@/components/repositories/repository404';
 import ProjectNotFound from '@/components/projects/project404';
+import RepositoryNotFound from '@/components/repositories/repository404';
+import TaskNotFound from '@/components/tasks/task404';
 import { AppState, ThunkDispatch } from '@/store';
 import { createObject, fetchObject, fetchObjects } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
-import { Repository } from '@/store/repositories/reducer';
-import {
-  selectRepository,
-  selectRepositorySlug,
-} from '@/store/repositories/selectors';
 import { Project } from '@/store/projects/reducer';
 import {
   selectProject,
   selectProjectsByRepository,
   selectProjectSlug,
 } from '@/store/projects/selectors';
+import { Repository } from '@/store/repositories/reducer';
+import {
+  selectRepository,
+  selectRepositorySlug,
+} from '@/store/repositories/selectors';
+import { Task } from '@/store/tasks/reducer';
 import { selectTasksByProject } from '@/store/tasks/selectors';
 import { selectUserState } from '@/store/user/selectors';
 import { ApiError } from '@/utils/api';
@@ -38,6 +43,105 @@ import {
 } from '@/utils/constants';
 import routes from '@/utils/routes';
 import githubIcon from '#/github.svg';
+
+interface Crumb {
+  name: string;
+  url?: string;
+}
+
+export const DetailPageLayout = ({
+  title,
+  description,
+  repoUrl,
+  breadcrumb,
+  onRenderHeaderActions,
+  sidebar,
+  children,
+}: {
+  title: string;
+  description?: string;
+  repoUrl: string;
+  breadcrumb: Crumb[];
+  onRenderHeaderActions?: () => JSX.Element;
+  sidebar?: ReactNode;
+  children?: ReactNode;
+}) => {
+  const descriptionHasTitle =
+    description &&
+    (description.startsWith('<h1>') || description.startsWith('<h2>'));
+
+  return (
+    <>
+      <PageHeader
+        className="page-header slds-p-around_x-large"
+        title={title}
+        info={<RepoLink url={repoUrl} shortenGithub />}
+        onRenderControls={onRenderHeaderActions}
+      />
+      <div
+        className="slds-p-horizontal_x-large
+          slds-p-top_x-small
+          ms-breadcrumb"
+      >
+        <BreadCrumb
+          trail={[
+            <Link to={routes.home()} key="home">
+              {i18n.t('Home')}
+            </Link>,
+          ].concat(
+            breadcrumb.map((crumb, idx) => {
+              if (crumb.url) {
+                return (
+                  <Link to={crumb.url} key={idx}>
+                    {crumb.name}
+                  </Link>
+                );
+              }
+              return (
+                <div className="slds-p-horizontal_x-small" key={idx}>
+                  {crumb.name}
+                </div>
+              );
+            }),
+          )}
+        />
+      </div>
+      <div
+        className="slds-p-around_x-large
+          slds-grid
+          slds-gutters
+          slds-wrap"
+      >
+        <div
+          className="slds-col
+            slds-size_1-of-1
+            slds-medium-size_2-of-3
+            slds-p-bottom_x-large"
+        >
+          {children}
+        </div>
+        <div
+          className="slds-col
+            slds-size_1-of-1
+            slds-medium-size_1-of-3
+            slds-text-longform"
+        >
+          {!descriptionHasTitle && (
+            <h2 className="slds-text-heading_medium">{title}</h2>
+          )}
+          {/* This description is pre-cleaned by the API */}
+          {description && (
+            <p
+              className="markdown"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
+          )}
+          {sidebar}
+        </div>
+      </div>
+    </>
+  );
+};
 
 // For use as a "loading" button label
 export const LabelWithSpinner = ({
@@ -145,6 +249,35 @@ export const getProjectLoadingOrNotFound = ({
       return <ProjectNotFound repository={repository} />;
     }
     // Fetching project from API
+    return <Spinner />;
+  }
+  return false;
+};
+
+export const getTaskLoadingOrNotFound = ({
+  repository,
+  project,
+  task,
+  taskSlug,
+}: {
+  repository?: Repository | null;
+  project?: Project | null;
+  task?: Task | null;
+  taskSlug?: string;
+}): ReactElement | false => {
+  if (!task) {
+    /* istanbul ignore if */
+    if (!repository) {
+      return <RepositoryNotFound />;
+    }
+    /* istanbul ignore if */
+    if (!project) {
+      return <ProjectNotFound repository={repository} />;
+    }
+    if (!taskSlug || task === null) {
+      return <TaskNotFound repository={repository} project={project} />;
+    }
+    // Fetching task from API
     return <Spinner />;
   }
   return false;

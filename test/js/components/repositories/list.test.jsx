@@ -54,7 +54,7 @@ describe('<RepositoryList />', () => {
       repositories: {
         repositories: [
           {
-            id: 'p1',
+            id: 'r1',
             name: 'Repository 1',
             slug: 'repository-1',
             description: 'This is a test repository.',
@@ -76,7 +76,7 @@ describe('<RepositoryList />', () => {
       repositories: {
         repositories: [
           {
-            id: 'p1',
+            id: 'r1',
             name: 'Repository 1',
             slug: 'repository-1',
             description: 'This is a test repository.',

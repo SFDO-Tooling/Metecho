@@ -23,7 +23,7 @@ afterEach(() => {
 });
 
 const defaultRepository = {
-  id: 'p1',
+  id: 'r1',
   name: 'Repository 1',
   slug: 'repository-1',
   old_slugs: [],
@@ -86,7 +86,7 @@ describe('<ProjectForm/>', () => {
         data: {
           name: 'Name of Project',
           description: 'This is the description',
-          repository: 'p1',
+          repository: 'r1',
         },
       });
     });
@@ -102,7 +102,7 @@ describe('<ProjectForm/>', () => {
                 id: 'project1',
                 slug: 'name-of-project',
                 name: 'Name of Project',
-                repository: 'p1',
+                repository: 'r1',
               },
             },
           }),

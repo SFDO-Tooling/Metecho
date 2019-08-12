@@ -22,7 +22,7 @@ describe('fetchObjects with `reset: true`', () => {
     test('GETs repositories from api', () => {
       const store = storeWithThunk({});
       const repository = {
-        id: 'p1',
+        id: 'r1',
         name: 'Repository 1',
         slug: 'repository-1',
         description: 'This is a test repository.',
@@ -177,7 +177,7 @@ describe('fetchObject', () => {
       const store = storeWithThunk({});
       const filters = { slug: 'repository-1' };
       const repository = {
-        id: 'p1',
+        id: 'r1',
         name: 'Repository 1',
         slug: 'repository-1',
       };

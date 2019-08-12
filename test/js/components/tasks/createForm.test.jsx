@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 const defaultProject = {
-  id: 'p1',
+  id: 'r1',
   name: 'Project 1',
   slug: 'project-1',
   old_slugs: [],
@@ -83,7 +83,7 @@ describe('<TaskForm/>', () => {
         data: {
           name: 'Name of Task',
           description: 'This is the description',
-          project: 'p1',
+          project: 'r1',
           assignee: null,
         },
       });
@@ -103,7 +103,7 @@ describe('<TaskForm/>', () => {
                 slug: 'name-of-task',
                 name: 'Name of Task',
                 description: '',
-                project: 'p1',
+                project: 'r1',
                 assignee: null,
               },
             },

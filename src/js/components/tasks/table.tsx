@@ -49,14 +49,7 @@ AssigneeTableCell.displayName = DataTableCell.displayName;
 
 const TaskTable = ({ repositorySlug, projectSlug, tasks }: Props) =>
   tasks.length ? (
-    <DataTable
-      items={tasks}
-      id="project-tasks-table"
-      className="minimal-th"
-      fixedLayout
-      noRowHover
-      unbufferedCell
-    >
+    <DataTable items={tasks} id="project-tasks-table" noRowHover>
       <DataTableColumn
         key="name"
         label={i18n.t('Task')}

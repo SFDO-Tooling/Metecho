@@ -148,7 +148,7 @@ describe('refetchAllData', () => {
         payload: user,
       };
       const repository = {
-        id: 'p1',
+        id: 'r1',
         name: 'Repository 1',
         slug: 'repository-1',
         description: 'This is a test repository.',

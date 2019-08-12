@@ -2,7 +2,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
-import { Repository, RepositoriesState } from '@/store/repositories/reducer';
+import { RepositoriesState, Repository } from '@/store/repositories/reducer';
 
 export const selectRepositoriesState = (
   appState: AppState,

@@ -1,19 +1,17 @@
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import ProjectDetail from '@/components/projects/detail';
-import { fetchObject, fetchObjects } from '@/store/actions';
+import TaskDetail from '@/components/tasks/detail';
+import { fetchObjects } from '@/store/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
 
-fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
-  fetchObject.mockClear();
   fetchObjects.mockClear();
 });
 
@@ -41,7 +39,7 @@ const defaultState = {
           name: 'Project 1',
           repository: 'r1',
           description: 'Project Description',
-          old_slugs: ['old-slug'],
+          old_slugs: [],
         },
       ],
       next: null,
@@ -55,7 +53,7 @@ const defaultState = {
         id: 'task1',
         name: 'Task 1',
         slug: 'task-1',
-        old_slugs: [],
+        old_slugs: ['old-slug'],
         project: 'project1',
         description: 'Task Description',
       },
@@ -63,19 +61,22 @@ const defaultState = {
   },
 };
 
-describe('<ProjectDetail/>', () => {
+describe('<TaskDetail/>', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
       repositorySlug: 'repository-1',
       projectSlug: 'project-1',
+      taskSlug: 'task-1',
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, repositorySlug, projectSlug } = opts;
+    const { initialState, repositorySlug, projectSlug, taskSlug } = opts;
     const context = {};
     const { getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectDetail match={{ params: { repositorySlug, projectSlug } }} />
+        <TaskDetail
+          match={{ params: { repositorySlug, projectSlug, taskSlug } }}
+        />
       </StaticRouter>,
       initialState,
       storeWithThunk,
@@ -83,35 +84,45 @@ describe('<ProjectDetail/>', () => {
     return { getByText, getByTitle, queryByText, context };
   };
 
-  test('renders project detail and tasks list', () => {
-    const { getByText, getByTitle } = setup();
+  test('renders task detail', () => {
+    const { getByText, getByTitle, queryByText } = setup();
 
-    expect(getByTitle('Project 1')).toBeVisible();
-    expect(getByText('Project Description')).toBeVisible();
-    expect(getByText('Tasks for Project 1')).toBeVisible();
-    expect(getByText('Task 1')).toBeVisible();
+    expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByText('Task Description')).toBeVisible();
+    expect(queryByText('View Branch')).toBeNull();
   });
 
-  test('renders with form expanded if no tasks', () => {
-    const { getByText, queryByText } = setup({
+  test('renders view branch button if branch_url exists', () => {
+    const { getByText, getByTitle } = setup({
       initialState: {
         ...defaultState,
-        tasks: { project1: [] },
+        tasks: {
+          ...defaultState.tasks,
+          project1: [
+            {
+              ...defaultState.tasks.project1[0],
+              branch_url: 'my-url',
+            },
+          ],
+        },
       },
     });
 
-    expect(getByText('Add a Task for Project 1')).toBeVisible();
-    expect(queryByText('Tasks for Project 1')).toBeNull();
+    expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByText('View Branch')).toBeVisible();
+    expect(getByText('Task Description')).toBeVisible();
   });
 
-  describe('project not found', () => {
-    test('fetches project from API', () => {
-      const { queryByText } = setup({ projectSlug: 'other-project' });
+  describe('tasks not found', () => {
+    test('fetches tasks from API', () => {
+      const { queryByText } = setup({
+        initialState: { ...defaultState, tasks: {} },
+      });
 
-      expect(queryByText('Project 1')).toBeNull();
-      expect(fetchObject).toHaveBeenCalledWith({
-        filters: { repository: 'r1', slug: 'other-project' },
-        objectType: 'project',
+      expect(queryByText('Task 1')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { project: 'project1' },
+        objectType: 'task',
       });
     });
   });
@@ -122,7 +133,7 @@ describe('<ProjectDetail/>', () => {
         repositorySlug: 'different-repository',
       });
 
-      expect(queryByText('Project 1')).toBeNull();
+      expect(queryByText('Task 1')).toBeNull();
       expect(getByText('list of all repositories')).toBeVisible();
     });
   });
@@ -133,36 +144,30 @@ describe('<ProjectDetail/>', () => {
         projectSlug: 'different-project',
       });
 
-      expect(queryByText('Project 1')).toBeNull();
+      expect(queryByText('Task 1')).toBeNull();
       expect(getByText('another project')).toBeVisible();
     });
   });
 
-  describe('old project slug', () => {
-    test('redirects to project_detail with new slug', () => {
-      const { context } = setup({ projectSlug: 'old-slug' });
+  describe('task does not exist', () => {
+    test('renders <TaskNotFound />', () => {
+      const { getByText, queryByText } = setup({
+        taskSlug: 'different-task',
+      });
 
-      expect(context.action).toEqual('REPLACE');
-      expect(context.url).toEqual(
-        routes.project_detail('repository-1', 'project-1'),
-      );
+      expect(queryByText('Task 1')).toBeNull();
+      expect(getByText('another task')).toBeVisible();
     });
   });
 
-  describe('tasks have not been fetched', () => {
-    test('fetches tasks from API', () => {
-      const { queryByText } = setup({
-        initialState: {
-          ...defaultState,
-          tasks: {},
-        },
-      });
+  describe('old task slug', () => {
+    test('redirects to task_detail with new slug', () => {
+      const { context } = setup({ taskSlug: 'old-slug' });
 
-      expect(queryByText('Tasks for Project 1')).toBeNull();
-      expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { project: 'project1' },
-        objectType: 'task',
-      });
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(
+        routes.task_detail('repository-1', 'project-1', 'task-1'),
+      );
     });
   });
 });

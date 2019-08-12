@@ -16,6 +16,7 @@
   "Create a Project": "Create a Project",
   "Create a Project for": "Create a Project for",
   "Custom Domain": "Custom Domain",
+  "Delete Task": "Delete Task",
   "Description": "Description",
   "GitHub Repo": "GitHub Repo",
   "Home": "Home",
@@ -42,6 +43,7 @@
   "Uh oh, we've encountered an error. You may need to": "Uh oh, we've encountered an error. You may need to",
   "Unchanged": "Unchanged",
   "Use Custom Domain": "Use Custom Domain",
+  "View Branch": "View Branch",
   "Welcome to MetaShare!": "Welcome to MetaShare!",
   "Welcome to MetaShare, the web-based tool for collaborating on Salesforce projects.": "Welcome to MetaShare, the web-based tool for collaborating on Salesforce projects.",
   "You are in offline mode. We are trying to reconnect, but you may need to": "You are in offline mode. We are trying to reconnect, but you may need to",
@@ -52,5 +54,6 @@
   "productListHelper": "Contributor access on GitHub is required to view products. If you do not see the product you’re looking for below, confirm that you are logged into the correct account or contact an admin on GitHub.",
   "productNotFound": "We can’t find the product you’re looking for. Try the <2>list of all products</2>?",
   "projectNotFound": "We can’t find the project you’re looking for. Try <2>another project</2> from that product?",
-  "reload the page.": "reload the page."
+  "reload the page.": "reload the page.",
+  "taskNotFound": "We can’t find the task you’re looking for. Try <2>another task</2> from that project?"
 }

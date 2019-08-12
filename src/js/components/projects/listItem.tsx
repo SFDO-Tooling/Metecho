@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Repository } from '@/store/repositories/reducer';
 import { Project } from '@/store/projects/reducer';
+import { Repository } from '@/store/repositories/reducer';
 import routes from '@/utils/routes';
 
 interface Props {
