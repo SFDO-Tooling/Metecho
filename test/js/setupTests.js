@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom/extend-expect';
-import '@testing-library/react/cleanup-after-each';
 import 'isomorphic-fetch';
 
 import fetchMock from 'fetch-mock';
