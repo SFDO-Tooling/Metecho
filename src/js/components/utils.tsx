@@ -27,11 +27,7 @@ import {
   selectProjectSlug,
 } from '@/store/projects/selectors';
 import { Task } from '@/store/tasks/reducer';
-import {
-  selectTask,
-  selectTasksByProject,
-  selectTaskSlug,
-} from '@/store/tasks/selectors';
+import { selectTasksByProject } from '@/store/tasks/selectors';
 import { selectUserState } from '@/store/user/selectors';
 import { ApiError } from '@/utils/api';
 import {
@@ -156,29 +152,26 @@ export const getProjectLoadingOrNotFound = ({
 export const getTaskLoadingOrNotFound = ({
   product,
   project,
-  projectSlug,
   task,
   taskSlug,
 }: {
   product?: Product | null;
   project?: Project | null;
-  projectSlug?: string;
   task?: Task | null;
   taskSlug?: string;
-}): ReactNode | false => {
+}): ReactElement | false => {
   if (!task) {
+    /* istanbul ignore if */
     if (!product) {
       return <ProductNotFound />;
     }
-    if (!projectSlug || project === null) {
+    /* istanbul ignore if */
+    if (!project) {
       return <ProjectNotFound product={product} />;
     }
-    if (project) {
-      if (!taskSlug || task === null) {
-        return <TaskNotFound product={product} project={project} />;
-      }
+    if (!taskSlug || task === null) {
+      return <TaskNotFound product={product} project={project} />;
     }
-
     // Fetching task from API
     return <Spinner />;
   }
@@ -305,34 +298,6 @@ export const useFetchTasksIfMissing = (
   }, [dispatch, project, tasks]);
 
   return { tasks };
-};
-
-export const useFetchTaskIfMissing = (
-  project: Project | null | undefined,
-  routeProps: RouteComponentProps,
-) => {
-  const dispatch = useDispatch<ThunkDispatch>();
-  const selectTaskWithProps = useCallback(selectTask, []);
-  const task = useSelector((state: AppState) =>
-    selectTaskWithProps(state, routeProps),
-  );
-  const taskSlug = useSelector((state: AppState) =>
-    selectTaskSlug(state, routeProps),
-  );
-
-  useEffect(() => {
-    if (project && !task) {
-      // Fetch tasks from API
-      dispatch(
-        fetchObjects({
-          objectType: OBJECT_TYPES.TASK,
-          filters: { project: project.id },
-        }),
-      );
-    }
-  }, [dispatch, project, task]);
-
-  return { task, taskSlug };
 };
 
 export const useForm = ({

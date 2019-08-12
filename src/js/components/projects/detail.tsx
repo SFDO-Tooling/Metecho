@@ -7,7 +7,7 @@ import React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 
-import ProductNotFound from '@/components/products/product404';
+import FourOhFour from '@/components/404';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import {
@@ -45,14 +45,14 @@ const ProjectDetail = (props: RouteComponentProps) => {
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
   if (!product || !project) {
-    return <ProductNotFound />;
+    return <FourOhFour />;
   }
 
   if (
     (productSlug && productSlug !== product.slug) ||
     (projectSlug && projectSlug !== project.slug)
   ) {
-    // Redirect to most recent product slug
+    // Redirect to most recent product/project slug
     return <Redirect to={routes.project_detail(product.slug, project.slug)} />;
   }
 
@@ -81,7 +81,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               <Link to={routes.home()} key="home">
                 {i18n.t('Home')}
               </Link>,
-              <Link to={routes.product_detail(product.slug)} key="home">
+              <Link to={routes.product_detail(product.slug)} key="product">
                 {product.name}
               </Link>,
               <div className="slds-p-horizontal_x-small" key={project.slug}>

@@ -44,6 +44,7 @@ import { log, logError } from '@/utils/logging';
 import routes, { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
 import SFLogo from '#/salesforce-logo.png';
+
 const App = withRouter(
   ({
     dispatch,

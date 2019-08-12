@@ -27,10 +27,10 @@ export const selectTaskSlug = (
 export const selectTask = createSelector(
   [selectTasksByProject, selectTaskSlug],
   (tasks, slug) => {
-    /* istanbul ignore else */
-    if (tasks) {
-      return tasks.find(t => t.slug === slug);
+    if (!tasks || !slug) {
+      return undefined;
     }
-    return undefined;
+    const task = tasks.find(t => t.slug === slug || t.old_slugs.includes(slug));
+    return task || null;
   },
 );

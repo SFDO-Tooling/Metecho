@@ -11,6 +11,7 @@ interface Props {
   product: Product;
   project: Project;
 }
+
 const TaskNotFound = ({ product, project }: Props) => (
   <FourOhFour
     message={
