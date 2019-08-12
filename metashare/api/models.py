@@ -108,7 +108,11 @@ class User(mixins.HashIdMixin, AbstractUser):
         return None
 
     @cached_property
-    def is_dev_hub_enabled(self):
+    def is_devhub_enabled(self):
+        # We can shortcut and avoid making an HTTP request in some cases:
+        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox, None):
+            return None
+
         token, _ = self.token
         instance_url = self.salesforce_account.extra_data["instance_url"]
         url = f"{instance_url}/services/data/v45.0/sobjects/ScratchOrgInfo"

@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -167,6 +167,85 @@ class TestUser:
 
         user = user_factory(socialaccount_set=[])
         assert user.full_org_type is None
+
+    def test_is_devhub_enabled__shortcut_none(
+        self, user_factory, social_account_factory
+    ):
+        user = user_factory()
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Something",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        assert user.is_devhub_enabled is None
+
+    def test_is_devhub_enabled__true(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Production",
+                    "IsSandbox": False,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        with patch("metashare.api.models.requests.get") as get:
+            response = MagicMock(status_code=200)
+            get.return_value = response
+            assert user.is_devhub_enabled
+
+    def test_is_devhub_enabled__false(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Production",
+                    "IsSandbox": False,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        with patch("metashare.api.models.requests.get") as get:
+            response = MagicMock(status_code=404)
+            get.return_value = response
+            assert not user.is_devhub_enabled
+
+    def test_is_devhub_enabled__final_none(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Production",
+                    "IsSandbox": False,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        with patch("metashare.api.models.requests.get") as get:
+            response = MagicMock(status_code=401)
+            get.return_value = response
+            assert user.is_devhub_enabled is None
 
 
 @pytest.mark.django_db
