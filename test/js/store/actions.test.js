@@ -214,23 +214,22 @@ describe('fetchObject', () => {
   describe('error', () => {
     test('dispatches FETCH_OBJECT_FAILED action', () => {
       const store = storeWithThunk({});
-      const filters = { slug: 'product-1' };
-      fetchMock.getOnce(addUrlParams(url, filters), {
+      fetchMock.getOnce(url, {
         status: 500,
         body: { detail: 'Nope.' },
       });
       const started = {
         type: 'FETCH_OBJECT_STARTED',
-        payload: { filters, ...objectPayload },
+        payload: { filters: {}, ...objectPayload },
       };
       const failed = {
         type: 'FETCH_OBJECT_FAILED',
-        payload: { filters, ...objectPayload },
+        payload: { filters: {}, ...objectPayload },
       };
 
       expect.assertions(5);
       return store
-        .dispatch(actions.fetchObject({ objectType: 'product', filters }))
+        .dispatch(actions.fetchObject({ objectType: 'product' }))
         .catch(() => {
           const allActions = store.getActions();
 
