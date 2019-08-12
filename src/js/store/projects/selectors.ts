@@ -2,26 +2,26 @@ import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
-import { Product } from '@/store/products/reducer';
-import { selectProduct } from '@/store/products/selectors';
+import { Repository } from '@/store/repositories/reducer';
+import { selectRepository } from '@/store/repositories/selectors';
 import {
   Project,
-  ProjectsByProductState,
+  ProjectsByRepositoryState,
   ProjectsState,
 } from '@/store/projects/reducer';
 
 export const selectProjectState = (appState: AppState): ProjectsState =>
   appState.projects;
 
-export const selectProjectsByProduct = createSelector(
-  [selectProjectState, selectProduct],
+export const selectProjectsByRepository = createSelector(
+  [selectProjectState, selectRepository],
   (
     projects: ProjectsState,
-    product?: Product | null,
-  ): ProjectsByProductState | undefined => {
+    repository?: Repository | null,
+  ): ProjectsByRepositoryState | undefined => {
     /* istanbul ignore else */
-    if (product) {
-      return projects[product.id];
+    if (repository) {
+      return projects[repository.id];
     }
     return undefined;
   },
@@ -33,13 +33,13 @@ export const selectProjectSlug = (
 ) => params.projectSlug;
 
 export const selectProjectNotFound = createSelector(
-  [selectProjectsByProduct, selectProjectSlug],
+  [selectProjectsByRepository, selectProjectSlug],
   (projects, projectSlug): boolean =>
     Boolean(projectSlug && projects && projects.notFound.includes(projectSlug)),
 );
 
 export const selectProject = createSelector(
-  [selectProjectsByProduct, selectProjectSlug, selectProjectNotFound],
+  [selectProjectsByRepository, selectProjectSlug, selectProjectNotFound],
   (projects, projectSlug, notFound): Project | null | undefined => {
     if (!projectSlug || !projects) {
       return undefined;

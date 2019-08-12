@@ -1,0 +1,87 @@
+import { ObjectsAction } from '@/store/actions';
+import { RepositoriesAction } from '@/store/repositories/actions';
+import { LogoutAction } from '@/store/user/actions';
+import { OBJECT_TYPES } from '@/utils/constants';
+
+export interface Repository {
+  id: string;
+  name: string;
+  slug: string;
+  old_slugs: string[];
+  repo_url: string;
+  description: string;
+  is_managed: boolean;
+}
+export interface RepositoriesState {
+  repositories: Repository[];
+  next: string | null;
+  notFound: string[];
+}
+
+const defaultState = {
+  repositories: [],
+  next: null,
+  notFound: [],
+};
+
+const reducer = (
+  repositories: RepositoriesState = defaultState,
+  action: RepositoriesAction | ObjectsAction | LogoutAction,
+): RepositoriesState => {
+  switch (action.type) {
+    case 'USER_LOGGED_OUT':
+      return { ...defaultState };
+    case 'FETCH_OBJECTS_SUCCEEDED': {
+      const {
+        response: { results, next },
+        objectType,
+        reset,
+      } = action.payload;
+      if (objectType === OBJECT_TYPES.REPOSITORY) {
+        if (reset) {
+          return {
+            ...repositories,
+            repositories: results,
+            next,
+          };
+        }
+        // Store list of known repository IDs to filter out duplicates
+        const ids = repositories.repositories.map(p => p.id);
+        return {
+          ...repositories,
+          repositories: [
+            ...repositories.repositories,
+            ...results.filter(p => !ids.includes(p.id)),
+          ],
+          next,
+        };
+      }
+      return repositories;
+    }
+    case 'FETCH_OBJECT_SUCCEEDED': {
+      const {
+        object,
+        filters: { slug },
+        objectType,
+      } = action.payload;
+      if (objectType === OBJECT_TYPES.REPOSITORY) {
+        if (!object) {
+          return {
+            ...repositories,
+            notFound: [...repositories.notFound, slug],
+          };
+        }
+        if (!repositories.repositories.find(p => p.id === object.id)) {
+          return {
+            ...repositories,
+            repositories: [...repositories.repositories, object],
+          };
+        }
+      }
+      return repositories;
+    }
+  }
+  return repositories;
+};
+
+export default reducer;

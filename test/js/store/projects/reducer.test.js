@@ -14,12 +14,12 @@ describe('reducer', () => {
       slug: 'project-1',
       name: 'Project 1',
       description: 'This is a test project.',
-      product: 'product-1',
+      repository: 'repository-1',
     };
     const expected = {};
     const actual = reducer(
       {
-        'product-1': {
+        'repository-1': {
           projects: [project1],
           next: 'next-url',
           notFound: ['project-2'],
@@ -32,39 +32,44 @@ describe('reducer', () => {
   });
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
-    test('resets projects list for product if `reset: true`', () => {
+    test('resets projects list for repository if `reset: true`', () => {
       const project1 = {
         id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const project2 = {
         id: 'p2',
         slug: 'project-2',
         name: 'Project 2',
         description: 'This is another test project.',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const expected = {
-        'product-1': {
+        'repository-1': {
           projects: [project2],
           next: 'next-url',
           notFound: [],
           fetched: true,
         },
-        'product-2': { projects: [], next: null, notFound: [], fetched: false },
+        'repository-2': {
+          projects: [],
+          next: null,
+          notFound: [],
+          fetched: false,
+        },
       };
       const actual = reducer(
         {
-          'product-1': {
+          'repository-1': {
             projects: [project1],
             next: null,
             notFound: [],
             fetched: false,
           },
-          'product-2': {
+          'repository-2': {
             projects: [],
             next: null,
             notFound: [],
@@ -77,7 +82,7 @@ describe('reducer', () => {
             response: { results: [project2], next: 'next-url' },
             objectType: 'project',
             reset: true,
-            filters: { product: 'product-1' },
+            filters: { repository: 'repository-1' },
           },
         },
       );
@@ -85,16 +90,16 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
 
-    test('creates product-project data if not already known', () => {
+    test('creates repository-project data if not already known', () => {
       const project1 = {
         id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const expected = {
-        'product-1': {
+        'repository-1': {
           projects: [project1],
           next: 'next-url',
           notFound: [],
@@ -109,7 +114,7 @@ describe('reducer', () => {
             response: { results: [project1], next: 'next-url' },
             objectType: 'project',
             reset: true,
-            filters: { product: 'product-1' },
+            filters: { repository: 'repository-1' },
           },
         },
       );
@@ -122,7 +127,7 @@ describe('reducer', () => {
         id: 'project1',
         slug: 'project-1',
         name: 'Project 1',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const mockProjects = {
         notFound: [],
@@ -134,24 +139,24 @@ describe('reducer', () => {
         id: 'project2',
         slug: 'project-2',
         name: 'Project 2',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const expected = {
-        'product-1': {
+        'repository-1': {
           ...mockProjects,
           projects: [...mockProjects.projects, project2],
           fetched: true,
         },
       };
       const actual = reducer(
-        { 'product-1': mockProjects },
+        { 'repository-1': mockProjects },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
             response: { results: [project1, project2], next: null },
             objectType: 'project',
             reset: false,
-            filters: { product: 'product-1' },
+            filters: { repository: 'repository-1' },
           },
         },
       );
@@ -164,7 +169,7 @@ describe('reducer', () => {
         id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const expected = {};
       const actual = reducer(expected, {
@@ -173,7 +178,7 @@ describe('reducer', () => {
           response: { results: [project], next: null },
           objectType: 'other-object',
           reset: true,
-          filters: { product: 'product-1' },
+          filters: { repository: 'repository-1' },
         },
       });
 
@@ -188,10 +193,10 @@ describe('reducer', () => {
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const expected = {
-        'product-1': {
+        'repository-1': {
           projects: [project1],
           next: null,
           notFound: [],
@@ -218,14 +223,14 @@ describe('reducer', () => {
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const expected = {
-        'product-1': { projects: [project1], next: null, notFound: [] },
+        'repository-1': { projects: [project1], next: null, notFound: [] },
       };
       const actual = reducer(
         {
-          'product-1': { projects: [project1], next: null, notFound: [] },
+          'repository-1': { projects: [project1], next: null, notFound: [] },
         },
         {
           type: 'CREATE_OBJECT_SUCCEEDED',
@@ -244,7 +249,7 @@ describe('reducer', () => {
         id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
-        product: 'product-1',
+        repository: 'repository-1',
       };
       const expected = {};
       const actual = reducer(expected, {
@@ -265,26 +270,30 @@ describe('reducer', () => {
         id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
-        product: 'product1',
+        repository: 'repository1',
       };
       const project2 = {
         id: 'p2',
         slug: 'project-2',
         name: 'Project 2',
-        product: 'product1',
+        repository: 'repository1',
       };
       const expected = {
-        product1: { projects: [project1, project2], next: null, notFound: [] },
+        repository1: {
+          projects: [project1, project2],
+          next: null,
+          notFound: [],
+        },
       };
       const actual = reducer(
         {
-          product1: { projects: [project1], next: null, notFound: [] },
+          repository1: { projects: [project1], next: null, notFound: [] },
         },
         {
           type: 'FETCH_OBJECT_SUCCEEDED',
           payload: {
             object: project2,
-            filters: { product: 'product1', slug: 'project-2' },
+            filters: { repository: 'repository1', slug: 'project-2' },
             objectType: 'project',
           },
         },
@@ -295,7 +304,7 @@ describe('reducer', () => {
 
     test('stores id of missing project', () => {
       const expected = {
-        product1: {
+        repository1: {
           projects: [],
           next: null,
           notFound: ['project-2'],
@@ -308,7 +317,7 @@ describe('reducer', () => {
           type: 'FETCH_OBJECT_SUCCEEDED',
           payload: {
             object: null,
-            filters: { product: 'product1', slug: 'project-2' },
+            filters: { repository: 'repository1', slug: 'project-2' },
             objectType: 'project',
           },
         },
@@ -322,16 +331,16 @@ describe('reducer', () => {
         id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
-        product: 'product1',
+        repository: 'repository1',
       };
       const expected = {
-        product1: { projects: [project1], next: null, notFound: [] },
+        repository1: { projects: [project1], next: null, notFound: [] },
       };
       const actual = reducer(expected, {
         type: 'FETCH_OBJECT_SUCCEEDED',
         payload: {
           object: project1,
-          filters: { product: 'product1', slug: 'project-1' },
+          filters: { repository: 'repository1', slug: 'project-1' },
           objectType: 'project',
         },
       });
@@ -346,7 +355,7 @@ describe('reducer', () => {
         {
           type: 'FETCH_OBJECT_SUCCEEDED',
           payload: {
-            objectType: 'product',
+            objectType: 'repository',
             filters: {},
           },
         },

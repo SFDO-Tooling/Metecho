@@ -9,9 +9,9 @@ describe('fetchObjects with `reset: true`', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.product_list();
+    url = window.api_urls.repository_list();
     objectPayload = {
-      objectType: 'product',
+      objectType: 'repository',
       url,
       reset: true,
       filters: {},
@@ -19,16 +19,16 @@ describe('fetchObjects with `reset: true`', () => {
   });
 
   describe('success', () => {
-    test('GETs products from api', () => {
+    test('GETs repositories from api', () => {
       const store = storeWithThunk({});
-      const product = {
+      const repository = {
         id: 'p1',
-        name: 'Product 1',
-        slug: 'product-1',
-        description: 'This is a test product.',
+        name: 'Repository 1',
+        slug: 'repository-1',
+        description: 'This is a test repository.',
         repo_url: 'http://www.test.test',
       };
-      const response = { next: null, results: [product] };
+      const response = { next: null, results: [repository] };
       fetchMock.getOnce(url, response);
       const started = {
         type: 'FETCH_OBJECTS_STARTED',
@@ -41,7 +41,9 @@ describe('fetchObjects with `reset: true`', () => {
 
       expect.assertions(1);
       return store
-        .dispatch(actions.fetchObjects({ objectType: 'product', reset: true }))
+        .dispatch(
+          actions.fetchObjects({ objectType: 'repository', reset: true }),
+        )
         .then(() => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
@@ -66,7 +68,9 @@ describe('fetchObjects with `reset: true`', () => {
 
       expect.assertions(5);
       return store
-        .dispatch(actions.fetchObjects({ objectType: 'product', reset: true }))
+        .dispatch(
+          actions.fetchObjects({ objectType: 'repository', reset: true }),
+        )
         .catch(() => {
           const allActions = store.getActions();
 
@@ -86,11 +90,11 @@ describe('fetchObjects with `reset: false`', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    const baseUrl = window.api_urls.product_list();
+    const baseUrl = window.api_urls.repository_list();
     const filters = { page: 2 };
     url = addUrlParams(baseUrl, filters);
     objectPayload = {
-      objectType: 'product',
+      objectType: 'repository',
       url,
       reset: false,
       filters: {},
@@ -98,12 +102,14 @@ describe('fetchObjects with `reset: false`', () => {
   });
 
   describe('success', () => {
-    test('GETs next products page', () => {
+    test('GETs next repositories page', () => {
       const store = storeWithThunk({});
-      const nextProducts = [{ id: 'p2', name: 'Product 2', slug: 'product-2' }];
+      const nextRepositories = [
+        { id: 'p2', name: 'Repository 2', slug: 'repository-2' },
+      ];
       const mockResponse = {
         next: null,
-        results: nextProducts,
+        results: nextRepositories,
       };
       fetchMock.getOnce(url, mockResponse);
       const started = {
@@ -117,7 +123,7 @@ describe('fetchObjects with `reset: false`', () => {
 
       expect.assertions(1);
       return store
-        .dispatch(actions.fetchObjects({ url, objectType: 'product' }))
+        .dispatch(actions.fetchObjects({ url, objectType: 'repository' }))
         .then(() => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
@@ -139,7 +145,7 @@ describe('fetchObjects with `reset: false`', () => {
 
       expect.assertions(5);
       return store
-        .dispatch(actions.fetchObjects({ url, objectType: 'product' }))
+        .dispatch(actions.fetchObjects({ url, objectType: 'repository' }))
         .catch(() => {
           const allActions = store.getActions();
 
@@ -159,39 +165,43 @@ describe('fetchObject', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.product_list();
+    url = window.api_urls.repository_list();
     objectPayload = {
-      objectType: 'product',
+      objectType: 'repository',
       url,
     };
   });
 
   describe('success', () => {
-    test('GETs product from api', () => {
+    test('GETs repository from api', () => {
       const store = storeWithThunk({});
-      const filters = { slug: 'product-1' };
-      const product = { id: 'p1', name: 'Product 1', slug: 'product-1' };
-      fetchMock.getOnce(addUrlParams(url, filters), { results: [product] });
+      const filters = { slug: 'repository-1' };
+      const repository = {
+        id: 'p1',
+        name: 'Repository 1',
+        slug: 'repository-1',
+      };
+      fetchMock.getOnce(addUrlParams(url, filters), { results: [repository] });
       const started = {
         type: 'FETCH_OBJECT_STARTED',
         payload: { filters, ...objectPayload },
       };
       const succeeded = {
         type: 'FETCH_OBJECT_SUCCEEDED',
-        payload: { filters, object: product, ...objectPayload },
+        payload: { filters, object: repository, ...objectPayload },
       };
 
       expect.assertions(1);
       return store
-        .dispatch(actions.fetchObject({ objectType: 'product', filters }))
+        .dispatch(actions.fetchObject({ objectType: 'repository', filters }))
         .then(() => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
     });
 
-    test('stores null if no product returned from api', () => {
+    test('stores null if no repository returned from api', () => {
       const store = storeWithThunk({});
-      const filters = { slug: 'product-1' };
+      const filters = { slug: 'repository-1' };
       fetchMock.getOnce(addUrlParams(url, filters), 404);
       const started = {
         type: 'FETCH_OBJECT_STARTED',
@@ -204,7 +214,7 @@ describe('fetchObject', () => {
 
       expect.assertions(1);
       return store
-        .dispatch(actions.fetchObject({ objectType: 'product', filters }))
+        .dispatch(actions.fetchObject({ objectType: 'repository', filters }))
         .then(() => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
@@ -229,7 +239,7 @@ describe('fetchObject', () => {
 
       expect.assertions(5);
       return store
-        .dispatch(actions.fetchObject({ objectType: 'product' }))
+        .dispatch(actions.fetchObject({ objectType: 'repository' }))
         .catch(() => {
           const allActions = store.getActions();
 

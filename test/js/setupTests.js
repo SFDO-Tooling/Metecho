@@ -20,8 +20,8 @@ beforeAll(() => {
     salesforce_test_login: () => '/accounts/salesforce-test/login/',
     user: () => '/api/user/',
     user_refresh: () => '/api/user/refresh/',
-    product_list: () => '/api/products/',
-    product_detail: slug => `/api/products/${slug}/`,
+    repository_list: () => '/api/repositories/',
+    repository_detail: slug => `/api/repositories/${slug}/`,
     project_list: () => '/api/projects/',
   };
   window.GLOBALS = {};

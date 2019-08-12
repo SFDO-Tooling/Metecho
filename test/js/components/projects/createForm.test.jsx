@@ -22,27 +22,27 @@ afterEach(() => {
   addError.mockClear();
 });
 
-const defaultProduct = {
+const defaultRepository = {
   id: 'p1',
-  name: 'Product 1',
-  slug: 'product-1',
+  name: 'Repository 1',
+  slug: 'repository-1',
   old_slugs: [],
-  description: 'This is a test product.',
+  description: 'This is a test repository.',
   repo_url: 'https://www.github.com/test/test-repo',
 };
 
 describe('<ProjectForm/>', () => {
   const setup = options => {
     const defaults = {
-      product: defaultProduct,
+      repository: defaultRepository,
       startOpen: true,
     };
     const opts = Object.assign({}, defaults, options);
-    const { product, startOpen } = opts;
+    const { repository, startOpen } = opts;
     const context = {};
     const { getByText, getByLabelText, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectForm product={product} startOpen={startOpen} />
+        <ProjectForm repository={repository} startOpen={startOpen} />
       </StaticRouter>,
       {},
       storeWithThunk,
@@ -86,7 +86,7 @@ describe('<ProjectForm/>', () => {
         data: {
           name: 'Name of Project',
           description: 'This is the description',
-          product: 'p1',
+          repository: 'p1',
         },
       });
     });
@@ -102,7 +102,7 @@ describe('<ProjectForm/>', () => {
                 id: 'project1',
                 slug: 'name-of-project',
                 name: 'Name of Project',
-                product: 'p1',
+                repository: 'p1',
               },
             },
           }),
@@ -118,7 +118,7 @@ describe('<ProjectForm/>', () => {
 
         expect(context.action).toEqual('PUSH');
         expect(context.url).toEqual(
-          routes.project_detail('product-1', 'name-of-project'),
+          routes.project_detail('repository-1', 'name-of-project'),
         );
       });
     });

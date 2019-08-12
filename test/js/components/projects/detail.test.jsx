@@ -18,18 +18,18 @@ afterEach(() => {
 });
 
 const defaultState = {
-  products: {
-    products: [
+  repositories: {
+    repositories: [
       {
         id: 'p1',
-        name: 'Product 1',
-        slug: 'product-1',
+        name: 'Repository 1',
+        slug: 'repository-1',
         old_slugs: [],
-        description: 'This is a test product.',
+        description: 'This is a test repository.',
         repo_url: 'https://www.github.com/test/test-repo',
       },
     ],
-    notFound: ['different-product'],
+    notFound: ['different-repository'],
     next: null,
   },
   projects: {
@@ -39,7 +39,7 @@ const defaultState = {
           id: 'project1',
           slug: 'project-1',
           name: 'Project 1',
-          product: 'p1',
+          repository: 'p1',
           description: 'Project Description',
           old_slugs: ['old-slug'],
         },
@@ -67,15 +67,15 @@ describe('<ProjectDetail/>', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
-      productSlug: 'product-1',
+      repositorySlug: 'repository-1',
       projectSlug: 'project-1',
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, productSlug, projectSlug } = opts;
+    const { initialState, repositorySlug, projectSlug } = opts;
     const context = {};
     const { getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectDetail match={{ params: { productSlug, projectSlug } }} />
+        <ProjectDetail match={{ params: { repositorySlug, projectSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
@@ -110,20 +110,20 @@ describe('<ProjectDetail/>', () => {
 
       expect(queryByText('Project 1')).toBeNull();
       expect(fetchObject).toHaveBeenCalledWith({
-        filters: { product: 'p1', slug: 'other-project' },
+        filters: { repository: 'p1', slug: 'other-project' },
         objectType: 'project',
       });
     });
   });
 
-  describe('product does not exist', () => {
-    test('renders <ProductNotFound />', () => {
+  describe('repository does not exist', () => {
+    test('renders <RepositoryNotFound />', () => {
       const { getByText, queryByText } = setup({
-        productSlug: 'different-product',
+        repositorySlug: 'different-repository',
       });
 
       expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('list of all products')).toBeVisible();
+      expect(getByText('list of all repositories')).toBeVisible();
     });
   });
 
@@ -144,7 +144,7 @@ describe('<ProjectDetail/>', () => {
 
       expect(context.action).toEqual('REPLACE');
       expect(context.url).toEqual(
-        routes.project_detail('product-1', 'project-1'),
+        routes.project_detail('repository-1', 'project-1'),
       );
     });
   });

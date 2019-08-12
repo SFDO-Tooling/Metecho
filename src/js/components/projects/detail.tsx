@@ -7,34 +7,34 @@ import React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Link, Redirect, RouteComponentProps } from 'react-router-dom';
 
-import ProductNotFound from '@/components/products/product404';
+import RepositoryNotFound from '@/components/repositories/repository404';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import {
-  getProductLoadingOrNotFound,
+  getRepositoryLoadingOrNotFound,
   getProjectLoadingOrNotFound,
   RepoLink,
-  useFetchProductIfMissing,
+  useFetchRepositoryIfMissing,
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
-  const { product, productSlug } = useFetchProductIfMissing(props);
-  const { project, projectSlug } = useFetchProjectIfMissing(product, props);
+  const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
+  const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
 
-  const productLoadingOrNotFound = getProductLoadingOrNotFound({
-    product,
-    productSlug,
+  const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
+    repository,
+    repositorySlug,
   });
-  if (productLoadingOrNotFound !== false) {
-    return productLoadingOrNotFound;
+  if (repositoryLoadingOrNotFound !== false) {
+    return repositoryLoadingOrNotFound;
   }
 
   const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
-    product,
+    repository,
     project,
     projectSlug,
   });
@@ -44,16 +44,18 @@ const ProjectDetail = (props: RouteComponentProps) => {
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!product || !project) {
-    return <ProductNotFound />;
+  if (!repository || !project) {
+    return <RepositoryNotFound />;
   }
 
   if (
-    (productSlug && productSlug !== product.slug) ||
+    (repositorySlug && repositorySlug !== repository.slug) ||
     (projectSlug && projectSlug !== project.slug)
   ) {
-    // Redirect to most recent product slug
-    return <Redirect to={routes.project_detail(product.slug, project.slug)} />;
+    // Redirect to most recent repository slug
+    return (
+      <Redirect to={routes.project_detail(repository.slug, project.slug)} />
+    );
   }
 
   const projectDescriptionHasTitle =
@@ -63,13 +65,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
 
   return (
     <DocumentTitle
-      title={`${project.name} | ${product.name} | ${i18n.t('MetaShare')}`}
+      title={`${project.name} | ${repository.name} | ${i18n.t('MetaShare')}`}
     >
       <>
         <PageHeader
           className="page-header slds-p-around_x-large"
           title={project.name}
-          info={<RepoLink url={product.repo_url} shortenGithub />}
+          info={<RepoLink url={repository.repo_url} shortenGithub />}
         />
         <div
           className="slds-p-horizontal_x-large
@@ -81,8 +83,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
               <Link to={routes.home()} key="home">
                 {i18n.t('Home')}
               </Link>,
-              <Link to={routes.product_detail(product.slug)} key="home">
-                {product.name}
+              <Link to={routes.repository_detail(repository.slug)} key="home">
+                {repository.name}
               </Link>,
               <div className="slds-p-horizontal_x-small" key={project.slug}>
                 {project.name}
@@ -122,7 +124,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 </h2>
                 <TaskForm project={project} startOpen={!tasks.length} />
                 <TaskTable
-                  productSlug={product.slug}
+                  repositorySlug={repository.slug}
                   projectSlug={project.slug}
                   tasks={tasks}
                 />

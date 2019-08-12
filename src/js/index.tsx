@@ -27,8 +27,8 @@ import FourOhFour from '@/components/404';
 import ErrorBoundary from '@/components/error';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
-import ProductDetail from '@/components/products/detail';
-import ProductList from '@/components/products/list';
+import RepositoryDetail from '@/components/repositories/detail';
+import RepositoryList from '@/components/repositories/list';
 import ProjectDetail from '@/components/projects/detail';
 import AuthError from '@/components/user/authError';
 import Login from '@/components/user/login';
@@ -68,17 +68,17 @@ const App = withRouter(
                   <Route
                     exact
                     path={routePatterns.home()}
-                    render={() => <Redirect to={routes.product_list()} />}
+                    render={() => <Redirect to={routes.repository_list()} />}
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.product_list()}
-                    component={ProductList}
+                    path={routePatterns.repository_list()}
+                    component={RepositoryList}
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.product_detail()}
-                    component={ProductDetail}
+                    path={routePatterns.repository_detail()}
+                    component={RepositoryDetail}
                   />
                   <PrivateRoute
                     exact
@@ -179,10 +179,10 @@ initializeI18n((i18nError?: string) => {
       );
     };
 
-    // If logged in, fetch products before rendering App
+    // If logged in, fetch repositories before rendering App
     if (user) {
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-        fetchObjects({ objectType: OBJECT_TYPES.PRODUCT, reset: true }),
+        fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
       ).finally(renderApp);
     } else {
       renderApp();

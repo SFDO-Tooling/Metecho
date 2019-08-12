@@ -8,16 +8,16 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
 import { useForm } from '@/components/utils';
-import { Product } from '@/store/products/reducer';
+import { Repository } from '@/store/repositories/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 interface Props extends RouteComponentProps {
-  product: Product;
+  repository: Repository;
   startOpen?: boolean;
 }
 
-const ProjectForm = ({ product, startOpen = false, history }: Props) => {
+const ProjectForm = ({ repository, startOpen = false, history }: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -38,7 +38,7 @@ const ProjectForm = ({ product, startOpen = false, history }: Props) => {
       object &&
       object.slug
     ) {
-      const url = routes.project_detail(product.slug, object.slug);
+      const url = routes.project_detail(repository.slug, object.slug);
       history.push(url);
     }
   };
@@ -52,7 +52,7 @@ const ProjectForm = ({ product, startOpen = false, history }: Props) => {
   } = useForm({
     fields: { name: '', description: '' },
     objectType: OBJECT_TYPES.PROJECT,
-    additionalData: { product: product.id },
+    additionalData: { repository: repository.id },
     onSuccess,
   });
 
