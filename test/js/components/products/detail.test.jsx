@@ -76,6 +76,26 @@ describe('<ProductDetail />', () => {
     expect(getByTitle('Product 1')).toBeVisible();
     expect(getByText('This is a test product.')).toBeVisible();
     expect(getByText('Project 1')).toBeVisible();
+    expect(getByText('Projects for Product 1')).toBeVisible();
+  });
+
+  test('renders with form expanded if no projects', () => {
+    const { getByText, queryByText } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          p1: {
+            projects: [],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+      },
+    });
+
+    expect(getByText('Create a Project for Product 1')).toBeVisible();
+    expect(queryByText('Projects for Product 1')).toBeNull();
   });
 
   describe('product not found', () => {

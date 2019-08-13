@@ -17,6 +17,7 @@ export interface ProjectsByProductState {
   notFound: string[];
   fetched: boolean;
 }
+
 export interface ProjectsState {
   [key: string]: ProjectsByProductState;
 }
@@ -87,6 +88,36 @@ const reducer = (
               ...product,
               // Prepend new project (projects are ordered by `-created_at`)
               projects: [object, ...product.projects],
+            },
+          };
+        }
+      }
+      return projects;
+    }
+    case 'FETCH_OBJECT_SUCCEEDED': {
+      const {
+        object,
+        filters: { product, slug },
+        objectType,
+      } = action.payload;
+      if (objectType === OBJECT_TYPES.PROJECT && product) {
+        const productProjects = projects[product] || { ...defaultState };
+        if (!object) {
+          return {
+            ...projects,
+            [product]: {
+              ...productProjects,
+              notFound: [...productProjects.notFound, slug],
+            },
+          };
+        }
+        // Do not store if we already know about this project
+        if (!productProjects.projects.filter(p => object.id === p.id).length) {
+          return {
+            ...projects,
+            [object.product]: {
+              ...productProjects,
+              projects: [...productProjects.projects, object],
             },
           };
         }

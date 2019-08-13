@@ -2,7 +2,25 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..serializers import ProductSerializer, ProjectSerializer
+from ..serializers import (
+    HashidPrimaryKeyRelatedField,
+    ProductSerializer,
+    ProjectSerializer,
+)
+
+
+class TestHashidPrimaryKeyRelatedField:
+    def test_with_pk_field(self):
+        pk_field = MagicMock()
+        pk_field.to_representation.return_value = 1
+        field = HashidPrimaryKeyRelatedField(read_only=True, pk_field=pk_field)
+        val = MagicMock(pk=1)
+        assert field.to_representation(val) == 1
+
+    def test_without_pk_field(self):
+        field = HashidPrimaryKeyRelatedField(read_only=True)
+        val = MagicMock(pk=1)
+        assert field.to_representation(val) == "1"
 
 
 @pytest.mark.django_db
@@ -97,10 +115,7 @@ class TestProjectSerializer:
         project = project_factory(product=product, name="Duplicate me")
         serializer = ProjectSerializer(
             instance=project,
-            data={
-                "product": str(product.id),
-                "name": "duplicate me",
-                "description": "Blorp",
-            },
+            data={"product": str(product.id), "description": "Blorp"},
+            partial=True,
         )
-        assert serializer.is_valid()
+        assert serializer.is_valid(), serializer.errors

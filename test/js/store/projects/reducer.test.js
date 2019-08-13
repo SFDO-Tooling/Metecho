@@ -258,4 +258,101 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
   });
+
+  describe('FETCH_OBJECT_SUCCEEDED', () => {
+    test('adds project', () => {
+      const project1 = {
+        id: 'p1',
+        slug: 'project-1',
+        name: 'Project 1',
+        product: 'product1',
+      };
+      const project2 = {
+        id: 'p2',
+        slug: 'project-2',
+        name: 'Project 2',
+        product: 'product1',
+      };
+      const expected = {
+        product1: { projects: [project1, project2], next: null, notFound: [] },
+      };
+      const actual = reducer(
+        {
+          product1: { projects: [project1], next: null, notFound: [] },
+        },
+        {
+          type: 'FETCH_OBJECT_SUCCEEDED',
+          payload: {
+            object: project2,
+            filters: { product: 'product1', slug: 'project-2' },
+            objectType: 'project',
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('stores id of missing project', () => {
+      const expected = {
+        product1: {
+          projects: [],
+          next: null,
+          notFound: ['project-2'],
+          fetched: false,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'FETCH_OBJECT_SUCCEEDED',
+          payload: {
+            object: null,
+            filters: { product: 'product1', slug: 'project-2' },
+            objectType: 'project',
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores duplicate project', () => {
+      const project1 = {
+        id: 'p1',
+        slug: 'project-1',
+        name: 'Project 1',
+        product: 'product1',
+      };
+      const expected = {
+        product1: { projects: [project1], next: null, notFound: [] },
+      };
+      const actual = reducer(expected, {
+        type: 'FETCH_OBJECT_SUCCEEDED',
+        payload: {
+          object: project1,
+          filters: { product: 'product1', slug: 'project-1' },
+          objectType: 'project',
+        },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if objectType !== "project"', () => {
+      const expected = {};
+      const actual = reducer(
+        {},
+        {
+          type: 'FETCH_OBJECT_SUCCEEDED',
+          payload: {
+            objectType: 'product',
+            filters: {},
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
 });

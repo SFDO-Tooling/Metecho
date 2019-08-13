@@ -5,10 +5,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import ProductFilter, ProjectFilter
-from .models import Product, Project
+from .filters import ProductFilter, ProjectFilter, TaskFilter
+from .models import Product, Project, Task
 from .paginators import CustomPaginator
-from .serializers import FullUserSerializer, ProductSerializer, ProjectSerializer
+from .serializers import (
+    FullUserSerializer,
+    MinimalUserSerializer,
+    ProductSerializer,
+    ProjectSerializer,
+    TaskSerializer,
+)
 
 User = get_user_model()
 
@@ -22,6 +28,10 @@ class CurrentUserObjectMixin:
 
 
 class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
+    """
+    Shows the current user.
+    """
+
     model = User
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
@@ -35,6 +45,13 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
         user = self.get_object()
         user.refresh_repositories()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = MinimalUserSerializer
+    pagination_class = CustomPaginator
+    queryset = User.objects.all()
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -57,3 +74,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TaskSerializer
+    queryset = Task.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TaskFilter

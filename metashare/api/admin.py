@@ -1,6 +1,15 @@
 from django.contrib import admin
 
-from .models import GitHubRepository, Product, ProductSlug, Project, ProjectSlug, User
+from .models import (
+    GitHubRepository,
+    Product,
+    ProductSlug,
+    Project,
+    ProjectSlug,
+    Task,
+    TaskSlug,
+    User,
+)
 
 
 @admin.register(User)
@@ -31,4 +40,14 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectSlug)
 class ProjectSlugAdmin(admin.ModelAdmin):
+    list_display = ("slug", "parent")
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ("name", "project")
+
+
+@admin.register(TaskSlug)
+class TaskSlugAdmin(admin.ModelAdmin):
     list_display = ("slug", "parent")

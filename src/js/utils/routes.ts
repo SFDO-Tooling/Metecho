@@ -7,6 +7,8 @@ const routes = {
   product_detail: (productSlug: string) => `/products/${productSlug}`,
   project_detail: (productSlug: string, projectSlug: string) =>
     `/products/${productSlug}/${projectSlug}`,
+  task_detail: (productSlug: string, projectSlug: string, taskSlug: string) =>
+    `/products/${productSlug}/${projectSlug}/${taskSlug}`,
 };
 
 export const routePatterns = {
@@ -16,6 +18,7 @@ export const routePatterns = {
   product_list: () => '/products',
   product_detail: () => '/products/:productSlug',
   project_detail: () => '/products/:productSlug/:projectSlug',
+  task_detail: () => '/products/:productSlug/:projectSlug/:taskSlug',
 };
 
 export default routes;

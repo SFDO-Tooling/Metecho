@@ -1,16 +1,23 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import Errors from '@/components/apiErrors';
+import { removeError } from '@/store/errors/actions';
+
+import { renderWithRedux } from './../utils';
+
+jest.mock('@/store/errors/actions');
+
+removeError.mockReturnValue({ type: 'TEST' });
+
+afterEach(() => {
+  removeError.mockClear();
+});
 
 describe('<Errors />', () => {
-  const doRemoveError = jest.fn();
-
   const setup = () => {
     const errors = [{ id: 'err1', message: 'This is an error.' }];
-    const { getByText } = render(
-      <Errors errors={errors} doRemoveError={doRemoveError} />,
-    );
+    const { getByText } = renderWithRedux(<Errors />, { errors });
     return { getByText };
   };
 
@@ -23,11 +30,11 @@ describe('<Errors />', () => {
     expect(window.location.reload).toHaveBeenCalledTimes(1);
   });
 
-  test('calls doRemoveError on close click', () => {
+  test('calls removeError on close click', () => {
     const { getByText } = setup();
     fireEvent.click(getByText('Close'));
 
-    expect(doRemoveError).toHaveBeenCalledTimes(1);
-    expect(doRemoveError).toHaveBeenCalledWith('err1');
+    expect(removeError).toHaveBeenCalledTimes(1);
+    expect(removeError).toHaveBeenCalledWith('err1');
   });
 });

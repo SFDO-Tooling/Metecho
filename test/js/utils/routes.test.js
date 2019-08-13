@@ -11,6 +11,11 @@ describe('routes', () => {
       ['product-slug', 'project-slug'],
       '/products/product-slug/project-slug',
     ],
+    [
+      'task_detail',
+      ['product-slug', 'project-slug', 'task-slug'],
+      '/products/product-slug/project-slug/task-slug',
+    ],
   ])('%s returns path with args: %o', (name, args, expected) => {
     expect(routes[name](...args)).toBe(expected);
   });
@@ -24,6 +29,7 @@ describe('routePatterns', () => {
     ['product_list', '/products'],
     ['product_detail', '/products/:productSlug'],
     ['project_detail', '/products/:productSlug/:projectSlug'],
+    ['task_detail', '/products/:productSlug/:projectSlug/:taskSlug'],
   ])('%s returns path', (name, expected) => {
     expect(routePatterns[name]()).toBe(expected);
   });
