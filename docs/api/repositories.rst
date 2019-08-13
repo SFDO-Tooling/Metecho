@@ -1,6 +1,6 @@
-========
+============
 Repositories
-========
+============
 
 This allows list, retrieve, create, update, and delete of Repositories.
 

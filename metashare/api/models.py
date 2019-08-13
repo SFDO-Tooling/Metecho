@@ -117,6 +117,7 @@ class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.M
         return self.name
 
     class Meta:
+        verbose_name_plural = "repositories"
         ordering = ("name",)
 
 
