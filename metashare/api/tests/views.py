@@ -27,13 +27,13 @@ def test_user_refresh_view(client):
 
 
 @pytest.mark.django_db
-def test_product_view(client, product_factory, git_hub_repository_factory):
+def test_repository_view(client, repository_factory, git_hub_repository_factory):
     git_hub_repository_factory(
         user=client.user, url="https://example.com/test-repo.git"
     )
-    product = product_factory(repo_url="https://example.com/test-repo.git")
-    product_factory(repo_url="https://example.com/test-repo2.git")
-    response = client.get(reverse("product-list"))
+    repository = repository_factory(repo_url="https://example.com/test-repo.git")
+    repository_factory(repo_url="https://example.com/test-repo2.git")
+    response = client.get(reverse("repository-list"))
 
     assert response.status_code == 200
     assert response.json() == {
@@ -42,12 +42,12 @@ def test_product_view(client, product_factory, git_hub_repository_factory):
         "next": None,
         "results": [
             {
-                "id": str(product.id),
+                "id": str(repository.id),
                 "description": "",
                 "is_managed": False,
-                "name": str(product.name),
+                "name": str(repository.name),
                 "repo_url": "https://example.com/test-repo.git",
-                "slug": str(product.slug),
+                "slug": str(repository.slug),
                 "old_slugs": [],
             }
         ],

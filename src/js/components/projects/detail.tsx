@@ -10,29 +10,29 @@ import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import {
   DetailPageLayout,
-  getProductLoadingOrNotFound,
   getProjectLoadingOrNotFound,
-  useFetchProductIfMissing,
+  getRepositoryLoadingOrNotFound,
   useFetchProjectIfMissing,
+  useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
-  const { product, productSlug } = useFetchProductIfMissing(props);
-  const { project, projectSlug } = useFetchProjectIfMissing(product, props);
+  const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
+  const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
 
-  const productLoadingOrNotFound = getProductLoadingOrNotFound({
-    product,
-    productSlug,
+  const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
+    repository,
+    repositorySlug,
   });
-  if (productLoadingOrNotFound !== false) {
-    return productLoadingOrNotFound;
+  if (repositoryLoadingOrNotFound !== false) {
+    return repositoryLoadingOrNotFound;
   }
 
   const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
-    product,
+    repository,
     project,
     projectSlug,
   });
@@ -42,28 +42,33 @@ const ProjectDetail = (props: RouteComponentProps) => {
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!product || !project) {
+  if (!repository || !project) {
     return <FourOhFour />;
   }
 
   if (
-    (productSlug && productSlug !== product.slug) ||
+    (repositorySlug && repositorySlug !== repository.slug) ||
     (projectSlug && projectSlug !== project.slug)
   ) {
-    // Redirect to most recent product/project slug
-    return <Redirect to={routes.project_detail(product.slug, project.slug)} />;
+    // Redirect to most recent repository/project slug
+    return (
+      <Redirect to={routes.project_detail(repository.slug, project.slug)} />
+    );
   }
 
   return (
     <DocumentTitle
-      title={`${project.name} | ${product.name} | ${i18n.t('MetaShare')}`}
+      title={`${project.name} | ${repository.name} | ${i18n.t('MetaShare')}`}
     >
       <DetailPageLayout
         title={project.name}
         description={project.description}
-        repoUrl={product.repo_url}
+        repoUrl={repository.repo_url}
         breadcrumb={[
-          { name: product.name, url: routes.product_detail(product.slug) },
+          {
+            name: repository.name,
+            url: routes.repository_detail(repository.slug),
+          },
           { name: project.name },
         ]}
       >
@@ -88,7 +93,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
             </h2>
             <TaskForm project={project} startOpen={!tasks.length} />
             <TaskTable
-              productSlug={product.slug}
+              repositorySlug={repository.slug}
               projectSlug={project.slug}
               tasks={tasks}
             />

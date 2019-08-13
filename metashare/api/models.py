@@ -99,24 +99,25 @@ class User(mixins.HashIdMixin, AbstractUser):
         return None
 
 
-class ProductSlug(AbstractSlug):
+class RepositorySlug(AbstractSlug):
     parent = models.ForeignKey(
-        "Product", on_delete=models.PROTECT, related_name="slugs"
+        "Repository", on_delete=models.PROTECT, related_name="slugs"
     )
 
 
-class Product(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     name = models.CharField(max_length=50, unique=True)
     repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
 
-    slug_class = ProductSlug
+    slug_class = RepositorySlug
 
     def __str__(self):
         return self.name
 
     class Meta:
+        verbose_name_plural = "repositories"
         ordering = ("name",)
 
 
@@ -144,8 +145,8 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.SlugField(max_length=50)
 
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="projects"
+    repository = models.ForeignKey(
+        Repository, on_delete=models.PROTECT, related_name="projects"
     )
 
     slug_class = ProjectSlug
@@ -160,7 +161,7 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "product"), ("branch_name", "product"))
+        unique_together = (("name", "repository"), ("branch_name", "repository"))
 
 
 class TaskSlug(AbstractSlug):
@@ -192,6 +193,6 @@ def ensure_slug_handler(sender, *, created, instance, **kwargs):
         instance.ensure_slug()
 
 
-post_save.connect(ensure_slug_handler, sender=Product)
+post_save.connect(ensure_slug_handler, sender=Repository)
 post_save.connect(ensure_slug_handler, sender=Project)
 post_save.connect(ensure_slug_handler, sender=Task)

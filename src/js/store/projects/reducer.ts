@@ -4,14 +4,14 @@ import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Project {
   id: string;
-  product: string;
+  repository: string;
   name: string;
   slug: string;
   old_slugs: string[];
   description: string;
   branch_url: string;
 }
-export interface ProjectsByProductState {
+export interface ProjectsByRepositoryState {
   projects: Project[];
   next: string | null;
   notFound: string[];
@@ -19,7 +19,7 @@ export interface ProjectsByProductState {
 }
 
 export interface ProjectsState {
-  [key: string]: ProjectsByProductState;
+  [key: string]: ProjectsByRepositoryState;
 }
 
 const defaultState = {
@@ -41,15 +41,15 @@ const reducer = (
         response: { results, next },
         objectType,
         reset,
-        filters: { product },
+        filters: { repository },
       } = action.payload;
-      if (objectType === OBJECT_TYPES.PROJECT && product) {
-        const productProjects = projects[product] || { ...defaultState };
+      if (objectType === OBJECT_TYPES.PROJECT && repository) {
+        const repositoryProjects = projects[repository] || { ...defaultState };
         if (reset) {
           return {
             ...projects,
-            [product]: {
-              ...productProjects,
+            [repository]: {
+              ...repositoryProjects,
               projects: results,
               next,
               fetched: true,
@@ -57,13 +57,13 @@ const reducer = (
           };
         }
         // Store list of known project IDs to filter out duplicates
-        const ids = productProjects.projects.map(p => p.id);
+        const ids = repositoryProjects.projects.map(p => p.id);
         return {
           ...projects,
-          [product]: {
-            ...productProjects,
+          [repository]: {
+            ...repositoryProjects,
             projects: [
-              ...productProjects.projects,
+              ...repositoryProjects.projects,
               ...results.filter(p => !ids.includes(p.id)),
             ],
             next,
@@ -79,15 +79,15 @@ const reducer = (
         objectType,
       }: { object: Project; objectType: ObjectTypes } = action.payload;
       if (objectType === OBJECT_TYPES.PROJECT && object) {
-        const product = projects[object.product] || { ...defaultState };
+        const repository = projects[object.repository] || { ...defaultState };
         // Do not store if (somehow) we already know about this project
-        if (!product.projects.filter(p => object.id === p.id).length) {
+        if (!repository.projects.filter(p => object.id === p.id).length) {
           return {
             ...projects,
-            [object.product]: {
-              ...product,
+            [object.repository]: {
+              ...repository,
               // Prepend new project (projects are ordered by `-created_at`)
-              projects: [object, ...product.projects],
+              projects: [object, ...repository.projects],
             },
           };
         }
@@ -97,27 +97,29 @@ const reducer = (
     case 'FETCH_OBJECT_SUCCEEDED': {
       const {
         object,
-        filters: { product, slug },
+        filters: { repository, slug },
         objectType,
       } = action.payload;
-      if (objectType === OBJECT_TYPES.PROJECT && product) {
-        const productProjects = projects[product] || { ...defaultState };
+      if (objectType === OBJECT_TYPES.PROJECT && repository) {
+        const repositoryProjects = projects[repository] || { ...defaultState };
         if (!object) {
           return {
             ...projects,
-            [product]: {
-              ...productProjects,
-              notFound: [...productProjects.notFound, slug],
+            [repository]: {
+              ...repositoryProjects,
+              notFound: [...repositoryProjects.notFound, slug],
             },
           };
         }
         // Do not store if we already know about this project
-        if (!productProjects.projects.filter(p => object.id === p.id).length) {
+        if (
+          !repositoryProjects.projects.filter(p => object.id === p.id).length
+        ) {
           return {
             ...projects,
-            [object.product]: {
-              ...productProjects,
-              projects: [...productProjects.projects, object],
+            [object.repository]: {
+              ...repositoryProjects,
+              projects: [...repositoryProjects.projects, object],
             },
           };
         }

@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import ProductDetail from '@/components/products/detail';
+import RepoDetail from '@/components/repositories/detail';
 import { fetchObject, fetchObjects } from '@/store/actions';
 import routes from '@/utils/routes';
 
@@ -19,28 +19,28 @@ afterEach(() => {
 });
 
 const defaultState = {
-  products: {
-    products: [
+  repositories: {
+    repositories: [
       {
-        id: 'p1',
-        name: 'Product 1',
-        slug: 'product-1',
+        id: 'r1',
+        name: 'Repository 1',
+        slug: 'repository-1',
         old_slugs: ['old-slug'],
-        description: 'This is a test product.',
+        description: 'This is a test repository.',
         repo_url: 'https://www.github.com/test/test-repo',
       },
     ],
-    notFound: ['yet-another-product'],
+    notFound: ['yet-another-repository'],
     next: null,
   },
   projects: {
-    p1: {
+    r1: {
       projects: [
         {
           id: 'project1',
           slug: 'project-1',
           name: 'Project 1',
-          product: 'p1',
+          repository: 'r1',
           description: 'Project Description',
         },
       ],
@@ -51,18 +51,18 @@ const defaultState = {
   },
 };
 
-describe('<ProductDetail />', () => {
+describe('<RepoDetail />', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
-      productSlug: 'product-1',
+      repositorySlug: 'repository-1',
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, productSlug } = opts;
+    const { initialState, repositorySlug } = opts;
     const context = {};
     const { getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
-        <ProductDetail match={{ params: { productSlug } }} />
+        <RepoDetail match={{ params: { repositorySlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
@@ -70,13 +70,13 @@ describe('<ProductDetail />', () => {
     return { getByText, getByTitle, queryByText, context };
   };
 
-  test('renders product detail and projects list', () => {
+  test('renders repository detail and projects list', () => {
     const { getByText, getByTitle } = setup();
 
-    expect(getByTitle('Product 1')).toBeVisible();
-    expect(getByText('This is a test product.')).toBeVisible();
+    expect(getByTitle('Repository 1')).toBeVisible();
+    expect(getByText('This is a test repository.')).toBeVisible();
     expect(getByText('Project 1')).toBeVisible();
-    expect(getByText('Projects for Product 1')).toBeVisible();
+    expect(getByText('Projects for Repository 1')).toBeVisible();
   });
 
   test('renders with form expanded if no projects', () => {
@@ -84,7 +84,7 @@ describe('<ProductDetail />', () => {
       initialState: {
         ...defaultState,
         projects: {
-          p1: {
+          r1: {
             projects: [],
             next: null,
             notFound: [],
@@ -94,48 +94,48 @@ describe('<ProductDetail />', () => {
       },
     });
 
-    expect(getByText('Create a Project for Product 1')).toBeVisible();
-    expect(queryByText('Projects for Product 1')).toBeNull();
+    expect(getByText('Create a Project for Repository 1')).toBeVisible();
+    expect(queryByText('Projects for Repository 1')).toBeNull();
   });
 
-  describe('product not found', () => {
-    test('fetches product from API', () => {
-      const { queryByText } = setup({ productSlug: 'other-product' });
+  describe('repository not found', () => {
+    test('fetches repository from API', () => {
+      const { queryByText } = setup({ repositorySlug: 'other-repository' });
 
-      expect(queryByText('Product 1')).toBeNull();
+      expect(queryByText('Repository 1')).toBeNull();
       expect(fetchObject).toHaveBeenCalledWith({
-        filters: { slug: 'other-product' },
-        objectType: 'product',
+        filters: { slug: 'other-repository' },
+        objectType: 'repository',
       });
     });
   });
 
-  describe('product does not exist', () => {
-    test('renders <ProductNotFound />', () => {
+  describe('repository does not exist', () => {
+    test('renders <RepositoryNotFound />', () => {
       const { getByText, queryByText } = setup({
-        productSlug: 'yet-another-product',
+        repositorySlug: 'yet-another-repository',
       });
 
-      expect(queryByText('Product 1')).toBeNull();
-      expect(getByText('list of all products')).toBeVisible();
+      expect(queryByText('Repository 1')).toBeNull();
+      expect(getByText('list of all repositories')).toBeVisible();
     });
   });
 
-  describe('old product slug', () => {
-    test('redirects to product_detail with new slug', () => {
-      const { context } = setup({ productSlug: 'old-slug' });
+  describe('old repository slug', () => {
+    test('redirects to repository_detail with new slug', () => {
+      const { context } = setup({ repositorySlug: 'old-slug' });
 
       expect(context.action).toEqual('REPLACE');
-      expect(context.url).toEqual(routes.product_detail('product-1'));
+      expect(context.url).toEqual(routes.repository_detail('repository-1'));
     });
   });
 
-  describe('no product slug', () => {
-    test('renders <ProductNotFound />', () => {
-      const { getByText, queryByText } = setup({ productSlug: '' });
+  describe('no repository slug', () => {
+    test('renders <RepositoryNotFound />', () => {
+      const { getByText, queryByText } = setup({ repositorySlug: '' });
 
-      expect(queryByText('Product 1')).toBeNull();
-      expect(getByText('list of all products')).toBeVisible();
+      expect(queryByText('Repository 1')).toBeNull();
+      expect(getByText('list of all repositories')).toBeVisible();
     });
   });
 
@@ -145,7 +145,7 @@ describe('<ProductDetail />', () => {
         initialState: {
           ...defaultState,
           projects: {
-            p1: {
+            r1: {
               projects: [],
               next: null,
               notFound: [],
@@ -155,9 +155,9 @@ describe('<ProductDetail />', () => {
         },
       });
 
-      expect(queryByText('Projects for Product 1')).toBeNull();
+      expect(queryByText('Projects for Repository 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { product: 'p1' },
+        filters: { repository: 'r1' },
         objectType: 'project',
         reset: true,
       });
@@ -170,15 +170,15 @@ describe('<ProductDetail />', () => {
         initialState: {
           ...defaultState,
           projects: {
-            p1: {
+            r1: {
               projects: [
                 {
                   branch_url: 'branch-url',
-                  description: 'product description',
+                  description: 'repository description',
                   id: 'project1',
                   name: 'Project 1',
                   old_slugs: [],
-                  product: 'p1',
+                  repository: 'r1',
                   slug: 'project-1',
                 },
               ],
@@ -196,7 +196,7 @@ describe('<ProductDetail />', () => {
       fireEvent.click(btn);
 
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { product: 'p1' },
+        filters: { repository: 'r1' },
         objectType: 'project',
         url: 'next-url',
       });
@@ -209,15 +209,15 @@ describe('<ProductDetail />', () => {
         initialState: {
           ...defaultState,
           projects: {
-            p1: {
+            r1: {
               projects: [
                 {
                   branch_url: 'branch-url',
-                  description: 'product description',
+                  description: 'repository description',
                   id: 'project1',
                   name: 'Project 1',
                   old_slugs: [],
-                  product: 'p1',
+                  repository: 'r1',
                   slug: 'project-1',
                 },
               ],

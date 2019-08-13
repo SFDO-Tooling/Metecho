@@ -127,9 +127,9 @@ describe('refetchAllData', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.product_list();
+    url = window.api_urls.repository_list();
     objectPayload = {
-      objectType: 'product',
+      objectType: 'repository',
       url,
       reset: true,
       filters: {},
@@ -147,20 +147,20 @@ describe('refetchAllData', () => {
         type: 'USER_LOGGED_IN',
         payload: user,
       };
-      const product = {
-        id: 'p1',
-        name: 'Product 1',
-        slug: 'product-1',
-        description: 'This is a test product.',
+      const repository = {
+        id: 'r1',
+        name: 'Repository 1',
+        slug: 'repository-1',
+        description: 'This is a test repository.',
         repo_url: 'http://www.test.test',
       };
-      const response = { next: null, results: [product] };
+      const response = { next: null, results: [repository] };
       fetchMock.getOnce(url, response);
-      const productsStarted = {
+      const repositoriesStarted = {
         type: 'FETCH_OBJECTS_STARTED',
         payload: objectPayload,
       };
-      const productsSucceeded = {
+      const repositoriesSucceeded = {
         type: 'FETCH_OBJECTS_SUCCEEDED',
         payload: {
           response,
@@ -174,8 +174,8 @@ describe('refetchAllData', () => {
           started,
           succeeded,
           loggedIn,
-          productsStarted,
-          productsSucceeded,
+          repositoriesStarted,
+          repositoriesSucceeded,
         ]);
       });
     });

@@ -5,14 +5,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import ProductFilter, ProjectFilter, TaskFilter
-from .models import Product, Project, Task
+from .filters import ProjectFilter, RepositoryFilter, TaskFilter
+from .models import Project, Repository, Task
 from .paginators import CustomPaginator
 from .serializers import (
     FullUserSerializer,
     MinimalUserSerializer,
-    ProductSerializer,
     ProjectSerializer,
+    RepositorySerializer,
     TaskSerializer,
 )
 
@@ -54,17 +54,17 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class RepositoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    serializer_class = ProductSerializer
+    serializer_class = RepositorySerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = ProductFilter
+    filterset_class = RepositoryFilter
     pagination_class = CustomPaginator
-    model = Product
+    model = Repository
 
     def get_queryset(self):
         repositories = self.request.user.repositories.values_list("url", flat=True)
-        return Product.objects.filter(repo_url__in=repositories)
+        return Repository.objects.filter(repo_url__in=repositories)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

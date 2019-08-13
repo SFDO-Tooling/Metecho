@@ -7,16 +7,16 @@ import DocumentTitle from 'react-document-title';
 import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import ProductNotFound from '@/components/products/product404';
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
+import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
-  getProductLoadingOrNotFound,
+  getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
   RepoLink,
-  useFetchProductIfMissing,
   useFetchProjectsIfMissing,
+  useFetchRepositoryIfMissing,
   useIsMounted,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
@@ -24,16 +24,16 @@ import { fetchObjects } from '@/store/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
-const ProductDetail = (props: RouteComponentProps) => {
+const RepositoryDetail = (props: RouteComponentProps) => {
   const [fetchingProjects, setFetchingProjects] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
-  const { product, productSlug } = useFetchProductIfMissing(props);
-  const { projects } = useFetchProjectsIfMissing(product, props);
+  const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
+  const { projects } = useFetchProjectsIfMissing(repository, props);
 
-  const loadingOrNotFound = getProductLoadingOrNotFound({
-    product,
-    productSlug,
+  const loadingOrNotFound = getRepositoryLoadingOrNotFound({
+    repository,
+    repositorySlug,
   });
 
   if (loadingOrNotFound !== false) {
@@ -42,13 +42,13 @@ const ProductDetail = (props: RouteComponentProps) => {
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!product) {
-    return <ProductNotFound />;
+  if (!repository) {
+    return <RepositoryNotFound />;
   }
 
-  if (productSlug && productSlug !== product.slug) {
-    // Redirect to most recent product slug
-    return <Redirect to={routes.product_detail(product.slug)} />;
+  if (repositorySlug && repositorySlug !== repository.slug) {
+    // Redirect to most recent repository slug
+    return <Redirect to={routes.repository_detail(repository.slug)} />;
   }
 
   const fetchMoreProjects = () => {
@@ -62,7 +62,7 @@ const ProductDetail = (props: RouteComponentProps) => {
       dispatch(
         fetchObjects({
           objectType: OBJECT_TYPES.PROJECT,
-          filters: { product: product.id },
+          filters: { repository: repository.id },
           url: projects.next,
         }),
       ).finally(() => {
@@ -75,7 +75,7 @@ const ProductDetail = (props: RouteComponentProps) => {
   };
 
   const sidebarContent = (
-    <RepoLink url={product.repo_url}>
+    <RepoLink url={repository.repo_url}>
       {i18n.t('GitHub Repo')}
       <Icon
         category="utility"
@@ -88,12 +88,12 @@ const ProductDetail = (props: RouteComponentProps) => {
   );
 
   return (
-    <DocumentTitle title={`${product.name} | ${i18n.t('MetaShare')}`}>
+    <DocumentTitle title={`${repository.name} | ${i18n.t('MetaShare')}`}>
       <DetailPageLayout
-        title={product.name}
-        description={product.description}
-        repoUrl={product.repo_url}
-        breadcrumb={[{ name: product.name }]}
+        title={repository.name}
+        description={repository.description}
+        repoUrl={repository.repo_url}
+        breadcrumb={[{ name: repository.name }]}
         sidebar={sidebarContent}
       >
         {!projects || !projects.fetched ? (
@@ -104,16 +104,16 @@ const ProductDetail = (props: RouteComponentProps) => {
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
               {projects.projects.length ? (
                 <>
-                  {i18n.t('Projects for')} {product.name}
+                  {i18n.t('Projects for')} {repository.name}
                 </>
               ) : (
                 <>
-                  {i18n.t('Create a Project for')} {product.name}
+                  {i18n.t('Create a Project for')} {repository.name}
                 </>
               )}
             </h2>
             <ProjectForm
-              product={product}
+              repository={repository}
               startOpen={!projects.projects.length}
             />
             {Boolean(projects.projects.length) && (
@@ -123,7 +123,7 @@ const ProductDetail = (props: RouteComponentProps) => {
                     <ProjectListItem
                       key={project.id}
                       project={project}
-                      product={product}
+                      repository={repository}
                     />
                   ))}
                 </ul>
@@ -154,4 +154,4 @@ const ProductDetail = (props: RouteComponentProps) => {
   );
 };
 
-export default ProductDetail;
+export default RepositoryDetail;

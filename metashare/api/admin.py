@@ -2,10 +2,10 @@ from django.contrib import admin
 
 from .models import (
     GitHubRepository,
-    Product,
-    ProductSlug,
     Project,
     ProjectSlug,
+    Repository,
+    RepositorySlug,
     Task,
     TaskSlug,
     User,
@@ -18,13 +18,13 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ("username",)
 
 
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
+@admin.register(Repository)
+class RepositoryAdmin(admin.ModelAdmin):
     list_display = ("name", "repo_url")
 
 
-@admin.register(ProductSlug)
-class ProductSlugAdmin(admin.ModelAdmin):
+@admin.register(RepositorySlug)
+class RepositorySlugAdmin(admin.ModelAdmin):
     list_display = ("slug", "parent")
 
 
@@ -35,7 +35,7 @@ class GitHubRepositoryAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ("name", "product")
+    list_display = ("name", "repository")
 
 
 @admin.register(ProjectSlug)

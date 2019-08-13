@@ -6,5 +6,5 @@ API Reference
    :caption: Contents:
 
    user
-   products
+   repositories
    projects

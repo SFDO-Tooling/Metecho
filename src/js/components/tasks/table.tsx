@@ -10,20 +10,20 @@ import { Task } from '@/store/tasks/reducer';
 import routes from '@/utils/routes';
 
 export interface Props {
-  productSlug: string;
+  repositorySlug: string;
   projectSlug: string;
   tasks: Task[];
 }
 
 const NameDataCell = ({
-  productSlug,
+  repositorySlug,
   projectSlug,
   item,
   children,
   ...props
 }: any) => (
   <DataTableCell {...props}>
-    <Link to={routes.task_detail(productSlug, projectSlug, item.slug)}>
+    <Link to={routes.task_detail(repositorySlug, projectSlug, item.slug)}>
       {children}
     </Link>
   </DataTableCell>
@@ -47,7 +47,7 @@ const AssigneeTableCell = ({ ...props }: any) => (
 );
 AssigneeTableCell.displayName = DataTableCell.displayName;
 
-const TaskTable = ({ productSlug, projectSlug, tasks }: Props) =>
+const TaskTable = ({ repositorySlug, projectSlug, tasks }: Props) =>
   tasks.length ? (
     <DataTable items={tasks} id="project-tasks-table" noRowHover>
       <DataTableColumn
@@ -58,7 +58,10 @@ const TaskTable = ({ productSlug, projectSlug, tasks }: Props) =>
         primaryColumn
         truncate
       >
-        <NameDataCell productSlug={productSlug} projectSlug={projectSlug} />
+        <NameDataCell
+          repositorySlug={repositorySlug}
+          projectSlug={projectSlug}
+        />
       </DataTableColumn>
       <DataTableColumn
         key="status"

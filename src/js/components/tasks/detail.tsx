@@ -9,12 +9,12 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import FourOhFour from '@/components/404';
 import {
   DetailPageLayout,
-  getProductLoadingOrNotFound,
   getProjectLoadingOrNotFound,
+  getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
   RepoLink,
-  useFetchProductIfMissing,
   useFetchProjectIfMissing,
+  useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
 import { AppState } from '@/store';
@@ -22,8 +22,8 @@ import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
-  const { product, productSlug } = useFetchProductIfMissing(props);
-  const { project, projectSlug } = useFetchProjectIfMissing(product, props);
+  const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
+  const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   useFetchTasksIfMissing(project, props);
   const selectTaskWithProps = useCallback(selectTask, []);
   const selectTaskSlugWithProps = useCallback(selectTaskSlug, []);
@@ -34,16 +34,16 @@ const TaskDetail = (props: RouteComponentProps) => {
     selectTaskSlugWithProps(state, props),
   );
 
-  const productLoadingOrNotFound = getProductLoadingOrNotFound({
-    product,
-    productSlug,
+  const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
+    repository,
+    repositorySlug,
   });
-  if (productLoadingOrNotFound !== false) {
-    return productLoadingOrNotFound;
+  if (repositoryLoadingOrNotFound !== false) {
+    return repositoryLoadingOrNotFound;
   }
 
   const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
-    product,
+    repository,
     project,
     projectSlug,
   });
@@ -53,7 +53,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   const taskLoadingOrNotFound = getTaskLoadingOrNotFound({
-    product,
+    repository,
     project,
     task,
     taskSlug,
@@ -65,19 +65,19 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!product || !project || !task) {
+  if (!repository || !project || !task) {
     return <FourOhFour />;
   }
 
   if (
-    (productSlug && productSlug !== product.slug) ||
+    (repositorySlug && repositorySlug !== repository.slug) ||
     (projectSlug && projectSlug !== project.slug) ||
     (taskSlug && taskSlug !== task.slug)
   ) {
-    // Redirect to most recent product/project/task slug
+    // Redirect to most recent repository/project/task slug
     return (
       <Redirect
-        to={routes.task_detail(product.slug, project.slug, task.slug)}
+        to={routes.task_detail(repository.slug, project.slug, task.slug)}
       />
     );
   }
@@ -109,19 +109,22 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   return (
     <DocumentTitle
-      title={` ${task.name} | ${project.name} | ${product.name} | ${i18n.t(
+      title={` ${task.name} | ${project.name} | ${repository.name} | ${i18n.t(
         'MetaShare',
       )}`}
     >
       <DetailPageLayout
         title={task.name}
         description={task.description}
-        repoUrl={product.repo_url}
+        repoUrl={repository.repo_url}
         breadcrumb={[
-          { name: product.name, url: routes.product_detail(product.slug) },
+          {
+            name: repository.name,
+            url: routes.repository_detail(repository.slug),
+          },
           {
             name: project.name,
-            url: routes.project_detail(product.slug, project.slug),
+            url: routes.project_detail(repository.slug, project.slug),
           },
           { name: task.name },
         ]}
