@@ -2,9 +2,9 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import ProductList from '@/components/products/list';
+import RepositoryList from '@/components/repositories/list';
 import { fetchObjects } from '@/store/actions';
-import { syncRepos } from '@/store/products/actions';
+import { syncRepos } from '@/store/repositories/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
@@ -15,7 +15,7 @@ jest.mock('react-fns', () => ({
   },
 }));
 jest.mock('@/store/actions');
-jest.mock('@/store/products/actions');
+jest.mock('@/store/repositories/actions');
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 syncRepos.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
@@ -24,17 +24,17 @@ afterEach(() => {
   syncRepos.mockClear();
 });
 
-describe('<ProductList />', () => {
+describe('<RepositoryList />', () => {
   const setup = (
     initialState = {
-      products: { products: [], notFound: [], next: null },
+      repositories: { repositories: [], notFound: [], next: null },
     },
     props = {},
     rerenderFn = null,
   ) => {
     const { getByText, queryByText, rerender } = renderWithRedux(
       <MemoryRouter>
-        <ProductList {...props} />
+        <RepositoryList {...props} />
       </MemoryRouter>,
       initialState,
       storeWithThunk,
@@ -43,21 +43,21 @@ describe('<ProductList />', () => {
     return { getByText, queryByText, rerender };
   };
 
-  test('renders products list (empty)', () => {
+  test('renders repositories list (empty)', () => {
     const { getByText } = setup();
 
     expect(getByText('¯\\_(ツ)_/¯')).toBeVisible();
   });
 
-  test('renders products list', () => {
+  test('renders repositories list', () => {
     const initialState = {
-      products: {
-        products: [
+      repositories: {
+        repositories: [
           {
-            id: 'p1',
-            name: 'Product 1',
-            slug: 'product-1',
-            description: 'This is a test product.',
+            id: 'r1',
+            name: 'Repository 1',
+            slug: 'repository-1',
+            description: 'This is a test repository.',
             repo_url: 'https://www.github.com/test/test-repo',
           },
         ],
@@ -67,19 +67,19 @@ describe('<ProductList />', () => {
     };
     const { getByText } = setup(initialState);
 
-    expect(getByText('Product 1')).toBeVisible();
-    expect(getByText('This is a test product.')).toBeVisible();
+    expect(getByText('Repository 1')).toBeVisible();
+    expect(getByText('This is a test repository.')).toBeVisible();
   });
 
-  describe('fetching more products', () => {
+  describe('fetching more repositories', () => {
     const initialState = {
-      products: {
-        products: [
+      repositories: {
+        repositories: [
           {
-            id: 'p1',
-            name: 'Product 1',
-            slug: 'product-1',
-            description: 'This is a test product.',
+            id: 'r1',
+            name: 'Repository 1',
+            slug: 'repository-1',
+            description: 'This is a test repository.',
             repo_url: 'https://www.github.com/test/test-repo',
           },
         ],
@@ -95,25 +95,25 @@ describe('<ProductList />', () => {
     });
 
     afterEach(() => {
-      window.sessionStorage.removeItem('activeProductsTab');
+      window.sessionStorage.removeItem('activeRepositoriesTab');
     });
 
-    test('fetches next page of products', () => {
+    test('fetches next page of repositories', () => {
       const { rerender, getByText } = setup(initialState);
       setup(initialState, { y: 1000 }, rerender);
 
       expect(getByText('Loading…')).toBeVisible();
       expect(fetchObjects).toHaveBeenCalledWith({
         url: 'next-url',
-        objectType: 'product',
+        objectType: 'repository',
       });
     });
 
-    test('does not fetch next page if no more products', () => {
+    test('does not fetch next page if no more repositories', () => {
       const state = {
         ...initialState,
-        products: {
-          ...initialState.products,
+        repositories: {
+          ...initialState.repositories,
           next: null,
         },
       };

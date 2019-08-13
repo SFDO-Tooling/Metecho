@@ -4,8 +4,8 @@ import pytest
 
 from ..serializers import (
     HashidPrimaryKeyRelatedField,
-    ProductSerializer,
     ProjectSerializer,
+    RepositorySerializer,
 )
 
 
@@ -24,9 +24,9 @@ class TestHashidPrimaryKeyRelatedField:
 
 
 @pytest.mark.django_db
-class TestProductSerializer:
+class TestRepositorySerializer:
     def test_validate_repo_url(self):
-        serializer = ProductSerializer(
+        serializer = RepositorySerializer(
             data={
                 "name": "Test name",
                 "repo_url": "http://github.com/test/repo.git",
@@ -40,16 +40,16 @@ class TestProductSerializer:
 
 @pytest.mark.django_db
 class TestProjectSerializer:
-    def test_markdown_fields_input(self, rf, user_factory, product_factory):
+    def test_markdown_fields_input(self, rf, user_factory, repository_factory):
         request = rf.post("/")
         request.user = user_factory()
-        product = product_factory()
+        repository = repository_factory()
         serializer = ProjectSerializer(
             data={
                 "name": "Test project",
                 "description": "Test `project`",
                 "branch_name": "some-branch",
-                "product": str(product.id),
+                "repository": str(repository.id),
             },
             context={"request": request},
         )
@@ -76,12 +76,12 @@ class TestProjectSerializer:
         expected = "https://www.github.com/test/repo/tree/test-project"
         assert serializer.data["branch_url"] == expected
 
-    def test_unique_name_for_product(self, product_factory, project_factory):
-        product = product_factory()
-        project_factory(product=product, name="Duplicate me")
+    def test_unique_name_for_repository(self, repository_factory, project_factory):
+        repository = repository_factory()
+        project_factory(repository=repository, name="Duplicate me")
         serializer = ProjectSerializer(
             data={
-                "product": str(product.id),
+                "repository": str(repository.id),
                 "name": "Duplicate Me",
                 "description": "Blorp",
             }
@@ -91,14 +91,14 @@ class TestProjectSerializer:
             "A project with this name already exists."
         ]
 
-    def test_unique_name_for_product__case_insensitive(
-        self, product_factory, project_factory
+    def test_unique_name_for_repository__case_insensitive(
+        self, repository_factory, project_factory
     ):
-        product = product_factory()
-        project_factory(product=product, name="Duplicate me")
+        repository = repository_factory()
+        project_factory(repository=repository, name="Duplicate me")
         serializer = ProjectSerializer(
             data={
-                "product": str(product.id),
+                "repository": str(repository.id),
                 "name": "duplicate me",
                 "description": "Blorp",
             }
@@ -108,14 +108,14 @@ class TestProjectSerializer:
             "A project with this name already exists."
         ]
 
-    def test_unique_name_for_product__case_insensitive__update(
-        self, product_factory, project_factory
+    def test_unique_name_for_repository__case_insensitive__update(
+        self, repository_factory, project_factory
     ):
-        product = product_factory()
-        project = project_factory(product=product, name="Duplicate me")
+        repository = repository_factory()
+        project = project_factory(repository=repository, name="Duplicate me")
         serializer = ProjectSerializer(
             instance=project,
-            data={"product": str(product.id), "description": "Blorp"},
+            data={"repository": str(repository.id), "description": "Blorp"},
             partial=True,
         )
         assert serializer.is_valid(), serializer.errors

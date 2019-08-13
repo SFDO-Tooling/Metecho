@@ -1,13 +1,13 @@
 from django.core.management.base import BaseCommand
 
-from ...models import Product, Project, Task
+from ...models import Project, Repository, Task
 
 
 class Command(BaseCommand):
     help = "Add some sample data to the database."
 
-    def create_product(self, **kwargs):
-        name = kwargs.pop("name", "Sample Product")
+    def create_repository(self, **kwargs):
+        name = kwargs.pop("name", "Sample Repository")
         description = kwargs.pop(
             "description",
             (
@@ -21,8 +21,10 @@ class Command(BaseCommand):
                 "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
-        product = Product.objects.create(name=name, description=description, **kwargs)
-        return product
+        repository = Repository.objects.create(
+            name=name, description=description, **kwargs
+        )
+        return repository
 
     def create_project(self, **kwargs):
         name = kwargs.pop("name", "Sample Project")
@@ -59,59 +61,63 @@ class Command(BaseCommand):
         return Task.objects.create(name=name, description=description, **kwargs)
 
     def handle(self, *args, **options):
-        metashare = self.create_product(
+        metashare = self.create_repository(
             name="MetaShare",
             repo_url="https://www.github.com/SFDO-Tooling/MetaShare",
             description=(
                 f"# Welcome to Meta(Meta)Share!\n\n"
-                "This is a description of the product. "
+                "This is a description of the repository. "
                 "It might contain [links](https://install.salesforce.org)."
             ),
         )
-        self.create_product(
+        self.create_repository(
             name="MetaDeploy", repo_url="https://www.github.com/SFDO-Tooling/MetaDeploy"
         )
-        self.create_product(
+        self.create_repository(
             name="CumulusCI", repo_url="https://www.github.com/SFDO-Tooling/CumulusCI"
         )
-        self.create_product(
+        self.create_repository(
             name="MetaCI", repo_url="https://www.github.com/SFDO-Tooling/MetaCI"
         )
-        self.create_product(
+        self.create_repository(
             name="Mister Belvedere",
             repo_url="https://www.github.com/SFDO-Tooling/mrbelvedere",
         )
-        self.create_product(
+        self.create_repository(
             name="SFDO Template",
             repo_url="https://www.github.com/SFDO-Tooling/sfdo-template",
         )
-        self.create_product(
+        self.create_repository(
             name="SFDO Template Helpers",
             repo_url="https://www.github.com/SFDO-Tooling/sfdo-template-helpers",
         )
-        self.create_product(
+        self.create_repository(
             name="OddSite", repo_url="https://www.github.com/oddbird/oddsite"
         )
-        self.create_product(
+        self.create_repository(
             name="Books", repo_url="https://www.github.com/oddbird/books"
         )
-        self.create_product(name="True", repo_url="https://www.github.com/oddbird/true")
-        self.create_product(name="Susy", repo_url="https://www.github.com/oddbird/susy")
-        self.create_product(
+        self.create_repository(
+            name="True", repo_url="https://www.github.com/oddbird/true"
+        )
+        self.create_repository(
+            name="Susy", repo_url="https://www.github.com/oddbird/susy"
+        )
+        self.create_repository(
             name="Herman",
             repo_url="https://www.github.com/oddbird/sassdoc-theme-herman",
         )
-        self.create_product(
+        self.create_repository(
             name="Accoutrement", repo_url="https://www.github.com/oddbird/accoutrement"
         )
 
         for i in range(55):
-            self.create_project(name=f"Sample Project {i+1}", product=metashare)
+            self.create_project(name=f"Sample Project {i+1}", repository=metashare)
 
         project = self.create_project(
             name="Project With Tasks",
             description="This project has tasks.",
-            product=metashare,
+            repository=metashare,
         )
 
         for i in range(5):

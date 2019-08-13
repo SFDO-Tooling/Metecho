@@ -13,7 +13,7 @@ interface SyncReposFailed {
   type: 'SYNC_REPOS_FAILED';
 }
 
-export type ProductsAction =
+export type RepositoriesAction =
   | SyncReposStarted
   | SyncReposSucceeded
   | SyncReposFailed;
@@ -26,7 +26,7 @@ export const syncRepos = (): ThunkResult => async dispatch => {
     });
     dispatch({ type: 'SYNC_REPOS_SUCCEEDED' });
     return dispatch(
-      fetchObjects({ objectType: OBJECT_TYPES.PRODUCT, reset: true }),
+      fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
     );
   } catch (err) {
     dispatch({ type: 'SYNC_REPOS_FAILED' });

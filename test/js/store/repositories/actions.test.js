@@ -1,6 +1,6 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '@/store/products/actions';
+import * as actions from '@/store/repositories/actions';
 
 import { storeWithThunk } from './../../utils';
 
@@ -8,16 +8,16 @@ describe('syncRepos', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.product_list();
+    url = window.api_urls.repository_list();
     objectPayload = {
-      objectType: 'product',
+      objectType: 'repository',
       url,
       reset: true,
       filters: {},
     };
   });
 
-  test('dispatches SyncRepos action and fetches products', () => {
+  test('dispatches SyncRepos action and fetches repositories', () => {
     const store = storeWithThunk({});
     fetchMock.getOnce(url, {
       next: null,

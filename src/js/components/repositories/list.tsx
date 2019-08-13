@@ -9,20 +9,23 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '@/components/404';
-import ProductListItem from '@/components/products/listItem';
+import RepositoryListItem from '@/components/repositories/listItem';
 import { LabelWithSpinner, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { fetchObjects } from '@/store/actions';
-import { syncRepos } from '@/store/products/actions';
-import { selectNextUrl, selectProducts } from '@/store/products/selectors';
+import { syncRepos } from '@/store/repositories/actions';
+import {
+  selectNextUrl,
+  selectRepositories,
+} from '@/store/repositories/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 
-const ProductList = withScroll(({ y }: ScrollProps) => {
-  const [fetchingProducts, setFetchingProducts] = useState(false);
+const RepositoryList = withScroll(({ y }: ScrollProps) => {
+  const [fetchingRepositories, setFetchingRepositories] = useState(false);
   const [syncingRepos, setSyncingRepos] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
-  const products = useSelector(selectProducts);
+  const repositories = useSelector(selectRepositories);
   const next = useSelector(selectNextUrl);
 
   const syncReposClicked = () => {
@@ -36,26 +39,26 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
   };
 
   useEffect(() => {
-    if (fetchingProducts || !next) {
+    if (fetchingRepositories || !next) {
       return;
     }
 
-    const maybeFetchMoreProducts = () => {
+    const maybeFetchMoreRepositories = () => {
       /* istanbul ignore else */
-      if (next && !fetchingProducts) {
+      if (next && !fetchingRepositories) {
         /* istanbul ignore else */
         if (isMounted.current) {
-          setFetchingProducts(true);
+          setFetchingRepositories(true);
         }
         dispatch(
           fetchObjects({
-            objectType: OBJECT_TYPES.PRODUCT,
+            objectType: OBJECT_TYPES.REPOSITORY,
             url: next,
           }),
         ).finally(() => {
           /* istanbul ignore else */
           if (isMounted.current) {
-            setFetchingProducts(false);
+            setFetchingRepositories(false);
           }
         });
       }
@@ -69,25 +72,25 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
     const clientHeight =
       (document.documentElement && document.documentElement.clientHeight) ||
       window.innerHeight;
-    // Fetch more products if within 100px of bottom of page...
+    // Fetch more repositories if within 100px of bottom of page...
     const scrolledToBottom = scrollHeight - Math.ceil(y + clientHeight) <= 100;
 
     /* istanbul ignore else */
     if (scrolledToBottom) {
-      maybeFetchMoreProducts();
+      maybeFetchMoreRepositories();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [y, next]);
 
   let contents;
-  switch (products.length) {
+  switch (repositories.length) {
     case 0: {
-      // No products; show empty message
+      // No repositories; show empty message
       const msg = (
-        <Trans i18nKey="noProductsHelper">
-          We couldn’t find any products you have access to on GitHub. Confirm
-          that you are logged into the correct account or contact an admin on
-          GitHub.
+        <Trans i18nKey="noRepositoriesHelper">
+          We couldn’t find any repositories you have access to on GitHub.
+          Confirm that you are logged into the correct account or contact an
+          admin on GitHub.
         </Trans>
       );
       contents = <EmptyIllustration message={msg} />;
@@ -96,8 +99,8 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
     default: {
       contents = (
         <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
-          {products.map(product => (
-            <ProductListItem product={product} key={product.id} />
+          {repositories.map(repository => (
+            <RepositoryListItem repository={repository} key={repository.id} />
           ))}
         </div>
       );
@@ -106,11 +109,11 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
   }
 
   return (
-    <DocumentTitle title={`${i18n.t('Products')} | ${i18n.t('MetaShare')}`}>
+    <DocumentTitle title={`${i18n.t('Repositories')} | ${i18n.t('MetaShare')}`}>
       <>
         <PageHeader
           className="page-header slds-p-around_x-large"
-          title={i18n.t('Select a Product')}
+          title={i18n.t('Select a Repository')}
         />
         <div className="slds-p-around_x-large">
           <div className="slds-grid slds-grid_vertical-align-start">
@@ -123,15 +126,15 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
                 restricted-container"
             >
               <p className="slds-p-bottom_small">
-                <Trans i18nKey="productListHelper">
-                  Contributor access on GitHub is required to view products. If
-                  you do not see the product you’re looking for below, confirm
-                  that you are logged into the correct account or contact an
-                  admin on GitHub.
+                <Trans i18nKey="repositoryListHelper">
+                  Contributor access on GitHub is required to view repositories.
+                  If you do not see the repository you’re looking for below,
+                  confirm that you are logged into the correct account or
+                  contact an admin on GitHub.
                 </Trans>
               </p>
               <Button
-                label={i18n.t('Create Product')}
+                label={i18n.t('Create Repository')}
                 variant="brand"
                 disabled
               />
@@ -167,7 +170,7 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
             </div>
           </div>
           {contents}
-          {fetchingProducts ? (
+          {fetchingRepositories ? (
             <div className="slds-align_absolute-center slds-m-top_x-large">
               <span className="slds-is-relative slds-m-right_large">
                 <Spinner variant="brand" size="small" />
@@ -181,4 +184,4 @@ const ProductList = withScroll(({ y }: ScrollProps) => {
   );
 });
 
-export default ProductList;
+export default RepositoryList;

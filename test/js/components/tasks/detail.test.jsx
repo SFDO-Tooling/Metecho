@@ -16,28 +16,28 @@ afterEach(() => {
 });
 
 const defaultState = {
-  products: {
-    products: [
+  repositories: {
+    repositories: [
       {
-        id: 'p1',
-        name: 'Product 1',
-        slug: 'product-1',
+        id: 'r1',
+        name: 'Repository 1',
+        slug: 'repository-1',
         old_slugs: [],
-        description: 'This is a test product.',
+        description: 'This is a test repository.',
         repo_url: 'https://www.github.com/test/test-repo',
       },
     ],
-    notFound: ['different-product'],
+    notFound: ['different-repository'],
     next: null,
   },
   projects: {
-    p1: {
+    r1: {
       projects: [
         {
           id: 'project1',
           slug: 'project-1',
           name: 'Project 1',
-          product: 'p1',
+          repository: 'r1',
           description: 'Project Description',
           old_slugs: [],
         },
@@ -65,17 +65,17 @@ describe('<TaskDetail/>', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
-      productSlug: 'product-1',
+      repositorySlug: 'repository-1',
       projectSlug: 'project-1',
       taskSlug: 'task-1',
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, productSlug, projectSlug, taskSlug } = opts;
+    const { initialState, repositorySlug, projectSlug, taskSlug } = opts;
     const context = {};
     const { getByText, getByTitle, queryByText } = renderWithRedux(
       <StaticRouter context={context}>
         <TaskDetail
-          match={{ params: { productSlug, projectSlug, taskSlug } }}
+          match={{ params: { repositorySlug, projectSlug, taskSlug } }}
         />
       </StaticRouter>,
       initialState,
@@ -127,14 +127,14 @@ describe('<TaskDetail/>', () => {
     });
   });
 
-  describe('product does not exist', () => {
-    test('renders <ProductNotFound />', () => {
+  describe('repository does not exist', () => {
+    test('renders <RepositoryNotFound />', () => {
       const { getByText, queryByText } = setup({
-        productSlug: 'different-product',
+        repositorySlug: 'different-repository',
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('list of all products')).toBeVisible();
+      expect(getByText('list of all repositories')).toBeVisible();
     });
   });
 
@@ -166,7 +166,7 @@ describe('<TaskDetail/>', () => {
 
       expect(context.action).toEqual('REPLACE');
       expect(context.url).toEqual(
-        routes.task_detail('product-1', 'project-1', 'task-1'),
+        routes.task_detail('repository-1', 'project-1', 'task-1'),
       );
     });
   });

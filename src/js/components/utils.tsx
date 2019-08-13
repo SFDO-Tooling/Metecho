@@ -15,20 +15,23 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Redirect, Route, RouteComponentProps } from 'react-router-dom';
 
-import ProductNotFound from '@/components/products/product404';
 import ProjectNotFound from '@/components/projects/project404';
+import RepositoryNotFound from '@/components/repositories/repository404';
 import TaskNotFound from '@/components/tasks/task404';
 import { AppState, ThunkDispatch } from '@/store';
 import { createObject, fetchObject, fetchObjects } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
-import { Product } from '@/store/products/reducer';
-import { selectProduct, selectProductSlug } from '@/store/products/selectors';
 import { Project } from '@/store/projects/reducer';
 import {
   selectProject,
-  selectProjectsByProduct,
+  selectProjectsByRepository,
   selectProjectSlug,
 } from '@/store/projects/selectors';
+import { Repository } from '@/store/repositories/reducer';
+import {
+  selectRepository,
+  selectRepositorySlug,
+} from '@/store/repositories/selectors';
 import { Task } from '@/store/tasks/reducer';
 import { selectTasksByProject } from '@/store/tasks/selectors';
 import { selectUserState } from '@/store/user/selectors';
@@ -211,39 +214,39 @@ export const PrivateRoute = ({
   );
 };
 
-export const getProductLoadingOrNotFound = ({
-  product,
-  productSlug,
+export const getRepositoryLoadingOrNotFound = ({
+  repository,
+  repositorySlug,
 }: {
-  product?: Product | null;
-  productSlug?: string;
+  repository?: Repository | null;
+  repositorySlug?: string;
 }): ReactElement | false => {
-  if (!product) {
-    if (!productSlug || product === null) {
-      return <ProductNotFound />;
+  if (!repository) {
+    if (!repositorySlug || repository === null) {
+      return <RepositoryNotFound />;
     }
-    // Fetching product from API
+    // Fetching repository from API
     return <Spinner />;
   }
   return false;
 };
 
 export const getProjectLoadingOrNotFound = ({
-  product,
+  repository,
   project,
   projectSlug,
 }: {
-  product?: Product | null;
+  repository?: Repository | null;
   project?: Project | null;
   projectSlug?: string;
 }): ReactElement | false => {
   if (!project) {
     /* istanbul ignore if */
-    if (!product) {
-      return <ProductNotFound />;
+    if (!repository) {
+      return <RepositoryNotFound />;
     }
     if (!projectSlug || project === null) {
-      return <ProjectNotFound product={product} />;
+      return <ProjectNotFound repository={repository} />;
     }
     // Fetching project from API
     return <Spinner />;
@@ -252,27 +255,27 @@ export const getProjectLoadingOrNotFound = ({
 };
 
 export const getTaskLoadingOrNotFound = ({
-  product,
+  repository,
   project,
   task,
   taskSlug,
 }: {
-  product?: Product | null;
+  repository?: Repository | null;
   project?: Project | null;
   task?: Task | null;
   taskSlug?: string;
 }): ReactElement | false => {
   if (!task) {
     /* istanbul ignore if */
-    if (!product) {
-      return <ProductNotFound />;
+    if (!repository) {
+      return <RepositoryNotFound />;
     }
     /* istanbul ignore if */
     if (!project) {
-      return <ProjectNotFound product={product} />;
+      return <ProjectNotFound repository={repository} />;
     }
     if (!taskSlug || task === null) {
-      return <TaskNotFound product={product} project={project} />;
+      return <TaskNotFound repository={repository} project={project} />;
     }
     // Fetching task from API
     return <Spinner />;
@@ -296,60 +299,62 @@ export const useIsMounted = () => {
   return isMounted;
 };
 
-export const useFetchProductIfMissing = (routeProps: RouteComponentProps) => {
-  const dispatch = useDispatch<ThunkDispatch>();
-  const selectProductWithProps = useCallback(selectProduct, []);
-  const selectProductSlugWithProps = useCallback(selectProductSlug, []);
-  const product = useSelector((state: AppState) =>
-    selectProductWithProps(state, routeProps),
-  );
-  const productSlug = useSelector((state: AppState) =>
-    selectProductSlugWithProps(state, routeProps),
-  );
-
-  useEffect(() => {
-    if (productSlug && product === undefined) {
-      // Fetch product from API
-      dispatch(
-        fetchObject({
-          objectType: OBJECT_TYPES.PRODUCT,
-          filters: { slug: productSlug },
-        }),
-      );
-    }
-  }, [dispatch, product, productSlug]);
-
-  return { product, productSlug };
-};
-
-export const useFetchProjectsIfMissing = (
-  product: Product | null | undefined,
+export const useFetchRepositoryIfMissing = (
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const selectProjectsWithProps = useCallback(selectProjectsByProduct, []);
+  const selectRepositoryWithProps = useCallback(selectRepository, []);
+  const selectRepositorySlugWithProps = useCallback(selectRepositorySlug, []);
+  const repository = useSelector((state: AppState) =>
+    selectRepositoryWithProps(state, routeProps),
+  );
+  const repositorySlug = useSelector((state: AppState) =>
+    selectRepositorySlugWithProps(state, routeProps),
+  );
+
+  useEffect(() => {
+    if (repositorySlug && repository === undefined) {
+      // Fetch repository from API
+      dispatch(
+        fetchObject({
+          objectType: OBJECT_TYPES.REPOSITORY,
+          filters: { slug: repositorySlug },
+        }),
+      );
+    }
+  }, [dispatch, repository, repositorySlug]);
+
+  return { repository, repositorySlug };
+};
+
+export const useFetchProjectsIfMissing = (
+  repository: Repository | null | undefined,
+  routeProps: RouteComponentProps,
+) => {
+  const dispatch = useDispatch<ThunkDispatch>();
+  const selectProjectsWithProps = useCallback(selectProjectsByRepository, []);
   const projects = useSelector((state: AppState) =>
     selectProjectsWithProps(state, routeProps),
   );
 
   useEffect(() => {
-    if (product && (!projects || !projects.fetched)) {
+    if (repository && (!projects || !projects.fetched)) {
       // Fetch projects from API
       dispatch(
         fetchObjects({
           objectType: OBJECT_TYPES.PROJECT,
-          filters: { product: product.id },
+          filters: { repository: repository.id },
           reset: true,
         }),
       );
     }
-  }, [dispatch, product, projects]);
+  }, [dispatch, repository, projects]);
 
   return { projects };
 };
 
 export const useFetchProjectIfMissing = (
-  product: Product | null | undefined,
+  repository: Repository | null | undefined,
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
@@ -363,16 +368,16 @@ export const useFetchProjectIfMissing = (
   );
 
   useEffect(() => {
-    if (product && projectSlug && project === undefined) {
+    if (repository && projectSlug && project === undefined) {
       // Fetch project from API
       dispatch(
         fetchObject({
           objectType: OBJECT_TYPES.PROJECT,
-          filters: { product: product.id, slug: projectSlug },
+          filters: { repository: repository.id, slug: projectSlug },
         }),
       );
     }
-  }, [dispatch, product, project, projectSlug]);
+  }, [dispatch, repository, project, projectSlug]);
 
   return { project, projectSlug };
 };

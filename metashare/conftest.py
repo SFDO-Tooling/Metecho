@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 
 from sfdo_template_helpers.crypto import fernet_encrypt
 
-from .api.models import GitHubRepository, Product, Project
+from .api.models import GitHubRepository, Project, Repository
 
 User = get_user_model()
 
@@ -63,11 +63,11 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @register
-class ProductFactory(factory.django.DjangoModelFactory):
+class RepositoryFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Product
+        model = Repository
 
-    name = factory.Sequence("Product {}".format)
+    name = factory.Sequence("Repository {}".format)
     repo_url = "https://www.github.com/test/repo"
 
 
@@ -86,7 +86,7 @@ class ProjectFactory(factory.django.DjangoModelFactory):
         model = Project
 
     name = factory.Sequence("Project {}".format)
-    product = factory.SubFactory(ProductFactory)
+    repository = factory.SubFactory(RepositoryFactory)
 
 
 @pytest.fixture

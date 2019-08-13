@@ -2,32 +2,32 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..models import Product, Project, user_logged_in_handler
+from ..models import Project, Repository, user_logged_in_handler
 
 
 @pytest.mark.django_db
-class TestProduct:
+class TestRepository:
     def test_signal(self):
-        product = Product(name="Test Product")
-        product.save()
-        assert product.slug == "test-product"
+        repository = Repository(name="Test Repository")
+        repository.save()
+        assert repository.slug == "test-repository"
 
     def test_str(self):
-        product = Product(name="Test Product")
-        assert str(product) == "Test Product"
+        repository = Repository(name="Test Repository")
+        assert str(repository) == "Test Repository"
 
 
 @pytest.mark.django_db
 class TestProject:
-    def test_signal(self, product_factory):
-        product = product_factory()
-        project = Project(name="Test Project", product=product)
+    def test_signal(self, repository_factory):
+        repository = repository_factory()
+        project = Project(name="Test Project", repository=repository)
         project.save()
         assert project.slug == "test-project"
 
-    def test_str(self, product_factory):
-        product = product_factory()
-        project = Project(name="Test Project", product=product)
+    def test_str(self, repository_factory):
+        repository = repository_factory()
+        project = Project(name="Test Project", repository=repository)
         assert str(project) == "Test Project"
 
 

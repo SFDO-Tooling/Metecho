@@ -1,15 +1,15 @@
-========
-Products
-========
+============
+Repositories
+============
 
-This allows list, retrieve, create, update, and delete of Products.
+This allows list, retrieve, create, update, and delete of Repositories.
 
 Retrieve
 --------
 
 .. sourcecode:: http
 
-   GET /api/products/ HTTP/1.1
+   GET /api/repositories/ HTTP/1.1
 
 .. sourcecode:: http
 
@@ -17,15 +17,15 @@ Retrieve
 
     {
       "count": 150,
-      "next": "https://.../api/products/?page=2",
+      "next": "https://.../api/repositories/?page=2",
       "previous": null,
       "results": [
         {
           "id": "3Lw7OwK",
-          "name": "Test Product",
-          "slug": "test-product",
+          "name": "Test Repository",
+          "slug": "test-repository",
           "old_slugs": [],
-          "repo_url": "https://github.com/sfdo/test-product",
+          "repo_url": "https://github.com/sfdo/test-repository",
           "description": "<p>This is safely rendered Markdown.</p>",
           "is_managed": false,
         }

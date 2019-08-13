@@ -54,7 +54,7 @@ case "$1" in
     "migrate")
         dcr python manage.py migrate "${@:2}"
         ;;
-    "migrations")
+    "makemigrations")
         dcr python manage.py makemigrations "${@:2}"
         ;;
     "showmigrations")

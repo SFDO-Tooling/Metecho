@@ -1,13 +1,13 @@
 from django_filters import rest_framework as filters
 
-from .models import Product, Project, Task
+from .models import Project, Repository, Task
 
 
-class ProductFilter(filters.FilterSet):
+class RepositoryFilter(filters.FilterSet):
     slug = filters.CharFilter(field_name="slugs__slug")
 
     class Meta:
-        model = Product
+        model = Repository
         fields = ("slug",)
 
 
@@ -16,7 +16,7 @@ class ProjectFilter(filters.FilterSet):
 
     class Meta:
         model = Project
-        fields = ("product", "slug")
+        fields = ("repository", "slug")
 
 
 class TaskFilter(filters.FilterSet):

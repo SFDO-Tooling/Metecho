@@ -3,22 +3,26 @@
 const routes = {
   home: () => '/',
   login: () => '/login',
-  product_list: () => '/products',
-  product_detail: (productSlug: string) => `/products/${productSlug}`,
-  project_detail: (productSlug: string, projectSlug: string) =>
-    `/products/${productSlug}/${projectSlug}`,
-  task_detail: (productSlug: string, projectSlug: string, taskSlug: string) =>
-    `/products/${productSlug}/${projectSlug}/${taskSlug}`,
+  repository_list: () => '/repositories',
+  repository_detail: (repositorySlug: string) =>
+    `/repositories/${repositorySlug}`,
+  project_detail: (repositorySlug: string, projectSlug: string) =>
+    `/repositories/${repositorySlug}/${projectSlug}`,
+  task_detail: (
+    repositorySlug: string,
+    projectSlug: string,
+    taskSlug: string,
+  ) => `/repositories/${repositorySlug}/${projectSlug}/${taskSlug}`,
 };
 
 export const routePatterns = {
   home: () => '/',
   login: () => '/login',
   auth_error: () => '/accounts/*',
-  product_list: () => '/products',
-  product_detail: () => '/products/:productSlug',
-  project_detail: () => '/products/:productSlug/:projectSlug',
-  task_detail: () => '/products/:productSlug/:projectSlug/:taskSlug',
+  repository_list: () => '/repositories',
+  repository_detail: () => '/repositories/:repositorySlug',
+  project_detail: () => '/repositories/:repositorySlug/:projectSlug',
+  task_detail: () => '/repositories/:repositorySlug/:projectSlug/:taskSlug',
 };
 
 export default routes;

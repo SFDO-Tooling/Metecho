@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .fields import MarkdownField
-from .models import Product, Project, Task
+from .models import Project, Repository, Task
 from .validators import CaseInsensitiveUniqueTogetherValidator
 
 User = get_user_model()
@@ -40,12 +40,12 @@ class MinimalUserSerializer(serializers.ModelSerializer):
         fields = ("id", "username")
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class RepositorySerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description = MarkdownField(allow_blank=True)
 
     class Meta:
-        model = Product
+        model = Repository
         fields = (
             "id",
             "name",
@@ -60,8 +60,8 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description = MarkdownField(allow_blank=True)
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(), pk_field=serializers.CharField()
+    repository = serializers.PrimaryKeyRelatedField(
+        queryset=Repository.objects.all(), pk_field=serializers.CharField()
     )
     branch_url = serializers.SerializerMethodField()
 
@@ -73,19 +73,19 @@ class ProjectSerializer(serializers.ModelSerializer):
             "description",
             "slug",
             "old_slugs",
-            "product",
+            "repository",
             "branch_url",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Project.objects.all(),
-                fields=("name", "product"),
+                fields=("name", "repository"),
                 message=_("A project with this name already exists."),
             ),
         )
 
     def get_branch_url(self, obj):
-        return f"{obj.product.repo_url}/tree/{obj.branch_name}"
+        return f"{obj.repository.repo_url}/tree/{obj.branch_name}"
 
 
 class TaskSerializer(serializers.ModelSerializer):

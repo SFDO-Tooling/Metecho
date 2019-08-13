@@ -26,8 +26,8 @@ Retrieve
           "description": "<p>This is safely rendered Markdown.</p>",
           "slug": "test-project",
           "old_slugs": [],
-          "product": "zVQYrye",
-          "branch_url": "https://www.github.com/SFDO-Tooling/test-product/tree/test-project",
+          "repository": "zVQYrye",
+          "branch_url": "https://www.github.com/SFDO-Tooling/test-repository/tree/test-project",
         }
         ...
       ]

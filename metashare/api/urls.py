@@ -2,8 +2,8 @@ from django.urls import path
 from rest_framework import routers
 
 from .views import (
-    ProductViewSet,
     ProjectViewSet,
+    RepositoryViewSet,
     TaskViewSet,
     UserRefreshView,
     UserView,
@@ -12,7 +12,7 @@ from .views import (
 
 router = routers.DefaultRouter()
 router.register("users", UserViewSet, basename="user")
-router.register("products", ProductViewSet, basename="product")
+router.register("repositories", RepositoryViewSet, basename="repository")
 router.register("projects", ProjectViewSet, basename="project")
 router.register("tasks", TaskViewSet, basename="task")
 urlpatterns = router.urls + [

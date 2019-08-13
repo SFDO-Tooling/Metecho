@@ -1,7 +1,7 @@
-export type ObjectTypes = 'product' | 'project' | 'task';
+export type ObjectTypes = 'repository' | 'project' | 'task';
 
 export const OBJECT_TYPES = {
-  PRODUCT: 'product' as 'product',
+  REPOSITORY: 'repository' as 'repository',
   PROJECT: 'project' as 'project',
   TASK: 'task' as 'task',
 };

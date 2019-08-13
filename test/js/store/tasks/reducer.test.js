@@ -14,12 +14,12 @@ describe('reducer', () => {
       slug: 'task-1',
       name: 'Task 1',
       description: 'This is a test task.',
-      project: 'p1',
+      project: 'r1',
     };
     const expected = {};
     const actual = reducer(
       {
-        p1: [task1],
+        r1: [task1],
       },
       { type: 'USER_LOGGED_OUT' },
     );
@@ -67,7 +67,7 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "task"', () => {
       const task = {
-        id: 'p1',
+        id: 'r1',
         slug: 'task-1',
         name: 'Task 1',
         project: 'project-1',
@@ -89,7 +89,7 @@ describe('reducer', () => {
   describe('CREATE_OBJECT_SUCCEEDED', () => {
     test('adds task to list', () => {
       const task1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'task-1',
         name: 'Task 1',
         project: 'project-1',
@@ -113,7 +113,7 @@ describe('reducer', () => {
 
     test('does not add duplicate task', () => {
       const task1 = {
-        id: 'p1',
+        id: 'r1',
         slug: 'task-1',
         name: 'Task 1',
         project: 'project-1',
@@ -134,7 +134,7 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "task"', () => {
       const task = {
-        id: 'p1',
+        id: 'r1',
         slug: 'task-1',
         name: 'Task 1',
         project: 'project-1',

@@ -64,7 +64,7 @@ export const refetchAllData = (): ThunkResult => async dispatch => {
     }
     dispatch(login(payload));
     return dispatch(
-      fetchObjects({ objectType: OBJECT_TYPES.PRODUCT, reset: true }),
+      fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
     );
   } catch (err) {
     dispatch({ type: 'REFETCH_DATA_FAILED' });
