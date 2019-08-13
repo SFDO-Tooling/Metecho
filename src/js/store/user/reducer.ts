@@ -4,6 +4,10 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  valid_token_for: string | null;
+  org_name: string | null;
+  org_type: string | null;
+  is_devhub_enabled: boolean | null;
   is_staff: boolean;
 }
 

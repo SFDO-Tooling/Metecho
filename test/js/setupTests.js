@@ -17,7 +17,6 @@ beforeAll(() => {
     github_login: () => '/accounts/github/login/',
     salesforce_custom_login: () => '/accounts/salesforce-custom/login/',
     salesforce_production_login: () => '/accounts/salesforce-production/login/',
-    salesforce_test_login: () => '/accounts/salesforce-test/login/',
     user: () => '/api/user/',
     user_refresh: () => '/api/user/refresh/',
     repository_list: () => '/api/repositories/',

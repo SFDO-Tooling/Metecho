@@ -29,6 +29,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "valid_token_for",
             "org_name",
             "org_type",
+            "is_devhub_enabled",
         )
 
 

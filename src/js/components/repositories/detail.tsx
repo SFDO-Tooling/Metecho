@@ -12,9 +12,9 @@ import ProjectListItem from '@/components/projects/listItem';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
+  ExternalLink,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
-  RepoLink,
   useFetchProjectsIfMissing,
   useFetchRepositoryIfMissing,
   useIsMounted,
@@ -75,7 +75,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
   };
 
   const sidebarContent = (
-    <RepoLink url={repository.repo_url}>
+    <ExternalLink url={repository.repo_url}>
       {i18n.t('GitHub Repo')}
       <Icon
         category="utility"
@@ -84,7 +84,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         className="slds-m-bottom_xx-small"
         containerClassName="slds-m-left_xx-small slds-current-color"
       />
-    </RepoLink>
+    </ExternalLink>
   );
 
   return (

@@ -9,10 +9,10 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import FourOhFour from '@/components/404';
 import {
   DetailPageLayout,
+  ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
-  RepoLink,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
@@ -93,7 +93,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         disabled
       />
       {task.branch_url ? (
-        <RepoLink url={task.branch_url}>
+        <ExternalLink url={task.branch_url}>
           <Button
             iconCategory="utility"
             iconName="new_window"
@@ -102,7 +102,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             variant="outline-brand"
             className="slds-m-left_large"
           />
-        </RepoLink>
+        </ExternalLink>
       ) : null}
     </PageHeaderControl>
   );

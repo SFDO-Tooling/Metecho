@@ -297,7 +297,7 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 SOCIALACCOUNT_PROVIDERS = {
     "github": {"SCOPE": ["read:user", "user:email", "repo", "read:org"]},
     "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
-    # "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
+    "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
 }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False

@@ -23,20 +23,10 @@ class SalesforceProductionProvider(ProviderMixin, SalesforceProvider):
     package = "metashare.multisalesforce"
 
 
-class SalesforceTestProvider(ProviderMixin, SalesforceProvider):
-    id = "salesforce-test"
-    name = "Salesforce Test"
-    package = "metashare.multisalesforce"
-
-
 class SalesforceCustomProvider(ProviderMixin, SalesforceProvider):
     id = "salesforce-custom"
     name = "Salesforce Custom"
     package = "metashare.multisalesforce"
 
 
-provider_classes = [
-    SalesforceProductionProvider,
-    SalesforceTestProvider,
-    SalesforceCustomProvider,
-]
+provider_classes = [SalesforceProductionProvider, SalesforceCustomProvider]

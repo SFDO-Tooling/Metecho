@@ -3,11 +3,7 @@ from functools import partial
 from allauth.utils import import_attribute
 from django.urls import include, path
 
-from .provider import (
-    SalesforceCustomProvider,
-    SalesforceProductionProvider,
-    SalesforceTestProvider,
-)
+from .provider import SalesforceCustomProvider, SalesforceProductionProvider
 
 
 def default_urlpatterns(provider, version):
@@ -28,5 +24,4 @@ def default_urlpatterns(provider, version):
 
 
 urlpatterns = default_urlpatterns(SalesforceProductionProvider, "prod")
-urlpatterns += default_urlpatterns(SalesforceTestProvider, "sandbox")
 urlpatterns += default_urlpatterns(SalesforceCustomProvider, "custom")
