@@ -102,7 +102,7 @@ class User(mixins.HashIdMixin, AbstractUser):
 
     @property
     def salesforce_account(self):
-        return self.socialaccount_set.filter(provider="salesforce-production").first()
+        return self.socialaccount_set.filter(provider__startswith="salesforce-").first()
 
     @property
     def valid_token_for(self):
