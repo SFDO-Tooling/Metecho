@@ -13,6 +13,16 @@ def test_user_view(client):
 
 
 @pytest.mark.django_db
+def test_user_disconnect_view(client):
+    response = client.post(reverse("user-disconnect-sf"))
+
+    assert response.status_code == 204
+    assert not client.user.socialaccount_set.filter(
+        provider__startswith="salesforce-"
+    ).exists()
+
+
+@pytest.mark.django_db
 def test_user_refresh_view(client):
     with patch("metashare.api.gh.login") as login:
         repo = MagicMock()
