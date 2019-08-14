@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 import Errors from '@/components/apiErrors';
 import OfflineAlert from '@/components/offlineAlert';
 import UserInfo from '@/components/user/info';
-import Logout from '@/components/user/logout';
 import { selectSocketState } from '@/store/socket/selectors';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
@@ -19,7 +18,6 @@ const Header = () => {
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
       <UserInfo />
-      <Logout />
     </PageHeaderControl>
   );
 

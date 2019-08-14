@@ -25,6 +25,7 @@ const CustomDomainForm = ({
     window.location.assign(
       addUrlParams(baseUrl, {
         custom_domain: val, // eslint-disable-line @typescript-eslint/camelcase
+        process: 'connect',
         next: window.location.pathname,
       }),
     );
@@ -90,6 +91,7 @@ const CustomDomainModal = ({
   const handleSubmit = () => {
     window.location.assign(
       addUrlParams(window.api_urls.salesforce_production_login(), {
+        process: 'connect',
         next: window.location.pathname,
       }),
     );
@@ -98,21 +100,13 @@ const CustomDomainModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      heading={
-        isCustomDomain
-          ? i18n.t('Use Custom Domain')
-          : i18n.t('Connect to a Salesforce Org')
-      }
+      heading={i18n.t('Connect to Salesforce')}
       tagline={
-        !isCustomDomain && (
-          <Trans>
-            Learn how to{' '}
-            <ExternalLink url="#@@@">
-              create a Developer Edition org
-            </ExternalLink>{' '}
-            and <ExternalLink url="#@@@">enable Dev Hub</ExternalLink>.
-          </Trans>
-        )
+        <Trans i18nKey="devHubInfo">
+          Learn how to{' '}
+          <ExternalLink url="#@@@">create a Developer Edition org</ExternalLink>{' '}
+          and <ExternalLink url="#@@@">enable Dev Hub</ExternalLink>.
+        </Trans>
       }
       footer={
         isCustomDomain && [
@@ -131,7 +125,7 @@ const CustomDomainModal = ({
       ) : (
         <div className="slds-p-around_large">
           <Button
-            label={i18n.t('Connect to Salesforce Org')}
+            label={i18n.t('Connect to Salesforce')}
             variant="brand"
             className="slds-size_full
               slds-p-vertical_x-small
