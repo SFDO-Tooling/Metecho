@@ -1,10 +1,10 @@
 # http://eslint.org/docs/rules/
 
 parserOptions:
+  sourceType: module
   ecmaFeatures:
     impliedStrict: true
     jsx: true
-  sourceType: module
 env:
   browser: true
   commonjs: true
