@@ -49,7 +49,7 @@ const CustomDomainForm = ({
   );
 };
 
-const CustomDomainModal = ({
+const ConnectModal = ({
   isOpen,
   toggleModal,
 }: {
@@ -163,4 +163,4 @@ const CustomDomainModal = ({
   );
 };
 
-export default CustomDomainModal;
+export default ConnectModal;

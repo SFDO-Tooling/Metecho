@@ -26,7 +26,7 @@ describe('<AuthError />', () => {
         { user: {} },
       );
 
-      expect(getByText('Log Out')).toBeVisible();
+      expect(getByText('Log Out of GitHub')).toBeVisible();
     });
   });
 });

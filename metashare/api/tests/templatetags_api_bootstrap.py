@@ -22,6 +22,7 @@ def test_serialize(user_factory):
                 "valid_token_for": None,
                 "org_name": None,
                 "org_type": None,
+                "is_devhub_enabled": None,
             }
         )
     )

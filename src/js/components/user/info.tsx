@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ConnectModal from '@/components/user/connect';
 import Logout from '@/components/user/logout';
 import { ExternalLink } from '@/components/utils';
+import { disconnect, refreshDevHubStatus } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 
@@ -58,12 +59,11 @@ const ConnectToSalesforce = ({
 
 const ConnectionInfo = ({ user }: { user: User }) => {
   const dispatch = useDispatch();
-  // @@@ make these work
   const doDisconnect = useCallback(() => {
-    dispatch({ type: 'disconnect' });
+    dispatch(disconnect());
   }, [dispatch]);
-  const doRefreshConnection = useCallback(() => {
-    dispatch({ type: 'refresh' });
+  const doRefreshDevHubStatus = useCallback(() => {
+    dispatch(refreshDevHubStatus());
   }, [dispatch]);
 
   return (
@@ -106,16 +106,11 @@ const ConnectionInfo = ({ user }: { user: User }) => {
               <Button
                 label={i18n.t('Check Again')}
                 variant="link"
-                onClick={doRefreshConnection}
+                onClick={doRefreshDevHubStatus}
               />
             </>
           )}
         </li>
-        {user.username && (
-          <li>
-            <strong>{i18n.t('User')}:</strong> {user.username}
-          </li>
-        )}
         {user.org_name && (
           <li>
             <strong>{i18n.t('Org')}:</strong> {user.org_name}

@@ -11,13 +11,30 @@ interface LoginAction {
 export interface LogoutAction {
   type: 'USER_LOGGED_OUT';
 }
-interface RefecthDataAction {
+interface RefetchDataAction {
   type:
     | 'REFETCH_DATA_STARTED'
     | 'REFETCH_DATA_SUCCEEDED'
     | 'REFETCH_DATA_FAILED';
 }
-export type UserAction = LoginAction | LogoutAction | RefecthDataAction;
+interface DisconnectAction {
+  type:
+    | 'USER_DISCONNECT_REQUESTED'
+    | 'USER_DISCONNECT_SUCCEEDED'
+    | 'USER_DISCONNECT_FAILED';
+}
+interface RefreshDevHubAction {
+  type:
+    | 'DEV_HUB_STATUS_REQUESTED'
+    | 'DEV_HUB_STATUS_SUCCEEDED'
+    | 'DEV_HUB_STATUS_FAILED';
+}
+export type UserAction =
+  | LoginAction
+  | LogoutAction
+  | RefetchDataAction
+  | DisconnectAction
+  | RefreshDevHubAction;
 
 export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
@@ -68,6 +85,34 @@ export const refetchAllData = (): ThunkResult => async dispatch => {
     );
   } catch (err) {
     dispatch({ type: 'REFETCH_DATA_FAILED' });
+    throw err;
+  }
+};
+
+/* istanbul ignore next */
+export const disconnect = (): ThunkResult => async dispatch => {
+  dispatch({ type: 'USER_DISCONNECT_REQUESTED' });
+  try {
+    // @@@ make this work
+    await apiFetch('@@@', dispatch, {
+      method: 'POST',
+    });
+    return dispatch({ type: 'USER_DISCONNECT_SUCCEEDED' });
+  } catch (err) {
+    dispatch({ type: 'USER_DISCONNECT_FAILED' });
+    throw err;
+  }
+};
+
+/* istanbul ignore next */
+export const refreshDevHubStatus = (): ThunkResult => async dispatch => {
+  dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
+  try {
+    // @@@ make this work
+    await apiFetch('@@@', dispatch);
+    return dispatch({ type: 'DEV_HUB_STATUS_SUCCEEDED' });
+  } catch (err) {
+    dispatch({ type: 'DEV_HUB_STATUS_FAILED' });
     throw err;
   }
 };
