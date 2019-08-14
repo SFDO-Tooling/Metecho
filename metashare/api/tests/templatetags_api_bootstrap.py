@@ -23,6 +23,7 @@ def test_serialize(user_factory):
                 "org_name": None,
                 "org_type": None,
                 "is_devhub_enabled": None,
+                "sf_nickname": None,
             }
         )
     )

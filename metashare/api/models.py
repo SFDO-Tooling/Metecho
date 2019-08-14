@@ -87,6 +87,13 @@ class User(mixins.HashIdMixin, AbstractUser):
             return None
 
     @property
+    def sf_nickname(self):
+        try:
+            return self.salesforce_account.extra_data["nickname"]
+        except (AttributeError, KeyError):
+            return None
+
+    @property
     def token(self):
         account = self.salesforce_account
         if account and account.socialtoken_set.exists():
