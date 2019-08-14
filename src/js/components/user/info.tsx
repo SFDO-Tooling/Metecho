@@ -58,6 +58,7 @@ const ConnectToSalesforce = ({
 
 const ConnectionInfo = ({ user }: { user: User }) => {
   const dispatch = useDispatch();
+  // @@@ make these work
   const doDisconnect = useCallback(() => {
     dispatch({ type: 'disconnect' });
   }, [dispatch]);
@@ -84,7 +85,10 @@ const ConnectionInfo = ({ user }: { user: User }) => {
           />
           <Trans i18nKey="devHubNotEnabled">
             This Salesforce org does not have Dev Hub enabled. Learn how to{' '}
-            <ExternalLink url="#@@@">enable Dev Hub</ExternalLink>.
+            <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
+              enable Dev Hub
+            </ExternalLink>
+            .
           </Trans>
         </p>
       )}

@@ -108,8 +108,14 @@ const CustomDomainModal = ({
       tagline={
         <Trans i18nKey="devHubInfo">
           Learn how to{' '}
-          <ExternalLink url="#@@@">create a Developer Edition org</ExternalLink>{' '}
-          and <ExternalLink url="#@@@">enable Dev Hub</ExternalLink>.
+          <ExternalLink url="https://developer.salesforce.com/signup">
+            create a Developer Edition org
+          </ExternalLink>{' '}
+          and{' '}
+          <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
+            enable Dev Hub
+          </ExternalLink>
+          .
         </Trans>
       }
       footer={
