@@ -91,7 +91,7 @@ const ConnectionInfo = ({ user }: { user: User }) => {
         {i18n.t('Connected to Salesforce')}
       </span>
       {!user.is_devhub_enabled && (
-        <p className="slds-text-body_small slds-m-top_x-small">
+        <p className="slds-text-body_small slds-m-top_small">
           <Icon
             assistiveText={{ label: i18n.t('Error') }}
             category="utility"
