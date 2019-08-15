@@ -30,7 +30,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "org_name",
             "org_type",
             "is_devhub_enabled",
-            "sf_nickname",
+            "sf_username",
         )
 
 

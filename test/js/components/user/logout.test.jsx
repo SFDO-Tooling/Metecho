@@ -19,7 +19,7 @@ describe('<Logout />', () => {
 
   test('calls logout on click', () => {
     const { getByText } = setup();
-    fireEvent.click(getByText('Log Out of GitHub'));
+    fireEvent.click(getByText('Log Out'));
 
     expect(logout).toHaveBeenCalledTimes(1);
   });

@@ -5,7 +5,7 @@ export interface User {
   username: string;
   email: string;
   valid_token_for: string | null;
-  sf_nickname: string | null;
+  sf_username: string | null;
   org_name: string | null;
   org_type: string | null;
   is_devhub_enabled: boolean | null;

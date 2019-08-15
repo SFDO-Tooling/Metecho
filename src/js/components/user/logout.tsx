@@ -12,7 +12,7 @@ const Logout = (props: any) => {
   }, [dispatch]);
   return (
     <Button
-      label={i18n.t('Log Out of GitHub')}
+      label={i18n.t('Log Out')}
       variant="link"
       onClick={doLogout}
       {...props}

@@ -21,7 +21,7 @@ Retrieve
      "username": "user123",
      "email": "user@domain.com",
      "valid_token_for": "00Dxxxxxxxxxxxxxxx",
-     "sf_nickname": "my_username",
+     "sf_username": "user@domain.com",
      "org_name": "OddBird",
      "org_type": "Developer Edition",
      "is_devhub_enabled": true,

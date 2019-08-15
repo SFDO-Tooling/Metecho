@@ -1,5 +1,5 @@
 import requests
-from allauth.account.signals import user_logged_in, user_logged_out
+from allauth.account.signals import user_logged_in
 from cryptography.fernet import InvalidToken
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -87,9 +87,9 @@ class User(mixins.HashIdMixin, AbstractUser):
             return None
 
     @property
-    def sf_nickname(self):
+    def sf_username(self):
         try:
-            return self.salesforce_account.extra_data["nickname"]
+            return self.salesforce_account.extra_data["preferred_username"]
         except (AttributeError, KeyError):
             return None
 
@@ -221,11 +221,6 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
     user.refresh_repositories()
-
-
-@receiver(user_logged_out)
-def user_logged_out_handler(sender, *, user, **kwargs):
-    user.invalidate_salesforce_credentials()
 
 
 def ensure_slug_handler(sender, *, created, instance, **kwargs):

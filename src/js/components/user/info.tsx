@@ -130,9 +130,9 @@ const ConnectionInfo = ({ user }: { user: User }) => {
             </>
           )}
         </li>
-        {user.sf_nickname && (
+        {user.sf_username && (
           <li>
-            <strong>{i18n.t('User')}:</strong> {user.sf_nickname}
+            <strong>{i18n.t('User')}:</strong> {user.sf_username}
           </li>
         )}
         {user.org_name && (

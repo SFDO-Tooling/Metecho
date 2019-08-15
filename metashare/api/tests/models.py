@@ -2,12 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..models import (
-    Project,
-    Repository,
-    user_logged_in_handler,
-    user_logged_out_handler,
-)
+from ..models import Project, Repository, user_logged_in_handler
 
 
 @pytest.mark.django_db
@@ -266,26 +261,3 @@ def test_login_handler(user_factory):
     with patch("metashare.api.models.gh") as gh:
         user_logged_in_handler(None, user=user)
         gh.get_all_org_repos.assert_called_with(user)
-
-
-@pytest.mark.django_db
-def test_logout_handler(user_factory, social_account_factory):
-    user = user_factory()
-    social_account_factory(
-        user=user,
-        provider="salesforce-production",
-        extra_data={
-            "instance_url": "https://example.com",
-            "organization_details": {
-                "Name": "Sample Org",
-                "OrganizationType": "Production",
-                "IsSandbox": False,
-                "TrialExpirationDate": None,
-            },
-        },
-    )
-    assert user.socialaccount_set.filter(provider__startswith="salesforce-").exists()
-    user_logged_out_handler(None, user=user)
-    assert not user.socialaccount_set.filter(
-        provider__startswith="salesforce-"
-    ).exists()

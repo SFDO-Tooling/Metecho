@@ -41,7 +41,7 @@ describe('<UserInfo />', () => {
     const { getByText } = setup();
 
     expect(getByText('Test User')).toBeVisible();
-    expect(getByText('Log Out of GitHub')).toBeVisible();
+    expect(getByText('Log Out')).toBeVisible();
   });
 
   describe('not connected', () => {
@@ -61,7 +61,7 @@ describe('<UserInfo />', () => {
         user: {
           username: 'Test User',
           valid_token_for: 'token',
-          sf_nickname: 'my-username',
+          sf_username: 'user@domain.com',
           org_name: 'Test Org',
           org_type: 'Test Org Type',
           is_devhub_enabled: true,
@@ -71,7 +71,7 @@ describe('<UserInfo />', () => {
       expect(getByText('Test User')).toBeVisible();
       expect(getByText('Connected to Salesforce')).toBeVisible();
       expect(getByText('Enabled')).toBeVisible();
-      expect(getByText('my-username')).toBeVisible();
+      expect(getByText('user@domain.com')).toBeVisible();
       expect(getByText('Test Org')).toBeVisible();
       expect(getByText('Test Org Type')).toBeVisible();
     });
@@ -84,7 +84,7 @@ describe('<UserInfo />', () => {
           user: {
             username: 'Test User',
             valid_token_for: 'token',
-            sf_nickname: 'my-username',
+            sf_username: 'user@domain.com',
             org_name: 'Test Org',
             org_type: 'Test Org Type',
             is_devhub_enabled: false,
