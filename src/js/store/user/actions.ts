@@ -17,24 +17,28 @@ interface RefetchDataAction {
     | 'REFETCH_DATA_SUCCEEDED'
     | 'REFETCH_DATA_FAILED';
 }
+interface DisconnectSucceeded {
+  type: 'USER_DISCONNECT_SUCCEEDED';
+  payload: User;
+}
 interface DisconnectAction {
-  type:
-    | 'USER_DISCONNECT_REQUESTED'
-    | 'USER_DISCONNECT_SUCCEEDED'
-    | 'USER_DISCONNECT_FAILED';
+  type: 'USER_DISCONNECT_REQUESTED' | 'USER_DISCONNECT_FAILED';
+}
+interface RefreshDevHubSucceeded {
+  type: 'DEV_HUB_STATUS_SUCCEEDED';
+  payload: User;
 }
 interface RefreshDevHubAction {
-  type:
-    | 'DEV_HUB_STATUS_REQUESTED'
-    | 'DEV_HUB_STATUS_SUCCEEDED'
-    | 'DEV_HUB_STATUS_FAILED';
+  type: 'DEV_HUB_STATUS_REQUESTED' | 'DEV_HUB_STATUS_FAILED';
 }
 export type UserAction =
   | LoginAction
   | LogoutAction
   | RefetchDataAction
   | DisconnectAction
-  | RefreshDevHubAction;
+  | DisconnectSucceeded
+  | RefreshDevHubAction
+  | RefreshDevHubSucceeded;
 
 export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
@@ -89,28 +93,28 @@ export const refetchAllData = (): ThunkResult => async dispatch => {
   }
 };
 
-/* istanbul ignore next */
 export const disconnect = (): ThunkResult => async dispatch => {
   dispatch({ type: 'USER_DISCONNECT_REQUESTED' });
   try {
-    // @@@ make this work
-    await apiFetch('@@@', dispatch, {
-      method: 'POST',
-    });
-    return dispatch({ type: 'USER_DISCONNECT_SUCCEEDED' });
+    const payload = await apiFetch(
+      window.api_urls.user_disconnect_sf(),
+      dispatch,
+      {
+        method: 'POST',
+      },
+    );
+    return dispatch({ type: 'USER_DISCONNECT_SUCCEEDED', payload });
   } catch (err) {
     dispatch({ type: 'USER_DISCONNECT_FAILED' });
     throw err;
   }
 };
 
-/* istanbul ignore next */
 export const refreshDevHubStatus = (): ThunkResult => async dispatch => {
   dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
   try {
-    // @@@ make this work
-    await apiFetch('@@@', dispatch);
-    return dispatch({ type: 'DEV_HUB_STATUS_SUCCEEDED' });
+    const payload = await apiFetch(window.api_urls.user(), dispatch);
+    return dispatch({ type: 'DEV_HUB_STATUS_SUCCEEDED', payload });
   } catch (err) {
     dispatch({ type: 'DEV_HUB_STATUS_FAILED' });
     throw err;

@@ -54,7 +54,8 @@ class UserDisconnectSFView(CurrentUserObjectMixin, APIView):
     def post(self, request):
         user = self.get_object()
         user.invalidate_salesforce_credentials()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = FullUserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):

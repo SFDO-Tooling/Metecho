@@ -2,6 +2,7 @@ import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Popover from '@salesforce/design-system-react/components/popover';
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
@@ -10,7 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import ConnectModal from '@/components/user/connect';
 import Logout from '@/components/user/logout';
-import { ExternalLink } from '@/components/utils';
+import { ExternalLink, useIsMounted } from '@/components/utils';
+import { ThunkDispatch } from '@/store';
 import { disconnect, refreshDevHubStatus } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
@@ -58,16 +60,32 @@ const ConnectToSalesforce = ({
 };
 
 const ConnectionInfo = ({ user }: { user: User }) => {
-  const dispatch = useDispatch();
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const isMounted = useIsMounted();
+  const dispatch = useDispatch<ThunkDispatch>();
   const doDisconnect = useCallback(() => {
-    dispatch(disconnect());
-  }, [dispatch]);
+    setIsDisconnecting(true);
+    dispatch(disconnect()).finally(() => {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        setIsDisconnecting(false);
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const doRefreshDevHubStatus = useCallback(() => {
-    dispatch(refreshDevHubStatus());
-  }, [dispatch]);
+    setIsRefreshing(true);
+    dispatch(refreshDevHubStatus()).finally(() => {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        setIsRefreshing(false);
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
+      {(isDisconnecting || isRefreshing) && <Spinner />}
       <Icon category="utility" name="connected_apps" size="small" />
       <span className="slds-p-left_small slds-text-heading_small">
         {i18n.t('Connected to Salesforce')}
@@ -84,7 +102,8 @@ const ConnectionInfo = ({ user }: { user: User }) => {
             containerClassName="slds-m-right_xx-small"
           />
           <Trans i18nKey="devHubNotEnabled">
-            This Salesforce org does not have Dev Hub enabled. Learn how to{' '}
+            This Salesforce org does not have Dev Hub enabled, and will not be
+            able to create new scratch orgs. Learn how to{' '}
             <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
               enable Dev Hub
             </ExternalLink>
@@ -111,6 +130,11 @@ const ConnectionInfo = ({ user }: { user: User }) => {
             </>
           )}
         </li>
+        {user.sf_nickname && (
+          <li>
+            <strong>{i18n.t('User')}:</strong> {user.sf_nickname}
+          </li>
+        )}
         {user.org_name && (
           <li>
             <strong>{i18n.t('Org')}:</strong> {user.org_name}

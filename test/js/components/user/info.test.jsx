@@ -5,12 +5,12 @@ import { MemoryRouter } from 'react-router-dom';
 import UserInfo from '@/components/user/info';
 import { disconnect, refreshDevHubStatus } from '@/store/user/actions';
 
-import { renderWithRedux } from './../../utils';
+import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/user/actions');
 
-disconnect.mockReturnValue({ type: 'TEST' });
-refreshDevHubStatus.mockReturnValue({ type: 'TEST' });
+disconnect.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshDevHubStatus.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   disconnect.mockClear();
@@ -28,6 +28,7 @@ describe('<UserInfo />', () => {
         <UserInfo />
       </MemoryRouter>,
       initialState,
+      storeWithThunk,
     );
     const btn = result.container.querySelector('.slds-button');
     if (btn) {
@@ -60,15 +61,17 @@ describe('<UserInfo />', () => {
         user: {
           username: 'Test User',
           valid_token_for: 'token',
+          sf_nickname: 'my-username',
           org_name: 'Test Org',
           org_type: 'Test Org Type',
           is_devhub_enabled: true,
         },
       });
 
+      expect(getByText('Test User')).toBeVisible();
       expect(getByText('Connected to Salesforce')).toBeVisible();
       expect(getByText('Enabled')).toBeVisible();
-      expect(getByText('Test User')).toBeVisible();
+      expect(getByText('my-username')).toBeVisible();
       expect(getByText('Test Org')).toBeVisible();
       expect(getByText('Test Org Type')).toBeVisible();
     });
@@ -81,6 +84,7 @@ describe('<UserInfo />', () => {
           user: {
             username: 'Test User',
             valid_token_for: 'token',
+            sf_nickname: 'my-username',
             org_name: 'Test Org',
             org_type: 'Test Org Type',
             is_devhub_enabled: false,

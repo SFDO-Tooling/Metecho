@@ -16,10 +16,11 @@ def test_user_view(client):
 def test_user_disconnect_view(client):
     response = client.post(reverse("user-disconnect-sf"))
 
-    assert response.status_code == 204
     assert not client.user.socialaccount_set.filter(
         provider__startswith="salesforce-"
     ).exists()
+    assert response.status_code == 200
+    assert response.json()["username"].endswith("@example.com")
 
 
 @pytest.mark.django_db

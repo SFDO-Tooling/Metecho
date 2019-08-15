@@ -19,6 +19,7 @@ beforeAll(() => {
     salesforce_production_login: () => '/accounts/salesforce-production/login/',
     user: () => '/api/user/',
     user_refresh: () => '/api/user/refresh/',
+    user_disconnect_sf: () => '/api/user/disconnect/',
     repository_list: () => '/api/repositories/',
     repository_detail: slug => `/api/repositories/${slug}/`,
     project_list: () => '/api/projects/',
