@@ -30,7 +30,7 @@ const ConnectToSalesforce = ({
     <>
       <Button
         label={i18n.t('Connect to Salesforce')}
-        className="slds-text-heading_small"
+        className="slds-text-body_regular"
         variant="link"
         onClick={openConnectModal}
       />
