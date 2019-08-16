@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .fields import MarkdownField
-from .models import Project, Repository, Task
+from .models import Project, Repository, ScratchOrg, Task
 from .validators import CaseInsensitiveUniqueTogetherValidator
 
 User = get_user_model()
@@ -117,4 +117,20 @@ class TaskSerializer(serializers.ModelSerializer):
                 fields=("name", "project"),
                 message=_("A task with this name already exists."),
             ),
+        )
+
+
+class ScratchOrgSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScratchOrg
+        fields = (
+            "id",
+            "org_type",
+            "owner",
+            "last_modified_at",
+            "expires_at",
+            "latest_commit",
+            "latest_commit_url",
+            "url",
+            "has_changes",
         )

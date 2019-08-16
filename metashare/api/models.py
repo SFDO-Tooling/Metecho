@@ -1,8 +1,15 @@
 import requests
 from allauth.account.signals import user_logged_in
+
 from cryptography.fernet import InvalidToken
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import UserManager as BaseUserManager
+
+from cumulusci.core.config import OrgConfig, ServiceConfig
+from cumulusci.core.runtime import BaseCumulusCI
+from django.conf import settings
+from django.contrib.auth.models import (
+    AbstractUser,
+    UserManager as BaseUserManager,
+)
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -11,7 +18,7 @@ from django.utils.text import slugify
 from model_utils import Choices
 
 from sfdo_template_helpers.crypto import fernet_decrypt
-from sfdo_template_helpers.fields import MarkdownField
+from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from . import gh
@@ -216,6 +223,29 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)
+
+
+SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+
+
+class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
+    task = models.ForeignKey(Task, on_delete=models.PROTECT)
+    org_type = StringField(choices=SCRATCH_ORG_TYPES)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    last_modified_at = models.DateTimeField(null=True)
+    expires_at = models.DateTimeField()
+    latest_commit = StringField(blank=True)
+    latest_commit_url = models.URLField(blank=True)
+    url = models.URLField()
+    has_changes = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.id is None:
+            self.create_scratch_org_on_sf()
+        super().save(*args, **kwargs)
+
+    def create_scratch_org_on_sf(self):
+        pass
 
 
 @receiver(user_logged_in)

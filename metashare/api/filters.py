@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from .models import Project, Repository, Task
+from .models import Project, Repository, ScratchOrg, Task
 
 
 class RepositoryFilter(filters.FilterSet):
@@ -25,3 +25,9 @@ class TaskFilter(filters.FilterSet):
     class Meta:
         model = Task
         fields = ("project", "slug")
+
+
+class ScratchOrgFilter(filters.FilterSet):
+    class Meta:
+        model = ScratchOrg
+        fields = ("task",)
