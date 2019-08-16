@@ -86,13 +86,18 @@ const ConnectionInfo = ({ user }: { user: User }) => {
   return (
     <>
       {(isDisconnecting || isRefreshing) && <Spinner />}
-      <Icon className="status-heading-icon" category="utility" name="connected_apps" size="small" />
-      <div class="slds-p-left_x-large">
+      <Icon
+        className="slds-is-absolute"
+        category="utility"
+        name="connected_apps"
+        size="small"
+      />
+      <div className="slds-p-left_x-large">
         <p className="slds-text-heading_small">
           {i18n.t('Connected to Salesforce')}
         </p>
         {!user.is_devhub_enabled && (
-          <p className="text-weak slds-m-top_xx-small">
+          <p className="slds-text-color_weak slds-m-top_xx-small">
             <Icon
               assistiveText={{ label: i18n.t('Error') }}
               category="utility"
@@ -168,9 +173,14 @@ const UserInfo = () => {
         align="bottom right"
         heading={
           <div className="slds-p-around_small">
-            <Icon className="status-heading-icon" category="utility" name="user" size="small" />
-            <div class="slds-p-left_x-large">
-              <p className="slds-text-heading_small">{user.username}</p>
+            <Icon
+              className="slds-is-absolute"
+              category="utility"
+              name="user"
+              size="small"
+            />
+            <div className="slds-p-left_x-large">
+              <p>{user.username}</p>
               <Logout className="slds-text-body_regular slds-m-top_xx-small" />
             </div>
           </div>
