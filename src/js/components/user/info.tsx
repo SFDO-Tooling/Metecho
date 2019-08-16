@@ -86,31 +86,33 @@ const ConnectionInfo = ({ user }: { user: User }) => {
   return (
     <>
       {(isDisconnecting || isRefreshing) && <Spinner />}
-      <Icon category="utility" name="connected_apps" size="small" />
-      <span className="slds-p-left_small slds-text-heading_small">
-        {i18n.t('Connected to Salesforce')}
-      </span>
-      {!user.is_devhub_enabled && (
-        <p className="slds-text-body_small slds-m-top_small">
-          <Icon
-            assistiveText={{ label: i18n.t('Error') }}
-            category="utility"
-            name="error"
-            colorVariant="error"
-            size="x-small"
-            className="slds-m-bottom_xxx-small"
-            containerClassName="slds-m-right_xx-small"
-          />
-          <Trans i18nKey="devHubNotEnabled">
-            This Salesforce org does not have Dev Hub enabled, and will not be
-            able to create new scratch orgs. Learn how to{' '}
-            <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
-              enable Dev Hub
-            </ExternalLink>
-            .
-          </Trans>
+      <Icon className="status-heading-icon" category="utility" name="connected_apps" size="small" />
+      <div class="slds-p-left_x-large">
+        <p className="slds-text-heading_small">
+          {i18n.t('Connected to Salesforce')}
         </p>
-      )}
+        {!user.is_devhub_enabled && (
+          <p className="text-weak slds-m-top_xx-small">
+            <Icon
+              assistiveText={{ label: i18n.t('Error') }}
+              category="utility"
+              name="error"
+              colorVariant="error"
+              size="x-small"
+              className="slds-m-bottom_xxx-small"
+              containerClassName="slds-m-right_xx-small"
+            />
+            <Trans i18nKey="devHubNotEnabled">
+              This Salesforce org does not have Dev Hub enabled, and will not be
+              able to create new scratch orgs. Learn how to{' '}
+              <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
+                enable Dev Hub
+              </ExternalLink>
+              .
+            </Trans>
+          </p>
+        )}
+      </div>
       <ul className="slds-m-top_small">
         <li>
           <strong>{i18n.t('Dev Hub')}:</strong>{' '}
@@ -166,10 +168,10 @@ const UserInfo = () => {
         align="bottom right"
         heading={
           <div className="slds-p-around_small">
-            <Icon category="utility" name="user" size="small" />
-            <span className="slds-p-left_small">{user.username}</span>
-            <div className="slds-m-left_large slds-p-left_small">
-              <Logout className="slds-text-body_regular" />
+            <Icon className="status-heading-icon" category="utility" name="user" size="small" />
+            <div class="slds-p-left_x-large">
+              <p className="slds-text-heading_small">{user.username}</p>
+              <Logout className="slds-text-body_regular slds-m-top_xx-small" />
             </div>
           </div>
         }
