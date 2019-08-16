@@ -1,0 +1,11 @@
+// Icons
+// =====
+
+.icon-link {
+  fill: $color-text-link;
+
+  &:hover,
+  &:focus {
+    fill: $color-text-link-hover;
+  }
+}

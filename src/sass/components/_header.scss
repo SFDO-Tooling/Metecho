@@ -17,17 +17,4 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
-
-  a {
-    svg {
-      fill: $color-text-link;
-    }
-
-    &:hover,
-    &:focus {
-      svg {
-        fill: $color-text-link-hover;
-      }
-    }
-  }
 }

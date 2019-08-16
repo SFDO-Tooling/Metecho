@@ -16,6 +16,9 @@ afterEach(() => {
 });
 
 const defaultState = {
+  user: {
+    id: 'user-id',
+  },
   repositories: {
     repositories: [
       {
@@ -59,6 +62,23 @@ const defaultState = {
       },
     ],
   },
+  orgs: {
+    task1: {
+      dev: {
+        id: 'org-id',
+        task: 'task1',
+        type: 'dev',
+        owner: 'user-id',
+        last_modified: '2019-08-16T12:58:53.721Z',
+        expiration: '2019-09-16T12:58:53.721Z',
+        latest_commit: '617a51',
+        latest_commit_url: '/test/commit/url/',
+        url: '/test/org/url/',
+        has_changes: true,
+      },
+      qa: null,
+    },
+  },
 };
 
 describe('<TaskDetail/>', () => {
@@ -84,12 +104,14 @@ describe('<TaskDetail/>', () => {
     return { getByText, getByTitle, queryByText, context };
   };
 
-  test('renders task detail', () => {
+  test('renders task detail with org', () => {
     const { getByText, getByTitle, queryByText } = setup();
 
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByText('Task Description')).toBeVisible();
     expect(queryByText('View Branch')).toBeNull();
+    expect(getByText('View Org')).toBeVisible();
+    expect(getByText('Task Orgs')).toBeVisible();
   });
 
   test('renders view branch button if branch_url exists', () => {
@@ -168,6 +190,23 @@ describe('<TaskDetail/>', () => {
       expect(context.url).toEqual(
         routes.task_detail('repository-1', 'project-1', 'task-1'),
       );
+    });
+  });
+
+  describe('orgs have not been fetched', () => {
+    test('fetches orgs from API', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {},
+        },
+      });
+
+      expect(queryByText('Task Orgs')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { task: 'task1' },
+        objectType: 'org',
+      });
     });
   });
 });

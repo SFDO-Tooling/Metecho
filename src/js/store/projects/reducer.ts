@@ -1,4 +1,4 @@
-import { ObjectsAction } from '@/store/actions';
+import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
@@ -38,11 +38,12 @@ const reducer = (
       return {};
     case 'FETCH_OBJECTS_SUCCEEDED': {
       const {
-        response: { results, next },
+        response,
         objectType,
         reset,
         filters: { repository },
       } = action.payload;
+      const { results, next } = response as PaginatedObjectResponse;
       if (objectType === OBJECT_TYPES.PROJECT && repository) {
         const repositoryProjects = projects[repository] || { ...defaultState };
         if (reset) {

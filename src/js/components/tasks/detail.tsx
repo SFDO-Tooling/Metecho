@@ -1,5 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
+import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import React, { useCallback } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -7,12 +8,14 @@ import { useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import OrgsTable from '@/components/orgs/table';
 import {
   DetailPageLayout,
   ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
+  useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
@@ -33,6 +36,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const taskSlug = useSelector((state: AppState) =>
     selectTaskSlugWithProps(state, props),
   );
+  const { orgs } = useFetchOrgsIfMissing(task, props);
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -129,7 +133,9 @@ const TaskDetail = (props: RouteComponentProps) => {
           { name: task.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
-      />
+      >
+        {orgs ? <OrgsTable orgs={orgs} /> : <Spinner />}
+      </DetailPageLayout>
     </DocumentTitle>
   );
 };

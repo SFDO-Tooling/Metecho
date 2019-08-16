@@ -2,6 +2,7 @@ import { AnyAction, combineReducers, Reducer } from 'redux';
 import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 import errorsReducer, { ErrorType } from '@/store/errors/reducer';
+import orgReducer, { OrgState } from '@/store/orgs/reducer';
 import projectsReducer, { ProjectsState } from '@/store/projects/reducer';
 import repositoriesReducer, {
   RepositoriesState,
@@ -12,11 +13,12 @@ import userReducer, { User } from '@/store/user/reducer';
 
 export interface AppState {
   errors: ErrorType[];
-  repositories: RepositoriesState;
+  orgs: OrgState;
   projects: ProjectsState;
+  repositories: RepositoriesState;
   socket: Socket;
-  user: User | null;
   tasks: TaskState;
+  user: User | null;
 }
 
 export interface Action {
@@ -29,11 +31,12 @@ export type ThunkDispatch = ReduxThunkDispatch<AppState, void, AnyAction>;
 
 const reducer: Reducer<AppState, Action> = combineReducers({
   errors: errorsReducer,
-  repositories: repositoriesReducer,
+  orgs: orgReducer,
   projects: projectsReducer,
+  repositories: repositoriesReducer,
   socket: socketReducer,
-  user: userReducer,
   tasks: taskReducer,
+  user: userReducer,
 });
 
 export default reducer;

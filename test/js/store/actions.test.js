@@ -50,6 +50,26 @@ describe('fetchObjects with `reset: true`', () => {
     });
   });
 
+  test('throws error if no url', () => {
+    const store = storeWithThunk({});
+    const payload = { ...objectPayload, objectType: 'foo', url: undefined };
+    const started = {
+      type: 'FETCH_OBJECTS_STARTED',
+      payload,
+    };
+    const failed = {
+      type: 'FETCH_OBJECTS_FAILED',
+      payload,
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.fetchObjects({ objectType: 'foo', reset: true }))
+      .catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+      });
+  });
+
   describe('error', () => {
     test('dispatches FETCH_OBJECTS_FAILED action', () => {
       const store = storeWithThunk({});
@@ -221,6 +241,31 @@ describe('fetchObject', () => {
     });
   });
 
+  test('throws error if no url', () => {
+    const store = storeWithThunk({});
+    const payload = {
+      ...objectPayload,
+      objectType: 'foo',
+      url: undefined,
+      filters: {},
+    };
+    const started = {
+      type: 'FETCH_OBJECT_STARTED',
+      payload,
+    };
+    const failed = {
+      type: 'FETCH_OBJECT_FAILED',
+      payload,
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.fetchObject({ objectType: 'foo' }))
+      .catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+      });
+  });
+
   describe('error', () => {
     test('dispatches FETCH_OBJECT_FAILED action', () => {
       const store = storeWithThunk({});
@@ -263,6 +308,7 @@ describe('createObject', () => {
       data: {
         name: 'Object Name',
       },
+      url,
     };
   });
 
@@ -285,6 +331,31 @@ describe('createObject', () => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
+  });
+
+  test('throws error if no url', () => {
+    const store = storeWithThunk({});
+    const payload = {
+      ...objectPayload,
+      objectType: 'foo',
+      url: undefined,
+      data: {},
+    };
+    const started = {
+      type: 'CREATE_OBJECT_STARTED',
+      payload,
+    };
+    const failed = {
+      type: 'CREATE_OBJECT_FAILED',
+      payload,
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.createObject({ objectType: 'foo' }))
+      .catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+      });
   });
 
   describe('error', () => {

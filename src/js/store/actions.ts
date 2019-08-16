@@ -2,9 +2,11 @@ import { ThunkResult } from '@/store';
 import apiFetch, { addUrlParams } from '@/utils/api';
 import { ObjectTypes } from '@/utils/constants';
 
-interface ObjectPayload {
+interface CreateObjectPayload {
   objectType: ObjectTypes;
   url: string;
+}
+interface ObjectPayload extends CreateObjectPayload {
   filters: ObjectFilters;
   reset?: boolean;
 }
@@ -14,9 +16,10 @@ interface ObjectFilters {
 interface ObjectData {
   [key: string]: any;
 }
-interface ObjectResponse {
+type ObjectResponse = any[];
+export interface PaginatedObjectResponse {
   next: string | null;
-  results: any[];
+  results: ObjectResponse;
 }
 
 interface FetchObjectsStarted {
@@ -25,7 +28,9 @@ interface FetchObjectsStarted {
 }
 interface FetchObjectsSucceeded {
   type: 'FETCH_OBJECTS_SUCCEEDED';
-  payload: { response: ObjectResponse } & ObjectPayload;
+  payload: {
+    response: PaginatedObjectResponse | ObjectResponse;
+  } & ObjectPayload;
 }
 interface FetchObjectsFailed {
   type: 'FETCH_OBJECTS_FAILED';
@@ -45,19 +50,18 @@ interface FetchObjectFailed {
 }
 interface CreateObjectStarted {
   type: 'CREATE_OBJECT_STARTED';
-  payload: { objectType: ObjectTypes; data: ObjectData };
+  payload: { data: ObjectData } & CreateObjectPayload;
 }
 interface CreateObjectSucceeded {
   type: 'CREATE_OBJECT_SUCCEEDED';
   payload: {
     data: ObjectData;
     object: any;
-    objectType: ObjectTypes;
-  };
+  } & CreateObjectPayload;
 }
 interface CreateObjectFailed {
   type: 'CREATE_OBJECT_FAILED';
-  payload: { objectType: ObjectTypes; data: ObjectData };
+  payload: { data: ObjectData } & CreateObjectPayload;
 }
 
 export type ObjectsAction =
@@ -96,12 +100,48 @@ export const fetchObjects = ({
   filters?: ObjectFilters;
   reset?: boolean;
 }): ThunkResult => async dispatch => {
-  const baseUrl = url || window.api_urls[`${objectType}_list`]();
+  const urlFn = window.api_urls[`${objectType}_list`];
+  let baseUrl;
+  if (url || urlFn) {
+    baseUrl = url || urlFn();
+  }
   dispatch({
     type: 'FETCH_OBJECTS_STARTED',
     payload: { objectType, url: baseUrl, reset, filters },
   });
   try {
+    // @@@ mocked data until API exists...
+    /* istanbul ignore if */
+    if (objectType === 'org') {
+      /* eslint-disable @typescript-eslint/camelcase */
+      return dispatch({
+        type: 'FETCH_OBJECTS_SUCCEEDED',
+        payload: {
+          response: [
+            {
+              id: 'org-id',
+              task: filters.task,
+              type: 'dev',
+              owner: 'o4RJlyN',
+              last_modified: '2019-08-16T12:58:53.721Z',
+              expiration: '2019-09-16T12:58:53.721Z',
+              latest_commit: '617a51',
+              latest_commit_url: '/test/url/',
+              url: '/test/url/',
+              has_changes: true,
+            },
+          ],
+          objectType,
+          url: baseUrl,
+          reset,
+          filters,
+        },
+      });
+      /* eslint-enable @typescript-eslint/camelcase */
+    }
+    if (!baseUrl) {
+      throw new Error(`No URL found for object: ${objectType}`);
+    }
     const response = await apiFetch(
       addUrlParams(baseUrl, { ...filters }),
       dispatch,
@@ -128,12 +168,19 @@ export const fetchObject = ({
   url?: string;
   filters?: ObjectFilters;
 }): ThunkResult => async dispatch => {
-  const baseUrl = url || window.api_urls[`${objectType}_list`]();
+  const urlFn = window.api_urls[`${objectType}_list`];
+  let baseUrl;
+  if (url || urlFn) {
+    baseUrl = url || urlFn();
+  }
   dispatch({
     type: 'FETCH_OBJECT_STARTED',
     payload: { objectType, url: baseUrl, filters },
   });
   try {
+    if (!baseUrl) {
+      throw new Error(`No URL found for object: ${objectType}`);
+    }
     const response = await apiFetch(
       addUrlParams(baseUrl, { ...filters }),
       dispatch,
@@ -157,17 +204,50 @@ export const fetchObject = ({
 
 export const createObject = ({
   objectType,
-  data,
+  data = {},
 }: {
   objectType: ObjectTypes;
   data?: ObjectData;
 }): ThunkResult => async dispatch => {
-  const baseUrl = window.api_urls[`${objectType}_list`]();
+  const urlFn = window.api_urls[`${objectType}_list`];
+  let baseUrl;
+  if (urlFn) {
+    baseUrl = urlFn();
+  }
   dispatch({
     type: 'CREATE_OBJECT_STARTED',
-    payload: { objectType, data },
+    payload: { objectType, url: baseUrl, data },
   });
   try {
+    // @@@ mocked data until API exists...
+    /* istanbul ignore if */
+    if (objectType === 'org') {
+      /* eslint-disable @typescript-eslint/camelcase */
+      return dispatch({
+        type: 'CREATE_OBJECT_SUCCEEDED',
+        payload: {
+          object: {
+            id: 'new-org-id',
+            task: 'YRE8B19',
+            type: 'qa',
+            owner: 'o4RJlyN',
+            last_modified: new Date().toISOString(),
+            expiration: '2019-10-16T12:58:53.721Z',
+            latest_commit: 'c6b2ce8',
+            latest_commit_url: '/test/url/',
+            url: '/test/url/',
+            has_changes: false,
+          },
+          data,
+          objectType,
+          url: baseUrl,
+        },
+      });
+      /* eslint-enable @typescript-eslint/camelcase */
+    }
+    if (!baseUrl) {
+      throw new Error(`No URL found for object: ${objectType}`);
+    }
     const object = await apiFetch(addUrlParams(baseUrl), dispatch, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -177,12 +257,12 @@ export const createObject = ({
     });
     return dispatch({
       type: 'CREATE_OBJECT_SUCCEEDED',
-      payload: { data, object, objectType },
+      payload: { data, object, url: baseUrl, objectType },
     });
   } catch (err) {
     dispatch({
       type: 'CREATE_OBJECT_FAILED',
-      payload: { objectType, data },
+      payload: { objectType, url: baseUrl, data },
     });
     throw err;
   }

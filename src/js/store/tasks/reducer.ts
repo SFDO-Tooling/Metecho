@@ -1,4 +1,5 @@
 import { ObjectsAction } from '@/store/actions';
+import { Org } from '@/store/orgs/reducer';
 import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
@@ -9,6 +10,8 @@ export interface Task {
   old_slugs: string[];
   project: string;
   description: string;
+  dev_org: Org | null;
+  qa_org: Org | null;
   branch_url?: string;
 }
 

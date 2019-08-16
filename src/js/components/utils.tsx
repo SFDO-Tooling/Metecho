@@ -21,6 +21,7 @@ import TaskNotFound from '@/components/tasks/task404';
 import { AppState, ThunkDispatch } from '@/store';
 import { createObject, fetchObject, fetchObjects } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
+import { selectOrgsByTask } from '@/store/orgs/selectors';
 import { Project } from '@/store/projects/reducer';
 import {
   selectProject,
@@ -176,7 +177,7 @@ export const ExternalLink = ({
         <Icon
           path={`${githubIcon}#github`}
           size="xx-small"
-          className="slds-m-bottom_xx-small"
+          className="icon-link slds-m-bottom_xx-small"
         />
         {url.slice(GITHUB_REPO_PREFIX.length)}
       </>
@@ -405,6 +406,31 @@ export const useFetchTasksIfMissing = (
   }, [dispatch, project, tasks]);
 
   return { tasks };
+};
+
+export const useFetchOrgsIfMissing = (
+  task: Task | null | undefined,
+  routeProps: RouteComponentProps,
+) => {
+  const dispatch = useDispatch<ThunkDispatch>();
+  const selectOrgsWithProps = useCallback(selectOrgsByTask, []);
+  const orgs = useSelector((state: AppState) =>
+    selectOrgsWithProps(state, routeProps),
+  );
+
+  useEffect(() => {
+    if (task && !orgs) {
+      // Fetch orgs from API
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.ORG,
+          filters: { task: task.id },
+        }),
+      );
+    }
+  }, [dispatch, task, orgs]);
+
+  return { orgs };
 };
 
 export const useForm = ({
