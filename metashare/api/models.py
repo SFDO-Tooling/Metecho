@@ -236,12 +236,12 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     url = models.URLField()
     has_changes = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pragma: nocover
         if self.id is None:
             self.create_scratch_org_on_sf()
         super().save(*args, **kwargs)
 
-    def create_scratch_org_on_sf(self):
+    def create_scratch_org_on_sf(self):  # pragma: nocover
         pass
 
 
