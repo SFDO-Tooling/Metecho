@@ -64,19 +64,19 @@ const defaultState = {
   },
   orgs: {
     task1: {
-      dev: {
+      Dev: {
         id: 'org-id',
         task: 'task1',
-        type: 'dev',
+        org_type: 'Dev',
         owner: 'user-id',
-        last_modified: '2019-08-16T12:58:53.721Z',
-        expiration: '2019-09-16T12:58:53.721Z',
+        last_modified_at: '2019-08-16T12:58:53.721Z',
+        expires_at: '2019-09-16T12:58:53.721Z',
         latest_commit: '617a51',
         latest_commit_url: '/test/commit/url/',
         url: '/test/org/url/',
         has_changes: true,
       },
-      qa: null,
+      QA: null,
     },
   },
 };
@@ -205,7 +205,7 @@ describe('<TaskDetail/>', () => {
       expect(queryByText('Task Orgs')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { task: 'task1' },
-        objectType: 'org',
+        objectType: 'scratch_org',
       });
     });
   });

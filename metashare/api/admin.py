@@ -6,6 +6,7 @@ from .models import (
     ProjectSlug,
     Repository,
     RepositorySlug,
+    ScratchOrg,
     Task,
     TaskSlug,
     User,
@@ -51,3 +52,8 @@ class TaskAdmin(admin.ModelAdmin):
 @admin.register(TaskSlug)
 class TaskSlugAdmin(admin.ModelAdmin):
     list_display = ("slug", "parent")
+
+
+@admin.register(ScratchOrg)
+class ScratchOrgAdmin(admin.ModelAdmin):
+    list_display = ("org_type", "owner", "task")

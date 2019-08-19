@@ -12,14 +12,14 @@ describe('reducer', () => {
     const org1 = {
       id: 'org-id',
       task: 'task-id',
-      type: 'dev',
+      org_type: 'Dev',
     };
     const expected = {};
     const actual = reducer(
       {
         'task-id': {
-          dev: org1,
-          qa: null,
+          Dev: org1,
+          QA: null,
         },
       },
       { type: 'USER_LOGGED_OUT' },
@@ -33,40 +33,40 @@ describe('reducer', () => {
       const org1 = {
         id: 'org-id',
         task: 'task-1',
-        type: 'dev',
+        org_type: 'Dev',
       };
       const org2 = {
         id: 'org-id-2',
         task: 'task-1',
-        type: 'qa',
+        org_type: 'QA',
       };
       const badOrg = {
         id: 'this-should-not-happen',
         task: 'task-1',
-        type: 'qa',
+        org_type: 'QA',
       };
       const expected = {
         'task-1': {
-          dev: org1,
-          qa: org2,
+          Dev: org1,
+          QA: org2,
         },
         'task-2': {
-          dev: null,
-          qa: null,
+          Dev: null,
+          QA: null,
         },
       };
       const actual = reducer(
         {
           'task-2': {
-            dev: null,
-            qa: null,
+            Dev: null,
+            QA: null,
           },
         },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
             response: [org1, org2, badOrg],
-            objectType: 'org',
+            objectType: 'scratch_org',
             filters: { task: 'task-1' },
           },
         },
@@ -78,8 +78,8 @@ describe('reducer', () => {
     test('stores null if no org for task', () => {
       const expected = {
         'task-1': {
-          dev: null,
-          qa: null,
+          Dev: null,
+          QA: null,
         },
       };
       const actual = reducer(
@@ -88,7 +88,7 @@ describe('reducer', () => {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
             response: [],
-            objectType: 'org',
+            objectType: 'scratch_org',
             filters: { task: 'task-1' },
           },
         },
@@ -97,11 +97,11 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
 
-    test('ignores if objectType !== "org"', () => {
+    test('ignores if objectType !== "scratch_org"', () => {
       const org = {
         id: 'org-id',
         task: 'task-1',
-        type: 'dev',
+        org_type: 'Dev',
       };
       const expected = {};
       const actual = reducer(expected, {
@@ -122,12 +122,12 @@ describe('reducer', () => {
       const org = {
         id: 'org-id',
         task: 'task-1',
-        type: 'dev',
+        org_type: 'Dev',
       };
       const expected = {
         'task-1': {
-          dev: org,
-          qa: null,
+          Dev: org,
+          QA: null,
         },
       };
       const actual = reducer(
@@ -136,7 +136,7 @@ describe('reducer', () => {
           type: 'CREATE_OBJECT_SUCCEEDED',
           payload: {
             object: org,
-            objectType: 'org',
+            objectType: 'scratch_org',
           },
         },
       );
@@ -144,11 +144,11 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
 
-    test('ignores if objectType !== "org"', () => {
+    test('ignores if objectType !== "scratch_org"', () => {
       const org = {
         id: 'org-id',
         task: 'task-1',
-        type: 'dev',
+        org_type: 'Dev',
       };
       const expected = {};
       const actual = reducer(expected, {

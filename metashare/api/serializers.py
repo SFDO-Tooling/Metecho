@@ -121,10 +121,19 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class ScratchOrgSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    task = serializers.PrimaryKeyRelatedField(
+        queryset=Task.objects.all(), pk_field=serializers.CharField()
+    )
+    owner = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), pk_field=serializers.CharField()
+    )
+
     class Meta:
         model = ScratchOrg
         fields = (
             "id",
+            "task",
             "org_type",
             "owner",
             "last_modified_at",

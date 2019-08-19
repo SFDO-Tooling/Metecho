@@ -217,6 +217,9 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
 
     slug_class = TaskSlug
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)

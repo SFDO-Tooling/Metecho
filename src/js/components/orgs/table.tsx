@@ -14,10 +14,9 @@ import { ThunkDispatch } from '@/store';
 import { createObject } from '@/store/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 interface Item extends Org {
-  displayType: OrgTypes;
   ownedByCurrentUser: boolean;
   isNull: boolean;
 }
@@ -42,10 +41,10 @@ const TypeDataCell = ({
   isCreatingOrg: OrgTypes | null;
 }) => {
   const doCreateOrg = useCallback(() => {
-    createOrg((item as Item).type);
+    createOrg((item as Item).org_type);
   }, [createOrg, item]);
   let icon;
-  const isCreating = item && isCreatingOrg === item.type;
+  const isCreating = item && isCreatingOrg === item.org_type;
   if (isCreating) {
     icon = (
       <span className="slds-is-relative slds-m-horizontal_x-small">
@@ -82,7 +81,7 @@ const TypeDataCell = ({
   }
   return (
     <DataTableCell
-      title={isCreating ? i18n.t('Creating Org…') : item && item.displayType}
+      title={isCreating ? i18n.t('Creating Org…') : item && item.org_type}
       {...props}
     >
       {icon}
@@ -107,14 +106,14 @@ const AccessOrgCell = ({ item, ...props }: DataCellProps) =>
 AccessOrgCell.displayName = DataTableCell.displayName;
 
 const LastModifiedTableCell = ({ item, ...props }: DataCellProps) => {
-  if (!item || item.isNull || !item.last_modified) {
+  if (!item || item.isNull || !item.last_modified_at) {
     return (
       <DataTableCell {...props}>
         <EmptyIcon />
       </DataTableCell>
     );
   }
-  const date = new Date(item.last_modified);
+  const date = new Date(item.last_modified_at);
   return (
     <DataTableCell title={format(date, 'PPpp')} {...props}>
       {formatDistanceToNow(date, { addSuffix: true })}
@@ -133,14 +132,14 @@ const LastModifiedTableCell = ({ item, ...props }: DataCellProps) => {
 LastModifiedTableCell.displayName = DataTableCell.displayName;
 
 const ExpirationDataCell = ({ item, ...props }: DataCellProps) => {
-  if (!item || item.isNull || !item.expiration) {
+  if (!item || item.isNull || !item.expires_at) {
     return (
       <DataTableCell {...props}>
         <EmptyIcon />
       </DataTableCell>
     );
   }
-  const date = new Date(item.expiration);
+  const date = new Date(item.expires_at);
   return (
     <DataTableCell title={format(date, 'PPpp')} {...props}>
       {formatDistanceToNow(date, { addSuffix: true })}
@@ -173,14 +172,20 @@ const StatusTableCell = ({ item, ...props }: DataCellProps) => {
 };
 StatusTableCell.displayName = DataTableCell.displayName;
 
-const OrgsTable = ({ orgs }: { orgs: OrgsByTask }) => {
+const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
   const user = useSelector(selectUserState);
   const isMounted = useIsMounted();
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypes | null>(null);
   const dispatch = useDispatch<ThunkDispatch>();
   const createOrg = useCallback((type: OrgTypes) => {
     setIsCreatingOrg(type);
-    dispatch(createObject({ objectType: 'org' })).finally(() => {
+    dispatch(
+      createObject({
+        objectType: OBJECT_TYPES.ORG,
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        data: { task, org_type: type },
+      }),
+    ).finally(() => {
       /* istanbul ignore else */
       if (isMounted.current) {
         setIsCreatingOrg(null);
@@ -192,22 +197,24 @@ const OrgsTable = ({ orgs }: { orgs: OrgsByTask }) => {
   const qaOrg = orgs[ORG_TYPES.QA];
   const currentUserOwnsDevOrg = user && devOrg && user.id === devOrg.owner;
   const currentUserOwnsQAOrg = user && qaOrg && user.id === qaOrg.owner;
+  /* eslint-disable @typescript-eslint/camelcase */
   const items = [
     {
-      displayType: i18n.t('Dev'),
+      org_type: ORG_TYPES.DEV,
       ownedByCurrentUser: currentUserOwnsDevOrg,
       id: ORG_TYPES.DEV,
       isNull: devOrg === null,
       ...devOrg,
     },
     {
-      displayType: i18n.t('QA'),
+      org_type: ORG_TYPES.QA,
       ownedByCurrentUser: currentUserOwnsQAOrg,
       id: ORG_TYPES.QA,
       isNull: qaOrg === null,
       ...qaOrg,
     },
   ];
+  /* eslint-enable @typescript-eslint/camelcase */
   return (
     <>
       <h2 className="slds-text-heading_medium slds-m-bottom_small">
@@ -215,9 +222,9 @@ const OrgsTable = ({ orgs }: { orgs: OrgsByTask }) => {
       </h2>
       <DataTable items={items} id="task-orgs-table" noRowHover>
         <DataTableColumn
-          key="type"
+          key="org_type"
           label={i18n.t('Type')}
-          property="displayType"
+          property="org_type"
           primaryColumn
         >
           <TypeDataCell createOrg={createOrg} isCreatingOrg={isCreatingOrg} />
@@ -228,16 +235,16 @@ const OrgsTable = ({ orgs }: { orgs: OrgsByTask }) => {
           </DataTableColumn>
         )}
         <DataTableColumn
-          key="last_modified"
+          key="last_modified_at"
           label={i18n.t('Last Modified')}
-          property="last_modified"
+          property="last_modified_at"
         >
           <LastModifiedTableCell />
         </DataTableColumn>
         <DataTableColumn
-          key="expiration"
+          key="expires_at"
           label={i18n.t('Expires')}
-          property="expiration"
+          property="expires_at"
         >
           <ExpirationDataCell />
         </DataTableColumn>

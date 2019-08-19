@@ -10,10 +10,10 @@ import {
 export interface Org {
   id: string;
   task: string;
-  type: OrgTypes;
+  org_type: OrgTypes;
   owner: string;
-  last_modified: string;
-  expiration: string;
+  last_modified_at: string;
+  expires_at: string;
   latest_commit: string;
   latest_commit_url: string;
   url: string;
@@ -50,11 +50,15 @@ const reducer = (
           [task]: {
             [ORG_TYPES.DEV]:
               (response &&
-                (response as Org[]).find(org => org.type === ORG_TYPES.DEV)) ||
+                (response as Org[]).find(
+                  org => org.org_type === ORG_TYPES.DEV,
+                )) ||
               null,
             [ORG_TYPES.QA]:
               (response &&
-                (response as Org[]).find(org => org.type === ORG_TYPES.QA)) ||
+                (response as Org[]).find(
+                  org => org.org_type === ORG_TYPES.QA,
+                )) ||
               null,
           },
         };
@@ -75,7 +79,7 @@ const reducer = (
           ...orgs,
           [object.task]: {
             ...taskOrgs,
-            [object.type]: object,
+            [object.org_type]: object,
           },
         };
       }

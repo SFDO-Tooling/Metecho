@@ -110,35 +110,6 @@ export const fetchObjects = ({
     payload: { objectType, url: baseUrl, reset, filters },
   });
   try {
-    // @@@ mocked data until API exists...
-    /* istanbul ignore if */
-    if (objectType === 'org') {
-      /* eslint-disable @typescript-eslint/camelcase */
-      return dispatch({
-        type: 'FETCH_OBJECTS_SUCCEEDED',
-        payload: {
-          response: [
-            {
-              id: 'org-id',
-              task: filters.task,
-              type: 'dev',
-              owner: 'o4RJlyN',
-              last_modified: '2019-08-16T12:58:53.721Z',
-              expiration: '2019-09-16T12:58:53.721Z',
-              latest_commit: '617a51',
-              latest_commit_url: '/test/url/',
-              url: '/test/url/',
-              has_changes: true,
-            },
-          ],
-          objectType,
-          url: baseUrl,
-          reset,
-          filters,
-        },
-      });
-      /* eslint-enable @typescript-eslint/camelcase */
-    }
     if (!baseUrl) {
       throw new Error(`No URL found for object: ${objectType}`);
     }
@@ -219,32 +190,6 @@ export const createObject = ({
     payload: { objectType, url: baseUrl, data },
   });
   try {
-    // @@@ mocked data until API exists...
-    /* istanbul ignore if */
-    if (objectType === 'org') {
-      /* eslint-disable @typescript-eslint/camelcase */
-      return dispatch({
-        type: 'CREATE_OBJECT_SUCCEEDED',
-        payload: {
-          object: {
-            id: 'new-org-id',
-            task: 'YRE8B19',
-            type: 'qa',
-            owner: 'o4RJlyN',
-            last_modified: new Date().toISOString(),
-            expiration: '2019-10-16T12:58:53.721Z',
-            latest_commit: 'c6b2ce8',
-            latest_commit_url: '/test/url/',
-            url: '/test/url/',
-            has_changes: false,
-          },
-          data,
-          objectType,
-          url: baseUrl,
-        },
-      });
-      /* eslint-enable @typescript-eslint/camelcase */
-    }
     if (!baseUrl) {
       throw new Error(`No URL found for object: ${objectType}`);
     }

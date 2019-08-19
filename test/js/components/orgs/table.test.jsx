@@ -18,19 +18,19 @@ afterEach(() => {
 });
 
 const defaultOrgs = {
-  dev: {
+  Dev: {
     id: 'org-id',
     task: 'task-id',
-    type: 'dev',
+    org_type: 'Dev',
     owner: 'user-id',
-    last_modified: '2019-08-16T12:58:53.721Z',
-    expiration: '2019-09-16T12:58:53.721Z',
+    last_modified_at: '2019-08-16T12:58:53.721Z',
+    expires_at: '2019-09-16T12:58:53.721Z',
     latest_commit: '617a51',
     latest_commit_url: '/test/commit/url/',
     url: '/test/org/url/',
     has_changes: true,
   },
-  qa: null,
+  QA: null,
 };
 const defaultState = {
   user: {
@@ -48,7 +48,7 @@ describe('<OrgsTable/>', () => {
     const { initialState, orgs } = opts;
     return renderWithRedux(
       <MemoryRouter>
-        <OrgsTable orgs={orgs} />
+        <OrgsTable orgs={orgs} task="task-id" />
       </MemoryRouter>,
       initialState,
       storeWithThunk,
@@ -69,10 +69,10 @@ describe('<OrgsTable/>', () => {
     test('renders table with orgs', () => {
       const orgs = {
         ...defaultOrgs,
-        dev: null,
-        qa: {
+        Dev: null,
+        QA: {
           ...defaultOrgs.dev,
-          type: 'qa',
+          org_type: 'QA',
           owner: 'other-user',
           has_changes: false,
         },
@@ -91,7 +91,11 @@ describe('<OrgsTable/>', () => {
       fireEvent.click(getByTitle('Create New Org'));
 
       expect(createObject).toHaveBeenCalledWith({
-        objectType: 'org',
+        objectType: 'scratch_org',
+        data: {
+          org_type: 'QA',
+          task: 'task-id',
+        },
       });
     });
   });

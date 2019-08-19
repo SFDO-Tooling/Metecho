@@ -134,7 +134,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        {orgs ? <OrgsTable orgs={orgs} /> : <Spinner />}
+        {orgs ? <OrgsTable orgs={orgs} task={task.id} /> : <Spinner />}
       </DetailPageLayout>
     </DocumentTitle>
   );
