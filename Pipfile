@@ -4,7 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-Sphinx = "==2.1.2"
+Sphinx = "==2.2.0"
 black = "==19.3b0"
 coveralls = "==1.8.2"
 django-extensions = "==2.2.1"
