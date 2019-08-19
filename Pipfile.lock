@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bed9fdbcfb41bf863ff4a70458d777ac044a0e895b1c4748a67ce1139e3f1c27"
+            "sha256": "b0c03ca6797e1383a38921e92f2df505aba0f5fb06a3b716e5613ec4cc847074"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -452,10 +452,10 @@
         },
         "newrelic": {
             "hashes": [
-                "sha256:0685dea97cc7d3d15cd52779e13f8bc4aea3f67fd5bd5620873b48b55c935130"
+                "sha256:9d6d3bf2e125410d485fd91279e1b0f50e8f0f5887284b345aed4ec81db33c0a"
             ],
             "index": "pypi",
-            "version": "==5.0.1.125"
+            "version": "==5.0.2.126"
         },
         "oauthlib": {
             "hashes": [
