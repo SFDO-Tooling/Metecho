@@ -17,6 +17,7 @@ import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 interface Item extends Org {
+  displayType: OrgTypes;
   ownedByCurrentUser: boolean;
   isNull: boolean;
 }
@@ -81,7 +82,7 @@ const TypeDataCell = ({
   }
   return (
     <DataTableCell
-      title={isCreating ? i18n.t('Creating Org…') : item && item.org_type}
+      title={isCreating ? i18n.t('Creating Org…') : item && item.displayType}
       {...props}
     >
       {icon}
@@ -200,14 +201,14 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
   /* eslint-disable @typescript-eslint/camelcase */
   const items = [
     {
-      org_type: ORG_TYPES.DEV,
+      displayType: i18n.t('Dev'),
       ownedByCurrentUser: currentUserOwnsDevOrg,
       id: ORG_TYPES.DEV,
       isNull: devOrg === null,
       ...devOrg,
     },
     {
-      org_type: ORG_TYPES.QA,
+      displayType: i18n.t('QA'),
       ownedByCurrentUser: currentUserOwnsQAOrg,
       id: ORG_TYPES.QA,
       isNull: qaOrg === null,
@@ -222,9 +223,9 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
       </h2>
       <DataTable items={items} id="task-orgs-table" noRowHover>
         <DataTableColumn
-          key="org_type"
+          key="displayType"
           label={i18n.t('Type')}
-          property="org_type"
+          property="displayType"
           primaryColumn
         >
           <TypeDataCell createOrg={createOrg} isCreatingOrg={isCreatingOrg} />
