@@ -1,7 +1,5 @@
 #!/bin/sh
 # Use the presence of $PORT as a proxy for "are we local or Heroku?"
-python manage.py collectstatic --noinput
-
 if [ -z ${PORT+x} ];
 then
     # PORT unset, we presume this is local dev:

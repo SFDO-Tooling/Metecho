@@ -40,5 +40,6 @@ RUN yarn install --check-files
 # if we override settings at runtime to be the local-dev settings, we'll build
 # and use local-dev assets.
 RUN yarn prod
+RUN python manage.py collectstatic --noinput 
 
 CMD /start-server.sh
