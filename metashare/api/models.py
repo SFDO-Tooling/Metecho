@@ -1,9 +1,6 @@
 import requests
 from allauth.account.signals import user_logged_in
 from cryptography.fernet import InvalidToken
-from cumulusci.core.config import OrgConfig, ServiceConfig
-from cumulusci.core.runtime import BaseCumulusCI
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
@@ -20,10 +17,6 @@ from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 from . import gh
 from . import model_mixins as mixins
 from .constants import ORGANIZATION_DETAILS
-
-# from cumulusci.core.config import OrgConfig, ServiceConfig
-# from cumulusci.core.runtime import BaseCumulusCI
-# from django.conf import settings
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
@@ -242,7 +235,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     url = models.URLField()
     has_changes = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):  # pragma: nocover
+    def save(self, *args, **kwargs):
         if self.id is None:
             self.create_scratch_org_on_sf()
         super().save(*args, **kwargs)

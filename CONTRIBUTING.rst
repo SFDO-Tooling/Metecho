@@ -21,6 +21,9 @@ Docker-based development
    Edit this file to change ``DJANGO_SECRET_KEY`` and ``DJANGO_HASHID_SALT`` to
    any two different arbitrary string values.
 
+   Generate your own ``GITHUB_TOKEN`` with "public_repo" permissions at
+   https://github.com/settings/tokens.
+
    Next, run the following commands to generate a database encryption key::
 
     $ pip install cryptography

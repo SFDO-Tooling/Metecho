@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..models import Project, Repository, user_logged_in_handler
+from ..models import Project, Repository, Task, user_logged_in_handler
 
 
 @pytest.mark.django_db
@@ -29,6 +29,13 @@ class TestProject:
         repository = repository_factory()
         project = Project(name="Test Project", repository=repository)
         assert str(project) == "Test Project"
+
+
+@pytest.mark.django_db
+class TestTask:
+    def test_str(self):
+        task = Task(name="Test Task")
+        assert str(task) == "Test Task"
 
 
 @pytest.mark.django_db
