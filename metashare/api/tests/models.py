@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -33,53 +33,78 @@ class TestProject:
 
 @pytest.mark.django_db
 class TestUser:
-    def test_org_name(self, user_factory):
+    def test_org_name(self, user_factory, social_account_factory):
         user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.org_name == "Sample Org"
 
         user.socialaccount_set.all().delete()
         assert user.org_name is None
 
-    def test_org_type(self, user_factory):
+    def test_org_type(self, user_factory, social_account_factory):
         user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.org_type == "Developer Edition"
 
         user.socialaccount_set.all().delete()
         assert user.org_type is None
 
-    def test_social_account(self, user_factory):
+    def test_social_account(self, user_factory, social_account_factory):
         user = user_factory()
-        assert user.social_account is not None
-        assert user.social_account == user.socialaccount_set.first()
+        social_account_factory(user=user, provider="salesforce-production")
+        assert user.salesforce_account is not None
+        assert (
+            user.salesforce_account
+            == user.socialaccount_set.filter(provider="salesforce-production").first()
+        )
 
         user.socialaccount_set.all().delete()
-        assert user.social_account is None
+        assert user.salesforce_account is None
 
-    def test_instance_url(self, user_factory):
+    def test_instance_url(self, user_factory, social_account_factory):
         user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.instance_url == "https://example.com"
 
         user.socialaccount_set.all().delete()
         assert user.instance_url is None
 
-    def test_token(self, user_factory):
+    def test_token(self, user_factory, social_account_factory):
         user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.token == ("0123456789abcdef", "secret.0123456789abcdef")
 
         user.socialaccount_set.all().delete()
         assert user.token == (None, None)
 
-    def test_valid_token_for(self, user_factory):
+    def test_token__invalid(
+        self, user_factory, social_token_factory, social_account_factory
+    ):
         user = user_factory()
+        social_account = social_account_factory(
+            socialtoken_set=[], user=user, provider="salesforce-production"
+        )
+        social_token_factory(token="an invalid token", account=social_account)
+        assert user.token == (None, None)
+
+        user.socialaccount_set.all().delete()
+        assert user.token == (None, None)
+
+    def test_valid_token_for(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.valid_token_for == "00Dxxxxxxxxxxxxxxx"
 
-        user.socialaccount_set.first().socialtoken_set.all().delete()
+        user.socialaccount_set.filter(
+            provider="salesforce-production"
+        ).first().socialtoken_set.all().delete()
         assert user.valid_token_for is None
 
     def test_full_org_type(self, user_factory, social_account_factory):
         user = user_factory(socialaccount_set=[])
         social_account_factory(
             user=user,
+            provider="salesforce-production",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -95,6 +120,7 @@ class TestUser:
         user = user_factory(socialaccount_set=[])
         social_account_factory(
             user=user,
+            provider="salesforce-production",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -110,6 +136,7 @@ class TestUser:
         user = user_factory(socialaccount_set=[])
         social_account_factory(
             user=user,
+            provider="salesforce-production",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -125,6 +152,7 @@ class TestUser:
         user = user_factory(socialaccount_set=[])
         social_account_factory(
             user=user,
+            provider="salesforce-production",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -139,6 +167,85 @@ class TestUser:
 
         user = user_factory(socialaccount_set=[])
         assert user.full_org_type is None
+
+    def test_is_devhub_enabled__shortcut_none(
+        self, user_factory, social_account_factory
+    ):
+        user = user_factory()
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Something",
+                    "IsSandbox": True,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        assert user.is_devhub_enabled is None
+
+    def test_is_devhub_enabled__true(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Production",
+                    "IsSandbox": False,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        with patch("metashare.api.models.requests.get") as get:
+            response = MagicMock(status_code=200)
+            get.return_value = response
+            assert user.is_devhub_enabled
+
+    def test_is_devhub_enabled__false(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Production",
+                    "IsSandbox": False,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        with patch("metashare.api.models.requests.get") as get:
+            response = MagicMock(status_code=404)
+            get.return_value = response
+            assert not user.is_devhub_enabled
+
+    def test_is_devhub_enabled__final_none(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={
+                "instance_url": "https://example.com",
+                "organization_details": {
+                    "Name": "Sample Org",
+                    "OrganizationType": "Production",
+                    "IsSandbox": False,
+                    "TrialExpirationDate": None,
+                },
+            },
+        )
+        with patch("metashare.api.models.requests.get") as get:
+            response = MagicMock(status_code=401)
+            get.return_value = response
+            assert user.is_devhub_enabled is None
 
 
 @pytest.mark.django_db

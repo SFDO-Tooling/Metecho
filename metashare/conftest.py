@@ -28,7 +28,7 @@ class SocialTokenFactory(factory.django.DjangoModelFactory):
         model = SocialToken
 
     token = fernet_encrypt("0123456789abcdef")
-    token_secret = fernet_encrypt("secret.0123456789abcdef")
+    token_secret = "secret.0123456789abcdef"
     app = factory.SubFactory(SocialAppFactory)
 
 

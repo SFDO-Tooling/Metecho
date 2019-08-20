@@ -47,6 +47,17 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class UserDisconnectSFView(CurrentUserObjectMixin, APIView):
+    model = User
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        user = self.get_object()
+        user.invalidate_salesforce_credentials()
+        serializer = FullUserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = MinimalUserSerializer

@@ -1,10 +1,12 @@
 # http://eslint.org/docs/rules/
 
+parser: '@typescript-eslint/parser'
 parserOptions:
+  sourceType: module
   ecmaFeatures:
     impliedStrict: true
     jsx: true
-  sourceType: module
+  project: ./tsconfig.json
 env:
   browser: true
   commonjs: true

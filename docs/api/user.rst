@@ -18,7 +18,12 @@ Retrieve
 
    {
      "id": "3Lw7OwK",
-     "username": "user@domain.com",
+     "username": "user123",
      "email": "user@domain.com",
-     "is_staff": true
+     "valid_token_for": "00Dxxxxxxxxxxxxxxx",
+     "sf_username": "user@domain.com",
+     "org_name": "OddBird",
+     "org_type": "Developer Edition",
+     "is_devhub_enabled": true,
+     "is_staff": false
    }

@@ -1,12 +1,9 @@
 # http://eslint.org/docs/rules/
 
 root: true
-parser: '@typescript-eslint/parser'
 parserOptions:
-  project: ./tsconfig.json
   sourceType: script
-  ecmaVersion: 2015
-  allowImportExportEverywhere: true
+  ecmaVersion: 2018
 env:
   es6: true
   node: true

@@ -30,8 +30,12 @@ class Command(BaseCommand):
     def create_production_app(self, id, secret):
         self._create_app("production", "https://login.salesforce.com/", id, secret)
 
+    def create_custom_app(self, id, secret):
+        self._create_app("custom", "", id, secret)
+
     def handle(self, *args, **options):
         if options["gh_id"] and options["gh_secret"]:
             self.create_github_app(options["gh_id"], options["gh_secret"])
         if options["sf_id"] and options["sf_secret"]:
             self.create_production_app(options["sf_id"], options["sf_secret"])
+            self.create_custom_app(options["sf_id"], options["sf_secret"])

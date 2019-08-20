@@ -214,3 +214,89 @@ describe('refetchAllData', () => {
     });
   });
 });
+
+describe('disconnect', () => {
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.user_disconnect_sf();
+  });
+
+  describe('success', () => {
+    test('returns updated user', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'me' };
+      fetchMock.postOnce(url, user);
+      const started = { type: 'USER_DISCONNECT_REQUESTED' };
+      const succeeded = { type: 'USER_DISCONNECT_SUCCEEDED', payload: user };
+
+      expect.assertions(1);
+      return store.dispatch(actions.disconnect()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches USER_DISCONNECT_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, 500);
+      const started = { type: 'USER_DISCONNECT_REQUESTED' };
+      const failed = { type: 'USER_DISCONNECT_FAILED' };
+
+      expect.assertions(5);
+      return store.dispatch(actions.disconnect()).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
+describe('refreshDevHubStatus', () => {
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.user();
+  });
+
+  describe('success', () => {
+    test('returns updated user', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'me' };
+      fetchMock.getOnce(url, user);
+      const started = { type: 'DEV_HUB_STATUS_REQUESTED' };
+      const succeeded = { type: 'DEV_HUB_STATUS_SUCCEEDED', payload: user };
+
+      expect.assertions(1);
+      return store.dispatch(actions.refreshDevHubStatus()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches DEV_HUB_STATUS_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.getOnce(url, 500);
+      const started = { type: 'DEV_HUB_STATUS_REQUESTED' };
+      const failed = { type: 'DEV_HUB_STATUS_FAILED' };
+
+      expect.assertions(5);
+      return store.dispatch(actions.refreshDevHubStatus()).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});

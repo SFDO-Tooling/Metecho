@@ -21,7 +21,17 @@ class FullUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "is_staff")
+        fields = (
+            "id",
+            "username",
+            "email",
+            "is_staff",
+            "valid_token_for",
+            "org_name",
+            "org_type",
+            "is_devhub_enabled",
+            "sf_username",
+        )
 
 
 class MinimalUserSerializer(serializers.ModelSerializer):

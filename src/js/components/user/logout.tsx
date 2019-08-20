@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 
 import { logout } from '@/store/user/actions';
 
-const Logout = () => {
+const Logout = (props: any) => {
   const dispatch = useDispatch();
   const doLogout = useCallback(() => {
     dispatch(logout());
@@ -14,11 +14,8 @@ const Logout = () => {
     <Button
       label={i18n.t('Log Out')}
       variant="link"
-      className="slds-m-left_x-large"
-      iconCategory="utility"
-      iconName="logout"
-      iconPosition="left"
       onClick={doLogout}
+      {...props}
     />
   );
 };

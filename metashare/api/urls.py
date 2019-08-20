@@ -5,6 +5,7 @@ from .views import (
     ProjectViewSet,
     RepositoryViewSet,
     TaskViewSet,
+    UserDisconnectSFView,
     UserRefreshView,
     UserView,
     UserViewSet,
@@ -17,5 +18,6 @@ router.register("projects", ProjectViewSet, basename="project")
 router.register("tasks", TaskViewSet, basename="task")
 urlpatterns = router.urls + [
     path("user/", UserView.as_view(), name="user"),
+    path("user/disconnect/", UserDisconnectSFView.as_view(), name="user-disconnect-sf"),
     path("user/refresh/", UserRefreshView.as_view(), name="user-refresh"),
 ]

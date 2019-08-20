@@ -29,18 +29,9 @@ describe('<Header />', () => {
 
   describe('logged out', () => {
     test('renders nothing', () => {
-      const { queryByText } = setup({ user: null, socket: true });
+      const { container } = setup({ user: null, socket: true });
 
-      expect(queryByText('Log In')).toBeNull();
-    });
-  });
-
-  describe('logged in', () => {
-    test('renders profile info and logout', () => {
-      const { getByText } = setup();
-
-      expect(getByText('Test User')).toBeVisible();
-      expect(getByText('Log Out')).toBeVisible();
+      expect(container).toBeEmpty();
     });
   });
 

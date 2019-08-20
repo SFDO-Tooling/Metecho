@@ -15,11 +15,7 @@ from django.core.exceptions import SuspiciousOperation
 from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from ..api.constants import ORGANIZATION_DETAILS
-from .provider import (
-    SalesforceCustomProvider,
-    SalesforceProductionProvider,
-    SalesforceTestProvider,
-)
+from .provider import SalesforceCustomProvider, SalesforceProductionProvider
 
 logger = logging.getLogger(__name__)
 ORGID_RE = re.compile(r"^00D[a-zA-Z0-9]{15}$")
@@ -101,12 +97,6 @@ class SalesforceOAuth2ProductionAdapter(
     provider_id = SalesforceProductionProvider.id
 
 
-class SalesforceOAuth2SandboxAdapter(
-    SalesforceOAuth2Mixin, SalesforceOAuth2BaseAdapter
-):
-    provider_id = SalesforceTestProvider.id
-
-
 class SalesforceOAuth2CustomAdapter(SalesforceOAuth2Mixin, SalesforceOAuth2BaseAdapter):
     provider_id = SalesforceCustomProvider.id
 
@@ -149,12 +139,6 @@ prod_oauth2_login = LoggingOAuth2LoginView.adapter_view(
 )
 prod_oauth2_callback = LoggingOAuth2CallbackView.adapter_view(
     SalesforceOAuth2ProductionAdapter
-)
-sandbox_oauth2_login = LoggingOAuth2LoginView.adapter_view(
-    SalesforceOAuth2SandboxAdapter
-)
-sandbox_oauth2_callback = LoggingOAuth2CallbackView.adapter_view(
-    SalesforceOAuth2SandboxAdapter
 )
 custom_oauth2_login = LoggingOAuth2LoginView.adapter_view(SalesforceOAuth2CustomAdapter)
 custom_oauth2_callback = LoggingOAuth2CallbackView.adapter_view(

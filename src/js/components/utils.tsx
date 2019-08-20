@@ -75,7 +75,7 @@ export const DetailPageLayout = ({
       <PageHeader
         className="page-header slds-p-around_x-large"
         title={title}
-        info={<RepoLink url={repoUrl} shortenGithub />}
+        info={<ExternalLink url={repoUrl} shortenGithub />}
         onRenderControls={onRenderHeaderActions}
       />
       <div
@@ -161,7 +161,7 @@ export const LabelWithSpinner = ({
   </>
 );
 
-export const RepoLink = ({
+export const ExternalLink = ({
   url,
   shortenGithub = false,
   children,

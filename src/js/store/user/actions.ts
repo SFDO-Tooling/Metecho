@@ -11,13 +11,34 @@ interface LoginAction {
 export interface LogoutAction {
   type: 'USER_LOGGED_OUT';
 }
-interface RefecthDataAction {
+interface RefetchDataAction {
   type:
     | 'REFETCH_DATA_STARTED'
     | 'REFETCH_DATA_SUCCEEDED'
     | 'REFETCH_DATA_FAILED';
 }
-export type UserAction = LoginAction | LogoutAction | RefecthDataAction;
+interface DisconnectSucceeded {
+  type: 'USER_DISCONNECT_SUCCEEDED';
+  payload: User;
+}
+interface DisconnectAction {
+  type: 'USER_DISCONNECT_REQUESTED' | 'USER_DISCONNECT_FAILED';
+}
+interface RefreshDevHubSucceeded {
+  type: 'DEV_HUB_STATUS_SUCCEEDED';
+  payload: User;
+}
+interface RefreshDevHubAction {
+  type: 'DEV_HUB_STATUS_REQUESTED' | 'DEV_HUB_STATUS_FAILED';
+}
+export type UserAction =
+  | LoginAction
+  | LogoutAction
+  | RefetchDataAction
+  | DisconnectAction
+  | DisconnectSucceeded
+  | RefreshDevHubAction
+  | RefreshDevHubSucceeded;
 
 export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
@@ -68,6 +89,34 @@ export const refetchAllData = (): ThunkResult => async dispatch => {
     );
   } catch (err) {
     dispatch({ type: 'REFETCH_DATA_FAILED' });
+    throw err;
+  }
+};
+
+export const disconnect = (): ThunkResult => async dispatch => {
+  dispatch({ type: 'USER_DISCONNECT_REQUESTED' });
+  try {
+    const payload = await apiFetch(
+      window.api_urls.user_disconnect_sf(),
+      dispatch,
+      {
+        method: 'POST',
+      },
+    );
+    return dispatch({ type: 'USER_DISCONNECT_SUCCEEDED', payload });
+  } catch (err) {
+    dispatch({ type: 'USER_DISCONNECT_FAILED' });
+    throw err;
+  }
+};
+
+export const refreshDevHubStatus = (): ThunkResult => async dispatch => {
+  dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
+  try {
+    const payload = await apiFetch(window.api_urls.user(), dispatch);
+    return dispatch({ type: 'DEV_HUB_STATUS_SUCCEEDED', payload });
+  } catch (err) {
+    dispatch({ type: 'DEV_HUB_STATUS_FAILED' });
     throw err;
   }
 };

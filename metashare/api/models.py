@@ -1,9 +1,12 @@
+import requests
 from allauth.account.signals import user_logged_in
+from cryptography.fernet import InvalidToken
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 from model_utils import Choices
 
@@ -36,13 +39,16 @@ class User(mixins.HashIdMixin, AbstractUser):
             [GitHubRepository(user=self, url=repo) for repo in repos]
         )
 
+    def invalidate_salesforce_credentials(self):
+        self.socialaccount_set.filter(provider__startswith="salesforce-").delete()
+
     def subscribable_by(self, user):
         return self == user
 
     def _get_org_property(self, key):
         try:
-            return self.social_account.extra_data[ORGANIZATION_DETAILS][key]
-        except (AttributeError, KeyError):
+            return self.salesforce_account.extra_data[ORGANIZATION_DETAILS][key]
+        except (AttributeError, KeyError, TypeError):
             return None
 
     @property
@@ -76,26 +82,55 @@ class User(mixins.HashIdMixin, AbstractUser):
     @property
     def instance_url(self):
         try:
-            return self.social_account.extra_data["instance_url"]
+            return self.salesforce_account.extra_data["instance_url"]
+        except (AttributeError, KeyError):
+            return None
+
+    @property
+    def sf_username(self):
+        try:
+            return self.salesforce_account.extra_data["preferred_username"]
         except (AttributeError, KeyError):
             return None
 
     @property
     def token(self):
-        account = self.social_account
+        account = self.salesforce_account
         if account and account.socialtoken_set.exists():
-            token = self.social_account.socialtoken_set.first()
-            return (fernet_decrypt(token.token), fernet_decrypt(token.token_secret))
+            token = self.salesforce_account.socialtoken_set.first()
+            try:
+                return (
+                    fernet_decrypt(token.token) if token.token else None,
+                    token.token_secret if token.token_secret else None,
+                )
+            except InvalidToken:
+                return (None, None)
         return (None, None)
 
     @property
-    def social_account(self):
-        return self.socialaccount_set.first()
+    def salesforce_account(self):
+        return self.socialaccount_set.filter(provider__startswith="salesforce-").first()
 
     @property
     def valid_token_for(self):
         if all(self.token) and self.org_id:
             return self.org_id
+        return None
+
+    @cached_property
+    def is_devhub_enabled(self):
+        # We can shortcut and avoid making an HTTP request in some cases:
+        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox, None):
+            return None
+
+        token, _ = self.token
+        instance_url = self.salesforce_account.extra_data["instance_url"]
+        url = f"{instance_url}/services/data/v45.0/sobjects/ScratchOrgInfo"
+        resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
+        if resp.status_code == 200:
+            return True
+        if resp.status_code == 404:
+            return False
         return None
 
 
