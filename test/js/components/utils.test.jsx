@@ -67,6 +67,7 @@ describe('useForm', () => {
       data: {
         testing: '',
       },
+      hasForm: true,
     });
   });
 });

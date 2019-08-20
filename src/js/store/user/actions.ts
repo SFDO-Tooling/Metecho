@@ -58,8 +58,12 @@ export const login = (payload: User): LoginAction => {
 };
 
 export const logout = (): ThunkResult => dispatch =>
-  apiFetch(window.api_urls.account_logout(), dispatch, {
-    method: 'POST',
+  apiFetch({
+    url: window.api_urls.account_logout(),
+    dispatch,
+    opts: {
+      method: 'POST',
+    },
   }).then(() => {
     /* istanbul ignore else */
     if (window.socket) {
@@ -74,11 +78,11 @@ export const logout = (): ThunkResult => dispatch =>
 export const refetchAllData = (): ThunkResult => async dispatch => {
   dispatch({ type: 'REFETCH_DATA_STARTED' });
   try {
-    const payload = await apiFetch(window.api_urls.user(), dispatch, {}, [
-      401,
-      403,
-      404,
-    ]);
+    const payload = await apiFetch({
+      url: window.api_urls.user(),
+      dispatch,
+      suppressErrorsOn: [401, 403, 404],
+    });
     dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
     if (!payload) {
       return dispatch({ type: 'USER_LOGGED_OUT' });
@@ -96,13 +100,13 @@ export const refetchAllData = (): ThunkResult => async dispatch => {
 export const disconnect = (): ThunkResult => async dispatch => {
   dispatch({ type: 'USER_DISCONNECT_REQUESTED' });
   try {
-    const payload = await apiFetch(
-      window.api_urls.user_disconnect_sf(),
+    const payload = await apiFetch({
+      url: window.api_urls.user_disconnect_sf(),
       dispatch,
-      {
+      opts: {
         method: 'POST',
       },
-    );
+    });
     return dispatch({ type: 'USER_DISCONNECT_SUCCEEDED', payload });
   } catch (err) {
     dispatch({ type: 'USER_DISCONNECT_FAILED' });
@@ -113,7 +117,7 @@ export const disconnect = (): ThunkResult => async dispatch => {
 export const refreshDevHubStatus = (): ThunkResult => async dispatch => {
   dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
   try {
-    const payload = await apiFetch(window.api_urls.user(), dispatch);
+    const payload = await apiFetch({ url: window.api_urls.user(), dispatch });
     return dispatch({ type: 'DEV_HUB_STATUS_SUCCEEDED', payload });
   } catch (err) {
     dispatch({ type: 'DEV_HUB_STATUS_FAILED' });

@@ -113,10 +113,10 @@ export const fetchObjects = ({
     if (!baseUrl) {
       throw new Error(`No URL found for object: ${objectType}`);
     }
-    const response = await apiFetch(
-      addUrlParams(baseUrl, { ...filters }),
+    const response = await apiFetch({
+      url: addUrlParams(baseUrl, { ...filters }),
       dispatch,
-    );
+    });
     return dispatch({
       type: 'FETCH_OBJECTS_SUCCEEDED',
       payload: { response, objectType, url: baseUrl, reset, filters },
@@ -152,10 +152,10 @@ export const fetchObject = ({
     if (!baseUrl) {
       throw new Error(`No URL found for object: ${objectType}`);
     }
-    const response = await apiFetch(
-      addUrlParams(baseUrl, { ...filters }),
+    const response = await apiFetch({
+      url: addUrlParams(baseUrl, { ...filters }),
       dispatch,
-    );
+    });
     const object =
       response && response.results && response.results.length
         ? response.results[0]
@@ -176,9 +176,11 @@ export const fetchObject = ({
 export const createObject = ({
   objectType,
   data = {},
+  hasForm = false,
 }: {
   objectType: ObjectTypes;
   data?: ObjectData;
+  hasForm?: boolean;
 }): ThunkResult => async dispatch => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
@@ -193,12 +195,17 @@ export const createObject = ({
     if (!baseUrl) {
       throw new Error(`No URL found for object: ${objectType}`);
     }
-    const object = await apiFetch(addUrlParams(baseUrl), dispatch, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
+    const object = await apiFetch({
+      url: addUrlParams(baseUrl),
+      dispatch,
+      opts: {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
+      hasForm,
     });
     return dispatch({
       type: 'CREATE_OBJECT_SUCCEEDED',

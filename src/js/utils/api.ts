@@ -37,12 +37,19 @@ const getResponse = (resp: Response): Promise<any> =>
       },
     );
 
-const apiFetch = async (
-  url: string,
-  dispatch: ThunkDispatch<any, any, any>,
-  opts: { [key: string]: any } = {},
-  suppressErrorsOn: number[] = [404],
-) => {
+const apiFetch = async ({
+  url,
+  dispatch,
+  opts = {},
+  suppressErrorsOn = [404],
+  hasForm = false,
+}: {
+  url: string;
+  dispatch: ThunkDispatch<any, any, any>;
+  opts?: { [key: string]: any };
+  suppressErrorsOn?: number[];
+  hasForm?: boolean;
+}) => {
   const options = Object.assign({}, { headers: {} }, opts);
   const method = options.method || 'GET';
   if (!csrfSafeMethod(method)) {
@@ -72,7 +79,7 @@ const apiFetch = async (
       }
     }
     // If a `POST` returns `400`, suppress default error to show errors inline
-    if (options.method !== 'POST' || response.status !== 400) {
+    if (!hasForm || options.method !== 'POST' || response.status !== 400) {
       dispatch(addError(msg));
     }
     const error: ApiError = new Error(msg);

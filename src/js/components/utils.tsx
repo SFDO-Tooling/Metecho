@@ -465,6 +465,7 @@ export const useForm = ({
           ...inputs,
           ...additionalData,
         },
+        hasForm: true,
       }),
     )
       .then((...args) => {
