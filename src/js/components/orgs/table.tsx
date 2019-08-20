@@ -201,6 +201,7 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
   /* eslint-disable @typescript-eslint/camelcase */
   const items = [
     {
+      org_type: ORG_TYPES.DEV,
       displayType: i18n.t('Dev'),
       ownedByCurrentUser: currentUserOwnsDevOrg,
       id: ORG_TYPES.DEV,
@@ -208,6 +209,7 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
       ...devOrg,
     },
     {
+      org_type: ORG_TYPES.QA,
       displayType: i18n.t('QA'),
       ownedByCurrentUser: currentUserOwnsQAOrg,
       id: ORG_TYPES.QA,
