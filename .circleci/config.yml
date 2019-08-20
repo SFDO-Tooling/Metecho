@@ -85,6 +85,7 @@ jobs:
           DJANGO_HASHID_SALT: test_hash_id
           DJANGO_SECRET_KEY: test_secret_key
           DJANGO_SETTINGS_MODULE: config.settings.test
+          GITHUB_TOKEN: test_github_token
           SECURE_SSL_REDIRECT: False
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
