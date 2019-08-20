@@ -1,6 +1,9 @@
 import requests
 from allauth.account.signals import user_logged_in
 from cryptography.fernet import InvalidToken
+from cumulusci.core.config import OrgConfig, ServiceConfig
+from cumulusci.core.runtime import BaseCumulusCI
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db import models
@@ -244,8 +247,13 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self.create_scratch_org_on_sf()
         super().save(*args, **kwargs)
 
-    def create_scratch_org_on_sf(self):  # pragma: nocover
-        pass
+    def create_scratch_org_on_sf(self):
+        from .jobs import create_scratch_org_job
+
+        create_scratch_org_job.delay(
+            user=self.owner,
+            repo_url=f"{self.task.project.repo}/tree/{self.task.project.branch_name}",
+        )
 
 
 @receiver(user_logged_in)

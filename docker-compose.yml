@@ -13,7 +13,8 @@ services:
     links:
       - 'postgres:db'
       - redis
-    env_file: .env
+    env_file: 
+      - .env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.local
       REDIS_URL: redis://redis:6379
