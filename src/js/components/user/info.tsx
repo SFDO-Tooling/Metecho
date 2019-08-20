@@ -171,29 +171,42 @@ const UserInfo = () => {
     <>
       <Popover
         align="bottom right"
-        heading={
-          <div className="slds-p-around_small">
-            <Icon
-              className="slds-is-absolute"
-              category="utility"
-              name="user"
-              size="small"
-            />
-            <div className="slds-p-left_x-large">
-              <p>{user.username}</p>
-              <Logout className="slds-text-body_regular slds-m-top_xx-small" />
-            </div>
-          </div>
-        }
         body={
-          <div className="slds-p-around_small">
-            {user.valid_token_for ? (
-              <ConnectionInfo user={user} />
-            ) : (
-              <ConnectToSalesforce toggleModal={setModalOpen} />
-            )}
-          </div>
+          <>
+            <header
+              className="slds-border_bottom
+                slds-p-bottom_x-small
+                slds-m-bottom_x-small"
+            >
+              <div className="slds-p-vertical_small slds-p-horizontal_large">
+                <Icon
+                  className="slds-is-absolute"
+                  category="utility"
+                  name="user"
+                  size="small"
+                />
+                <div className="slds-p-left_x-large">
+                  <h2
+                    id="user-info-heading"
+                    className="slds-text-heading_small"
+                  >
+                    {user.username}
+                  </h2>
+                  <Logout className="slds-m-top_xx-small" />
+                </div>
+              </div>
+            </header>
+            <div className="slds-p-vertical_small slds-p-horizontal_large">
+              {user.valid_token_for ? (
+                <ConnectionInfo user={user} />
+              ) : (
+                <ConnectToSalesforce toggleModal={setModalOpen} />
+              )}
+            </div>
+          </>
         }
+        classNameBody="slds-p-horizontal_none"
+        ariaLabelledby="user-info-heading"
         hasNoCloseButton
       >
         <Button variant="icon">
