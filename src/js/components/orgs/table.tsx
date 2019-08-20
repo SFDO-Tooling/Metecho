@@ -9,10 +9,13 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import ConnectModal from '@/components/user/connect';
+import { ConnectionInfoModal } from '@/components/user/info';
 import { ExternalLink, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { createObject } from '@/store/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
+import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 
@@ -34,16 +37,32 @@ const EmptyIcon = () => (
 const TypeDataCell = ({
   item,
   children,
+  user,
   createOrg,
   isCreatingOrg,
+  toggleConnectModal,
+  toggleInfoModal,
   ...props
 }: DataCellProps & {
+  user: User;
   createOrg: (type: OrgTypes) => void;
   isCreatingOrg: OrgTypes | null;
+  toggleConnectModal: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleInfoModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const doCreateOrg = useCallback(() => {
     createOrg((item as Item).org_type);
   }, [createOrg, item]);
+  const openConnectModal = () => {
+    toggleConnectModal(true);
+  };
+  const openInfoModal = () => {
+    toggleInfoModal(true);
+  };
+  let action = openConnectModal;
+  if (user.valid_token_for) {
+    action = user.is_devhub_enabled ? doCreateOrg : openInfoModal;
+  }
   let icon;
   const isCreating = item && isCreatingOrg === item.org_type;
   if (isCreating) {
@@ -76,7 +95,7 @@ const TypeDataCell = ({
         iconName="add"
         iconClassName="slds-m-bottom_xxx-small"
         variant="icon"
-        onClick={doCreateOrg}
+        onClick={action}
       />
     );
   }
@@ -176,6 +195,8 @@ StatusTableCell.displayName = DataTableCell.displayName;
 const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
   const user = useSelector(selectUserState);
   const isMounted = useIsMounted();
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypes | null>(null);
   const dispatch = useDispatch<ThunkDispatch>();
   const createOrg = useCallback((type: OrgTypes) => {
@@ -230,7 +251,13 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
           property="displayType"
           primaryColumn
         >
-          <TypeDataCell createOrg={createOrg} isCreatingOrg={isCreatingOrg} />
+          <TypeDataCell
+            user={user as User}
+            createOrg={createOrg}
+            isCreatingOrg={isCreatingOrg}
+            toggleConnectModal={setConnectModalOpen}
+            toggleInfoModal={setInfoModalOpen}
+          />
         </DataTableColumn>
         {(currentUserOwnsDevOrg || currentUserOwnsQAOrg) && (
           <DataTableColumn key="url" property="url">
@@ -259,6 +286,20 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
           <StatusTableCell />
         </DataTableColumn>
       </DataTable>
+      <ConnectModal
+        isOpen={!(user && user.valid_token_for) && connectModalOpen}
+        toggleModal={setConnectModalOpen}
+      />
+      <ConnectionInfoModal
+        user={user as User}
+        isOpen={Boolean(
+          user &&
+            user.valid_token_for &&
+            !user.is_devhub_enabled &&
+            infoModalOpen,
+        )}
+        toggleModal={setInfoModalOpen}
+      />
     </>
   );
 };

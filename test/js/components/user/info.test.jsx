@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import UserInfo from '@/components/user/info';
+import UserDropdown, { ConnectionInfoModal } from '@/components/user/info';
 import { disconnect, refreshDevHubStatus } from '@/store/user/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -17,7 +17,39 @@ afterEach(() => {
   refreshDevHubStatus.mockClear();
 });
 
-describe('<UserInfo />', () => {
+describe('<ConnectionInfoModal />', () => {
+  const toggleModal = jest.fn();
+
+  const setup = options => {
+    const defaults = {
+      isOpen: true,
+    };
+    const opts = { ...defaults, ...options };
+    return renderWithRedux(
+      <MemoryRouter>
+        <ConnectionInfoModal
+          user={{}}
+          isOpen={opts.isOpen}
+          toggleModal={toggleModal}
+        />
+        ,
+      </MemoryRouter>,
+      {},
+      storeWithThunk,
+    );
+  };
+
+  describe('"close" click', () => {
+    test('closes modal', () => {
+      const { getByTitle } = setup();
+      fireEvent.click(getByTitle('Close'));
+
+      expect(toggleModal).toHaveBeenCalledWith(false);
+    });
+  });
+});
+
+describe('<UserDropdown />', () => {
   const setup = (
     initialState = {
       user: { username: 'Test User' },
@@ -25,7 +57,7 @@ describe('<UserInfo />', () => {
   ) => {
     const result = renderWithRedux(
       <MemoryRouter>
-        <UserInfo />
+        <UserDropdown />
       </MemoryRouter>,
       initialState,
       storeWithThunk,

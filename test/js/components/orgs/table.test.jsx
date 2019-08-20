@@ -35,6 +35,8 @@ const defaultOrgs = {
 const defaultState = {
   user: {
     id: 'user-id',
+    valid_token_for: 'sf-org',
+    is_devhub_enabled: true,
   },
 };
 
@@ -96,6 +98,30 @@ describe('<OrgsTable/>', () => {
           org_type: 'QA',
           task: 'task-id',
         },
+      });
+    });
+
+    describe('not connected to sf org', () => {
+      test('opens connect modal', () => {
+        const { getByTitle, getByText } = setup({ initialState: { user: {} } });
+        fireEvent.click(getByTitle('Create New Org'));
+
+        expect(createObject).not.toHaveBeenCalled();
+        expect(getByText('Use Custom Domain')).toBeVisible();
+      });
+    });
+
+    describe('dev hub not enabled', () => {
+      test('opens warning modal', () => {
+        const { getByTitle, getByText } = setup({
+          initialState: {
+            user: { ...defaultState.user, is_devhub_enabled: false },
+          },
+        });
+        fireEvent.click(getByTitle('Create New Org'));
+
+        expect(createObject).not.toHaveBeenCalled();
+        expect(getByText('Enable Dev Hub')).toBeVisible();
       });
     });
   });
