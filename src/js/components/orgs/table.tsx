@@ -64,7 +64,8 @@ const TypeDataCell = ({
     action = user.is_devhub_enabled ? doCreateOrg : openInfoModal;
   }
   let icon;
-  const isCreating = item && isCreatingOrg === item.org_type;
+  const isCreating =
+    item && (isCreatingOrg === item.org_type || (!item.isNull && !item.url));
   if (isCreating) {
     icon = (
       <span className="slds-is-relative slds-m-horizontal_x-small">
@@ -126,7 +127,7 @@ const AccessOrgCell = ({ item, ...props }: DataCellProps) =>
 AccessOrgCell.displayName = DataTableCell.displayName;
 
 const LastModifiedTableCell = ({ item, ...props }: DataCellProps) => {
-  if (!item || item.isNull || !item.last_modified_at) {
+  if (!item || item.isNull || !item.last_modified_at || !item.url) {
     return (
       <DataTableCell {...props}>
         <EmptyIcon />
@@ -152,7 +153,7 @@ const LastModifiedTableCell = ({ item, ...props }: DataCellProps) => {
 LastModifiedTableCell.displayName = DataTableCell.displayName;
 
 const ExpirationDataCell = ({ item, ...props }: DataCellProps) => {
-  if (!item || item.isNull || !item.expires_at) {
+  if (!item || item.isNull || !item.expires_at || !item.url) {
     return (
       <DataTableCell {...props}>
         <EmptyIcon />
@@ -169,7 +170,7 @@ const ExpirationDataCell = ({ item, ...props }: DataCellProps) => {
 ExpirationDataCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ item, ...props }: DataCellProps) => {
-  if (item && !item.isNull) {
+  if (item && !item.isNull && item.url) {
     const title = item.has_changes
       ? i18n.t('Has uncaptured changes')
       : i18n.t('All changes captured');
@@ -206,6 +207,7 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
         objectType: OBJECT_TYPES.ORG,
         // eslint-disable-next-line @typescript-eslint/camelcase
         data: { task, org_type: type },
+        shouldSubscribeToObject: (object: Org) => object && !object.url,
       }),
     ).finally(() => {
       /* istanbul ignore else */
@@ -217,8 +219,10 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
 
   const devOrg = orgs[ORG_TYPES.DEV];
   const qaOrg = orgs[ORG_TYPES.QA];
-  const currentUserOwnsDevOrg = user && devOrg && user.id === devOrg.owner;
-  const currentUserOwnsQAOrg = user && qaOrg && user.id === qaOrg.owner;
+  const currentUserOwnsDevOrg =
+    user && devOrg && devOrg.url && user.id === devOrg.owner;
+  const currentUserOwnsQAOrg =
+    user && qaOrg && qaOrg.url && user.id === qaOrg.owner;
   /* eslint-disable @typescript-eslint/camelcase */
   const items = [
     {
