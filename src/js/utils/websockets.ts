@@ -1,6 +1,8 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
+import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
+import { Org } from '@/store/orgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { log } from '@/utils/logging';
 
@@ -17,23 +19,30 @@ interface ErrorEvent {
   type: 'BACKEND_ERROR';
   payload: { message: string };
 }
-type EventType = SubscriptionEvent | ErrorEvent;
+interface OrgProvisionedEvent {
+  type: 'SCRATCH_ORG_PROVISIONED' | 'SCRATCH_ORG_PROVISION_FAILED';
+  payload: Org;
+}
+type ModelEvent = ErrorEvent | OrgProvisionedEvent;
+type EventType = SubscriptionEvent | ModelEvent;
 interface Subscription {
   model: string;
   id: string;
 }
 
-const isErrorEvent = (event: EventType): event is ErrorEvent =>
-  (event as ErrorEvent).type !== undefined;
+const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
+  (event as ModelEvent).type === undefined;
 
 export const getAction = (event: EventType) => {
-  if (!event || !isErrorEvent(event)) {
+  if (!event || isSubscriptionEvent(event)) {
     return null;
   }
-  // switch (event.type) {
-  //   case 'MY_ACTION_TYPE':
-  //     return myActionCreator(event.payload);
-  // }
+  switch (event.type) {
+    case 'SCRATCH_ORG_PROVISIONED':
+      return provisionOrg(event.payload);
+    case 'SCRATCH_ORG_PROVISION_FAILED':
+      return provisionFailed(event.payload);
+  }
   return null;
 };
 

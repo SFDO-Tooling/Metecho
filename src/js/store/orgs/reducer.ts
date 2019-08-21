@@ -1,4 +1,5 @@
 import { ObjectsAction } from '@/store/actions';
+import { OrgsAction } from '@/store/orgs/actions';
 import { LogoutAction } from '@/store/user/actions';
 import {
   OBJECT_TYPES,
@@ -33,7 +34,7 @@ const defaultState = {};
 
 const reducer = (
   orgs: OrgState = defaultState,
-  action: ObjectsAction | LogoutAction,
+  action: ObjectsAction | LogoutAction | OrgsAction,
 ) => {
   switch (action.type) {
     case 'USER_LOGGED_OUT':
@@ -84,6 +85,34 @@ const reducer = (
         };
       }
       return orgs;
+    }
+    case 'SCRATCH_ORG_PROVISIONED': {
+      const org = action.payload;
+      const taskOrgs = orgs[org.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [org.task]: {
+          ...taskOrgs,
+          [org.org_type]: org,
+        },
+      };
+    }
+    case 'SCRATCH_ORG_PROVISION_FAILED': {
+      const org = action.payload;
+      const taskOrgs = orgs[org.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [org.task]: {
+          ...taskOrgs,
+          [org.org_type]: null,
+        },
+      };
     }
   }
   return orgs;

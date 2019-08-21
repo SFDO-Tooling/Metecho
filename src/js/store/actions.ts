@@ -94,11 +94,13 @@ export const fetchObjects = ({
   url,
   filters = {},
   reset = false,
+  shouldSubscribeToObject = () => false,
 }: {
   objectType: ObjectTypes;
   url?: string;
   filters?: ObjectFilters;
   reset?: boolean;
+  shouldSubscribeToObject?: (response: any) => boolean;
 }): ThunkResult => async dispatch => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
@@ -117,6 +119,18 @@ export const fetchObjects = ({
       url: addUrlParams(baseUrl, { ...filters }),
       dispatch,
     });
+    /* istanbul ignore else */
+    if (window.socket) {
+      const arr = Array.isArray(response) ? response : response.results;
+      for (const object of arr) {
+        if (shouldSubscribeToObject(object) && object && object.id) {
+          window.socket.subscribe({
+            model: objectType,
+            id: object.id,
+          });
+        }
+      }
+    }
     return dispatch({
       type: 'FETCH_OBJECTS_SUCCEEDED',
       payload: { response, objectType, url: baseUrl, reset, filters },
@@ -177,10 +191,12 @@ export const createObject = ({
   objectType,
   data = {},
   hasForm = false,
+  shouldSubscribeToObject = () => false,
 }: {
   objectType: ObjectTypes;
   data?: ObjectData;
   hasForm?: boolean;
+  shouldSubscribeToObject?: (object: any) => boolean;
 }): ThunkResult => async dispatch => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
@@ -207,6 +223,18 @@ export const createObject = ({
       },
       hasForm,
     });
+    /* istanbul ignore else */
+    if (
+      shouldSubscribeToObject(object) &&
+      object &&
+      object.id &&
+      window.socket
+    ) {
+      window.socket.subscribe({
+        model: objectType,
+        id: object.id,
+      });
+    }
     return dispatch({
       type: 'CREATE_OBJECT_SUCCEEDED',
       payload: { data, object, url: baseUrl, objectType },
