@@ -126,7 +126,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         queryset=Task.objects.all(), pk_field=serializers.CharField()
     )
     owner = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), pk_field=serializers.CharField()
+        pk_field=serializers.CharField(),
+        default=serializers.CurrentUserDefault(),
+        read_only=True,
     )
 
     class Meta:
@@ -143,3 +145,11 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "url",
             "has_changes",
         )
+        extra_kwargs = {
+            "last_modified_at": {"read_only": True},
+            "expires_at": {"read_only": True},
+            "latest_commit": {"read_only": True},
+            "latest_commit_url": {"read_only": True},
+            "url": {"read_only": True},
+            "has_changes": {"read_only": True},
+        }

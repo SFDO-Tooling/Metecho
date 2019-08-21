@@ -229,10 +229,10 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     last_modified_at = models.DateTimeField(null=True)
-    expires_at = models.DateTimeField()
+    expires_at = models.DateTimeField(null=True)
     latest_commit = StringField(blank=True)
     latest_commit_url = models.URLField(blank=True)
-    url = models.URLField()
+    url = models.URLField(null=True)
     has_changes = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
