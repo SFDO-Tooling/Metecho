@@ -126,7 +126,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         queryset=Task.objects.all(), pk_field=serializers.CharField()
     )
     owner = serializers.PrimaryKeyRelatedField(
-        default=serializers.CurrentUserDefault(), read_only=True
+        pk_field=serializers.CharField(),
+        default=serializers.CurrentUserDefault(),
+        read_only=True,
     )
 
     class Meta:
