@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
@@ -15,6 +15,7 @@ import {
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
+  LabelWithSpinner,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
@@ -25,6 +26,7 @@ import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
+  const [capturingChanges, setCapturingChanges] = useState(false);
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   useFetchTasksIfMissing(project, props);
@@ -63,6 +65,14 @@ const TaskDetail = (props: RouteComponentProps) => {
     taskSlug,
   });
 
+  const captureChanges = () => {
+    setCapturingChanges(true);
+    setTimeout(() => {
+      setCapturingChanges(false);
+    }, 2000);
+    // makes api call then
+    //  then open modal
+  };
   if (taskLoadingOrNotFound !== false) {
     return taskLoadingOrNotFound;
   }
@@ -134,6 +144,24 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
+        {/* @todo if scratchorg has changes && owner === user */}
+        <Button
+          label={
+            capturingChanges ? (
+              <LabelWithSpinner
+                label={i18n.t('Loading…')}
+                variant="base"
+                size="x-small"
+              />
+            ) : (
+              i18n.t('Capture Task Changes')
+            )
+          }
+          className="slds-size_full slds-m-bottom_x-large"
+          variant="brand"
+          onClick={captureChanges}
+          disabled={capturingChanges}
+        />
         {orgs ? <OrgsTable orgs={orgs} task={task.id} /> : <Spinner />}
       </DetailPageLayout>
     </DocumentTitle>
