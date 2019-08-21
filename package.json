@@ -100,7 +100,7 @@
     "core-js": "^3.2.1",
     "coveralls": "^3.0.6",
     "css-loader": "^3.2.0",
-    "eslint": "^6.2.1",
+    "eslint": "~6.1.0",
     "eslint-config-prettier": "^6.1.0",
     "eslint-import-resolver-typescript": "^1.1.1",
     "eslint-import-resolver-webpack": "^0.11.1",
@@ -135,5 +135,9 @@
     "webpack-cli": "^3.3.7",
     "webpack-dev-server": "^3.8.0",
     "webpack-merge": "^4.2.1"
+  },
+  "resolutions": {
+    "eslint": "~6.1.0",
+    "espree": "6.0.0"
   }
 }

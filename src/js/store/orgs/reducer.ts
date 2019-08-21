@@ -12,11 +12,11 @@ export interface Org {
   task: string;
   org_type: OrgTypes;
   owner: string;
-  last_modified_at: string;
-  expires_at: string;
+  last_modified_at: string | null;
+  expires_at: string | null;
   latest_commit: string;
   latest_commit_url: string;
-  url: string;
+  url: string | null;
   has_changes: boolean;
 }
 
