@@ -125,11 +125,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
     task = serializers.PrimaryKeyRelatedField(
         queryset=Task.objects.all(), pk_field=serializers.CharField()
     )
-    owner = serializers.PrimaryKeyRelatedField(
-        pk_field=serializers.CharField(),
-        default=serializers.CurrentUserDefault(),
-        read_only=True,
-    )
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = ScratchOrg
