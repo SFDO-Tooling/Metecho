@@ -125,7 +125,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
     task = serializers.PrimaryKeyRelatedField(
         queryset=Task.objects.all(), pk_field=serializers.CharField()
     )
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    owner = serializers.PrimaryKeyRelatedField(
+        default=serializers.CurrentUserDefault(), read_only=True
+    )
 
     class Meta:
         model = ScratchOrg
@@ -149,3 +151,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "url": {"read_only": True},
             "has_changes": {"read_only": True},
         }
+
+    def save(self, **kwargs):
+        kwargs["owner"] = kwargs.get("owner", self.context["request"].user)
+        super().save(**kwargs)
