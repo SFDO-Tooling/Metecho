@@ -236,9 +236,10 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     has_changes = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        if self.id is None:
-            self.create_scratch_org_on_sf()
+        save_on_sf = self.id is None
         super().save(*args, **kwargs)
+        if save_on_sf:
+            self.create_scratch_org_on_sf()
 
     def create_scratch_org_on_sf(self):
         from .jobs import create_scratch_org_job
