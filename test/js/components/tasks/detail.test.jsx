@@ -110,7 +110,7 @@ describe('<TaskDetail/>', () => {
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByText('Task Description')).toBeVisible();
     expect(queryByText('View Branch')).toBeNull();
-    expect(getByText('View Org')).toBeVisible();
+    expect(getByTitle('View Org')).toBeVisible();
     expect(getByText('Task Orgs')).toBeVisible();
   });
 
