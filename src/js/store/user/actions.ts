@@ -47,7 +47,7 @@ export const login = (payload: User): LoginAction => {
   /* istanbul ignore else */
   if (payload && window.socket) {
     window.socket.subscribe({
-      model: 'user',
+      model: OBJECT_TYPES.USER,
       id: payload.id,
     });
   }
