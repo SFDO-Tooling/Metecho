@@ -203,10 +203,14 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('Task Orgs')).toBeNull();
-      expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { task: 'task1' },
-        objectType: 'scratch_org',
-      });
+      expect(fetchObjects).toHaveBeenCalledTimes(1);
+
+      const args = fetchObjects.mock.calls[0][0];
+
+      expect(args.objectType).toEqual('scratch_org');
+      expect(args.filters).toEqual({ task: 'task1' });
+      expect(args.shouldSubscribeToObject({})).toBe(true);
+      expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
     });
   });
 });

@@ -219,10 +219,12 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
 
   const devOrg = orgs[ORG_TYPES.DEV];
   const qaOrg = orgs[ORG_TYPES.QA];
-  const currentUserOwnsDevOrg =
-    user && devOrg && devOrg.url && user.id === devOrg.owner;
-  const currentUserOwnsQAOrg =
-    user && qaOrg && qaOrg.url && user.id === qaOrg.owner;
+  const currentUserOwnsDevOrg = Boolean(
+    user && devOrg && devOrg.url && user.id === devOrg.owner,
+  );
+  const currentUserOwnsQAOrg = Boolean(
+    user && qaOrg && qaOrg.url && user.id === qaOrg.owner,
+  );
   /* eslint-disable @typescript-eslint/camelcase */
   const items = [
     {

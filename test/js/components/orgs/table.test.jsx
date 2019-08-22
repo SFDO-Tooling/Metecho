@@ -73,7 +73,7 @@ describe('<OrgsTable/>', () => {
         ...defaultOrgs,
         Dev: null,
         QA: {
-          ...defaultOrgs.dev,
+          ...defaultOrgs.Dev,
           org_type: 'QA',
           owner: 'other-user',
           has_changes: false,
@@ -92,13 +92,17 @@ describe('<OrgsTable/>', () => {
       const { getByTitle } = setup();
       fireEvent.click(getByTitle('Create New Org'));
 
-      expect(createObject).toHaveBeenCalledWith({
-        objectType: 'scratch_org',
-        data: {
-          org_type: 'QA',
-          task: 'task-id',
-        },
+      expect(createObject).toHaveBeenCalledTimes(1);
+
+      const args = createObject.mock.calls[0][0];
+
+      expect(args.objectType).toEqual('scratch_org');
+      expect(args.data).toEqual({
+        org_type: 'QA',
+        task: 'task-id',
       });
+      expect(args.shouldSubscribeToObject({})).toBe(true);
+      expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
     });
 
     describe('not connected to sf org', () => {
