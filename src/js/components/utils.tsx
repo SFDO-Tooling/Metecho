@@ -167,12 +167,14 @@ export const ExternalLink = ({
   url,
   shortenGithub = false,
   children,
+  ...props
 }: {
   url: string;
   shortenGithub?: boolean;
   children?: ReactNode;
+  [key: string]: any;
 }) => (
-  <a href={url} target="_blank" rel="noreferrer noopener">
+  <a href={url} target="_blank" rel="noreferrer noopener" {...props}>
     {shortenGithub && url.startsWith(GITHUB_REPO_PREFIX) ? (
       <>
         <Icon

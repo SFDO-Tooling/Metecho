@@ -36,7 +36,6 @@ const EmptyIcon = () => (
 
 const TypeDataCell = ({
   item,
-  children,
   user,
   createOrg,
   isCreatingOrg,
@@ -63,41 +62,55 @@ const TypeDataCell = ({
   if (user.valid_token_for) {
     action = user.is_devhub_enabled ? doCreateOrg : openInfoModal;
   }
-  let icon;
+  let contents;
+  const displayType = (
+    <span className="slds-m-left_x-small">{item && item.displayType}</span>
+  );
   const isCreating =
     item && (isCreatingOrg === item.org_type || (!item.isNull && !item.url));
   if (isCreating) {
-    icon = (
-      <span className="slds-is-relative slds-m-horizontal_x-small">
-        <Spinner size="x-small" />
-      </span>
+    contents = (
+      <>
+        <span className="slds-is-relative slds-m-horizontal_x-small">
+          <Spinner size="x-small" />
+        </span>
+        {displayType}
+      </>
     );
   } else if (item && !item.isNull) {
     if (item.ownedByCurrentUser && item.url) {
-      icon = (
-        <ExternalLink url={item.url}>
+      contents = (
+        <ExternalLink url={item.url} title={i18n.t('View Org')}>
           <Icon
-            title={i18n.t('View Org')}
             category="utility"
             name="link"
             size="xx-small"
             className="icon-link slds-m-bottom_xxx-small"
           />
+          {displayType}
         </ExternalLink>
       );
     } else {
-      icon = <Icon category="utility" name="link" size="xx-small" />;
+      contents = (
+        <>
+          <Icon category="utility" name="link" size="xx-small" />
+          {displayType}
+        </>
+      );
     }
   } else {
-    icon = (
-      <Button
-        title={i18n.t('Create New Org')}
-        iconCategory="utility"
-        iconName="add"
-        iconClassName="slds-m-bottom_xxx-small"
-        variant="icon"
-        onClick={action}
-      />
+    contents = (
+      <>
+        <Button
+          title={i18n.t('Create New Org')}
+          iconCategory="utility"
+          iconName="add"
+          iconClassName="slds-m-bottom_xxx-small"
+          variant="icon"
+          onClick={action}
+        />
+        {displayType}
+      </>
     );
   }
   return (
@@ -105,26 +118,11 @@ const TypeDataCell = ({
       title={isCreating ? i18n.t('Creating Org…') : item && item.displayType}
       {...props}
     >
-      {icon}
-      <span className="slds-m-left_x-small">{children}</span>
+      {contents}
     </DataTableCell>
   );
 };
 TypeDataCell.displayName = DataTableCell.displayName;
-
-const AccessOrgCell = ({ item, ...props }: DataCellProps) =>
-  item && !item.isNull && item.url ? (
-    <DataTableCell title={i18n.t('View Org')} {...props}>
-      <ExternalLink url={item.url}>
-        <Button label={i18n.t('View Org')} variant="link" />
-      </ExternalLink>
-    </DataTableCell>
-  ) : (
-    <DataTableCell {...props}>
-      <EmptyIcon />
-    </DataTableCell>
-  );
-AccessOrgCell.displayName = DataTableCell.displayName;
 
 const LastModifiedTableCell = ({ item, ...props }: DataCellProps) => {
   if (!item || item.isNull || !item.last_modified_at || !item.url) {
@@ -265,11 +263,6 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
             toggleInfoModal={setInfoModalOpen}
           />
         </DataTableColumn>
-        {(currentUserOwnsDevOrg || currentUserOwnsQAOrg) && (
-          <DataTableColumn key="url" property="url">
-            <AccessOrgCell />
-          </DataTableColumn>
-        )}
         <DataTableColumn
           key="last_modified_at"
           label={i18n.t('Last Modified')}

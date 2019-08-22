@@ -59,9 +59,9 @@ describe('<OrgsTable/>', () => {
 
   describe('owned by current user', () => {
     test('renders table with orgs', () => {
-      const { getByText, getByTitle } = setup();
+      const { getByTitle } = setup();
 
-      expect(getByText('View Org')).toBeVisible();
+      expect(getByTitle('View Org')).toBeVisible();
       expect(getByTitle('Has uncaptured changes')).toBeVisible();
       expect(getByTitle('Create New Org')).toBeVisible();
     });
@@ -79,9 +79,9 @@ describe('<OrgsTable/>', () => {
           has_changes: false,
         },
       };
-      const { queryByText, getByTitle } = setup({ orgs });
+      const { queryByTitle, getByTitle } = setup({ orgs });
 
-      expect(queryByText('View Org')).toBeNull();
+      expect(queryByTitle('View Org')).toBeNull();
       expect(getByTitle('All changes captured')).toBeVisible();
       expect(getByTitle('Create New Org')).toBeVisible();
     });
