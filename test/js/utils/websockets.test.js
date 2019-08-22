@@ -4,6 +4,10 @@ import * as orgActions from '@/store/orgs/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import * as sockets from '@/utils/websockets';
 
+jest.mock('@/store/orgs/actions');
+
+orgActions.provisionOrg.mockReturnValue({ type: 'TEST', payload: {} });
+
 const mockJson = jest.fn();
 const mockClose = jest.fn();
 const mockOpen = jest.fn();
@@ -24,6 +28,8 @@ afterEach(() => {
   mockClose.mockClear();
   mockOpen.mockClear();
   dispatch.mockClear();
+  orgActions.provisionOrg.mockClear();
+  orgActions.provisionFailed.mockClear();
 });
 
 describe('getAction', () => {
@@ -33,11 +39,10 @@ describe('getAction', () => {
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };
-    // eslint-disable-next-line import/namespace
-    const expected = orgActions[action](payload);
-    const actual = sockets.getAction(msg);
+    sockets.getAction(msg);
 
-    expect(actual).toEqual(expected);
+    // eslint-disable-next-line import/namespace
+    expect(orgActions[action]).toHaveBeenCalledWith(payload);
   });
 
   test('handles unknown event', () => {
@@ -133,9 +138,9 @@ describe('createSocket', () => {
         socketInstance.onmessage({
           data: { type: 'SCRATCH_ORG_PROVISIONED', payload: {} },
         });
-        const expected = orgActions.provisionOrg({});
 
-        expect(dispatch).toHaveBeenCalledWith(expected);
+        expect(dispatch).toHaveBeenCalledTimes(1);
+        expect(orgActions.provisionOrg).toHaveBeenCalledWith({});
       });
     });
 
