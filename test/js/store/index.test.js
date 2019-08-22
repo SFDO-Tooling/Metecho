@@ -6,6 +6,7 @@ describe('reducer', () => {
 
     expect(Object.keys(actual).sort()).toEqual(
       [
+        'toasts',
         'errors',
         'orgs',
         'projects',

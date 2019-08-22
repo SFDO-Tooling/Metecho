@@ -4,10 +4,12 @@ import Sockette from 'sockette';
 import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { WEBSOCKET_ACTIONS, WebsocketActions } from '@/utils/constants';
 import { log } from '@/utils/logging';
 
 export interface Socket {
   subscribe: (payload: Subscription) => void;
+  unsubscribe: (payload: Subscription) => void;
   reconnect: () => void;
 }
 
@@ -20,12 +22,20 @@ interface ErrorEvent {
   payload: { message: string };
 }
 interface OrgProvisionedEvent {
-  type: 'SCRATCH_ORG_PROVISIONED' | 'SCRATCH_ORG_PROVISION_FAILED';
+  type: 'SCRATCH_ORG_PROVISIONED';
   payload: Org;
 }
-type ModelEvent = ErrorEvent | OrgProvisionedEvent;
+interface OrgProvisionFailedEvent {
+  type: 'SCRATCH_ORG_PROVISION_FAILED';
+  payload: {
+    error?: string;
+    model: Org;
+  };
+}
+type ModelEvent = ErrorEvent | OrgProvisionedEvent | OrgProvisionFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 interface Subscription {
+  action?: WebsocketActions;
   model: string;
   id: string;
 }
@@ -140,8 +150,19 @@ export const createSocket = ({
   });
 
   const subscribe = (payload: Subscription) => {
+    payload = { ...payload, action: WEBSOCKET_ACTIONS.SUBSCRIBE };
     if (open) {
       log('[WebSocket] subscribing to:', payload);
+      socket.json(payload);
+    } else {
+      pending.add(payload);
+    }
+  };
+
+  const unsubscribe = (payload: Subscription) => {
+    payload = { ...payload, action: WEBSOCKET_ACTIONS.UNSUBSCRIBE };
+    if (open) {
+      log('[WebSocket] unsubscribing from:', payload);
       socket.json(payload);
     } else {
       pending.add(payload);
@@ -171,6 +192,7 @@ export const createSocket = ({
 
   return {
     subscribe,
+    unsubscribe,
     reconnect,
   };
 };

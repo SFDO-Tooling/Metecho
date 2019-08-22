@@ -472,7 +472,7 @@ export const useForm = ({
         hasForm: true,
       }),
     )
-      .then((...args) => {
+      .then((...args: any[]) => {
         /* istanbul ignore else */
         if (isMounted.current) {
           resetForm();
