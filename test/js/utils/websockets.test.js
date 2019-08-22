@@ -82,12 +82,21 @@ describe('createSocket', () => {
         );
       });
 
-      test('subscribes to pending objects', () => {
+      test('subscribes/unsubscribes to/from pending objects', () => {
         const payload = { model: 'foo', id: 'bar' };
         socket.subscribe(payload);
+        socket.unsubscribe(payload);
         socketInstance.onopen();
 
-        expect(mockJson).toHaveBeenCalledWith(payload);
+        expect(mockJson).toHaveBeenCalledTimes(2);
+        expect(mockJson).toHaveBeenCalledWith({
+          ...payload,
+          action: 'SUBSCRIBE',
+        });
+        expect(mockJson).toHaveBeenCalledWith({
+          ...payload,
+          action: 'UNSUBSCRIBE',
+        });
       });
 
       test('dispatches connectSocket action', () => {
@@ -209,7 +218,31 @@ describe('createSocket', () => {
         Sockette.mock.calls[0][1].onopen();
         socket.subscribe(payload);
 
-        expect(mockJson).toHaveBeenCalledWith(payload);
+        expect(mockJson).toHaveBeenCalledWith({
+          ...payload,
+          action: 'SUBSCRIBE',
+        });
+      });
+    });
+  });
+
+  describe('unsubscribe', () => {
+    let socket;
+
+    beforeEach(() => {
+      socket = sockets.createSocket(opts);
+    });
+
+    describe('ws open', () => {
+      test('unsubscribes from object', () => {
+        const payload = { model: 'foo', id: 'bar' };
+        Sockette.mock.calls[0][1].onopen();
+        socket.unsubscribe(payload);
+
+        expect(mockJson).toHaveBeenCalledWith({
+          ...payload,
+          action: 'UNSUBSCRIBE',
+        });
       });
     });
   });
