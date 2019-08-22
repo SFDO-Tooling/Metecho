@@ -246,11 +246,8 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         create_scratch_org_job.delay(
             user=self.owner,
-            repo_url=(
-                f"{self.task.project.repository.repo_url}"
-                "/tree/"
-                "{self.task.project.branch_name}"
-            ),
+            repo_url=self.task.project.repository.repo_url,
+            commit_ish=self.task.project.branch_name,
         )
 
 
