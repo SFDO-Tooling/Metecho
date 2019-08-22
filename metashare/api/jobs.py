@@ -52,14 +52,18 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def create_scratch_org(*, user, repo_url, commit_ish):
+def create_scratch_org(scratch_org, *, user, repo_url, commit_ish):
     token, token_secret = user.token
     organization_url = user.instance_url
 
-    org_config = ScratchOrgConfig(
-        {"config_file": "orgs/dev.json", "scratch": True}, "dev"
-    )
-    org_config.create_scratch_org()
+    scratch_org.url = "https://example.com"
+    scratch_org.save()
+
+    # org_config = ScratchOrgConfig(
+    #     {"config_file": "orgs/dev.json", "scratch": True}, "dev"
+    # )
+    # org_config.create_scratch_org()
+
     # with temporary_dir() as tmpdirname:
     #     # Let's clone the repo locally:
     #     gh = github3.login(token=settings.GITHUB_TOKEN)

@@ -156,4 +156,4 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         kwargs["owner"] = kwargs.get("owner", self.context["request"].user)
-        super().save(**kwargs)
+        return super().save(**kwargs)
