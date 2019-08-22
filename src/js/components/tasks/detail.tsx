@@ -9,6 +9,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import OrgsTable from '@/components/orgs/table';
+import CaptureModal from '@/components/tasks/capture';
 import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
 import {
@@ -27,12 +28,11 @@ import { AppState } from '@/store';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
-
 const TaskDetail = (props: RouteComponentProps) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-
+  const [captureModalOpen, setCaptureModalOpen] = useState(true);
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   useFetchTasksIfMissing(project, props);
@@ -77,16 +77,18 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   const action = () => {
-    setCapturingChanges(true);
-    if (!user.valid_token_for) {
-      setCapturingChanges(false);
-      setConnectModalOpen(true);
+    if (user) {
+      setCapturingChanges(true);
+      if (!user.valid_token_for) {
+        setCapturingChanges(false);
+        setConnectModalOpen(true);
+      }
+      if (user.valid_token_for && !user.is_devhub_enabled) {
+        setCapturingChanges(false);
+        setInfoModalOpen(true);
+      }
+      setCaptureModalOpen(true);
     }
-    if (user.valid_token_for && !user.is_devhub_enabled) {
-      setCapturingChanges(false);
-      setInfoModalOpen(true);
-    }
-    console.log('fetch list and display in modal');
   };
 
   // This redundant check is used to satisfy TypeScript...
@@ -187,6 +189,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           isOpen={infoModalOpen}
           toggleModal={setInfoModalOpen}
         />
+        <CaptureModal isOpen={captureModalOpen} />
       </DetailPageLayout>
     </DocumentTitle>
   );
