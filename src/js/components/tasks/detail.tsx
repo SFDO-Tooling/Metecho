@@ -9,6 +9,8 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import OrgsTable from '@/components/orgs/table';
+import ConnectModal from '@/components/user/connect';
+import { ConnectionInfoModal } from '@/components/user/info';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -23,10 +25,14 @@ import {
 } from '@/components/utils';
 import { AppState } from '@/store';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
+import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   useFetchTasksIfMissing(project, props);
@@ -39,6 +45,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     selectTaskSlugWithProps(state, props),
   );
   const { orgs } = useFetchOrgsIfMissing(task, props);
+  const user = useSelector(selectUserState);
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -65,17 +72,22 @@ const TaskDetail = (props: RouteComponentProps) => {
     taskSlug,
   });
 
-  const captureChanges = () => {
-    setCapturingChanges(true);
-    setTimeout(() => {
-      setCapturingChanges(false);
-    }, 2000);
-    // makes api call then
-    //  then open modal
-  };
   if (taskLoadingOrNotFound !== false) {
     return taskLoadingOrNotFound;
   }
+
+  const action = () => {
+    setCapturingChanges(true);
+    if (!user.valid_token_for) {
+      setCapturingChanges(false);
+      setConnectModalOpen(true);
+    }
+    if (user.valid_token_for && !user.is_devhub_enabled) {
+      setCapturingChanges(false);
+      setInfoModalOpen(true);
+    }
+    console.log('fetch list and display in modal');
+  };
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
@@ -144,25 +156,37 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        {/* @todo if scratchorg has changes && owner === user */}
-        <Button
-          label={
-            capturingChanges ? (
-              <LabelWithSpinner
-                label={i18n.t('Loading…')}
-                variant="base"
-                size="x-small"
-              />
-            ) : (
-              i18n.t('Capture Task Changes')
-            )
-          }
-          className="slds-size_full slds-m-bottom_x-large"
-          variant="brand"
-          onClick={captureChanges}
-          disabled={capturingChanges}
-        />
+        {/* and matched owner and org has changes */}
+        {user.id ? (
+          <Button
+            label={
+              capturingChanges ? (
+                <LabelWithSpinner
+                  label={i18n.t('Loading…')}
+                  variant="base"
+                  size="x-small"
+                />
+              ) : (
+                i18n.t('Capture Task Changes')
+              )
+            }
+            className="slds-size_full slds-m-bottom_x-large"
+            variant="brand"
+            onClick={action}
+            disabled={capturingChanges}
+          />
+        ) : null}
+
         {orgs ? <OrgsTable orgs={orgs} task={task.id} /> : <Spinner />}
+        <ConnectModal
+          isOpen={connectModalOpen}
+          toggleModal={setConnectModalOpen}
+        />
+        <ConnectionInfoModal
+          user={user}
+          isOpen={infoModalOpen}
+          toggleModal={setInfoModalOpen}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );
