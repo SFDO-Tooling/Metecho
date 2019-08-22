@@ -162,4 +162,82 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
   });
+
+  describe('SCRATCH_ORG_PROVISIONED', () => {
+    test('adds org to task', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const expected = {
+        'task-1': {
+          Dev: org,
+          QA: null,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'SCRATCH_ORG_PROVISIONED',
+          payload: org,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('SCRATCH_ORG_PROVISION_FAILED', () => {
+    test('removes org from task', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const expected = {
+        'task-1': {
+          Dev: null,
+          QA: null,
+        },
+      };
+      const actual = reducer(
+        {
+          'task-1': {
+            Dev: org,
+            QA: null,
+          },
+        },
+        {
+          type: 'SCRATCH_ORG_PROVISION_FAILED',
+          payload: org,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('does not error if org not found', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const expected = {
+        'task-1': {
+          Dev: null,
+          QA: null,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'SCRATCH_ORG_PROVISION_FAILED',
+          payload: org,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
 });

@@ -119,7 +119,6 @@ export const fetchObjects = ({
       url: addUrlParams(baseUrl, { ...filters }),
       dispatch,
     });
-    /* istanbul ignore else */
     if (window.socket) {
       const arr = Array.isArray(response) ? response : response.results;
       for (const object of arr) {
@@ -223,7 +222,6 @@ export const createObject = ({
       },
       hasForm,
     });
-    /* istanbul ignore else */
     if (
       shouldSubscribeToObject(object) &&
       object &&

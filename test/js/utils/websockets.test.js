@@ -1,5 +1,6 @@
 import Sockette from 'sockette';
 
+import * as orgActions from '@/store/orgs/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import * as sockets from '@/utils/websockets';
 
@@ -26,13 +27,18 @@ afterEach(() => {
 });
 
 describe('getAction', () => {
-  // test('handles MY_ACTION_TYPE event', () => {
-  //   const event = { type: 'MY_ACTION_TYPE', payload: 'foobar' };
-  //   const expected = myActionCreator('foobar');
-  //   const actual = sockets.getAction(event);
+  test.each([
+    ['SCRATCH_ORG_PROVISIONED', 'provisionOrg'],
+    ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
+  ])('handles %s event', (type, action) => {
+    const payload = { foo: 'bar' };
+    const msg = { type, payload };
+    // eslint-disable-next-line import/namespace
+    const expected = orgActions[action](payload);
+    const actual = sockets.getAction(msg);
 
-  //   expect(actual).toEqual(expected);
-  // });
+    expect(actual).toEqual(expected);
+  });
 
   test('handles unknown event', () => {
     const event = { type: 'UNKNOWN' };
@@ -114,14 +120,14 @@ describe('createSocket', () => {
         );
       });
 
-      // test('dispatches action', () => {
-      //   socketInstance.onmessage({
-      //     data: { type: 'MY_ACTION_TYPE' },
-      //   });
-      //   const expected = myActionCreator();
+      test('dispatches action', () => {
+        socketInstance.onmessage({
+          data: { type: 'SCRATCH_ORG_PROVISIONED', payload: {} },
+        });
+        const expected = orgActions.provisionOrg({});
 
-      //   expect(dispatch).toHaveBeenCalledWith(expected);
-      // });
+        expect(dispatch).toHaveBeenCalledWith(expected);
+      });
     });
 
     describe('onreconnect', () => {
