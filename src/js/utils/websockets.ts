@@ -22,10 +22,17 @@ interface ErrorEvent {
   payload: { message: string };
 }
 interface OrgProvisionedEvent {
-  type: 'SCRATCH_ORG_PROVISIONED' | 'SCRATCH_ORG_PROVISION_FAILED';
+  type: 'SCRATCH_ORG_PROVISIONED';
   payload: Org;
 }
-type ModelEvent = ErrorEvent | OrgProvisionedEvent;
+interface OrgProvisionFailedEvent {
+  type: 'SCRATCH_ORG_PROVISION_FAILED';
+  payload: {
+    error?: string;
+    model: Org;
+  };
+}
+type ModelEvent = ErrorEvent | OrgProvisionedEvent | OrgProvisionFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 interface Subscription {
   action?: WebsocketActions;

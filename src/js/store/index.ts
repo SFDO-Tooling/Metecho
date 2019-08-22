@@ -9,10 +9,12 @@ import repositoriesReducer, {
 } from '@/store/repositories/reducer';
 import socketReducer, { Socket } from '@/store/socket/reducer';
 import taskReducer, { TaskState } from '@/store/tasks/reducer';
+import toastsReducer, { ToastType } from '@/store/toasts/reducer';
 import userReducer, { User } from '@/store/user/reducer';
 
 export interface AppState {
   errors: ErrorType[];
+  toasts: ToastType[];
   orgs: OrgState;
   projects: ProjectsState;
   repositories: RepositoriesState;
@@ -26,10 +28,16 @@ export interface Action {
   payload?: any;
 }
 
-export type ThunkResult = ThunkAction<Promise<any>, AppState, void, AnyAction>;
+export type ThunkResult = ThunkAction<
+  Promise<any> | AnyAction,
+  AppState,
+  void,
+  AnyAction
+>;
 export type ThunkDispatch = ReduxThunkDispatch<AppState, void, AnyAction>;
 
 const reducer: Reducer<AppState, Action> = combineReducers({
+  toasts: toastsReducer,
   errors: errorsReducer,
   orgs: orgReducer,
   projects: projectsReducer,
