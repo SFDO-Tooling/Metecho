@@ -4,13 +4,23 @@ import Sockette from 'sockette';
 import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { WEBSOCKET_ACTIONS, WebsocketActions } from '@/utils/constants';
+import {
+  ObjectTypes,
+  WEBSOCKET_ACTIONS,
+  WebsocketActions,
+} from '@/utils/constants';
 import { log } from '@/utils/logging';
 
 export interface Socket {
   subscribe: (payload: Subscription) => void;
   unsubscribe: (payload: Subscription) => void;
   reconnect: () => void;
+}
+
+interface Subscription {
+  action?: WebsocketActions;
+  model: ObjectTypes;
+  id: string;
 }
 
 interface SubscriptionEvent {
@@ -34,11 +44,6 @@ interface OrgProvisionFailedEvent {
 }
 type ModelEvent = ErrorEvent | OrgProvisionedEvent | OrgProvisionFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
-interface Subscription {
-  action?: WebsocketActions;
-  model: string;
-  id: string;
-}
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;

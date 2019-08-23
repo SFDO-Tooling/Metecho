@@ -239,6 +239,9 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     url = models.URLField(null=True)
     has_changes = models.BooleanField(default=False)
 
+    def subscribable_by(self, user):  # pragma: nocover
+        return self.owner == user
+
     def save(self, *args, **kwargs):
         save_on_sf = self.id is None
         super().save(*args, **kwargs)
@@ -262,9 +265,9 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     def notify_has_url(self):
         from .serializers import ScratchOrgSerializer
 
-        async_to_sync(push.push_message_about_instance)(
-            self, ScratchOrgSerializer(self).data
-        )
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_PROVISIONED", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
 
 @receiver(user_logged_in)
