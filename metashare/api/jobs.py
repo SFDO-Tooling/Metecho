@@ -1,17 +1,19 @@
-import itertools
 import logging
 import os
-import shutil
-import zipfile
-from glob import glob
 from urllib.parse import urlparse
 
-import github3
-from cumulusci.core.config import BaseProjectConfig, ScratchOrgConfig
+from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.utils import temporary_dir
-from django.conf import settings
 from django_rq import job
+
+# import itertools
+# import shutil
+# import zipfile
+# from glob import glob
+# import github3
+# from cumulusci.core.config import ScratchOrgConfig
+# from cumulusci.utils import temporary_dir
+# from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +56,7 @@ def zip_file_is_safe(zip_file):
 
 def create_scratch_org(scratch_org, *, user, repo_url, commit_ish):
     token, token_secret = user.token
-    organization_url = user.instance_url
+    # organization_url = user.instance_url
 
     scratch_org.url = "https://example.com"
     scratch_org.save()

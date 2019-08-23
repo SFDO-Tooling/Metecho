@@ -246,7 +246,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         if save_on_sf:
             self.create_scratch_org_on_sf()
 
-        if self.tracker.has_changed("url"):
+        if self.tracker.has_changed("url"):  # pragma: nocover
             self.notify_has_url()
 
     def create_scratch_org_on_sf(self):

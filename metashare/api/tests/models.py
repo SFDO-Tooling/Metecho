@@ -2,7 +2,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..models import Project, Repository, ScratchOrg, Task, user_logged_in_handler
+from ..models import Project, Repository, Task, user_logged_in_handler
+
+# from ..models import ScratchOrg
 
 
 @pytest.mark.django_db
@@ -278,7 +280,9 @@ class TestScratchOrg:
 
     # def test_create_scratch_org_on_sf(self, scratch_org_factory):
     #     scratch_org = scratch_org_factory()
-    #     with patch("metashare.api.models.create_scratch_org_job") as create_scratch_org_job:
+    #     with patch(
+    #         "metashare.api.models.create_scratch_org_job"
+    #     ) as create_scratch_org_job:
     #         scratch_org.create_scratch_org_on_sf()
 
     #         assert create_scratch_org_job.delay.called
