@@ -16,6 +16,11 @@ ENV DJANGO_HASHID_SALT 'sample hashid salt'
 ENV DJANGO_SECRET_KEY 'sample secret key'
 ENV DJANGO_SETTINGS_MODULE config.settings.production
 
+# Set up SFDX:
+COPY ./compose/web/install-sfdx.sh /install-sfdx.sh
+RUN chmod +x /install-sfdx.sh
+RUN /install-sfdx.sh
+
 # Python server setup:
 COPY ./Pipfile.lock /Pipfile.lock
 COPY ./Pipfile /Pipfile

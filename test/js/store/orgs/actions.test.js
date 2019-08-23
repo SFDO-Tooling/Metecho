@@ -39,7 +39,7 @@ describe('provisionOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Successfully created new Dev org.',
+        'Successfully created Dev org.',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
       expect(allActions[0].payload.linkUrl).toEqual(org.url);
@@ -55,7 +55,7 @@ describe('provisionOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Successfully created new Dev org.',
+        'Successfully created Dev org.',
       );
       expect(allActions[0].payload.linkText).toBe(undefined);
       expect(allActions[0].payload.linkUrl).toBe(undefined);

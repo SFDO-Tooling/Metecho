@@ -1,5 +1,6 @@
 import requests
 from allauth.account.signals import user_logged_in
+from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -8,7 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
 from django.utils.text import slugify
-from model_utils import Choices
+from model_utils import Choices, FieldTracker
 
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
@@ -16,6 +17,7 @@ from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from . import gh
 from . import model_mixins as mixins
+from . import push
 from .constants import ORGANIZATION_DETAILS
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
@@ -225,6 +227,8 @@ SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
 class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
+    tracker = FieldTracker(fields=("url",))
+
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -235,23 +239,36 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     url = models.URLField(null=True)
     has_changes = models.BooleanField(default=False)
 
+    def subscribable_by(self, user):  # pragma: nocover
+        # TODO: revisit this?
+        return True
+
     def save(self, *args, **kwargs):
         save_on_sf = self.id is None
         super().save(*args, **kwargs)
+
         if save_on_sf:
             self.create_scratch_org_on_sf()
+
+        if self.tracker.has_changed("url"):  # pragma: nocover
+            self.notify_has_url()
 
     def create_scratch_org_on_sf(self):
         from .jobs import create_scratch_org_job
 
         create_scratch_org_job.delay(
+            self,
             user=self.owner,
-            repo_url=(
-                f"{self.task.project.repository.repo_url}"
-                "/tree/"
-                "{self.task.project.branch_name}"
-            ),
+            repo_url=self.task.project.repository.repo_url,
+            commit_ish=self.task.project.branch_name,
         )
+
+    def notify_has_url(self):
+        from .serializers import ScratchOrgSerializer
+
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_PROVISIONED", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
 
 @receiver(user_logged_in)

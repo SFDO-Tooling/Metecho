@@ -30,8 +30,8 @@ export const provisionOrg = (payload: Org): ThunkResult => (
   const user = getState().user;
   if (user && user.id === payload.owner) {
     const msg = {
-      [ORG_TYPES.DEV]: i18n.t('Successfully created new Dev org.'),
-      [ORG_TYPES.QA]: i18n.t('Successfully created new QA org.'),
+      [ORG_TYPES.DEV]: i18n.t('Successfully created Dev org.'),
+      [ORG_TYPES.QA]: i18n.t('Successfully created QA org.'),
     };
     dispatch(
       addToast({
