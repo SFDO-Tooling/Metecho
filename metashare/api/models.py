@@ -240,7 +240,8 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     has_changes = models.BooleanField(default=False)
 
     def subscribable_by(self, user):  # pragma: nocover
-        return self.owner == user
+        # TODO: revisit this?
+        return True
 
     def save(self, *args, **kwargs):
         save_on_sf = self.id is None
