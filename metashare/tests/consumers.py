@@ -33,6 +33,31 @@ async def test_push_notification_consumer__report_error(user_factory):
 
 @pytest.mark.django_db
 @pytest.mark.asyncio
+async def test_push_notification_consumer__unsubscribe(user_factory):
+    user = user_factory()
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = user
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to(
+        {"model": "user", "id": str(user.id), "action": "SUBSCRIBE"}
+    )
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await communicator.send_json_to(
+        {"model": "user", "id": str(user.id), "action": "UNSUBSCRIBE"}
+    )
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
 async def test_push_notification_consumer__invalid_subscription(user_factory):
     user = user_factory()
 

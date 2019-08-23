@@ -1,4 +1,5 @@
 from collections import namedtuple
+from enum import Enum
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
@@ -14,6 +15,11 @@ Request = namedtuple("Request", "user")
 
 
 KNOWN_MODELS = {"user", "scratchorg"}
+
+
+class Actions(Enum):
+    Subscribe = "SUBSCRIBE"
+    Unsubscribe = "UNSUBSCRIBE"
 
 
 # def user_context(user):
@@ -64,7 +70,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     #     return getattr(import_module(mod), serializer)
 
     async def receive_json(self, content, **kwargs):
-        # Just used to subscribe to notification channels.
+        # Just used to sub/unsub to notification channels.
         is_valid, content = self.is_valid(content)
         is_known_model = self.is_known_model(content.get("model", None))
         has_good_permissions = self.has_good_permissions(content)
@@ -76,14 +82,24 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             model=content["model"], id=content["id"]
         )
         self.groups.append(group_name)
-        await self.channel_layer.group_add(group_name, self.channel_name)
-        await self.send_json(
-            {
-                "ok": _("Subscribed to {model}.id = {id_}").format(
-                    model=content["model"], id_=content["id"]
-                )
-            }
-        )
+        if content["action"] == Actions.Subscribe.value:
+            await self.channel_layer.group_add(group_name, self.channel_name)
+            await self.send_json(
+                {
+                    "ok": _("Subscribed to {model}.id = {id_}").format(
+                        model=content["model"], id_=content["id"]
+                    )
+                }
+            )
+        if content["action"] == Actions.Unsubscribe.value:
+            await self.send_json(
+                {
+                    "ok": _("Unsubscribed from {model}.id = {id_}").format(
+                        model=content["model"], id_=content["id"]
+                    )
+                }
+            )
+            await self.channel_layer.group_discard(group_name, self.channel_name)
 
     def _process_value(self, key, value):
         if key == "model":
