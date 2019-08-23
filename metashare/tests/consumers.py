@@ -15,7 +15,9 @@ async def test_push_notification_consumer__report_error(user_factory):
     connected, _ = await communicator.connect()
     assert connected
 
-    await communicator.send_json_to({"model": "user", "id": str(user.id)})
+    await communicator.send_json_to(
+        {"model": "user", "id": str(user.id), "action": "SUBSCRIBE"}
+    )
     response = await communicator.receive_json_from()
     assert "ok" in response
 

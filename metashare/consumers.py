@@ -55,7 +55,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         #     await self.send_json(payload)
         #     return
 
-    def get_instance(self, *, model, id):
+    def get_instance(self, *, model, id, **kwargs):
         Model = apps.get_model("api", model)
         return Model.objects.get(pk=id)
 
@@ -65,7 +65,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive_json(self, content, **kwargs):
         # Just used to subscribe to notification channels.
-        is_valid = self.is_valid(content)
+        is_valid, content = self.is_valid(content)
         is_known_model = self.is_known_model(content.get("model", None))
         has_good_permissions = self.has_good_permissions(content)
         all_good = is_valid and is_known_model and has_good_permissions
@@ -85,8 +85,20 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
+    def _process_value(self, key, value):
+        if key == "model":
+            # We want to accept model names with `_` and `-` in them
+            # from the frontend, but translate them into a normalized
+            # form in the backend. It's conceivable that a Django model
+            # could have an underscore in it, but it shouldn't, and
+            # doing so will cause this to break things.
+            return value.replace("_", "").replace("-", "").lower()
+        return value
+
     def is_valid(self, content):
-        return content.keys() == {"model", "id"}
+        if content.keys() == {"model", "id", "action"}:
+            return True, {k: self._process_value(k, v) for k, v in content.items()}
+        return False, content
 
     def is_known_model(self, model):
         return model in KNOWN_MODELS
