@@ -18,7 +18,8 @@ const mockList = {
 };
 
 const CaptureModal = ({ isOpen }) => {
-  const [expandedPanels, setExpandedPanels] = useState(new Set([]));
+  const handleCaptureChanges = () => console.log('handle action');
+  const [expandedPanels, setExpandedPanels] = useState(new Set());
 
   const id = 1;
   const handlePanelToggle = id => {
@@ -26,6 +27,7 @@ const CaptureModal = ({ isOpen }) => {
       setExpandedPanels(expandedPanels.delete(id));
     } else {
       setExpandedPanels(expandedPanels.add(id));
+      console.log(expandedPanels);
     }
   };
   return (
@@ -35,36 +37,66 @@ const CaptureModal = ({ isOpen }) => {
       size="large"
       align="top"
     >
-      <Checkbox
-        assistiveText={{
-          label: `${i18n.t('Select All')}`,
-        }}
-        id="checkbox-example"
-        labels={{
-          label: `${i18n.t('Select All')}`,
-        }}
-        onChange={e => {
-          console.log('onChange ', e.target);
-        }}
-      />
-      <Accordion id="base-example-accordion">
-        <AccordionPanel
-          expanded={Boolean(expandedPanels.has(1))}
-          id={id}
-          onTogglePanel={() => handlePanelToggle(1)}
-          summary="summary"
-        >
-          <div>Hello</div>>
-        </AccordionPanel>
-        <AccordionPanel
-          expanded={Boolean(expandedPanels.has(2))}
-          id={2}
-          onTogglePanel={() => handlePanelToggle(2)}
-          summary="summary"
-        >
-          <div>Hello</div>>
-        </AccordionPanel>
-      </Accordion>
+      <form className="slds-p-around_large" onSubmit={handleCaptureChanges}>
+        <Checkbox
+          assistiveText={{
+            label: `${i18n.t('Select All')}`,
+          }}
+          id="checkbox-example"
+          labels={{
+            label: `${i18n.t('Select All')}`,
+          }}
+          onChange={e => {
+            console.log('onChange ', e.target);
+          }}
+        />
+        {Object.keys(mockList).map((item, idx) => {
+          const panelId = `${item}-${idx}`;
+
+          return (
+            <Accordion key={idx} className="" id="base-example-accordion">
+              <AccordionPanel
+                expanded={expandedPanels.has(panelId)}
+                id={id}
+                onTogglePanel={() => handlePanelToggle(panelId)}
+                summary={
+                  <Checkbox
+                    key={`${item}-${idx}`}
+                    assistiveText={{
+                      label: item,
+                    }}
+                    id="checkbox-example"
+                    label
+                    labels={{
+                      label: item,
+                    }}
+                    onChange={e => {
+                      console.log('onChange ', e.target);
+                    }}
+                  />
+                }
+              >
+                {mockList[item].map((list: any) => (
+                  <Checkbox
+                    key={`${list}-${idx}`}
+                    assistiveText={{
+                      label: list.name,
+                    }}
+                    id="checkbox-example"
+                    label
+                    labels={{
+                      label: list.name,
+                    }}
+                    onChange={e => {
+                      console.log('onChange ', e.target);
+                    }}
+                  />
+                ))}
+              </AccordionPanel>
+            </Accordion>
+          );
+        })}
+      </form>
     </Modal>
   );
 };
