@@ -26,13 +26,15 @@ import {
 } from '@/components/utils';
 import { AppState } from '@/store';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
+import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
+
 const TaskDetail = (props: RouteComponentProps) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [captureModalOpen, setCaptureModalOpen] = useState(true);
+  const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   useFetchTasksIfMissing(project, props);
@@ -44,9 +46,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   const taskSlug = useSelector((state: AppState) =>
     selectTaskSlugWithProps(state, props),
   );
+
   const { orgs } = useFetchOrgsIfMissing(task, props);
   const user = useSelector(selectUserState);
-
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -87,9 +89,35 @@ const TaskDetail = (props: RouteComponentProps) => {
         setCapturingChanges(false);
         setInfoModalOpen(true);
       }
-      setCaptureModalOpen(true);
+      if (user.is_devhub_enabled) {
+        setCaptureModalOpen(true);
+      }
     }
   };
+
+  const orgInfo: any = orgs && Object.values(orgs);
+  let orgsHaveChanges, userIsOwner;
+  if (orgInfo) {
+    orgsHaveChanges = orgInfo
+      .map((item: any): boolean => {
+        if (item) {
+          return item.has_changes;
+        }
+        return false;
+      })
+      .includes(true);
+
+    userIsOwner =
+      user &&
+      orgInfo
+        .map((item: any): boolean => {
+          if (item) {
+            return item.owner;
+          }
+          return false;
+        })
+        .includes(user.id);
+  }
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
@@ -158,8 +186,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        {/* and matched owner and org has changes */}
-        {user.id ? (
+        {userIsOwner && orgsHaveChanges ? (
           <Button
             label={
               capturingChanges ? (
@@ -185,7 +212,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           toggleModal={setConnectModalOpen}
         />
         <ConnectionInfoModal
-          user={user}
+          user={user as User}
           isOpen={infoModalOpen}
           toggleModal={setInfoModalOpen}
         />
