@@ -2,7 +2,9 @@ import Button from '@salesforce/design-system-react/components/button';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import DataTableRowActions from '@salesforce/design-system-react/components/data-table/row-actions';
 import Icon from '@salesforce/design-system-react/components/icon';
+import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
@@ -13,7 +15,7 @@ import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
 import { ExternalLink, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { createObject } from '@/store/actions';
+import { createObject, deleteObject } from '@/store/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
@@ -30,6 +32,11 @@ interface DataCellProps {
   item?: Item;
 }
 
+interface OrgTypeTracker {
+  [ORG_TYPES.DEV]: boolean;
+  [ORG_TYPES.QA]: boolean;
+}
+
 const EmptyIcon = () => (
   <Icon category="utility" name="dash" size="xx-small" colorVariant="light" />
 );
@@ -39,13 +46,15 @@ const TypeDataCell = ({
   user,
   createOrg,
   isCreatingOrg,
+  isDeletingOrg,
   toggleConnectModal,
   toggleInfoModal,
   ...props
 }: DataCellProps & {
   user: User;
   createOrg: (type: OrgTypes) => void;
-  isCreatingOrg: OrgTypes | null;
+  isCreatingOrg: OrgTypeTracker;
+  isDeletingOrg: OrgTypeTracker;
   toggleConnectModal: React.Dispatch<React.SetStateAction<boolean>>;
   toggleInfoModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -67,8 +76,10 @@ const TypeDataCell = ({
     <span className="slds-m-left_x-small">{item && item.displayType}</span>
   );
   const isCreating =
-    item && (isCreatingOrg === item.org_type || (!item.isNull && !item.url));
-  if (isCreating) {
+    item && (isCreatingOrg[item.org_type] || (!item.isNull && !item.url));
+  const isDeleting =
+    item && (isDeletingOrg[item.org_type] || item.deletion_queued_at);
+  if (isCreating || isDeleting) {
     contents = (
       <>
         <span className="slds-is-relative slds-m-horizontal_x-small">
@@ -113,11 +124,14 @@ const TypeDataCell = ({
       </>
     );
   }
+  let title = item && item.displayType;
+  if (isCreating) {
+    title = i18n.t('Creating Org…');
+  } else if (isDeleting) {
+    title = i18n.t('Deleting Org…');
+  }
   return (
-    <DataTableCell
-      title={isCreating ? i18n.t('Creating Org…') : item && item.displayType}
-      {...props}
-    >
+    <DataTableCell title={title} {...props}>
       {contents}
     </DataTableCell>
   );
@@ -191,15 +205,36 @@ const StatusTableCell = ({ item, ...props }: DataCellProps) => {
 };
 StatusTableCell.displayName = DataTableCell.displayName;
 
+const RowActions = ({
+  isDeletingOrg,
+  ...props
+}: { isDeletingOrg: OrgTypeTracker } & DataCellProps) =>
+  props.item &&
+  props.item.ownedByCurrentUser &&
+  !props.item.deletion_queued_at &&
+  !isDeletingOrg[props.item.org_type] ? (
+    <DataTableRowActions {...props} />
+  ) : (
+    <td style={{ width: '3.25rem' }}></td>
+  );
+RowActions.displayName = DataTableRowActions.displayName;
+
 const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
   const user = useSelector(selectUserState);
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypes | null>(null);
+  const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>({
+    [ORG_TYPES.DEV]: false,
+    [ORG_TYPES.QA]: false,
+  });
+  const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>({
+    [ORG_TYPES.DEV]: false,
+    [ORG_TYPES.QA]: false,
+  });
   const dispatch = useDispatch<ThunkDispatch>();
   const createOrg = useCallback((type: OrgTypes) => {
-    setIsCreatingOrg(type);
+    setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
     dispatch(
       createObject({
         objectType: OBJECT_TYPES.ORG,
@@ -210,10 +245,31 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
     ).finally(() => {
       /* istanbul ignore else */
       if (isMounted.current) {
-        setIsCreatingOrg(null);
+        setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const handleDelete = useCallback((item: Item) => {
+    setIsDeletingOrg({ ...isDeletingOrg, [item.org_type]: true });
+    dispatch(
+      deleteObject({
+        objectType: OBJECT_TYPES.ORG,
+        object: item,
+        shouldSubscribeToObject: () => true,
+      }),
+    ).finally(() => {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        setIsDeletingOrg({ ...isDeletingOrg, [item.org_type]: false });
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  let deleteAction: (...args: any[]) => void = () => setConnectModalOpen(true);
+  if (user && user.valid_token_for) {
+    deleteAction = user.is_devhub_enabled
+      ? handleDelete
+      : () => setInfoModalOpen(true);
+  }
 
   const devOrg = orgs[ORG_TYPES.DEV];
   const qaOrg = orgs[ORG_TYPES.QA];
@@ -259,6 +315,7 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
             user={user as User}
             createOrg={createOrg}
             isCreatingOrg={isCreatingOrg}
+            isDeletingOrg={isDeletingOrg}
             toggleConnectModal={setConnectModalOpen}
             toggleInfoModal={setInfoModalOpen}
           />
@@ -284,6 +341,15 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
         >
           <StatusTableCell />
         </DataTableColumn>
+        {((currentUserOwnsDevOrg && !isDeletingOrg[ORG_TYPES.DEV]) ||
+          (currentUserOwnsQAOrg && !isDeletingOrg[ORG_TYPES.QA])) && (
+          <RowActions
+            options={[{ id: 0, label: i18n.t('Delete') }]}
+            dropdown={<Dropdown width="xx-small" />}
+            onAction={deleteAction}
+            isDeletingOrg={isDeletingOrg}
+          />
+        )}
       </DataTable>
       <ConnectModal
         isOpen={!(user && user.valid_token_for) && connectModalOpen}

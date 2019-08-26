@@ -19,6 +19,7 @@ export interface Org {
   latest_commit_url: string;
   url: string | null;
   has_changes: boolean;
+  deletion_queued_at: string | null;
 }
 
 export interface OrgsByTask {
@@ -86,7 +87,8 @@ const reducer = (
       }
       return orgs;
     }
-    case 'SCRATCH_ORG_PROVISIONED': {
+    case 'SCRATCH_ORG_PROVISIONED':
+    case 'SCRATCH_ORG_DELETE_FAILED': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
@@ -100,7 +102,8 @@ const reducer = (
         },
       };
     }
-    case 'SCRATCH_ORG_PROVISION_FAILED': {
+    case 'SCRATCH_ORG_PROVISION_FAILED':
+    case 'SCRATCH_ORG_DELETED': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
@@ -113,6 +116,30 @@ const reducer = (
           [org.org_type]: null,
         },
       };
+    }
+    case 'DELETE_OBJECT_SUCCEEDED': {
+      const {
+        objectType,
+        object,
+      }: { objectType: ObjectTypes; object: Org } = action.payload;
+      if (objectType === OBJECT_TYPES.ORG && object) {
+        const taskOrgs = orgs[object.task] || {
+          [ORG_TYPES.DEV]: null,
+          [ORG_TYPES.QA]: null,
+        };
+        return {
+          ...orgs,
+          [object.task]: {
+            ...taskOrgs,
+            [object.org_type]: {
+              ...taskOrgs[object.org_type],
+              // eslint-disable-next-line @typescript-eslint/camelcase
+              deletion_queued_at: new Date().toISOString(),
+            },
+          },
+        };
+      }
+      return orgs;
     }
   }
   return orgs;

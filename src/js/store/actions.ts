@@ -63,6 +63,13 @@ interface CreateObjectFailed {
   type: 'CREATE_OBJECT_FAILED';
   payload: { data: ObjectData } & CreateObjectPayload;
 }
+interface DeleteObjectAction {
+  type:
+    | 'DELETE_OBJECT_STARTED'
+    | 'DELETE_OBJECT_SUCCEEDED'
+    | 'DELETE_OBJECT_FAILED';
+  payload: { object: any } & CreateObjectPayload;
+}
 
 export type ObjectsAction =
   | FetchObjectsStarted
@@ -73,7 +80,8 @@ export type ObjectsAction =
   | FetchObjectFailed
   | CreateObjectStarted
   | CreateObjectSucceeded
-  | CreateObjectFailed;
+  | CreateObjectFailed
+  | DeleteObjectAction;
 
 export type ObjectsActionType = ({
   objectType,
@@ -211,7 +219,7 @@ export const createObject = ({
       throw new Error(`No URL found for object: ${objectType}`);
     }
     const object = await apiFetch({
-      url: addUrlParams(baseUrl),
+      url: baseUrl,
       dispatch,
       opts: {
         method: 'POST',
@@ -241,6 +249,52 @@ export const createObject = ({
     dispatch({
       type: 'CREATE_OBJECT_FAILED',
       payload: { objectType, url: baseUrl, data },
+    });
+    throw err;
+  }
+};
+
+export const deleteObject = ({
+  objectType,
+  object,
+  shouldSubscribeToObject = () => false,
+}: {
+  objectType: ObjectTypes;
+  object: { id: string; [key: string]: any };
+  shouldSubscribeToObject?: (object: any) => boolean;
+}): ThunkResult => async dispatch => {
+  const urlFn = window.api_urls[`${objectType}_detail`];
+  let baseUrl;
+  if (urlFn && object.id) {
+    baseUrl = urlFn(object.id);
+  }
+  dispatch({
+    type: 'DELETE_OBJECT_STARTED',
+    payload: { objectType, url: baseUrl, object },
+  });
+  try {
+    if (!baseUrl) {
+      throw new Error(`No URL found for object: ${objectType}`);
+    }
+    await apiFetch({
+      url: baseUrl,
+      dispatch,
+      opts: { method: 'DELETE' },
+    });
+    if (shouldSubscribeToObject(object) && window.socket) {
+      window.socket.subscribe({
+        model: objectType,
+        id: object.id,
+      });
+    }
+    return dispatch({
+      type: 'DELETE_OBJECT_SUCCEEDED',
+      payload: { objectType, url: baseUrl, object },
+    });
+  } catch (err) {
+    dispatch({
+      type: 'DELETE_OBJECT_FAILED',
+      payload: { objectType, url: baseUrl, object },
     });
     throw err;
   }

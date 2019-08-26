@@ -1,5 +1,7 @@
 import reducer from '@/store/orgs/reducer';
 
+jest.useFakeTimers();
+
 describe('reducer', () => {
   test('returns initial state', () => {
     const expected = {};
@@ -236,6 +238,52 @@ describe('reducer', () => {
           payload: org,
         },
       );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('DELETE_OBJECT_SUCCEEDED', () => {
+    test('adds deletion_queued_at to org', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const expected = {
+        'task-1': {
+          Dev: { deletion_queued_at: new Date().toISOString() },
+          QA: null,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'DELETE_OBJECT_SUCCEEDED',
+          payload: {
+            object: org,
+            objectType: 'scratch_org',
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if objectType !== "scratch_org"', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const expected = {};
+      const actual = reducer(expected, {
+        type: 'DELETE_OBJECT_SUCCEEDED',
+        payload: {
+          object: org,
+          objectType: 'other-object',
+        },
+      });
 
       expect(actual).toEqual(expected);
     });

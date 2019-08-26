@@ -1,7 +1,12 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
-import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
+import {
+  deleteFailed,
+  deleteOrg,
+  provisionFailed,
+  provisionOrg,
+} from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
@@ -42,7 +47,23 @@ interface OrgProvisionFailedEvent {
     model: Org;
   };
 }
-type ModelEvent = ErrorEvent | OrgProvisionedEvent | OrgProvisionFailedEvent;
+interface OrgDeletedEvent {
+  type: 'SCRATCH_ORG_DELETED';
+  payload: Org;
+}
+interface OrgDeleteFailedEvent {
+  type: 'SCRATCH_ORG_DELETE_FAILED';
+  payload: {
+    error?: string;
+    model: Org;
+  };
+}
+type ModelEvent =
+  | ErrorEvent
+  | OrgProvisionedEvent
+  | OrgProvisionFailedEvent
+  | OrgDeletedEvent
+  | OrgDeleteFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -57,6 +78,10 @@ export const getAction = (event: EventType) => {
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
       return provisionFailed(event.payload);
+    case 'SCRATCH_ORG_DELETED':
+      return deleteOrg(event.payload);
+    case 'SCRATCH_ORG_DELETE_FAILED':
+      return deleteFailed(event.payload);
   }
   return null;
 };

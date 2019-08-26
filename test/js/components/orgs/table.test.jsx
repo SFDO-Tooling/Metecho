@@ -3,7 +3,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import OrgsTable from '@/components/orgs/table';
-import { createObject } from '@/store/actions';
+import { createObject, deleteObject } from '@/store/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
@@ -12,9 +12,13 @@ jest.mock('@/store/actions');
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
+deleteObject.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 
 afterEach(() => {
   createObject.mockClear();
+  deleteObject.mockClear();
 });
 
 const defaultOrgs = {
@@ -103,6 +107,7 @@ describe('<OrgsTable/>', () => {
       });
       expect(args.shouldSubscribeToObject({})).toBe(true);
       expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
+      expect(getByTitle('Creating Org…')).toBeVisible();
     });
 
     describe('not connected to sf org', () => {
@@ -125,6 +130,79 @@ describe('<OrgsTable/>', () => {
         fireEvent.click(getByTitle('Create New Org'));
 
         expect(createObject).not.toHaveBeenCalled();
+        expect(getByText('Enable Dev Hub')).toBeVisible();
+      });
+    });
+  });
+
+  describe('delete org click', () => {
+    test('deletes dev org', () => {
+      const { container, getByTitle } = setup();
+      fireEvent.click(container.querySelector('[data-label="Actions"] button'));
+      fireEvent.click(getByTitle('Delete'));
+
+      expect(deleteObject).toHaveBeenCalledTimes(1);
+
+      const args = deleteObject.mock.calls[0][0];
+
+      expect(args.objectType).toEqual('scratch_org');
+      expect(args.object.id).toEqual('org-id');
+      expect(args.shouldSubscribeToObject()).toBe(true);
+      expect(getByTitle('Deleting Org…')).toBeVisible();
+    });
+
+    test('deletes qa org', () => {
+      const { container, getByTitle } = setup({
+        orgs: {
+          Dev: null,
+          QA: { ...defaultOrgs.Dev, org_type: 'QA' },
+        },
+      });
+      fireEvent.click(container.querySelector('[data-label="Actions"] button'));
+      fireEvent.click(getByTitle('Delete'));
+
+      expect(deleteObject).toHaveBeenCalledTimes(1);
+
+      const args = deleteObject.mock.calls[0][0];
+
+      expect(args.objectType).toEqual('scratch_org');
+      expect(args.object.id).toEqual('org-id');
+      expect(args.shouldSubscribeToObject()).toBe(true);
+      expect(getByTitle('Deleting Org…')).toBeVisible();
+    });
+
+    describe('not connected to sf org', () => {
+      test('opens connect modal', () => {
+        const { container, getByTitle, getByText } = setup({
+          initialState: {
+            ...defaultState,
+            user: { ...defaultState.user, valid_token_for: null },
+          },
+        });
+        fireEvent.click(
+          container.querySelector('[data-label="Actions"] button'),
+        );
+        fireEvent.click(getByTitle('Delete'));
+
+        expect(deleteObject).not.toHaveBeenCalled();
+        expect(getByText('Use Custom Domain')).toBeVisible();
+      });
+    });
+
+    describe('dev hub not enabled', () => {
+      test('opens warning modal', () => {
+        const { container, getByTitle, getByText } = setup({
+          initialState: {
+            ...defaultState,
+            user: { ...defaultState.user, is_devhub_enabled: false },
+          },
+        });
+        fireEvent.click(
+          container.querySelector('[data-label="Actions"] button'),
+        );
+        fireEvent.click(getByTitle('Delete'));
+
+        expect(deleteObject).not.toHaveBeenCalled();
         expect(getByText('Enable Dev Hub')).toBeVisible();
       });
     });

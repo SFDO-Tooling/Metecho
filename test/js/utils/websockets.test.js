@@ -36,6 +36,8 @@ describe('getAction', () => {
   test.each([
     ['SCRATCH_ORG_PROVISIONED', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
+    ['SCRATCH_ORG_DELETED', 'deleteOrg'],
+    ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };
