@@ -136,26 +136,11 @@ describe('<OrgsTable/>', () => {
   });
 
   describe('delete org click', () => {
-    test('deletes dev org', () => {
-      const { container, getByTitle } = setup();
-      fireEvent.click(container.querySelector('[data-label="Actions"] button'));
-      fireEvent.click(getByTitle('Delete'));
-
-      expect(deleteObject).toHaveBeenCalledTimes(1);
-
-      const args = deleteObject.mock.calls[0][0];
-
-      expect(args.objectType).toEqual('scratch_org');
-      expect(args.object.id).toEqual('org-id');
-      expect(args.shouldSubscribeToObject()).toBe(true);
-      expect(getByTitle('Deleting Org…')).toBeVisible();
-    });
-
-    test('deletes qa org', () => {
+    test('deletes org', () => {
       const { container, getByTitle } = setup({
         orgs: {
-          Dev: null,
-          QA: { ...defaultOrgs.Dev, org_type: 'QA' },
+          ...defaultOrgs,
+          Dev: { ...defaultOrgs.Dev, has_changes: false },
         },
       });
       fireEvent.click(container.querySelector('[data-label="Actions"] button'));
@@ -204,6 +189,67 @@ describe('<OrgsTable/>', () => {
 
         expect(deleteObject).not.toHaveBeenCalled();
         expect(getByText('Enable Dev Hub')).toBeVisible();
+      });
+    });
+
+    describe('org has changes', () => {
+      test('opens confirm modal', () => {
+        const { container, getByTitle, getByText } = setup({
+          orgs: {
+            Dev: null,
+            QA: { ...defaultOrgs.Dev, org_type: 'QA' },
+          },
+        });
+        fireEvent.click(
+          container.querySelector('[data-label="Actions"] button'),
+        );
+        fireEvent.click(getByTitle('Delete'));
+
+        expect(deleteObject).not.toHaveBeenCalled();
+        expect(getByText('Confirm Delete Org')).toBeVisible();
+      });
+
+      describe('<ConfirmDeleteModal />', () => {
+        let result;
+
+        beforeEach(() => {
+          result = setup({
+            orgs: {
+              Dev: null,
+              QA: { ...defaultOrgs.Dev, org_type: 'QA' },
+            },
+          });
+          fireEvent.click(
+            result.container.querySelector('[data-label="Actions"] button'),
+          );
+          fireEvent.click(result.getByTitle('Delete'));
+        });
+
+        describe('"cancel" click', () => {
+          test('closes modal', () => {
+            const { getByText, queryByText } = result;
+            fireEvent.click(getByText('Cancel'));
+
+            expect(queryByText('Confirm Delete Org')).toBeNull();
+          });
+        });
+
+        describe('"delete" click', () => {
+          test('deletes org', () => {
+            const { getByText, queryByText, getByTitle } = result;
+            fireEvent.click(getByText('Delete'));
+
+            expect(queryByText('Confirm Delete Org')).toBeNull();
+            expect(deleteObject).toHaveBeenCalledTimes(1);
+
+            const args = deleteObject.mock.calls[0][0];
+
+            expect(args.objectType).toEqual('scratch_org');
+            expect(args.object.id).toEqual('org-id');
+            expect(args.shouldSubscribeToObject()).toBe(true);
+            expect(getByTitle('Deleting Org…')).toBeVisible();
+          });
+        });
       });
     });
   });

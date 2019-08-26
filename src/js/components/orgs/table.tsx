@@ -5,6 +5,7 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import DataTableRowActions from '@salesforce/design-system-react/components/data-table/row-actions';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
+import Modal from '@salesforce/design-system-react/components/modal';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
@@ -36,6 +37,54 @@ interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
   [ORG_TYPES.QA]: boolean;
 }
+
+const ConfirmDeleteModal = ({
+  confirmDeleteModalOpen,
+  toggleModal,
+  orgs,
+  handleDelete,
+}: {
+  confirmDeleteModalOpen: OrgTypes | null;
+  toggleModal: React.Dispatch<React.SetStateAction<OrgTypes | null>>;
+  orgs: OrgsByTask;
+  handleDelete: (item: Item | Org) => void;
+}) => {
+  const handleClose = () => {
+    toggleModal(null);
+  };
+  const handleSubmit = () => {
+    handleClose();
+    const org = confirmDeleteModalOpen && orgs[confirmDeleteModalOpen];
+    /* istanbul ignore else */
+    if (org) {
+      handleDelete(org);
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={Boolean(confirmDeleteModalOpen)}
+      heading={i18n.t('Confirm Delete Org')}
+      prompt="warning"
+      onRequestClose={handleClose}
+      footer={[
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
+        <Button
+          key="submit"
+          label={i18n.t('Delete')}
+          variant="brand"
+          onClick={handleSubmit}
+        />,
+      ]}
+    >
+      <div className="slds-p-vertical_medium">
+        {i18n.t(
+          'Are you sure you want to delete this org with uncaptured changes?',
+        )}
+      </div>
+    </Modal>
+  );
+};
 
 const EmptyIcon = () => (
   <Icon category="utility" name="dash" size="xx-small" colorVariant="light" />
@@ -224,6 +273,10 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [
+    confirmDeleteModalOpen,
+    setConfirmDeleteModalOpen,
+  ] = useState<OrgTypes | null>(null);
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>({
     [ORG_TYPES.DEV]: false,
     [ORG_TYPES.QA]: false,
@@ -249,7 +302,7 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const handleDelete = useCallback((item: Item) => {
+  const handleDelete = useCallback((item: Item | Org) => {
     setIsDeletingOrg({ ...isDeletingOrg, [item.org_type]: true });
     dispatch(
       deleteObject({
@@ -267,7 +320,13 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
   let deleteAction: (...args: any[]) => void = () => setConnectModalOpen(true);
   if (user && user.valid_token_for) {
     deleteAction = user.is_devhub_enabled
-      ? handleDelete
+      ? (item: Item) => {
+          if (item.has_changes) {
+            setConfirmDeleteModalOpen(item.org_type);
+          } else {
+            handleDelete(item);
+          }
+        }
       : () => setInfoModalOpen(true);
   }
 
@@ -364,6 +423,12 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
             infoModalOpen,
         )}
         toggleModal={setInfoModalOpen}
+      />
+      <ConfirmDeleteModal
+        confirmDeleteModalOpen={confirmDeleteModalOpen}
+        toggleModal={setConfirmDeleteModalOpen}
+        orgs={orgs}
+        handleDelete={handleDelete}
       />
     </>
   );
