@@ -21,13 +21,11 @@ const CaptureModal = ({ isOpen }) => {
   const handleCaptureChanges = () => console.log('handle action');
   const [expandedPanels, setExpandedPanels] = useState(new Set());
 
-  const id = 1;
-  const handlePanelToggle = id => {
+  const handlePanelToggle = (id: string) => {
     if (expandedPanels.has(id)) {
       setExpandedPanels(expandedPanels.delete(id));
     } else {
       setExpandedPanels(expandedPanels.add(id));
-      console.log(expandedPanels);
     }
   };
   return (
@@ -57,7 +55,7 @@ const CaptureModal = ({ isOpen }) => {
             <Accordion key={idx} className="" id="base-example-accordion">
               <AccordionPanel
                 expanded={expandedPanels.has(panelId)}
-                id={id}
+                id={panelId}
                 onTogglePanel={() => handlePanelToggle(panelId)}
                 summary={
                   <Checkbox
@@ -71,8 +69,9 @@ const CaptureModal = ({ isOpen }) => {
                       label: item,
                     }}
                     onChange={e => {
-                      console.log('onChange ', e.target);
+                      console.log(e.target.value);
                     }}
+                    name="changes"
                   />
                 }
               >
