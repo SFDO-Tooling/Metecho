@@ -75,7 +75,6 @@ def extract_zip_file(zip_file, user, repo_name):
 
 
 def call_out_to_sf_api():
-    # TODO: this ain't workin'.
     org_config = ScratchOrgConfig(
         {"config_file": "orgs/dev.json", "scratch": True}, "dev"
     )
@@ -83,8 +82,6 @@ def call_out_to_sf_api():
 
 
 def make_scratch_org(repo_url, commit_ish):
-    repo_url = "https://github.com/SFDO-Tooling/CumulusCI-Test"
-    commit_ish = "master"
     with temporary_dir():
         repo = clone_repo_locally(repo_url)
         user, repo_name = normalize_user_and_repo_name(repo)
