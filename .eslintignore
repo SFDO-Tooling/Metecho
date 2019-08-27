@@ -1,3 +1,11 @@
 dist/
 !.*
 venv/
+.vscode/
+coverage/
+postgres/
+htmlcov/
+docs/
+staticfiles/
+.git/
+node_modules/

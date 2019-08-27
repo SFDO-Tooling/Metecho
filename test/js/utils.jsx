@@ -10,10 +10,11 @@ const mockStore = configureStore([]);
 export const renderWithRedux = (
   ui,
   initialState = {},
-  customStore = mockStore,
+  customStoreCreator = mockStore,
   rerender = false,
+  customStore,
 ) => {
-  const store = customStore(initialState);
+  const store = customStore || customStoreCreator(initialState);
   const renderFn = rerender ? rerender : render;
   return {
     ...renderFn(<Provider store={store}>{ui}</Provider>),
