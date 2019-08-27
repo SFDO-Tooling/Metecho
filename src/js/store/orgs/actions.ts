@@ -1,8 +1,9 @@
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
-import { Org } from '@/store/orgs/reducer';
+import { Changeset, Org } from '@/store/orgs/reducer';
 import { addToast } from '@/store/toasts/actions';
+import apiFetch from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 
 interface OrgProvisioned {
@@ -13,8 +14,26 @@ interface OrgProvisionFailed {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
   payload: Org;
 }
+interface ChangesetPayload {
+  org: Org;
+  url: string;
+}
+interface ChangesetEvent {
+  type: 'FETCH_CHANGESET_STARTED' | 'FETCH_CHANGESET_FAILED';
+  payload: ChangesetPayload;
+}
+interface ChangesetSucceeded {
+  type: 'FETCH_CHANGESET_SUCCEEDED';
+  payload: {
+    changeset: Changeset;
+  } & ChangesetPayload;
+}
 
-export type OrgsAction = OrgProvisioned | OrgProvisionFailed;
+export type OrgsAction =
+  | OrgProvisioned
+  | OrgProvisionFailed
+  | ChangesetEvent
+  | ChangesetSucceeded;
 
 export const provisionOrg = (payload: Org): ThunkResult => (
   dispatch,
@@ -84,4 +103,38 @@ export const provisionFailed = ({
     type: 'SCRATCH_ORG_PROVISION_FAILED',
     payload: model,
   });
+};
+
+export const getChangeset = ({
+  org,
+}: {
+  org: Org;
+}): ThunkResult => async dispatch => {
+  const url = window.api_urls.scratch_org_detail(org.id);
+  dispatch({
+    type: 'FETCH_CHANGESET_STARTED',
+    payload: { org, url },
+  });
+  try {
+    const changeset = await apiFetch({
+      url,
+      dispatch,
+    });
+    if (changeset && changeset.id && window.socket) {
+      window.socket.subscribe({
+        model: OBJECT_TYPES.CHANGESET,
+        id: changeset.id,
+      });
+    }
+    return dispatch({
+      type: 'FETCH_CHANGESET_SUCCEEDED',
+      payload: { org, url, changeset },
+    });
+  } catch (err) {
+    dispatch({
+      type: 'FETCH_CHANGESET_FAILED',
+      payload: { org, url },
+    });
+    throw err;
+  }
 };

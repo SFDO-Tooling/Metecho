@@ -189,7 +189,9 @@ export const ConnectionInfoModal = ({
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={Boolean(
+        user && user.valid_token_for && !user.is_devhub_enabled && isOpen,
+      )}
       heading={i18n.t('Enable Dev Hub')}
       tagline={<ConnectionInfoWarning />}
       prompt="warning"
@@ -252,7 +254,7 @@ const UserDropdown = () => {
           <Avatar />
         </Button>
       </Popover>
-      <ConnectModal isOpen={modalOpen} toggleModal={setModalOpen} />
+      <ConnectModal user={user} isOpen={modalOpen} toggleModal={setModalOpen} />
     </>
   ) : null;
 };

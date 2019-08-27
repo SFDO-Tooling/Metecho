@@ -148,10 +148,10 @@ export const DetailPageLayout = ({
 // For use as a "loading" button label
 export const LabelWithSpinner = ({
   label,
-  variant = 'inverse',
-  size = 'small',
+  variant = 'base',
+  size = 'x-small',
 }: {
-  label: string;
+  label?: string;
   variant?: string;
   size?: string;
 }) => (
@@ -159,7 +159,7 @@ export const LabelWithSpinner = ({
     <span className="slds-is-relative slds-m-right_large">
       <Spinner variant={variant} size={size} />
     </span>
-    {label}
+    {label || i18n.t('Loading…')}
   </>
 );
 
@@ -508,11 +508,4 @@ export const useForm = ({
     handleSubmit,
     resetForm,
   };
-};
-
-export const pluralize = (count: number, str: string) => {
-  if (count > 1) {
-    return `${str}s`;
-  }
-  return str;
 };

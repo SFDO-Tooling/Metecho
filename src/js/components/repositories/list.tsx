@@ -148,11 +148,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
               {syncingRepos ? (
                 <Button
                   label={
-                    <LabelWithSpinner
-                      label={i18n.t('Syncing GitHub Repos…')}
-                      variant="base"
-                      size="x-small"
-                    />
+                    <LabelWithSpinner label={i18n.t('Syncing GitHub Repos…')} />
                   }
                   variant="outline-brand"
                   disabled

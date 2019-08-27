@@ -7,8 +7,10 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
-import { useForm, pluralize } from '@/components/utils';
+import { useForm } from '@/components/utils';
 import { OBJECT_TYPES } from '@/utils/constants';
+import { pluralize } from '@/utils/helpers';
+
 const mockList = {
   ApexClasses: [{ id: '1', name: 'Class 1' }, { id: '2', name: 'Class 2' }],
   CustomObjects: [{ id: '2', name: 'Custom objects' }],
@@ -21,8 +23,10 @@ const mockList = {
 
 interface Props {
   isOpen: boolean;
+  toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const CaptureModal = ({ isOpen }: Props) => {
+
+const CaptureModal = ({ isOpen, toggleModal }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState({});
   const [checkedItems, setCheckedItems] = useState({});
   const [checkboxes, setCheckBoxes] = useState(mockList);
@@ -34,6 +38,9 @@ const CaptureModal = ({ isOpen }: Props) => {
 
   const onSuccess = (action: AnyAction) => {
     console.log('success');
+  };
+  const handleClose = () => {
+    toggleModal(false);
   };
   const handleChange = (event: React.BaseSyntheticEvent, value: string) => {
     setCheckedItems({ ...checkedItems, [value]: event.target.checked });
@@ -58,12 +65,20 @@ const CaptureModal = ({ isOpen }: Props) => {
 
   return (
     <Modal
-      heading={i18n.t('Select the changes you wish to capture')}
       isOpen={isOpen}
-      size="small"
-      align="top"
+      heading={i18n.t('Select the changes to capture')}
+      onRequestClose={handleClose}
+      footer={[
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
+        <Button
+          key="submit"
+          label={i18n.t('Capture Selected Changes')}
+          variant="brand"
+          onClick={handleSubmit}
+        />,
+      ]}
     >
-      <form className="slds-p-around_large" onSubmit={handleSubmit}>
+      <form className="slds-form slds-p-around_large" onSubmit={handleSubmit}>
         <div className="slds-grid">
           <Checkbox
             className="slds-col slds-size_1-of-3"

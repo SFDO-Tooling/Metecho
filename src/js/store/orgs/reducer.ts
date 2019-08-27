@@ -30,6 +30,10 @@ export interface OrgState {
   [key: string]: OrgsByTask;
 }
 
+export interface Changeset {
+  id: string;
+}
+
 const defaultState = {};
 
 const reducer = (

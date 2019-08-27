@@ -4,7 +4,7 @@ import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
@@ -23,11 +23,15 @@ import {
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
+  useIsMounted,
 } from '@/components/utils';
-import { AppState } from '@/store';
+import { AppState, ThunkDispatch } from '@/store';
+import { getChangeset } from '@/store/orgs/actions';
+import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
+import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
@@ -37,6 +41,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
+  const dispatch = useDispatch<ThunkDispatch>();
   useFetchTasksIfMissing(project, props);
   const selectTaskWithProps = useCallback(selectTask, []);
   const selectTaskSlugWithProps = useCallback(selectTaskSlug, []);
@@ -46,9 +51,20 @@ const TaskDetail = (props: RouteComponentProps) => {
   const taskSlug = useSelector((state: AppState) =>
     selectTaskSlugWithProps(state, props),
   );
-
   const { orgs } = useFetchOrgsIfMissing(task, props);
-  const user = useSelector(selectUserState);
+  const user = useSelector(selectUserState) as User;
+  const isMounted = useIsMounted();
+
+  const fetchChangeset = useCallback((org: Org) => {
+    setCapturingChanges(true);
+    dispatch(getChangeset({ org })).catch(() => {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        setCapturingChanges(false);
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -78,46 +94,27 @@ const TaskDetail = (props: RouteComponentProps) => {
     return taskLoadingOrNotFound;
   }
 
-  const action = () => {
-    if (user) {
-      setCapturingChanges(true);
-      if (!user.valid_token_for) {
-        setCapturingChanges(false);
-        setConnectModalOpen(true);
-      }
-      if (user.valid_token_for && !user.is_devhub_enabled) {
-        setCapturingChanges(false);
-        setInfoModalOpen(true);
-      }
-      if (user.is_devhub_enabled) {
-        setCaptureModalOpen(true);
-      }
-    }
-  };
-
-  const orgInfo: any = orgs && Object.values(orgs);
-  let orgsHaveChanges, userIsOwner;
-  if (orgInfo) {
-    orgsHaveChanges = orgInfo
-      .map((item: any): boolean => {
-        if (item) {
-          return item.has_changes;
-        }
-        return false;
-      })
-      .includes(true);
-
-    userIsOwner =
-      user &&
-      orgInfo
-        .map((item: any): boolean => {
-          if (item) {
-            return item.owner;
-          }
-          return false;
-        })
-        .includes(user.id);
+  let orgHasChanges, userIsOwner, devOrg: Org | null | undefined;
+  if (orgs && user) {
+    devOrg = orgs[ORG_TYPES.DEV];
+    orgHasChanges = devOrg && devOrg.has_changes;
+    userIsOwner = devOrg && devOrg.owner === user.id;
   }
+
+  const action = () => {
+    if (user.valid_token_for) {
+      if (user.is_devhub_enabled) {
+        if (!devOrg) {
+          return undefined;
+        }
+        // @@@ this should not happen until we have a changeset
+        setCaptureModalOpen(true);
+        return fetchChangeset(devOrg);
+      }
+      return setInfoModalOpen(true);
+    }
+    return setConnectModalOpen(true);
+  };
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
@@ -186,14 +183,13 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        {userIsOwner && orgsHaveChanges ? (
+        {userIsOwner && orgHasChanges ? (
           <Button
             label={
               capturingChanges ? (
                 <LabelWithSpinner
-                  label={i18n.t('Loading…')}
-                  variant="base"
-                  size="x-small"
+                  label={i18n.t('Capturing Task Changes…')}
+                  variant="inverse"
                 />
               ) : (
                 i18n.t('Capture Task Changes')
@@ -208,15 +204,19 @@ const TaskDetail = (props: RouteComponentProps) => {
 
         {orgs ? <OrgsTable orgs={orgs} task={task.id} /> : <Spinner />}
         <ConnectModal
+          user={user}
           isOpen={connectModalOpen}
           toggleModal={setConnectModalOpen}
         />
         <ConnectionInfoModal
-          user={user as User}
+          user={user}
           isOpen={infoModalOpen}
           toggleModal={setInfoModalOpen}
         />
-        <CaptureModal isOpen={captureModalOpen} />
+        <CaptureModal
+          isOpen={captureModalOpen}
+          toggleModal={setCaptureModalOpen}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );

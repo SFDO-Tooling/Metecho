@@ -132,11 +132,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
                     <Button
                       label={
                         fetchingProjects ? (
-                          <LabelWithSpinner
-                            label={i18n.t('Loading…')}
-                            variant="base"
-                            size="x-small"
-                          />
+                          <LabelWithSpinner />
                         ) : (
                           i18n.t('Load More')
                         )

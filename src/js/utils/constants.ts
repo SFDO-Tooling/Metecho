@@ -3,7 +3,8 @@ export type ObjectTypes =
   | 'repository'
   | 'project'
   | 'task'
-  | 'scratch_org';
+  | 'scratch_org'
+  | 'scratch_org_changeset';
 
 export const OBJECT_TYPES = {
   USER: 'user' as 'user',
@@ -11,6 +12,7 @@ export const OBJECT_TYPES = {
   PROJECT: 'project' as 'project',
   TASK: 'task' as 'task',
   ORG: 'scratch_org' as 'scratch_org',
+  CHANGESET: 'scratch_org_changeset' as 'scratch_org_changeset',
 };
 
 export const GITHUB_REPO_PREFIX = 'https://www.github.com';

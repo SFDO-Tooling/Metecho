@@ -286,17 +286,13 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
         </DataTableColumn>
       </DataTable>
       <ConnectModal
-        isOpen={!(user && user.valid_token_for) && connectModalOpen}
+        user={user as User}
+        isOpen={connectModalOpen}
         toggleModal={setConnectModalOpen}
       />
       <ConnectionInfoModal
         user={user as User}
-        isOpen={Boolean(
-          user &&
-            user.valid_token_for &&
-            !user.is_devhub_enabled &&
-            infoModalOpen,
-        )}
+        isOpen={infoModalOpen}
         toggleModal={setInfoModalOpen}
       />
     </>

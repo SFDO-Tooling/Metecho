@@ -50,9 +50,11 @@ const CustomDomainForm = ({
 };
 
 const ConnectModal = ({
+  user,
   isOpen,
   toggleModal,
 }: {
+  user: User;
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
 }) => {
@@ -103,7 +105,7 @@ const ConnectModal = ({
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={!(user && user.valid_token_for) && isOpen}
       heading={i18n.t('Connect to Salesforce')}
       tagline={
         <Trans i18nKey="devHubInfo">
