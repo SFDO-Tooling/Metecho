@@ -21,7 +21,7 @@
     "rq:serve": "npm-run-all redis:clear -p worker:serve scheduler:serve",
     "serve": "run-p django:serve webpack:serve rq:serve",
     "prettier": "prettier --write '*.js' '.*.js' 'src/js/*.ts' 'src/js/*.tsx' 'src/js/**/*.ts' 'src/js/**/*.tsx' 'test/js/*.js' 'test/js/*.jsx' 'test/js/**/*.js' 'test/js/**/*.jsx' 'src/sass/**/*.scss'",
-    "eslint": "eslint '*.js' 'src/js/*.ts' 'src/js/*.tsx' 'src/js/**/*.ts' 'src/js/**/*.tsx' 'test/js/*.js' 'test/js/**/*.js' 'test/js/**/*.jsx'",
+    "eslint": "eslint '*.js' src/js test/js --ext .js,.ts,.jsx,.tsx",
     "tsc": "tsc",
     "stylelint": "stylelint 'src/sass/**/*.scss'",
     "flake8": "flake8 manage.py metashare/ config/",

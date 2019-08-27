@@ -25,23 +25,23 @@ afterEach(() => {
 });
 
 describe('<RepositoryList />', () => {
-  const setup = (
+  const setup = ({
     initialState = {
       repositories: { repositories: [], notFound: [], next: null },
     },
     props = {},
-    rerenderFn = null,
-  ) => {
-    const { getByText, queryByText, rerender } = renderWithRedux(
+    rerender = null,
+    store,
+  } = {}) =>
+    renderWithRedux(
       <MemoryRouter>
         <RepositoryList {...props} />
       </MemoryRouter>,
       initialState,
       storeWithThunk,
-      rerenderFn,
+      rerender,
+      store,
     );
-    return { getByText, queryByText, rerender };
-  };
 
   test('renders repositories list (empty)', () => {
     const { getByText } = setup();
@@ -65,7 +65,7 @@ describe('<RepositoryList />', () => {
         next: null,
       },
     };
-    const { getByText } = setup(initialState);
+    const { getByText } = setup({ initialState });
 
     expect(getByText('Repository 1')).toBeVisible();
     expect(getByText('This is a test repository.')).toBeVisible();
@@ -99,8 +99,8 @@ describe('<RepositoryList />', () => {
     });
 
     test('fetches next page of repositories', () => {
-      const { rerender, getByText } = setup(initialState);
-      setup(initialState, { y: 1000 }, rerender);
+      const { rerender, getByText, store } = setup({ initialState });
+      setup({ props: { y: 1000 }, rerender, store });
 
       expect(getByText('Loading…')).toBeVisible();
       expect(fetchObjects).toHaveBeenCalledWith({
@@ -117,9 +117,9 @@ describe('<RepositoryList />', () => {
           next: null,
         },
       };
-      const { rerender, queryByText } = setup(state);
+      const { rerender, queryByText, store } = setup({ initialState: state });
 
-      setup(state, { y: 1000 }, rerender);
+      setup({ props: { y: 1000 }, rerender, store });
 
       expect(queryByText('Loading…')).toBeNull();
       expect(fetchObjects).not.toHaveBeenCalled();
