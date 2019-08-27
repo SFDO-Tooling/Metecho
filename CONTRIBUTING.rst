@@ -47,13 +47,17 @@ Docker-based development
     BUCKETEER_AWS_SECRET_ACCESS_KEY=...
     BUCKETEER_BUCKET_NAME=...
 
-3. Run ``./derrick build`` to build/re-build all the container images.
+3. Copy the ``server.key`` from Keybase into your local repo::
 
-4. Run ``./derrick up`` to start the server(s).
+   cp "/Volumes/Keybase ($USER)/team/oddbird/metashare/jwt/server.key" compose/web/
 
-5. Visit `<http://localhost:8080/>`_ in your browser.
+4. Run ``./derrick build`` to build/re-build all the container images.
 
-6. When you're done working on MetaShare, ``Ctrl-C`` in the terminal where the
+5. Run ``./derrick up`` to start the server(s).
+
+6. Visit `<http://localhost:8080/>`_ in your browser.
+
+7. When you're done working on MetaShare, ``Ctrl-C`` in the terminal where the
    containers are running to exit. You can also ``./derrick down`` to stop
    all running containers, or ``./derrick prune`` to clean up unused
    images/containers. (``docker-compose ps`` will tell you what containers are

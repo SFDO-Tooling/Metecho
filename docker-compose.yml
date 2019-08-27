@@ -23,6 +23,7 @@ services:
       - /app/node_modules
     ports:
       - '0.0.0.0:8080:8080'
+      - '0.0.0.0:1717:1717'  # For SFDX JWT Auth
       # Open this port to attach to remote debuggers in the Python process,
       # if need-be:
       - '0.0.0.0:33284:33284' # Spells "DEBUG" in phone-number
