@@ -509,3 +509,10 @@ export const useForm = ({
     resetForm,
   };
 };
+
+export const pluralize = (count: number, str: string) => {
+  if (count > 1) {
+    return `${str}s`;
+  }
+  return str;
+};

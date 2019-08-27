@@ -7,10 +7,10 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
-import { useForm } from '@/components/utils';
+import { useForm, pluralize } from '@/components/utils';
 import { OBJECT_TYPES } from '@/utils/constants';
 const mockList = {
-  ApexClasses: [{ id: '1', name: 'Class 1' }],
+  ApexClasses: [{ id: '1', name: 'Class 1' }, { id: '2', name: 'Class 2' }],
   CustomObjects: [{ id: '2', name: 'Custom objects' }],
   ClassOthers: [{ id: '3', name: 'Class others' }],
   FooBars: [{ id: '4', name: 'Foo Bars' }],
@@ -42,7 +42,6 @@ const CaptureModal = ({ isOpen }: Props) => {
       setSelectAllChanges(!selectAllChanges);
     }
   };
-
   const {
     inputs,
     errors,
@@ -54,51 +53,71 @@ const CaptureModal = ({ isOpen }: Props) => {
     objectType: OBJECT_TYPES.TASK,
     onSuccess,
   });
+  // length of top level checkboxes
+  const totalChanges = Object.entries(checkboxes).flat().length;
 
   return (
     <Modal
       heading={i18n.t('Select the changes you wish to capture')}
       isOpen={isOpen}
-      size="large"
+      size="small"
       align="top"
     >
       <form className="slds-p-around_large" onSubmit={handleSubmit}>
-        <Checkbox
-          assistiveText={{
-            label: `${i18n.t('Select All')}`,
-          }}
-          id="select-all"
-          labels={{
-            label: `${i18n.t('Select All')}`,
-          }}
-          onChange={(e: any) => handleChange(e, 'select-all')}
-        />
+        <div className="slds-grid">
+          <Checkbox
+            className="slds-col slds-size_1-of-3"
+            assistiveText={{
+              label: `${i18n.t('Select All')}`,
+            }}
+            id="select-all"
+            labels={{
+              label: `${i18n.t('Select All')}`,
+            }}
+            onChange={(e: any) => handleChange(e, 'select-all')}
+          />
+          <span className="slds-col slds-size_1-of-3">{`(${totalChanges} ${pluralize(
+            totalChanges,
+            'change',
+          )})`}</span>
+        </div>
         {Object.keys(checkboxes).map((item, idx) => {
           const panelId = `${item}-${idx}`;
+          const count: number = checkboxes[item].map((list, idx) => idx + 1)
+            .length;
 
           return (
             <Accordion key={idx} className="" id="base-example-accordion">
               <AccordionPanel
-                expanded={expandedPanels[panelId]}
+                expanded={
+                  selectAllChanges ? selectAllChanges : expandedPanels[panelId]
+                }
                 id={panelId}
                 onTogglePanel={() => handlePanelToggle(panelId)}
                 summary={
-                  <Checkbox
-                    key={`${item}-${idx}`}
-                    assistiveText={{
-                      label: item,
-                    }}
-                    id={panelId}
-                    label
-                    labels={{
-                      label: item,
-                    }}
-                    onChange={(e: any) => handleChange(e, item)}
-                    name="changes"
-                    checked={
-                      selectAllChanges ? selectAllChanges : checkedItems[item]
-                    }
-                  />
+                  <div className="slds-grid">
+                    <Checkbox
+                      key={`${item}-${idx}`}
+                      assistiveText={{
+                        label: item,
+                      }}
+                      id={panelId}
+                      label
+                      labels={{
+                        label: item,
+                      }}
+                      onChange={(e: any) => handleChange(e, item)}
+                      name="changes"
+                      checked={
+                        selectAllChanges ? selectAllChanges : checkedItems[item]
+                      }
+                      className="slds-col"
+                    />
+                    <span className="slds-col">{`(${count} ${pluralize(
+                      count,
+                      'change',
+                    )} )`}</span>
+                  </div>
                 }
               >
                 {checkboxes[item].map((list: any) => {
@@ -106,19 +125,20 @@ const CaptureModal = ({ isOpen }: Props) => {
                     selectAllChanges ||
                     checkedItems[item] ||
                     checkedItems[list.name];
+                  const id = `${list.name}-${idx}`;
                   return (
                     <Checkbox
-                      key={`${list}-${idx}`}
+                      key={id}
                       assistiveText={{
                         label: list.name,
                       }}
-                      id={`${list.name}-${idx}`}
+                      id={id}
                       label
                       labels={{
                         label: list.name,
                       }}
                       onChange={e => handleChange(e, list.name)}
-                      checked={checked}
+                      checked={checked && checked}
                     />
                   );
                 })}
