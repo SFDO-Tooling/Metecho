@@ -4,10 +4,12 @@ import Sockette from 'sockette';
 import {
   addChangeset,
   changesetFailed,
+  commitFailed,
+  commitSucceeded,
   provisionFailed,
   provisionOrg,
 } from '@/store/orgs/actions';
-import { Changeset, Org } from '@/store/orgs/reducer';
+import { Changeset, Commit, Org } from '@/store/orgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   ObjectTypes,
@@ -58,12 +60,25 @@ interface ChangesetFailedEvent {
     model: Changeset;
   };
 }
+interface CommitSucceededEvent {
+  type: 'COMMIT_SUCCEEDED';
+  payload: Commit;
+}
+interface CommitFailedEvent {
+  type: 'COMMIT_FAILED';
+  payload: {
+    error?: string;
+    model: Commit;
+  };
+}
 type ModelEvent =
   | ErrorEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | ChangesetSucceededEvent
-  | ChangesetFailedEvent;
+  | ChangesetFailedEvent
+  | CommitSucceededEvent
+  | CommitFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -82,6 +97,10 @@ export const getAction = (event: EventType) => {
       return addChangeset(event.payload);
     case 'CHANGESET_FAILED':
       return changesetFailed(event.payload);
+    case 'COMMIT_SUCCEEDED':
+      return commitSucceeded(event.payload);
+    case 'COMMIT_FAILED':
+      return commitFailed(event.payload);
   }
   return null;
 };

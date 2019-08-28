@@ -442,11 +442,17 @@ export const useForm = ({
   objectType,
   additionalData = {},
   onSuccess = () => {},
+  onError = () => {},
+  resetFormOnSuccess = true,
+  shouldSubscribeToObject,
 }: {
   fields: { [key: string]: any };
   objectType: ObjectTypes;
   additionalData?: { [key: string]: any };
   onSuccess?: (...args: any[]) => any;
+  onError?: (...args: any[]) => any;
+  resetFormOnSuccess?: boolean;
+  shouldSubscribeToObject?: (...args: any[]) => boolean;
 }) => {
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
@@ -470,16 +476,18 @@ export const useForm = ({
           ...additionalData,
         },
         hasForm: true,
+        shouldSubscribeToObject,
       }),
     )
       .then((...args: any[]) => {
         /* istanbul ignore else */
-        if (isMounted.current) {
+        if (isMounted.current && resetFormOnSuccess) {
           resetForm();
         }
         onSuccess(...args);
       })
       .catch((err: ApiError) => {
+        onError(err);
         const allErrors =
           err.body && typeof err.body === 'object' ? err.body : {};
         const fieldErrors: typeof errors = {};

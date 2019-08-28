@@ -1,12 +1,7 @@
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
 import { LogoutAction } from '@/store/user/actions';
-import {
-  OBJECT_TYPES,
-  ObjectTypes,
-  ORG_TYPES,
-  OrgTypes,
-} from '@/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 export interface Org {
   id: string;
@@ -25,6 +20,7 @@ export interface OrgsByTask {
   [ORG_TYPES.DEV]: Org | null;
   [ORG_TYPES.QA]: Org | null;
   changeset?: Changeset | null;
+  committing?: boolean;
 }
 
 export interface OrgState {
@@ -34,6 +30,11 @@ export interface OrgState {
 interface Change {
   id: string;
   name: string;
+}
+
+export interface Commit {
+  id: string;
+  task: string;
 }
 
 export interface Changeset {
@@ -81,22 +82,41 @@ const reducer = (
       return orgs;
     }
     case 'CREATE_OBJECT_SUCCEEDED': {
-      const {
-        object,
-        objectType,
-      }: { object: Org; objectType: ObjectTypes } = action.payload;
-      if (objectType === OBJECT_TYPES.ORG && object) {
-        const taskOrgs = orgs[object.task] || {
-          [ORG_TYPES.DEV]: null,
-          [ORG_TYPES.QA]: null,
-        };
-        return {
-          ...orgs,
-          [object.task]: {
-            ...taskOrgs,
-            [object.org_type]: object,
-          },
-        };
+      switch (action.payload.objectType) {
+        case OBJECT_TYPES.ORG: {
+          const { object }: { object: Org } = action.payload;
+          if (object) {
+            const taskOrgs = orgs[object.task] || {
+              [ORG_TYPES.DEV]: null,
+              [ORG_TYPES.QA]: null,
+            };
+            return {
+              ...orgs,
+              [object.task]: {
+                ...taskOrgs,
+                [object.org_type]: object,
+              },
+            };
+          }
+          return orgs;
+        }
+        case OBJECT_TYPES.CHANGESET: {
+          const { object }: { object: Commit } = action.payload;
+          if (object) {
+            const taskOrgs = orgs[object.task] || {
+              [ORG_TYPES.DEV]: null,
+              [ORG_TYPES.QA]: null,
+            };
+            return {
+              ...orgs,
+              [object.task]: {
+                ...taskOrgs,
+                committing: true,
+              },
+            };
+          }
+          return orgs;
+        }
       }
       return orgs;
     }
@@ -168,6 +188,21 @@ const reducer = (
         [changeset.task]: {
           ...taskOrgs,
           changeset: action.type === 'CHANGESET_FAILED' ? null : undefined,
+        },
+      };
+    }
+    case 'COMMIT_FAILED':
+    case 'COMMIT_SUCCEEDED': {
+      const commit = action.payload;
+      const taskOrgs = orgs[commit.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [commit.task]: {
+          ...taskOrgs,
+          committing: false,
         },
       };
     }

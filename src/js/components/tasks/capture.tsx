@@ -8,7 +8,7 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useForm } from '@/components/utils';
+import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
 import { cancelChangeset } from '@/store/orgs/actions';
 import { Changeset } from '@/store/orgs/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -17,7 +17,7 @@ import { pluralize } from '@/utils/helpers';
 interface Props {
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
-  toggleCapturingChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleFetchingChanges: React.Dispatch<React.SetStateAction<boolean>>;
   changeset: Changeset;
 }
 
@@ -28,10 +28,29 @@ interface BooleanObject {
 const CaptureModal = ({
   isOpen,
   toggleModal,
-  toggleCapturingChanges,
+  toggleFetchingChanges,
   changeset,
 }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
+  const [capturingChanges, setCapturingChanges] = useState(false);
+  const isMounted = useIsMounted();
+
+  const handleSuccess = () => {
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      setCapturingChanges(false);
+      toggleModal(false);
+      toggleFetchingChanges(false);
+    }
+  };
+
+  const handleError = () => {
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      setCapturingChanges(false);
+    }
+  };
+
   const {
     inputs,
     errors,
@@ -42,6 +61,9 @@ const CaptureModal = ({
   } = useForm({
     fields: { changes: [], message: '' },
     objectType: OBJECT_TYPES.CHANGESET,
+    onSuccess: handleSuccess,
+    onError: handleError,
+    shouldSubscribeToObject: () => true,
   });
   const dispatch = useDispatch();
 
@@ -97,12 +119,16 @@ const CaptureModal = ({
 
   const handleClose = () => {
     toggleModal(false);
-    toggleCapturingChanges(false);
+    toggleFetchingChanges(false);
     dispatch(cancelChangeset(changeset));
     resetForm();
   };
 
-  // length of all changes
+  const submitChanges = (e: React.FormEvent<HTMLFormElement>) => {
+    setCapturingChanges(true);
+    handleSubmit(e);
+  };
+
   const totalChanges = Object.values(changeset.changes).flat().length;
   const allChangesChecked = inputs.changes.length === totalChanges;
   const noChangesChecked = !inputs.changes.length;
@@ -116,14 +142,24 @@ const CaptureModal = ({
         <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
         <Button
           key="submit"
-          label={i18n.t('Capture Selected Changes')}
+          label={
+            capturingChanges ? (
+              <LabelWithSpinner
+                label={i18n.t('Capturing Selected Changes…')}
+                variant="inverse"
+              />
+            ) : (
+              i18n.t('Capture Selected Changes')
+            )
+          }
           variant="brand"
-          onClick={handleSubmit}
+          onClick={submitChanges}
+          disabled={!inputs.changes.length || capturingChanges}
         />,
       ]}
       onRequestClose={handleClose}
     >
-      <form className="slds-form slds-p-around_large" onSubmit={handleSubmit}>
+      <form className="slds-form slds-p-around_large" onSubmit={submitChanges}>
         <div>
           <Checkbox
             id="select-all"
@@ -191,8 +227,8 @@ const CaptureModal = ({
                       label: change.name,
                     }}
                     name="changes"
-                    onChange={handleChange}
                     checked={inputs.changes.includes(change.id)}
+                    onChange={handleChange}
                   />
                 ))}
               </AccordionPanel>

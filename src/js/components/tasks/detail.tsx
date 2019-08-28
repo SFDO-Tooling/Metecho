@@ -36,7 +36,7 @@ import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
-  const [capturingChanges, setCapturingChanges] = useState(false);
+  const [fetchingChanges, setFetchingChanges] = useState(false);
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
@@ -72,7 +72,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
 
   const fetchChangeset = useCallback((org: Org) => {
-    setCapturingChanges(true);
+    setFetchingChanges(true);
     setCaptureModalOpen(true);
     dispatch(getChangeset({ org }))
       .then((action: RequestChangesetSucceeded) => {
@@ -83,7 +83,7 @@ const TaskDetail = (props: RouteComponentProps) => {
       .catch((err: ApiError) => {
         /* istanbul ignore else */
         if (isMounted.current) {
-          setCapturingChanges(false);
+          setFetchingChanges(false);
         }
         throw err;
       });
@@ -182,6 +182,10 @@ const TaskDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
+  const changesLoading =
+    (fetchingChanges && !(orgs && orgs.changeset === null)) ||
+    (orgs && orgs.committing);
+
   return (
     <DocumentTitle
       title={` ${task.name} | ${project.name} | ${repository.name} | ${i18n.t(
@@ -208,7 +212,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         {userIsOwner && orgHasChanges ? (
           <Button
             label={
-              capturingChanges && !(orgs && orgs.changeset === null) ? (
+              changesLoading ? (
                 <LabelWithSpinner
                   label={i18n.t('Capturing Task Changes…')}
                   variant="inverse"
@@ -220,7 +224,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             className="slds-size_full slds-m-bottom_x-large"
             variant="brand"
             onClick={action}
-            disabled={capturingChanges && !(orgs && orgs.changeset === null)}
+            disabled={changesLoading}
           />
         ) : null}
 
@@ -239,7 +243,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           <CaptureModal
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
-            toggleCapturingChanges={setCapturingChanges}
+            toggleFetchingChanges={setFetchingChanges}
             changeset={orgs.changeset}
           />
         )}

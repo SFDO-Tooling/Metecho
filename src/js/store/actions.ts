@@ -1,6 +1,7 @@
 import { ThunkResult } from '@/store';
+import { commitSucceeded } from '@/store/orgs/actions';
 import apiFetch, { addUrlParams } from '@/utils/api';
-import { ObjectTypes } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 interface CreateObjectPayload {
   objectType: ObjectTypes;
@@ -207,21 +208,42 @@ export const createObject = ({
     payload: { objectType, url, data },
   });
   try {
-    if (!url) {
-      throw new Error(`No URL found for object: ${objectType}`);
-    }
-    const object = await apiFetch({
-      url,
-      dispatch,
-      opts: {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
+    let object: any;
+    // @@@ Mock out until API exists
+    if (objectType === OBJECT_TYPES.CHANGESET) {
+      object = {
+        id: 'commit-id',
+        task: 'g1VBk10',
+      };
+      setTimeout(() => {
+        // Success case
+        dispatch(
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          commitSucceeded(object),
+        );
+        // Error case
+        // dispatch(
+        //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        //   commitFailed({ model: object, error: 'Oops.' }),
+        // );
+      }, 1500);
+    } else {
+      if (!url) {
+        throw new Error(`No URL found for object: ${objectType}`);
+      }
+      object = await apiFetch({
+        url,
+        dispatch,
+        opts: {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      },
-      hasForm,
-    });
+        hasForm,
+      });
+    }
     if (
       shouldSubscribeToObject(object) &&
       object &&

@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
-import { Changeset, Org } from '@/store/orgs/reducer';
+import { Changeset, Commit, Org } from '@/store/orgs/reducer';
 import { addToast } from '@/store/toasts/actions';
 import apiFetch from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
@@ -32,13 +32,18 @@ interface ChangesetEvent {
   type: 'CHANGESET_SUCCEEDED' | 'CHANGESET_FAILED' | 'CHANGESET_CANCELED';
   payload: Changeset;
 }
+interface CommitEvent {
+  type: 'COMMIT_SUCCEEDED' | 'COMMIT_FAILED';
+  payload: Commit;
+}
 
 export type OrgsAction =
   | OrgProvisioned
   | OrgProvisionFailed
   | RequestChangesetEvent
   | RequestChangesetSucceeded
-  | ChangesetEvent;
+  | ChangesetEvent
+  | CommitEvent;
 
 export const provisionOrg = (payload: Org): ThunkResult => (
   dispatch,
@@ -220,3 +225,51 @@ export const cancelChangeset = (payload: Changeset): ChangesetEvent => ({
   type: 'CHANGESET_CANCELED',
   payload,
 });
+
+export const commitSucceeded = (payload: Commit): ThunkResult => dispatch => {
+  /* istanbul ignore else */
+  if (window.socket) {
+    window.socket.unsubscribe({
+      model: OBJECT_TYPES.COMMIT,
+      id: payload.id,
+    });
+  }
+  dispatch(
+    addToast({
+      heading: i18n.t('Successfully committed changes from your Dev org.'),
+    }),
+  );
+  return dispatch({
+    type: 'COMMIT_SUCCEEDED',
+    payload,
+  });
+};
+
+export const commitFailed = ({
+  model,
+  error,
+}: {
+  model: Commit;
+  error?: string;
+}): ThunkResult => dispatch => {
+  /* istanbul ignore else */
+  if (window.socket) {
+    window.socket.unsubscribe({
+      model: OBJECT_TYPES.COMMIT,
+      id: model.id,
+    });
+  }
+  dispatch(
+    addToast({
+      heading: i18n.t(
+        'Uh oh. There was an error committing changes from your Dev org.',
+      ),
+      details: error,
+      variant: 'error',
+    }),
+  );
+  return dispatch({
+    type: 'COMMIT_FAILED',
+    payload: model,
+  });
+};
