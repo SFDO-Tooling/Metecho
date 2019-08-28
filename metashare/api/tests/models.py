@@ -81,10 +81,10 @@ class TestUser:
     def test_token(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
-        assert user.token == ("0123456789abcdef", "secret.0123456789abcdef")
+        assert user.sf_token == ("0123456789abcdef", "secret.0123456789abcdef")
 
         user.socialaccount_set.all().delete()
-        assert user.token == (None, None)
+        assert user.sf_token == (None, None)
 
     def test_token__invalid(
         self, user_factory, social_token_factory, social_account_factory
@@ -94,10 +94,10 @@ class TestUser:
             socialtoken_set=[], user=user, provider="salesforce-production"
         )
         social_token_factory(token="an invalid token", account=social_account)
-        assert user.token == (None, None)
+        assert user.sf_token == (None, None)
 
         user.socialaccount_set.all().delete()
-        assert user.token == (None, None)
+        assert user.sf_token == (None, None)
 
     def test_valid_token_for(self, user_factory, social_account_factory):
         user = user_factory()

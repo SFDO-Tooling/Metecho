@@ -96,28 +96,36 @@ class User(mixins.HashIdMixin, AbstractUser):
             return None
 
     @property
-    def token(self):
-        account = self.salesforce_account
-        if account and account.socialtoken_set.exists():
+    def sf_token(self):
+        try:
             token = self.salesforce_account.socialtoken_set.first()
-            try:
-                return (
-                    fernet_decrypt(token.token) if token.token else None,
-                    token.token_secret if token.token_secret else None,
-                )
-            except InvalidToken:
-                return (None, None)
-        return (None, None)
+            return (
+                fernet_decrypt(token.token) if token.token else None,
+                token.token_secret if token.token_secret else None,
+            )
+        except (InvalidToken, AttributeError):
+            return (None, None)
 
     @property
     def salesforce_account(self):
         return self.socialaccount_set.filter(provider__startswith="salesforce-").first()
 
     @property
+    def github_account(self):
+        return self.socialaccount_set.filter(provider="github").first()
+
+    @property
     def valid_token_for(self):
-        if all(self.token) and self.org_id:
+        if all(self.sf_token) and self.org_id:
             return self.org_id
         return None
+
+    @property
+    def gh_token(self):
+        try:
+            return self.github_account.socialtoken_set.first().token
+        except AttributeError:
+            return None
 
     @cached_property
     def is_devhub_enabled(self):
@@ -125,7 +133,7 @@ class User(mixins.HashIdMixin, AbstractUser):
         if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox, None):
             return None
 
-        token, _ = self.token
+        token, _ = self.sf_token
         instance_url = self.salesforce_account.extra_data["instance_url"]
         url = f"{instance_url}/services/data/v45.0/sobjects/ScratchOrgInfo"
         resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
@@ -212,6 +220,7 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     assignee = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="assigned_tasks"
     )
+    branch_name = models.SlugField(max_length=50)
 
     slug_class = TaskSlug
 
@@ -244,11 +253,12 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         return True
 
     def save(self, *args, **kwargs):
-        save_on_sf = self.id is None
+        create_remote_resources = self.id is None
         super().save(*args, **kwargs)
 
-        if save_on_sf:
+        if create_remote_resources:
             self.create_scratch_org_on_sf()
+            self.create_branches_on_github()
 
         if self.tracker.has_changed("url"):  # pragma: nocover
             self.notify_has_url()
@@ -261,6 +271,16 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             user=self.owner,
             repo_url=self.task.project.repository.repo_url,
             commit_ish=self.task.project.branch_name,
+        )
+
+    def create_branches_on_github(self):
+        from .jobs import create_branches_on_github_job
+
+        create_branches_on_github_job.delay(
+            user=self.owner,
+            repo_url=self.task.project.repository.repo_url,
+            project_branch_name=self.task.project.branch_name,
+            task_branch_name=self.task.branch_name,
         )
 
     def notify_has_url(self):
