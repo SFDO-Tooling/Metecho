@@ -69,6 +69,7 @@
   "To go to your company’s login page, enter the custom domain name.": "To go to your company’s login page, enter the custom domain name.",
   "Type": "Type",
   "Uh oh, we've encountered an error. You may need to": "Uh oh, we've encountered an error. You may need to",
+  "Uh oh. There was an error capturing changes from your scratch org.": "Uh oh. There was an error capturing changes from your scratch org.",
   "Uh oh. There was an error creating your new Dev org.": "Uh oh. There was an error creating your new Dev org.",
   "Uh oh. There was an error creating your new QA org.": "Uh oh. There was an error creating your new QA org.",
   "Unchanged": "Unchanged",

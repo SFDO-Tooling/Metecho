@@ -497,6 +497,8 @@ export const useForm = ({
         } else if (err.response && err.response.status === 400) {
           // If no inline errors to show, fallback to default global error toast
           dispatch(addError(err.message));
+        } else {
+          throw err;
         }
       });
   };
@@ -505,6 +507,7 @@ export const useForm = ({
     inputs,
     errors,
     handleInputChange,
+    setInputs,
     handleSubmit,
     resetForm,
   };

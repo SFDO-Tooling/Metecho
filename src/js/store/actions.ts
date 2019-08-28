@@ -198,20 +198,20 @@ export const createObject = ({
   shouldSubscribeToObject?: (object: any) => boolean;
 }): ThunkResult => async dispatch => {
   const urlFn = window.api_urls[`${objectType}_list`];
-  let baseUrl;
+  let url;
   if (urlFn) {
-    baseUrl = urlFn();
+    url = urlFn();
   }
   dispatch({
     type: 'CREATE_OBJECT_STARTED',
-    payload: { objectType, url: baseUrl, data },
+    payload: { objectType, url, data },
   });
   try {
-    if (!baseUrl) {
+    if (!url) {
       throw new Error(`No URL found for object: ${objectType}`);
     }
     const object = await apiFetch({
-      url: addUrlParams(baseUrl),
+      url,
       dispatch,
       opts: {
         method: 'POST',
@@ -235,12 +235,12 @@ export const createObject = ({
     }
     return dispatch({
       type: 'CREATE_OBJECT_SUCCEEDED',
-      payload: { data, object, url: baseUrl, objectType },
+      payload: { data, object, url, objectType },
     });
   } catch (err) {
     dispatch({
       type: 'CREATE_OBJECT_FAILED',
-      payload: { objectType, url: baseUrl, data },
+      payload: { objectType, url, data },
     });
     throw err;
   }

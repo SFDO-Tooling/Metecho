@@ -24,14 +24,24 @@ export interface Org {
 export interface OrgsByTask {
   [ORG_TYPES.DEV]: Org | null;
   [ORG_TYPES.QA]: Org | null;
+  changeset?: Changeset | null;
 }
 
 export interface OrgState {
   [key: string]: OrgsByTask;
 }
 
+interface Change {
+  id: string;
+  name: string;
+}
+
 export interface Changeset {
   id: string;
+  task: string;
+  changes: {
+    [key: string]: Change[];
+  };
 }
 
 const defaultState = {};
@@ -115,6 +125,36 @@ const reducer = (
         [org.task]: {
           ...taskOrgs,
           [org.org_type]: null,
+        },
+      };
+    }
+    case 'CHANGESET_SUCCEEDED': {
+      const changeset = action.payload;
+      const taskOrgs = orgs[changeset.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [changeset.task]: {
+          ...taskOrgs,
+          changeset,
+        },
+      };
+    }
+    case 'REQUEST_CHANGESET_STARTED':
+    case 'CHANGESET_FAILED':
+    case 'CHANGESET_CANCELED': {
+      const changeset = action.payload;
+      const taskOrgs = orgs[changeset.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [changeset.task]: {
+          ...taskOrgs,
+          changeset: action.type === 'CHANGESET_FAILED' ? null : undefined,
         },
       };
     }

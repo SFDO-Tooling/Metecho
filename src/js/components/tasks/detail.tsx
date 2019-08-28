@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
@@ -26,12 +26,12 @@ import {
   useIsMounted,
 } from '@/components/utils';
 import { AppState, ThunkDispatch } from '@/store';
-import { getChangeset } from '@/store/orgs/actions';
+import { getChangeset, RequestChangesetSucceeded } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
@@ -39,6 +39,8 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
+  const [changesetID, setChangesetID] = useState('');
+
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const dispatch = useDispatch<ThunkDispatch>();
@@ -55,14 +57,34 @@ const TaskDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
 
+  // Unsubscribe from changeset WS if leaving page
+  useEffect(
+    () => () => {
+      if (changesetID && window.socket) {
+        window.socket.unsubscribe({
+          model: OBJECT_TYPES.CHANGESET,
+          id: changesetID,
+        });
+      }
+    },
+    [changesetID],
+  );
+
   const fetchChangeset = useCallback((org: Org) => {
     setCapturingChanges(true);
-    dispatch(getChangeset({ org })).catch(() => {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        setCapturingChanges(false);
-      }
-    });
+    setCaptureModalOpen(true);
+    dispatch(getChangeset({ org }))
+      .then((action: RequestChangesetSucceeded) => {
+        if (action && action.payload && action.payload.changeset) {
+          setChangesetID(action.payload.changeset.id);
+        }
+      })
+      .catch(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setCapturingChanges(false);
+        }
+      });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -107,8 +129,6 @@ const TaskDetail = (props: RouteComponentProps) => {
         if (!devOrg) {
           return undefined;
         }
-        // @@@ this should not happen until we have a changeset
-        setCaptureModalOpen(true);
         return fetchChangeset(devOrg);
       }
       return setInfoModalOpen(true);
@@ -186,7 +206,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         {userIsOwner && orgHasChanges ? (
           <Button
             label={
-              capturingChanges ? (
+              capturingChanges && changeset !== null ? (
                 <LabelWithSpinner
                   label={i18n.t('Capturing Task Changes…')}
                   variant="inverse"
@@ -213,10 +233,14 @@ const TaskDetail = (props: RouteComponentProps) => {
           isOpen={infoModalOpen}
           toggleModal={setInfoModalOpen}
         />
-        <CaptureModal
-          isOpen={captureModalOpen}
-          toggleModal={setCaptureModalOpen}
-        />
+        {orgs && orgs.changeset && (
+          <CaptureModal
+            isOpen={captureModalOpen}
+            toggleModal={setCaptureModalOpen}
+            toggleCapturingChanges={setCapturingChanges}
+            changeset={orgs.changeset}
+          />
+        )}
       </DetailPageLayout>
     </DocumentTitle>
   );

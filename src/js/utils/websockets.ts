@@ -1,8 +1,13 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
-import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
-import { Org } from '@/store/orgs/reducer';
+import {
+  addChangeset,
+  changesetFailed,
+  provisionFailed,
+  provisionOrg,
+} from '@/store/orgs/actions';
+import { Changeset, Org } from '@/store/orgs/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   ObjectTypes,
@@ -42,7 +47,23 @@ interface OrgProvisionFailedEvent {
     model: Org;
   };
 }
-type ModelEvent = ErrorEvent | OrgProvisionedEvent | OrgProvisionFailedEvent;
+interface ChangesetSucceededEvent {
+  type: 'CHANGESET_SUCCEEDED';
+  payload: Changeset;
+}
+interface ChangesetFailedEvent {
+  type: 'CHANGESET_FAILED';
+  payload: {
+    error?: string;
+    model: Changeset;
+  };
+}
+type ModelEvent =
+  | ErrorEvent
+  | OrgProvisionedEvent
+  | OrgProvisionFailedEvent
+  | ChangesetSucceededEvent
+  | ChangesetFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -57,6 +78,10 @@ export const getAction = (event: EventType) => {
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
       return provisionFailed(event.payload);
+    case 'CHANGESET_SUCCEEDED':
+      return addChangeset(event.payload);
+    case 'CHANGESET_FAILED':
+      return changesetFailed(event.payload);
   }
   return null;
 };

@@ -18,22 +18,27 @@ interface ChangesetPayload {
   org: Org;
   url: string;
 }
-interface ChangesetEvent {
-  type: 'FETCH_CHANGESET_STARTED' | 'FETCH_CHANGESET_FAILED';
+interface RequestChangesetEvent {
+  type: 'REQUEST_CHANGESET_STARTED' | 'REQUEST_CHANGESET_FAILED';
   payload: ChangesetPayload;
 }
-interface ChangesetSucceeded {
-  type: 'FETCH_CHANGESET_SUCCEEDED';
+export interface RequestChangesetSucceeded {
+  type: 'REQUEST_CHANGESET_SUCCEEDED';
   payload: {
     changeset: Changeset;
   } & ChangesetPayload;
+}
+interface ChangesetEvent {
+  type: 'CHANGESET_SUCCEEDED' | 'CHANGESET_FAILED' | 'CHANGESET_CANCELED';
+  payload: Changeset;
 }
 
 export type OrgsAction =
   | OrgProvisioned
   | OrgProvisionFailed
-  | ChangesetEvent
-  | ChangesetSucceeded;
+  | RequestChangesetEvent
+  | RequestChangesetSucceeded
+  | ChangesetEvent;
 
 export const provisionOrg = (payload: Org): ThunkResult => (
   dispatch,
@@ -112,7 +117,7 @@ export const getChangeset = ({
 }): ThunkResult => async dispatch => {
   const url = window.api_urls.scratch_org_detail(org.id);
   dispatch({
-    type: 'FETCH_CHANGESET_STARTED',
+    type: 'REQUEST_CHANGESET_STARTED',
     payload: { org, url },
   });
   try {
@@ -126,15 +131,86 @@ export const getChangeset = ({
         id: changeset.id,
       });
     }
+    // @@@ Mock out until API exists...
+    setTimeout(() => {
+      const mockChangeset = {
+        id: 'changeset-id',
+        task: org.task,
+        changes: {
+          ApexClasses: [
+            { id: '0', name: 'Class 1' },
+            { id: '1', name: 'Class 2' },
+          ],
+          CustomObjects: [{ id: '2', name: 'Custom objects' }],
+          ClassOthers: [{ id: '3', name: 'Class others' }],
+          FooBars: [{ id: '4', name: 'Foo Bars' }],
+          Feefitfum: [{ id: '5', name: 'Fee fitfum' }],
+          'Whatcha macallit': [{ id: '6', name: 'Whatchamacallit' }],
+          'Loopy ': [{ id: '7', name: 'Loopy Looo' }],
+        },
+      };
+      dispatch(
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        addChangeset(mockChangeset),
+      );
+    }, 1500);
     return dispatch({
-      type: 'FETCH_CHANGESET_SUCCEEDED',
+      type: 'REQUEST_CHANGESET_SUCCEEDED',
       payload: { org, url, changeset },
     });
   } catch (err) {
     dispatch({
-      type: 'FETCH_CHANGESET_FAILED',
+      type: 'REQUEST_CHANGESET_FAILED',
       payload: { org, url },
     });
     throw err;
   }
 };
+
+export const addChangeset = (payload: Changeset): ChangesetEvent => {
+  /* istanbul ignore else */
+  if (window.socket) {
+    window.socket.unsubscribe({
+      model: OBJECT_TYPES.CHANGESET,
+      id: payload.id,
+    });
+  }
+  return {
+    type: 'CHANGESET_SUCCEEDED',
+    payload,
+  };
+};
+
+export const changesetFailed = ({
+  model,
+  error,
+}: {
+  model: Changeset;
+  error?: string;
+}): ThunkResult => dispatch => {
+  /* istanbul ignore else */
+  if (window.socket) {
+    window.socket.unsubscribe({
+      model: OBJECT_TYPES.CHANGESET,
+      id: model.id,
+    });
+  }
+  dispatch(
+    addToast({
+      heading: i18n.t(
+        'Uh oh. There was an error capturing changes from your scratch org.',
+      ),
+      details: error,
+      variant: 'error',
+    }),
+  );
+  return dispatch({
+    type: 'CHANGESET_FAILED',
+    payload: model,
+  });
+};
+
+export const cancelChangeset = (payload: Changeset): ChangesetEvent => ({
+  type: 'CHANGESET_CANCELED',
+  payload,
+});
