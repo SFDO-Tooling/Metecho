@@ -31,6 +31,7 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
+import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
@@ -79,11 +80,12 @@ const TaskDetail = (props: RouteComponentProps) => {
           setChangesetID(action.payload.changeset.id);
         }
       })
-      .catch(() => {
+      .catch((err: ApiError) => {
         /* istanbul ignore else */
         if (isMounted.current) {
           setCapturingChanges(false);
         }
+        throw err;
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -206,7 +208,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         {userIsOwner && orgHasChanges ? (
           <Button
             label={
-              capturingChanges && changeset !== null ? (
+              capturingChanges && !(orgs && orgs.changeset === null) ? (
                 <LabelWithSpinner
                   label={i18n.t('Capturing Task Changes…')}
                   variant="inverse"
@@ -218,7 +220,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             className="slds-size_full slds-m-bottom_x-large"
             variant="brand"
             onClick={action}
-            disabled={capturingChanges}
+            disabled={capturingChanges && !(orgs && orgs.changeset === null)}
           />
         ) : null}
 

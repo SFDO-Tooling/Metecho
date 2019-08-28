@@ -142,7 +142,20 @@ const reducer = (
         },
       };
     }
-    case 'REQUEST_CHANGESET_STARTED':
+    case 'REQUEST_CHANGESET_STARTED': {
+      const { org } = action.payload;
+      const taskOrgs = orgs[org.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [org.task]: {
+          ...taskOrgs,
+          changeset: undefined,
+        },
+      };
+    }
     case 'CHANGESET_FAILED':
     case 'CHANGESET_CANCELED': {
       const changeset = action.payload;

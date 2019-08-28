@@ -149,10 +149,16 @@ export const getChangeset = ({
           'Loopy ': [{ id: '7', name: 'Loopy Looo' }],
         },
       };
+      // Success case
       dispatch(
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         addChangeset(mockChangeset),
       );
+      // Error case
+      // dispatch(
+      //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      //   changesetFailed({ model: mockChangeset, error: 'Oops.' }),
+      // );
     }, 1500);
     return dispatch({
       type: 'REQUEST_CHANGESET_SUCCEEDED',
