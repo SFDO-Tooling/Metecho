@@ -47,9 +47,10 @@ Docker-based development
     BUCKETEER_AWS_SECRET_ACCESS_KEY=...
     BUCKETEER_BUCKET_NAME=...
 
-3. Copy the ``server.key`` from Keybase into your local repo::
+3. Copy the ``server.key`` from Keybase into your local repo
+   (``compose/web/``)::
 
-   cp "/Volumes/Keybase ($USER)/team/oddbird/metashare/jwt/server.key" compose/web/
+    $ cp "/Volumes/Keybase ($USER)/team/oddbird/metashare/jwt/server.key" compose/web/
 
 4. Run ``./derrick build`` to build/re-build all the container images.
 
