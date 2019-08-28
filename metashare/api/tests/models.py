@@ -2,6 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from sfdo_template_helpers.crypto import fernet_decrypt
+
 from ..models import Project, Repository, Task, user_logged_in_handler
 
 # from ..models import ScratchOrg
@@ -78,7 +80,7 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.instance_url is None
 
-    def test_token(self, user_factory, social_account_factory):
+    def test_sf_token(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
         assert user.sf_token == ("0123456789abcdef", "secret.0123456789abcdef")
@@ -86,7 +88,16 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.sf_token == (None, None)
 
-    def test_token__invalid(
+    def test_gh_token(self, user_factory):
+        user = user_factory()
+        # Because the test fixture Fernet encrypts this by default. We
+        # don't expect the GitHub token to be encrypted usually.
+        assert fernet_decrypt(user.gh_token) == "0123456789abcdef"
+
+        user.socialaccount_set.all().delete()
+        assert user.gh_token is None
+
+    def test_sf_token__invalid(
         self, user_factory, social_token_factory, social_account_factory
     ):
         user = user_factory()
