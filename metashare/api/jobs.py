@@ -56,20 +56,29 @@ def create_branches_on_github(*, user, repo_url, project, task):
     gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
-    project_branch_name = slugify(project.name)
-    task_branch_name = slugify(task.name)
+
     # Make project branch:
-    project_branch_name = try_to_make_branch(
-        repository,
-        new_branch=project_branch_name,
-        base_branch=repository.default_branch,
-    )
+    project_branch_name = slugify(project.name)
+    if project.branch_name:
+        project_branch_name = project.branch_name
+    else:
+        project_branch_name = try_to_make_branch(
+            repository,
+            new_branch=project_branch_name,
+            base_branch=repository.default_branch,
+        )
+        project.branch_name = project_branch_name
+
     # Make task branch:
-    task_branch_name = try_to_make_branch(
-        repository, new_branch=task_branch_name, base_branch=project_branch_name
-    )
-    project.branch_name = project_branch_name
-    task.branch_name = task_branch_name
+    task_branch_name = slugify(task.name)
+    if task.branch_name:
+        task_branch_name = task.branch_name
+    else:
+        task_branch_name = try_to_make_branch(
+            repository, new_branch=task_branch_name, base_branch=project_branch_name
+        )
+        task.branch_name = task_branch_name
+
     project.save()
     task.save()
 

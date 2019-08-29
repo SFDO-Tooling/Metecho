@@ -13,7 +13,7 @@ def test_create_scratch_org():
         create_scratch_org(
             scratch_org=scratch_org,
             user=user,
-            repo_url="https://github.com/test/repo",
+            repo_url="https://github.com/test/repo-lombardy",
             commit_ish="master",
         )
         assert make_scratch_org.called
@@ -33,12 +33,33 @@ class TestCreateBranchesOnGitHub:
 
             create_branches_on_github(
                 user=user,
-                repo_url="https://github.com/user/repo",
+                repo_url="https://github.com/user/repo-bohemia",
                 project=project,
                 task=task,
             )
 
             assert repository.create_branch_ref.called
+
+    def test_create_branches_on_github__already_there(
+        self, user_factory, project_factory, task_factory
+    ):
+        user = user_factory()
+        project = project_factory(branch_name="pepin")
+        task = task_factory(branch_name="charlemagne", project=project)
+        with patch("metashare.api.jobs.login") as login:
+            repository = MagicMock()
+            gh = MagicMock()
+            gh.repository.return_value = repository
+            login.return_value = gh
+
+            create_branches_on_github(
+                user=user,
+                repo_url="https://github.com/user/repo-francia",
+                project=project,
+                task=task,
+            )
+
+            assert not repository.create_branch_ref.called
 
     def test_try_to_make_branch(self, user_factory, task_factory):
         repository = MagicMock()
