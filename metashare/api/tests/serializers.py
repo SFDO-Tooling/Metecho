@@ -144,6 +144,10 @@ def test_ScratchOrgSerializer(rf, user_factory, task_factory):
         data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
     )
     assert serializer.is_valid()
-    instance = serializer.save()
+    create_branches_on_github_then_create_scratch_org_job = (
+        "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
+    )
+    with patch(create_branches_on_github_then_create_scratch_org_job):
+        instance = serializer.save()
 
     assert instance.owner == user

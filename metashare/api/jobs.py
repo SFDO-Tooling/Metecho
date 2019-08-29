@@ -28,8 +28,8 @@ class MetaDeployCCI(BaseCumulusCI):
     project_config_class = MetadeployProjectConfig
 
 
-def create_scratch_org(scratch_org, *, user, repo_url, commit_ish):
-    # We will eventually use scratch_org and user, but not yet.
+def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
+    # We will eventually use user, but not yet.
     url = make_scratch_org(user, repo_url, commit_ish)
     scratch_org.url = url
     scratch_org.save()
@@ -53,3 +53,21 @@ def create_branches_on_github(*, user, repo_url, project_branch_name, task_branc
 
 
 create_branches_on_github_job = job(create_branches_on_github)
+
+
+@job
+def create_branches_on_github_then_create_scratch_org_job(
+    *args, **kwargs
+):  # pragma: nocover
+    create_branches_on_github(
+        user=kwargs["user"],
+        repo_url=kwargs["repo_url"],
+        project_branch_name=kwargs["project_branch_name"],
+        task_branch_name=kwargs["task_branch_name"],
+    )
+    create_scratch_org_on_sf(
+        scratch_org=kwargs["scratch_org"],
+        user=kwargs["user"],
+        repo_url=kwargs["repo_url"],
+        commit_ish=kwargs["commit_ish"],
+    )

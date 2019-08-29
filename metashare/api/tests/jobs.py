@@ -10,7 +10,7 @@ def test_create_scratch_org():
     user = None
     with patch("metashare.api.jobs.make_scratch_org") as make_scratch_org:
         create_scratch_org(
-            scratch_org,
+            scratch_org=scratch_org,
             user=user,
             repo_url="https://github.com/test/repo",
             commit_ish="master",

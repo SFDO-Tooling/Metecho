@@ -262,30 +262,21 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         super().save(*args, **kwargs)
 
         if create_remote_resources:
-            self.create_branches_on_github()
-            self.create_scratch_org_on_sf()
+            self.create_remote_resources()
 
         if self.tracker.has_changed("url"):
             self.notify_has_url()
 
-    def create_scratch_org_on_sf(self):
-        from .jobs import create_scratch_org_job
+    def create_remote_resources(self):
+        from .jobs import create_branches_on_github_then_create_scratch_org_job
 
-        create_scratch_org_job.delay(
-            self,
-            user=self.owner,
-            repo_url=self.task.project.repository.repo_url,
+        create_branches_on_github_then_create_scratch_org_job(
             commit_ish=self.task.branch_name,
-        )
-
-    def create_branches_on_github(self):
-        from .jobs import create_branches_on_github_job
-
-        create_branches_on_github_job.delay(
-            user=self.owner,
-            repo_url=self.task.project.repository.repo_url,
             project_branch_name=self.task.project.branch_name,
+            repo_url=self.task.project.repository.repo_url,
+            scratch_org=self,
             task_branch_name=self.task.branch_name,
+            user=self.owner,
         )
 
     def notify_has_url(self):
