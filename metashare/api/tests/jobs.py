@@ -6,7 +6,7 @@ from ..jobs import create_branches_on_github, create_scratch_org
 
 
 def test_create_scratch_org():
-    scratch_org = None
+    scratch_org = MagicMock()
     user = None
     with patch("metashare.api.jobs.make_scratch_org") as make_scratch_org:
         create_scratch_org(

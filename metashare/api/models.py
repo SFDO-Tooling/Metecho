@@ -265,7 +265,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self.create_branches_on_github()
             self.create_scratch_org_on_sf()
 
-        if self.tracker.has_changed("url"):  # pragma: nocover
+        if self.tracker.has_changed("url"):
             self.notify_has_url()
 
     def create_scratch_org_on_sf(self):

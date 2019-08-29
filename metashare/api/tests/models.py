@@ -301,7 +301,8 @@ class TestScratchOrg:
     def test_notify_has_url(self, scratch_org_factory):
         scratch_org = scratch_org_factory()
         with patch("metashare.api.models.async_to_sync") as async_to_sync:
-            scratch_org.notify_has_url()
+            scratch_org.url = "https://example.com"
+            scratch_org.save()
 
             assert async_to_sync.called
 
