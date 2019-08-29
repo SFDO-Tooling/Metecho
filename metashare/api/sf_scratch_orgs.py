@@ -9,15 +9,14 @@ from urllib.parse import urlparse
 import github3
 from cumulusci.core.config import ScratchOrgConfig
 from cumulusci.utils import temporary_dir
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
-def extract_user_and_repo(gh_url):
+def extract_owner_and_repo(gh_url):
     path = urlparse(gh_url).path
-    _, user, repo, *_ = path.split("/")
-    return user, repo
+    _, owner, repo, *_ = path.split("/")
+    return owner, repo
 
 
 def is_safe_path(path):
@@ -28,20 +27,20 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def clone_repo_locally(repo_url):
-    gh = github3.login(token=settings.GITHUB_TOKEN)
-    user, repo_name = extract_user_and_repo(repo_url)
-    return gh.repository(user, repo_name)
+def clone_repo_locally(user, repo_url):
+    gh = github3.login(token=user.gh_token)
+    owner, repo_name = extract_owner_and_repo(repo_url)
+    return gh.repository(owner, repo_name)
 
 
-def normalize_user_and_repo_name(repo):
+def normalize_owner_and_repo_name(repo):
     """
     Make sure we have the _actual_ owner/repo name if we were
     redirected.
     """
-    user = repo.owner.login
+    owner = repo.owner.login
     repo_name = repo.name
-    return user, repo_name
+    return owner, repo_name
 
 
 def get_zip_file(repo, commit_ish):
@@ -50,21 +49,21 @@ def get_zip_file(repo, commit_ish):
     return zipfile.ZipFile(zip_file_name)
 
 
-def log_unsafe_zipfile_error(user, repo_name, commit_ish):
+def log_unsafe_zipfile_error(owner, repo_name, commit_ish):
     """
     It is very unlikely that we will get an unsafe zipfile, as we get it
     from GitHub, but must be considered.
     """
-    url = f"https://github.com/{user}/{repo_name}#{commit_ish}"
+    url = f"https://github.com/{owner}/{repo_name}#{commit_ish}"
     logger.error(f"Malformed or malicious zip file from {url}.")
 
 
-def extract_zip_file(zip_file, user, repo_name):
+def extract_zip_file(zip_file, owner, repo_name):
     zip_file.extractall()
     # We know that the zipball contains a root directory named something
     # like this by GitHub's convention. If that ever breaks, this will
     # break:
-    zipball_root = glob(f"{user}-{repo_name}-*")[0]
+    zipball_root = glob(f"{owner}-{repo_name}-*")[0]
     # It's not unlikely that the zipball root contains a directory with
     # the same name, so we pre-emptively rename it to probably avoid
     # collisions:
@@ -81,19 +80,19 @@ def call_out_to_sf_api():
     org_config.create_org()
 
 
-def make_scratch_org(repo_url, commit_ish):
+def make_scratch_org(user, repo_url, commit_ish):
     with temporary_dir():
-        repo = clone_repo_locally(repo_url)
-        user, repo_name = normalize_user_and_repo_name(repo)
+        repo = clone_repo_locally(user, repo_url)
+        owner, repo_name = normalize_owner_and_repo_name(repo)
         zip_file = get_zip_file(repo, commit_ish)
 
         if not zip_file_is_safe(zip_file):
-            log_unsafe_zipfile_error(user, repo_name, commit_ish)
+            log_unsafe_zipfile_error(owner, repo_name, commit_ish)
             return
 
         # Because subsequent operations require certain things to be
         # present in the filesystem at cwd, things that are in the repo
         # (we hope):
-        extract_zip_file(zip_file, user, repo_name)
+        extract_zip_file(zip_file, owner, repo_name)
 
         call_out_to_sf_api()

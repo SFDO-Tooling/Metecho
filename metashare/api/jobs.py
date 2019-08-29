@@ -3,7 +3,7 @@ from cumulusci.core.runtime import BaseCumulusCI
 from django_rq import job
 from github3 import login
 
-from .sf_scratch_orgs import extract_user_and_repo, make_scratch_org
+from .sf_scratch_orgs import extract_owner_and_repo, make_scratch_org
 
 
 class MetadeployProjectConfig(BaseProjectConfig):
@@ -11,13 +11,13 @@ class MetadeployProjectConfig(BaseProjectConfig):
         self, *args, repo_root=None, repo_url=None, commit_ish=None, **kwargs
     ):  # pragma: nocover
 
-        user, repo_name = extract_user_and_repo(repo_url)
+        owner, repo_name = extract_owner_and_repo(repo_url)
 
         repo_info = {
             "root": repo_root,
             "url": repo_url,
             "name": repo_name,
-            "owner": user,
+            "owner": owner,
             "commit": commit_ish,
         }
 
@@ -30,7 +30,7 @@ class MetaDeployCCI(BaseCumulusCI):
 
 def create_scratch_org(scratch_org, *, user, repo_url, commit_ish):
     # We will eventually use scratch_org and user, but not yet.
-    make_scratch_org(repo_url, commit_ish)
+    make_scratch_org(user, repo_url, commit_ish)
 
 
 create_scratch_org_job = job(create_scratch_org)
@@ -38,8 +38,8 @@ create_scratch_org_job = job(create_scratch_org)
 
 def create_branches_on_github(*, user, repo_url, project_branch_name, task_branch_name):
     gh = login(token=user.gh_token)
-    user, repo = extract_user_and_repo(repo_url)
-    repository = gh.repository(user, repo)
+    owner, repo = extract_owner_and_repo(repo_url)
+    repository = gh.repository(owner, repo)
     # Make project branch:
     repository.create_branch_ref(
         project_branch_name, repository.branch(repository.default_branch).latest_sha()

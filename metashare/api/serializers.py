@@ -99,6 +99,7 @@ class TaskSerializer(serializers.ModelSerializer):
     assignee = HashidPrimaryKeyRelatedField(
         queryset=User.objects.all(), allow_null=True
     )
+    branch_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -110,6 +111,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "assignee",
             "slug",
             "old_slugs",
+            "branch_url",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -118,6 +120,9 @@ class TaskSerializer(serializers.ModelSerializer):
                 message=_("A task with this name already exists."),
             ),
         )
+
+    def get_branch_url(self, obj):
+        return f"{obj.project.repository.repo_url}/tree/{obj.branch_name}"
 
 
 class ScratchOrgSerializer(serializers.ModelSerializer):

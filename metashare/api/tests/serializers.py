@@ -7,6 +7,7 @@ from ..serializers import (
     ProjectSerializer,
     RepositorySerializer,
     ScratchOrgSerializer,
+    TaskSerializer,
 )
 
 
@@ -120,6 +121,15 @@ class TestProjectSerializer:
             partial=True,
         )
         assert serializer.is_valid(), serializer.errors
+
+
+@pytest.mark.django_db
+class TestTaskSerializer:
+    def test_branch_url(self, task_factory):
+        task = task_factory(name="Test task")
+        serializer = TaskSerializer(task)
+        expected = "https://www.github.com/test/repo/tree/test-task"
+        assert serializer.data["branch_url"] == expected
 
 
 @pytest.mark.django_db

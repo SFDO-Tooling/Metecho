@@ -227,6 +227,11 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.branch_name:
+            self.branch_name = slugify(self.name)
+        super().save(*args, **kwargs)
+
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)
@@ -257,8 +262,8 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         super().save(*args, **kwargs)
 
         if create_remote_resources:
-            self.create_scratch_org_on_sf()
             self.create_branches_on_github()
+            self.create_scratch_org_on_sf()
 
         if self.tracker.has_changed("url"):  # pragma: nocover
             self.notify_has_url()
@@ -270,7 +275,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self,
             user=self.owner,
             repo_url=self.task.project.repository.repo_url,
-            commit_ish=self.task.project.branch_name,
+            commit_ish=self.task.branch_name,
         )
 
     def create_branches_on_github(self):
