@@ -35,9 +35,7 @@ class TestCreateBranchesOnGitHub:
                 user=user,
                 repo_url="https://github.com/user/repo",
                 project=project,
-                project_branch_name="project-branch",
                 task=task,
-                task_branch_name="task-branch",
             )
 
             assert repository.create_branch_ref.called

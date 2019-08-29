@@ -1,5 +1,6 @@
 from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.runtime import BaseCumulusCI
+from django.utils.text import slugify
 from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
@@ -51,12 +52,12 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
             branch_name = f"{new_branch}-{counter}"
 
 
-def create_branches_on_github(
-    *, user, repo_url, project, project_branch_name, task, task_branch_name
-):
+def create_branches_on_github(*, user, repo_url, project, task):
     gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
+    project_branch_name = slugify(project.name)
+    task_branch_name = slugify(task.name)
     # Make project branch:
     project_branch_name = try_to_make_branch(
         repository,
@@ -84,9 +85,7 @@ def create_branches_on_github_then_create_scratch_org_job(
         user=kwargs["user"],
         repo_url=kwargs["repo_url"],
         project=kwargs["project"],
-        project_branch_name=kwargs["project_branch_name"],
         task=kwargs["task"],
-        task_branch_name=kwargs["task_branch_name"],
     )
     create_scratch_org(
         scratch_org=kwargs["scratch_org"],

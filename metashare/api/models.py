@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
-from django.utils.text import slugify
 from model_utils import Choices, FieldTracker
 
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -186,9 +185,11 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    tracker = FieldTracker(fields=("branch_name",))
+
     name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = models.SlugField(max_length=50)
+    branch_name = models.SlugField(max_length=50, null=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -200,9 +201,17 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.branch_name:
-            self.branch_name = slugify(self.name)
         super().save(*args, **kwargs)
+
+        if self.tracker.has_changed("branch_name"):
+            self.notify_has_branch_name()
+
+    def notify_has_branch_name(self):
+        from .serializers import ProjectSerializer
+
+        payload = ProjectSerializer(self).data
+        message = {"type": "PROJECT_UPDATE", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -214,13 +223,15 @@ class TaskSlug(AbstractSlug):
 
 
 class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    tracker = FieldTracker(fields=("branch_name",))
+
     name = models.CharField(max_length=50)
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     assignee = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="assigned_tasks"
     )
-    branch_name = models.SlugField(max_length=50)
+    branch_name = models.SlugField(max_length=50, null=True)
 
     slug_class = TaskSlug
 
@@ -228,9 +239,17 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.branch_name:
-            self.branch_name = slugify(self.name)
         super().save(*args, **kwargs)
+
+        if self.tracker.has_changed("branch_name"):
+            self.notify_has_branch_name()
+
+    def notify_has_branch_name(self):
+        from .serializers import TaskSerializer
+
+        payload = TaskSerializer(self).data
+        message = {"type": "TASK_UPDATE", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -273,11 +292,9 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         create_branches_on_github_then_create_scratch_org_job(
             commit_ish=self.task.branch_name,
             project=self.task.project,
-            project_branch_name=self.task.project.branch_name,
             repo_url=self.task.project.repository.repo_url,
             scratch_org=self,
             task=self.task,
-            task_branch_name=self.task.branch_name,
             user=self.owner,
         )
 

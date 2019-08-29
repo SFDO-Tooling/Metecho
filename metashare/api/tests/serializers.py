@@ -72,11 +72,21 @@ class TestProjectSerializer:
         serializer = ProjectSerializer(project)
         assert serializer.data["description"] == "<p>Test <code>project</code></p>"
 
-    def test_branch_url(self, project_factory):
-        project = project_factory(name="Test project", description="Test `project`")
+    def test_branch_url__present(self, project_factory):
+        project = project_factory(
+            name="Test project",
+            description="Test `project`",
+            branch_name="test-project",
+        )
         serializer = ProjectSerializer(project)
         expected = "https://www.github.com/test/repo/tree/test-project"
         assert serializer.data["branch_url"] == expected
+
+    def test_branch_url__missing(self, project_factory):
+        project = project_factory(name="Test project", description="Test `project`")
+        serializer = ProjectSerializer(project)
+        expected = "https://www.github.com/test/repo/tree/test-project"
+        assert serializer.data["branch_url"] is None
 
     def test_unique_name_for_repository(self, repository_factory, project_factory):
         repository = repository_factory()
@@ -125,11 +135,17 @@ class TestProjectSerializer:
 
 @pytest.mark.django_db
 class TestTaskSerializer:
-    def test_branch_url(self, task_factory):
-        task = task_factory(name="Test task")
+    def test_branch_url__present(self, task_factory):
+        task = task_factory(name="Test task", branch_name="test-task")
         serializer = TaskSerializer(task)
         expected = "https://www.github.com/test/repo/tree/test-task"
         assert serializer.data["branch_url"] == expected
+
+    def test_branch_url__missing(self, task_factory):
+        task = task_factory(name="Test task")
+        serializer = TaskSerializer(task)
+        expected = "https://www.github.com/test/repo/tree/test-task"
+        assert serializer.data["branch_url"] is None
 
 
 @pytest.mark.django_db
