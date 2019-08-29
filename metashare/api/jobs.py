@@ -31,6 +31,8 @@ class MetaDeployCCI(BaseCumulusCI):
 def create_scratch_org(scratch_org, *, user, repo_url, commit_ish):
     # We will eventually use scratch_org and user, but not yet.
     make_scratch_org(user, repo_url, commit_ish)
+    scratch_org.url = "https://example.com"
+    scratch_org.save()
 
 
 create_scratch_org_job = job(create_scratch_org)
