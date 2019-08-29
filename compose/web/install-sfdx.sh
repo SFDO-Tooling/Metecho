@@ -11,3 +11,5 @@ cp -r sfdx "vendor/sfdx/cli"
 chmod -R 755  "vendor/sfdx/cli"
 
 ln -s /sfdx/bin/sfdx /usr/local/bin
+
+sfdx force:auth:jwt:grant -d -a DevHub -i "$SFDX_CLIENT_ID" -f /server.key -u kit@oddbird.net
