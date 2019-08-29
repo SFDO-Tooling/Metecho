@@ -1,8 +1,9 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from github3.exceptions import UnprocessableEntity
 
-from ..jobs import create_branches_on_github, create_scratch_org
+from ..jobs import create_branches_on_github, create_scratch_org, try_to_make_branch
 
 
 def test_create_scratch_org():
@@ -19,19 +20,37 @@ def test_create_scratch_org():
 
 
 @pytest.mark.django_db
-def test_create_branches_on_github(user_factory):
-    user = user_factory()
-    with patch("metashare.api.jobs.login") as login:
-        repository = MagicMock()
-        gh = MagicMock()
-        gh.repository.return_value = repository
-        login.return_value = gh
+class TestCreateBranchesOnGitHub:
+    def test_create_branches_on_github(self, user_factory, task_factory):
+        user = user_factory()
+        task = task_factory()
+        project = task.project
+        with patch("metashare.api.jobs.login") as login:
+            repository = MagicMock()
+            gh = MagicMock()
+            gh.repository.return_value = repository
+            login.return_value = gh
 
-        create_branches_on_github(
-            user=user,
-            repo_url="https://github.com/user/repo",
-            project_branch_name="project-branch",
-            task_branch_name="task-branch",
+            create_branches_on_github(
+                user=user,
+                repo_url="https://github.com/user/repo",
+                project=project,
+                project_branch_name="project-branch",
+                task=task,
+                task_branch_name="task-branch",
+            )
+
+            assert repository.create_branch_ref.called
+
+    def test_try_to_make_branch(self, user_factory, task_factory):
+        repository = MagicMock()
+        resp = MagicMock(status_code=422, content="Test message")
+        repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
+        branch = MagicMock()
+        branch.latest_sha.return_value = "1234abc"
+        repository.branch.return_value = branch
+        result = try_to_make_branch(
+            repository, new_branch="new-branch", base_branch="base-branch"
         )
 
-        assert repository.create_branch_ref.called
+        assert result == "new-branch-1"

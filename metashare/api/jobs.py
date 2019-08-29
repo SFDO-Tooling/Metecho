@@ -2,6 +2,7 @@ from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from django_rq import job
 from github3 import login
+from github3.exceptions import UnprocessableEntity
 
 from .sf_scratch_orgs import extract_owner_and_repo, make_scratch_org
 
@@ -37,18 +38,39 @@ def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
 create_scratch_org_job = job(create_scratch_org)
 
 
-def create_branches_on_github(*, user, repo_url, project_branch_name, task_branch_name):
+def try_to_make_branch(repository, *, new_branch, base_branch):
+    branch_name = new_branch
+    counter = 0
+    while True:
+        try:
+            latest_sha = repository.branch(base_branch).latest_sha()
+            repository.create_branch_ref(branch_name, latest_sha)
+            return branch_name
+        except UnprocessableEntity:
+            counter += 1
+            branch_name = f"{new_branch}-{counter}"
+
+
+def create_branches_on_github(
+    *, user, repo_url, project, project_branch_name, task, task_branch_name
+):
     gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
     # Make project branch:
-    repository.create_branch_ref(
-        project_branch_name, repository.branch(repository.default_branch).latest_sha()
+    project_branch_name = try_to_make_branch(
+        repository,
+        new_branch=project_branch_name,
+        base_branch=repository.default_branch,
     )
     # Make task branch:
-    repository.create_branch_ref(
-        task_branch_name, repository.branch(project_branch_name).latest_sha()
+    task_branch_name = try_to_make_branch(
+        repository, new_branch=task_branch_name, base_branch=project_branch_name
     )
+    project.branch_name = project_branch_name
+    task.branch_name = task_branch_name
+    project.save()
+    task.save()
 
 
 create_branches_on_github_job = job(create_branches_on_github)
@@ -61,7 +83,9 @@ def create_branches_on_github_then_create_scratch_org_job(
     create_branches_on_github(
         user=kwargs["user"],
         repo_url=kwargs["repo_url"],
+        project=kwargs["project"],
         project_branch_name=kwargs["project_branch_name"],
+        task=kwargs["task"],
         task_branch_name=kwargs["task_branch_name"],
     )
     create_scratch_org(

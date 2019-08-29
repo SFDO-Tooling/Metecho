@@ -272,9 +272,11 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         create_branches_on_github_then_create_scratch_org_job(
             commit_ish=self.task.branch_name,
+            project=self.task.project,
             project_branch_name=self.task.project.branch_name,
             repo_url=self.task.project.repository.repo_url,
             scratch_org=self,
+            task=self.task,
             task_branch_name=self.task.branch_name,
             user=self.owner,
         )
