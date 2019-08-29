@@ -443,7 +443,6 @@ export const useForm = ({
   additionalData = {},
   onSuccess = () => {},
   onError = () => {},
-  resetFormOnSuccess = true,
   shouldSubscribeToObject,
 }: {
   fields: { [key: string]: any };
@@ -451,7 +450,6 @@ export const useForm = ({
   additionalData?: { [key: string]: any };
   onSuccess?: (...args: any[]) => any;
   onError?: (...args: any[]) => any;
-  resetFormOnSuccess?: boolean;
   shouldSubscribeToObject?: (...args: any[]) => boolean;
 }) => {
   const isMounted = useIsMounted();
@@ -481,7 +479,7 @@ export const useForm = ({
     )
       .then((...args: any[]) => {
         /* istanbul ignore else */
-        if (isMounted.current && resetFormOnSuccess) {
+        if (isMounted.current) {
           resetForm();
         }
         onSuccess(...args);

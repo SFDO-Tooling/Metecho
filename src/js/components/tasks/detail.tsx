@@ -31,7 +31,6 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
@@ -80,12 +79,11 @@ const TaskDetail = (props: RouteComponentProps) => {
           setChangesetID(action.payload.changeset.id);
         }
       })
-      .catch((err: ApiError) => {
+      .finally(() => {
         /* istanbul ignore else */
         if (isMounted.current) {
           setFetchingChanges(false);
         }
-        throw err;
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -182,8 +180,10 @@ const TaskDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
+  // Considered "loading" if we're currently fetching or committing changes
   const changesLoading =
-    (fetchingChanges && !(orgs && orgs.changeset === null)) ||
+    fetchingChanges ||
+    (orgs && orgs.fetchingChangeset) ||
     (orgs && orgs.committing);
 
   return (
@@ -241,10 +241,9 @@ const TaskDetail = (props: RouteComponentProps) => {
         />
         {orgs && orgs.changeset && (
           <CaptureModal
+            changeset={orgs.changeset}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
-            toggleFetchingChanges={setFetchingChanges}
-            changeset={orgs.changeset}
           />
         )}
       </DetailPageLayout>

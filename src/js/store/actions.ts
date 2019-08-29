@@ -210,7 +210,7 @@ export const createObject = ({
   try {
     let object: any;
     // @@@ Mock out until API exists
-    if (objectType === OBJECT_TYPES.CHANGESET) {
+    if (objectType === OBJECT_TYPES.COMMIT) {
       object = {
         id: 'commit-id',
         task: data.task,

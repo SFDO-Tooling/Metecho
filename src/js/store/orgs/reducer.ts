@@ -19,7 +19,8 @@ export interface Org {
 export interface OrgsByTask {
   [ORG_TYPES.DEV]: Org | null;
   [ORG_TYPES.QA]: Org | null;
-  changeset?: Changeset | null;
+  changeset?: Changeset;
+  fetchingChangeset?: boolean;
   committing?: boolean;
 }
 
@@ -100,7 +101,7 @@ const reducer = (
           }
           return orgs;
         }
-        case OBJECT_TYPES.CHANGESET: {
+        case OBJECT_TYPES.COMMIT: {
           const { object }: { object: Commit } = action.payload;
           if (object) {
             const taskOrgs = orgs[object.task] || {
@@ -111,6 +112,7 @@ const reducer = (
               ...orgs,
               [object.task]: {
                 ...taskOrgs,
+                changeset: undefined,
                 committing: true,
               },
             };
@@ -148,20 +150,6 @@ const reducer = (
         },
       };
     }
-    case 'CHANGESET_SUCCEEDED': {
-      const changeset = action.payload;
-      const taskOrgs = orgs[changeset.task] || {
-        [ORG_TYPES.DEV]: null,
-        [ORG_TYPES.QA]: null,
-      };
-      return {
-        ...orgs,
-        [changeset.task]: {
-          ...taskOrgs,
-          changeset,
-        },
-      };
-    }
     case 'REQUEST_CHANGESET_STARTED': {
       const { org } = action.payload;
       const taskOrgs = orgs[org.task] || {
@@ -176,6 +164,35 @@ const reducer = (
         },
       };
     }
+    case 'REQUEST_CHANGESET_SUCCEEDED': {
+      const { org } = action.payload;
+      const taskOrgs = orgs[org.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [org.task]: {
+          ...taskOrgs,
+          fetchingChangeset: true,
+        },
+      };
+    }
+    case 'CHANGESET_SUCCEEDED': {
+      const changeset = action.payload;
+      const taskOrgs = orgs[changeset.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [changeset.task]: {
+          ...taskOrgs,
+          changeset,
+          fetchingChangeset: false,
+        },
+      };
+    }
     case 'CHANGESET_FAILED':
     case 'CHANGESET_CANCELED': {
       const changeset = action.payload;
@@ -187,7 +204,8 @@ const reducer = (
         ...orgs,
         [changeset.task]: {
           ...taskOrgs,
-          changeset: action.type === 'CHANGESET_FAILED' ? null : undefined,
+          changeset: undefined,
+          fetchingChangeset: false,
         },
       };
     }

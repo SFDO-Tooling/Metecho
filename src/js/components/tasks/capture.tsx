@@ -5,7 +5,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
@@ -15,22 +15,16 @@ import { OBJECT_TYPES } from '@/utils/constants';
 import { pluralize } from '@/utils/helpers';
 
 interface Props {
+  changeset: Changeset;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
-  toggleFetchingChanges: React.Dispatch<React.SetStateAction<boolean>>;
-  changeset: Changeset;
 }
 
 interface BooleanObject {
   [key: string]: boolean;
 }
 
-const CaptureModal = ({
-  isOpen,
-  toggleModal,
-  toggleFetchingChanges,
-  changeset,
-}: Props) => {
+const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
   const [capturingChanges, setCapturingChanges] = useState(false);
   const isMounted = useIsMounted();
@@ -41,7 +35,6 @@ const CaptureModal = ({
     if (isMounted.current) {
       setCapturingChanges(false);
       toggleModal(false);
-      toggleFetchingChanges(false);
     }
   };
 
@@ -61,7 +54,7 @@ const CaptureModal = ({
     resetForm,
   } = useForm({
     fields: { changes: [], message: '' },
-    objectType: OBJECT_TYPES.CHANGESET,
+    objectType: OBJECT_TYPES.COMMIT,
     additionalData: { task: changeset.task },
     onSuccess: handleSuccess,
     onError: handleError,
@@ -120,6 +113,7 @@ const CaptureModal = ({
   };
 
   const handleSubmitClicked = () => {
+    // Click hidden button inside form to activate native browser validation
     if (submitButton.current) {
       submitButton.current.click();
     }
@@ -127,7 +121,6 @@ const CaptureModal = ({
 
   const handleClose = () => {
     toggleModal(false);
-    toggleFetchingChanges(false);
     dispatch(cancelChangeset(changeset));
     resetForm();
   };
@@ -145,9 +138,15 @@ const CaptureModal = ({
     <Modal
       isOpen={isOpen}
       size="medium"
+      disableClose={capturingChanges}
       heading={i18n.t('Select the changes to capture')}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
+        <Button
+          key="cancel"
+          label={i18n.t('Cancel')}
+          disabled={capturingChanges}
+          onClick={handleClose}
+        />,
         <Button
           key="submit"
           type="submit"
@@ -257,6 +256,7 @@ const CaptureModal = ({
           errorText={errors.message}
           onChange={handleInputChange}
         />
+        {/* Clicking hidden button allows for native browser form validation */}
         <button ref={submitButton} type="submit" style={{ display: 'none' }} />
       </form>
     </Modal>
