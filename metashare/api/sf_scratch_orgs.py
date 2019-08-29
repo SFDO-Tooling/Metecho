@@ -78,6 +78,7 @@ def call_out_to_sf_api():
         {"config_file": "orgs/dev.json", "scratch": True}, "dev"
     )
     org_config.create_org()
+    return org_config
 
 
 def make_scratch_org(user, repo_url, commit_ish):
@@ -95,4 +96,6 @@ def make_scratch_org(user, repo_url, commit_ish):
         # (we hope):
         extract_zip_file(zip_file, owner, repo_name)
 
-        call_out_to_sf_api()
+        created_org = call_out_to_sf_api()
+
+        return created_org.instance_url
