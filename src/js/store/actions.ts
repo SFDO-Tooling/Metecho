@@ -213,7 +213,7 @@ export const createObject = ({
     if (objectType === OBJECT_TYPES.CHANGESET) {
       object = {
         id: 'commit-id',
-        task: 'g1VBk10',
+        task: data.task,
       };
       setTimeout(() => {
         // Success case
@@ -226,7 +226,7 @@ export const createObject = ({
         //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
         //   commitFailed({ model: object, error: 'Oops.' }),
         // );
-      }, 1500);
+      }, 3000);
     } else {
       if (!url) {
         throw new Error(`No URL found for object: ${objectType}`);

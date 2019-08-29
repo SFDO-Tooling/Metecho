@@ -164,7 +164,7 @@ export const getChangeset = ({
       //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
       //   changesetFailed({ model: mockChangeset, error: 'Oops.' }),
       // );
-    }, 1500);
+    }, 3000);
     return dispatch({
       type: 'REQUEST_CHANGESET_SUCCEEDED',
       payload: { org, url, changeset },

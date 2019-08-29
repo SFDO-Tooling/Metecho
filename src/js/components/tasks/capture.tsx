@@ -5,7 +5,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
@@ -34,6 +34,7 @@ const CaptureModal = ({
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
   const [capturingChanges, setCapturingChanges] = useState(false);
   const isMounted = useIsMounted();
+  const submitButton = useRef<HTMLButtonElement | null>(null);
 
   const handleSuccess = () => {
     /* istanbul ignore else */
@@ -61,6 +62,7 @@ const CaptureModal = ({
   } = useForm({
     fields: { changes: [], message: '' },
     objectType: OBJECT_TYPES.CHANGESET,
+    additionalData: { task: changeset.task },
     onSuccess: handleSuccess,
     onError: handleError,
     shouldSubscribeToObject: () => true,
@@ -117,6 +119,12 @@ const CaptureModal = ({
     }
   };
 
+  const handleSubmitClicked = () => {
+    if (submitButton.current) {
+      submitButton.current.click();
+    }
+  };
+
   const handleClose = () => {
     toggleModal(false);
     toggleFetchingChanges(false);
@@ -142,6 +150,7 @@ const CaptureModal = ({
         <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
         <Button
           key="submit"
+          type="submit"
           label={
             capturingChanges ? (
               <LabelWithSpinner
@@ -153,7 +162,7 @@ const CaptureModal = ({
             )
           }
           variant="brand"
-          onClick={submitChanges}
+          onClick={handleSubmitClicked}
           disabled={!inputs.changes.length || capturingChanges}
         />,
       ]}
@@ -201,6 +210,7 @@ const CaptureModal = ({
                 expanded={Boolean(expandedPanels[groupName])}
                 id={groupName}
                 onTogglePanel={handleThisPanelToggle}
+                title={groupName}
                 summary={
                   <div>
                     <Checkbox
@@ -247,6 +257,7 @@ const CaptureModal = ({
           errorText={errors.message}
           onChange={handleInputChange}
         />
+        <button ref={submitButton} type="submit" style={{ display: 'none' }} />
       </form>
     </Modal>
   );
