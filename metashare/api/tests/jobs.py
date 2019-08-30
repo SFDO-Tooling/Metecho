@@ -4,7 +4,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 from github3.exceptions import UnprocessableEntity
 
-from ..jobs import create_branches_on_github, create_scratch_org, try_to_make_branch
+from ..jobs import (
+    create_branches_on_github,
+    create_scratch_org,
+    report_errors_on,
+    try_to_make_branch,
+)
 
 
 @pytest.mark.django_db
@@ -79,3 +84,17 @@ class TestCreateBranchesOnGitHub:
         )
 
         assert result == "new-branch-1"
+
+
+@pytest.mark.django_db
+def test_report_errors_on(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch("metashare.api.jobs.get_channel_layer") as get_channel_layer:
+        channel_layer = MagicMock()
+        get_channel_layer.return_value = channel_layer
+        try:
+            with report_errors_on(scratch_org):
+                raise ValueError
+        except ValueError:
+            pass
+        assert channel_layer.group_send.called

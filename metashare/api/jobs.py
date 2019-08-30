@@ -1,12 +1,50 @@
+import contextlib
+import logging
+import traceback
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from django.utils.text import slugify
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
 from .sf_scratch_orgs import extract_owner_and_repo, make_scratch_org
+
+logger = logging.getLogger(__name__)
+
+
+def report_scratch_org_error(instance):
+    from .serializers import ScratchOrgSerializer
+
+    message = {
+        "type": "SCRATCH_ORG_PROVISION_FAILED",
+        "payload": {
+            "message": str(_("There was an error")),
+            "model": ScratchOrgSerializer(instance).data,
+        },
+    }
+    model_name = instance._meta.model_name
+    id = str(instance.id)
+    group_name = "{model}.{id}".format(model=model_name, id=id)
+    channel_layer = get_channel_layer()
+    sent_message = {"type": "notify", "group": group_name, "content": message}
+    async_to_sync(channel_layer.group_send(group_name, sent_message))
+
+
+@contextlib.contextmanager
+def report_errors_on(scratch_org):
+    try:
+        yield
+    except Exception:
+        report_scratch_org_error(scratch_org)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
 
 
 class MetadeployProjectConfig(BaseProjectConfig):
@@ -32,18 +70,21 @@ class MetaDeployCCI(BaseCumulusCI):
 
 
 def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
-    org = make_scratch_org(user, repo_url, commit_ish)
-    scratch_org.url = org.instance_url
-    scratch_org.last_modified_at = now()
-    scratch_org.expires_at = org.expires
-
     gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
     branch = repository.branch(commit_ish)
-    scratch_org.latest_commit = branch.latest_sha()
-    scratch_org.latest_commit_url = branch.url
-    scratch_org.save()
+    latest_commit = branch.latest_sha()
+    latest_commit_url = branch.url
+
+    with report_errors_on(scratch_org):
+        org = make_scratch_org(user, repo_url, commit_ish)
+        scratch_org.url = org.instance_url
+        scratch_org.last_modified_at = now()
+        scratch_org.expires_at = org.expires
+        scratch_org.latest_commit = latest_commit
+        scratch_org.latest_commit_url = latest_commit_url
+        scratch_org.save()
 
 
 def try_to_make_branch(repository, *, new_branch, base_branch):
