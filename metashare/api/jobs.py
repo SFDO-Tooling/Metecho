@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from django.utils.text import slugify
