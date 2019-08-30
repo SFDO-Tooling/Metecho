@@ -9,7 +9,7 @@ export interface Task {
   old_slugs: string[];
   project: string;
   description: string;
-  branch_url: string;
+  branch_url: string | null;
 }
 
 export interface TaskState {

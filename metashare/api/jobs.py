@@ -70,10 +70,8 @@ def create_branches_on_github(*, user, repo_url, project, task):
         project.branch_name = project_branch_name
 
     # Make task branch:
-    task_branch_name = slugify(task.name)
-    if task.branch_name:
-        task_branch_name = task.branch_name
-    else:
+    if not task.branch_name:
+        task_branch_name = project_branch_name + "__" + slugify(task.name)
         task_branch_name = try_to_make_branch(
             repository, new_branch=task_branch_name, base_branch=project_branch_name
         )
@@ -100,5 +98,5 @@ def create_branches_on_github_then_create_scratch_org_job(
         scratch_org=kwargs["scratch_org"],
         user=kwargs["user"],
         repo_url=kwargs["repo_url"],
-        commit_ish=kwargs["commit_ish"],
+        commit_ish=kwargs["task"].branch_name,
     )

@@ -215,7 +215,7 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "repository"), ("branch_name", "repository"))
+        unique_together = (("name", "repository"),)
 
 
 class TaskSlug(AbstractSlug):
@@ -290,7 +290,6 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
 
         create_branches_on_github_then_create_scratch_org_job(
-            commit_ish=self.task.branch_name,
             project=self.task.project,
             repo_url=self.task.project.repository.repo_url,
             scratch_org=self,

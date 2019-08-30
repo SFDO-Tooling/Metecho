@@ -91,6 +91,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_branch_url(self, obj) -> Optional[str]:
         if obj.branch_name:
             return f"{obj.repository.repo_url}/tree/{obj.branch_name}"
+        return None
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -127,6 +128,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def get_branch_url(self, obj) -> Optional[str]:
         if obj.branch_name:
             return f"{obj.project.repository.repo_url}/tree/{obj.branch_name}"
+        return None
 
 
 class ScratchOrgSerializer(serializers.ModelSerializer):
