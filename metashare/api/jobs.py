@@ -36,9 +36,6 @@ def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
     scratch_org.save()
 
 
-create_scratch_org_job = job(create_scratch_org)
-
-
 def try_to_make_branch(repository, *, new_branch, base_branch):
     branch_name = new_branch
     counter = 0
@@ -79,9 +76,6 @@ def create_branches_on_github(*, user, repo_url, project, task):
 
     project.save()
     task.save()
-
-
-create_branches_on_github_job = job(create_branches_on_github)
 
 
 @job

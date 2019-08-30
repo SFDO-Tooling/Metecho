@@ -289,7 +289,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     def create_remote_resources(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
 
-        create_branches_on_github_then_create_scratch_org_job(
+        create_branches_on_github_then_create_scratch_org_job.delay(
             project=self.task.project,
             repo_url=self.task.project.repository.repo_url,
             scratch_org=self,
