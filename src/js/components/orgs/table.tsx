@@ -15,6 +15,8 @@ import { ExternalLink, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { createObject } from '@/store/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
+import { Project } from '@/store/projects/reducer';
+import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
@@ -191,7 +193,15 @@ const StatusTableCell = ({ item, ...props }: DataCellProps) => {
 };
 StatusTableCell.displayName = DataTableCell.displayName;
 
-const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
+const OrgsTable = ({
+  orgs,
+  task,
+  project,
+}: {
+  orgs: OrgsByTask;
+  task: Task;
+  project: Project;
+}) => {
   const user = useSelector(selectUserState);
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
@@ -200,11 +210,28 @@ const OrgsTable = ({ orgs, task }: { orgs: OrgsByTask; task: string }) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const createOrg = useCallback((type: OrgTypes) => {
     setIsCreatingOrg(type);
+    // Subscribe to project/task for possible branch creation...
+    if (window.socket) {
+      /* istanbul ignore else */
+      if (!project.branch_url) {
+        window.socket.subscribe({
+          model: OBJECT_TYPES.PROJECT,
+          id: project.id,
+        });
+      }
+      /* istanbul ignore else */
+      if (!task.branch_url) {
+        window.socket.subscribe({
+          model: OBJECT_TYPES.TASK,
+          id: task.id,
+        });
+      }
+    }
     dispatch(
       createObject({
         objectType: OBJECT_TYPES.ORG,
         // eslint-disable-next-line @typescript-eslint/camelcase
-        data: { task, org_type: type },
+        data: { task: task.id, org_type: type },
         shouldSubscribeToObject: (object: Org) => object && !object.url,
       }),
     ).finally(() => {

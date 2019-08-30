@@ -1,4 +1,5 @@
 import { ObjectsAction } from '@/store/actions';
+import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
@@ -20,7 +21,7 @@ const defaultState = {};
 
 const reducer = (
   tasks: TaskState = defaultState,
-  action: ObjectsAction | LogoutAction,
+  action: TaskAction | ObjectsAction | LogoutAction,
 ) => {
   switch (action.type) {
     case 'USER_LOGGED_OUT':
@@ -56,6 +57,26 @@ const reducer = (
         }
       }
       return tasks;
+    }
+    case 'TASK_UPDATE': {
+      const task = action.payload;
+      const projectTasks = tasks[task.project] || [];
+      const existingTask = projectTasks.find(t => t.id === task.id);
+      if (existingTask) {
+        return {
+          ...tasks,
+          [task.project]: projectTasks.map(t => {
+            if (t.id === task.id) {
+              return { ...task };
+            }
+            return t;
+          }),
+        };
+      }
+      return {
+        ...tasks,
+        [task.project]: [task, ...projectTasks],
+      };
     }
   }
   return tasks;

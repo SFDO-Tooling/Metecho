@@ -200,6 +200,10 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     def __str__(self):
         return self.name
 
+    def subscribable_by(self, user):  # pragma: nocover
+        # TODO: revisit this?
+        return True
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
@@ -237,6 +241,10 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
 
     def __str__(self):
         return self.name
+
+    def subscribable_by(self, user):  # pragma: nocover
+        # TODO: revisit this?
+        return True
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

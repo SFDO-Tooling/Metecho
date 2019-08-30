@@ -50,7 +50,11 @@ describe('<OrgsTable/>', () => {
     const { initialState, orgs } = opts;
     return renderWithRedux(
       <MemoryRouter>
-        <OrgsTable orgs={orgs} task="task-id" />
+        <OrgsTable
+          orgs={orgs}
+          task={{ id: 'task-id' }}
+          project={{ id: 'project-id' }}
+        />
       </MemoryRouter>,
       initialState,
       storeWithThunk,
@@ -103,6 +107,31 @@ describe('<OrgsTable/>', () => {
       });
       expect(args.shouldSubscribeToObject({})).toBe(true);
       expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
+    });
+
+    describe('with websocket', () => {
+      beforeEach(() => {
+        window.socket = { subscribe: jest.fn() };
+      });
+
+      afterEach(() => {
+        Reflect.deleteProperty(window, 'socket');
+      });
+
+      test('subscribes to project/task', () => {
+        const { getByTitle } = setup();
+        fireEvent.click(getByTitle('Create New Org'));
+
+        expect(window.socket.subscribe).toHaveBeenCalledTimes(2);
+        expect(window.socket.subscribe).toHaveBeenCalledWith({
+          model: 'project',
+          id: 'project-id',
+        });
+        expect(window.socket.subscribe).toHaveBeenCalledWith({
+          model: 'task',
+          id: 'task-id',
+        });
+      });
     });
 
     describe('not connected to sf org', () => {
