@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -6,10 +7,15 @@ from github3.exceptions import UnprocessableEntity
 from ..jobs import create_branches_on_github, create_scratch_org, try_to_make_branch
 
 
-def test_create_scratch_org():
+@pytest.mark.django_db
+def test_create_scratch_org(user_factory):
     scratch_org = MagicMock()
-    user = None
-    with patch("metashare.api.jobs.make_scratch_org") as make_scratch_org:
+    user = user_factory()
+    with ExitStack() as stack:
+        make_scratch_org = stack.enter_context(
+            patch("metashare.api.jobs.make_scratch_org")
+        )
+        stack.enter_context(patch("metashare.api.jobs.login"))
         create_scratch_org(
             scratch_org=scratch_org,
             user=user,

@@ -95,7 +95,5 @@ def make_scratch_org(user, repo_url, commit_ish):
         # present in the filesystem at cwd, things that are in the repo
         # (we hope):
         extract_zip_file(zip_file, owner, repo_name)
-
         created_org = call_out_to_sf_api()
-
-        return created_org.instance_url
+        return created_org

@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from cumulusci.core.config import BaseProjectConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from django.utils.text import slugify
+from django.utils.timezone import now
 from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
@@ -31,8 +34,17 @@ class MetaDeployCCI(BaseCumulusCI):
 
 
 def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
-    url = make_scratch_org(user, repo_url, commit_ish)
-    scratch_org.url = url
+    org = make_scratch_org(user, repo_url, commit_ish)
+    scratch_org.url = org.instance_url
+    scratch_org.last_modified_at = now()
+    scratch_org.expires_at = org.expires
+
+    gh = login(token=user.gh_token)
+    owner, repo = extract_owner_and_repo(repo_url)
+    repository = gh.repository(owner, repo)
+    branch = repository.branch(commit_ish)
+    scratch_org.latest_commit = branch.latest_sha()
+    scratch_org.latest_commit_url = branch.url
     scratch_org.save()
 
 
