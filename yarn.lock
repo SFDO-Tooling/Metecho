@@ -967,16 +967,16 @@
   resolved "https://registry.yarnpkg.com/@salesforce/babel-preset-design-system-react/-/babel-preset-design-system-react-3.0.0.tgz#b8334d14fc3801064ac5b6e5349145dc057bc17f"
   integrity sha512-NM3aObtfYl9RpfVu5eDU96fmTW7Mj2V1Y1O5b8dpLGESgXxqHiGIV7d4bKHzmD8O00g1qjPAPusd0f2IB7Yi0Q==
 
-"@salesforce/design-system-react@^0.10.9":
-  version "0.10.9"
-  resolved "https://registry.yarnpkg.com/@salesforce/design-system-react/-/design-system-react-0.10.9.tgz#c2faf51cc1074c848c7a0d3957330b13ea5dece5"
-  integrity sha512-twt6gYgDVF2YlMq9Eu4iwjx/k5UmTxZga49Z/Gj5lpRzCP0N3s82beHMBAc5xPU0wrT91DaBqhQr/WRGbe1GMA==
+"@salesforce/design-system-react@^0.10.11":
+  version "0.10.11"
+  resolved "https://registry.yarnpkg.com/@salesforce/design-system-react/-/design-system-react-0.10.11.tgz#386c09717bfda67157b9c32e6cdafead4c7ecdf2"
+  integrity sha512-A51+pSANCRAwr8rI3yFtN8HUtdjLs1sJTqGaOz/Q7hBKvkf8abrdzVqMQRMDRboLqvzYYuGN8fCHP6HF2al8Eg==
   dependencies:
     "@salesforce/babel-preset-design-system-react" "^3.0.0"
     "@storybook/router" "^5.1.9"
     axe-puppeteer "^1.0.0"
     babel-plugin-require-context-hook "^1.0.0"
-    classnames "^2.2.5"
+    classnames "^2.2.6"
     create-react-class "^15.6.0"
     lodash.assign "^4.0.9"
     lodash.escaperegexp "^4.1.1"
@@ -989,9 +989,10 @@
     lodash.reject "^4.3.0"
     popper.js "^1.10.8"
     prop-types ">=15.5.8"
+    react-contenteditable "^3.3.1"
     react-highlighter "^0.4.3"
     react-modal "3.8.1"
-    react-onclickoutside "^6.8.0"
+    react-onclickoutside "^6.9.0"
     react-required-if "^1.0.3"
     react-text-truncate "^0.14.1"
     shortid "^2.2.14"
@@ -2652,7 +2653,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.5, classnames@^2.2.6:
+classnames@^2.2.6:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
   integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
@@ -8566,7 +8567,7 @@ prompts@^2.0.1:
     kleur "^3.0.3"
     sisteransi "^1.0.3"
 
-prop-types@>=15.5.8, prop-types@^15.5.10, prop-types@^15.5.6, prop-types@^15.5.7, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@>=15.5.8, prop-types@^15.5.10, prop-types@^15.5.6, prop-types@^15.5.7, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.1, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -8738,6 +8739,14 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-contenteditable@^3.3.1:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/react-contenteditable/-/react-contenteditable-3.3.2.tgz#8821c8ab0ce51295fd2086aed826e95b80644931"
+  integrity sha512-dGj4ABKOG/AwuboJFTSxX4dQvCXboSOJcC2K1k/rZat+7hebO9iVpIDG8W2Kbj2Vbxbx2rAVCp9xlWEJa1+FGA==
+  dependencies:
+    fast-deep-equal "^2.0.1"
+    prop-types "^15.7.1"
+
 react-document-title@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/react-document-title/-/react-document-title-2.0.3.tgz#bbf922a0d71412fc948245e4283b2412df70f2b9"
@@ -8812,7 +8821,7 @@ react-modal@3.8.1:
     react-lifecycles-compat "^3.0.0"
     warning "^3.0.0"
 
-react-onclickoutside@^6.8.0:
+react-onclickoutside@^6.9.0:
   version "6.9.0"
   resolved "https://registry.yarnpkg.com/react-onclickoutside/-/react-onclickoutside-6.9.0.tgz#a54bc317ae8cf6131a5d78acea55a11067f37a1f"
   integrity sha512-8ltIY3bC7oGhj2nPAvWOGi+xGFybPNhJM0V1H8hY/whNcXgmDeaeoCMPPd8VatrpTsUWjb/vGzrmu6SrXVty3A==
