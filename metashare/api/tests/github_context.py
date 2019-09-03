@@ -89,7 +89,7 @@ class TestLocalGitHubCheckout:
         user = MagicMock()
         repo = "https://github.com/user/repo"
         with ExitStack() as stack:
-            zipfile = stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
             gh3 = stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
@@ -104,9 +104,9 @@ class TestLocalGitHubCheckout:
         user = MagicMock()
         repo = "https://github.com/user/repo"
         with ExitStack() as stack:
-            zipfile = stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
             gh3 = stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
-            shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             zip_file_is_safe = stack.enter_context(
                 patch(f"{PATCH_ROOT}.zip_file_is_safe")
@@ -117,5 +117,5 @@ class TestLocalGitHubCheckout:
             glob.return_value = [".."]
 
             with pytest.raises(UnsafeZipfileError):
-                with local_github_checkout(user, repo, "commit-ish"):
+                with local_github_checkout(user, repo, "commit-ish"):  # pragma: nocover
                     pass

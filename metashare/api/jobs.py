@@ -13,7 +13,7 @@ from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
-from .github_context import extract_owner_and_repo
+from .github_context import extract_owner_and_repo, local_github_checkout
 
 logger = logging.getLogger(__name__)
 
