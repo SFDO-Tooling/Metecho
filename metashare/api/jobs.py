@@ -8,7 +8,6 @@ from cumulusci.core.config import BaseProjectConfig, ScratchOrgConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from django.utils.text import slugify
 from django.utils.timezone import now
-from django.utils.translation import gettext_lazy as _
 from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
