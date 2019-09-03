@@ -105,7 +105,7 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
             branch_name = f"{new_branch}-{counter}"
 
 
-def create_branches_on_github(*, user, repo_url, project, task):
+def create_branches_on_github(*, user, repo_url, project, task, repo_root):
     """
     Expects to be called in the context of a local github checkout.
     """
@@ -114,7 +114,15 @@ def create_branches_on_github(*, user, repo_url, project, task):
     repository = gh.repository(owner, repo)
 
     # Make project branch:
-    project_branch_name = f"{get_cumulus_prefix()}{slugify(project.name)}"
+    prefix = get_cumulus_prefix(
+        repo_root=repo_root,
+        repo_name="Repo Name",
+        repo_url=repo_url,
+        repo_owner=owner,
+        repo_branch=repository.default_branch,
+        repo_commit=repository.branch(repository.default_branch).latest_sha(),
+    )
+    project_branch_name = f"{prefix}{slugify(project.name)}"
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
@@ -142,9 +150,13 @@ def create_branches_on_github(*, user, repo_url, project, task):
 def create_branches_on_github_then_create_scratch_org_job(
     *, project, repo_url, scratch_org, task, user, commit_ish
 ):  # pragma: nocover
-    with local_github_checkout(user, repo_url, commit_ish):
+    with local_github_checkout(user, repo_url, commit_ish) as repo_root:
         create_branches_on_github(
-            user=user, repo_url=repo_url, project=project, task=task
+            user=user,
+            repo_url=repo_url,
+            project=project,
+            task=task,
+            repo_root=repo_root,
         )
         create_scratch_org(
             scratch_org=scratch_org, user=user, repo_url=repo_url, commit_ish=commit_ish

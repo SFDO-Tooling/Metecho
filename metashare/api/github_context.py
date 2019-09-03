@@ -10,6 +10,8 @@ from urllib.parse import urlparse
 import github3
 from cumulusci.utils import temporary_dir
 
+from .custom_cci_configs import GlobalConfig, ProjectConfig
+
 logger = logging.getLogger(__name__)
 
 
@@ -79,7 +81,7 @@ def extract_zip_file(zip_file, owner, repo_name):
 
 @contextlib.contextmanager
 def local_github_checkout(user, repo_url, commit_ish):
-    with temporary_dir():
+    with temporary_dir() as repo_root:
         repo = clone_repo_locally(user, repo_url)
         owner, repo_name = normalize_owner_and_repo_name(repo)
         zip_file = get_zip_file(repo, commit_ish)
@@ -92,8 +94,13 @@ def local_github_checkout(user, repo_url, commit_ish):
             # present in the filesystem at cwd, things that are in the
             # repo (we hope):
             extract_zip_file(zip_file, owner, repo_name)
-            yield
+            yield repo_root
 
 
-def get_cumulus_prefix():
-    return "feature/"
+def get_cumulus_prefix(**kwargs):
+    """
+    Expects to be in a local_github_checkout.
+    """
+    global_config = GlobalConfig()
+    project_config = global_config.get_project_config(**kwargs)
+    return project_config.project__git__prefix_feature

@@ -38,7 +38,16 @@ class TestCreateBranchesOnGitHub:
         user = user_factory()
         task = task_factory()
         project = task.project
-        with patch("metashare.api.jobs.login") as login:
+        with ExitStack() as stack:
+            global_config = stack.enter_context(
+                patch("metashare.api.github_context.GlobalConfig")
+            )
+            global_config_instance = MagicMock()
+            global_config.return_value = global_config_instance
+            global_config_instance.get_project_config.return_value = MagicMock(
+                project__git__prefix_feature="feature/"
+            )
+            login = stack.enter_context(patch("metashare.api.jobs.login"))
             repository = MagicMock()
             gh = MagicMock()
             gh.repository.return_value = repository
@@ -49,6 +58,7 @@ class TestCreateBranchesOnGitHub:
                 repo_url="https://github.com/user/repo-bohemia",
                 project=project,
                 task=task,
+                repo_root="",
             )
 
             assert repository.create_branch_ref.called
@@ -59,7 +69,16 @@ class TestCreateBranchesOnGitHub:
         user = user_factory()
         project = project_factory(branch_name="pepin")
         task = task_factory(branch_name="charlemagne", project=project)
-        with patch("metashare.api.jobs.login") as login:
+        with ExitStack() as stack:
+            global_config = stack.enter_context(
+                patch("metashare.api.github_context.GlobalConfig")
+            )
+            global_config_instance = MagicMock()
+            global_config.return_value = global_config_instance
+            global_config_instance.get_project_config.return_value = MagicMock(
+                project__git__prefix_feature="feature/"
+            )
+            login = stack.enter_context(patch("metashare.api.jobs.login"))
             repository = MagicMock()
             gh = MagicMock()
             gh.repository.return_value = repository
@@ -70,6 +89,7 @@ class TestCreateBranchesOnGitHub:
                 repo_url="https://github.com/user/repo-francia",
                 project=project,
                 task=task,
+                repo_root="",
             )
 
             assert not repository.create_branch_ref.called
