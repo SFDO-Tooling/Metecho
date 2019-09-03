@@ -141,9 +141,8 @@ def create_branches_on_github(*, user, repo_url, project, task):
 
 @job
 def create_branches_on_github_then_create_scratch_org_job(
-    *, project, repo_url, scratch_org, task, user
+    *, project, repo_url, scratch_org, task, user, commit_ish
 ):  # pragma: nocover
-    commit_ish = task.branch_name
     with local_github_checkout(user, repo_url, commit_ish):
         create_branches_on_github(
             user=user, repo_url=repo_url, project=project, task=task
