@@ -134,7 +134,9 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
         project.branch_name = project_branch_name
 
     # Make task branch:
-    if not task.branch_name:
+    if task.branch_name:
+        task_branch_name = task.branch_name
+    else:
         task_branch_name = try_to_make_branch(
             repository,
             new_branch=f"{project_branch_name}__{slugify(task.name)}",
@@ -145,13 +147,16 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
     project.save()
     task.save()
 
+    return task_branch_name
+
 
 @job
 def create_branches_on_github_then_create_scratch_org_job(
-    *, project, repo_url, scratch_org, task, user, commit_ish
+    *, project, repo_url, scratch_org, task, user
 ):  # pragma: nocover
-    with local_github_checkout(user, repo_url, commit_ish) as repo_root:
-        create_branches_on_github(
+    # TODO: temporarily we are using "master" instead of the appropriate branch name.
+    with local_github_checkout(user, repo_url, "master") as repo_root:
+        commit_ish = create_branches_on_github(
             user=user,
             repo_url=repo_url,
             project=project,

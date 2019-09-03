@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import github3
 from cumulusci.utils import temporary_dir
 
-from .custom_cci_configs import GlobalConfig, ProjectConfig
+from .custom_cci_configs import GlobalConfig
 
 logger = logging.getLogger(__name__)
 

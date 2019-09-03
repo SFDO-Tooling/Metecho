@@ -303,7 +303,6 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             scratch_org=self,
             task=self.task,
             user=self.owner,
-            commit_ish=self.task.branch_name,
         )
 
     def notify_has_url(self):
