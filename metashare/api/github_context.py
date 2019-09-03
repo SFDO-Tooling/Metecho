@@ -93,3 +93,7 @@ def local_github_checkout(user, repo_url, commit_ish):
             # repo (we hope):
             extract_zip_file(zip_file, owner, repo_name)
             yield
+
+
+def get_cumulus_prefix():
+    return "feature/"

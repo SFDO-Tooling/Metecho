@@ -13,20 +13,21 @@ from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
-from .github_context import extract_owner_and_repo, local_github_checkout
+from .github_context import (
+    extract_owner_and_repo,
+    get_cumulus_prefix,
+    local_github_checkout,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def report_scratch_org_error(instance):
+def report_scratch_org_error(instance, message):
     from .serializers import ScratchOrgSerializer
 
     message = {
         "type": "SCRATCH_ORG_PROVISION_FAILED",
-        "payload": {
-            "message": str(_("There was an error")),
-            "model": ScratchOrgSerializer(instance).data,
-        },
+        "payload": {"message": message, "model": ScratchOrgSerializer(instance).data},
     }
     model_name = instance._meta.model_name
     id = str(instance.id)
@@ -40,8 +41,8 @@ def report_scratch_org_error(instance):
 def report_errors_on(scratch_org):
     try:
         yield
-    except Exception:
-        report_scratch_org_error(scratch_org)
+    except Exception as e:
+        report_scratch_org_error(scratch_org, str(e))
         tb = traceback.format_exc()
         logger.error(tb)
         raise
@@ -114,7 +115,7 @@ def create_branches_on_github(*, user, repo_url, project, task):
     repository = gh.repository(owner, repo)
 
     # Make project branch:
-    project_branch_name = slugify(project.name)
+    project_branch_name = f"{get_cumulus_prefix()}{slugify(project.name)}"
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
