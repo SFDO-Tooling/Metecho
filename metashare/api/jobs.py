@@ -4,7 +4,7 @@ import traceback
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from cumulusci.core.config import BaseProjectConfig
+from cumulusci.core.config import BaseProjectConfig, ScratchOrgConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from django.utils.text import slugify
 from django.utils.timezone import now
@@ -13,7 +13,7 @@ from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
-from .sf_scratch_orgs import extract_owner_and_repo, make_scratch_org
+from .github_context import extract_owner_and_repo
 
 logger = logging.getLogger(__name__)
 
@@ -70,15 +70,20 @@ class MetaDeployCCI(BaseCumulusCI):
 
 
 def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
+    """
+    Expects to be called in the context of a local github checkout.
+    """
     gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
     branch = repository.branch(commit_ish)
     latest_commit = branch.latest_sha()
-    latest_commit_url = branch.url
+    # We can't use the urlt objects in repository because they build API urls:
+    latest_commit_url = f"{repository.html_url}/commit/{latest_commit}"
 
     with report_errors_on(scratch_org):
-        org = make_scratch_org(user, repo_url, commit_ish)
+        org = ScratchOrgConfig({"config_file": "orgs/dev.json", "scratch": True}, "dev")
+        org.create_org()
         scratch_org.url = org.instance_url
         scratch_org.last_modified_at = now()
         scratch_org.expires_at = org.expires
@@ -101,6 +106,9 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
 
 
 def create_branches_on_github(*, user, repo_url, project, task):
+    """
+    Expects to be called in the context of a local github checkout.
+    """
     gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
@@ -119,9 +127,10 @@ def create_branches_on_github(*, user, repo_url, project, task):
 
     # Make task branch:
     if not task.branch_name:
-        task_branch_name = project_branch_name + "__" + slugify(task.name)
         task_branch_name = try_to_make_branch(
-            repository, new_branch=task_branch_name, base_branch=project_branch_name
+            repository,
+            new_branch=f"{project_branch_name}__{slugify(task.name)}",
+            base_branch=project_branch_name,
         )
         task.branch_name = task_branch_name
 
@@ -131,17 +140,13 @@ def create_branches_on_github(*, user, repo_url, project, task):
 
 @job
 def create_branches_on_github_then_create_scratch_org_job(
-    *args, **kwargs
+    *, project, repo_url, scratch_org, task, user
 ):  # pragma: nocover
-    create_branches_on_github(
-        user=kwargs["user"],
-        repo_url=kwargs["repo_url"],
-        project=kwargs["project"],
-        task=kwargs["task"],
-    )
-    create_scratch_org(
-        scratch_org=kwargs["scratch_org"],
-        user=kwargs["user"],
-        repo_url=kwargs["repo_url"],
-        commit_ish=kwargs["task"].branch_name,
-    )
+    commit_ish = task.branch_name
+    with local_github_checkout(user, repo_url, commit_ish):
+        create_branches_on_github(
+            user=user, repo_url=repo_url, project=project, task=task
+        )
+        create_scratch_org(
+            scratch_org=scratch_org, user=user, repo_url=repo_url, commit_ish=commit_ish
+        )

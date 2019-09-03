@@ -1,3 +1,4 @@
+import contextlib
 import itertools
 import logging
 import os
@@ -7,10 +8,13 @@ from glob import glob
 from urllib.parse import urlparse
 
 import github3
-from cumulusci.core.config import ScratchOrgConfig
 from cumulusci.utils import temporary_dir
 
 logger = logging.getLogger(__name__)
+
+
+class UnsafeZipfileError(Exception):
+    pass
 
 
 def extract_owner_and_repo(gh_url):
@@ -73,15 +77,8 @@ def extract_zip_file(zip_file, owner, repo_name):
     shutil.rmtree("zipball_root")
 
 
-def call_out_to_sf_api():
-    org_config = ScratchOrgConfig(
-        {"config_file": "orgs/dev.json", "scratch": True}, "dev"
-    )
-    org_config.create_org()
-    return org_config
-
-
-def make_scratch_org(user, repo_url, commit_ish):
+@contextlib.contextmanager
+def local_github_checkout(user, repo_url, commit_ish):
     with temporary_dir():
         repo = clone_repo_locally(user, repo_url)
         owner, repo_name = normalize_owner_and_repo_name(repo)
@@ -89,11 +86,10 @@ def make_scratch_org(user, repo_url, commit_ish):
 
         if not zip_file_is_safe(zip_file):
             log_unsafe_zipfile_error(owner, repo_name, commit_ish)
-            return
-
-        # Because subsequent operations require certain things to be
-        # present in the filesystem at cwd, things that are in the repo
-        # (we hope):
-        extract_zip_file(zip_file, owner, repo_name)
-        created_org = call_out_to_sf_api()
-        return created_org
+            raise UnsafeZipfileError
+        else:
+            # Because subsequent operations require certain things to be
+            # present in the filesystem at cwd, things that are in the
+            # repo (we hope):
+            extract_zip_file(zip_file, owner, repo_name)
+            yield

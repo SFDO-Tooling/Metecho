@@ -17,9 +17,11 @@ def test_create_scratch_org(user_factory):
     scratch_org = MagicMock()
     user = user_factory()
     with ExitStack() as stack:
-        make_scratch_org = stack.enter_context(
-            patch("metashare.api.jobs.make_scratch_org")
+        ScratchOrgConfig = stack.enter_context(
+            patch("metashare.api.jobs.ScratchOrgConfig")
         )
+        scratch_org = MagicMock()
+        ScratchOrgConfig.return_value = scratch_org
         stack.enter_context(patch("metashare.api.jobs.login"))
         create_scratch_org(
             scratch_org=scratch_org,
@@ -27,7 +29,7 @@ def test_create_scratch_org(user_factory):
             repo_url="https://github.com/test/repo-lombardy",
             commit_ish="master",
         )
-        assert make_scratch_org.called
+        assert scratch_org.create_org.called
 
 
 @pytest.mark.django_db
