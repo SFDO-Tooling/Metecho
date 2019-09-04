@@ -79,52 +79,45 @@ const ConfirmDeleteModal = ({
 };
 
 const OrgCard = ({
-  org,
+  orgs,
   type,
   displayType,
-  ownedByCurrentUser,
-  user,
-  createOrg,
-  deleteAction,
+  userId,
   isCreatingOrg,
   isDeletingOrg,
-  toggleConnectModal,
-  toggleInfoModal,
+  createAction,
+  deleteAction,
 }: {
-  org: Org | null;
+  orgs: OrgsByTask;
   type: OrgTypes;
   displayType: string;
-  ownedByCurrentUser: boolean;
-  user: User;
-  createOrg: (type: OrgTypes) => void;
-  deleteAction: (...args: any[]) => void;
+  userId: string | null;
   isCreatingOrg: OrgTypeTracker;
   isDeletingOrg: OrgTypeTracker;
-  toggleConnectModal: React.Dispatch<React.SetStateAction<boolean>>;
-  toggleInfoModal: React.Dispatch<React.SetStateAction<boolean>>;
+  createAction: (type: OrgTypes) => void;
+  deleteAction: (org: Org) => void;
 }) => {
-  const doCreateOrg = useCallback(() => {
-    createOrg(type);
-  }, [createOrg, type]);
-  const doDeleteOrg = useCallback(() => {
-    deleteAction(org);
-  }, [deleteAction, org]);
-  const openConnectModal = () => {
-    toggleConnectModal(true);
-  };
-  const openInfoModal = () => {
-    toggleInfoModal(true);
-  };
-  let action = openConnectModal;
-  if (user.valid_token_for) {
-    action = user.is_devhub_enabled ? doCreateOrg : openInfoModal;
-  }
+  const org = orgs[type];
+  const ownedByCurrentUser = Boolean(
+    userId && org && org.url && userId === org.owner,
+  );
   const isCreating = isCreatingOrg[type] || (org && !org.url);
   const isDeleting = isDeletingOrg[type] || (org && org.deletion_queued_at);
+  const doCreateAction = useCallback(() => {
+    createAction(type);
+  }, [createAction, type]);
+  const doDeleteAction = useCallback(() => {
+    /* istanbul ignore else */
+    if (org) {
+      deleteAction(org);
+    }
+  }, [deleteAction, org]);
+
   let contents = null;
   let icon = null;
   let actions = null;
   let footer = null;
+
   if (isCreating) {
     actions = (
       <Button
@@ -185,6 +178,7 @@ const OrgCard = ({
       </ul>
     );
     icon = <Icon category="utility" name="link" size="small" />;
+
     if (isDeleting) {
       footer = (
         <>
@@ -221,12 +215,12 @@ const OrgCard = ({
           iconVariant="border-filled"
           width="xx-small"
           options={[{ id: 0, label: i18n.t('Delete') }]}
-          onSelect={doDeleteOrg}
+          onSelect={doDeleteAction}
         />
       );
     }
   } else {
-    actions = <Button label={i18n.t('Create Org')} onClick={action} />;
+    actions = <Button label={i18n.t('Create Org')} onClick={doCreateAction} />;
   }
 
   return (
@@ -274,6 +268,7 @@ const OrgCards = ({
     [ORG_TYPES.QA]: false,
   });
   const dispatch = useDispatch<ThunkDispatch>();
+
   const createOrg = useCallback((type: OrgTypes) => {
     setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
     // Subscribe to project/task for possible branch creation...
@@ -307,7 +302,8 @@ const OrgCards = ({
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const handleDelete = useCallback((org: Org) => {
+
+  const deleteOrg = useCallback((org: Org) => {
     setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
     dispatch(
       deleteObject({
@@ -322,57 +318,52 @@ const OrgCards = ({
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  let deleteAction: (...args: any[]) => void = () => setConnectModalOpen(true);
+
+  const openConnectModal = () => {
+    setConnectModalOpen(true);
+  };
+  const openInfoModal = () => {
+    setInfoModalOpen(true);
+  };
+
+  let deleteAction: (...args: any[]) => void = openConnectModal;
+  let createAction: (...args: any[]) => void = openConnectModal;
   if (user && user.valid_token_for) {
+    createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
     deleteAction = user.is_devhub_enabled
       ? (org: Org) => {
           if (org.has_changes) {
             setConfirmDeleteModalOpen(org.org_type);
           } else {
-            handleDelete(org);
+            deleteOrg(org);
           }
         }
-      : () => setInfoModalOpen(true);
+      : openInfoModal;
   }
-
-  const devOrg = orgs[ORG_TYPES.DEV];
-  const qaOrg = orgs[ORG_TYPES.QA];
-  const currentUserOwnsDevOrg = Boolean(
-    user && devOrg && devOrg.url && user.id === devOrg.owner,
-  );
-  const currentUserOwnsQAOrg = Boolean(
-    user && qaOrg && qaOrg.url && user.id === qaOrg.owner,
-  );
 
   return (
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Orgs')}</h2>
       <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
         <OrgCard
-          org={devOrg}
+          orgs={orgs}
           type={ORG_TYPES.DEV}
           displayType={i18n.t('Dev')}
-          ownedByCurrentUser={currentUserOwnsDevOrg}
-          user={user as User}
-          createOrg={createOrg}
-          deleteAction={deleteAction}
+          userId={user && user.id}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
-          toggleConnectModal={setConnectModalOpen}
-          toggleInfoModal={setInfoModalOpen}
+          createAction={createAction}
+          deleteAction={deleteAction}
         />
         <OrgCard
-          org={qaOrg}
+          orgs={orgs}
           type={ORG_TYPES.QA}
           displayType={i18n.t('QA')}
-          ownedByCurrentUser={currentUserOwnsQAOrg}
-          user={user as User}
-          createOrg={createOrg}
-          deleteAction={deleteAction}
+          userId={user && user.id}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
-          toggleConnectModal={setConnectModalOpen}
-          toggleInfoModal={setInfoModalOpen}
+          createAction={createAction}
+          deleteAction={deleteAction}
         />
       </div>
       <ConnectModal
@@ -393,7 +384,7 @@ const OrgCards = ({
         confirmDeleteModalOpen={confirmDeleteModalOpen}
         toggleModal={setConfirmDeleteModalOpen}
         orgs={orgs}
-        handleDelete={handleDelete}
+        handleDelete={deleteOrg}
       />
     </>
   );

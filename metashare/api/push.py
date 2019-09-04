@@ -4,6 +4,12 @@ Websocket notifications you can subscribe to:
     user.:id
         BACKEND_ERROR
 
+    project.:id
+        PROJECT_UPDATE
+
+    task.:id
+        TASK_UPDATE
+
     scratchorg.:id
         SCRATCH_ORG_PROVISIONED
         SCRATCH_ORG_PROVISION_FAILED
