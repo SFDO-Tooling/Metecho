@@ -135,7 +135,7 @@ const OrgCard = ({
             size="x-small"
           />
         }
-        disabled={true}
+        disabled
       />
     );
     footer = i18n.t('This process could take up to 15 minutes.');
@@ -185,7 +185,14 @@ const OrgCard = ({
       </ul>
     );
     icon = <Icon category="utility" name="link" size="small" />;
-    if (!isDeleting && ownedByCurrentUser) {
+    if (isDeleting) {
+      footer = (
+        <>
+          <Spinner size="x-small" />
+          {i18n.t('Deleting Org…')}
+        </>
+      );
+    } else if (ownedByCurrentUser) {
       /* istanbul ignore else */
       if (org.url) {
         footer = (
@@ -218,17 +225,10 @@ const OrgCard = ({
         />
       );
     }
-    if (isDeleting) {
-      footer = (
-        <>
-          <Spinner size="x-small" />
-          {i18n.t('Deleting Org…')}
-        </>
-      );
-    }
   } else {
     actions = <Button label={i18n.t('Create Org')} onClick={action} />;
   }
+
   return (
     <div
       className="slds-size_1-of-1
