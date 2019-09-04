@@ -80,9 +80,11 @@ def extract_zip_file(zip_file, owner, repo_name):
 
 
 @contextlib.contextmanager
-def local_github_checkout(user, repo_url, commit_ish):
+def local_github_checkout(user, repo_url, commit_ish=None):
     with temporary_dir() as repo_root:
         repo = clone_repo_locally(user, repo_url)
+        if commit_ish is None:
+            commit_ish = repo.default_branch
         owner, repo_name = normalize_owner_and_repo_name(repo)
         zip_file = get_zip_file(repo, commit_ish)
 

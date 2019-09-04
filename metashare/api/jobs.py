@@ -3,7 +3,6 @@ import logging
 import traceback
 
 from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from cumulusci.core.config import BaseProjectConfig, ScratchOrgConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from django.utils.text import slugify
@@ -17,23 +16,19 @@ from .github_context import (
     get_cumulus_prefix,
     local_github_checkout,
 )
+from .push import push_message_about_instance
 
 logger = logging.getLogger(__name__)
 
 
-def report_scratch_org_error(instance, message):
+async def report_scratch_org_error(instance, message):
     from .serializers import ScratchOrgSerializer
 
     message = {
         "type": "SCRATCH_ORG_PROVISION_FAILED",
         "payload": {"message": message, "model": ScratchOrgSerializer(instance).data},
     }
-    model_name = instance._meta.model_name
-    id = str(instance.id)
-    group_name = "{model}.{id}".format(model=model_name, id=id)
-    channel_layer = get_channel_layer()
-    sent_message = {"type": "notify", "group": group_name, "content": message}
-    async_to_sync(channel_layer.group_send(group_name, sent_message))
+    await push_message_about_instance(instance, message)
 
 
 @contextlib.contextmanager
@@ -41,13 +36,14 @@ def report_errors_on(scratch_org):
     try:
         yield
     except Exception as e:
-        report_scratch_org_error(scratch_org, str(e))
+        async_to_sync(report_scratch_org_error)(scratch_org, str(e))
         tb = traceback.format_exc()
         logger.error(tb)
+        scratch_org.delete()
         raise
 
 
-class MetadeployProjectConfig(BaseProjectConfig):
+class MetaShareProjectConfig(BaseProjectConfig):
     def __init__(
         self, *args, repo_root=None, repo_url=None, commit_ish=None, **kwargs
     ):  # pragma: nocover
@@ -65,8 +61,8 @@ class MetadeployProjectConfig(BaseProjectConfig):
         super().__init__(*args, repo_info=repo_info, **kwargs)
 
 
-class MetaDeployCCI(BaseCumulusCI):
-    project_config_class = MetadeployProjectConfig
+class MetaShareCCI(BaseCumulusCI):
+    project_config_class = MetaShareProjectConfig
 
 
 def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
@@ -114,18 +110,18 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
     repository = gh.repository(owner, repo)
 
     # Make project branch:
-    prefix = get_cumulus_prefix(
-        repo_root=repo_root,
-        repo_name="Repo Name",
-        repo_url=repo_url,
-        repo_owner=owner,
-        repo_branch=repository.default_branch,
-        repo_commit=repository.branch(repository.default_branch).latest_sha(),
-    )
-    project_branch_name = f"{prefix}{slugify(project.name)}"
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
+        prefix = get_cumulus_prefix(
+            repo_root=repo_root,
+            repo_name="Repo Name",  # A placeholder, not used.
+            repo_url=repo_url,
+            repo_owner=owner,
+            repo_branch=repository.default_branch,
+            repo_commit=repository.branch(repository.default_branch).latest_sha(),
+        )
+        project_branch_name = f"{prefix}{slugify(project.name)}"
         project_branch_name = try_to_make_branch(
             repository,
             new_branch=project_branch_name,
@@ -150,12 +146,10 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
     return task_branch_name
 
 
-@job
-def create_branches_on_github_then_create_scratch_org_job(
+def create_branches_on_github_then_create_scratch_org(
     *, project, repo_url, scratch_org, task, user
-):  # pragma: nocover
-    # TODO: temporarily we are using "master" instead of the appropriate branch name.
-    with local_github_checkout(user, repo_url, "master") as repo_root:
+):
+    with local_github_checkout(user, repo_url) as repo_root:
         commit_ish = create_branches_on_github(
             user=user,
             repo_url=repo_url,
@@ -166,3 +160,8 @@ def create_branches_on_github_then_create_scratch_org_job(
         create_scratch_org(
             scratch_org=scratch_org, user=user, repo_url=repo_url, commit_ish=commit_ish
         )
+
+
+create_branches_on_github_then_create_scratch_org_job = job(
+    create_branches_on_github_then_create_scratch_org
+)
