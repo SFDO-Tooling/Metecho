@@ -23,7 +23,6 @@ beforeAll(() => {
     repository_list: () => '/api/repositories/',
     repository_detail: slug => `/api/repositories/${slug}/`,
     project_list: () => '/api/projects/',
-    org_list: () => '/api/orgs/',
     scratch_org_list: () => '/api/scratch_orgs/',
     scratch_org_detail: id => `/api/scratch_orgs/${id}/`,
     scratch_org_changeset_list: () => '/api/scratch_org_changesets/',
