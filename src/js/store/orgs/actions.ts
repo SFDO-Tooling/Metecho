@@ -125,10 +125,10 @@ export const deleteOrg = (payload: Org): ThunkResult => (
 
 export const deleteFailed = ({
   model,
-  error,
+  message,
 }: {
   model: Org;
-  error?: string;
+  message?: string;
 }): ThunkResult => (dispatch, getState) => {
   /* istanbul ignore else */
   if (window.socket) {
@@ -148,7 +148,7 @@ export const deleteFailed = ({
     dispatch(
       addToast({
         heading: msg[model.org_type],
-        details: error,
+        details: message,
         variant: 'error',
       }),
     );

@@ -173,7 +173,7 @@ describe('deleteFailed', () => {
     const store = storeWithThunk({});
     const org = { id: 'org-id' };
     const action = { type: 'SCRATCH_ORG_DELETE_FAILED', payload: org };
-    store.dispatch(actions.deleteFailed({ model: org, error: 'error msg' }));
+    store.dispatch(actions.deleteFailed({ model: org, message: 'error msg' }));
 
     expect(store.getActions()).toEqual([action]);
     expect(window.socket.unsubscribe).toHaveBeenCalledWith({
@@ -194,7 +194,9 @@ describe('deleteFailed', () => {
         type: 'SCRATCH_ORG_DELETE_FAILED',
         payload: org,
       };
-      store.dispatch(actions.deleteFailed({ model: org, error: 'error msg' }));
+      store.dispatch(
+        actions.deleteFailed({ model: org, message: 'error msg' }),
+      );
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');

@@ -58,7 +58,7 @@ interface OrgDeletedEvent {
 interface OrgDeleteFailedEvent {
   type: 'SCRATCH_ORG_DELETE_FAILED';
   payload: {
-    error?: string;
+    message?: string;
     model: Org;
   };
 }
