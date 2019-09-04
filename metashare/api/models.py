@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
-from django.utils.text import slugify
 from model_utils import Choices, FieldTracker
 
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -186,9 +185,11 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    tracker = FieldTracker(fields=("branch_name",))
+
     name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = models.SlugField(max_length=50)
+    branch_name = models.SlugField(max_length=50, null=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -199,14 +200,26 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     def __str__(self):
         return self.name
 
+    def subscribable_by(self, user):  # pragma: nocover
+        # TODO: revisit this?
+        return True
+
     def save(self, *args, **kwargs):
-        if not self.branch_name:
-            self.branch_name = slugify(self.name)
         super().save(*args, **kwargs)
+
+        if self.tracker.has_changed("branch_name"):
+            self.notify_has_branch_name()
+
+    def notify_has_branch_name(self):
+        from .serializers import ProjectSerializer
+
+        payload = ProjectSerializer(self).data
+        message = {"type": "PROJECT_UPDATE", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "repository"), ("branch_name", "repository"))
+        unique_together = (("name", "repository"),)
 
 
 class TaskSlug(AbstractSlug):
@@ -214,23 +227,37 @@ class TaskSlug(AbstractSlug):
 
 
 class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    tracker = FieldTracker(fields=("branch_name",))
+
     name = models.CharField(max_length=50)
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     assignee = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="assigned_tasks"
     )
-    branch_name = models.SlugField(max_length=50)
+    branch_name = models.SlugField(max_length=50, null=True)
 
     slug_class = TaskSlug
 
     def __str__(self):
         return self.name
 
+    def subscribable_by(self, user):  # pragma: nocover
+        # TODO: revisit this?
+        return True
+
     def save(self, *args, **kwargs):
-        if not self.branch_name:
-            self.branch_name = slugify(self.name)
         super().save(*args, **kwargs)
+
+        if self.tracker.has_changed("branch_name"):
+            self.notify_has_branch_name()
+
+    def notify_has_branch_name(self):
+        from .serializers import TaskSerializer
+
+        payload = TaskSerializer(self).data
+        message = {"type": "TASK_UPDATE", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -262,30 +289,20 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         super().save(*args, **kwargs)
 
         if create_remote_resources:
-            self.create_branches_on_github()
-            self.create_scratch_org_on_sf()
+            self.create_remote_resources()
 
-        if self.tracker.has_changed("url"):  # pragma: nocover
+        if self.tracker.has_changed("url"):
             self.notify_has_url()
 
-    def create_scratch_org_on_sf(self):
-        from .jobs import create_scratch_org_job
+    def create_remote_resources(self):
+        from .jobs import create_branches_on_github_then_create_scratch_org_job
 
-        create_scratch_org_job.delay(
-            self,
-            user=self.owner,
+        create_branches_on_github_then_create_scratch_org_job.delay(
+            project=self.task.project,
             repo_url=self.task.project.repository.repo_url,
-            commit_ish=self.task.branch_name,
-        )
-
-    def create_branches_on_github(self):
-        from .jobs import create_branches_on_github_job
-
-        create_branches_on_github_job.delay(
+            scratch_org=self,
+            task=self.task,
             user=self.owner,
-            repo_url=self.task.project.repository.repo_url,
-            project_branch_name=self.task.project.branch_name,
-            task_branch_name=self.task.branch_name,
         )
 
     def notify_has_url(self):

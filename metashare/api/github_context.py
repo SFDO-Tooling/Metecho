@@ -1,3 +1,4 @@
+import contextlib
 import itertools
 import logging
 import os
@@ -7,10 +8,15 @@ from glob import glob
 from urllib.parse import urlparse
 
 import github3
-from cumulusci.core.config import ScratchOrgConfig
 from cumulusci.utils import temporary_dir
 
+from .custom_cci_configs import GlobalConfig
+
 logger = logging.getLogger(__name__)
+
+
+class UnsafeZipfileError(Exception):
+    pass
 
 
 def extract_owner_and_repo(gh_url):
@@ -73,29 +79,30 @@ def extract_zip_file(zip_file, owner, repo_name):
     shutil.rmtree("zipball_root")
 
 
-def call_out_to_sf_api():
-    org_config = ScratchOrgConfig(
-        {"config_file": "orgs/dev.json", "scratch": True}, "dev"
-    )
-    org_config.create_org()
-    return org_config
-
-
-def make_scratch_org(user, repo_url, commit_ish):
-    with temporary_dir():
+@contextlib.contextmanager
+def local_github_checkout(user, repo_url, commit_ish=None):
+    with temporary_dir() as repo_root:
         repo = clone_repo_locally(user, repo_url)
+        if commit_ish is None:
+            commit_ish = repo.default_branch
         owner, repo_name = normalize_owner_and_repo_name(repo)
         zip_file = get_zip_file(repo, commit_ish)
 
         if not zip_file_is_safe(zip_file):
             log_unsafe_zipfile_error(owner, repo_name, commit_ish)
-            return
+            raise UnsafeZipfileError
+        else:
+            # Because subsequent operations require certain things to be
+            # present in the filesystem at cwd, things that are in the
+            # repo (we hope):
+            extract_zip_file(zip_file, owner, repo_name)
+            yield repo_root
 
-        # Because subsequent operations require certain things to be
-        # present in the filesystem at cwd, things that are in the repo
-        # (we hope):
-        extract_zip_file(zip_file, owner, repo_name)
 
-        created_org = call_out_to_sf_api()
-
-        return created_org.instance_url
+def get_cumulus_prefix(**kwargs):
+    """
+    Expects to be in a local_github_checkout.
+    """
+    global_config = GlobalConfig()
+    project_config = global_config.get_project_config(**kwargs)
+    return project_config.project__git__prefix_feature

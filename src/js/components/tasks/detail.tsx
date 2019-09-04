@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import OrgsTable from '@/components/orgs/table';
+import OrgCards from '@/components/orgs/cards';
 import CaptureModal from '@/components/tasks/capture';
 import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
@@ -228,7 +228,11 @@ const TaskDetail = (props: RouteComponentProps) => {
           />
         ) : null}
 
-        {orgs ? <OrgsTable orgs={orgs} task={task.id} /> : <Spinner />}
+        {orgs ? (
+          <OrgCards orgs={orgs} task={task} project={project} />
+        ) : (
+          <Spinner />
+        )}
         <ConnectModal
           user={user}
           isOpen={connectModalOpen}

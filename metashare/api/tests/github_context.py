@@ -3,20 +3,20 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..sf_scratch_orgs import (
-    call_out_to_sf_api,
+from ..github_context import (
+    UnsafeZipfileError,
     clone_repo_locally,
     extract_owner_and_repo,
     extract_zip_file,
     get_zip_file,
     is_safe_path,
+    local_github_checkout,
     log_unsafe_zipfile_error,
-    make_scratch_org,
     normalize_owner_and_repo_name,
     zip_file_is_safe,
 )
 
-PATCH_ROOT = "metashare.api.sf_scratch_orgs"
+PATCH_ROOT = "metashare.api.github_context"
 
 
 def test_extract_owner_and_repo():
@@ -84,54 +84,40 @@ def test_extract_zip_file():
         assert shutil.rmtree.called
 
 
-def test_call_out_to_sf_api():
-    with patch(f"{PATCH_ROOT}.ScratchOrgConfig") as ScratchOrgConfig:
-        scratch_org = MagicMock()
-        ScratchOrgConfig.return_value = scratch_org
-        call_out_to_sf_api()
-        assert scratch_org.create_org.called
-
-
-@pytest.mark.django_db
-class TestMakeScratchOrg:
-    def test_make_scratch_org(self, user_factory):
-        user = user_factory()
+class TestLocalGitHubCheckout:
+    def test_safe(self):
+        user = MagicMock()
+        repo = "https://github.com/user/repo"
         with ExitStack() as stack:
-            stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
-            ScratchOrgConfig = stack.enter_context(
-                patch(f"{PATCH_ROOT}.ScratchOrgConfig")
-            )
-            scratch_org = MagicMock()
-            ScratchOrgConfig.return_value = scratch_org
+            gh3 = stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
+            shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
+            glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
+            repository = MagicMock(default_branch="master")
+            gh = MagicMock()
+            gh.repository.return_value = repository
+            gh3.login.return_value = gh
+            glob.return_value = ["owner-repo_name-"]
 
-            repo_url = "https://github.com/SFDO-Tooling/CumulusCI-Test"
-            commit_ish = "master"
-            make_scratch_org(user, repo_url, commit_ish)
+            with local_github_checkout(user, repo):
+                assert shutil.rmtree.called
 
-            assert scratch_org.create_org.called
-
-    def test_make_scratch_org__unsafe_zipfile(self, user_factory):
-        user = user_factory()
+    def test_unsafe(self):
+        user = MagicMock()
+        repo = "https://github.com/user/repo"
         with ExitStack() as stack:
-            stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
+            gh3 = stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
+            glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             zip_file_is_safe = stack.enter_context(
                 patch(f"{PATCH_ROOT}.zip_file_is_safe")
             )
             zip_file_is_safe.return_value = False
-            ScratchOrgConfig = stack.enter_context(
-                patch(f"{PATCH_ROOT}.ScratchOrgConfig")
-            )
-            scratch_org = MagicMock()
-            ScratchOrgConfig.return_value = scratch_org
+            gh = MagicMock()
+            gh3.login.return_value = gh
+            glob.return_value = [".."]
 
-            repo_url = "https://github.com/SFDO-Tooling/CumulusCI-Test"
-            commit_ish = "master"
-            make_scratch_org(user, repo_url, commit_ish)
-
-            assert not scratch_org.create_org.called
+            with pytest.raises(UnsafeZipfileError):
+                with local_github_checkout(user, repo, "commit-ish"):  # pragma: nocover
+                    pass

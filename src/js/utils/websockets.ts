@@ -10,7 +10,11 @@ import {
   provisionOrg,
 } from '@/store/orgs/actions';
 import { Changeset, Commit, Org } from '@/store/orgs/reducer';
+import { updateProject } from '@/store/projects/actions';
+import { Project } from '@/store/projects/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { updateTask } from '@/store/tasks/actions';
+import { Task } from '@/store/tasks/reducer';
 import {
   ObjectTypes,
   WEBSOCKET_ACTIONS,
@@ -45,7 +49,7 @@ interface OrgProvisionedEvent {
 interface OrgProvisionFailedEvent {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
   payload: {
-    error?: string;
+    message?: string;
     model: Org;
   };
 }
@@ -56,7 +60,7 @@ interface ChangesetSucceededEvent {
 interface ChangesetFailedEvent {
   type: 'CHANGESET_FAILED';
   payload: {
-    error?: string;
+    message?: string;
     model: Changeset;
   };
 }
@@ -67,9 +71,17 @@ interface CommitSucceededEvent {
 interface CommitFailedEvent {
   type: 'COMMIT_FAILED';
   payload: {
-    error?: string;
+    message?: string;
     model: Commit;
   };
+}
+interface ProjectUpdatedEvent {
+  type: 'PROJECT_UPDATE';
+  payload: Project;
+}
+interface TaskUpdatedEvent {
+  type: 'TASK_UPDATE';
+  payload: Task;
 }
 type ModelEvent =
   | ErrorEvent
@@ -78,7 +90,9 @@ type ModelEvent =
   | ChangesetSucceededEvent
   | ChangesetFailedEvent
   | CommitSucceededEvent
-  | CommitFailedEvent;
+  | CommitFailedEvent
+  | ProjectUpdatedEvent
+  | TaskUpdatedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -101,6 +115,10 @@ export const getAction = (event: EventType) => {
       return commitSucceeded(event.payload);
     case 'COMMIT_FAILED':
       return commitFailed(event.payload);
+    case 'PROJECT_UPDATE':
+      return updateProject(event.payload);
+    case 'TASK_UPDATE':
+      return updateTask(event.payload);
   }
   return null;
 };

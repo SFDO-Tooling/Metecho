@@ -1,4 +1,5 @@
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
+import { ProjectAction } from '@/store/projects/actions';
 import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
@@ -9,7 +10,7 @@ export interface Project {
   slug: string;
   old_slugs: string[];
   description: string;
-  branch_url: string;
+  branch_url: string | null;
 }
 export interface ProjectsByRepositoryState {
   projects: Project[];
@@ -31,7 +32,7 @@ const defaultState = {
 
 const reducer = (
   projects: ProjectsState = {},
-  action: ObjectsAction | LogoutAction,
+  action: ProjectAction | ObjectsAction | LogoutAction,
 ) => {
   switch (action.type) {
     case 'USER_LOGGED_OUT':
@@ -126,6 +127,36 @@ const reducer = (
         }
       }
       return projects;
+    }
+    case 'PROJECT_UPDATE': {
+      const project = action.payload;
+      const repositoryProjects = projects[project.repository] || {
+        ...defaultState,
+      };
+      const existingProject = repositoryProjects.projects.find(
+        p => p.id === project.id,
+      );
+      if (existingProject) {
+        return {
+          ...projects,
+          [project.repository]: {
+            ...repositoryProjects,
+            projects: repositoryProjects.projects.map(p => {
+              if (p.id === project.id) {
+                return { ...project };
+              }
+              return p;
+            }),
+          },
+        };
+      }
+      return {
+        ...projects,
+        [project.repository]: {
+          ...repositoryProjects,
+          projects: [...repositoryProjects.projects, project],
+        },
+      };
     }
   }
   return projects;

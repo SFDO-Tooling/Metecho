@@ -2,10 +2,10 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import OrgsTable from '@/components/orgs/table';
+import OrgCards from '@/components/orgs/cards';
 import { createObject } from '@/store/actions';
 
-import { renderWithRedux, storeWithThunk } from './../../utils';
+import { renderWithRedux, storeWithThunk } from '../../utils';
 
 jest.mock('@/store/actions');
 
@@ -40,7 +40,7 @@ const defaultState = {
   },
 };
 
-describe('<OrgsTable/>', () => {
+describe('<OrgCards/>', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
@@ -50,7 +50,11 @@ describe('<OrgsTable/>', () => {
     const { initialState, orgs } = opts;
     return renderWithRedux(
       <MemoryRouter>
-        <OrgsTable orgs={orgs} task="task-id" />
+        <OrgCards
+          orgs={orgs}
+          task={{ id: 'task-id' }}
+          project={{ id: 'project-id' }}
+        />
       </MemoryRouter>,
       initialState,
       storeWithThunk,
@@ -58,17 +62,17 @@ describe('<OrgsTable/>', () => {
   };
 
   describe('owned by current user', () => {
-    test('renders table with orgs', () => {
-      const { getByTitle } = setup();
+    test('renders org cards', () => {
+      const { getByText } = setup();
 
-      expect(getByTitle('View Org')).toBeVisible();
-      expect(getByTitle('Has uncaptured changes')).toBeVisible();
-      expect(getByTitle('Create New Org')).toBeVisible();
+      expect(getByText('View Org')).toBeVisible();
+      expect(getByText('Has uncaptured changes')).toBeVisible();
+      expect(getByText('Create Org')).toBeVisible();
     });
   });
 
   describe('not owned by current user', () => {
-    test('renders table with orgs', () => {
+    test('renders org cards', () => {
       const orgs = {
         ...defaultOrgs,
         Dev: null,
@@ -79,18 +83,18 @@ describe('<OrgsTable/>', () => {
           has_changes: false,
         },
       };
-      const { queryByTitle, getByTitle } = setup({ orgs });
+      const { queryByText, getByText } = setup({ orgs });
 
-      expect(queryByTitle('View Org')).toBeNull();
-      expect(getByTitle('All changes captured')).toBeVisible();
-      expect(getByTitle('Create New Org')).toBeVisible();
+      expect(queryByText('View Org')).toBeNull();
+      expect(getByText('All changes captured')).toBeVisible();
+      expect(getByText('Create Org')).toBeVisible();
     });
   });
 
   describe('create org click', () => {
     test('creates a new org', () => {
-      const { getByTitle } = setup();
-      fireEvent.click(getByTitle('Create New Org'));
+      const { getByText } = setup();
+      fireEvent.click(getByText('Create Org'));
 
       expect(createObject).toHaveBeenCalledTimes(1);
 
@@ -105,10 +109,35 @@ describe('<OrgsTable/>', () => {
       expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
     });
 
+    describe('with websocket', () => {
+      beforeEach(() => {
+        window.socket = { subscribe: jest.fn() };
+      });
+
+      afterEach(() => {
+        Reflect.deleteProperty(window, 'socket');
+      });
+
+      test('subscribes to project/task', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Create Org'));
+
+        expect(window.socket.subscribe).toHaveBeenCalledTimes(2);
+        expect(window.socket.subscribe).toHaveBeenCalledWith({
+          model: 'project',
+          id: 'project-id',
+        });
+        expect(window.socket.subscribe).toHaveBeenCalledWith({
+          model: 'task',
+          id: 'task-id',
+        });
+      });
+    });
+
     describe('not connected to sf org', () => {
       test('opens connect modal', () => {
-        const { getByTitle, getByText } = setup({ initialState: { user: {} } });
-        fireEvent.click(getByTitle('Create New Org'));
+        const { getByText } = setup({ initialState: { user: {} } });
+        fireEvent.click(getByText('Create Org'));
 
         expect(createObject).not.toHaveBeenCalled();
         expect(getByText('Use Custom Domain')).toBeVisible();
@@ -117,12 +146,12 @@ describe('<OrgsTable/>', () => {
 
     describe('dev hub not enabled', () => {
       test('opens warning modal', () => {
-        const { getByTitle, getByText } = setup({
+        const { getByText } = setup({
           initialState: {
             user: { ...defaultState.user, is_devhub_enabled: false },
           },
         });
-        fireEvent.click(getByTitle('Create New Org'));
+        fireEvent.click(getByText('Create Org'));
 
         expect(createObject).not.toHaveBeenCalled();
         expect(getByText('Enable Dev Hub')).toBeVisible();

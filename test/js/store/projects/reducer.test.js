@@ -364,4 +364,69 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
   });
+
+  describe('PROJECT_UPDATE', () => {
+    test('adds new project to list', () => {
+      const project = {
+        id: 'p1',
+        repository: 'repository-1',
+        name: 'Project 1',
+      };
+      const expected = {
+        'repository-1': {
+          projects: [project],
+          next: null,
+          notFound: [],
+          fetched: false,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'PROJECT_UPDATE',
+          payload: project,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('updates existing project', () => {
+      const project = {
+        id: 'p1',
+        repository: 'repository-1',
+        name: 'Project 1',
+      };
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const editedProject = { ...project, name: 'Edited Project Name' };
+      const expected = {
+        'repository-1': {
+          projects: [editedProject, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(
+        {
+          'repository-1': {
+            projects: [project, project2],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+        {
+          type: 'PROJECT_UPDATE',
+          payload: editedProject,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
 });

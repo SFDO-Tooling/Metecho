@@ -79,10 +79,10 @@ export const provisionOrg = (payload: Org): ThunkResult => (
 
 export const provisionFailed = ({
   model,
-  error,
+  message,
 }: {
   model: Org;
-  error?: string;
+  message?: string;
 }): ThunkResult => (dispatch, getState) => {
   /* istanbul ignore else */
   if (window.socket) {
@@ -104,7 +104,7 @@ export const provisionFailed = ({
     dispatch(
       addToast({
         heading: msg[model.org_type],
-        details: error,
+        details: message,
         variant: 'error',
       }),
     );
@@ -194,10 +194,10 @@ export const addChangeset = (payload: Changeset): ChangesetEvent => {
 
 export const changesetFailed = ({
   model,
-  error,
+  message,
 }: {
   model: Changeset;
-  error?: string;
+  message?: string;
 }): ThunkResult => dispatch => {
   /* istanbul ignore else */
   if (window.socket) {
@@ -211,7 +211,7 @@ export const changesetFailed = ({
       heading: i18n.t(
         'Uh oh. There was an error capturing changes from your scratch org.',
       ),
-      details: error,
+      details: message,
       variant: 'error',
     }),
   );
@@ -247,10 +247,10 @@ export const commitSucceeded = (payload: Commit): ThunkResult => dispatch => {
 
 export const commitFailed = ({
   model,
-  error,
+  message,
 }: {
   model: Commit;
-  error?: string;
+  message?: string;
 }): ThunkResult => dispatch => {
   /* istanbul ignore else */
   if (window.socket) {
@@ -264,7 +264,7 @@ export const commitFailed = ({
       heading: i18n.t(
         'Uh oh. There was an error committing changes from your Dev org.',
       ),
-      details: error,
+      details: message,
       variant: 'error',
     }),
   );

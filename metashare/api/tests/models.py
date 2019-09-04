@@ -270,40 +270,17 @@ class TestUser:
 
 @pytest.mark.django_db
 class TestScratchOrg:
-    # def test_save__new(self, user_factory, task_factory):
-    #     user = user_factory()
-    #     task = task_factory()
-    #     scratch_org = ScratchOrg(task=task, owner=user, org_type="Dev")
-
-    #     with patch("create_scratch_org_on_sf") as create_scratch_org_on_sf:
-    #         scratch_org.save()
-    #         assert create_scratch_org_on_sf.called
-
-    # def test_save__new(self, user_factory, task_factory, scratch_org_factory):
-    #     user = user_factory()
-    #     task = task_factory()
-    #     scratch_org = scratch_org_factory(task=task, owner=user, org_type="Dev")
-
-    #     with patch(scratch_org, "notify_has_url") as notify_has_url:
-    #         scratch_org.url = "https://example.com"
-    #         scratch_org.save()
-    #         assert notify_has_url.called
-
-    # def test_create_scratch_org_on_sf(self, scratch_org_factory):
-    #     scratch_org = scratch_org_factory()
-    #     with patch(
-    #         "metashare.api.models.create_scratch_org_job"
-    #     ) as create_scratch_org_job:
-    #         scratch_org.create_scratch_org_on_sf()
-
-    #         assert create_scratch_org_job.delay.called
-
     def test_notify_has_url(self, scratch_org_factory):
-        scratch_org = scratch_org_factory()
-        with patch("metashare.api.models.async_to_sync") as async_to_sync:
-            scratch_org.notify_has_url()
+        create_branches_on_github_then_create_scratch_org_job = (
+            "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
+        )
+        with patch(create_branches_on_github_then_create_scratch_org_job):
+            with patch("metashare.api.models.async_to_sync") as async_to_sync:
+                scratch_org = scratch_org_factory()
+                scratch_org.url = "https://example.com"
+                scratch_org.save()
 
-            assert async_to_sync.called
+                assert async_to_sync.called
 
 
 @pytest.mark.django_db
