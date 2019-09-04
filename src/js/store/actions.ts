@@ -211,7 +211,7 @@ export const createObject = ({
       throw new Error(`No URL found for object: ${objectType}`);
     }
     const object = await apiFetch({
-      url: addUrlParams(baseUrl),
+      url: baseUrl,
       dispatch,
       opts: {
         method: 'POST',

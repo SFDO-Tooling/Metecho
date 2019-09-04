@@ -23,40 +23,29 @@ import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 const OrgCard = ({
-  org,
+  orgs,
   type,
   displayType,
-  ownedByCurrentUser,
-  user,
-  createOrg,
+  userId,
   isCreatingOrg,
-  toggleConnectModal,
-  toggleInfoModal,
+  action,
 }: {
-  org: Org | null;
+  orgs: OrgsByTask;
   type: OrgTypes;
   displayType: string;
-  ownedByCurrentUser: boolean;
-  user: User;
-  createOrg: (type: OrgTypes) => void;
+  userId: string | null;
   isCreatingOrg: OrgTypes | null;
-  toggleConnectModal: React.Dispatch<React.SetStateAction<boolean>>;
-  toggleInfoModal: React.Dispatch<React.SetStateAction<boolean>>;
+  action: (type: OrgTypes) => void;
 }) => {
-  const doCreateOrg = useCallback(() => {
-    createOrg(type);
-  }, [createOrg, type]);
-  const openConnectModal = () => {
-    toggleConnectModal(true);
-  };
-  const openInfoModal = () => {
-    toggleInfoModal(true);
-  };
-  let action = openConnectModal;
-  if (user.valid_token_for) {
-    action = user.is_devhub_enabled ? doCreateOrg : openInfoModal;
-  }
+  const doAction = useCallback(() => {
+    action(type);
+  }, [action, type]);
+  const org = orgs[type];
+  const ownedByCurrentUser = Boolean(
+    userId && org && org.url && userId === org.owner,
+  );
   const isCreating = isCreatingOrg === type || (org && !org.url);
+
   let contents = null;
   let icon = null;
   if (isCreating) {
@@ -106,6 +95,7 @@ const OrgCard = ({
         </li>
       </ul>
     );
+
     if (ownedByCurrentUser && org.url) {
       icon = (
         <ExternalLink url={org.url} title={i18n.t('View Org')}>
@@ -121,6 +111,7 @@ const OrgCard = ({
       icon = <Icon category="utility" name="link" size="small" />;
     }
   }
+
   return (
     <div
       className="slds-size_1-of-1
@@ -146,7 +137,7 @@ const OrgCard = ({
                 )
               }
               disabled={isCreating}
-              onClick={action}
+              onClick={doAction}
             />
           )
         }
@@ -212,41 +203,36 @@ const OrgCards = ({
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const devOrg = orgs[ORG_TYPES.DEV];
-  const qaOrg = orgs[ORG_TYPES.QA];
-  const currentUserOwnsDevOrg = Boolean(
-    user && devOrg && devOrg.url && user.id === devOrg.owner,
-  );
-  const currentUserOwnsQAOrg = Boolean(
-    user && qaOrg && qaOrg.url && user.id === qaOrg.owner,
-  );
+  const openConnectModal = () => {
+    setConnectModalOpen(true);
+  };
+  const openInfoModal = () => {
+    setInfoModalOpen(true);
+  };
+  let action: (type: OrgTypes) => void = openConnectModal;
+  if (user && user.valid_token_for) {
+    action = user && user.is_devhub_enabled ? createOrg : openInfoModal;
+  }
 
   return (
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Orgs')}</h2>
       <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
         <OrgCard
-          org={devOrg}
+          orgs={orgs}
           type={ORG_TYPES.DEV}
           displayType={i18n.t('Dev')}
-          ownedByCurrentUser={currentUserOwnsDevOrg}
-          user={user as User}
-          createOrg={createOrg}
+          userId={user && user.id}
           isCreatingOrg={isCreatingOrg}
-          toggleConnectModal={setConnectModalOpen}
-          toggleInfoModal={setInfoModalOpen}
+          action={action}
         />
         <OrgCard
-          org={qaOrg}
+          orgs={orgs}
           type={ORG_TYPES.QA}
           displayType={i18n.t('QA')}
-          ownedByCurrentUser={currentUserOwnsQAOrg}
-          user={user as User}
-          createOrg={createOrg}
+          userId={user && user.id}
           isCreatingOrg={isCreatingOrg}
-          toggleConnectModal={setConnectModalOpen}
-          toggleInfoModal={setInfoModalOpen}
+          action={action}
         />
       </div>
       <ConnectModal
