@@ -62,10 +62,10 @@ export const provisionOrg = (payload: Org): ThunkResult => (
 
 export const provisionFailed = ({
   model,
-  error,
+  message,
 }: {
   model: Org;
-  error?: string;
+  message?: string;
 }): ThunkResult => (dispatch, getState) => {
   /* istanbul ignore else */
   if (window.socket) {
@@ -87,7 +87,7 @@ export const provisionFailed = ({
     dispatch(
       addToast({
         heading: msg[model.org_type],
-        details: error,
+        details: message,
         variant: 'error',
       }),
     );

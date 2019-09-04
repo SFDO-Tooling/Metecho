@@ -47,7 +47,7 @@ interface OrgProvisionedEvent {
 interface OrgProvisionFailedEvent {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
   payload: {
-    error?: string;
+    message?: string;
     model: Org;
   };
 }

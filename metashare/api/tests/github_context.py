@@ -93,11 +93,13 @@ class TestLocalGitHubCheckout:
             gh3 = stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
+            repository = MagicMock(default_branch="master")
             gh = MagicMock()
+            gh.repository.return_value = repository
             gh3.login.return_value = gh
             glob.return_value = ["owner-repo_name-"]
 
-            with local_github_checkout(user, repo, "commit-ish"):
+            with local_github_checkout(user, repo):
                 assert shutil.rmtree.called
 
     def test_unsafe(self):

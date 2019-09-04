@@ -6,10 +6,19 @@ from github3.exceptions import UnprocessableEntity
 
 from ..jobs import (
     create_branches_on_github,
+    create_branches_on_github_then_create_scratch_org,
     create_scratch_org,
     report_errors_on,
     try_to_make_branch,
 )
+
+
+class AsyncMock(MagicMock):
+    async def __call__(self, *args, **kwargs):
+        return super().__call__(*args, **kwargs)
+
+
+PATCH_ROOT = "metashare.api.jobs"
 
 
 @pytest.mark.django_db
@@ -17,12 +26,10 @@ def test_create_scratch_org(user_factory):
     scratch_org = MagicMock()
     user = user_factory()
     with ExitStack() as stack:
-        ScratchOrgConfig = stack.enter_context(
-            patch("metashare.api.jobs.ScratchOrgConfig")
-        )
+        ScratchOrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.ScratchOrgConfig"))
         scratch_org = MagicMock()
         ScratchOrgConfig.return_value = scratch_org
-        stack.enter_context(patch("metashare.api.jobs.login"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.login"))
         create_scratch_org(
             scratch_org=scratch_org,
             user=user,
@@ -47,7 +54,7 @@ class TestCreateBranchesOnGitHub:
             global_config_instance.get_project_config.return_value = MagicMock(
                 project__git__prefix_feature="feature/"
             )
-            login = stack.enter_context(patch("metashare.api.jobs.login"))
+            login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
             repository = MagicMock()
             gh = MagicMock()
             gh.repository.return_value = repository
@@ -78,7 +85,7 @@ class TestCreateBranchesOnGitHub:
             global_config_instance.get_project_config.return_value = MagicMock(
                 project__git__prefix_feature="feature/"
             )
-            login = stack.enter_context(patch("metashare.api.jobs.login"))
+            login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
             repository = MagicMock()
             gh = MagicMock()
             gh.repository.return_value = repository
@@ -111,12 +118,35 @@ class TestCreateBranchesOnGitHub:
 @pytest.mark.django_db
 def test_report_errors_on(scratch_org_factory):
     scratch_org = scratch_org_factory()
-    with patch("metashare.api.jobs.get_channel_layer") as get_channel_layer:
-        channel_layer = MagicMock()
-        get_channel_layer.return_value = channel_layer
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
         try:
             with report_errors_on(scratch_org):
                 raise ValueError
         except ValueError:
             pass
-        assert channel_layer.group_send.called
+        assert push_message_about_instance.called
+
+
+def test_create_branches_on_github_then_create_scratch_org():
+    # Not a great test, but not a complicated function.
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+        create_branches_on_github = stack.enter_context(
+            patch(f"{PATCH_ROOT}.create_branches_on_github")
+        )
+        create_scratch_org = stack.enter_context(
+            patch(f"{PATCH_ROOT}.create_scratch_org")
+        )
+
+        create_branches_on_github_then_create_scratch_org(
+            project=MagicMock(),
+            repo_url=MagicMock(),
+            scratch_org=MagicMock(),
+            task=MagicMock(),
+            user=MagicMock(),
+        )
+
+        assert create_branches_on_github.called
+        assert create_scratch_org.called

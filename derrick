@@ -75,7 +75,7 @@ case "$1" in
         ;;
     "prune")
         # See https://docs.docker.com/config/pruning/ for more detail.
-        docker system prune -f
+        docker system prune -f --volumes
         ;;
     "*" | "help")
         echo "Sorry, I don't know that command."

@@ -77,7 +77,9 @@ describe('provisionFailed', () => {
     const store = storeWithThunk({});
     const org = { id: 'org-id' };
     const action = { type: 'SCRATCH_ORG_PROVISION_FAILED', payload: org };
-    store.dispatch(actions.provisionFailed({ model: org, error: 'error msg' }));
+    store.dispatch(
+      actions.provisionFailed({ model: org, message: 'error msg' }),
+    );
 
     expect(store.getActions()).toEqual([action]);
     expect(window.socket.unsubscribe).toHaveBeenCalledWith({
@@ -99,7 +101,7 @@ describe('provisionFailed', () => {
         payload: org,
       };
       store.dispatch(
-        actions.provisionFailed({ model: org, error: 'error msg' }),
+        actions.provisionFailed({ model: org, message: 'error msg' }),
       );
       const allActions = store.getActions();
 
