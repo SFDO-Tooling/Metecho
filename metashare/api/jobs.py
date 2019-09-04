@@ -78,7 +78,7 @@ def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
     repository = gh.repository(owner, repo)
     branch = repository.branch(commit_ish)
     latest_commit = branch.latest_sha()
-    # We can't use the urlt objects in repository because they build API urls:
+    # We can't use the url objects in repository because they build API urls:
     latest_commit_url = f"{repository.html_url}/commit/{latest_commit}"
 
     with report_errors_on(scratch_org):

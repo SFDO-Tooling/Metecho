@@ -142,7 +142,7 @@ const LastModifiedTableCell = ({ item, ...props }: DataCellProps) => {
         <>
           {' ('}
           <ExternalLink url={item.latest_commit_url}>
-            {item.latest_commit}
+            {item.latest_commit.substring(0, 7)}
           </ExternalLink>
           {')'}
         </>
