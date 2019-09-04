@@ -136,11 +136,7 @@ const OrgCard = ({
             <Button
               label={
                 isCreating ? (
-                  <LabelWithSpinner
-                    label={i18n.t('Creating Org…')}
-                    variant="base"
-                    size="x-small"
-                  />
+                  <LabelWithSpinner label={i18n.t('Creating Org…')} />
                 ) : (
                   i18n.t('Create Org')
                 )
