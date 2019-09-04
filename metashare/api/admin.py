@@ -56,4 +56,4 @@ class TaskSlugAdmin(admin.ModelAdmin):
 
 @admin.register(ScratchOrg)
 class ScratchOrgAdmin(admin.ModelAdmin):
-    list_display = ("org_type", "owner", "task")
+    list_display = ("owner", "org_type", "task")

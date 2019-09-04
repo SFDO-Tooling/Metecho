@@ -1,12 +1,31 @@
 import Sockette from 'sockette';
 
-import * as orgActions from '@/store/orgs/actions';
+import {
+  deleteFailed,
+  deleteOrg,
+  provisionFailed,
+  provisionOrg,
+} from '@/store/orgs/actions';
+import { updateProject } from '@/store/projects/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { updateTask } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
 jest.mock('@/store/orgs/actions');
+jest.mock('@/store/projects/actions');
+jest.mock('@/store/tasks/actions');
 
-orgActions.provisionOrg.mockReturnValue({ type: 'TEST', payload: {} });
+const actions = {
+  deleteFailed,
+  deleteOrg,
+  provisionOrg,
+  provisionFailed,
+  updateProject,
+  updateTask,
+};
+for (const action of Object.values(actions)) {
+  action.mockReturnValue({ type: 'TEST', payload: {} });
+}
 
 const mockJson = jest.fn();
 const mockClose = jest.fn();
@@ -28,8 +47,9 @@ afterEach(() => {
   mockClose.mockClear();
   mockOpen.mockClear();
   dispatch.mockClear();
-  orgActions.provisionOrg.mockClear();
-  orgActions.provisionFailed.mockClear();
+  for (const action of Object.values(actions)) {
+    action.mockClear();
+  }
 });
 
 describe('getAction', () => {
@@ -38,13 +58,15 @@ describe('getAction', () => {
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
     ['SCRATCH_ORG_DELETED', 'deleteOrg'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
+    ['PROJECT_UPDATE', 'updateProject'],
+    ['TASK_UPDATE', 'updateTask'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };
     sockets.getAction(msg);
 
     // eslint-disable-next-line import/namespace
-    expect(orgActions[action]).toHaveBeenCalledWith(payload);
+    expect(actions[action]).toHaveBeenCalledWith(payload);
   });
 
   test('handles unknown event', () => {
@@ -142,7 +164,7 @@ describe('createSocket', () => {
         });
 
         expect(dispatch).toHaveBeenCalledTimes(1);
-        expect(orgActions.provisionOrg).toHaveBeenCalledWith({});
+        expect(actions.provisionOrg).toHaveBeenCalledWith({});
       });
     });
 

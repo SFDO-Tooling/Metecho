@@ -10,4 +10,4 @@ def test_populate_data():
 
     call_command("populate_data")
 
-    assert Repository.objects.count() == 13
+    assert Repository.objects.count() == 14

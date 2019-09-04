@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import OrgsTable from '@/components/orgs/table';
+import OrgCards from '@/components/orgs/cards';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -134,7 +134,11 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        {orgs ? <OrgsTable orgs={orgs} task={task.id} /> : <Spinner />}
+        {orgs ? (
+          <OrgCards orgs={orgs} task={task} project={project} />
+        ) : (
+          <Spinner />
+        )}
       </DetailPageLayout>
     </DocumentTitle>
   );

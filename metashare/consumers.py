@@ -14,7 +14,7 @@ from .consumer_utils import clear_message_semaphore
 Request = namedtuple("Request", "user")
 
 
-KNOWN_MODELS = {"user", "scratchorg"}
+KNOWN_MODELS = {"user", "project", "task", "scratchorg"}
 
 
 class Actions(Enum):

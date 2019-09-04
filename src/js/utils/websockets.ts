@@ -8,7 +8,11 @@ import {
   provisionOrg,
 } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
+import { updateProject } from '@/store/projects/actions';
+import { Project } from '@/store/projects/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { updateTask } from '@/store/tasks/actions';
+import { Task } from '@/store/tasks/reducer';
 import {
   ObjectTypes,
   WEBSOCKET_ACTIONS,
@@ -58,12 +62,22 @@ interface OrgDeleteFailedEvent {
     model: Org;
   };
 }
+interface ProjectUpdatedEvent {
+  type: 'PROJECT_UPDATE';
+  payload: Project;
+}
+interface TaskUpdatedEvent {
+  type: 'TASK_UPDATE';
+  payload: Task;
+}
 type ModelEvent =
   | ErrorEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgDeletedEvent
-  | OrgDeleteFailedEvent;
+  | OrgDeleteFailedEvent
+  | ProjectUpdatedEvent
+  | TaskUpdatedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -82,6 +96,10 @@ export const getAction = (event: EventType) => {
       return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
+    case 'PROJECT_UPDATE':
+      return updateProject(event.payload);
+    case 'TASK_UPDATE':
+      return updateTask(event.payload);
   }
   return null;
 };

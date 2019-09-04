@@ -151,4 +151,52 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
   });
+
+  describe('TASK_UPDATE', () => {
+    test('adds new task to list', () => {
+      const task = {
+        id: 't1',
+        project: 'project-1',
+      };
+      const expected = {
+        'project-1': [task],
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'TASK_UPDATE',
+          payload: task,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('updates existing task', () => {
+      const task = {
+        id: 't1',
+        project: 'project-1',
+        name: 'Task Name',
+      };
+      const task2 = {
+        id: 't2',
+        project: 'project-1',
+      };
+      const editedTask = { ...task, name: 'Edited Task Name' };
+      const expected = {
+        'project-1': [editedTask, task2],
+      };
+      const actual = reducer(
+        {
+          'project-1': [task, task2],
+        },
+        {
+          type: 'TASK_UPDATE',
+          payload: editedTask,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
 });

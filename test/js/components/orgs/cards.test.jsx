@@ -2,10 +2,10 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import OrgsTable from '@/components/orgs/table';
+import OrgCards from '@/components/orgs/cards';
 import { createObject, deleteObject } from '@/store/actions';
 
-import { renderWithRedux, storeWithThunk } from './../../utils';
+import { renderWithRedux, storeWithThunk } from '../../utils';
 
 jest.mock('@/store/actions');
 
@@ -44,7 +44,7 @@ const defaultState = {
   },
 };
 
-describe('<OrgsTable/>', () => {
+describe('<OrgCards/>', () => {
   const setup = options => {
     const defaults = {
       initialState: defaultState,
@@ -54,7 +54,11 @@ describe('<OrgsTable/>', () => {
     const { initialState, orgs } = opts;
     return renderWithRedux(
       <MemoryRouter>
-        <OrgsTable orgs={orgs} task="task-id" />
+        <OrgCards
+          orgs={orgs}
+          task={{ id: 'task-id' }}
+          project={{ id: 'project-id' }}
+        />
       </MemoryRouter>,
       initialState,
       storeWithThunk,
@@ -62,17 +66,17 @@ describe('<OrgsTable/>', () => {
   };
 
   describe('owned by current user', () => {
-    test('renders table with orgs', () => {
-      const { getByTitle } = setup();
+    test('renders org cards', () => {
+      const { getByText } = setup();
 
-      expect(getByTitle('View Org')).toBeVisible();
-      expect(getByTitle('Has uncaptured changes')).toBeVisible();
-      expect(getByTitle('Create New Org')).toBeVisible();
+      expect(getByText('View Org')).toBeVisible();
+      expect(getByText('Has uncaptured changes')).toBeVisible();
+      expect(getByText('Create Org')).toBeVisible();
     });
   });
 
   describe('not owned by current user', () => {
-    test('renders table with orgs', () => {
+    test('renders org cards', () => {
       const orgs = {
         ...defaultOrgs,
         Dev: null,
@@ -83,18 +87,18 @@ describe('<OrgsTable/>', () => {
           has_changes: false,
         },
       };
-      const { queryByTitle, getByTitle } = setup({ orgs });
+      const { queryByText, getByText } = setup({ orgs });
 
-      expect(queryByTitle('View Org')).toBeNull();
-      expect(getByTitle('All changes captured')).toBeVisible();
-      expect(getByTitle('Create New Org')).toBeVisible();
+      expect(queryByText('View Org')).toBeNull();
+      expect(getByText('All changes captured')).toBeVisible();
+      expect(getByText('Create Org')).toBeVisible();
     });
   });
 
   describe('create org click', () => {
     test('creates a new org', () => {
-      const { getByTitle } = setup();
-      fireEvent.click(getByTitle('Create New Org'));
+      const { getByText } = setup();
+      fireEvent.click(getByText('Create Org'));
 
       expect(createObject).toHaveBeenCalledTimes(1);
 
@@ -107,13 +111,38 @@ describe('<OrgsTable/>', () => {
       });
       expect(args.shouldSubscribeToObject({})).toBe(true);
       expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
-      expect(getByTitle('Creating Org…')).toBeVisible();
+      expect(getByText('Creating Org…')).toBeVisible();
+    });
+
+    describe('with websocket', () => {
+      beforeEach(() => {
+        window.socket = { subscribe: jest.fn() };
+      });
+
+      afterEach(() => {
+        Reflect.deleteProperty(window, 'socket');
+      });
+
+      test('subscribes to project/task', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Create Org'));
+
+        expect(window.socket.subscribe).toHaveBeenCalledTimes(2);
+        expect(window.socket.subscribe).toHaveBeenCalledWith({
+          model: 'project',
+          id: 'project-id',
+        });
+        expect(window.socket.subscribe).toHaveBeenCalledWith({
+          model: 'task',
+          id: 'task-id',
+        });
+      });
     });
 
     describe('not connected to sf org', () => {
       test('opens connect modal', () => {
-        const { getByTitle, getByText } = setup({ initialState: { user: {} } });
-        fireEvent.click(getByTitle('Create New Org'));
+        const { getByText } = setup({ initialState: { user: {} } });
+        fireEvent.click(getByText('Create Org'));
 
         expect(createObject).not.toHaveBeenCalled();
         expect(getByText('Use Custom Domain')).toBeVisible();
@@ -122,12 +151,12 @@ describe('<OrgsTable/>', () => {
 
     describe('dev hub not enabled', () => {
       test('opens warning modal', () => {
-        const { getByTitle, getByText } = setup({
+        const { getByText } = setup({
           initialState: {
             user: { ...defaultState.user, is_devhub_enabled: false },
           },
         });
-        fireEvent.click(getByTitle('Create New Org'));
+        fireEvent.click(getByText('Create Org'));
 
         expect(createObject).not.toHaveBeenCalled();
         expect(getByText('Enable Dev Hub')).toBeVisible();
@@ -137,14 +166,14 @@ describe('<OrgsTable/>', () => {
 
   describe('delete org click', () => {
     test('deletes org', () => {
-      const { container, getByTitle } = setup({
+      const { getByText } = setup({
         orgs: {
           ...defaultOrgs,
           Dev: { ...defaultOrgs.Dev, has_changes: false },
         },
       });
-      fireEvent.click(container.querySelector('[data-label="Actions"] button'));
-      fireEvent.click(getByTitle('Delete'));
+      fireEvent.click(getByText('Actions'));
+      fireEvent.click(getByText('Delete'));
 
       expect(deleteObject).toHaveBeenCalledTimes(1);
 
@@ -153,20 +182,18 @@ describe('<OrgsTable/>', () => {
       expect(args.objectType).toEqual('scratch_org');
       expect(args.object.id).toEqual('org-id');
       expect(args.shouldSubscribeToObject()).toBe(true);
-      expect(getByTitle('Deleting Org…')).toBeVisible();
+      expect(getByText('Deleting Org…')).toBeVisible();
     });
 
     describe('not connected to sf org', () => {
       test('opens connect modal', () => {
-        const { container, getByTitle, getByText } = setup({
+        const { getByTitle, getByText } = setup({
           initialState: {
             ...defaultState,
             user: { ...defaultState.user, valid_token_for: null },
           },
         });
-        fireEvent.click(
-          container.querySelector('[data-label="Actions"] button'),
-        );
+        fireEvent.click(getByText('Actions'));
         fireEvent.click(getByTitle('Delete'));
 
         expect(deleteObject).not.toHaveBeenCalled();
@@ -176,15 +203,13 @@ describe('<OrgsTable/>', () => {
 
     describe('dev hub not enabled', () => {
       test('opens warning modal', () => {
-        const { container, getByTitle, getByText } = setup({
+        const { getByTitle, getByText } = setup({
           initialState: {
             ...defaultState,
             user: { ...defaultState.user, is_devhub_enabled: false },
           },
         });
-        fireEvent.click(
-          container.querySelector('[data-label="Actions"] button'),
-        );
+        fireEvent.click(getByText('Actions'));
         fireEvent.click(getByTitle('Delete'));
 
         expect(deleteObject).not.toHaveBeenCalled();
@@ -194,15 +219,13 @@ describe('<OrgsTable/>', () => {
 
     describe('org has changes', () => {
       test('opens confirm modal', () => {
-        const { container, getByTitle, getByText } = setup({
+        const { getByTitle, getByText } = setup({
           orgs: {
             Dev: null,
             QA: { ...defaultOrgs.Dev, org_type: 'QA' },
           },
         });
-        fireEvent.click(
-          container.querySelector('[data-label="Actions"] button'),
-        );
+        fireEvent.click(getByText('Actions'));
         fireEvent.click(getByTitle('Delete'));
 
         expect(deleteObject).not.toHaveBeenCalled();
@@ -219,9 +242,7 @@ describe('<OrgsTable/>', () => {
               QA: { ...defaultOrgs.Dev, org_type: 'QA' },
             },
           });
-          fireEvent.click(
-            result.container.querySelector('[data-label="Actions"] button'),
-          );
+          fireEvent.click(result.getByText('Actions'));
           fireEvent.click(result.getByTitle('Delete'));
         });
 
@@ -236,7 +257,7 @@ describe('<OrgsTable/>', () => {
 
         describe('"delete" click', () => {
           test('deletes org', () => {
-            const { getByText, queryByText, getByTitle } = result;
+            const { getByText, queryByText } = result;
             fireEvent.click(getByText('Delete'));
 
             expect(queryByText('Confirm Delete Org')).toBeNull();
@@ -247,7 +268,7 @@ describe('<OrgsTable/>', () => {
             expect(args.objectType).toEqual('scratch_org');
             expect(args.object.id).toEqual('org-id');
             expect(args.shouldSubscribeToObject()).toBe(true);
-            expect(getByTitle('Deleting Org…')).toBeVisible();
+            expect(getByText('Deleting Org…')).toBeVisible();
           });
         });
       });

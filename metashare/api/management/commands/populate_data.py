@@ -62,13 +62,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         metashare = self.create_repository(
-            name="MetaShare",
-            repo_url="https://www.github.com/SFDO-Tooling/MetaShare",
+            name="MetaShare-Test",
+            repo_url="https://www.github.com/oddbird/MetaShare-Test",
             description=(
                 f"# Welcome to Meta(Meta)Share!\n\n"
                 "This is a description of the repository. "
                 "It might contain [links](https://install.salesforce.org)."
             ),
+        )
+        self.create_repository(
+            name="MetaShare", repo_url="https://www.github.com/SFDO-Tooling/MetaShare"
         )
         self.create_repository(
             name="MetaDeploy", repo_url="https://www.github.com/SFDO-Tooling/MetaDeploy"

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -86,8 +88,10 @@ class ProjectSerializer(serializers.ModelSerializer):
             ),
         )
 
-    def get_branch_url(self, obj):
-        return f"{obj.repository.repo_url}/tree/{obj.branch_name}"
+    def get_branch_url(self, obj) -> Optional[str]:
+        if obj.branch_name:
+            return f"{obj.repository.repo_url}/tree/{obj.branch_name}"
+        return None
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -99,6 +103,7 @@ class TaskSerializer(serializers.ModelSerializer):
     assignee = HashidPrimaryKeyRelatedField(
         queryset=User.objects.all(), allow_null=True
     )
+    branch_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -110,6 +115,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "assignee",
             "slug",
             "old_slugs",
+            "branch_url",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -118,6 +124,11 @@ class TaskSerializer(serializers.ModelSerializer):
                 message=_("A task with this name already exists."),
             ),
         )
+
+    def get_branch_url(self, obj) -> Optional[str]:
+        if obj.branch_name:
+            return f"{obj.project.repository.repo_url}/tree/{obj.branch_name}"
+        return None
 
 
 class ScratchOrgSerializer(serializers.ModelSerializer):

@@ -269,13 +269,6 @@ AWS_STORAGE_BUCKET_NAME = env(
 AWS_DEFAULT_ACL = None
 
 
-# SF Connected App and GitHub configuration:
-# CONNECTED_APP_CLIENT_SECRET = env("CONNECTED_APP_CLIENT_SECRET")
-# CONNECTED_APP_CALLBACK_URL = env("CONNECTED_APP_CALLBACK_URL")
-# CONNECTED_APP_CLIENT_ID = env("CONNECTED_APP_CLIENT_ID")
-GITHUB_TOKEN = env("GITHUB_TOKEN", default=None)
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
