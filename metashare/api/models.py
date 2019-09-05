@@ -277,6 +277,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     expires_at = models.DateTimeField(null=True)
     latest_commit = StringField(blank=True)
     latest_commit_url = models.URLField(blank=True)
+    latest_commit_at = models.DateTimeField(null=True)
     url = models.URLField(null=True)
     has_changes = models.BooleanField(default=False)
 

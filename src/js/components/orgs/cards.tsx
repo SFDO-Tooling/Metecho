@@ -51,19 +51,19 @@ const OrgCard = ({
   if (isCreating) {
     contents = i18n.t('This process could take up to 15 minutes.');
   } else if (org) {
-    const lastModifiedAt =
-      org.last_modified_at && new Date(org.last_modified_at);
+    const latestCommitAt =
+      org.latest_commit_at && new Date(org.latest_commit_at);
     const expiresAt = org.expires_at && new Date(org.expires_at);
     const changesMsg = org.has_changes
       ? i18n.t('has uncaptured changes')
       : i18n.t('up-to-date');
     contents = (
       <ul>
-        {lastModifiedAt && (
+        {latestCommitAt && (
           <li>
-            <strong>{i18n.t('Last Modified')}:</strong>{' '}
-            <span title={format(lastModifiedAt, 'PPpp')}>
-              {formatDistanceToNow(lastModifiedAt, { addSuffix: true })}
+            <strong>{i18n.t('Latest Commit')}:</strong>{' '}
+            <span title={format(latestCommitAt, 'PPpp')}>
+              {formatDistanceToNow(latestCommitAt, { addSuffix: true })}
             </span>
             {org.latest_commit && org.latest_commit_url && (
               <>
@@ -85,8 +85,7 @@ const OrgCard = ({
           </li>
         )}
         <li>
-          <strong>{i18n.t('Status')}:</strong>{' '}
-          {changesMsg}
+          <strong>{i18n.t('Status')}:</strong> {changesMsg}
         </li>
       </ul>
     );

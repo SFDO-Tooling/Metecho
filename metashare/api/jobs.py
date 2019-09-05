@@ -73,9 +73,10 @@ def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
     branch = repository.branch(commit_ish)
-    latest_commit = branch.latest_sha()
-    # We can't use the url objects in repository because they build API urls:
-    latest_commit_url = f"{repository.html_url}/commit/{latest_commit}"
+    commit = branch.commit
+    latest_commit = commit.sha
+    latest_commit_url = commit.html_url
+    latest_commit_at = commit.commit.author.get("date", None)
 
     with report_errors_on(scratch_org):
         org = ScratchOrgConfig({"config_file": "orgs/dev.json", "scratch": True}, "dev")
@@ -85,6 +86,7 @@ def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
         scratch_org.expires_at = org.expires
         scratch_org.latest_commit = latest_commit
         scratch_org.latest_commit_url = latest_commit_url
+        scratch_org.latest_commit_at = latest_commit_at
         scratch_org.save()
 
 
