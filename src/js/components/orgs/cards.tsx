@@ -55,8 +55,8 @@ const OrgCard = ({
       org.last_modified_at && new Date(org.last_modified_at);
     const expiresAt = org.expires_at && new Date(org.expires_at);
     const changesMsg = org.has_changes
-      ? i18n.t('Has uncaptured changes')
-      : i18n.t('All changes captured');
+      ? i18n.t('has uncaptured changes')
+      : i18n.t('up-to-date');
     contents = (
       <ul>
         {lastModifiedAt && (
@@ -85,12 +85,7 @@ const OrgCard = ({
           </li>
         )}
         <li>
-          <Icon
-            category="utility"
-            name={org.has_changes ? 'warning' : 'check'}
-            size="x-small"
-            className="slds-m-bottom_xx-small slds-m-right_xx-small"
-          />
+          <strong>{i18n.t('Status')}:</strong>{' '}
           {changesMsg}
         </li>
       </ul>
@@ -102,13 +97,20 @@ const OrgCard = ({
           <Icon
             category="utility"
             name="link"
-            size="small"
-            className="icon-link"
+            size="x-small"
+            className="icon-link slds-m-bottom_xxx-small"
           />
         </ExternalLink>
       );
     } else {
-      icon = <Icon category="utility" name="link" size="small" />;
+      icon = (
+        <Icon
+          category="utility"
+          name="link"
+          size="x-small"
+          className="slds-m-bottom_xxx-small"
+        />
+      );
     }
   }
 

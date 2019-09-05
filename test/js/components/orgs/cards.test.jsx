@@ -66,7 +66,7 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup();
 
       expect(getByText('View Org')).toBeVisible();
-      expect(getByText('Has uncaptured changes')).toBeVisible();
+      expect(getByText('has uncaptured changes')).toBeVisible();
       expect(getByText('Create Org')).toBeVisible();
     });
   });
@@ -86,7 +86,7 @@ describe('<OrgCards/>', () => {
       const { queryByText, getByText } = setup({ orgs });
 
       expect(queryByText('View Org')).toBeNull();
-      expect(getByText('All changes captured')).toBeVisible();
+      expect(getByText('up-to-date')).toBeVisible();
       expect(getByText('Create Org')).toBeVisible();
     });
   });
