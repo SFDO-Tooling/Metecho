@@ -9,8 +9,10 @@ from ..jobs import (
     create_branches_on_github_then_create_scratch_org,
     create_scratch_org,
     report_errors_on,
+    run_appropriate_flow,
     try_to_make_branch,
 )
+from ..models import SCRATCH_ORG_TYPES
 
 
 class AsyncMock(MagicMock):
@@ -115,6 +117,27 @@ class TestCreateBranchesOnGitHub:
         assert result == "new-branch-1"
 
 
+def test_run_appropriate_flow():
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.login"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.MetaShareCCI"))
+        extract_owner_and_repo = stack.enter_context(
+            patch(f"{PATCH_ROOT}.extract_owner_and_repo")
+        )
+        extract_owner_and_repo.return_value = ("owner", "repo")
+        flowrunner = stack.enter_context(patch(f"{PATCH_ROOT}.flowrunner"))
+        run_appropriate_flow(
+            MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
+            user=MagicMock(),
+            repo_root=MagicMock(),
+            repo_url=MagicMock(),
+            repo_branch=MagicMock(),
+            org_config=MagicMock(),
+        )
+
+        assert flowrunner.FlowCoordinator.called
+
+
 @pytest.mark.django_db
 def test_report_errors_on(scratch_org_factory):
     scratch_org = scratch_org_factory()
@@ -139,10 +162,11 @@ def test_create_branches_on_github_then_create_scratch_org():
         create_scratch_org = stack.enter_context(
             patch(f"{PATCH_ROOT}.create_scratch_org")
         )
+        stack.enter_context(patch(f"{PATCH_ROOT}.run_appropriate_flow"))
 
         create_branches_on_github_then_create_scratch_org(
             project=MagicMock(),
-            repo_url=MagicMock(),
+            repo_url="https://github.com/user/repo",
             scratch_org=MagicMock(),
             task=MagicMock(),
             user=MagicMock(),
