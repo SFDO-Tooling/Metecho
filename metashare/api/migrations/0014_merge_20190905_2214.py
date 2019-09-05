@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0013_scratchorg_config'),
-        ('api', '0013_scratchorg_latest_commit_at'),
+        ("api", "0013_scratchorg_config"),
+        ("api", "0013_scratchorg_latest_commit_at"),
     ]
 
-    operations = [
-    ]
+    operations = []
