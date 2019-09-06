@@ -49,7 +49,9 @@ const OrgCard = ({
   let contents = null;
   let icon = null;
   if (isCreating) {
-    contents = i18n.t('This process could take up to 15 minutes.');
+    contents = i18n.t(
+      'This process could take a number of minutes. Feel free to leave this page and check back later.',
+    );
   } else if (org) {
     const latestCommitAt =
       org.latest_commit_at && new Date(org.latest_commit_at);

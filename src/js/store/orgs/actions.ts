@@ -2,6 +2,7 @@ import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
 import { Org } from '@/store/orgs/reducer';
+import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 
@@ -27,12 +28,24 @@ export const provisionOrg = (payload: Org): ThunkResult => (
       id: payload.id,
     });
   }
-  const user = getState().user;
+  const state = getState();
+  const user = state.user;
   if (user && user.id === payload.owner) {
-    const msg = {
+    const task = selectTaskById(state, payload.task);
+    let msg = {
       [ORG_TYPES.DEV]: i18n.t('Successfully created Dev org.'),
       [ORG_TYPES.QA]: i18n.t('Successfully created QA org.'),
     };
+    if (task) {
+      msg = {
+        [ORG_TYPES.DEV]: `${i18n.t('Successfully created Dev org for task')} “${
+          task.name
+        }”.`,
+        [ORG_TYPES.QA]: `${i18n.t('Successfully created QA org for task')} “${
+          task.name
+        }”.`,
+      };
+    }
     dispatch(
       addToast({
         heading: msg[payload.org_type],
@@ -62,9 +75,11 @@ export const provisionFailed = ({
       id: model.id,
     });
   }
-  const user = getState().user;
+  const state = getState();
+  const user = state.user;
   if (user && user.id === model.owner) {
-    const msg = {
+    const task = selectTaskById(state, model.task);
+    let msg = {
       [ORG_TYPES.DEV]: i18n.t(
         'Uh oh. There was an error creating your new Dev org.',
       ),
@@ -72,6 +87,16 @@ export const provisionFailed = ({
         'Uh oh. There was an error creating your new QA org.',
       ),
     };
+    if (task) {
+      msg = {
+        [ORG_TYPES.DEV]: `${i18n.t(
+          'Uh oh. There was an error creating your new Dev org for task',
+        )} “${task.name}”.`,
+        [ORG_TYPES.QA]: `${i18n.t(
+          'Uh oh. There was an error creating your new QA org for task',
+        )} “${task.name}”.`,
+      };
+    }
     dispatch(
       addToast({
         heading: msg[model.org_type],
