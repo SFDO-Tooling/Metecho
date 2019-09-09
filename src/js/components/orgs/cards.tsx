@@ -251,6 +251,7 @@ const OrgCards = ({
             infoModalOpen,
         )}
         toggleModal={setInfoModalOpen}
+        onDisconnect={openConnectModal}
       />
     </>
   );

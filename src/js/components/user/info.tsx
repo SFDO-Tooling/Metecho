@@ -71,7 +71,13 @@ const ConnectionInfoWarning = () => (
   </Trans>
 );
 
-const UserInfo = ({ user }: { user: User }) => {
+const UserInfo = ({
+  user,
+  onDisconnect = () => {},
+}: {
+  user: User;
+  onDisconnect?: () => void;
+}) => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isMounted = useIsMounted();
@@ -79,6 +85,7 @@ const UserInfo = ({ user }: { user: User }) => {
   const doDisconnect = useCallback(() => {
     setIsDisconnecting(true);
     dispatch(disconnect()).finally(() => {
+      onDisconnect();
       /* istanbul ignore else */
       if (isMounted.current) {
         setIsDisconnecting(false);
@@ -178,10 +185,12 @@ export const ConnectionInfoModal = ({
   user,
   isOpen,
   toggleModal,
+  onDisconnect,
 }: {
   user: User;
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
+  onDisconnect?: () => void;
 }) => {
   const handleClose = () => {
     toggleModal(false);
@@ -196,7 +205,7 @@ export const ConnectionInfoModal = ({
       onRequestClose={handleClose}
     >
       <div className="slds-p-vertical_medium slds-is-relative">
-        <UserInfo user={user} />
+        <UserInfo user={user} onDisconnect={onDisconnect} />
       </div>
     </Modal>
   );
