@@ -153,6 +153,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "expires_at",
             "latest_commit",
             "latest_commit_url",
+            "latest_commit_at",
             "url",
             "has_changes",
         )
@@ -161,6 +162,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "expires_at": {"read_only": True},
             "latest_commit": {"read_only": True},
             "latest_commit_url": {"read_only": True},
+            "latest_commit_at": {"read_only": True},
             "url": {"read_only": True},
             "has_changes": {"read_only": True},
         }
