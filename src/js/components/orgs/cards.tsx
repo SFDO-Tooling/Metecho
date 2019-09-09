@@ -203,9 +203,11 @@ const OrgCards = ({
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const openConnectModal = () => {
+    setInfoModalOpen(false);
     setConnectModalOpen(true);
   };
   const openInfoModal = () => {
+    setConnectModalOpen(false);
     setInfoModalOpen(true);
   };
   let action: (type: OrgTypes) => void = openConnectModal;
@@ -243,6 +245,10 @@ const OrgCards = ({
         user={user as User}
         isOpen={infoModalOpen}
         toggleModal={setInfoModalOpen}
+        onDisconnect={openConnectModal}
+        successText={i18n.t(
+          'Please close this message and try creating the scratch org again.',
+        )}
       />
     </>
   );
