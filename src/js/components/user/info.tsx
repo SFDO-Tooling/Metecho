@@ -71,7 +71,13 @@ const ConnectionInfoWarning = () => (
   </Trans>
 );
 
-const UserInfo = ({ user }: { user: User }) => {
+const UserInfo = ({
+  user,
+  onDisconnect = () => {},
+}: {
+  user: User;
+  onDisconnect?: () => void;
+}) => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isMounted = useIsMounted();
@@ -79,6 +85,7 @@ const UserInfo = ({ user }: { user: User }) => {
   const doDisconnect = useCallback(() => {
     setIsDisconnecting(true);
     dispatch(disconnect()).finally(() => {
+      onDisconnect();
       /* istanbul ignore else */
       if (isMounted.current) {
         setIsDisconnecting(false);
@@ -178,10 +185,14 @@ export const ConnectionInfoModal = ({
   user,
   isOpen,
   toggleModal,
+  onDisconnect,
+  successText = '',
 }: {
   user: User;
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
+  onDisconnect?: () => void;
+  successText?: string;
 }) => {
   const handleClose = () => {
     toggleModal(false);
@@ -190,13 +201,26 @@ export const ConnectionInfoModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      heading={i18n.t('Enable Dev Hub')}
-      tagline={<ConnectionInfoWarning />}
-      prompt="warning"
+      heading={
+        user.is_devhub_enabled
+          ? i18n.t('Dev Hub Enabled')
+          : i18n.t('Enable Dev Hub')
+      }
+      tagline={user.is_devhub_enabled ? successText : <ConnectionInfoWarning />}
+      prompt={user.is_devhub_enabled ? 'success' : 'warning'}
+      footer={
+        user.is_devhub_enabled && [
+          <Button
+            key="close"
+            label={i18n.t('Continue')}
+            onClick={handleClose}
+          />,
+        ]
+      }
       onRequestClose={handleClose}
     >
       <div className="slds-p-vertical_medium slds-is-relative">
-        <UserInfo user={user} />
+        <UserInfo user={user} onDisconnect={onDisconnect} />
       </div>
     </Modal>
   );
