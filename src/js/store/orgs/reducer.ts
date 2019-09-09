@@ -17,6 +17,7 @@ export interface Org {
   expires_at: string | null;
   latest_commit: string;
   latest_commit_url: string;
+  latest_commit_at: string | null;
   url: string | null;
   has_changes: boolean;
   deletion_queued_at: string | null;

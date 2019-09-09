@@ -27,10 +27,10 @@ const defaultOrgs = {
     task: 'task-id',
     org_type: 'Dev',
     owner: 'user-id',
-    last_modified_at: '2019-08-16T12:58:53.721Z',
     expires_at: '2019-09-16T12:58:53.721Z',
     latest_commit: '617a51',
     latest_commit_url: '/test/commit/url/',
+    latest_commit_at: '2019-08-16T12:58:53.721Z',
     url: '/test/org/url/',
     has_changes: true,
   },
@@ -70,7 +70,7 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup();
 
       expect(getByText('View Org')).toBeVisible();
-      expect(getByText('Has uncaptured changes')).toBeVisible();
+      expect(getByText('has uncaptured changes')).toBeVisible();
       expect(getByText('Create Org')).toBeVisible();
     });
   });
@@ -90,7 +90,7 @@ describe('<OrgCards/>', () => {
       const { queryByText, getByText } = setup({ orgs });
 
       expect(queryByText('View Org')).toBeNull();
-      expect(getByText('All changes captured')).toBeVisible();
+      expect(getByText('up-to-date')).toBeVisible();
       expect(getByText('Create Org')).toBeVisible();
     });
   });

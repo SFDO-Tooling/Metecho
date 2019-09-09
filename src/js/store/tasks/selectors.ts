@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
 import { selectProject } from '@/store/projects/selectors';
-import { TaskState } from '@/store/tasks/reducer';
+import { Task, TaskState } from '@/store/tasks/reducer';
 
 export const selectTaskState = (appState: AppState): TaskState =>
   appState.tasks;
@@ -34,3 +34,11 @@ export const selectTask = createSelector(
     return task || null;
   },
 );
+
+export const selectTaskById = (
+  appState: AppState,
+  id: string,
+): Task | undefined =>
+  ([] as Task[])
+    .concat(...Object.values(appState.tasks))
+    .find(t => t.id === id);

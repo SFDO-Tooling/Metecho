@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
@@ -97,15 +98,18 @@ const TaskDetail = (props: RouteComponentProps) => {
         disabled
       />
       {task.branch_url ? (
-        <ExternalLink url={task.branch_url}>
-          <Button
-            iconCategory="utility"
-            iconName="new_window"
-            iconPosition="left"
-            label={i18n.t('View Branch')}
-            variant="outline-brand"
-            className="slds-m-left_large"
+        <ExternalLink
+          url={task.branch_url}
+          className="slds-button slds-button_outline-brand"
+        >
+          <Icon
+            category="utility"
+            name="new_window"
+            size="xx-small"
+            className="slds-button__icon slds-button__icon_left"
+            containerClassName="slds-icon_container slds-current-color"
           />
+          {i18n.t('View Branch')}
         </ExternalLink>
       ) : null}
     </PageHeaderControl>

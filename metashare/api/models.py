@@ -4,6 +4,8 @@ from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
+from django.contrib.postgres.fields import JSONField
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -277,8 +279,10 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     expires_at = models.DateTimeField(null=True)
     latest_commit = StringField(blank=True)
     latest_commit_url = models.URLField(blank=True)
+    latest_commit_at = models.DateTimeField(null=True)
     url = models.URLField(null=True)
     has_changes = models.BooleanField(default=False)
+    config = JSONField(default=dict, encoder=DjangoJSONEncoder)
 
     def subscribable_by(self, user):  # pragma: nocover
         # TODO: revisit this?
