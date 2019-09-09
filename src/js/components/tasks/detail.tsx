@@ -124,18 +124,24 @@ const TaskDetail = (props: RouteComponentProps) => {
     userIsOwner = devOrg && devOrg.owner === user.id;
   }
 
-  const action = () => {
-    if (user.valid_token_for) {
-      if (user.is_devhub_enabled) {
-        if (!devOrg) {
-          return undefined;
-        }
-        return fetchChangeset(devOrg);
-      }
-      return setInfoModalOpen(true);
-    }
-    return setConnectModalOpen(true);
+  const openConnectModal = () => {
+    setInfoModalOpen(false);
+    setConnectModalOpen(true);
   };
+  const openInfoModal = () => {
+    setConnectModalOpen(false);
+    setInfoModalOpen(true);
+  };
+  const doFetchChangeset = () => {
+    if (devOrg) {
+      fetchChangeset(devOrg);
+    }
+  };
+
+  let action = openConnectModal;
+  if (user.valid_token_for) {
+    action = user.is_devhub_enabled ? doFetchChangeset : openInfoModal;
+  }
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
@@ -246,6 +252,10 @@ const TaskDetail = (props: RouteComponentProps) => {
           user={user}
           isOpen={infoModalOpen}
           toggleModal={setInfoModalOpen}
+          onDisconnect={openConnectModal}
+          successText={i18n.t(
+            'Please close this message and try capturing task changes again.',
+          )}
         />
         {orgs && orgs.changeset && (
           <CaptureModal
