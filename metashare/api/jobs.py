@@ -133,8 +133,8 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
         )
         task.branch_name = task_branch_name
 
-    # We'll then save these in the orchestrating function, once all
-    # tasks are done.
+    project.save()
+    task.save()
 
     return task_branch_name
 
@@ -186,8 +186,6 @@ def create_branches_on_github_then_create_scratch_org(
             org_config=org_config,
         )
 
-        task.save()
-        project.save()
         scratch_org.save()
 
 
