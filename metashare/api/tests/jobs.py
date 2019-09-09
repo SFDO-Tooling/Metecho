@@ -118,24 +118,15 @@ class TestCreateBranchesOnGitHub:
 
 
 def test_run_appropriate_flow():
-    with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.login"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.MetaShareCCI"))
-        extract_owner_and_repo = stack.enter_context(
-            patch(f"{PATCH_ROOT}.extract_owner_and_repo")
-        )
-        extract_owner_and_repo.return_value = ("owner", "repo")
-        flowrunner = stack.enter_context(patch(f"{PATCH_ROOT}.flowrunner"))
+    with patch(f"{PATCH_ROOT}.run_flow") as run_flow:
         run_appropriate_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
-            repo_root=MagicMock(),
-            repo_url=MagicMock(),
+            repo_url="https://github.com/owner/repo",
             repo_branch=MagicMock(),
-            org_config=MagicMock(),
         )
 
-        assert flowrunner.FlowCoordinator.called
+        assert run_flow.called
 
 
 @pytest.mark.django_db
