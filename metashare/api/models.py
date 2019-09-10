@@ -203,7 +203,6 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
         return self.name
 
     def subscribable_by(self, user):  # pragma: nocover
-        # TODO: revisit this?
         return True
 
     def save(self, *args, **kwargs):
@@ -245,7 +244,6 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         return self.name
 
     def subscribable_by(self, user):  # pragma: nocover
-        # TODO: revisit this?
         return True
 
     def save(self, *args, **kwargs):
@@ -285,7 +283,6 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     config = JSONField(default=dict, encoder=DjangoJSONEncoder)
 
     def subscribable_by(self, user):  # pragma: nocover
-        # TODO: revisit this?
         return True
 
     def save(self, *args, **kwargs):

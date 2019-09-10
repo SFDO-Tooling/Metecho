@@ -1,6 +1,11 @@
 import Sockette from 'sockette';
 
-import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
+import {
+  deleteFailed,
+  deleteOrg,
+  provisionFailed,
+  provisionOrg,
+} from '@/store/orgs/actions';
 import { updateProject } from '@/store/projects/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { updateTask } from '@/store/tasks/actions';
@@ -10,7 +15,14 @@ jest.mock('@/store/orgs/actions');
 jest.mock('@/store/projects/actions');
 jest.mock('@/store/tasks/actions');
 
-const actions = { provisionOrg, provisionFailed, updateProject, updateTask };
+const actions = {
+  deleteFailed,
+  deleteOrg,
+  provisionOrg,
+  provisionFailed,
+  updateProject,
+  updateTask,
+};
 for (const action of Object.values(actions)) {
   action.mockReturnValue({ type: 'TEST', payload: {} });
 }
@@ -44,6 +56,8 @@ describe('getAction', () => {
   test.each([
     ['SCRATCH_ORG_PROVISIONED', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
+    ['SCRATCH_ORG_DELETED', 'deleteOrg'],
+    ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['PROJECT_UPDATE', 'updateProject'],
     ['TASK_UPDATE', 'updateTask'],
   ])('handles %s event', (type, action) => {

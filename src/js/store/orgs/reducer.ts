@@ -1,7 +1,12 @@
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
 import { LogoutAction } from '@/store/user/actions';
-import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
+import {
+  OBJECT_TYPES,
+  ObjectTypes,
+  ORG_TYPES,
+  OrgTypes,
+} from '@/utils/constants';
 
 export interface Org {
   id: string;
@@ -15,6 +20,7 @@ export interface Org {
   latest_commit_at: string | null;
   url: string | null;
   has_changes: boolean;
+  deletion_queued_at: string | null;
 }
 
 export interface OrgsByTask {
@@ -123,7 +129,8 @@ const reducer = (
       }
       return orgs;
     }
-    case 'SCRATCH_ORG_PROVISIONED': {
+    case 'SCRATCH_ORG_PROVISIONED':
+    case 'SCRATCH_ORG_DELETE_FAILED': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
@@ -137,7 +144,8 @@ const reducer = (
         },
       };
     }
-    case 'SCRATCH_ORG_PROVISION_FAILED': {
+    case 'SCRATCH_ORG_PROVISION_FAILED':
+    case 'SCRATCH_ORG_DELETED': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
@@ -150,6 +158,30 @@ const reducer = (
           [org.org_type]: null,
         },
       };
+    }
+    case 'DELETE_OBJECT_SUCCEEDED': {
+      const {
+        objectType,
+        object,
+      }: { objectType: ObjectTypes; object: Org } = action.payload;
+      if (objectType === OBJECT_TYPES.ORG && object) {
+        const taskOrgs = orgs[object.task] || {
+          [ORG_TYPES.DEV]: null,
+          [ORG_TYPES.QA]: null,
+        };
+        return {
+          ...orgs,
+          [object.task]: {
+            ...taskOrgs,
+            [object.org_type]: {
+              ...taskOrgs[object.org_type],
+              // eslint-disable-next-line @typescript-eslint/camelcase
+              deletion_queued_at: new Date().toISOString(),
+            },
+          },
+        };
+      }
+      return orgs;
     }
     case 'REQUEST_CHANGESET_STARTED': {
       const { org } = action.payload;

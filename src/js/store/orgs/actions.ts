@@ -15,6 +15,14 @@ interface OrgProvisionFailed {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
   payload: Org;
 }
+interface OrgDeleted {
+  type: 'SCRATCH_ORG_DELETED';
+  payload: Org;
+}
+interface OrgDeleteFailed {
+  type: 'SCRATCH_ORG_DELETE_FAILED';
+  payload: Org;
+}
 interface ChangesetPayload {
   org: Org;
   url: string;
@@ -41,6 +49,8 @@ interface CommitEvent {
 export type OrgsAction =
   | OrgProvisioned
   | OrgProvisionFailed
+  | OrgDeleted
+  | OrgDeleteFailed
   | RequestChangesetEvent
   | RequestChangesetSucceeded
   | ChangesetEvent
@@ -136,6 +146,67 @@ export const provisionFailed = ({
   }
   return dispatch({
     type: 'SCRATCH_ORG_PROVISION_FAILED',
+    payload: model,
+  });
+};
+
+export const deleteOrg = (payload: Org): ThunkResult => (
+  dispatch,
+  getState,
+) => {
+  /* istanbul ignore else */
+  if (window.socket) {
+    window.socket.unsubscribe({
+      model: OBJECT_TYPES.ORG,
+      id: payload.id,
+    });
+  }
+  const user = getState().user;
+  if (user && user.id === payload.owner) {
+    const msg = {
+      [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev org.'),
+      [ORG_TYPES.QA]: i18n.t('Successfully deleted QA org.'),
+    };
+    dispatch(addToast({ heading: msg[payload.org_type] }));
+  }
+  return dispatch({
+    type: 'SCRATCH_ORG_DELETED',
+    payload,
+  });
+};
+
+export const deleteFailed = ({
+  model,
+  message,
+}: {
+  model: Org;
+  message?: string;
+}): ThunkResult => (dispatch, getState) => {
+  /* istanbul ignore else */
+  if (window.socket) {
+    window.socket.unsubscribe({
+      model: OBJECT_TYPES.ORG,
+      id: model.id,
+    });
+  }
+  const user = getState().user;
+  if (user && user.id === model.owner) {
+    const msg = {
+      [ORG_TYPES.DEV]: i18n.t(
+        'Uh oh. There was an error deleting your Dev org.',
+      ),
+      [ORG_TYPES.QA]: i18n.t('Uh oh. There was an error deleting your QA org.'),
+    };
+    dispatch(
+      addToast({
+        heading: msg[model.org_type],
+        details: message,
+        variant: 'error',
+      }),
+    );
+  }
+  return dispatch({
+    type: 'SCRATCH_ORG_DELETE_FAILED',
     payload: model,
   });
 };

@@ -163,3 +163,97 @@ describe('provisionFailed', () => {
     });
   });
 });
+
+describe('deleteOrg', () => {
+  beforeEach(() => {
+    window.socket = { unsubscribe: jest.fn() };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
+  test('unsubscribes from socket and returns action', () => {
+    const store = storeWithThunk({});
+    const org = { id: 'org-id' };
+    const action = { type: 'SCRATCH_ORG_DELETED', payload: org };
+    store.dispatch(actions.deleteOrg(org));
+
+    expect(store.getActions()).toEqual([action]);
+    expect(window.socket.unsubscribe).toHaveBeenCalledWith({
+      model: 'scratch_org',
+      id: 'org-id',
+    });
+  });
+
+  describe('owned by current user', () => {
+    test('adds success message', () => {
+      const store = storeWithThunk({ user: { id: 'user-id' } });
+      const org = {
+        id: 'org-id',
+        owner: 'user-id',
+        url: '/test/url/',
+        org_type: 'Dev',
+      };
+      const orgAction = { type: 'SCRATCH_ORG_DELETED', payload: org };
+      store.dispatch(actions.deleteOrg(org));
+      const allActions = store.getActions();
+
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toEqual(
+        'Successfully deleted Dev org.',
+      );
+      expect(allActions[1]).toEqual(orgAction);
+    });
+  });
+});
+
+describe('deleteFailed', () => {
+  beforeEach(() => {
+    window.socket = { unsubscribe: jest.fn() };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
+  test('unsubscribes from socket and returns action', () => {
+    const store = storeWithThunk({});
+    const org = { id: 'org-id' };
+    const action = { type: 'SCRATCH_ORG_DELETE_FAILED', payload: org };
+    store.dispatch(actions.deleteFailed({ model: org, message: 'error msg' }));
+
+    expect(store.getActions()).toEqual([action]);
+    expect(window.socket.unsubscribe).toHaveBeenCalledWith({
+      model: 'scratch_org',
+      id: 'org-id',
+    });
+  });
+
+  describe('owned by current user', () => {
+    test('adds error message', () => {
+      const store = storeWithThunk({ user: { id: 'user-id' } });
+      const org = {
+        id: 'org-id',
+        owner: 'user-id',
+        org_type: 'Dev',
+      };
+      const orgAction = {
+        type: 'SCRATCH_ORG_DELETE_FAILED',
+        payload: org,
+      };
+      store.dispatch(
+        actions.deleteFailed({ model: org, message: 'error msg' }),
+      );
+      const allActions = store.getActions();
+
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toEqual(
+        'Uh oh. There was an error deleting your Dev org.',
+      );
+      expect(allActions[0].payload.details).toEqual('error msg');
+      expect(allActions[0].payload.variant).toEqual('error');
+      expect(allActions[1]).toEqual(orgAction);
+    });
+  });
+});

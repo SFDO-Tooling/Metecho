@@ -6,6 +6,8 @@ import {
   changesetFailed,
   commitFailed,
   commitSucceeded,
+  deleteFailed,
+  deleteOrg,
   provisionFailed,
   provisionOrg,
 } from '@/store/orgs/actions';
@@ -75,6 +77,17 @@ interface CommitFailedEvent {
     model: Commit;
   };
 }
+interface OrgDeletedEvent {
+  type: 'SCRATCH_ORG_DELETED';
+  payload: Org;
+}
+interface OrgDeleteFailedEvent {
+  type: 'SCRATCH_ORG_DELETE_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
   payload: Project;
@@ -91,6 +104,8 @@ type ModelEvent =
   | ChangesetFailedEvent
   | CommitSucceededEvent
   | CommitFailedEvent
+  | OrgDeletedEvent
+  | OrgDeleteFailedEvent
   | ProjectUpdatedEvent
   | TaskUpdatedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
@@ -115,6 +130,10 @@ export const getAction = (event: EventType) => {
       return commitSucceeded(event.payload);
     case 'COMMIT_FAILED':
       return commitFailed(event.payload);
+    case 'SCRATCH_ORG_DELETED':
+      return deleteOrg(event.payload);
+    case 'SCRATCH_ORG_DELETE_FAILED':
+      return deleteFailed(event.payload);
     case 'PROJECT_UPDATE':
       return updateProject(event.payload);
     case 'TASK_UPDATE':

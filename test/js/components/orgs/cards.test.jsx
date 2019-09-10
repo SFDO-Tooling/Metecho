@@ -3,7 +3,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import OrgCards from '@/components/orgs/cards';
-import { createObject } from '@/store/actions';
+import { createObject, deleteObject } from '@/store/actions';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
@@ -12,9 +12,13 @@ jest.mock('@/store/actions');
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
+deleteObject.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 
 afterEach(() => {
   createObject.mockClear();
+  deleteObject.mockClear();
 });
 
 const defaultOrgs = {
@@ -107,6 +111,7 @@ describe('<OrgCards/>', () => {
       });
       expect(args.shouldSubscribeToObject({})).toBe(true);
       expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
+      expect(getByText('Creating Org…')).toBeVisible();
     });
 
     describe('with websocket', () => {
@@ -155,6 +160,117 @@ describe('<OrgCards/>', () => {
 
         expect(createObject).not.toHaveBeenCalled();
         expect(getByText('Enable Dev Hub')).toBeVisible();
+      });
+    });
+  });
+
+  describe('delete org click', () => {
+    test('deletes org', () => {
+      const { getByText } = setup({
+        orgs: {
+          ...defaultOrgs,
+          Dev: { ...defaultOrgs.Dev, has_changes: false },
+        },
+      });
+      fireEvent.click(getByText('Actions'));
+      fireEvent.click(getByText('Delete'));
+
+      expect(deleteObject).toHaveBeenCalledTimes(1);
+
+      const args = deleteObject.mock.calls[0][0];
+
+      expect(args.objectType).toEqual('scratch_org');
+      expect(args.object.id).toEqual('org-id');
+      expect(args.shouldSubscribeToObject()).toBe(true);
+      expect(getByText('Deleting Org…')).toBeVisible();
+    });
+
+    describe('not connected to sf org', () => {
+      test('opens connect modal', () => {
+        const { getByTitle, getByText } = setup({
+          initialState: {
+            ...defaultState,
+            user: { ...defaultState.user, valid_token_for: null },
+          },
+        });
+        fireEvent.click(getByText('Actions'));
+        fireEvent.click(getByTitle('Delete'));
+
+        expect(deleteObject).not.toHaveBeenCalled();
+        expect(getByText('Use Custom Domain')).toBeVisible();
+      });
+    });
+
+    describe('dev hub not enabled', () => {
+      test('opens warning modal', () => {
+        const { getByTitle, getByText } = setup({
+          initialState: {
+            ...defaultState,
+            user: { ...defaultState.user, is_devhub_enabled: false },
+          },
+        });
+        fireEvent.click(getByText('Actions'));
+        fireEvent.click(getByTitle('Delete'));
+
+        expect(deleteObject).not.toHaveBeenCalled();
+        expect(getByText('Enable Dev Hub')).toBeVisible();
+      });
+    });
+
+    describe('org has changes', () => {
+      test('opens confirm modal', () => {
+        const { getByTitle, getByText } = setup({
+          orgs: {
+            Dev: null,
+            QA: { ...defaultOrgs.Dev, org_type: 'QA' },
+          },
+        });
+        fireEvent.click(getByText('Actions'));
+        fireEvent.click(getByTitle('Delete'));
+
+        expect(deleteObject).not.toHaveBeenCalled();
+        expect(getByText('Confirm Delete Org')).toBeVisible();
+      });
+
+      describe('<ConfirmDeleteModal />', () => {
+        let result;
+
+        beforeEach(() => {
+          result = setup({
+            orgs: {
+              Dev: null,
+              QA: { ...defaultOrgs.Dev, org_type: 'QA' },
+            },
+          });
+          fireEvent.click(result.getByText('Actions'));
+          fireEvent.click(result.getByTitle('Delete'));
+        });
+
+        describe('"cancel" click', () => {
+          test('closes modal', () => {
+            const { getByText, queryByText } = result;
+            fireEvent.click(getByText('Cancel'));
+
+            expect(queryByText('Confirm Delete Org')).toBeNull();
+          });
+        });
+
+        describe('"delete" click', () => {
+          test('deletes org', () => {
+            const { getByText, queryByText } = result;
+            fireEvent.click(getByText('Delete'));
+
+            expect(queryByText('Confirm Delete Org')).toBeNull();
+            expect(deleteObject).toHaveBeenCalledTimes(1);
+
+            const args = deleteObject.mock.calls[0][0];
+
+            expect(args.objectType).toEqual('scratch_org');
+            expect(args.object.id).toEqual('org-id');
+            expect(args.shouldSubscribeToObject()).toBe(true);
+            expect(getByText('Deleting Org…')).toBeVisible();
+          });
+        });
       });
     });
   });

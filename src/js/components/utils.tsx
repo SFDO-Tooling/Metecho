@@ -428,7 +428,8 @@ export const useFetchOrgsIfMissing = (
         fetchObjects({
           objectType: OBJECT_TYPES.ORG,
           filters: { task: task.id },
-          shouldSubscribeToObject: (object: Org) => object && !object.url,
+          shouldSubscribeToObject: (object: Org) =>
+            Boolean(object && (!object.url || object.deletion_queued_at)),
         }),
       );
     }
