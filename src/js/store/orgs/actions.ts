@@ -369,9 +369,9 @@ export const commitSucceeded = (payload: Commit): ThunkResult => (
     addToast({
       heading: task
         ? `${i18n.t(
-            'Successfully committed changes from your Dev org on task',
+            'Successfully committed changes from your scratch org on task',
           )} “${task.name}”.`
-        : i18n.t('Successfully committed changes from your Dev org.'),
+        : i18n.t('Successfully committed changes from your scratch org.'),
     }),
   );
   return dispatch({
@@ -399,10 +399,10 @@ export const commitFailed = ({
     addToast({
       heading: task
         ? `${i18n.t(
-            'Uh oh. There was an error committing changes from your Dev org on task',
+            'Uh oh. There was an error committing changes from your scratch org on task',
           )} “${task.name}”.`
         : i18n.t(
-            'Uh oh. There was an error committing changes from your Dev org.',
+            'Uh oh. There was an error committing changes from your scratch org.',
           ),
       details: message,
       variant: 'error',
