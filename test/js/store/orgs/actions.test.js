@@ -188,12 +188,20 @@ describe('deleteOrg', () => {
 
   describe('owned by current user', () => {
     test('adds success message', () => {
-      const store = storeWithThunk({ user: { id: 'user-id' } });
+      const store = storeWithThunk({
+        user: { id: 'user-id' },
+        tasks: {
+          'project-id': [
+            { id: 'task-id', name: 'My Task', project: 'project-id' },
+          ],
+        },
+      });
       const org = {
         id: 'org-id',
         owner: 'user-id',
         url: '/test/url/',
         org_type: 'Dev',
+        task: 'task-id',
       };
       const orgAction = { type: 'SCRATCH_ORG_DELETED', payload: org };
       store.dispatch(actions.deleteOrg(org));
@@ -201,7 +209,7 @@ describe('deleteOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Successfully deleted Dev org.',
+        'Successfully deleted Dev org for task “My Task”.',
       );
       expect(allActions[1]).toEqual(orgAction);
     });
@@ -232,11 +240,19 @@ describe('deleteFailed', () => {
 
   describe('owned by current user', () => {
     test('adds error message', () => {
-      const store = storeWithThunk({ user: { id: 'user-id' } });
+      const store = storeWithThunk({
+        user: { id: 'user-id' },
+        tasks: {
+          'project-id': [
+            { id: 'task-id', name: 'My Task', project: 'project-id' },
+          ],
+        },
+      });
       const org = {
         id: 'org-id',
         owner: 'user-id',
         org_type: 'Dev',
+        task: 'task-id',
       };
       const orgAction = {
         type: 'SCRATCH_ORG_DELETE_FAILED',
@@ -249,7 +265,7 @@ describe('deleteFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error deleting your Dev org.',
+        'Uh oh. There was an error deleting your Dev org for task “My Task”.',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');

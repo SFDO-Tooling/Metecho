@@ -134,12 +134,25 @@ export const deleteOrg = (payload: Org): ThunkResult => (
       id: payload.id,
     });
   }
-  const user = getState().user;
+  const state = getState();
+  const user = state.user;
   if (user && user.id === payload.owner) {
-    const msg = {
+    const task = selectTaskById(state, payload.task);
+    let msg = {
       [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev org.'),
       [ORG_TYPES.QA]: i18n.t('Successfully deleted QA org.'),
     };
+    /* istanbul ignore else */
+    if (task) {
+      msg = {
+        [ORG_TYPES.DEV]: `${i18n.t('Successfully deleted Dev org for task')} “${
+          task.name
+        }”.`,
+        [ORG_TYPES.QA]: `${i18n.t('Successfully deleted QA org for task')} “${
+          task.name
+        }”.`,
+      };
+    }
     dispatch(addToast({ heading: msg[payload.org_type] }));
   }
   return dispatch({
@@ -162,14 +175,27 @@ export const deleteFailed = ({
       id: model.id,
     });
   }
-  const user = getState().user;
+  const state = getState();
+  const user = state.user;
   if (user && user.id === model.owner) {
-    const msg = {
+    const task = selectTaskById(state, model.task);
+    let msg = {
       [ORG_TYPES.DEV]: i18n.t(
         'Uh oh. There was an error deleting your Dev org.',
       ),
       [ORG_TYPES.QA]: i18n.t('Uh oh. There was an error deleting your QA org.'),
     };
+    /* istanbul ignore else */
+    if (task) {
+      msg = {
+        [ORG_TYPES.DEV]: `${i18n.t(
+          'Uh oh. There was an error deleting your Dev org for task',
+        )} “${task.name}”.`,
+        [ORG_TYPES.QA]: `${i18n.t(
+          'Uh oh. There was an error deleting your QA org for task',
+        )} “${task.name}”.`,
+      };
+    }
     dispatch(
       addToast({
         heading: msg[model.org_type],
