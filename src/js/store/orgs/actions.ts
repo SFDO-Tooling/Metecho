@@ -320,7 +320,7 @@ export const changesetFailed = ({
 }: {
   model: Changeset;
   message?: string;
-}): ThunkResult => dispatch => {
+}): ThunkResult => (dispatch, getState) => {
   /* istanbul ignore else */
   if (window.socket) {
     window.socket.unsubscribe({
@@ -328,11 +328,16 @@ export const changesetFailed = ({
       id: model.id,
     });
   }
+  const task = selectTaskById(getState(), model.task);
   dispatch(
     addToast({
-      heading: i18n.t(
-        'Uh oh. There was an error capturing changes from your scratch org.',
-      ),
+      heading: task
+        ? `${i18n.t(
+            'Uh oh. There was an error capturing changes from your scratch org on task',
+          )} “${task.name}”.`
+        : i18n.t(
+            'Uh oh. There was an error capturing changes from your scratch org.',
+          ),
       details: message,
       variant: 'error',
     }),
@@ -348,7 +353,10 @@ export const cancelChangeset = (payload: Changeset): ChangesetEvent => ({
   payload,
 });
 
-export const commitSucceeded = (payload: Commit): ThunkResult => dispatch => {
+export const commitSucceeded = (payload: Commit): ThunkResult => (
+  dispatch,
+  getState,
+) => {
   /* istanbul ignore else */
   if (window.socket) {
     window.socket.unsubscribe({
@@ -356,9 +364,14 @@ export const commitSucceeded = (payload: Commit): ThunkResult => dispatch => {
       id: payload.id,
     });
   }
+  const task = selectTaskById(getState(), payload.task);
   dispatch(
     addToast({
-      heading: i18n.t('Successfully committed changes from your Dev org.'),
+      heading: task
+        ? `${i18n.t(
+            'Successfully committed changes from your Dev org on task',
+          )} “${task.name}”.`
+        : i18n.t('Successfully committed changes from your Dev org.'),
     }),
   );
   return dispatch({
@@ -373,7 +386,7 @@ export const commitFailed = ({
 }: {
   model: Commit;
   message?: string;
-}): ThunkResult => dispatch => {
+}): ThunkResult => (dispatch, getState) => {
   /* istanbul ignore else */
   if (window.socket) {
     window.socket.unsubscribe({
@@ -381,11 +394,16 @@ export const commitFailed = ({
       id: model.id,
     });
   }
+  const task = selectTaskById(getState(), model.task);
   dispatch(
     addToast({
-      heading: i18n.t(
-        'Uh oh. There was an error committing changes from your Dev org.',
-      ),
+      heading: task
+        ? `${i18n.t(
+            'Uh oh. There was an error committing changes from your Dev org on task',
+          )} “${task.name}”.`
+        : i18n.t(
+            'Uh oh. There was an error committing changes from your Dev org.',
+          ),
       details: message,
       variant: 'error',
     }),
