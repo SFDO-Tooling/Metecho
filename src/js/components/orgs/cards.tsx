@@ -375,9 +375,6 @@ const OrgCards = ({
         isOpen={infoModalOpen}
         toggleModal={setInfoModalOpen}
         onDisconnect={openConnectModal}
-        successText={i18n.t(
-          'Please close this message and try creating the scratch org again.',
-        )}
       />
       <ConfirmDeleteModal
         confirmDeleteModalOpen={confirmDeleteModalOpen}

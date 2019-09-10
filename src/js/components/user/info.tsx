@@ -186,7 +186,7 @@ export const ConnectionInfoModal = ({
   isOpen,
   toggleModal,
   onDisconnect,
-  successText = '',
+  successText,
 }: {
   user: User;
   isOpen: boolean;
@@ -206,7 +206,14 @@ export const ConnectionInfoModal = ({
           ? i18n.t('Dev Hub Enabled')
           : i18n.t('Enable Dev Hub')
       }
-      tagline={user.is_devhub_enabled ? successText : <ConnectionInfoWarning />}
+      tagline={
+        user.is_devhub_enabled ? (
+          successText ||
+          i18n.t('Please close this message and try your action again.')
+        ) : (
+          <ConnectionInfoWarning />
+        )
+      }
       prompt={user.is_devhub_enabled ? 'success' : 'warning'}
       footer={
         user.is_devhub_enabled && [
