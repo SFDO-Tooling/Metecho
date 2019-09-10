@@ -79,7 +79,12 @@ with open("/server.key") as f:
     SF_CLIENT_KEY = f.read()
 
 
-def construct_org_config(*, config, org_name, login_url, sf_client_id):
+def refresh_access_token(*, config, org_name, login_url, sf_client_id):
+    """
+    Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
+    which we don't want now -- this is a total hack which I'll try to
+    smooth over with some improvements in CumulusCI
+    """
     org_config = OrgConfig(config, org_name)
     org_config.refresh_oauth_token = Mock()
     info = jwt_session(
@@ -188,10 +193,11 @@ def get_access_token(
     ] = auth_result["access_token"]
 
 
-def save_settings(
+def deploy_org_settings(
     *,
     cci,
     login_url,
+    org_config,
     org_name,
     scratch_org_config,
     scratch_org_definition,
@@ -223,11 +229,7 @@ def save_settings(
             with open("package.xml", "w") as f:
                 f.write(PACKAGE_XML)
 
-            # Construct a new OrgConfig because ScratchOrgConfig
-            # tries to use sfdx which we don't want now -- this is a
-            # total hack which I'll try to smooth over with some
-            # improvements in CumulusCI
-            org_config = construct_org_config(
+            org_config = refresh_access_token(
                 config=scratch_org_config.config,
                 org_name=org_name,
                 login_url=login_url,
@@ -238,7 +240,7 @@ def save_settings(
             task = Deploy(cci.project_config, task_config, org_config)
             task()
             return org_config
-    return None
+    return org_config
 
 
 def run_flow(*, repo_owner, repo_name, repo_branch, user, flow_name):
@@ -303,9 +305,10 @@ def run_flow(*, repo_owner, repo_name, repo_branch, user, flow_name):
             sf_client_id=sf_client_id,
             sf_client_secret=sf_client_secret,
         )
-        org_config = save_settings(
+        org_config = deploy_org_settings(
             cci=cci,
             login_url=login_url,
+            org_config=scratch_org_config,
             org_name=org_name,
             scratch_org_config=scratch_org_config,
             scratch_org_definition=scratch_org_definition,
@@ -314,13 +317,12 @@ def run_flow(*, repo_owner, repo_name, repo_branch, user, flow_name):
 
         # ---
         # Scratch org construction is done but we haven't run a flow
-        # yet.  This is the point where you would want to serialize
+        # yet. This is the point where you would want to serialize
         # scratch_org_config.config to store in the database for use
         # later. Then reconstitute by running construc_org_config
         # ---
 
-        if org_config:
-            # Run flow (takes care of getting a new access token)
-            flow = cci.get_flow(flow_name)
-            with cd(project_path):
-                flow.run(org_config)
+        # Run flow (takes care of getting a new access token)
+        flow = cci.get_flow(flow_name)
+        with cd(project_path):
+            flow.run(org_config)
