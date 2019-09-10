@@ -3,7 +3,6 @@ import logging
 import traceback
 
 from asgiref.sync import async_to_sync
-from cumulusci.core import flowrunner
 from cumulusci.core.config import ScratchOrgConfig
 from django.utils.text import slugify
 from django.utils.timezone import now
@@ -11,13 +10,13 @@ from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
-from .custom_cci_configs import MetaShareCCI
 from .github_context import (
     extract_owner_and_repo,
     get_cumulus_prefix,
     local_github_checkout,
 )
 from .push import push_message_about_instance
+from .sf_run_flow import run_flow
 
 logger = logging.getLogger(__name__)
 
@@ -57,28 +56,24 @@ def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
     latest_commit_url = commit.html_url
     latest_commit_at = commit.commit.author.get("date", None)
 
-    with report_errors_on(scratch_org):
-        org_config = ScratchOrgConfig(
-            {"config_file": "orgs/dev.json", "scratch": True}, "dev"
-        )
-        org_config.create_org()
-        # We just need to access this property to pull down info from SF
-        # as a side-effect.
-        org_config.scratch_info
-        # TODO: We should actually just save all of org_config.config as
-        # json to the model, and use it to re-hydrate the
-        # ScratchOrgConfig as-needed.
-        scratch_org.url = org_config.instance_url
-        scratch_org.last_modified_at = now()
-        scratch_org.expires_at = org_config.expires
-        scratch_org.latest_commit = latest_commit
-        scratch_org.latest_commit_url = latest_commit_url
-        scratch_org.latest_commit_at = latest_commit_at
-        scratch_org.config = org_config.config
-        # We'll then save this in the orchestrating function, once all
-        # tasks are done.
+    org_config = ScratchOrgConfig(
+        {"config_file": "orgs/dev.json", "scratch": True}, "dev"
+    )
+    org_config.create_org()
+    # We just need to access this property to pull down info from SF as
+    # a side-effect.
+    org_config.scratch_info
+    scratch_org.url = org_config.instance_url
+    scratch_org.last_modified_at = now()
+    scratch_org.expires_at = org_config.expires
+    scratch_org.latest_commit = latest_commit
+    scratch_org.latest_commit_url = latest_commit_url
+    scratch_org.latest_commit_at = latest_commit_at
+    scratch_org.config = org_config.config
+    # We'll then save this in the orchestrating function, once all tasks
+    # are done.
 
-        return org_config
+    return org_config
 
 
 def try_to_make_branch(repository, *, new_branch, base_branch):
@@ -139,34 +134,28 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
     return task_branch_name
 
 
-def run_appropriate_flow(
-    scratch_org, *, user, repo_root, repo_url, repo_branch, org_config
-):
-    # TODO: I hope this function is right, but I am not whether it is or
-    # how to meaningfully test it!
+def run_appropriate_flow(scratch_org, *, user, repo_url, repo_branch):
     from .models import SCRATCH_ORG_TYPES
 
     cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
 
-    gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
-    repository = gh.repository(owner, repo)
-    cci = MetaShareCCI(
-        repo_root=repo_root,
-        repo_name="Repo Name",  # A placeholder, not used.
-        repo_url=repo_url,
+    run_flow(
         repo_owner=owner,
+        repo_name=repo,
         repo_branch=repo_branch,
-        repo_commit=repository.branch(repo_branch).latest_sha(),
+        user=user,
+        flow_name=cases[scratch_org.org_type],
     )
-    flow_config = cci.get_flow(cases[scratch_org.org_type])
-    flowrunner.FlowCoordinator(cci.project_config, flow_config).run(org_config)
 
 
 def create_branches_on_github_then_create_scratch_org(
     *, project, repo_url, scratch_org, task, user
 ):
-    with local_github_checkout(user, repo_url) as repo_root:
+    with contextlib.ExitStack() as stack:
+        repo_root = stack.enter_context(local_github_checkout(user, repo_url))
+        stack.enter_context(report_errors_on(scratch_org))
+
         commit_ish = create_branches_on_github(
             user=user,
             repo_url=repo_url,
@@ -174,16 +163,11 @@ def create_branches_on_github_then_create_scratch_org(
             task=task,
             repo_root=repo_root,
         )
-        org_config = create_scratch_org(
+        create_scratch_org(
             scratch_org=scratch_org, user=user, repo_url=repo_url, commit_ish=commit_ish
         )
         run_appropriate_flow(
-            scratch_org,
-            user=user,
-            repo_root=repo_root,
-            repo_url=repo_url,
-            repo_branch=task.branch_name,
-            org_config=org_config,
+            scratch_org, user=user, repo_url=repo_url, repo_branch=task.branch_name
         )
 
         scratch_org.save()
