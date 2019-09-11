@@ -326,4 +326,4 @@ def create_org_and_run_flow(
     with cd(project_path):
         flow.run(org_config)
 
-    return org_config
+    return scratch_org_config
