@@ -325,3 +325,5 @@ def create_org_and_run_flow(
     flow = cci.get_flow(flow_name)
     with cd(project_path):
         flow.run(org_config)
+
+    return org_config
