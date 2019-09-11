@@ -7,9 +7,8 @@ from github3.exceptions import UnprocessableEntity
 from ..jobs import (
     create_branches_on_github,
     create_branches_on_github_then_create_scratch_org,
-    create_scratch_org,
+    create_org_and_run_flow,
     report_errors_on,
-    run_appropriate_flow,
     try_to_make_branch,
 )
 from ..models import SCRATCH_ORG_TYPES
@@ -21,24 +20,6 @@ class AsyncMock(MagicMock):
 
 
 PATCH_ROOT = "metashare.api.jobs"
-
-
-@pytest.mark.django_db
-def test_create_scratch_org(user_factory):
-    scratch_org = MagicMock()
-    user = user_factory()
-    with ExitStack() as stack:
-        ScratchOrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.ScratchOrgConfig"))
-        scratch_org = MagicMock()
-        ScratchOrgConfig.return_value = scratch_org
-        stack.enter_context(patch(f"{PATCH_ROOT}.login"))
-        create_scratch_org(
-            scratch_org=scratch_org,
-            user=user,
-            repo_url="https://github.com/test/repo-lombardy",
-            commit_ish="master",
-        )
-        assert scratch_org.create_org.called
 
 
 @pytest.mark.django_db
@@ -117,16 +98,19 @@ class TestCreateBranchesOnGitHub:
         assert result == "new-branch-1"
 
 
-def test_run_appropriate_flow():
-    with patch(f"{PATCH_ROOT}.run_flow") as run_flow:
-        run_appropriate_flow(
+def test_create_org_and_run_flow():
+    with ExitStack() as stack:
+        sf_run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_run_flow"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.login"))
+        create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
             repo_url="https://github.com/owner/repo",
             repo_branch=MagicMock(),
+            project_path="",
         )
 
-        assert run_flow.called
+        assert sf_run_flow.create_org_and_run_flow.called
 
 
 @pytest.mark.django_db
@@ -150,10 +134,9 @@ def test_create_branches_on_github_then_create_scratch_org():
         create_branches_on_github = stack.enter_context(
             patch(f"{PATCH_ROOT}.create_branches_on_github")
         )
-        create_scratch_org = stack.enter_context(
-            patch(f"{PATCH_ROOT}.create_scratch_org")
+        create_org_and_run_flow = stack.enter_context(
+            patch(f"{PATCH_ROOT}.create_org_and_run_flow")
         )
-        stack.enter_context(patch(f"{PATCH_ROOT}.run_appropriate_flow"))
 
         create_branches_on_github_then_create_scratch_org(
             project=MagicMock(),
@@ -164,4 +147,4 @@ def test_create_branches_on_github_then_create_scratch_org():
         )
 
         assert create_branches_on_github.called
-        assert create_scratch_org.called
+        assert create_org_and_run_flow.called
