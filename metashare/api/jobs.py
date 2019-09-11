@@ -94,6 +94,8 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
         )
         task.branch_name = task_branch_name
 
+    project.save()
+    task.save()
     return task_branch_name
 
 
@@ -127,8 +129,7 @@ def create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project
     scratch_org.latest_commit_url = latest_commit_url
     scratch_org.latest_commit_at = latest_commit_at
     scratch_org.config = org_config.config
-    # We'll then save this in the orchestrating function, once all tasks
-    # are done.
+    scratch_org.save()
 
 
 def create_branches_on_github_then_create_scratch_org(
@@ -152,10 +153,6 @@ def create_branches_on_github_then_create_scratch_org(
             repo_branch=commit_ish,
             project_path=repo_root,
         )
-
-        project.save()
-        task.save()
-        scratch_org.save()
 
 
 create_branches_on_github_then_create_scratch_org_job = job(
