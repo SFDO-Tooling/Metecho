@@ -3,20 +3,19 @@ import logging
 import traceback
 
 from asgiref.sync import async_to_sync
-from cumulusci.core.config import ScratchOrgConfig
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
+from . import sf_run_flow
 from .github_context import (
     extract_owner_and_repo,
     get_cumulus_prefix,
     local_github_checkout,
 )
 from .push import push_message_about_instance
-from .sf_run_flow import run_flow
 
 logger = logging.getLogger(__name__)
 
@@ -41,39 +40,6 @@ def report_errors_on(scratch_org):
         logger.error(tb)
         scratch_org.delete()
         raise
-
-
-def create_scratch_org(*, scratch_org, user, repo_url, commit_ish):
-    """
-    Expects to be called in the context of a local github checkout.
-    """
-    gh = login(token=user.gh_token)
-    owner, repo = extract_owner_and_repo(repo_url)
-    repository = gh.repository(owner, repo)
-    branch = repository.branch(commit_ish)
-    commit = branch.commit
-    latest_commit = commit.sha
-    latest_commit_url = commit.html_url
-    latest_commit_at = commit.commit.author.get("date", None)
-
-    org_config = ScratchOrgConfig(
-        {"config_file": "orgs/dev.json", "scratch": True}, "dev"
-    )
-    org_config.create_org()
-    # We just need to access this property to pull down info from SF as
-    # a side-effect.
-    org_config.scratch_info
-    scratch_org.url = org_config.instance_url
-    scratch_org.last_modified_at = now()
-    scratch_org.expires_at = org_config.expires
-    scratch_org.latest_commit = latest_commit
-    scratch_org.latest_commit_url = latest_commit_url
-    scratch_org.latest_commit_at = latest_commit_at
-    scratch_org.config = org_config.config
-    # We'll then save this in the orchestrating function, once all tasks
-    # are done.
-
-    return org_config
 
 
 def try_to_make_branch(repository, *, new_branch, base_branch):
@@ -130,23 +96,40 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
 
     project.save()
     task.save()
-
     return task_branch_name
 
 
-def run_appropriate_flow(scratch_org, *, user, repo_url, repo_branch):
+def create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project_path):
     from .models import SCRATCH_ORG_TYPES
 
     cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
 
+    gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
-    run_flow(
+    repository = gh.repository(owner, repo)
+    branch = repository.branch(repo_branch)
+    commit = branch.commit
+    latest_commit = commit.sha
+    latest_commit_url = commit.html_url
+    latest_commit_at = commit.commit.author.get("date", None)
+
+    owner, repo = extract_owner_and_repo(repo_url)
+    org_config = sf_run_flow.create_org_and_run_flow(
         repo_owner=owner,
         repo_name=repo,
         repo_branch=repo_branch,
         user=user,
         flow_name=cases[scratch_org.org_type],
+        project_path=project_path,
     )
+    scratch_org.url = org_config.instance_url
+    scratch_org.last_modified_at = now()
+    scratch_org.expires_at = org_config.expires
+    scratch_org.latest_commit = latest_commit
+    scratch_org.latest_commit_url = latest_commit_url
+    scratch_org.latest_commit_at = latest_commit_at
+    scratch_org.config = org_config.config
+    scratch_org.save()
 
 
 def create_branches_on_github_then_create_scratch_org(
@@ -163,14 +146,13 @@ def create_branches_on_github_then_create_scratch_org(
             task=task,
             repo_root=repo_root,
         )
-        create_scratch_org(
-            scratch_org=scratch_org, user=user, repo_url=repo_url, commit_ish=commit_ish
+        create_org_and_run_flow(
+            scratch_org,
+            user=user,
+            repo_url=repo_url,
+            repo_branch=commit_ish,
+            project_path=repo_root,
         )
-        run_appropriate_flow(
-            scratch_org, user=user, repo_url=repo_url, repo_branch=task.branch_name
-        )
-
-        scratch_org.save()
 
 
 create_branches_on_github_then_create_scratch_org_job = job(

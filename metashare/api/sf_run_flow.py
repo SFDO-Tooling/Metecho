@@ -15,8 +15,6 @@ from cumulusci.tasks.salesforce import Deploy
 from cumulusci.utils import cd, temporary_dir
 from simple_salesforce import Salesforce as SimpleSalesforce
 
-from metashare.api.github_context import local_github_checkout
-
 # Deploy org settings metadata -- this should get moved into CumulusCI
 SETTINGS_XML_t = """<?xml version="1.0" encoding="UTF-8"?>
 <{settingsName} xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -79,7 +77,12 @@ with open("/server.key") as f:
     SF_CLIENT_KEY = f.read()
 
 
-def construct_org_config(*, config, org_name, login_url, sf_client_id):
+def refresh_access_token(*, config, org_name, login_url, sf_client_id):
+    """
+    Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
+    which we don't want now -- this is a total hack which I'll try to
+    smooth over with some improvements in CumulusCI
+    """
     org_config = OrgConfig(config, org_name)
     org_config.refresh_oauth_token = Mock()
     info = jwt_session(
@@ -188,10 +191,11 @@ def get_access_token(
     ] = auth_result["access_token"]
 
 
-def save_settings(
+def deploy_org_settings(
     *,
     cci,
     login_url,
+    org_config,
     org_name,
     scratch_org_config,
     scratch_org_definition,
@@ -223,11 +227,7 @@ def save_settings(
             with open("package.xml", "w") as f:
                 f.write(PACKAGE_XML)
 
-            # Construct a new OrgConfig because ScratchOrgConfig
-            # tries to use sfdx which we don't want now -- this is a
-            # total hack which I'll try to smooth over with some
-            # improvements in CumulusCI
-            org_config = construct_org_config(
+            org_config = refresh_access_token(
                 config=scratch_org_config.config,
                 org_name=org_name,
                 login_url=login_url,
@@ -238,10 +238,12 @@ def save_settings(
             task = Deploy(cci.project_config, task_config, org_config)
             task()
             return org_config
-    return None
+    return org_config
 
 
-def run_flow(*, repo_owner, repo_name, repo_branch, user, flow_name):
+def create_org_and_run_flow(
+    *, repo_owner, repo_name, repo_branch, user, flow_name, project_path
+):
     # TODO: Should this come from env, even if that mirrors the DB contents?
     sa = SocialApp.objects.filter(provider__startswith="salesforce").first()
     sf_client_id = sa.client_id
@@ -265,62 +267,63 @@ def run_flow(*, repo_owner, repo_name, repo_branch, user, flow_name):
     devhub_username = user.sf_username
     email = user.email  # TODO: check that this is reliably right.
 
-    with local_github_checkout(user, repo_url) as project_path:
-        cci = BaseCumulusCI(
-            repo_info={
-                "root": project_path,
-                "url": repo_url,
-                "name": repo_name,
-                "owner": repo_owner,
-                "commit": repo_branch,
-            }
-        )
-        devhub_api = get_devhub_api(
-            devhub_username=devhub_username, sf_client_id=sf_client_id
-        )
-        scratch_org_config, scratch_org_definition = get_org_details(
-            cci=cci, org_name=org_name, project_path=project_path
-        )
-        org_result = get_org_result(
-            email=email,
-            repo_owner=repo_owner,
-            repo_name=repo_name,
-            repo_branch=repo_branch,
-            scratch_org_config=scratch_org_config,
-            scratch_org_definition=scratch_org_definition,
-            cci=cci,
-            devhub_api=devhub_api,
-            sf_client_id=sf_client_id,
-        )
-        mutate_scratch_org(
-            scratch_org_config=scratch_org_config, org_result=org_result, email=email
-        )
-        login_url = get_login_url(org_result)
-        get_access_token(
-            login_url=login_url,
-            org_result=org_result,
-            scratch_org_config=scratch_org_config,
-            sf_client_id=sf_client_id,
-            sf_client_secret=sf_client_secret,
-        )
-        org_config = save_settings(
-            cci=cci,
-            login_url=login_url,
-            org_name=org_name,
-            scratch_org_config=scratch_org_config,
-            scratch_org_definition=scratch_org_definition,
-            sf_client_id=sf_client_id,
-        )
+    cci = BaseCumulusCI(
+        repo_info={
+            "root": project_path,
+            "url": repo_url,
+            "name": repo_name,
+            "owner": repo_owner,
+            "commit": repo_branch,
+        }
+    )
+    devhub_api = get_devhub_api(
+        devhub_username=devhub_username, sf_client_id=sf_client_id
+    )
+    scratch_org_config, scratch_org_definition = get_org_details(
+        cci=cci, org_name=org_name, project_path=project_path
+    )
+    org_result = get_org_result(
+        email=email,
+        repo_owner=repo_owner,
+        repo_name=repo_name,
+        repo_branch=repo_branch,
+        scratch_org_config=scratch_org_config,
+        scratch_org_definition=scratch_org_definition,
+        cci=cci,
+        devhub_api=devhub_api,
+        sf_client_id=sf_client_id,
+    )
+    mutate_scratch_org(
+        scratch_org_config=scratch_org_config, org_result=org_result, email=email
+    )
+    login_url = get_login_url(org_result)
+    get_access_token(
+        login_url=login_url,
+        org_result=org_result,
+        scratch_org_config=scratch_org_config,
+        sf_client_id=sf_client_id,
+        sf_client_secret=sf_client_secret,
+    )
+    org_config = deploy_org_settings(
+        cci=cci,
+        login_url=login_url,
+        org_config=scratch_org_config,
+        org_name=org_name,
+        scratch_org_config=scratch_org_config,
+        scratch_org_definition=scratch_org_definition,
+        sf_client_id=sf_client_id,
+    )
 
-        # ---
-        # Scratch org construction is done but we haven't run a flow
-        # yet.  This is the point where you would want to serialize
-        # scratch_org_config.config to store in the database for use
-        # later. Then reconstitute by running construc_org_config
-        # ---
+    # ---
+    # Scratch org construction is done but we haven't run a flow
+    # yet. This is the point where you would want to serialize
+    # scratch_org_config.config to store in the database for use
+    # later. Then reconstitute by running construc_org_config
+    # ---
 
-        if org_config:
-            # Run flow (takes care of getting a new access token)
-            flow = cci.get_flow(flow_name)
-            with cd(project_path):
-                flow.run(org_config)
+    # Run flow (takes care of getting a new access token)
+    flow = cci.get_flow(flow_name)
+    with cd(project_path):
+        flow.run(org_config)
+
+    return scratch_org_config
