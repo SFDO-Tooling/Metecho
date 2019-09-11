@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 
 from sfdo_template_helpers.crypto import fernet_encrypt
 
-from .api.models import GitHubRepository, Project, Repository
+from .api.models import GitHubRepository, Project, Repository, ScratchOrg, Task
 
 User = get_user_model()
 
@@ -87,6 +87,25 @@ class ProjectFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence("Project {}".format)
     repository = factory.SubFactory(RepositoryFactory)
+
+
+@register
+class TaskFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Task
+
+    name = factory.Sequence("Project {}".format)
+    project = factory.SubFactory(ProjectFactory)
+
+
+@register
+class ScratchOrgFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ScratchOrg
+
+    task = factory.SubFactory(TaskFactory)
+    owner = factory.SubFactory(UserFactory)
+    org_type = "Dev"
 
 
 @pytest.fixture

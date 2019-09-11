@@ -2,21 +2,25 @@ import { AnyAction, combineReducers, Reducer } from 'redux';
 import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 import errorsReducer, { ErrorType } from '@/store/errors/reducer';
+import orgReducer, { OrgState } from '@/store/orgs/reducer';
 import projectsReducer, { ProjectsState } from '@/store/projects/reducer';
 import repositoriesReducer, {
   RepositoriesState,
 } from '@/store/repositories/reducer';
 import socketReducer, { Socket } from '@/store/socket/reducer';
 import taskReducer, { TaskState } from '@/store/tasks/reducer';
+import toastsReducer, { ToastType } from '@/store/toasts/reducer';
 import userReducer, { User } from '@/store/user/reducer';
 
 export interface AppState {
   errors: ErrorType[];
-  repositories: RepositoriesState;
+  toasts: ToastType[];
+  orgs: OrgState;
   projects: ProjectsState;
+  repositories: RepositoriesState;
   socket: Socket;
-  user: User | null;
   tasks: TaskState;
+  user: User | null;
 }
 
 export interface Action {
@@ -24,16 +28,23 @@ export interface Action {
   payload?: any;
 }
 
-export type ThunkResult = ThunkAction<Promise<any>, AppState, void, AnyAction>;
+export type ThunkResult = ThunkAction<
+  Promise<any> | AnyAction,
+  AppState,
+  void,
+  AnyAction
+>;
 export type ThunkDispatch = ReduxThunkDispatch<AppState, void, AnyAction>;
 
 const reducer: Reducer<AppState, Action> = combineReducers({
+  toasts: toastsReducer,
   errors: errorsReducer,
-  repositories: repositoriesReducer,
+  orgs: orgReducer,
   projects: projectsReducer,
+  repositories: repositoriesReducer,
   socket: socketReducer,
-  user: userReducer,
   tasks: taskReducer,
+  user: userReducer,
 });
 
 export default reducer;

@@ -31,7 +31,6 @@
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
-    "search.usePCRE2": true,
     "javascript.suggestionActions.enabled": false,
     "eslint.autoFixOnSave": true,
     "eslint.validate": [
@@ -63,19 +62,14 @@
       "editor.rulers": [80]
     },
     "[restructuredtext]": {
-      "editor.formatOnSave": true,
       "editor.rulers": [80]
     },
     "[markdown]": {
-      "editor.formatOnSave": true,
       "editor.rulers": [80]
     },
     "[javascriptreact]": {
       "editor.formatOnSave": false,
       "editor.rulers": [80]
-    },
-    "[jsonc]": {
-      "editor.formatOnSave": true
     },
     "[typescript]": {
       "editor.formatOnSave": false,
@@ -85,8 +79,8 @@
       "editor.formatOnSave": false,
       "editor.rulers": [80]
     },
-    "[scss]": {
-      "editor.formatOnSave": true
+    "[python]": {
+      "editor.rulers": [88]
     },
     "files.exclude": {
       "**/.git": true,

@@ -1,6 +1,7 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
+import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
@@ -59,7 +60,24 @@ const ConnectToSalesforce = ({
   );
 };
 
-const ConnectionInfo = ({ user }: { user: User }) => {
+const ConnectionInfoWarning = () => (
+  <Trans i18nKey="devHubNotEnabled">
+    This Salesforce org does not have Dev Hub enabled, and will not be able to
+    create new scratch orgs. Learn how to{' '}
+    <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
+      enable Dev Hub
+    </ExternalLink>
+    .
+  </Trans>
+);
+
+const UserInfo = ({
+  user,
+  onDisconnect = () => {},
+}: {
+  user: User;
+  onDisconnect?: () => void;
+}) => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isMounted = useIsMounted();
@@ -67,6 +85,7 @@ const ConnectionInfo = ({ user }: { user: User }) => {
   const doDisconnect = useCallback(() => {
     setIsDisconnecting(true);
     dispatch(disconnect()).finally(() => {
+      onDisconnect();
       /* istanbul ignore else */
       if (isMounted.current) {
         setIsDisconnecting(false);
@@ -86,39 +105,7 @@ const ConnectionInfo = ({ user }: { user: User }) => {
   return (
     <>
       {(isDisconnecting || isRefreshing) && <Spinner />}
-      <Icon
-        className="slds-is-absolute"
-        category="utility"
-        name="connected_apps"
-        size="small"
-      />
-      <div className="slds-p-left_x-large">
-        <p className="slds-text-heading_small">
-          {i18n.t('Connected to Salesforce')}
-        </p>
-        {!user.is_devhub_enabled && (
-          <p className="slds-text-color_weak slds-m-top_xx-small">
-            <Icon
-              assistiveText={{ label: i18n.t('Error') }}
-              category="utility"
-              name="error"
-              colorVariant="error"
-              size="x-small"
-              className="slds-m-bottom_xxx-small"
-              containerClassName="slds-m-right_xx-small"
-            />
-            <Trans i18nKey="devHubNotEnabled">
-              This Salesforce org does not have Dev Hub enabled, and will not be
-              able to create new scratch orgs. Learn how to{' '}
-              <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
-                enable Dev Hub
-              </ExternalLink>
-              .
-            </Trans>
-          </p>
-        )}
-      </div>
-      <ul className="slds-m-top_small">
+      <ul>
         <li>
           <strong>{i18n.t('Dev Hub')}:</strong>{' '}
           {user.is_devhub_enabled ? (
@@ -163,7 +150,83 @@ const ConnectionInfo = ({ user }: { user: User }) => {
   );
 };
 
-const UserInfo = () => {
+const ConnectionInfo = ({ user }: { user: User }) => (
+  <>
+    <Icon
+      className="slds-is-absolute"
+      category="utility"
+      name="connected_apps"
+      size="small"
+    />
+    <div className="slds-p-left_x-large slds-m-bottom_small">
+      <p className="slds-text-heading_small">
+        {i18n.t('Connected to Salesforce')}
+      </p>
+      {!user.is_devhub_enabled && (
+        <p className="slds-text-color_weak slds-m-top_xx-small">
+          <Icon
+            assistiveText={{ label: i18n.t('Error') }}
+            category="utility"
+            name="error"
+            colorVariant="error"
+            size="x-small"
+            className="slds-m-bottom_xxx-small"
+            containerClassName="slds-m-right_xx-small"
+          />
+          <ConnectionInfoWarning />
+        </p>
+      )}
+    </div>
+    <UserInfo user={user} />
+  </>
+);
+
+export const ConnectionInfoModal = ({
+  user,
+  isOpen,
+  toggleModal,
+  onDisconnect,
+  successText = '',
+}: {
+  user: User;
+  isOpen: boolean;
+  toggleModal: (open: boolean) => void;
+  onDisconnect?: () => void;
+  successText?: string;
+}) => {
+  const handleClose = () => {
+    toggleModal(false);
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      heading={
+        user.is_devhub_enabled
+          ? i18n.t('Dev Hub Enabled')
+          : i18n.t('Enable Dev Hub')
+      }
+      tagline={user.is_devhub_enabled ? successText : <ConnectionInfoWarning />}
+      prompt={user.is_devhub_enabled ? 'success' : 'warning'}
+      footer={
+        user.is_devhub_enabled && [
+          <Button
+            key="close"
+            label={i18n.t('Continue')}
+            onClick={handleClose}
+          />,
+        ]
+      }
+      onRequestClose={handleClose}
+    >
+      <div className="slds-p-vertical_medium slds-is-relative">
+        <UserInfo user={user} onDisconnect={onDisconnect} />
+      </div>
+    </Modal>
+  );
+};
+
+const UserDropdown = () => {
   const user = useSelector(selectUserState);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -218,4 +281,4 @@ const UserInfo = () => {
   ) : null;
 };
 
-export default UserInfo;
+export default UserDropdown;

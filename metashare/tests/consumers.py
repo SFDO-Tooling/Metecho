@@ -15,7 +15,9 @@ async def test_push_notification_consumer__report_error(user_factory):
     connected, _ = await communicator.connect()
     assert connected
 
-    await communicator.send_json_to({"model": "user", "id": str(user.id)})
+    await communicator.send_json_to(
+        {"model": "user", "id": str(user.id), "action": "SUBSCRIBE"}
+    )
     response = await communicator.receive_json_from()
     assert "ok" in response
 
@@ -25,6 +27,31 @@ async def test_push_notification_consumer__report_error(user_factory):
         "type": "BACKEND_ERROR",
         "payload": {"message": "There was an error"},
     }
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+@pytest.mark.asyncio
+async def test_push_notification_consumer__unsubscribe(user_factory):
+    user = user_factory()
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = user
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to(
+        {"model": "user", "id": str(user.id), "action": "SUBSCRIBE"}
+    )
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await communicator.send_json_to(
+        {"model": "user", "id": str(user.id), "action": "UNSUBSCRIBE"}
+    )
+    response = await communicator.receive_json_from()
+    assert "ok" in response
 
     await communicator.disconnect()
 

@@ -19,31 +19,31 @@ case "$1" in
         docker-compose build
         ;;
     "populate")
-        dcr python manage.py populate_data
+        dcr python manage.py populate_data "${@:2}"
         ;;
     "truncate")
-        dcr python manage.py truncate_data
+        dcr python manage.py truncate_data "${@:2}"
         ;;
     "lint")
-        dcrq yarn lint
+        dcrq yarn lint "${@:2}"
         ;;
     "lint:py")
-        dcrq yarn lintpy
+        dcrq yarn lintpy "${@:2}"
         ;;
     "lint:js")
-        dcrq yarn lintjs
+        dcrq yarn lintjs "${@:2}"
         ;;
     "test")
-        dcr yarn test:all
+        dcr yarn test:all "${@:2}"
         ;;
     "test:watch")
-        dcr yarn test:watch
+        dcr yarn test:watch "${@:2}"
         ;;
     "test:py")
         dcr yarn pytest "${@:2}"
         ;;
     "test:js")
-        dcrq yarn test
+        dcrq yarn test "${@:2}"
         ;;
     "add:js")
         dcrq yarn add "${@:2}"
@@ -65,16 +65,17 @@ case "$1" in
         dcr python manage.py compilemessages
         ;;
     "shell")
-        dcr python manage.py shell
+        dcr python manage.py shell "${@:2}"
         ;;
     "dbshell")
-        dcr python manage.py dbshell
+        dcr python manage.py dbshell "${@:2}"
+        ;;
+    "manage")
+        dcr python manage.py "${@:2}"
         ;;
     "prune")
         # See https://docs.docker.com/config/pruning/ for more detail.
-        docker image prune -f
-        docker container prune -f
-        docker volume rm $(docker volume ls -qf dangling=true)
+        docker system prune -f --volumes
         ;;
     "*" | "help")
         echo "Sorry, I don't know that command."

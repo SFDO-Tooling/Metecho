@@ -1,6 +1,14 @@
 from django.core.management.base import BaseCommand
 
-from ...models import Project, ProjectSlug, Repository, RepositorySlug, Task, TaskSlug
+from ...models import (
+    Project,
+    ProjectSlug,
+    Repository,
+    RepositorySlug,
+    ScratchOrg,
+    Task,
+    TaskSlug,
+)
 
 
 class Command(BaseCommand):
@@ -8,6 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ordered_models = [
+            ScratchOrg,
             TaskSlug,
             Task,
             ProjectSlug,

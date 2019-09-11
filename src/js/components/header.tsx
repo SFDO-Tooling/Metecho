@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 import Errors from '@/components/apiErrors';
 import OfflineAlert from '@/components/offlineAlert';
+import Toasts from '@/components/toasts';
 import UserInfo from '@/components/user/info';
 import { selectSocketState } from '@/store/socket/selectors';
 import { selectUserState } from '@/store/user/selectors';
@@ -25,6 +26,7 @@ const Header = () => {
     <>
       {socket ? null : <OfflineAlert />}
       <Errors />
+      <Toasts />
       <PageHeader
         className="global-header
           slds-p-horizontal_x-large

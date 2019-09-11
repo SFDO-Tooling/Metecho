@@ -88,6 +88,7 @@ describe('<ProjectForm/>', () => {
           description: 'This is the description',
           repository: 'r1',
         },
+        hasForm: true,
       });
     });
 

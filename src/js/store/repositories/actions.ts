@@ -21,8 +21,12 @@ export type RepositoriesAction =
 export const syncRepos = (): ThunkResult => async dispatch => {
   dispatch({ type: 'SYNC_REPOS_STARTED' });
   try {
-    await apiFetch(window.api_urls.user_refresh(), dispatch, {
-      method: 'POST',
+    await apiFetch({
+      url: window.api_urls.user_refresh(),
+      dispatch,
+      opts: {
+        method: 'POST',
+      },
     });
     dispatch({ type: 'SYNC_REPOS_SUCCEEDED' });
     return dispatch(

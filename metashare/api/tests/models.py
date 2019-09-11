@@ -2,7 +2,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..models import Project, Repository, user_logged_in_handler
+from sfdo_template_helpers.crypto import fernet_decrypt
+
+from ..models import Project, Repository, Task, user_logged_in_handler
+
+# from ..models import ScratchOrg
 
 
 @pytest.mark.django_db
@@ -29,6 +33,13 @@ class TestProject:
         repository = repository_factory()
         project = Project(name="Test Project", repository=repository)
         assert str(project) == "Test Project"
+
+
+@pytest.mark.django_db
+class TestTask:
+    def test_str(self):
+        task = Task(name="Test Task")
+        assert str(task) == "Test Task"
 
 
 @pytest.mark.django_db
@@ -69,15 +80,24 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.instance_url is None
 
-    def test_token(self, user_factory, social_account_factory):
+    def test_sf_token(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
-        assert user.token == ("0123456789abcdef", "secret.0123456789abcdef")
+        assert user.sf_token == ("0123456789abcdef", "secret.0123456789abcdef")
 
         user.socialaccount_set.all().delete()
-        assert user.token == (None, None)
+        assert user.sf_token == (None, None)
 
-    def test_token__invalid(
+    def test_gh_token(self, user_factory):
+        user = user_factory()
+        # Because the test fixture Fernet encrypts this by default. We
+        # don't expect the GitHub token to be encrypted usually.
+        assert fernet_decrypt(user.gh_token) == "0123456789abcdef"
+
+        user.socialaccount_set.all().delete()
+        assert user.gh_token is None
+
+    def test_sf_token__invalid(
         self, user_factory, social_token_factory, social_account_factory
     ):
         user = user_factory()
@@ -85,10 +105,10 @@ class TestUser:
             socialtoken_set=[], user=user, provider="salesforce-production"
         )
         social_token_factory(token="an invalid token", account=social_account)
-        assert user.token == (None, None)
+        assert user.sf_token == (None, None)
 
         user.socialaccount_set.all().delete()
-        assert user.token == (None, None)
+        assert user.sf_token == (None, None)
 
     def test_valid_token_for(self, user_factory, social_account_factory):
         user = user_factory()
@@ -246,6 +266,21 @@ class TestUser:
             response = MagicMock(status_code=401)
             get.return_value = response
             assert user.is_devhub_enabled is None
+
+
+@pytest.mark.django_db
+class TestScratchOrg:
+    def test_notify_has_url(self, scratch_org_factory):
+        create_branches_on_github_then_create_scratch_org_job = (
+            "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
+        )
+        with patch(create_branches_on_github_then_create_scratch_org_job):
+            with patch("metashare.api.models.async_to_sync") as async_to_sync:
+                scratch_org = scratch_org_factory()
+                scratch_org.url = "https://example.com"
+                scratch_org.save()
+
+                assert async_to_sync.called
 
 
 @pytest.mark.django_db

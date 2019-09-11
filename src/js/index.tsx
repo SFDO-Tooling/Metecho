@@ -38,6 +38,7 @@ import initializeI18n from '@/i18n';
 import reducer from '@/store';
 import { fetchObjects } from '@/store/actions';
 import { clearErrors } from '@/store/errors/actions';
+import { clearToasts } from '@/store/toasts/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
 import { log, logError } from '@/utils/logging';
@@ -53,6 +54,7 @@ const App = withRouter(
     useEffect(
       () => () => {
         dispatch(clearErrors());
+        dispatch(clearToasts());
       },
       [dispatch, pathname],
     );

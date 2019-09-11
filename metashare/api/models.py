@@ -1,21 +1,24 @@
 import requests
 from allauth.account.signals import user_logged_in
+from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
+from django.contrib.postgres.fields import JSONField
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
-from django.utils.text import slugify
-from model_utils import Choices
+from model_utils import Choices, FieldTracker
 
 from sfdo_template_helpers.crypto import fernet_decrypt
-from sfdo_template_helpers.fields import MarkdownField
+from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 
 from . import gh
 from . import model_mixins as mixins
+from . import push
 from .constants import ORGANIZATION_DETAILS
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
@@ -94,28 +97,36 @@ class User(mixins.HashIdMixin, AbstractUser):
             return None
 
     @property
-    def token(self):
-        account = self.salesforce_account
-        if account and account.socialtoken_set.exists():
+    def sf_token(self):
+        try:
             token = self.salesforce_account.socialtoken_set.first()
-            try:
-                return (
-                    fernet_decrypt(token.token) if token.token else None,
-                    token.token_secret if token.token_secret else None,
-                )
-            except InvalidToken:
-                return (None, None)
-        return (None, None)
+            return (
+                fernet_decrypt(token.token) if token.token else None,
+                token.token_secret if token.token_secret else None,
+            )
+        except (InvalidToken, AttributeError):
+            return (None, None)
 
     @property
     def salesforce_account(self):
         return self.socialaccount_set.filter(provider__startswith="salesforce-").first()
 
     @property
+    def github_account(self):
+        return self.socialaccount_set.filter(provider="github").first()
+
+    @property
     def valid_token_for(self):
-        if all(self.token) and self.org_id:
+        if all(self.sf_token) and self.org_id:
             return self.org_id
         return None
+
+    @property
+    def gh_token(self):
+        try:
+            return self.github_account.socialtoken_set.first().token
+        except AttributeError:
+            return None
 
     @cached_property
     def is_devhub_enabled(self):
@@ -123,7 +134,7 @@ class User(mixins.HashIdMixin, AbstractUser):
         if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox, None):
             return None
 
-        token, _ = self.token
+        token, _ = self.sf_token
         instance_url = self.salesforce_account.extra_data["instance_url"]
         url = f"{instance_url}/services/data/v45.0/sobjects/ScratchOrgInfo"
         resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
@@ -176,9 +187,11 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    tracker = FieldTracker(fields=("branch_name",))
+
     name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = models.SlugField(max_length=50)
+    branch_name = models.SlugField(max_length=50, null=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -189,14 +202,25 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     def __str__(self):
         return self.name
 
+    def subscribable_by(self, user):  # pragma: nocover
+        return True
+
     def save(self, *args, **kwargs):
-        if not self.branch_name:
-            self.branch_name = slugify(self.name)
         super().save(*args, **kwargs)
+
+        if self.tracker.has_changed("branch_name"):
+            self.notify_has_branch_name()
+
+    def notify_has_branch_name(self):
+        from .serializers import ProjectSerializer
+
+        payload = ProjectSerializer(self).data
+        message = {"type": "PROJECT_UPDATE", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "repository"), ("branch_name", "repository"))
+        unique_together = (("name", "repository"),)
 
 
 class TaskSlug(AbstractSlug):
@@ -204,18 +228,90 @@ class TaskSlug(AbstractSlug):
 
 
 class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+    tracker = FieldTracker(fields=("branch_name",))
+
     name = models.CharField(max_length=50)
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     assignee = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="assigned_tasks"
     )
+    branch_name = models.SlugField(max_length=50, null=True)
 
     slug_class = TaskSlug
+
+    def __str__(self):
+        return self.name
+
+    def subscribable_by(self, user):  # pragma: nocover
+        return True
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.tracker.has_changed("branch_name"):
+            self.notify_has_branch_name()
+
+    def notify_has_branch_name(self):
+        from .serializers import TaskSerializer
+
+        payload = TaskSerializer(self).data
+        message = {"type": "TASK_UPDATE", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)
+
+
+SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+
+
+class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
+    tracker = FieldTracker(fields=("url",))
+
+    task = models.ForeignKey(Task, on_delete=models.PROTECT)
+    org_type = StringField(choices=SCRATCH_ORG_TYPES)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT)
+    last_modified_at = models.DateTimeField(null=True)
+    expires_at = models.DateTimeField(null=True)
+    latest_commit = StringField(blank=True)
+    latest_commit_url = models.URLField(blank=True)
+    latest_commit_at = models.DateTimeField(null=True)
+    url = models.URLField(null=True)
+    has_changes = models.BooleanField(default=False)
+    config = JSONField(default=dict, encoder=DjangoJSONEncoder)
+
+    def subscribable_by(self, user):  # pragma: nocover
+        return True
+
+    def save(self, *args, **kwargs):
+        create_remote_resources = self.id is None
+        super().save(*args, **kwargs)
+
+        if create_remote_resources:
+            self.create_remote_resources()
+
+        if self.tracker.has_changed("url"):
+            self.notify_has_url()
+
+    def create_remote_resources(self):
+        from .jobs import create_branches_on_github_then_create_scratch_org_job
+
+        create_branches_on_github_then_create_scratch_org_job.delay(
+            project=self.task.project,
+            repo_url=self.task.project.repository.repo_url,
+            scratch_org=self,
+            task=self.task,
+            user=self.owner,
+        )
+
+    def notify_has_url(self):
+        from .serializers import ScratchOrgSerializer
+
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_PROVISIONED", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
 
 @receiver(user_logged_in)

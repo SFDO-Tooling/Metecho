@@ -23,6 +23,8 @@ beforeAll(() => {
     repository_list: () => '/api/repositories/',
     repository_detail: slug => `/api/repositories/${slug}/`,
     project_list: () => '/api/projects/',
+    scratch_org_list: () => '/api/scratch_orgs/',
+    scratch_org_detail: id => `/api/scratch_orgs/${id}/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();

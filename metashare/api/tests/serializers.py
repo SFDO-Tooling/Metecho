@@ -6,6 +6,8 @@ from ..serializers import (
     HashidPrimaryKeyRelatedField,
     ProjectSerializer,
     RepositorySerializer,
+    ScratchOrgSerializer,
+    TaskSerializer,
 )
 
 
@@ -70,11 +72,20 @@ class TestProjectSerializer:
         serializer = ProjectSerializer(project)
         assert serializer.data["description"] == "<p>Test <code>project</code></p>"
 
-    def test_branch_url(self, project_factory):
-        project = project_factory(name="Test project", description="Test `project`")
+    def test_branch_url__present(self, project_factory):
+        project = project_factory(
+            name="Test project",
+            description="Test `project`",
+            branch_name="test-project",
+        )
         serializer = ProjectSerializer(project)
         expected = "https://www.github.com/test/repo/tree/test-project"
         assert serializer.data["branch_url"] == expected
+
+    def test_branch_url__missing(self, project_factory):
+        project = project_factory(name="Test project", description="Test `project`")
+        serializer = ProjectSerializer(project)
+        assert serializer.data["branch_url"] is None
 
     def test_unique_name_for_repository(self, repository_factory, project_factory):
         repository = repository_factory()
@@ -119,3 +130,38 @@ class TestProjectSerializer:
             partial=True,
         )
         assert serializer.is_valid(), serializer.errors
+
+
+@pytest.mark.django_db
+class TestTaskSerializer:
+    def test_branch_url__present(self, task_factory):
+        task = task_factory(name="Test task", branch_name="test-task")
+        serializer = TaskSerializer(task)
+        expected = "https://www.github.com/test/repo/tree/test-task"
+        assert serializer.data["branch_url"] == expected
+
+    def test_branch_url__missing(self, task_factory):
+        task = task_factory(name="Test task")
+        serializer = TaskSerializer(task)
+        assert serializer.data["branch_url"] is None
+
+
+@pytest.mark.django_db
+def test_ScratchOrgSerializer(rf, user_factory, task_factory):
+    user = user_factory()
+    task = task_factory()
+
+    r = rf.get("/")
+    r.user = user
+
+    serializer = ScratchOrgSerializer(
+        data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
+    )
+    assert serializer.is_valid()
+    create_branches_on_github_then_create_scratch_org_job = (
+        "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
+    )
+    with patch(create_branches_on_github_then_create_scratch_org_job):
+        instance = serializer.save()
+
+    assert instance.owner == user

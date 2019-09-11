@@ -48,6 +48,83 @@ describe('fetchObjects with `reset: true`', () => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
     });
+
+    describe('with shouldSubscribeToObject', () => {
+      let store, repo;
+
+      beforeEach(() => {
+        window.socket = { subscribe: jest.fn() };
+        store = storeWithThunk({});
+        repo = {
+          id: 'r1',
+          name: 'Repository 1',
+          slug: 'repository-1',
+          description: 'This is a test repository.',
+          repo_url: 'http://www.test.test',
+          shouldSubscribe: true,
+        };
+      });
+
+      afterEach(() => {
+        Reflect.deleteProperty(window, 'socket');
+      });
+
+      test('subscribes to socket if test passes', () => {
+        const response = [repo, { ...repo, shouldSubscribe: false }];
+        fetchMock.getOnce(url, response);
+
+        expect.assertions(2);
+        return store
+          .dispatch(
+            actions.fetchObjects({
+              objectType: 'repository',
+              reset: true,
+              shouldSubscribeToObject: obj => obj.shouldSubscribe,
+            }),
+          )
+          .then(() => {
+            expect(window.socket.subscribe).toHaveBeenCalledTimes(1);
+            expect(window.socket.subscribe).toHaveBeenCalledWith({
+              model: 'repository',
+              id: 'r1',
+            });
+          });
+      });
+
+      test('does not subscribe if test fails', () => {
+        const response = { next: null, results: [repo] };
+        fetchMock.getOnce(url, response);
+
+        expect.assertions(1);
+        return store
+          .dispatch(
+            actions.fetchObjects({ objectType: 'repository', reset: true }),
+          )
+          .then(() => {
+            expect(window.socket.subscribe).not.toHaveBeenCalled();
+          });
+      });
+    });
+  });
+
+  test('throws error if no url', () => {
+    const store = storeWithThunk({});
+    const payload = { ...objectPayload, objectType: 'foo', url: undefined };
+    const started = {
+      type: 'FETCH_OBJECTS_STARTED',
+      payload,
+    };
+    const failed = {
+      type: 'FETCH_OBJECTS_FAILED',
+      payload,
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.fetchObjects({ objectType: 'foo', reset: true }))
+      .catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+      });
   });
 
   describe('error', () => {
@@ -221,6 +298,31 @@ describe('fetchObject', () => {
     });
   });
 
+  test('throws error if no url', () => {
+    const store = storeWithThunk({});
+    const payload = {
+      ...objectPayload,
+      objectType: 'foo',
+      url: undefined,
+      filters: {},
+    };
+    const started = {
+      type: 'FETCH_OBJECT_STARTED',
+      payload,
+    };
+    const failed = {
+      type: 'FETCH_OBJECT_FAILED',
+      payload,
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.fetchObject({ objectType: 'foo' }))
+      .catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+      });
+  });
+
   describe('error', () => {
     test('dispatches FETCH_OBJECT_FAILED action', () => {
       const store = storeWithThunk({});
@@ -263,6 +365,7 @@ describe('createObject', () => {
       data: {
         name: 'Object Name',
       },
+      url,
     };
   });
 
@@ -285,6 +388,79 @@ describe('createObject', () => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
+
+    describe('with shouldSubscribeToObject', () => {
+      let store, project;
+
+      beforeEach(() => {
+        window.socket = { subscribe: jest.fn() };
+        store = storeWithThunk({});
+        project = {
+          id: 'project-id',
+          shouldSubscribe: true,
+        };
+      });
+
+      afterEach(() => {
+        Reflect.deleteProperty(window, 'socket');
+      });
+
+      test('subscribes to socket if test passes', () => {
+        fetchMock.postOnce(url, project);
+
+        expect.assertions(2);
+        return store
+          .dispatch(
+            actions.createObject({
+              objectType: 'project',
+              shouldSubscribeToObject: o => o.shouldSubscribe,
+            }),
+          )
+          .then(() => {
+            expect(window.socket.subscribe).toHaveBeenCalledTimes(1);
+            expect(window.socket.subscribe).toHaveBeenCalledWith({
+              model: 'project',
+              id: 'project-id',
+            });
+          });
+      });
+
+      test('does not subscribe if test fails', () => {
+        fetchMock.postOnce(url, project);
+
+        expect.assertions(1);
+        return store
+          .dispatch(actions.createObject({ objectType: 'project' }))
+          .then(() => {
+            expect(window.socket.subscribe).not.toHaveBeenCalled();
+          });
+      });
+    });
+  });
+
+  test('throws error if no url', () => {
+    const store = storeWithThunk({});
+    const payload = {
+      ...objectPayload,
+      objectType: 'foo',
+      url: undefined,
+      data: {},
+    };
+    const started = {
+      type: 'CREATE_OBJECT_STARTED',
+      payload,
+    };
+    const failed = {
+      type: 'CREATE_OBJECT_FAILED',
+      payload,
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.createObject({ objectType: 'foo' }))
+      .catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+      });
   });
 
   describe('error', () => {

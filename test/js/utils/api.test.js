@@ -22,20 +22,26 @@ describe('apiFetch', () => {
     const expected = { foo: 'bar' };
     fetchMock.getOnce('/test/url/', expected);
 
-    return expect(apiFetch('/test/url/', dispatch)).resolves.toEqual(expected);
+    return expect(apiFetch({ url: '/test/url/', dispatch })).resolves.toEqual(
+      expected,
+    );
   });
 
   test('string response: returns response', () => {
     const expected = 'foobar';
     fetchMock.getOnce('/test/url/', expected);
 
-    return expect(apiFetch('/test/url/', dispatch)).resolves.toEqual(expected);
+    return expect(apiFetch({ url: '/test/url/', dispatch })).resolves.toEqual(
+      expected,
+    );
   });
 
   test('404: returns null', () => {
     fetchMock.getOnce('/test/url/', 404);
 
-    return expect(apiFetch('/test/url/', dispatch)).resolves.toBeNull();
+    return expect(
+      apiFetch({ url: '/test/url/', dispatch }),
+    ).resolves.toBeNull();
   });
 
   describe('error', () => {
@@ -44,7 +50,7 @@ describe('apiFetch', () => {
 
       expect.assertions(2);
       try {
-        await apiFetch('/test/url/', dispatch);
+        await apiFetch({ url: '/test/url/', dispatch });
       } catch (err) {
         expect(err.message).toEqual('Internal Server Error: {}');
         expect(addError).toHaveBeenCalledWith('Internal Server Error: {}');
@@ -56,7 +62,7 @@ describe('apiFetch', () => {
 
       expect.assertions(2);
       try {
-        await apiFetch('/test/url/', dispatch);
+        await apiFetch({ url: '/test/url/', dispatch });
       } catch (err) {
         expect(err.message).toEqual('Internal Server Error: not cool');
         expect(addError).toHaveBeenCalledWith(
@@ -73,7 +79,7 @@ describe('apiFetch', () => {
 
       expect.assertions(2);
       try {
-        await apiFetch('/test/url/', dispatch);
+        await apiFetch({ url: '/test/url/', dispatch });
       } catch (err) {
         expect(err.message).toEqual('not cool');
         expect(addError).toHaveBeenCalledWith('not cool');
@@ -88,7 +94,7 @@ describe('apiFetch', () => {
 
       expect.assertions(2);
       try {
-        await apiFetch('/test/url/', dispatch);
+        await apiFetch({ url: '/test/url/', dispatch });
       } catch (err) {
         expect(err.message).toEqual('not cool');
         expect(addError).toHaveBeenCalledWith('not cool');
@@ -104,7 +110,12 @@ describe('apiFetch', () => {
 
       expect.assertions(2);
       try {
-        await apiFetch('/test/url/', dispatch, { method: 'POST' });
+        await apiFetch({
+          url: '/test/url/',
+          dispatch,
+          opts: { method: 'POST' },
+          hasForm: true,
+        });
       } catch (err) {
         expect(err.message).toEqual(`Bad Request: ${JSON.stringify(response)}`);
         expect(addError).not.toHaveBeenCalled();
@@ -116,7 +127,7 @@ describe('apiFetch', () => {
 
       expect.assertions(2);
       try {
-        await apiFetch('/test/url/', dispatch);
+        await apiFetch({ url: '/test/url/', dispatch });
       } catch (err) {
         expect(err.message).toEqual('not cool');
         expect(addError).not.toHaveBeenCalled();

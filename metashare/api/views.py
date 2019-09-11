@@ -5,14 +5,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import ProjectFilter, RepositoryFilter, TaskFilter
-from .models import Project, Repository, Task
+from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
+from .models import Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
     FullUserSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
     RepositorySerializer,
+    ScratchOrgSerializer,
     TaskSerializer,
 )
 
@@ -93,3 +94,11 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
+
+
+class ScratchOrgViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ScratchOrgSerializer
+    queryset = ScratchOrg.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ScratchOrgFilter

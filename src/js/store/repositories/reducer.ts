@@ -1,4 +1,4 @@
-import { ObjectsAction } from '@/store/actions';
+import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { RepositoriesAction } from '@/store/repositories/actions';
 import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -32,11 +32,8 @@ const reducer = (
     case 'USER_LOGGED_OUT':
       return { ...defaultState };
     case 'FETCH_OBJECTS_SUCCEEDED': {
-      const {
-        response: { results, next },
-        objectType,
-        reset,
-      } = action.payload;
+      const { response, objectType, reset } = action.payload;
+      const { results, next } = response as PaginatedObjectResponse;
       if (objectType === OBJECT_TYPES.REPOSITORY) {
         if (reset) {
           return {

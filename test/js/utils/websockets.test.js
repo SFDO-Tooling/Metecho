@@ -1,7 +1,19 @@
 import Sockette from 'sockette';
 
+import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
+import { updateProject } from '@/store/projects/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { updateTask } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
+
+jest.mock('@/store/orgs/actions');
+jest.mock('@/store/projects/actions');
+jest.mock('@/store/tasks/actions');
+
+const actions = { provisionOrg, provisionFailed, updateProject, updateTask };
+for (const action of Object.values(actions)) {
+  action.mockReturnValue({ type: 'TEST', payload: {} });
+}
 
 const mockJson = jest.fn();
 const mockClose = jest.fn();
@@ -23,16 +35,25 @@ afterEach(() => {
   mockClose.mockClear();
   mockOpen.mockClear();
   dispatch.mockClear();
+  for (const action of Object.values(actions)) {
+    action.mockClear();
+  }
 });
 
 describe('getAction', () => {
-  // test('handles MY_ACTION_TYPE event', () => {
-  //   const event = { type: 'MY_ACTION_TYPE', payload: 'foobar' };
-  //   const expected = myActionCreator('foobar');
-  //   const actual = sockets.getAction(event);
+  test.each([
+    ['SCRATCH_ORG_PROVISIONED', 'provisionOrg'],
+    ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
+    ['PROJECT_UPDATE', 'updateProject'],
+    ['TASK_UPDATE', 'updateTask'],
+  ])('handles %s event', (type, action) => {
+    const payload = { foo: 'bar' };
+    const msg = { type, payload };
+    sockets.getAction(msg);
 
-  //   expect(actual).toEqual(expected);
-  // });
+    // eslint-disable-next-line import/namespace
+    expect(actions[action]).toHaveBeenCalledWith(payload);
+  });
 
   test('handles unknown event', () => {
     const event = { type: 'UNKNOWN' };
@@ -76,12 +97,21 @@ describe('createSocket', () => {
         );
       });
 
-      test('subscribes to pending objects', () => {
+      test('subscribes/unsubscribes to/from pending objects', () => {
         const payload = { model: 'foo', id: 'bar' };
         socket.subscribe(payload);
+        socket.unsubscribe(payload);
         socketInstance.onopen();
 
-        expect(mockJson).toHaveBeenCalledWith(payload);
+        expect(mockJson).toHaveBeenCalledTimes(2);
+        expect(mockJson).toHaveBeenCalledWith({
+          ...payload,
+          action: 'SUBSCRIBE',
+        });
+        expect(mockJson).toHaveBeenCalledWith({
+          ...payload,
+          action: 'UNSUBSCRIBE',
+        });
       });
 
       test('dispatches connectSocket action', () => {
@@ -114,14 +144,14 @@ describe('createSocket', () => {
         );
       });
 
-      // test('dispatches action', () => {
-      //   socketInstance.onmessage({
-      //     data: { type: 'MY_ACTION_TYPE' },
-      //   });
-      //   const expected = myActionCreator();
+      test('dispatches action', () => {
+        socketInstance.onmessage({
+          data: { type: 'SCRATCH_ORG_PROVISIONED', payload: {} },
+        });
 
-      //   expect(dispatch).toHaveBeenCalledWith(expected);
-      // });
+        expect(dispatch).toHaveBeenCalledTimes(1);
+        expect(actions.provisionOrg).toHaveBeenCalledWith({});
+      });
     });
 
     describe('onreconnect', () => {
@@ -203,7 +233,31 @@ describe('createSocket', () => {
         Sockette.mock.calls[0][1].onopen();
         socket.subscribe(payload);
 
-        expect(mockJson).toHaveBeenCalledWith(payload);
+        expect(mockJson).toHaveBeenCalledWith({
+          ...payload,
+          action: 'SUBSCRIBE',
+        });
+      });
+    });
+  });
+
+  describe('unsubscribe', () => {
+    let socket;
+
+    beforeEach(() => {
+      socket = sockets.createSocket(opts);
+    });
+
+    describe('ws open', () => {
+      test('unsubscribes from object', () => {
+        const payload = { model: 'foo', id: 'bar' };
+        Sockette.mock.calls[0][1].onopen();
+        socket.unsubscribe(payload);
+
+        expect(mockJson).toHaveBeenCalledWith({
+          ...payload,
+          action: 'UNSUBSCRIBE',
+        });
       });
     });
   });

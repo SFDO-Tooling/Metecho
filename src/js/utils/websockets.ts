@@ -1,12 +1,30 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
+import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
+import { Org } from '@/store/orgs/reducer';
+import { updateProject } from '@/store/projects/actions';
+import { Project } from '@/store/projects/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
+import { updateTask } from '@/store/tasks/actions';
+import { Task } from '@/store/tasks/reducer';
+import {
+  ObjectTypes,
+  WEBSOCKET_ACTIONS,
+  WebsocketActions,
+} from '@/utils/constants';
 import { log } from '@/utils/logging';
 
 export interface Socket {
   subscribe: (payload: Subscription) => void;
+  unsubscribe: (payload: Subscription) => void;
   reconnect: () => void;
+}
+
+interface Subscription {
+  action?: WebsocketActions;
+  model: ObjectTypes;
+  id: string;
 }
 
 interface SubscriptionEvent {
@@ -17,23 +35,50 @@ interface ErrorEvent {
   type: 'BACKEND_ERROR';
   payload: { message: string };
 }
-type EventType = SubscriptionEvent | ErrorEvent;
-interface Subscription {
-  model: string;
-  id: string;
+interface OrgProvisionedEvent {
+  type: 'SCRATCH_ORG_PROVISIONED';
+  payload: Org;
 }
+interface OrgProvisionFailedEvent {
+  type: 'SCRATCH_ORG_PROVISION_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
+interface ProjectUpdatedEvent {
+  type: 'PROJECT_UPDATE';
+  payload: Project;
+}
+interface TaskUpdatedEvent {
+  type: 'TASK_UPDATE';
+  payload: Task;
+}
+type ModelEvent =
+  | ErrorEvent
+  | OrgProvisionedEvent
+  | OrgProvisionFailedEvent
+  | ProjectUpdatedEvent
+  | TaskUpdatedEvent;
+type EventType = SubscriptionEvent | ModelEvent;
 
-const isErrorEvent = (event: EventType): event is ErrorEvent =>
-  (event as ErrorEvent).type !== undefined;
+const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
+  (event as ModelEvent).type === undefined;
 
 export const getAction = (event: EventType) => {
-  if (!event || !isErrorEvent(event)) {
+  if (!event || isSubscriptionEvent(event)) {
     return null;
   }
-  // switch (event.type) {
-  //   case 'MY_ACTION_TYPE':
-  //     return myActionCreator(event.payload);
-  // }
+  switch (event.type) {
+    case 'SCRATCH_ORG_PROVISIONED':
+      return provisionOrg(event.payload);
+    case 'SCRATCH_ORG_PROVISION_FAILED':
+      return provisionFailed(event.payload);
+    case 'PROJECT_UPDATE':
+      return updateProject(event.payload);
+    case 'TASK_UPDATE':
+      return updateTask(event.payload);
+  }
   return null;
 };
 
@@ -97,7 +142,6 @@ export const createSocket = ({
       }
       log('[WebSocket] received:', data);
       const action = getAction(data);
-      /* istanbul ignore if */
       if (action) {
         dispatch(action);
       }
@@ -132,8 +176,19 @@ export const createSocket = ({
   });
 
   const subscribe = (payload: Subscription) => {
+    payload = { ...payload, action: WEBSOCKET_ACTIONS.SUBSCRIBE };
     if (open) {
       log('[WebSocket] subscribing to:', payload);
+      socket.json(payload);
+    } else {
+      pending.add(payload);
+    }
+  };
+
+  const unsubscribe = (payload: Subscription) => {
+    payload = { ...payload, action: WEBSOCKET_ACTIONS.UNSUBSCRIBE };
+    if (open) {
+      log('[WebSocket] unsubscribing from:', payload);
       socket.json(payload);
     } else {
       pending.add(payload);
@@ -163,6 +218,7 @@ export const createSocket = ({
 
   return {
     subscribe,
+    unsubscribe,
     reconnect,
   };
 };
