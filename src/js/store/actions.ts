@@ -218,6 +218,7 @@ export const createObject = ({
   try {
     let object: any;
     // @@@ Mock out until API exists
+    /* istanbul ignore if */
     if (objectType === OBJECT_TYPES.COMMIT) {
       object = {
         id: 'commit-id',

@@ -174,7 +174,7 @@ const reducer = (
           [object.task]: {
             ...taskOrgs,
             [object.org_type]: {
-              ...taskOrgs[object.org_type],
+              ...object,
               // eslint-disable-next-line @typescript-eslint/camelcase
               deletion_queued_at: new Date().toISOString(),
             },
@@ -186,7 +186,7 @@ const reducer = (
     case 'REQUEST_CHANGESET_STARTED': {
       const { org } = action.payload;
       const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.DEV]: org,
         [ORG_TYPES.QA]: null,
       };
       return {
@@ -200,7 +200,7 @@ const reducer = (
     case 'REQUEST_CHANGESET_SUCCEEDED': {
       const { org } = action.payload;
       const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.DEV]: org,
         [ORG_TYPES.QA]: null,
       };
       return {

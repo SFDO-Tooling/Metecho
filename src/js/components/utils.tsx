@@ -499,6 +499,7 @@ export const useForm = ({
             fieldErrors[field] = allErrors[field].join(', ');
           }
         }
+        /* istanbul ignore else */
         if (isMounted.current && Object.keys(fieldErrors).length) {
           setErrors(fieldErrors);
         } else if (err.response && err.response.status === 400) {

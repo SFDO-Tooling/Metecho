@@ -28,7 +28,7 @@ describe('<ConnectionInfoModal />', () => {
     return renderWithRedux(
       <MemoryRouter>
         <ConnectionInfoModal
-          user={{}}
+          user={{ valid_token_for: 'foo' }}
           isOpen={opts.isOpen}
           toggleModal={toggleModal}
         />

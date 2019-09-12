@@ -1,6 +1,10 @@
 import Sockette from 'sockette';
 
 import {
+  addChangeset,
+  changesetFailed,
+  commitFailed,
+  commitSucceeded,
   deleteFailed,
   deleteOrg,
   provisionFailed,
@@ -16,6 +20,10 @@ jest.mock('@/store/projects/actions');
 jest.mock('@/store/tasks/actions');
 
 const actions = {
+  addChangeset,
+  changesetFailed,
+  commitFailed,
+  commitSucceeded,
   deleteFailed,
   deleteOrg,
   provisionOrg,
@@ -60,6 +68,10 @@ describe('getAction', () => {
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['PROJECT_UPDATE', 'updateProject'],
     ['TASK_UPDATE', 'updateTask'],
+    ['CHANGESET_SUCCEEDED', 'addChangeset'],
+    ['CHANGESET_FAILED', 'changesetFailed'],
+    ['COMMIT_SUCCEEDED', 'commitSucceeded'],
+    ['COMMIT_FAILED', 'commitFailed'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };

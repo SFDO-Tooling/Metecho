@@ -1,7 +1,5 @@
 import reducer from '@/store/orgs/reducer';
 
-jest.useFakeTimers();
-
 describe('reducer', () => {
   test('returns initial state', () => {
     const expected = {};
@@ -120,48 +118,104 @@ describe('reducer', () => {
   });
 
   describe('CREATE_OBJECT_SUCCEEDED', () => {
-    test('adds org to task', () => {
-      const org = {
-        id: 'org-id',
-        task: 'task-1',
-        org_type: 'Dev',
-      };
-      const expected = {
-        'task-1': {
-          Dev: org,
-          QA: null,
-        },
-      };
+    describe('OBJECT_TYPES.ORG', () => {
+      test('adds org to task', () => {
+        const org = {
+          id: 'org-id',
+          task: 'task-1',
+          org_type: 'Dev',
+        };
+        const expected = {
+          'task-1': {
+            Dev: org,
+            QA: null,
+          },
+        };
+        const actual = reducer(
+          {},
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              object: org,
+              objectType: 'scratch_org',
+            },
+          },
+        );
+
+        expect(actual).toEqual(expected);
+      });
+
+      test('ignores if no object', () => {
+        const actual = reducer(
+          {},
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              objectType: 'scratch_org',
+            },
+          },
+        );
+
+        expect(actual).toEqual({});
+      });
+    });
+
+    describe('OBJECT_TYPES.COMMIT', () => {
+      test('sets committing: true', () => {
+        const commit = {
+          id: 'commit-id',
+          task: 'task-1',
+        };
+        const expected = {
+          'task-1': {
+            Dev: null,
+            QA: null,
+            changeset: undefined,
+            committing: true,
+          },
+        };
+        const actual = reducer(
+          {},
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              object: commit,
+              objectType: 'scratch_org_commit',
+            },
+          },
+        );
+
+        expect(actual).toEqual(expected);
+      });
+
+      test('ignores if no object', () => {
+        const actual = reducer(
+          {},
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              objectType: 'scratch_org_commit',
+            },
+          },
+        );
+
+        expect(actual).toEqual({});
+      });
+    });
+
+    test('ignores if objectType unknown', () => {
       const actual = reducer(
         {},
         {
           type: 'CREATE_OBJECT_SUCCEEDED',
           payload: {
-            object: org,
-            objectType: 'scratch_org',
+            object: {},
+            objectType: 'other-object',
           },
         },
       );
 
-      expect(actual).toEqual(expected);
-    });
-
-    test('ignores if objectType !== "scratch_org"', () => {
-      const org = {
-        id: 'org-id',
-        task: 'task-1',
-        org_type: 'Dev',
-      };
-      const expected = {};
-      const actual = reducer(expected, {
-        type: 'CREATE_OBJECT_SUCCEEDED',
-        payload: {
-          object: org,
-          objectType: 'other-object',
-        },
-      });
-
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual({});
     });
   });
 
@@ -250,12 +304,6 @@ describe('reducer', () => {
         task: 'task-1',
         org_type: 'Dev',
       };
-      const expected = {
-        'task-1': {
-          Dev: { deletion_queued_at: new Date().toISOString() },
-          QA: null,
-        },
-      };
       const actual = reducer(
         {},
         {
@@ -267,7 +315,7 @@ describe('reducer', () => {
         },
       );
 
-      expect(actual).toEqual(expected);
+      expect(actual['task-1'].Dev.deletion_queued_at).not.toBe(undefined);
     });
 
     test('ignores if objectType !== "scratch_org"', () => {
@@ -284,6 +332,135 @@ describe('reducer', () => {
           objectType: 'other-object',
         },
       });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REQUEST_CHANGESET_STARTED', () => {
+    test('removes changeset from task', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const expected = {
+        'task-1': {
+          Dev: org,
+          QA: null,
+          changeset: undefined,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'REQUEST_CHANGESET_STARTED',
+          payload: { org },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REQUEST_CHANGESET_SUCCEEDED', () => {
+    test('sets fetchingChangeset: true', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const expected = {
+        'task-1': {
+          Dev: org,
+          QA: null,
+          fetchingChangeset: true,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'REQUEST_CHANGESET_SUCCEEDED',
+          payload: { org },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('CHANGESET_SUCCEEDED', () => {
+    test('stores changeset and sets fetchingChangeset: false', () => {
+      const changeset = {
+        id: 'changeset-id',
+        task: 'task-1',
+      };
+      const expected = {
+        'task-1': {
+          Dev: null,
+          QA: null,
+          changeset,
+          fetchingChangeset: false,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'CHANGESET_SUCCEEDED',
+          payload: changeset,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('CHANGESET_FAILED/CHANGESET_CANCELED', () => {
+    test('removes changeset and sets fetchingChangeset: false', () => {
+      const changeset = {
+        id: 'changeset-id',
+        task: 'task-1',
+      };
+      const expected = {
+        'task-1': {
+          Dev: null,
+          QA: null,
+          changeset: undefined,
+          fetchingChangeset: false,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'CHANGESET_FAILED',
+          payload: changeset,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('COMMIT_FAILED/COMMIT_SUCCEEDED', () => {
+    test('sets committing: false', () => {
+      const commit = {
+        id: 'commit-id',
+        task: 'task-1',
+      };
+      const expected = {
+        'task-1': {
+          Dev: null,
+          QA: null,
+          committing: false,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'COMMIT_FAILED',
+          payload: commit,
+        },
+      );
 
       expect(actual).toEqual(expected);
     });
