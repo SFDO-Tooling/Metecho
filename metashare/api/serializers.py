@@ -156,6 +156,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "latest_commit_at",
             "url",
             "has_changes",
+            "currently_refreshing_changes",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -165,6 +166,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "latest_commit_at": {"read_only": True},
             "url": {"read_only": True},
             "has_changes": {"read_only": True},
+            "currently_refreshing_changes": {"read_only": True},
         }
 
     def save(self, **kwargs):

@@ -268,7 +268,7 @@ SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
 class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
-    tracker = FieldTracker(fields=("url",))
+    tracker = FieldTracker(fields=("url", "currently_refreshing_changes"))
 
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
@@ -280,6 +280,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     latest_commit_at = models.DateTimeField(null=True)
     url = models.URLField(null=True)
     has_changes = models.BooleanField(default=False)
+    currently_refreshing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder)
 
     def subscribable_by(self, user):  # pragma: nocover
@@ -294,6 +295,9 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         if self.tracker.has_changed("url"):
             self.notify_has_url()
+
+        if self.tracker.has_changed("currently_refreshing_changes"):
+            self.notify_refreshing_changes()
 
     def create_remote_resources(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
@@ -311,6 +315,13 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         payload = ScratchOrgSerializer(self).data
         message = {"type": "SCRATCH_ORG_PROVISIONED", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
+
+    def notify_refreshing_changes(self):
+        from .serializers import ScratchOrgSerializer
+
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_UPDATED", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
 
 
