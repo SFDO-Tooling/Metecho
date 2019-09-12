@@ -21,7 +21,6 @@ import TaskNotFound from '@/components/tasks/task404';
 import { AppState, ThunkDispatch } from '@/store';
 import { createObject, fetchObject, fetchObjects } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
-import { Org } from '@/store/orgs/reducer';
 import { selectOrgsByTask } from '@/store/orgs/selectors';
 import { Project } from '@/store/projects/reducer';
 import {
@@ -428,8 +427,7 @@ export const useFetchOrgsIfMissing = (
         fetchObjects({
           objectType: OBJECT_TYPES.ORG,
           filters: { task: task.id },
-          shouldSubscribeToObject: (object: Org) =>
-            Boolean(object && (!object.url || object.deletion_queued_at)),
+          shouldSubscribeToObject: () => true,
         }),
       );
     }

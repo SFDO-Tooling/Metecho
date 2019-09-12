@@ -6,6 +6,7 @@ import {
   deleteOrg,
   provisionFailed,
   provisionOrg,
+  updateOrg,
 } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { updateProject } from '@/store/projects/actions';
@@ -70,6 +71,10 @@ interface TaskUpdatedEvent {
   type: 'TASK_UPDATE';
   payload: Task;
 }
+interface OrgUpdatedEvent {
+  type: 'SCRATCH_ORG_UPDATED';
+  payload: Org;
+}
 type ModelEvent =
   | ErrorEvent
   | OrgProvisionedEvent
@@ -77,7 +82,8 @@ type ModelEvent =
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
   | ProjectUpdatedEvent
-  | TaskUpdatedEvent;
+  | TaskUpdatedEvent
+  | OrgUpdatedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -100,6 +106,8 @@ export const getAction = (event: EventType) => {
       return updateProject(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload);
+    case 'SCRATCH_ORG_UPDATED':
+      return updateOrg(event.payload);
   }
   return null;
 };

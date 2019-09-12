@@ -4,6 +4,7 @@ import { ThunkResult } from '@/store';
 import { Org } from '@/store/orgs/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
+import apiFetch from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 
 interface OrgProvisioned {
@@ -12,6 +13,14 @@ interface OrgProvisioned {
 }
 interface OrgProvisionFailed {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
+  payload: Org;
+}
+interface RefetchOrg {
+  type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_SUCCEEDED' | 'REFETCH_ORG_FAILED';
+  payload: { org: Org; url?: string; response?: Org | null };
+}
+interface OrgUpdated {
+  type: 'SCRATCH_ORG_UPDATED';
   payload: Org;
 }
 interface OrgDeleted {
@@ -26,6 +35,8 @@ interface OrgDeleteFailed {
 export type OrgsAction =
   | OrgProvisioned
   | OrgProvisionFailed
+  | RefetchOrg
+  | OrgUpdated
   | OrgDeleted
   | OrgDeleteFailed;
 
@@ -122,6 +133,57 @@ export const provisionFailed = ({
     payload: model,
   });
 };
+
+export const refetchOrg = ({
+  org,
+}: {
+  org: Org;
+}): ThunkResult => async dispatch => {
+  const url = window.api_urls.scratch_org_detail(org.id);
+  dispatch({
+    type: 'REFETCH_ORG_STARTED',
+    payload: { org, url },
+  });
+  try {
+    if (!url) {
+      throw new Error(`No URL found for org: ${org.id}`);
+    }
+    const response = await apiFetch({
+      url,
+      dispatch,
+    });
+    if (!response) {
+      return dispatch({
+        type: 'REFETCH_ORG_FAILED',
+        payload: { org, url, response },
+      });
+    }
+    // @@@ Mock out until API exists
+    setTimeout(() => {
+      dispatch({
+        type: 'SCRATCH_ORG_UPDATED',
+        payload: { ...response },
+      });
+    }, 3000);
+    return dispatch({
+      type: 'REFETCH_ORG_SUCCEEDED',
+      // @@@
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      payload: { ...response, currently_refreshing_changes: true },
+    });
+  } catch (err) {
+    dispatch({
+      type: 'REFETCH_ORG_FAILED',
+      payload: { org, url },
+    });
+    throw err;
+  }
+};
+
+export const updateOrg = (payload: Org): OrgUpdated => ({
+  type: 'SCRATCH_ORG_UPDATED',
+  payload,
+});
 
 export const deleteOrg = (payload: Org): ThunkResult => (
   dispatch,
