@@ -34,7 +34,7 @@
     "test:watch": "jest --watchAll",
     "test:coverage": "JEST_JUNIT_OUTPUT_DIR='./coverage' jest --ci --runInBand --reporters=default --reporters=jest-junit",
     "test:report-coverage": "cat ./coverage/lcov.info | coveralls",
-    "test:check-coverage": "nyc check-coverage --temp-directory coverage",
+    "test:check-coverage": "nyc check-coverage --temp-dir coverage",
     "pytest": "pytest",
     "pytest:report-coverage": "$VIRTUAL_ENV/bin/coveralls",
     "pytest:check-coverage": "coverage3 report --fail-under=100",
