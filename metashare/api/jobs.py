@@ -169,3 +169,14 @@ def create_branches_on_github_then_create_scratch_org(
 create_branches_on_github_then_create_scratch_org_job = job(
     create_branches_on_github_then_create_scratch_org
 )
+
+
+def delete_scratch_org(scratch_org):
+    # TODO:
+    # if scratch_org.has_pending_changes:
+    #     return
+    sf_run_flow.delete_scratch_org(scratch_org)
+    scratch_org.delete()
+
+
+delete_scratch_org_job = job(delete_scratch_org)

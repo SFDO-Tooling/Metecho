@@ -102,3 +102,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     queryset = ScratchOrg.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ScratchOrgFilter
+
+    def perform_destroy(self, instance):
+        instance.queue_delete()
