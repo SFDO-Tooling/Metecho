@@ -250,12 +250,6 @@ def create_org_and_run_flow(
     devhub_username = user.sf_username
     email = user.email  # TODO: check that this is reliably right.
 
-    # TODO: We may want to subclass this to use a custom GlobalConfig
-    # and ProjectConfig that will not ever load from ~/.cumulusci. This
-    # shouldn't be an issue in deployment (we can trust we don't have a
-    # ~/.cumulusci on Heroku), but if not addressed may lead to
-    # surprising and hard-to-track-down effects in some local
-    # development environments.
     cci = BaseCumulusCI(
         repo_info={
             "root": project_path,
