@@ -31,6 +31,17 @@ async def report_scratch_org_error(instance, message):
 
 
 @contextlib.contextmanager
+def mark_refreshing_changes(scratch_org):
+    scratch_org.currently_refreshing_changes = True
+    scratch_org.save()
+    try:
+        yield
+    finally:
+        scratch_org.currently_refreshing_changes = False
+        scratch_org.save()
+
+
+@contextlib.contextmanager
 def report_errors_on(scratch_org):
     try:
         yield

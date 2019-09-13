@@ -416,6 +416,7 @@ export const useFetchOrgsIfMissing = (
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
+  const user = useSelector(selectUserState);
   const selectOrgsWithProps = useCallback(selectOrgsByTask, []);
   const orgs = useSelector((state: AppState) =>
     selectOrgsWithProps(state, routeProps),
@@ -429,11 +430,11 @@ export const useFetchOrgsIfMissing = (
           objectType: OBJECT_TYPES.ORG,
           filters: { task: task.id },
           shouldSubscribeToObject: (object: Org) =>
-            Boolean(object && (!object.url || object.deletion_queued_at)),
+            Boolean(object && user && object.owner === user.id),
         }),
       );
     }
-  }, [dispatch, task, orgs]);
+  }, [dispatch, task, orgs, user]);
 
   return { orgs };
 };

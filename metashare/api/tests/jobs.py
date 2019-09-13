@@ -8,6 +8,7 @@ from ..jobs import (
     create_branches_on_github,
     create_branches_on_github_then_create_scratch_org,
     create_org_and_run_flow,
+    mark_refreshing_changes,
     report_errors_on,
     try_to_make_branch,
 )
@@ -148,3 +149,12 @@ def test_create_branches_on_github_then_create_scratch_org():
 
         assert create_branches_on_github.called
         assert create_org_and_run_flow.called
+
+
+@pytest.mark.django_db
+def test_mark_refreshing_changes(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    assert not scratch_org.currently_refreshing_changes
+    with mark_refreshing_changes(scratch_org):
+        assert scratch_org.currently_refreshing_changes
+    assert not scratch_org.currently_refreshing_changes

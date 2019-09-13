@@ -297,6 +297,63 @@ describe('reducer', () => {
     });
   });
 
+  describe('REFETCH_ORG_STARTED', () => {
+    test('sets currently_refreshing_changes: true', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+        currently_refreshing_changes: false,
+      };
+      const expected = {
+        'task-1': {
+          Dev: { ...org, currently_refreshing_changes: true },
+          QA: null,
+        },
+      };
+      const actual = reducer(
+        {
+          'task-1': {
+            Dev: org,
+            QA: null,
+          },
+        },
+        {
+          type: 'REFETCH_ORG_STARTED',
+          payload: { org },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFETCH_ORG_FAILED', () => {
+    test('sets currently_refreshing_changes: false', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+        currently_refreshing_changes: true,
+      };
+      const expected = {
+        'task-1': {
+          Dev: { ...org, currently_refreshing_changes: false },
+          QA: null,
+        },
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'REFETCH_ORG_FAILED',
+          payload: { org },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('DELETE_OBJECT_SUCCEEDED', () => {
     test('adds deletion_queued_at to org', () => {
       const org = {

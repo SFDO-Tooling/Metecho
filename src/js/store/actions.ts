@@ -304,6 +304,13 @@ export const deleteObject = ({
       dispatch,
       opts: { method: 'DELETE' },
     });
+    // @@@ Mock out until API exists
+    // setTimeout(() => {
+    //   dispatch({
+    //     type: 'SCRATCH_ORG_DELETED',
+    //     payload: { ...object },
+    //   });
+    // }, 3000);
     if (shouldSubscribeToObject(object) && window.socket) {
       window.socket.subscribe({
         model: objectType,

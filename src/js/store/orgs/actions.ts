@@ -15,6 +15,18 @@ interface OrgProvisionFailed {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
   payload: Org;
 }
+interface RefetchOrg {
+  type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_FAILED';
+  payload: { org: Org; url: string; response?: any };
+}
+interface RefetchOrgSucceeded {
+  type: 'REFETCH_ORG_SUCCEEDED';
+  payload: Org;
+}
+interface OrgUpdated {
+  type: 'SCRATCH_ORG_UPDATED';
+  payload: Org;
+}
 interface OrgDeleted {
   type: 'SCRATCH_ORG_DELETED';
   payload: Org;
@@ -49,6 +61,9 @@ interface CommitEvent {
 export type OrgsAction =
   | OrgProvisioned
   | OrgProvisionFailed
+  | RefetchOrg
+  | RefetchOrgSucceeded
+  | OrgUpdated
   | OrgDeleted
   | OrgDeleteFailed
   | RequestChangesetEvent
@@ -60,15 +75,9 @@ export const provisionOrg = (payload: Org): ThunkResult => (
   dispatch,
   getState,
 ) => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.ORG,
-      id: payload.id,
-    });
-  }
   const state = getState();
   const user = state.user;
+  /* istanbul ignore else */
   if (user && user.id === payload.owner) {
     const task = selectTaskById(state, payload.task);
     let msg = {
@@ -150,6 +159,49 @@ export const provisionFailed = ({
   });
 };
 
+export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
+  const url = window.api_urls.scratch_org_detail(org.id);
+  dispatch({
+    type: 'REFETCH_ORG_STARTED',
+    payload: { org, url },
+  });
+  try {
+    /* istanbul ignore if */
+    if (!url) {
+      throw new Error(`No URL found for org: ${org.id}`);
+    }
+    const response = await apiFetch({ url, dispatch });
+    if (!response) {
+      return dispatch({
+        type: 'REFETCH_ORG_FAILED',
+        payload: { org, url, response },
+      });
+    }
+    // @@@ Mock out until API exists
+    // setTimeout(() => {
+    //   dispatch({
+    //     type: 'SCRATCH_ORG_UPDATED',
+    //     payload: { ...response },
+    //   });
+    // }, 3000);
+    return dispatch({
+      type: 'REFETCH_ORG_SUCCEEDED',
+      payload: response,
+    });
+  } catch (err) {
+    dispatch({
+      type: 'REFETCH_ORG_FAILED',
+      payload: { org, url },
+    });
+    throw err;
+  }
+};
+
+export const updateOrg = (payload: Org): OrgUpdated => ({
+  type: 'SCRATCH_ORG_UPDATED',
+  payload,
+});
+
 export const deleteOrg = (payload: Org): ThunkResult => (
   dispatch,
   getState,
@@ -195,15 +247,9 @@ export const deleteFailed = ({
   model: Org;
   message?: string;
 }): ThunkResult => (dispatch, getState) => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.ORG,
-      id: model.id,
-    });
-  }
   const state = getState();
   const user = state.user;
+  /* istanbul ignore else */
   if (user && user.id === model.owner) {
     const task = selectTaskById(state, model.task);
     let msg = {
