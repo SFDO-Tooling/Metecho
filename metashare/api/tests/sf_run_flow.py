@@ -44,10 +44,7 @@ def test_refresh_access_token():
         OrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
         refresh_access_token(
-            config=MagicMock(),
-            org_name=MagicMock(),
-            login_url="https://example.com",
-            sf_client_id=MagicMock(),
+            config=MagicMock(), org_name=MagicMock(), login_url="https://example.com"
         )
 
         assert OrgConfig.called
@@ -58,7 +55,7 @@ def test_get_devhub_api():
         stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
         SimpleSalesforce = stack.enter_context(patch(f"{PATCH_ROOT}.SimpleSalesforce"))
 
-        get_devhub_api(devhub_username="devhub_username", sf_client_id="sf_client_id")
+        get_devhub_api(devhub_username="devhub_username")
 
         assert SimpleSalesforce.called
 
@@ -85,7 +82,6 @@ def test_get_org_result():
         scratch_org_definition={"edition": MagicMock()},
         cci=MagicMock(),
         devhub_api=MagicMock(),
-        sf_client_id=MagicMock(),
     )
 
     assert result
@@ -113,8 +109,6 @@ def test_get_access_token():
             login_url="https://example.com",
             org_result=MagicMock(),
             scratch_org_config=MagicMock(),
-            sf_client_id=MagicMock(),
-            sf_client_secret=MagicMock(),
         )
 
         assert SalesforceOAuth2.called
@@ -145,7 +139,6 @@ class TestDeployOrgSettings:
                 org_name=MagicMock(),
                 scratch_org_config=MagicMock(),
                 scratch_org_definition=scratch_org_definition,
-                sf_client_id=MagicMock(),
             )
             assert Deploy.called
 
@@ -173,7 +166,6 @@ class TestDeployOrgSettings:
                 org_name=MagicMock(),
                 scratch_org_config=MagicMock(),
                 scratch_org_definition=scratch_org_definition,
-                sf_client_id=MagicMock(),
             )
             assert Deploy.called
 
@@ -201,7 +193,6 @@ class TestDeployOrgSettings:
                 org_name=MagicMock(),
                 scratch_org_config=MagicMock(),
                 scratch_org_definition=scratch_org_definition,
-                sf_client_id=MagicMock(),
             )
             assert not Deploy.called
 
