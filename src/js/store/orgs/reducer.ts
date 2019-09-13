@@ -156,7 +156,7 @@ const reducer = (
           [object.task]: {
             ...taskOrgs,
             [object.org_type]: {
-              ...taskOrgs[object.org_type],
+              ...object,
               deletion_queued_at: new Date().toISOString(),
             },
           },

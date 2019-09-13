@@ -5,6 +5,7 @@ import {
   deleteOrg,
   provisionFailed,
   provisionOrg,
+  updateOrg,
 } from '@/store/orgs/actions';
 import { updateProject } from '@/store/projects/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
@@ -20,6 +21,7 @@ const actions = {
   deleteOrg,
   provisionOrg,
   provisionFailed,
+  updateOrg,
   updateProject,
   updateTask,
 };
@@ -60,6 +62,7 @@ describe('getAction', () => {
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['PROJECT_UPDATE', 'updateProject'],
     ['TASK_UPDATE', 'updateTask'],
+    ['SCRATCH_ORG_UPDATED', 'updateOrg'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };

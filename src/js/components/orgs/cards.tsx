@@ -8,7 +8,6 @@ import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AnyAction } from 'redux';
 
 import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
@@ -94,7 +93,7 @@ const OrgCard = ({
   isDeletingOrg,
   createAction,
   deleteAction,
-  doRefetchOrg,
+  refreshAction,
 }: {
   orgs: OrgsByTask;
   type: OrgTypes;
@@ -104,7 +103,7 @@ const OrgCard = ({
   isDeletingOrg: OrgTypeTracker;
   createAction: (type: OrgTypes) => void;
   deleteAction: (org: Org) => void;
-  doRefetchOrg: (org: Org) => Promise<any> | AnyAction;
+  refreshAction: (org: Org) => void;
 }) => {
   const org = orgs[type];
   const ownedByCurrentUser = Boolean(
@@ -121,6 +120,12 @@ const OrgCard = ({
       deleteAction(org);
     }
   }, [deleteAction, org]);
+  const doRefreshAction = useCallback(() => {
+    /* istanbul ignore else */
+    if (org) {
+      refreshAction(org);
+    }
+  }, [refreshAction, org]);
 
   let contents = null;
   let icon = null;
@@ -177,19 +182,21 @@ const OrgCard = ({
             </span>
           </li>
         )}
-        <li>
-          <strong>{i18n.t('Status')}:</strong> {changesMsg}
-          {type === ORG_TYPES.DEV && (
-            <>
-              {' | '}
-              <Button
-                label={i18n.t('check again')}
-                variant="link"
-                onClick={doRefetchOrg}
-              />
-            </>
-          )}
-        </li>
+        {type === ORG_TYPES.DEV && (
+          <li>
+            <strong>{i18n.t('Status')}:</strong> {changesMsg}
+            {ownedByCurrentUser && (
+              <>
+                {' | '}
+                <Button
+                  label={i18n.t('check again')}
+                  variant="link"
+                  onClick={doRefreshAction}
+                />
+              </>
+            )}
+          </li>
+        )}
       </ul>
     );
     icon = (
@@ -204,7 +211,7 @@ const OrgCard = ({
     if (isDeleting) {
       footer = (
         <>
-          <Spinner size="x-small" />
+          <Spinner size="small" />
           {i18n.t('Deleting Org…')}
         </>
       );
@@ -259,7 +266,7 @@ const OrgCard = ({
         footer={
           org && org.currently_refreshing_changes ? (
             <>
-              <Spinner size="x-small" />
+              <Spinner size="small" />
               {i18n.t('Refreshing Org…')}
             </>
           ) : (
@@ -301,10 +308,9 @@ const OrgCards = ({
 
   const devOrg = orgs[ORG_TYPES.DEV];
 
-  const doRefetchOrg = useCallback(
-    (org: Org) => dispatch(refetchOrg({ org })),
-    [], // eslint-disable-line react-hooks/exhaustive-deps
-  );
+  const doRefetchOrg = useCallback((org: Org) => {
+    dispatch(refetchOrg(org));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const deleteOrg = useCallback((org: Org) => {
     setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
@@ -312,7 +318,6 @@ const OrgCards = ({
       deleteObject({
         objectType: OBJECT_TYPES.ORG,
         object: org,
-        shouldSubscribeToObject: () => true,
       }),
     ).finally(() => {
       /* istanbul ignore else */
@@ -321,20 +326,6 @@ const OrgCards = ({
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const readyToDeleteOrg =
-      isWaitingToDeleteDevOrg && devOrg && !devOrg.currently_refreshing_changes;
-
-    if (readyToDeleteOrg && devOrg) {
-      setIsWaitingToDeleteDevOrg(false);
-      if (devOrg.has_changes) {
-        setConfirmDeleteModalOpen(devOrg.org_type);
-      } else {
-        deleteOrg(devOrg);
-      }
-    }
-  }, [deleteOrg, isWaitingToDeleteDevOrg, devOrg]);
 
   const createOrg = useCallback((type: OrgTypes) => {
     setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
@@ -395,6 +386,21 @@ const OrgCards = ({
       : openInfoModal;
   }
 
+  // When dev org delete has been triggered, wait until it has been refreshed...
+  useEffect(() => {
+    const readyToDeleteOrg =
+      isWaitingToDeleteDevOrg && devOrg && !devOrg.currently_refreshing_changes;
+
+    if (readyToDeleteOrg && devOrg) {
+      setIsWaitingToDeleteDevOrg(false);
+      if (devOrg.has_changes) {
+        setConfirmDeleteModalOpen(devOrg.org_type);
+      } else {
+        deleteOrg(devOrg);
+      }
+    }
+  }, [deleteOrg, isWaitingToDeleteDevOrg, devOrg]);
+
   return (
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Orgs')}</h2>
@@ -408,7 +414,7 @@ const OrgCards = ({
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
           deleteAction={deleteAction}
-          doRefetchOrg={doRefetchOrg}
+          refreshAction={doRefetchOrg}
         />
         <OrgCard
           orgs={orgs}
@@ -419,7 +425,7 @@ const OrgCards = ({
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
           deleteAction={deleteAction}
-          doRefetchOrg={doRefetchOrg}
+          refreshAction={doRefetchOrg}
         />
       </div>
       <ConnectModal

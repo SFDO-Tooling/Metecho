@@ -262,8 +262,6 @@ export const deleteObject = ({
   objectType: ObjectTypes;
   object: { id: string; [key: string]: any };
   shouldSubscribeToObject?: (object: any) => boolean;
-  // @@@
-  // eslint-disable-next-line require-await
 }): ThunkResult => async dispatch => {
   const urlFn = window.api_urls[`${objectType}_detail`];
   let baseUrl;
@@ -278,18 +276,18 @@ export const deleteObject = ({
     if (!baseUrl) {
       throw new Error(`No URL found for object: ${objectType}`);
     }
+    await apiFetch({
+      url: baseUrl,
+      dispatch,
+      opts: { method: 'DELETE' },
+    });
     // @@@ Mock out until API exists
-    // await apiFetch({
-    //   url: baseUrl,
-    //   dispatch,
-    //   opts: { method: 'DELETE' },
-    // });
-    setTimeout(() => {
-      dispatch({
-        type: 'SCRATCH_ORG_DELETED',
-        payload: { ...object },
-      });
-    }, 3000);
+    // setTimeout(() => {
+    //   dispatch({
+    //     type: 'SCRATCH_ORG_DELETED',
+    //     payload: { ...object },
+    //   });
+    // }, 3000);
     if (shouldSubscribeToObject(object) && window.socket) {
       window.socket.subscribe({
         model: objectType,

@@ -1,29 +1,10 @@
+import fetchMock from 'fetch-mock';
+
 import * as actions from '@/store/orgs/actions';
 
 import { storeWithThunk } from './../../utils';
 
 describe('provisionOrg', () => {
-  beforeEach(() => {
-    window.socket = { unsubscribe: jest.fn() };
-  });
-
-  afterEach(() => {
-    Reflect.deleteProperty(window, 'socket');
-  });
-
-  test('unsubscribes from socket and returns action', () => {
-    const store = storeWithThunk({});
-    const org = { id: 'org-id', org_type: 'Dev' };
-    const action = { type: 'SCRATCH_ORG_PROVISIONED', payload: org };
-    store.dispatch(actions.provisionOrg(org));
-
-    expect(store.getActions()).toEqual([action]);
-    expect(window.socket.unsubscribe).toHaveBeenCalledWith({
-      model: 'scratch_org',
-      id: 'org-id',
-    });
-  });
-
   describe('owned by current user', () => {
     test('adds success message', () => {
       const store = storeWithThunk({
@@ -164,6 +145,88 @@ describe('provisionFailed', () => {
   });
 });
 
+describe('refetchOrg', () => {
+  let url, payload;
+
+  beforeAll(() => {
+    url = window.api_urls.scratch_org_detail('org-id');
+    const org = {
+      id: 'org-id',
+    };
+    payload = { org, url };
+  });
+
+  test('GETs org from api', () => {
+    const store = storeWithThunk({});
+    const response = { id: 'org-id', currently_refreshing_changes: true };
+    fetchMock.getOnce(url, response);
+    const started = {
+      type: 'REFETCH_ORG_STARTED',
+      payload,
+    };
+    const succeeded = {
+      type: 'REFETCH_ORG_SUCCEEDED',
+      payload: response,
+    };
+
+    expect.assertions(1);
+    return store.dispatch(actions.refetchOrg(payload.org)).then(() => {
+      expect(store.getActions()).toEqual([started, succeeded]);
+    });
+  });
+
+  test('handles null response', () => {
+    const store = storeWithThunk({});
+    fetchMock.getOnce(url, 404);
+    const started = {
+      type: 'REFETCH_ORG_STARTED',
+      payload,
+    };
+    const succeeded = {
+      type: 'REFETCH_ORG_FAILED',
+      payload: { ...payload, response: null },
+    };
+
+    expect.assertions(1);
+    return store.dispatch(actions.refetchOrg(payload.org)).then(() => {
+      expect(store.getActions()).toEqual([started, succeeded]);
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches REFETCH_ORG_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.getOnce(url, 500);
+      const started = {
+        type: 'REFETCH_ORG_STARTED',
+        payload,
+      };
+      const failed = {
+        type: 'REFETCH_ORG_FAILED',
+        payload,
+      };
+
+      expect.assertions(3);
+      return store.dispatch(actions.refetchOrg(payload.org)).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[2]).toEqual(failed);
+      });
+    });
+  });
+});
+
+describe('updateOrg', () => {
+  test('returns SCRATCH_ORG_UPDATED action', () => {
+    const org = { id: 'org-id' };
+    const expected = { type: 'SCRATCH_ORG_UPDATED', payload: org };
+
+    expect(actions.updateOrg(org)).toEqual(expected);
+  });
+});
+
 describe('deleteOrg', () => {
   beforeEach(() => {
     window.socket = { unsubscribe: jest.fn() };
@@ -217,27 +280,6 @@ describe('deleteOrg', () => {
 });
 
 describe('deleteFailed', () => {
-  beforeEach(() => {
-    window.socket = { unsubscribe: jest.fn() };
-  });
-
-  afterEach(() => {
-    Reflect.deleteProperty(window, 'socket');
-  });
-
-  test('unsubscribes from socket and returns action', () => {
-    const store = storeWithThunk({});
-    const org = { id: 'org-id' };
-    const action = { type: 'SCRATCH_ORG_DELETE_FAILED', payload: org };
-    store.dispatch(actions.deleteFailed({ model: org, message: 'error msg' }));
-
-    expect(store.getActions()).toEqual([action]);
-    expect(window.socket.unsubscribe).toHaveBeenCalledWith({
-      model: 'scratch_org',
-      id: 'org-id',
-    });
-  });
-
   describe('owned by current user', () => {
     test('adds error message', () => {
       const store = storeWithThunk({
