@@ -350,10 +350,8 @@ REST_FRAMEWORK = {
 
 # SF client settings:
 SF_CALLBACK_URL = env("SF_CALLBACK_URL", default=None)
-SF_CLIENT_KEY = env("SF_CLIENT_KEY", default=None)
-if SF_CLIENT_KEY is not None:
-    # Ugly hack to fix https://github.com/moby/moby/issues/12997
-    SF_CLIENT_KEY = SF_CLIENT_KEY.replace("\\n", "\n")
+# Ugly hack to fix https://github.com/moby/moby/issues/12997
+SF_CLIENT_KEY = env("SF_CLIENT_KEY", default="").replace("\\n", "\n")
 SF_CLIENT_ID = env("SF_CLIENT_ID", default=None)
 SF_CLIENT_SECRET = env("SF_CLIENT_SECRET", default=None)
 
