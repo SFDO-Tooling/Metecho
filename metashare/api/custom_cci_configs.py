@@ -1,5 +1,4 @@
 from cumulusci.core.config import BaseGlobalConfig, BaseProjectConfig
-from cumulusci.core.runtime import BaseCumulusCI
 
 
 class ProjectConfig(BaseProjectConfig):
@@ -75,7 +74,3 @@ class GlobalConfig(BaseGlobalConfig):
         }
 
         return self.project_config_class(self, **kwargs)
-
-
-class MetaShareCCI(BaseCumulusCI):
-    project_config_class = ProjectConfig

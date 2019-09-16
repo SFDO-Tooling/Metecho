@@ -299,6 +299,15 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         if self.tracker.has_changed("currently_refreshing_changes"):
             self.notify_refreshing_changes()
 
+    def queue_delete(self):
+        from .jobs import delete_scratch_org_job
+
+        delete_scratch_org_job.delay(self)
+
+    def delete(self, *args, **kwargs):
+        self.notify_deleted()
+        super().delete(*args, **kwargs)
+
     def create_remote_resources(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
 
@@ -322,6 +331,13 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         payload = ScratchOrgSerializer(self).data
         message = {"type": "SCRATCH_ORG_UPDATED", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
+
+    def notify_deleted(self):
+        from .serializers import ScratchOrgSerializer
+
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_DELETED", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
 
 

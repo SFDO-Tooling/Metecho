@@ -7,13 +7,20 @@ from urllib.parse import urljoin
 
 import jwt as pyjwt
 import requests
-from allauth.socialaccount.models import SocialApp
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.oauth.salesforce import SalesforceOAuth2
 from cumulusci.tasks.salesforce import Deploy
 from cumulusci.utils import cd, temporary_dir
+from django.conf import settings
 from simple_salesforce import Salesforce as SimpleSalesforce
+
+# Salesforce connected app
+# Assign these locally, for brevity:
+SF_CALLBACK_URL = settings.SF_CALLBACK_URL
+SF_CLIENT_KEY = settings.SF_CLIENT_KEY
+SF_CLIENT_ID = settings.SF_CLIENT_ID
+SF_CLIENT_SECRET = settings.SF_CLIENT_SECRET
 
 # Deploy org settings metadata -- this should get moved into CumulusCI
 SETTINGS_XML_t = """<?xml version="1.0" encoding="UTF-8"?>
@@ -70,14 +77,7 @@ def jwt_session(client_id, private_key, username, url=None, is_sandbox=False):
     return response.json()
 
 
-# Salesforce connected app
-# Load this at module load, as it's stable, and this minimizes IO
-SF_CALLBACK_URL = "http://localhost:8080/accounts/salesforce-production/login/callback/"
-with open("/server.key") as f:
-    SF_CLIENT_KEY = f.read()
-
-
-def refresh_access_token(*, config, org_name, login_url, sf_client_id):
+def refresh_access_token(*, config, org_name, login_url):
     """
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
     which we don't want now -- this is a total hack which I'll try to
@@ -86,19 +86,19 @@ def refresh_access_token(*, config, org_name, login_url, sf_client_id):
     org_config = OrgConfig(config, org_name)
     org_config.refresh_oauth_token = Mock()
     info = jwt_session(
-        sf_client_id, SF_CLIENT_KEY, org_config.username, login_url, is_sandbox=True
+        SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, login_url, is_sandbox=True
     )
     org_config.config["access_token"] = info["access_token"]
     return org_config
 
 
-def get_devhub_api(*, devhub_username, sf_client_id):
+def get_devhub_api(*, devhub_username):
     """
     Get an access token (session) for the specified dev hub username.
     This only works if the user has already authorized the connected app
     via an interactive login flow, such as the django-allauth login.
     """
-    jwt = jwt_session(sf_client_id, SF_CLIENT_KEY, devhub_username)
+    jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, devhub_username)
     return SimpleSalesforce(
         instance_url=jwt["instance_url"],
         session_id=jwt["access_token"],
@@ -128,14 +128,13 @@ def get_org_result(
     scratch_org_definition,
     cci,
     devhub_api,
-    sf_client_id,
 ):
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm
     response = devhub_api.ScratchOrgInfo.create(
         {
             "AdminEmail": email,
-            "ConnectedAppConsumerKey": sf_client_id,
+            "ConnectedAppConsumerKey": SF_CLIENT_ID,
             "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
             "Description": f"{repo_owner}/{repo_name} {repo_branch}",
             "DurationDays": scratch_org_config.days,
@@ -181,10 +180,8 @@ def get_login_url(org_result):
     return f"https://{signup_instance}.salesforce.com"
 
 
-def get_access_token(
-    *, login_url, org_result, scratch_org_config, sf_client_id, sf_client_secret
-):
-    oauth = SalesforceOAuth2(sf_client_id, sf_client_secret, SF_CALLBACK_URL, login_url)
+def get_access_token(*, login_url, org_result, scratch_org_config):
+    oauth = SalesforceOAuth2(SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, login_url)
     auth_result = oauth.get_token(org_result["AuthCode"]).json()
     scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
         "access_token"
@@ -192,14 +189,7 @@ def get_access_token(
 
 
 def deploy_org_settings(
-    *,
-    cci,
-    login_url,
-    org_config,
-    org_name,
-    scratch_org_config,
-    scratch_org_definition,
-    sf_client_id,
+    *, cci, login_url, org_config, org_name, scratch_org_config, scratch_org_definition
 ):
     settings = scratch_org_definition.get("settings", {})
     if settings:
@@ -228,10 +218,7 @@ def deploy_org_settings(
                 f.write(PACKAGE_XML)
 
             org_config = refresh_access_token(
-                config=scratch_org_config.config,
-                org_name=org_name,
-                login_url=login_url,
-                sf_client_id=sf_client_id,
+                config=scratch_org_config.config, org_name=org_name, login_url=login_url
             )
 
             task_config = TaskConfig({"options": {"path": path}})
@@ -244,17 +231,13 @@ def deploy_org_settings(
 def create_org_and_run_flow(
     *, repo_owner, repo_name, repo_branch, user, flow_name, project_path
 ):
-    # TODO: Should this come from env, even if that mirrors the DB contents?
-    sa = SocialApp.objects.filter(provider__startswith="salesforce").first()
-    sf_client_id = sa.client_id
-    sf_client_secret = sa.secret
     # Update environment with some keys CumulusCI uses
     # TODO: Should this be in a context manager so as not to leak across
     # runs?
     os.environ.update(
         {
             # Salesforce connected app
-            "SFDX_CLIENT_ID": sf_client_id,
+            "SFDX_CLIENT_ID": SF_CLIENT_ID,
             "SFDX_HUB_KEY": SF_CLIENT_KEY,
             # GitHub App
             "GITHUB_APP_ID": "",
@@ -276,9 +259,7 @@ def create_org_and_run_flow(
             "commit": repo_branch,
         }
     )
-    devhub_api = get_devhub_api(
-        devhub_username=devhub_username, sf_client_id=sf_client_id
-    )
+    devhub_api = get_devhub_api(devhub_username=devhub_username)
     scratch_org_config, scratch_org_definition = get_org_details(
         cci=cci, org_name=org_name, project_path=project_path
     )
@@ -291,7 +272,6 @@ def create_org_and_run_flow(
         scratch_org_definition=scratch_org_definition,
         cci=cci,
         devhub_api=devhub_api,
-        sf_client_id=sf_client_id,
     )
     mutate_scratch_org(
         scratch_org_config=scratch_org_config, org_result=org_result, email=email
@@ -301,8 +281,6 @@ def create_org_and_run_flow(
         login_url=login_url,
         org_result=org_result,
         scratch_org_config=scratch_org_config,
-        sf_client_id=sf_client_id,
-        sf_client_secret=sf_client_secret,
     )
     org_config = deploy_org_settings(
         cci=cci,
@@ -311,7 +289,6 @@ def create_org_and_run_flow(
         org_name=org_name,
         scratch_org_config=scratch_org_config,
         scratch_org_definition=scratch_org_definition,
-        sf_client_id=sf_client_id,
     )
 
     # ---
@@ -327,3 +304,28 @@ def create_org_and_run_flow(
         flow.run(org_config)
 
     return scratch_org_config
+
+
+def delete_scratch_org(scratch_org):
+    # TODO: Actually try this out
+
+    # Update environment with some keys CumulusCI uses
+    # TODO: Should this be in a context manager so as not to leak across
+    # runs?
+    os.environ.update(
+        {
+            # Salesforce connected app
+            "SFDX_CLIENT_ID": "placeholder",  # SF_CLIENT_ID,
+            "SFDX_HUB_KEY": SF_CLIENT_KEY,
+        }
+    )
+
+    devhub_username = scratch_org.owner.sf_username
+    org_id = scratch_org.config["Id"]  # TODO: Is this remotely right?
+
+    devhub_api = get_devhub_api(devhub_username=devhub_username)
+    active_scratch_org_id = devhub_api.query(
+        f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'"
+    )["records"][0]["Id"]
+    if active_scratch_org_id:
+        devhub_api.ActiveScratchOrg.delete(active_scratch_org_id)
