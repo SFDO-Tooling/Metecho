@@ -5,9 +5,9 @@ import pytest
 
 from ..github_context import (
     UnsafeZipfileError,
-    clone_repo_locally,
     extract_owner_and_repo,
     extract_zip_file,
+    get_repo_info,
     get_zip_file,
     is_safe_path,
     local_github_checkout,
@@ -46,12 +46,12 @@ def test_log_unsafe_zipfile_error():
 
 
 @pytest.mark.django_db
-def test_clone_repo_locally(user_factory):
+def test_get_repo_info(user_factory):
     with patch(f"{PATCH_ROOT}.github3") as gh3:
         user = user_factory()
         gh = MagicMock()
         gh3.login.return_value = gh
-        clone_repo_locally(user, "https://github.com/owner/repo")
+        get_repo_info(user, "https://github.com/owner/repo")
 
         gh.repository.assert_called_with("owner", "repo")
 

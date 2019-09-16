@@ -1,3 +1,5 @@
+from os import environ
+
 from allauth.socialaccount.models import SocialApp
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
@@ -9,8 +11,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--gh-id")
         parser.add_argument("--gh-secret")
-        parser.add_argument("--sf-id")
-        parser.add_argument("--sf-secret")
+        parser.add_argument("--sf-id", default=environ.get("SF_CLIENT_ID"))
+        parser.add_argument("--sf-secret", default=environ.get("SF_CLIENT_SECRET"))
 
     def create_github_app(self, id, secret):
         app, _ = SocialApp.objects.get_or_create(
