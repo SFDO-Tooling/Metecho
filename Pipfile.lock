@@ -202,11 +202,11 @@
         },
         "cumulusci": {
             "hashes": [
-                "sha256:a2ca5c35330594077f77176987fb0ca1a5e79f64fef2e2496fd20760fc49423f",
-                "sha256:edafc7c25e3502345c86ee1d5a0c201f622e17acd3f657e7fc9afffe04755d72"
+                "sha256:649fb2de596beabec379cc8af7ef828a0ee3c381bc6ba8d89544b27281ef72c8",
+                "sha256:d9494acfa5c2ef71d51e684e1a0df97b4969a1aa35405c61c147f6e1be6425f3"
             ],
             "index": "pypi",
-            "version": "==2.5.7"
+            "version": "==2.5.8"
         },
         "daphne": {
             "hashes": [
