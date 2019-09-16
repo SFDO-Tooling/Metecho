@@ -33,7 +33,7 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def clone_repo_locally(user, repo_url):
+def get_repo_info(user, repo_url):
     gh = github3.login(token=user.gh_token)
     owner, repo_name = extract_owner_and_repo(repo_url)
     return gh.repository(owner, repo_name)
@@ -82,7 +82,7 @@ def extract_zip_file(zip_file, owner, repo_name):
 @contextlib.contextmanager
 def local_github_checkout(user, repo_url, commit_ish=None):
     with temporary_dir() as repo_root:
-        repo = clone_repo_locally(user, repo_url)
+        repo = get_repo_info(user, repo_url)
         if commit_ish is None:
             commit_ish = repo.default_branch
         owner, repo_name = normalize_owner_and_repo_name(repo)

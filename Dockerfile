@@ -15,13 +15,6 @@ ENV DJANGO_ALLOWED_HOSTS localhost
 ENV DJANGO_HASHID_SALT 'sample hashid salt'
 ENV DJANGO_SECRET_KEY 'sample secret key'
 ENV DJANGO_SETTINGS_MODULE config.settings.production
-ENV SFDX_CLIENT_ID 3MVG9oNqAtcJCF.FGhrPHhh9wPn3TbvF6mcqZfijFj0Zc.I4J6N0YCfsW6qZ.XKVAluOAAijDKV0_B1t3ZI0Z
-
-# Set up SFDX:
-COPY ./compose/web/install-sfdx.sh /install-sfdx.sh
-COPY ./compose/web/server.key /server.key
-RUN chmod +x /install-sfdx.sh
-RUN /install-sfdx.sh
 
 # Python server setup:
 COPY ./Pipfile.lock /Pipfile.lock

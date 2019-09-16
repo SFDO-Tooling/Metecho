@@ -100,10 +100,6 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: Make fake server.key
-          command: |
-            touch /server.key
-      - run:
           name: Run Database Migrations
           command: |
             . venv/bin/activate

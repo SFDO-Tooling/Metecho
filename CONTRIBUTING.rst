@@ -43,25 +43,42 @@ Docker-based development
     BUCKETEER_AWS_ACCESS_KEY_ID=...
     BUCKETEER_AWS_SECRET_ACCESS_KEY=...
     BUCKETEER_BUCKET_NAME=...
+    SF_CLIENT_KEY=...
+    SF_CLIENT_ID=...
+    SF_CLIENT_SECRET=...
 
-3. Copy the ``server.key`` from Keybase into your local repo
-   (``compose/web/``)::
+3. Run ``./derrick build`` to build/re-build all the container images.
 
-    $ cp "/Volumes/Keybase ($USER)/team/oddbird/metashare/jwt/server.key" compose/web/
+4. Run ``./derrick up`` to start the server(s).
 
-4. Run ``./derrick build`` to build/re-build all the container images.
+5. Visit `<http://localhost:8080/>`_ in your browser.
 
-5. Run ``./derrick up`` to start the server(s).
-
-6. Visit `<http://localhost:8080/>`_ in your browser.
-
-7. When you're done working on MetaShare, ``Ctrl-C`` in the terminal where the
+6. When you're done working on MetaShare, ``Ctrl-C`` in the terminal where the
    containers are running to exit. You can also ``./derrick down`` to stop
    all running containers, or ``./derrick prune`` to clean up unused
    images/containers. (``docker-compose ps`` will tell you what containers are
    currently running.)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
+
+Logging in with GitHub
+----------------------
+
+To setup OAuth integration, run the ``populate_social_apps`` management command.
+The values to use for ``--gh-id``, ``--gh-secret``, ``--sf-id`` and
+``--sf-secret`` can be found in the GitHub App and Salesforce App, respectively,
+or if you're an OddBird you can find these values in the shared Keybase team
+folder (``metashare/prod.db``). If you've successfully set your ``SF_CLIENT_ID``
+and ``SF_CLIENT_SECRET`` environment variables above in step 2, you only need to
+add GitHub keys here::
+
+    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
+
+Once you've done that and successfully logged in, you probably want to make your
+user a superuser. You can do that easily via the ``promote_superuser``
+management command::
+
+    $ docker-compose run --rm web python manage.py promote_superuser <your email>
 
 Setting up the database
 -----------------------
@@ -166,23 +183,6 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 .. _Remote Development: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
 .. _integrated terminal: https://code.visualstudio.com/docs/editor/integrated-terminal
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
-
-Logging in with GitHub
-----------------------
-
-To setup OAuth integration, run the ``populate_social_apps`` management command.
-The values to use in place of ``AAA``, ``BBB``, ``XXX`` and ``YYY`` can be found
-in the GitHub App and Salesforce App, respectively, or if you're an OddBird you
-can find these values in the shared Keybase team folder
-(``metashare/prod.db``)::
-
-    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id AAA --gh-secret BBB --sf-id XXX --sf-secret YYY
-
-Once you've done that and successfully logged in, you probably want to make your
-user a superuser. You can do that easily via the ``promote_superuser``
-management command::
-
-    $ docker-compose run --rm web python manage.py promote_superuser <your email>
 
 Internationalization
 --------------------

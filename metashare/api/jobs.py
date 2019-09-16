@@ -50,9 +50,12 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
             latest_sha = repository.branch(base_branch).latest_sha()
             repository.create_branch_ref(branch_name, latest_sha)
             return branch_name
-        except UnprocessableEntity:
-            counter += 1
-            branch_name = f"{new_branch}-{counter}"
+        except UnprocessableEntity as err:
+            if err.msg == "Reference already exists":
+                counter += 1
+                branch_name = f"{new_branch}-{counter}"
+            else:
+                raise
 
 
 def create_branches_on_github(*, user, repo_url, project, task, repo_root):
@@ -69,7 +72,7 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
     else:
         prefix = get_cumulus_prefix(
             repo_root=repo_root,
-            repo_name="Repo Name",  # A placeholder, not used.
+            repo_name=repository.name,
             repo_url=repo_url,
             repo_owner=owner,
             repo_branch=repository.default_branch,
@@ -82,6 +85,7 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
             base_branch=repository.default_branch,
         )
         project.branch_name = project_branch_name
+        project.save()
 
     # Make task branch:
     if task.branch_name:
@@ -93,9 +97,8 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
             base_branch=project_branch_name,
         )
         task.branch_name = task_branch_name
+        task.save()
 
-    project.save()
-    task.save()
     return task_branch_name
 
 
