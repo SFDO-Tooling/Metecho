@@ -36,19 +36,6 @@ Docker-based development
    ``Ctrl-D`` on OS X or Linux. Alternatively, you could also type the Python
    command ``exit()`` and press ``Enter``.
 
-   Set these environment variables::
-
-    SF_CALLBACK_URL='http://localhost:8080/accounts/salesforce-production/login/callback/'
-    SF_CLIENT_KEY='-----BEGIN RSA PRIVATE KEY-----[some key here]-----END RSA PRIVATE KEY-----'
-    SF_CLIENT_ID=...
-    SF_CLIENT_SECRET=...
-
-   The ``SF_CLIENT_ID`` and ``SF_CLIENT_SECRET`` values should be the
-   same as the values you will eventually put in the database when you
-   initialize the SocialApps. The value for ``SF_CLIENT_KEY`` can be
-   found in the shared Keybase if you're an OddBird, under
-   ``metashare/jwt/server.key``; you can strip newlines from it.
-
    Finally, set the following environment variables (if you're an OddBird, you
    can find these values in the shared Keybase team folder --
    ``metashare/env``)::
@@ -56,6 +43,9 @@ Docker-based development
     BUCKETEER_AWS_ACCESS_KEY_ID=...
     BUCKETEER_AWS_SECRET_ACCESS_KEY=...
     BUCKETEER_BUCKET_NAME=...
+    SF_CLIENT_KEY=...
+    SF_CLIENT_ID=...
+    SF_CLIENT_SECRET=...
 
 3. Run ``./derrick build`` to build/re-build all the container images.
 
@@ -70,6 +60,24 @@ Docker-based development
    currently running.)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
+
+Logging in with GitHub
+----------------------
+
+To setup OAuth integration, run the ``populate_social_apps`` management command.
+The values to use in place of ``AAA``, ``BBB``, ``XXX`` and ``YYY`` can be found
+in the GitHub App and Salesforce App, respectively, or if you're an OddBird you
+can find these values in the shared Keybase team folder (``metashare/prod.db``).
+If you've successfully set your ``SF_CLIENT_ID`` and ``SF_CLIENT_SECRET``
+environment variables above in step 2, you only need to add GitHub keys here::
+
+    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id AAA --gh-secret BBB
+
+Once you've done that and successfully logged in, you probably want to make your
+user a superuser. You can do that easily via the ``promote_superuser``
+management command::
+
+    $ docker-compose run --rm web python manage.py promote_superuser <your email>
 
 Setting up the database
 -----------------------
@@ -174,26 +182,6 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 .. _Remote Development: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
 .. _integrated terminal: https://code.visualstudio.com/docs/editor/integrated-terminal
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
-
-Logging in with GitHub
-----------------------
-
-To setup OAuth integration, run the ``populate_social_apps`` management command.
-The values to use in place of ``AAA``, ``BBB``, ``XXX`` and ``YYY`` can be found
-in the GitHub App and Salesforce App, respectively, or if you're an OddBird you
-can find these values in the shared Keybase team folder
-(``metashare/prod.db``)::
-
-    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id AAA --gh-secret BBB --sf-id XXX --sf-secret YYY
-
-If you already have the ``SF_CLIENT_*`` environment variables set, you can omit the
-``--sf-*`` flags; it will pick up the correct values from the environment.
-
-Once you've done that and successfully logged in, you probably want to make your
-user a superuser. You can do that easily via the ``promote_superuser``
-management command::
-
-    $ docker-compose run --rm web python manage.py promote_superuser <your email>
 
 Internationalization
 --------------------
