@@ -186,6 +186,9 @@ can find these values in the shared Keybase team folder
 
     $ docker-compose run --rm web python manage.py populate_social_apps --gh-id AAA --gh-secret BBB --sf-id XXX --sf-secret YYY
 
+If you already have the ``SF_CLIENT_*`` environment variables set, you can omit the
+``--sf-*`` flags; it will pick up the correct values from the environment.
+
 Once you've done that and successfully logged in, you probably want to make your
 user a superuser. You can do that easily via the ``promote_superuser``
 management command::
