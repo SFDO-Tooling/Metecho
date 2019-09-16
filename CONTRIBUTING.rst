@@ -36,6 +36,19 @@ Docker-based development
    ``Ctrl-D`` on OS X or Linux. Alternatively, you could also type the Python
    command ``exit()`` and press ``Enter``.
 
+   Set these environment variables::
+
+    SF_CALLBACK_URL='http://localhost:8080/accounts/salesforce-production/login/callback/'
+    SF_CLIENT_KEY='-----BEGIN RSA PRIVATE KEY-----[some key here]-----END RSA PRIVATE KEY-----'
+    SF_CLIENT_ID=...
+    SF_CLIENT_SECRET=...
+
+   The ``SF_CLIENT_ID`` and ``SF_CLIENT_SECRET`` values should be the
+   same as the values you will eventually put in the database when you
+   initialize the SocialApps. The value for ``SF_CLIENT_KEY`` can be
+   found in the shared Keybase if you're an OddBird, under
+   ``metashare/jwt/server.key``; you can strip newlines from it.
+
    Finally, set the following environment variables (if you're an OddBird, you
    can find these values in the shared Keybase team folder --
    ``metashare/env``)::
