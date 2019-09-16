@@ -65,13 +65,14 @@ Logging in with GitHub
 ----------------------
 
 To setup OAuth integration, run the ``populate_social_apps`` management command.
-The values to use in place of ``AAA``, ``BBB``, ``XXX`` and ``YYY`` can be found
-in the GitHub App and Salesforce App, respectively, or if you're an OddBird you
-can find these values in the shared Keybase team folder (``metashare/prod.db``).
-If you've successfully set your ``SF_CLIENT_ID`` and ``SF_CLIENT_SECRET``
-environment variables above in step 2, you only need to add GitHub keys here::
+The values to use for ``--gh-id``, ``--gh-secret``, ``--sf-id`` and
+``--sf-secret`` can be found in the GitHub App and Salesforce App, respectively,
+or if you're an OddBird you can find these values in the shared Keybase team
+folder (``metashare/prod.db``). If you've successfully set your ``SF_CLIENT_ID``
+and ``SF_CLIENT_SECRET`` environment variables above in step 2, you only need to
+add GitHub keys here::
 
-    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id AAA --gh-secret BBB
+    $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
 
 Once you've done that and successfully logged in, you probably want to make your
 user a superuser. You can do that easily via the ``promote_superuser``
