@@ -192,7 +192,7 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = models.SlugField(max_length=50, null=True)
+    branch_name = models.SlugField(max_length=50, null=True, blank=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -235,9 +235,13 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     assignee = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="assigned_tasks"
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_tasks",
     )
-    branch_name = models.SlugField(max_length=50, null=True)
+    branch_name = models.SlugField(max_length=50, null=True, blank=True)
 
     slug_class = TaskSlug
 
@@ -274,16 +278,16 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
-    last_modified_at = models.DateTimeField(null=True)
-    expires_at = models.DateTimeField(null=True)
+    last_modified_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
     latest_commit = StringField(blank=True)
     latest_commit_url = models.URLField(blank=True)
-    latest_commit_at = models.DateTimeField(null=True)
-    url = models.URLField(null=True)
+    latest_commit_at = models.DateTimeField(null=True, blank=True)
+    url = models.URLField(null=True, blank=True)
     has_changes = models.BooleanField(default=False)
     currently_refreshing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder)
-    delete_queued_at = models.DateTimeField(null=True)
+    delete_queued_at = models.DateTimeField(null=True, blank=True)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True

@@ -23,7 +23,7 @@ export interface Org {
   url: string | null;
   has_changes: boolean;
   currently_refreshing_changes: boolean;
-  deletion_queued_at: string | null;
+  delete_queued_at: string | null;
 }
 
 export interface OrgsByTask {
@@ -157,7 +157,7 @@ const reducer = (
             ...taskOrgs,
             [object.org_type]: {
               ...object,
-              deletion_queued_at: new Date().toISOString(),
+              delete_queued_at: new Date().toISOString(),
             },
           },
         };

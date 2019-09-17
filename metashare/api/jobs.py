@@ -57,7 +57,7 @@ def report_errors_on_provision(scratch_org):
     try:
         with report_errors_on(scratch_org, "SCRATCH_ORG_PROVISION_FAILED"):
             yield
-    except Exception as e:
+    except Exception:
         scratch_org.delete()
         raise
 
@@ -67,7 +67,7 @@ def report_errors_on_delete(scratch_org):
     try:
         with report_errors_on(scratch_org, "SCRATCH_ORG_DELETE_FAILED"):
             yield
-    except Exception as e:
+    except Exception:
         scratch_org.delete_queued_at = None
         scratch_org.save()
         raise

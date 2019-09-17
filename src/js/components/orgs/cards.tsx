@@ -110,7 +110,7 @@ const OrgCard = ({
     userId && org && org.url && userId === org.owner,
   );
   const isCreating = isCreatingOrg[type] || (org && !org.url);
-  const isDeleting = isDeletingOrg[type] || (org && org.deletion_queued_at);
+  const isDeleting = isDeletingOrg[type] || (org && org.delete_queued_at);
   const doCreateAction = useCallback(() => {
     createAction(type);
   }, [createAction, type]);
