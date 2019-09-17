@@ -289,14 +289,20 @@ class TestScratchOrg:
             assert async_to_sync.called
 
     def test_queue_delete(self, scratch_org_factory):
-        with ExitStack() as stack:
-            delete_scratch_org_job = stack.enter_context(
-                patch("metashare.api.jobs.delete_scratch_org_job")
-            )
+        with patch(
+            "metashare.api.jobs.delete_scratch_org_job"
+        ) as delete_scratch_org_job:
             scratch_org = scratch_org_factory()
             scratch_org.queue_delete()
 
             assert delete_scratch_org_job.delay.called
+
+    def test_notify_delete(self, scratch_org_factory):
+        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory(url="https://example.com")
+            scratch_org.delete()
+
+            assert async_to_sync.called
 
 
 @pytest.mark.django_db

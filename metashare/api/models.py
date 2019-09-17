@@ -309,7 +309,12 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         delete_scratch_org_job.delay(self)
 
     def delete(self, *args, **kwargs):
-        self.notify_deleted()
+        # If the scratch org has no URL, it has not really been created
+        # on Salesforce, and therefore we don't need to notify of its
+        # destruction; this should only happen when it is destroyed
+        # during provisioning.
+        if self.url:
+            self.notify_deleted()
         super().delete(*args, **kwargs)
 
     def create_remote_resources(self):
