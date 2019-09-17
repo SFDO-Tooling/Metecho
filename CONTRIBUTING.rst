@@ -47,6 +47,10 @@ Docker-based development
     SF_CLIENT_ID=...
     SF_CLIENT_SECRET=...
 
+   *Note that none of the values should be quoted, and while ``SF_CLIENT_KEY`` is
+   an RSA private key, it must have newlines replaced with ``\n`` in order to
+   work properly in the Docker ``.env`` file syntax.*
+
 3. Run ``./derrick build`` to build/re-build all the container images.
 
 4. Run ``./derrick up`` to start the server(s).
