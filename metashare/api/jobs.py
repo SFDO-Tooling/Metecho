@@ -42,22 +42,15 @@ def mark_refreshing_changes(scratch_org):
 
 
 @contextlib.contextmanager
-def report_errors_on(scratch_org, type_):
+def report_errors_on_provision(scratch_org):
     try:
         yield
     except Exception as e:
-        async_to_sync(report_scratch_org_error)(scratch_org, str(e), type_)
+        async_to_sync(report_scratch_org_error)(
+            scratch_org, str(e), "SCRATCH_ORG_PROVISION_FAILED"
+        )
         tb = traceback.format_exc()
         logger.error(tb)
-        raise
-
-
-@contextlib.contextmanager
-def report_errors_on_provision(scratch_org):
-    try:
-        with report_errors_on(scratch_org, "SCRATCH_ORG_PROVISION_FAILED"):
-            yield
-    except Exception:
         scratch_org.delete()
         raise
 
@@ -65,11 +58,15 @@ def report_errors_on_provision(scratch_org):
 @contextlib.contextmanager
 def report_errors_on_delete(scratch_org):
     try:
-        with report_errors_on(scratch_org, "SCRATCH_ORG_DELETE_FAILED"):
-            yield
-    except Exception:
+        yield
+    except Exception as e:
         scratch_org.delete_queued_at = None
         scratch_org.save()
+        async_to_sync(report_scratch_org_error)(
+            scratch_org, str(e), "SCRATCH_ORG_DELETE_FAILED"
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
         raise
 
 
