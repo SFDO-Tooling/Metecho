@@ -302,7 +302,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         if self.tracker.has_changed("url"):
             self.notify_has_url()
 
-        if not is_new and self.tracker.has_changed("currently_refreshing_changes"):
+        if self.tracker.has_changed("currently_refreshing_changes"):
             self.notify_refreshing_changes()
 
     def queue_delete(self):
