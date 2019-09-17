@@ -8,6 +8,7 @@ from ..jobs import (
     create_branches_on_github,
     create_branches_on_github_then_create_scratch_org,
     create_org_and_run_flow,
+    delete_scratch_org,
     mark_refreshing_changes,
     report_errors_on,
     try_to_make_branch,
@@ -171,3 +172,12 @@ def test_mark_refreshing_changes(scratch_org_factory):
     with mark_refreshing_changes(scratch_org):
         assert scratch_org.currently_refreshing_changes
     assert not scratch_org.currently_refreshing_changes
+
+
+@pytest.mark.django_db
+def test_delete_scratch_org(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch(f"{PATCH_ROOT}.sf_run_flow.delete_scratch_org") as sf_delete_scratch_org:
+        delete_scratch_org(scratch_org)
+
+        assert sf_delete_scratch_org.called
