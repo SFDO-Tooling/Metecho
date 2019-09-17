@@ -10,7 +10,8 @@ from ..jobs import (
     create_org_and_run_flow,
     delete_scratch_org,
     mark_refreshing_changes,
-    report_errors_on,
+    report_errors_on_delete,
+    report_errors_on_provision,
     try_to_make_branch,
 )
 from ..models import SCRATCH_ORG_TYPES
@@ -129,13 +130,27 @@ def test_create_org_and_run_flow():
 
 
 @pytest.mark.django_db
-def test_report_errors_on(scratch_org_factory):
+def test_report_errors_on_provision(scratch_org_factory):
     scratch_org = scratch_org_factory()
     with patch(
         f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
     ) as push_message_about_instance:
         try:
-            with report_errors_on(scratch_org):
+            with report_errors_on_provision(scratch_org):
+                raise ValueError
+        except ValueError:
+            pass
+        assert push_message_about_instance.called
+
+
+@pytest.mark.django_db
+def test_report_errors_on_delete(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
+        try:
+            with report_errors_on_delete(scratch_org):
                 raise ValueError
         except ValueError:
             pass

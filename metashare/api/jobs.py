@@ -20,11 +20,11 @@ from .push import push_message_about_instance
 logger = logging.getLogger(__name__)
 
 
-async def report_scratch_org_error(instance, message):
+async def report_scratch_org_error(instance, message, type_):
     from .serializers import ScratchOrgSerializer
 
     message = {
-        "type": "SCRATCH_ORG_PROVISION_FAILED",
+        "type": type_,
         "payload": {"message": message, "model": ScratchOrgSerializer(instance).data},
     }
     await push_message_about_instance(instance, message)
@@ -42,14 +42,34 @@ def mark_refreshing_changes(scratch_org):
 
 
 @contextlib.contextmanager
-def report_errors_on(scratch_org):
+def report_errors_on(scratch_org, type_):
     try:
         yield
     except Exception as e:
-        async_to_sync(report_scratch_org_error)(scratch_org, str(e))
+        async_to_sync(report_scratch_org_error)(scratch_org, str(e), type_)
         tb = traceback.format_exc()
         logger.error(tb)
+        raise
+
+
+@contextlib.contextmanager
+def report_errors_on_provision(scratch_org):
+    try:
+        with report_errors_on(scratch_org, "SCRATCH_ORG_PROVISION_FAILED"):
+            yield
+    except Exception as e:
         scratch_org.delete()
+        raise
+
+
+@contextlib.contextmanager
+def report_errors_on_delete(scratch_org):
+    try:
+        with report_errors_on(scratch_org, "SCRATCH_ORG_DELETE_FAILED"):
+            yield
+    except Exception as e:
+        scratch_org.delete_queued_at = None
+        scratch_org.save()
         raise
 
 
@@ -151,7 +171,7 @@ def create_branches_on_github_then_create_scratch_org(
 ):
     with contextlib.ExitStack() as stack:
         repo_root = stack.enter_context(local_github_checkout(user, repo_url))
-        stack.enter_context(report_errors_on(scratch_org))
+        stack.enter_context(report_errors_on_provision(scratch_org))
 
         commit_ish = create_branches_on_github(
             user=user,
@@ -175,8 +195,9 @@ create_branches_on_github_then_create_scratch_org_job = job(
 
 
 def delete_scratch_org(scratch_org):
-    sf_run_flow.delete_scratch_org(scratch_org)
-    scratch_org.delete()
+    with report_errors_on_delete(scratch_org):
+        sf_run_flow.delete_scratch_org(scratch_org)
+        scratch_org.delete()
 
 
 delete_scratch_org_job = job(delete_scratch_org)

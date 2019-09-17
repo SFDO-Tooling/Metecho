@@ -9,6 +9,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.functional import cached_property
 from model_utils import Choices, FieldTracker
 
@@ -282,6 +283,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     has_changes = models.BooleanField(default=False)
     currently_refreshing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder)
+    delete_queued_at = models.DateTimeField(null=True)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -302,6 +304,8 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     def queue_delete(self):
         from .jobs import delete_scratch_org_job
 
+        self.delete_queued_at = timezone.now()
+        self.save()
         delete_scratch_org_job.delay(self)
 
     def delete(self, *args, **kwargs):
