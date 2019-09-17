@@ -293,16 +293,16 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         return True
 
     def save(self, *args, **kwargs):
-        create_remote_resources = self.id is None
+        is_new = self.id is None
         super().save(*args, **kwargs)
 
-        if create_remote_resources:
+        if is_new:
             self.create_remote_resources()
 
         if self.tracker.has_changed("url"):
             self.notify_has_url()
 
-        if self.tracker.has_changed("currently_refreshing_changes"):
+        if not is_new and self.tracker.has_changed("currently_refreshing_changes"):
             self.notify_refreshing_changes()
 
     def queue_delete(self):
