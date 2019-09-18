@@ -74,7 +74,7 @@ const defaultState = {
         latest_commit_url: '/test/commit/url/',
         latest_commit_at: '2019-08-16T12:58:53.721Z',
         url: '/test/org/url/',
-        has_changes: true,
+        changes: {},
       },
       QA: null,
     },

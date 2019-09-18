@@ -216,43 +216,43 @@ export const createObject = ({
     payload: { objectType, url, data },
   });
   try {
-    let object: any;
     // @@@ Mock out until API exists
-    /* istanbul ignore if */
-    if (objectType === OBJECT_TYPES.COMMIT) {
-      object = {
-        id: 'commit-id',
-        task: data.task,
-      };
-      setTimeout(() => {
-        // Success case
-        dispatch(
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          commitSucceeded(object),
-        );
-        // Error case
-        // dispatch(
-        //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        //   commitFailed({ model: object, error: 'Oops.' }),
-        // );
-      }, 3000);
-    } else {
-      if (!url) {
-        throw new Error(`No URL found for object: ${objectType}`);
-      }
-      object = await apiFetch({
-        url,
-        dispatch,
-        opts: {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-        hasForm,
-      });
+    // let object: any;
+    // if (objectType === OBJECT_TYPES.COMMIT) {
+    //   object = {
+    //     id: 'commit-id',
+    //     org: data.org,
+    //     task: data.task,
+    //   };
+    //   setTimeout(() => {
+    //     // Success case
+    //     dispatch(
+    //       // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    //       commitSucceeded(object),
+    //     );
+    //     // Error case
+    //     // dispatch(
+    //     //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    //     //   commitFailed({ model: object, error: 'Oops.' }),
+    //     // );
+    //   }, 3000);
+    // } else {
+    if (!url) {
+      throw new Error(`No URL found for object: ${objectType}`);
     }
+    const object = await apiFetch({
+      url,
+      dispatch,
+      opts: {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      hasForm,
+    });
+    // }
     if (
       shouldSubscribeToObject(object) &&
       object &&

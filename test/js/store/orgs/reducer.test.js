@@ -170,7 +170,6 @@ describe('reducer', () => {
           'task-1': {
             Dev: null,
             QA: null,
-            changeset: undefined,
             committing: true,
           },
         };
@@ -389,110 +388,6 @@ describe('reducer', () => {
           objectType: 'other-object',
         },
       });
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('REQUEST_CHANGESET_STARTED', () => {
-    test('removes changeset from task', () => {
-      const org = {
-        id: 'org-id',
-        task: 'task-1',
-        org_type: 'Dev',
-      };
-      const expected = {
-        'task-1': {
-          Dev: org,
-          QA: null,
-          changeset: undefined,
-        },
-      };
-      const actual = reducer(
-        {},
-        {
-          type: 'REQUEST_CHANGESET_STARTED',
-          payload: { org },
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('REQUEST_CHANGESET_SUCCEEDED', () => {
-    test('sets fetchingChangeset: true', () => {
-      const org = {
-        id: 'org-id',
-        task: 'task-1',
-        org_type: 'Dev',
-      };
-      const expected = {
-        'task-1': {
-          Dev: org,
-          QA: null,
-          fetchingChangeset: true,
-        },
-      };
-      const actual = reducer(
-        {},
-        {
-          type: 'REQUEST_CHANGESET_SUCCEEDED',
-          payload: { org },
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('CHANGESET_SUCCEEDED', () => {
-    test('stores changeset and sets fetchingChangeset: false', () => {
-      const changeset = {
-        id: 'changeset-id',
-        task: 'task-1',
-      };
-      const expected = {
-        'task-1': {
-          Dev: null,
-          QA: null,
-          changeset,
-          fetchingChangeset: false,
-        },
-      };
-      const actual = reducer(
-        {},
-        {
-          type: 'CHANGESET_SUCCEEDED',
-          payload: changeset,
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('CHANGESET_FAILED/CHANGESET_CANCELED', () => {
-    test('removes changeset and sets fetchingChangeset: false', () => {
-      const changeset = {
-        id: 'changeset-id',
-        task: 'task-1',
-      };
-      const expected = {
-        'task-1': {
-          Dev: null,
-          QA: null,
-          changeset: undefined,
-          fetchingChangeset: false,
-        },
-      };
-      const actual = reducer(
-        {},
-        {
-          type: 'CHANGESET_FAILED',
-          payload: changeset,
-        },
-      );
 
       expect(actual).toEqual(expected);
     });

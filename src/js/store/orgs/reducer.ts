@@ -21,21 +21,13 @@ export interface Org {
   latest_commit_url: string;
   latest_commit_at: string | null;
   url: string | null;
-  has_changes: boolean;
+  changes: Changeset | null;
   currently_refreshing_changes: boolean;
   delete_queued_at: string | null;
 }
 
-export interface OrgsByTask {
-  [ORG_TYPES.DEV]: Org | null;
-  [ORG_TYPES.QA]: Org | null;
-  changeset?: Changeset;
-  fetchingChangeset?: boolean;
-  committing?: boolean;
-}
-
-export interface OrgState {
-  [key: string]: OrgsByTask;
+export interface Changeset {
+  [key: string]: Change[];
 }
 
 interface Change {
@@ -43,17 +35,20 @@ interface Change {
   name: string;
 }
 
-export interface Commit {
-  id: string;
-  task: string;
+export interface OrgsByTask {
+  [ORG_TYPES.DEV]: Org | null;
+  [ORG_TYPES.QA]: Org | null;
+  committing?: boolean;
 }
 
-export interface Changeset {
+export interface OrgState {
+  [key: string]: OrgsByTask;
+}
+
+export interface Commit {
   id: string;
+  org: string;
   task: string;
-  changes: {
-    [key: string]: Change[];
-  };
 }
 
 const defaultState = {};
@@ -122,7 +117,6 @@ const reducer = (
               ...orgs,
               [object.task]: {
                 ...taskOrgs,
-                changeset: undefined,
                 committing: true,
               },
             };
@@ -204,65 +198,6 @@ const reducer = (
         };
       }
       return orgs;
-    }
-    case 'REQUEST_CHANGESET_STARTED': {
-      const { org } = action.payload;
-      const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: org,
-        [ORG_TYPES.QA]: null,
-      };
-      return {
-        ...orgs,
-        [org.task]: {
-          ...taskOrgs,
-          changeset: undefined,
-        },
-      };
-    }
-    case 'REQUEST_CHANGESET_SUCCEEDED': {
-      const { org } = action.payload;
-      const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: org,
-        [ORG_TYPES.QA]: null,
-      };
-      return {
-        ...orgs,
-        [org.task]: {
-          ...taskOrgs,
-          fetchingChangeset: true,
-        },
-      };
-    }
-    case 'CHANGESET_SUCCEEDED': {
-      const changeset = action.payload;
-      const taskOrgs = orgs[changeset.task] || {
-        [ORG_TYPES.DEV]: null,
-        [ORG_TYPES.QA]: null,
-      };
-      return {
-        ...orgs,
-        [changeset.task]: {
-          ...taskOrgs,
-          changeset,
-          fetchingChangeset: false,
-        },
-      };
-    }
-    case 'CHANGESET_FAILED':
-    case 'CHANGESET_CANCELED': {
-      const changeset = action.payload;
-      const taskOrgs = orgs[changeset.task] || {
-        [ORG_TYPES.DEV]: null,
-        [ORG_TYPES.QA]: null,
-      };
-      return {
-        ...orgs,
-        [changeset.task]: {
-          ...taskOrgs,
-          changeset: undefined,
-          fetchingChangeset: false,
-        },
-      };
     }
     case 'COMMIT_FAILED':
     case 'COMMIT_SUCCEEDED': {

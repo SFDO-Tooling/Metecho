@@ -24,15 +24,14 @@ import {
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
-  useIsMounted,
 } from '@/components/utils';
 import { AppState, ThunkDispatch } from '@/store';
-import { getChangeset, RequestChangesetSucceeded } from '@/store/orgs/actions';
+import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
+import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
@@ -40,7 +39,6 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
-  const [changesetID, setChangesetID] = useState('');
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -56,37 +54,51 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
   const { orgs } = useFetchOrgsIfMissing(task, props);
   const user = useSelector(selectUserState) as User;
-  const isMounted = useIsMounted();
 
-  // Unsubscribe from changeset WS if leaving page
-  useEffect(
-    () => () => {
-      if (changesetID && window.socket) {
-        window.socket.unsubscribe({
-          model: OBJECT_TYPES.CHANGESET,
-          id: changesetID,
-        });
+  let orgHasChanges, userIsOwner, devOrg: Org | null | undefined;
+  if (orgs) {
+    devOrg = orgs[ORG_TYPES.DEV];
+    orgHasChanges = Boolean(devOrg && devOrg.changes);
+    userIsOwner = devOrg && devOrg.owner === user.id;
+  }
+
+  // When capture changes has been triggered, wait until org has been refreshed
+  useEffect(() => {
+    const changesFetched =
+      fetchingChanges && devOrg && !devOrg.currently_refreshing_changes;
+
+    if (changesFetched && devOrg) {
+      setFetchingChanges(false);
+      if (devOrg.changes) {
+        setCaptureModalOpen(true);
       }
-    },
-    [changesetID],
-  );
+    }
+  }, [fetchingChanges, devOrg]);
 
-  const fetchChangeset = useCallback((org: Org) => {
-    setFetchingChanges(true);
-    setCaptureModalOpen(true);
-    dispatch(getChangeset({ org }))
-      .then((action: RequestChangesetSucceeded) => {
-        if (action && action.payload && action.payload.changeset) {
-          setChangesetID(action.payload.changeset.id);
-        }
-      })
-      .finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setFetchingChanges(false);
-        }
-      });
+  const doRefetchOrg = useCallback((org: Org) => {
+    dispatch(refetchOrg(org));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openConnectModal = () => {
+    setInfoModalOpen(false);
+    setConnectModalOpen(true);
+  };
+  const openInfoModal = () => {
+    setConnectModalOpen(false);
+    setInfoModalOpen(true);
+  };
+
+  let action = openConnectModal;
+  if (user.valid_token_for) {
+    action = user.is_devhub_enabled
+      ? () => {
+          if (devOrg) {
+            setFetchingChanges(true);
+            doRefetchOrg(devOrg);
+          }
+        }
+      : openInfoModal;
+  }
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -115,32 +127,6 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   if (taskLoadingOrNotFound !== false) {
     return taskLoadingOrNotFound;
-  }
-
-  let orgHasChanges, userIsOwner, devOrg: Org | null | undefined;
-  if (orgs && user) {
-    devOrg = orgs[ORG_TYPES.DEV];
-    orgHasChanges = devOrg && devOrg.has_changes;
-    userIsOwner = devOrg && devOrg.owner === user.id;
-  }
-
-  const openConnectModal = () => {
-    setInfoModalOpen(false);
-    setConnectModalOpen(true);
-  };
-  const openInfoModal = () => {
-    setConnectModalOpen(false);
-    setInfoModalOpen(true);
-  };
-  const doFetchChangeset = () => {
-    if (devOrg) {
-      fetchChangeset(devOrg);
-    }
-  };
-
-  let action = openConnectModal;
-  if (user.valid_token_for) {
-    action = user.is_devhub_enabled ? doFetchChangeset : openInfoModal;
   }
 
   // This redundant check is used to satisfy TypeScript...
@@ -190,11 +176,20 @@ const TaskDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
-  // Considered "loading" if we're currently fetching or committing changes
-  const changesLoading =
-    fetchingChanges ||
-    (orgs && orgs.fetchingChangeset) ||
-    (orgs && orgs.committing);
+  const committing = Boolean(orgs && orgs.committing);
+  let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
+  if (fetchingChanges) {
+    buttonText = (
+      <LabelWithSpinner label={i18n.t('Refreshing Org…')} variant="inverse" />
+    );
+  } else if (committing) {
+    buttonText = (
+      <LabelWithSpinner
+        label={i18n.t('Capturing Selected Changes…')}
+        variant="inverse"
+      />
+    );
+  }
 
   return (
     <DocumentTitle
@@ -221,20 +216,11 @@ const TaskDetail = (props: RouteComponentProps) => {
       >
         {userIsOwner && orgHasChanges ? (
           <Button
-            label={
-              changesLoading ? (
-                <LabelWithSpinner
-                  label={i18n.t('Capturing Task Changes…')}
-                  variant="inverse"
-                />
-              ) : (
-                i18n.t('Capture Task Changes')
-              )
-            }
+            label={buttonText}
             className="slds-size_full slds-m-bottom_x-large"
             variant="brand"
             onClick={action}
-            disabled={changesLoading}
+            disabled={fetchingChanges || committing}
           />
         ) : null}
 
@@ -257,9 +243,11 @@ const TaskDetail = (props: RouteComponentProps) => {
             'Please close this message and try capturing task changes again.',
           )}
         />
-        {orgs && orgs.changeset && (
+        {devOrg && devOrg.changes && (
           <CaptureModal
-            changeset={orgs.changeset}
+            orgId={devOrg.id}
+            taskId={devOrg.task}
+            changeset={devOrg.changes}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
           />

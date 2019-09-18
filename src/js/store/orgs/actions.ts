@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
-import { Changeset, Commit, Org } from '@/store/orgs/reducer';
+import { Commit, Org } from '@/store/orgs/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
 import apiFetch from '@/utils/api';
@@ -35,24 +35,6 @@ interface OrgDeleteFailed {
   type: 'SCRATCH_ORG_DELETE_FAILED';
   payload: Org;
 }
-interface ChangesetPayload {
-  org: Org;
-  url: string;
-}
-interface RequestChangesetEvent {
-  type: 'REQUEST_CHANGESET_STARTED' | 'REQUEST_CHANGESET_FAILED';
-  payload: ChangesetPayload;
-}
-export interface RequestChangesetSucceeded {
-  type: 'REQUEST_CHANGESET_SUCCEEDED';
-  payload: {
-    changeset: Changeset;
-  } & ChangesetPayload;
-}
-interface ChangesetEvent {
-  type: 'CHANGESET_SUCCEEDED' | 'CHANGESET_FAILED' | 'CHANGESET_CANCELED';
-  payload: Changeset;
-}
 interface CommitEvent {
   type: 'COMMIT_SUCCEEDED' | 'COMMIT_FAILED';
   payload: Commit;
@@ -66,9 +48,6 @@ export type OrgsAction =
   | OrgUpdated
   | OrgDeleted
   | OrgDeleteFailed
-  | RequestChangesetEvent
-  | RequestChangesetSucceeded
-  | ChangesetEvent
   | CommitEvent;
 
 export const provisionOrg = (payload: Org): ThunkResult => (
@@ -181,12 +160,31 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
     // setTimeout(() => {
     //   dispatch({
     //     type: 'SCRATCH_ORG_UPDATED',
-    //     payload: { ...response },
+    //     payload: {
+    //       ...response,
+    //       changes: {
+    //         ApexClasses: [
+    //           { id: '0', name: 'Class 1' },
+    //           { id: '1', name: 'Class 2' },
+    //         ],
+    //         CustomObjects: [{ id: '2', name: 'Custom objects' }],
+    //         ClassOthers: [{ id: '3', name: 'Class others' }],
+    //         FooBars: [{ id: '4', name: 'Foo Bars' }],
+    //         Feefitfum: [{ id: '5', name: 'Fee fitfum' }],
+    //         'Whatcha macallit': [{ id: '6', name: 'Whatchamacallit' }],
+    //         'Loopy ': [{ id: '7', name: 'Loopy Looo' }],
+    //       },
+    //     },
     //   });
     // }, 3000);
     return dispatch({
       type: 'REFETCH_ORG_SUCCEEDED',
-      payload: response,
+      payload: {
+        // @@@ Mock out until API exists
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        // response: { ...response, currently_refreshing_changes: true },
+        response,
+      },
     });
   } catch (err) {
     dispatch({
@@ -283,122 +281,6 @@ export const deleteFailed = ({
   });
 };
 
-export const getChangeset = ({
-  org,
-}: {
-  org: Org;
-}): ThunkResult => async dispatch => {
-  const url = window.api_urls.scratch_org_detail(org.id);
-  dispatch({
-    type: 'REQUEST_CHANGESET_STARTED',
-    payload: { org, url },
-  });
-  try {
-    const changeset = await apiFetch({
-      url,
-      dispatch,
-    });
-    if (changeset && changeset.id && window.socket) {
-      window.socket.subscribe({
-        model: OBJECT_TYPES.CHANGESET,
-        id: changeset.id,
-      });
-    }
-    // @@@ Mock out until API exists...
-    // setTimeout(() => {
-    //   const mockChangeset = {
-    //     id: 'changeset-id',
-    //     task: org.task,
-    //     changes: {
-    //       ApexClasses: [
-    //         { id: '0', name: 'Class 1' },
-    //         { id: '1', name: 'Class 2' },
-    //       ],
-    //       CustomObjects: [{ id: '2', name: 'Custom objects' }],
-    //       ClassOthers: [{ id: '3', name: 'Class others' }],
-    //       FooBars: [{ id: '4', name: 'Foo Bars' }],
-    //       Feefitfum: [{ id: '5', name: 'Fee fitfum' }],
-    //       'Whatcha macallit': [{ id: '6', name: 'Whatchamacallit' }],
-    //       'Loopy ': [{ id: '7', name: 'Loopy Looo' }],
-    //     },
-    //   };
-    //   // Success case
-    //   dispatch(
-    //     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //     addChangeset(mockChangeset),
-    //   );
-    //   // Error case
-    //   // dispatch(
-    //   //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //   //   changesetFailed({ model: mockChangeset, error: 'Oops.' }),
-    //   // );
-    // }, 3000);
-    return dispatch({
-      type: 'REQUEST_CHANGESET_SUCCEEDED',
-      payload: { org, url, changeset },
-    });
-  } catch (err) {
-    dispatch({
-      type: 'REQUEST_CHANGESET_FAILED',
-      payload: { org, url },
-    });
-    throw err;
-  }
-};
-
-export const addChangeset = (payload: Changeset): ChangesetEvent => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.CHANGESET,
-      id: payload.id,
-    });
-  }
-  return {
-    type: 'CHANGESET_SUCCEEDED',
-    payload,
-  };
-};
-
-export const changesetFailed = ({
-  model,
-  message,
-}: {
-  model: Changeset;
-  message?: string;
-}): ThunkResult => (dispatch, getState) => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.CHANGESET,
-      id: model.id,
-    });
-  }
-  const task = selectTaskById(getState(), model.task);
-  dispatch(
-    addToast({
-      heading: task
-        ? `${i18n.t(
-            'Uh oh. There was an error capturing changes from your scratch org on task',
-          )} “${task.name}”.`
-        : i18n.t(
-            'Uh oh. There was an error capturing changes from your scratch org.',
-          ),
-      details: message,
-      variant: 'error',
-    }),
-  );
-  return dispatch({
-    type: 'CHANGESET_FAILED',
-    payload: model,
-  });
-};
-
-export const cancelChangeset = (payload: Changeset): ChangesetEvent => ({
-  type: 'CHANGESET_CANCELED',
-  payload,
-});
-
 export const commitSucceeded = (payload: Commit): ThunkResult => (
   dispatch,
   getState,
@@ -415,9 +297,9 @@ export const commitSucceeded = (payload: Commit): ThunkResult => (
     addToast({
       heading: task
         ? `${i18n.t(
-            'Successfully committed changes from your scratch org on task',
+            'Successfully captured changes from your scratch org on task',
           )} “${task.name}”.`
-        : i18n.t('Successfully committed changes from your scratch org.'),
+        : i18n.t('Successfully captured changes from your scratch org.'),
     }),
   );
   return dispatch({
@@ -445,10 +327,10 @@ export const commitFailed = ({
     addToast({
       heading: task
         ? `${i18n.t(
-            'Uh oh. There was an error committing changes from your scratch org on task',
+            'Uh oh. There was an error capturing changes from your scratch org on task',
           )} “${task.name}”.`
         : i18n.t(
-            'Uh oh. There was an error committing changes from your scratch org.',
+            'Uh oh. There was an error capturing changes from your scratch org.',
           ),
       details: message,
       variant: 'error',

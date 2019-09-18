@@ -13,6 +13,11 @@ Websocket notifications you can subscribe to:
     scratchorg.:id
         SCRATCH_ORG_PROVISIONED
         SCRATCH_ORG_PROVISION_FAILED
+        SCRATCH_ORG_DELETED
+        SCRATCH_ORG_DELETE_FAILED
+        SCRATCH_ORG_UPDATED
+        COMMIT_SUCCEEDED
+        COMMIT_FAILED
 """
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _

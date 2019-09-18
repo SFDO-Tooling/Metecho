@@ -306,8 +306,9 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         if self.tracker.has_changed("url"):
             self.notify_has_url()
 
-        # if self.tracker.has_changed("currently_refreshing_changes"):
-        #     self.notify_refreshing_changes()
+        # TODO: Fix this so that it does not run on every job save
+        if self.tracker.has_changed("currently_refreshing_changes"):
+            self.notify_refreshing_changes()
 
         return ret
 
@@ -345,12 +346,12 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         message = {"type": "SCRATCH_ORG_PROVISIONED", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
 
-    # def notify_refreshing_changes(self):
-    #     from .serializers import ScratchOrgSerializer
+    def notify_refreshing_changes(self):
+        from .serializers import ScratchOrgSerializer
 
-    #     payload = ScratchOrgSerializer(self).data
-    #     message = {"type": "SCRATCH_ORG_UPDATED", "payload": payload}
-    #     async_to_sync(push.push_message_about_instance)(self, message)
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_UPDATED", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     def notify_deleted(self):
         from .serializers import ScratchOrgSerializer

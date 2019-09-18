@@ -6,15 +6,15 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
-import { cancelChangeset } from '@/store/orgs/actions';
 import { Changeset } from '@/store/orgs/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 import { pluralize } from '@/utils/helpers';
 
 interface Props {
+  orgId: string;
+  taskId: string;
   changeset: Changeset;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,7 +24,13 @@ interface BooleanObject {
   [key: string]: boolean;
 }
 
-const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
+const CaptureModal = ({
+  orgId,
+  taskId,
+  changeset,
+  isOpen,
+  toggleModal,
+}: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
   const [capturingChanges, setCapturingChanges] = useState(false);
   const isMounted = useIsMounted();
@@ -55,12 +61,11 @@ const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
   } = useForm({
     fields: { changes: [], message: '' },
     objectType: OBJECT_TYPES.COMMIT,
-    additionalData: { task: changeset.task },
+    additionalData: { org: orgId, task: taskId },
     onSuccess: handleSuccess,
     onError: handleError,
     shouldSubscribeToObject: () => true,
   });
-  const dispatch = useDispatch();
 
   const setChanges = (changes: string[]) => {
     setInputs({ ...inputs, changes });
@@ -75,7 +80,7 @@ const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
 
   const handleSelectGroup = (groupName: string, checked: boolean) => {
     const newCheckedItems = new Set(inputs.changes as string[]);
-    for (const { id } of changeset.changes[groupName]) {
+    for (const { id } of changeset[groupName]) {
       if (checked) {
         newCheckedItems.add(id);
       } else {
@@ -103,7 +108,7 @@ const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
     { checked }: { checked: boolean },
   ) => {
     if (checked) {
-      const ids = Object.values(changeset.changes)
+      const ids = Object.values(changeset)
         .flat()
         .map(change => change.id);
       setChanges(ids);
@@ -121,7 +126,6 @@ const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
 
   const handleClose = () => {
     toggleModal(false);
-    dispatch(cancelChangeset(changeset));
     resetForm();
   };
 
@@ -130,7 +134,7 @@ const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
     handleSubmit(e);
   };
 
-  const totalChanges = Object.values(changeset.changes).flat().length;
+  const totalChanges = Object.values(changeset).flat().length;
   const allChangesChecked = inputs.changes.length === totalChanges;
   const noChangesChecked = !inputs.changes.length;
 
@@ -183,8 +187,8 @@ const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
             {`(${totalChanges} ${pluralize(totalChanges, 'change')})`}
           </span>
         </div>
-        {Object.keys(changeset.changes).map(groupName => {
-          const children = changeset.changes[groupName];
+        {Object.keys(changeset).map(groupName => {
+          const children = changeset[groupName];
           const handleThisPanelToggle = () => handlePanelToggle(groupName);
           const handleSelectThisGroup = (
             event: React.ChangeEvent<HTMLInputElement>,
@@ -228,7 +232,7 @@ const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
                   </div>
                 }
               >
-                {changeset.changes[groupName].map(change => (
+                {changeset[groupName].map(change => (
                   <Checkbox
                     key={change.id}
                     id={change.id}
@@ -257,7 +261,12 @@ const CaptureModal = ({ changeset, isOpen, toggleModal }: Props) => {
           onChange={handleInputChange}
         />
         {/* Clicking hidden button allows for native browser form validation */}
-        <button ref={submitButton} type="submit" style={{ display: 'none' }} />
+        <button
+          ref={submitButton}
+          type="submit"
+          style={{ display: 'none' }}
+          disabled={!inputs.changes.length || capturingChanges}
+        />
       </form>
     </Modal>
   );

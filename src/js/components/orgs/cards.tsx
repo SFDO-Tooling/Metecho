@@ -146,7 +146,7 @@ const OrgCard = ({
     const latestCommitAt =
       org.latest_commit_at && new Date(org.latest_commit_at);
     const expiresAt = org.expires_at && new Date(org.expires_at);
-    const changesMsg = org.has_changes
+    const changesMsg = org.changes
       ? i18n.t('has uncaptured changes')
       : i18n.t('up-to-date');
     contents = (
@@ -387,7 +387,7 @@ const OrgCards = ({
 
     if (readyToDeleteOrg && devOrg) {
       setIsWaitingToDeleteDevOrg(false);
-      if (devOrg.has_changes) {
+      if (devOrg.changes) {
         setConfirmDeleteModalOpen(devOrg.org_type);
       } else {
         deleteOrg(devOrg);

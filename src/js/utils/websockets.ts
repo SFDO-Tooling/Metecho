@@ -2,8 +2,6 @@ import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
 import {
-  addChangeset,
-  changesetFailed,
   commitFailed,
   commitSucceeded,
   deleteFailed,
@@ -12,7 +10,7 @@ import {
   provisionOrg,
   updateOrg,
 } from '@/store/orgs/actions';
-import { Changeset, Commit, Org } from '@/store/orgs/reducer';
+import { Commit, Org } from '@/store/orgs/reducer';
 import { updateProject } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
@@ -79,17 +77,6 @@ interface OrgDeleteFailedEvent {
     model: Org;
   };
 }
-interface ChangesetSucceededEvent {
-  type: 'CHANGESET_SUCCEEDED';
-  payload: Changeset;
-}
-interface ChangesetFailedEvent {
-  type: 'CHANGESET_FAILED';
-  payload: {
-    message?: string;
-    model: Changeset;
-  };
-}
 interface CommitSucceededEvent {
   type: 'COMMIT_SUCCEEDED';
   payload: Commit;
@@ -110,8 +97,6 @@ type ModelEvent =
   | OrgUpdatedEvent
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
-  | ChangesetSucceededEvent
-  | ChangesetFailedEvent
   | CommitSucceededEvent
   | CommitFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
@@ -138,10 +123,6 @@ export const getAction = (event: EventType) => {
       return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
-    case 'CHANGESET_SUCCEEDED':
-      return addChangeset(event.payload);
-    case 'CHANGESET_FAILED':
-      return changesetFailed(event.payload);
     case 'COMMIT_SUCCEEDED':
       return commitSucceeded(event.payload);
     case 'COMMIT_FAILED':
