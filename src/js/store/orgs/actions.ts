@@ -179,12 +179,12 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
     // }, 3000);
     return dispatch({
       type: 'REFETCH_ORG_SUCCEEDED',
-      payload: {
-        // @@@ Mock out until API exists
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        // response: { ...response, currently_refreshing_changes: true },
-        response,
-      },
+      payload: response,
+      // @@@ Mock out until API exists
+      // payload: {
+      //   // eslint-disable-next-line @typescript-eslint/camelcase
+      //   response: { ...response, currently_refreshing_changes: true },
+      // },
     });
   } catch (err) {
     dispatch({

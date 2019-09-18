@@ -39,6 +39,6 @@ export const selectTaskById = (
   appState: AppState,
   id: string,
 ): Task | undefined =>
-  ([] as Task[])
-    .concat(...Object.values(appState.tasks))
+  Object.values(appState.tasks)
+    .flat()
     .find(t => t.id === id);

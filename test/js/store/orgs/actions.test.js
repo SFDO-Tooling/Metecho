@@ -357,7 +357,7 @@ describe('commitSucceeded', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully committed changes from your scratch org on task “My Task”.',
+      'Successfully captured changes from your scratch org on task “My Task”.',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -406,7 +406,7 @@ describe('commitFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error committing changes from your scratch org on task “My Task”.',
+      'Uh oh. There was an error capturing changes from your scratch org on task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

@@ -38,7 +38,7 @@ const defaultOrgs = {
     latest_commit_url: '/test/commit/url/',
     latest_commit_at: '2019-08-16T12:58:53.721Z',
     url: '/test/org/url/',
-    changes: {},
+    changes: { Foo: [{ id: 'change-1', name: 'Bar' }] },
   },
   QA: null,
 };
@@ -77,7 +77,7 @@ describe('<OrgCards/>', () => {
 
       expect(getByText('View Org')).toBeVisible();
       expect(
-        getByText('has uncaptured changes', { exact: false }),
+        getByText('has 1 uncaptured change', { exact: false }),
       ).toBeVisible();
       expect(getByText('Create Org')).toBeVisible();
       expect(getByText('check again')).toBeVisible();
@@ -103,7 +103,7 @@ describe('<OrgCards/>', () => {
   });
 
   describe('QA org', () => {
-    test('render without status', () => {
+    test('renders without status', () => {
       const orgs = {
         ...defaultOrgs,
         Dev: null,
@@ -116,7 +116,7 @@ describe('<OrgCards/>', () => {
 
       expect(getByText('View Org')).toBeVisible();
       expect(
-        queryByText('has uncaptured changes', { exact: false }),
+        queryByText('has 1 uncaptured change', { exact: false }),
       ).toBeNull();
     });
   });
