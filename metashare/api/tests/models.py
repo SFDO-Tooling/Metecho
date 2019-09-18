@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -271,16 +272,37 @@ class TestUser:
 @pytest.mark.django_db
 class TestScratchOrg:
     def test_notify_has_url(self, scratch_org_factory):
-        create_branches_on_github_then_create_scratch_org_job = (
-            "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
-        )
-        with patch(create_branches_on_github_then_create_scratch_org_job):
-            with patch("metashare.api.models.async_to_sync") as async_to_sync:
-                scratch_org = scratch_org_factory()
-                scratch_org.url = "https://example.com"
-                scratch_org.save()
+        with ExitStack() as stack:
+            stack.enter_context(
+                patch(
+                    "metashare.api.jobs."
+                    "create_branches_on_github_then_create_scratch_org_job"
+                )
+            )
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            scratch_org = scratch_org_factory()
+            scratch_org.url = "https://example.com"
+            scratch_org.save()
 
-                assert async_to_sync.called
+            assert async_to_sync.called
+
+    def test_queue_delete(self, scratch_org_factory):
+        with patch(
+            "metashare.api.jobs.delete_scratch_org_job"
+        ) as delete_scratch_org_job:
+            scratch_org = scratch_org_factory()
+            scratch_org.queue_delete()
+
+            assert delete_scratch_org_job.delay.called
+
+    def test_notify_delete(self, scratch_org_factory):
+        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory(url="https://example.com")
+            scratch_org.delete()
+
+            assert async_to_sync.called
 
 
 @pytest.mark.django_db

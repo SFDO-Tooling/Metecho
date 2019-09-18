@@ -9,6 +9,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.functional import cached_property
 from model_utils import Choices, FieldTracker
 
@@ -191,7 +192,7 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = models.SlugField(max_length=50, null=True)
+    branch_name = models.SlugField(max_length=50, null=True, blank=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -206,10 +207,12 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
         return True
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        ret = super().save(*args, **kwargs)
 
         if self.tracker.has_changed("branch_name"):
             self.notify_has_branch_name()
+
+        return ret
 
     def notify_has_branch_name(self):
         from .serializers import ProjectSerializer
@@ -234,9 +237,13 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     assignee = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="assigned_tasks"
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_tasks",
     )
-    branch_name = models.SlugField(max_length=50, null=True)
+    branch_name = models.SlugField(max_length=50, null=True, blank=True)
 
     slug_class = TaskSlug
 
@@ -247,10 +254,12 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         return True
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        ret = super().save(*args, **kwargs)
 
         if self.tracker.has_changed("branch_name"):
             self.notify_has_branch_name()
+
+        return ret
 
     def notify_has_branch_name(self):
         from .serializers import TaskSerializer
@@ -268,32 +277,55 @@ SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
 class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
-    tracker = FieldTracker(fields=("url",))
+    tracker = FieldTracker(fields=("url", "currently_refreshing_changes"))
 
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
-    last_modified_at = models.DateTimeField(null=True)
-    expires_at = models.DateTimeField(null=True)
+    last_modified_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
     latest_commit = StringField(blank=True)
     latest_commit_url = models.URLField(blank=True)
-    latest_commit_at = models.DateTimeField(null=True)
-    url = models.URLField(null=True)
+    latest_commit_at = models.DateTimeField(null=True, blank=True)
+    url = models.URLField(null=True, blank=True)
     has_changes = models.BooleanField(default=False)
+    currently_refreshing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder)
+    delete_queued_at = models.DateTimeField(null=True, blank=True)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
     def save(self, *args, **kwargs):
-        create_remote_resources = self.id is None
-        super().save(*args, **kwargs)
+        is_new = self.id is None
+        ret = super().save(*args, **kwargs)
 
-        if create_remote_resources:
+        if is_new:
             self.create_remote_resources()
 
         if self.tracker.has_changed("url"):
             self.notify_has_url()
+
+        # if self.tracker.has_changed("currently_refreshing_changes"):
+        #     self.notify_refreshing_changes()
+
+        return ret
+
+    def queue_delete(self):
+        from .jobs import delete_scratch_org_job
+
+        self.delete_queued_at = timezone.now()
+        self.save()
+        delete_scratch_org_job.delay(self)
+
+    def delete(self, *args, **kwargs):
+        # If the scratch org has no URL, it has not really been created
+        # on Salesforce, and therefore we don't need to notify of its
+        # destruction; this should only happen when it is destroyed
+        # during provisioning.
+        if self.url:
+            self.notify_deleted()
+        super().delete(*args, **kwargs)
 
     def create_remote_resources(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
@@ -311,6 +343,20 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         payload = ScratchOrgSerializer(self).data
         message = {"type": "SCRATCH_ORG_PROVISIONED", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
+
+    # def notify_refreshing_changes(self):
+    #     from .serializers import ScratchOrgSerializer
+
+    #     payload = ScratchOrgSerializer(self).data
+    #     message = {"type": "SCRATCH_ORG_UPDATED", "payload": payload}
+    #     async_to_sync(push.push_message_about_instance)(self, message)
+
+    def notify_deleted(self):
+        from .serializers import ScratchOrgSerializer
+
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_DELETED", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
 
 

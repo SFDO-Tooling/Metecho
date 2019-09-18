@@ -63,3 +63,13 @@ def test_repository_view(client, repository_factory, git_hub_repository_factory)
             }
         ],
     }
+
+
+@pytest.mark.django_db
+def test_scratch_org_view(client, scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch("metashare.api.models.ScratchOrg.queue_delete"):
+        url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+        response = client.delete(url)
+
+        assert response.status_code == 204

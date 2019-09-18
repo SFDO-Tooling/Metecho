@@ -3,18 +3,28 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import OrgCards from '@/components/orgs/cards';
-import { createObject } from '@/store/actions';
+import { createObject, deleteObject } from '@/store/actions';
+import { refetchOrg } from '@/store/orgs/actions';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
 jest.mock('@/store/actions');
+jest.mock('@/store/orgs/actions');
 
 createObject.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
+deleteObject.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
+refetchOrg.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
 
 afterEach(() => {
   createObject.mockClear();
+  deleteObject.mockClear();
+  refetchOrg.mockClear();
 });
 
 const defaultOrgs = {
@@ -66,8 +76,11 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup();
 
       expect(getByText('View Org')).toBeVisible();
-      expect(getByText('has uncaptured changes')).toBeVisible();
+      expect(
+        getByText('has uncaptured changes', { exact: false }),
+      ).toBeVisible();
       expect(getByText('Create Org')).toBeVisible();
+      expect(getByText('check again')).toBeVisible();
     });
   });
 
@@ -75,10 +88,8 @@ describe('<OrgCards/>', () => {
     test('renders org cards', () => {
       const orgs = {
         ...defaultOrgs,
-        Dev: null,
-        QA: {
+        Dev: {
           ...defaultOrgs.Dev,
-          org_type: 'QA',
           owner: 'other-user',
           has_changes: false,
         },
@@ -86,8 +97,27 @@ describe('<OrgCards/>', () => {
       const { queryByText, getByText } = setup({ orgs });
 
       expect(queryByText('View Org')).toBeNull();
-      expect(getByText('up-to-date')).toBeVisible();
-      expect(getByText('Create Org')).toBeVisible();
+      expect(getByText('up-to-date', { exact: false })).toBeVisible();
+      expect(queryByText('check again')).toBeNull();
+    });
+  });
+
+  describe('QA org', () => {
+    test('render without status', () => {
+      const orgs = {
+        ...defaultOrgs,
+        Dev: null,
+        QA: {
+          ...defaultOrgs.Dev,
+          org_type: 'QA',
+        },
+      };
+      const { queryByText, getByText } = setup({ orgs });
+
+      expect(getByText('View Org')).toBeVisible();
+      expect(
+        queryByText('has uncaptured changes', { exact: false }),
+      ).toBeNull();
     });
   });
 
@@ -105,8 +135,8 @@ describe('<OrgCards/>', () => {
         org_type: 'QA',
         task: 'task-id',
       });
-      expect(args.shouldSubscribeToObject({})).toBe(true);
-      expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
+      expect(args.shouldSubscribeToObject()).toBe(true);
+      expect(getByText('Creating Org…')).toBeVisible();
     });
 
     describe('with websocket', () => {
@@ -155,6 +185,165 @@ describe('<OrgCards/>', () => {
 
         expect(createObject).not.toHaveBeenCalled();
         expect(getByText('Enable Dev Hub')).toBeVisible();
+      });
+    });
+  });
+
+  describe('refetch org click', () => {
+    test('refetches org', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('check again'));
+
+      expect(refetchOrg).toHaveBeenCalledTimes(1);
+      expect(refetchOrg).toHaveBeenCalledWith(defaultOrgs.Dev);
+    });
+
+    describe('refetching org', () => {
+      test('displays spinner and message', () => {
+        const { getByText } = setup({
+          orgs: {
+            ...defaultOrgs,
+            Dev: {
+              ...defaultOrgs.Dev,
+              currently_refreshing_changes: true,
+            },
+          },
+        });
+
+        expect(getByText('Refreshing Org…')).toBeVisible();
+      });
+    });
+  });
+
+  describe('delete org click', () => {
+    describe('QA org', () => {
+      let orgs;
+
+      beforeEach(() => {
+        orgs = {
+          Dev: null,
+          QA: { ...defaultOrgs.Dev, org_type: 'QA', has_changes: false },
+        };
+      });
+
+      test('deletes org', () => {
+        const { getByText } = setup({ orgs });
+        fireEvent.click(getByText('Actions'));
+        fireEvent.click(getByText('Delete'));
+
+        expect(deleteObject).toHaveBeenCalledTimes(1);
+
+        const args = deleteObject.mock.calls[0][0];
+
+        expect(args.objectType).toEqual('scratch_org');
+        expect(args.object.id).toEqual('org-id');
+        expect(getByText('Deleting Org…')).toBeVisible();
+      });
+
+      describe('not connected to sf org', () => {
+        test('opens connect modal', () => {
+          const { getByTitle, getByText } = setup({
+            orgs,
+            initialState: {
+              ...defaultState,
+              user: { ...defaultState.user, valid_token_for: null },
+            },
+          });
+          fireEvent.click(getByText('Actions'));
+          fireEvent.click(getByTitle('Delete'));
+
+          expect(deleteObject).not.toHaveBeenCalled();
+          expect(getByText('Use Custom Domain')).toBeVisible();
+        });
+      });
+
+      describe('dev hub not enabled', () => {
+        test('opens warning modal', () => {
+          const { getByTitle, getByText } = setup({
+            orgs,
+            initialState: {
+              ...defaultState,
+              user: { ...defaultState.user, is_devhub_enabled: false },
+            },
+          });
+          fireEvent.click(getByText('Actions'));
+          fireEvent.click(getByTitle('Delete'));
+
+          expect(deleteObject).not.toHaveBeenCalled();
+          expect(getByText('Enable Dev Hub')).toBeVisible();
+        });
+      });
+    });
+
+    describe('Dev org', () => {
+      test('refreshes and then deletes org', () => {
+        const { getByText } = setup({
+          orgs: {
+            ...defaultOrgs,
+            Dev: { ...defaultOrgs.Dev, has_changes: false },
+          },
+        });
+        fireEvent.click(getByText('Actions'));
+        fireEvent.click(getByText('Delete'));
+
+        expect(refetchOrg).toHaveBeenCalledTimes(1);
+
+        const refetchArgs = refetchOrg.mock.calls[0][0];
+
+        expect(refetchArgs.id).toEqual('org-id');
+        expect(deleteObject).toHaveBeenCalledTimes(1);
+
+        const deleteArgs = deleteObject.mock.calls[0][0];
+
+        expect(deleteArgs.objectType).toEqual('scratch_org');
+        expect(deleteArgs.object.id).toEqual('org-id');
+        expect(getByText('Deleting Org…')).toBeVisible();
+      });
+
+      describe('org has changes', () => {
+        test('opens confirm modal', () => {
+          const { getByTitle, getByText } = setup();
+          fireEvent.click(getByText('Actions'));
+          fireEvent.click(getByTitle('Delete'));
+
+          expect(deleteObject).not.toHaveBeenCalled();
+          expect(getByText('Confirm Delete Org')).toBeVisible();
+        });
+
+        describe('<ConfirmDeleteModal />', () => {
+          let result;
+
+          beforeEach(() => {
+            result = setup();
+            fireEvent.click(result.getByText('Actions'));
+            fireEvent.click(result.getByTitle('Delete'));
+          });
+
+          describe('"cancel" click', () => {
+            test('closes modal', () => {
+              const { getByText, queryByText } = result;
+              fireEvent.click(getByText('Cancel'));
+
+              expect(queryByText('Confirm Delete Org')).toBeNull();
+            });
+          });
+
+          describe('"delete" click', () => {
+            test('deletes org', () => {
+              const { getByText, queryByText } = result;
+              fireEvent.click(getByText('Delete'));
+
+              expect(queryByText('Confirm Delete Org')).toBeNull();
+              expect(deleteObject).toHaveBeenCalledTimes(1);
+
+              const args = deleteObject.mock.calls[0][0];
+
+              expect(args.objectType).toEqual('scratch_org');
+              expect(args.object.id).toEqual('org-id');
+              expect(getByText('Deleting Org…')).toBeVisible();
+            });
+          });
+        });
       });
     });
   });

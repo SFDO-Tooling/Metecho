@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
 import { LogoutAction } from '@/store/user/actions';
@@ -20,6 +22,8 @@ export interface Org {
   latest_commit_at: string | null;
   url: string | null;
   has_changes: boolean;
+  currently_refreshing_changes: boolean;
+  delete_queued_at: string | null;
 }
 
 export interface OrgsByTask {
@@ -87,8 +91,11 @@ const reducer = (
       }
       return orgs;
     }
-    case 'SCRATCH_ORG_PROVISIONED': {
-      const org = action.payload;
+    case 'SCRATCH_ORG_PROVISIONED':
+    case 'SCRATCH_ORG_UPDATED':
+    case 'REFETCH_ORG_SUCCEEDED':
+    case 'SCRATCH_ORG_DELETE_FAILED': {
+      const org = action.payload as Org;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
         [ORG_TYPES.QA]: null,
@@ -101,7 +108,8 @@ const reducer = (
         },
       };
     }
-    case 'SCRATCH_ORG_PROVISION_FAILED': {
+    case 'SCRATCH_ORG_PROVISION_FAILED':
+    case 'SCRATCH_ORG_DELETED': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
@@ -114,6 +122,47 @@ const reducer = (
           [org.org_type]: null,
         },
       };
+    }
+    case 'REFETCH_ORG_STARTED':
+    case 'REFETCH_ORG_FAILED': {
+      const { org } = action.payload;
+      const taskOrgs = orgs[org.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [org.task]: {
+          ...taskOrgs,
+          [org.org_type]: {
+            ...org,
+            currently_refreshing_changes: action.type === 'REFETCH_ORG_STARTED',
+          },
+        },
+      };
+    }
+    case 'DELETE_OBJECT_SUCCEEDED': {
+      const {
+        objectType,
+        object,
+      }: { objectType: ObjectTypes; object: Org } = action.payload;
+      if (objectType === OBJECT_TYPES.ORG && object) {
+        const taskOrgs = orgs[object.task] || {
+          [ORG_TYPES.DEV]: null,
+          [ORG_TYPES.QA]: null,
+        };
+        return {
+          ...orgs,
+          [object.task]: {
+            ...taskOrgs,
+            [object.org_type]: {
+              ...object,
+              delete_queued_at: new Date().toISOString(),
+            },
+          },
+        };
+      }
+      return orgs;
     }
   }
   return orgs;

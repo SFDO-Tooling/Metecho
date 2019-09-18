@@ -18,6 +18,9 @@ case "$1" in
     "build")
         docker-compose build
         ;;
+    "manage")
+        dcr python manage.py "${@:2}"
+        ;;
     "populate")
         dcr python manage.py populate_data "${@:2}"
         ;;

@@ -7,9 +7,12 @@ external calls, so this would be mock-heavy anyway.
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from ..sf_run_flow import (
     capitalize,
     create_org_and_run_flow,
+    delete_scratch_org,
     deploy_org_settings,
     get_access_token,
     get_devhub_api,
@@ -219,3 +222,18 @@ def test_create_org_and_run_flow():
             flow_name=MagicMock(),
             project_path=MagicMock(),
         )
+
+
+@pytest.mark.django_db
+def test_delete_scratch_org(scratch_org_factory):
+    scratch_org = scratch_org_factory(config={"org_id": "some-id"})
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+        devhub_api = MagicMock()
+        get_devhub_api = stack.enter_context(patch(f"{PATCH_ROOT}.get_devhub_api"))
+        get_devhub_api.return_value = devhub_api
+        devhub_api.query.return_value = {"records": [{"Id": "some-id"}]}
+
+        delete_scratch_org(scratch_org)
+
+        assert devhub_api.ActiveScratchOrg.delete.called

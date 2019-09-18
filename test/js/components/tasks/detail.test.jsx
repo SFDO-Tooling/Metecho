@@ -209,8 +209,8 @@ describe('<TaskDetail/>', () => {
 
       expect(args.objectType).toEqual('scratch_org');
       expect(args.filters).toEqual({ task: 'task1' });
-      expect(args.shouldSubscribeToObject({})).toBe(true);
-      expect(args.shouldSubscribeToObject({ url: true })).toBe(false);
+      expect(args.shouldSubscribeToObject({})).toBe(false);
+      expect(args.shouldSubscribeToObject({ owner: 'user-id' })).toBe(true);
     });
   });
 });
