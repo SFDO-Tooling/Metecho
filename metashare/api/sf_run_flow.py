@@ -313,8 +313,7 @@ def delete_scratch_org(scratch_org):
     devhub_api = get_devhub_api(devhub_username=devhub_username)
     active_scratch_org_id = (
         devhub_api.query(f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'")
-        .get("records", {})
-        .get(0, {})
+        .get("records", [{}])[0]
         .get("Id")
     )
     if active_scratch_org_id:
