@@ -307,23 +307,15 @@ def create_org_and_run_flow(
 
 
 def delete_scratch_org(scratch_org):
-    # Update environment with some keys CumulusCI uses
-    # TODO: Should this be in a context manager so as not to leak across
-    # runs?
-    os.environ.update(
-        {
-            # Salesforce connected app
-            "SFDX_CLIENT_ID": SF_CLIENT_ID,
-            "SFDX_HUB_KEY": SF_CLIENT_KEY,
-        }
-    )
-
     devhub_username = scratch_org.owner.sf_username
     org_id = scratch_org.config["org_id"]
 
     devhub_api = get_devhub_api(devhub_username=devhub_username)
-    active_scratch_org_id = devhub_api.query(
-        f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'"
-    )["records"][0]["Id"]
+    active_scratch_org_id = (
+        devhub_api.query(f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'")
+        .get("records", {})
+        .get(0, {})
+        .get("Id")
+    )
     if active_scratch_org_id:
         devhub_api.ActiveScratchOrg.delete(active_scratch_org_id)
