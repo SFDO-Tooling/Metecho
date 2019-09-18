@@ -10,7 +10,7 @@ import React, { useRef, useState } from 'react';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
 import { Changeset } from '@/store/orgs/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
-import { pluralize } from '@/utils/helpers';
+import { getOrgChildChanges, getOrgTotalChanges } from '@/utils/helpers';
 
 interface Props {
   orgId: string;
@@ -183,9 +183,7 @@ const CaptureModal = ({
             errorText={errors.changes}
             onChange={handleSelectAllChange}
           />
-          <span>
-            {`(${totalChanges} ${pluralize(totalChanges, 'change')})`}
-          </span>
+          <span>({getOrgTotalChanges(changeset)})</span>
         </div>
         {Object.keys(changeset).map(groupName => {
           const children = changeset[groupName];
@@ -224,10 +222,7 @@ const CaptureModal = ({
                       onChange={handleSelectThisGroup}
                     />
                     <span className="slds-text-body_regular">
-                      {`(${children.length} ${pluralize(
-                        children.length,
-                        'change',
-                      )})`}
+                      ({getOrgChildChanges(children.length)})
                     </span>
                   </div>
                 }

@@ -25,6 +25,7 @@ import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { getOrgStatusMsg } from '@/utils/helpers';
 
 interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
@@ -146,9 +147,6 @@ const OrgCard = ({
     const latestCommitAt =
       org.latest_commit_at && new Date(org.latest_commit_at);
     const expiresAt = org.expires_at && new Date(org.expires_at);
-    const changesMsg = org.changes
-      ? i18n.t('has uncaptured changes')
-      : i18n.t('up-to-date');
     contents = (
       <ul>
         {latestCommitAt && (
@@ -178,7 +176,7 @@ const OrgCard = ({
         )}
         {type === ORG_TYPES.DEV && (
           <li>
-            <strong>{i18n.t('Status')}:</strong> {changesMsg}
+            <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
             {ownedByCurrentUser && (
               <>
                 {' | '}
