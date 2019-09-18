@@ -49,7 +49,8 @@ Docker-based development
 
    Note that none of the values should be quoted, and while ``SF_CLIENT_KEY`` is
    an RSA private key, it must have newlines replaced with ``\n`` in order to
-   work properly in the Docker ``.env`` file syntax.
+   work properly with the Docker ``env_file`` configuration option (see `this
+   issue`_).
 
 3. Run ``./derrick build`` to build/re-build all the container images.
 
@@ -64,6 +65,7 @@ Docker-based development
    currently running.)
 
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
+.. _this issue: https://github.com/moby/moby/issues/12997
 
 Logging in with GitHub
 ----------------------
