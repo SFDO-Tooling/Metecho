@@ -207,10 +207,12 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
         return True
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        ret = super().save(*args, **kwargs)
 
         if self.tracker.has_changed("branch_name"):
             self.notify_has_branch_name()
+
+        return ret
 
     def notify_has_branch_name(self):
         from .serializers import ProjectSerializer
@@ -252,10 +254,12 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         return True
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        ret = super().save(*args, **kwargs)
 
         if self.tracker.has_changed("branch_name"):
             self.notify_has_branch_name()
+
+        return ret
 
     def notify_has_branch_name(self):
         from .serializers import TaskSerializer
@@ -294,7 +298,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self.id is None
-        super().save(*args, **kwargs)
+        ret = super().save(*args, **kwargs)
 
         if is_new:
             self.create_remote_resources()
@@ -304,6 +308,8 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         if self.tracker.has_changed("currently_refreshing_changes"):
             self.notify_refreshing_changes()
+
+        return ret
 
     def queue_delete(self):
         from .jobs import delete_scratch_org_job
