@@ -45,12 +45,35 @@ interface ErrorEvent {
   type: 'BACKEND_ERROR';
   payload: { message: string };
 }
+interface ProjectUpdatedEvent {
+  type: 'PROJECT_UPDATE';
+  payload: Project;
+}
+interface TaskUpdatedEvent {
+  type: 'TASK_UPDATE';
+  payload: Task;
+}
 interface OrgProvisionedEvent {
   type: 'SCRATCH_ORG_PROVISIONED';
   payload: Org;
 }
 interface OrgProvisionFailedEvent {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
+interface OrgUpdatedEvent {
+  type: 'SCRATCH_ORG_UPDATED';
+  payload: Org;
+}
+interface OrgDeletedEvent {
+  type: 'SCRATCH_ORG_DELETED';
+  payload: Org;
+}
+interface OrgDeleteFailedEvent {
+  type: 'SCRATCH_ORG_DELETE_FAILED';
   payload: {
     message?: string;
     model: Org;
@@ -78,42 +101,19 @@ interface CommitFailedEvent {
     model: Commit;
   };
 }
-interface OrgDeletedEvent {
-  type: 'SCRATCH_ORG_DELETED';
-  payload: Org;
-}
-interface OrgDeleteFailedEvent {
-  type: 'SCRATCH_ORG_DELETE_FAILED';
-  payload: {
-    message?: string;
-    model: Org;
-  };
-}
-interface ProjectUpdatedEvent {
-  type: 'PROJECT_UPDATE';
-  payload: Project;
-}
-interface TaskUpdatedEvent {
-  type: 'TASK_UPDATE';
-  payload: Task;
-}
-interface OrgUpdatedEvent {
-  type: 'SCRATCH_ORG_UPDATED';
-  payload: Org;
-}
 type ModelEvent =
   | ErrorEvent
+  | ProjectUpdatedEvent
+  | TaskUpdatedEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
+  | OrgUpdatedEvent
+  | OrgDeletedEvent
+  | OrgDeleteFailedEvent
   | ChangesetSucceededEvent
   | ChangesetFailedEvent
   | CommitSucceededEvent
-  | CommitFailedEvent
-  | OrgDeletedEvent
-  | OrgDeleteFailedEvent
-  | ProjectUpdatedEvent
-  | TaskUpdatedEvent
-  | OrgUpdatedEvent;
+  | CommitFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -124,10 +124,20 @@ export const getAction = (event: EventType) => {
     return null;
   }
   switch (event.type) {
+    case 'PROJECT_UPDATE':
+      return updateProject(event.payload);
+    case 'TASK_UPDATE':
+      return updateTask(event.payload);
     case 'SCRATCH_ORG_PROVISIONED':
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
       return provisionFailed(event.payload);
+    case 'SCRATCH_ORG_UPDATED':
+      return updateOrg(event.payload);
+    case 'SCRATCH_ORG_DELETED':
+      return deleteOrg(event.payload);
+    case 'SCRATCH_ORG_DELETE_FAILED':
+      return deleteFailed(event.payload);
     case 'CHANGESET_SUCCEEDED':
       return addChangeset(event.payload);
     case 'CHANGESET_FAILED':
@@ -136,16 +146,6 @@ export const getAction = (event: EventType) => {
       return commitSucceeded(event.payload);
     case 'COMMIT_FAILED':
       return commitFailed(event.payload);
-    case 'SCRATCH_ORG_DELETED':
-      return deleteOrg(event.payload);
-    case 'SCRATCH_ORG_DELETE_FAILED':
-      return deleteFailed(event.payload);
-    case 'PROJECT_UPDATE':
-      return updateProject(event.payload);
-    case 'TASK_UPDATE':
-      return updateTask(event.payload);
-    case 'SCRATCH_ORG_UPDATED':
-      return updateOrg(event.payload);
   }
   return null;
 };
