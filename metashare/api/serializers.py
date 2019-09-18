@@ -157,6 +157,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "url",
             "has_changes",
             "currently_refreshing_changes",
+            "delete_queued_at",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},

@@ -355,7 +355,7 @@ describe('reducer', () => {
   });
 
   describe('DELETE_OBJECT_SUCCEEDED', () => {
-    test('adds deletion_queued_at to org', () => {
+    test('adds delete_queued_at to org', () => {
       const org = {
         id: 'org-id',
         task: 'task-1',
@@ -372,7 +372,7 @@ describe('reducer', () => {
         },
       );
 
-      expect(actual['task-1'].Dev.deletion_queued_at).not.toBe(undefined);
+      expect(actual['task-1'].Dev.delete_queued_at).not.toBe(undefined);
     });
 
     test('ignores if objectType !== "scratch_org"', () => {
