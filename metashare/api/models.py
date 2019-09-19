@@ -353,7 +353,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         from .serializers import ScratchOrgSerializer
 
         payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_PROVISIONED", "payload": payload}
+        message = {"type": "SCRATCH_ORG_PROVISION", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
 
     # def notify_refreshing_changes(self):

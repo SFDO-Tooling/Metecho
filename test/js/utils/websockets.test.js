@@ -56,13 +56,13 @@ afterEach(() => {
 
 describe('getAction', () => {
   test.each([
-    ['SCRATCH_ORG_PROVISIONED', 'provisionOrg'],
+    ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
-    ['SCRATCH_ORG_DELETED', 'deleteOrg'],
+    ['SCRATCH_ORG_DELETE', 'deleteOrg'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['PROJECT_UPDATE', 'updateProject'],
     ['TASK_UPDATE', 'updateTask'],
-    ['SCRATCH_ORG_UPDATED', 'updateOrg'],
+    ['SCRATCH_ORG_UPDATE', 'updateOrg'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };
@@ -163,7 +163,7 @@ describe('createSocket', () => {
 
       test('dispatches action', () => {
         socketInstance.onmessage({
-          data: { type: 'SCRATCH_ORG_PROVISIONED', payload: {} },
+          data: { type: 'SCRATCH_ORG_PROVISION', payload: {} },
         });
 
         expect(dispatch).toHaveBeenCalledTimes(1);

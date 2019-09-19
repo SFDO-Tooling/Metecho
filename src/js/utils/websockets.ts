@@ -50,7 +50,7 @@ interface TaskUpdatedEvent {
   payload: Task;
 }
 interface OrgProvisionedEvent {
-  type: 'SCRATCH_ORG_PROVISIONED';
+  type: 'SCRATCH_ORG_PROVISION';
   payload: Org;
 }
 interface OrgProvisionFailedEvent {
@@ -61,11 +61,11 @@ interface OrgProvisionFailedEvent {
   };
 }
 interface OrgUpdatedEvent {
-  type: 'SCRATCH_ORG_UPDATED';
+  type: 'SCRATCH_ORG_UPDATE';
   payload: Org;
 }
 interface OrgDeletedEvent {
-  type: 'SCRATCH_ORG_DELETED';
+  type: 'SCRATCH_ORG_DELETE';
   payload: Org;
 }
 interface OrgDeleteFailedEvent {
@@ -98,13 +98,13 @@ export const getAction = (event: EventType) => {
       return updateProject(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload);
-    case 'SCRATCH_ORG_PROVISIONED':
+    case 'SCRATCH_ORG_PROVISION':
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
       return provisionFailed(event.payload);
-    case 'SCRATCH_ORG_UPDATED':
+    case 'SCRATCH_ORG_UPDATE':
       return updateOrg(event.payload);
-    case 'SCRATCH_ORG_DELETED':
+    case 'SCRATCH_ORG_DELETE':
       return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);

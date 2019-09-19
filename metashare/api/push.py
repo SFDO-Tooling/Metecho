@@ -12,10 +12,11 @@ Websocket notifications you can subscribe to:
         TASK_UPDATE
 
     scratchorg.:id
-        SCRATCH_ORG_PROVISIONED
+        SCRATCH_ORG_PROVISION
         SCRATCH_ORG_PROVISION_FAILED
         SCRATCH_ORG_UPDATE
         SCRATCH_ORG_DELETE
+        SCRATCH_ORG_DELETE_FAILED
 """
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
