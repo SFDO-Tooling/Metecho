@@ -3,6 +3,7 @@ Websocket notifications you can subscribe to:
 
     user.:id
         BACKEND_ERROR
+        USER_REPOS_REFRESH
 
     project.:id
         PROJECT_UPDATE
@@ -13,6 +14,8 @@ Websocket notifications you can subscribe to:
     scratchorg.:id
         SCRATCH_ORG_PROVISIONED
         SCRATCH_ORG_PROVISION_FAILED
+        SCRATCH_ORG_UPDATE
+        SCRATCH_ORG_DELETE
 """
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _

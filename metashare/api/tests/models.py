@@ -315,6 +315,7 @@ class TestGitHubRepository:
 @pytest.mark.django_db
 def test_login_handler(user_factory):
     user = user_factory()
-    with patch("metashare.api.models.gh") as gh:
+    patch_path = "metashare.api.jobs.refresh_github_repositories_for_user_job"
+    with patch(patch_path) as refresh_job:
         user_logged_in_handler(None, user=user)
-        gh.get_all_org_repos.assert_called_with(user)
+        refresh_job.delay.assert_called_with(user)

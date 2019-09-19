@@ -42,6 +42,17 @@ class User(mixins.HashIdMixin, AbstractUser):
         GitHubRepository.objects.bulk_create(
             [GitHubRepository(user=self, url=repo) for repo in repos]
         )
+        self.notify_repositories_updated()
+
+    def notify_repositories_updated(self):
+        from .serializers import RepositorySerializer
+
+        gh_repositories = self.repositories.values_list("url", flat=True)
+        repositories = Repository.objects.filter(repo_url__in=gh_repositories)
+
+        payload = RepositorySerializer(repositories, many=True).data
+        message = {"type": "USER_REPOS_REFRESH", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     def invalidate_salesforce_credentials(self):
         self.socialaccount_set.filter(provider__startswith="salesforce-").delete()
@@ -349,20 +360,22 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     #     from .serializers import ScratchOrgSerializer
 
     #     payload = ScratchOrgSerializer(self).data
-    #     message = {"type": "SCRATCH_ORG_UPDATED", "payload": payload}
+    #     message = {"type": "SCRATCH_ORG_UPDATE", "payload": payload}
     #     async_to_sync(push.push_message_about_instance)(self, message)
 
     def notify_deleted(self):
         from .serializers import ScratchOrgSerializer
 
         payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_DELETED", "payload": payload}
+        message = {"type": "SCRATCH_ORG_DELETE", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
 
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
-    user.refresh_repositories()
+    from .jobs import refresh_github_repositories_for_user_job
+
+    refresh_github_repositories_for_user_job.delay(user)
 
 
 def ensure_slug_handler(sender, *, created, instance, **kwargs):
