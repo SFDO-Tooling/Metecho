@@ -289,7 +289,7 @@ def create_org_and_run_flow(
     with cd(project_path):
         flow.run(org_config)
 
-    return scratch_org_config
+    return scratch_org_config, login_url
 
 
 def delete_scratch_org(scratch_org):
@@ -297,10 +297,14 @@ def delete_scratch_org(scratch_org):
     org_id = scratch_org.config["org_id"]
 
     devhub_api = get_devhub_api(devhub_username=devhub_username)
-    active_scratch_org_id = (
-        devhub_api.query(f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'")
-        .get("records", [{}])[0]
-        .get("Id")
-    )
+
+    records = (
+        devhub_api.query(
+            f"SELECT Id FROM ActiveScratchOrg WHERE ScratchOrg='{org_id}'"
+        ).get("records")
+        # the above could return an empty list, so we have to use an or:
+        or [{}]
+    )[0]
+    active_scratch_org_id = records.get("Id")
     if active_scratch_org_id:
         devhub_api.ActiveScratchOrg.delete(active_scratch_org_id)

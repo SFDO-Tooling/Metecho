@@ -117,6 +117,7 @@ class TestCreateBranchesOnGitHub:
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
         sf_run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_run_flow"))
+        sf_run_flow.create_org_and_run_flow.return_value = (MagicMock(), MagicMock())
         stack.enter_context(patch(f"{PATCH_ROOT}.login"))
         create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
