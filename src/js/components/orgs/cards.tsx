@@ -259,7 +259,7 @@ const OrgCard = ({
           org && org.currently_refreshing_changes ? (
             <>
               <Spinner size="small" />
-              {i18n.t('Refreshing Org…')}
+              {i18n.t('Checking for Uncaptured Changes…')}
             </>
           ) : (
             footer

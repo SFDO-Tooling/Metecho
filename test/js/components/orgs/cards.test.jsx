@@ -210,7 +210,7 @@ describe('<OrgCards/>', () => {
           },
         });
 
-        expect(getByText('Refreshing Org…')).toBeVisible();
+        expect(getByText('Checking for Uncaptured Changes…')).toBeVisible();
       });
     });
   });

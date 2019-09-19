@@ -182,7 +182,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
   if (fetchingChanges) {
     buttonText = (
-      <LabelWithSpinner label={i18n.t('Refreshing Org…')} variant="inverse" />
+      <LabelWithSpinner
+        label={i18n.t('Checking for Uncaptured Changes…')}
+        variant="inverse"
+      />
     );
   } else if (committing) {
     buttonText = (
