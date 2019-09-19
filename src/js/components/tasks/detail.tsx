@@ -9,8 +9,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
-import CaptureModal from '@/components/tasks/capture';
 import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
 import {
@@ -69,6 +69,7 @@ const TaskDetail = (props: RouteComponentProps) => {
 
     if (changesFetched && devOrg) {
       setFetchingChanges(false);
+      /* istanbul ignore else */
       if (devOrg.changes) {
         setCaptureModalOpen(true);
       }
@@ -92,6 +93,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   if (user.valid_token_for) {
     action = user.is_devhub_enabled
       ? () => {
+          /* istanbul ignore else */
           if (devOrg) {
             setFetchingChanges(true);
             doRefetchOrg(devOrg);

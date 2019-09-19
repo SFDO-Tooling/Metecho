@@ -91,7 +91,7 @@ describe('<OrgCards/>', () => {
         Dev: {
           ...defaultOrgs.Dev,
           owner: 'other-user',
-          changes: null,
+          changes: {},
         },
       };
       const { queryByText, getByText } = setup({ orgs });

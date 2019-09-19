@@ -44,8 +44,8 @@ const CaptureModal = ({
     }
   };
 
+  /* istanbul ignore next */
   const handleError = () => {
-    /* istanbul ignore else */
     if (isMounted.current) {
       setCapturingChanges(false);
     }
@@ -119,6 +119,7 @@ const CaptureModal = ({
 
   const handleSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
+    /* istanbul ignore else */
     if (submitButton.current) {
       submitButton.current.click();
     }

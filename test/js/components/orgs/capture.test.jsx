@@ -1,0 +1,155 @@
+import { fireEvent } from '@testing-library/react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+
+import CaptureModal from '@/components/orgs/capture';
+import { createObject } from '@/store/actions';
+
+import { renderWithRedux, storeWithThunk } from './../../utils';
+
+jest.mock('@/store/actions');
+
+createObject.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
+
+afterEach(() => {
+  createObject.mockClear();
+});
+
+const defaultChangeset = {
+  Foo: [{ id: 'foo-1', name: 'Bar' }],
+  Buz: [{ id: 'buz-1', name: 'Baz' }, { id: 'buz-2', name: 'Bing' }],
+};
+
+describe('<CaptureModal/>', () => {
+  const setup = options => {
+    const defaults = {
+      changeset: defaultChangeset,
+    };
+    const opts = Object.assign({}, defaults, options);
+    const { changeset } = opts;
+    const toggleModal = jest.fn();
+    const result = renderWithRedux(
+      <MemoryRouter>
+        <CaptureModal
+          orgId="org-id"
+          taskId="task-id"
+          changeset={changeset}
+          isOpen
+          toggleModal={toggleModal}
+        />
+      </MemoryRouter>,
+      {},
+      storeWithThunk,
+    );
+    return { ...result, toggleModal };
+  };
+
+  describe('cancel button', () => {
+    test('closes modal', () => {
+      const { getByText, toggleModal } = setup();
+
+      expect(getByText('Select the changes to capture')).toBeVisible();
+      expect(getByText('Cancel')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(toggleModal).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('form submit', () => {
+    test('creates a new commit', () => {
+      const { getByText, getByLabelText } = setup();
+      const submit = getByText('Capture Selected Changes');
+      const selectAll = getByLabelText('Select All');
+      const commitInput = getByLabelText('*Commit Message');
+      fireEvent.click(selectAll);
+      fireEvent.change(commitInput, { target: { value: 'My Commit' } });
+      fireEvent.click(submit);
+
+      expect(getByText('Capturing Selected Changes…')).toBeVisible();
+      expect(createObject).toHaveBeenCalledTimes(1);
+
+      const args = createObject.mock.calls[0][0];
+
+      expect(args.shouldSubscribeToObject()).toBe(true);
+
+      Reflect.deleteProperty(args, 'shouldSubscribeToObject');
+
+      expect(args).toEqual({
+        objectType: 'scratch_org_commit',
+        data: {
+          org: 'org-id',
+          task: 'task-id',
+          message: 'My Commit',
+          changes: ['foo-1', 'buz-1', 'buz-2'],
+        },
+        hasForm: true,
+      });
+    });
+  });
+
+  describe('select-all/none', () => {
+    test('selects/deselects all items', () => {
+      const { getByLabelText } = setup();
+      const selectAll = getByLabelText('Select All');
+      const input1 = getByLabelText('Bar');
+      const input2 = getByLabelText('Baz');
+      const input3 = getByLabelText('Bing');
+      fireEvent.click(selectAll);
+
+      expect(input1.checked).toBe(true);
+      expect(input2.checked).toBe(true);
+      expect(input3.checked).toBe(true);
+
+      fireEvent.click(selectAll);
+
+      expect(input1.checked).toBe(false);
+      expect(input2.checked).toBe(false);
+      expect(input3.checked).toBe(false);
+    });
+  });
+
+  describe('select/deselect-group', () => {
+    test('selects/deselects all items in group', () => {
+      const { getByLabelText } = setup();
+      const group1 = getByLabelText('Buz');
+      const input1 = getByLabelText('Bar');
+      const input2 = getByLabelText('Baz');
+      const input3 = getByLabelText('Bing');
+      fireEvent.click(group1);
+
+      expect(input1.checked).toBe(false);
+      expect(input2.checked).toBe(true);
+      expect(input3.checked).toBe(true);
+
+      fireEvent.click(group1);
+
+      expect(input1.checked).toBe(false);
+      expect(input2.checked).toBe(false);
+      expect(input3.checked).toBe(false);
+    });
+  });
+
+  describe('select/deselect-item', () => {
+    test('selects/deselects item', () => {
+      const { getByLabelText } = setup();
+      const input1 = getByLabelText('Bar');
+      const input2 = getByLabelText('Baz');
+      const input3 = getByLabelText('Bing');
+      fireEvent.click(input2);
+
+      expect(input1.checked).toBe(false);
+      expect(input2.checked).toBe(true);
+      expect(input3.checked).toBe(false);
+
+      fireEvent.click(input2);
+
+      expect(input1.checked).toBe(false);
+      expect(input2.checked).toBe(false);
+      expect(input3.checked).toBe(false);
+    });
+  });
+});
