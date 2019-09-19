@@ -45,6 +45,18 @@ class TestTask:
 
 @pytest.mark.django_db
 class TestUser:
+    def test_refresh_repositories(self, user_factory):
+        user = user_factory()
+        with ExitStack() as stack:
+            gh = stack.enter_context(patch("metashare.api.models.gh"))
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            gh.get_all_org_repos.return_value = []
+            user.refresh_repositories()
+
+            assert async_to_sync.called
+
     def test_org_name(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")

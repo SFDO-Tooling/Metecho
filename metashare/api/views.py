@@ -43,9 +43,11 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+        from .jobs import refresh_github_repositories_for_user_job
+
         user = self.get_object()
-        user.refresh_repositories()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        refresh_github_repositories_for_user_job.delay(user)
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class UserDisconnectSFView(CurrentUserObjectMixin, APIView):
