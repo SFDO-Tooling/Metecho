@@ -37,6 +37,7 @@ class User(mixins.HashIdMixin, AbstractUser):
     objects = UserManager()
 
     def refresh_repositories(self):
+        self.notify_refreshing_repositories()
         repos = gh.get_all_org_repos(self)
         GitHubRepository.objects.filter(user=self).delete()
         GitHubRepository.objects.bulk_create(
@@ -44,14 +45,12 @@ class User(mixins.HashIdMixin, AbstractUser):
         )
         self.notify_repositories_updated()
 
+    def notify_refreshing_repositories(self):
+        message = {"type": "USER_REPOS_REFRESHING"}
+        async_to_sync(push.push_message_about_instance)(self, message)
+
     def notify_repositories_updated(self):
-        from .serializers import RepositorySerializer
-
-        gh_repositories = self.repositories.values_list("url", flat=True)
-        repositories = Repository.objects.filter(repo_url__in=gh_repositories)
-
-        payload = RepositorySerializer(repositories, many=True).data
-        message = {"type": "USER_REPOS_REFRESH", "payload": payload}
+        message = {"type": "USER_REPOS_REFRESH"}
         async_to_sync(push.push_message_about_instance)(self, message)
 
     def invalidate_salesforce_credentials(self):

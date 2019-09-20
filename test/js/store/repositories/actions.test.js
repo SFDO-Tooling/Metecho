@@ -4,7 +4,7 @@ import * as actions from '@/store/repositories/actions';
 
 import { storeWithThunk } from './../../utils';
 
-describe('syncRepos', () => {
+describe('refreshRepos', () => {
   let url, objectPayload;
 
   beforeAll(() => {
@@ -17,7 +17,7 @@ describe('syncRepos', () => {
     };
   });
 
-  test('dispatches SyncRepos action and fetches repositories', () => {
+  test('dispatches RefreshRepos action and fetches repositories', () => {
     const store = storeWithThunk({});
     fetchMock.getOnce(url, {
       next: null,
@@ -27,11 +27,11 @@ describe('syncRepos', () => {
       status: 204,
       body: {},
     });
-    const syncReposStarted = {
-      type: 'SYNC_REPOS_STARTED',
+    const RefreshReposRequested = {
+      type: 'REFRESH_REPOS_REQUESTED',
     };
-    const syncReposSucceeded = {
-      type: 'SYNC_REPOS_SUCCEEDED',
+    const RefreshReposAccepted = {
+      type: 'REFRESH_REPOS_ACCEPTED',
     };
     const started = {
       type: 'FETCH_OBJECTS_STARTED',
@@ -46,10 +46,10 @@ describe('syncRepos', () => {
     };
 
     expect.assertions(1);
-    return store.dispatch(actions.syncRepos()).then(() => {
+    return store.dispatch(actions.refreshRepos()).then(() => {
       expect(store.getActions()).toEqual([
-        syncReposStarted,
-        syncReposSucceeded,
+        RefreshReposRequested,
+        RefreshReposAccepted,
         started,
         succeeded,
       ]);
@@ -57,21 +57,21 @@ describe('syncRepos', () => {
   });
 
   describe('error', () => {
-    test('dispatches SYNC_REPOS_FAILED action', () => {
+    test('dispatches REFRESH_REPOS_REJECTED action', () => {
       const store = storeWithThunk({});
       fetchMock.postOnce(window.api_urls.user_refresh(), {
         status: 500,
         body: { non_field_errors: ['Foobar'] },
       });
       const started = {
-        type: 'SYNC_REPOS_STARTED',
+        type: 'REFRESH_REPOS_REQUESTED',
       };
       const failed = {
-        type: 'SYNC_REPOS_FAILED',
+        type: 'REFRESH_REPOS_REJECTED',
       };
 
       expect.assertions(5);
-      return store.dispatch(actions.syncRepos()).catch(() => {
+      return store.dispatch(actions.refreshRepos()).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);

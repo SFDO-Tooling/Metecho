@@ -13,27 +13,29 @@ import RepositoryListItem from '@/components/repositories/listItem';
 import { LabelWithSpinner, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { fetchObjects } from '@/store/actions';
-import { syncRepos } from '@/store/repositories/actions';
+import { refreshRepos } from '@/store/repositories/actions';
 import {
   selectNextUrl,
   selectRepositories,
+  selectReposRefreshing,
 } from '@/store/repositories/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 const RepositoryList = withScroll(({ y }: ScrollProps) => {
   const [fetchingRepositories, setFetchingRepositories] = useState(false);
-  const [syncingRepos, setSyncingRepos] = useState(false);
+  const [refreshingRepos, setRefreshingRepos] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const repositories = useSelector(selectRepositories);
+  const refreshing = useSelector(selectReposRefreshing);
   const next = useSelector(selectNextUrl);
 
-  const syncReposClicked = () => {
-    setSyncingRepos(true);
-    dispatch(syncRepos()).finally(() => {
+  const refreshReposClicked = () => {
+    setRefreshingRepos(true);
+    dispatch(refreshRepos()).finally(() => {
       /* istanbul ignore else */
       if (isMounted.current) {
-        setSyncingRepos(false);
+        setRefreshingRepos(false);
       }
     });
   };
@@ -133,11 +135,11 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                   contact an admin on GitHub.
                 </Trans>
               </p>
-              <Button
+              {/* <Button
                 label={i18n.t('Create Repository')}
                 variant="brand"
                 disabled
-              />
+              /> */}
             </div>
             <div
               className="slds-grid
@@ -145,7 +147,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                 slds-shrink-none
                 slds-grid_align-end"
             >
-              {syncingRepos ? (
+              {refreshingRepos || refreshing ? (
                 <Button
                   label={
                     <LabelWithSpinner
@@ -164,7 +166,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                   iconCategory="utility"
                   iconName="refresh"
                   iconPosition="left"
-                  onClick={syncReposClicked}
+                  onClick={refreshReposClicked}
                 />
               )}
             </div>
