@@ -27,6 +27,10 @@ def boolish(val: str) -> bool:
     return val in BOOLS
 
 
+def github_oauth_scopes(val: str) -> List[str]:
+    return [s.strip for s in val.split(",")]
+
+
 def ipv4_networks(val: str) -> List[IPv4Network]:
     return [IPv4Network(s.strip()) for s in val.split(",")]
 
@@ -295,7 +299,13 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
 SOCIALACCOUNT_PROVIDERS = {
-    "github": {"SCOPE": ["read:user", "user:email", "repo", "read:org"]},
+    "github": {
+        "SCOPE": env(
+            "GITHUB_OAUTH_SCOPES",
+            default="read:user,user:email,public_repo",
+            type_=github_oauth_scopes,
+        )
+    },
     "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
     "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
 }
