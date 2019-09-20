@@ -12,7 +12,6 @@ import {
 import { Org } from '@/store/orgs/reducer';
 import { updateProject } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
-import { reposRefreshing } from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { updateTask } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
@@ -43,9 +42,6 @@ interface SubscriptionEvent {
 interface ErrorEvent {
   type: 'BACKEND_ERROR';
   payload: { message: string };
-}
-interface ReposRefreshingEvent {
-  type: 'USER_REPOS_REFRESHING';
 }
 interface ReposRefreshedEvent {
   type: 'USER_REPOS_REFRESH';
@@ -86,7 +82,6 @@ interface OrgDeleteFailedEvent {
 }
 type ModelEvent =
   | ErrorEvent
-  | ReposRefreshingEvent
   | ReposRefreshedEvent
   | ProjectUpdatedEvent
   | TaskUpdatedEvent
@@ -105,8 +100,6 @@ export const getAction = (event: EventType) => {
     return null;
   }
   switch (event.type) {
-    case 'USER_REPOS_REFRESHING':
-      return reposRefreshing();
     case 'USER_REPOS_REFRESH':
       return fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true });
     case 'PROJECT_UPDATE':

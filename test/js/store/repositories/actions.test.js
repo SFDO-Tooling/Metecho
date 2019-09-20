@@ -5,19 +5,13 @@ import * as actions from '@/store/repositories/actions';
 import { storeWithThunk } from './../../utils';
 
 describe('refreshRepos', () => {
-  let url, objectPayload;
+  let url;
 
   beforeAll(() => {
     url = window.api_urls.repository_list();
-    objectPayload = {
-      objectType: 'repository',
-      url,
-      reset: true,
-      filters: {},
-    };
   });
 
-  test('dispatches RefreshRepos action and fetches repositories', () => {
+  test('dispatches RefreshRepos action', () => {
     const store = storeWithThunk({});
     fetchMock.getOnce(url, {
       next: null,
@@ -33,25 +27,12 @@ describe('refreshRepos', () => {
     const RefreshReposAccepted = {
       type: 'REFRESH_REPOS_ACCEPTED',
     };
-    const started = {
-      type: 'FETCH_OBJECTS_STARTED',
-      payload: objectPayload,
-    };
-    const succeeded = {
-      type: 'FETCH_OBJECTS_SUCCEEDED',
-      payload: {
-        response: { next: null, results: [] },
-        ...objectPayload,
-      },
-    };
 
     expect.assertions(1);
     return store.dispatch(actions.refreshRepos()).then(() => {
       expect(store.getActions()).toEqual([
         RefreshReposRequested,
         RefreshReposAccepted,
-        started,
-        succeeded,
       ]);
     });
   });
@@ -81,5 +62,13 @@ describe('refreshRepos', () => {
         expect(window.console.error).toHaveBeenCalled();
       });
     });
+  });
+});
+
+describe('reposRefreshing', () => {
+  test('returns REFRESHING_REPOS action', () => {
+    const expected = { type: 'REFRESHING_REPOS' };
+
+    expect(actions.reposRefreshing()).toEqual(expected);
   });
 });

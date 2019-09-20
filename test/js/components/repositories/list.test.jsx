@@ -127,7 +127,7 @@ describe('<RepositoryList />', () => {
   });
 
   describe('sync repos clicked', () => {
-    test('sync repos', () => {
+    test('syncs repos', () => {
       const { getByText } = setup();
       const btn = getByText('Sync GitHub Repositories');
 
@@ -135,8 +135,24 @@ describe('<RepositoryList />', () => {
 
       fireEvent.click(btn);
 
-      expect(getByText('Syncing GitHub Repos…')).toBeVisible();
       expect(refreshRepos).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('syncing repos', () => {
+    test('displays button as loading', () => {
+      const { getByText } = setup({
+        initialState: {
+          repositories: {
+            repositories: [],
+            notFound: [],
+            next: null,
+            refreshing: true,
+          },
+        },
+      });
+
+      expect(getByText('Syncing GitHub Repos…')).toBeVisible();
     });
   });
 });

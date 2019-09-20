@@ -2,7 +2,12 @@ import reducer from '@/store/repositories/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {
-    const expected = { repositories: [], next: null, notFound: [] };
+    const expected = {
+      repositories: [],
+      next: null,
+      notFound: [],
+      refreshing: false,
+    };
     const actual = reducer(undefined, {});
 
     expect(actual).toEqual(expected);
@@ -15,7 +20,12 @@ describe('reducer', () => {
       name: 'Repository 1',
       description: 'This is a test repository.',
     };
-    const expected = { repositories: [], next: null, notFound: [] };
+    const expected = {
+      repositories: [],
+      next: null,
+      notFound: [],
+      refreshing: false,
+    };
     const actual = reducer(
       {
         repositories: [repository1],
@@ -26,6 +36,72 @@ describe('reducer', () => {
     );
 
     expect(actual).toEqual(expected);
+  });
+
+  describe('REFRESH_REPOS_REQUESTED', () => {
+    test('sets refreshing: true', () => {
+      const expected = {
+        repositories: [],
+        next: null,
+        notFound: [],
+        refreshing: true,
+      };
+      const actual = reducer(
+        {
+          repositories: [],
+          next: null,
+          notFound: [],
+          refreshing: false,
+        },
+        { type: 'REFRESH_REPOS_REQUESTED' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESHING_REPOS', () => {
+    test('sets refreshing: true', () => {
+      const expected = {
+        repositories: [],
+        next: null,
+        notFound: [],
+        refreshing: true,
+      };
+      const actual = reducer(
+        {
+          repositories: [],
+          next: null,
+          notFound: [],
+          refreshing: false,
+        },
+        { type: 'REFRESHING_REPOS' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_REPOS_REJECTED', () => {
+    test('sets refreshing: false', () => {
+      const expected = {
+        repositories: [],
+        next: null,
+        notFound: [],
+        refreshing: false,
+      };
+      const actual = reducer(
+        {
+          repositories: [],
+          next: null,
+          notFound: [],
+          refreshing: true,
+        },
+        { type: 'REFRESH_REPOS_REJECTED' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
   });
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
@@ -42,9 +118,13 @@ describe('reducer', () => {
         name: 'Repository 2',
         description: 'This is another test repository.',
       };
-      const expected = { repositories: [repository2], next: 'next-url' };
+      const expected = {
+        repositories: [repository2],
+        next: 'next-url',
+        refreshing: false,
+      };
       const actual = reducer(
-        { repositories: [repository1], next: null },
+        { repositories: [repository1], next: null, refreshing: true },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
@@ -69,6 +149,7 @@ describe('reducer', () => {
           },
         ],
         next: null,
+        refreshing: false,
       };
       const fetchedRepository = {
         id: 'repository2',

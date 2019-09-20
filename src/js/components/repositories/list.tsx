@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { ScrollProps, withScroll } from 'react-fns';
 import { Trans } from 'react-i18next';
@@ -23,22 +23,15 @@ import { OBJECT_TYPES } from '@/utils/constants';
 
 const RepositoryList = withScroll(({ y }: ScrollProps) => {
   const [fetchingRepositories, setFetchingRepositories] = useState(false);
-  const [refreshingRepos, setRefreshingRepos] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const repositories = useSelector(selectRepositories);
   const refreshing = useSelector(selectReposRefreshing);
   const next = useSelector(selectNextUrl);
 
-  const refreshReposClicked = () => {
-    setRefreshingRepos(true);
-    dispatch(refreshRepos()).finally(() => {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        setRefreshingRepos(false);
-      }
-    });
-  };
+  const doRefreshRepos = useCallback(() => {
+    dispatch(refreshRepos());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (fetchingRepositories || !next) {
@@ -147,7 +140,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                 slds-shrink-none
                 slds-grid_align-end"
             >
-              {refreshingRepos || refreshing ? (
+              {refreshing ? (
                 <Button
                   label={
                     <LabelWithSpinner
@@ -166,12 +159,20 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                   iconCategory="utility"
                   iconName="refresh"
                   iconPosition="left"
-                  onClick={refreshReposClicked}
+                  onClick={doRefreshRepos}
                 />
               )}
             </div>
           </div>
-          {contents}
+          {refreshing ? (
+            <div className="slds-align_absolute-center slds-m-top_x-large">
+              <span className="slds-is-relative">
+                <Spinner />
+              </span>
+            </div>
+          ) : (
+            contents
+          )}
           {fetchingRepositories ? (
             <div className="slds-align_absolute-center slds-m-top_x-large">
               <span className="slds-is-relative slds-m-right_large">

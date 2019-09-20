@@ -3,7 +3,6 @@ Websocket notifications you can subscribe to:
 
     user.:id
         BACKEND_ERROR
-        USER_REPOS_REFRESHING
         USER_REPOS_REFRESH
 
     project.:id

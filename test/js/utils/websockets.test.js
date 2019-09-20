@@ -1,5 +1,6 @@
 import Sockette from 'sockette';
 
+import { fetchObjects } from '@/store/actions';
 import {
   deleteFailed,
   deleteOrg,
@@ -12,6 +13,7 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { updateTask } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
+jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
 jest.mock('@/store/projects/actions');
 jest.mock('@/store/tasks/actions');
@@ -19,6 +21,7 @@ jest.mock('@/store/tasks/actions');
 const actions = {
   deleteFailed,
   deleteOrg,
+  fetchObjects,
   provisionOrg,
   provisionFailed,
   updateOrg,
@@ -70,6 +73,19 @@ describe('getAction', () => {
 
     // eslint-disable-next-line import/namespace
     expect(actions[action]).toHaveBeenCalledWith(payload);
+  });
+
+  describe('USER_REPOS_REFRESH', () => {
+    test('fetches repositories', () => {
+      const event = { type: 'USER_REPOS_REFRESH' };
+      sockets.getAction(event);
+
+      expect(fetchObjects).toHaveBeenCalledTimes(1);
+      expect(fetchObjects).toHaveBeenCalledWith({
+        objectType: 'repository',
+        reset: true,
+      });
+    });
   });
 
   test('handles unknown event', () => {
