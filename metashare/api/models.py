@@ -37,17 +37,12 @@ class User(mixins.HashIdMixin, AbstractUser):
     objects = UserManager()
 
     def refresh_repositories(self):
-        self.notify_refreshing_repositories()
         repos = gh.get_all_org_repos(self)
         GitHubRepository.objects.filter(user=self).delete()
         GitHubRepository.objects.bulk_create(
             [GitHubRepository(user=self, url=repo) for repo in repos]
         )
         self.notify_repositories_updated()
-
-    def notify_refreshing_repositories(self):
-        message = {"type": "USER_REPOS_REFRESHING"}
-        async_to_sync(push.push_message_about_instance)(self, message)
 
     def notify_repositories_updated(self):
         message = {"type": "USER_REPOS_REFRESH"}
