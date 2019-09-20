@@ -57,7 +57,8 @@ def jwt_session(client_id, private_key, username, url=None, is_sandbox=False):
     :param client_id: Client Id for the connected app
     :param private_key: Private key used to sign the connected app's certificate
     :param username: Username to authenticate as
-    :param url: Base URL of the instance hosting the org (e.g. https://na40.salesforce.com)
+    :param url: Base URL of the instance hosting the org
+    (e.g. https://na40.salesforce.com)
     :param is_sandbox: True if the org is a sandbox or scratch org
     """
     if url is None:
@@ -175,7 +176,8 @@ def get_org_result(
 
 
 def mutate_scratch_org(*, scratch_org_config, org_result, email):
-    """Updates the org config for a new scratch org with details from its ScratchOrgInfo"""
+    """Updates the org config for a new scratch org with details
+    from its ScratchOrgInfo"""
     scratch_org_config._scratch_info = {
         "instance_url": org_result["LoginUrl"],
         "org_id": org_result["ScratchOrg"],
@@ -323,7 +325,8 @@ def create_org_and_run_flow(
 
 
 def delete_scratch_org(scratch_org):
-    """Delete a scratch org by deleting its ActiveScratchOrg record in the Dev Hub org."""
+    """Delete a scratch org by deleting its ActiveScratchOrg record
+    in the Dev Hub org."""
     devhub_username = scratch_org.owner.sf_username
     org_id = scratch_org.config["org_id"]
 
