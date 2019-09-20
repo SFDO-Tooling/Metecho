@@ -34,7 +34,7 @@ def test_user_refresh_view(client):
 
         response = client.post(reverse("user-refresh"))
 
-    assert response.status_code == 204
+    assert response.status_code == 202
 
 
 @pytest.mark.django_db

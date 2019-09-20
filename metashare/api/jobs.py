@@ -198,3 +198,10 @@ def delete_scratch_org(scratch_org):
 
 
 delete_scratch_org_job = job(delete_scratch_org)
+
+
+def refresh_github_repositories_for_user(user):
+    user.refresh_repositories()
+
+
+refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
