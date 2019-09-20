@@ -28,7 +28,7 @@ def boolish(val: str) -> bool:
 
 
 def github_oauth_scopes(val: str) -> List[str]:
-    return [s.strip for s in val.split(",")]
+    return [s.strip() for s in val.split(",")]
 
 
 def ipv4_networks(val: str) -> List[IPv4Network]:
