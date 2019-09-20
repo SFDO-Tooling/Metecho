@@ -9,6 +9,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="scratchorg", name="login_url", field=models.URLField(null=True)
+            model_name="scratchorg", name="login_url", field=models.URLField(null=True, blank=True)
         )
     ]
