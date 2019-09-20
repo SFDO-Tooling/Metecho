@@ -10,6 +10,7 @@ from ..jobs import (
     create_org_and_run_flow,
     delete_scratch_org,
     mark_refreshing_changes,
+    refresh_github_repositories_for_user,
     report_errors_on_delete,
     report_errors_on_provision,
     try_to_make_branch,
@@ -197,3 +198,9 @@ def test_delete_scratch_org(scratch_org_factory):
         delete_scratch_org(scratch_org)
 
         assert sf_delete_scratch_org.called
+
+
+def test_refresh_github_repositories_for_user(user_factory):
+    user = MagicMock()
+    refresh_github_repositories_for_user(user)
+    assert user.refresh_repositories.called

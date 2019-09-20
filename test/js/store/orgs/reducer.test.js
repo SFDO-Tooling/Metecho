@@ -218,7 +218,7 @@ describe('reducer', () => {
     });
   });
 
-  describe('SCRATCH_ORG_PROVISIONED', () => {
+  describe('SCRATCH_ORG_PROVISION', () => {
     test('adds org to task', () => {
       const org = {
         id: 'org-id',
@@ -234,7 +234,7 @@ describe('reducer', () => {
       const actual = reducer(
         {},
         {
-          type: 'SCRATCH_ORG_PROVISIONED',
+          type: 'SCRATCH_ORG_PROVISION',
           payload: org,
         },
       );
@@ -393,7 +393,7 @@ describe('reducer', () => {
     });
   });
 
-  describe('COMMIT_FAILED/COMMIT_SUCCEEDED', () => {
+  describe('COMMIT_FAILED/COMMIT_CREATE', () => {
     test('sets committing: false', () => {
       const commit = {
         id: 'commit-id',

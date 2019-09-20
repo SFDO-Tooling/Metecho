@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { ScrollProps, withScroll } from 'react-fns';
 import { Trans } from 'react-i18next';
@@ -13,30 +13,25 @@ import RepositoryListItem from '@/components/repositories/listItem';
 import { LabelWithSpinner, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { fetchObjects } from '@/store/actions';
-import { syncRepos } from '@/store/repositories/actions';
+import { refreshRepos } from '@/store/repositories/actions';
 import {
   selectNextUrl,
   selectRepositories,
+  selectReposRefreshing,
 } from '@/store/repositories/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 const RepositoryList = withScroll(({ y }: ScrollProps) => {
   const [fetchingRepositories, setFetchingRepositories] = useState(false);
-  const [syncingRepos, setSyncingRepos] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const repositories = useSelector(selectRepositories);
+  const refreshing = useSelector(selectReposRefreshing);
   const next = useSelector(selectNextUrl);
 
-  const syncReposClicked = () => {
-    setSyncingRepos(true);
-    dispatch(syncRepos()).finally(() => {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        setSyncingRepos(false);
-      }
-    });
-  };
+  const doRefreshRepos = useCallback(() => {
+    dispatch(refreshRepos());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (fetchingRepositories || !next) {
@@ -133,11 +128,11 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                   contact an admin on GitHub.
                 </Trans>
               </p>
-              <Button
+              {/* <Button
                 label={i18n.t('Create Repository')}
                 variant="brand"
                 disabled
-              />
+              /> */}
             </div>
             <div
               className="slds-grid
@@ -145,7 +140,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                 slds-shrink-none
                 slds-grid_align-end"
             >
-              {syncingRepos ? (
+              {refreshing ? (
                 <Button
                   label={
                     <LabelWithSpinner label={i18n.t('Syncing GitHub Repos…')} />
@@ -160,12 +155,20 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                   iconCategory="utility"
                   iconName="refresh"
                   iconPosition="left"
-                  onClick={syncReposClicked}
+                  onClick={doRefreshRepos}
                 />
               )}
             </div>
           </div>
-          {contents}
+          {refreshing ? (
+            <div className="slds-align_absolute-center slds-m-top_x-large">
+              <span className="slds-is-relative">
+                <Spinner />
+              </span>
+            </div>
+          ) : (
+            contents
+          )}
           {fetchingRepositories ? (
             <div className="slds-align_absolute-center slds-m-top_x-large">
               <span className="slds-is-relative slds-m-right_large">

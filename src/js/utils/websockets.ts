@@ -1,6 +1,7 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
+import { fetchObjects } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
@@ -17,6 +18,7 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { updateTask } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
 import {
+  OBJECT_TYPES,
   ObjectTypes,
   WEBSOCKET_ACTIONS,
   WebsocketActions,
@@ -43,6 +45,9 @@ interface ErrorEvent {
   type: 'BACKEND_ERROR';
   payload: { message: string };
 }
+interface ReposRefreshedEvent {
+  type: 'USER_REPOS_REFRESH';
+}
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
   payload: Project;
@@ -52,7 +57,7 @@ interface TaskUpdatedEvent {
   payload: Task;
 }
 interface OrgProvisionedEvent {
-  type: 'SCRATCH_ORG_PROVISIONED';
+  type: 'SCRATCH_ORG_PROVISION';
   payload: Org;
 }
 interface OrgProvisionFailedEvent {
@@ -63,11 +68,11 @@ interface OrgProvisionFailedEvent {
   };
 }
 interface OrgUpdatedEvent {
-  type: 'SCRATCH_ORG_UPDATED';
+  type: 'SCRATCH_ORG_UPDATE';
   payload: Org;
 }
 interface OrgDeletedEvent {
-  type: 'SCRATCH_ORG_DELETED';
+  type: 'SCRATCH_ORG_DELETE';
   payload: Org;
 }
 interface OrgDeleteFailedEvent {
@@ -78,7 +83,7 @@ interface OrgDeleteFailedEvent {
   };
 }
 interface CommitSucceededEvent {
-  type: 'COMMIT_SUCCEEDED';
+  type: 'COMMIT_CREATE';
   payload: Commit;
 }
 interface CommitFailedEvent {
@@ -90,6 +95,7 @@ interface CommitFailedEvent {
 }
 type ModelEvent =
   | ErrorEvent
+  | ReposRefreshedEvent
   | ProjectUpdatedEvent
   | TaskUpdatedEvent
   | OrgProvisionedEvent
@@ -109,21 +115,23 @@ export const getAction = (event: EventType) => {
     return null;
   }
   switch (event.type) {
+    case 'USER_REPOS_REFRESH':
+      return fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true });
     case 'PROJECT_UPDATE':
       return updateProject(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload);
-    case 'SCRATCH_ORG_PROVISIONED':
+    case 'SCRATCH_ORG_PROVISION':
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
       return provisionFailed(event.payload);
-    case 'SCRATCH_ORG_UPDATED':
+    case 'SCRATCH_ORG_UPDATE':
       return updateOrg(event.payload);
-    case 'SCRATCH_ORG_DELETED':
+    case 'SCRATCH_ORG_DELETE':
       return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
-    case 'COMMIT_SUCCEEDED':
+    case 'COMMIT_CREATE':
       return commitSucceeded(event.payload);
     case 'COMMIT_FAILED':
       return commitFailed(event.payload);

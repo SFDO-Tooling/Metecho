@@ -126,8 +126,8 @@ const reducer = (
       }
       return orgs;
     }
-    case 'SCRATCH_ORG_PROVISIONED':
-    case 'SCRATCH_ORG_UPDATED':
+    case 'SCRATCH_ORG_PROVISION':
+    case 'SCRATCH_ORG_UPDATE':
     case 'REFETCH_ORG_SUCCEEDED':
     case 'SCRATCH_ORG_DELETE_FAILED': {
       const org = action.payload as Org;
@@ -144,7 +144,7 @@ const reducer = (
       };
     }
     case 'SCRATCH_ORG_PROVISION_FAILED':
-    case 'SCRATCH_ORG_DELETED': {
+    case 'SCRATCH_ORG_DELETE': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
@@ -200,7 +200,7 @@ const reducer = (
       return orgs;
     }
     case 'COMMIT_FAILED':
-    case 'COMMIT_SUCCEEDED': {
+    case 'COMMIT_CREATE': {
       const commit = action.payload;
       const taskOrgs = orgs[commit.task] || {
         [ORG_TYPES.DEV]: null,

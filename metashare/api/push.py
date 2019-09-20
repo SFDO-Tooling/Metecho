@@ -3,6 +3,7 @@ Websocket notifications you can subscribe to:
 
     user.:id
         BACKEND_ERROR
+        USER_REPOS_REFRESH
 
     project.:id
         PROJECT_UPDATE
@@ -11,12 +12,12 @@ Websocket notifications you can subscribe to:
         TASK_UPDATE
 
     scratchorg.:id
-        SCRATCH_ORG_PROVISIONED
+        SCRATCH_ORG_PROVISION
         SCRATCH_ORG_PROVISION_FAILED
-        SCRATCH_ORG_DELETED
+        SCRATCH_ORG_UPDATE
+        SCRATCH_ORG_DELETE
         SCRATCH_ORG_DELETE_FAILED
-        SCRATCH_ORG_UPDATED
-        COMMIT_SUCCEEDED
+        COMMIT_CREATE
         COMMIT_FAILED
 """
 from channels.layers import get_channel_layer
