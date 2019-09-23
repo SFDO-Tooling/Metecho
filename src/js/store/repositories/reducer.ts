@@ -16,12 +16,14 @@ export interface RepositoriesState {
   repositories: Repository[];
   next: string | null;
   notFound: string[];
+  refreshing: boolean;
 }
 
 const defaultState = {
   repositories: [],
   next: null,
   notFound: [],
+  refreshing: false,
 };
 
 const reducer = (
@@ -31,6 +33,14 @@ const reducer = (
   switch (action.type) {
     case 'USER_LOGGED_OUT':
       return { ...defaultState };
+    case 'REFRESH_REPOS_REQUESTED':
+    case 'REFRESHING_REPOS':
+    case 'REFRESH_REPOS_REJECTED': {
+      return {
+        ...repositories,
+        refreshing: action.type !== 'REFRESH_REPOS_REJECTED',
+      };
+    }
     case 'FETCH_OBJECTS_SUCCEEDED': {
       const { response, objectType, reset } = action.payload;
       const { results, next } = response as PaginatedObjectResponse;
@@ -40,6 +50,7 @@ const reducer = (
             ...repositories,
             repositories: results,
             next,
+            refreshing: false,
           };
         }
         // Store list of known repository IDs to filter out duplicates
@@ -51,6 +62,7 @@ const reducer = (
             ...results.filter(p => !ids.includes(p.id)),
           ],
           next,
+          refreshing: false,
         };
       }
       return repositories;

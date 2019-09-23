@@ -13,6 +13,11 @@ export const selectRepositories = createSelector(
   (repositories: RepositoriesState): Repository[] => repositories.repositories,
 );
 
+export const selectReposRefreshing = createSelector(
+  selectRepositoriesState,
+  (repositories: RepositoriesState): boolean => repositories.refreshing,
+);
+
 export const selectNextUrl = createSelector(
   selectRepositoriesState,
   (repositories: RepositoriesState): string | null => repositories.next,

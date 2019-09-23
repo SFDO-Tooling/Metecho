@@ -1,25 +1,27 @@
 import { ThunkResult } from '@/store';
-import { fetchObjects } from '@/store/actions';
 import apiFetch from '@/utils/api';
-import { OBJECT_TYPES } from '@/utils/constants';
 
-interface SyncReposStarted {
-  type: 'SYNC_REPOS_STARTED';
+interface RefreshReposRequested {
+  type: 'REFRESH_REPOS_REQUESTED';
 }
-interface SyncReposSucceeded {
-  type: 'SYNC_REPOS_SUCCEEDED';
+interface RefreshReposAccepted {
+  type: 'REFRESH_REPOS_ACCEPTED';
 }
-interface SyncReposFailed {
-  type: 'SYNC_REPOS_FAILED';
+interface RefreshReposRejected {
+  type: 'REFRESH_REPOS_REJECTED';
+}
+interface ReposRefreshing {
+  type: 'REFRESHING_REPOS';
 }
 
 export type RepositoriesAction =
-  | SyncReposStarted
-  | SyncReposSucceeded
-  | SyncReposFailed;
+  | RefreshReposRequested
+  | RefreshReposAccepted
+  | RefreshReposRejected
+  | ReposRefreshing;
 
-export const syncRepos = (): ThunkResult => async dispatch => {
-  dispatch({ type: 'SYNC_REPOS_STARTED' });
+export const refreshRepos = (): ThunkResult => async dispatch => {
+  dispatch({ type: 'REFRESH_REPOS_REQUESTED' });
   try {
     await apiFetch({
       url: window.api_urls.user_refresh(),
@@ -28,12 +30,13 @@ export const syncRepos = (): ThunkResult => async dispatch => {
         method: 'POST',
       },
     });
-    dispatch({ type: 'SYNC_REPOS_SUCCEEDED' });
-    return dispatch(
-      fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
-    );
+    return dispatch({ type: 'REFRESH_REPOS_ACCEPTED' });
   } catch (err) {
-    dispatch({ type: 'SYNC_REPOS_FAILED' });
+    dispatch({ type: 'REFRESH_REPOS_REJECTED' });
     throw err;
   }
 };
+
+export const reposRefreshing = (): ReposRefreshing => ({
+  type: 'REFRESHING_REPOS',
+});
