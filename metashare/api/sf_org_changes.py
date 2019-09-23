@@ -13,7 +13,8 @@ def get_salesforce_connection(
     user,
     project_path,
     config,
-    login_url
+    login_url,
+    base_url="",
 ):
     org_name = "dev"
 
@@ -33,7 +34,7 @@ def get_salesforce_connection(
     conn = get_simple_salesforce_connection(
         cci.project_config, org_config, api_version=None
     )
-    conn.base_url += "tooling/"
+    conn.base_url += base_url
 
     return conn
 
@@ -51,6 +52,7 @@ def sf_org_has_changes(*, scratch_org, user):
             project_path=project_path,
             config=scratch_org.config,
             login_url=scratch_org.login_url,
+            base_url="tooling/",
         )
 
     return conn.query_all(
