@@ -294,6 +294,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     latest_commit_at = models.DateTimeField(null=True, blank=True)
     url = models.URLField(null=True, blank=True)
     has_changes = models.BooleanField(default=False)
+    latest_revision_numbers = JSONField(default=dict, encoder=DjangoJSONEncoder)
     currently_refreshing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder)
     login_url = models.URLField(null=True, blank=True)

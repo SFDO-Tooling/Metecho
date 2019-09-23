@@ -207,8 +207,12 @@ create_branches_on_github_then_create_scratch_org_job = job(
 
 def check_if_changes_on_org(*, scratch_org, user):
     with report_errors_on_check_changes(scratch_org):
-        scratch_org.has_changes = sf_org_changes.sf_org_has_changes(
+        old_revision_numbers = scratch_org.latest_revision_numbers
+        scratch_org.latest_revision_numbers = sf_org_changes.get_latest_revision_numbers(
             scratch_org=scratch_org, user=user
+        )
+        scratch_org.has_changes = sf_org_changes.compare_revisions(
+            old_revision_numbers, scratch_org.latest_revision_numbers
         )
         scratch_org.save()
 
