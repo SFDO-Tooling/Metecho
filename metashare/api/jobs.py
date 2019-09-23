@@ -9,7 +9,7 @@ from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
-from . import sf_run_flow
+from . import sf_org_changes, sf_run_flow
 from .github_context import (
     extract_owner_and_repo,
     get_cumulus_prefix,
@@ -52,6 +52,19 @@ def report_errors_on_provision(scratch_org):
         tb = traceback.format_exc()
         logger.error(tb)
         scratch_org.delete()
+        raise
+
+
+@contextlib.contextmanager
+def report_errors_on_check_changes(scratch_org):
+    try:
+        yield
+    except Exception as e:
+        async_to_sync(report_scratch_org_error)(
+            scratch_org, str(e), "SCRATCH_ORG_FETCH_CHANGES_FAILED"
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
         raise
 
 
@@ -190,6 +203,17 @@ def create_branches_on_github_then_create_scratch_org(
 create_branches_on_github_then_create_scratch_org_job = job(
     create_branches_on_github_then_create_scratch_org
 )
+
+
+def check_if_changes_on_org(*, scratch_org, user):
+    with report_errors_on_check_changes(scratch_org):
+        scratch_org.has_changes = sf_org_changes.sf_org_has_changes(
+            scratch_org=scratch_org, user=user
+        )
+        scratch_org.save()
+
+
+check_if_changes_on_org_job = job(check_if_changes_on_org)
 
 
 def delete_scratch_org(scratch_org):

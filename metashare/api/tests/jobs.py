@@ -5,12 +5,14 @@ import pytest
 from github3.exceptions import UnprocessableEntity
 
 from ..jobs import (
+    check_if_changes_on_org,
     create_branches_on_github,
     create_branches_on_github_then_create_scratch_org,
     create_org_and_run_flow,
     delete_scratch_org,
     mark_refreshing_changes,
     refresh_github_repositories_for_user,
+    report_errors_on_check_changes,
     report_errors_on_delete,
     report_errors_on_provision,
     try_to_make_branch,
@@ -129,6 +131,32 @@ def test_create_org_and_run_flow():
         )
 
         assert sf_run_flow.create_org_and_run_flow.called
+
+
+@pytest.mark.django_db
+def test_check_if_changes_on_org(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+
+    with patch(f"{PATCH_ROOT}.sf_org_changes") as sf_org_changes:
+        sf_org_changes.sf_org_has_changes.return_value = True
+
+        check_if_changes_on_org(scratch_org=scratch_org, user=MagicMock())
+
+        assert scratch_org.has_changes
+
+
+@pytest.mark.django_db
+def test_report_errors_on_check_changes(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
+        try:
+            with report_errors_on_check_changes(scratch_org):
+                raise ValueError
+        except ValueError:
+            pass
+        assert push_message_about_instance.called
 
 
 @pytest.mark.django_db
