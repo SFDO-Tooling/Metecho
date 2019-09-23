@@ -8,7 +8,7 @@ import apiFetch from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 
 interface OrgProvisioned {
-  type: 'SCRATCH_ORG_PROVISIONED';
+  type: 'SCRATCH_ORG_PROVISION';
   payload: Org;
 }
 interface OrgProvisionFailed {
@@ -24,11 +24,11 @@ interface RefetchOrgSucceeded {
   payload: Org;
 }
 interface OrgUpdated {
-  type: 'SCRATCH_ORG_UPDATED';
+  type: 'SCRATCH_ORG_UPDATE';
   payload: Org;
 }
 interface OrgDeleted {
-  type: 'SCRATCH_ORG_DELETED';
+  type: 'SCRATCH_ORG_DELETE';
   payload: Org;
 }
 interface OrgDeleteFailed {
@@ -78,7 +78,7 @@ export const provisionOrg = (payload: Org): ThunkResult => (
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_PROVISIONED',
+    type: 'SCRATCH_ORG_PROVISION',
     payload,
   });
 };
@@ -154,7 +154,7 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
     // @@@ Mock out until API exists
     // setTimeout(() => {
     //   dispatch({
-    //     type: 'SCRATCH_ORG_UPDATED',
+    //     type: 'SCRATCH_ORG_UPDATE',
     //     payload: { ...response },
     //   });
     // }, 3000);
@@ -172,7 +172,7 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
 };
 
 export const updateOrg = (payload: Org): OrgUpdated => ({
-  type: 'SCRATCH_ORG_UPDATED',
+  type: 'SCRATCH_ORG_UPDATE',
   payload,
 });
 
@@ -209,7 +209,7 @@ export const deleteOrg = (payload: Org): ThunkResult => (
     dispatch(addToast({ heading: msg[payload.org_type] }));
   }
   return dispatch({
-    type: 'SCRATCH_ORG_DELETED',
+    type: 'SCRATCH_ORG_DELETE',
     payload,
   });
 };

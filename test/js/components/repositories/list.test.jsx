@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import RepositoryList from '@/components/repositories/list';
 import { fetchObjects } from '@/store/actions';
-import { syncRepos } from '@/store/repositories/actions';
+import { refreshRepos } from '@/store/repositories/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
@@ -17,11 +17,11 @@ jest.mock('react-fns', () => ({
 jest.mock('@/store/actions');
 jest.mock('@/store/repositories/actions');
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-syncRepos.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshRepos.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObjects.mockClear();
-  syncRepos.mockClear();
+  refreshRepos.mockClear();
 });
 
 describe('<RepositoryList />', () => {
@@ -127,7 +127,7 @@ describe('<RepositoryList />', () => {
   });
 
   describe('sync repos clicked', () => {
-    test('sync repos', () => {
+    test('syncs repos', () => {
       const { getByText } = setup();
       const btn = getByText('Sync GitHub Repositories');
 
@@ -135,8 +135,24 @@ describe('<RepositoryList />', () => {
 
       fireEvent.click(btn);
 
+      expect(refreshRepos).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('syncing repos', () => {
+    test('displays button as loading', () => {
+      const { getByText } = setup({
+        initialState: {
+          repositories: {
+            repositories: [],
+            notFound: [],
+            next: null,
+            refreshing: true,
+          },
+        },
+      });
+
       expect(getByText('Syncing GitHub Repos…')).toBeVisible();
-      expect(syncRepos).toHaveBeenCalledTimes(1);
     });
   });
 });

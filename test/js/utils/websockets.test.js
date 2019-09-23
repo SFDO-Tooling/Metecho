@@ -1,5 +1,6 @@
 import Sockette from 'sockette';
 
+import { fetchObjects } from '@/store/actions';
 import {
   deleteFailed,
   deleteOrg,
@@ -12,6 +13,7 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { updateTask } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
+jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
 jest.mock('@/store/projects/actions');
 jest.mock('@/store/tasks/actions');
@@ -19,6 +21,7 @@ jest.mock('@/store/tasks/actions');
 const actions = {
   deleteFailed,
   deleteOrg,
+  fetchObjects,
   provisionOrg,
   provisionFailed,
   updateOrg,
@@ -56,13 +59,13 @@ afterEach(() => {
 
 describe('getAction', () => {
   test.each([
-    ['SCRATCH_ORG_PROVISIONED', 'provisionOrg'],
+    ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
-    ['SCRATCH_ORG_DELETED', 'deleteOrg'],
+    ['SCRATCH_ORG_DELETE', 'deleteOrg'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['PROJECT_UPDATE', 'updateProject'],
     ['TASK_UPDATE', 'updateTask'],
-    ['SCRATCH_ORG_UPDATED', 'updateOrg'],
+    ['SCRATCH_ORG_UPDATE', 'updateOrg'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };
@@ -70,6 +73,19 @@ describe('getAction', () => {
 
     // eslint-disable-next-line import/namespace
     expect(actions[action]).toHaveBeenCalledWith(payload);
+  });
+
+  describe('USER_REPOS_REFRESH', () => {
+    test('fetches repositories', () => {
+      const event = { type: 'USER_REPOS_REFRESH' };
+      sockets.getAction(event);
+
+      expect(fetchObjects).toHaveBeenCalledTimes(1);
+      expect(fetchObjects).toHaveBeenCalledWith({
+        objectType: 'repository',
+        reset: true,
+      });
+    });
   });
 
   test('handles unknown event', () => {
@@ -163,7 +179,7 @@ describe('createSocket', () => {
 
       test('dispatches action', () => {
         socketInstance.onmessage({
-          data: { type: 'SCRATCH_ORG_PROVISIONED', payload: {} },
+          data: { type: 'SCRATCH_ORG_PROVISION', payload: {} },
         });
 
         expect(dispatch).toHaveBeenCalledTimes(1);
