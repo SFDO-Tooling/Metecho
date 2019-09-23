@@ -8,6 +8,7 @@ import {
   deleteOrg,
   provisionFailed,
   provisionOrg,
+  updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
 import { updateProject } from '@/store/projects/actions';
@@ -29,6 +30,7 @@ const actions = {
   provisionOrg,
   provisionFailed,
   updateOrg,
+  updateFailed,
   updateProject,
   updateTask,
 };
@@ -70,6 +72,7 @@ describe('getAction', () => {
     ['SCRATCH_ORG_DELETE', 'deleteOrg'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['SCRATCH_ORG_UPDATE', 'updateOrg'],
+    ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed'],
     ['COMMIT_CREATE', 'commitSucceeded'],
     ['COMMIT_FAILED', 'commitFailed'],
   ])('handles %s event', (type, action) => {

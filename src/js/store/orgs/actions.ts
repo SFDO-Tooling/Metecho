@@ -200,6 +200,33 @@ export const updateOrg = (payload: Org): OrgUpdated => ({
   payload,
 });
 
+export const updateFailed = ({
+  model,
+  message,
+}: {
+  model: Org;
+  message?: string;
+}): ThunkResult => (dispatch, getState) => {
+  const task = selectTaskById(getState(), model.task);
+  dispatch(
+    addToast({
+      heading: task
+        ? `${i18n.t(
+            'Uh oh. There was an error checking for changes on your scratch org for task',
+          )} “${task.name}”.`
+        : i18n.t(
+            'Uh oh. There was an error checking for changes on your scratch org.',
+          ),
+      details: message,
+      variant: 'error',
+    }),
+  );
+  return dispatch({
+    type: 'SCRATCH_ORG_UPDATE',
+    payload: model,
+  });
+};
+
 export const deleteOrg = (payload: Org): ThunkResult => (
   dispatch,
   getState,

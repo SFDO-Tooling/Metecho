@@ -227,6 +227,58 @@ describe('updateOrg', () => {
   });
 });
 
+describe('updateFailed', () => {
+  test('adds error message', () => {
+    const store = storeWithThunk({
+      tasks: {
+        'project-id': [
+          { id: 'task-id', name: 'My Task', project: 'project-id' },
+        ],
+      },
+    });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+    };
+    const action = {
+      type: 'SCRATCH_ORG_UPDATE',
+      payload: org,
+    };
+    store.dispatch(actions.updateFailed({ model: org, message: 'error msg' }));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error checking for changes on your scratch org for task “My Task”.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[1]).toEqual(action);
+  });
+
+  test('adds error message (no task)', () => {
+    const store = storeWithThunk({ tasks: {} });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+    };
+    const action = {
+      type: 'SCRATCH_ORG_UPDATE',
+      payload: org,
+    };
+    store.dispatch(actions.updateFailed({ model: org }));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error checking for changes on your scratch org.',
+    );
+    expect(allActions[0].payload.details).toBe(undefined);
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[1]).toEqual(action);
+  });
+});
+
 describe('deleteOrg', () => {
   beforeEach(() => {
     window.socket = { unsubscribe: jest.fn() };

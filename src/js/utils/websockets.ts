@@ -9,6 +9,7 @@ import {
   deleteOrg,
   provisionFailed,
   provisionOrg,
+  updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
 import { Commit, Org } from '@/store/orgs/reducer';
@@ -71,6 +72,13 @@ interface OrgUpdatedEvent {
   type: 'SCRATCH_ORG_UPDATE';
   payload: Org;
 }
+interface OrgUpdateFailedEvent {
+  type: 'SCRATCH_ORG_FETCH_CHANGES_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
 interface OrgDeletedEvent {
   type: 'SCRATCH_ORG_DELETE';
   payload: Org;
@@ -101,6 +109,7 @@ type ModelEvent =
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
+  | OrgUpdateFailedEvent
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
   | CommitSucceededEvent
@@ -127,6 +136,8 @@ export const getAction = (event: EventType) => {
       return provisionFailed(event.payload);
     case 'SCRATCH_ORG_UPDATE':
       return updateOrg(event.payload);
+    case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
+      return updateFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
       return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
