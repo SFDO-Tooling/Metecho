@@ -36,6 +36,9 @@ def mark_refreshing_changes(scratch_org):
     scratch_org.save()
     try:
         yield
+    except Exception:
+        scratch_org.has_changes = False
+        raise
     finally:
         scratch_org.currently_refreshing_changes = False
         scratch_org.save()

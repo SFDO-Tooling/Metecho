@@ -215,6 +215,20 @@ def test_mark_refreshing_changes(scratch_org_factory):
 
 
 @pytest.mark.django_db
+def test_mark_refreshing_changes__exception(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    assert not scratch_org.currently_refreshing_changes
+    with pytest.raises(ValueError):
+        with mark_refreshing_changes(scratch_org):
+            assert scratch_org.currently_refreshing_changes
+            raise ValueError
+
+    scratch_org.refresh_from_db()
+    assert not scratch_org.has_changes
+    assert not scratch_org.currently_refreshing_changes
+
+
+@pytest.mark.django_db
 def test_delete_scratch_org(scratch_org_factory):
     scratch_org = scratch_org_factory()
     with patch(f"{PATCH_ROOT}.sf_run_flow.delete_scratch_org") as sf_delete_scratch_org:
