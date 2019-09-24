@@ -335,6 +335,11 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self.notify_deleted()
         super().delete(*args, **kwargs)
 
+    def check_if_has_changes(self):
+        from .jobs import check_if_changes_on_org_job
+
+        check_if_changes_on_org_job.delay(self)
+
     def create_remote_resources(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
 

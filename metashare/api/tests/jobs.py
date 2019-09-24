@@ -12,8 +12,7 @@ from ..jobs import (
     delete_scratch_org,
     mark_refreshing_changes,
     refresh_github_repositories_for_user,
-    report_errors_on_check_changes,
-    report_errors_on_delete,
+    report_errors_on_fetch_changes,
     report_errors_on_provision,
     try_to_make_branch,
 )
@@ -145,7 +144,7 @@ def test_check_if_changes_on_org(scratch_org_factory):
             "TypeTwo:NameTwo": 10,
         }
 
-        check_if_changes_on_org(scratch_org=scratch_org, user=MagicMock())
+        check_if_changes_on_org(scratch_org=scratch_org)
         scratch_org.refresh_from_db()
 
         assert scratch_org.has_changes
@@ -162,7 +161,7 @@ def test_report_errors_on_check_changes(scratch_org_factory):
         f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
     ) as push_message_about_instance:
         try:
-            with report_errors_on_check_changes(scratch_org):
+            with report_errors_on_fetch_changes(scratch_org):
                 raise ValueError
         except ValueError:
             pass
@@ -177,20 +176,6 @@ def test_report_errors_on_provision(scratch_org_factory):
     ) as push_message_about_instance:
         try:
             with report_errors_on_provision(scratch_org):
-                raise ValueError
-        except ValueError:
-            pass
-        assert push_message_about_instance.called
-
-
-@pytest.mark.django_db
-def test_report_errors_on_delete(scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    with patch(
-        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
-    ) as push_message_about_instance:
-        try:
-            with report_errors_on_delete(scratch_org):
                 raise ValueError
         except ValueError:
             pass
@@ -236,6 +221,18 @@ def test_delete_scratch_org(scratch_org_factory):
         delete_scratch_org(scratch_org)
 
         assert sf_delete_scratch_org.called
+
+
+@pytest.mark.django_db
+def test_delete_scratch_org__exception(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch(f"{PATCH_ROOT}.sf_run_flow.delete_scratch_org") as sf_delete_scratch_org:
+        sf_delete_scratch_org.side_effect = ValueError
+        with pytest.raises(ValueError):
+            delete_scratch_org(scratch_org)
+
+        scratch_org.refresh_from_db()
+        assert scratch_org.delete_queued_at is None
 
 
 def test_refresh_github_repositories_for_user(user_factory):

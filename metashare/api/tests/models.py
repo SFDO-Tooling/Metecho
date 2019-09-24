@@ -316,6 +316,15 @@ class TestScratchOrg:
 
             assert async_to_sync.called
 
+    def test_check_if_has_changes(self, scratch_org_factory):
+        with patch(
+            "metashare.api.jobs.check_if_changes_on_org_job"
+        ) as check_if_changes_on_org_job:
+            scratch_org = scratch_org_factory()
+            scratch_org.check_if_has_changes()
+
+            assert check_if_changes_on_org_job.delay.called
+
 
 @pytest.mark.django_db
 class TestGitHubRepository:
