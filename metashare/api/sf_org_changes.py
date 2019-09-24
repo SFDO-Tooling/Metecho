@@ -1,68 +1,32 @@
-from cumulusci.core.config import BaseGlobalConfig, BaseProjectConfig
-from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.salesforce_api.utils import get_simple_salesforce_connection
+import simple_salesforce
+from cumulusci.core.config import BaseGlobalConfig
+from django.conf import settings
 
-from .github_context import extract_owner_and_repo, local_github_checkout
 from .sf_run_flow import refresh_access_token
 
-# class DbBaseProjectConfig(BaseProjectConfig):
-#     pass
 
-
-# class DbBaseCumulusCI(BaseCumulusCI):
-#     project_config_class = DbBaseProjectConfig
-
-
-def get_salesforce_connection(
-    *,
-    repo_url,
-    repo_owner,
-    repo_name,
-    repo_branch,
-    user,
-    # project_path,
-    config,
-    login_url,
-    base_url="",
-):
+def get_salesforce_connection(*, config, login_url, base_url=""):
     org_name = "dev"
-
-    cci = BaseCumulusCI(
-        repo_info={
-            # "root": project_path,
-            "url": repo_url,
-            "name": repo_name,
-            "owner": repo_owner,
-            "commit": repo_branch,
-        },
-        config=config,
-    )
     org_config = refresh_access_token(
         config=config, org_name=org_name, login_url=login_url
     )
 
-    conn = get_simple_salesforce_connection(
-        cci.project_config, org_config, api_version=None
+    conn = simple_salesforce.Salesforce(
+        instance_url=org_config.instance_url,
+        session_id=org_config.access_token,
+        version=BaseGlobalConfig().project__package__api_version,
+    )
+    conn.headers.setdefault(
+        "Sforce-Call-Options", "client={}".format(settings.SF_CLIENT_ID)
     )
     conn.base_url += base_url
 
     return conn
 
 
-def get_latest_revision_numbers(*, scratch_org, user):
-    repo_url = scratch_org.task.project.repository.repo_url
-    repo_owner, repo_name = extract_owner_and_repo(repo_url)
-    # with local_github_checkout(user, repo_url) as project_path:
+def get_latest_revision_numbers(scratch_org):
     conn = get_salesforce_connection(
-        repo_url=repo_url,
-        repo_owner=repo_owner,
-        repo_name=repo_name,
-        repo_branch=scratch_org.task.branch_name,
-        user=user,
-        # project_path=project_path,
-        config=scratch_org.config,
-        login_url=scratch_org.login_url,
-        base_url="tooling/",
+        config=scratch_org.config, login_url=scratch_org.login_url, base_url="tooling/"
     )
 
     # Store the results here on the org, and if any of these are > number than earlier
@@ -73,11 +37,12 @@ def get_latest_revision_numbers(*, scratch_org, user):
         "WHERE IsNameObsolete=false"
     ).get("records", [])
 
-    records = {record["MemberName"]: record["RevisionNum"] for record in records}
+    records = {
+        f"{record['MemberType']}:{record['MemberName']}": record["RevisionNum"]
+        for record in records
+    }
 
     return records
-
-    # To get the actual changes, we need to use
 
 
 def compare_revisions(old_revision, new_revision):

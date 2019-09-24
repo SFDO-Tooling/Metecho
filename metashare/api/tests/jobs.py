@@ -135,14 +135,24 @@ def test_create_org_and_run_flow():
 
 @pytest.mark.django_db
 def test_check_if_changes_on_org(scratch_org_factory):
-    scratch_org = scratch_org_factory()
+    scratch_org = scratch_org_factory(latest_revision_numbers={"TypeOne:NameOne": 10})
 
-    with patch(f"{PATCH_ROOT}.sf_org_changes") as sf_org_changes:
-        sf_org_changes.sf_org_has_changes.return_value = True
+    with patch(
+        f"{PATCH_ROOT}.sf_org_changes.get_latest_revision_numbers"
+    ) as get_latest_revision_numbers:
+        get_latest_revision_numbers.return_value = {
+            "TypeOne:NameOne": 13,
+            "TypeTwo:NameTwo": 10,
+        }
 
         check_if_changes_on_org(scratch_org=scratch_org, user=MagicMock())
+        scratch_org.refresh_from_db()
 
         assert scratch_org.has_changes
+        assert scratch_org.latest_revision_numbers == {
+            "TypeOne:NameOne": 13,
+            "TypeTwo:NameTwo": 10,
+        }
 
 
 @pytest.mark.django_db
