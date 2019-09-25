@@ -77,7 +77,7 @@ def jwt_session(client_id, private_key, username, url=None, is_sandbox=False):
         response.raise_for_status()
     except Exception as err:
         # We need to add a detailed error message on to the exception:
-        raise err.__class__(f"{err.args[0]}: {response.content.decode('utf-8')}")
+        raise err.__class__(f"{err.args[0]}: {response.text}")
     return response.json()
 
 
