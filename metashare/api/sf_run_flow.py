@@ -73,7 +73,11 @@ def jwt_session(client_id, private_key, username, url=None, is_sandbox=False):
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     auth_url = urljoin(url, "services/oauth2/token")
     response = requests.post(url=auth_url, data=data, headers=headers)
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except Exception as err:
+        # We need to add a detailed error message on to the exception:
+        raise err.__class__(f"{err.args[0]}: {response.content.decode('utf-8')}")
     return response.json()
 
 
