@@ -36,6 +36,9 @@ def mark_refreshing_changes(scratch_org):
     scratch_org.save()
     try:
         yield
+    except Exception:
+        scratch_org.has_changes = False
+        raise
     finally:
         scratch_org.currently_refreshing_changes = False
         scratch_org.save()
@@ -56,27 +59,12 @@ def report_errors_on_provision(scratch_org):
 
 
 @contextlib.contextmanager
-def report_errors_on_check_changes(scratch_org):
+def report_errors_on_fetch_changes(scratch_org):
     try:
         yield
     except Exception as e:
         async_to_sync(report_scratch_org_error)(
             scratch_org, str(e), "SCRATCH_ORG_FETCH_CHANGES_FAILED"
-        )
-        tb = traceback.format_exc()
-        logger.error(tb)
-        raise
-
-
-@contextlib.contextmanager
-def report_errors_on_delete(scratch_org):
-    try:
-        yield
-    except Exception as e:
-        scratch_org.delete_queued_at = None
-        scratch_org.save()
-        async_to_sync(report_scratch_org_error)(
-            scratch_org, str(e), "SCRATCH_ORG_DELETE_FAILED"
         )
         tb = traceback.format_exc()
         logger.error(tb)
@@ -205,8 +193,11 @@ create_branches_on_github_then_create_scratch_org_job = job(
 )
 
 
-def check_if_changes_on_org(*, scratch_org, user):
-    with report_errors_on_check_changes(scratch_org):
+def check_if_changes_on_org(scratch_org):
+    with contextlib.ExitStack() as stack:
+        stack.enter_context(report_errors_on_fetch_changes(scratch_org))
+        stack.enter_context(mark_refreshing_changes(scratch_org))
+
         old_revision_numbers = scratch_org.latest_revision_numbers
         new_revision_numbers = sf_org_changes.get_latest_revision_numbers(scratch_org)
         scratch_org.has_changes = sf_org_changes.compare_revisions(
@@ -222,9 +213,18 @@ check_if_changes_on_org_job = job(check_if_changes_on_org)
 
 
 def delete_scratch_org(scratch_org):
-    with report_errors_on_delete(scratch_org):
+    try:
         sf_run_flow.delete_scratch_org(scratch_org)
         scratch_org.delete()
+    except Exception as e:
+        scratch_org.delete_queued_at = None
+        scratch_org.save()
+        async_to_sync(report_scratch_org_error)(
+            scratch_org, str(e), "SCRATCH_ORG_DELETE_FAILED"
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
 
 
 delete_scratch_org_job = job(delete_scratch_org)
