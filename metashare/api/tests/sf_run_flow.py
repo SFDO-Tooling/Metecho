@@ -8,6 +8,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from requests.exceptions import HTTPError
 
 from ..sf_run_flow import (
     capitalize,
@@ -38,6 +39,22 @@ def test_jwt_session():
 
         jwt_session(MagicMock(), MagicMock(), MagicMock(), url=None, is_sandbox=False)
         assert requests.post.called
+
+
+def test_jwt_session__exception():
+    with ExitStack() as stack:
+        requests = stack.enter_context(patch(f"{PATCH_ROOT}.requests"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.pyjwt"))
+
+        response = MagicMock()
+        requests.post.return_value = response
+        response.content = b"Detailed message"
+        response.raise_for_status.side_effect = HTTPError("Error")
+
+        with pytest.raises(HTTPError):
+            jwt_session(
+                MagicMock(), MagicMock(), MagicMock(), url=None, is_sandbox=False
+            )
 
 
 def test_refresh_access_token():
