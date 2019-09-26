@@ -27,10 +27,6 @@ def boolish(val: str) -> bool:
     return val in BOOLS
 
 
-def github_oauth_scopes(val: str) -> List[str]:
-    return [s.strip for s in val.split(",")]
-
-
 def ipv4_networks(val: str) -> List[IPv4Network]:
     return [IPv4Network(s.strip()) for s in val.split(",")]
 
@@ -298,14 +294,20 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
+# If GITHUB_OAUTH_PRIVATE_REPO env var is True, oauth scope should include 
+# private repositories. Otherwise, the scope will only be for public repos.
+GITHUB_OAUTH_PRIVATE_REPO = env(
+    "GITHUB_OAUTH_PRIVATE_REPO",
+    default=False,
+    type_=boolish
+)
+GITHUB_OAUTH_SCOPES = ["read:user","user:email"]
+GITHUB_OAUTH_SCOPES.append(
+    "public_repo" if not GITHUB_OAUTH_PRIVATE_REPO else "repo"
+)
+
 SOCIALACCOUNT_PROVIDERS = {
-    "github": {
-        "SCOPE": env(
-            "GITHUB_OAUTH_SCOPES",
-            default="read:user,user:email,public_repo",
-            type_=github_oauth_scopes,
-        )
-    },
+    "github": {"SCOPE": GITHUB_OAUTH_SCOPES},
     "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
     "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
 }
