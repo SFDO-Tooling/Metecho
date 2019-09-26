@@ -294,17 +294,13 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
-# If GITHUB_OAUTH_PRIVATE_REPO env var is True, oauth scope should include 
+# If GITHUB_OAUTH_PRIVATE_REPO env var is True, oauth scope should include
 # private repositories. Otherwise, the scope will only be for public repos.
 GITHUB_OAUTH_PRIVATE_REPO = env(
-    "GITHUB_OAUTH_PRIVATE_REPO",
-    default=False,
-    type_=boolish
+    "GITHUB_OAUTH_PRIVATE_REPO", default=False, type_=boolish
 )
-GITHUB_OAUTH_SCOPES = ["read:user","user:email"]
-GITHUB_OAUTH_SCOPES.append(
-    "public_repo" if not GITHUB_OAUTH_PRIVATE_REPO else "repo"
-)
+GITHUB_OAUTH_SCOPES = ["read:user", "user:email"]
+GITHUB_OAUTH_SCOPES.append("repo" if GITHUB_OAUTH_PRIVATE_REPO else "public_repo")
 
 SOCIALACCOUNT_PROVIDERS = {
     "github": {"SCOPE": GITHUB_OAUTH_SCOPES},
