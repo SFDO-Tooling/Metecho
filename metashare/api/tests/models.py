@@ -45,6 +45,18 @@ class TestTask:
 
 @pytest.mark.django_db
 class TestUser:
+    def test_refresh_repositories(self, user_factory):
+        user = user_factory()
+        with ExitStack() as stack:
+            gh = stack.enter_context(patch("metashare.api.models.gh"))
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            gh.get_all_org_repos.return_value = []
+            user.refresh_repositories()
+
+            assert async_to_sync.called
+
     def test_org_name(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
@@ -315,6 +327,7 @@ class TestGitHubRepository:
 @pytest.mark.django_db
 def test_login_handler(user_factory):
     user = user_factory()
-    with patch("metashare.api.models.gh") as gh:
+    patch_path = "metashare.api.jobs.refresh_github_repositories_for_user_job"
+    with patch(patch_path) as refresh_job:
         user_logged_in_handler(None, user=user)
-        gh.get_all_org_repos.assert_called_with(user)
+        refresh_job.delay.assert_called_with(user)

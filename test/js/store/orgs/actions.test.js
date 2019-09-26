@@ -22,7 +22,7 @@ describe('provisionOrg', () => {
         org_type: 'Dev',
         task: 'task-id',
       };
-      const orgAction = { type: 'SCRATCH_ORG_PROVISIONED', payload: org };
+      const orgAction = { type: 'SCRATCH_ORG_PROVISION', payload: org };
       store.dispatch(actions.provisionOrg(org));
       const allActions = store.getActions();
 
@@ -43,7 +43,7 @@ describe('provisionOrg', () => {
         org_type: 'Dev',
         task: 'task-id',
       };
-      const orgAction = { type: 'SCRATCH_ORG_PROVISIONED', payload: org };
+      const orgAction = { type: 'SCRATCH_ORG_PROVISION', payload: org };
       store.dispatch(actions.provisionOrg(org));
       const allActions = store.getActions();
 
@@ -219,9 +219,9 @@ describe('refetchOrg', () => {
 });
 
 describe('updateOrg', () => {
-  test('returns SCRATCH_ORG_UPDATED action', () => {
+  test('returns SCRATCH_ORG_UPDATE action', () => {
     const org = { id: 'org-id' };
-    const expected = { type: 'SCRATCH_ORG_UPDATED', payload: org };
+    const expected = { type: 'SCRATCH_ORG_UPDATE', payload: org };
 
     expect(actions.updateOrg(org)).toEqual(expected);
   });
@@ -239,7 +239,7 @@ describe('deleteOrg', () => {
   test('unsubscribes from socket and returns action', () => {
     const store = storeWithThunk({});
     const org = { id: 'org-id' };
-    const action = { type: 'SCRATCH_ORG_DELETED', payload: org };
+    const action = { type: 'SCRATCH_ORG_DELETE', payload: org };
     store.dispatch(actions.deleteOrg(org));
 
     expect(store.getActions()).toEqual([action]);
@@ -266,7 +266,7 @@ describe('deleteOrg', () => {
         org_type: 'Dev',
         task: 'task-id',
       };
-      const orgAction = { type: 'SCRATCH_ORG_DELETED', payload: org };
+      const orgAction = { type: 'SCRATCH_ORG_DELETE', payload: org };
       store.dispatch(actions.deleteOrg(org));
       const allActions = store.getActions();
 

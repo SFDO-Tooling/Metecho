@@ -5,44 +5,10 @@ from django.core.exceptions import ValidationError
 
 from ..gh import (
     NoGitHubTokenError,
-    create_branch,
     get_all_org_repos,
     normalize_github_url,
     validate_gh_url,
 )
-
-
-@pytest.mark.django_db
-class TestCreateBranch:
-    def test_debug(self, settings, user_factory):
-        settings.DEBUG = True
-        user = user_factory()
-        repo_url = "https://www.github.com/test/repo"
-        branch_name = "test-branch"
-        with patch("metashare.api.gh.login") as login:
-            repo = MagicMock()
-            gh = MagicMock()
-            gh.repository.return_value = repo
-            login.return_value = gh
-
-            create_branch(user, repo_url, branch_name)
-
-            assert not repo.create_branch_ref.called
-
-    def test_no_debug(self, settings, user_factory):
-        settings.DEBUG = False
-        user = user_factory()
-        repo_url = "https://www.github.com/test/repo"
-        branch_name = "test-branch"
-        with patch("metashare.api.gh.login") as login:
-            repo = MagicMock()
-            gh = MagicMock()
-            gh.repository.return_value = repo
-            login.return_value = gh
-
-            create_branch(user, repo_url, branch_name)
-
-            assert repo.create_branch_ref.called
 
 
 @pytest.mark.django_db

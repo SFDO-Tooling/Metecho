@@ -2,7 +2,6 @@
 GitHub utilities
 """
 
-from django.conf import settings
 from django.core.exceptions import (
     MultipleObjectsReturned,
     ObjectDoesNotExist,
@@ -26,33 +25,10 @@ def gh_given_user(user):
     return login(token=token)
 
 
-def parse_repo_url(repo_url):
-    return URL(repo_url).path().split("/")[1:]
-
-
-# NOTE: not currently used, will be used once we work on stories to make
-# tasks with scratch orgs.
-def create_branch(user, repo, branch_name):
-    gh = gh_given_user(user)
-    owner, repo = parse_repo_url(repo)
-    repo = gh.repository(owner, repo)
-    sha = repo.branch(repo.default_branch).commit.sha
-    if settings.DEBUG:
-        return None
-    else:  # pragma: nocover (hand-tested)
-        return repo.create_branch_ref(branch_name, sha)
-
-
 def get_all_org_repos(user):
     gh = gh_given_user(user)
     repos = set(
         [
-            normalize_github_url(repo.url)
-            for org in gh.organizations()
-            for repo in org.repositories()
-            if repo.permissions.get("push", False)
-        ]
-        + [
             normalize_github_url(repo.url)
             for repo in gh.repositories()
             if repo.permissions.get("push", False)
