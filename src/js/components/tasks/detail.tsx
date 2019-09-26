@@ -34,11 +34,15 @@ import { selectUserState } from '@/store/user/selectors';
 import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
+import SubmitModal from './submit';
+
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
+  const [readyForReview, setReadyForReview] = useState(true);
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -87,6 +91,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   const openInfoModal = () => {
     setConnectModalOpen(false);
     setInfoModalOpen(true);
+  };
+  const openSubmitModal = () => {
+    console.log('open');
   };
 
   let action = openConnectModal;
@@ -179,7 +186,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
 
   const committing = Boolean(orgs && orgs.committing);
-  let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
+  let buttonText: string | React.ReactNode = readyForReview
+    ? i18n.t('Submit Task for Review')
+    : i18n.t('Capture Task Changes');
   if (fetchingChanges) {
     buttonText = (
       <LabelWithSpinner
@@ -229,6 +238,16 @@ const TaskDetail = (props: RouteComponentProps) => {
           />
         ) : null}
 
+        {readyForReview ? (
+          <Button
+            label={buttonText}
+            className="slds-size_full slds-m-bottom_x-large"
+            variant="brand"
+            onClick={() => setSubmitModalOpen(true)}
+            disabled={fetchingChanges || committing}
+          />
+        ) : null}
+
         {orgs ? (
           <OrgCards orgs={orgs} task={task} project={project} />
         ) : (
@@ -257,6 +276,10 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setCaptureModalOpen}
           />
         )}
+        <SubmitModal
+          isOpen={submitModalOpen}
+          toggleModal={setSubmitModalOpen}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );
