@@ -1,8 +1,8 @@
 import { ThunkResult } from '@/store';
+import { submitTask } from '@/store/tasks/actions';
 // import { commitSucceeded } from '@/store/orgs/actions';
 import apiFetch, { addUrlParams } from '@/utils/api';
-// import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
-import { ObjectTypes } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 interface CreateObjectPayload {
   objectType: ObjectTypes;
@@ -216,6 +216,10 @@ export const createObject = ({
     type: 'CREATE_OBJECT_STARTED',
     payload: { objectType, url, data },
   });
+  // @@@ Mock success call
+  if (objectType === OBJECT_TYPES.PULL_REQUEST) {
+    return dispatch(submitTask(data));
+  }
   try {
     // @@@ Mock out until API exists
     // let object: any;

@@ -5,23 +5,20 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { useForm } from '@/components/utils';
+import { LabelWithSpinner, useForm } from '@/components/utils';
 import { OBJECT_TYPES } from '@/utils/constants';
 
-const SubmitModal = ({ isOpen, toggleModal }) => {
-  const handleTaskSubmit = () => {
-    console.log('submit');
-  };
-  const handleClose = () => {
-    toggleModal(false);
-  };
-  const handleCancel = () => {
-    toggleModal(false);
-  };
-  const onSuccess = () => {
-    console.log('success!');
-  };
+interface Props {
+  isOpen: boolean;
+  toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const SubmitModal = ({ isOpen, toggleModal }: Props) => {
+  const [submittingReview, setSubmittingReview] = useState(false);
 
+  const handleSuccess = () => {
+    setSubmittingReview(false);
+    toggleModal(false);
+  };
   const {
     inputs,
     errors,
@@ -35,34 +32,56 @@ const SubmitModal = ({ isOpen, toggleModal }) => {
       issuesClosed: '',
       devNotes: '',
     },
-    objectType: 'COMMIT', //@@@ todo
-    onSuccess,
+    objectType: OBJECT_TYPES.PULL_REQUEST, //@@@ todo for now
+    onSuccess: handleSuccess,
   });
-
-  const submitClicked = (e: React.FormEvent<HTMLFormElement>) => {
-    handleSubmit(e);
+  const handleCancel = () => {
+    resetForm();
+    toggleModal(false);
   };
+  const submitTask = (e: React.FormEvent<HTMLFormElement>) => {
+    setSubmittingReview(true);
+    setTimeout(() => {
+      handleSubmit(e);
+    }, 1500);
+  };
+  const handleClose = () => {
+    resetForm();
+    toggleModal(false);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
       heading={i18n.t('Submit this task for review')}
+      size="medium"
+      disableClose={submittingReview}
       footer={[
         <Button
           key="back"
           label={i18n.t('Cancel Submit')}
           onClick={handleCancel}
+          disbaled={submittingReview}
         />,
         <Button
           key="submit"
-          label={i18n.t('Submit Task for Review')}
+          label={
+            submittingReview ? (
+              <LabelWithSpinner
+                label={i18n.t('Submitting Task…')}
+                variant="inverse"
+              />
+            ) : (
+              i18n.t('Submit Task for Review')
+            )
+          }
           variant="brand"
-          onClick={submitClicked}
+          onClick={submitTask}
         />,
       ]}
       onRequestClose={handleClose}
-      size="medium"
     >
-      <form className="slds-p-around_large" onSubmit={handleTaskSubmit}>
+      <form className="slds-p-around_large" onSubmit={submitTask}>
         <div className="slds-grid slds-wrap slds-gutters">
           <div className="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_8-of-12">
             <p className="slds-m-bottom_medium">
