@@ -46,7 +46,8 @@ def get_latest_revision_numbers(scratch_org):
 
 
 def compare_revisions(old_revision, new_revision):
-    for key in new_revision.keys():
-        if new_revision[key] > old_revision.get(key, -1):
-            return True
-    return False
+    return [
+        key
+        for key in new_revision.keys()
+        if new_revision[key] > old_revision.get(key, -1)
+    ]

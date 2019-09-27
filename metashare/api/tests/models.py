@@ -7,8 +7,6 @@ from sfdo_template_helpers.crypto import fernet_decrypt
 
 from ..models import Project, Repository, Task, user_logged_in_handler
 
-# from ..models import ScratchOrg
-
 
 @pytest.mark.django_db
 class TestRepository:
@@ -316,14 +314,14 @@ class TestScratchOrg:
 
             assert async_to_sync.called
 
-    def test_check_if_has_changes(self, scratch_org_factory):
+    def test_get_unsaved_changes(self, scratch_org_factory):
         with patch(
-            "metashare.api.jobs.check_if_changes_on_org_job"
-        ) as check_if_changes_on_org_job:
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
             scratch_org = scratch_org_factory()
-            scratch_org.check_if_has_changes()
+            scratch_org.get_unsaved_changes()
 
-            assert check_if_changes_on_org_job.delay.called
+            assert get_unsaved_changes_job.delay.called
 
 
 @pytest.mark.django_db

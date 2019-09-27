@@ -155,7 +155,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "latest_commit_url",
             "latest_commit_at",
             "url",
-            "has_changes",
+            "unsaved_changes",
             "currently_refreshing_changes",
             "delete_queued_at",
         )
@@ -166,7 +166,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "latest_commit_url": {"read_only": True},
             "latest_commit_at": {"read_only": True},
             "url": {"read_only": True},
-            "has_changes": {"read_only": True},
+            "unsaved_changes": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
         }
 

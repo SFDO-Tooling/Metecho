@@ -37,7 +37,7 @@ def mark_refreshing_changes(scratch_org):
     try:
         yield
     except Exception:
-        scratch_org.has_changes = False
+        scratch_org.unsaved_changes = []
         raise
     finally:
         scratch_org.currently_refreshing_changes = False
@@ -193,23 +193,23 @@ create_branches_on_github_then_create_scratch_org_job = job(
 )
 
 
-def check_if_changes_on_org(scratch_org):
+def get_unsaved_changes(scratch_org):
     with contextlib.ExitStack() as stack:
         stack.enter_context(report_errors_on_fetch_changes(scratch_org))
         stack.enter_context(mark_refreshing_changes(scratch_org))
 
         old_revision_numbers = scratch_org.latest_revision_numbers
         new_revision_numbers = sf_org_changes.get_latest_revision_numbers(scratch_org)
-        scratch_org.has_changes = sf_org_changes.compare_revisions(
+        unsaved_changes = sf_org_changes.compare_revisions(
             old_revision_numbers, new_revision_numbers
         )
-        if scratch_org.has_changes:
+        if unsaved_changes:
             scratch_org.latest_revision_numbers = new_revision_numbers
-            scratch_org.has_changes = True
+            scratch_org.unsaved_changes = unsaved_changes
             scratch_org.save()
 
 
-check_if_changes_on_org_job = job(check_if_changes_on_org)
+get_unsaved_changes_job = job(get_unsaved_changes)
 
 
 def delete_scratch_org(scratch_org):
