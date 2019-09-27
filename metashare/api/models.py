@@ -293,7 +293,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     latest_commit_url = models.URLField(blank=True)
     latest_commit_at = models.DateTimeField(null=True, blank=True)
     url = models.URLField(null=True, blank=True)
-    has_changes = models.BooleanField(default=False)
+    unsaved_changes = JSONField(default=list, encoder=DjangoJSONEncoder)
     latest_revision_numbers = JSONField(default=dict, encoder=DjangoJSONEncoder)
     currently_refreshing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder)
@@ -335,10 +335,10 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self.notify_deleted()
         super().delete(*args, **kwargs)
 
-    def check_if_has_changes(self):
-        from .jobs import check_if_changes_on_org_job
+    def get_unsaved_changes(self):
+        from .jobs import get_unsaved_changes_job
 
-        check_if_changes_on_org_job.delay(self)
+        get_unsaved_changes_job.delay(self)
 
     def create_remote_resources(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job

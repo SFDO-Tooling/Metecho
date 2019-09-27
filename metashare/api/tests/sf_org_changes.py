@@ -1,9 +1,62 @@
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
-from ..sf_org_changes import compare_revisions, get_latest_revision_numbers
+import pytest
+
+from ..sf_org_changes import (
+    build_package_xml,
+    commit_changes_to_github,
+    compare_revisions,
+    get_latest_revision_numbers,
+    run_retrieve_task,
+)
 
 PATCH_ROOT = "metashare.api.sf_org_changes"
+
+
+def test_build_package_xml():
+    with patch(f"{PATCH_ROOT}.open") as open_mock:
+        scratch_org = MagicMock(unsaved_changes=["test:value"])
+        build_package_xml(scratch_org, "package_xml_path")
+
+        assert open_mock.called
+
+
+@pytest.mark.django_db
+def test_run_retrieve_task(user_factory, scratch_org_factory):
+    user = user_factory()
+    scratch_org = scratch_org_factory()
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.build_package_xml"))
+        RetrieveUnpackaged = stack.enter_context(
+            patch(f"{PATCH_ROOT}.RetrieveUnpackaged")
+        )
+
+        run_retrieve_task(user, scratch_org, ".")
+
+        assert RetrieveUnpackaged.called
+
+
+@pytest.mark.django_db
+def test_commit_changes_to_github(user_factory, scratch_org_factory):
+    user = user_factory()
+    scratch_org = scratch_org_factory()
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.run_retrieve_task"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        CommitDir = stack.enter_context(patch(f"{PATCH_ROOT}.CommitDir"))
+
+        commit_changes_to_github(
+            user=user,
+            scratch_org=scratch_org,
+            repo_url="https://github.com/user/repo",
+            branch="test-branch",
+        )
+
+        assert CommitDir.called
 
 
 def test_get_latest_revision_numbers():

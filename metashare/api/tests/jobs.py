@@ -5,11 +5,12 @@ import pytest
 from github3.exceptions import UnprocessableEntity
 
 from ..jobs import (
-    check_if_changes_on_org,
+    commit_changes_from_org,
     create_branches_on_github,
     create_branches_on_github_then_create_scratch_org,
     create_org_and_run_flow,
     delete_scratch_org,
+    get_unsaved_changes,
     mark_refreshing_changes,
     refresh_github_repositories_for_user,
     report_errors_on_fetch_changes,
@@ -133,7 +134,7 @@ def test_create_org_and_run_flow():
 
 
 @pytest.mark.django_db
-def test_check_if_changes_on_org(scratch_org_factory):
+def test_get_unsaved_changes(scratch_org_factory):
     scratch_org = scratch_org_factory(latest_revision_numbers={"TypeOne:NameOne": 10})
 
     with patch(
@@ -144,10 +145,10 @@ def test_check_if_changes_on_org(scratch_org_factory):
             "TypeTwo:NameTwo": 10,
         }
 
-        check_if_changes_on_org(scratch_org=scratch_org)
+        get_unsaved_changes(scratch_org=scratch_org)
         scratch_org.refresh_from_db()
 
-        assert scratch_org.has_changes
+        assert scratch_org.unsaved_changes
         assert scratch_org.latest_revision_numbers == {
             "TypeOne:NameOne": 13,
             "TypeTwo:NameTwo": 10,
@@ -224,7 +225,7 @@ def test_mark_refreshing_changes__exception(scratch_org_factory):
             raise ValueError
 
     scratch_org.refresh_from_db()
-    assert not scratch_org.has_changes
+    assert not scratch_org.unsaved_changes
     assert not scratch_org.currently_refreshing_changes
 
 
@@ -253,3 +254,15 @@ def test_refresh_github_repositories_for_user(user_factory):
     user = MagicMock()
     refresh_github_repositories_for_user(user)
     assert user.refresh_repositories.called
+
+
+@pytest.mark.django_db
+def test_commit_changes_from_org(scratch_org_factory, user_factory):
+    scratch_org = scratch_org_factory()
+    user = user_factory()
+    with patch(
+        f"{PATCH_ROOT}.sf_org_changes.commit_changes_to_github"
+    ) as commit_changes_to_github:
+        commit_changes_from_org(scratch_org, user)
+
+        assert commit_changes_to_github.called

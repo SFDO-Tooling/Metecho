@@ -1,8 +1,66 @@
+import os.path
+from collections import defaultdict
+
 import simple_salesforce
-from cumulusci.core.config import BaseGlobalConfig
+from cumulusci.core.config import BaseGlobalConfig, TaskConfig
+from cumulusci.core.runtime import BaseCumulusCI
+from cumulusci.tasks.github.util import CommitDir
+from cumulusci.tasks.metadata.package import PackageXmlGenerator
+from cumulusci.tasks.salesforce.RetrieveUnpackaged import RetrieveUnpackaged
+from cumulusci.tasks.salesforce.sourcetracking import MetadataType
 from django.conf import settings
 
+from .github_context import extract_owner_and_repo, get_repo_info, local_github_checkout
 from .sf_run_flow import refresh_access_token
+
+
+def build_package_xml(scratch_org, package_xml_path):
+    types_dict = defaultdict(list)
+    for key in scratch_org.unsaved_changes:
+        type_, name = key.split(":")
+        types_dict[type_].append(name)
+
+    types = [MetadataType(name, members) for (name, members) in types_dict.items()]
+
+    api_version = BaseGlobalConfig().project__package__api_version
+    package_xml = PackageXmlGenerator(".", api_version, types=types)()
+    with open(package_xml_path, "w") as f:
+        f.write(package_xml)
+
+
+def run_retrieve_task(user, scratch_org, project_path):
+    repo_url = scratch_org.task.project.repository.repo_url
+    org_config = refresh_access_token(
+        config=scratch_org.config, org_name="dev", login_url=scratch_org.login_url
+    )
+    repo_name, repo_owner = extract_owner_and_repo(repo_url)
+    repo_branch = "master"
+    cci = BaseCumulusCI(
+        repo_info={
+            "root": project_path,
+            "url": repo_url,
+            "name": repo_name,
+            "owner": repo_owner,
+            "commit": repo_branch,
+        }
+    )
+    package_xml_path = os.path.join(project_path, "src", "package.xml")
+    build_package_xml(scratch_org, package_xml_path)
+    task_config = TaskConfig(
+        {"options": {"path": project_path, "package_xml": package_xml_path}}
+    )
+    task = RetrieveUnpackaged(cci.project_config, task_config, org_config)
+    task()
+
+
+def commit_changes_to_github(*, user, scratch_org, repo_url, branch):
+    with local_github_checkout(user, repo_url) as project_path:
+        # This won't return anything in-memory, but rather it will emit files which we
+        # then copy into a source checkout, and then commit and push all that.
+        run_retrieve_task(user, scratch_org, project_path)
+        repo = get_repo_info(user, repo_url)
+        author = {"name": user.username, "email": user.email}
+        CommitDir(repo, author=author)(project_path, branch, repo_dir="")
 
 
 def get_salesforce_connection(*, config, login_url, base_url=""):
@@ -46,7 +104,8 @@ def get_latest_revision_numbers(scratch_org):
 
 
 def compare_revisions(old_revision, new_revision):
-    for key in new_revision.keys():
-        if new_revision[key] > old_revision.get(key, -1):
-            return True
-    return False
+    return [
+        key
+        for key in new_revision.keys()
+        if new_revision[key] > old_revision.get(key, -1)
+    ]
