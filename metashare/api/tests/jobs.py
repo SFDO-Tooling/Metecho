@@ -5,6 +5,7 @@ import pytest
 from github3.exceptions import UnprocessableEntity
 
 from ..jobs import (
+    commit_changes_from_org,
     create_branches_on_github,
     create_branches_on_github_then_create_scratch_org,
     create_org_and_run_flow,
@@ -253,3 +254,15 @@ def test_refresh_github_repositories_for_user(user_factory):
     user = MagicMock()
     refresh_github_repositories_for_user(user)
     assert user.refresh_repositories.called
+
+
+@pytest.mark.django_db
+def test_commit_changes_from_org(scratch_org_factory, user_factory):
+    scratch_org = scratch_org_factory()
+    user = user_factory()
+    with patch(
+        f"{PATCH_ROOT}.sf_org_changes.commit_changes_to_github"
+    ) as commit_changes_to_github:
+        commit_changes_from_org(scratch_org, user)
+
+        assert commit_changes_to_github.called
