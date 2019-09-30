@@ -54,6 +54,9 @@ case "$1" in
     "add:py")
         dcrq pipenv install "${@:2}"
         ;;
+    "lock:py")
+        dcrq pipenv lock "${@:2}"
+        ;;
     "migrate")
         dcr python manage.py migrate "${@:2}"
         ;;

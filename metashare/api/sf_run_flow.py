@@ -52,6 +52,15 @@ def capitalize(s):
 
 # This is copied from cumulusci.oauth.salesforce but we need a fix.
 def jwt_session(client_id, private_key, username, url=None, is_sandbox=False):
+    """Complete the JWT Token Oauth flow to obtain an access token for an org.
+
+    :param client_id: Client Id for the connected app
+    :param private_key: Private key used to sign the connected app's certificate
+    :param username: Username to authenticate as
+    :param url: Base URL of the instance hosting the org
+    (e.g. https://na40.salesforce.com)
+    :param is_sandbox: True if the org is a sandbox or scratch org
+    """
     if url is None:
         url = "https://login.salesforce.com"
     aud = (
@@ -112,6 +121,13 @@ def get_devhub_api(*, devhub_username):
 
 
 def get_org_details(*, cci, org_name, project_path):
+    """Obtain details needed to create a scratch org.
+
+    Returns scratch_org_config
+    (from the project's cumulusci.yml)
+    and scratch_org_definition
+    (the sfdx *.org file with JSON specifying what kind of org to create)
+    """
     scratch_org_config = cci.keychain.get_org(org_name)
     scratch_org_definition_path = os.path.join(
         project_path, scratch_org_config.config_file
@@ -133,6 +149,8 @@ def get_org_result(
     cci,
     devhub_api,
 ):
+    """Create a new scratch org using the ScratchOrgInfo object in the Dev Hub org,
+    and get the result."""
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm
     response = devhub_api.ScratchOrgInfo.create(
@@ -162,6 +180,8 @@ def get_org_result(
 
 
 def mutate_scratch_org(*, scratch_org_config, org_result, email):
+    """Updates the org config for a new scratch org with details
+    from its ScratchOrgInfo"""
     scratch_org_config._scratch_info = {
         "instance_url": org_result["LoginUrl"],
         "org_id": org_result["ScratchOrg"],
@@ -180,11 +200,19 @@ def mutate_scratch_org(*, scratch_org_config, org_result, email):
 
 
 def get_login_url(org_result):
+    """Get the base login/auth URL for a new scratch org from its ScratchOrgInfo"""
     signup_instance = org_result["SignupInstance"]
     return f"https://{signup_instance}.salesforce.com"
 
 
 def get_access_token(*, login_url, org_result, scratch_org_config):
+    """Trades the AuthCode from a ScratchOrgInfo for an org access token,
+    and stores it in the org config.
+
+    The AuthCode is short-lived so this is only useful immediately after
+    the scratch org is created. This must be completed once in order for future
+    access tokens to be obtained using the JWT token flow.
+    """
     oauth = SalesforceOAuth2(SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, login_url)
     auth_result = oauth.get_token(org_result["AuthCode"]).json()
     scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
@@ -195,6 +223,9 @@ def get_access_token(*, login_url, org_result, scratch_org_config):
 def deploy_org_settings(
     *, cci, login_url, org_config, org_name, scratch_org_config, scratch_org_definition
 ):
+    """Do a Metadata API deployment to configure org settings
+    as specified in the scratch org definition file.
+    """
     settings = scratch_org_definition.get("settings", {})
     if settings:
         with temporary_dir() as path:
@@ -235,6 +266,7 @@ def deploy_org_settings(
 def create_org_and_run_flow(
     *, repo_owner, repo_name, repo_branch, user, flow_name, project_path
 ):
+    """Create a new scratch org and run a flow"""
     repo_url = f"https://github.com/{repo_owner}/{repo_name}"
     org_name = "dev"
     devhub_username = user.sf_username
@@ -297,6 +329,8 @@ def create_org_and_run_flow(
 
 
 def delete_scratch_org(scratch_org):
+    """Delete a scratch org by deleting its ActiveScratchOrg record
+    in the Dev Hub org."""
     devhub_username = scratch_org.owner.sf_username
     org_id = scratch_org.config["org_id"]
 
