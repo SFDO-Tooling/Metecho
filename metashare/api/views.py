@@ -1,12 +1,13 @@
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
-from .models import Project, Repository, ScratchOrg, Task
+from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
     FullUserSerializer,
@@ -96,6 +97,21 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
+
+    @action(detail=True, methods=["POST"])
+    def commit(self, request, pk=None):
+        from .jobs import commit_changes_from_org_job
+
+        bad_scratch_orgs = (ScratchOrg.DoesNotExist, ScratchOrg.MultipleObjectsReturned)
+        task = self.get_object()
+        try:
+            scratch_org = task.scratchorg_set.filter(
+                org_type=SCRATCH_ORG_TYPES.Dev
+            ).get()
+            commit_changes_from_org_job.delay(scratch_org, request.user)
+            return Response("", status=status.HTTP_202_ACCEPTED)
+        except bad_scratch_orgs:
+            return Response("", status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 class ScratchOrgViewSet(viewsets.ModelViewSet):

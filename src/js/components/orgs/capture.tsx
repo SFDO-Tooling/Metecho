@@ -214,7 +214,7 @@ const CaptureModal = ({
                 onTogglePanel={handleThisPanelToggle}
                 title={groupName}
                 summary={
-                  <div>
+                  <div className="form-grid">
                     <Checkbox
                       id={groupName}
                       labels={{ label: groupName }}
