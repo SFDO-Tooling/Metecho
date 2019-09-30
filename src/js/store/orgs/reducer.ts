@@ -21,7 +21,7 @@ export interface Org {
   latest_commit_url: string;
   latest_commit_at: string | null;
   url: string | null;
-  changes: Changeset | null;
+  unsaved_changes: Changeset | null;
   currently_refreshing_changes: boolean;
   delete_queued_at: string | null;
 }
@@ -43,12 +43,6 @@ export interface OrgsByTask {
 
 export interface OrgState {
   [key: string]: OrgsByTask;
-}
-
-export interface Commit {
-  id: string;
-  org: string;
-  task: string;
 }
 
 const defaultState = {};
@@ -107,7 +101,7 @@ const reducer = (
           return orgs;
         }
         case OBJECT_TYPES.COMMIT: {
-          const { object }: { object: Commit } = action.payload;
+          const { object }: { object: Org } = action.payload;
           if (object) {
             const taskOrgs = orgs[object.task] || {
               [ORG_TYPES.DEV]: null,
@@ -200,15 +194,15 @@ const reducer = (
       return orgs;
     }
     case 'COMMIT_FAILED':
-    case 'COMMIT_CREATE': {
-      const commit = action.payload;
-      const taskOrgs = orgs[commit.task] || {
+    case 'GITHUB_CHANGES_COMMITTED': {
+      const org = action.payload;
+      const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
         [ORG_TYPES.QA]: null,
       };
       return {
         ...orgs,
-        [commit.task]: {
+        [org.task]: {
           ...taskOrgs,
           committing: false,
         },

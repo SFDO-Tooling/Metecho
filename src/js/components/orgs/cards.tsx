@@ -385,7 +385,7 @@ const OrgCards = ({
 
     if (readyToDeleteOrg && devOrg) {
       setIsWaitingToDeleteDevOrg(false);
-      if (devOrg.changes) {
+      if (devOrg.unsaved_changes) {
         setConfirmDeleteModalOpen(devOrg.org_type);
       } else {
         deleteOrg(devOrg);

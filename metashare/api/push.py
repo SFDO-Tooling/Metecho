@@ -18,7 +18,7 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_FETCH_CHANGES_FAILED
         SCRATCH_ORG_DELETE
         SCRATCH_ORG_DELETE_FAILED
-        COMMIT_CREATE
+        GITHUB_CHANGES_COMMITTED
         COMMIT_FAILED
 """
 from channels.layers import get_channel_layer

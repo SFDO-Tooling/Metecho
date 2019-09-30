@@ -198,19 +198,22 @@ export const fetchObject = ({
 
 export const createObject = ({
   objectType,
+  url,
   data = {},
   hasForm = false,
   shouldSubscribeToObject = () => false,
 }: {
   objectType: ObjectTypes;
+  url?: string;
   data?: ObjectData;
   hasForm?: boolean;
   shouldSubscribeToObject?: (object: any) => boolean;
 }): ThunkResult => async dispatch => {
-  const urlFn = window.api_urls[`${objectType}_list`];
-  let url;
-  if (urlFn) {
-    url = urlFn();
+  if (!url) {
+    const urlFn = window.api_urls[`${objectType}_list`];
+    if (urlFn) {
+      url = urlFn();
+    }
   }
   dispatch({
     type: 'CREATE_OBJECT_STARTED',
@@ -222,7 +225,6 @@ export const createObject = ({
     // if (objectType === OBJECT_TYPES.COMMIT) {
     //   object = {
     //     id: 'commit-id',
-    //     org: data.org,
     //     task: data.task,
     //   };
     //   setTimeout(() => {

@@ -58,7 +58,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   let orgHasChanges, userIsOwner, devOrg: Org | null | undefined;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
-    orgHasChanges = Boolean(devOrg && devOrg.changes);
+    orgHasChanges = Boolean(devOrg && devOrg.unsaved_changes);
     userIsOwner = devOrg && devOrg.owner === user.id;
   }
 
@@ -70,7 +70,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     if (changesFetched && devOrg) {
       setFetchingChanges(false);
       /* istanbul ignore else */
-      if (devOrg.changes) {
+      if (devOrg.unsaved_changes) {
         setCaptureModalOpen(true);
       }
     }
@@ -248,11 +248,10 @@ const TaskDetail = (props: RouteComponentProps) => {
             'Please close this message and try capturing task changes again.',
           )}
         />
-        {devOrg && devOrg.changes && (
+        {devOrg && devOrg.unsaved_changes && (
           <CaptureModal
-            orgId={devOrg.id}
             taskId={devOrg.task}
-            changeset={devOrg.changes}
+            changeset={devOrg.unsaved_changes}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
           />

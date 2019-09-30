@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
-import { Commit, Org } from '@/store/orgs/reducer';
+import { Org } from '@/store/orgs/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
 import apiFetch from '@/utils/api';
@@ -36,8 +36,8 @@ interface OrgDeleteFailed {
   payload: Org;
 }
 interface CommitEvent {
-  type: 'COMMIT_CREATE' | 'COMMIT_FAILED';
-  payload: Commit;
+  type: 'GITHUB_CHANGES_COMMITTED' | 'COMMIT_FAILED';
+  payload: Org;
 }
 
 export type OrgsAction =
@@ -162,7 +162,7 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
     //     type: 'SCRATCH_ORG_UPDATE',
     //     payload: {
     //       ...response,
-    //       changes: {
+    //       unsaved_changes: {
     //         ApexClasses: [
     //           { id: '0', name: 'Class 1' },
     //           { id: '1', name: 'Class 2' },
@@ -308,17 +308,10 @@ export const deleteFailed = ({
   });
 };
 
-export const commitSucceeded = (payload: Commit): ThunkResult => (
+export const commitSucceeded = (payload: Org): ThunkResult => (
   dispatch,
   getState,
 ) => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.COMMIT,
-      id: payload.id,
-    });
-  }
   const task = selectTaskById(getState(), payload.task);
   dispatch(
     addToast({
@@ -330,7 +323,7 @@ export const commitSucceeded = (payload: Commit): ThunkResult => (
     }),
   );
   return dispatch({
-    type: 'COMMIT_CREATE',
+    type: 'GITHUB_CHANGES_COMMITTED',
     payload,
   });
 };
@@ -339,16 +332,9 @@ export const commitFailed = ({
   model,
   message,
 }: {
-  model: Commit;
+  model: Org;
   message?: string;
 }): ThunkResult => (dispatch, getState) => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.COMMIT,
-      id: model.id,
-    });
-  }
   const task = selectTaskById(getState(), model.task);
   dispatch(
     addToast({

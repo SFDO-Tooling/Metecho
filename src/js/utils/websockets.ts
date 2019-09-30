@@ -12,7 +12,7 @@ import {
   updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
-import { Commit, Org } from '@/store/orgs/reducer';
+import { Org } from '@/store/orgs/reducer';
 import { updateProject } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
@@ -91,14 +91,14 @@ interface OrgDeleteFailedEvent {
   };
 }
 interface CommitSucceededEvent {
-  type: 'COMMIT_CREATE';
-  payload: Commit;
+  type: 'GITHUB_CHANGES_COMMITTED';
+  payload: Org;
 }
 interface CommitFailedEvent {
   type: 'COMMIT_FAILED';
   payload: {
     message?: string;
-    model: Commit;
+    model: Org;
   };
 }
 type ModelEvent =
@@ -142,7 +142,7 @@ export const getAction = (event: EventType) => {
       return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
-    case 'COMMIT_CREATE':
+    case 'GITHUB_CHANGES_COMMITTED':
       return commitSucceeded(event.payload);
     case 'COMMIT_FAILED':
       return commitFailed(event.payload);

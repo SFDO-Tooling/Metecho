@@ -73,7 +73,7 @@ describe('getAction', () => {
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['SCRATCH_ORG_UPDATE', 'updateOrg'],
     ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed'],
-    ['COMMIT_CREATE', 'commitSucceeded'],
+    ['GITHUB_CHANGES_COMMITTED', 'commitSucceeded'],
     ['COMMIT_FAILED', 'commitFailed'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };

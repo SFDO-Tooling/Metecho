@@ -71,18 +71,10 @@ describe('<CaptureModal/>', () => {
 
       expect(getByText('Capturing Selected Changes…')).toBeVisible();
       expect(createObject).toHaveBeenCalledTimes(1);
-
-      const args = createObject.mock.calls[0][0];
-
-      expect(args.shouldSubscribeToObject()).toBe(true);
-
-      Reflect.deleteProperty(args, 'shouldSubscribeToObject');
-
-      expect(args).toEqual({
+      expect(createObject).toHaveBeenCalledWith({
         objectType: 'scratch_org_commit',
+        url: window.api_urls.task_detail('task-id'),
         data: {
-          org: 'org-id',
-          task: 'task-id',
           message: 'My Commit',
           changes: ['foo-1', 'buz-1', 'buz-2'],
         },

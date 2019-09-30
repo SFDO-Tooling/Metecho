@@ -393,7 +393,7 @@ describe('reducer', () => {
     });
   });
 
-  describe('COMMIT_FAILED/COMMIT_CREATE', () => {
+  describe('COMMIT_FAILED/GITHUB_CHANGES_COMMITTED', () => {
     test('sets committing: false', () => {
       const commit = {
         id: 'commit-id',

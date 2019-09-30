@@ -139,11 +139,7 @@ def create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project
     gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
-    branch = repository.branch(repo_branch)
-    commit = branch.commit
-    latest_commit = commit.sha
-    latest_commit_url = commit.html_url
-    latest_commit_at = commit.commit.author.get("date", None)
+    commit = repository.branch(repo_branch).commit
 
     owner, repo = extract_owner_and_repo(repo_url)
     org_config, login_url = sf_run_flow.create_org_and_run_flow(
@@ -157,9 +153,9 @@ def create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project
     scratch_org.url = org_config.instance_url
     scratch_org.last_modified_at = now()
     scratch_org.expires_at = org_config.expires
-    scratch_org.latest_commit = latest_commit
-    scratch_org.latest_commit_url = latest_commit_url
-    scratch_org.latest_commit_at = latest_commit_at
+    scratch_org.latest_commit = commit.sha
+    scratch_org.latest_commit_url = commit.html_url
+    scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = org_config.config
     scratch_org.login_url = login_url
     scratch_org.save()

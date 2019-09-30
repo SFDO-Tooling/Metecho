@@ -13,7 +13,6 @@ import { OBJECT_TYPES } from '@/utils/constants';
 import { getOrgChildChanges, getOrgTotalChanges } from '@/utils/helpers';
 
 interface Props {
-  orgId: string;
   taskId: string;
   changeset: Changeset;
   isOpen: boolean;
@@ -24,13 +23,7 @@ interface BooleanObject {
   [key: string]: boolean;
 }
 
-const CaptureModal = ({
-  orgId,
-  taskId,
-  changeset,
-  isOpen,
-  toggleModal,
-}: Props) => {
+const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
   const [capturingChanges, setCapturingChanges] = useState(false);
   const isMounted = useIsMounted();
@@ -61,10 +54,9 @@ const CaptureModal = ({
   } = useForm({
     fields: { changes: [], message: '' },
     objectType: OBJECT_TYPES.COMMIT,
-    additionalData: { org: orgId, task: taskId },
+    url: window.api_urls.task_detail(taskId),
     onSuccess: handleSuccess,
     onError: handleError,
-    shouldSubscribeToObject: () => true,
   });
 
   const setChanges = (changes: string[]) => {

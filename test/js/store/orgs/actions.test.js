@@ -369,25 +369,6 @@ describe('deleteFailed', () => {
 });
 
 describe('commitSucceeded', () => {
-  beforeEach(() => {
-    window.socket = { unsubscribe: jest.fn() };
-  });
-
-  afterEach(() => {
-    Reflect.deleteProperty(window, 'socket');
-  });
-
-  test('unsubscribes from socket', () => {
-    const store = storeWithThunk({ tasks: {} });
-    const commit = { id: 'commit-id', task: 'task-id' };
-    store.dispatch(actions.commitSucceeded(commit));
-
-    expect(window.socket.unsubscribe).toHaveBeenCalledWith({
-      model: 'scratch_org_commit',
-      id: 'commit-id',
-    });
-  });
-
   test('adds error message', () => {
     const store = storeWithThunk({
       tasks: {
@@ -401,7 +382,7 @@ describe('commitSucceeded', () => {
       task: 'task-id',
     };
     const action = {
-      type: 'COMMIT_CREATE',
+      type: 'GITHUB_CHANGES_COMMITTED',
       payload: commit,
     };
     store.dispatch(actions.commitSucceeded(commit));
@@ -413,28 +394,31 @@ describe('commitSucceeded', () => {
     );
     expect(allActions[1]).toEqual(action);
   });
+
+  test('adds error message [no known task]', () => {
+    const store = storeWithThunk({
+      tasks: {},
+    });
+    const commit = {
+      id: 'commit-id',
+      task: 'task-id',
+    };
+    const action = {
+      type: 'GITHUB_CHANGES_COMMITTED',
+      payload: commit,
+    };
+    store.dispatch(actions.commitSucceeded(commit));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Successfully captured changes from your scratch org.',
+    );
+    expect(allActions[1]).toEqual(action);
+  });
 });
 
 describe('commitFailed', () => {
-  beforeEach(() => {
-    window.socket = { unsubscribe: jest.fn() };
-  });
-
-  afterEach(() => {
-    Reflect.deleteProperty(window, 'socket');
-  });
-
-  test('unsubscribes from socket', () => {
-    const store = storeWithThunk({ tasks: {} });
-    const commit = { id: 'commit-id', task: 'task-id' };
-    store.dispatch(actions.commitFailed({ model: commit }));
-
-    expect(window.socket.unsubscribe).toHaveBeenCalledWith({
-      model: 'scratch_org_commit',
-      id: 'commit-id',
-    });
-  });
-
   test('adds error message', () => {
     const store = storeWithThunk({
       tasks: {
@@ -459,6 +443,32 @@ describe('commitFailed', () => {
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
       'Uh oh. There was an error capturing changes from your scratch org on task “My Task”.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[1]).toEqual(action);
+  });
+
+  test('adds error message [no known task]', () => {
+    const store = storeWithThunk({
+      tasks: {},
+    });
+    const commit = {
+      id: 'commit-id',
+      task: 'task-id',
+    };
+    const action = {
+      type: 'COMMIT_FAILED',
+      payload: commit,
+    };
+    store.dispatch(
+      actions.commitFailed({ model: commit, message: 'error msg' }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error capturing changes from your scratch org.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

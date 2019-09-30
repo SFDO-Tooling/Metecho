@@ -85,7 +85,7 @@ const defaultState = {
         latest_commit_url: '/test/commit/url/',
         latest_commit_at: '2019-08-16T12:58:53.721Z',
         url: '/test/org/url/',
-        changes: { Foo: [{ id: 'change-1', name: 'Bar' }] },
+        unsaved_changes: { Foo: [{ id: 'change-1', name: 'Bar' }] },
       },
       QA: null,
     },

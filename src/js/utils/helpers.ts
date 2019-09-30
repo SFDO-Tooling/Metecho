@@ -6,8 +6,8 @@ export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
 
 export const getOrgStatusMsg = (org: Org) => {
-  if (org.changes) {
-    const totalChanges = Object.values(org.changes).flat().length;
+  if (org.unsaved_changes) {
+    const totalChanges = Object.values(org.unsaved_changes).flat().length;
     if (totalChanges) {
       const statusMsgDefault = `has ${totalChanges} uncaptured ${pluralize(
         totalChanges,
