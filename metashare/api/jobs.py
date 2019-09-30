@@ -213,10 +213,35 @@ get_unsaved_changes_job = job(get_unsaved_changes)
 
 
 def commit_changes_from_org(scratch_org, user):
+    from .serializers import ScratchOrgSerializer
+
     repo_url = scratch_org.task.project.repository.repo_url
     branch = scratch_org.task.branch_name
     sf_org_changes.commit_changes_to_github(
         user=user, scratch_org=scratch_org, repo_url=repo_url, branch=branch
+    )
+
+    # Update
+    gh = login(token=user.gh_token)
+    owner, repo = extract_owner_and_repo(repo_url)
+    repository = gh.repository(owner, repo)
+    commit = repository.branch(branch).commit
+
+    scratch_org.last_modified_at = now()
+    scratch_org.latest_commit = commit.sha
+    scratch_org.latest_commit_url = commit.html_url
+    scratch_org.latest_commit_at = commit.commit.author.get("date", None)
+    # TODO: should this actually be the same logic as in get_unsaved_changes?
+    scratch_org.unsaved_changes = []
+    scratch_org.currently_refreshing_changes = False
+    scratch_org.save()
+
+    push_message_about_instance(
+        scratch_org,
+        {
+            "type": "GITHUB_CHANGES_COMMITTED",
+            "payload": ScratchOrgSerializer(scratch_org).data,
+        },
     )
 
 
