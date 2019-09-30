@@ -2,6 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.utils.timezone import now
 from github3.exceptions import UnprocessableEntity
 
 from ..jobs import (
@@ -260,9 +261,21 @@ def test_refresh_github_repositories_for_user(user_factory):
 def test_commit_changes_from_org(scratch_org_factory, user_factory):
     scratch_org = scratch_org_factory()
     user = user_factory()
-    with patch(
-        f"{PATCH_ROOT}.sf_org_changes.commit_changes_to_github"
-    ) as commit_changes_to_github:
+    with ExitStack() as stack:
+        commit_changes_to_github = stack.enter_context(
+            patch(f"{PATCH_ROOT}.sf_org_changes.commit_changes_to_github")
+        )
+        login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
+        commit = MagicMock(
+            sha="12345",
+            html_url="https://github.com/test/user/foo",
+            commit=MagicMock(author={"date": now()}),
+        )
+        repository = MagicMock()
+        repository.branch.return_value = MagicMock(commit=commit)
+        gh = MagicMock()
+        gh.repository.return_value = repository
+        login.return_value = gh
         commit_changes_from_org(scratch_org, user)
 
         assert commit_changes_to_github.called

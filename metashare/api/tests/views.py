@@ -66,6 +66,28 @@ def test_repository_view(client, repository_factory, git_hub_repository_factory)
 
 
 @pytest.mark.django_db
+class TestTaskCommit:
+    def test_happy_path(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(org_type="Dev")
+        task = scratch_org.task
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(reverse("task-commit", kwargs={"pk": str(task.id)}))
+            assert response.status_code == 202
+            assert commit_changes_from_org_job.delay.called
+
+    def test_sad_path(self, client, task_factory):
+        task = task_factory()
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(reverse("task-commit", kwargs={"pk": str(task.id)}))
+            assert response.status_code == 422
+            assert not commit_changes_from_org_job.delay.called
+
+
+@pytest.mark.django_db
 def test_scratch_org_view(client, scratch_org_factory):
     scratch_org = scratch_org_factory()
     with patch("metashare.api.models.ScratchOrg.queue_delete"):
