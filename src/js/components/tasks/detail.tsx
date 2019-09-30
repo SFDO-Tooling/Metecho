@@ -41,8 +41,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
-  const [readyForReview, setReadyForReview] = useState(true);
+  const [readyForReview, setReadyForReview] = useState(true); // true for now
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [openingReview, setOpeningReview] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -78,7 +79,10 @@ const TaskDetail = (props: RouteComponentProps) => {
         setCaptureModalOpen(true);
       }
     }
-  }, [fetchingChanges, devOrg]);
+    if (openingReview && !submitModalOpen) {
+      setOpeningReview(false);
+    }
+  }, [fetchingChanges, devOrg, submitModalOpen, openingReview]);
 
   const doRefetchOrg = useCallback((org: Org) => {
     dispatch(refetchOrg(org));
@@ -93,7 +97,8 @@ const TaskDetail = (props: RouteComponentProps) => {
     setInfoModalOpen(true);
   };
   const openSubmitModal = () => {
-    console.log('open');
+    setOpeningReview(true);
+    setSubmitModalOpen(true);
   };
 
   let action = openConnectModal;
@@ -107,6 +112,9 @@ const TaskDetail = (props: RouteComponentProps) => {
           }
         }
       : openInfoModal;
+  }
+  if (readyForReview) {
+    action = openSubmitModal;
   }
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -186,9 +194,8 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
 
   const committing = Boolean(orgs && orgs.committing);
-  let buttonText: string | React.ReactNode = readyForReview
-    ? i18n.t('Submit Task for Review')
-    : i18n.t('Capture Task Changes');
+  let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
+
   if (fetchingChanges) {
     buttonText = (
       <LabelWithSpinner
@@ -196,13 +203,17 @@ const TaskDetail = (props: RouteComponentProps) => {
         variant="inverse"
       />
     );
-  } else if (committing) {
+  }
+  if (committing) {
     buttonText = (
       <LabelWithSpinner
         label={i18n.t('Capturing Selected Changes…')}
         variant="inverse"
       />
     );
+  }
+  if (readyForReview) {
+    buttonText = i18n.t('Submit Task for Review');
   }
 
   return (
@@ -234,17 +245,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             className="slds-size_full slds-m-bottom_x-large"
             variant="brand"
             onClick={action}
-            disabled={fetchingChanges || committing}
-          />
-        ) : null}
-
-        {readyForReview ? (
-          <Button
-            label={buttonText}
-            className="slds-size_full slds-m-bottom_x-large"
-            variant="brand"
-            onClick={() => setSubmitModalOpen(true)}
-            disabled={fetchingChanges || committing}
+            disabled={fetchingChanges || committing || openingReview}
           />
         ) : null}
 
