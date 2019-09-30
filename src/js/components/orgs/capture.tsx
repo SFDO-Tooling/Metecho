@@ -208,39 +208,45 @@ const CaptureModal = ({
 
           return (
             <Accordion key={groupName}>
-              <AccordionPanel
-                expanded={Boolean(expandedPanels[groupName])}
-                id={groupName}
-                onTogglePanel={handleThisPanelToggle}
-                title={groupName}
-                summary={
-                  <div className="form-grid">
+              {[
+                // https://github.com/salesforce/design-system-react/issues/2340
+                <AccordionPanel
+                  expanded={Boolean(expandedPanels[groupName])}
+                  id={groupName}
+                  key={groupName}
+                  onTogglePanel={handleThisPanelToggle}
+                  title={groupName}
+                  summary={
+                    <div className="form-grid">
+                      <Checkbox
+                        id={groupName}
+                        labels={{ label: groupName }}
+                        checked={allChildrenChecked}
+                        indeterminate={
+                          !allChildrenChecked && !noChildrenChecked
+                        }
+                        onChange={handleSelectThisGroup}
+                      />
+                      <span className="slds-text-body_regular">
+                        ({getOrgChildChanges(children.length)})
+                      </span>
+                    </div>
+                  }
+                >
+                  {changeset[groupName].map(change => (
                     <Checkbox
-                      id={groupName}
-                      labels={{ label: groupName }}
-                      checked={allChildrenChecked}
-                      indeterminate={!allChildrenChecked && !noChildrenChecked}
-                      onChange={handleSelectThisGroup}
+                      key={change.id}
+                      id={change.id}
+                      labels={{
+                        label: change.name,
+                      }}
+                      name="changes"
+                      checked={inputs.changes.includes(change.id)}
+                      onChange={handleChange}
                     />
-                    <span className="slds-text-body_regular">
-                      ({getOrgChildChanges(children.length)})
-                    </span>
-                  </div>
-                }
-              >
-                {changeset[groupName].map(change => (
-                  <Checkbox
-                    key={change.id}
-                    id={change.id}
-                    labels={{
-                      label: change.name,
-                    }}
-                    name="changes"
-                    checked={inputs.changes.includes(change.id)}
-                    onChange={handleChange}
-                  />
-                ))}
-              </AccordionPanel>
+                  ))}
+                </AccordionPanel>,
+              ]}
             </Accordion>
           );
         })}
