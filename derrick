@@ -31,22 +31,22 @@ case "$1" in
         dcrq yarn lint "${@:2}"
         ;;
     "lint:py")
-        dcrq yarn lintpy "${@:2}"
+        dcrq yarn lint:py "${@:2}"
         ;;
     "lint:js")
-        dcrq yarn lintjs "${@:2}"
+        dcrq yarn lint:js "${@:2}"
         ;;
     "test")
-        dcr yarn test:all "${@:2}"
+        dcr yarn test "${@:2}"
         ;;
     "test:watch")
-        dcr yarn test:watch "${@:2}"
+        dcrq yarn test:js:watch "${@:2}"
         ;;
     "test:py")
-        dcr yarn pytest "${@:2}"
+        dcr yarn test:py "${@:2}"
         ;;
     "test:js")
-        dcrq yarn test "${@:2}"
+        dcrq yarn test:js "${@:2}"
         ;;
     "add:js")
         dcrq yarn add "${@:2}"
