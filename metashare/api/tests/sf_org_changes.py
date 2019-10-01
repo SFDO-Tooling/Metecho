@@ -67,6 +67,30 @@ def test_get_latest_revision_numbers():
         stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
 
         conn = MagicMock()
+        conn.query_all.return_value = {
+            "records": [
+                {
+                    "MemberType": "some-type-1",
+                    "MemberName": "some-name-1",
+                    "RevisionNum": 3,
+                },
+                {
+                    "MemberType": "some-type-1",
+                    "MemberName": "some-name-2",
+                    "RevisionNum": 3,
+                },
+                {
+                    "MemberType": "some-type-2",
+                    "MemberName": "some-name-1",
+                    "RevisionNum": 3,
+                },
+                {
+                    "MemberType": "some-type-2",
+                    "MemberName": "some-name-2",
+                    "RevisionNum": 3,
+                },
+            ]
+        }
         Salesforce.return_value = conn
 
         scratch_org = MagicMock()
@@ -79,11 +103,11 @@ def test_get_latest_revision_numbers():
 
 def test_compare_revisions__true():
     old = {}
-    new = {"type:name": 1}
+    new = {"type": {"name": 1}}
     assert compare_revisions(old, new)
 
 
 def test_compare_revisions__false():
-    old = {"type:name": 1}
-    new = {"type:name": 1}
+    old = {"type": {"name": 1}}
+    new = {"type": {"name": 1}}
     assert not compare_revisions(old, new)

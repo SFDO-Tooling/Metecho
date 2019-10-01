@@ -95,17 +95,17 @@ def get_latest_revision_numbers(scratch_org):
         "WHERE IsNameObsolete=false"
     ).get("records", [])
 
-    records = {
-        f"{record['MemberType']}:{record['MemberName']}": record["RevisionNum"]
-        for record in records
-    }
+    record_dict = defaultdict(lambda: defaultdict(dict))
+    for record in records:
+        record_dict[record["MemberType"]][record["MemberName"]] = record["RevisionNum"]
 
-    return records
+    return record_dict
 
 
 def compare_revisions(old_revision, new_revision):
-    return [
-        key
-        for key in new_revision.keys()
-        if new_revision[key] > old_revision.get(key, -1)
-    ]
+    ret = defaultdict(list)
+    for mt in new_revision.keys():
+        for mn in new_revision[mt].keys():
+            if new_revision[mt][mn] > old_revision.get(mt, {}).get(mn, -1):
+                ret[mt].append(mn)
+    return ret

@@ -142,8 +142,8 @@ def test_get_unsaved_changes(scratch_org_factory):
         f"{PATCH_ROOT}.sf_org_changes.get_latest_revision_numbers"
     ) as get_latest_revision_numbers:
         get_latest_revision_numbers.return_value = {
-            "TypeOne:NameOne": 13,
-            "TypeTwo:NameTwo": 10,
+            "TypeOne": {"NameOne": 13},
+            "TypeTwo": {"NameTwo": 10},
         }
 
         get_unsaved_changes(scratch_org=scratch_org)
@@ -151,8 +151,8 @@ def test_get_unsaved_changes(scratch_org_factory):
 
         assert scratch_org.unsaved_changes
         assert scratch_org.latest_revision_numbers == {
-            "TypeOne:NameOne": 13,
-            "TypeTwo:NameTwo": 10,
+            "TypeOne": {"NameOne": 13},
+            "TypeTwo": {"NameTwo": 10},
         }
 
 
