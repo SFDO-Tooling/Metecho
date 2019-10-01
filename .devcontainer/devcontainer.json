@@ -94,6 +94,7 @@
       "jscache": true,
       "__pycache__": true,
       ".coverage": true,
+      "coverage": true,
       "htmlcov": true,
       "pycov": true,
       ".tags": true,

@@ -1,7 +1,19 @@
 build:
+  config:
+    BUILD_ENV: production
   docker:
     web: Dockerfile
+run:
+  web: /start-server.sh
+  worker:
+    command:
+      - python manage.py rqworker default
+    image: web
+  scheduler:
+    command:
+      - python manage.py rqscheduler --queue default
+    image: web
 release:
   command:
-    - python /app/manage.py migrate --noinput
+    - python manage.py migrate --noinput
   image: web
