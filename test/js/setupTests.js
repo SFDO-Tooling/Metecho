@@ -25,7 +25,7 @@ beforeAll(() => {
     project_list: () => '/api/projects/',
     scratch_org_list: () => '/api/scratch_orgs/',
     scratch_org_detail: id => `/api/scratch_orgs/${id}/`,
-    task_detail: id => `/api/tasks/${id}/`,
+    task_commit: id => `/api/tasks/${id}/commit/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();

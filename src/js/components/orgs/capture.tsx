@@ -54,7 +54,7 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
   } = useForm({
     fields: { changes: [], message: '' },
     objectType: OBJECT_TYPES.COMMIT,
-    url: window.api_urls.task_detail(taskId),
+    url: window.api_urls.task_commit(taskId),
     onSuccess: handleSuccess,
     onError: handleError,
   });

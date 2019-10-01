@@ -73,7 +73,7 @@ describe('<CaptureModal/>', () => {
       expect(createObject).toHaveBeenCalledTimes(1);
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'scratch_org_commit',
-        url: window.api_urls.task_detail('task-id'),
+        url: window.api_urls.task_commit('task-id'),
         data: {
           message: 'My Commit',
           changes: ['foo-1', 'buz-1', 'buz-2'],
