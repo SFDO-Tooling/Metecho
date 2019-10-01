@@ -3,6 +3,9 @@
 # Script modified from:
 # https://github.com/microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker-compose
 
+# Bail if production
+if [ "${BUILD_ENV}" = "production" ] ; then return 0 ; fi
+
 # Configure apt and install packages
 apt-get update
 apt-get -y install --no-install-recommends apt-utils 2>&1

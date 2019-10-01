@@ -106,11 +106,11 @@ will see you can run e.g.::
     $ ./derrick up  # start containers and servers
     $ ./derrick down  # shut down running containers
     $ ./derrick build  # rebuild all containers
-    $ ./derrick lint  # format and lint JS, Sass, Python
+    $ ./derrick lint  # format and lint JS, Sass, Python, etc
     $ ./derrick test  # run JS and Python tests
-    $ ./derrick test:watch  # run JS tests and watches for changes
     $ ./derrick test:py  # run Python tests
     $ ./derrick test:js  # run JS tests
+    $ ./derrick test:js:watch  # run JS tests and watches for changes
     $ ./derrick add:js <package>  # add a yarn/npm package to dependencies
     $ ./derrick add:py <package>  # add a Python package to dependencies
     $ ./derrick migrate <app> <prefix>  # run Django migrations
@@ -172,7 +172,7 @@ For any commands, when using the VS Code integrated terminal inside the
 Docker container, omit any ``docker-compose run --rm web...`` prefix, e.g.::
 
     $ python manage.py promote_superuser <your email>
-    $ yarn test
+    $ yarn test:js
     $ python manage.py truncate_data
     $ python manage.py populate_data
 
