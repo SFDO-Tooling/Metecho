@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
-from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
+from .models import Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
     FullUserSerializer,
@@ -98,21 +98,6 @@ class TaskViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
 
-    @action(detail=True, methods=["POST"])
-    def commit(self, request, pk=None):
-        from .jobs import commit_changes_from_org_job
-
-        bad_scratch_orgs = (ScratchOrg.DoesNotExist, ScratchOrg.MultipleObjectsReturned)
-        task = self.get_object()
-        try:
-            scratch_org = task.scratchorg_set.filter(
-                org_type=SCRATCH_ORG_TYPES.Dev
-            ).get()
-            commit_changes_from_org_job.delay(scratch_org, request.user)
-            return Response("", status=status.HTTP_202_ACCEPTED)
-        except bad_scratch_orgs:
-            return Response("", status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
 
 class ScratchOrgViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -123,3 +108,17 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         instance.queue_delete()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.get_unsaved_changes()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["POST"])
+    def commit(self, request, pk=None):
+        from .jobs import commit_changes_from_org_job
+
+        scratch_org = self.get_object()
+        commit_changes_from_org_job.delay(scratch_org, request.user)
+        return Response("", status=status.HTTP_202_ACCEPTED)

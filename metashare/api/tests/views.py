@@ -66,32 +66,33 @@ def test_repository_view(client, repository_factory, git_hub_repository_factory)
 
 
 @pytest.mark.django_db
-class TestTaskCommit:
-    def test_happy_path(self, client, scratch_org_factory):
+class TestScratchOrgView:
+    def test_commit_happy_path(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(org_type="Dev")
-        task = scratch_org.task
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"
         ) as commit_changes_from_org_job:
-            response = client.post(reverse("task-commit", kwargs={"pk": str(task.id)}))
+            response = client.post(
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)})
+            )
             assert response.status_code == 202
             assert commit_changes_from_org_job.delay.called
 
-    def test_sad_path(self, client, task_factory):
-        task = task_factory()
+    def test_retrieve_changes(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
         with patch(
-            "metashare.api.jobs.commit_changes_from_org_job"
-        ) as commit_changes_from_org_job:
-            response = client.post(reverse("task-commit", kwargs={"pk": str(task.id)}))
-            assert response.status_code == 422
-            assert not commit_changes_from_org_job.delay.called
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
+            url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+            response = client.get(url)
 
+            assert response.status_code == 200
+            assert get_unsaved_changes_job.delay.called
 
-@pytest.mark.django_db
-def test_scratch_org_view(client, scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    with patch("metashare.api.models.ScratchOrg.queue_delete"):
-        url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
-        response = client.delete(url)
+    def test_queue_delete(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch("metashare.api.models.ScratchOrg.queue_delete"):
+            url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+            response = client.delete(url)
 
-        assert response.status_code == 204
+            assert response.status_code == 204
