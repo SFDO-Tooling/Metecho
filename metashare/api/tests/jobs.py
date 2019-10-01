@@ -284,6 +284,8 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         gh = MagicMock()
         gh.repository.return_value = repository
         login.return_value = gh
-        commit_changes_from_org(scratch_org, user)
+
+        desired_changes = {"name": ["member"]}
+        commit_changes_from_org(scratch_org, user, desired_changes)
 
         assert commit_changes_to_github.called

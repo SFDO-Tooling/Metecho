@@ -119,8 +119,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     def commit(self, request, pk=None):
         from .jobs import commit_changes_from_org_job
 
-        # TODO: get post data with a serializer.
-
         scratch_org = self.get_object()
-        commit_changes_from_org_job.delay(scratch_org, request.user)
+        # Expect request.data to be Dict<str, List<str>>
+        commit_changes_from_org_job.delay(scratch_org, request.user, request.data)
         return Response("", status=status.HTTP_202_ACCEPTED)

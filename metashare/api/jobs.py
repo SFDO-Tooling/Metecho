@@ -210,13 +210,17 @@ def get_unsaved_changes(scratch_org, should_save=True):
 get_unsaved_changes_job = job(get_unsaved_changes)
 
 
-def commit_changes_from_org(scratch_org, user):
+def commit_changes_from_org(scratch_org, user, desired_changes):
     from .serializers import ScratchOrgSerializer
 
     repo_url = scratch_org.task.project.repository.repo_url
     branch = scratch_org.task.branch_name
     sf_org_changes.commit_changes_to_github(
-        user=user, scratch_org=scratch_org, repo_url=repo_url, branch=branch
+        user=user,
+        scratch_org=scratch_org,
+        repo_url=repo_url,
+        branch=branch,
+        desired_changes=desired_changes,
     )
 
     # Update

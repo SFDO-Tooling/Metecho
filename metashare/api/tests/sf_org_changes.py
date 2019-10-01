@@ -17,7 +17,8 @@ PATCH_ROOT = "metashare.api.sf_org_changes"
 def test_build_package_xml():
     with patch(f"{PATCH_ROOT}.open") as open_mock:
         scratch_org = MagicMock(unsaved_changes=["test:value"])
-        build_package_xml(scratch_org, "package_xml_path")
+        desired_changes = {"name": ["member"]}
+        build_package_xml(scratch_org, "package_xml_path", desired_changes)
 
         assert open_mock.called
 
@@ -34,7 +35,8 @@ def test_run_retrieve_task(user_factory, scratch_org_factory):
             patch(f"{PATCH_ROOT}.RetrieveUnpackaged")
         )
 
-        run_retrieve_task(user, scratch_org, ".")
+        desired_changes = {"name": ["member"]}
+        run_retrieve_task(user, scratch_org, ".", desired_changes)
 
         assert RetrieveUnpackaged.called
 
@@ -49,11 +51,13 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         CommitDir = stack.enter_context(patch(f"{PATCH_ROOT}.CommitDir"))
 
+        desired_changes = {"name": ["member"]}
         commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
             repo_url="https://github.com/user/repo",
             branch="test-branch",
+            desired_changes=desired_changes,
         )
 
         assert CommitDir.called
