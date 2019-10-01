@@ -182,6 +182,7 @@ def create_branches_on_github_then_create_scratch_org(
             repo_branch=commit_ish,
             project_path=repo_root,
         )
+        get_unsaved_changes(scratch_org, should_save=False)
 
 
 create_branches_on_github_then_create_scratch_org_job = job(
@@ -189,7 +190,7 @@ create_branches_on_github_then_create_scratch_org_job = job(
 )
 
 
-def get_unsaved_changes(scratch_org):
+def get_unsaved_changes(scratch_org, should_save=True):
     with contextlib.ExitStack() as stack:
         stack.enter_context(report_errors_on_fetch_changes(scratch_org))
         stack.enter_context(mark_refreshing_changes(scratch_org))
@@ -202,7 +203,8 @@ def get_unsaved_changes(scratch_org):
         if unsaved_changes:
             scratch_org.latest_revision_numbers = new_revision_numbers
             scratch_org.unsaved_changes = unsaved_changes
-            scratch_org.save()
+            if should_save:
+                scratch_org.save()
 
 
 get_unsaved_changes_job = job(get_unsaved_changes)
@@ -227,8 +229,7 @@ def commit_changes_from_org(scratch_org, user):
     scratch_org.latest_commit = commit.sha
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
-    # TODO: should this actually be the same logic as in get_unsaved_changes?
-    scratch_org.unsaved_changes = []
+    get_unsaved_changes(scratch_org, should_save=False)
     scratch_org.currently_refreshing_changes = False
     scratch_org.save()
 

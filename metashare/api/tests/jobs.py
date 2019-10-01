@@ -194,6 +194,9 @@ def test_create_branches_on_github_then_create_scratch_org():
         create_org_and_run_flow = stack.enter_context(
             patch(f"{PATCH_ROOT}.create_org_and_run_flow")
         )
+        get_unsaved_changes = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_unsaved_changes")
+        )
 
         create_branches_on_github_then_create_scratch_org(
             project=MagicMock(),
@@ -205,6 +208,7 @@ def test_create_branches_on_github_then_create_scratch_org():
 
         assert create_branches_on_github.called
         assert create_org_and_run_flow.called
+        assert get_unsaved_changes.called
 
 
 @pytest.mark.django_db
@@ -265,6 +269,10 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         commit_changes_to_github = stack.enter_context(
             patch(f"{PATCH_ROOT}.sf_org_changes.commit_changes_to_github")
         )
+        get_latest_revision_numbers = stack.enter_context(
+            patch(f"{PATCH_ROOT}.sf_org_changes.get_latest_revision_numbers")
+        )
+        get_latest_revision_numbers.return_value = {}
         login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
         commit = MagicMock(
             sha="12345",
