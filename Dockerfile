@@ -1,5 +1,7 @@
 FROM wlonk/oddbird:latest
 
+ARG BUILD_ENV=development
+
 # Install local development tools (git, docker-cli used for viewing logs):
 COPY ./compose/web/install-dev-tools.sh /install-dev-tools.sh
 RUN chmod +x /install-dev-tools.sh
@@ -35,7 +37,6 @@ WORKDIR /app
 RUN yarn install --check-files
 
 # Avoid building prod assets in development
-ARG BUILD_ENV=development
 RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 RUN python manage.py collectstatic --noinput
 
