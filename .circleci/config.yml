@@ -60,7 +60,7 @@ jobs:
           at: .
       - run:
           name: Test JS
-          command: yarn test:coverage
+          command: yarn test:js:coverage
       - store_artifacts:
           path: coverage
           destination: js-reports
@@ -133,15 +133,15 @@ jobs:
           name: Report Test Coverage
           command: |
             . venv/bin/activate
-            yarn pytest:report-coverage
-            yarn test:report-coverage
+            yarn test:js:report-coverage
+            yarn test:py:report-coverage
             curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
       - run:
           name: Check Test Coverage
           command: |
             . venv/bin/activate
-            yarn pytest:check-coverage
-            yarn test:check-coverage
+            yarn test:js:check-coverage
+            yarn test:py:check-coverage
 
   build-docs:
     working_directory: ~/metashare

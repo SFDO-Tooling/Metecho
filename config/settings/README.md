@@ -34,8 +34,7 @@ Since this is a normal Django settings module, all settings are just "constants"
 (or by convention, all-caps named public members) on the module. So, here, we're
 defining a setting called `SECURE_HSTS_SECONDS`. The first parameter is the name
 of an environment variable; if that var is set, that value is used. The second
-parameter, `default`, is used if the var is not set. Keep in mind, `$ export
-APPLESAUCE=` will cause `env('APPLESAUCE', default='3')` to not be 3, but
+parameter, `default`, is used if the var is not set. Keep in mind, `$ export APPLESAUCE=` will cause `env('APPLESAUCE', default='3')` to not be 3, but
 instead an empty string! Lastly, there's the `type_` parameter, which is a value
 coercion function. It will be called on whatever value `env` comes up with. It
 will be called on the `default` if you specified a default and the key was not

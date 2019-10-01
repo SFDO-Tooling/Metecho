@@ -36,7 +36,7 @@ RUN yarn install --check-files
 
 # Avoid building prod assets in development
 ARG BUILD_ENV=development
-RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist ; fi
+RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
 RUN python manage.py collectstatic --noinput
 
 CMD /start-server.sh
