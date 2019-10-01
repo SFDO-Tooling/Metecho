@@ -14,6 +14,7 @@ from ..jobs import (
     get_unsaved_changes,
     mark_refreshing_changes,
     refresh_github_repositories_for_user,
+    report_errors_on_commit_changes,
     report_errors_on_fetch_changes,
     report_errors_on_provision,
     try_to_make_branch,
@@ -178,6 +179,20 @@ def test_report_errors_on_provision(scratch_org_factory):
     ) as push_message_about_instance:
         try:
             with report_errors_on_provision(scratch_org):
+                raise ValueError
+        except ValueError:
+            pass
+        assert push_message_about_instance.called
+
+
+@pytest.mark.django_db
+def test_report_errors_on_commit_changes(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
+        try:
+            with report_errors_on_commit_changes(scratch_org):
                 raise ValueError
         except ValueError:
             pass
