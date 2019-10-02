@@ -442,6 +442,7 @@ export const useFetchOrgsIfMissing = (
 export const useForm = ({
   fields,
   objectType,
+  url,
   additionalData = {},
   onSuccess = () => {},
   onError = () => {},
@@ -449,6 +450,7 @@ export const useForm = ({
 }: {
   fields: { [key: string]: any };
   objectType: ObjectTypes;
+  url?: string;
   additionalData?: { [key: string]: any };
   onSuccess?: (...args: any[]) => any;
   onError?: (...args: any[]) => any;
@@ -471,6 +473,7 @@ export const useForm = ({
     dispatch(
       createObject({
         objectType,
+        url,
         data: {
           ...inputs,
           ...additionalData,

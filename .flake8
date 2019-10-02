@@ -7,6 +7,5 @@ exclude =
     dist,
     coverage,
     node,
-    node_modules,
-    requirements
-max-line-length=88 
+    node_modules
+max-line-length=88

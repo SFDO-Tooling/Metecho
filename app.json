@@ -48,7 +48,6 @@
       "quantity": 1
     }
   },
-  "image": "heroku/python",
   "addons": [
     "heroku-postgresql",
     "heroku-redis",
@@ -56,14 +55,12 @@
     "newrelic",
     "sentry"
   ],
-  "buildpacks": [
-      {"url": "heroku/nodejs"},
-      {"url": "heroku/python"}
-  ],
+  "stack": "container",
+  "buildpacks": [{ "url": "heroku/nodejs" }, { "url": "heroku/python" }],
   "environments": {
     "test": {
       "scripts": {
-        "test-setup": "pip install --upgrade -r requirements/test.txt",
+        "test-setup": "pipenv install --dev --deploy --ignore-pipfile",
         "test": "pytest"
       },
       "env": {

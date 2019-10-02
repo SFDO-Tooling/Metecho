@@ -1,6 +1,6 @@
 import { ThunkResult } from '@/store';
+import { commitSucceeded } from '@/store/orgs/actions';
 import { submitTask } from '@/store/tasks/actions';
-// import { commitSucceeded } from '@/store/orgs/actions';
 import apiFetch, { addUrlParams } from '@/utils/api';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
@@ -198,19 +198,22 @@ export const fetchObject = ({
 
 export const createObject = ({
   objectType,
+  url,
   data = {},
   hasForm = false,
   shouldSubscribeToObject = () => false,
 }: {
   objectType: ObjectTypes;
+  url?: string;
   data?: ObjectData;
   hasForm?: boolean;
   shouldSubscribeToObject?: (object: any) => boolean;
 }): ThunkResult => async dispatch => {
-  const urlFn = window.api_urls[`${objectType}_list`];
-  let url;
-  if (urlFn) {
-    url = urlFn();
+  if (!url) {
+    const urlFn = window.api_urls[`${objectType}_list`];
+    if (urlFn) {
+      url = urlFn();
+    }
   }
   dispatch({
     type: 'CREATE_OBJECT_STARTED',
@@ -222,57 +225,57 @@ export const createObject = ({
   }
   try {
     // @@@ Mock out until API exists
-    // let object: any;
-    // if (objectType === OBJECT_TYPES.COMMIT) {
-    //   object = {
-    //     id: 'commit-id',
-    //     org: data.org,
-    //     task: data.task,
-    //   };
-    //   setTimeout(() => {
-    //     // Success case
-    //     dispatch(
-    //       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //       commitSucceeded(object),
-    //     );
-    //     // Error case
-    //     // dispatch(
-    //     //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //     //   commitFailed({ model: object, error: 'Oops.' }),
-    //     // );
-    //   }, 3000);
-    // } else {
-    if (!url) {
-      throw new Error(`No URL found for object: ${objectType}`);
-    }
-    const object = await apiFetch({
-      url,
-      dispatch,
-      opts: {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
+    let object: any;
+    if (objectType === OBJECT_TYPES.COMMIT) {
+      object = {
+        id: 'commit-id',
+        org: data.org,
+        task: data.task,
+      };
+      setTimeout(() => {
+        // Success case
+        dispatch(
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          commitSucceeded(object),
+        );
+        // Error case
+        // dispatch(
+        //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        //   commitFailed({ model: object, error: 'Oops.' }),
+        // );
+      }, 3000);
+    } else {
+      if (!url) {
+        throw new Error(`No URL found for object: ${objectType}`);
+      }
+      object = await apiFetch({
+        url,
+        dispatch,
+        opts: {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      },
-      hasForm,
-    });
-    // }
-    if (
-      shouldSubscribeToObject(object) &&
-      object &&
-      object.id &&
-      window.socket
-    ) {
-      window.socket.subscribe({
-        model: objectType,
-        id: object.id,
+        hasForm,
+      });
+      if (
+        shouldSubscribeToObject(object) &&
+        object &&
+        object.id &&
+        window.socket
+      ) {
+        window.socket.subscribe({
+          model: objectType,
+          id: object.id,
+        });
+      }
+      return dispatch({
+        type: 'CREATE_OBJECT_SUCCEEDED',
+        payload: { data, object, url, objectType },
       });
     }
-    return dispatch({
-      type: 'CREATE_OBJECT_SUCCEEDED',
-      payload: { data, object, url, objectType },
-    });
   } catch (err) {
     dispatch({
       type: 'CREATE_OBJECT_FAILED',

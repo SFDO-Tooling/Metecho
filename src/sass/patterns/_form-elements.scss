@@ -18,3 +18,16 @@
 .task-submit-textarea.slds-textarea {
   min-height: 100px;
 }
+// temporary fix
+.form-grid {
+  display: grid;
+  grid-template-columns: minmax($size-small, 1fr) auto;
+}
+
+.slds-is-open {
+  > .slds-accordion__content {
+    .slds-checkbox {
+      margin-left: $size-xxx-small;
+    }
+  }
+}

@@ -60,11 +60,15 @@ const TaskDetail = (props: RouteComponentProps) => {
   const { orgs } = useFetchOrgsIfMissing(task, props);
   const user = useSelector(selectUserState) as User;
 
-  let orgHasChanges, userIsOwner, devOrg: Org | null | undefined;
+  let currentlyFetching,
+    orgHasChanges,
+    userIsOwner,
+    devOrg: Org | null | undefined;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
-    orgHasChanges = Boolean(devOrg && devOrg.changes);
+    orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
     userIsOwner = devOrg && devOrg.owner === user.id;
+    currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
   }
 
   // When capture changes has been triggered, wait until org has been refreshed
@@ -75,7 +79,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     if (changesFetched && devOrg) {
       setFetchingChanges(false);
       /* istanbul ignore else */
-      if (devOrg.changes) {
+      if (devOrg.has_unsaved_changes) {
         setCaptureModalOpen(true);
       }
     }
@@ -195,8 +199,7 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   const committing = Boolean(orgs && orgs.committing);
   let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
-
-  if (fetchingChanges) {
+  if (fetchingChanges || currentlyFetching) {
     buttonText = (
       <LabelWithSpinner
         label={i18n.t('Checking for Uncaptured Changes…')}
@@ -245,7 +248,12 @@ const TaskDetail = (props: RouteComponentProps) => {
             className="slds-size_full slds-m-bottom_x-large"
             variant="brand"
             onClick={action}
-            disabled={fetchingChanges || committing || openingReview}
+            disabled={
+              fetchingChanges ||
+              currentlyFetching ||
+              committing ||
+              openingReview
+            }
           />
         ) : null}
 
@@ -268,11 +276,10 @@ const TaskDetail = (props: RouteComponentProps) => {
             'Please close this message and try capturing task changes again.',
           )}
         />
-        {devOrg && devOrg.changes && (
+        {devOrg && devOrg.has_unsaved_changes && (
           <CaptureModal
             orgId={devOrg.id}
-            taskId={devOrg.task}
-            changeset={devOrg.changes}
+            changeset={devOrg.unsaved_changes}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
           />

@@ -14,21 +14,15 @@ from .github_context import extract_owner_and_repo, get_repo_info, local_github_
 from .sf_run_flow import refresh_access_token
 
 
-def build_package_xml(scratch_org, package_xml_path):
-    types_dict = defaultdict(list)
-    for key in scratch_org.unsaved_changes:
-        type_, name = key.split(":")
-        types_dict[type_].append(name)
-
-    types = [MetadataType(name, members) for (name, members) in types_dict.items()]
-
+def build_package_xml(scratch_org, package_xml_path, desired_changes):
+    types = [MetadataType(name, members) for (name, members) in desired_changes.items()]
     api_version = BaseGlobalConfig().project__package__api_version
     package_xml = PackageXmlGenerator(".", api_version, types=types)()
     with open(package_xml_path, "w") as f:
         f.write(package_xml)
 
 
-def run_retrieve_task(user, scratch_org, project_path):
+def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     repo_url = scratch_org.task.project.repository.repo_url
     org_config = refresh_access_token(
         config=scratch_org.config, org_name="dev", login_url=scratch_org.login_url
@@ -45,7 +39,7 @@ def run_retrieve_task(user, scratch_org, project_path):
         }
     )
     package_xml_path = os.path.join(project_path, "src", "package.xml")
-    build_package_xml(scratch_org, package_xml_path)
+    build_package_xml(scratch_org, package_xml_path, desired_changes)
     task_config = TaskConfig(
         {"options": {"path": project_path, "package_xml": package_xml_path}}
     )
@@ -53,14 +47,18 @@ def run_retrieve_task(user, scratch_org, project_path):
     task()
 
 
-def commit_changes_to_github(*, user, scratch_org, repo_url, branch):
+def commit_changes_to_github(
+    *, user, scratch_org, repo_url, branch, desired_changes, commit_message
+):
     with local_github_checkout(user, repo_url) as project_path:
         # This won't return anything in-memory, but rather it will emit files which we
         # then copy into a source checkout, and then commit and push all that.
-        run_retrieve_task(user, scratch_org, project_path)
+        run_retrieve_task(user, scratch_org, project_path, desired_changes)
         repo = get_repo_info(user, repo_url)
         author = {"name": user.username, "email": user.email}
-        CommitDir(repo, author=author)(project_path, branch, repo_dir="")
+        CommitDir(repo, author=author)(
+            project_path, branch, repo_dir="", commit_message=commit_message
+        )
 
 
 def get_salesforce_connection(*, config, login_url, base_url=""):
@@ -95,17 +93,17 @@ def get_latest_revision_numbers(scratch_org):
         "WHERE IsNameObsolete=false"
     ).get("records", [])
 
-    records = {
-        f"{record['MemberType']}:{record['MemberName']}": record["RevisionNum"]
-        for record in records
-    }
+    record_dict = defaultdict(lambda: defaultdict(dict))
+    for record in records:
+        record_dict[record["MemberType"]][record["MemberName"]] = record["RevisionNum"]
 
-    return records
+    return record_dict
 
 
 def compare_revisions(old_revision, new_revision):
-    return [
-        key
-        for key in new_revision.keys()
-        if new_revision[key] > old_revision.get(key, -1)
-    ]
+    ret = defaultdict(list)
+    for mt in new_revision.keys():
+        for mn in new_revision[mt].keys():
+            if new_revision[mt][mn] > old_revision.get(mt, {}).get(mn, -1):
+                ret[mt].append(mn)
+    return ret

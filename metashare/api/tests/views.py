@@ -66,10 +66,59 @@ def test_repository_view(client, repository_factory, git_hub_repository_factory)
 
 
 @pytest.mark.django_db
-def test_scratch_org_view(client, scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    with patch("metashare.api.models.ScratchOrg.queue_delete"):
-        url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
-        response = client.delete(url)
+class TestScratchOrgView:
+    def test_commit_happy_path(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(org_type="Dev")
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
+                {"commit_message": "Test message", "changes": {}},
+                format="json",
+            )
+            assert response.status_code == 202
+            assert commit_changes_from_org_job.delay.called
 
-        assert response.status_code == 204
+    def test_commit_sad_path(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(org_type="Dev")
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
+                {"changes": {}},
+                format="json",
+            )
+            assert response.status_code == 422
+            assert not commit_changes_from_org_job.delay.called
+
+    def test_list_fetch_changes(self, client, scratch_org_factory):
+        scratch_org_factory()
+        with patch(
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
+            url = reverse("scratch-org-list")
+            response = client.get(url)
+
+            assert response.status_code == 200
+            assert get_unsaved_changes_job.delay.called
+
+    def test_retrieve_fetch_changes(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch(
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
+            url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+            response = client.get(url)
+
+            assert response.status_code == 200
+            assert get_unsaved_changes_job.delay.called
+
+    def test_queue_delete(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch("metashare.api.models.ScratchOrg.queue_delete"):
+            url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+            response = client.delete(url)
+
+            assert response.status_code == 204

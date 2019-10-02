@@ -1,14 +1,16 @@
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
-from .models import Project, Repository, ScratchOrg, Task
+from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
+    CommitSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
@@ -107,3 +109,50 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         instance.queue_delete()
+
+    def list(self, request, *args, **kwargs):
+        # XXX: This method is copied verbatim from
+        # rest_framework.mixins.RetrieveModelMixin, because I needed to insert the
+        # get_unsaved_changes line in the middle.
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # XXX: I am apprehensive about the possibility of flooding the worker queues
+        # easily this way:
+        for instance in queryset.filter(org_type=SCRATCH_ORG_TYPES.Dev):
+            instance.get_unsaved_changes()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:  # pragma: nocover
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        # XXX: This method is copied verbatim from
+        # rest_framework.mixins.RetrieveModelMixin, because I needed to insert the
+        # get_unsaved_changes line in the middle.
+        instance = self.get_object()
+        if instance.org_type == SCRATCH_ORG_TYPES.Dev:
+            instance.get_unsaved_changes()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["POST"])
+    def commit(self, request, pk=None):
+        from .jobs import commit_changes_from_org_job
+
+        serializer = CommitSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        scratch_org = self.get_object()
+        commit_message = serializer.validated_data["commit_message"]
+        desired_changes = serializer.validated_data["changes"]
+        commit_changes_from_org_job.delay(
+            scratch_org, request.user, desired_changes, commit_message
+        )
+        return Response("", status=status.HTTP_202_ACCEPTED)

@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
-import { Commit, Org } from '@/store/orgs/reducer';
+import { Org } from '@/store/orgs/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
 import apiFetch from '@/utils/api';
@@ -16,12 +16,8 @@ interface OrgProvisionFailed {
   payload: Org;
 }
 interface RefetchOrg {
-  type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_FAILED';
+  type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_SUCCEEDED' | 'REFETCH_ORG_FAILED';
   payload: { org: Org; url: string; response?: any };
-}
-interface RefetchOrgSucceeded {
-  type: 'REFETCH_ORG_SUCCEEDED';
-  payload: Org;
 }
 interface OrgUpdated {
   type: 'SCRATCH_ORG_UPDATE';
@@ -36,15 +32,14 @@ interface OrgDeleteFailed {
   payload: Org;
 }
 interface CommitEvent {
-  type: 'COMMIT_CREATE' | 'COMMIT_FAILED';
-  payload: Commit;
+  type: 'GITHUB_CHANGES_COMMITTED' | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
+  payload: Org;
 }
 
 export type OrgsAction =
   | OrgProvisioned
   | OrgProvisionFailed
   | RefetchOrg
-  | RefetchOrgSucceeded
   | OrgUpdated
   | OrgDeleted
   | OrgDeleteFailed
@@ -162,7 +157,7 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
     //     type: 'SCRATCH_ORG_UPDATE',
     //     payload: {
     //       ...response,
-    //       changes: {
+    //       unsaved_changes: {
     //         ApexClasses: [
     //           { id: '0', name: 'Class 1' },
     //           { id: '1', name: 'Class 2' },
@@ -174,17 +169,18 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
     //         'Whatcha macallit': [{ id: '6', name: 'Whatchamacallit' }],
     //         'Loopy ': [{ id: '7', name: 'Loopy Looo' }],
     //       },
+    //       has_unsaved_changes: true,
     //     },
     //   });
     // }, 3000);
     return dispatch({
       type: 'REFETCH_ORG_SUCCEEDED',
-      payload: response,
+      payload: { org: response, url },
       // @@@ Mock out until API exists
-      // payload: {
-      //   // eslint-disable-next-line @typescript-eslint/camelcase
-      //   response: { ...response, currently_refreshing_changes: true },
-      // },
+      payload: {
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        response: { ...response, currently_refreshing_changes: true },
+      },
     });
   } catch (err) {
     dispatch({
@@ -308,17 +304,10 @@ export const deleteFailed = ({
   });
 };
 
-export const commitSucceeded = (payload: Commit): ThunkResult => (
+export const commitSucceeded = (payload: Org): ThunkResult => (
   dispatch,
   getState,
 ) => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.COMMIT,
-      id: payload.id,
-    });
-  }
   const task = selectTaskById(getState(), payload.task);
   dispatch(
     addToast({
@@ -330,7 +319,7 @@ export const commitSucceeded = (payload: Commit): ThunkResult => (
     }),
   );
   return dispatch({
-    type: 'COMMIT_CREATE',
+    type: 'GITHUB_CHANGES_COMMITTED',
     payload,
   });
 };
@@ -339,16 +328,9 @@ export const commitFailed = ({
   model,
   message,
 }: {
-  model: Commit;
+  model: Org;
   message?: string;
 }): ThunkResult => (dispatch, getState) => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.COMMIT,
-      id: model.id,
-    });
-  }
   const task = selectTaskById(getState(), model.task);
   dispatch(
     addToast({
@@ -364,7 +346,7 @@ export const commitFailed = ({
     }),
   );
   return dispatch({
-    type: 'COMMIT_FAILED',
+    type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
     payload: model,
   });
 };

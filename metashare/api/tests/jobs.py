@@ -2,6 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.utils.timezone import now
 from github3.exceptions import UnprocessableEntity
 
 from ..jobs import (
@@ -13,6 +14,7 @@ from ..jobs import (
     get_unsaved_changes,
     mark_refreshing_changes,
     refresh_github_repositories_for_user,
+    report_errors_on_commit_changes,
     report_errors_on_fetch_changes,
     report_errors_on_provision,
     try_to_make_branch,
@@ -141,8 +143,8 @@ def test_get_unsaved_changes(scratch_org_factory):
         f"{PATCH_ROOT}.sf_org_changes.get_latest_revision_numbers"
     ) as get_latest_revision_numbers:
         get_latest_revision_numbers.return_value = {
-            "TypeOne:NameOne": 13,
-            "TypeTwo:NameTwo": 10,
+            "TypeOne": {"NameOne": 13},
+            "TypeTwo": {"NameTwo": 10},
         }
 
         get_unsaved_changes(scratch_org=scratch_org)
@@ -150,8 +152,8 @@ def test_get_unsaved_changes(scratch_org_factory):
 
         assert scratch_org.unsaved_changes
         assert scratch_org.latest_revision_numbers == {
-            "TypeOne:NameOne": 13,
-            "TypeTwo:NameTwo": 10,
+            "TypeOne": {"NameOne": 13},
+            "TypeTwo": {"NameTwo": 10},
         }
 
 
@@ -183,6 +185,20 @@ def test_report_errors_on_provision(scratch_org_factory):
         assert push_message_about_instance.called
 
 
+@pytest.mark.django_db
+def test_report_errors_on_commit_changes(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
+        try:
+            with report_errors_on_commit_changes(scratch_org):
+                raise ValueError
+        except ValueError:
+            pass
+        assert push_message_about_instance.called
+
+
 def test_create_branches_on_github_then_create_scratch_org():
     # Not a great test, but not a complicated function.
     with ExitStack() as stack:
@@ -192,6 +208,9 @@ def test_create_branches_on_github_then_create_scratch_org():
         )
         create_org_and_run_flow = stack.enter_context(
             patch(f"{PATCH_ROOT}.create_org_and_run_flow")
+        )
+        get_unsaved_changes = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_unsaved_changes")
         )
 
         create_branches_on_github_then_create_scratch_org(
@@ -204,6 +223,7 @@ def test_create_branches_on_github_then_create_scratch_org():
 
         assert create_branches_on_github.called
         assert create_org_and_run_flow.called
+        assert get_unsaved_changes.called
 
 
 @pytest.mark.django_db
@@ -260,9 +280,28 @@ def test_refresh_github_repositories_for_user(user_factory):
 def test_commit_changes_from_org(scratch_org_factory, user_factory):
     scratch_org = scratch_org_factory()
     user = user_factory()
-    with patch(
-        f"{PATCH_ROOT}.sf_org_changes.commit_changes_to_github"
-    ) as commit_changes_to_github:
-        commit_changes_from_org(scratch_org, user)
+    with ExitStack() as stack:
+        commit_changes_to_github = stack.enter_context(
+            patch(f"{PATCH_ROOT}.sf_org_changes.commit_changes_to_github")
+        )
+        get_latest_revision_numbers = stack.enter_context(
+            patch(f"{PATCH_ROOT}.sf_org_changes.get_latest_revision_numbers")
+        )
+        get_latest_revision_numbers.return_value = {}
+        login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
+        commit = MagicMock(
+            sha="12345",
+            html_url="https://github.com/test/user/foo",
+            commit=MagicMock(author={"date": now()}),
+        )
+        repository = MagicMock()
+        repository.branch.return_value = MagicMock(commit=commit)
+        gh = MagicMock()
+        gh.repository.return_value = repository
+        login.return_value = gh
+
+        desired_changes = {"name": ["member"]}
+        commit_message = "test message"
+        commit_changes_from_org(scratch_org, user, desired_changes, commit_message)
 
         assert commit_changes_to_github.called

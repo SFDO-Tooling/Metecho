@@ -30,12 +30,6 @@ def get_all_org_repos(user):
     repos = set(
         [
             normalize_github_url(repo.url)
-            for org in gh.organizations()
-            for repo in org.repositories()
-            if repo.permissions.get("push", False)
-        ]
-        + [
-            normalize_github_url(repo.url)
             for repo in gh.repositories()
             if repo.permissions.get("push", False)
         ]

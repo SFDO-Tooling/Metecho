@@ -37,7 +37,7 @@ def mark_refreshing_changes(scratch_org):
     try:
         yield
     except Exception:
-        scratch_org.unsaved_changes = []
+        scratch_org.unsaved_changes = {}
         raise
     finally:
         scratch_org.currently_refreshing_changes = False
@@ -65,6 +65,19 @@ def report_errors_on_fetch_changes(scratch_org):
     except Exception as e:
         async_to_sync(report_scratch_org_error)(
             scratch_org, str(e), "SCRATCH_ORG_FETCH_CHANGES_FAILED"
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+
+
+@contextlib.contextmanager
+def report_errors_on_commit_changes(scratch_org):
+    try:
+        yield
+    except Exception as e:
+        async_to_sync(report_scratch_org_error)(
+            scratch_org, str(e), "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
         )
         tb = traceback.format_exc()
         logger.error(tb)
@@ -139,11 +152,7 @@ def create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project
     gh = login(token=user.gh_token)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
-    branch = repository.branch(repo_branch)
-    commit = branch.commit
-    latest_commit = commit.sha
-    latest_commit_url = commit.html_url
-    latest_commit_at = commit.commit.author.get("date", None)
+    commit = repository.branch(repo_branch).commit
 
     owner, repo = extract_owner_and_repo(repo_url)
     org_config, login_url = sf_run_flow.create_org_and_run_flow(
@@ -157,9 +166,9 @@ def create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project
     scratch_org.url = org_config.instance_url
     scratch_org.last_modified_at = now()
     scratch_org.expires_at = org_config.expires
-    scratch_org.latest_commit = latest_commit
-    scratch_org.latest_commit_url = latest_commit_url
-    scratch_org.latest_commit_at = latest_commit_at
+    scratch_org.latest_commit = commit.sha
+    scratch_org.latest_commit_url = commit.html_url
+    scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = org_config.config
     scratch_org.login_url = login_url
     scratch_org.save()
@@ -186,6 +195,7 @@ def create_branches_on_github_then_create_scratch_org(
             repo_branch=commit_ish,
             project_path=repo_root,
         )
+        get_unsaved_changes(scratch_org, should_save=False)
 
 
 create_branches_on_github_then_create_scratch_org_job = job(
@@ -193,7 +203,7 @@ create_branches_on_github_then_create_scratch_org_job = job(
 )
 
 
-def get_unsaved_changes(scratch_org):
+def get_unsaved_changes(scratch_org, should_save=True):
     with contextlib.ExitStack() as stack:
         stack.enter_context(report_errors_on_fetch_changes(scratch_org))
         stack.enter_context(mark_refreshing_changes(scratch_org))
@@ -206,17 +216,48 @@ def get_unsaved_changes(scratch_org):
         if unsaved_changes:
             scratch_org.latest_revision_numbers = new_revision_numbers
             scratch_org.unsaved_changes = unsaved_changes
-            scratch_org.save()
+            if should_save:
+                scratch_org.save()
 
 
 get_unsaved_changes_job = job(get_unsaved_changes)
 
 
-def commit_changes_from_org(scratch_org, user):
+def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
+    from .serializers import ScratchOrgSerializer
+
     repo_url = scratch_org.task.project.repository.repo_url
     branch = scratch_org.task.branch_name
-    sf_org_changes.commit_changes_to_github(
-        user=user, scratch_org=scratch_org, repo_url=repo_url, branch=branch
+
+    with report_errors_on_commit_changes(scratch_org):
+        sf_org_changes.commit_changes_to_github(
+            user=user,
+            scratch_org=scratch_org,
+            repo_url=repo_url,
+            branch=branch,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+        )
+
+        # Update
+        gh = login(token=user.gh_token)
+        owner, repo = extract_owner_and_repo(repo_url)
+        repository = gh.repository(owner, repo)
+        commit = repository.branch(branch).commit
+
+        scratch_org.last_modified_at = now()
+        scratch_org.latest_commit = commit.sha
+        scratch_org.latest_commit_url = commit.html_url
+        scratch_org.latest_commit_at = commit.commit.author.get("date", None)
+        get_unsaved_changes(scratch_org, should_save=False)
+        scratch_org.save()
+
+    push_message_about_instance(
+        scratch_org,
+        {
+            "type": "GITHUB_CHANGES_COMMITTED",
+            "payload": ScratchOrgSerializer(scratch_org).data,
+        },
     )
 
 

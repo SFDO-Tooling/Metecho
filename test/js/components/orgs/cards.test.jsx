@@ -38,7 +38,8 @@ const defaultOrgs = {
     latest_commit_url: '/test/commit/url/',
     latest_commit_at: '2019-08-16T12:58:53.721Z',
     url: '/test/org/url/',
-    changes: { Foo: [{ id: 'change-1', name: 'Bar' }] },
+    unsaved_changes: { Foo: ['Bar'] },
+    has_unsaved_changes: true,
   },
   QA: null,
 };
@@ -91,7 +92,8 @@ describe('<OrgCards/>', () => {
         Dev: {
           ...defaultOrgs.Dev,
           owner: 'other-user',
-          changes: {},
+          unsaved_changes: {},
+          has_unsaved_changes: false,
         },
       };
       const { queryByText, getByText } = setup({ orgs });
@@ -222,7 +224,12 @@ describe('<OrgCards/>', () => {
       beforeEach(() => {
         orgs = {
           Dev: null,
-          QA: { ...defaultOrgs.Dev, org_type: 'QA', changes: null },
+          QA: {
+            ...defaultOrgs.Dev,
+            org_type: 'QA',
+            unsaved_changes: {},
+            has_unsaved_changes: false,
+          },
         };
       });
 
@@ -280,7 +287,11 @@ describe('<OrgCards/>', () => {
         const { getByText } = setup({
           orgs: {
             ...defaultOrgs,
-            Dev: { ...defaultOrgs.Dev, changes: null },
+            Dev: {
+              ...defaultOrgs.Dev,
+              unsaved_changes: {},
+              has_unsaved_changes: false,
+            },
           },
         });
         fireEvent.click(getByText('Actions'));
