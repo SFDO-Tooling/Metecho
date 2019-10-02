@@ -393,7 +393,7 @@ describe('reducer', () => {
     });
   });
 
-  describe('COMMIT_FAILED/GITHUB_CHANGES_COMMITTED', () => {
+  describe('SCRATCH_ORG_COMMIT_CHANGES_FAILED/GITHUB_CHANGES_COMMITTED', () => {
     test('sets committing: false', () => {
       const commit = {
         id: 'commit-id',
@@ -409,7 +409,7 @@ describe('reducer', () => {
       const actual = reducer(
         {},
         {
-          type: 'COMMIT_FAILED',
+          type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
           payload: commit,
         },
       );

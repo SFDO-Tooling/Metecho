@@ -16,12 +16,8 @@ interface OrgProvisionFailed {
   payload: Org;
 }
 interface RefetchOrg {
-  type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_FAILED';
+  type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_SUCCEEDED' | 'REFETCH_ORG_FAILED';
   payload: { org: Org; url: string; response?: any };
-}
-interface RefetchOrgSucceeded {
-  type: 'REFETCH_ORG_SUCCEEDED';
-  payload: Org;
 }
 interface OrgUpdated {
   type: 'SCRATCH_ORG_UPDATE';
@@ -36,7 +32,7 @@ interface OrgDeleteFailed {
   payload: Org;
 }
 interface CommitEvent {
-  type: 'GITHUB_CHANGES_COMMITTED' | 'COMMIT_FAILED';
+  type: 'GITHUB_CHANGES_COMMITTED' | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
   payload: Org;
 }
 
@@ -44,7 +40,6 @@ export type OrgsAction =
   | OrgProvisioned
   | OrgProvisionFailed
   | RefetchOrg
-  | RefetchOrgSucceeded
   | OrgUpdated
   | OrgDeleted
   | OrgDeleteFailed
@@ -174,12 +169,13 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
     //         'Whatcha macallit': [{ id: '6', name: 'Whatchamacallit' }],
     //         'Loopy ': [{ id: '7', name: 'Loopy Looo' }],
     //       },
+    //       has_unsaved_changes: true,
     //     },
     //   });
     // }, 3000);
     return dispatch({
       type: 'REFETCH_ORG_SUCCEEDED',
-      payload: response,
+      payload: { org: response, url },
       // @@@ Mock out until API exists
       // payload: {
       //   // eslint-disable-next-line @typescript-eslint/camelcase
@@ -350,7 +346,7 @@ export const commitFailed = ({
     }),
   );
   return dispatch({
-    type: 'COMMIT_FAILED',
+    type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
     payload: model,
   });
 };

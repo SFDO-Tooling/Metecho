@@ -37,7 +37,7 @@ def mark_refreshing_changes(scratch_org):
     try:
         yield
     except Exception:
-        scratch_org.unsaved_changes = []
+        scratch_org.unsaved_changes = {}
         raise
     finally:
         scratch_org.currently_refreshing_changes = False

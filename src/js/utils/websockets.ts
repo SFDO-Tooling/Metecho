@@ -95,7 +95,7 @@ interface CommitSucceededEvent {
   payload: Org;
 }
 interface CommitFailedEvent {
-  type: 'COMMIT_FAILED';
+  type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
   payload: {
     message?: string;
     model: Org;
@@ -144,7 +144,7 @@ export const getAction = (event: EventType) => {
       return deleteFailed(event.payload);
     case 'GITHUB_CHANGES_COMMITTED':
       return commitSucceeded(event.payload);
-    case 'COMMIT_FAILED':
+    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
       return commitFailed(event.payload);
   }
   return null;

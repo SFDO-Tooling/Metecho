@@ -18,8 +18,8 @@ afterEach(() => {
 });
 
 const defaultChangeset = {
-  Foo: [{ id: 'foo-1', name: 'Bar' }],
-  Buz: [{ id: 'buz-1', name: 'Baz' }, { id: 'buz-2', name: 'Bing' }],
+  Foo: ['Bar'],
+  Buz: ['Baz', 'Bing'],
 };
 
 describe('<CaptureModal/>', () => {
@@ -34,7 +34,6 @@ describe('<CaptureModal/>', () => {
       <MemoryRouter>
         <CaptureModal
           orgId="org-id"
-          taskId="task-id"
           changeset={changeset}
           isOpen
           toggleModal={toggleModal}
@@ -73,10 +72,10 @@ describe('<CaptureModal/>', () => {
       expect(createObject).toHaveBeenCalledTimes(1);
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'scratch_org_commit',
-        url: window.api_urls.task_commit('task-id'),
+        url: window.api_urls.scratch_org_commit('org-id'),
         data: {
           message: 'My Commit',
-          changes: ['foo-1', 'buz-1', 'buz-2'],
+          changes: defaultChangeset,
         },
         hasForm: true,
       });
@@ -137,10 +136,16 @@ describe('<CaptureModal/>', () => {
       expect(input2.checked).toBe(true);
       expect(input3.checked).toBe(false);
 
-      fireEvent.click(input2);
+      fireEvent.click(input3);
 
       expect(input1.checked).toBe(false);
-      expect(input2.checked).toBe(false);
+      expect(input2.checked).toBe(true);
+      expect(input3.checked).toBe(true);
+
+      fireEvent.click(input3);
+
+      expect(input1.checked).toBe(false);
+      expect(input2.checked).toBe(true);
       expect(input3.checked).toBe(false);
     });
   });

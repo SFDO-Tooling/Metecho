@@ -158,15 +158,14 @@ describe('refetchOrg', () => {
 
   test('GETs org from api', () => {
     const store = storeWithThunk({});
-    const response = { id: 'org-id', currently_refreshing_changes: true };
-    fetchMock.getOnce(url, response);
+    fetchMock.getOnce(url, payload.org);
     const started = {
       type: 'REFETCH_ORG_STARTED',
       payload,
     };
     const succeeded = {
       type: 'REFETCH_ORG_SUCCEEDED',
-      payload: response,
+      payload,
     };
 
     expect.assertions(1);
@@ -432,7 +431,7 @@ describe('commitFailed', () => {
       task: 'task-id',
     };
     const action = {
-      type: 'COMMIT_FAILED',
+      type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
       payload: commit,
     };
     store.dispatch(
@@ -458,7 +457,7 @@ describe('commitFailed', () => {
       task: 'task-id',
     };
     const action = {
-      type: 'COMMIT_FAILED',
+      type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
       payload: commit,
     };
     store.dispatch(

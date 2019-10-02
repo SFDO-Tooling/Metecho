@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             model_name="scratchorg",
             name="unsaved_changes",
             field=django.contrib.postgres.fields.jsonb.JSONField(
-                default=list, encoder=django.core.serializers.json.DjangoJSONEncoder
+                default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder
             ),
         ),
     ]

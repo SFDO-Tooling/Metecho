@@ -19,7 +19,7 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_DELETE
         SCRATCH_ORG_DELETE_FAILED
         GITHUB_CHANGES_COMMITTED
-        COMMIT_FAILED
+        SCRATCH_ORG_COMMIT_CHANGES_FAILED
 """
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _

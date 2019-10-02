@@ -141,6 +141,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
         read_only=True,
     )
+    has_unsaved_changes = serializers.SerializerMethodField()
 
     class Meta:
         model = ScratchOrg
@@ -156,6 +157,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "latest_commit_at",
             "url",
             "unsaved_changes",
+            "has_unsaved_changes",
             "currently_refreshing_changes",
             "delete_queued_at",
         )
@@ -169,6 +171,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "unsaved_changes": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
         }
+
+    def get_has_unsaved_changes(self, obj) -> bool:
+        return bool(obj.unsaved_changes)
 
     def save(self, **kwargs):
         kwargs["owner"] = kwargs.get("owner", self.context["request"].user)

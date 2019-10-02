@@ -21,18 +21,14 @@ export interface Org {
   latest_commit_url: string;
   latest_commit_at: string | null;
   url: string | null;
-  unsaved_changes: Changeset | null;
+  unsaved_changes: Changeset;
+  has_unsaved_changes: boolean;
   currently_refreshing_changes: boolean;
   delete_queued_at: string | null;
 }
 
 export interface Changeset {
-  [key: string]: Change[];
-}
-
-interface Change {
-  id: string;
-  name: string;
+  [key: string]: string[];
 }
 
 export interface OrgsByTask {
@@ -122,7 +118,6 @@ const reducer = (
     }
     case 'SCRATCH_ORG_PROVISION':
     case 'SCRATCH_ORG_UPDATE':
-    case 'REFETCH_ORG_SUCCEEDED':
     case 'SCRATCH_ORG_DELETE_FAILED': {
       const org = action.payload as Org;
       const taskOrgs = orgs[org.task] || {
@@ -153,6 +148,7 @@ const reducer = (
       };
     }
     case 'REFETCH_ORG_STARTED':
+    case 'REFETCH_ORG_SUCCEEDED':
     case 'REFETCH_ORG_FAILED': {
       const { org } = action.payload;
       const taskOrgs = orgs[org.task] || {
@@ -165,7 +161,7 @@ const reducer = (
           ...taskOrgs,
           [org.org_type]: {
             ...org,
-            currently_refreshing_changes: action.type === 'REFETCH_ORG_STARTED',
+            currently_refreshing_changes: action.type !== 'REFETCH_ORG_FAILED',
           },
         },
       };
@@ -193,7 +189,7 @@ const reducer = (
       }
       return orgs;
     }
-    case 'COMMIT_FAILED':
+    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
     case 'GITHUB_CHANGES_COMMITTED': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {

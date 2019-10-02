@@ -13,17 +13,22 @@ import { OBJECT_TYPES } from '@/utils/constants';
 import { getOrgChildChanges, getOrgTotalChanges } from '@/utils/helpers';
 
 interface Props {
-  taskId: string;
+  orgId: string;
   changeset: Changeset;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface Inputs {
+  changes: Changeset;
+  message: string;
 }
 
 interface BooleanObject {
   [key: string]: boolean;
 }
 
-const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
+const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
   const [capturingChanges, setCapturingChanges] = useState(false);
   const isMounted = useIsMounted();
@@ -52,15 +57,15 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: { changes: [], message: '' },
+    fields: { changes: {}, message: '' },
     objectType: OBJECT_TYPES.COMMIT,
-    url: window.api_urls.task_commit(taskId),
+    url: window.api_urls.scratch_org_commit(orgId),
     onSuccess: handleSuccess,
     onError: handleError,
   });
 
-  const setChanges = (changes: string[]) => {
-    setInputs({ ...inputs, changes });
+  const setChanges = (changes: Changeset) => {
+    setInputs({ ...(inputs as Inputs), changes });
   };
 
   const handlePanelToggle = (groupName: string) => {
@@ -71,28 +76,47 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
   };
 
   const handleSelectGroup = (groupName: string, checked: boolean) => {
-    const newCheckedItems = new Set(inputs.changes as string[]);
-    for (const { id } of changeset[groupName]) {
-      if (checked) {
-        newCheckedItems.add(id);
-      } else {
-        newCheckedItems.delete(id);
-      }
+    const newCheckedItems = JSON.parse(
+      JSON.stringify((inputs as Inputs).changes),
+    ) as Changeset;
+    if (checked) {
+      newCheckedItems[groupName] = [...changeset[groupName]];
+    } else {
+      Reflect.deleteProperty(newCheckedItems, groupName);
     }
-    setChanges([...newCheckedItems]);
+    setChanges(newCheckedItems);
   };
 
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    { checked }: { checked: boolean },
-  ) => {
-    const newCheckedItems = new Set(inputs.changes as string[]);
+  const handleChange = ({
+    groupName,
+    change,
+    checked,
+  }: {
+    groupName: string;
+    change: string;
+    checked: boolean;
+  }) => {
+    const newCheckedItems = JSON.parse(
+      JSON.stringify((inputs as Inputs).changes),
+    ) as Changeset;
+    const changes = newCheckedItems[groupName];
     if (checked) {
-      newCheckedItems.add(event.target.id);
+      if (changes) {
+        /* istanbul ignore else */
+        if (!changes.includes(change)) {
+          changes.push(change);
+        }
+      } else {
+        newCheckedItems[groupName] = [change];
+      }
     } else {
-      newCheckedItems.delete(event.target.id);
+      /* istanbul ignore else */
+      // eslint-disable-next-line no-lonely-if
+      if (changes && changes.includes(change)) {
+        changes.splice(changes.indexOf(change), 1);
+      }
     }
-    setChanges([...newCheckedItems]);
+    setChanges(newCheckedItems);
   };
 
   const handleSelectAllChange = (
@@ -100,12 +124,10 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
     { checked }: { checked: boolean },
   ) => {
     if (checked) {
-      const ids = Object.values(changeset)
-        .flat()
-        .map(change => change.id);
-      setChanges(ids);
+      const allChanges = JSON.parse(JSON.stringify(changeset)) as Changeset;
+      setChanges(allChanges);
     } else {
-      setChanges([]);
+      setChanges({});
     }
   };
 
@@ -128,8 +150,10 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
   };
 
   const totalChanges = Object.values(changeset).flat().length;
-  const allChangesChecked = inputs.changes.length === totalChanges;
-  const noChangesChecked = !inputs.changes.length;
+  const changesChecked = Object.values((inputs as Inputs).changes).flat()
+    .length;
+  const allChangesChecked = changesChecked === totalChanges;
+  const noChangesChecked = !changesChecked;
 
   return (
     <Modal
@@ -159,7 +183,7 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
           }
           variant="brand"
           onClick={handleSubmitClicked}
-          disabled={!inputs.changes.length || capturingChanges}
+          disabled={!changesChecked || capturingChanges}
         />,
       ]}
       onRequestClose={handleClose}
@@ -189,7 +213,10 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
           let allChildrenChecked = false;
           let noChildrenChecked = true;
           for (const child of children) {
-            if (inputs.changes.includes(child.id)) {
+            if (
+              (inputs as Inputs).changes[groupName] &&
+              (inputs as Inputs).changes[groupName].includes(child)
+            ) {
               noChildrenChecked = false;
               checkedChildren = checkedChildren + 1;
             }
@@ -227,14 +254,19 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
                 >
                   {changeset[groupName].map(change => (
                     <Checkbox
-                      key={change.id}
-                      id={change.id}
+                      key={`${groupName}-${change}`}
                       labels={{
-                        label: change.name,
+                        label: change,
                       }}
                       name="changes"
-                      checked={inputs.changes.includes(change.id)}
-                      onChange={handleChange}
+                      checked={
+                        (inputs as Inputs).changes[groupName] &&
+                        (inputs as Inputs).changes[groupName].includes(change)
+                      }
+                      onChange={(
+                        event: React.ChangeEvent<HTMLInputElement>,
+                        { checked }: { checked: boolean },
+                      ) => handleChange({ groupName, change, checked })}
                     />
                   ))}
                 </AccordionPanel>,
@@ -247,7 +279,7 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
           label={i18n.t('Commit Message')}
           className="slds-form-element_stacked slds-p-left_none"
           name="message"
-          value={inputs.message}
+          value={(inputs as Inputs).message}
           required
           aria-required
           maxLength="50"
@@ -259,7 +291,7 @@ const CaptureModal = ({ taskId, changeset, isOpen, toggleModal }: Props) => {
           ref={submitButton}
           type="submit"
           style={{ display: 'none' }}
-          disabled={!inputs.changes.length || capturingChanges}
+          disabled={!changesChecked || capturingChanges}
         />
       </form>
     </Modal>
