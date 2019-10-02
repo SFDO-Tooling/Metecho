@@ -24,6 +24,13 @@ logger = logging.getLogger(__name__)
 async def report_scratch_org_error(instance, message, type_):
     from .serializers import ScratchOrgSerializer
 
+    # @jgerigmeyer asked for the error to be unwrapped in the case that
+    # there's only one, which is the most common case, per this
+    # discussion:
+    # https://github.com/SFDO-Tooling/MetaShare/pull/149#discussion_r327308563
+    if isinstance(message, list) and len(message) == 1:
+        message = message[0]
+
     message = {
         "type": type_,
         "payload": {"message": message, "model": ScratchOrgSerializer(instance).data},
@@ -51,7 +58,7 @@ def report_errors_on_provision(scratch_org):
         yield
     except Exception as e:
         async_to_sync(report_scratch_org_error)(
-            scratch_org, str(e), "SCRATCH_ORG_PROVISION_FAILED"
+            scratch_org, e.content, "SCRATCH_ORG_PROVISION_FAILED"
         )
         tb = traceback.format_exc()
         logger.error(tb)
@@ -65,7 +72,7 @@ def report_errors_on_fetch_changes(scratch_org):
         yield
     except Exception as e:
         async_to_sync(report_scratch_org_error)(
-            scratch_org, str(e), "SCRATCH_ORG_FETCH_CHANGES_FAILED"
+            scratch_org, e.content, "SCRATCH_ORG_FETCH_CHANGES_FAILED"
         )
         tb = traceback.format_exc()
         logger.error(tb)
@@ -78,7 +85,7 @@ def report_errors_on_commit_changes(scratch_org):
         yield
     except Exception as e:
         async_to_sync(report_scratch_org_error)(
-            scratch_org, str(e), "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
+            scratch_org, e.content, "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
         )
         tb = traceback.format_exc()
         logger.error(tb)
@@ -276,7 +283,7 @@ def delete_scratch_org(scratch_org):
         scratch_org.delete_queued_at = None
         scratch_org.save()
         async_to_sync(report_scratch_org_error)(
-            scratch_org, str(e), "SCRATCH_ORG_DELETE_FAILED"
+            scratch_org, e.content, "SCRATCH_ORG_DELETE_FAILED"
         )
         tb = traceback.format_exc()
         logger.error(tb)

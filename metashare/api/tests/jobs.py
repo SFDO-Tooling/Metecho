@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.utils.timezone import now
 from github3.exceptions import UnprocessableEntity
+from simple_salesforce.exceptions import SalesforceGeneralError
 
 from ..jobs import (
     _create_branches_on_github,
@@ -165,8 +166,13 @@ def test_report_errors_on_check_changes(scratch_org_factory):
     ) as push_message_about_instance:
         try:
             with report_errors_on_fetch_changes(scratch_org):
-                raise ValueError
-        except ValueError:
+                raise SalesforceGeneralError(
+                    "https://example.com",
+                    418,
+                    "I'M A TEAPOT",
+                    [{"error": "Short and stout"}],
+                )
+        except SalesforceGeneralError:
             pass
         assert push_message_about_instance.called
 
@@ -179,8 +185,13 @@ def test_report_errors_on_provision(scratch_org_factory):
     ) as push_message_about_instance:
         try:
             with report_errors_on_provision(scratch_org):
-                raise ValueError
-        except ValueError:
+                raise SalesforceGeneralError(
+                    "https://example.com",
+                    418,
+                    "I'M A TEAPOT",
+                    [{"error": "Short and stout"}],
+                )
+        except SalesforceGeneralError:
             pass
         assert push_message_about_instance.called
 
@@ -193,8 +204,13 @@ def test_report_errors_on_commit_changes(scratch_org_factory):
     ) as push_message_about_instance:
         try:
             with report_errors_on_commit_changes(scratch_org):
-                raise ValueError
-        except ValueError:
+                raise SalesforceGeneralError(
+                    "https://example.com",
+                    418,
+                    "I'M A TEAPOT",
+                    [{"error": "Short and stout"}],
+                )
+        except SalesforceGeneralError:
             pass
         assert push_message_about_instance.called
 
@@ -240,10 +256,15 @@ def test_mark_refreshing_changes(scratch_org_factory):
 def test_mark_refreshing_changes__exception(scratch_org_factory):
     scratch_org = scratch_org_factory()
     assert not scratch_org.currently_refreshing_changes
-    with pytest.raises(ValueError):
+    with pytest.raises(SalesforceGeneralError):
         with mark_refreshing_changes(scratch_org):
             assert scratch_org.currently_refreshing_changes
-            raise ValueError
+            raise SalesforceGeneralError(
+                "https://example.com",
+                418,
+                "I'M A TEAPOT",
+                [{"error": "Short and stout"}],
+            )
 
     scratch_org.refresh_from_db()
     assert not scratch_org.unsaved_changes
@@ -263,8 +284,10 @@ def test_delete_scratch_org(scratch_org_factory):
 def test_delete_scratch_org__exception(scratch_org_factory):
     scratch_org = scratch_org_factory()
     with patch(f"{PATCH_ROOT}.sf_flow.delete_scratch_org") as sf_delete_scratch_org:
-        sf_delete_scratch_org.side_effect = ValueError
-        with pytest.raises(ValueError):
+        sf_delete_scratch_org.side_effect = SalesforceGeneralError(
+            "https://example.com", 418, "I'M A TEAPOT", [{"error": "Short and stout"}]
+        )
+        with pytest.raises(SalesforceGeneralError):
             delete_scratch_org(scratch_org)
 
         scratch_org.refresh_from_db()
