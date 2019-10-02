@@ -2,7 +2,7 @@
 
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
-import { LogoutAction } from '@/store/user/actions';
+import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import {
   OBJECT_TYPES,
   ObjectTypes,
@@ -45,9 +45,10 @@ const defaultState = {};
 
 const reducer = (
   orgs: OrgState = defaultState,
-  action: ObjectsAction | LogoutAction | OrgsAction,
+  action: ObjectsAction | LogoutAction | OrgsAction | RefetchDataAction,
 ) => {
   switch (action.type) {
+    case 'REFETCH_DATA_SUCCEEDED':
     case 'USER_LOGGED_OUT':
       return defaultState;
     case 'FETCH_OBJECTS_SUCCEEDED': {

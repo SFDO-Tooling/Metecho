@@ -1,7 +1,7 @@
 import reducer from '@/store/repositories/reducer';
 
 describe('reducer', () => {
-  test('returns initial state', () => {
+  test('returns initial state if no action', () => {
     const expected = {
       repositories: [],
       next: null,
@@ -13,30 +13,33 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles USER_LOGGED_OUT action', () => {
-    const repository1 = {
-      id: 'r1',
-      slug: 'repository-1',
-      name: 'Repository 1',
-      description: 'This is a test repository.',
-    };
-    const expected = {
-      repositories: [],
-      next: null,
-      notFound: [],
-      refreshing: false,
-    };
-    const actual = reducer(
-      {
-        repositories: [repository1],
-        next: 'next-url',
-        notFound: ['repository-1'],
-      },
-      { type: 'USER_LOGGED_OUT' },
-    );
+  test.each([['USER_LOGGED_OUT'], ['REFETCH_DATA_SUCCEEDED']])(
+    'returns initial state on %s action',
+    action => {
+      const repository1 = {
+        id: 'r1',
+        slug: 'repository-1',
+        name: 'Repository 1',
+        description: 'This is a test repository.',
+      };
+      const expected = {
+        repositories: [],
+        next: null,
+        notFound: [],
+        refreshing: false,
+      };
+      const actual = reducer(
+        {
+          repositories: [repository1],
+          next: 'next-url',
+          notFound: ['repository-1'],
+        },
+        { type: action },
+      );
 
-    expect(actual).toEqual(expected);
-  });
+      expect(actual).toEqual(expected);
+    },
+  );
 
   describe('REFRESH_REPOS_REQUESTED', () => {
     test('sets refreshing: true', () => {

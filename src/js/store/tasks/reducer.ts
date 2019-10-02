@@ -1,6 +1,6 @@
 import { ObjectsAction } from '@/store/actions';
 import { TaskAction } from '@/store/tasks/actions';
-import { LogoutAction } from '@/store/user/actions';
+import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Task {
@@ -21,9 +21,10 @@ const defaultState = {};
 
 const reducer = (
   tasks: TaskState = defaultState,
-  action: TaskAction | ObjectsAction | LogoutAction,
+  action: TaskAction | ObjectsAction | LogoutAction | RefetchDataAction,
 ) => {
   switch (action.type) {
+    case 'REFETCH_DATA_SUCCEEDED':
     case 'USER_LOGGED_OUT':
       return defaultState;
     case 'FETCH_OBJECTS_SUCCEEDED': {

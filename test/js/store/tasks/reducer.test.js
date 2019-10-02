@@ -1,31 +1,34 @@
 import reducer from '@/store/tasks/reducer';
 
 describe('reducer', () => {
-  test('returns initial state', () => {
+  test('returns initial state if no action', () => {
     const expected = {};
     const actual = reducer(undefined, {});
 
     expect(actual).toEqual(expected);
   });
 
-  test('handles USER_LOGGED_OUT action', () => {
-    const task1 = {
-      id: 't1',
-      slug: 'task-1',
-      name: 'Task 1',
-      description: 'This is a test task.',
-      project: 'r1',
-    };
-    const expected = {};
-    const actual = reducer(
-      {
-        r1: [task1],
-      },
-      { type: 'USER_LOGGED_OUT' },
-    );
+  test.each([['USER_LOGGED_OUT'], ['REFETCH_DATA_SUCCEEDED']])(
+    'returns initial state on %s action',
+    action => {
+      const task1 = {
+        id: 't1',
+        slug: 'task-1',
+        name: 'Task 1',
+        description: 'This is a test task.',
+        project: 'r1',
+      };
+      const expected = {};
+      const actual = reducer(
+        {
+          r1: [task1],
+        },
+        { type: action },
+      );
 
-    expect(actual).toEqual(expected);
-  });
+      expect(actual).toEqual(expected);
+    },
+  );
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
     test('resets task list for project', () => {
