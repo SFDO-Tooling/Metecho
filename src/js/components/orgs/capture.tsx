@@ -21,7 +21,7 @@ interface Props {
 
 interface Inputs {
   changes: Changeset;
-  message: string;
+  commit_message: string;
 }
 
 interface BooleanObject {
@@ -57,7 +57,8 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: { changes: {}, message: '' },
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    fields: { changes: {}, commit_message: '' },
     objectType: OBJECT_TYPES.COMMIT,
     url: window.api_urls.scratch_org_commit(orgId),
     onSuccess: handleSuccess,
@@ -278,12 +279,12 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
           id="commit-message"
           label={i18n.t('Commit Message')}
           className="slds-form-element_stacked slds-p-left_none"
-          name="message"
-          value={(inputs as Inputs).message}
+          name="commit_message"
+          value={(inputs as Inputs).commit_message}
           required
           aria-required
           maxLength="50"
-          errorText={errors.message}
+          errorText={errors.commit_message}
           onChange={handleInputChange}
         />
         {/* Clicking hidden button allows for native browser form validation */}

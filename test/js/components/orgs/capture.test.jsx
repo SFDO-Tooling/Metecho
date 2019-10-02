@@ -74,7 +74,7 @@ describe('<CaptureModal/>', () => {
         objectType: 'scratch_org_commit',
         url: window.api_urls.scratch_org_commit('org-id'),
         data: {
-          message: 'My Commit',
+          commit_message: 'My Commit',
           changes: defaultChangeset,
         },
         hasForm: true,
