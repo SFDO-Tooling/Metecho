@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
-from .models import Project, Repository, ScratchOrg, Task
+from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
     CommitSerializer,
@@ -118,7 +118,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
 
         # XXX: I am apprehensive about the possibility of flooding the worker queues
         # easily this way:
-        for instance in queryset:
+        for instance in queryset.filter(org_type=SCRATCH_ORG_TYPES.Dev):
             instance.get_unsaved_changes()
 
         page = self.paginate_queryset(queryset)
@@ -134,7 +134,8 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # rest_framework.mixins.RetrieveModelMixin, because I needed to insert the
         # get_unsaved_changes line in the middle.
         instance = self.get_object()
-        instance.get_unsaved_changes()
+        if instance.org_type == SCRATCH_ORG_TYPES.Dev:
+            instance.get_unsaved_changes()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
