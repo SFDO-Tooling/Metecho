@@ -110,7 +110,29 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         instance.queue_delete()
 
+    def list(self, request, *args, **kwargs):
+        # XXX: This method is copied verbatim from
+        # rest_framework.mixins.RetrieveModelMixin, because I needed to insert the
+        # get_unsaved_changes line in the middle.
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # XXX: I am apprehensive about the possibility of flooding the worker queues
+        # easily this way:
+        for instance in queryset:
+            instance.get_unsaved_changes()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:  # pragma: nocover
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def retrieve(self, request, *args, **kwargs):
+        # XXX: This method is copied verbatim from
+        # rest_framework.mixins.RetrieveModelMixin, because I needed to insert the
+        # get_unsaved_changes line in the middle.
         instance = self.get_object()
         instance.get_unsaved_changes()
         serializer = self.get_serializer(instance)
