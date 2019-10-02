@@ -58,6 +58,7 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
             repo_url="https://github.com/user/repo",
             branch="test-branch",
             desired_changes=desired_changes,
+            commit_message="test message",
         )
 
         assert CommitDir.called

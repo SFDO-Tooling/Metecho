@@ -10,6 +10,7 @@ from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilt
 from .models import Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
+    CommitSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
@@ -119,7 +120,16 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     def commit(self, request, pk=None):
         from .jobs import commit_changes_from_org_job
 
+        serializer = CommitSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
         scratch_org = self.get_object()
-        # Expect request.data to be Dict<str, List<str>>
-        commit_changes_from_org_job.delay(scratch_org, request.user, request.data)
+        commit_message = serializer.validated_data["commit_message"]
+        desired_changes = serializer.validated_data["changes"]
+        commit_changes_from_org_job.delay(
+            scratch_org, request.user, desired_changes, commit_message
+        )
         return Response("", status=status.HTTP_202_ACCEPTED)

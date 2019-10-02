@@ -301,6 +301,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         login.return_value = gh
 
         desired_changes = {"name": ["member"]}
-        commit_changes_from_org(scratch_org, user, desired_changes)
+        commit_message = "test message"
+        commit_changes_from_org(scratch_org, user, desired_changes, commit_message)
 
         assert commit_changes_to_github.called

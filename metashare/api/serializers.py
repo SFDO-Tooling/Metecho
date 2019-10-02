@@ -178,3 +178,11 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         kwargs["owner"] = kwargs.get("owner", self.context["request"].user)
         return super().save(**kwargs)
+
+
+class CommitSerializer(serializers.Serializer):
+    commit_message = serializers.CharField()
+    # Expect this to be Dict<str, List<str>>
+    changes = serializers.DictField(
+        child=serializers.ListField(child=serializers.CharField())
+    )

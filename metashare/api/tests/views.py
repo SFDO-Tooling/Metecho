@@ -73,10 +73,25 @@ class TestScratchOrgView:
             "metashare.api.jobs.commit_changes_from_org_job"
         ) as commit_changes_from_org_job:
             response = client.post(
-                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)})
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
+                {"commit_message": "Test message", "changes": {}},
+                format="json",
             )
             assert response.status_code == 202
             assert commit_changes_from_org_job.delay.called
+
+    def test_commit_sad_path(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(org_type="Dev")
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
+                {"changes": {}},
+                format="json",
+            )
+            assert response.status_code == 422
+            assert not commit_changes_from_org_job.delay.called
 
     def test_retrieve_changes(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory()

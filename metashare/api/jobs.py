@@ -223,7 +223,7 @@ def get_unsaved_changes(scratch_org, should_save=True):
 get_unsaved_changes_job = job(get_unsaved_changes)
 
 
-def commit_changes_from_org(scratch_org, user, desired_changes):
+def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
     from .serializers import ScratchOrgSerializer
 
     repo_url = scratch_org.task.project.repository.repo_url
@@ -236,6 +236,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes):
             repo_url=repo_url,
             branch=branch,
             desired_changes=desired_changes,
+            commit_message=commit_message,
         )
 
         # Update
