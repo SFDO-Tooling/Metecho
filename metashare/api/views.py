@@ -155,4 +155,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         commit_changes_from_org_job.delay(
             scratch_org, request.user, desired_changes, commit_message
         )
-        return Response("", status=status.HTTP_202_ACCEPTED)
+        return Response(
+            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )

@@ -252,7 +252,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         get_unsaved_changes(scratch_org, should_save=False)
         scratch_org.save()
 
-    push_message_about_instance(
+    async_to_sync(push_message_about_instance)(
         scratch_org,
         {
             "type": "GITHUB_CHANGES_COMMITTED",

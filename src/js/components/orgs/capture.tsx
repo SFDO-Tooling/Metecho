@@ -203,7 +203,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
           />
           <span>({getOrgTotalChanges(changeset)})</span>
         </div>
-        {Object.keys(changeset).map(groupName => {
+        {Object.keys(changeset).map((groupName, index) => {
           const children = changeset[groupName];
           const handleThisPanelToggle = () => handlePanelToggle(groupName);
           const handleSelectThisGroup = (
@@ -228,50 +228,44 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
 
           return (
             <Accordion key={groupName}>
-              {[
-                // https://github.com/salesforce/design-system-react/issues/2340
-                <AccordionPanel
-                  expanded={Boolean(expandedPanels[groupName])}
-                  id={groupName}
-                  key={groupName}
-                  onTogglePanel={handleThisPanelToggle}
-                  title={groupName}
-                  summary={
-                    <div className="form-grid">
-                      <Checkbox
-                        id={groupName}
-                        labels={{ label: groupName }}
-                        checked={allChildrenChecked}
-                        indeterminate={
-                          !allChildrenChecked && !noChildrenChecked
-                        }
-                        onChange={handleSelectThisGroup}
-                      />
-                      <span className="slds-text-body_regular">
-                        ({getOrgChildChanges(children.length)})
-                      </span>
-                    </div>
-                  }
-                >
-                  {changeset[groupName].map(change => (
+              <AccordionPanel
+                expanded={Boolean(expandedPanels[groupName])}
+                key={groupName}
+                id={`group-${index}`}
+                onTogglePanel={handleThisPanelToggle}
+                title={groupName}
+                summary={
+                  <div className="form-grid">
                     <Checkbox
-                      key={`${groupName}-${change}`}
-                      labels={{
-                        label: change,
-                      }}
-                      name="changes"
-                      checked={
-                        (inputs as Inputs).changes[groupName] &&
-                        (inputs as Inputs).changes[groupName].includes(change)
-                      }
-                      onChange={(
-                        event: React.ChangeEvent<HTMLInputElement>,
-                        { checked }: { checked: boolean },
-                      ) => handleChange({ groupName, change, checked })}
+                      labels={{ label: groupName }}
+                      checked={allChildrenChecked}
+                      indeterminate={!allChildrenChecked && !noChildrenChecked}
+                      onChange={handleSelectThisGroup}
                     />
-                  ))}
-                </AccordionPanel>,
-              ]}
+                    <span className="slds-text-body_regular">
+                      ({getOrgChildChanges(children.length)})
+                    </span>
+                  </div>
+                }
+              >
+                {changeset[groupName].map(change => (
+                  <Checkbox
+                    key={`${groupName}-${change}`}
+                    labels={{
+                      label: change,
+                    }}
+                    name="changes"
+                    checked={Boolean(
+                      (inputs as Inputs).changes[groupName] &&
+                        (inputs as Inputs).changes[groupName].includes(change),
+                    )}
+                    onChange={(
+                      event: React.ChangeEvent<HTMLInputElement>,
+                      { checked }: { checked: boolean },
+                    ) => handleChange({ groupName, change, checked })}
+                  />
+                ))}
+              </AccordionPanel>
             </Accordion>
           );
         })}

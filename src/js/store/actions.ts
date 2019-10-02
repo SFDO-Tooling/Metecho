@@ -257,10 +257,10 @@ export const createObject = ({
     });
     // }
     if (
-      shouldSubscribeToObject(object) &&
       object &&
       object.id &&
-      window.socket
+      window.socket &&
+      shouldSubscribeToObject(object)
     ) {
       window.socket.subscribe({
         model: objectType,
