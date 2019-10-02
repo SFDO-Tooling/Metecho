@@ -27,12 +27,12 @@ const SubmitModal = ({ isOpen, toggleModal }: Props) => {
     resetForm,
   } = useForm({
     fields: {
-      criticalChanges: '',
-      changes: '',
-      issuesClosed: '',
-      devNotes: '',
+      critical_changes: '',
+      additional_changes: '',
+      issues: '',
+      notes: '',
     },
-    objectType: OBJECT_TYPES.PULL_REQUEST, //@@@ todo for now
+    objectType: OBJECT_TYPES.PULL_REQUEST, // @@@ todo for now
     onSuccess: handleSuccess,
   });
   const handleCancel = () => {
@@ -95,38 +95,42 @@ const SubmitModal = ({ isOpen, toggleModal }: Props) => {
               label={i18n.t(
                 'Describe any critical changes which might impact existing functionality',
               )}
-              name="criticalChanges"
-              value={inputs.criticalChanges}
+              name="critical_changes"
+              value={inputs.critical_changes}
               onChange={handleInputChange}
               className="task-submit-textarea"
+              errorText={errors.critical_changes}
             />
             <Textarea
-              id="task-changes"
+              id="task_additional_changes"
               label={i18n.t(
                 'Describe additional changes including instructions for users for any post-upgrade tasks.',
               )}
-              name="changes"
-              value={inputs.changes}
+              name="additional_changes"
+              value={inputs.additional_changes}
               onChange={handleInputChange}
               className="task-submit-textarea"
+              errorText={errors.additional_changes}
             />
             <Textarea
-              id="task-issues-closed"
+              id="task-issues"
               label={i18n.t(
                 'Which, if any, issues were closed (including issue #number)',
               )}
-              name="issuesClosed"
-              value={inputs.issuesClosed}
+              name="issues"
+              value={inputs.issues}
               onChange={handleInputChange}
               className="task-submit-textarea"
+              errorText={errors.issues}
             />
             <Textarea
-              id="task-dev-notes"
+              id="task-notes"
               label={i18n.t('Developer notes')}
-              name="devNotes"
-              value={inputs.devNotes}
+              name="notes"
+              value={inputs.notes}
               onChange={handleInputChange}
               className="task-submit-textarea"
+              errorText={errors.notes}
             />
           </div>
           <div className="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12">
