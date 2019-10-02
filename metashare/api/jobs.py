@@ -9,7 +9,8 @@ from django_rq import job
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
-from . import sf_org_changes, sf_run_flow
+from . import sf_org_changes as sf_changes
+from . import sf_run_flow as sf_flow
 from .github_context import (
     extract_owner_and_repo,
     get_cumulus_prefix,
@@ -84,7 +85,7 @@ def report_errors_on_commit_changes(scratch_org):
         raise
 
 
-def try_to_make_branch(repository, *, new_branch, base_branch):
+def _try_to_make_branch(repository, *, new_branch, base_branch):
     branch_name = new_branch
     counter = 0
     while True:
@@ -100,7 +101,7 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
                 raise
 
 
-def create_branches_on_github(*, user, repo_url, project, task, repo_root):
+def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
     """
     Expects to be called in the context of a local github checkout.
     """
@@ -121,7 +122,7 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
             repo_commit=repository.branch(repository.default_branch).latest_sha(),
         )
         project_branch_name = f"{prefix}{slugify(project.name)}"
-        project_branch_name = try_to_make_branch(
+        project_branch_name = _try_to_make_branch(
             repository,
             new_branch=project_branch_name,
             base_branch=repository.default_branch,
@@ -133,7 +134,7 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
     if task.branch_name:
         task_branch_name = task.branch_name
     else:
-        task_branch_name = try_to_make_branch(
+        task_branch_name = _try_to_make_branch(
             repository,
             new_branch=f"{project_branch_name}__{slugify(task.name)}",
             base_branch=project_branch_name,
@@ -144,7 +145,7 @@ def create_branches_on_github(*, user, repo_url, project, task, repo_root):
     return task_branch_name
 
 
-def create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project_path):
+def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project_path):
     from .models import SCRATCH_ORG_TYPES
 
     cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
@@ -155,7 +156,7 @@ def create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project
     commit = repository.branch(repo_branch).commit
 
     owner, repo = extract_owner_and_repo(repo_url)
-    org_config, login_url = sf_run_flow.create_org_and_run_flow(
+    org_config, login_url = sf_flow.create_org_and_run_flow(
         repo_owner=owner,
         repo_name=repo,
         repo_branch=repo_branch,
@@ -181,21 +182,24 @@ def create_branches_on_github_then_create_scratch_org(
         repo_root = stack.enter_context(local_github_checkout(user, repo_url))
         stack.enter_context(report_errors_on_provision(scratch_org))
 
-        commit_ish = create_branches_on_github(
+        commit_ish = _create_branches_on_github(
             user=user,
             repo_url=repo_url,
             project=project,
             task=task,
             repo_root=repo_root,
         )
-        create_org_and_run_flow(
+        _create_org_and_run_flow(
             scratch_org,
             user=user,
             repo_url=repo_url,
             repo_branch=commit_ish,
             project_path=repo_root,
         )
-        get_unsaved_changes(scratch_org, should_save=False)
+        scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
+            scratch_org
+        )
+        scratch_org.save()
 
 
 create_branches_on_github_then_create_scratch_org_job = job(
@@ -203,21 +207,19 @@ create_branches_on_github_then_create_scratch_org_job = job(
 )
 
 
-def get_unsaved_changes(scratch_org, should_save=True):
+def get_unsaved_changes(scratch_org):
     with contextlib.ExitStack() as stack:
         stack.enter_context(report_errors_on_fetch_changes(scratch_org))
         stack.enter_context(mark_refreshing_changes(scratch_org))
 
         old_revision_numbers = scratch_org.latest_revision_numbers
-        new_revision_numbers = sf_org_changes.get_latest_revision_numbers(scratch_org)
-        unsaved_changes = sf_org_changes.compare_revisions(
+        new_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
+        unsaved_changes = sf_changes.compare_revisions(
             old_revision_numbers, new_revision_numbers
         )
         if unsaved_changes:
             scratch_org.latest_revision_numbers = new_revision_numbers
             scratch_org.unsaved_changes = unsaved_changes
-            if should_save:
-                scratch_org.save()
 
 
 get_unsaved_changes_job = job(get_unsaved_changes)
@@ -230,7 +232,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
     branch = scratch_org.task.branch_name
 
     with report_errors_on_commit_changes(scratch_org):
-        sf_org_changes.commit_changes_to_github(
+        sf_changes.commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
             repo_url=repo_url,
@@ -249,7 +251,9 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         scratch_org.latest_commit = commit.sha
         scratch_org.latest_commit_url = commit.html_url
         scratch_org.latest_commit_at = commit.commit.author.get("date", None)
-        get_unsaved_changes(scratch_org, should_save=False)
+        scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
+            scratch_org
+        )
         scratch_org.save()
 
     async_to_sync(push_message_about_instance)(
@@ -266,7 +270,7 @@ commit_changes_from_org_job = job(commit_changes_from_org)
 
 def delete_scratch_org(scratch_org):
     try:
-        sf_run_flow.delete_scratch_org(scratch_org)
+        sf_flow.delete_scratch_org(scratch_org)
         scratch_org.delete()
     except Exception as e:
         scratch_org.delete_queued_at = None

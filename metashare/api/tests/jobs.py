@@ -6,10 +6,11 @@ from django.utils.timezone import now
 from github3.exceptions import UnprocessableEntity
 
 from ..jobs import (
+    _create_branches_on_github,
+    _create_org_and_run_flow,
+    _try_to_make_branch,
     commit_changes_from_org,
-    create_branches_on_github,
     create_branches_on_github_then_create_scratch_org,
-    create_org_and_run_flow,
     delete_scratch_org,
     get_unsaved_changes,
     mark_refreshing_changes,
@@ -17,7 +18,6 @@ from ..jobs import (
     report_errors_on_commit_changes,
     report_errors_on_fetch_changes,
     report_errors_on_provision,
-    try_to_make_branch,
 )
 from ..models import SCRATCH_ORG_TYPES
 
@@ -51,7 +51,7 @@ class TestCreateBranchesOnGitHub:
             gh.repository.return_value = repository
             login.return_value = gh
 
-            create_branches_on_github(
+            _create_branches_on_github(
                 user=user,
                 repo_url="https://github.com/user/repo-bohemia",
                 project=project,
@@ -82,7 +82,7 @@ class TestCreateBranchesOnGitHub:
             gh.repository.return_value = repository
             login.return_value = gh
 
-            create_branches_on_github(
+            _create_branches_on_github(
                 user=user,
                 repo_url="https://github.com/user/repo-francia",
                 project=project,
@@ -100,7 +100,7 @@ class TestCreateBranchesOnGitHub:
         branch = MagicMock()
         branch.latest_sha.return_value = "1234abc"
         repository.branch.return_value = branch
-        result = try_to_make_branch(
+        result = _try_to_make_branch(
             repository, new_branch="new-branch", base_branch="base-branch"
         )
 
@@ -114,17 +114,17 @@ class TestCreateBranchesOnGitHub:
         branch.latest_sha.return_value = "1234abc"
         repository.branch.return_value = branch
         with pytest.raises(UnprocessableEntity):
-            try_to_make_branch(
+            _try_to_make_branch(
                 repository, new_branch="new-branch", base_branch="base-branch"
             )
 
 
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
-        sf_run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_run_flow"))
-        sf_run_flow.create_org_and_run_flow.return_value = (MagicMock(), MagicMock())
+        sf_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_flow"))
+        sf_flow.create_org_and_run_flow.return_value = (MagicMock(), MagicMock())
         stack.enter_context(patch(f"{PATCH_ROOT}.login"))
-        create_org_and_run_flow(
+        _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
             repo_url="https://github.com/owner/repo",
@@ -132,7 +132,7 @@ def test_create_org_and_run_flow():
             project_path="",
         )
 
-        assert sf_run_flow.create_org_and_run_flow.called
+        assert sf_flow.create_org_and_run_flow.called
 
 
 @pytest.mark.django_db
@@ -140,7 +140,7 @@ def test_get_unsaved_changes(scratch_org_factory):
     scratch_org = scratch_org_factory(latest_revision_numbers={"TypeOne:NameOne": 10})
 
     with patch(
-        f"{PATCH_ROOT}.sf_org_changes.get_latest_revision_numbers"
+        f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers"
     ) as get_latest_revision_numbers:
         get_latest_revision_numbers.return_value = {
             "TypeOne": {"NameOne": 13},
@@ -203,15 +203,16 @@ def test_create_branches_on_github_then_create_scratch_org():
     # Not a great test, but not a complicated function.
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-        create_branches_on_github = stack.enter_context(
-            patch(f"{PATCH_ROOT}.create_branches_on_github")
+        _create_branches_on_github = stack.enter_context(
+            patch(f"{PATCH_ROOT}._create_branches_on_github")
         )
-        create_org_and_run_flow = stack.enter_context(
-            patch(f"{PATCH_ROOT}.create_org_and_run_flow")
+        _create_org_and_run_flow = stack.enter_context(
+            patch(f"{PATCH_ROOT}._create_org_and_run_flow")
         )
-        get_unsaved_changes = stack.enter_context(
-            patch(f"{PATCH_ROOT}.get_unsaved_changes")
+        get_latest_revision_numbers = stack.enter_context(
+            patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
         )
+        get_latest_revision_numbers.return_value = {}
 
         create_branches_on_github_then_create_scratch_org(
             project=MagicMock(),
@@ -221,9 +222,9 @@ def test_create_branches_on_github_then_create_scratch_org():
             user=MagicMock(),
         )
 
-        assert create_branches_on_github.called
-        assert create_org_and_run_flow.called
-        assert get_unsaved_changes.called
+        assert _create_branches_on_github.called
+        assert _create_org_and_run_flow.called
+        assert get_latest_revision_numbers.called
 
 
 @pytest.mark.django_db
@@ -252,7 +253,7 @@ def test_mark_refreshing_changes__exception(scratch_org_factory):
 @pytest.mark.django_db
 def test_delete_scratch_org(scratch_org_factory):
     scratch_org = scratch_org_factory()
-    with patch(f"{PATCH_ROOT}.sf_run_flow.delete_scratch_org") as sf_delete_scratch_org:
+    with patch(f"{PATCH_ROOT}.sf_flow.delete_scratch_org") as sf_delete_scratch_org:
         delete_scratch_org(scratch_org)
 
         assert sf_delete_scratch_org.called
@@ -261,7 +262,7 @@ def test_delete_scratch_org(scratch_org_factory):
 @pytest.mark.django_db
 def test_delete_scratch_org__exception(scratch_org_factory):
     scratch_org = scratch_org_factory()
-    with patch(f"{PATCH_ROOT}.sf_run_flow.delete_scratch_org") as sf_delete_scratch_org:
+    with patch(f"{PATCH_ROOT}.sf_flow.delete_scratch_org") as sf_delete_scratch_org:
         sf_delete_scratch_org.side_effect = ValueError
         with pytest.raises(ValueError):
             delete_scratch_org(scratch_org)
@@ -282,10 +283,10 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
     user = user_factory()
     with ExitStack() as stack:
         commit_changes_to_github = stack.enter_context(
-            patch(f"{PATCH_ROOT}.sf_org_changes.commit_changes_to_github")
+            patch(f"{PATCH_ROOT}.sf_changes.commit_changes_to_github")
         )
         get_latest_revision_numbers = stack.enter_context(
-            patch(f"{PATCH_ROOT}.sf_org_changes.get_latest_revision_numbers")
+            patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
         )
         get_latest_revision_numbers.return_value = {}
         login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
