@@ -149,4 +149,17 @@ describe('<CaptureModal/>', () => {
       expect(input3.checked).toBe(false);
     });
   });
+
+  describe('accordion panel click', () => {
+    test('expands/collapses', () => {
+      const { baseElement, getByTitle } = setup();
+      const content = baseElement.querySelector('.slds-accordion__content');
+
+      expect(content).toHaveAttribute('aria-hidden', 'true');
+
+      fireEvent.click(getByTitle('Foo'));
+
+      expect(content).toHaveAttribute('aria-hidden', 'false');
+    });
+  });
 });

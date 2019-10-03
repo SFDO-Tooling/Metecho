@@ -215,6 +215,20 @@ def test_report_errors_on_commit_changes(scratch_org_factory):
         assert push_message_about_instance.called
 
 
+@pytest.mark.django_db
+def test_report_errors_on_jwt_session(scratch_org_factory):
+    scratch_org = scratch_org_factory()
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
+        try:
+            with report_errors_on_fetch_changes(scratch_org):
+                raise Exception("This is not a SalesforceException")
+        except Exception:
+            pass
+        assert push_message_about_instance.called
+
+
 def test_create_branches_on_github_then_create_scratch_org():
     # Not a great test, but not a complicated function.
     with ExitStack() as stack:

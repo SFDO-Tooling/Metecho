@@ -35,7 +35,7 @@ async def report_scratch_org_error(instance, err, type_):
         if isinstance(message, dict):
             message = message.get("message", message)
         message = str(message)
-    except Exception:
+    except AttributeError:
         message = str(err)
 
     message = {
