@@ -164,16 +164,17 @@ describe('reducer', () => {
     });
 
     describe('OBJECT_TYPES.COMMIT', () => {
-      test('sets committing: true', () => {
-        const commit = {
-          id: 'commit-id',
+      test('sets currently_capturing_changes: true', () => {
+        const org = {
+          id: 'org-id',
           task: 'task-1',
+          org_type: 'Dev',
+          currently_capturing_changes: true,
         };
         const expected = {
           'task-1': {
-            Dev: null,
+            Dev: org,
             QA: null,
-            committing: true,
           },
         };
         const actual = reducer(
@@ -181,7 +182,7 @@ describe('reducer', () => {
           {
             type: 'CREATE_OBJECT_SUCCEEDED',
             payload: {
-              object: commit,
+              object: org,
               objectType: 'scratch_org_commit',
             },
           },
@@ -397,23 +398,24 @@ describe('reducer', () => {
   });
 
   describe('SCRATCH_ORG_COMMIT_CHANGES_FAILED/GITHUB_CHANGES_COMMITTED', () => {
-    test('sets committing: false', () => {
-      const commit = {
-        id: 'commit-id',
+    test('updates org', () => {
+      const org = {
+        id: 'org-id',
         task: 'task-1',
+        org_type: 'Dev',
+        currently_capturing_changes: false,
       };
       const expected = {
         'task-1': {
-          Dev: null,
+          Dev: org,
           QA: null,
-          committing: false,
         },
       };
       const actual = reducer(
         {},
         {
           type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
-          payload: commit,
+          payload: org,
         },
       );
 

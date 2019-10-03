@@ -280,7 +280,10 @@ describe('<TaskDetail/>', () => {
             ...defaultState.orgs,
             task1: {
               ...defaultState.orgs.task1,
-              committing: true,
+              Dev: {
+                ...defaultState.orgs.task1.Dev,
+                currently_capturing_changes: true,
+              },
             },
           },
         },

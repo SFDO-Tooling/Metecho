@@ -208,7 +208,7 @@ const OrgCard = ({
         </>
       );
     } else if (ownedByCurrentUser) {
-      if (type === ORG_TYPES.DEV && orgs.committing) {
+      if (org.currently_capturing_changes) {
         footer = (
           <>
             <Spinner size="small" />

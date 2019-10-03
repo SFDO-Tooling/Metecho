@@ -24,6 +24,7 @@ export interface Org {
   unsaved_changes: Changeset;
   has_unsaved_changes: boolean;
   currently_refreshing_changes: boolean;
+  currently_capturing_changes: boolean;
   delete_queued_at: string | null;
 }
 
@@ -34,7 +35,6 @@ export interface Changeset {
 export interface OrgsByTask {
   [ORG_TYPES.DEV]: Org | null;
   [ORG_TYPES.QA]: Org | null;
-  committing?: boolean;
 }
 
 export interface OrgState {
@@ -108,7 +108,10 @@ const reducer = (
               ...orgs,
               [object.task]: {
                 ...taskOrgs,
-                committing: true,
+                [object.org_type]: {
+                  ...object,
+                  currently_capturing_changes: true,
+                },
               },
             };
           }
@@ -201,7 +204,7 @@ const reducer = (
         ...orgs,
         [org.task]: {
           ...taskOrgs,
-          committing: false,
+          [org.org_type]: org,
         },
       };
     }

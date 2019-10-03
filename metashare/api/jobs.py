@@ -60,6 +60,17 @@ def mark_refreshing_changes(scratch_org):
 
 
 @contextlib.contextmanager
+def mark_capturing_changes(scratch_org):
+    scratch_org.currently_capturing_changes = True
+    scratch_org.save()
+    try:
+        yield
+    finally:
+        scratch_org.currently_capturing_changes = False
+        scratch_org.save()
+
+
+@contextlib.contextmanager
 def report_errors_on_provision(scratch_org):
     try:
         yield
@@ -245,7 +256,10 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
     repo_url = scratch_org.task.project.repository.repo_url
     branch = scratch_org.task.branch_name
 
-    with report_errors_on_commit_changes(scratch_org):
+    with contextlib.ExitStack() as stack:
+        stack.enter_context(report_errors_on_commit_changes(scratch_org))
+        stack.enter_context(mark_capturing_changes(scratch_org))
+
         sf_changes.commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
