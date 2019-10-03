@@ -157,7 +157,7 @@ describe('<CaptureModal/>', () => {
 
       expect(content).toHaveAttribute('aria-hidden', 'true');
 
-      fireEvent.click(getByTitle('Foo'));
+      fireEvent.click(getByTitle('Buz'));
 
       expect(content).toHaveAttribute('aria-hidden', 'false');
     });
