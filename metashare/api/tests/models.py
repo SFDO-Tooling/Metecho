@@ -281,7 +281,7 @@ class TestUser:
 
 @pytest.mark.django_db
 class TestScratchOrg:
-    def test_notify_has_url(self, scratch_org_factory):
+    def test_notify_changed(self, scratch_org_factory):
         with ExitStack() as stack:
             stack.enter_context(
                 patch(
@@ -293,8 +293,7 @@ class TestScratchOrg:
                 patch("metashare.api.models.async_to_sync")
             )
             scratch_org = scratch_org_factory()
-            scratch_org.url = "https://example.com"
-            scratch_org.save()
+            scratch_org.notify_changed()
 
             assert async_to_sync.called
 
@@ -319,9 +318,16 @@ class TestScratchOrg:
             "metashare.api.jobs.get_unsaved_changes_job"
         ) as get_unsaved_changes_job:
             scratch_org = scratch_org_factory()
-            scratch_org.get_unsaved_changes()
+            scratch_org.queue_get_unsaved_changes()
 
             assert get_unsaved_changes_job.delay.called
+
+    def test_finalize_provision(self, scratch_org_factory):
+        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory()
+            scratch_org.finalize_provision()
+
+            assert async_to_sync.called
 
 
 @pytest.mark.django_db
