@@ -151,36 +151,9 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
         payload: { org, url, response },
       });
     }
-    // @@@ Mock out until API exists
-    // setTimeout(() => {
-    //   dispatch({
-    //     type: 'SCRATCH_ORG_UPDATE',
-    //     payload: {
-    //       ...response,
-    //       unsaved_changes: {
-    //         ApexClasses: [
-    //           { id: '0', name: 'Class 1' },
-    //           { id: '1', name: 'Class 2' },
-    //         ],
-    //         CustomObjects: [{ id: '2', name: 'Custom objects' }],
-    //         ClassOthers: [{ id: '3', name: 'Class others' }],
-    //         FooBars: [{ id: '4', name: 'Foo Bars' }],
-    //         Feefitfum: [{ id: '5', name: 'Fee fitfum' }],
-    //         'Whatcha macallit': [{ id: '6', name: 'Whatchamacallit' }],
-    //         'Loopy ': [{ id: '7', name: 'Loopy Looo' }],
-    //       },
-    //       has_unsaved_changes: true,
-    //     },
-    //   });
-    // }, 3000);
     return dispatch({
       type: 'REFETCH_ORG_SUCCEEDED',
       payload: { org: response, url },
-      // @@@ Mock out until API exists
-      // payload: {
-      //   // eslint-disable-next-line @typescript-eslint/camelcase
-      //   response: { ...response, currently_refreshing_changes: true },
-      // },
     });
   } catch (err) {
     dispatch({
@@ -194,6 +167,56 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
 export const updateOrg = (payload: Org): OrgUpdated => ({
   type: 'SCRATCH_ORG_UPDATE',
   payload,
+  // @@@ uncomment to mock out an org with changes
+  // payload: {
+  //   ...payload,
+  //   unsaved_changes: {
+  //     Layout: [
+  //       'Child_Sample_Object__c-Child Sample Object Layout',
+  //       'SampleObject__c-SampleObject Layout',
+  //     ],
+  //     Profile: ['Admin'],
+  //     WebLink: [
+  //       'Campaign.ViewCampaignInfluenceReport',
+  //       'SampleObject__c.Just_Testing',
+  //     ],
+  //     ApexPage: ['SamplePage'],
+  //     ListView: [
+  //       'Opportunity.Default_Opportunity_Pipeline',
+  //       'SampleObject__c.All',
+  //       'Account.Household_Accounts',
+  //     ],
+  //     ApexClass: [
+  //       'SampleClass',
+  //       'SampleClass_TEST',
+  //       'SamplePage_CTRL',
+  //       'SamplePage_CTRL_TEST',
+  //     ],
+  //     CustomTab: ['SampleObject__c'],
+  //     RecordType: [
+  //       'Account.HH_Account',
+  //       'Account.Organization',
+  //       'Opportunity.NPSP_Default',
+  //     ],
+  //     ApexTrigger: ['SampleTrigger'],
+  //     CustomField: [
+  //       'Child_Sample_Object__c.Parent__c',
+  //       'SampleObject__c.Sample_Field__c',
+  //     ],
+  //     QuickAction: ['SampleObject__c.New_Child'],
+  //     CustomObject: ['Child_Sample_Object__c', 'SampleObject__c'],
+  //     ApexComponent: ['SampleComponent'],
+  //     CompactLayout: [
+  //       'Account.NPSP_Household_Account',
+  //       'Account.NPSP_Organization_Account',
+  //     ],
+  //     HomePageLayout: ['SampleHomePage'],
+  //     BusinessProcess: ['Opportunity.NPSP_Default'],
+  //     CustomApplication: ['CumulusCITest'],
+  //     HomePageComponent: ['SampleComponent'],
+  //   },
+  //   has_unsaved_changes: true,
+  // },
 });
 
 export const updateFailed = ({

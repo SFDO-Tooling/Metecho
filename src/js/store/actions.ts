@@ -1,7 +1,5 @@
 import { ThunkResult } from '@/store';
-// import { commitSucceeded } from '@/store/orgs/actions';
 import apiFetch, { addUrlParams } from '@/utils/api';
-// import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 import { ObjectTypes } from '@/utils/constants';
 
 interface CreateObjectPayload {
@@ -220,26 +218,6 @@ export const createObject = ({
     payload: { objectType, url, data },
   });
   try {
-    // @@@ Mock out until API exists
-    // let object: any;
-    // if (objectType === OBJECT_TYPES.COMMIT) {
-    //   object = {
-    //     id: 'commit-id',
-    //     task: data.task,
-    //   };
-    //   setTimeout(() => {
-    //     // Success case
-    //     dispatch(
-    //       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //       commitSucceeded(object),
-    //     );
-    //     // Error case
-    //     // dispatch(
-    //     //   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    //     //   commitFailed({ model: object, error: 'Oops.' }),
-    //     // );
-    //   }, 3000);
-    // } else {
     if (!url) {
       throw new Error(`No URL found for object: ${objectType}`);
     }
@@ -255,7 +233,6 @@ export const createObject = ({
       },
       hasForm,
     });
-    // }
     if (
       object &&
       object.id &&
