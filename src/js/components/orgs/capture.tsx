@@ -234,7 +234,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                 id={`group-${index}`}
                 onTogglePanel={handleThisPanelToggle}
                 title={groupName}
-                summary={
+                panelContentActions={
                   <div className="form-grid">
                     <Checkbox
                       labels={{ label: groupName }}
@@ -247,6 +247,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                     </span>
                   </div>
                 }
+                summary=""
               >
                 {changeset[groupName].map(change => (
                   <Checkbox

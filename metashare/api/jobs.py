@@ -1,4 +1,3 @@
-import ast
 import contextlib
 import logging
 import traceback
@@ -30,11 +29,7 @@ async def report_scratch_org_error(instance, err, type_):
     # discussion:
     # https://github.com/SFDO-Tooling/MetaShare/pull/149#discussion_r327308563
     try:
-        try:
-            message = err.content
-        except Exception:
-            message = ast.literal_eval(str(err))
-
+        message = err.content
         if isinstance(message, list) and len(message) == 1:
             message = message[0]
         if isinstance(message, dict):
