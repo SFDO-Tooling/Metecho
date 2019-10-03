@@ -134,7 +134,8 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
 
-    # Make project branch:
+    # Make project branch, with latest from project:
+    project.refresh_from_db()
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
@@ -155,7 +156,8 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
         project.branch_name = project_branch_name
         project.save()
 
-    # Make task branch:
+    # Make task branch, with latest from task:
+    task.refresh_from_db()
     if task.branch_name:
         task_branch_name = task.branch_name
     else:
