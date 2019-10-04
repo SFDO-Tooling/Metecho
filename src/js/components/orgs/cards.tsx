@@ -132,6 +132,9 @@ const OrgCard = ({
   let icon = null;
   let actions = null;
   let footer = null;
+  const loadingMsg = i18n.t(
+    'This process could take a number of minutes. Feel free to leave this page and check back later.',
+  );
 
   if (isCreating) {
     actions = (
@@ -140,9 +143,7 @@ const OrgCard = ({
         disabled
       />
     );
-    footer = i18n.t(
-      'This process could take a number of minutes. Feel free to leave this page and check back later.',
-    );
+    footer = loadingMsg;
   } else if (org) {
     const latestCommitAt =
       org.latest_commit_at && new Date(org.latest_commit_at);
@@ -213,6 +214,7 @@ const OrgCard = ({
           <>
             <Spinner size="small" />
             {i18n.t('Capturing Selected Changes…')}
+            <div className="slds-p-top_small">{loadingMsg}</div>
           </>
         );
       } else if (org.currently_refreshing_changes) {

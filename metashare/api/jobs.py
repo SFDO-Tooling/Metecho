@@ -178,21 +178,21 @@ def get_unsaved_changes(scratch_org):
     try:
         old_revision_numbers = scratch_org.latest_revision_numbers
         new_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
-        unsaved_changes = sf_changes.compare_revisions(
+        scratch_org.unsaved_changes = sf_changes.compare_revisions(
             old_revision_numbers, new_revision_numbers
         )
-        if unsaved_changes:
-            scratch_org.latest_revision_numbers = new_revision_numbers
-            scratch_org.unsaved_changes = unsaved_changes
+        scratch_org.latest_revision_numbers = new_revision_numbers
     except Exception as e:
         scratch_org.unsaved_changes = {}
+        scratch_org.currently_refreshing_changes = False
+        scratch_org.save()
         async_to_sync(report_scratch_org_error)(
             scratch_org, e, "SCRATCH_ORG_FETCH_CHANGES_FAILED"
         )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
-    finally:
+    else:
         scratch_org.currently_refreshing_changes = False
         scratch_org.finalize_get_unsaved_changes()
 
@@ -228,13 +228,15 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
             scratch_org
         )
     except Exception as e:
+        scratch_org.currently_capturing_changes = False
+        scratch_org.save()
         async_to_sync(report_scratch_org_error)(
             scratch_org, e, "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
         )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
-    finally:
+    else:
         scratch_org.currently_capturing_changes = False
         scratch_org.finalize_commit_changes()
 
