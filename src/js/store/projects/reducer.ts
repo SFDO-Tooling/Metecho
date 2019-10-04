@@ -1,6 +1,6 @@
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { ProjectAction } from '@/store/projects/actions';
-import { LogoutAction } from '@/store/user/actions';
+import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Project {
@@ -32,9 +32,10 @@ const defaultState = {
 
 const reducer = (
   projects: ProjectsState = {},
-  action: ProjectAction | ObjectsAction | LogoutAction,
+  action: ProjectAction | ObjectsAction | LogoutAction | RefetchDataAction,
 ) => {
   switch (action.type) {
+    case 'REFETCH_DATA_SUCCEEDED':
     case 'USER_LOGGED_OUT':
       return {};
     case 'FETCH_OBJECTS_SUCCEEDED': {

@@ -89,13 +89,14 @@ management command::
 Setting up the database
 -----------------------
 
-To populate the database with sample data for development, run::
-
-    $ ./derrick populate
-
 If your database has outdated sample data for development, remove it with::
 
     $ ./derrick truncate
+
+To populate the database with sample data for development, run::
+
+    $ ./derrick truncate
+    $ ./derrick populate
 
 Docker development tasks
 ------------------------

@@ -61,6 +61,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
 
   let currentlyFetching,
+    currentlyCommitting,
     orgHasChanges,
     userIsOwner,
     devOrg: Org | null | undefined;
@@ -69,6 +70,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
     userIsOwner = devOrg && devOrg.owner === user.id;
     currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
+    currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
   }
 
   // When capture changes has been triggered, wait until org has been refreshed
@@ -197,20 +199,18 @@ const TaskDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
-  const committing = Boolean(orgs && orgs.committing);
   let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
-  if (fetchingChanges || currentlyFetching) {
-    buttonText = (
-      <LabelWithSpinner
-        label={i18n.t('Checking for Uncaptured Changes…')}
-        variant="inverse"
-      />
-    );
-  }
-  if (committing) {
+  if (currentlyCommitting) {
     buttonText = (
       <LabelWithSpinner
         label={i18n.t('Capturing Selected Changes…')}
+        variant="inverse"
+      />
+    );
+  } else if (fetchingChanges || currentlyFetching) {
+    buttonText = (
+      <LabelWithSpinner
+        label={i18n.t('Checking for Uncaptured Changes…')}
         variant="inverse"
       />
     );
@@ -242,7 +242,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        {userIsOwner && orgHasChanges ? (
+        {(userIsOwner && orgHasChanges) || readyForReview ? (
           <Button
             label={buttonText}
             className="slds-size_full slds-m-bottom_x-large"
@@ -251,8 +251,8 @@ const TaskDetail = (props: RouteComponentProps) => {
             disabled={
               fetchingChanges ||
               currentlyFetching ||
-              committing ||
-              openingReview
+              currentlyCommitting ||
+              readyForReview
             }
           />
         ) : null}

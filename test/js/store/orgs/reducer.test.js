@@ -1,32 +1,35 @@
 import reducer from '@/store/orgs/reducer';
 
 describe('reducer', () => {
-  test('returns initial state', () => {
+  test('returns initial state if no action', () => {
     const expected = {};
     const actual = reducer(undefined, {});
 
     expect(actual).toEqual(expected);
   });
 
-  test('handles USER_LOGGED_OUT action', () => {
-    const org1 = {
-      id: 'org-id',
-      task: 'task-id',
-      org_type: 'Dev',
-    };
-    const expected = {};
-    const actual = reducer(
-      {
-        'task-id': {
-          Dev: org1,
-          QA: null,
+  test.each([['USER_LOGGED_OUT'], ['REFETCH_DATA_SUCCEEDED']])(
+    'returns initial state on %s action',
+    action => {
+      const org1 = {
+        id: 'org-id',
+        task: 'task-id',
+        org_type: 'Dev',
+      };
+      const expected = {};
+      const actual = reducer(
+        {
+          'task-id': {
+            Dev: org1,
+            QA: null,
+          },
         },
-      },
-      { type: 'USER_LOGGED_OUT' },
-    );
+        { type: action },
+      );
 
-    expect(actual).toEqual(expected);
-  });
+      expect(actual).toEqual(expected);
+    },
+  );
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
     test('resets orgs for task', () => {
@@ -161,16 +164,17 @@ describe('reducer', () => {
     });
 
     describe('OBJECT_TYPES.COMMIT', () => {
-      test('sets committing: true', () => {
-        const commit = {
-          id: 'commit-id',
+      test('sets currently_capturing_changes: true', () => {
+        const org = {
+          id: 'org-id',
           task: 'task-1',
+          org_type: 'Dev',
+          currently_capturing_changes: true,
         };
         const expected = {
           'task-1': {
-            Dev: null,
+            Dev: org,
             QA: null,
-            committing: true,
           },
         };
         const actual = reducer(
@@ -178,7 +182,7 @@ describe('reducer', () => {
           {
             type: 'CREATE_OBJECT_SUCCEEDED',
             payload: {
-              object: commit,
+              object: org,
               objectType: 'scratch_org_commit',
             },
           },
@@ -394,23 +398,24 @@ describe('reducer', () => {
   });
 
   describe('SCRATCH_ORG_COMMIT_CHANGES_FAILED/GITHUB_CHANGES_COMMITTED', () => {
-    test('sets committing: false', () => {
-      const commit = {
-        id: 'commit-id',
+    test('updates org', () => {
+      const org = {
+        id: 'org-id',
         task: 'task-1',
+        org_type: 'Dev',
+        currently_capturing_changes: false,
       };
       const expected = {
         'task-1': {
-          Dev: null,
+          Dev: org,
           QA: null,
-          committing: false,
         },
       };
       const actual = reducer(
         {},
         {
           type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
-          payload: commit,
+          payload: org,
         },
       );
 

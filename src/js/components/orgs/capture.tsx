@@ -203,43 +203,42 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
           />
           <span>({getOrgTotalChanges(changeset)})</span>
         </div>
-        {Object.keys(changeset).map(groupName => {
-          const children = changeset[groupName];
-          const handleThisPanelToggle = () => handlePanelToggle(groupName);
-          const handleSelectThisGroup = (
-            event: React.ChangeEvent<HTMLInputElement>,
-            { checked }: { checked: boolean },
-          ) => handleSelectGroup(groupName, checked);
-          let checkedChildren = 0;
-          let allChildrenChecked = false;
-          let noChildrenChecked = true;
-          for (const child of children) {
-            if (
-              (inputs as Inputs).changes[groupName] &&
-              (inputs as Inputs).changes[groupName].includes(child)
-            ) {
-              noChildrenChecked = false;
-              checkedChildren = checkedChildren + 1;
+        {Object.keys(changeset)
+          .sort()
+          .map((groupName, index) => {
+            const children = changeset[groupName];
+            const handleThisPanelToggle = () => handlePanelToggle(groupName);
+            const handleSelectThisGroup = (
+              event: React.ChangeEvent<HTMLInputElement>,
+              { checked }: { checked: boolean },
+            ) => handleSelectGroup(groupName, checked);
+            let checkedChildren = 0;
+            let allChildrenChecked = false;
+            let noChildrenChecked = true;
+            for (const child of children) {
+              if (
+                (inputs as Inputs).changes[groupName] &&
+                (inputs as Inputs).changes[groupName].includes(child)
+              ) {
+                noChildrenChecked = false;
+                checkedChildren = checkedChildren + 1;
+              }
             }
-          }
-          if (checkedChildren === children.length) {
-            allChildrenChecked = true;
-          }
+            if (checkedChildren === children.length) {
+              allChildrenChecked = true;
+            }
 
-          return (
-            <Accordion key={groupName}>
-              {[
-                // https://github.com/salesforce/design-system-react/issues/2340
+            return (
+              <Accordion key={groupName}>
                 <AccordionPanel
                   expanded={Boolean(expandedPanels[groupName])}
-                  id={groupName}
                   key={groupName}
+                  id={`group-${index}`}
                   onTogglePanel={handleThisPanelToggle}
                   title={groupName}
-                  summary={
+                  panelContentActions={
                     <div className="form-grid">
                       <Checkbox
-                        id={groupName}
                         labels={{ label: groupName }}
                         checked={allChildrenChecked}
                         indeterminate={
@@ -252,29 +251,31 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                       </span>
                     </div>
                   }
+                  summary=""
                 >
-                  {changeset[groupName].map(change => (
+                  {changeset[groupName].sort().map(change => (
                     <Checkbox
                       key={`${groupName}-${change}`}
                       labels={{
                         label: change,
                       }}
                       name="changes"
-                      checked={
+                      checked={Boolean(
                         (inputs as Inputs).changes[groupName] &&
-                        (inputs as Inputs).changes[groupName].includes(change)
-                      }
+                          (inputs as Inputs).changes[groupName].includes(
+                            change,
+                          ),
+                      )}
                       onChange={(
                         event: React.ChangeEvent<HTMLInputElement>,
                         { checked }: { checked: boolean },
                       ) => handleChange({ groupName, change, checked })}
                     />
                   ))}
-                </AccordionPanel>,
-              ]}
-            </Accordion>
-          );
-        })}
+                </AccordionPanel>
+              </Accordion>
+            );
+          })}
         <Input
           id="commit-message"
           label={i18n.t('Commit Message')}

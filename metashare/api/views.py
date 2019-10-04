@@ -112,27 +112,25 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
-        # rest_framework.mixins.RetrieveModelMixin, because I needed to insert the
-        # get_unsaved_changes line in the middle.
+        # rest_framework.mixins.RetrieveModelMixin, because I needed to
+        # insert the get_unsaved_changes line in the middle.
         queryset = self.filter_queryset(self.get_queryset())
 
-        # XXX: I am apprehensive about the possibility of flooding the worker queues
-        # easily this way:
+        # XXX: I am apprehensive about the possibility of flooding the
+        # worker queues easily this way:
         for instance in queryset.filter(org_type=SCRATCH_ORG_TYPES.Dev):
             instance.get_unsaved_changes()
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:  # pragma: nocover
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        # XXX: If we ever paginate this endpoint, we will need to add
+        # pagination logic back in here.
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
-        # rest_framework.mixins.RetrieveModelMixin, because I needed to insert the
-        # get_unsaved_changes line in the middle.
+        # rest_framework.mixins.RetrieveModelMixin, because I needed to
+        # insert the get_unsaved_changes line in the middle.
         instance = self.get_object()
         if instance.org_type == SCRATCH_ORG_TYPES.Dev:
             instance.get_unsaved_changes()
@@ -155,4 +153,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         commit_changes_from_org_job.delay(
             scratch_org, request.user, desired_changes, commit_message
         )
-        return Response("", status=status.HTTP_202_ACCEPTED)
+        return Response(
+            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )

@@ -1,5 +1,4 @@
 import { ThunkResult } from '@/store';
-import { fetchObjects } from '@/store/actions';
 import { User } from '@/store/user/reducer';
 import apiFetch from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -11,7 +10,7 @@ interface LoginAction {
 export interface LogoutAction {
   type: 'USER_LOGGED_OUT';
 }
-interface RefetchDataAction {
+export interface RefetchDataAction {
   type:
     | 'REFETCH_DATA_STARTED'
     | 'REFETCH_DATA_SUCCEEDED'
@@ -83,14 +82,11 @@ export const refetchAllData = (): ThunkResult => async dispatch => {
       dispatch,
       suppressErrorsOn: [401, 403, 404],
     });
-    dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
     if (!payload) {
       return dispatch({ type: 'USER_LOGGED_OUT' });
     }
     dispatch(login(payload));
-    return dispatch(
-      fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
-    );
+    return dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
   } catch (err) {
     dispatch({ type: 'REFETCH_DATA_FAILED' });
     throw err;

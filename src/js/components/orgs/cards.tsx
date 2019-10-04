@@ -208,11 +208,31 @@ const OrgCard = ({
         </>
       );
     } else if (ownedByCurrentUser) {
+      if (org.currently_capturing_changes) {
+        footer = (
+          <>
+            <Spinner size="small" />
+            {i18n.t('Capturing Selected Changes…')}
+          </>
+        );
+      } else if (org.currently_refreshing_changes) {
+        footer = (
+          <>
+            <Spinner size="small" />
+            {i18n.t('Checking for Uncaptured Changes…')}
+          </>
+        );
+      } else {
+        /* istanbul ignore else */
+        // eslint-disable-next-line no-lonely-if
+        if (org.url) {
+          footer = (
+            <ExternalLink url={org.url}>{i18n.t('View Org')}</ExternalLink>
+          );
+        }
+      }
       /* istanbul ignore else */
       if (org.url) {
-        footer = (
-          <ExternalLink url={org.url}>{i18n.t('View Org')}</ExternalLink>
-        );
         icon = (
           <ExternalLink url={org.url} title={i18n.t('View Org')}>
             <Icon
@@ -255,16 +275,7 @@ const OrgCard = ({
         icon={icon}
         heading={displayType}
         headerActions={actions}
-        footer={
-          org && org.currently_refreshing_changes ? (
-            <>
-              <Spinner size="small" />
-              {i18n.t('Checking for Uncaptured Changes…')}
-            </>
-          ) : (
-            footer
-          )
-        }
+        footer={footer}
       >
         {contents}
       </Card>

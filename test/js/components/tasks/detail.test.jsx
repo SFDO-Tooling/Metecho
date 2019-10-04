@@ -104,7 +104,7 @@ describe('<TaskDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug, projectSlug, taskSlug } = opts;
     const context = {};
-    const { getByText, getByTitle, queryByText } = renderWithRedux(
+    const result = renderWithRedux(
       <StaticRouter context={context}>
         <TaskDetail
           match={{ params: { repositorySlug, projectSlug, taskSlug } }}
@@ -113,7 +113,7 @@ describe('<TaskDetail/>', () => {
       initialState,
       storeWithThunk,
     );
-    return { getByText, getByTitle, queryByText, context };
+    return { ...result, context };
   };
 
   test('renders task detail with org', () => {
@@ -273,20 +273,23 @@ describe('<TaskDetail/>', () => {
 
   describe('commiting changes', () => {
     test('renders loading button', () => {
-      const { getByText } = setup({
+      const { getAllByText } = setup({
         initialState: {
           ...defaultState,
           orgs: {
             ...defaultState.orgs,
             task1: {
               ...defaultState.orgs.task1,
-              committing: true,
+              Dev: {
+                ...defaultState.orgs.task1.Dev,
+                currently_capturing_changes: true,
+              },
             },
           },
         },
       });
 
-      expect(getByText('Capturing Selected Changes…')).toBeVisible();
+      expect(getAllByText('Capturing Selected Changes…').length).toEqual(2);
     });
   });
 });

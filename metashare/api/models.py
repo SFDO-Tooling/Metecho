@@ -282,7 +282,9 @@ SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
 class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
-    tracker = FieldTracker(fields=("url", "currently_refreshing_changes"))
+    tracker = FieldTracker(
+        fields=("url", "currently_refreshing_changes", "currently_capturing_changes")
+    )
 
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
@@ -296,6 +298,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder)
     latest_revision_numbers = JSONField(default=dict, encoder=DjangoJSONEncoder)
     currently_refreshing_changes = models.BooleanField(default=False)
+    currently_capturing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder)
     login_url = models.URLField(null=True, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
@@ -315,7 +318,10 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         # TODO: Fix this so that it does not run on every job save
         if self.tracker.has_changed("currently_refreshing_changes"):
-            self.notify_refreshing_changes()
+            self.notify_changed()
+
+        if self.tracker.has_changed("currently_capturing_changes"):
+            self.notify_changed()
 
         return ret
 
@@ -358,7 +364,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         message = {"type": "SCRATCH_ORG_PROVISION", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
 
-    def notify_refreshing_changes(self):
+    def notify_changed(self):
         from .serializers import ScratchOrgSerializer
 
         payload = ScratchOrgSerializer(self).data

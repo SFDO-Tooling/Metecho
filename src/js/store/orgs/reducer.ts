@@ -2,7 +2,7 @@
 
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
-import { LogoutAction } from '@/store/user/actions';
+import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import {
   OBJECT_TYPES,
   ObjectTypes,
@@ -24,6 +24,7 @@ export interface Org {
   unsaved_changes: Changeset;
   has_unsaved_changes: boolean;
   currently_refreshing_changes: boolean;
+  currently_capturing_changes: boolean;
   delete_queued_at: string | null;
 }
 
@@ -34,7 +35,6 @@ export interface Changeset {
 export interface OrgsByTask {
   [ORG_TYPES.DEV]: Org | null;
   [ORG_TYPES.QA]: Org | null;
-  committing?: boolean;
 }
 
 export interface OrgState {
@@ -45,9 +45,10 @@ const defaultState = {};
 
 const reducer = (
   orgs: OrgState = defaultState,
-  action: ObjectsAction | LogoutAction | OrgsAction,
+  action: ObjectsAction | LogoutAction | OrgsAction | RefetchDataAction,
 ) => {
   switch (action.type) {
+    case 'REFETCH_DATA_SUCCEEDED':
     case 'USER_LOGGED_OUT':
       return defaultState;
     case 'FETCH_OBJECTS_SUCCEEDED': {
@@ -107,7 +108,10 @@ const reducer = (
               ...orgs,
               [object.task]: {
                 ...taskOrgs,
-                committing: true,
+                [object.org_type]: {
+                  ...object,
+                  currently_capturing_changes: true,
+                },
               },
             };
           }
@@ -200,7 +204,7 @@ const reducer = (
         ...orgs,
         [org.task]: {
           ...taskOrgs,
-          committing: false,
+          [org.org_type]: org,
         },
       };
     }
