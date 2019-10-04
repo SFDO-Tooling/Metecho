@@ -14,19 +14,9 @@ from ..jobs import (
     create_branches_on_github_then_create_scratch_org,
     delete_scratch_org,
     get_unsaved_changes,
-    mark_refreshing_changes,
     refresh_github_repositories_for_user,
-    report_errors_on_commit_changes,
-    report_errors_on_fetch_changes,
-    report_errors_on_provision,
 )
 from ..models import SCRATCH_ORG_TYPES
-
-
-class AsyncMock(MagicMock):
-    async def __call__(self, *args, **kwargs):
-        return super().__call__(*args, **kwargs)
-
 
 PATCH_ROOT = "metashare.api.jobs"
 
@@ -122,6 +112,7 @@ class TestCreateBranchesOnGitHub:
 
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.sf_changes"))
         sf_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_flow"))
         sf_flow.create_org_and_run_flow.return_value = (MagicMock(), MagicMock())
         stack.enter_context(patch(f"{PATCH_ROOT}.login"))
@@ -158,77 +149,6 @@ def test_get_unsaved_changes(scratch_org_factory):
         }
 
 
-@pytest.mark.django_db
-def test_report_errors_on_check_changes(scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    with patch(
-        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
-    ) as push_message_about_instance:
-        try:
-            with report_errors_on_fetch_changes(scratch_org):
-                raise SalesforceGeneralError(
-                    "https://example.com",
-                    418,
-                    "I'M A TEAPOT",
-                    [{"error": "Short and stout"}],
-                )
-        except SalesforceGeneralError:
-            pass
-        assert push_message_about_instance.called
-
-
-@pytest.mark.django_db
-def test_report_errors_on_provision(scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    with patch(
-        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
-    ) as push_message_about_instance:
-        try:
-            with report_errors_on_provision(scratch_org):
-                raise SalesforceGeneralError(
-                    "https://example.com",
-                    418,
-                    "I'M A TEAPOT",
-                    [{"error": "Short and stout"}],
-                )
-        except SalesforceGeneralError:
-            pass
-        assert push_message_about_instance.called
-
-
-@pytest.mark.django_db
-def test_report_errors_on_commit_changes(scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    with patch(
-        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
-    ) as push_message_about_instance:
-        try:
-            with report_errors_on_commit_changes(scratch_org):
-                raise SalesforceGeneralError(
-                    "https://example.com",
-                    418,
-                    "I'M A TEAPOT",
-                    [{"error": "Short and stout"}],
-                )
-        except SalesforceGeneralError:
-            pass
-        assert push_message_about_instance.called
-
-
-@pytest.mark.django_db
-def test_report_errors_on_jwt_session(scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    with patch(
-        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
-    ) as push_message_about_instance:
-        try:
-            with report_errors_on_fetch_changes(scratch_org):
-                raise Exception("This is not a SalesforceException")
-        except Exception:
-            pass
-        assert push_message_about_instance.called
-
-
 def test_create_branches_on_github_then_create_scratch_org():
     # Not a great test, but not a complicated function.
     with ExitStack() as stack:
@@ -239,10 +159,6 @@ def test_create_branches_on_github_then_create_scratch_org():
         _create_org_and_run_flow = stack.enter_context(
             patch(f"{PATCH_ROOT}._create_org_and_run_flow")
         )
-        get_latest_revision_numbers = stack.enter_context(
-            patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
-        )
-        get_latest_revision_numbers.return_value = {}
 
         create_branches_on_github_then_create_scratch_org(
             project=MagicMock(),
@@ -254,35 +170,6 @@ def test_create_branches_on_github_then_create_scratch_org():
 
         assert _create_branches_on_github.called
         assert _create_org_and_run_flow.called
-        assert get_latest_revision_numbers.called
-
-
-@pytest.mark.django_db
-def test_mark_refreshing_changes(scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    assert not scratch_org.currently_refreshing_changes
-    with mark_refreshing_changes(scratch_org):
-        assert scratch_org.currently_refreshing_changes
-    assert not scratch_org.currently_refreshing_changes
-
-
-@pytest.mark.django_db
-def test_mark_refreshing_changes__exception(scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    assert not scratch_org.currently_refreshing_changes
-    with pytest.raises(SalesforceGeneralError):
-        with mark_refreshing_changes(scratch_org):
-            assert scratch_org.currently_refreshing_changes
-            raise SalesforceGeneralError(
-                "https://example.com",
-                418,
-                "I'M A TEAPOT",
-                [{"error": "Short and stout"}],
-            )
-
-    scratch_org.refresh_from_db()
-    assert not scratch_org.unsaved_changes
-    assert not scratch_org.currently_refreshing_changes
 
 
 @pytest.mark.django_db
@@ -343,3 +230,68 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         commit_changes_from_org(scratch_org, user, desired_changes, commit_message)
 
         assert commit_changes_to_github.called
+
+
+# TODO: this should be bundled with each function, not all error-handling together.
+@pytest.mark.django_db
+class TestErrorHandling:
+    def test_create_branches_on_github_then_create_scratch_org(
+        self, user_factory, scratch_org_factory
+    ):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            _create_branches_on_github = stack.enter_context(
+                patch(f"{PATCH_ROOT}._create_branches_on_github")
+            )
+            _create_branches_on_github.side_effect = Exception
+            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+            scratch_org.delete = MagicMock()
+
+            with pytest.raises(Exception):
+                create_branches_on_github_then_create_scratch_org(
+                    project=MagicMock(),
+                    repo_url="https://github.org/test/repo",
+                    scratch_org=scratch_org,
+                    task=MagicMock(),
+                    user=user,
+                )
+
+            assert scratch_org.delete.called
+            assert async_to_sync.called
+
+    def test_get_unsaved_changes(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            get_latest_revision_numbers = stack.enter_context(
+                patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
+            )
+            get_latest_revision_numbers.side_effect = Exception
+
+            with pytest.raises(Exception):
+                get_unsaved_changes(scratch_org)
+
+            assert async_to_sync.called
+
+    def test_commit_changes_from_org(self, scratch_org_factory, user_factory):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            commit_changes_to_github = stack.enter_context(
+                patch(f"{PATCH_ROOT}.sf_changes.commit_changes_to_github")
+            )
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            commit_changes_to_github.side_effect = Exception
+
+            with pytest.raises(Exception):
+                commit_changes_from_org(scratch_org, user, {}, "message")
+
+            assert async_to_sync.called

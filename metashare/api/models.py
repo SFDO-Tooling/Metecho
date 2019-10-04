@@ -11,7 +11,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
-from model_utils import Choices, FieldTracker
+from model_utils import Choices
 
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
@@ -193,8 +193,6 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    tracker = FieldTracker(fields=("branch_name",))
-
     name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.SlugField(max_length=50, null=True, blank=True)
@@ -211,17 +209,10 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
-    def save(self, *args, **kwargs):
-        ret = super().save(*args, **kwargs)
-
-        if self.tracker.has_changed("branch_name"):
-            self.notify_has_branch_name()
-
-        return ret
-
-    def notify_has_branch_name(self):
+    def finalize_branch_update(self):
         from .serializers import ProjectSerializer
 
+        self.save()
         payload = ProjectSerializer(self).data
         message = {"type": "PROJECT_UPDATE", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
@@ -236,8 +227,6 @@ class TaskSlug(AbstractSlug):
 
 
 class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    tracker = FieldTracker(fields=("branch_name",))
-
     name = models.CharField(max_length=50)
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
@@ -258,17 +247,10 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
-    def save(self, *args, **kwargs):
-        ret = super().save(*args, **kwargs)
-
-        if self.tracker.has_changed("branch_name"):
-            self.notify_has_branch_name()
-
-        return ret
-
-    def notify_has_branch_name(self):
+    def finalize_branch_update(self):
         from .serializers import TaskSerializer
 
+        self.save()
         payload = TaskSerializer(self).data
         message = {"type": "TASK_UPDATE", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
@@ -282,10 +264,6 @@ SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
 class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
-    tracker = FieldTracker(
-        fields=("url", "currently_refreshing_changes", "currently_capturing_changes")
-    )
-
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -311,26 +289,34 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         ret = super().save(*args, **kwargs)
 
         if is_new:
-            self.create_remote_resources()
-
-        if self.tracker.has_changed("url"):
-            self.notify_has_url()
-
-        # TODO: Fix this so that it does not run on every job save
-        if self.tracker.has_changed("currently_refreshing_changes"):
-            self.notify_changed()
-
-        if self.tracker.has_changed("currently_capturing_changes"):
-            self.notify_changed()
+            self.queue_provision()
 
         return ret
+
+    def notify_changed(self):
+        from .serializers import ScratchOrgSerializer
+
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_UPDATE", "payload": payload}
+
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     def queue_delete(self):
         from .jobs import delete_scratch_org_job
 
         self.delete_queued_at = timezone.now()
         self.save()
+        self.notify_changed()
+
         delete_scratch_org_job.delay(self)
+
+    def finalize_delete(self):
+        from .serializers import ScratchOrgSerializer
+
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_DELETE", "payload": payload}
+
+        async_to_sync(push.push_message_about_instance)(self, message)
 
     def delete(self, *args, **kwargs):
         # If the scratch org has no URL, it has not really been created
@@ -338,15 +324,10 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         # destruction; this should only happen when it is destroyed
         # during provisioning.
         if self.url:
-            self.notify_deleted()
+            self.finalize_delete()
         super().delete(*args, **kwargs)
 
-    def get_unsaved_changes(self):
-        from .jobs import get_unsaved_changes_job
-
-        get_unsaved_changes_job.delay(self)
-
-    def create_remote_resources(self):
+    def queue_provision(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
 
         create_branches_on_github_then_create_scratch_org_job.delay(
@@ -357,26 +338,70 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             user=self.owner,
         )
 
-    def notify_has_url(self):
+    def finalize_provision(self, error=None):
         from .serializers import ScratchOrgSerializer
 
-        payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_PROVISION", "payload": payload}
-        async_to_sync(push.push_message_about_instance)(self, message)
+        if error is None:
+            async_to_sync(push.push_message_about_instance)(
+                self,
+                {
+                    "type": "SCRATCH_ORG_PROVISION",
+                    "payload": ScratchOrgSerializer(self).data,
+                },
+            )
+        else:
+            async_to_sync(push.report_scratch_org_error)(
+                self, error, "SCRATCH_ORG_PROVISION_FAILED"
+            )
+            self.delete()
 
-    def notify_changed(self):
+    def queue_get_unsaved_changes(self):
+        from .jobs import get_unsaved_changes_job
+
+        self.currently_refreshing_changes = True
+        self.save()
+        self.notify_changed()
+
+        get_unsaved_changes_job.delay(self)
+
+    def finalize_get_unsaved_changes(self, error=None):
+        self.currently_refreshing_changes = False
+        if error is None:
+            self.save()
+            self.notify_changed()
+        else:
+            self.unsaved_changes = {}
+            self.save()
+            async_to_sync(push.report_scratch_org_error)(
+                self, error, "SCRATCH_ORG_FETCH_CHANGES_FAILED"
+            )
+
+    def queue_commit_changes(self, user, desired_changes, commit_message):
+        from .jobs import commit_changes_from_org_job
+
+        self.currently_capturing_changes = True
+        self.save()
+        self.notify_changed()
+
+        commit_changes_from_org_job.delay(self, user, desired_changes, commit_message)
+
+    def finalize_commit_changes(self, error=None):
         from .serializers import ScratchOrgSerializer
 
-        payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_UPDATE", "payload": payload}
-        async_to_sync(push.push_message_about_instance)(self, message)
-
-    def notify_deleted(self):
-        from .serializers import ScratchOrgSerializer
-
-        payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_DELETE", "payload": payload}
-        async_to_sync(push.push_message_about_instance)(self, message)
+        self.currently_capturing_changes = False
+        self.save()
+        if error is None:
+            async_to_sync(push.push_message_about_instance)(
+                self,
+                {
+                    "type": "GITHUB_CHANGES_COMMITTED",
+                    "payload": ScratchOrgSerializer(self).data,
+                },
+            )
+        else:
+            async_to_sync(push.report_scratch_org_error)(
+                self, error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
+            )
 
 
 @receiver(user_logged_in)

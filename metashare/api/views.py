@@ -119,7 +119,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         for instance in queryset.filter(org_type=SCRATCH_ORG_TYPES.Dev):
-            instance.get_unsaved_changes()
+            instance.queue_get_unsaved_changes()
 
         # XXX: If we ever paginate this endpoint, we will need to add
         # pagination logic back in here.
@@ -133,14 +133,12 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # insert the get_unsaved_changes line in the middle.
         instance = self.get_object()
         if instance.org_type == SCRATCH_ORG_TYPES.Dev:
-            instance.get_unsaved_changes()
+            instance.queue_get_unsaved_changes()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
     @action(detail=True, methods=["POST"])
     def commit(self, request, pk=None):
-        from .jobs import commit_changes_from_org_job
-
         serializer = CommitSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
@@ -150,9 +148,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         scratch_org = self.get_object()
         commit_message = serializer.validated_data["commit_message"]
         desired_changes = serializer.validated_data["changes"]
-        commit_changes_from_org_job.delay(
-            scratch_org, request.user, desired_changes, commit_message
-        )
+        scratch_org.queue_commit_changes(request.user, desired_changes, commit_message)
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )

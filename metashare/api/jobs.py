@@ -1,4 +1,3 @@
-import contextlib
 import logging
 import traceback
 
@@ -16,98 +15,9 @@ from .github_context import (
     get_cumulus_prefix,
     local_github_checkout,
 )
-from .push import push_message_about_instance
+from .push import report_scratch_org_error
 
 logger = logging.getLogger(__name__)
-
-
-async def report_scratch_org_error(instance, err, type_):
-    from .serializers import ScratchOrgSerializer
-
-    # @jgerigmeyer asked for the error to be unwrapped in the case that
-    # there's only one, which is the most common case, per this
-    # discussion:
-    # https://github.com/SFDO-Tooling/MetaShare/pull/149#discussion_r327308563
-    try:
-        message = err.content
-        if isinstance(message, list) and len(message) == 1:
-            message = message[0]
-        if isinstance(message, dict):
-            message = message.get("message", message)
-        message = str(message)
-    except AttributeError:
-        message = str(err)
-
-    message = {
-        "type": type_,
-        "payload": {"message": message, "model": ScratchOrgSerializer(instance).data},
-    }
-    await push_message_about_instance(instance, message)
-
-
-@contextlib.contextmanager
-def mark_refreshing_changes(scratch_org):
-    scratch_org.currently_refreshing_changes = True
-    scratch_org.save()
-    try:
-        yield
-    except Exception:
-        scratch_org.unsaved_changes = {}
-        raise
-    finally:
-        scratch_org.currently_refreshing_changes = False
-        scratch_org.save()
-
-
-@contextlib.contextmanager
-def mark_capturing_changes(scratch_org):
-    scratch_org.currently_capturing_changes = True
-    scratch_org.save()
-    try:
-        yield
-    finally:
-        scratch_org.currently_capturing_changes = False
-        scratch_org.save()
-
-
-@contextlib.contextmanager
-def report_errors_on_provision(scratch_org):
-    try:
-        yield
-    except Exception as e:
-        async_to_sync(report_scratch_org_error)(
-            scratch_org, e, "SCRATCH_ORG_PROVISION_FAILED"
-        )
-        tb = traceback.format_exc()
-        logger.error(tb)
-        scratch_org.delete()
-        raise
-
-
-@contextlib.contextmanager
-def report_errors_on_fetch_changes(scratch_org):
-    try:
-        yield
-    except Exception as e:
-        async_to_sync(report_scratch_org_error)(
-            scratch_org, e, "SCRATCH_ORG_FETCH_CHANGES_FAILED"
-        )
-        tb = traceback.format_exc()
-        logger.error(tb)
-        raise
-
-
-@contextlib.contextmanager
-def report_errors_on_commit_changes(scratch_org):
-    try:
-        yield
-    except Exception as e:
-        async_to_sync(report_scratch_org_error)(
-            scratch_org, e, "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
-        )
-        tb = traceback.format_exc()
-        logger.error(tb)
-        raise
 
 
 def _try_to_make_branch(repository, *, new_branch, base_branch):
@@ -154,7 +64,7 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
             base_branch=repository.default_branch,
         )
         project.branch_name = project_branch_name
-        project.save()
+        project.finalize_branch_update()
 
     # Make task branch, with latest from task:
     task.refresh_from_db()
@@ -167,7 +77,7 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
             base_branch=project_branch_name,
         )
         task.branch_name = task_branch_name
-        task.save()
+        task.finalize_branch_update()
 
     return task_branch_name
 
@@ -199,34 +109,37 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = org_config.config
     scratch_org.login_url = login_url
-    scratch_org.save()
+    scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
+        scratch_org
+    )
 
 
 def create_branches_on_github_then_create_scratch_org(
     *, project, repo_url, scratch_org, task, user
 ):
-    with contextlib.ExitStack() as stack:
-        repo_root = stack.enter_context(local_github_checkout(user, repo_url))
-        stack.enter_context(report_errors_on_provision(scratch_org))
-
-        commit_ish = _create_branches_on_github(
-            user=user,
-            repo_url=repo_url,
-            project=project,
-            task=task,
-            repo_root=repo_root,
-        )
-        _create_org_and_run_flow(
-            scratch_org,
-            user=user,
-            repo_url=repo_url,
-            repo_branch=commit_ish,
-            project_path=repo_root,
-        )
-        scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
-            scratch_org
-        )
-        scratch_org.save()
+    try:
+        with local_github_checkout(user, repo_url) as repo_root:
+            commit_ish = _create_branches_on_github(
+                user=user,
+                repo_url=repo_url,
+                project=project,
+                task=task,
+                repo_root=repo_root,
+            )
+            _create_org_and_run_flow(
+                scratch_org,
+                user=user,
+                repo_url=repo_url,
+                repo_branch=commit_ish,
+                project_path=repo_root,
+            )
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(tb)
+        scratch_org.finalize_provision(e)
+        raise
+    else:
+        scratch_org.finalize_provision()
 
 
 create_branches_on_github_then_create_scratch_org_job = job(
@@ -235,33 +148,30 @@ create_branches_on_github_then_create_scratch_org_job = job(
 
 
 def get_unsaved_changes(scratch_org):
-    with contextlib.ExitStack() as stack:
-        stack.enter_context(report_errors_on_fetch_changes(scratch_org))
-        stack.enter_context(mark_refreshing_changes(scratch_org))
-
+    try:
         old_revision_numbers = scratch_org.latest_revision_numbers
         new_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
-        unsaved_changes = sf_changes.compare_revisions(
+        scratch_org.unsaved_changes = sf_changes.compare_revisions(
             old_revision_numbers, new_revision_numbers
         )
-        if unsaved_changes:
-            scratch_org.latest_revision_numbers = new_revision_numbers
-            scratch_org.unsaved_changes = unsaved_changes
+        scratch_org.latest_revision_numbers = new_revision_numbers
+    except Exception as e:
+        scratch_org.finalize_get_unsaved_changes(e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        scratch_org.finalize_get_unsaved_changes()
 
 
 get_unsaved_changes_job = job(get_unsaved_changes)
 
 
 def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
-    from .serializers import ScratchOrgSerializer
-
     repo_url = scratch_org.task.project.repository.repo_url
     branch = scratch_org.task.branch_name
 
-    with contextlib.ExitStack() as stack:
-        stack.enter_context(report_errors_on_commit_changes(scratch_org))
-        stack.enter_context(mark_capturing_changes(scratch_org))
-
+    try:
         sf_changes.commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
@@ -284,15 +194,13 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
             scratch_org
         )
-        scratch_org.save()
-
-    async_to_sync(push_message_about_instance)(
-        scratch_org,
-        {
-            "type": "GITHUB_CHANGES_COMMITTED",
-            "payload": ScratchOrgSerializer(scratch_org).data,
-        },
-    )
+    except Exception as e:
+        scratch_org.finalize_commit_changes(e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        scratch_org.finalize_commit_changes()
 
 
 commit_changes_from_org_job = job(commit_changes_from_org)
