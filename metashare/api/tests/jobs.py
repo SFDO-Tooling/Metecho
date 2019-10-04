@@ -15,15 +15,8 @@ from ..jobs import (
     delete_scratch_org,
     get_unsaved_changes,
     refresh_github_repositories_for_user,
-    report_scratch_org_error,
 )
 from ..models import SCRATCH_ORG_TYPES
-
-
-class AsyncMock(MagicMock):
-    async def __call__(self, *args, **kwargs):
-        return super().__call__(*args, **kwargs)
-
 
 PATCH_ROOT = "metashare.api.jobs"
 
@@ -242,17 +235,21 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
 # TODO: this should be bundled with each function, not all error-handling together.
 @pytest.mark.django_db
 class TestErrorHandling:
-    def test_create_branches_on_github_then_create_scratch_org(self, user_factory):
+    def test_create_branches_on_github_then_create_scratch_org(
+        self, user_factory, scratch_org_factory
+    ):
         user = user_factory()
+        scratch_org = scratch_org_factory()
         with ExitStack() as stack:
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
             _create_branches_on_github = stack.enter_context(
                 patch(f"{PATCH_ROOT}._create_branches_on_github")
             )
-            async_to_sync = stack.enter_context(patch(f"{PATCH_ROOT}.async_to_sync"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
             _create_branches_on_github.side_effect = Exception
-
-            scratch_org = MagicMock()
+            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+            scratch_org.delete = MagicMock()
 
             with pytest.raises(Exception):
                 create_branches_on_github_then_create_scratch_org(
@@ -269,11 +266,13 @@ class TestErrorHandling:
     def test_get_unsaved_changes(self, scratch_org_factory):
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
-            compare_revisions = stack.enter_context(
-                patch(f"{PATCH_ROOT}.sf_changes.compare_revisions")
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
             )
-            async_to_sync = stack.enter_context(patch(f"{PATCH_ROOT}.async_to_sync"))
-            compare_revisions.side_effect = Exception
+            get_latest_revision_numbers = stack.enter_context(
+                patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
+            )
+            get_latest_revision_numbers.side_effect = Exception
 
             with pytest.raises(Exception):
                 get_unsaved_changes(scratch_org)
@@ -287,19 +286,12 @@ class TestErrorHandling:
             commit_changes_to_github = stack.enter_context(
                 patch(f"{PATCH_ROOT}.sf_changes.commit_changes_to_github")
             )
-            async_to_sync = stack.enter_context(patch(f"{PATCH_ROOT}.async_to_sync"))
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
             commit_changes_to_github.side_effect = Exception
 
             with pytest.raises(Exception):
                 commit_changes_from_org(scratch_org, user, {}, "message")
 
             assert async_to_sync.called
-
-
-@pytest.mark.asyncio
-async def test_report_scratch_org_error():
-    with patch(
-        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
-    ) as push_message_about_instance:
-        await report_scratch_org_error(MagicMock(), "fake error", "fake type")
-        assert push_message_about_instance.called

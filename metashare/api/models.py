@@ -338,13 +338,22 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             user=self.owner,
         )
 
-    def finalize_provision(self):
+    def finalize_provision(self, error=None):
         from .serializers import ScratchOrgSerializer
 
-        payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_PROVISION", "payload": payload}
-
-        async_to_sync(push.push_message_about_instance)(self, message)
+        if error is None:
+            async_to_sync(push.push_message_about_instance)(
+                self,
+                {
+                    "type": "SCRATCH_ORG_PROVISION",
+                    "payload": ScratchOrgSerializer(self).data,
+                },
+            )
+        else:
+            async_to_sync(push.report_scratch_org_error)(
+                self, error, "SCRATCH_ORG_PROVISION_FAILED"
+            )
+            self.delete()
 
     def queue_get_unsaved_changes(self):
         from .jobs import get_unsaved_changes_job
@@ -355,9 +364,17 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         get_unsaved_changes_job.delay(self)
 
-    def finalize_get_unsaved_changes(self):
-        self.save()
-        self.notify_changed()
+    def finalize_get_unsaved_changes(self, error=None):
+        self.currently_refreshing_changes = False
+        if error is None:
+            self.save()
+            self.notify_changed()
+        else:
+            self.unsaved_changes = {}
+            self.save()
+            async_to_sync(push.report_scratch_org_error)(
+                self, error, "SCRATCH_ORG_FETCH_CHANGES_FAILED"
+            )
 
     def queue_commit_changes(self, user, desired_changes, commit_message):
         from .jobs import commit_changes_from_org_job
@@ -368,17 +385,23 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         commit_changes_from_org_job.delay(self, user, desired_changes, commit_message)
 
-    def finalize_commit_changes(self):
+    def finalize_commit_changes(self, error=None):
         from .serializers import ScratchOrgSerializer
 
+        self.currently_capturing_changes = False
         self.save()
-        async_to_sync(push.push_message_about_instance)(
-            self,
-            {
-                "type": "GITHUB_CHANGES_COMMITTED",
-                "payload": ScratchOrgSerializer(self).data,
-            },
-        )
+        if error is None:
+            async_to_sync(push.push_message_about_instance)(
+                self,
+                {
+                    "type": "GITHUB_CHANGES_COMMITTED",
+                    "payload": ScratchOrgSerializer(self).data,
+                },
+            )
+        else:
+            async_to_sync(push.report_scratch_org_error)(
+                self, error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
+            )
 
 
 @receiver(user_logged_in)

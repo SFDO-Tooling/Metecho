@@ -15,33 +15,9 @@ from .github_context import (
     get_cumulus_prefix,
     local_github_checkout,
 )
-from .push import push_message_about_instance
+from .push import report_scratch_org_error
 
 logger = logging.getLogger(__name__)
-
-
-async def report_scratch_org_error(instance, err, type_):
-    from .serializers import ScratchOrgSerializer
-
-    # @jgerigmeyer asked for the error to be unwrapped in the case that
-    # there's only one, which is the most common case, per this
-    # discussion:
-    # https://github.com/SFDO-Tooling/MetaShare/pull/149#discussion_r327308563
-    try:
-        message = err.content
-        if isinstance(message, list) and len(message) == 1:
-            message = message[0]
-        if isinstance(message, dict):
-            message = message.get("message", message)
-        message = str(message)
-    except AttributeError:
-        message = str(err)
-
-    message = {
-        "type": type_,
-        "payload": {"message": message, "model": ScratchOrgSerializer(instance).data},
-    }
-    await push_message_about_instance(instance, message)
 
 
 def _try_to_make_branch(repository, *, new_branch, base_branch):
@@ -158,12 +134,9 @@ def create_branches_on_github_then_create_scratch_org(
                 project_path=repo_root,
             )
     except Exception as e:
-        async_to_sync(report_scratch_org_error)(
-            scratch_org, e, "SCRATCH_ORG_PROVISION_FAILED"
-        )
         tb = traceback.format_exc()
         logger.error(tb)
-        scratch_org.delete()
+        scratch_org.finalize_provision(e)
         raise
     else:
         scratch_org.finalize_provision()
@@ -183,17 +156,11 @@ def get_unsaved_changes(scratch_org):
         )
         scratch_org.latest_revision_numbers = new_revision_numbers
     except Exception as e:
-        scratch_org.unsaved_changes = {}
-        scratch_org.currently_refreshing_changes = False
-        scratch_org.save()
-        async_to_sync(report_scratch_org_error)(
-            scratch_org, e, "SCRATCH_ORG_FETCH_CHANGES_FAILED"
-        )
+        scratch_org.finalize_get_unsaved_changes(e)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.currently_refreshing_changes = False
         scratch_org.finalize_get_unsaved_changes()
 
 
@@ -228,16 +195,11 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
             scratch_org
         )
     except Exception as e:
-        scratch_org.currently_capturing_changes = False
-        scratch_org.save()
-        async_to_sync(report_scratch_org_error)(
-            scratch_org, e, "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
-        )
+        scratch_org.finalize_commit_changes(e)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.currently_capturing_changes = False
         scratch_org.finalize_commit_changes()
 
 
