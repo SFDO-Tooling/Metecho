@@ -101,6 +101,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
         flow_name=cases[scratch_org.org_type],
         project_path=project_path,
     )
+    scratch_org.refresh_from_db()
     scratch_org.url = org_config.instance_url
     scratch_org.last_modified_at = now()
     scratch_org.expires_at = org_config.expires
@@ -134,9 +135,9 @@ def create_branches_on_github_then_create_scratch_org(
                 project_path=repo_root,
             )
     except Exception as e:
+        scratch_org.finalize_provision(e)
         tb = traceback.format_exc()
         logger.error(tb)
-        scratch_org.finalize_provision(e)
         raise
     else:
         scratch_org.finalize_provision()
@@ -149,13 +150,17 @@ create_branches_on_github_then_create_scratch_org_job = job(
 
 def get_unsaved_changes(scratch_org):
     try:
+        scratch_org.refresh_from_db()
         old_revision_numbers = scratch_org.latest_revision_numbers
         new_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
-        scratch_org.unsaved_changes = sf_changes.compare_revisions(
+        unsaved_changes = sf_changes.compare_revisions(
             old_revision_numbers, new_revision_numbers
         )
+        scratch_org.refresh_from_db()
+        scratch_org.unsaved_changes = unsaved_changes
         scratch_org.latest_revision_numbers = new_revision_numbers
     except Exception as e:
+        scratch_org.refresh_from_db()
         scratch_org.finalize_get_unsaved_changes(e)
         tb = traceback.format_exc()
         logger.error(tb)
@@ -187,6 +192,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         repository = gh.repository(owner, repo)
         commit = repository.branch(branch).commit
 
+        scratch_org.refresh_from_db()
         scratch_org.last_modified_at = now()
         scratch_org.latest_commit = commit.sha
         scratch_org.latest_commit_url = commit.html_url
@@ -195,6 +201,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
             scratch_org
         )
     except Exception as e:
+        scratch_org.refresh_from_db()
         scratch_org.finalize_commit_changes(e)
         tb = traceback.format_exc()
         logger.error(tb)
@@ -211,6 +218,7 @@ def delete_scratch_org(scratch_org):
         sf_flow.delete_scratch_org(scratch_org)
         scratch_org.delete()
     except Exception as e:
+        scratch_org.refresh_from_db()
         scratch_org.delete_queued_at = None
         scratch_org.save()
         async_to_sync(report_scratch_org_error)(
