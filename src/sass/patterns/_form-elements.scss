@@ -18,7 +18,9 @@
 // temporary fix
 .form-grid {
   display: grid;
-  grid-template-columns: minmax($size-small, 1fr) auto;
+  grid-template-columns: 1fr 40%;
+  flex-grow: 1;
+  width: calc(100% - 2.25rem);
 }
 
 .slds-is-open {
@@ -27,4 +29,26 @@
       margin-left: $size-xxx-small;
     }
   }
+}
+
+[data-form='task-capture'] {
+  display: grid;
+  height: 100%;
+}
+
+.selectall-header {
+  padding-left: $spacing-small; // matches padding with slds-accordion__section
+  margin-left: 18px; // 18px chevron icon placeholder
+}
+
+.changes-col {
+  margin-left: 3px; // magic number to help line up changes column
+}
+
+.form-scrollable {
+  overflow-y: auto;
+}
+
+.prefooter-field {
+  padding: $spacing-medium $spacing-large;
 }

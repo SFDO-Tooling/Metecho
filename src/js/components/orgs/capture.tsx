@@ -189,20 +189,21 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
       ]}
       onRequestClose={handleClose}
     >
-      <form className="slds-form slds-p-around_large" onSubmit={submitChanges}>
-        <div>
-          <Checkbox
-            id="select-all"
-            labels={{
-              label: `${i18n.t('Select All')}`,
-            }}
-            checked={allChangesChecked}
-            indeterminate={!allChangesChecked && !noChangesChecked}
-            errorText={errors.changes}
-            onChange={handleSelectAllChange}
-          />
-          <span>({getOrgTotalChanges(changeset)})</span>
-        </div>
+      <form className="slds-form" data-form="task-capture" onSubmit={submitChanges}>
+        <div className="form-scrollable slds-p-around_large">
+          <div class="form-grid selectall-header">
+            <Checkbox
+              id="select-all"
+              labels={{
+                label: `${i18n.t('Select All')}`,
+              }}
+              checked={allChangesChecked}
+              indeterminate={!allChangesChecked && !noChangesChecked}
+              errorText={errors.changes}
+              onChange={handleSelectAllChange}
+            />
+            <span className="changes-col">({getOrgTotalChanges(changeset)})</span>
+          </div>
         {Object.keys(changeset)
           .sort()
           .map((groupName, index) => {
@@ -276,10 +277,11 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
               </Accordion>
             );
           })}
+        </div>
         <Input
           id="commit-message"
           label={i18n.t('Commit Message')}
-          className="slds-form-element_stacked slds-p-left_none"
+          className="prefooter-field"
           name="commit_message"
           value={(inputs as Inputs).commit_message}
           required
