@@ -57,6 +57,14 @@ class TestUser:
 
             assert async_to_sync.called
 
+    def test_org_id(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
+        assert user.org_id is not None
+
+        user.socialaccount_set.all().delete()
+        assert user.org_id is None
+
     def test_org_name(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")

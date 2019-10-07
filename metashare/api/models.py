@@ -62,7 +62,10 @@ class User(mixins.HashIdMixin, AbstractUser):
 
     @property
     def org_id(self):
-        return self._get_org_property("Id")
+        try:
+            return self.salesforce_account.extra_data["organization_id"]
+        except (AttributeError, KeyError, TypeError):
+            return None
 
     @property
     def org_name(self):
@@ -137,10 +140,12 @@ class User(mixins.HashIdMixin, AbstractUser):
     @cached_property
     def is_devhub_enabled(self):
         # We can shortcut and avoid making an HTTP request in some cases:
-        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox, None):
+        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
             return None
 
         token, _ = self.sf_token
+        if token is None:
+            return None
         instance_url = self.salesforce_account.extra_data["instance_url"]
         url = f"{instance_url}/services/data/v45.0/sobjects/ScratchOrgInfo"
         resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
