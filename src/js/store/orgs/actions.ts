@@ -167,6 +167,56 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
 export const updateOrg = (payload: Org): OrgUpdated => ({
   type: 'SCRATCH_ORG_UPDATE',
   payload,
+  // @@@ uncomment below (and comment out line above) to mock org with changes
+  // payload: {
+  //   ...payload,
+  //   unsaved_changes: {
+  //     Layout: [
+  //       'Child_Sample_Object__c-Child Sample Object Layout',
+  //       'SampleObject__c-SampleObject Layout',
+  //     ],
+  //     Profile: ['Admin'],
+  //     WebLink: [
+  //       'Campaign.ViewCampaignInfluenceReport',
+  //       'SampleObject__c.Just_Testing',
+  //     ],
+  //     ApexPage: ['SamplePage'],
+  //     ListView: [
+  //       'Opportunity.Default_Opportunity_Pipeline',
+  //       'SampleObject__c.All',
+  //       'Account.Household_Accounts',
+  //     ],
+  //     ApexClass: [
+  //       'SampleClass',
+  //       'SampleClass_TEST',
+  //       'SamplePage_CTRL',
+  //       'SamplePage_CTRL_TEST',
+  //     ],
+  //     CustomTab: ['SampleObject__c'],
+  //     RecordType: [
+  //       'Account.HH_Account',
+  //       'Account.Organization',
+  //       'Opportunity.NPSP_Default',
+  //     ],
+  //     ApexTrigger: ['SampleTrigger'],
+  //     CustomField: [
+  //       'Child_Sample_Object__c.Parent__c',
+  //       'SampleObject__c.Sample_Field__c',
+  //     ],
+  //     QuickAction: ['SampleObject__c.New_Child'],
+  //     CustomObject: ['Child_Sample_Object__c', 'SampleObject__c'],
+  //     ApexComponent: ['SampleComponent'],
+  //     CompactLayout: [
+  //       'Account.NPSP_Household_Account',
+  //       'Account.NPSP_Organization_Account',
+  //     ],
+  //     HomePageLayout: ['SampleHomePage'],
+  //     BusinessProcess: ['Opportunity.NPSP_Default'],
+  //     CustomApplication: ['CumulusCITest'],
+  //     HomePageComponent: ['SampleComponent'],
+  //   },
+  //   has_unsaved_changes: true,
+  // },
 });
 
 export const updateFailed = ({
