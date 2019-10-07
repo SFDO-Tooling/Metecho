@@ -118,7 +118,6 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django_rq",
-    "scheduler",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -250,22 +249,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Media files
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-AWS_ACCESS_KEY_ID = env(
-    "BUCKETEER_AWS_ACCESS_KEY_ID", default=env("AWS_ACCESS_KEY_ID", default=None)
-)
-AWS_SECRET_ACCESS_KEY = env(
-    "BUCKETEER_AWS_SECRET_ACCESS_KEY",
-    default=env("AWS_SECRET_ACCESS_KEY", default=None),
-)
-AWS_STORAGE_BUCKET_NAME = env(
-    "BUCKETEER_BUCKET_NAME", default=env("AWS_BUCKET_NAME", default=None)
-)
-AWS_DEFAULT_ACL = None
 
 
 # Static files (CSS, JavaScript, Images)
