@@ -237,7 +237,10 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
               }
 
               return (
-                <Accordion key={groupName}>
+                <Accordion
+                  key={groupName}
+                  className="light-bordered-row"
+                >
                   <AccordionPanel
                     expanded={Boolean(expandedPanels[groupName])}
                     key={groupName}
