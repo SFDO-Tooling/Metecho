@@ -76,9 +76,6 @@ jobs:
     docker:
       - image: wlonk/oddbird
         environment:
-          BUCKETEER_AWS_ACCESS_KEY_ID: circle_test
-          BUCKETEER_AWS_SECRET_ACCESS_KEY: circle_test
-          BUCKETEER_BUCKET_NAME: circle_test
           DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
           DJANGO_DEBUG: False
@@ -89,9 +86,6 @@ jobs:
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
-          AWS_ACCESS_KEY_ID: None
-          AWS_BUCKET_NAME: None
-          AWS_SECRET_ACCESS_KEY: None
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
           POSTGRES_USER: ubuntu
