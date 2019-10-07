@@ -3,7 +3,6 @@ import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
@@ -12,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import ConnectModal from '@/components/user/connect';
 import Logout from '@/components/user/logout';
-import { ExternalLink, useIsMounted } from '@/components/utils';
+import { ExternalLink, SpinnerWrapper, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { disconnect, refreshDevHubStatus } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
@@ -104,7 +103,7 @@ const UserInfo = ({
 
   return (
     <>
-      {(isDisconnecting || isRefreshing) && <Spinner />}
+      {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
       <ul>
         <li>
           <strong>{i18n.t('Dev Hub')}:</strong>{' '}

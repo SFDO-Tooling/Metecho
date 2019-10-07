@@ -1,6 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -15,6 +14,7 @@ import {
   ExternalLink,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
+  SpinnerWrapper,
   useFetchProjectsIfMissing,
   useFetchRepositoryIfMissing,
   useIsMounted,
@@ -98,7 +98,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
       >
         {!projects || !projects.fetched ? (
           // Fetching projects from API
-          <Spinner />
+          <SpinnerWrapper />
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">

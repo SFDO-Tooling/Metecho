@@ -1,7 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -20,6 +19,7 @@ import {
   getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
   LabelWithSpinner,
+  SpinnerWrapper,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
@@ -239,7 +239,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         {orgs ? (
           <OrgCards orgs={orgs} task={task} project={project} />
         ) : (
-          <Spinner />
+          <SpinnerWrapper />
         )}
         <ConnectModal
           user={user}

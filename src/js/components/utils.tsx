@@ -145,6 +145,20 @@ export const DetailPageLayout = ({
   );
 };
 
+export const SpinnerWrapper = ({
+  size,
+  variant,
+}: {
+  size?: string;
+  variant?: string;
+}) => (
+  <Spinner
+    containerClassName="spinner-container"
+    size={size}
+    variant={variant}
+  />
+);
+
 // For use as a "loading" button label
 export const LabelWithSpinner = ({
   label,
@@ -157,7 +171,7 @@ export const LabelWithSpinner = ({
 }) => (
   <>
     <span className="slds-is-relative slds-m-right_large">
-      <Spinner variant={variant} size={size} />
+      <SpinnerWrapper variant={variant} size={size} />
     </span>
     {label || i18n.t('Loading…')}
   </>
@@ -230,7 +244,7 @@ export const getRepositoryLoadingOrNotFound = ({
       return <RepositoryNotFound />;
     }
     // Fetching repository from API
-    return <Spinner />;
+    return <SpinnerWrapper />;
   }
   return false;
 };
@@ -253,7 +267,7 @@ export const getProjectLoadingOrNotFound = ({
       return <ProjectNotFound repository={repository} />;
     }
     // Fetching project from API
-    return <Spinner />;
+    return <SpinnerWrapper />;
   }
   return false;
 };
@@ -282,7 +296,7 @@ export const getTaskLoadingOrNotFound = ({
       return <TaskNotFound repository={repository} project={project} />;
     }
     // Fetching task from API
-    return <Spinner />;
+    return <SpinnerWrapper />;
   }
   return false;
 };
