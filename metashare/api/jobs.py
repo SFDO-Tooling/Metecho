@@ -73,7 +73,10 @@ def report_errors_on_delete(scratch_org):
 def try_to_make_branch(repository, *, new_branch, base_branch):
     branch_name = new_branch
     counter = 0
+    max_length = 50  # From models::Project.branch_name
     while True:
+        suffix = f"-{counter}" if counter else ""
+        branch_name = f"{new_branch[:max_length-len(suffix)]}{suffix}"
         try:
             latest_sha = repository.branch(base_branch).latest_sha()
             repository.create_branch_ref(branch_name, latest_sha)
@@ -81,7 +84,6 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
         except UnprocessableEntity as err:
             if err.msg == "Reference already exists":
                 counter += 1
-                branch_name = f"{new_branch}-{counter}"
             else:
                 raise
 
