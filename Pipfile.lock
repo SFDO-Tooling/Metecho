@@ -202,11 +202,11 @@
         },
         "cumulusci": {
             "hashes": [
-                "sha256:263a1dcd0297ed6f1afbaed45b665728d78cab30babf213792783f43b771f28d",
-                "sha256:65cf8c6690a2aff31aa2e75dfb61396c9b13e608dd76d56eb93df107a745a029"
+                "sha256:f207f230b0726b071daf07fac7fdc3263b21b78256a5af03a6a7e19de3700da6",
+                "sha256:fdcdcdddb7bf41569de207261d5a8d4adba05103972a256abf28eb520ae1acdc"
             ],
             "index": "pypi",
-            "version": "==2.5.9"
+            "version": "==3.0.0"
         },
         "daphne": {
             "hashes": [
@@ -340,11 +340,11 @@
         },
         "docutils": {
             "hashes": [
-                "sha256:02aec4bd92ab067f6ff27a38a38a41173bf01bed8f89157768c1573f53e474a6",
-                "sha256:51e64ef2ebfb29cae1faa133b3710143496eca21c530f3f71424d77687764274",
-                "sha256:7a4bd47eaf6596e1295ecb11361139febe29b084a87bf005bf899f9a42edc3c6"
+                "sha256:6c4f696463b79f1fb8ba0c594b63840ebd41f059e92b31957c46b74a4599b6d0",
+                "sha256:9e4d7ecfc600058e07ba661411a2b7de2fd0fafa17d1a7f7361cd47b1175c827",
+                "sha256:a2aeea129088da402665e92e0b25b04b073c04b2dce4ab65caaa38b7ce2e1a99"
             ],
-            "version": "==0.14"
+            "version": "==0.15.2"
         },
         "entrypoints": {
             "hashes": [
@@ -366,12 +366,6 @@
                 "sha256:a6459ff518d1fc6ee2238a7209e6c899517872c7e1115510279033ffe6fe8ef3"
             ],
             "version": "==2.0.2"
-        },
-        "future": {
-            "hashes": [
-                "sha256:67045236dcfd6816dc439556d009594abf643e5eb48992e36beac09c2ca659b8"
-            ],
-            "version": "==0.17.1"
         },
         "github3-py": {
             "hashes": [
@@ -484,10 +478,10 @@
         },
         "keyring": {
             "hashes": [
-                "sha256:67d6cc0132bd77922725fae9f18366bb314fd8f95ff4d323a4df41890a96a838",
-                "sha256:7b29ebfcf8678c4da531b2478a912eea01e80007e5ddca9ee0c7038cb3489ec6"
+                "sha256:91037ccaf0c9a112a76f7740e4a416b9457a69b66c2799421581bee710a974b3",
+                "sha256:f5bb20ea6c57c2360daf0c591931c9ea0d7660a8d9e32ca84d63273f131ea605"
             ],
-            "version": "==18.0.1"
+            "version": "==19.2.0"
         },
         "logfmt": {
             "hashes": [
@@ -858,7 +852,7 @@
                 "sha256:20c797ae48a4419f66f8d28fc221623f11fc45b6828f96bdb1ad9990acb59f92",
                 "sha256:7a119fb52a88e398dbb22a4b3eb39b779bfbace7e4153b7bc6e5954d86282a8a"
             ],
-            "markers": "sys_platform == 'linux' and python_version >= '3.5'",
+            "markers": "sys_platform == 'linux'",
             "version": "==3.1.1"
         },
         "selenium": {
@@ -1195,11 +1189,11 @@
         },
         "docutils": {
             "hashes": [
-                "sha256:02aec4bd92ab067f6ff27a38a38a41173bf01bed8f89157768c1573f53e474a6",
-                "sha256:51e64ef2ebfb29cae1faa133b3710143496eca21c530f3f71424d77687764274",
-                "sha256:7a4bd47eaf6596e1295ecb11361139febe29b084a87bf005bf899f9a42edc3c6"
+                "sha256:6c4f696463b79f1fb8ba0c594b63840ebd41f059e92b31957c46b74a4599b6d0",
+                "sha256:9e4d7ecfc600058e07ba661411a2b7de2fd0fafa17d1a7f7361cd47b1175c827",
+                "sha256:a2aeea129088da402665e92e0b25b04b073c04b2dce4ab65caaa38b7ce2e1a99"
             ],
-            "version": "==0.14"
+            "version": "==0.15.2"
         },
         "entrypoints": {
             "hashes": [
