@@ -237,13 +237,10 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
               }
 
               return (
-                <Accordion
-                  key={groupName}
-                  className="light-bordered-row"
-                >
+                <Accordion key={groupName} className="light-bordered-row">
                   <AccordionPanel
                     expanded={Boolean(expandedPanels[groupName])}
-                    key={groupName}
+                    key={`${groupName}-panel`}
                     id={`group-${index}`}
                     onTogglePanel={handleThisPanelToggle}
                     title={groupName}
