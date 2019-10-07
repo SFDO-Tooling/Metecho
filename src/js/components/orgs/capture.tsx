@@ -270,6 +270,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                         labels={{
                           label: change,
                         }}
+                        className="slds-p-left_xx-large"
                         name="changes"
                         checked={Boolean(
                           (inputs as Inputs).changes[groupName] &&

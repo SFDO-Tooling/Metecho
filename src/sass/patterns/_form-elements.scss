@@ -1,33 +1,11 @@
 // Form Elements
 // =============
 
-.vertical-separator {
-  border-right: 1px solid $color-border-separator-alt;
-  height: 100%;
-  width: 1px;
-
-  .hide-separator + & {
-    display: none;
-  }
-
-  .show-separator + & {
-    display: inline;
-  }
-}
-
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 25%;
   flex-grow: 1;
   width: calc(100% - 2.25rem);
-}
-
-.slds-is-open {
-  > .slds-accordion__content {
-    .slds-checkbox {
-      margin-left: $size-xxx-small;
-    }
-  }
 }
 
 [data-form='task-capture'] {
@@ -48,6 +26,7 @@
     }
   }
 
+  // adding input focus since keyboard nav doesn't focus on spans
   [type='checkbox'] {
     &:focus {
       + .slds-checkbox__label {

@@ -4,3 +4,17 @@
 .light-bordered-row {
   border-top: 1px solid $color-border-separator;
 }
+
+.vertical-separator {
+  border-right: 1px solid $color-border-separator-alt;
+  height: 100%;
+  width: 1px;
+
+  .hide-separator + & {
+    display: none;
+  }
+
+  .show-separator + & {
+    display: inline;
+  }
+}
