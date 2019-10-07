@@ -102,6 +102,20 @@ class TestCreateBranchesOnGitHub:
 
         assert result == "new-branch-1"
 
+    def test_try_to_make_branch__long_duplicate_name(self, user_factory, task_factory):
+        repository = MagicMock()
+        resp = MagicMock(status_code=422)
+        resp.json.return_value = {"message": "Reference already exists"}
+        repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
+        branch = MagicMock()
+        branch.latest_sha.return_value = "1234abc"
+        repository.branch.return_value = branch
+        result = try_to_make_branch(
+            repository, new_branch="a" * 100, base_branch="base-branch"
+        )
+
+        assert result == "a" * 98 + "-1"
+
     def test_try_to_make_branch__unknown_error(self, user_factory, task_factory):
         repository = MagicMock()
         resp = MagicMock(status_code=422, msg="Test message")
