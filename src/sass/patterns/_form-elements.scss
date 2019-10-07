@@ -17,7 +17,7 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 40%;
+  grid-template-columns: 1fr 25%;
   flex-grow: 1;
   width: calc(100% - 2.25rem);
 }
@@ -33,6 +33,30 @@
 [data-form='task-capture'] {
   display: grid;
   height: 100%;
+
+  // using slds class since we can't access inner checkbox + label markup
+  .slds-checkbox__label {
+    &:hover {
+      .slds-form-element__label {
+        color: $brand-text-link-active;
+      }
+
+      .slds-checkbox_faux,
+      .slds-checkbox--faux {
+        border-color: $brand-text-link-active;
+      }
+    }
+  }
+
+  [type='checkbox'] {
+    &:focus {
+      + .slds-checkbox__label {
+        .slds-form-element__label {
+          color: $brand-text-link-active;
+        }
+      }
+    }
+  }
 }
 
 .selectall-header {
