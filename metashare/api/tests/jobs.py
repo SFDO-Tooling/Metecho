@@ -111,15 +111,10 @@ class TestCreateBranchesOnGitHub:
         branch.latest_sha.return_value = "1234abc"
         repository.branch.return_value = branch
         result = try_to_make_branch(
-            repository,
-            new_branch=(
-                "new-branch-with-a-notably-long-name-which-is-long-enough-to-get-"
-                "cropped"
-            ),
-            base_branch="base-branch",
+            repository, new_branch="a" * 100, base_branch="base-branch"
         )
 
-        assert result == "new-branch-with-a-notably-long-name-which-is-lon-1"
+        assert result == "a" * 98 + "-1"
 
     def test_try_to_make_branch__unknown_error(self, user_factory, task_factory):
         repository = MagicMock()

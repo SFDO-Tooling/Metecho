@@ -202,7 +202,7 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
 
     name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = models.SlugField(max_length=50, null=True, blank=True)
+    branch_name = models.SlugField(max_length=100, null=True, blank=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -253,7 +253,7 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         blank=True,
         related_name="assigned_tasks",
     )
-    branch_name = models.SlugField(max_length=50, null=True, blank=True)
+    branch_name = models.SlugField(max_length=100, null=True, blank=True)
 
     slug_class = TaskSlug
 
