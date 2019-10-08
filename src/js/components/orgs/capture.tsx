@@ -195,19 +195,19 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
         onSubmit={submitChanges}
       >
         <div className="slds-scrollable_y slds-p-around_large">
-          <div className="form-grid selectall-header slds-p-left_small">
+          <div className="form-grid slds-p-around_small">
             <Checkbox
               id="select-all"
               labels={{
                 label: `${i18n.t('Select All')}`,
               }}
-              className="slds-form-element_stacked slds-p-left_none"
+              className="slds-p-left_none select-header-action-col"
               checked={allChangesChecked}
               indeterminate={!allChangesChecked && !noChangesChecked}
               errorText={errors.changes}
               onChange={handleSelectAllChange}
             />
-            <span className="changes-col">
+            <span className="select-header-changes-col">
               ({getOrgTotalChanges(changeset)})
             </span>
           </div>

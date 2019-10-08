@@ -3,14 +3,19 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 25%;
-  flex-grow: 1;
-  width: calc(100% - 2.25rem);
+  // needs a non-percentage and non fr
+  //   for changes column to be consistent between row types
+  //   16vw is a magic number that works well in changes column
+  grid-template-columns: 1fr 16vw;
 }
 
 [data-form='task-capture'] {
   display: grid;
   height: 100%;
+
+  .slds-accordion__summary {
+    @include icon-checkbox-layout;
+  }
 
   // using slds class since we can't access inner checkbox + label markup
   .slds-checkbox__label {
@@ -38,10 +43,10 @@
   }
 }
 
-.selectall-header {
-  margin-left: 18px; // 18px chevron icon placeholder
-}
+.select-header-action-col {
+  @include icon-checkbox-layout;
 
-.changes-col {
-  margin-left: 3px; // magic number to help line up changes column
+  .slds-form-element__control {
+    grid-column: 2;
+  }
 }
