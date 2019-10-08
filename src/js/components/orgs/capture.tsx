@@ -205,7 +205,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
               }}
               className="slds-p-left_none select-header-action-col"
               checked={allChangesChecked}
-              indeterminate={!allChangesChecked && !noChangesChecked}
+              indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
               errorText={errors.changes}
               onChange={handleSelectAllChange}
             />
@@ -245,10 +245,10 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                         <Checkbox
                           labels={{ label: groupName }}
                           checked={checkedChildren === children.length}
-                          indeterminate={
+                          indeterminate={Boolean(
                             checkedChildren &&
-                            checkedChildren !== children.length
-                          }
+                              checkedChildren !== children.length,
+                          )}
                           onChange={handleSelectThisGroup}
                         />
                         <span className="slds-text-body_regular">
