@@ -107,15 +107,6 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.sf_token == (None, None)
 
-    def test_gh_token(self, user_factory):
-        user = user_factory()
-        # Because the test fixture Fernet encrypts this by default. We
-        # don't expect the GitHub token to be encrypted usually.
-        assert fernet_decrypt(user.gh_token) == "0123456789abcdef"
-
-        user.socialaccount_set.all().delete()
-        assert user.gh_token is None
-
     def test_sf_token__invalid(
         self, user_factory, social_token_factory, social_account_factory
     ):

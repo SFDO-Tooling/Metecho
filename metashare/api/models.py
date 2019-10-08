@@ -121,21 +121,10 @@ class User(mixins.HashIdMixin, AbstractUser):
         return self.socialaccount_set.filter(provider__startswith="salesforce-").first()
 
     @property
-    def github_account(self):
-        return self.socialaccount_set.filter(provider="github").first()
-
-    @property
     def valid_token_for(self):
         if all(self.sf_token) and self.org_id:
             return self.org_id
         return None
-
-    @property
-    def gh_token(self):
-        try:
-            return self.github_account.socialtoken_set.first().token
-        except AttributeError:
-            return None
 
     @cached_property
     def is_devhub_enabled(self):
