@@ -64,13 +64,13 @@ const reducer = (
             [ORG_TYPES.DEV]:
               (response &&
                 (response as Org[]).find(
-                  org => org.org_type === ORG_TYPES.DEV,
+                  (org) => org.org_type === ORG_TYPES.DEV,
                 )) ||
               null,
             [ORG_TYPES.QA]:
               (response &&
                 (response as Org[]).find(
-                  org => org.org_type === ORG_TYPES.QA,
+                  (org) => org.org_type === ORG_TYPES.QA,
                 )) ||
               null,
           },

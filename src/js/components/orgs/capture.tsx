@@ -77,6 +77,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
   };
 
   const handleSelectGroup = (groupName: string, checked: boolean) => {
+    // Lazy way to quickly deep clone the object
     const newCheckedItems = JSON.parse(
       JSON.stringify((inputs as Inputs).changes),
     ) as Changeset;
@@ -97,6 +98,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     change: string;
     checked: boolean;
   }) => {
+    // Lazy way to quickly deep clone the object
     const newCheckedItems = JSON.parse(
       JSON.stringify((inputs as Inputs).changes),
     ) as Changeset;
@@ -221,29 +223,20 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                 { checked }: { checked: boolean },
               ) => handleSelectGroup(groupName, checked);
               let checkedChildren = 0;
-              let allChildrenChecked = false;
-              let noChildrenChecked = true;
               for (const child of children) {
                 if (
                   (inputs as Inputs).changes[groupName] &&
                   (inputs as Inputs).changes[groupName].includes(child)
                 ) {
-                  noChildrenChecked = false;
                   checkedChildren = checkedChildren + 1;
                 }
               }
-              if (checkedChildren === children.length) {
-                allChildrenChecked = true;
-              }
 
               return (
-                <Accordion
-                  key={groupName}
-                  className="light-bordered-row"
-                >
+                <Accordion key={groupName} className="light-bordered-row">
                   <AccordionPanel
                     expanded={Boolean(expandedPanels[groupName])}
-                    key={groupName}
+                    key={`${groupName}-panel`}
                     id={`group-${index}`}
                     onTogglePanel={handleThisPanelToggle}
                     title={groupName}
@@ -251,9 +244,10 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                       <div className="form-grid">
                         <Checkbox
                           labels={{ label: groupName }}
-                          checked={allChildrenChecked}
+                          checked={checkedChildren === children.length}
                           indeterminate={
-                            !allChildrenChecked && !noChildrenChecked
+                            checkedChildren &&
+                            checkedChildren !== children.length
                           }
                           onChange={handleSelectThisGroup}
                         />
@@ -264,7 +258,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                     }
                     summary=""
                   >
-                    {changeset[groupName].sort().map(change => (
+                    {changeset[groupName].sort().map((change) => (
                       <Checkbox
                         key={`${groupName}-${change}`}
                         labels={{

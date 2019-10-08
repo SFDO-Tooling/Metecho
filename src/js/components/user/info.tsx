@@ -61,8 +61,8 @@ const ConnectToSalesforce = ({
 
 const ConnectionInfoWarning = () => (
   <Trans i18nKey="devHubNotEnabled">
-    This Salesforce org does not have Dev Hub enabled, and will not be able to
-    create or modify scratch orgs. Learn how to{' '}
+    This Salesforce org does not have Dev Hub enabled or your user does not have
+    permission to create or modify scratch orgs. Learn how to{' '}
     <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
       enable Dev Hub
     </ExternalLink>

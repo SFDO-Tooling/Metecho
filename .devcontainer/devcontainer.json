@@ -47,6 +47,7 @@
     ],
     "prettier.singleQuote": true,
     "prettier.trailingComma": "all",
+    "prettier.arrowParens": "always",
     "typescript.preferences.quoteStyle": "single",
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,

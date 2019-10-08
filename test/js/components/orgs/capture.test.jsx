@@ -23,7 +23,7 @@ const defaultChangeset = {
 };
 
 describe('<CaptureModal/>', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       changeset: defaultChangeset,
     };

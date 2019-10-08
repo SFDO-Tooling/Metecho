@@ -20,7 +20,7 @@ export type RepositoriesAction =
   | RefreshReposRejected
   | ReposRefreshing;
 
-export const refreshRepos = (): ThunkResult => async dispatch => {
+export const refreshRepos = (): ThunkResult => async (dispatch) => {
   dispatch({ type: 'REFRESH_REPOS_REQUESTED' });
   try {
     await apiFetch({

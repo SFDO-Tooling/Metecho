@@ -55,12 +55,12 @@ const reducer = (
           };
         }
         // Store list of known repository IDs to filter out duplicates
-        const ids = repositories.repositories.map(p => p.id);
+        const ids = repositories.repositories.map((p) => p.id);
         return {
           ...repositories,
           repositories: [
             ...repositories.repositories,
-            ...results.filter(p => !ids.includes(p.id)),
+            ...results.filter((p) => !ids.includes(p.id)),
           ],
           next,
           refreshing: false,
@@ -81,7 +81,7 @@ const reducer = (
             notFound: [...repositories.notFound, slug],
           };
         }
-        if (!repositories.repositories.find(p => p.id === object.id)) {
+        if (!repositories.repositories.find((p) => p.id === object.id)) {
           return {
             ...repositories,
             repositories: [...repositories.repositories, object],

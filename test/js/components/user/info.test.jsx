@@ -20,7 +20,7 @@ afterEach(() => {
 describe('<ConnectionInfoModal />', () => {
   const toggleModal = jest.fn();
 
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       isOpen: true,
     };

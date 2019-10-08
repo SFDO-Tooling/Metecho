@@ -56,7 +56,7 @@ export const login = (payload: User): LoginAction => {
   };
 };
 
-export const logout = (): ThunkResult => dispatch =>
+export const logout = (): ThunkResult => (dispatch) =>
   apiFetch({
     url: window.api_urls.account_logout(),
     dispatch,
@@ -69,12 +69,12 @@ export const logout = (): ThunkResult => dispatch =>
       window.socket.reconnect();
     }
     if (window.Sentry) {
-      window.Sentry.configureScope(scope => scope.clear());
+      window.Sentry.configureScope((scope) => scope.clear());
     }
     return dispatch({ type: 'USER_LOGGED_OUT' });
   });
 
-export const refetchAllData = (): ThunkResult => async dispatch => {
+export const refetchAllData = (): ThunkResult => async (dispatch) => {
   dispatch({ type: 'REFETCH_DATA_STARTED' });
   try {
     const payload = await apiFetch({
@@ -93,7 +93,7 @@ export const refetchAllData = (): ThunkResult => async dispatch => {
   }
 };
 
-export const disconnect = (): ThunkResult => async dispatch => {
+export const disconnect = (): ThunkResult => async (dispatch) => {
   dispatch({ type: 'USER_DISCONNECT_REQUESTED' });
   try {
     const payload = await apiFetch({
@@ -110,7 +110,7 @@ export const disconnect = (): ThunkResult => async dispatch => {
   }
 };
 
-export const refreshDevHubStatus = (): ThunkResult => async dispatch => {
+export const refreshDevHubStatus = (): ThunkResult => async (dispatch) => {
   dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
   try {
     const payload = await apiFetch({ url: window.api_urls.user(), dispatch });

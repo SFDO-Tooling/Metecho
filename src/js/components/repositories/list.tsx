@@ -97,7 +97,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
     default: {
       contents = (
         <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
-          {repositories.map(repository => (
+          {repositories.map((repository) => (
             <RepositoryListItem repository={repository} key={repository.id} />
           ))}
         </div>

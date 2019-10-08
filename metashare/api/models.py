@@ -62,7 +62,10 @@ class User(mixins.HashIdMixin, AbstractUser):
 
     @property
     def org_id(self):
-        return self._get_org_property("Id")
+        try:
+            return self.salesforce_account.extra_data["organization_id"]
+        except (AttributeError, KeyError, TypeError):
+            return None
 
     @property
     def org_name(self):
@@ -137,10 +140,12 @@ class User(mixins.HashIdMixin, AbstractUser):
     @cached_property
     def is_devhub_enabled(self):
         # We can shortcut and avoid making an HTTP request in some cases:
-        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox, None):
+        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
             return None
 
         token, _ = self.sf_token
+        if token is None:
+            return None
         instance_url = self.salesforce_account.extra_data["instance_url"]
         url = f"{instance_url}/services/data/v45.0/sobjects/ScratchOrgInfo"
         resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
@@ -195,7 +200,7 @@ class ProjectSlug(AbstractSlug):
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     name = models.CharField(max_length=50)
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = models.SlugField(max_length=50, null=True, blank=True)
+    branch_name = models.SlugField(max_length=100, null=True, blank=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -237,7 +242,7 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         blank=True,
         related_name="assigned_tasks",
     )
-    branch_name = models.SlugField(max_length=50, null=True, blank=True)
+    branch_name = models.SlugField(max_length=100, null=True, blank=True)
 
     slug_class = TaskSlug
 
@@ -273,11 +278,13 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     latest_commit_url = models.URLField(blank=True)
     latest_commit_at = models.DateTimeField(null=True, blank=True)
     url = models.URLField(null=True, blank=True)
-    unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder)
-    latest_revision_numbers = JSONField(default=dict, encoder=DjangoJSONEncoder)
+    unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
+    latest_revision_numbers = JSONField(
+        default=dict, encoder=DjangoJSONEncoder, blank=True
+    )
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_capturing_changes = models.BooleanField(default=False)
-    config = JSONField(default=dict, encoder=DjangoJSONEncoder)
+    config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     login_url = models.URLField(null=True, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
 
@@ -342,6 +349,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         from .serializers import ScratchOrgSerializer
 
         if error is None:
+            self.save()
             async_to_sync(push.push_message_about_instance)(
                 self,
                 {
