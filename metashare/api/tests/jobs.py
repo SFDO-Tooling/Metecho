@@ -28,9 +28,7 @@ class TestCreateBranchesOnGitHub:
         task = task_factory()
         project = task.project
         with ExitStack() as stack:
-            global_config = stack.enter_context(
-                patch("metashare.api.github_context.GlobalConfig")
-            )
+            global_config = stack.enter_context(patch("metashare.api.gh.GlobalConfig"))
             global_config_instance = MagicMock()
             global_config.return_value = global_config_instance
             global_config_instance.get_project_config.return_value = MagicMock(
@@ -59,9 +57,7 @@ class TestCreateBranchesOnGitHub:
         project = project_factory(branch_name="pepin")
         task = task_factory(branch_name="charlemagne", project=project)
         with ExitStack() as stack:
-            global_config = stack.enter_context(
-                patch("metashare.api.github_context.GlobalConfig")
-            )
+            global_config = stack.enter_context(patch("metashare.api.gh.GlobalConfig"))
             global_config_instance = MagicMock()
             global_config.return_value = global_config_instance
             global_config_instance.get_project_config.return_value = MagicMock(

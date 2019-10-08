@@ -10,8 +10,12 @@ from cumulusci.tasks.salesforce.RetrieveUnpackaged import RetrieveUnpackaged
 from cumulusci.tasks.salesforce.sourcetracking import MetadataType
 from django.conf import settings
 
-from .gh import gh_given_user
-from .github_context import extract_owner_and_repo, get_repo_info, local_github_checkout
+from .gh import (
+    extract_owner_and_repo,
+    get_repo_info,
+    gh_given_user,
+    local_github_checkout,
+)
 from .sf_run_flow import refresh_access_token
 
 

@@ -9,10 +9,10 @@ from github3.exceptions import UnprocessableEntity
 
 from . import sf_org_changes as sf_changes
 from . import sf_run_flow as sf_flow
-from .gh import gh_given_user
-from .github_context import (
+from .gh import (
     extract_owner_and_repo,
     get_cumulus_prefix,
+    gh_given_user,
     local_github_checkout,
 )
 from .push import report_scratch_org_error
