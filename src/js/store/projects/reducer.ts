@@ -60,14 +60,14 @@ const reducer = (
           };
         }
         // Store list of known project IDs to filter out duplicates
-        const ids = repositoryProjects.projects.map(p => p.id);
+        const ids = repositoryProjects.projects.map((p) => p.id);
         return {
           ...projects,
           [repository]: {
             ...repositoryProjects,
             projects: [
               ...repositoryProjects.projects,
-              ...results.filter(p => !ids.includes(p.id)),
+              ...results.filter((p) => !ids.includes(p.id)),
             ],
             next,
             fetched: true,
@@ -84,7 +84,7 @@ const reducer = (
       if (objectType === OBJECT_TYPES.PROJECT && object) {
         const repository = projects[object.repository] || { ...defaultState };
         // Do not store if (somehow) we already know about this project
-        if (!repository.projects.filter(p => object.id === p.id).length) {
+        if (!repository.projects.filter((p) => object.id === p.id).length) {
           return {
             ...projects,
             [object.repository]: {
@@ -116,7 +116,7 @@ const reducer = (
         }
         // Do not store if we already know about this project
         if (
-          !repositoryProjects.projects.filter(p => object.id === p.id).length
+          !repositoryProjects.projects.filter((p) => object.id === p.id).length
         ) {
           return {
             ...projects,
@@ -135,14 +135,14 @@ const reducer = (
         ...defaultState,
       };
       const existingProject = repositoryProjects.projects.find(
-        p => p.id === project.id,
+        (p) => p.id === project.id,
       );
       if (existingProject) {
         return {
           ...projects,
           [project.repository]: {
             ...repositoryProjects,
-            projects: repositoryProjects.projects.map(p => {
+            projects: repositoryProjects.projects.map((p) => {
               if (p.id === project.id) {
                 return { ...project };
               }

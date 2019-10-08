@@ -30,7 +30,7 @@ const defaultProject = {
 };
 
 describe('<TaskForm/>', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       project: defaultProject,
       startOpen: true,

@@ -119,7 +119,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             {Boolean(projects.projects.length) && (
               <>
                 <ul className="slds-has-dividers_bottom">
-                  {projects.projects.map(project => (
+                  {projects.projects.map((project) => (
                     <ProjectListItem
                       key={project.id}
                       project={project}

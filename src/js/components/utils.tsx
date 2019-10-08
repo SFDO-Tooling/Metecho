@@ -216,7 +216,7 @@ export const PrivateRoute = ({
   return (
     <Route
       {...rest}
-      render={props =>
+      render={(props) =>
         user ? (
           <Component {...props} />
         ) : (

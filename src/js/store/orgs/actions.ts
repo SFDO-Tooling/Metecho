@@ -133,7 +133,7 @@ export const provisionFailed = ({
   });
 };
 
-export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
+export const refetchOrg = (org: Org): ThunkResult => async (dispatch) => {
   const url = window.api_urls.scratch_org_detail(org.id);
   dispatch({
     type: 'REFETCH_ORG_STARTED',

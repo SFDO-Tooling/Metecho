@@ -10,7 +10,7 @@ describe('reducer', () => {
 
   test.each([['USER_LOGGED_OUT'], ['REFETCH_DATA_SUCCEEDED']])(
     'returns initial state on %s action',
-    action => {
+    (action) => {
       const task1 = {
         id: 't1',
         slug: 'task-1',

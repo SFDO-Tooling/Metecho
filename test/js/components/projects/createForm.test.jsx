@@ -32,7 +32,7 @@ const defaultRepository = {
 };
 
 describe('<ProjectForm/>', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       repository: defaultRepository,
       startOpen: true,

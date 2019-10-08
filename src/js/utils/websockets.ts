@@ -184,7 +184,7 @@ export const createSocket = ({
   const socket = new Sockette(url, {
     timeout: opts.timeout,
     maxAttempts: opts.maxAttempts,
-    onopen: e => {
+    onopen: (e) => {
       dispatch(connectSocket());
       open = true;
       for (const payload of pending) {
@@ -201,7 +201,7 @@ export const createSocket = ({
         opts.onopen(e);
       }
     },
-    onmessage: e => {
+    onmessage: (e) => {
       let data = e.data;
       try {
         data = JSON.parse(e.data);
@@ -221,11 +221,11 @@ export const createSocket = ({
         lostConnection = true;
       }
     },
-    onmaximum: e => {
+    onmaximum: (e) => {
       log(`[WebSocket] ending reconnect after ${opts.maxAttempts} attempts`);
       opts.onmaximum(e);
     },
-    onclose: e => {
+    onclose: (e) => {
       log('[WebSocket] closed');
       if (open) {
         open = false;
@@ -237,7 +237,7 @@ export const createSocket = ({
       }
       opts.onclose(e);
     },
-    onerror: e => {
+    onerror: (e) => {
       log('[WebSocket] error');
       opts.onerror(e);
     },

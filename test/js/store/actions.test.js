@@ -79,7 +79,7 @@ describe('fetchObjects with `reset: true`', () => {
             actions.fetchObjects({
               objectType: 'repository',
               reset: true,
-              shouldSubscribeToObject: obj => obj.shouldSubscribe,
+              shouldSubscribeToObject: (obj) => obj.shouldSubscribe,
             }),
           )
           .then(() => {
@@ -413,7 +413,7 @@ describe('createObject', () => {
           .dispatch(
             actions.createObject({
               objectType: 'project',
-              shouldSubscribeToObject: o => o.shouldSubscribe,
+              shouldSubscribeToObject: (o) => o.shouldSubscribe,
             }),
           )
           .then(() => {
