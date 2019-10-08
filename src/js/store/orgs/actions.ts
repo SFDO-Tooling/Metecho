@@ -32,7 +32,7 @@ interface OrgDeleteFailed {
   payload: Org;
 }
 interface CommitEvent {
-  type: 'GITHUB_CHANGES_COMMITTED' | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
+  type: 'SCRATCH_ORG_COMMIT_CHANGES' | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
   payload: Org;
 }
 
@@ -292,7 +292,7 @@ export const commitSucceeded = (payload: Org): ThunkResult => (
     }),
   );
   return dispatch({
-    type: 'GITHUB_CHANGES_COMMITTED',
+    type: 'SCRATCH_ORG_COMMIT_CHANGES',
     payload,
   });
 };

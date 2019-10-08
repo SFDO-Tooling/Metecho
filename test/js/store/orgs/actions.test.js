@@ -381,7 +381,7 @@ describe('commitSucceeded', () => {
       task: 'task-id',
     };
     const action = {
-      type: 'GITHUB_CHANGES_COMMITTED',
+      type: 'SCRATCH_ORG_COMMIT_CHANGES',
       payload: commit,
     };
     store.dispatch(actions.commitSucceeded(commit));
@@ -403,7 +403,7 @@ describe('commitSucceeded', () => {
       task: 'task-id',
     };
     const action = {
-      type: 'GITHUB_CHANGES_COMMITTED',
+      type: 'SCRATCH_ORG_COMMIT_CHANGES',
       payload: commit,
     };
     store.dispatch(actions.commitSucceeded(commit));

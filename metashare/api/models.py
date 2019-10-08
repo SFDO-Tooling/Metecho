@@ -402,7 +402,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             async_to_sync(push.push_message_about_instance)(
                 self,
                 {
-                    "type": "GITHUB_CHANGES_COMMITTED",
+                    "type": "SCRATCH_ORG_COMMIT_CHANGES",
                     "payload": ScratchOrgSerializer(self).data,
                 },
             )

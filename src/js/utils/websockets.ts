@@ -91,7 +91,7 @@ interface OrgDeleteFailedEvent {
   };
 }
 interface CommitSucceededEvent {
-  type: 'GITHUB_CHANGES_COMMITTED';
+  type: 'SCRATCH_ORG_COMMIT_CHANGES';
   payload: Org;
 }
 interface CommitFailedEvent {
@@ -142,7 +142,7 @@ export const getAction = (event: EventType) => {
       return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
-    case 'GITHUB_CHANGES_COMMITTED':
+    case 'SCRATCH_ORG_COMMIT_CHANGES':
       return commitSucceeded(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
       return commitFailed(event.payload);

@@ -397,7 +397,7 @@ describe('reducer', () => {
     });
   });
 
-  describe('SCRATCH_ORG_COMMIT_CHANGES_FAILED/GITHUB_CHANGES_COMMITTED', () => {
+  describe('SCRATCH_ORG_COMMIT_CHANGES_FAILED/SCRATCH_ORG_COMMIT_CHANGES', () => {
     test('updates org', () => {
       const org = {
         id: 'org-id',
