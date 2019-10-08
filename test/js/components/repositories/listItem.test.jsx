@@ -5,11 +5,11 @@ import { MemoryRouter } from 'react-router-dom';
 import RepositoryListItem from '@/components/repositories/listItem';
 
 describe('<RepositoryListItem />', () => {
-  const setup = initialState => {
+  const setup = (initialState) => {
     const { getByText } = render(
       <MemoryRouter>
         <>
-          {initialState.repositories.repositories.map(repository => (
+          {initialState.repositories.repositories.map((repository) => (
             <RepositoryListItem repository={repository} key={repository.id} />
           ))}
         </>

@@ -18,7 +18,7 @@ const reducer = (
     case 'TOAST_ADDED':
       return [...toasts, action.payload];
     case 'TOAST_REMOVED':
-      return toasts.filter(toast => toast.id !== action.payload);
+      return toasts.filter((toast) => toast.id !== action.payload);
     case 'TOASTS_CLEARED':
       return [];
   }

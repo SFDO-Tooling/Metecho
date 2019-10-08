@@ -38,7 +38,8 @@ const defaultOrgs = {
     latest_commit_url: '/test/commit/url/',
     latest_commit_at: '2019-08-16T12:58:53.721Z',
     url: '/test/org/url/',
-    has_changes: true,
+    unsaved_changes: { Foo: ['Bar'] },
+    has_unsaved_changes: true,
   },
   QA: null,
 };
@@ -51,7 +52,7 @@ const defaultState = {
 };
 
 describe('<OrgCards/>', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       initialState: defaultState,
       orgs: defaultOrgs,
@@ -77,7 +78,7 @@ describe('<OrgCards/>', () => {
 
       expect(getByText('View Org')).toBeVisible();
       expect(
-        getByText('has uncaptured changes', { exact: false }),
+        getByText('has 1 uncaptured change', { exact: false }),
       ).toBeVisible();
       expect(getByText('Create Org')).toBeVisible();
       expect(getByText('check again')).toBeVisible();
@@ -91,7 +92,8 @@ describe('<OrgCards/>', () => {
         Dev: {
           ...defaultOrgs.Dev,
           owner: 'other-user',
-          has_changes: false,
+          unsaved_changes: {},
+          has_unsaved_changes: false,
         },
       };
       const { queryByText, getByText } = setup({ orgs });
@@ -103,7 +105,7 @@ describe('<OrgCards/>', () => {
   });
 
   describe('QA org', () => {
-    test('render without status', () => {
+    test('renders without status', () => {
       const orgs = {
         ...defaultOrgs,
         Dev: null,
@@ -116,7 +118,7 @@ describe('<OrgCards/>', () => {
 
       expect(getByText('View Org')).toBeVisible();
       expect(
-        queryByText('has uncaptured changes', { exact: false }),
+        queryByText('has 1 uncaptured change', { exact: false }),
       ).toBeNull();
     });
   });
@@ -210,7 +212,7 @@ describe('<OrgCards/>', () => {
           },
         });
 
-        expect(getByText('Refreshing Org…')).toBeVisible();
+        expect(getByText('Checking for Uncaptured Changes…')).toBeVisible();
       });
     });
   });
@@ -222,7 +224,12 @@ describe('<OrgCards/>', () => {
       beforeEach(() => {
         orgs = {
           Dev: null,
-          QA: { ...defaultOrgs.Dev, org_type: 'QA', has_changes: false },
+          QA: {
+            ...defaultOrgs.Dev,
+            org_type: 'QA',
+            unsaved_changes: {},
+            has_unsaved_changes: false,
+          },
         };
       });
 
@@ -280,7 +287,11 @@ describe('<OrgCards/>', () => {
         const { getByText } = setup({
           orgs: {
             ...defaultOrgs,
-            Dev: { ...defaultOrgs.Dev, has_changes: false },
+            Dev: {
+              ...defaultOrgs.Dev,
+              unsaved_changes: {},
+              has_unsaved_changes: false,
+            },
           },
         });
         fireEvent.click(getByText('Actions'));

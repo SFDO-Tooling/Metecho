@@ -30,7 +30,9 @@ export const selectTask = createSelector(
     if (!tasks || !slug) {
       return undefined;
     }
-    const task = tasks.find(t => t.slug === slug || t.old_slugs.includes(slug));
+    const task = tasks.find(
+      (t) => t.slug === slug || t.old_slugs.includes(slug),
+    );
     return task || null;
   },
 );
@@ -39,6 +41,6 @@ export const selectTaskById = (
   appState: AppState,
   id: string,
 ): Task | undefined =>
-  ([] as Task[])
-    .concat(...Object.values(appState.tasks))
-    .find(t => t.id === id);
+  Object.values(appState.tasks)
+    .flat()
+    .find((t) => t.id === id);

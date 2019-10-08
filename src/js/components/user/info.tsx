@@ -3,7 +3,6 @@ import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
@@ -12,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import ConnectModal from '@/components/user/connect';
 import Logout from '@/components/user/logout';
-import { ExternalLink, useIsMounted } from '@/components/utils';
+import { ExternalLink, SpinnerWrapper, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { disconnect, refreshDevHubStatus } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
@@ -104,7 +103,7 @@ const UserInfo = ({
 
   return (
     <>
-      {(isDisconnecting || isRefreshing) && <Spinner />}
+      {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
       <ul>
         <li>
           <strong>{i18n.t('Dev Hub')}:</strong>{' '}
@@ -186,7 +185,7 @@ export const ConnectionInfoModal = ({
   isOpen,
   toggleModal,
   onDisconnect,
-  successText = '',
+  successText,
 }: {
   user: User;
   isOpen: boolean;
@@ -200,13 +199,20 @@ export const ConnectionInfoModal = ({
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={Boolean(user && user.valid_token_for && isOpen)}
       heading={
         user.is_devhub_enabled
           ? i18n.t('Dev Hub Enabled')
           : i18n.t('Enable Dev Hub')
       }
-      tagline={user.is_devhub_enabled ? successText : <ConnectionInfoWarning />}
+      tagline={
+        user.is_devhub_enabled ? (
+          successText ||
+          i18n.t('Please close this message and try your action again.')
+        ) : (
+          <ConnectionInfoWarning />
+        )
+      }
       prompt={user.is_devhub_enabled ? 'success' : 'warning'}
       footer={
         user.is_devhub_enabled && [
@@ -276,7 +282,7 @@ const UserDropdown = () => {
           <Avatar />
         </Button>
       </Popover>
-      <ConnectModal isOpen={modalOpen} toggleModal={setModalOpen} />
+      <ConnectModal user={user} isOpen={modalOpen} toggleModal={setModalOpen} />
     </>
   ) : null;
 };

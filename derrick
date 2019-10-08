@@ -39,7 +39,7 @@ case "$1" in
     "test")
         dcr yarn test "${@:2}"
         ;;
-    "test:watch")
+    "test:js:watch")
         dcrq yarn test:js:watch "${@:2}"
         ;;
     "test:py")

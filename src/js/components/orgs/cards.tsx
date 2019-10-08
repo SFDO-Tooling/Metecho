@@ -3,7 +3,6 @@ import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import Modal from '@salesforce/design-system-react/components/modal';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -14,6 +13,7 @@ import { ConnectionInfoModal } from '@/components/user/info';
 import {
   ExternalLink,
   LabelWithSpinner,
+  SpinnerWrapper,
   useIsMounted,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
@@ -25,6 +25,7 @@ import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { getOrgStatusMsg } from '@/utils/helpers';
 
 interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
@@ -131,30 +132,22 @@ const OrgCard = ({
   let icon = null;
   let actions = null;
   let footer = null;
+  const loadingMsg = i18n.t(
+    'This process could take a number of minutes. Feel free to leave this page and check back later.',
+  );
 
   if (isCreating) {
     actions = (
       <Button
-        label={
-          <LabelWithSpinner
-            label={i18n.t('Creating Org…')}
-            variant="base"
-            size="x-small"
-          />
-        }
+        label={<LabelWithSpinner label={i18n.t('Creating Org…')} />}
         disabled
       />
     );
-    footer = i18n.t(
-      'This process could take a number of minutes. Feel free to leave this page and check back later.',
-    );
+    footer = loadingMsg;
   } else if (org) {
     const latestCommitAt =
       org.latest_commit_at && new Date(org.latest_commit_at);
     const expiresAt = org.expires_at && new Date(org.expires_at);
-    const changesMsg = org.has_changes
-      ? i18n.t('has uncaptured changes')
-      : i18n.t('up-to-date');
     contents = (
       <ul>
         {latestCommitAt && (
@@ -184,7 +177,7 @@ const OrgCard = ({
         )}
         {type === ORG_TYPES.DEV && (
           <li>
-            <strong>{i18n.t('Status')}:</strong> {changesMsg}
+            <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
             {ownedByCurrentUser && (
               <>
                 {' | '}
@@ -211,16 +204,37 @@ const OrgCard = ({
     if (isDeleting) {
       footer = (
         <>
-          <Spinner size="small" />
+          <SpinnerWrapper size="small" />
           {i18n.t('Deleting Org…')}
         </>
       );
     } else if (ownedByCurrentUser) {
+      if (org.currently_capturing_changes) {
+        footer = (
+          <>
+            <SpinnerWrapper size="small" />
+            {i18n.t('Capturing Selected Changes…')}
+            <div className="slds-p-top_small">{loadingMsg}</div>
+          </>
+        );
+      } else if (org.currently_refreshing_changes) {
+        footer = (
+          <>
+            <SpinnerWrapper size="small" />
+            {i18n.t('Checking for Uncaptured Changes…')}
+          </>
+        );
+      } else {
+        /* istanbul ignore else */
+        // eslint-disable-next-line no-lonely-if
+        if (org.url) {
+          footer = (
+            <ExternalLink url={org.url}>{i18n.t('View Org')}</ExternalLink>
+          );
+        }
+      }
       /* istanbul ignore else */
       if (org.url) {
-        footer = (
-          <ExternalLink url={org.url}>{i18n.t('View Org')}</ExternalLink>
-        );
         icon = (
           <ExternalLink url={org.url} title={i18n.t('View Org')}>
             <Icon
@@ -263,16 +277,7 @@ const OrgCard = ({
         icon={icon}
         heading={displayType}
         headerActions={actions}
-        footer={
-          org && org.currently_refreshing_changes ? (
-            <>
-              <Spinner size="small" />
-              {i18n.t('Refreshing Org…')}
-            </>
-          ) : (
-            footer
-          )
-        }
+        footer={footer}
       >
         {contents}
       </Card>
@@ -393,7 +398,7 @@ const OrgCards = ({
 
     if (readyToDeleteOrg && devOrg) {
       setIsWaitingToDeleteDevOrg(false);
-      if (devOrg.has_changes) {
+      if (devOrg.has_unsaved_changes) {
         setConfirmDeleteModalOpen(devOrg.org_type);
       } else {
         deleteOrg(devOrg);
@@ -429,17 +434,15 @@ const OrgCards = ({
         />
       </div>
       <ConnectModal
-        isOpen={!(user && user.valid_token_for) && connectModalOpen}
+        user={user as User}
+        isOpen={connectModalOpen}
         toggleModal={setConnectModalOpen}
       />
       <ConnectionInfoModal
         user={user as User}
-        isOpen={Boolean(user && user.valid_token_for && infoModalOpen)}
+        isOpen={infoModalOpen}
         toggleModal={setInfoModalOpen}
         onDisconnect={openConnectModal}
-        successText={i18n.t(
-          'Please close this message and try creating the scratch org again.',
-        )}
       />
       <ConfirmDeleteModal
         confirmDeleteModalOpen={confirmDeleteModalOpen}

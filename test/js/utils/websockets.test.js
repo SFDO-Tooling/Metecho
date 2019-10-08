@@ -2,10 +2,13 @@ import Sockette from 'sockette';
 
 import { fetchObjects } from '@/store/actions';
 import {
+  commitFailed,
+  commitSucceeded,
   deleteFailed,
   deleteOrg,
   provisionFailed,
   provisionOrg,
+  updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
 import { updateProject } from '@/store/projects/actions';
@@ -19,12 +22,15 @@ jest.mock('@/store/projects/actions');
 jest.mock('@/store/tasks/actions');
 
 const actions = {
+  commitFailed,
+  commitSucceeded,
   deleteFailed,
   deleteOrg,
   fetchObjects,
   provisionOrg,
   provisionFailed,
   updateOrg,
+  updateFailed,
   updateProject,
   updateTask,
 };
@@ -59,13 +65,16 @@ afterEach(() => {
 
 describe('getAction', () => {
   test.each([
+    ['PROJECT_UPDATE', 'updateProject'],
+    ['TASK_UPDATE', 'updateTask'],
     ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
     ['SCRATCH_ORG_DELETE', 'deleteOrg'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
-    ['PROJECT_UPDATE', 'updateProject'],
-    ['TASK_UPDATE', 'updateTask'],
     ['SCRATCH_ORG_UPDATE', 'updateOrg'],
+    ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed'],
+    ['SCRATCH_ORG_COMMIT_CHANGES', 'commitSucceeded'],
+    ['SCRATCH_ORG_COMMIT_CHANGES_FAILED', 'commitFailed'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };

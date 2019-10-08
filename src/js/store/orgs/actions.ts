@@ -16,12 +16,8 @@ interface OrgProvisionFailed {
   payload: Org;
 }
 interface RefetchOrg {
-  type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_FAILED';
+  type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_SUCCEEDED' | 'REFETCH_ORG_FAILED';
   payload: { org: Org; url: string; response?: any };
-}
-interface RefetchOrgSucceeded {
-  type: 'REFETCH_ORG_SUCCEEDED';
-  payload: Org;
 }
 interface OrgUpdated {
   type: 'SCRATCH_ORG_UPDATE';
@@ -35,15 +31,19 @@ interface OrgDeleteFailed {
   type: 'SCRATCH_ORG_DELETE_FAILED';
   payload: Org;
 }
+interface CommitEvent {
+  type: 'SCRATCH_ORG_COMMIT_CHANGES' | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
+  payload: Org;
+}
 
 export type OrgsAction =
   | OrgProvisioned
   | OrgProvisionFailed
   | RefetchOrg
-  | RefetchOrgSucceeded
   | OrgUpdated
   | OrgDeleted
-  | OrgDeleteFailed;
+  | OrgDeleteFailed
+  | CommitEvent;
 
 export const provisionOrg = (payload: Org): ThunkResult => (
   dispatch,
@@ -133,7 +133,7 @@ export const provisionFailed = ({
   });
 };
 
-export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
+export const refetchOrg = (org: Org): ThunkResult => async (dispatch) => {
   const url = window.api_urls.scratch_org_detail(org.id);
   dispatch({
     type: 'REFETCH_ORG_STARTED',
@@ -151,16 +151,9 @@ export const refetchOrg = (org: Org): ThunkResult => async dispatch => {
         payload: { org, url, response },
       });
     }
-    // @@@ Mock out until API exists
-    // setTimeout(() => {
-    //   dispatch({
-    //     type: 'SCRATCH_ORG_UPDATE',
-    //     payload: { ...response },
-    //   });
-    // }, 3000);
     return dispatch({
       type: 'REFETCH_ORG_SUCCEEDED',
-      payload: response,
+      payload: { org: response, url },
     });
   } catch (err) {
     dispatch({
@@ -175,6 +168,33 @@ export const updateOrg = (payload: Org): OrgUpdated => ({
   type: 'SCRATCH_ORG_UPDATE',
   payload,
 });
+
+export const updateFailed = ({
+  model,
+  message,
+}: {
+  model: Org;
+  message?: string;
+}): ThunkResult => (dispatch, getState) => {
+  const task = selectTaskById(getState(), model.task);
+  dispatch(
+    addToast({
+      heading: task
+        ? `${i18n.t(
+            'Uh oh. There was an error checking for changes on your scratch org for task',
+          )} “${task.name}”.`
+        : i18n.t(
+            'Uh oh. There was an error checking for changes on your scratch org.',
+          ),
+      details: message,
+      variant: 'error',
+    }),
+  );
+  return dispatch({
+    type: 'SCRATCH_ORG_UPDATE',
+    payload: model,
+  });
+};
 
 export const deleteOrg = (payload: Org): ThunkResult => (
   dispatch,
@@ -253,6 +273,53 @@ export const deleteFailed = ({
   }
   return dispatch({
     type: 'SCRATCH_ORG_DELETE_FAILED',
+    payload: model,
+  });
+};
+
+export const commitSucceeded = (payload: Org): ThunkResult => (
+  dispatch,
+  getState,
+) => {
+  const task = selectTaskById(getState(), payload.task);
+  dispatch(
+    addToast({
+      heading: task
+        ? `${i18n.t(
+            'Successfully captured changes from your scratch org on task',
+          )} “${task.name}”.`
+        : i18n.t('Successfully captured changes from your scratch org.'),
+    }),
+  );
+  return dispatch({
+    type: 'SCRATCH_ORG_COMMIT_CHANGES',
+    payload,
+  });
+};
+
+export const commitFailed = ({
+  model,
+  message,
+}: {
+  model: Org;
+  message?: string;
+}): ThunkResult => (dispatch, getState) => {
+  const task = selectTaskById(getState(), model.task);
+  dispatch(
+    addToast({
+      heading: task
+        ? `${i18n.t(
+            'Uh oh. There was an error capturing changes from your scratch org on task',
+          )} “${task.name}”.`
+        : i18n.t(
+            'Uh oh. There was an error capturing changes from your scratch org.',
+          ),
+      details: message,
+      variant: 'error',
+    }),
+  );
+  return dispatch({
+    type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
     payload: model,
   });
 };

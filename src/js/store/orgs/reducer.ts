@@ -2,7 +2,7 @@
 
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
-import { LogoutAction } from '@/store/user/actions';
+import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import {
   OBJECT_TYPES,
   ObjectTypes,
@@ -21,9 +21,15 @@ export interface Org {
   latest_commit_url: string;
   latest_commit_at: string | null;
   url: string | null;
-  has_changes: boolean;
+  unsaved_changes: Changeset;
+  has_unsaved_changes: boolean;
   currently_refreshing_changes: boolean;
+  currently_capturing_changes: boolean;
   delete_queued_at: string | null;
+}
+
+export interface Changeset {
+  [key: string]: string[];
 }
 
 export interface OrgsByTask {
@@ -39,9 +45,10 @@ const defaultState = {};
 
 const reducer = (
   orgs: OrgState = defaultState,
-  action: ObjectsAction | LogoutAction | OrgsAction,
+  action: ObjectsAction | LogoutAction | OrgsAction | RefetchDataAction,
 ) => {
   switch (action.type) {
+    case 'REFETCH_DATA_SUCCEEDED':
     case 'USER_LOGGED_OUT':
       return defaultState;
     case 'FETCH_OBJECTS_SUCCEEDED': {
@@ -57,13 +64,13 @@ const reducer = (
             [ORG_TYPES.DEV]:
               (response &&
                 (response as Org[]).find(
-                  org => org.org_type === ORG_TYPES.DEV,
+                  (org) => org.org_type === ORG_TYPES.DEV,
                 )) ||
               null,
             [ORG_TYPES.QA]:
               (response &&
                 (response as Org[]).find(
-                  org => org.org_type === ORG_TYPES.QA,
+                  (org) => org.org_type === ORG_TYPES.QA,
                 )) ||
               null,
           },
@@ -72,28 +79,49 @@ const reducer = (
       return orgs;
     }
     case 'CREATE_OBJECT_SUCCEEDED': {
-      const {
-        object,
-        objectType,
-      }: { object: Org; objectType: ObjectTypes } = action.payload;
-      if (objectType === OBJECT_TYPES.ORG && object) {
-        const taskOrgs = orgs[object.task] || {
-          [ORG_TYPES.DEV]: null,
-          [ORG_TYPES.QA]: null,
-        };
-        return {
-          ...orgs,
-          [object.task]: {
-            ...taskOrgs,
-            [object.org_type]: object,
-          },
-        };
+      switch (action.payload.objectType) {
+        case OBJECT_TYPES.ORG: {
+          const { object }: { object: Org } = action.payload;
+          if (object) {
+            const taskOrgs = orgs[object.task] || {
+              [ORG_TYPES.DEV]: null,
+              [ORG_TYPES.QA]: null,
+            };
+            return {
+              ...orgs,
+              [object.task]: {
+                ...taskOrgs,
+                [object.org_type]: object,
+              },
+            };
+          }
+          return orgs;
+        }
+        case OBJECT_TYPES.COMMIT: {
+          const { object }: { object: Org } = action.payload;
+          if (object) {
+            const taskOrgs = orgs[object.task] || {
+              [ORG_TYPES.DEV]: null,
+              [ORG_TYPES.QA]: null,
+            };
+            return {
+              ...orgs,
+              [object.task]: {
+                ...taskOrgs,
+                [object.org_type]: {
+                  ...object,
+                  currently_capturing_changes: true,
+                },
+              },
+            };
+          }
+          return orgs;
+        }
       }
       return orgs;
     }
     case 'SCRATCH_ORG_PROVISION':
     case 'SCRATCH_ORG_UPDATE':
-    case 'REFETCH_ORG_SUCCEEDED':
     case 'SCRATCH_ORG_DELETE_FAILED': {
       const org = action.payload as Org;
       const taskOrgs = orgs[org.task] || {
@@ -124,6 +152,7 @@ const reducer = (
       };
     }
     case 'REFETCH_ORG_STARTED':
+    case 'REFETCH_ORG_SUCCEEDED':
     case 'REFETCH_ORG_FAILED': {
       const { org } = action.payload;
       const taskOrgs = orgs[org.task] || {
@@ -136,7 +165,7 @@ const reducer = (
           ...taskOrgs,
           [org.org_type]: {
             ...org,
-            currently_refreshing_changes: action.type === 'REFETCH_ORG_STARTED',
+            currently_refreshing_changes: action.type !== 'REFETCH_ORG_FAILED',
           },
         },
       };
@@ -163,6 +192,21 @@ const reducer = (
         };
       }
       return orgs;
+    }
+    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
+    case 'SCRATCH_ORG_COMMIT_CHANGES': {
+      const org = action.payload;
+      const taskOrgs = orgs[org.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [org.task]: {
+          ...taskOrgs,
+          [org.org_type]: org,
+        },
+      };
     }
   }
   return orgs;

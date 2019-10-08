@@ -1,23 +1,34 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import TaskDetail from '@/components/tasks/detail';
 import { fetchObjects } from '@/store/actions';
+import { refetchOrg } from '@/store/orgs/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
+jest.mock('@/store/orgs/actions');
 
-fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+fetchObjects.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
+refetchOrg.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 
 afterEach(() => {
   fetchObjects.mockClear();
+  refetchOrg.mockClear();
 });
 
 const defaultState = {
   user: {
     id: 'user-id',
+    valid_token_for: 'my-org',
+    is_devhub_enabled: true,
   },
   repositories: {
     repositories: [
@@ -74,7 +85,8 @@ const defaultState = {
         latest_commit_url: '/test/commit/url/',
         latest_commit_at: '2019-08-16T12:58:53.721Z',
         url: '/test/org/url/',
-        has_changes: true,
+        unsaved_changes: { Foo: ['Bar'] },
+        has_unsaved_changes: true,
       },
       QA: null,
     },
@@ -82,7 +94,7 @@ const defaultState = {
 };
 
 describe('<TaskDetail/>', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       initialState: defaultState,
       repositorySlug: 'repository-1',
@@ -92,7 +104,7 @@ describe('<TaskDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug, projectSlug, taskSlug } = opts;
     const context = {};
-    const { getByText, getByTitle, queryByText } = renderWithRedux(
+    const result = renderWithRedux(
       <StaticRouter context={context}>
         <TaskDetail
           match={{ params: { repositorySlug, projectSlug, taskSlug } }}
@@ -101,7 +113,7 @@ describe('<TaskDetail/>', () => {
       initialState,
       storeWithThunk,
     );
-    return { getByText, getByTitle, queryByText, context };
+    return { ...result, context };
   };
 
   test('renders task detail with org', () => {
@@ -211,6 +223,73 @@ describe('<TaskDetail/>', () => {
       expect(args.filters).toEqual({ task: 'task1' });
       expect(args.shouldSubscribeToObject({})).toBe(false);
       expect(args.shouldSubscribeToObject({ owner: 'user-id' })).toBe(true);
+    });
+  });
+
+  describe('"Capture Task Changes" click', () => {
+    test('refreshes and then opens modal', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Capture Task Changes'));
+
+      expect(refetchOrg).toHaveBeenCalledTimes(1);
+
+      const refetchArgs = refetchOrg.mock.calls[0][0];
+
+      expect(refetchArgs.id).toEqual('org-id');
+
+      expect(getByText('Select the changes to capture')).toBeVisible();
+    });
+
+    describe('not connected to sf org', () => {
+      test('opens connect modal', () => {
+        const { getByText } = setup({
+          initialState: {
+            ...defaultState,
+            user: { ...defaultState.user, valid_token_for: null },
+          },
+        });
+        fireEvent.click(getByText('Capture Task Changes'));
+
+        expect(refetchOrg).not.toHaveBeenCalled();
+        expect(getByText('Use Custom Domain')).toBeVisible();
+      });
+    });
+
+    describe('dev hub not enabled', () => {
+      test('opens warning modal', () => {
+        const { getByText } = setup({
+          initialState: {
+            ...defaultState,
+            user: { ...defaultState.user, is_devhub_enabled: false },
+          },
+        });
+        fireEvent.click(getByText('Capture Task Changes'));
+
+        expect(refetchOrg).not.toHaveBeenCalled();
+        expect(getByText('Enable Dev Hub')).toBeVisible();
+      });
+    });
+  });
+
+  describe('commiting changes', () => {
+    test('renders loading button', () => {
+      const { getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            ...defaultState.orgs,
+            task1: {
+              ...defaultState.orgs.task1,
+              Dev: {
+                ...defaultState.orgs.task1.Dev,
+                currently_capturing_changes: true,
+              },
+            },
+          },
+        },
+      });
+
+      expect(getAllByText('Capturing Selected Changes…').length).toEqual(2);
     });
   });
 });

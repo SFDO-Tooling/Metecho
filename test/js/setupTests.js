@@ -21,10 +21,11 @@ beforeAll(() => {
     user_refresh: () => '/api/user/refresh/',
     user_disconnect_sf: () => '/api/user/disconnect/',
     repository_list: () => '/api/repositories/',
-    repository_detail: slug => `/api/repositories/${slug}/`,
+    repository_detail: (slug) => `/api/repositories/${slug}/`,
     project_list: () => '/api/projects/',
     scratch_org_list: () => '/api/scratch_orgs/',
-    scratch_org_detail: id => `/api/scratch_orgs/${id}/`,
+    scratch_org_detail: (id) => `/api/scratch_orgs/${id}/`,
+    scratch_org_commit: (id) => `/api/scratch_orgs/${id}/commit/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();

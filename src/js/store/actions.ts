@@ -109,7 +109,7 @@ export const fetchObjects = ({
   filters?: ObjectFilters;
   reset?: boolean;
   shouldSubscribeToObject?: (response: any) => boolean;
-}): ThunkResult => async dispatch => {
+}): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
   if (url || urlFn) {
@@ -159,7 +159,7 @@ export const fetchObject = ({
   objectType: ObjectTypes;
   url?: string;
   filters?: ObjectFilters;
-}): ThunkResult => async dispatch => {
+}): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
   if (url || urlFn) {
@@ -196,30 +196,33 @@ export const fetchObject = ({
 
 export const createObject = ({
   objectType,
+  url,
   data = {},
   hasForm = false,
   shouldSubscribeToObject = () => false,
 }: {
   objectType: ObjectTypes;
+  url?: string;
   data?: ObjectData;
   hasForm?: boolean;
   shouldSubscribeToObject?: (object: any) => boolean;
-}): ThunkResult => async dispatch => {
-  const urlFn = window.api_urls[`${objectType}_list`];
-  let baseUrl;
-  if (urlFn) {
-    baseUrl = urlFn();
+}): ThunkResult => async (dispatch) => {
+  if (!url) {
+    const urlFn = window.api_urls[`${objectType}_list`];
+    if (urlFn) {
+      url = urlFn();
+    }
   }
   dispatch({
     type: 'CREATE_OBJECT_STARTED',
-    payload: { objectType, url: baseUrl, data },
+    payload: { objectType, url, data },
   });
   try {
-    if (!baseUrl) {
+    if (!url) {
       throw new Error(`No URL found for object: ${objectType}`);
     }
     const object = await apiFetch({
-      url: baseUrl,
+      url,
       dispatch,
       opts: {
         method: 'POST',
@@ -231,10 +234,10 @@ export const createObject = ({
       hasForm,
     });
     if (
-      shouldSubscribeToObject(object) &&
       object &&
       object.id &&
-      window.socket
+      window.socket &&
+      shouldSubscribeToObject(object)
     ) {
       window.socket.subscribe({
         model: objectType,
@@ -243,12 +246,12 @@ export const createObject = ({
     }
     return dispatch({
       type: 'CREATE_OBJECT_SUCCEEDED',
-      payload: { data, object, url: baseUrl, objectType },
+      payload: { data, object, url, objectType },
     });
   } catch (err) {
     dispatch({
       type: 'CREATE_OBJECT_FAILED',
-      payload: { objectType, url: baseUrl, data },
+      payload: { objectType, url, data },
     });
     throw err;
   }
@@ -262,7 +265,7 @@ export const deleteObject = ({
   objectType: ObjectTypes;
   object: { id: string; [key: string]: any };
   shouldSubscribeToObject?: (object: any) => boolean;
-}): ThunkResult => async dispatch => {
+}): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_detail`];
   let baseUrl;
   if (urlFn && object.id) {

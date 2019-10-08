@@ -3,10 +3,13 @@ import Sockette from 'sockette';
 
 import { fetchObjects } from '@/store/actions';
 import {
+  commitFailed,
+  commitSucceeded,
   deleteFailed,
   deleteOrg,
   provisionFailed,
   provisionOrg,
+  updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
@@ -69,12 +72,30 @@ interface OrgUpdatedEvent {
   type: 'SCRATCH_ORG_UPDATE';
   payload: Org;
 }
+interface OrgUpdateFailedEvent {
+  type: 'SCRATCH_ORG_FETCH_CHANGES_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
 interface OrgDeletedEvent {
   type: 'SCRATCH_ORG_DELETE';
   payload: Org;
 }
 interface OrgDeleteFailedEvent {
   type: 'SCRATCH_ORG_DELETE_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
+interface CommitSucceededEvent {
+  type: 'SCRATCH_ORG_COMMIT_CHANGES';
+  payload: Org;
+}
+interface CommitFailedEvent {
+  type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
   payload: {
     message?: string;
     model: Org;
@@ -88,8 +109,11 @@ type ModelEvent =
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
+  | OrgUpdateFailedEvent
   | OrgDeletedEvent
-  | OrgDeleteFailedEvent;
+  | OrgDeleteFailedEvent
+  | CommitSucceededEvent
+  | CommitFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -112,10 +136,16 @@ export const getAction = (event: EventType) => {
       return provisionFailed(event.payload);
     case 'SCRATCH_ORG_UPDATE':
       return updateOrg(event.payload);
+    case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
+      return updateFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
       return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
+    case 'SCRATCH_ORG_COMMIT_CHANGES':
+      return commitSucceeded(event.payload);
+    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
+      return commitFailed(event.payload);
   }
   return null;
 };
@@ -154,7 +184,7 @@ export const createSocket = ({
   const socket = new Sockette(url, {
     timeout: opts.timeout,
     maxAttempts: opts.maxAttempts,
-    onopen: e => {
+    onopen: (e) => {
       dispatch(connectSocket());
       open = true;
       for (const payload of pending) {
@@ -171,7 +201,7 @@ export const createSocket = ({
         opts.onopen(e);
       }
     },
-    onmessage: e => {
+    onmessage: (e) => {
       let data = e.data;
       try {
         data = JSON.parse(e.data);
@@ -191,11 +221,11 @@ export const createSocket = ({
         lostConnection = true;
       }
     },
-    onmaximum: e => {
+    onmaximum: (e) => {
       log(`[WebSocket] ending reconnect after ${opts.maxAttempts} attempts`);
       opts.onmaximum(e);
     },
-    onclose: e => {
+    onclose: (e) => {
       log('[WebSocket] closed');
       if (open) {
         open = false;
@@ -207,7 +237,7 @@ export const createSocket = ({
       }
       opts.onclose(e);
     },
-    onerror: e => {
+    onerror: (e) => {
       log('[WebSocket] error');
       opts.onerror(e);
     },

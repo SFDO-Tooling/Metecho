@@ -145,21 +145,35 @@ export const DetailPageLayout = ({
   );
 };
 
+export const SpinnerWrapper = ({
+  size,
+  variant,
+}: {
+  size?: string;
+  variant?: string;
+}) => (
+  <Spinner
+    containerClassName="spinner-container"
+    size={size}
+    variant={variant}
+  />
+);
+
 // For use as a "loading" button label
 export const LabelWithSpinner = ({
   label,
-  variant = 'inverse',
-  size = 'small',
+  variant = 'base',
+  size = 'x-small',
 }: {
-  label: string;
+  label?: string;
   variant?: string;
   size?: string;
 }) => (
   <>
     <span className="slds-is-relative slds-m-right_large">
-      <Spinner variant={variant} size={size} />
+      <SpinnerWrapper variant={variant} size={size} />
     </span>
-    {label}
+    {label || i18n.t('Loading…')}
   </>
 );
 
@@ -202,7 +216,7 @@ export const PrivateRoute = ({
   return (
     <Route
       {...rest}
-      render={props =>
+      render={(props) =>
         user ? (
           <Component {...props} />
         ) : (
@@ -230,7 +244,7 @@ export const getRepositoryLoadingOrNotFound = ({
       return <RepositoryNotFound />;
     }
     // Fetching repository from API
-    return <Spinner />;
+    return <SpinnerWrapper />;
   }
   return false;
 };
@@ -253,7 +267,7 @@ export const getProjectLoadingOrNotFound = ({
       return <ProjectNotFound repository={repository} />;
     }
     // Fetching project from API
-    return <Spinner />;
+    return <SpinnerWrapper />;
   }
   return false;
 };
@@ -282,7 +296,7 @@ export const getTaskLoadingOrNotFound = ({
       return <TaskNotFound repository={repository} project={project} />;
     }
     // Fetching task from API
-    return <Spinner />;
+    return <SpinnerWrapper />;
   }
   return false;
 };
@@ -442,13 +456,19 @@ export const useFetchOrgsIfMissing = (
 export const useForm = ({
   fields,
   objectType,
+  url,
   additionalData = {},
   onSuccess = () => {},
+  onError = () => {},
+  shouldSubscribeToObject,
 }: {
   fields: { [key: string]: any };
   objectType: ObjectTypes;
+  url?: string;
   additionalData?: { [key: string]: any };
   onSuccess?: (...args: any[]) => any;
+  onError?: (...args: any[]) => any;
+  shouldSubscribeToObject?: (...args: any[]) => boolean;
 }) => {
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
@@ -467,11 +487,13 @@ export const useForm = ({
     dispatch(
       createObject({
         objectType,
+        url,
         data: {
           ...inputs,
           ...additionalData,
         },
         hasForm: true,
+        shouldSubscribeToObject,
       }),
     )
       .then((...args: any[]) => {
@@ -482,6 +504,7 @@ export const useForm = ({
         onSuccess(...args);
       })
       .catch((err: ApiError) => {
+        onError(err);
         const allErrors =
           err.body && typeof err.body === 'object' ? err.body : {};
         const fieldErrors: typeof errors = {};
@@ -494,11 +517,14 @@ export const useForm = ({
             fieldErrors[field] = allErrors[field].join(', ');
           }
         }
+        /* istanbul ignore else */
         if (isMounted.current && Object.keys(fieldErrors).length) {
           setErrors(fieldErrors);
         } else if (err.response && err.response.status === 400) {
           // If no inline errors to show, fallback to default global error toast
           dispatch(addError(err.message));
+        } else {
+          throw err;
         }
       });
   };
@@ -507,6 +533,7 @@ export const useForm = ({
     inputs,
     errors,
     handleInputChange,
+    setInputs,
     handleSubmit,
     resetForm,
   };
