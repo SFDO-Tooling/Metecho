@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.postgres.fields import JSONField
+from django.forms.widgets import Textarea
 
 from .models import (
     GitHubRepository,
@@ -11,6 +13,12 @@ from .models import (
     TaskSlug,
     User,
 )
+
+
+class JSONWidget(Textarea):
+    def value_from_datadict(self, data, files, name):
+        value = data.get(name)
+        return value if value else "{}"
 
 
 @admin.register(User)
@@ -57,3 +65,4 @@ class TaskSlugAdmin(admin.ModelAdmin):
 @admin.register(ScratchOrg)
 class ScratchOrgAdmin(admin.ModelAdmin):
     list_display = ("owner", "org_type", "task")
+    formfield_overrides = {JSONField: {"widget": JSONWidget}}
