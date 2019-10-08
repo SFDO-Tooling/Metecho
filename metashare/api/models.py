@@ -347,6 +347,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         from .serializers import ScratchOrgSerializer
 
         if error is None:
+            self.save()
             async_to_sync(push.push_message_about_instance)(
                 self,
                 {
