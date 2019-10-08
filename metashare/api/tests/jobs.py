@@ -105,7 +105,7 @@ class TestCreateBranchesOnGitHub:
         branch = MagicMock()
         branch.latest_sha.return_value = "1234abc"
         repository.branch.return_value = branch
-        result = try_to_make_branch(
+        result = _try_to_make_branch(
             repository, new_branch="a" * 100, base_branch="base-branch"
         )
 
