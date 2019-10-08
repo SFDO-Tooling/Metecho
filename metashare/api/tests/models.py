@@ -3,8 +3,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sfdo_template_helpers.crypto import fernet_decrypt
-
 from ..models import Project, Repository, Task, user_logged_in_handler
 
 
