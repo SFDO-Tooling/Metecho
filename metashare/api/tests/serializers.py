@@ -57,12 +57,12 @@ class TestProjectSerializer:
         )
         assert serializer.is_valid()
 
-        with patch("metashare.api.gh.login") as login:
+        with patch("metashare.api.gh.gh_given_user") as gh_given_user:
             repo = MagicMock()
             repo.url = "test"
             gh = MagicMock()
             gh.repositories.return_value = [repo]
-            login.return_value = gh
+            gh_given_user.return_value = gh
             project = serializer.save()
 
         assert project.description_markdown == "<p>Test <code>project</code></p>"

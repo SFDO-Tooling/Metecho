@@ -5,11 +5,11 @@ from asgiref.sync import async_to_sync
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django_rq import job
-from github3 import login
 from github3.exceptions import UnprocessableEntity
 
 from . import sf_org_changes as sf_changes
 from . import sf_run_flow as sf_flow
+from .gh import gh_given_user
 from .github_context import (
     extract_owner_and_repo,
     get_cumulus_prefix,
@@ -42,7 +42,7 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
     """
     Expects to be called in the context of a local github checkout.
     """
-    gh = login(token=user.gh_token)
+    gh = gh_given_user(user)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
 
@@ -89,7 +89,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
 
     cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
 
-    gh = login(token=user.gh_token)
+    gh = gh_given_user(user)
     owner, repo = extract_owner_and_repo(repo_url)
     repository = gh.repository(owner, repo)
     commit = repository.branch(repo_branch).commit
@@ -189,7 +189,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         )
 
         # Update
-        gh = login(token=user.gh_token)
+        gh = gh_given_user(user)
         owner, repo = extract_owner_and_repo(repo_url)
         repository = gh.repository(owner, repo)
         commit = repository.branch(branch).commit

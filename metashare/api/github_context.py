@@ -7,10 +7,10 @@ import zipfile
 from glob import glob
 from urllib.parse import urlparse
 
-import github3
 from cumulusci.utils import temporary_dir
 
 from .custom_cci_configs import GlobalConfig
+from .gh import gh_given_user
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def zip_file_is_safe(zip_file):
 
 
 def get_repo_info(user, repo_url):
-    gh = github3.login(token=user.gh_token)
+    gh = gh_given_user(user)
     owner, repo_name = extract_owner_and_repo(repo_url)
     return gh.repository(owner, repo_name)
 

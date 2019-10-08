@@ -47,10 +47,10 @@ def test_log_unsafe_zipfile_error():
 
 @pytest.mark.django_db
 def test_get_repo_info(user_factory):
-    with patch(f"{PATCH_ROOT}.github3") as gh3:
+    with patch(f"{PATCH_ROOT}.gh_given_user") as gh_given_user:
         user = user_factory()
         gh = MagicMock()
-        gh3.login.return_value = gh
+        gh_given_user.return_value = gh
         get_repo_info(user, "https://github.com/owner/repo")
 
         gh.repository.assert_called_with("owner", "repo")
@@ -90,13 +90,13 @@ class TestLocalGitHubCheckout:
         repo = "https://github.com/user/repo"
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
-            gh3 = stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
+            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             repository = MagicMock(default_branch="master")
             gh = MagicMock()
             gh.repository.return_value = repository
-            gh3.login.return_value = gh
+            gh_given_user.return_value = gh
             glob.return_value = ["owner-repo_name-"]
 
             with local_github_checkout(user, repo):
@@ -107,7 +107,7 @@ class TestLocalGitHubCheckout:
         repo = "https://github.com/user/repo"
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
-            gh3 = stack.enter_context(patch(f"{PATCH_ROOT}.github3"))
+            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             zip_file_is_safe = stack.enter_context(
@@ -115,7 +115,7 @@ class TestLocalGitHubCheckout:
             )
             zip_file_is_safe.return_value = False
             gh = MagicMock()
-            gh3.login.return_value = gh
+            gh_given_user.return_value = gh
             glob.return_value = [".."]
 
             with pytest.raises(UnsafeZipfileError):

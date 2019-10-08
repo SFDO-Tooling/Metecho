@@ -36,11 +36,11 @@ class TestCreateBranchesOnGitHub:
             global_config_instance.get_project_config.return_value = MagicMock(
                 project__git__prefix_feature="feature/"
             )
-            login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
+            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             repository = MagicMock()
             gh = MagicMock()
             gh.repository.return_value = repository
-            login.return_value = gh
+            gh_given_user.return_value = gh
 
             _create_branches_on_github(
                 user=user,
@@ -67,11 +67,11 @@ class TestCreateBranchesOnGitHub:
             global_config_instance.get_project_config.return_value = MagicMock(
                 project__git__prefix_feature="feature/"
             )
-            login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
+            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             repository = MagicMock()
             gh = MagicMock()
             gh.repository.return_value = repository
-            login.return_value = gh
+            gh_given_user.return_value = gh
 
             _create_branches_on_github(
                 user=user,
@@ -129,7 +129,7 @@ def test_create_org_and_run_flow():
         stack.enter_context(patch(f"{PATCH_ROOT}.sf_changes"))
         sf_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_flow"))
         sf_flow.create_org_and_run_flow.return_value = (MagicMock(), MagicMock())
-        stack.enter_context(patch(f"{PATCH_ROOT}.login"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
@@ -227,7 +227,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
             patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
         )
         get_latest_revision_numbers.return_value = {}
-        login = stack.enter_context(patch(f"{PATCH_ROOT}.login"))
+        gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         commit = MagicMock(
             sha="12345",
             html_url="https://github.com/test/user/foo",
@@ -237,7 +237,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         repository.branch.return_value = MagicMock(commit=commit)
         gh = MagicMock()
         gh.repository.return_value = repository
-        login.return_value = gh
+        gh_given_user.return_value = gh
 
         desired_changes = {"name": ["member"]}
         commit_message = "test message"

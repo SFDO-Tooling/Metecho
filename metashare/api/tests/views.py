@@ -27,12 +27,12 @@ def test_user_disconnect_view(client):
 
 @pytest.mark.django_db
 def test_user_refresh_view(client):
-    with patch("metashare.api.gh.login") as login:
+    with patch("metashare.api.gh.gh_given_user") as gh_given_user:
         repo = MagicMock()
         repo.url = "test"
         gh = MagicMock()
         gh.repositories.return_value = [repo]
-        login.return_value = gh
+        gh_given_user.return_value = gh
 
         response = client.post(reverse("user-refresh"))
 
