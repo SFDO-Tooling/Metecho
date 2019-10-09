@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import React from 'react';
 import DocumentTitle from 'react-document-title';
@@ -12,6 +11,7 @@ import {
   DetailPageLayout,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
+  SpinnerWrapper,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
@@ -100,7 +100,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           </>
         ) : (
           // Fetching tasks from API
-          <Spinner />
+          <SpinnerWrapper />
         )}
       </DetailPageLayout>
     </DocumentTitle>

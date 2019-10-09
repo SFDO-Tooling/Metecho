@@ -1,33 +1,48 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
+import ConnectModal from '@/components/user/connect';
+import { ConnectionInfoModal } from '@/components/user/info';
 import {
   DetailPageLayout,
   ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
+  LabelWithSpinner,
+  SpinnerWrapper,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
-import { AppState } from '@/store';
+import { AppState, ThunkDispatch } from '@/store';
+import { refetchOrg } from '@/store/orgs/actions';
+import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
+import { User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
+import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
+  const [fetchingChanges, setFetchingChanges] = useState(false);
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [captureModalOpen, setCaptureModalOpen] = useState(false);
+
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
+  const dispatch = useDispatch<ThunkDispatch>();
   useFetchTasksIfMissing(project, props);
   const selectTaskWithProps = useCallback(selectTask, []);
   const selectTaskSlugWithProps = useCallback(selectTaskSlug, []);
@@ -38,6 +53,60 @@ const TaskDetail = (props: RouteComponentProps) => {
     selectTaskSlugWithProps(state, props),
   );
   const { orgs } = useFetchOrgsIfMissing(task, props);
+  const user = useSelector(selectUserState) as User;
+
+  let currentlyFetching,
+    currentlyCommitting,
+    orgHasChanges,
+    userIsOwner,
+    devOrg: Org | null | undefined;
+  if (orgs) {
+    devOrg = orgs[ORG_TYPES.DEV];
+    orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
+    userIsOwner = devOrg && devOrg.owner === user.id;
+    currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
+    currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
+  }
+
+  // When capture changes has been triggered, wait until org has been refreshed
+  useEffect(() => {
+    const changesFetched =
+      fetchingChanges && devOrg && !devOrg.currently_refreshing_changes;
+
+    if (changesFetched && devOrg) {
+      setFetchingChanges(false);
+      /* istanbul ignore else */
+      if (devOrg.has_unsaved_changes) {
+        setCaptureModalOpen(true);
+      }
+    }
+  }, [fetchingChanges, devOrg]);
+
+  const doRefetchOrg = useCallback((org: Org) => {
+    dispatch(refetchOrg(org));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openConnectModal = () => {
+    setInfoModalOpen(false);
+    setConnectModalOpen(true);
+  };
+  const openInfoModal = () => {
+    setConnectModalOpen(false);
+    setInfoModalOpen(true);
+  };
+
+  let action = openConnectModal;
+  if (user.valid_token_for) {
+    action = user.is_devhub_enabled
+      ? () => {
+          /* istanbul ignore else */
+          if (devOrg) {
+            setFetchingChanges(true);
+            doRefetchOrg(devOrg);
+          }
+        }
+      : openInfoModal;
+  }
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -115,6 +184,23 @@ const TaskDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
+  let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
+  if (currentlyCommitting) {
+    buttonText = (
+      <LabelWithSpinner
+        label={i18n.t('Capturing Selected Changes…')}
+        variant="inverse"
+      />
+    );
+  } else if (fetchingChanges || currentlyFetching) {
+    buttonText = (
+      <LabelWithSpinner
+        label={i18n.t('Checking for Uncaptured Changes…')}
+        variant="inverse"
+      />
+    );
+  }
+
   return (
     <DocumentTitle
       title={` ${task.name} | ${project.name} | ${repository.name} | ${i18n.t(
@@ -138,10 +224,44 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
+        {userIsOwner && orgHasChanges ? (
+          <Button
+            label={buttonText}
+            className="slds-size_full slds-m-bottom_x-large"
+            variant="brand"
+            onClick={action}
+            disabled={
+              fetchingChanges || currentlyFetching || currentlyCommitting
+            }
+          />
+        ) : null}
+
         {orgs ? (
           <OrgCards orgs={orgs} task={task} project={project} />
         ) : (
-          <Spinner />
+          <SpinnerWrapper />
+        )}
+        <ConnectModal
+          user={user}
+          isOpen={connectModalOpen}
+          toggleModal={setConnectModalOpen}
+        />
+        <ConnectionInfoModal
+          user={user}
+          isOpen={infoModalOpen}
+          toggleModal={setInfoModalOpen}
+          onDisconnect={openConnectModal}
+          successText={i18n.t(
+            'Please close this message and try capturing task changes again.',
+          )}
+        />
+        {devOrg && devOrg.has_unsaved_changes && (
+          <CaptureModal
+            orgId={devOrg.id}
+            changeset={devOrg.unsaved_changes}
+            isOpen={captureModalOpen}
+            toggleModal={setCaptureModalOpen}
+          />
         )}
       </DetailPageLayout>
     </DocumentTitle>

@@ -38,6 +38,8 @@ import initializeI18n from '@/i18n';
 import reducer from '@/store';
 import { fetchObjects } from '@/store/actions';
 import { clearErrors } from '@/store/errors/actions';
+import { reposRefreshing } from '@/store/repositories/actions';
+import { selectRepositories } from '@/store/repositories/selectors';
 import { clearToasts } from '@/store/toasts/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -191,7 +193,15 @@ initializeI18n((i18nError?: string) => {
     if (user) {
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
         fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
-      ).finally(renderApp);
+      ).finally(() => {
+        const repos = selectRepositories(appStore.getState());
+        if (!repos.length) {
+          (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
+            reposRefreshing(),
+          );
+        }
+        renderApp();
+      });
     } else {
       renderApp();
     }

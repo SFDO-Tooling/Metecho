@@ -13,6 +13,11 @@ export const selectRepositories = createSelector(
   (repositories: RepositoriesState): Repository[] => repositories.repositories,
 );
 
+export const selectReposRefreshing = createSelector(
+  selectRepositoriesState,
+  (repositories: RepositoriesState): boolean => repositories.refreshing,
+);
+
 export const selectNextUrl = createSelector(
   selectRepositoriesState,
   (repositories: RepositoriesState): string | null => repositories.next,
@@ -36,7 +41,7 @@ export const selectRepository = createSelector(
       return undefined;
     }
     const repository = repositories.find(
-      p => p.slug === repositorySlug || p.old_slugs.includes(repositorySlug),
+      (p) => p.slug === repositorySlug || p.old_slugs.includes(repositorySlug),
     );
     if (repository) {
       return repository;

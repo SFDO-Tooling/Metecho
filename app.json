@@ -12,6 +12,11 @@
       "description": "The url path to the admin section of the site",
       "value": "admin"
     },
+    "ADMIN_API_ALLOWED_SUBNETS": {
+      "description": "Comma-separated list of IPv4 networks which will have Django admin access",
+      "value": "0.0.0.0/0",
+      "required": false
+    },
     "DJANGO_SECRET_KEY": {
       "description": "A secret key used to provide cryptographic signing",
       "generator": "secret"
@@ -27,14 +32,17 @@
     "DB_ENCRYPTION_KEY": {
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
     },
-    "AWS_ACCESS_KEY_ID": {
-      "description": "The AWS Access Key ID for S3 storages."
+    "SF_CALLBACK_URL": {
+      "description": "Callback URL for Salesforce Connected App (e.g. \"https://<...>/accounts/salesforce-production/login/callback/\")"
     },
-    "AWS_SECRET_ACCESS_KEY": {
-      "description": "The AWS Secret Access Key for S3 storages."
+    "SF_CLIENT_ID": {
+      "description": "Consumer Key for Salesforce Connected App"
     },
-    "AWS_BUCKET_NAME": {
-      "description": "The S3 bucket name to use for S3 storages."
+    "SF_CLIENT_SECRET": {
+      "description": "Consumer Secret for Salesforce Connected App"
+    },
+    "SF_CLIENT_KEY": {
+      "description": "RSA private key matching digital certificate on Salesforce Connected App"
     }
   },
   "formation": {
@@ -43,39 +51,8 @@
     },
     "worker": {
       "quantity": 1
-    },
-    "scheduler": {
-      "quantity": 1
     }
   },
-  "image": "heroku/python",
-  "addons": [
-    "heroku-postgresql",
-    "heroku-redis",
-    "bucketeer",
-    "newrelic",
-    "sentry"
-  ],
-  "buildpacks": [
-      {"url": "heroku/nodejs"},
-      {"url": "heroku/python"}
-  ],
-  "environments": {
-    "test": {
-      "scripts": {
-        "test-setup": "pip install --upgrade -r requirements/test.txt",
-        "test": "pytest"
-      },
-      "env": {
-        "DJANGO_SETTINGS_MODULE": "config.settings.test",
-        "DATABASE_URL": "sqlite:///test.db",
-        "AWS_ACCESS_KEY_ID": "None",
-        "AWS_SECRET_ACCESS_KEY": "None",
-        "AWS_BUCKET_NAME": "None"
-      }
-    }
-  },
-  "scripts": {
-    "postdeploy": "python manage.py migrate --noinput"
-  }
+  "addons": ["heroku-postgresql", "heroku-redis", "newrelic", "sentry"],
+  "stack": "container"
 }

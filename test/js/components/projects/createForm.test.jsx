@@ -32,7 +32,7 @@ const defaultRepository = {
 };
 
 describe('<ProjectForm/>', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       repository: defaultRepository,
       startOpen: true,
@@ -176,27 +176,6 @@ describe('<ProjectForm/>', () => {
 
         expect(addError).toHaveBeenCalledWith('This is an error.');
       });
-    });
-
-    test('does not call addError on non-400', async () => {
-      createObject.mockReturnValueOnce(() =>
-        // eslint-disable-next-line prefer-promise-reject-errors
-        Promise.reject({
-          response: {
-            status: 500,
-          },
-        }),
-      );
-      const { getByText, getByLabelText } = setup();
-      const submit = getByText('Create Project');
-      const nameInput = getByLabelText('*Project Name');
-      fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
-      fireEvent.click(submit);
-
-      expect.assertions(1);
-      await createObject;
-
-      expect(addError).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,9 +1,11 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
+import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
+import Modal from '@salesforce/design-system-react/components/modal';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import ConnectModal from '@/components/user/connect';
@@ -11,16 +13,77 @@ import { ConnectionInfoModal } from '@/components/user/info';
 import {
   ExternalLink,
   LabelWithSpinner,
+  SpinnerWrapper,
   useIsMounted,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { createObject } from '@/store/actions';
+import { createObject, deleteObject } from '@/store/actions';
+import { refetchOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { getOrgStatusMsg } from '@/utils/helpers';
+
+interface OrgTypeTracker {
+  [ORG_TYPES.DEV]: boolean;
+  [ORG_TYPES.QA]: boolean;
+}
+
+const OrgTypeTrackerDefault = {
+  [ORG_TYPES.DEV]: false,
+  [ORG_TYPES.QA]: false,
+};
+
+const ConfirmDeleteModal = ({
+  confirmDeleteModalOpen,
+  toggleModal,
+  orgs,
+  handleDelete,
+}: {
+  confirmDeleteModalOpen: OrgTypes | null;
+  toggleModal: React.Dispatch<React.SetStateAction<OrgTypes | null>>;
+  orgs: OrgsByTask;
+  handleDelete: (org: Org) => void;
+}) => {
+  const handleClose = () => {
+    toggleModal(null);
+  };
+  const handleSubmit = () => {
+    handleClose();
+    const org = confirmDeleteModalOpen && orgs[confirmDeleteModalOpen];
+    /* istanbul ignore else */
+    if (org) {
+      handleDelete(org);
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={Boolean(confirmDeleteModalOpen)}
+      heading={i18n.t('Confirm Delete Org')}
+      prompt="warning"
+      onRequestClose={handleClose}
+      footer={[
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
+        <Button
+          key="submit"
+          label={i18n.t('Delete')}
+          variant="brand"
+          onClick={handleSubmit}
+        />,
+      ]}
+    >
+      <div className="slds-p-vertical_medium">
+        {i18n.t(
+          'Are you sure you want to delete this org with uncaptured changes?',
+        )}
+      </div>
+    </Modal>
+  );
+};
 
 const OrgCard = ({
   orgs,
@@ -28,37 +91,63 @@ const OrgCard = ({
   displayType,
   userId,
   isCreatingOrg,
-  action,
+  isDeletingOrg,
+  createAction,
+  deleteAction,
+  refreshAction,
 }: {
   orgs: OrgsByTask;
   type: OrgTypes;
   displayType: string;
   userId: string | null;
-  isCreatingOrg: OrgTypes | null;
-  action: (type: OrgTypes) => void;
+  isCreatingOrg: OrgTypeTracker;
+  isDeletingOrg: OrgTypeTracker;
+  createAction: (type: OrgTypes) => void;
+  deleteAction: (org: Org) => void;
+  refreshAction: (org: Org) => void;
 }) => {
-  const doAction = useCallback(() => {
-    action(type);
-  }, [action, type]);
   const org = orgs[type];
   const ownedByCurrentUser = Boolean(
     userId && org && org.url && userId === org.owner,
   );
-  const isCreating = isCreatingOrg === type || (org && !org.url);
+  const isCreating = isCreatingOrg[type] || (org && !org.url);
+  const isDeleting = isDeletingOrg[type] || (org && org.delete_queued_at);
+  const doCreateAction = useCallback(() => {
+    createAction(type);
+  }, [createAction, type]);
+  const doDeleteAction = useCallback(() => {
+    /* istanbul ignore else */
+    if (org) {
+      deleteAction(org);
+    }
+  }, [deleteAction, org]);
+  const doRefreshAction = useCallback(() => {
+    /* istanbul ignore else */
+    if (org) {
+      refreshAction(org);
+    }
+  }, [refreshAction, org]);
 
   let contents = null;
   let icon = null;
+  let actions = null;
+  let footer = null;
+  const loadingMsg = i18n.t(
+    'This process could take a number of minutes. Feel free to leave this page and check back later.',
+  );
+
   if (isCreating) {
-    contents = i18n.t(
-      'This process could take a number of minutes. Feel free to leave this page and check back later.',
+    actions = (
+      <Button
+        label={<LabelWithSpinner label={i18n.t('Creating Org…')} />}
+        disabled
+      />
     );
+    footer = loadingMsg;
   } else if (org) {
     const latestCommitAt =
       org.latest_commit_at && new Date(org.latest_commit_at);
     const expiresAt = org.expires_at && new Date(org.expires_at);
-    const changesMsg = org.has_changes
-      ? i18n.t('has uncaptured changes')
-      : i18n.t('up-to-date');
     contents = (
       <ul>
         {latestCommitAt && (
@@ -86,33 +175,95 @@ const OrgCard = ({
             </span>
           </li>
         )}
-        <li>
-          <strong>{i18n.t('Status')}:</strong> {changesMsg}
-        </li>
+        {type === ORG_TYPES.DEV && (
+          <li>
+            <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
+            {ownedByCurrentUser && (
+              <>
+                {' | '}
+                <Button
+                  label={i18n.t('check again')}
+                  variant="link"
+                  onClick={doRefreshAction}
+                />
+              </>
+            )}
+          </li>
+        )}
       </ul>
     );
+    icon = (
+      <Icon
+        category="utility"
+        name="link"
+        size="x-small"
+        className="slds-m-bottom_xxx-small"
+      />
+    );
 
-    if (ownedByCurrentUser && org.url) {
-      icon = (
-        <ExternalLink url={org.url} title={i18n.t('View Org')}>
-          <Icon
-            category="utility"
-            name="link"
-            size="x-small"
-            className="icon-link slds-m-bottom_xxx-small"
-          />
-        </ExternalLink>
+    if (isDeleting) {
+      footer = (
+        <>
+          <SpinnerWrapper size="small" />
+          {i18n.t('Deleting Org…')}
+        </>
       );
-    } else {
-      icon = (
-        <Icon
-          category="utility"
-          name="link"
-          size="x-small"
-          className="slds-m-bottom_xxx-small"
+    } else if (ownedByCurrentUser) {
+      if (org.currently_capturing_changes) {
+        footer = (
+          <>
+            <SpinnerWrapper size="small" />
+            {i18n.t('Capturing Selected Changes…')}
+            <div className="slds-p-top_small">{loadingMsg}</div>
+          </>
+        );
+      } else if (org.currently_refreshing_changes) {
+        footer = (
+          <>
+            <SpinnerWrapper size="small" />
+            {i18n.t('Checking for Uncaptured Changes…')}
+          </>
+        );
+      } else {
+        /* istanbul ignore else */
+        // eslint-disable-next-line no-lonely-if
+        if (org.url) {
+          footer = (
+            <ExternalLink url={org.url}>{i18n.t('View Org')}</ExternalLink>
+          );
+        }
+      }
+      /* istanbul ignore else */
+      if (org.url) {
+        icon = (
+          <ExternalLink url={org.url} title={i18n.t('View Org')}>
+            <Icon
+              category="utility"
+              name="link"
+              size="x-small"
+              className="icon-link slds-m-bottom_xxx-small"
+            />
+          </ExternalLink>
+        );
+      }
+      actions = (
+        <Dropdown
+          align="right"
+          assistiveText={{ icon: 'Actions' }}
+          buttonClassName="slds-button_icon-x-small"
+          buttonVariant="icon"
+          iconCategory="utility"
+          iconName="down"
+          iconSize="small"
+          iconVariant="border-filled"
+          width="xx-small"
+          options={[{ id: 0, label: i18n.t('Delete') }]}
+          onSelect={doDeleteAction}
         />
       );
     }
+  } else {
+    actions = <Button label={i18n.t('Create Org')} onClick={doCreateAction} />;
   }
 
   return (
@@ -125,32 +276,8 @@ const OrgCard = ({
         bodyClassName="slds-card__body_inner"
         icon={icon}
         heading={displayType}
-        headerActions={
-          (isCreating || !org) && (
-            <Button
-              label={
-                isCreating ? (
-                  <LabelWithSpinner
-                    label={i18n.t('Creating Org…')}
-                    variant="base"
-                    size="x-small"
-                  />
-                ) : (
-                  i18n.t('Create Org')
-                )
-              }
-              disabled={isCreating}
-              onClick={doAction}
-            />
-          )
-        }
-        footer={
-          org &&
-          org.url &&
-          ownedByCurrentUser && (
-            <ExternalLink url={org.url}>{i18n.t('View Org')}</ExternalLink>
-          )
-        }
+        headerActions={actions}
+        footer={footer}
       >
         {contents}
       </Card>
@@ -171,10 +298,42 @@ const OrgCards = ({
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypes | null>(null);
+  const [
+    confirmDeleteModalOpen,
+    setConfirmDeleteModalOpen,
+  ] = useState<OrgTypes | null>(null);
+  const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
+    OrgTypeTrackerDefault,
+  );
+  const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
+    OrgTypeTrackerDefault,
+  );
+  const [isWaitingToDeleteDevOrg, setIsWaitingToDeleteDevOrg] = useState(false);
   const dispatch = useDispatch<ThunkDispatch>();
+
+  const devOrg = orgs[ORG_TYPES.DEV];
+
+  const doRefetchOrg = useCallback((org: Org) => {
+    dispatch(refetchOrg(org));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const deleteOrg = useCallback((org: Org) => {
+    setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
+    dispatch(
+      deleteObject({
+        objectType: OBJECT_TYPES.ORG,
+        object: org,
+      }),
+    ).finally(() => {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: false });
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const createOrg = useCallback((type: OrgTypes) => {
-    setIsCreatingOrg(type);
+    setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
     // Subscribe to project/task for possible branch creation...
     if (window.socket) {
       /* istanbul ignore else */
@@ -197,15 +356,16 @@ const OrgCards = ({
         objectType: OBJECT_TYPES.ORG,
         // eslint-disable-next-line @typescript-eslint/camelcase
         data: { task: task.id, org_type: type },
-        shouldSubscribeToObject: (object: Org) => object && !object.url,
+        shouldSubscribeToObject: () => true,
       }),
     ).finally(() => {
       /* istanbul ignore else */
       if (isMounted.current) {
-        setIsCreatingOrg(null);
+        setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const openConnectModal = () => {
     setInfoModalOpen(false);
     setConnectModalOpen(true);
@@ -214,10 +374,37 @@ const OrgCards = ({
     setConnectModalOpen(false);
     setInfoModalOpen(true);
   };
-  let action: (type: OrgTypes) => void = openConnectModal;
+
+  let deleteAction: (...args: any[]) => void = openConnectModal;
+  let createAction: (...args: any[]) => void = openConnectModal;
   if (user && user.valid_token_for) {
-    action = user && user.is_devhub_enabled ? createOrg : openInfoModal;
+    createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
+    deleteAction = user.is_devhub_enabled
+      ? (org: Org) => {
+          if (org.org_type === ORG_TYPES.DEV) {
+            setIsWaitingToDeleteDevOrg(true);
+            doRefetchOrg(org);
+          } else {
+            deleteOrg(org);
+          }
+        }
+      : openInfoModal;
   }
+
+  // When dev org delete has been triggered, wait until it has been refreshed...
+  useEffect(() => {
+    const readyToDeleteOrg =
+      isWaitingToDeleteDevOrg && devOrg && !devOrg.currently_refreshing_changes;
+
+    if (readyToDeleteOrg && devOrg) {
+      setIsWaitingToDeleteDevOrg(false);
+      if (devOrg.has_unsaved_changes) {
+        setConfirmDeleteModalOpen(devOrg.org_type);
+      } else {
+        deleteOrg(devOrg);
+      }
+    }
+  }, [deleteOrg, isWaitingToDeleteDevOrg, devOrg]);
 
   return (
     <>
@@ -229,7 +416,10 @@ const OrgCards = ({
           displayType={i18n.t('Dev')}
           userId={user && user.id}
           isCreatingOrg={isCreatingOrg}
-          action={action}
+          isDeletingOrg={isDeletingOrg}
+          createAction={createAction}
+          deleteAction={deleteAction}
+          refreshAction={doRefetchOrg}
         />
         <OrgCard
           orgs={orgs}
@@ -237,21 +427,28 @@ const OrgCards = ({
           displayType={i18n.t('QA')}
           userId={user && user.id}
           isCreatingOrg={isCreatingOrg}
-          action={action}
+          isDeletingOrg={isDeletingOrg}
+          createAction={createAction}
+          deleteAction={deleteAction}
+          refreshAction={doRefetchOrg}
         />
       </div>
       <ConnectModal
-        isOpen={!(user && user.valid_token_for) && connectModalOpen}
+        user={user as User}
+        isOpen={connectModalOpen}
         toggleModal={setConnectModalOpen}
       />
       <ConnectionInfoModal
         user={user as User}
-        isOpen={Boolean(user && user.valid_token_for && infoModalOpen)}
+        isOpen={infoModalOpen}
         toggleModal={setInfoModalOpen}
         onDisconnect={openConnectModal}
-        successText={i18n.t(
-          'Please close this message and try creating the scratch org again.',
-        )}
+      />
+      <ConfirmDeleteModal
+        confirmDeleteModalOpen={confirmDeleteModalOpen}
+        toggleModal={setConfirmDeleteModalOpen}
+        orgs={orgs}
+        handleDelete={deleteOrg}
       />
     </>
   );

@@ -1,35 +1,38 @@
 import reducer from '@/store/projects/reducer';
 
 describe('reducer', () => {
-  test('returns initial state', () => {
+  test('returns initial state if no action', () => {
     const expected = {};
     const actual = reducer(undefined, {});
 
     expect(actual).toEqual(expected);
   });
 
-  test('handles USER_LOGGED_OUT action', () => {
-    const project1 = {
-      id: 'r1',
-      slug: 'project-1',
-      name: 'Project 1',
-      description: 'This is a test project.',
-      repository: 'repository-1',
-    };
-    const expected = {};
-    const actual = reducer(
-      {
-        'repository-1': {
-          projects: [project1],
-          next: 'next-url',
-          notFound: ['project-2'],
+  test.each([['USER_LOGGED_OUT'], ['REFETCH_DATA_SUCCEEDED']])(
+    'returns initial state on %s action',
+    (action) => {
+      const project1 = {
+        id: 'r1',
+        slug: 'project-1',
+        name: 'Project 1',
+        description: 'This is a test project.',
+        repository: 'repository-1',
+      };
+      const expected = {};
+      const actual = reducer(
+        {
+          'repository-1': {
+            projects: [project1],
+            next: 'next-url',
+            notFound: ['project-2'],
+          },
         },
-      },
-      { type: 'USER_LOGGED_OUT' },
-    );
+        { type: action },
+      );
 
-    expect(actual).toEqual(expected);
-  });
+      expect(actual).toEqual(expected);
+    },
+  );
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
     test('resets projects list for repository if `reset: true`', () => {

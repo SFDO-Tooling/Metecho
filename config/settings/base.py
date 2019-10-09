@@ -98,7 +98,6 @@ ALLOWED_HOSTS = [
     "localhost",
     "localhost:8000",
     "localhost:8080",
-    "web",
 ] + [
     el.strip()
     for el in env("DJANGO_ALLOWED_HOSTS", default="", type_=lambda x: x.split(","))
@@ -119,7 +118,6 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django_rq",
-    "scheduler",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -253,22 +251,6 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Media files
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-AWS_ACCESS_KEY_ID = env(
-    "BUCKETEER_AWS_ACCESS_KEY_ID", default=env("AWS_ACCESS_KEY_ID", default=None)
-)
-AWS_SECRET_ACCESS_KEY = env(
-    "BUCKETEER_AWS_SECRET_ACCESS_KEY",
-    default=env("AWS_SECRET_ACCESS_KEY", default=None),
-)
-AWS_STORAGE_BUCKET_NAME = env(
-    "BUCKETEER_BUCKET_NAME", default=env("AWS_BUCKET_NAME", default=None)
-)
-AWS_DEFAULT_ACL = None
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
@@ -294,8 +276,16 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
+# If GITHUB_OAUTH_PRIVATE_REPO env var is True, oauth scope should include
+# private repositories. Otherwise, the scope will only be for public repos.
+GITHUB_OAUTH_PRIVATE_REPO = env(
+    "GITHUB_OAUTH_PRIVATE_REPO", default=False, type_=boolish
+)
+GITHUB_OAUTH_SCOPES = ["read:user", "user:email"]
+GITHUB_OAUTH_SCOPES.append("repo" if GITHUB_OAUTH_PRIVATE_REPO else "public_repo")
+
 SOCIALACCOUNT_PROVIDERS = {
-    "github": {"SCOPE": ["read:user", "user:email", "repo", "read:org"]},
+    "github": {"SCOPE": GITHUB_OAUTH_SCOPES},
     "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
     "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
 }
@@ -350,8 +340,9 @@ REST_FRAMEWORK = {
 
 # SF client settings:
 SF_CALLBACK_URL = env("SF_CALLBACK_URL", default=None)
-SF_CLIENT_KEY = env("SF_CLIENT_KEY", default=None)
-SF_CLIENT_ID = env("SF_CALLBACK_URL", default=None)
+# Ugly hack to fix https://github.com/moby/moby/issues/12997
+SF_CLIENT_KEY = env("SF_CLIENT_KEY", default="").replace("\\n", "\n")
+SF_CLIENT_ID = env("SF_CLIENT_ID", default=None)
 SF_CLIENT_SECRET = env("SF_CLIENT_SECRET", default=None)
 
 # Logging

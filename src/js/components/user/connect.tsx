@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { ExternalLink } from '@/components/utils';
+import { User } from '@/store/user/reducer';
 import { addUrlParams } from '@/utils/api';
 
 const CustomDomainForm = ({
@@ -50,9 +51,11 @@ const CustomDomainForm = ({
 };
 
 const ConnectModal = ({
+  user,
   isOpen,
   toggleModal,
 }: {
+  user: User;
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
 }) => {
@@ -103,12 +106,12 @@ const ConnectModal = ({
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={!(user && user.valid_token_for) && isOpen}
       heading={i18n.t('Connect to Salesforce')}
       tagline={
         <Trans i18nKey="devHubInfo">
           Connection to a Salesforce org with Dev Hub enabled is required to
-          create a new Dev or QA scratch org. Learn how to{' '}
+          create or modify a Dev or QA scratch org. Learn how to{' '}
           <ExternalLink url="https://developer.salesforce.com/signup">
             create a Developer Edition org
           </ExternalLink>{' '}

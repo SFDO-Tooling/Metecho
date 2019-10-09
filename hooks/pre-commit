@@ -41,13 +41,12 @@ done
 
 if [ ${#JS[@]} -ne 0 ]; then
     dcr web ./node_modules/.bin/prettier --write ${JS[@]}
-    dcr web ./node_modules/.bin/eslint ${JS[@]}
+    dcr web ./node_modules/.bin/eslint --fix ${JS[@]}
     git add ${JS[@]}
 fi
 
 if [ ${#SCSS[@]} -ne 0 ]; then
-    dcr web ./node_modules/.bin/prettier --write ${SCSS[@]}
-    dcr web ./node_modules/.bin/stylelint ${SCSS[@]}
+    dcr web ./node_modules/.bin/stylelint --fix ${SCSS[@]}
     git add ${SCSS[@]}
 fi
 

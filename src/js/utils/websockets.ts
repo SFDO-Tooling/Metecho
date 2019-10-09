@@ -1,7 +1,17 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
-import { provisionFailed, provisionOrg } from '@/store/orgs/actions';
+import { fetchObjects } from '@/store/actions';
+import {
+  commitFailed,
+  commitSucceeded,
+  deleteFailed,
+  deleteOrg,
+  provisionFailed,
+  provisionOrg,
+  updateFailed,
+  updateOrg,
+} from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { updateProject } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
@@ -9,6 +19,7 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { updateTask } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
 import {
+  OBJECT_TYPES,
   ObjectTypes,
   WEBSOCKET_ACTIONS,
   WebsocketActions,
@@ -35,16 +46,8 @@ interface ErrorEvent {
   type: 'BACKEND_ERROR';
   payload: { message: string };
 }
-interface OrgProvisionedEvent {
-  type: 'SCRATCH_ORG_PROVISIONED';
-  payload: Org;
-}
-interface OrgProvisionFailedEvent {
-  type: 'SCRATCH_ORG_PROVISION_FAILED';
-  payload: {
-    message?: string;
-    model: Org;
-  };
+interface ReposRefreshedEvent {
+  type: 'USER_REPOS_REFRESH';
 }
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
@@ -54,12 +57,63 @@ interface TaskUpdatedEvent {
   type: 'TASK_UPDATE';
   payload: Task;
 }
+interface OrgProvisionedEvent {
+  type: 'SCRATCH_ORG_PROVISION';
+  payload: Org;
+}
+interface OrgProvisionFailedEvent {
+  type: 'SCRATCH_ORG_PROVISION_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
+interface OrgUpdatedEvent {
+  type: 'SCRATCH_ORG_UPDATE';
+  payload: Org;
+}
+interface OrgUpdateFailedEvent {
+  type: 'SCRATCH_ORG_FETCH_CHANGES_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
+interface OrgDeletedEvent {
+  type: 'SCRATCH_ORG_DELETE';
+  payload: Org;
+}
+interface OrgDeleteFailedEvent {
+  type: 'SCRATCH_ORG_DELETE_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
+interface CommitSucceededEvent {
+  type: 'SCRATCH_ORG_COMMIT_CHANGES';
+  payload: Org;
+}
+interface CommitFailedEvent {
+  type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
 type ModelEvent =
   | ErrorEvent
+  | ReposRefreshedEvent
+  | ProjectUpdatedEvent
+  | TaskUpdatedEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
-  | ProjectUpdatedEvent
-  | TaskUpdatedEvent;
+  | OrgUpdatedEvent
+  | OrgUpdateFailedEvent
+  | OrgDeletedEvent
+  | OrgDeleteFailedEvent
+  | CommitSucceededEvent
+  | CommitFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -70,14 +124,28 @@ export const getAction = (event: EventType) => {
     return null;
   }
   switch (event.type) {
-    case 'SCRATCH_ORG_PROVISIONED':
-      return provisionOrg(event.payload);
-    case 'SCRATCH_ORG_PROVISION_FAILED':
-      return provisionFailed(event.payload);
+    case 'USER_REPOS_REFRESH':
+      return fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true });
     case 'PROJECT_UPDATE':
       return updateProject(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload);
+    case 'SCRATCH_ORG_PROVISION':
+      return provisionOrg(event.payload);
+    case 'SCRATCH_ORG_PROVISION_FAILED':
+      return provisionFailed(event.payload);
+    case 'SCRATCH_ORG_UPDATE':
+      return updateOrg(event.payload);
+    case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
+      return updateFailed(event.payload);
+    case 'SCRATCH_ORG_DELETE':
+      return deleteOrg(event.payload);
+    case 'SCRATCH_ORG_DELETE_FAILED':
+      return deleteFailed(event.payload);
+    case 'SCRATCH_ORG_COMMIT_CHANGES':
+      return commitSucceeded(event.payload);
+    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
+      return commitFailed(event.payload);
   }
   return null;
 };
@@ -116,7 +184,7 @@ export const createSocket = ({
   const socket = new Sockette(url, {
     timeout: opts.timeout,
     maxAttempts: opts.maxAttempts,
-    onopen: e => {
+    onopen: (e) => {
       dispatch(connectSocket());
       open = true;
       for (const payload of pending) {
@@ -133,7 +201,7 @@ export const createSocket = ({
         opts.onopen(e);
       }
     },
-    onmessage: e => {
+    onmessage: (e) => {
       let data = e.data;
       try {
         data = JSON.parse(e.data);
@@ -153,11 +221,11 @@ export const createSocket = ({
         lostConnection = true;
       }
     },
-    onmaximum: e => {
+    onmaximum: (e) => {
       log(`[WebSocket] ending reconnect after ${opts.maxAttempts} attempts`);
       opts.onmaximum(e);
     },
-    onclose: e => {
+    onclose: (e) => {
       log('[WebSocket] closed');
       if (open) {
         open = false;
@@ -169,7 +237,7 @@ export const createSocket = ({
       }
       opts.onclose(e);
     },
-    onerror: e => {
+    onerror: (e) => {
       log('[WebSocket] error');
       opts.onerror(e);
     },

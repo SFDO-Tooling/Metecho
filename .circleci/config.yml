@@ -60,7 +60,7 @@ jobs:
           at: .
       - run:
           name: Test JS
-          command: yarn test:coverage
+          command: yarn test:js:coverage
       - store_artifacts:
           path: coverage
           destination: js-reports
@@ -76,9 +76,6 @@ jobs:
     docker:
       - image: wlonk/oddbird
         environment:
-          BUCKETEER_AWS_ACCESS_KEY_ID: circle_test
-          BUCKETEER_AWS_SECRET_ACCESS_KEY: circle_test
-          BUCKETEER_BUCKET_NAME: circle_test
           DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
           DJANGO_DEBUG: False
@@ -89,9 +86,6 @@ jobs:
       - image: circleci/redis:latest
       - image: circleci/postgres:latest
         environment:
-          AWS_ACCESS_KEY_ID: None
-          AWS_BUCKET_NAME: None
-          AWS_SECRET_ACCESS_KEY: None
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
           POSTGRES_USER: ubuntu
@@ -133,15 +127,15 @@ jobs:
           name: Report Test Coverage
           command: |
             . venv/bin/activate
-            yarn pytest:report-coverage
-            yarn test:report-coverage
+            yarn test:js:report-coverage
+            yarn test:py:report-coverage
             curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
       - run:
           name: Check Test Coverage
           command: |
             . venv/bin/activate
-            yarn pytest:check-coverage
-            yarn test:check-coverage
+            yarn test:js:check-coverage
+            yarn test:py:check-coverage
 
   build-docs:
     working_directory: ~/metashare

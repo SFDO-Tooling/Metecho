@@ -1,12 +1,9 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sfdo_template_helpers.crypto import fernet_decrypt
-
 from ..models import Project, Repository, Task, user_logged_in_handler
-
-# from ..models import ScratchOrg
 
 
 @pytest.mark.django_db
@@ -44,6 +41,26 @@ class TestTask:
 
 @pytest.mark.django_db
 class TestUser:
+    def test_refresh_repositories(self, user_factory):
+        user = user_factory()
+        with ExitStack() as stack:
+            gh = stack.enter_context(patch("metashare.api.models.gh"))
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            gh.get_all_org_repos.return_value = []
+            user.refresh_repositories()
+
+            assert async_to_sync.called
+
+    def test_org_id(self, user_factory, social_account_factory):
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
+        assert user.org_id is not None
+
+        user.socialaccount_set.all().delete()
+        assert user.org_id is None
+
     def test_org_name(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
@@ -87,15 +104,6 @@ class TestUser:
 
         user.socialaccount_set.all().delete()
         assert user.sf_token == (None, None)
-
-    def test_gh_token(self, user_factory):
-        user = user_factory()
-        # Because the test fixture Fernet encrypts this by default. We
-        # don't expect the GitHub token to be encrypted usually.
-        assert fernet_decrypt(user.gh_token) == "0123456789abcdef"
-
-        user.socialaccount_set.all().delete()
-        assert user.gh_token is None
 
     def test_sf_token__invalid(
         self, user_factory, social_token_factory, social_account_factory
@@ -270,17 +278,53 @@ class TestUser:
 
 @pytest.mark.django_db
 class TestScratchOrg:
-    def test_notify_has_url(self, scratch_org_factory):
-        create_branches_on_github_then_create_scratch_org_job = (
-            "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
-        )
-        with patch(create_branches_on_github_then_create_scratch_org_job):
-            with patch("metashare.api.models.async_to_sync") as async_to_sync:
-                scratch_org = scratch_org_factory()
-                scratch_org.url = "https://example.com"
-                scratch_org.save()
+    def test_notify_changed(self, scratch_org_factory):
+        with ExitStack() as stack:
+            stack.enter_context(
+                patch(
+                    "metashare.api.jobs."
+                    "create_branches_on_github_then_create_scratch_org_job"
+                )
+            )
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            scratch_org = scratch_org_factory()
+            scratch_org.notify_changed()
 
-                assert async_to_sync.called
+            assert async_to_sync.called
+
+    def test_queue_delete(self, scratch_org_factory):
+        with patch(
+            "metashare.api.jobs.delete_scratch_org_job"
+        ) as delete_scratch_org_job:
+            scratch_org = scratch_org_factory()
+            scratch_org.queue_delete()
+
+            assert delete_scratch_org_job.delay.called
+
+    def test_notify_delete(self, scratch_org_factory):
+        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory(url="https://example.com")
+            scratch_org.delete()
+
+            assert async_to_sync.called
+
+    def test_get_unsaved_changes(self, scratch_org_factory):
+        with patch(
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
+            scratch_org = scratch_org_factory()
+            scratch_org.queue_get_unsaved_changes()
+
+            assert get_unsaved_changes_job.delay.called
+
+    def test_finalize_provision(self, scratch_org_factory):
+        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory()
+            scratch_org.finalize_provision()
+
+            assert async_to_sync.called
 
 
 @pytest.mark.django_db
@@ -293,6 +337,7 @@ class TestGitHubRepository:
 @pytest.mark.django_db
 def test_login_handler(user_factory):
     user = user_factory()
-    with patch("metashare.api.models.gh") as gh:
+    patch_path = "metashare.api.jobs.refresh_github_repositories_for_user_job"
+    with patch(patch_path) as refresh_job:
         user_logged_in_handler(None, user=user)
-        gh.get_all_org_repos.assert_called_with(user)
+        refresh_job.delay.assert_called_with(user)

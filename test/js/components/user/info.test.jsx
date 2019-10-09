@@ -20,7 +20,7 @@ afterEach(() => {
 describe('<ConnectionInfoModal />', () => {
   const toggleModal = jest.fn();
 
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       isOpen: true,
     };
@@ -28,7 +28,7 @@ describe('<ConnectionInfoModal />', () => {
     return renderWithRedux(
       <MemoryRouter>
         <ConnectionInfoModal
-          user={{}}
+          user={{ valid_token_for: 'foo' }}
           isOpen={opts.isOpen}
           toggleModal={toggleModal}
         />

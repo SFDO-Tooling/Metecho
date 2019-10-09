@@ -1,0 +1,11 @@
+// Layout
+// ======
+
+// Icon Checkbox Layout [mixin]
+// ----------------------------
+/// Grid snippet for re-use in multiple selectors
+/// @group layout
+@mixin icon-checkbox-layout {
+  display: grid;
+  grid-template-columns: $square-icon-x-small-boundary 1fr;
+}

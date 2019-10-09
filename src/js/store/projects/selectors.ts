@@ -45,7 +45,7 @@ export const selectProject = createSelector(
       return undefined;
     }
     const project = projects.projects.find(
-      p => p.slug === projectSlug || p.old_slugs.includes(projectSlug),
+      (p) => p.slug === projectSlug || p.old_slugs.includes(projectSlug),
     );
     if (project) {
       return project;

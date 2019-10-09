@@ -79,7 +79,7 @@ describe('fetchObjects with `reset: true`', () => {
             actions.fetchObjects({
               objectType: 'repository',
               reset: true,
-              shouldSubscribeToObject: obj => obj.shouldSubscribe,
+              shouldSubscribeToObject: (obj) => obj.shouldSubscribe,
             }),
           )
           .then(() => {
@@ -413,7 +413,7 @@ describe('createObject', () => {
           .dispatch(
             actions.createObject({
               objectType: 'project',
-              shouldSubscribeToObject: o => o.shouldSubscribe,
+              shouldSubscribeToObject: (o) => o.shouldSubscribe,
             }),
           )
           .then(() => {
@@ -478,6 +478,142 @@ describe('createObject', () => {
 
       expect.assertions(5);
       return store.dispatch(actions.createObject(objectPayload)).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
+describe('deleteObject', () => {
+  let url, objectPayload;
+
+  beforeAll(() => {
+    url = window.api_urls.scratch_org_detail('org-id');
+    const org = {
+      id: 'org-id',
+    };
+    objectPayload = {
+      objectType: 'scratch_org',
+      object: org,
+      url,
+    };
+  });
+
+  describe('success', () => {
+    test('sends DELETE to api', () => {
+      const store = storeWithThunk({});
+      fetchMock.deleteOnce(url, 204);
+      const started = {
+        type: 'DELETE_OBJECT_STARTED',
+        payload: objectPayload,
+      };
+      const succeeded = {
+        type: 'DELETE_OBJECT_SUCCEEDED',
+        payload: objectPayload,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.deleteObject(objectPayload)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+
+    describe('with shouldSubscribeToObject', () => {
+      let store, org;
+
+      beforeEach(() => {
+        window.socket = { subscribe: jest.fn() };
+        store = storeWithThunk({});
+        org = {
+          id: 'org-id',
+        };
+      });
+
+      afterEach(() => {
+        Reflect.deleteProperty(window, 'socket');
+      });
+
+      test('subscribes to socket if test passes', () => {
+        fetchMock.deleteOnce(url, 204);
+
+        expect.assertions(2);
+        return store
+          .dispatch(
+            actions.deleteObject({
+              objectType: 'scratch_org',
+              object: org,
+              shouldSubscribeToObject: () => true,
+            }),
+          )
+          .then(() => {
+            expect(window.socket.subscribe).toHaveBeenCalledTimes(1);
+            expect(window.socket.subscribe).toHaveBeenCalledWith({
+              model: 'scratch_org',
+              id: 'org-id',
+            });
+          });
+      });
+
+      test('does not subscribe if test fails', () => {
+        fetchMock.deleteOnce(url, 204);
+
+        expect.assertions(1);
+        return store
+          .dispatch(
+            actions.deleteObject({ objectType: 'scratch_org', object: org }),
+          )
+          .then(() => {
+            expect(window.socket.subscribe).not.toHaveBeenCalled();
+          });
+      });
+    });
+  });
+
+  test('throws error if no url', () => {
+    const store = storeWithThunk({});
+    const payload = {
+      objectType: 'foo',
+      url: undefined,
+      object: {},
+    };
+    const started = {
+      type: 'DELETE_OBJECT_STARTED',
+      payload,
+    };
+    const failed = {
+      type: 'DELETE_OBJECT_FAILED',
+      payload,
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.deleteObject({ objectType: 'foo', object: {} }))
+      .catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+      });
+  });
+
+  describe('error', () => {
+    test('dispatches DELETE_OBJECT_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.deleteOnce(url, 500);
+      const started = {
+        type: 'DELETE_OBJECT_STARTED',
+        payload: objectPayload,
+      };
+      const failed = {
+        type: 'DELETE_OBJECT_FAILED',
+        payload: objectPayload,
+      };
+
+      expect.assertions(5);
+      return store.dispatch(actions.deleteObject(objectPayload)).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
