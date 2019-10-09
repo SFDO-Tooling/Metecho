@@ -63,7 +63,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         metashare = self.create_repository(
             name="MetaShare-Test",
-            repo_url="https://www.github.com/oddbird/MetaShare-Test",
+            repo_url="https://github.com/oddbird/MetaShare-Test",
             description=(
                 f"# Welcome to Meta(Meta)Share!\n\n"
                 "This is a description of the repository. "
@@ -71,47 +71,42 @@ class Command(BaseCommand):
             ),
         )
         self.create_repository(
-            name="MetaShare", repo_url="https://www.github.com/SFDO-Tooling/MetaShare"
+            name="MetaShare", repo_url="https://github.com/SFDO-Tooling/MetaShare"
         )
         self.create_repository(
-            name="MetaDeploy", repo_url="https://www.github.com/SFDO-Tooling/MetaDeploy"
+            name="MetaDeploy", repo_url="https://github.com/SFDO-Tooling/MetaDeploy"
         )
         self.create_repository(
-            name="CumulusCI", repo_url="https://www.github.com/SFDO-Tooling/CumulusCI"
+            name="CumulusCI", repo_url="https://github.com/SFDO-Tooling/CumulusCI"
         )
         self.create_repository(
-            name="MetaCI", repo_url="https://www.github.com/SFDO-Tooling/MetaCI"
+            name="MetaCI", repo_url="https://github.com/SFDO-Tooling/MetaCI"
         )
         self.create_repository(
             name="Mister Belvedere",
-            repo_url="https://www.github.com/SFDO-Tooling/mrbelvedere",
+            repo_url="https://github.com/SFDO-Tooling/mrbelvedere",
         )
         self.create_repository(
             name="SFDO Template",
-            repo_url="https://www.github.com/SFDO-Tooling/sfdo-template",
+            repo_url="https://github.com/SFDO-Tooling/sfdo-template",
         )
         self.create_repository(
             name="SFDO Template Helpers",
-            repo_url="https://www.github.com/SFDO-Tooling/sfdo-template-helpers",
+            repo_url="https://github.com/SFDO-Tooling/sfdo-template-helpers",
         )
         self.create_repository(
-            name="OddSite", repo_url="https://www.github.com/oddbird/oddsite"
+            name="OddSite", repo_url="https://github.com/oddbird/oddsite"
         )
         self.create_repository(
-            name="Books", repo_url="https://www.github.com/oddbird/books"
+            name="Books", repo_url="https://github.com/oddbird/books"
+        )
+        self.create_repository(name="True", repo_url="https://github.com/oddbird/true")
+        self.create_repository(name="Susy", repo_url="https://github.com/oddbird/susy")
+        self.create_repository(
+            name="Herman", repo_url="https://github.com/oddbird/sassdoc-theme-herman"
         )
         self.create_repository(
-            name="True", repo_url="https://www.github.com/oddbird/true"
-        )
-        self.create_repository(
-            name="Susy", repo_url="https://www.github.com/oddbird/susy"
-        )
-        self.create_repository(
-            name="Herman",
-            repo_url="https://www.github.com/oddbird/sassdoc-theme-herman",
-        )
-        self.create_repository(
-            name="Accoutrement", repo_url="https://www.github.com/oddbird/accoutrement"
+            name="Accoutrement", repo_url="https://github.com/oddbird/accoutrement"
         )
 
         for i in range(55):

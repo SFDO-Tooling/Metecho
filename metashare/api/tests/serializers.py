@@ -79,7 +79,7 @@ class TestProjectSerializer:
             branch_name="test-project",
         )
         serializer = ProjectSerializer(project)
-        expected = "https://www.github.com/test/repo/tree/test-project"
+        expected = "https://github.com/test/repo/tree/test-project"
         assert serializer.data["branch_url"] == expected
 
     def test_branch_url__missing(self, project_factory):
@@ -137,7 +137,7 @@ class TestTaskSerializer:
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
         serializer = TaskSerializer(task)
-        expected = "https://www.github.com/test/repo/tree/test-task"
+        expected = "https://github.com/test/repo/tree/test-task"
         assert serializer.data["branch_url"] == expected
 
     def test_branch_url__missing(self, task_factory):

@@ -69,7 +69,7 @@ class RepositoryFactory(factory.django.DjangoModelFactory):
         model = Repository
 
     name = factory.Sequence("Repository {}".format)
-    repo_url = "https://www.github.com/test/repo"
+    repo_url = "https://github.com/test/repo"
 
 
 @register

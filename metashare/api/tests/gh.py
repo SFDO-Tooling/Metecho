@@ -34,7 +34,7 @@ class TestGetAllOrgRepos:
             gh = MagicMock()
             gh.repositories.return_value = [repo]
             login.return_value = gh
-            assert get_all_org_repos(user) == {"https://www.github.com/test"}
+            assert get_all_org_repos(user) == {"https://github.com/test"}
 
     def test_bad_social_auth(self, user_factory):
         user = user_factory(socialaccount_set=[])
@@ -44,7 +44,7 @@ class TestGetAllOrgRepos:
 
 def test_normalize_github_url():
     actual = normalize_github_url("http://github.com/repos/test/repo.git")
-    expected = "https://www.github.com/test/repo"
+    expected = "https://github.com/test/repo"
 
     assert actual == expected
 

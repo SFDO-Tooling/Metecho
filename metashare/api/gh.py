@@ -55,15 +55,14 @@ def get_all_org_repos(user):
     return repos
 
 
-def normalize_github_url(url, with_www=True):
+def normalize_github_url(url):
     # Stupid variable assignment to help Black and the linter get along:
     prefix = "/repos"
     prefix_len = len(prefix)
     suffix = ".git"
     suffix_len = len(suffix)
 
-    www = "www." if with_www else ""
-    url = URL(url).scheme("https").host(f"{www}github.com")
+    url = URL(url).scheme("https").host("github.com")
     if url.path().startswith(prefix):
         url = url.path(url.path()[prefix_len:])
     if url.path().endswith(suffix):
@@ -72,9 +71,7 @@ def normalize_github_url(url, with_www=True):
 
 
 def validate_gh_url(value):
-    valid = value == normalize_github_url(value) or value == normalize_github_url(
-        value, with_www=True
-    )
+    valid = value == normalize_github_url(value)
     if not valid:
         raise ValidationError(
             "%(value)s should be of the form 'https://github.com/:org/:repo'.",
