@@ -1,8 +1,8 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..push import report_error
+from ..push import report_error, report_scratch_org_error
 
 
 class AsyncMock(MagicMock):
@@ -10,12 +10,24 @@ class AsyncMock(MagicMock):
         return super().__call__(*args, **kwargs)
 
 
+PATCH_ROOT = "metashare.api.push"
+
+
 @pytest.mark.django_db
 @pytest.mark.asyncio
-async def test_report_error(mocker, user_factory):
-    push_message = mocker.patch(
-        "metashare.api.push.push_message_about_instance", new=AsyncMock()
-    )
-    user = user_factory()
-    await report_error(user)
-    assert push_message.called
+async def test_report_error(user_factory):
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message:
+        user = user_factory()
+        await report_error(user)
+        assert push_message.called
+
+
+@pytest.mark.asyncio
+async def test_report_scratch_org_error():
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
+        await report_scratch_org_error(MagicMock(), "fake error", "fake type")
+        assert push_message_about_instance.called

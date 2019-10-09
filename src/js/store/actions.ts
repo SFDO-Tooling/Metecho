@@ -111,7 +111,7 @@ export const fetchObjects = ({
   filters?: ObjectFilters;
   reset?: boolean;
   shouldSubscribeToObject?: (response: any) => boolean;
-}): ThunkResult => async dispatch => {
+}): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
   if (url || urlFn) {
@@ -161,7 +161,7 @@ export const fetchObject = ({
   objectType: ObjectTypes;
   url?: string;
   filters?: ObjectFilters;
-}): ThunkResult => async dispatch => {
+}): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
   if (url || urlFn) {
@@ -208,7 +208,7 @@ export const createObject = ({
   data?: ObjectData;
   hasForm?: boolean;
   shouldSubscribeToObject?: (object: any) => boolean;
-}): ThunkResult => async dispatch => {
+}): ThunkResult => async (dispatch) => {
   if (!url) {
     const urlFn = window.api_urls[`${objectType}_list`];
     if (urlFn) {
@@ -293,7 +293,7 @@ export const deleteObject = ({
   objectType: ObjectTypes;
   object: { id: string; [key: string]: any };
   shouldSubscribeToObject?: (object: any) => boolean;
-}): ThunkResult => async dispatch => {
+}): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_detail`];
   let baseUrl;
   if (urlFn && object.id) {

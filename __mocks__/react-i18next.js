@@ -9,13 +9,13 @@
 const React = require('react');
 const reactI18next = require('react-i18next');
 
-const hasChildren = node =>
+const hasChildren = (node) =>
   node && (node.children || (node.props && node.props.children));
 
-const getChildren = node =>
+const getChildren = (node) =>
   node && node.children ? node.children : node.props && node.props.children;
 
-const renderNodes = reactNodes => {
+const renderNodes = (reactNodes) => {
   if (typeof reactNodes === 'string') {
     return reactNodes;
   }
@@ -46,11 +46,13 @@ const i18n = jest.genMockFromModule('react-i18next');
 module.exports = {
   ...i18n,
   // this mock makes sure any components using the translate HoC receive the t function as a prop
-  withNamespaces: jest.fn(() => Component => props => (
-    <Component t={k => k} {...props} />
+  withNamespaces: jest.fn(() => (Component) => (props) => (
+    <Component t={(k) => k} {...props} />
   )),
   Trans: jest.fn(({ children }) => renderNodes(children)),
-  NamespacesConsumer: jest.fn(({ children }) => children(k => k, { i18n: {} })),
+  NamespacesConsumer: jest.fn(({ children }) =>
+    children((k) => k, { i18n: {} }),
+  ),
 
   // mock if needed
   Interpolate: reactI18next.Interpolate,

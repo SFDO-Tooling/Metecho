@@ -10,7 +10,12 @@ from cumulusci.tasks.salesforce.RetrieveUnpackaged import RetrieveUnpackaged
 from cumulusci.tasks.salesforce.sourcetracking import MetadataType
 from django.conf import settings
 
-from .github_context import extract_owner_and_repo, get_repo_info, local_github_checkout
+from .gh import (
+    extract_owner_and_repo,
+    get_repo_info,
+    gh_given_user,
+    local_github_checkout,
+)
 from .sf_run_flow import refresh_access_token
 
 
@@ -27,15 +32,17 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     org_config = refresh_access_token(
         config=scratch_org.config, org_name="dev", login_url=scratch_org.login_url
     )
-    repo_name, repo_owner = extract_owner_and_repo(repo_url)
-    repo_branch = "master"
+    owner, repo = extract_owner_and_repo(repo_url)
+    gh = gh_given_user(user)
+    repository = gh.repository(owner, repo)
+    branch = repository.default_branch
     cci = BaseCumulusCI(
         repo_info={
             "root": project_path,
             "url": repo_url,
-            "name": repo_name,
-            "owner": repo_owner,
-            "commit": repo_branch,
+            "name": owner,
+            "owner": repo,
+            "commit": branch,
         }
     )
     package_xml_path = os.path.join(project_path, "src", "package.xml")

@@ -41,7 +41,7 @@ export const selectRepository = createSelector(
       return undefined;
     }
     const repository = repositories.find(
-      p => p.slug === repositorySlug || p.old_slugs.includes(repositorySlug),
+      (p) => p.slug === repositorySlug || p.old_slugs.includes(repositorySlug),
     );
     if (repository) {
       return repository;

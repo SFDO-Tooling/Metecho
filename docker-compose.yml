@@ -19,7 +19,7 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings.local
       REDIS_URL: redis://redis:6379
     volumes:
-      - .:/app
+      - .:/app:cached
       - /app/node_modules
     ports:
       - '0.0.0.0:8080:8080'
@@ -35,7 +35,7 @@ services:
     environment:
       - POSTGRES_USER=metashare
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./postgres:/var/lib/postgresql/data:cached
 
   # Runs the queue process:
   redis:
@@ -47,5 +47,5 @@ services:
       context: .
       dockerfile: ./compose/githooks/Dockerfile
     volumes:
-      - ./.git:/tmp/.git
-      - ./hooks:/tmp/hooks
+      - ./.git:/tmp/.git:cached
+      - ./hooks:/tmp/hooks:cached

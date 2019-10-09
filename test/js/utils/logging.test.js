@@ -9,7 +9,7 @@ describe('logError', () => {
         setExtras: jest.fn(),
       };
       window.Sentry = {
-        withScope: cb => cb(scope),
+        withScope: (cb) => cb(scope),
         captureException: jest.fn(),
         captureMessage: jest.fn(),
       };

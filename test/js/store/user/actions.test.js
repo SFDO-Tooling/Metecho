@@ -106,7 +106,7 @@ describe('logout', () => {
         clear: jest.fn(),
       };
       window.Sentry = {
-        configureScope: cb => cb(scope),
+        configureScope: (cb) => cb(scope),
       };
     });
 

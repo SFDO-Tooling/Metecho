@@ -1,6 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -10,7 +9,11 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '@/components/404';
 import RepositoryListItem from '@/components/repositories/listItem';
-import { LabelWithSpinner, useIsMounted } from '@/components/utils';
+import {
+  LabelWithSpinner,
+  SpinnerWrapper,
+  useIsMounted,
+} from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { fetchObjects } from '@/store/actions';
 import { refreshRepos } from '@/store/repositories/actions';
@@ -94,7 +97,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
     default: {
       contents = (
         <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
-          {repositories.map(repository => (
+          {repositories.map((repository) => (
             <RepositoryListItem repository={repository} key={repository.id} />
           ))}
         </div>
@@ -163,7 +166,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
           {refreshing ? (
             <div className="slds-align_absolute-center slds-m-top_x-large">
               <span className="slds-is-relative">
-                <Spinner />
+                <SpinnerWrapper />
               </span>
             </div>
           ) : (
@@ -172,7 +175,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
           {fetchingRepositories ? (
             <div className="slds-align_absolute-center slds-m-top_x-large">
               <span className="slds-is-relative slds-m-right_large">
-                <Spinner variant="brand" size="small" />
+                <SpinnerWrapper variant="brand" size="small" />
               </span>
               {i18n.t('Loading…')}
             </div>

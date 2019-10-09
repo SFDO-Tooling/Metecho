@@ -49,6 +49,7 @@ rules:
     - 2
     - singleQuote: true
       trailingComma: all
+      arrowParens: always
 
   # Import
   import/order:

@@ -70,6 +70,9 @@ case "$1" in
         dcr python manage.py makemessages --locale "${@:2}"
         dcr python manage.py compilemessages
         ;;
+    "bash")
+        dcr bash
+        ;;
     "shell")
         dcr python manage.py shell "${@:2}"
         ;;

@@ -1,33 +1,56 @@
 // Form Elements
 // =============
 
-.vertical-separator {
-  border-right: 1px solid $color-border-separator-alt;
-  height: 100%;
-  width: 1px;
-
-  .hide-separator + & {
-    display: none;
-  }
-
-  .show-separator + & {
-    display: inline;
-  }
-}
-
 .task-submit-textarea.slds-textarea {
   min-height: 100px;
 }
-// temporary fix
+
 .form-grid {
   display: grid;
-  grid-template-columns: minmax($size-small, 1fr) auto;
+  // needs a non-percentage and non fr
+  //   for changes column to be consistent between row types
+  //   16vw is a magic number that works well in changes column
+  grid-template-columns: 1fr 16vw;
 }
 
-.slds-is-open {
-  > .slds-accordion__content {
-    .slds-checkbox {
-      margin-left: $size-xxx-small;
+[data-form='task-capture'] {
+  display: grid;
+  height: 100%;
+
+  .slds-accordion__summary {
+    @include icon-checkbox-layout;
+  }
+
+  // using slds class since we can't access inner checkbox + label markup
+  .slds-checkbox__label {
+    &:hover {
+      .slds-form-element__label {
+        color: $brand-text-link-active;
+      }
+
+      .slds-checkbox_faux,
+      .slds-checkbox--faux {
+        border-color: $brand-text-link-active;
+      }
     }
+  }
+
+  // adding input focus since keyboard nav doesn't focus on spans
+  [type='checkbox'] {
+    &:focus {
+      + .slds-checkbox__label {
+        .slds-form-element__label {
+          color: $brand-text-link-active;
+        }
+      }
+    }
+  }
+}
+
+.select-header-action-col {
+  @include icon-checkbox-layout;
+
+  .slds-form-element__control {
+    grid-column: 2;
   }
 }

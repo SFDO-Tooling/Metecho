@@ -31,6 +31,7 @@ def test_run_retrieve_task(user_factory, scratch_org_factory):
         stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
         stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
         stack.enter_context(patch(f"{PATCH_ROOT}.build_package_xml"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         RetrieveUnpackaged = stack.enter_context(
             patch(f"{PATCH_ROOT}.RetrieveUnpackaged")
         )

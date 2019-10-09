@@ -64,13 +64,13 @@ const reducer = (
             [ORG_TYPES.DEV]:
               (response &&
                 (response as Org[]).find(
-                  org => org.org_type === ORG_TYPES.DEV,
+                  (org) => org.org_type === ORG_TYPES.DEV,
                 )) ||
               null,
             [ORG_TYPES.QA]:
               (response &&
                 (response as Org[]).find(
-                  org => org.org_type === ORG_TYPES.QA,
+                  (org) => org.org_type === ORG_TYPES.QA,
                 )) ||
               null,
           },
@@ -194,7 +194,7 @@ const reducer = (
       return orgs;
     }
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
-    case 'GITHUB_CHANGES_COMMITTED': {
+    case 'SCRATCH_ORG_COMMIT_CHANGES': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,

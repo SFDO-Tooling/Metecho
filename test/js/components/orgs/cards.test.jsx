@@ -52,7 +52,7 @@ const defaultState = {
 };
 
 describe('<OrgCards/>', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       initialState: defaultState,
       orgs: defaultOrgs,

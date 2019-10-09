@@ -14,3 +14,7 @@
 .restricted-container {
   @include restrict-container;
 }
+
+.spinner-container.slds-spinner_container {
+  z-index: 0;
+}

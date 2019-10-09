@@ -3,6 +3,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.urls import reverse
 
+from ..models import SCRATCH_ORG_TYPES
+
 
 @pytest.mark.django_db
 def test_user_view(client):
@@ -25,12 +27,12 @@ def test_user_disconnect_view(client):
 
 @pytest.mark.django_db
 def test_user_refresh_view(client):
-    with patch("metashare.api.gh.login") as login:
+    with patch("metashare.api.gh.gh_given_user") as gh_given_user:
         repo = MagicMock()
         repo.url = "test"
         gh = MagicMock()
         gh.repositories.return_value = [repo]
-        login.return_value = gh
+        gh_given_user.return_value = gh
 
         response = client.post(reverse("user-refresh"))
 
@@ -94,7 +96,13 @@ class TestScratchOrgView:
             assert not commit_changes_from_org_job.delay.called
 
     def test_list_fetch_changes(self, client, scratch_org_factory):
-        scratch_org_factory()
+        scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Dev,
+            url="https://example.com",
+            delete_queued_at=None,
+            currently_capturing_changes=False,
+            currently_refreshing_changes=False,
+        )
         with patch(
             "metashare.api.jobs.get_unsaved_changes_job"
         ) as get_unsaved_changes_job:
@@ -105,7 +113,13 @@ class TestScratchOrgView:
             assert get_unsaved_changes_job.delay.called
 
     def test_retrieve_fetch_changes(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Dev,
+            url="https://example.com",
+            delete_queued_at=None,
+            currently_capturing_changes=False,
+            currently_refreshing_changes=False,
+        )
         with patch(
             "metashare.api.jobs.get_unsaved_changes_job"
         ) as get_unsaved_changes_job:

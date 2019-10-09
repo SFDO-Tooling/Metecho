@@ -3,7 +3,7 @@ export const logError = (
   data: { [key: string]: any } = {},
 ) => {
   if (window.Sentry) {
-    window.Sentry.withScope(scope => {
+    window.Sentry.withScope((scope) => {
       scope.setExtras(data);
       /* istanbul ignore else */
       if (window.Sentry) {

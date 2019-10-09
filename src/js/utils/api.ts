@@ -21,7 +21,7 @@ const csrfSafeMethod = (method: string) =>
 const getResponse = (resp: Response): Promise<any> =>
   resp
     .text()
-    .then(text => {
+    .then((text) => {
       try {
         return { response: resp, body: JSON.parse(text) };
       } catch (err) {
@@ -31,7 +31,7 @@ const getResponse = (resp: Response): Promise<any> =>
     })
     .catch(
       /* istanbul ignore next */
-      err => {
+      (err) => {
         logError(err);
         throw err;
       },
@@ -95,7 +95,7 @@ const apiFetch = async ({
 // Based on https://fetch.spec.whatwg.org/#fetch-api
 export const addUrlParams = (baseUrl: string, params: UrlParams = {}) => {
   const url = new URL(baseUrl, window.location.origin);
-  Object.keys(params).forEach(key => {
+  Object.keys(params).forEach((key) => {
     const value = params[key].toString();
     // Disallow duplicate params with the same key:value
     if (url.searchParams.get(key) !== value) {

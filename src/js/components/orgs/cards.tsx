@@ -3,7 +3,6 @@ import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import Modal from '@salesforce/design-system-react/components/modal';
-import Spinner from '@salesforce/design-system-react/components/spinner';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -14,6 +13,7 @@ import { ConnectionInfoModal } from '@/components/user/info';
 import {
   ExternalLink,
   LabelWithSpinner,
+  SpinnerWrapper,
   useIsMounted,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
@@ -132,6 +132,9 @@ const OrgCard = ({
   let icon = null;
   let actions = null;
   let footer = null;
+  const loadingMsg = i18n.t(
+    'This process could take a number of minutes. Feel free to leave this page and check back later.',
+  );
 
   if (isCreating) {
     actions = (
@@ -140,9 +143,7 @@ const OrgCard = ({
         disabled
       />
     );
-    footer = i18n.t(
-      'This process could take a number of minutes. Feel free to leave this page and check back later.',
-    );
+    footer = loadingMsg;
   } else if (org) {
     const latestCommitAt =
       org.latest_commit_at && new Date(org.latest_commit_at);
@@ -203,7 +204,7 @@ const OrgCard = ({
     if (isDeleting) {
       footer = (
         <>
-          <Spinner size="small" />
+          <SpinnerWrapper size="small" />
           {i18n.t('Deleting Org…')}
         </>
       );
@@ -211,14 +212,15 @@ const OrgCard = ({
       if (org.currently_capturing_changes) {
         footer = (
           <>
-            <Spinner size="small" />
+            <SpinnerWrapper size="small" />
             {i18n.t('Capturing Selected Changes…')}
+            <div className="slds-p-top_small">{loadingMsg}</div>
           </>
         );
       } else if (org.currently_refreshing_changes) {
         footer = (
           <>
-            <Spinner size="small" />
+            <SpinnerWrapper size="small" />
             {i18n.t('Checking for Uncaptured Changes…')}
           </>
         );
