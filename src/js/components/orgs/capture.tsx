@@ -197,7 +197,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
         onSubmit={submitChanges}
       >
         <div className="slds-scrollable_y slds-p-around_large">
-          <div className="form-grid slds-p-around_small">
+          <div className="form-grid slds-p-around_x-small">
             <Checkbox
               id="select-all"
               labels={{
