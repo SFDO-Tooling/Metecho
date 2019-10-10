@@ -1,4 +1,3 @@
-from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -121,15 +120,9 @@ class TestScratchOrgView:
             currently_capturing_changes=False,
             currently_refreshing_changes=False,
         )
-        with ExitStack() as stack:
-            get_unsaved_changes_job = stack.enter_context(
-                patch("metashare.api.jobs.get_unsaved_changes_job")
-            )
-            refresh_access_token = stack.enter_context(
-                patch("metashare.api.models.refresh_access_token")
-            )
-            refresh_access_token.return_value = {}
-
+        with patch(
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.get(url)
 
