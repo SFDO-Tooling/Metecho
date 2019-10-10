@@ -153,7 +153,7 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = StringField(unique=True)
     repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
@@ -188,7 +188,7 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    name = models.CharField(max_length=50)
+    name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.SlugField(max_length=100, null=True, blank=True)
 
@@ -222,7 +222,7 @@ class TaskSlug(AbstractSlug):
 
 
 class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    name = models.CharField(max_length=50)
+    name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     assignee = models.ForeignKey(
