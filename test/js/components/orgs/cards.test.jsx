@@ -34,7 +34,7 @@ const defaultOrgs = {
     org_type: 'Dev',
     owner: 'user-id',
     expires_at: '2019-09-16T12:58:53.721Z',
-    latest_commit: '617a51',
+    latest_commit: '617a512-longlong',
     latest_commit_url: '/test/commit/url/',
     latest_commit_at: '2019-08-16T12:58:53.721Z',
     url: '/test/org/url/',
@@ -82,6 +82,20 @@ describe('<OrgCards/>', () => {
       ).toBeVisible();
       expect(getByText('Create Org')).toBeVisible();
       expect(getByText('check again')).toBeVisible();
+      expect(getByText('617a512')).toBeVisible();
+    });
+
+    test('renders without commit URL', () => {
+      const orgs = {
+        ...defaultOrgs,
+        Dev: {
+          ...defaultOrgs.Dev,
+          latest_commit_url: '',
+        },
+      };
+      const { getByText } = setup({ orgs });
+
+      expect(getByText('617a512')).toBeVisible();
     });
   });
 
