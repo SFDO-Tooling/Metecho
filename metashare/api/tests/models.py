@@ -326,6 +326,19 @@ class TestScratchOrg:
 
             assert async_to_sync.called
 
+    def test_get_login_url(self, scratch_org_factory):
+        with ExitStack() as stack:
+            refresh_access_token = stack.enter_context(
+                patch("metashare.api.models.refresh_access_token")
+            )
+            jwt_session = stack.enter_context(patch("metashare.api.models.jwt_session"))
+            refresh_access_token.return_value = {}
+
+            scratch_org = scratch_org_factory()
+            scratch_org.get_login_url()
+
+            assert jwt_session.called
+
 
 @pytest.mark.django_db
 class TestGitHubRepository:

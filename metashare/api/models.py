@@ -1,7 +1,11 @@
+from urllib.parse import urljoin
+
 import requests
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
+from cumulusci.core.config import OrgConfig
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
@@ -21,6 +25,7 @@ from . import gh
 from . import model_mixins as mixins
 from . import push
 from .constants import ORGANIZATION_DETAILS
+from .sf_run_flow import jwt_session, refresh_access_token
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
@@ -288,6 +293,29 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self.queue_provision()
 
         return ret
+
+    def refresh_access_token(self):
+        """
+        This refreshes the access token in-band, so be careful.
+        """
+        self.config = refresh_access_token(
+            config=self.config, org_name="dev", login_url=self.login_url
+        )
+        self.save()
+
+    def get_login_url(self):
+        self.refresh_access_token()
+        org_config = OrgConfig(self.config, "dev")
+        session = jwt_session(
+            settings.SF_CLIENT_ID,
+            settings.SF_CLIENT_KEY,
+            org_config.username,
+            url=self.login_url,
+        )
+        return urljoin(
+            str(session["instance_url"]),
+            "secur/frontdoor.jsp?sid={}".format(session["access_token"]),
+        )
 
     def notify_changed(self):
         from .serializers import ScratchOrgSerializer
