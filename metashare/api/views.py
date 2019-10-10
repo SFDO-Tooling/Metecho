@@ -139,6 +139,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # rest_framework.mixins.RetrieveModelMixin, because I needed to
         # insert the get_unsaved_changes line in the middle.
         instance = self.get_object()
+        instance.refresh_access_token()
         conditions = [
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
             instance.url is not None,

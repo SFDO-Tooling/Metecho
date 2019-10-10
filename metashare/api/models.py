@@ -21,6 +21,7 @@ from . import gh
 from . import model_mixins as mixins
 from . import push
 from .constants import ORGANIZATION_DETAILS
+from .sf_run_flow import refresh_access_token
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
@@ -288,6 +289,15 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self.queue_provision()
 
         return ret
+
+    def refresh_access_token(self):
+        """
+        This refreshes the access token in-band, so be careful.
+        """
+        self.config = refresh_access_token(
+            config=self.config, org_name="dev", login_url=self.login_url
+        )
+        self.save()
 
     def notify_changed(self):
         from .serializers import ScratchOrgSerializer
