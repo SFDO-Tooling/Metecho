@@ -294,18 +294,12 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         return ret
 
-    def refresh_access_token(self):
-        """
-        This refreshes the access token in-band, so be careful.
-        """
-        self.config = refresh_access_token(
-            config=self.config, org_name="dev", login_url=self.login_url
-        ).config
-        self.save()
-
     def get_login_url(self):
-        self.refresh_access_token()
-        org_config = OrgConfig(self.config, "dev")
+        org_config = refresh_access_token(
+            config=self.config, org_name="dev", login_url=self.login_url
+        )
+        self.config = org_config.config
+        self.save()
         session = jwt_session(
             settings.SF_CLIENT_ID,
             settings.SF_CLIENT_KEY,

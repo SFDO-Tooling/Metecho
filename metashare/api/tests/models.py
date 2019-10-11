@@ -332,7 +332,7 @@ class TestScratchOrg:
                 patch("metashare.api.models.refresh_access_token")
             )
             jwt_session = stack.enter_context(patch("metashare.api.models.jwt_session"))
-            refresh_access_token.return_value = {}
+            refresh_access_token.return_value = MagicMock(config={})
 
             scratch_org = scratch_org_factory()
             scratch_org.get_login_url()
