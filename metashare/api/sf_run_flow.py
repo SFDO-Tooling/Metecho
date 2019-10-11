@@ -169,6 +169,7 @@ def get_org_result(
                 else None
             ),
             "OrgName": scratch_org_definition.get("orgName", "MetaShare Task Org"),
+            "SignupInstance": "cs68",
             # should really flesh this out to pass the other
             # optional fields from the scratch org definition file,
             # but this will work for a start

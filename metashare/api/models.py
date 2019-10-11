@@ -1,10 +1,9 @@
-from urllib.parse import urljoin
-
 import requests
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from cumulusci.core.config import OrgConfig
+from cumulusci.oauth.salesforce import jwt_session
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -25,7 +24,6 @@ from . import gh
 from . import model_mixins as mixins
 from . import push
 from .constants import ORGANIZATION_DETAILS
-from .sf_run_flow import jwt_session, refresh_access_token
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
@@ -294,22 +292,22 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         return ret
 
-    def get_login_url(self):
-        org_config = refresh_access_token(
-            config=self.config, org_name="dev", login_url=self.login_url
-        )
-        self.config = org_config.config
-        self.save()
-        session = jwt_session(
+    def get_refreshed_org_config(self):
+        org_config = OrgConfig(self.config, "dev")
+        info = jwt_session(
             settings.SF_CLIENT_ID,
             settings.SF_CLIENT_KEY,
             org_config.username,
-            url=self.login_url,
+            org_config.instance_url,
         )
-        return urljoin(
-            str(session["instance_url"]),
-            "secur/frontdoor.jsp?sid={}".format(session["access_token"]),
-        )
+        org_config.config.update(info)
+        org_config._load_userinfo()
+        org_config._load_orginfo()
+        return org_config
+
+    def get_login_url(self):
+        org_config = self.get_refreshed_org_config()
+        return org_config.start_url
 
     def notify_changed(self):
         from .serializers import ScratchOrgSerializer

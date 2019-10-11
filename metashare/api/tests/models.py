@@ -328,15 +328,12 @@ class TestScratchOrg:
 
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
-            refresh_access_token = stack.enter_context(
-                patch("metashare.api.models.refresh_access_token")
-            )
             jwt_session = stack.enter_context(patch("metashare.api.models.jwt_session"))
-            refresh_access_token.return_value = MagicMock(config={})
+            OrgConfig = stack.enter_context(patch("metashare.api.models.OrgConfig"))
+            OrgConfig.return_value = MagicMock(start_url="https://example.com")
 
             scratch_org = scratch_org_factory()
-            scratch_org.get_login_url()
-
+            assert scratch_org.get_login_url() == "https://example.com"
             assert jwt_session.called
 
 
