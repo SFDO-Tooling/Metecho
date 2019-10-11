@@ -300,7 +300,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         """
         self.config = refresh_access_token(
             config=self.config, org_name="dev", login_url=self.login_url
-        )
+        ).config
         self.save()
 
     def get_login_url(self):

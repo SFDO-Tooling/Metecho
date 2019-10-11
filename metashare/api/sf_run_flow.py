@@ -317,7 +317,7 @@ def create_org_and_run_flow(
     # Scratch org construction is done but we haven't run a flow
     # yet. This is the point where you would want to serialize
     # scratch_org_config.config to store in the database for use
-    # later. Then reconstitute by running construc_org_config
+    # later. Then reconstitute by running construct_org_config
     # ---
 
     # Run flow (takes care of getting a new access token)

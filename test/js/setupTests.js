@@ -26,6 +26,7 @@ beforeAll(() => {
     scratch_org_list: () => '/api/scratch_orgs/',
     scratch_org_detail: (id) => `/api/scratch_orgs/${id}/`,
     scratch_org_commit: (id) => `/api/scratch_orgs/${id}/commit/`,
+    scratch_org_redirect: (id) => `/api/scratch_orgs/${id}/redirect/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();

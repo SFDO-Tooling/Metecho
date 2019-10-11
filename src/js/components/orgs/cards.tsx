@@ -145,6 +145,7 @@ const OrgCard = ({
     );
     footer = loadingMsg;
   } else if (org) {
+    const orgUrl = window.api_urls.scratch_org_redirect(org.id);
     const latestCommitAt =
       org.latest_commit_at && new Date(org.latest_commit_at);
     const expiresAt = org.expires_at && new Date(org.expires_at);
@@ -227,16 +228,16 @@ const OrgCard = ({
       } else {
         /* istanbul ignore else */
         // eslint-disable-next-line no-lonely-if
-        if (org.url) {
+        if (orgUrl) {
           footer = (
-            <ExternalLink url={org.url}>{i18n.t('View Org')}</ExternalLink>
+            <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>
           );
         }
       }
       /* istanbul ignore else */
-      if (org.url) {
+      if (orgUrl) {
         icon = (
-          <ExternalLink url={org.url} title={i18n.t('View Org')}>
+          <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
             <Icon
               category="utility"
               name="link"
