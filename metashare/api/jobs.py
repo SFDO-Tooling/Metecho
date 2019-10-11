@@ -5,7 +5,6 @@ from asgiref.sync import async_to_sync
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django_rq import job
-from github3.exceptions import UnprocessableEntity
 
 from . import sf_org_changes as sf_changes
 from . import sf_run_flow as sf_flow
@@ -14,28 +13,11 @@ from .gh import (
     get_cumulus_prefix,
     gh_given_user,
     local_github_checkout,
+    try_to_make_branch,
 )
 from .push import report_scratch_org_error
 
 logger = logging.getLogger(__name__)
-
-
-def _try_to_make_branch(repository, *, new_branch, base_branch):
-    branch_name = new_branch
-    counter = 0
-    max_length = 100  # From models::Project.branch_name
-    while True:
-        suffix = f"-{counter}" if counter else ""
-        branch_name = f"{new_branch[:max_length-len(suffix)]}{suffix}"
-        try:
-            latest_sha = repository.branch(base_branch).latest_sha()
-            repository.create_branch_ref(branch_name, latest_sha)
-            return branch_name
-        except UnprocessableEntity as err:
-            if err.msg == "Reference already exists":
-                counter += 1
-            else:
-                raise
 
 
 def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
@@ -60,7 +42,7 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
             repo_commit=repository.branch(repository.default_branch).latest_sha(),
         )
         project_branch_name = f"{prefix}{slugify(project.name)}"
-        project_branch_name = _try_to_make_branch(
+        project_branch_name = try_to_make_branch(
             repository,
             new_branch=project_branch_name,
             base_branch=repository.default_branch,
@@ -73,7 +55,7 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
     if task.branch_name:
         task_branch_name = task.branch_name
     else:
-        task_branch_name = _try_to_make_branch(
+        task_branch_name = try_to_make_branch(
             repository,
             new_branch=f"{project_branch_name}__{slugify(task.name)}",
             base_branch=project_branch_name,

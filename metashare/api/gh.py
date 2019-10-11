@@ -18,6 +18,7 @@ from django.core.exceptions import (
     ValidationError,
 )
 from github3 import login
+from github3.exceptions import UnprocessableEntity
 from purl import URL
 
 from .custom_cci_configs import GlobalConfig
@@ -166,3 +167,21 @@ def get_cumulus_prefix(**kwargs):
     global_config = GlobalConfig()
     project_config = global_config.get_project_config(**kwargs)
     return project_config.project__git__prefix_feature
+
+
+def try_to_make_branch(repository, *, new_branch, base_branch):
+    branch_name = new_branch
+    counter = 0
+    max_length = 100  # From models::Project.branch_name
+    while True:
+        suffix = f"-{counter}" if counter else ""
+        branch_name = f"{new_branch[:max_length-len(suffix)]}{suffix}"
+        try:
+            latest_sha = repository.branch(base_branch).latest_sha()
+            repository.create_branch_ref(branch_name, latest_sha)
+            return branch_name
+        except UnprocessableEntity as err:
+            if err.msg == "Reference already exists":
+                counter += 1
+            else:
+                raise
