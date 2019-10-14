@@ -42,7 +42,7 @@ def test_user_refresh_view(client):
 @pytest.mark.django_db
 def test_repository_view(client, repository_factory, git_hub_repository_factory):
     git_hub_repository_factory(
-        user=client.user, url="https://example.com/test-repo.git"
+        user=client.user, repo_url="https://example.com/test-repo.git"
     )
     repository = repository_factory(repo_url="https://example.com/test-repo.git")
     repository_factory(repo_url="https://example.com/test-repo2.git")

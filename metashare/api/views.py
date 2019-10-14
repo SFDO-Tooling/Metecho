@@ -80,7 +80,7 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     model = Repository
 
     def get_queryset(self):
-        repositories = self.request.user.repositories.values_list("url", flat=True)
+        repositories = self.request.user.repositories.values_list("repo_url", flat=True)
         return Repository.objects.filter(repo_url__in=repositories)
 
 

@@ -178,7 +178,7 @@ class Repository(
 
 
 class GitHubRepository(mixins.PopulateRepoId, mixins.HashIdMixin, models.Model):
-    url = models.URLField()
+    repo_url = models.URLField()
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
@@ -188,7 +188,7 @@ class GitHubRepository(mixins.PopulateRepoId, mixins.HashIdMixin, models.Model):
         verbose_name_plural = "GitHub repositories"
 
     def __str__(self):
-        return self.url
+        return self.repo_url
 
 
 class ProjectSlug(AbstractSlug):

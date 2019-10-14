@@ -35,11 +35,7 @@ class PopulateRepoId:
             return self.repo_id
 
         gh = gh_given_user(user)
-        owner, name = extract_owner_and_repo(
-            # Stupid workaround for the fact that we didn't name the
-            # url/repo_url attribute consistently:
-            getattr(self, "repo_url", self.url)
-        )
+        owner, name = extract_owner_and_repo(self.repo_url)
         repo = gh.repository(owner, name)
         self.repo_id = repo.id
         self.save()
