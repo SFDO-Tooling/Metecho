@@ -124,7 +124,7 @@ def test_extract_zip_file():
 class TestLocalGitHubCheckout:
     def test_safe(self):
         user = MagicMock()
-        repo = "https://github.com/user/repo"
+        repo = 123
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
             gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
@@ -141,7 +141,7 @@ class TestLocalGitHubCheckout:
 
     def test_unsafe(self):
         user = MagicMock()
-        repo = "https://github.com/user/repo"
+        repo = 123
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
             gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))

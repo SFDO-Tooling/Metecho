@@ -101,13 +101,13 @@ def _create_org_and_run_flow(
 
 
 def create_branches_on_github_then_create_scratch_org(
-    *, project, repo_url, scratch_org, task, user
+    *, project, repo_id, scratch_org, task, user
 ):
     try:
-        with local_github_checkout(user, repo_url) as repo_root:
+        with local_github_checkout(user, repo_id) as repo_root:
             commit_ish = _create_branches_on_github(
                 user=user,
-                repo_url=repo_url,
+                repo_id=repo_id,
                 project=project,
                 task=task,
                 repo_root=repo_root,
@@ -115,7 +115,7 @@ def create_branches_on_github_then_create_scratch_org(
             _create_org_and_run_flow(
                 scratch_org,
                 user=user,
-                repo_url=repo_url,
+                repo_id=repo_id,
                 repo_branch=commit_ish,
                 project_path=repo_root,
             )
@@ -158,7 +158,6 @@ get_unsaved_changes_job = job(get_unsaved_changes)
 
 
 def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
-    repo_url = scratch_org.task.project.repository.repo_url
     repo_id = scratch_org.task.project.repository.get_repo_id(user)
     branch = scratch_org.task.branch_name
 
@@ -166,7 +165,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         sf_changes.commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
-            repo_url=repo_url,
+            repo_id=repo_id,
             branch=branch,
             desired_changes=desired_changes,
             commit_message=commit_message,

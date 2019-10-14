@@ -133,7 +133,7 @@ def test_create_branches_on_github_then_create_scratch_org():
 
         create_branches_on_github_then_create_scratch_org(
             project=MagicMock(),
-            repo_url="https://github.com/user/repo",
+            repo_id=123,
             scratch_org=MagicMock(),
             task=MagicMock(),
             user=MagicMock(),
@@ -225,7 +225,7 @@ class TestErrorHandling:
             with pytest.raises(Exception):
                 create_branches_on_github_then_create_scratch_org(
                     project=MagicMock(),
-                    repo_url="https://github.org/test/repo",
+                    repo_id=123,
                     scratch_org=scratch_org,
                     task=MagicMock(),
                     user=user,
