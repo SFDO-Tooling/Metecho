@@ -28,7 +28,7 @@ def boolish(val: str) -> bool:
 
 
 def optional_str(val: Optional[str]) -> Optional[str]:
-    if not val:
+    if val is None:
         return val
     return str(val)
 
