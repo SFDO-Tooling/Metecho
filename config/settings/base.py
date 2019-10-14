@@ -344,6 +344,7 @@ SF_CALLBACK_URL = env("SF_CALLBACK_URL", default=None)
 SF_CLIENT_KEY = env("SF_CLIENT_KEY", default="").replace("\\n", "\n")
 SF_CLIENT_ID = env("SF_CLIENT_ID", default=None)
 SF_CLIENT_SECRET = env("SF_CLIENT_SECRET", default=None)
+SF_SIGNUP_INSTANCE = env("SF_SIGNUP_INSTANCE", default=None)
 
 # Logging
 
