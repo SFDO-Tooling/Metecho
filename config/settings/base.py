@@ -70,7 +70,8 @@ def env(name, default=NoDefaultValue, type_=str):
         if default == NoDefaultValue:
             raise ImproperlyConfigured(f"Missing environment variable: {name}.")
         val = default
-    val = type_(val)
+    if val is not None:
+        val = type_(val)
     return val
 
 

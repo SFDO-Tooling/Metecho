@@ -173,7 +173,7 @@ def get_org_result(
         # but this will work for a start
     }
     if settings.SF_SIGNUP_INSTANCE:
-        create_args["SignupInstance"] = settings.SF_SIGNUP_INSTANCE
+        create_args["Instance"] = settings.SF_SIGNUP_INSTANCE
     response = devhub_api.ScratchOrgInfo.create(create_args)
 
     # Get details and update scratch org config
