@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 from ipaddress import IPv4Network
 from os import environ
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import dj_database_url
 import sentry_sdk
@@ -25,6 +25,12 @@ BOOLS = ("True", "true", "T", "t", "1", 1)
 
 def boolish(val: str) -> bool:
     return val in BOOLS
+
+
+def optional_str(val: Optional[str]) -> Optional[str]:
+    if not val:
+        return val
+    return str(val)
 
 
 def ipv4_networks(val: str) -> List[IPv4Network]:
@@ -344,7 +350,7 @@ SF_CALLBACK_URL = env("SF_CALLBACK_URL", default=None)
 SF_CLIENT_KEY = env("SF_CLIENT_KEY", default="").replace("\\n", "\n")
 SF_CLIENT_ID = env("SF_CLIENT_ID", default=None)
 SF_CLIENT_SECRET = env("SF_CLIENT_SECRET", default=None)
-SF_SIGNUP_INSTANCE = env("SF_SIGNUP_INSTANCE", default=None)
+SF_SIGNUP_INSTANCE = env("SF_SIGNUP_INSTANCE", default=None, type_=optional_str)
 
 # Logging
 
