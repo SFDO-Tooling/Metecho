@@ -136,3 +136,12 @@ class TestScratchOrgView:
             response = client.delete(url)
 
             assert response.status_code == 204
+
+    def test_redirect(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch("metashare.api.models.ScratchOrg.get_login_url") as get_login_url:
+            get_login_url.return_value = "https://example.com"
+            url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
+            response = client.get(url)
+
+            assert response.status_code == 302
