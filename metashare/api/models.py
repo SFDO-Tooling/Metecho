@@ -2,6 +2,9 @@ import requests
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
+from cumulusci.core.config import OrgConfig
+from cumulusci.oauth.salesforce import jwt_session
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
@@ -288,6 +291,23 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self.queue_provision()
 
         return ret
+
+    def get_refreshed_org_config(self):
+        org_config = OrgConfig(self.config, "dev")
+        info = jwt_session(
+            settings.SF_CLIENT_ID,
+            settings.SF_CLIENT_KEY,
+            org_config.username,
+            org_config.instance_url,
+        )
+        org_config.config.update(info)
+        org_config._load_userinfo()
+        org_config._load_orginfo()
+        return org_config
+
+    def get_login_url(self):
+        org_config = self.get_refreshed_org_config()
+        return org_config.start_url
 
     def notify_changed(self):
         from .serializers import ScratchOrgSerializer

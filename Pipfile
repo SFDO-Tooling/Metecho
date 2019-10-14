@@ -52,7 +52,7 @@ pyOpenSSL = "==19.0.0"
 sentry-sdk = "==0.12.3"
 service_identity = "==18.1.0"
 whitenoise = "==4.1.4"
-cumulusci = "*"
+cumulusci = {git = "https://github.com/SFDO-Tooling/CumulusCI"}
 simple-salesforce = "==0.74.2"
 
 [requires]

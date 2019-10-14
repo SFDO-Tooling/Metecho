@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.http import HttpResponseRedirect
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
@@ -166,3 +167,9 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
+
+    @action(detail=True, methods=["GET"])
+    def redirect(self, request, pk=None):
+        instance = self.get_object()
+        url = instance.get_login_url()
+        return HttpResponseRedirect(redirect_to=url)

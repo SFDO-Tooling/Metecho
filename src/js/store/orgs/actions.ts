@@ -72,7 +72,9 @@ export const provisionOrg = (payload: Org): ThunkResult => (
       addToast({
         heading: msg[payload.org_type],
         linkText: payload.url ? i18n.t('View your new org.') : undefined,
-        linkUrl: payload.url || undefined,
+        linkUrl: payload.url
+          ? window.api_urls.scratch_org_redirect(payload.id)
+          : undefined,
         openLinkInNewWindow: true,
       }),
     );

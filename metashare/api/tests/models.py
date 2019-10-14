@@ -326,6 +326,16 @@ class TestScratchOrg:
 
             assert async_to_sync.called
 
+    def test_get_login_url(self, scratch_org_factory):
+        with ExitStack() as stack:
+            jwt_session = stack.enter_context(patch("metashare.api.models.jwt_session"))
+            OrgConfig = stack.enter_context(patch("metashare.api.models.OrgConfig"))
+            OrgConfig.return_value = MagicMock(start_url="https://example.com")
+
+            scratch_org = scratch_org_factory()
+            assert scratch_org.get_login_url() == "https://example.com"
+            assert jwt_session.called
+
 
 @pytest.mark.django_db
 class TestGitHubRepository:
