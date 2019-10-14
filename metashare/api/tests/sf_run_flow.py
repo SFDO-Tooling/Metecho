@@ -92,7 +92,8 @@ def test_get_org_details():
         assert json.load.called
 
 
-def test_get_org_result():
+def test_get_org_result(settings):
+    settings.SF_SIGNUP_INSTANCE = "cs68"
     result = get_org_result(
         email=MagicMock(),
         repo_owner=MagicMock(),

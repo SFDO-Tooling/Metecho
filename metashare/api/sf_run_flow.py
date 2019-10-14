@@ -153,28 +153,28 @@ def get_org_result(
     and get the result."""
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm
-    response = devhub_api.ScratchOrgInfo.create(
-        {
-            "AdminEmail": email,
-            "ConnectedAppConsumerKey": SF_CLIENT_ID,
-            "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
-            "Description": f"{repo_owner}/{repo_name} {repo_branch}",
-            "DurationDays": scratch_org_config.days,
-            "Edition": scratch_org_definition["edition"],
-            "Features": ";".join(scratch_org_definition.get("features", [])),
-            "HasSampleData": scratch_org_definition.get("hasSampleData", False),
-            "Namespace": (
-                cci.project_config.project__package__namespace
-                if scratch_org_config.namespaced
-                else None
-            ),
-            "OrgName": scratch_org_definition.get("orgName", "MetaShare Task Org"),
-            "SignupInstance": "cs68",
-            # should really flesh this out to pass the other
-            # optional fields from the scratch org definition file,
-            # but this will work for a start
-        }
-    )
+    create_args = {
+        "AdminEmail": email,
+        "ConnectedAppConsumerKey": SF_CLIENT_ID,
+        "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
+        "Description": f"{repo_owner}/{repo_name} {repo_branch}",
+        "DurationDays": scratch_org_config.days,
+        "Edition": scratch_org_definition["edition"],
+        "Features": ";".join(scratch_org_definition.get("features", [])),
+        "HasSampleData": scratch_org_definition.get("hasSampleData", False),
+        "Namespace": (
+            cci.project_config.project__package__namespace
+            if scratch_org_config.namespaced
+            else None
+        ),
+        "OrgName": scratch_org_definition.get("orgName", "MetaShare Task Org"),
+        # should really flesh this out to pass the other
+        # optional fields from the scratch org definition file,
+        # but this will work for a start
+    }
+    if settings.SF_SIGNUP_INSTANCE:
+        create_args["SignupInstance"] = settings.SF_SIGNUP_INSTANCE
+    response = devhub_api.ScratchOrgInfo.create(create_args)
 
     # Get details and update scratch org config
     return devhub_api.ScratchOrgInfo.get(response["id"])
