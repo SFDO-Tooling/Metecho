@@ -88,9 +88,9 @@ def test_get_repo_info(user_factory):
         user = user_factory()
         gh = MagicMock()
         gh_given_user.return_value = gh
-        get_repo_info(user, "https://github.com/owner/repo")
+        get_repo_info(user, 123)
 
-        gh.repository.assert_called_with("owner", "repo")
+        gh.repository_with_id.assert_called_with(123)
 
 
 def test_normalize_owner_and_repo_name():

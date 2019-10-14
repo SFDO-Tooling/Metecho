@@ -35,7 +35,7 @@ class TestCreateBranchesOnGitHub:
             gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             repository = MagicMock()
             gh = MagicMock()
-            gh.repository.return_value = repository
+            gh.repository_with_id.return_value = repository
             gh_given_user.return_value = gh
 
             _create_branches_on_github(
@@ -44,6 +44,7 @@ class TestCreateBranchesOnGitHub:
                 project=project,
                 task=task,
                 repo_root="",
+                repo_id=123,
             )
 
             assert repository.create_branch_ref.called
@@ -64,7 +65,7 @@ class TestCreateBranchesOnGitHub:
             gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             repository = MagicMock()
             gh = MagicMock()
-            gh.repository.return_value = repository
+            gh.repository_with_id.return_value = repository
             gh_given_user.return_value = gh
 
             _create_branches_on_github(
@@ -73,6 +74,7 @@ class TestCreateBranchesOnGitHub:
                 project=project,
                 task=task,
                 repo_root="",
+                repo_id=123,
             )
 
             assert not repository.create_branch_ref.called
@@ -88,6 +90,7 @@ def test_create_org_and_run_flow():
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
             repo_url="https://github.com/owner/repo",
+            repo_id=123,
             repo_branch=MagicMock(),
             project_path="",
         )
@@ -190,7 +193,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         repository = MagicMock()
         repository.branch.return_value = MagicMock(commit=commit)
         gh = MagicMock()
-        gh.repository.return_value = repository
+        gh.repository_with_id.return_value = repository
         gh_given_user.return_value = gh
 
         desired_changes = {"name": ["member"]}

@@ -29,12 +29,13 @@ def build_package_xml(scratch_org, package_xml_path, desired_changes):
 
 def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     repo_url = scratch_org.task.project.repository.repo_url
+    repo_id = scratch_org.task.project.repository.get_repo_id(user)
     org_config = refresh_access_token(
         config=scratch_org.config, org_name="dev", login_url=scratch_org.login_url
     )
     owner, repo = extract_owner_and_repo(repo_url)
     gh = gh_given_user(user)
-    repository = gh.repository(owner, repo)
+    repository = gh.repository_with_id(repo_id)
     branch = repository.default_branch
     cci = BaseCumulusCI(
         repo_info={

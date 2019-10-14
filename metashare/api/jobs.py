@@ -20,13 +20,13 @@ from .push import report_scratch_org_error
 logger = logging.getLogger(__name__)
 
 
-def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
+def _create_branches_on_github(*, user, repo_url, repo_id, project, task, repo_root):
     """
     Expects to be called in the context of a local github checkout.
     """
     gh = gh_given_user(user)
-    owner, repo = extract_owner_and_repo(repo_url)
-    repository = gh.repository(owner, repo)
+    owner, name = extract_owner_and_repo(repo_url)
+    repository = gh.repository_with_id(repo_id)
 
     # Make project branch, with latest from project:
     project.refresh_from_db()
@@ -35,7 +35,7 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
     else:
         prefix = get_cumulus_prefix(
             repo_root=repo_root,
-            repo_name=repository.name,
+            repo_name=name,
             repo_url=repo_url,
             repo_owner=owner,
             repo_branch=repository.default_branch,
@@ -66,20 +66,21 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
     return task_branch_name
 
 
-def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project_path):
+def _create_org_and_run_flow(
+    scratch_org, *, user, repo_url, repo_id, repo_branch, project_path
+):
     from .models import SCRATCH_ORG_TYPES
 
     cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
 
     gh = gh_given_user(user)
-    owner, repo = extract_owner_and_repo(repo_url)
-    repository = gh.repository(owner, repo)
+    owner, name = extract_owner_and_repo(repo_url)
+    repository = gh.repository_with_id(repo_id)
     commit = repository.branch(repo_branch).commit
 
-    owner, repo = extract_owner_and_repo(repo_url)
     org_config, login_url = sf_flow.create_org_and_run_flow(
         repo_owner=owner,
-        repo_name=repo,
+        repo_name=name,
         repo_branch=repo_branch,
         user=user,
         flow_name=cases[scratch_org.org_type],
@@ -158,6 +159,7 @@ get_unsaved_changes_job = job(get_unsaved_changes)
 
 def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
     repo_url = scratch_org.task.project.repository.repo_url
+    repo_id = scratch_org.task.project.repository.get_repo_id(user)
     branch = scratch_org.task.branch_name
 
     try:
@@ -172,8 +174,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
 
         # Update
         gh = gh_given_user(user)
-        owner, repo = extract_owner_and_repo(repo_url)
-        repository = gh.repository(owner, repo)
+        repository = gh.repository_with_id(repo_id)
         commit = repository.branch(branch).commit
 
         scratch_org.refresh_from_db()

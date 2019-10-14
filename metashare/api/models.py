@@ -154,11 +154,18 @@ class RepositorySlug(AbstractSlug):
     )
 
 
-class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+class Repository(
+    mixins.PopulateRepoId,
+    mixins.HashIdMixin,
+    mixins.TimestampsMixin,
+    SlugMixin,
+    models.Model,
+):
     name = StringField(unique=True)
     repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
+    repo_id = models.IntegerField(null=True)
 
     slug_class = RepositorySlug
 
@@ -170,11 +177,12 @@ class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.M
         ordering = ("name",)
 
 
-class GitHubRepository(mixins.HashIdMixin, models.Model):
+class GitHubRepository(mixins.PopulateRepoId, mixins.HashIdMixin, models.Model):
     url = models.URLField()
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
+    repo_id = models.IntegerField(null=True)
 
     class Meta:
         verbose_name_plural = "GitHub repositories"

@@ -94,10 +94,9 @@ def zip_file_is_safe(zip_file):
     return all(is_safe_path(info.filename) for info in zip_file.infolist())
 
 
-def get_repo_info(user, repo_url):
+def get_repo_info(user, repo_id):
     gh = gh_given_user(user)
-    owner, repo_name = extract_owner_and_repo(repo_url)
-    return gh.repository(owner, repo_name)
+    return gh.repository_with_id(repo_id)
 
 
 def normalize_owner_and_repo_name(repo):

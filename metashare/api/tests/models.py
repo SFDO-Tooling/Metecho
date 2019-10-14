@@ -341,7 +341,21 @@ class TestScratchOrg:
 class TestGitHubRepository:
     def test_str(self, git_hub_repository_factory):
         gh_repo = git_hub_repository_factory()
-        assert str(gh_repo) == "https://example.com/repo.git"
+        assert str(gh_repo) == "https://github.com/test/repo.git"
+
+    def test_get_repo_id(self, git_hub_repository_factory):
+        with patch("metashare.api.model_mixins.gh_given_user") as gh_given_user:
+            gh = MagicMock()
+            gh.repository.return_value = MagicMock(id=123)
+            gh_given_user.return_value = gh
+            user = MagicMock()
+
+            gh_repo = git_hub_repository_factory(repo_id=None)
+            gh_repo.get_repo_id(user)
+
+            gh_repo.refresh_from_db()
+            assert gh_given_user.called
+            assert gh_repo.repo_id == 123
 
 
 @pytest.mark.django_db
