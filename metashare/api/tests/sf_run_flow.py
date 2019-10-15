@@ -98,12 +98,13 @@ def test_get_access_token():
 class TestDeployOrgSettings:
     def test_org_preference_settings(self):
         with ExitStack() as stack:
-            stack.enter_context(patch(f"{PATCH_ROOT}.temporary_dir"))
             stack.enter_context(patch(f"{PATCH_ROOT}.os"))
             stack.enter_context(patch(f"{PATCH_ROOT}.open"))
             stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
             stack.enter_context(patch(f"{PATCH_ROOT}.TaskConfig"))
-            Deploy = stack.enter_context(patch(f"{PATCH_ROOT}.Deploy"))
+            DeployOrgSettings = stack.enter_context(
+                patch(f"{PATCH_ROOT}.DeployOrgSettings")
+            )
 
             section_setting = MagicMock()
             settings = MagicMock()
@@ -118,61 +119,8 @@ class TestDeployOrgSettings:
                 org_config=MagicMock(),
                 org_name=MagicMock(),
                 scratch_org_config=MagicMock(),
-                scratch_org_definition=scratch_org_definition,
             )
-            assert Deploy.called
-
-    def test_other_settings(self):
-        with ExitStack() as stack:
-            stack.enter_context(patch(f"{PATCH_ROOT}.temporary_dir"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.open"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.TaskConfig"))
-            Deploy = stack.enter_context(patch(f"{PATCH_ROOT}.Deploy"))
-
-            section_setting = MagicMock()
-            settings = MagicMock()
-            scratch_org_definition = MagicMock()
-
-            section_setting.items.return_value = [(MagicMock(), MagicMock())]
-            settings.items.return_value = [("something else", section_setting)]
-            scratch_org_definition.get.return_value = settings
-
-            deploy_org_settings(
-                cci=MagicMock(),
-                org_config=MagicMock(),
-                org_name=MagicMock(),
-                scratch_org_config=MagicMock(),
-                scratch_org_definition=scratch_org_definition,
-            )
-            assert Deploy.called
-
-    def test_no_settings(self):
-        with ExitStack() as stack:
-            stack.enter_context(patch(f"{PATCH_ROOT}.temporary_dir"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.open"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.TaskConfig"))
-            Deploy = stack.enter_context(patch(f"{PATCH_ROOT}.Deploy"))
-
-            section_setting = MagicMock()
-            settings = MagicMock()
-            scratch_org_definition = MagicMock()
-
-            section_setting.items.return_value = [(MagicMock(), MagicMock())]
-            settings.items.return_value = [("orgPreferenceSettings", section_setting)]
-            scratch_org_definition.get.return_value = None
-
-            deploy_org_settings(
-                cci=MagicMock(),
-                org_config=MagicMock(),
-                org_name=MagicMock(),
-                scratch_org_config=MagicMock(),
-                scratch_org_definition=scratch_org_definition,
-            )
-            assert not Deploy.called
+            assert DeployOrgSettings.called
 
 
 def test_create_org_and_run_flow():
