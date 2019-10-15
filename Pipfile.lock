@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "907e3a6775231d4a12ae2ab3a08268d9af0b84acd53f515c27d94b6ba19896d0"
+            "sha256": "9e7d7fd5fa875efa06138039d33fe1023882b0edf1f357904377de4fba87d390"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -413,10 +413,10 @@
         },
         "newrelic": {
             "hashes": [
-                "sha256:736c2544bccc2db5a015b1a0f2852ee855b43aec40e5439da54af68640ef3505"
+                "sha256:da9adab674d9fe7aa8fbabb6691b33fb7be94a32b6a80548ec7018be9df8ef65"
             ],
             "index": "pypi",
-            "version": "==5.2.0.127"
+            "version": "==5.2.1.129"
         },
         "oauthlib": {
             "hashes": [
@@ -609,11 +609,10 @@
         },
         "simple-salesforce": {
             "hashes": [
-                "sha256:60b834cf47505171e5bebfdbfcc0ca9676c960266a913014fa63e5db2e399fdc",
-                "sha256:9404c4aa11efd9ea08700a94161ae4f91faa99ae6a6d5a1fe3736fc3b35be831"
+                "sha256:0bf4065a7769388d8f830bfc31200e6d2d6de50d19034e4113b59831dd72a438"
             ],
             "index": "pypi",
-            "version": "==0.74.2"
+            "version": "==0.74.3"
         },
         "six": {
             "hashes": [
