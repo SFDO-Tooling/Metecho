@@ -82,7 +82,7 @@ def test_create_org_and_run_flow():
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.sf_changes"))
         sf_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_flow"))
-        sf_flow.create_org_and_run_flow.return_value = (MagicMock(), MagicMock())
+        sf_flow.create_org_and_run_flow.return_value = MagicMock()
         stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
@@ -110,11 +110,11 @@ def test_get_unsaved_changes(scratch_org_factory):
         get_unsaved_changes(scratch_org=scratch_org)
         scratch_org.refresh_from_db()
 
-        assert scratch_org.unsaved_changes
-        assert scratch_org.latest_revision_numbers == {
-            "TypeOne": {"NameOne": 13},
-            "TypeTwo": {"NameTwo": 10},
+        assert scratch_org.unsaved_changes == {
+            "TypeOne": ["NameOne"],
+            "TypeTwo": ["NameTwo"],
         }
+        assert scratch_org.latest_revision_numbers == {"TypeOne:NameOne": 10}
 
 
 def test_create_branches_on_github_then_create_scratch_org():
