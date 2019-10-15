@@ -290,7 +290,6 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_capturing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
-    login_url = models.URLField(null=True, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
 
     def subscribable_by(self, user):  # pragma: nocover
