@@ -56,14 +56,33 @@ def commit_changes_to_github(
     *, user, scratch_org, repo_url, branch, desired_changes, commit_message
 ):
     with local_github_checkout(user, repo_url) as project_path:
-        # This won't return anything in-memory, but rather it will emit files which we
-        # then copy into a source checkout, and then commit and push all that.
+        # This won't return anything in-memory, but rather it will emit
+        # files which we then copy into a source checkout, and then
+        # commit and push all that.
         run_retrieve_task(user, scratch_org, project_path, desired_changes)
         repo = get_repo_info(user, repo_url)
         author = {"name": user.username, "email": user.email}
         CommitDir(repo, author=author)(
             project_path, branch, repo_dir="", commit_message=commit_message
         )
+
+        # Update scratch_org.latest_revision_numbers with appropriate
+        # numbers for the values in desired_changes.
+        latest_revision_numbers = get_latest_revision_numbers(scratch_org)
+        for member_name in desired_changes.keys():
+            for member_type in desired_changes[member_name]:
+                try:
+                    member_name_dict = scratch_org.latest_revision_numbers[member_name]
+                except KeyError:
+                    member_name_dict = scratch_org.latest_revision_numbers[
+                        member_name
+                    ] = {}
+
+                member_name_dict[member_type] = latest_revision_numbers[member_name][
+                    member_type
+                ]
+
+        scratch_org.save()
 
 
 def get_salesforce_connection(*, config, base_url=""):

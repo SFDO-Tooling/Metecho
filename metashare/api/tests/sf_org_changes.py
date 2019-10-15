@@ -50,9 +50,17 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
         stack.enter_context(patch(f"{PATCH_ROOT}.run_retrieve_task"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        get_latest_revision_numbers = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
+        )
+        get_latest_revision_numbers.return_value = {
+            "name": {"member": 1, "member2": 1},
+            "name1": {"member": 1, "member2": 1},
+        }
         CommitDir = stack.enter_context(patch(f"{PATCH_ROOT}.CommitDir"))
 
         desired_changes = {"name": ["member"]}
+        assert scratch_org.latest_revision_numbers == {}
         commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
@@ -63,6 +71,7 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
         )
 
         assert CommitDir.called
+        assert scratch_org.latest_revision_numbers == {"name": {"member": 1}}
 
 
 def test_get_latest_revision_numbers():
