@@ -179,9 +179,24 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         scratch_org.latest_commit = commit.sha
         scratch_org.latest_commit_url = commit.html_url
         scratch_org.latest_commit_at = commit.commit.author.get("date", None)
-        scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
-            scratch_org
-        )
+
+        # Update scratch_org.latest_revision_numbers with appropriate
+        # numbers for the values in desired_changes.
+        latest_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
+        for member_name in desired_changes.keys():
+            for member_type in desired_changes[member_name]:
+                try:
+                    member_name_dict = scratch_org.latest_revision_numbers[member_name]
+                except KeyError:
+                    member_name_dict = scratch_org.latest_revision_numbers[
+                        member_name
+                    ] = {}
+
+                member_name_dict[member_type] = latest_revision_numbers[member_name][
+                    member_type
+                ]
+
+        scratch_org.save()
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.finalize_commit_changes(e)
