@@ -1,7 +1,7 @@
 from django.db import models
 from hashid_field import HashidAutoField
 
-from .gh import extract_owner_and_repo, gh_given_user
+from .gh import get_repo_info
 
 
 class HashIdMixin(models.Model):
@@ -34,9 +34,7 @@ class PopulateRepoId:
         if self.repo_id:
             return self.repo_id
 
-        gh = gh_given_user(user)
-        owner, name = extract_owner_and_repo(self.repo_url)
-        repo = gh.repository(owner, name)
+        repo = get_repo_info(user, repo_owner=self.repo_owner, repo_name=self.repo_name)
         self.repo_id = repo.id
         self.save()
         return self.repo_id

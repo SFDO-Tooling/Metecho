@@ -63,7 +63,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         metashare = self.create_repository(
             name="MetaShare-Test",
-            repo_url="https://github.com/oddbird/MetaShare-Test",
+            repo_owner="oddbird",
+            repo_name="MetaShare-Test",
             description=(
                 f"# Welcome to Meta(Meta)Share!\n\n"
                 "This is a description of the repository. "
@@ -71,42 +72,39 @@ class Command(BaseCommand):
             ),
         )
         self.create_repository(
-            name="MetaShare", repo_url="https://github.com/SFDO-Tooling/MetaShare"
+            name="MetaShare", repo_owner="SFDO-Tooling", repo_name="MetaShare"
         )
         self.create_repository(
-            name="MetaDeploy", repo_url="https://github.com/SFDO-Tooling/MetaDeploy"
+            name="MetaDeploy", repo_owner="SFDO-Tooling", repo_name="MetaDeploy"
         )
         self.create_repository(
-            name="CumulusCI", repo_url="https://github.com/SFDO-Tooling/CumulusCI"
+            name="CumulusCI", repo_owner="SFDO-Tooling", repo_name="CumulusCI"
         )
         self.create_repository(
-            name="MetaCI", repo_url="https://github.com/SFDO-Tooling/MetaCI"
+            name="MetaCI", repo_owner="SFDO-Tooling", repo_name="MetaCI"
         )
         self.create_repository(
-            name="Mister Belvedere",
-            repo_url="https://github.com/SFDO-Tooling/mrbelvedere",
+            name="Mister Belvedere", repo_owner="SFDO-Tooling", repo_name="mrbelvedere"
         )
         self.create_repository(
-            name="SFDO Template",
-            repo_url="https://github.com/SFDO-Tooling/sfdo-template",
+            name="SFDO Template", repo_owner="SFDO-Tooling", repo_name="sfdo-template"
         )
         self.create_repository(
             name="SFDO Template Helpers",
-            repo_url="https://github.com/SFDO-Tooling/sfdo-template-helpers",
+            repo_owner="SFDO-Tooling",
+            repo_name="sfdo-template-helpers",
         )
         self.create_repository(
-            name="OddSite", repo_url="https://github.com/oddbird/oddsite"
+            name="OddSite", repo_owner="oddbird", repo_name="oddsite"
+        )
+        self.create_repository(name="Books", repo_owner="oddbird", repo_name="books")
+        self.create_repository(name="True", repo_owner="oddbird", repo_name="true")
+        self.create_repository(name="Susy", repo_owner="oddbird", repo_name="susy")
+        self.create_repository(
+            name="Herman", repo_owner="oddbird", repo_name="sassdoc-theme-herman"
         )
         self.create_repository(
-            name="Books", repo_url="https://github.com/oddbird/books"
-        )
-        self.create_repository(name="True", repo_url="https://github.com/oddbird/true")
-        self.create_repository(name="Susy", repo_url="https://github.com/oddbird/susy")
-        self.create_repository(
-            name="Herman", repo_url="https://github.com/oddbird/sassdoc-theme-herman"
-        )
-        self.create_repository(
-            name="Accoutrement", repo_url="https://github.com/oddbird/accoutrement"
+            name="Accoutrement", repo_owner="oddbird", repo_name="accoutrement"
         )
 
         for i in range(55):

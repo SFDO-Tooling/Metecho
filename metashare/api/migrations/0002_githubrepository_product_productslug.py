@@ -5,7 +5,6 @@ import hashid_field.field
 from django.conf import settings
 from django.db import migrations, models
 
-import metashare.api.gh
 import sfdo_template_helpers.fields.markdown
 import sfdo_template_helpers.slugs
 
@@ -32,12 +31,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("edited_at", models.DateTimeField(auto_now=True)),
                 ("name", models.CharField(max_length=50, unique=True)),
-                (
-                    "repo_url",
-                    models.URLField(
-                        unique=True, validators=[metashare.api.gh.validate_gh_url]
-                    ),
-                ),
+                ("repo_url", models.URLField(unique=True)),
                 (
                     "description",
                     sfdo_template_helpers.fields.markdown.MarkdownField(

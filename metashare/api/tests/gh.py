@@ -2,13 +2,11 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.core.exceptions import ValidationError
 from github3.exceptions import UnprocessableEntity
 
 from ..gh import (
     NoGitHubTokenError,
     UnsafeZipfileError,
-    extract_owner_and_repo,
     extract_zip_file,
     get_all_org_repos,
     get_repo_info,
@@ -16,10 +14,7 @@ from ..gh import (
     is_safe_path,
     local_github_checkout,
     log_unsafe_zipfile_error,
-    normalize_github_url,
-    normalize_owner_and_repo_name,
     try_to_make_branch,
-    validate_gh_url,
     zip_file_is_safe,
 )
 
@@ -36,30 +31,12 @@ class TestGetAllOrgRepos:
             gh = MagicMock()
             gh.repositories.return_value = [repo]
             login.return_value = gh
-            assert get_all_org_repos(user) == {"https://github.com/test"}
+            assert len(get_all_org_repos(user)) == 1
 
     def test_bad_social_auth(self, user_factory):
         user = user_factory(socialaccount_set=[])
         with pytest.raises(NoGitHubTokenError):
             get_all_org_repos(user)
-
-
-def test_normalize_github_url():
-    actual = normalize_github_url("http://github.com/repos/test/repo.git")
-    expected = "https://github.com/test/repo"
-
-    assert actual == expected
-
-
-def test_validate_gh_url():
-    with pytest.raises(ValidationError):
-        validate_gh_url("http://github.com/repos/test/repo.git")
-
-
-def test_extract_owner_and_repo():
-    owner, repo = extract_owner_and_repo("https://github.com/owner/repo/tree/master")
-    assert owner == "owner"
-    assert repo == "repo"
 
 
 def test_is_safe_path():
@@ -78,26 +55,29 @@ def test_zip_file_is_safe():
 
 def test_log_unsafe_zipfile_error():
     with patch(f"{PATCH_ROOT}.logger") as logger:
-        log_unsafe_zipfile_error("owner", "repo_name", "commit_ish")
+        log_unsafe_zipfile_error("repo_url", "commit_ish")
         assert logger.error.called
 
 
 @pytest.mark.django_db
-def test_get_repo_info(user_factory):
-    with patch(f"{PATCH_ROOT}.gh_given_user") as gh_given_user:
-        user = user_factory()
-        gh = MagicMock()
-        gh_given_user.return_value = gh
-        get_repo_info(user, 123)
+class TestGetRepoInfo:
+    def test_with_repo_id(self, user_factory):
+        with patch(f"{PATCH_ROOT}.gh_given_user") as gh_given_user:
+            user = user_factory()
+            gh = MagicMock()
+            gh_given_user.return_value = gh
+            get_repo_info(user, repo_id=123)
 
-        gh.repository_with_id.assert_called_with(123)
+            gh.repository_with_id.assert_called_with(123)
 
+    def test_without_repo_id(self, user_factory):
+        with patch(f"{PATCH_ROOT}.gh_given_user") as gh_given_user:
+            user = user_factory()
+            gh = MagicMock()
+            gh_given_user.return_value = gh
+            get_repo_info(user, repo_owner="owner", repo_name="name")
 
-def test_normalize_owner_and_repo_name():
-    repo = MagicMock()
-    repo.owner.login = "owner"
-    repo.name = "reponame"
-    assert normalize_owner_and_repo_name(repo) == ("owner", "reponame")
+            gh.repository.assert_called_with("owner", "name")
 
 
 def test_get_zip_file():

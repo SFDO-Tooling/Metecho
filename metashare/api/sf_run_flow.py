@@ -265,10 +265,9 @@ def deploy_org_settings(
 
 
 def create_org_and_run_flow(
-    *, repo_owner, repo_name, repo_branch, user, flow_name, project_path
+    *, repo_owner, repo_name, repo_url, repo_branch, user, flow_name, project_path
 ):
     """Create a new scratch org and run a flow"""
-    repo_url = f"https://github.com/{repo_owner}/{repo_name}"
     org_name = "dev"
     devhub_username = user.sf_username
     email = user.email  # TODO: check that this is reliably right.

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9e7d7fd5fa875efa06138039d33fe1023882b0edf1f357904377de4fba87d390"
+            "sha256": "ef1009c3322c5a4979275b4b3346882c8dc72b2cf2f6dedef9a9647b067511b0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -171,7 +171,7 @@
         },
         "cumulusci": {
             "git": "https://github.com/SFDO-Tooling/CumulusCI",
-            "ref": "394f6808f0acf7530676384702416fbfebd2ffb3"
+            "ref": "1d0d5a55420374a19ec69a8f793f0aa37d7d06e6"
         },
         "daphne": {
             "hashes": [
@@ -490,14 +490,6 @@
             ],
             "index": "pypi",
             "version": "==2.8.3"
-        },
-        "purl": {
-            "hashes": [
-                "sha256:5ac0e85979da0172d80156701cb3eb9b1eff31f3b43e981ef6dc06251c53a3a4",
-                "sha256:75141bef1e7fce943afda671663a97c792af01c81648026cd5b5c0dcc3b72b96"
-            ],
-            "index": "pypi",
-            "version": "==1.5"
         },
         "pyasn1": {
             "hashes": [

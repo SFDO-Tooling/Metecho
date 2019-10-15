@@ -29,7 +29,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Repository)
 class RepositoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "repo_url")
+    list_display = ("name", "repo_owner", "repo_name")
 
 
 @admin.register(RepositorySlug)

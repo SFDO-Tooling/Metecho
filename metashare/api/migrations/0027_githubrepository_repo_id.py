@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="githubrepository",
             name="repo_id",
-            field=models.IntegerField(null=True),
+            field=models.IntegerField(null=True, blank=True),
         )
     ]

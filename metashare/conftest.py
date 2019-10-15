@@ -69,7 +69,8 @@ class RepositoryFactory(factory.django.DjangoModelFactory):
         model = Repository
 
     name = factory.Sequence("Repository {}".format)
-    repo_url = "https://github.com/test/repo"
+    repo_owner = "test"
+    repo_name = "repo"
     repo_id = 123
 
 
@@ -118,17 +119,3 @@ def client(user_factory):
     client.force_login(user)
     client.user = user
     return client
-
-
-# @pytest.fixture
-# def admin_api_client(user_factory):
-#     user = user_factory(is_superuser=True)
-#     client = APIClient()
-#     client.force_login(user)
-#     client.user = user
-#     return client
-
-
-# @pytest.fixture
-# def anon_client():
-#     return APIClient()
