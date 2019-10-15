@@ -97,7 +97,9 @@ def test_create_org_and_run_flow():
 
 @pytest.mark.django_db
 def test_get_unsaved_changes(scratch_org_factory):
-    scratch_org = scratch_org_factory(latest_revision_numbers={"TypeOne:NameOne": 10})
+    scratch_org = scratch_org_factory(
+        latest_revision_numbers={"TypeOne": {"NameOne": 10}}
+    )
 
     with patch(
         f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers"
@@ -114,7 +116,7 @@ def test_get_unsaved_changes(scratch_org_factory):
             "TypeOne": ["NameOne"],
             "TypeTwo": ["NameTwo"],
         }
-        assert scratch_org.latest_revision_numbers == {"TypeOne:NameOne": 10}
+        assert scratch_org.latest_revision_numbers == {"TypeOne": {"NameOne": 10}}
 
 
 def test_create_branches_on_github_then_create_scratch_org():
