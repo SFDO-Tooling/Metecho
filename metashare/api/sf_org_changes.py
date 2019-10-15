@@ -29,9 +29,7 @@ def build_package_xml(scratch_org, package_xml_path, desired_changes):
 
 def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     repo_url = scratch_org.task.project.repository.repo_url
-    org_config = refresh_access_token(
-        config=scratch_org.config, org_name="dev", login_url=scratch_org.login_url
-    )
+    org_config = refresh_access_token(config=scratch_org.config, org_name="dev")
     owner, repo = extract_owner_and_repo(repo_url)
     gh = gh_given_user(user)
     repository = gh.repository(owner, repo)
@@ -68,11 +66,9 @@ def commit_changes_to_github(
         )
 
 
-def get_salesforce_connection(*, config, login_url, base_url=""):
+def get_salesforce_connection(*, config, base_url=""):
     org_name = "dev"
-    org_config = refresh_access_token(
-        config=config, org_name=org_name, login_url=login_url
-    )
+    org_config = refresh_access_token(config=config, org_name=org_name)
 
     conn = simple_salesforce.Salesforce(
         instance_url=org_config.instance_url,
@@ -88,9 +84,7 @@ def get_salesforce_connection(*, config, login_url, base_url=""):
 
 
 def get_latest_revision_numbers(scratch_org):
-    conn = get_salesforce_connection(
-        config=scratch_org.config, login_url=scratch_org.login_url, base_url="tooling/"
-    )
+    conn = get_salesforce_connection(config=scratch_org.config, base_url="tooling/")
 
     # Store the results here on the org, and if any of these are > number than earlier
     # version, there are changes.
