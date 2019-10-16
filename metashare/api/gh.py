@@ -139,7 +139,7 @@ def extract_zip_file(zip_file, owner, repo_name):
     for path in itertools.chain(glob("zipball_root/*"), glob("zipball_root/.*")):
         shutil.move(path, ".")
     shutil.rmtree("zipball_root")
-    shutil.rmtree(ZIP_FILE_NAME)
+    os.remove(ZIP_FILE_NAME)
 
 
 @contextlib.contextmanager
