@@ -195,11 +195,6 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
                 member_name_dict[member_type] = latest_revision_numbers[member_name][
                     member_type
                 ]
-
-        # Finally, update scratch_org.unsaved_changes
-        scratch_org.unsaved_changes = sf_changes.compare_revisions(
-            scratch_org.latest_revision_numbers, latest_revision_numbers
-        )
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.finalize_commit_changes(e)
