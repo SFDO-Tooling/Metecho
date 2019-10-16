@@ -77,7 +77,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     commit = repository.branch(repo_branch).commit
 
     owner, repo = extract_owner_and_repo(repo_url)
-    org_config, login_url = sf_flow.create_org_and_run_flow(
+    org_config = sf_flow.create_org_and_run_flow(
         repo_owner=owner,
         repo_name=repo,
         repo_branch=repo_branch,
@@ -93,7 +93,6 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = org_config.config
-    scratch_org.login_url = login_url
     scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
         scratch_org
     )
@@ -142,7 +141,6 @@ def get_unsaved_changes(scratch_org):
         )
         scratch_org.refresh_from_db()
         scratch_org.unsaved_changes = unsaved_changes
-        scratch_org.latest_revision_numbers = new_revision_numbers
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.finalize_get_unsaved_changes(e)

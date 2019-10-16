@@ -171,7 +171,7 @@
         },
         "cumulusci": {
             "git": "https://github.com/SFDO-Tooling/CumulusCI",
-            "ref": "394f6808f0acf7530676384702416fbfebd2ffb3"
+            "ref": "1d0d5a55420374a19ec69a8f793f0aa37d7d06e6"
         },
         "daphne": {
             "hashes": [

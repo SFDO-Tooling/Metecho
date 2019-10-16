@@ -1,17 +1,13 @@
 import json
 import os
-from calendar import timegm
 from datetime import datetime
 from unittest.mock import Mock
-from urllib.parse import urljoin
 
-import jwt as pyjwt
-import requests
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.oauth.salesforce import SalesforceOAuth2
-from cumulusci.tasks.salesforce import Deploy
-from cumulusci.utils import cd, temporary_dir
+from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
+from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
+from cumulusci.utils import cd
 from django.conf import settings
 from simple_salesforce import Salesforce as SimpleSalesforce
 
@@ -50,47 +46,7 @@ def capitalize(s):
     return s[0].upper() + s[1:]
 
 
-# This is copied from cumulusci.oauth.salesforce but we need a fix.
-def jwt_session(client_id, private_key, username, url=None, is_sandbox=False):
-    """Complete the JWT Token Oauth flow to obtain an access token for an org.
-
-    :param client_id: Client Id for the connected app
-    :param private_key: Private key used to sign the connected app's certificate
-    :param username: Username to authenticate as
-    :param url: Base URL of the instance hosting the org
-    (e.g. https://na40.salesforce.com)
-    :param is_sandbox: True if the org is a sandbox or scratch org
-    """
-    if url is None:
-        url = "https://login.salesforce.com"
-    aud = (
-        "https://test.salesforce.com" if is_sandbox else "https://login.salesforce.com"
-    )
-
-    payload = {
-        "alg": "RS256",
-        "iss": client_id,
-        "sub": username,
-        "aud": aud,  # jwt aud is NOT mydomain
-        "exp": timegm(datetime.utcnow().utctimetuple()),
-    }
-    encoded_jwt = pyjwt.encode(payload, private_key, algorithm="RS256")
-    data = {
-        "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-        "assertion": encoded_jwt,
-    }
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    auth_url = urljoin(url, "services/oauth2/token")
-    response = requests.post(url=auth_url, data=data, headers=headers)
-    try:
-        response.raise_for_status()
-    except Exception as err:
-        # We need to add a detailed error message on to the exception:
-        raise err.__class__(f"{err.args[0]}: {response.text}")
-    return response.json()
-
-
-def refresh_access_token(*, config, org_name, login_url):
+def refresh_access_token(*, config, org_name):
     """
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
     which we don't want now -- this is a total hack which I'll try to
@@ -99,7 +55,7 @@ def refresh_access_token(*, config, org_name, login_url):
     org_config = OrgConfig(config, org_name)
     org_config.refresh_oauth_token = Mock()
     info = jwt_session(
-        SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, login_url, is_sandbox=True
+        SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
     )
     org_config.config["access_token"] = info["access_token"]
     return org_config
@@ -200,13 +156,7 @@ def mutate_scratch_org(*, scratch_org_config, org_result, email):
     )
 
 
-def get_login_url(org_result):
-    """Get the base login/auth URL for a new scratch org from its ScratchOrgInfo"""
-    signup_instance = org_result["SignupInstance"]
-    return f"https://{signup_instance}.salesforce.com"
-
-
-def get_access_token(*, login_url, org_result, scratch_org_config):
+def get_access_token(*, org_result, scratch_org_config):
     """Trades the AuthCode from a ScratchOrgInfo for an org access token,
     and stores it in the org config.
 
@@ -214,53 +164,26 @@ def get_access_token(*, login_url, org_result, scratch_org_config):
     the scratch org is created. This must be completed once in order for future
     access tokens to be obtained using the JWT token flow.
     """
-    oauth = SalesforceOAuth2(SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, login_url)
+    oauth = SalesforceOAuth2(
+        SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, scratch_org_config.instance_url
+    )
     auth_result = oauth.get_token(org_result["AuthCode"]).json()
     scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
         "access_token"
     ] = auth_result["access_token"]
 
 
-def deploy_org_settings(
-    *, cci, login_url, org_config, org_name, scratch_org_config, scratch_org_definition
-):
+def deploy_org_settings(*, cci, org_config, org_name, scratch_org_config):
     """Do a Metadata API deployment to configure org settings
     as specified in the scratch org definition file.
     """
-    settings = scratch_org_definition.get("settings", {})
-    if settings:
-        with temporary_dir() as path:
-            os.mkdir("settings")
-            for section, section_settings in settings.items():
-                settings_name = capitalize(section)
-                if section == "orgPreferenceSettings":
-                    values = "\n    ".join(
-                        ORGPREF_t.format(name=capitalize(k), value=v)
-                        for k, v in section_settings.items()
-                    )
-                else:
-                    values = "\n    ".join(
-                        f"<{k}>{v}</{k}>" for k, v in section_settings.items()
-                    )
-                # e.g. AccountSettings -> settings/Account.settings
-                settings_file = os.path.join(
-                    "settings", settings_name[: -len("Settings")] + ".settings"
-                )
-                with open(settings_file, "w") as f:
-                    f.write(
-                        SETTINGS_XML_t.format(settingsName=settings_name, values=values)
-                    )
-            with open("package.xml", "w") as f:
-                f.write(PACKAGE_XML)
-
-            org_config = refresh_access_token(
-                config=scratch_org_config.config, org_name=org_name, login_url=login_url
-            )
-
-            task_config = TaskConfig({"options": {"path": path}})
-            task = Deploy(cci.project_config, task_config, org_config)
-            task()
-            return org_config
+    org_config = refresh_access_token(
+        config=scratch_org_config.config, org_name=org_name
+    )
+    path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
+    task_config = TaskConfig({"options": {"definition_file": path}})
+    task = DeployOrgSettings(cci.project_config, task_config, org_config)
+    task()
     return org_config
 
 
@@ -299,19 +222,12 @@ def create_org_and_run_flow(
     mutate_scratch_org(
         scratch_org_config=scratch_org_config, org_result=org_result, email=email
     )
-    login_url = get_login_url(org_result)
-    get_access_token(
-        login_url=login_url,
-        org_result=org_result,
-        scratch_org_config=scratch_org_config,
-    )
+    get_access_token(org_result=org_result, scratch_org_config=scratch_org_config)
     org_config = deploy_org_settings(
         cci=cci,
-        login_url=login_url,
         org_config=scratch_org_config,
         org_name=org_name,
         scratch_org_config=scratch_org_config,
-        scratch_org_definition=scratch_org_definition,
     )
 
     # ---
@@ -326,7 +242,7 @@ def create_org_and_run_flow(
     with cd(project_path):
         flow.run(org_config)
 
-    return scratch_org_config, login_url
+    return scratch_org_config
 
 
 def delete_scratch_org(scratch_org):
