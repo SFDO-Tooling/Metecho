@@ -182,10 +182,6 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
         )
-
-        get_latest_revision_numbers = stack.enter_context(
-            patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
-        )
         get_latest_revision_numbers.return_value = {
             "name": {"member": 1, "member2": 1},
             "name1": {"member": 1, "member2": 1},
