@@ -182,7 +182,11 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
         )
-        get_latest_revision_numbers.return_value = {}
+        get_latest_revision_numbers.return_value = {
+            "name": {"member": 1, "member2": 1},
+            "name1": {"member": 1, "member2": 1},
+        }
+
         gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         commit = MagicMock(
             sha="12345",
@@ -197,9 +201,11 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
 
         desired_changes = {"name": ["member"]}
         commit_message = "test message"
+        assert scratch_org.latest_revision_numbers == {}
         commit_changes_from_org(scratch_org, user, desired_changes, commit_message)
 
         assert commit_changes_to_github.called
+        assert scratch_org.latest_revision_numbers == {"name": {"member": 1}}
 
 
 # TODO: this should be bundled with each function, not all error-handling together.

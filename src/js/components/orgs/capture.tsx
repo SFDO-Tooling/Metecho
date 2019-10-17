@@ -5,6 +5,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
+import cloneDeep from 'lodash.clonedeep';
 import React, { useRef, useState } from 'react';
 
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
@@ -77,10 +78,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
   };
 
   const handleSelectGroup = (groupName: string, checked: boolean) => {
-    // Lazy way to quickly deep clone the object
-    const newCheckedItems = JSON.parse(
-      JSON.stringify((inputs as Inputs).changes),
-    ) as Changeset;
+    const newCheckedItems = cloneDeep((inputs as Inputs).changes);
     if (checked) {
       newCheckedItems[groupName] = [...changeset[groupName]];
     } else {
@@ -98,10 +96,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     change: string;
     checked: boolean;
   }) => {
-    // Lazy way to quickly deep clone the object
-    const newCheckedItems = JSON.parse(
-      JSON.stringify((inputs as Inputs).changes),
-    ) as Changeset;
+    const newCheckedItems = cloneDeep((inputs as Inputs).changes);
     const changes = newCheckedItems[groupName];
     if (checked) {
       if (changes) {
@@ -127,7 +122,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     { checked }: { checked: boolean },
   ) => {
     if (checked) {
-      const allChanges = JSON.parse(JSON.stringify(changeset)) as Changeset;
+      const allChanges = cloneDeep(changeset);
       setChanges(allChanges);
     } else {
       setChanges({});
@@ -197,7 +192,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
         onSubmit={submitChanges}
       >
         <div className="slds-scrollable_y slds-p-around_large">
-          <div className="form-grid slds-p-around_small">
+          <div className="form-grid slds-p-around_x-small">
             <Checkbox
               id="select-all"
               labels={{
