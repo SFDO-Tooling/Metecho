@@ -2,14 +2,8 @@ FROM wlonk/oddbird:latest
 
 ARG BUILD_ENV=development
 
-# Install local development tools (git, docker-cli used for viewing logs):
-COPY ./compose/web/install-dev-tools.sh /install-dev-tools.sh
-RUN chmod +x /install-dev-tools.sh
-RUN /install-dev-tools.sh
-
 # Env setup:
 ENV PYTHONPATH /app
-
 ENV DATABASE_URL postgres://metashare@db:5432/metashare
 # A sample key, not to be used for realsies:
 ENV DB_ENCRYPTION_KEY 'IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE='
@@ -18,13 +12,13 @@ ENV DJANGO_SECRET_KEY 'sample secret key'
 ENV DJANGO_SETTINGS_MODULE config.settings.production
 
 # Python server setup:
-COPY ./Pipfile.lock /Pipfile.lock
-COPY ./Pipfile /Pipfile
 COPY ./compose/web/start-server.sh /start-server.sh
-
 RUN chmod +x /start-server.sh
-RUN pipenv lock
-RUN pipenv install --dev --system --deploy --ignore-pipfile
+
+# Python requirements:
+COPY ./requirements /requirements
+RUN pip install --no-cache-dir -r requirements/prod.txt
+RUN if [ "${BUILD_ENV}" = "development" ]; then pip install --no-cache-dir -r requirements/dev.txt; fi
 
 # JS client setup:
 COPY ./package.json /app/package.json
