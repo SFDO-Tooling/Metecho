@@ -9,7 +9,7 @@
     "url": "https://github.com/SFDO-Tooling/MetaShare.git"
   },
   "engines": {
-    "node": "10.16.0"
+    "node": "10.16.3"
   },
   "scripts": {
     "webpack:serve": "webpack-dev-server --config webpack.dev.js",

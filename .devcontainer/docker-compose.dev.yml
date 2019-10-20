@@ -7,7 +7,7 @@ services:
       - vscode-server:/root/.vscode-server:cached
       - /var/run/docker.sock:/var/run/docker.sock:cached
     # Override command to prevent container crashing if webpack build exits
-    command: sleep infinity
+    command: sh -c 'while sleep 3600; do :; done'
 
 volumes:
   vscode-server: {}
