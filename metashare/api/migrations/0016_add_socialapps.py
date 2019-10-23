@@ -6,11 +6,10 @@ from django.db import migrations
 
 
 def forwards(apps, schema_editor):
-    SocialApp = apps.get_model("socialaccount", "SocialApp")
-
     client_id = environ.get("SF_CLIENT_ID")
     secret = environ.get("SF_CLIENT_SECRET")
     if client_id and secret:
+        SocialApp = apps.get_model("socialaccount", "SocialApp")
         SocialApp.objects.get_or_create(
             provider=f"salesforce-production",
             defaults=dict(
@@ -29,6 +28,9 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [("api", "0015_scratchorg_config_encoder")]
+    dependencies = [
+        ("api", "0015_scratchorg_config_encoder"),
+        ("socialaccount", "0003_extra_data_default_dict"),
+    ]
 
     operations = [migrations.RunPython(forwards, backwards)]

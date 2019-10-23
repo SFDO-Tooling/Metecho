@@ -21,8 +21,10 @@ def test_populate_social_apps__success():
     sf = SocialApp.objects.get(name="Salesforce Production")
 
     assert sf.provider == "salesforce-production"
-    assert sf.client_id == "sf-id"
-    assert sf.secret == "sf-secret"
+    # These values are provided by the database migration, as the
+    # command does a get-or-create:
+    # assert sf.client_id == "sf-id"
+    # assert sf.secret == "sf-secret"
     assert sf.key == "https://login.salesforce.com/"
     assert sf.sites.exists()
 
