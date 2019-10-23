@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ValidationError
+from github3.exceptions import UnprocessableEntity
 
 from ..gh import (
     NoGitHubTokenError,
@@ -17,6 +18,7 @@ from ..gh import (
     log_unsafe_zipfile_error,
     normalize_github_url,
     normalize_owner_and_repo_name,
+    try_to_make_branch,
     validate_gh_url,
     zip_file_is_safe,
 )
@@ -110,6 +112,7 @@ def test_extract_zip_file():
     zip_file = MagicMock()
     with ExitStack() as stack:
         shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
+        os = stack.enter_context(patch(f"{PATCH_ROOT}.os"))
         glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
 
         glob.return_value = ["owner-repo_name-"]
@@ -117,6 +120,7 @@ def test_extract_zip_file():
         assert zip_file.extractall.called
         assert shutil.move.called
         assert shutil.rmtree.called
+        assert os.remove.called
 
 
 class TestLocalGitHubCheckout:
@@ -125,6 +129,7 @@ class TestLocalGitHubCheckout:
         repo = "https://github.com/user/repo"
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
+            os = stack.enter_context(patch(f"{PATCH_ROOT}.os"))
             gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
@@ -136,6 +141,7 @@ class TestLocalGitHubCheckout:
 
             with local_github_checkout(user, repo):
                 assert shutil.rmtree.called
+                assert os.remove.called
 
     def test_unsafe(self):
         user = MagicMock()
@@ -156,3 +162,45 @@ class TestLocalGitHubCheckout:
             with pytest.raises(UnsafeZipfileError):
                 with local_github_checkout(user, repo, "commit-ish"):  # pragma: nocover
                     pass
+
+
+class TestTryCreateBranch:
+    def test_try_to_make_branch__duplicate_name(self, user_factory, task_factory):
+        repository = MagicMock()
+        resp = MagicMock(status_code=422)
+        resp.json.return_value = {"message": "Reference already exists"}
+        repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
+        branch = MagicMock()
+        branch.latest_sha.return_value = "1234abc"
+        repository.branch.return_value = branch
+        result = try_to_make_branch(
+            repository, new_branch="new-branch", base_branch="base-branch"
+        )
+
+        assert result == "new-branch-1"
+
+    def test_try_to_make_branch__long_duplicate_name(self, user_factory, task_factory):
+        repository = MagicMock()
+        resp = MagicMock(status_code=422)
+        resp.json.return_value = {"message": "Reference already exists"}
+        repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
+        branch = MagicMock()
+        branch.latest_sha.return_value = "1234abc"
+        repository.branch.return_value = branch
+        result = try_to_make_branch(
+            repository, new_branch="a" * 100, base_branch="base-branch"
+        )
+
+        assert result == "a" * 98 + "-1"
+
+    def test_try_to_make_branch__unknown_error(self, user_factory, task_factory):
+        repository = MagicMock()
+        resp = MagicMock(status_code=422, msg="Test message")
+        repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
+        branch = MagicMock()
+        branch.latest_sha.return_value = "1234abc"
+        repository.branch.return_value = branch
+        with pytest.raises(UnprocessableEntity):
+            try_to_make_branch(
+                repository, new_branch="new-branch", base_branch="base-branch"
+            )

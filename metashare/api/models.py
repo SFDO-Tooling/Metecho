@@ -2,6 +2,9 @@ import requests
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
+from cumulusci.core.config import OrgConfig
+from cumulusci.oauth.salesforce import jwt_session
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
@@ -152,7 +155,7 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = StringField(unique=True)
     repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
@@ -187,7 +190,7 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    name = models.CharField(max_length=50)
+    name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.SlugField(max_length=100, null=True, blank=True)
 
@@ -221,7 +224,7 @@ class TaskSlug(AbstractSlug):
 
 
 class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
-    name = models.CharField(max_length=50)
+    name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     assignee = models.ForeignKey(
@@ -274,7 +277,6 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_capturing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
-    login_url = models.URLField(null=True, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
 
     def subscribable_by(self, user):  # pragma: nocover
@@ -288,6 +290,23 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             self.queue_provision()
 
         return ret
+
+    def get_refreshed_org_config(self):
+        org_config = OrgConfig(self.config, "dev")
+        info = jwt_session(
+            settings.SF_CLIENT_ID,
+            settings.SF_CLIENT_KEY,
+            org_config.username,
+            org_config.instance_url,
+        )
+        org_config.config.update(info)
+        org_config._load_userinfo()
+        org_config._load_orginfo()
+        return org_config
+
+    def get_login_url(self):
+        org_config = self.get_refreshed_org_config()
+        return org_config.start_url
 
     def notify_changed(self):
         from .serializers import ScratchOrgSerializer

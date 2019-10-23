@@ -29,9 +29,7 @@ def build_package_xml(scratch_org, package_xml_path, desired_changes):
 
 def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     repo_url = scratch_org.task.project.repository.repo_url
-    org_config = refresh_access_token(
-        config=scratch_org.config, org_name="dev", login_url=scratch_org.login_url
-    )
+    org_config = refresh_access_token(config=scratch_org.config, org_name="dev")
     owner, repo = extract_owner_and_repo(repo_url)
     gh = gh_given_user(user)
     repository = gh.repository(owner, repo)
@@ -48,7 +46,12 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     package_xml_path = os.path.join(project_path, "src", "package.xml")
     build_package_xml(scratch_org, package_xml_path, desired_changes)
     task_config = TaskConfig(
-        {"options": {"path": project_path, "package_xml": package_xml_path}}
+        {
+            "options": {
+                "path": os.path.join(project_path, "src"),
+                "package_xml": package_xml_path,
+            }
+        }
     )
     task = RetrieveUnpackaged(cci.project_config, task_config, org_config)
     task()
@@ -58,8 +61,9 @@ def commit_changes_to_github(
     *, user, scratch_org, repo_url, branch, desired_changes, commit_message
 ):
     with local_github_checkout(user, repo_url) as project_path:
-        # This won't return anything in-memory, but rather it will emit files which we
-        # then copy into a source checkout, and then commit and push all that.
+        # This won't return anything in-memory, but rather it will emit
+        # files which we then copy into a source checkout, and then
+        # commit and push all that.
         run_retrieve_task(user, scratch_org, project_path, desired_changes)
         repo = get_repo_info(user, repo_url)
         author = {"name": user.username, "email": user.email}
@@ -68,11 +72,9 @@ def commit_changes_to_github(
         )
 
 
-def get_salesforce_connection(*, config, login_url, base_url=""):
+def get_salesforce_connection(*, config, base_url=""):
     org_name = "dev"
-    org_config = refresh_access_token(
-        config=config, org_name=org_name, login_url=login_url
-    )
+    org_config = refresh_access_token(config=config, org_name=org_name)
 
     conn = simple_salesforce.Salesforce(
         instance_url=org_config.instance_url,
@@ -88,9 +90,7 @@ def get_salesforce_connection(*, config, login_url, base_url=""):
 
 
 def get_latest_revision_numbers(scratch_org):
-    conn = get_salesforce_connection(
-        config=scratch_org.config, login_url=scratch_org.login_url, base_url="tooling/"
-    )
+    conn = get_salesforce_connection(config=scratch_org.config, base_url="tooling/")
 
     # Store the results here on the org, and if any of these are > number than earlier
     # version, there are changes.

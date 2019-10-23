@@ -5,7 +5,6 @@ from asgiref.sync import async_to_sync
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django_rq import job
-from github3.exceptions import UnprocessableEntity
 
 from . import sf_org_changes as sf_changes
 from . import sf_run_flow as sf_flow
@@ -14,28 +13,11 @@ from .gh import (
     get_cumulus_prefix,
     gh_given_user,
     local_github_checkout,
+    try_to_make_branch,
 )
 from .push import report_scratch_org_error
 
 logger = logging.getLogger(__name__)
-
-
-def _try_to_make_branch(repository, *, new_branch, base_branch):
-    branch_name = new_branch
-    counter = 0
-    max_length = 100  # From models::Project.branch_name
-    while True:
-        suffix = f"-{counter}" if counter else ""
-        branch_name = f"{new_branch[:max_length-len(suffix)]}{suffix}"
-        try:
-            latest_sha = repository.branch(base_branch).latest_sha()
-            repository.create_branch_ref(branch_name, latest_sha)
-            return branch_name
-        except UnprocessableEntity as err:
-            if err.msg == "Reference already exists":
-                counter += 1
-            else:
-                raise
 
 
 def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
@@ -60,7 +42,7 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
             repo_commit=repository.branch(repository.default_branch).latest_sha(),
         )
         project_branch_name = f"{prefix}{slugify(project.name)}"
-        project_branch_name = _try_to_make_branch(
+        project_branch_name = try_to_make_branch(
             repository,
             new_branch=project_branch_name,
             base_branch=repository.default_branch,
@@ -73,7 +55,7 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
     if task.branch_name:
         task_branch_name = task.branch_name
     else:
-        task_branch_name = _try_to_make_branch(
+        task_branch_name = try_to_make_branch(
             repository,
             new_branch=f"{project_branch_name}__{slugify(task.name)}",
             base_branch=project_branch_name,
@@ -95,7 +77,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     commit = repository.branch(repo_branch).commit
 
     owner, repo = extract_owner_and_repo(repo_url)
-    org_config, login_url = sf_flow.create_org_and_run_flow(
+    org_config = sf_flow.create_org_and_run_flow(
         repo_owner=owner,
         repo_name=repo,
         repo_branch=repo_branch,
@@ -111,7 +93,6 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = org_config.config
-    scratch_org.login_url = login_url
     scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
         scratch_org
     )
@@ -160,7 +141,6 @@ def get_unsaved_changes(scratch_org):
         )
         scratch_org.refresh_from_db()
         scratch_org.unsaved_changes = unsaved_changes
-        scratch_org.latest_revision_numbers = new_revision_numbers
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.finalize_get_unsaved_changes(e)
@@ -199,8 +179,27 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         scratch_org.latest_commit = commit.sha
         scratch_org.latest_commit_url = commit.html_url
         scratch_org.latest_commit_at = commit.commit.author.get("date", None)
-        scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
-            scratch_org
+
+        # Update scratch_org.latest_revision_numbers with appropriate
+        # numbers for the values in desired_changes.
+        latest_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
+        for member_type in desired_changes.keys():
+            for member_name in desired_changes[member_type]:
+                try:
+                    member_type_dict = scratch_org.latest_revision_numbers[member_type]
+                except KeyError:
+                    member_type_dict = scratch_org.latest_revision_numbers[
+                        member_type
+                    ] = {}
+
+                # Mutate the scratch_org.latest_revision_numbers dict in-place:
+                member_type_dict[member_name] = latest_revision_numbers[member_type][
+                    member_name
+                ]
+
+        # Finally, update scratch_org.unsaved_changes
+        scratch_org.unsaved_changes = sf_changes.compare_revisions(
+            scratch_org.latest_revision_numbers, latest_revision_numbers
         )
     except Exception as e:
         scratch_org.refresh_from_db()
