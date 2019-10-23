@@ -82,7 +82,7 @@ def test_create_org_and_run_flow():
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.sf_changes"))
         sf_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_flow"))
-        sf_flow.create_org_and_run_flow.return_value = (MagicMock(), MagicMock())
+        sf_flow.create_org_and_run_flow.return_value = MagicMock()
         stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
@@ -97,7 +97,9 @@ def test_create_org_and_run_flow():
 
 @pytest.mark.django_db
 def test_get_unsaved_changes(scratch_org_factory):
-    scratch_org = scratch_org_factory(latest_revision_numbers={"TypeOne:NameOne": 10})
+    scratch_org = scratch_org_factory(
+        latest_revision_numbers={"TypeOne": {"NameOne": 10}}
+    )
 
     with patch(
         f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers"
@@ -110,11 +112,11 @@ def test_get_unsaved_changes(scratch_org_factory):
         get_unsaved_changes(scratch_org=scratch_org)
         scratch_org.refresh_from_db()
 
-        assert scratch_org.unsaved_changes
-        assert scratch_org.latest_revision_numbers == {
-            "TypeOne": {"NameOne": 13},
-            "TypeTwo": {"NameTwo": 10},
+        assert scratch_org.unsaved_changes == {
+            "TypeOne": ["NameOne"],
+            "TypeTwo": ["NameTwo"],
         }
+        assert scratch_org.latest_revision_numbers == {"TypeOne": {"NameOne": 10}}
 
 
 def test_create_branches_on_github_then_create_scratch_org():
@@ -180,7 +182,11 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
         )
-        get_latest_revision_numbers.return_value = {}
+        get_latest_revision_numbers.return_value = {
+            "name": {"member": 1, "member2": 1},
+            "name1": {"member": 1, "member2": 1},
+        }
+
         gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         commit = MagicMock(
             sha="12345",
@@ -195,9 +201,11 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
 
         desired_changes = {"name": ["member"]}
         commit_message = "test message"
+        assert scratch_org.latest_revision_numbers == {}
         commit_changes_from_org(scratch_org, user, desired_changes, commit_message)
 
         assert commit_changes_to_github.called
+        assert scratch_org.latest_revision_numbers == {"name": {"member": 1}}
 
 
 # TODO: this should be bundled with each function, not all error-handling together.

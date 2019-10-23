@@ -17,33 +17,16 @@
   display: grid;
   height: 100%;
 
+  .slds-accordion__section {
+    padding: $spacing-x-small;
+  }
+
   .slds-accordion__summary {
     @include icon-checkbox-layout;
   }
 
-  // using slds class since we can't access inner checkbox + label markup
-  .slds-checkbox__label {
-    &:hover {
-      .slds-form-element__label {
-        color: $brand-text-link-active;
-      }
-
-      .slds-checkbox_faux,
-      .slds-checkbox--faux {
-        border-color: $brand-text-link-active;
-      }
-    }
-  }
-
-  // adding input focus since keyboard nav doesn't focus on spans
-  [type='checkbox'] {
-    &:focus {
-      + .slds-checkbox__label {
-        .slds-form-element__label {
-          color: $brand-text-link-active;
-        }
-      }
-    }
+  .slds-is-open > .slds-accordion__summary {
+    margin-bottom: $spacing-x-small;
   }
 }
 

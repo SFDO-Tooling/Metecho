@@ -145,25 +145,19 @@ const OrgCard = ({
     );
     footer = loadingMsg;
   } else if (org) {
-    const latestCommitAt =
-      org.latest_commit_at && new Date(org.latest_commit_at);
+    const orgUrl = window.api_urls.scratch_org_redirect(org.id);
     const expiresAt = org.expires_at && new Date(org.expires_at);
     contents = (
       <ul>
-        {latestCommitAt && (
+        {org.latest_commit && (
           <li>
-            <strong>{i18n.t('Latest Commit')}:</strong>{' '}
-            <span title={format(latestCommitAt, 'PPpp')}>
-              {formatDistanceToNow(latestCommitAt, { addSuffix: true })}
-            </span>
-            {org.latest_commit && org.latest_commit_url && (
-              <>
-                {' ('}
-                <ExternalLink url={org.latest_commit_url}>
-                  {org.latest_commit.substring(0, 7)}
-                </ExternalLink>
-                {')'}
-              </>
+            <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
+            {org.latest_commit_url ? (
+              <ExternalLink url={org.latest_commit_url}>
+                {org.latest_commit.substring(0, 7)}
+              </ExternalLink>
+            ) : (
+              org.latest_commit.substring(0, 7)
             )}
           </li>
         )}
@@ -227,16 +221,16 @@ const OrgCard = ({
       } else {
         /* istanbul ignore else */
         // eslint-disable-next-line no-lonely-if
-        if (org.url) {
+        if (orgUrl) {
           footer = (
-            <ExternalLink url={org.url}>{i18n.t('View Org')}</ExternalLink>
+            <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>
           );
         }
       }
       /* istanbul ignore else */
-      if (org.url) {
+      if (orgUrl) {
         icon = (
-          <ExternalLink url={org.url} title={i18n.t('View Org')}>
+          <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
             <Icon
               category="utility"
               name="link"

@@ -77,7 +77,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     commit = repository.branch(repo_branch).commit
 
     owner, repo = extract_owner_and_repo(repo_url)
-    org_config, login_url = sf_flow.create_org_and_run_flow(
+    org_config = sf_flow.create_org_and_run_flow(
         repo_owner=owner,
         repo_name=repo,
         repo_branch=repo_branch,
@@ -93,7 +93,6 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = org_config.config
-    scratch_org.login_url = login_url
     scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
         scratch_org
     )
@@ -142,7 +141,6 @@ def get_unsaved_changes(scratch_org):
         )
         scratch_org.refresh_from_db()
         scratch_org.unsaved_changes = unsaved_changes
-        scratch_org.latest_revision_numbers = new_revision_numbers
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.finalize_get_unsaved_changes(e)
@@ -181,8 +179,27 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         scratch_org.latest_commit = commit.sha
         scratch_org.latest_commit_url = commit.html_url
         scratch_org.latest_commit_at = commit.commit.author.get("date", None)
-        scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
-            scratch_org
+
+        # Update scratch_org.latest_revision_numbers with appropriate
+        # numbers for the values in desired_changes.
+        latest_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
+        for member_type in desired_changes.keys():
+            for member_name in desired_changes[member_type]:
+                try:
+                    member_type_dict = scratch_org.latest_revision_numbers[member_type]
+                except KeyError:
+                    member_type_dict = scratch_org.latest_revision_numbers[
+                        member_type
+                    ] = {}
+
+                # Mutate the scratch_org.latest_revision_numbers dict in-place:
+                member_type_dict[member_name] = latest_revision_numbers[member_type][
+                    member_name
+                ]
+
+        # Finally, update scratch_org.unsaved_changes
+        scratch_org.unsaved_changes = sf_changes.compare_revisions(
+            scratch_org.latest_revision_numbers, latest_revision_numbers
         )
     except Exception as e:
         scratch_org.refresh_from_db()

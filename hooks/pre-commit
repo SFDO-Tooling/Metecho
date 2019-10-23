@@ -1,8 +1,41 @@
-#!/bin/bash
+#!/bin/bash -e
 
-function dcr {
-  docker-compose run --rm --no-deps $@
+# Remember, this runs on the host, so even if the container is alpine or slim
+# and may not have bash, we can assume and use bash features here.
+
+SERVICE_NAME=web
+STARTED_BACKGROUND_CONTAINER=0
+
+function is_running {
+    RUNNING=`docker-compose top $SERVICE_NAME` 
+    if [[ -n "$RUNNING" ]]; then
+        echo "running"
+    else
+        echo "not-running"
+    fi
 }
+
+function dce {
+    RUNNING=`is_running`
+    case "$RUNNING" in
+        "running")
+            docker-compose exec -T web $@
+            ;;
+        "not-running")
+            echo "Something went wrong; are you sure the container is running?"
+            return 1
+            ;;
+    esac
+}
+
+function clean_up {
+    if [[ $STARTED_BACKGROUND_CONTAINER -eq 1 ]]; then
+        echo "Stopping container in background..."
+        docker-compose down
+    fi
+}
+
+trap clean_up EXIT
 
 STAGED_FILES=$(git diff --name-only --cached --diff-filter=d)
 
@@ -39,20 +72,34 @@ do
     esac
 done
 
-if [ ${#JS[@]} -ne 0 ]; then
-    dcr web ./node_modules/.bin/prettier --write ${JS[@]}
-    dcr web ./node_modules/.bin/eslint --fix ${JS[@]}
+if [[ ${#JS[@]} -ne 0 || ${#SCSS[@]} -ne 0 || ${#PY[@]} -ne 0 ]]; then
+    RUNNING=`is_running`
+    case "$RUNNING" in
+        "running")
+            echo "Container running, using it in background..."
+            ;;
+        "not-running")
+            echo "Starting container in background..."
+            docker-compose up -d $SERVICE_NAME
+            STARTED_BACKGROUND_CONTAINER=1
+            ;;
+    esac
+fi
+
+if [[ ${#JS[@]} -ne 0 ]]; then
+    dce ./node_modules/.bin/prettier --write ${JS[@]}
+    dce ./node_modules/.bin/eslint --fix ${JS[@]}
     git add ${JS[@]}
 fi
 
-if [ ${#SCSS[@]} -ne 0 ]; then
-    dcr web ./node_modules/.bin/stylelint --fix ${SCSS[@]}
+if [[ ${#SCSS[@]} -ne 0 ]]; then
+    dce ./node_modules/.bin/stylelint --fix ${SCSS[@]}
     git add ${SCSS[@]}
 fi
 
-if [ ${#PY[@]} -ne 0 ]; then
-    dcr web isort ${PY[@]}
-    dcr web black ${PY[@]}
-    dcr web flake8 ${PY[@]}
+if [[ ${#PY[@]} -ne 0 ]]; then
+    dce isort ${PY[@]}
+    dce black ${PY[@]}
+    dce flake8 ${PY[@]}
     git add ${PY[@]}
 fi
