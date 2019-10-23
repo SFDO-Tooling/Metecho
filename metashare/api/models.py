@@ -164,8 +164,8 @@ class Repository(
     SlugMixin,
     models.Model,
 ):
-    repo_owner = StringField()
-    repo_name = StringField()
+    repo_owner = StringField(null=True, blank=True)
+    repo_name = StringField(null=True, blank=True)
     name = StringField(unique=True)
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
@@ -186,7 +186,7 @@ class GitHubRepository(mixins.HashIdMixin, models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
-    repo_id = models.IntegerField(unique=True)
+    repo_id = models.IntegerField(null=True, unique=True)
     repo_url = models.URLField()
 
     class Meta:
