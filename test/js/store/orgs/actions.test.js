@@ -31,7 +31,9 @@ describe('provisionOrg', () => {
         'Successfully created Dev org for task “My Task”.',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
-      expect(allActions[0].payload.linkUrl).toEqual(org.url);
+      expect(allActions[0].payload.linkUrl).toEqual(
+        window.api_urls.scratch_org_redirect(org.id),
+      );
       expect(allActions[1]).toEqual(orgAction);
     });
 

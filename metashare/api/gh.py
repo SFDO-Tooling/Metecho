@@ -18,11 +18,15 @@ from django.core.exceptions import (
     ValidationError,
 )
 from github3 import login
+from github3.exceptions import UnprocessableEntity
 from purl import URL
 
 from .custom_cci_configs import GlobalConfig
 
 logger = logging.getLogger(__name__)
+
+
+ZIP_FILE_NAME = "archive.zip"
 
 
 class UnsafeZipfileError(Exception):
@@ -109,9 +113,8 @@ def normalize_owner_and_repo_name(repo):
 
 
 def get_zip_file(repo, commit_ish):
-    zip_file_name = "archive.zip"
-    repo.archive("zipball", path=zip_file_name, ref=commit_ish)
-    return zipfile.ZipFile(zip_file_name)
+    repo.archive("zipball", path=ZIP_FILE_NAME, ref=commit_ish)
+    return zipfile.ZipFile(ZIP_FILE_NAME)
 
 
 def log_unsafe_zipfile_error(owner, repo_name, commit_ish):
@@ -136,6 +139,7 @@ def extract_zip_file(zip_file, owner, repo_name):
     for path in itertools.chain(glob("zipball_root/*"), glob("zipball_root/.*")):
         shutil.move(path, ".")
     shutil.rmtree("zipball_root")
+    os.remove(ZIP_FILE_NAME)
 
 
 @contextlib.contextmanager
@@ -165,3 +169,21 @@ def get_cumulus_prefix(**kwargs):
     global_config = GlobalConfig()
     project_config = global_config.get_project_config(**kwargs)
     return project_config.project__git__prefix_feature
+
+
+def try_to_make_branch(repository, *, new_branch, base_branch):
+    branch_name = new_branch
+    counter = 0
+    max_length = 100  # From models::Project.branch_name
+    while True:
+        suffix = f"-{counter}" if counter else ""
+        branch_name = f"{new_branch[:max_length-len(suffix)]}{suffix}"
+        try:
+            latest_sha = repository.branch(base_branch).latest_sha()
+            repository.create_branch_ref(branch_name, latest_sha)
+            return branch_name
+        except UnprocessableEntity as err:
+            if err.msg == "Reference already exists":
+                counter += 1
+            else:
+                raise

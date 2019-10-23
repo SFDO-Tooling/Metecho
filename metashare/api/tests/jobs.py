@@ -3,13 +3,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
-from github3.exceptions import UnprocessableEntity
 from simple_salesforce.exceptions import SalesforceGeneralError
 
 from ..jobs import (
     _create_branches_on_github,
     _create_org_and_run_flow,
-    _try_to_make_branch,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
     delete_scratch_org,
@@ -79,52 +77,12 @@ class TestCreateBranchesOnGitHub:
 
             assert not repository.create_branch_ref.called
 
-    def test_try_to_make_branch__duplicate_name(self, user_factory, task_factory):
-        repository = MagicMock()
-        resp = MagicMock(status_code=422)
-        resp.json.return_value = {"message": "Reference already exists"}
-        repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
-        result = _try_to_make_branch(
-            repository, new_branch="new-branch", base_branch="base-branch"
-        )
-
-        assert result == "new-branch-1"
-
-    def test_try_to_make_branch__long_duplicate_name(self, user_factory, task_factory):
-        repository = MagicMock()
-        resp = MagicMock(status_code=422)
-        resp.json.return_value = {"message": "Reference already exists"}
-        repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
-        result = _try_to_make_branch(
-            repository, new_branch="a" * 100, base_branch="base-branch"
-        )
-
-        assert result == "a" * 98 + "-1"
-
-    def test_try_to_make_branch__unknown_error(self, user_factory, task_factory):
-        repository = MagicMock()
-        resp = MagicMock(status_code=422, msg="Test message")
-        repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
-        with pytest.raises(UnprocessableEntity):
-            _try_to_make_branch(
-                repository, new_branch="new-branch", base_branch="base-branch"
-            )
-
 
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.sf_changes"))
         sf_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_flow"))
-        sf_flow.create_org_and_run_flow.return_value = (MagicMock(), MagicMock())
+        sf_flow.create_org_and_run_flow.return_value = MagicMock()
         stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
@@ -139,7 +97,9 @@ def test_create_org_and_run_flow():
 
 @pytest.mark.django_db
 def test_get_unsaved_changes(scratch_org_factory):
-    scratch_org = scratch_org_factory(latest_revision_numbers={"TypeOne:NameOne": 10})
+    scratch_org = scratch_org_factory(
+        latest_revision_numbers={"TypeOne": {"NameOne": 10}}
+    )
 
     with patch(
         f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers"
@@ -152,11 +112,11 @@ def test_get_unsaved_changes(scratch_org_factory):
         get_unsaved_changes(scratch_org=scratch_org)
         scratch_org.refresh_from_db()
 
-        assert scratch_org.unsaved_changes
-        assert scratch_org.latest_revision_numbers == {
-            "TypeOne": {"NameOne": 13},
-            "TypeTwo": {"NameTwo": 10},
+        assert scratch_org.unsaved_changes == {
+            "TypeOne": ["NameOne"],
+            "TypeTwo": ["NameTwo"],
         }
+        assert scratch_org.latest_revision_numbers == {"TypeOne": {"NameOne": 10}}
 
 
 def test_create_branches_on_github_then_create_scratch_org():
@@ -222,7 +182,11 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
         )
-        get_latest_revision_numbers.return_value = {}
+        get_latest_revision_numbers.return_value = {
+            "name": {"member": 1, "member2": 1},
+            "name1": {"member": 1, "member2": 1},
+        }
+
         gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         commit = MagicMock(
             sha="12345",
@@ -237,9 +201,11 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
 
         desired_changes = {"name": ["member"]}
         commit_message = "test message"
+        assert scratch_org.latest_revision_numbers == {}
         commit_changes_from_org(scratch_org, user, desired_changes, commit_message)
 
         assert commit_changes_to_github.called
+        assert scratch_org.latest_revision_numbers == {"name": {"member": 1}}
 
 
 # TODO: this should be bundled with each function, not all error-handling together.
