@@ -92,6 +92,7 @@ def test_extract_zip_file():
     zip_file = MagicMock()
     with ExitStack() as stack:
         shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
+        os = stack.enter_context(patch(f"{PATCH_ROOT}.os"))
         glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
 
         glob.return_value = ["owner-repo_name-"]
@@ -99,6 +100,7 @@ def test_extract_zip_file():
         assert zip_file.extractall.called
         assert shutil.move.called
         assert shutil.rmtree.called
+        assert os.remove.called
 
 
 class TestLocalGitHubCheckout:
@@ -107,6 +109,7 @@ class TestLocalGitHubCheckout:
         repo = 123
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.zipfile"))
+            os = stack.enter_context(patch(f"{PATCH_ROOT}.os"))
             gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
@@ -118,6 +121,7 @@ class TestLocalGitHubCheckout:
 
             with local_github_checkout(user, repo):
                 assert shutil.rmtree.called
+                assert os.remove.called
 
     def test_unsafe(self):
         user = MagicMock()

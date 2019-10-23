@@ -20,6 +20,9 @@ from .custom_cci_configs import GlobalConfig
 logger = logging.getLogger(__name__)
 
 
+ZIP_FILE_NAME = "archive.zip"
+
+
 class UnsafeZipfileError(Exception):
     pass
 
@@ -62,9 +65,8 @@ def get_repo_info(user, repo_id=None, repo_owner=None, repo_name=None):
 
 
 def get_zip_file(repo, commit_ish):
-    zip_file_name = "archive.zip"
-    repo.archive("zipball", path=zip_file_name, ref=commit_ish)
-    return zipfile.ZipFile(zip_file_name)
+    repo.archive("zipball", path=ZIP_FILE_NAME, ref=commit_ish)
+    return zipfile.ZipFile(ZIP_FILE_NAME)
 
 
 def log_unsafe_zipfile_error(repo_url, commit_ish):
@@ -89,6 +91,7 @@ def extract_zip_file(zip_file, owner, repo_name):
     for path in itertools.chain(glob("zipball_root/*"), glob("zipball_root/.*")):
         shutil.move(path, ".")
     shutil.rmtree("zipball_root")
+    os.remove(ZIP_FILE_NAME)
 
 
 @contextlib.contextmanager

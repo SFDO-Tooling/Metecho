@@ -35,7 +35,7 @@ services:
     environment:
       - POSTGRES_USER=metashare
     volumes:
-      - ./postgres:/var/lib/postgresql/data:cached
+      - ./postgres:/var/lib/postgresql/data:delegated
 
   # Runs the queue process:
   redis:
@@ -47,5 +47,5 @@ services:
       context: .
       dockerfile: ./compose/githooks/Dockerfile
     volumes:
-      - ./.git:/tmp/.git:cached
-      - ./hooks:/tmp/hooks:cached
+      - ./.git:/tmp/.git
+      - ./hooks:/tmp/hooks

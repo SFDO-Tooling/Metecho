@@ -47,7 +47,12 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
     user = user_factory()
     scratch_org = scratch_org_factory()
     with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+        local_github_checkout = stack.enter_context(
+            patch(f"{PATCH_ROOT}.local_github_checkout")
+        )
+        local_github_checkout.return_value = MagicMock(
+            __enter__=MagicMock(return_value=".")
+        )
         stack.enter_context(patch(f"{PATCH_ROOT}.run_retrieve_task"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         CommitDir = stack.enter_context(patch(f"{PATCH_ROOT}.CommitDir"))

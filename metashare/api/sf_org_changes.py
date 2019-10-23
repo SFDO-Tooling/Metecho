@@ -39,7 +39,12 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     package_xml_path = os.path.join(project_path, "src", "package.xml")
     build_package_xml(scratch_org, package_xml_path, desired_changes)
     task_config = TaskConfig(
-        {"options": {"path": project_path, "package_xml": package_xml_path}}
+        {
+            "options": {
+                "path": os.path.join(project_path, "src"),
+                "package_xml": package_xml_path,
+            }
+        }
     )
     task = RetrieveUnpackaged(cci.project_config, task_config, org_config)
     task()
@@ -49,8 +54,9 @@ def commit_changes_to_github(
     *, user, scratch_org, repo_id, branch, desired_changes, commit_message
 ):
     with local_github_checkout(user, repo_id) as project_path:
-        # This won't return anything in-memory, but rather it will emit files which we
-        # then copy into a source checkout, and then commit and push all that.
+        # This won't return anything in-memory, but rather it will emit
+        # files which we then copy into a source checkout, and then
+        # commit and push all that.
         run_retrieve_task(user, scratch_org, project_path, desired_changes)
         repo = get_repo_info(user, repo_id=repo_id)
         author = {"name": user.username, "email": user.email}
