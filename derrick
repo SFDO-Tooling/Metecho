@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 function dcr {
   docker-compose run --rm web $@
@@ -86,7 +86,8 @@ case "$1" in
         # See https://docs.docker.com/config/pruning/ for more detail.
         docker system prune -f --volumes
         ;;
-    "*" | "help")
+    *)
         echo "Sorry, I don't know that command."
+        exit 1
         ;;
 esac
