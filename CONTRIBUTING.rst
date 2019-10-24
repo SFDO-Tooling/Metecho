@@ -177,10 +177,6 @@ Docker container, omit any ``docker-compose run --rm web...`` prefix, e.g.::
 After running ``yarn serve``, view the running app at
 `<http://localhost:8080/>`_ in your browser.
 
-To view logs from other Docker containers (e.g. redis or postgres), run the
-"Docker Containers: View Logs" command from the VS Code Command Palette and
-select the desired container.
-
 For more detailed instructions and options, see the `VS Code documentation`_.
 
 .. _VS Code: https://code.visualstudio.com/

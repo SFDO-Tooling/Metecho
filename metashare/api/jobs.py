@@ -20,7 +20,7 @@ from .push import report_scratch_org_error
 logger = logging.getLogger(__name__)
 
 
-def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
+def _create_branches_on_github(*, user, repo_url, project, task):
     """
     Expects to be called in the context of a local github checkout.
     """
@@ -33,14 +33,15 @@ def _create_branches_on_github(*, user, repo_url, project, task, repo_root):
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
-        prefix = get_cumulus_prefix(
-            repo_root=repo_root,
-            repo_name=repository.name,
-            repo_url=repo_url,
-            repo_owner=owner,
-            repo_branch=repository.default_branch,
-            repo_commit=repository.branch(repository.default_branch).latest_sha(),
-        )
+        with local_github_checkout(user, repo_url) as repo_root:
+            prefix = get_cumulus_prefix(
+                repo_root=repo_root,
+                repo_name=repository.name,
+                repo_url=repo_url,
+                repo_owner=owner,
+                repo_branch=repository.default_branch,
+                repo_commit=repository.branch(repository.default_branch).latest_sha(),
+            )
         project_branch_name = f"{prefix}{slugify(project.name)}"
         project_branch_name = try_to_make_branch(
             repository,
@@ -102,14 +103,10 @@ def create_branches_on_github_then_create_scratch_org(
     *, project, repo_url, scratch_org, task, user
 ):
     try:
-        with local_github_checkout(user, repo_url) as repo_root:
-            commit_ish = _create_branches_on_github(
-                user=user,
-                repo_url=repo_url,
-                project=project,
-                task=task,
-                repo_root=repo_root,
-            )
+        commit_ish = _create_branches_on_github(
+            user=user, repo_url=repo_url, project=project, task=task
+        )
+        with local_github_checkout(user, repo_url, commit_ish) as repo_root:
             _create_org_and_run_flow(
                 scratch_org,
                 user=user,
