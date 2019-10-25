@@ -26,6 +26,7 @@ class TestCreateBranchesOnGitHub:
         task = task_factory()
         project = task.project
         with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
             global_config = stack.enter_context(patch("metashare.api.gh.GlobalConfig"))
             global_config_instance = MagicMock()
             global_config.return_value = global_config_instance
@@ -43,7 +44,6 @@ class TestCreateBranchesOnGitHub:
                 repo_url="https://github.com/user/repo-bohemia",
                 project=project,
                 task=task,
-                repo_root="",
             )
 
             assert repository.create_branch_ref.called
@@ -72,7 +72,6 @@ class TestCreateBranchesOnGitHub:
                 repo_url="https://github.com/user/repo-francia",
                 project=project,
                 task=task,
-                repo_root="",
             )
 
             assert not repository.create_branch_ref.called
