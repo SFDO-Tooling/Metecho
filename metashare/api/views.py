@@ -136,9 +136,10 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        # XXX: This method is copied verbatim from
-        # rest_framework.mixins.RetrieveModelMixin, because I needed to
-        # insert the get_unsaved_changes line in the middle.
+        # XXX: This method is adapted from
+        # rest_framework.mixins.RetrieveModelMixin, but one particular
+        # change: we needed to insert the get_unsaved_changes line in
+        # the middle.
         instance = self.get_object()
         conditions = [
             instance.org_type == SCRATCH_ORG_TYPES.Dev,

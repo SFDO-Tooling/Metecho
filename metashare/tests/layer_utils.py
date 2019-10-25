@@ -5,6 +5,9 @@ class MockedConnection:
     async def setnx(self, *args, **kwargs):
         return True
 
+    async def expire(self, *args, **kwargs):
+        pass
+
     async def delete(self, *args, **kwargs):
         pass
 

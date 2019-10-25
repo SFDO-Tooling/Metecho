@@ -15,7 +15,9 @@ def message_to_hash(message):
 async def get_set_message_semaphore(channel_layer, message):
     msg_hash = message_to_hash(message)
     async with channel_layer.connection(0) as connection:
-        return await connection.setnx(msg_hash, 1)
+        ret = await connection.setnx(msg_hash, 1)
+        await connection.expire(msg_hash, 2)
+        return ret
 
 
 async def clear_message_semaphore(channel_layer, message):
