@@ -6,8 +6,6 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 from django_rq import job
 
-from . import sf_org_changes as sf_changes
-from . import sf_run_flow as sf_flow
 from .gh import (
     extract_owner_and_repo,
     get_cumulus_prefix,
@@ -16,6 +14,12 @@ from .gh import (
     try_to_make_branch,
 )
 from .push import report_scratch_org_error
+from .sf_org_changes import (
+    commit_changes_to_github,
+    compare_revisions,
+    get_latest_revision_numbers,
+)
+from .sf_run_flow import create_org, delete_org, run_flow
 
 logger = logging.getLogger(__name__)
 
@@ -78,25 +82,32 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     commit = repository.branch(repo_branch).commit
 
     owner, repo = extract_owner_and_repo(repo_url)
-    org_config = sf_flow.create_org_and_run_flow(
+    scratch_org_config, cci, org_config = create_org(
         repo_owner=owner,
         repo_name=repo,
         repo_branch=repo_branch,
         user=user,
+        project_path=project_path,
+    )
+    scratch_org.refresh_from_db()
+    # Save these values on org creation so that we have what we need to delete the org
+    # later, even if the initial flow run fails.
+    scratch_org.url = scratch_org_config.instance_url
+    scratch_org.expires_at = scratch_org_config.expires
+    scratch_org.latest_commit = commit.sha
+    scratch_org.latest_commit_url = commit.html_url
+    scratch_org.latest_commit_at = commit.commit.author.get("date", None)
+    scratch_org.config = scratch_org_config.config
+    scratch_org.save()
+    run_flow(
+        cci=cci,
+        org_config=org_config,
         flow_name=cases[scratch_org.org_type],
         project_path=project_path,
     )
     scratch_org.refresh_from_db()
-    scratch_org.url = org_config.instance_url
     scratch_org.last_modified_at = now()
-    scratch_org.expires_at = org_config.expires
-    scratch_org.latest_commit = commit.sha
-    scratch_org.latest_commit_url = commit.html_url
-    scratch_org.latest_commit_at = commit.commit.author.get("date", None)
-    scratch_org.config = org_config.config
-    scratch_org.latest_revision_numbers = sf_changes.get_latest_revision_numbers(
-        scratch_org
-    )
+    scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
 
 
 def create_branches_on_github_then_create_scratch_org(
@@ -132,10 +143,8 @@ def get_unsaved_changes(scratch_org):
     try:
         scratch_org.refresh_from_db()
         old_revision_numbers = scratch_org.latest_revision_numbers
-        new_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
-        unsaved_changes = sf_changes.compare_revisions(
-            old_revision_numbers, new_revision_numbers
-        )
+        new_revision_numbers = get_latest_revision_numbers(scratch_org)
+        unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
         scratch_org.refresh_from_db()
         scratch_org.unsaved_changes = unsaved_changes
     except Exception as e:
@@ -156,7 +165,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
     branch = scratch_org.task.branch_name
 
     try:
-        sf_changes.commit_changes_to_github(
+        commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
             repo_url=repo_url,
@@ -179,7 +188,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
 
         # Update scratch_org.latest_revision_numbers with appropriate
         # numbers for the values in desired_changes.
-        latest_revision_numbers = sf_changes.get_latest_revision_numbers(scratch_org)
+        latest_revision_numbers = get_latest_revision_numbers(scratch_org)
         for member_type in desired_changes.keys():
             for member_name in desired_changes[member_type]:
                 try:
@@ -195,7 +204,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
                 ]
 
         # Finally, update scratch_org.unsaved_changes
-        scratch_org.unsaved_changes = sf_changes.compare_revisions(
+        scratch_org.unsaved_changes = compare_revisions(
             scratch_org.latest_revision_numbers, latest_revision_numbers
         )
     except Exception as e:
@@ -213,11 +222,20 @@ commit_changes_from_org_job = job(commit_changes_from_org)
 
 def delete_scratch_org(scratch_org):
     try:
-        sf_flow.delete_scratch_org(scratch_org)
+        delete_org(scratch_org)
         scratch_org.delete()
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.delete_queued_at = None
+        # If the scratch org has no `last_modified_at` or `latest_revision_numbers`, it
+        # was being deleted after an unsuccessful initial flow run. In that case, fill
+        # in those values so it's not in an in-between state.
+        if not scratch_org.last_modified_at:
+            scratch_org.last_modified_at = now()
+        if not scratch_org.latest_revision_numbers:
+            scratch_org.latest_revision_numbers = get_latest_revision_numbers(
+                scratch_org
+            )
         scratch_org.save()
         async_to_sync(report_scratch_org_error)(
             scratch_org, e, "SCRATCH_ORG_DELETE_FAILED"

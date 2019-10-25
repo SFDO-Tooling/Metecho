@@ -61,15 +61,7 @@ describe('provisionOrg', () => {
 });
 
 describe('provisionFailed', () => {
-  beforeEach(() => {
-    window.socket = { unsubscribe: jest.fn() };
-  });
-
-  afterEach(() => {
-    Reflect.deleteProperty(window, 'socket');
-  });
-
-  test('unsubscribes from socket and returns action', () => {
+  test('returns action', () => {
     const store = storeWithThunk({});
     const org = { id: 'org-id' };
     const action = { type: 'SCRATCH_ORG_PROVISION_FAILED', payload: org };
@@ -78,10 +70,6 @@ describe('provisionFailed', () => {
     );
 
     expect(store.getActions()).toEqual([action]);
-    expect(window.socket.unsubscribe).toHaveBeenCalledWith({
-      model: 'scratch_org',
-      id: 'org-id',
-    });
   });
 
   describe('owned by current user', () => {
