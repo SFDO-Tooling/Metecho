@@ -47,7 +47,7 @@
     "@salesforce/design-system-react": "0.10.11",
     "@sentry/browser": "^5.7.1",
     "classnames": "^2.2.6",
-    "date-fns": "^2.5.0",
+    "date-fns": "^2.6.0",
     "i18next": "^17.2.0",
     "i18next-browser-languagedetector": "^4.0.0",
     "i18next-xhr-backend": "^3.2.0",
