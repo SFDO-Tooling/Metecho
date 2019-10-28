@@ -90,8 +90,8 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
         project_path=project_path,
     )
     scratch_org.refresh_from_db()
-    # Save these values on org creation so that we have what we need to delete the org
-    # later, even if the initial flow run fails.
+    # Save these values on org creation so that we have what we need to
+    # delete the org later, even if the initial flow run fails.
     scratch_org.url = scratch_org_config.instance_url
     scratch_org.expires_at = scratch_org_config.expires
     scratch_org.latest_commit = commit.sha
@@ -198,7 +198,8 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
                         member_type
                     ] = {}
 
-                # Mutate the scratch_org.latest_revision_numbers dict in-place:
+                # Mutate the scratch_org.latest_revision_numbers dict
+                # in-place:
                 member_type_dict[member_name] = latest_revision_numbers[member_type][
                     member_name
                 ]
@@ -227,9 +228,10 @@ def delete_scratch_org(scratch_org):
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.delete_queued_at = None
-        # If the scratch org has no `last_modified_at` or `latest_revision_numbers`, it
-        # was being deleted after an unsuccessful initial flow run. In that case, fill
-        # in those values so it's not in an in-between state.
+        # If the scratch org has no `last_modified_at` or
+        # `latest_revision_numbers`, it was being deleted after an
+        # unsuccessful initial flow run. In that case, fill in those
+        # values so it's not in an in-between state.
         if not scratch_org.last_modified_at:
             scratch_org.last_modified_at = now()
         if not scratch_org.latest_revision_numbers:

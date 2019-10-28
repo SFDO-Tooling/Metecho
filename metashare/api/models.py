@@ -318,10 +318,11 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     def queue_delete(self):
         from .jobs import delete_scratch_org_job
 
-        # If the scratch org has no `last_modified_at`, it did not successfully complete
-        # the initial flow run on Salesforce, and therefore we don't need to notify of
-        # its destruction; this should only happen when it is destroyed during the
-        # initial flow run.
+        # If the scratch org has no `last_modified_at`, it did not
+        # successfully complete the initial flow run on Salesforce, and
+        # therefore we don't need to notify of its destruction; this
+        # should only happen when it is destroyed during the initial
+        # flow run.
         if self.last_modified_at:
             self.delete_queued_at = timezone.now()
             self.save()
@@ -338,10 +339,11 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         async_to_sync(push.push_message_about_instance)(self, message)
 
     def delete(self, *args, **kwargs):
-        # If the scratch org has no `last_modified_at`, it did not successfully complete
-        # the initial flow run on Salesforce, and therefore we don't need to notify of
-        # its destruction; this should only happen when it is destroyed during
-        # provisioning or the initial flow run.
+        # If the scratch org has no `last_modified_at`, it did not
+        # successfully complete the initial flow run on Salesforce, and
+        # therefore we don't need to notify of its destruction; this
+        # should only happen when it is destroyed during provisioning or
+        # the initial flow run.
         if self.last_modified_at:
             self.finalize_delete()
         super().delete(*args, **kwargs)
