@@ -8,7 +8,6 @@ from log_request_id import (
     local,
 )
 from log_request_id.middleware import RequestIDMiddleware
-
 from sfdo_template_helpers.addresses import get_remote_ip
 
 logger = logging.getLogger(__name__)
