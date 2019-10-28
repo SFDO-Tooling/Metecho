@@ -43,7 +43,7 @@
     "prod": "webpack --config webpack.prod.js"
   },
   "dependencies": {
-    "@salesforce-ux/design-system": "^2.10.0",
+    "@salesforce-ux/design-system": "^2.10.2",
     "@salesforce/design-system-react": "0.10.11",
     "@sentry/browser": "^5.7.1",
     "classnames": "^2.2.6",
