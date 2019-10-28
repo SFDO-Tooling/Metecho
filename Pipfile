@@ -25,7 +25,7 @@ sphinxcontrib-httpdomain = "==1.7.0"
 [packages]
 sfdo-template-helpers = {editable = true,git = "https://github.com/SFDO-Tooling/sfdo-template-helpers.git",ref = "v0.9.0"}
 Django = "==2.2.6"
-Pillow = "==6.2.0"
+Pillow = "==6.2.1"
 Werkzeug = "==0.16.0"
 bleach = "==3.1.0"
 channels = "==2.3.0"
