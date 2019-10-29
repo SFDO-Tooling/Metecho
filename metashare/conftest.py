@@ -70,7 +70,7 @@ class RepositoryFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence("Repository {}".format)
     repo_owner = "test"
     repo_name = "repo"
-    repo_id = 123
+    repo_id = factory.Sequence(lambda n: n)
 
 
 @register
@@ -79,7 +79,7 @@ class GitHubRepositoryFactory(factory.django.DjangoModelFactory):
         model = GitHubRepository
 
     repo_url = "https://github.com/test/repo.git"
-    repo_id = 123
+    repo_id = factory.Sequence(lambda n: n)
     user = factory.SubFactory(UserFactory)
 
 

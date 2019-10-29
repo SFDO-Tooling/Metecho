@@ -185,7 +185,7 @@ class GitHubRepository(mixins.HashIdMixin, models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
-    repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    repo_id = models.IntegerField(unique=True)
     repo_url = models.URLField()
 
     class Meta:
