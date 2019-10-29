@@ -79,9 +79,10 @@ class TestCreateBranchesOnGitHub:
 
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.sf_changes"))
-        sf_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_flow"))
-        sf_flow.create_org_and_run_flow.return_value = MagicMock()
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_latest_revision_numbers"))
+        create_org = stack.enter_context(patch(f"{PATCH_ROOT}.create_org"))
+        create_org.return_value = (MagicMock(), MagicMock(), MagicMock())
+        run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
         stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
@@ -91,7 +92,8 @@ def test_create_org_and_run_flow():
             project_path="",
         )
 
-        assert sf_flow.create_org_and_run_flow.called
+        assert create_org.called
+        assert run_flow.called
 
 
 @pytest.mark.django_db
@@ -101,7 +103,7 @@ def test_get_unsaved_changes(scratch_org_factory):
     )
 
     with patch(
-        f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers"
+        f"{PATCH_ROOT}.get_latest_revision_numbers"
     ) as get_latest_revision_numbers:
         get_latest_revision_numbers.return_value = {
             "TypeOne": {"NameOne": 13},
@@ -144,7 +146,7 @@ def test_create_branches_on_github_then_create_scratch_org():
 @pytest.mark.django_db
 def test_delete_scratch_org(scratch_org_factory):
     scratch_org = scratch_org_factory()
-    with patch(f"{PATCH_ROOT}.sf_flow.delete_scratch_org") as sf_delete_scratch_org:
+    with patch(f"{PATCH_ROOT}.delete_org") as sf_delete_scratch_org:
         delete_scratch_org(scratch_org)
 
         assert sf_delete_scratch_org.called
@@ -153,7 +155,15 @@ def test_delete_scratch_org(scratch_org_factory):
 @pytest.mark.django_db
 def test_delete_scratch_org__exception(scratch_org_factory):
     scratch_org = scratch_org_factory()
-    with patch(f"{PATCH_ROOT}.sf_flow.delete_scratch_org") as sf_delete_scratch_org:
+    with ExitStack() as stack:
+        get_latest_revision_numbers = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
+        )
+        get_latest_revision_numbers.return_value = {
+            "name": {"member": 1, "member2": 1},
+            "name1": {"member": 1, "member2": 1},
+        }
+        sf_delete_scratch_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
         sf_delete_scratch_org.side_effect = SalesforceGeneralError(
             "https://example.com", 418, "I'M A TEAPOT", [{"error": "Short and stout"}]
         )
@@ -162,6 +172,7 @@ def test_delete_scratch_org__exception(scratch_org_factory):
 
         scratch_org.refresh_from_db()
         assert scratch_org.delete_queued_at is None
+        assert get_latest_revision_numbers.called
 
 
 def test_refresh_github_repositories_for_user(user_factory):
@@ -176,10 +187,10 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
     user = user_factory()
     with ExitStack() as stack:
         commit_changes_to_github = stack.enter_context(
-            patch(f"{PATCH_ROOT}.sf_changes.commit_changes_to_github")
+            patch(f"{PATCH_ROOT}.commit_changes_to_github")
         )
         get_latest_revision_numbers = stack.enter_context(
-            patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
+            patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
         )
         get_latest_revision_numbers.return_value = {
             "name": {"member": 1, "member2": 1},
@@ -245,7 +256,7 @@ class TestErrorHandling:
                 patch("metashare.api.models.async_to_sync")
             )
             get_latest_revision_numbers = stack.enter_context(
-                patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
+                patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
             )
             get_latest_revision_numbers.side_effect = Exception
 
@@ -259,7 +270,7 @@ class TestErrorHandling:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             commit_changes_to_github = stack.enter_context(
-                patch(f"{PATCH_ROOT}.sf_changes.commit_changes_to_github")
+                patch(f"{PATCH_ROOT}.commit_changes_to_github")
             )
             async_to_sync = stack.enter_context(
                 patch("metashare.api.models.async_to_sync")

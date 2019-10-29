@@ -2,12 +2,12 @@
 
 import django.db.models.deletion
 import hashid_field.field
+import sfdo_template_helpers.fields.markdown
+import sfdo_template_helpers.slugs
 from django.conf import settings
 from django.db import migrations, models
 
 import metashare.api.gh
-import sfdo_template_helpers.fields.markdown
-import sfdo_template_helpers.slugs
 
 ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
