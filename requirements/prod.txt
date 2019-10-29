@@ -14,13 +14,13 @@ automat==0.7.0            # via twisted
 bleach==3.1.0
 certifi==2019.9.11        # via cumulusci, requests, sentry-sdk
 cffi==1.12.3              # via cryptography, cumulusci
-channels-redis==2.4.0
-channels==2.3.0
+channels-redis==2.4.1
+channels==2.3.1
 chardet==3.0.4            # via cumulusci, requests
 click==7.0                # via cumulusci, rq
 coloredlogs==10.0         # via cumulusci
 constantly==15.1.0        # via twisted
-cryptography==2.7         # via autobahn, cumulusci, jwcrypto, pyopenssl, requests, secretstorage, service-identity
+cryptography==2.7         # via autobahn, cumulusci, jwcrypto, pyopenssl, requests, service-identity
 cumulusci==3.0.2
 daphne==2.3.0             # via channels
 defusedxml==0.6.0         # via python3-openid
@@ -50,7 +50,6 @@ humanfriendly==4.18       # via coloredlogs, cumulusci
 hyperlink==19.0.0         # via twisted
 idna==2.8                 # via hyperlink, requests
 incremental==17.5.0       # via twisted
-jeepney==0.4.1            # via secretstorage
 jinja2==2.10.3            # via cumulusci
 jwcrypto==0.6.0           # via cumulusci, github3-py, github3.py
 keyring==19.2.0           # via cumulusci
@@ -61,7 +60,7 @@ markupsafe==1.1.1         # via cumulusci, jinja2
 msgpack==0.6.2            # via channels-redis
 newrelic==5.2.1.129
 oauthlib==3.1.0           # via requests-oauthlib
-pillow==6.2.0
+pillow==6.2.1
 psycopg2-binary==2.8.4
 purl==1.5
 pyasn1-modules==0.2.7     # via service-identity
@@ -85,9 +84,8 @@ rq==1.1.0                 # via django-rq
 rst2ansi==0.1.5           # via cumulusci
 salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
-secretstorage==3.1.1      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sentry-sdk==0.13.0
+sentry-sdk==0.13.1
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.9.0.tar.gz
 simple-salesforce==0.74.2
@@ -108,4 +106,4 @@ xmltodict==0.12.0         # via cumulusci
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.4.0        # via markdown, pyhamcrest, zope.interface
+# setuptools==41.5.1        # via markdown, pyhamcrest, zope.interface

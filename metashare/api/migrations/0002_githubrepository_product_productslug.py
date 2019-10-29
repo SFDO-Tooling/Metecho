@@ -2,11 +2,10 @@
 
 import django.db.models.deletion
 import hashid_field.field
-from django.conf import settings
-from django.db import migrations, models
-
 import sfdo_template_helpers.fields.markdown
 import sfdo_template_helpers.slugs
+from django.conf import settings
+from django.db import migrations, models
 
 ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 

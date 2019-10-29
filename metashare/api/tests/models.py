@@ -2,6 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.utils.timezone import now
 
 from ..models import Project, Repository, Task, user_logged_in_handler
 
@@ -310,14 +311,14 @@ class TestScratchOrg:
         with patch(
             "metashare.api.jobs.delete_scratch_org_job"
         ) as delete_scratch_org_job:
-            scratch_org = scratch_org_factory()
+            scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.queue_delete()
 
             assert delete_scratch_org_job.delay.called
 
     def test_notify_delete(self, scratch_org_factory):
         with patch("metashare.api.models.async_to_sync") as async_to_sync:
-            scratch_org = scratch_org_factory(url="https://example.com")
+            scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.delete()
 
             assert async_to_sync.called
@@ -337,6 +338,17 @@ class TestScratchOrg:
             scratch_org.finalize_provision()
 
             assert async_to_sync.called
+
+    def test_finalize_provision__flow_error(self, scratch_org_factory):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metashare.api.models.async_to_sync"))
+            delete_queued = stack.enter_context(
+                patch("metashare.api.jobs.delete_scratch_org_job")
+            )
+            scratch_org = scratch_org_factory(url="https://example.com")
+            scratch_org.finalize_provision(error=True)
+
+            assert delete_queued.delay.called
 
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:

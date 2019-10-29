@@ -11,8 +11,8 @@ import pytest
 
 from ..sf_run_flow import (
     capitalize,
-    create_org_and_run_flow,
-    delete_scratch_org,
+    create_org,
+    delete_org,
     deploy_org_settings,
     get_access_token,
     get_devhub_api,
@@ -20,6 +20,7 @@ from ..sf_run_flow import (
     get_org_result,
     mutate_scratch_org,
     refresh_access_token,
+    run_flow,
 )
 
 PATCH_ROOT = "metashare.api.sf_run_flow"
@@ -115,10 +116,7 @@ class TestDeployOrgSettings:
             scratch_org_definition.get.return_value = settings
 
             deploy_org_settings(
-                cci=MagicMock(),
-                org_config=MagicMock(),
-                org_name=MagicMock(),
-                scratch_org_config=MagicMock(),
+                cci=MagicMock(), org_name=MagicMock(), scratch_org_config=MagicMock()
             )
             assert DeployOrgSettings.called
 
@@ -136,19 +134,24 @@ def test_create_org_and_run_flow():
         stack.enter_context(patch(f"{PATCH_ROOT}.deploy_org_settings"))
         stack.enter_context(patch(f"{PATCH_ROOT}.cd"))
 
-        create_org_and_run_flow(
+        create_org(
             repo_owner=MagicMock(),
             repo_name=MagicMock(),
             repo_url=MagicMock(),
             repo_branch=MagicMock(),
             user=MagicMock(),
+            project_path=MagicMock(),
+        )
+        run_flow(
+            cci=MagicMock(),
+            org_config=MagicMock(),
             flow_name=MagicMock(),
             project_path=MagicMock(),
         )
 
 
 @pytest.mark.django_db
-def test_delete_scratch_org(scratch_org_factory):
+def test_delete_org(scratch_org_factory):
     scratch_org = scratch_org_factory(config={"org_id": "some-id"})
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
@@ -157,6 +160,6 @@ def test_delete_scratch_org(scratch_org_factory):
         get_devhub_api.return_value = devhub_api
         devhub_api.query.return_value = {"records": [{"Id": "some-id"}]}
 
-        delete_scratch_org(scratch_org)
+        delete_org(scratch_org)
 
         assert devhub_api.ActiveScratchOrg.delete.called

@@ -92,13 +92,6 @@ export const provisionFailed = ({
   model: Org;
   message?: string;
 }): ThunkResult => (dispatch, getState) => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.unsubscribe({
-      model: OBJECT_TYPES.ORG,
-      id: model.id,
-    });
-  }
   const state = getState();
   const user = state.user;
   if (user && user.id === model.owner) {
