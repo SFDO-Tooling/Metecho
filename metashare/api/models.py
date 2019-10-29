@@ -15,7 +15,6 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 from model_utils import Choices
-
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
