@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("api", "0028_merge_20191023_2024"),
-        ("api", "0031_auto_20191023_1838"),
+        ("api", "0031_repository_repo_owner_and_name"),
     ]
 
     operations = []
