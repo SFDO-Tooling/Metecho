@@ -22,7 +22,6 @@ logfmt==0.4
 markdown==3.1.1
 newrelic==5.2.1.129
 psycopg2-binary==2.8.4
-purl==1.5
 pyOpenSSL==19.0.0
 sentry-sdk==0.13.1
 service_identity==18.1.0
