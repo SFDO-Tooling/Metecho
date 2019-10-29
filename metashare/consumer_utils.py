@@ -14,10 +14,10 @@ def message_to_hash(message):
 
 async def get_set_message_semaphore(channel_layer, message):
     """Set a semaphore in redis.
-    Used to prevent sending the same message twice within 5 seconds."""
+    Used to prevent sending the same message twice within 2 seconds."""
     msg_hash = message_to_hash(message)
     async with channel_layer.connection(0) as connection:
-        return await connection.set(msg_hash, 1, expire=5, exist="SET_IF_NOT_EXIST")
+        return await connection.set(msg_hash, 1, expire=2, exist="SET_IF_NOT_EXIST")
 
 
 async def clear_message_semaphore(channel_layer, message):
