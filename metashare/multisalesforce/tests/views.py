@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 from django.core.exceptions import SuspiciousOperation
-
 from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from ..views import (

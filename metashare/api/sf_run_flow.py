@@ -173,7 +173,7 @@ def get_access_token(*, org_result, scratch_org_config):
     ] = auth_result["access_token"]
 
 
-def deploy_org_settings(*, cci, org_config, org_name, scratch_org_config):
+def deploy_org_settings(*, cci, org_name, scratch_org_config):
     """Do a Metadata API deployment to configure org settings
     as specified in the scratch org definition file.
     """
@@ -187,10 +187,8 @@ def deploy_org_settings(*, cci, org_config, org_name, scratch_org_config):
     return org_config
 
 
-def create_org_and_run_flow(
-    *, repo_owner, repo_name, repo_branch, user, flow_name, project_path
-):
-    """Create a new scratch org and run a flow"""
+def create_org(*, repo_owner, repo_name, repo_branch, user, project_path):
+    """Create a new scratch org"""
     repo_url = f"https://github.com/{repo_owner}/{repo_name}"
     org_name = "dev"
     devhub_username = user.sf_username
@@ -224,33 +222,25 @@ def create_org_and_run_flow(
     )
     get_access_token(org_result=org_result, scratch_org_config=scratch_org_config)
     org_config = deploy_org_settings(
-        cci=cci,
-        org_config=scratch_org_config,
-        org_name=org_name,
-        scratch_org_config=scratch_org_config,
+        cci=cci, org_name=org_name, scratch_org_config=scratch_org_config
     )
 
-    # ---
-    # Scratch org construction is done but we haven't run a flow
-    # yet. This is the point where you would want to serialize
-    # scratch_org_config.config to store in the database for use
-    # later. Then reconstitute by running construct_org_config
-    # ---
+    return (scratch_org_config, cci, org_config)
 
+
+def run_flow(*, cci, org_config, flow_name, project_path):
+    """Run a flow on a scratch org"""
     # Run flow (takes care of getting a new access token)
     flow = cci.get_flow(flow_name)
     with cd(project_path):
         flow.run(org_config)
 
-    return scratch_org_config
 
-
-def delete_scratch_org(scratch_org):
+def delete_org(scratch_org):
     """Delete a scratch org by deleting its ActiveScratchOrg record
     in the Dev Hub org."""
     devhub_username = scratch_org.owner.sf_username
     org_id = scratch_org.config["org_id"]
-
     devhub_api = get_devhub_api(devhub_username=devhub_username)
 
     records = (

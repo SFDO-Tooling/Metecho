@@ -1,7 +1,6 @@
 import bleach
 from markdown import markdown
 from rest_framework.fields import CharField
-
 from sfdo_template_helpers.fields.markdown import MarkdownFieldMixin
 
 # Get the allowed values off the the library we use for the underpinning Model field:
