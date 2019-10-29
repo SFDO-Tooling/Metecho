@@ -187,9 +187,8 @@ def deploy_org_settings(*, cci, org_name, scratch_org_config):
     return org_config
 
 
-def create_org(*, repo_owner, repo_name, repo_branch, user, project_path):
+def create_org(*, repo_owner, repo_name, repo_url, repo_branch, user, project_path):
     """Create a new scratch org"""
-    repo_url = f"https://github.com/{repo_owner}/{repo_name}"
     org_name = "dev"
     devhub_username = user.sf_username
     email = user.email  # TODO: check that this is reliably right.

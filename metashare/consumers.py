@@ -9,8 +9,6 @@ from django.utils.translation import gettext as _
 from .api.constants import CHANNELS_GROUP_NAME
 from .consumer_utils import clear_message_semaphore
 
-# from importlib import import_module
-
 Request = namedtuple("Request", "user")
 
 
@@ -20,10 +18,6 @@ KNOWN_MODELS = {"user", "project", "task", "scratchorg"}
 class Actions(Enum):
     Subscribe = "SUBSCRIBE"
     Unsubscribe = "UNSUBSCRIBE"
-
-
-# def user_context(user):
-#     return {"request": Request(user)}
 
 
 class PushNotificationConsumer(AsyncJsonWebsocketConsumer):

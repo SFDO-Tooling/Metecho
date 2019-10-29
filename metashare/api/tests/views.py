@@ -42,10 +42,11 @@ def test_user_refresh_view(client):
 @pytest.mark.django_db
 def test_repository_view(client, repository_factory, git_hub_repository_factory):
     git_hub_repository_factory(
-        user=client.user, url="https://example.com/test-repo.git"
+        user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
     )
-    repository = repository_factory(repo_url="https://example.com/test-repo.git")
-    repository_factory(repo_url="https://example.com/test-repo2.git")
+    repo = repository_factory(repo_name="repo", repo_id=123)
+    repository_factory(repo_name="repo2", repo_id=456)
+    repository_factory(repo_name="repo3", repo_id=None)
     response = client.get(reverse("repository-list"))
 
     assert response.status_code == 200
@@ -55,13 +56,13 @@ def test_repository_view(client, repository_factory, git_hub_repository_factory)
         "next": None,
         "results": [
             {
-                "id": str(repository.id),
+                "id": str(repo.id),
+                "name": str(repo.name),
                 "description": "",
                 "is_managed": False,
-                "name": str(repository.name),
-                "repo_url": "https://example.com/test-repo.git",
-                "slug": str(repository.slug),
+                "slug": str(repo.slug),
                 "old_slugs": [],
+                "repo_url": f"https://github.com/{repo.repo_owner}/{repo.repo_name}",
             }
         ],
     }

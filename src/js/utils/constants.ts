@@ -17,7 +17,7 @@ export const OBJECT_TYPES = {
   PULL_REQUEST: 'task_pull_request' as 'task_pull_request',
 };
 
-export const GITHUB_REPO_PREFIX = 'https://www.github.com';
+export const GITHUB_REPO_PREFIX = 'https://github.com';
 
 export type OrgTypes = 'Dev' | 'QA';
 
