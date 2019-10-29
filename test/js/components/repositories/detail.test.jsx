@@ -27,7 +27,7 @@ const defaultState = {
         slug: 'repository-1',
         old_slugs: ['old-slug'],
         description: 'This is a test repository.',
-        repo_url: 'https://www.github.com/test/test-repo',
+        repo_url: 'https://github.com/test/test-repo',
       },
     ],
     notFound: ['yet-another-repository'],

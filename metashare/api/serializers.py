@@ -47,6 +47,7 @@ class MinimalUserSerializer(serializers.ModelSerializer):
 class RepositorySerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description = MarkdownField(allow_blank=True)
+    repo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Repository
@@ -59,6 +60,9 @@ class RepositorySerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
         )
+
+    def get_repo_url(self, obj) -> Optional[str]:
+        return f"https://github.com/{obj.repo_owner}/{obj.repo_name}"
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -89,8 +93,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
-        if obj.branch_name:
-            return f"{obj.repository.repo_url}/tree/{obj.branch_name}"
+        repo = obj.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        branch = obj.branch_name
+        if repo_owner and repo_name and branch:
+            return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
         return None
 
 
@@ -126,8 +134,12 @@ class TaskSerializer(serializers.ModelSerializer):
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
-        if obj.branch_name:
-            return f"{obj.project.repository.repo_url}/tree/{obj.branch_name}"
+        repo = obj.project.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        branch = obj.branch_name
+        if repo_owner and repo_name and branch:
+            return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
         return None
 
 
