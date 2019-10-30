@@ -33,17 +33,12 @@ class TestCreateBranchesOnGitHub:
             global_config_instance.get_project_config.return_value = MagicMock(
                 project__git__prefix_feature="feature/"
             )
-            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
-            gh = MagicMock()
-            gh.repository.return_value = repository
-            gh_given_user.return_value = gh
+            get_repo_info.return_value = repository
 
             _create_branches_on_github(
-                user=user,
-                repo_url="https://github.com/user/repo-bohemia",
-                project=project,
-                task=task,
+                user=user, repo_id=123, project=project, task=task
             )
 
             assert repository.create_branch_ref.called
@@ -61,17 +56,12 @@ class TestCreateBranchesOnGitHub:
             global_config_instance.get_project_config.return_value = MagicMock(
                 project__git__prefix_feature="feature/"
             )
-            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
-            gh = MagicMock()
-            gh.repository.return_value = repository
-            gh_given_user.return_value = gh
+            get_repo_info.return_value = repository
 
             _create_branches_on_github(
-                user=user,
-                repo_url="https://github.com/user/repo-francia",
-                project=project,
-                task=task,
+                user=user, repo_id=123, project=project, task=task
             )
 
             assert not repository.create_branch_ref.called
@@ -83,11 +73,11 @@ def test_create_org_and_run_flow():
         create_org = stack.enter_context(patch(f"{PATCH_ROOT}.create_org"))
         create_org.return_value = (MagicMock(), MagicMock(), MagicMock())
         run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
-            repo_url="https://github.com/owner/repo",
+            repo_id=123,
             repo_branch=MagicMock(),
             project_path="",
         )
@@ -131,13 +121,7 @@ def test_create_branches_on_github_then_create_scratch_org():
             patch(f"{PATCH_ROOT}._create_org_and_run_flow")
         )
 
-        create_branches_on_github_then_create_scratch_org(
-            project=MagicMock(),
-            repo_url="https://github.com/user/repo",
-            scratch_org=MagicMock(),
-            task=MagicMock(),
-            user=MagicMock(),
-        )
+        create_branches_on_github_then_create_scratch_org(scratch_org=MagicMock())
 
         assert _create_branches_on_github.called
         assert _create_org_and_run_flow.called
@@ -196,8 +180,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
             "name": {"member": 1, "member2": 1},
             "name1": {"member": 1, "member2": 1},
         }
-
-        gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+        get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         commit = MagicMock(
             sha="12345",
             html_url="https://github.com/test/user/foo",
@@ -205,9 +188,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         )
         repository = MagicMock()
         repository.branch.return_value = MagicMock(commit=commit)
-        gh = MagicMock()
-        gh.repository.return_value = repository
-        gh_given_user.return_value = gh
+        get_repo_info.return_value = repository
 
         desired_changes = {"name": ["member"]}
         commit_message = "test message"
@@ -222,9 +203,8 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
 @pytest.mark.django_db
 class TestErrorHandling:
     def test_create_branches_on_github_then_create_scratch_org(
-        self, user_factory, scratch_org_factory
+        self, scratch_org_factory
     ):
-        user = user_factory()
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
@@ -239,11 +219,7 @@ class TestErrorHandling:
 
             with pytest.raises(Exception):
                 create_branches_on_github_then_create_scratch_org(
-                    project=MagicMock(),
-                    repo_url="https://github.org/test/repo",
-                    scratch_org=scratch_org,
-                    task=MagicMock(),
-                    user=user,
+                    scratch_org=scratch_org
                 )
 
             assert scratch_org.delete.called

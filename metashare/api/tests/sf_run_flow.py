@@ -137,6 +137,7 @@ def test_create_org_and_run_flow():
         create_org(
             repo_owner=MagicMock(),
             repo_name=MagicMock(),
+            repo_url=MagicMock(),
             repo_branch=MagicMock(),
             user=MagicMock(),
             project_path=MagicMock(),

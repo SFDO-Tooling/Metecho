@@ -31,7 +31,7 @@ def test_run_retrieve_task(user_factory, scratch_org_factory):
         stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
         stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
         stack.enter_context(patch(f"{PATCH_ROOT}.build_package_xml"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         RetrieveUnpackaged = stack.enter_context(
             patch(f"{PATCH_ROOT}.RetrieveUnpackaged")
         )
@@ -61,7 +61,7 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
         commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
-            repo_url="https://github.com/user/repo",
+            repo_id=123,
             branch="test-branch",
             desired_changes=desired_changes,
             commit_message="test message",
@@ -105,7 +105,6 @@ def test_get_latest_revision_numbers():
         Salesforce.return_value = conn
 
         scratch_org = MagicMock()
-        scratch_org.task.project.repository.repo_url = "https://github.com/test/repo"
 
         get_latest_revision_numbers(scratch_org=scratch_org)
 

@@ -7,9 +7,8 @@ from django.utils.timezone import now
 from django_rq import job
 
 from .gh import (
-    extract_owner_and_repo,
     get_cumulus_prefix,
-    gh_given_user,
+    get_repo_info,
     local_github_checkout,
     try_to_make_branch,
 )
@@ -24,25 +23,23 @@ from .sf_run_flow import create_org, delete_org, run_flow
 logger = logging.getLogger(__name__)
 
 
-def _create_branches_on_github(*, user, repo_url, project, task):
+def _create_branches_on_github(*, user, repo_id, project, task):
     """
     Expects to be called in the context of a local github checkout.
     """
-    gh = gh_given_user(user)
-    owner, repo = extract_owner_and_repo(repo_url)
-    repository = gh.repository(owner, repo)
+    repository = get_repo_info(user, repo_id=repo_id)
 
     # Make project branch, with latest from project:
     project.refresh_from_db()
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
-        with local_github_checkout(user, repo_url) as repo_root:
+        with local_github_checkout(user, repo_id) as repo_root:
             prefix = get_cumulus_prefix(
                 repo_root=repo_root,
                 repo_name=repository.name,
-                repo_url=repo_url,
-                repo_owner=owner,
+                repo_url=repository.html_url,
+                repo_owner=repository.owner.login,
                 repo_branch=repository.default_branch,
                 repo_commit=repository.branch(repository.default_branch).latest_sha(),
             )
@@ -71,20 +68,18 @@ def _create_branches_on_github(*, user, repo_url, project, task):
     return task_branch_name
 
 
-def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, project_path):
+def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project_path):
     from .models import SCRATCH_ORG_TYPES
 
     cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
 
-    gh = gh_given_user(user)
-    owner, repo = extract_owner_and_repo(repo_url)
-    repository = gh.repository(owner, repo)
+    repository = get_repo_info(user, repo_id=repo_id)
     commit = repository.branch(repo_branch).commit
 
-    owner, repo = extract_owner_and_repo(repo_url)
     scratch_org_config, cci, org_config = create_org(
-        repo_owner=owner,
-        repo_name=repo,
+        repo_owner=repository.owner.login,
+        repo_name=repository.name,
+        repo_url=repository.html_url,
         repo_branch=repo_branch,
         user=user,
         project_path=project_path,
@@ -110,18 +105,22 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_url, repo_branch, projec
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
 
 
-def create_branches_on_github_then_create_scratch_org(
-    *, project, repo_url, scratch_org, task, user
-):
+def create_branches_on_github_then_create_scratch_org(*, scratch_org):
+    scratch_org.refresh_from_db()
+    user = scratch_org.owner
+    task = scratch_org.task
+    project = task.project
+
     try:
+        repo_id = project.repository.get_repo_id(user)
         commit_ish = _create_branches_on_github(
-            user=user, repo_url=repo_url, project=project, task=task
+            user=user, repo_id=repo_id, project=project, task=task
         )
-        with local_github_checkout(user, repo_url, commit_ish) as repo_root:
+        with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             _create_org_and_run_flow(
                 scratch_org,
                 user=user,
-                repo_url=repo_url,
+                repo_id=repo_id,
                 repo_branch=commit_ish,
                 project_path=repo_root,
             )
@@ -161,23 +160,22 @@ get_unsaved_changes_job = job(get_unsaved_changes)
 
 
 def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
-    repo_url = scratch_org.task.project.repository.repo_url
+    scratch_org.refresh_from_db()
     branch = scratch_org.task.branch_name
 
     try:
+        repo_id = scratch_org.task.project.repository.get_repo_id(user)
         commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
-            repo_url=repo_url,
+            repo_id=repo_id,
             branch=branch,
             desired_changes=desired_changes,
             commit_message=commit_message,
         )
 
         # Update
-        gh = gh_given_user(user)
-        owner, repo = extract_owner_and_repo(repo_url)
-        repository = gh.repository(owner, repo)
+        repository = get_repo_info(user, repo_id=repo_id)
         commit = repository.branch(branch).commit
 
         scratch_org.refresh_from_db()

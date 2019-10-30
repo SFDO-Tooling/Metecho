@@ -42,7 +42,10 @@ class User(mixins.HashIdMixin, AbstractUser):
         repos = gh.get_all_org_repos(self)
         GitHubRepository.objects.filter(user=self).delete()
         GitHubRepository.objects.bulk_create(
-            [GitHubRepository(user=self, url=repo) for repo in repos]
+            [
+                GitHubRepository(user=self, repo_id=repo.id, repo_url=repo.html_url)
+                for repo in repos
+            ]
         )
         self.notify_repositories_updated()
 
@@ -153,11 +156,19 @@ class RepositorySlug(AbstractSlug):
     )
 
 
-class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+class Repository(
+    mixins.PopulateRepoId,
+    mixins.HashIdMixin,
+    mixins.TimestampsMixin,
+    SlugMixin,
+    models.Model,
+):
+    repo_owner = StringField()
+    repo_name = StringField()
     name = StringField(unique=True)
-    repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
+    repo_id = models.IntegerField(null=True, blank=True, unique=True)
 
     slug_class = RepositorySlug
 
@@ -167,19 +178,21 @@ class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.M
     class Meta:
         verbose_name_plural = "repositories"
         ordering = ("name",)
+        unique_together = (("repo_owner", "repo_name"),)
 
 
 class GitHubRepository(mixins.HashIdMixin, models.Model):
-    url = models.URLField()
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
+    repo_id = models.IntegerField(unique=True)
+    repo_url = models.URLField()
 
     class Meta:
         verbose_name_plural = "GitHub repositories"
 
     def __str__(self):
-        return self.url
+        return self.repo_url
 
 
 class ProjectSlug(AbstractSlug):
@@ -351,13 +364,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     def queue_provision(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
 
-        create_branches_on_github_then_create_scratch_org_job.delay(
-            project=self.task.project,
-            repo_url=self.task.project.repository.repo_url,
-            scratch_org=self,
-            task=self.task,
-            user=self.owner,
-        )
+        create_branches_on_github_then_create_scratch_org_job.delay(scratch_org=self)
 
     def finalize_provision(self, error=None):
         from .serializers import ScratchOrgSerializer

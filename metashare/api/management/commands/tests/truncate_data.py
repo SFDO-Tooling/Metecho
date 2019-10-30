@@ -6,9 +6,9 @@ from ....models import Repository, RepositorySlug
 
 @pytest.mark.django_db
 def test_truncate_data(repository_factory):
-    repository_factory(repo_url="https://example.com/test-repo.git")
-    repository_factory(repo_url="https://example.com/test-repo2.git")
-    repository_factory(repo_url="https://example.com/test-repo3.git")
+    repository_factory(repo_owner="test", repo_name="repo")
+    repository_factory(repo_owner="test", repo_name="repo2")
+    repository_factory(repo_owner="test", repo_name="repo3")
 
     assert RepositorySlug.objects.count() == 3
     assert Repository.objects.count() == 3
