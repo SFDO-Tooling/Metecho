@@ -9,7 +9,7 @@
     "url": "https://github.com/SFDO-Tooling/MetaShare.git"
   },
   "engines": {
-    "node": "10.16.0"
+    "node": "12.13.0"
   },
   "scripts": {
     "webpack:serve": "webpack-dev-server --config webpack.dev.js",
@@ -48,16 +48,16 @@
     "@sentry/browser": "^5.7.1",
     "classnames": "^2.2.6",
     "date-fns": "^2.6.0",
-    "i18next": "^18.0.1",
-    "i18next-browser-languagedetector": "^4.0.0",
-    "i18next-xhr-backend": "^3.2.0",
+    "i18next": "^19.0.0",
+    "i18next-browser-languagedetector": "^4.0.1",
+    "i18next-xhr-backend": "3.2.0",
     "js-cookie": "^2.2.1",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.11.0",
     "react-document-title": "^2.0.3",
     "react-dom": "^16.11.0",
     "react-fns": "^1.4.0",
-    "react-i18next": "^11.0.0",
+    "react-i18next": "^11.0.1",
     "react-redux": "^7.1.1",
     "react-router-dom": "^5.1.2",
     "redux": "^4.0.4",
@@ -89,7 +89,7 @@
     "@types/react-document-title": "^2.0.3",
     "@types/react-dom": "^16.9.3",
     "@types/react-redux": "^7.1.5",
-    "@types/react-router-dom": "^5.1.0",
+    "@types/react-router-dom": "^5.1.1",
     "@types/redux-logger": "^3.0.7",
     "@types/uuid": "^3.4.5",
     "@typescript-eslint/eslint-plugin": "^2.6.0",
