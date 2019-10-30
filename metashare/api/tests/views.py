@@ -1,49 +1,17 @@
-from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.urls import reverse
-from sfdo_template_helpers.crypto import fernet_encrypt
 
 from ..models import SCRATCH_ORG_TYPES
 
 
 @pytest.mark.django_db
-class TestUserView:
-    def test_refresh_token_good(self, client, social_account_factory):
-        social_account = social_account_factory(
-            user=client.user, provider="salesforce-production"
-        )
-        social_token = social_account.socialtoken_set.first()
-        social_token.token_secret = fernet_encrypt(social_token.token_secret)
-        social_token.save()
-        with patch("metashare.api.views.requests.post") as post:
-            response_json = MagicMock(return_value={"access_token": "test"})
-            post.return_value = MagicMock(json=response_json)
-            response = client.get(reverse("user"))
+def test_user_view(client):
+    response = client.get(reverse("user"))
 
-            assert response.status_code == 200
-            assert response.json()["username"].endswith("@example.com")
-
-    def test_refresh_token_bad(self, client, social_account_factory):
-        social_account = social_account_factory(
-            user=client.user, provider="salesforce-production"
-        )
-        social_token = social_account.socialtoken_set.first()
-        social_token.token_secret = "I am not Fernet encrypted"
-        social_token.save()
-        with ExitStack() as stack:
-            post = stack.enter_context(patch("metashare.api.views.requests.post"))
-            fernet_encrypt = stack.enter_context(
-                patch("metashare.api.views.fernet_encrypt")
-            )
-            response_json = MagicMock(return_value={"access_token": "test"})
-            post.return_value = MagicMock(json=response_json)
-            response = client.get(reverse("user"))
-
-            assert not fernet_encrypt.called
-            assert response.status_code == 200
-            assert response.json()["username"].endswith("@example.com")
+    assert response.status_code == 200
+    assert response.json()["username"].endswith("@example.com")
 
 
 @pytest.mark.django_db

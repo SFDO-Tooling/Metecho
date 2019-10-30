@@ -1,8 +1,3 @@
-import logging
-
-import requests
-from cryptography.fernet import InvalidToken
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,7 +7,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
@@ -27,7 +21,6 @@ from .serializers import (
     TaskSerializer,
 )
 
-logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -47,30 +40,6 @@ class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
     model = User
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
-
-    def get(self, *args, **kwargs):
-        self.refresh_user_salesforce_token()
-        return super().get(*args, **kwargs)
-
-    def refresh_user_salesforce_token(self):
-        tolerable_exceptions = (AttributeError, InvalidToken, requests.HTTPError)
-        try:
-            _, refresh_token = self.request.user.sf_token
-            resp = requests.post(
-                "https://login.salesforce.com/services/oauth2/token",
-                params={
-                    "grant_type": "refresh_token",
-                    "refresh_token": fernet_decrypt(refresh_token),
-                    "client_id": settings.SF_CLIENT_ID,
-                    "client_secret": settings.SF_CLIENT_SECRET,
-                },
-            )
-            resp.raise_for_status()
-            token = self.request.user.salesforce_account.socialtoken_set.first()
-            token.token = fernet_encrypt(resp.json()["access_token"])
-            token.save()
-        except tolerable_exceptions as e:
-            logger.info(f"Error refreshing SalesForce access token: {e}")
 
 
 class UserRefreshView(CurrentUserObjectMixin, APIView):
