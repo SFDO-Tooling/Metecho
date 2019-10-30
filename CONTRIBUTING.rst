@@ -110,8 +110,7 @@ will see you can run e.g.::
     $ ./derrick test:js  # run JS tests
     $ ./derrick test:js:watch  # run JS tests and watches for changes
     $ ./derrick add:js <package>  # add a yarn/npm package to dependencies
-    $ ./derrick lock:py:dev  # update requirements/dev.txt from dev.in file
-    $ ./derrick lock:py:prod  # update requirements/prod.txt from prod.in file
+    $ ./derrick lock:py  # update requirements *.txt from *.in files
     $ ./derrick migrate <app> <prefix>  # run Django migrations
     $ ./derrick migrations <app>  # add new Django migrations (``makemigrations``)
     $ ./derrick messages <locale>  # build messages for i18n

@@ -51,11 +51,9 @@ case "$1" in
     "add:js")
         dcrq yarn add "${@:2}"
         ;;
-    "lock:py:dev")
-        dcrq pip-compile --output-file=requirements/dev.txt requirements/dev.in
-        ;;
-    "lock:py:prod")
+    "lock:py")
         dcrq pip-compile --output-file=requirements/prod.txt requirements/prod.in
+        dcrq pip-compile --output-file=requirements/dev.txt requirements/dev.in
         ;;
     "migrate")
         dcr python manage.py migrate "${@:2}"
