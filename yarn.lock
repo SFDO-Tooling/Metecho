@@ -1245,9 +1245,9 @@
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
 "@types/node@*":
-  version "12.12.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.1.tgz#47d295109420cfd3381bdd7e4292976659bb9de8"
-  integrity sha512-m6VgTAkmFCu/uSgAvm4zta1nxMU9U02BFZY36FILD4R/fdRXM7v0EHY3BAg+MCgDmDTIUDj2986G+rMPi49+SQ==
+  version "12.12.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.3.tgz#ebfe83507ac506bc3486314a8aa395be66af8d23"
+  integrity sha512-opgSsy+cEF9N8MgaVPnWVtdJ3o4mV2aMHvDq7thkQUFt0EuOHJon4rQpJfhjmNHB+ikl0Cd6WhWIErOyQ+f7tw==
 
 "@types/prop-types@*":
   version "15.7.3"
@@ -1414,9 +1414,9 @@
     source-map "^0.6.1"
 
 "@types/webpack@^4.4.31":
-  version "4.39.5"
-  resolved "https://registry.yarnpkg.com/@types/webpack/-/webpack-4.39.5.tgz#3671b65928d9e0c6fcd4adff3f8167d48b174681"
-  integrity sha512-9twG6D97ao13MBLvigwfBJe6rxtb04UY3TcYHBYkW5sXZjUrNhqIRxLYg74VzK/YAE8xlVhOyd+3Whr7E5RrBA==
+  version "4.39.6"
+  resolved "https://registry.yarnpkg.com/@types/webpack/-/webpack-4.39.6.tgz#705fd8abdbe7c30b9c504682d4e89bed694fd70d"
+  integrity sha512-7FS/gEGyKki5+pcN1TnGGLhpUTyMTYhCfe3iCM7bQ2JIOV0FztzindOC5o7vYBtdnGUjZvavei+ZyoG17527Lg==
   dependencies:
     "@types/anymatch" "*"
     "@types/node" "*"
@@ -5225,10 +5225,10 @@ i18next-scanner@^2.10.2:
     vinyl "^2.2.0"
     vinyl-fs "^3.0.1"
 
-i18next-xhr-backend@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/i18next-xhr-backend/-/i18next-xhr-backend-3.2.1.tgz#ee7dcd9137d86ecc3d737d14e4b57dd0222f52b3"
-  integrity sha512-aep1Xjl9g7VIJTAcyikEnNIEXgvSU6aXx//Ld0SC0qGMji8n2hCkjghYaoL8uZh3LCu5kLd/sMdpc2yXWPpowg==
+i18next-xhr-backend@3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/i18next-xhr-backend/-/i18next-xhr-backend-3.2.0.tgz#f2ac0792c38ca8ee653fab723fc9dcc7b0ff4d71"
+  integrity sha512-WKxC7YWqMT5CNwmnuSbFqb3pXZyDglIONO8qC8HBmP1OaT4GHc1Ox4JX42G27RQjzKK2px3ynwW9Z35LR9RoQg==
   dependencies:
     "@babel/runtime" "^7.5.5"
 
