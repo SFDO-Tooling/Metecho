@@ -1,4 +1,3 @@
-import requests
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
@@ -23,6 +22,7 @@ from . import gh
 from . import model_mixins as mixins
 from . import push
 from .constants import ORGANIZATION_DETAILS
+from .sf_run_flow import get_devhub_api
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
@@ -134,15 +134,13 @@ class User(mixins.HashIdMixin, AbstractUser):
     @cached_property
     def is_devhub_enabled(self):
         # We can shortcut and avoid making an HTTP request in some cases:
+        if not self.salesforce_account:
+            return None
         if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
             return None
 
-        token, _ = self.sf_token
-        if token is None:
-            return None
-        instance_url = self.salesforce_account.extra_data["instance_url"]
-        url = f"{instance_url}/services/data/v45.0/sobjects/ScratchOrgInfo"
-        resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
+        client = get_devhub_api(devhub_username=self.sf_username)
+        resp = client.restful("sobjects/ScratchOrgInfo")
         if resp.status_code == 200:
             return True
         if resp.status_code == 404:

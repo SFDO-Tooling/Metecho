@@ -243,9 +243,11 @@ class TestUser:
                 },
             },
         )
-        with patch("metashare.api.models.requests.get") as get:
-            response = MagicMock(status_code=200)
-            get.return_value = response
+        with patch("metashare.api.models.get_devhub_api") as get_devhub_api:
+            resp = MagicMock(status_code=200)
+            client = MagicMock()
+            client.restful.return_value = resp
+            get_devhub_api.return_value = client
             assert user.is_devhub_enabled
 
     def test_is_devhub_enabled__false(self, user_factory, social_account_factory):
@@ -263,9 +265,11 @@ class TestUser:
                 },
             },
         )
-        with patch("metashare.api.models.requests.get") as get:
-            response = MagicMock(status_code=404)
-            get.return_value = response
+        with patch("metashare.api.models.get_devhub_api") as get_devhub_api:
+            resp = MagicMock(status_code=404)
+            client = MagicMock()
+            client.restful.return_value = resp
+            get_devhub_api.return_value = client
             assert not user.is_devhub_enabled
 
     def test_is_devhub_enabled__final_none(self, user_factory, social_account_factory):
@@ -283,9 +287,11 @@ class TestUser:
                 },
             },
         )
-        with patch("metashare.api.models.requests.get") as get:
-            response = MagicMock(status_code=401)
-            get.return_value = response
+        with patch("metashare.api.models.get_devhub_api") as get_devhub_api:
+            resp = MagicMock(status_code=401)
+            client = MagicMock()
+            client.restful.return_value = resp
+            get_devhub_api.return_value = client
             assert user.is_devhub_enabled is None
 
 
