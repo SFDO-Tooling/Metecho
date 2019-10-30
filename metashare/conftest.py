@@ -4,7 +4,6 @@ from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth import get_user_model
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
-
 from sfdo_template_helpers.crypto import fernet_encrypt
 
 from .api.models import GitHubRepository, Project, Repository, ScratchOrg, Task
@@ -69,7 +68,9 @@ class RepositoryFactory(factory.django.DjangoModelFactory):
         model = Repository
 
     name = factory.Sequence("Repository {}".format)
-    repo_url = "https://www.github.com/test/repo"
+    repo_owner = "test"
+    repo_name = "repo"
+    repo_id = factory.Sequence(lambda n: n)
 
 
 @register
@@ -77,7 +78,8 @@ class GitHubRepositoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GitHubRepository
 
-    url = "https://example.com/repo.git"
+    repo_url = "https://github.com/test/repo.git"
+    repo_id = factory.Sequence(lambda n: n)
     user = factory.SubFactory(UserFactory)
 
 
@@ -116,17 +118,3 @@ def client(user_factory):
     client.force_login(user)
     client.user = user
     return client
-
-
-# @pytest.fixture
-# def admin_api_client(user_factory):
-#     user = user_factory(is_superuser=True)
-#     client = APIClient()
-#     client.force_login(user)
-#     client.user = user
-#     return client
-
-
-# @pytest.fixture
-# def anon_client():
-#     return APIClient()

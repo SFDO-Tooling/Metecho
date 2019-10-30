@@ -10,12 +10,7 @@ from cumulusci.tasks.salesforce.RetrieveUnpackaged import RetrieveUnpackaged
 from cumulusci.tasks.salesforce.sourcetracking import MetadataType
 from django.conf import settings
 
-from .gh import (
-    extract_owner_and_repo,
-    get_repo_info,
-    gh_given_user,
-    local_github_checkout,
-)
+from .gh import get_repo_info, local_github_checkout
 from .sf_run_flow import refresh_access_token
 
 
@@ -28,18 +23,16 @@ def build_package_xml(scratch_org, package_xml_path, desired_changes):
 
 
 def run_retrieve_task(user, scratch_org, project_path, desired_changes):
-    repo_url = scratch_org.task.project.repository.repo_url
+    repo_id = scratch_org.task.project.repository.get_repo_id(user)
     org_config = refresh_access_token(config=scratch_org.config, org_name="dev")
-    owner, repo = extract_owner_and_repo(repo_url)
-    gh = gh_given_user(user)
-    repository = gh.repository(owner, repo)
+    repository = get_repo_info(user, repo_id=repo_id)
     branch = repository.default_branch
     cci = BaseCumulusCI(
         repo_info={
             "root": project_path,
-            "url": repo_url,
-            "name": owner,
-            "owner": repo,
+            "url": repository.html_url,
+            "name": repository.name,
+            "owner": repository.owner.login,
             "commit": branch,
         }
     )
@@ -58,14 +51,14 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
 
 
 def commit_changes_to_github(
-    *, user, scratch_org, repo_url, branch, desired_changes, commit_message
+    *, user, scratch_org, repo_id, branch, desired_changes, commit_message
 ):
-    with local_github_checkout(user, repo_url) as project_path:
+    with local_github_checkout(user, repo_id) as project_path:
         # This won't return anything in-memory, but rather it will emit
         # files which we then copy into a source checkout, and then
         # commit and push all that.
         run_retrieve_task(user, scratch_org, project_path, desired_changes)
-        repo = get_repo_info(user, repo_url)
+        repo = get_repo_info(user, repo_id=repo_id)
         author = {"name": user.username, "email": user.email}
         CommitDir(repo, author=author)(
             project_path, branch, repo_dir="", commit_message=commit_message

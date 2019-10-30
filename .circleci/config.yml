@@ -8,7 +8,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - metashare-py-{{ checksum "Pipfile.lock" }}
+            - metashare-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
       - restore_cache:
           keys:
             - metashare-npm-{{ checksum "yarn.lock" }}
@@ -18,7 +18,8 @@ jobs:
             yarn install --frozen-lockfile
             python3 -m venv venv
             . venv/bin/activate
-            pipenv install --dev --deploy --ignore-pipfile
+            pip install -r requirements/prod.txt
+            pip install -r requirements/dev.txt
       - run:
           name: Compile Front-End Assets
           command: yarn prod
@@ -28,7 +29,7 @@ jobs:
             - ./venv
             - ./node_modules
       - save_cache:
-          key: metashare-py-{{ checksum "Pipfile.lock" }}
+          key: metashare-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
           paths:
             - ./venv
       - save_cache:

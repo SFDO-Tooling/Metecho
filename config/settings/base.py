@@ -19,6 +19,8 @@ import dj_database_url
 import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.rq import RqIntegration
 
 BOOLS = ("True", "true", "T", "t", "1", 1)
 
@@ -423,4 +425,7 @@ API_PAGE_SIZE = env("API_PAGE_SIZE", type_=int, default=50)
 SENTRY_DSN = env("SENTRY_DSN", default="")
 
 if SENTRY_DSN:
-    sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(), RedisIntegration(), RqIntegration()],
+    )

@@ -2,6 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.utils.timezone import now
 
 from ..models import Project, Repository, Task, user_logged_in_handler
 
@@ -16,6 +17,18 @@ class TestRepository:
     def test_str(self):
         repository = Repository(name="Test Repository")
         assert str(repository) == "Test Repository"
+
+    def test_get_repo_id(self, repository_factory):
+        with patch("metashare.api.model_mixins.get_repo_info") as get_repo_info:
+            get_repo_info.return_value = MagicMock(id=123)
+            user = MagicMock()
+
+            gh_repo = repository_factory(repo_id=None)
+            gh_repo.get_repo_id(user)
+
+            gh_repo.refresh_from_db()
+            assert get_repo_info.called
+            assert gh_repo.repo_id == 123
 
 
 @pytest.mark.django_db
@@ -298,14 +311,14 @@ class TestScratchOrg:
         with patch(
             "metashare.api.jobs.delete_scratch_org_job"
         ) as delete_scratch_org_job:
-            scratch_org = scratch_org_factory()
+            scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.queue_delete()
 
             assert delete_scratch_org_job.delay.called
 
     def test_notify_delete(self, scratch_org_factory):
         with patch("metashare.api.models.async_to_sync") as async_to_sync:
-            scratch_org = scratch_org_factory(url="https://example.com")
+            scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.delete()
 
             assert async_to_sync.called
@@ -326,6 +339,17 @@ class TestScratchOrg:
 
             assert async_to_sync.called
 
+    def test_finalize_provision__flow_error(self, scratch_org_factory):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metashare.api.models.async_to_sync"))
+            delete_queued = stack.enter_context(
+                patch("metashare.api.jobs.delete_scratch_org_job")
+            )
+            scratch_org = scratch_org_factory(url="https://example.com")
+            scratch_org.finalize_provision(error=True)
+
+            assert delete_queued.delay.called
+
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
             jwt_session = stack.enter_context(patch("metashare.api.models.jwt_session"))
@@ -341,7 +365,7 @@ class TestScratchOrg:
 class TestGitHubRepository:
     def test_str(self, git_hub_repository_factory):
         gh_repo = git_hub_repository_factory()
-        assert str(gh_repo) == "https://example.com/repo.git"
+        assert str(gh_repo) == "https://github.com/test/repo.git"
 
 
 @pytest.mark.django_db

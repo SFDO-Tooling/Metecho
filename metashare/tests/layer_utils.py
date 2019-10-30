@@ -2,7 +2,7 @@ from channels.layers import InMemoryChannelLayer
 
 
 class MockedConnection:
-    async def setnx(self, *args, **kwargs):
+    async def set(self, *args, **kwargs):
         return True
 
     async def delete(self, *args, **kwargs):

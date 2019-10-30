@@ -15,7 +15,7 @@ export const OBJECT_TYPES = {
   COMMIT: 'scratch_org_commit' as 'scratch_org_commit',
 };
 
-export const GITHUB_REPO_PREFIX = 'https://www.github.com';
+export const GITHUB_REPO_PREFIX = 'https://github.com';
 
 export type OrgTypes = 'Dev' | 'QA';
 

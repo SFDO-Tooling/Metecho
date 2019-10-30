@@ -15,7 +15,6 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 from model_utils import Choices
-
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
@@ -43,7 +42,10 @@ class User(mixins.HashIdMixin, AbstractUser):
         repos = gh.get_all_org_repos(self)
         GitHubRepository.objects.filter(user=self).delete()
         GitHubRepository.objects.bulk_create(
-            [GitHubRepository(user=self, url=repo) for repo in repos]
+            [
+                GitHubRepository(user=self, repo_id=repo.id, repo_url=repo.html_url)
+                for repo in repos
+            ]
         )
         self.notify_repositories_updated()
 
@@ -154,11 +156,19 @@ class RepositorySlug(AbstractSlug):
     )
 
 
-class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+class Repository(
+    mixins.PopulateRepoId,
+    mixins.HashIdMixin,
+    mixins.TimestampsMixin,
+    SlugMixin,
+    models.Model,
+):
+    repo_owner = StringField()
+    repo_name = StringField()
     name = StringField(unique=True)
-    repo_url = models.URLField(unique=True, validators=[gh.validate_gh_url])
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
+    repo_id = models.IntegerField(null=True, blank=True, unique=True)
 
     slug_class = RepositorySlug
 
@@ -168,19 +178,21 @@ class Repository(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.M
     class Meta:
         verbose_name_plural = "repositories"
         ordering = ("name",)
+        unique_together = (("repo_owner", "repo_name"),)
 
 
 class GitHubRepository(mixins.HashIdMixin, models.Model):
-    url = models.URLField()
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
+    repo_id = models.IntegerField(unique=True)
+    repo_url = models.URLField()
 
     class Meta:
         verbose_name_plural = "GitHub repositories"
 
     def __str__(self):
-        return self.url
+        return self.repo_url
 
 
 class ProjectSlug(AbstractSlug):
@@ -319,9 +331,15 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     def queue_delete(self):
         from .jobs import delete_scratch_org_job
 
-        self.delete_queued_at = timezone.now()
-        self.save()
-        self.notify_changed()
+        # If the scratch org has no `last_modified_at`, it did not
+        # successfully complete the initial flow run on Salesforce, and
+        # therefore we don't need to notify of its destruction; this
+        # should only happen when it is destroyed during the initial
+        # flow run.
+        if self.last_modified_at:
+            self.delete_queued_at = timezone.now()
+            self.save()
+            self.notify_changed()
 
         delete_scratch_org_job.delay(self)
 
@@ -334,24 +352,19 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         async_to_sync(push.push_message_about_instance)(self, message)
 
     def delete(self, *args, **kwargs):
-        # If the scratch org has no URL, it has not really been created
-        # on Salesforce, and therefore we don't need to notify of its
-        # destruction; this should only happen when it is destroyed
-        # during provisioning.
-        if self.url:
+        # If the scratch org has no `last_modified_at`, it did not
+        # successfully complete the initial flow run on Salesforce, and
+        # therefore we don't need to notify of its destruction; this
+        # should only happen when it is destroyed during provisioning or
+        # the initial flow run.
+        if self.last_modified_at:
             self.finalize_delete()
         super().delete(*args, **kwargs)
 
     def queue_provision(self):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
 
-        create_branches_on_github_then_create_scratch_org_job.delay(
-            project=self.task.project,
-            repo_url=self.task.project.repository.repo_url,
-            scratch_org=self,
-            task=self.task,
-            user=self.owner,
-        )
+        create_branches_on_github_then_create_scratch_org_job.delay(scratch_org=self)
 
     def finalize_provision(self, error=None):
         from .serializers import ScratchOrgSerializer
@@ -369,7 +382,12 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
             async_to_sync(push.report_scratch_org_error)(
                 self, error, "SCRATCH_ORG_PROVISION_FAILED"
             )
-            self.delete()
+            # If the scratch org has already been created on Salesforce,
+            # we need to delete it there as well.
+            if self.url:
+                self.queue_delete()
+            else:
+                self.delete()
 
     def queue_get_unsaved_changes(self):
         from .jobs import get_unsaved_changes_job

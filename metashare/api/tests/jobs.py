@@ -26,24 +26,19 @@ class TestCreateBranchesOnGitHub:
         task = task_factory()
         project = task.project
         with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
             global_config = stack.enter_context(patch("metashare.api.gh.GlobalConfig"))
             global_config_instance = MagicMock()
             global_config.return_value = global_config_instance
             global_config_instance.get_project_config.return_value = MagicMock(
                 project__git__prefix_feature="feature/"
             )
-            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
-            gh = MagicMock()
-            gh.repository.return_value = repository
-            gh_given_user.return_value = gh
+            get_repo_info.return_value = repository
 
             _create_branches_on_github(
-                user=user,
-                repo_url="https://github.com/user/repo-bohemia",
-                project=project,
-                task=task,
-                repo_root="",
+                user=user, repo_id=123, project=project, task=task
             )
 
             assert repository.create_branch_ref.called
@@ -61,18 +56,12 @@ class TestCreateBranchesOnGitHub:
             global_config_instance.get_project_config.return_value = MagicMock(
                 project__git__prefix_feature="feature/"
             )
-            gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
-            gh = MagicMock()
-            gh.repository.return_value = repository
-            gh_given_user.return_value = gh
+            get_repo_info.return_value = repository
 
             _create_branches_on_github(
-                user=user,
-                repo_url="https://github.com/user/repo-francia",
-                project=project,
-                task=task,
-                repo_root="",
+                user=user, repo_id=123, project=project, task=task
             )
 
             assert not repository.create_branch_ref.called
@@ -80,19 +69,21 @@ class TestCreateBranchesOnGitHub:
 
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.sf_changes"))
-        sf_flow = stack.enter_context(patch(f"{PATCH_ROOT}.sf_flow"))
-        sf_flow.create_org_and_run_flow.return_value = MagicMock()
-        stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_latest_revision_numbers"))
+        create_org = stack.enter_context(patch(f"{PATCH_ROOT}.create_org"))
+        create_org.return_value = (MagicMock(), MagicMock(), MagicMock())
+        run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
-            repo_url="https://github.com/owner/repo",
+            repo_id=123,
             repo_branch=MagicMock(),
             project_path="",
         )
 
-        assert sf_flow.create_org_and_run_flow.called
+        assert create_org.called
+        assert run_flow.called
 
 
 @pytest.mark.django_db
@@ -102,7 +93,7 @@ def test_get_unsaved_changes(scratch_org_factory):
     )
 
     with patch(
-        f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers"
+        f"{PATCH_ROOT}.get_latest_revision_numbers"
     ) as get_latest_revision_numbers:
         get_latest_revision_numbers.return_value = {
             "TypeOne": {"NameOne": 13},
@@ -130,13 +121,7 @@ def test_create_branches_on_github_then_create_scratch_org():
             patch(f"{PATCH_ROOT}._create_org_and_run_flow")
         )
 
-        create_branches_on_github_then_create_scratch_org(
-            project=MagicMock(),
-            repo_url="https://github.com/user/repo",
-            scratch_org=MagicMock(),
-            task=MagicMock(),
-            user=MagicMock(),
-        )
+        create_branches_on_github_then_create_scratch_org(scratch_org=MagicMock())
 
         assert _create_branches_on_github.called
         assert _create_org_and_run_flow.called
@@ -145,7 +130,7 @@ def test_create_branches_on_github_then_create_scratch_org():
 @pytest.mark.django_db
 def test_delete_scratch_org(scratch_org_factory):
     scratch_org = scratch_org_factory()
-    with patch(f"{PATCH_ROOT}.sf_flow.delete_scratch_org") as sf_delete_scratch_org:
+    with patch(f"{PATCH_ROOT}.delete_org") as sf_delete_scratch_org:
         delete_scratch_org(scratch_org)
 
         assert sf_delete_scratch_org.called
@@ -154,7 +139,15 @@ def test_delete_scratch_org(scratch_org_factory):
 @pytest.mark.django_db
 def test_delete_scratch_org__exception(scratch_org_factory):
     scratch_org = scratch_org_factory()
-    with patch(f"{PATCH_ROOT}.sf_flow.delete_scratch_org") as sf_delete_scratch_org:
+    with ExitStack() as stack:
+        get_latest_revision_numbers = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
+        )
+        get_latest_revision_numbers.return_value = {
+            "name": {"member": 1, "member2": 1},
+            "name1": {"member": 1, "member2": 1},
+        }
+        sf_delete_scratch_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
         sf_delete_scratch_org.side_effect = SalesforceGeneralError(
             "https://example.com", 418, "I'M A TEAPOT", [{"error": "Short and stout"}]
         )
@@ -163,6 +156,7 @@ def test_delete_scratch_org__exception(scratch_org_factory):
 
         scratch_org.refresh_from_db()
         assert scratch_org.delete_queued_at is None
+        assert get_latest_revision_numbers.called
 
 
 def test_refresh_github_repositories_for_user(user_factory):
@@ -177,17 +171,16 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
     user = user_factory()
     with ExitStack() as stack:
         commit_changes_to_github = stack.enter_context(
-            patch(f"{PATCH_ROOT}.sf_changes.commit_changes_to_github")
+            patch(f"{PATCH_ROOT}.commit_changes_to_github")
         )
         get_latest_revision_numbers = stack.enter_context(
-            patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
+            patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
         )
         get_latest_revision_numbers.return_value = {
             "name": {"member": 1, "member2": 1},
             "name1": {"member": 1, "member2": 1},
         }
-
-        gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
+        get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         commit = MagicMock(
             sha="12345",
             html_url="https://github.com/test/user/foo",
@@ -195,9 +188,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
         )
         repository = MagicMock()
         repository.branch.return_value = MagicMock(commit=commit)
-        gh = MagicMock()
-        gh.repository.return_value = repository
-        gh_given_user.return_value = gh
+        get_repo_info.return_value = repository
 
         desired_changes = {"name": ["member"]}
         commit_message = "test message"
@@ -212,9 +203,8 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
 @pytest.mark.django_db
 class TestErrorHandling:
     def test_create_branches_on_github_then_create_scratch_org(
-        self, user_factory, scratch_org_factory
+        self, scratch_org_factory
     ):
-        user = user_factory()
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
@@ -229,11 +219,7 @@ class TestErrorHandling:
 
             with pytest.raises(Exception):
                 create_branches_on_github_then_create_scratch_org(
-                    project=MagicMock(),
-                    repo_url="https://github.org/test/repo",
-                    scratch_org=scratch_org,
-                    task=MagicMock(),
-                    user=user,
+                    scratch_org=scratch_org
                 )
 
             assert scratch_org.delete.called
@@ -246,7 +232,7 @@ class TestErrorHandling:
                 patch("metashare.api.models.async_to_sync")
             )
             get_latest_revision_numbers = stack.enter_context(
-                patch(f"{PATCH_ROOT}.sf_changes.get_latest_revision_numbers")
+                patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
             )
             get_latest_revision_numbers.side_effect = Exception
 
@@ -260,7 +246,7 @@ class TestErrorHandling:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             commit_changes_to_github = stack.enter_context(
-                patch(f"{PATCH_ROOT}.sf_changes.commit_changes_to_github")
+                patch(f"{PATCH_ROOT}.commit_changes_to_github")
             )
             async_to_sync = stack.enter_context(
                 patch("metashare.api.models.async_to_sync")

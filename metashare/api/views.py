@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django_filters.rest_framework import DjangoFilterBackend
+from github3.exceptions import ResponseError
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -80,8 +81,15 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     model = Repository
 
     def get_queryset(self):
-        repositories = self.request.user.repositories.values_list("url", flat=True)
-        return Repository.objects.filter(repo_url__in=repositories)
+        repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
+
+        for repo in Repository.objects.filter(repo_id__isnull=True):
+            try:
+                repo.get_repo_id(self.request.user)
+            except ResponseError:
+                pass
+
+        return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -136,9 +144,10 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        # XXX: This method is copied verbatim from
-        # rest_framework.mixins.RetrieveModelMixin, because I needed to
-        # insert the get_unsaved_changes line in the middle.
+        # XXX: This method is adapted from
+        # rest_framework.mixins.RetrieveModelMixin, but one particular
+        # change: we needed to insert the get_unsaved_changes line in
+        # the middle.
         instance = self.get_object()
         conditions = [
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
