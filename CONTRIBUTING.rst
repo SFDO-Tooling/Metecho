@@ -206,5 +206,4 @@ automatically parsed, but will log errors while the app is running if they're
 missing from the served translation files. To resolve, add the missing key:value
 translations to ``locales/<language>/translation.json``.
 
-.. _GNU gettext toolset: https://www.gnu.org/software/gettext/
 .. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector
