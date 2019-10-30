@@ -1,4 +1,4 @@
-FROM wlonk/oddbird:latest
+FROM oddbirds/pyjs
 
 ARG BUILD_ENV=development
 
