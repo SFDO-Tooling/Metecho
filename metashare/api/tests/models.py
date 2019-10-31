@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
+from simple_salesforce.exceptions import SalesforceError
 
 from ..models import Project, Repository, Task, user_logged_in_handler
 
@@ -244,11 +245,11 @@ class TestUser:
             },
         )
         with patch("metashare.api.models.get_devhub_api") as get_devhub_api:
-            resp = MagicMock(status_code=200)
+            resp = {"foo": "bar"}
             client = MagicMock()
             client.restful.return_value = resp
             get_devhub_api.return_value = client
-            assert user.is_devhub_enabled
+            assert user.is_devhub_enabled is True
 
     def test_is_devhub_enabled__false(self, user_factory, social_account_factory):
         user = user_factory()
@@ -266,13 +267,13 @@ class TestUser:
             },
         )
         with patch("metashare.api.models.get_devhub_api") as get_devhub_api:
-            resp = MagicMock(status_code=404)
+            resp = None
             client = MagicMock()
             client.restful.return_value = resp
             get_devhub_api.return_value = client
-            assert not user.is_devhub_enabled
+            assert user.is_devhub_enabled is False
 
-    def test_is_devhub_enabled__final_none(self, user_factory, social_account_factory):
+    def test_is_devhub_enabled__sf_error(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(
             user=user,
@@ -288,11 +289,20 @@ class TestUser:
             },
         )
         with patch("metashare.api.models.get_devhub_api") as get_devhub_api:
-            resp = MagicMock(status_code=401)
             client = MagicMock()
-            client.restful.return_value = resp
+            client.restful.side_effect = SalesforceError(
+                "https://example.com",
+                404,
+                "Not Found",
+                [
+                    {
+                        "errorCode": "NOT_FOUND",
+                        "message": "The requested resource does not exist",
+                    }
+                ],
+            )
             get_devhub_api.return_value = client
-            assert user.is_devhub_enabled is None
+            assert user.is_devhub_enabled is False
 
 
 @pytest.mark.django_db

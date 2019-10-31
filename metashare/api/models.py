@@ -17,6 +17,7 @@ from model_utils import Choices
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
+from simple_salesforce.exceptions import SalesforceError
 
 from . import gh
 from . import model_mixins as mixins
@@ -140,12 +141,13 @@ class User(mixins.HashIdMixin, AbstractUser):
             return None
 
         client = get_devhub_api(devhub_username=self.sf_username)
-        resp = client.restful("sobjects/ScratchOrgInfo")
-        if resp.status_code == 200:
-            return True
-        if resp.status_code == 404:
+        try:
+            resp = client.restful("sobjects/ScratchOrgInfo")
+            if resp:
+                return True
             return False
-        return None
+        except SalesforceError:
+            return False
 
 
 class RepositorySlug(AbstractSlug):
