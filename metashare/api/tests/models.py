@@ -210,7 +210,7 @@ class TestUser:
         user = user_factory(socialaccount_set=[])
         assert user.full_org_type is None
 
-    def test_is_devhub_enabled__shortcut_none(
+    def test_is_devhub_enabled__shortcut_false(
         self, user_factory, social_account_factory
     ):
         user = user_factory()
@@ -227,7 +227,7 @@ class TestUser:
                 },
             },
         )
-        assert user.is_devhub_enabled is None
+        assert not user.is_devhub_enabled
 
     def test_is_devhub_enabled__true(self, user_factory, social_account_factory):
         user = user_factory()
@@ -249,7 +249,7 @@ class TestUser:
             client = MagicMock()
             client.restful.return_value = resp
             get_devhub_api.return_value = client
-            assert user.is_devhub_enabled is True
+            assert user.is_devhub_enabled
 
     def test_is_devhub_enabled__false(self, user_factory, social_account_factory):
         user = user_factory()
@@ -271,7 +271,7 @@ class TestUser:
             client = MagicMock()
             client.restful.return_value = resp
             get_devhub_api.return_value = client
-            assert user.is_devhub_enabled is False
+            assert not user.is_devhub_enabled
 
     def test_is_devhub_enabled__sf_error(self, user_factory, social_account_factory):
         user = user_factory()
@@ -302,7 +302,7 @@ class TestUser:
                 ],
             )
             get_devhub_api.return_value = client
-            assert user.is_devhub_enabled is False
+            assert not user.is_devhub_enabled
 
 
 @pytest.mark.django_db
