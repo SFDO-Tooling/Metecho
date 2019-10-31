@@ -136,9 +136,9 @@ class User(mixins.HashIdMixin, AbstractUser):
     def is_devhub_enabled(self):
         # We can shortcut and avoid making an HTTP request in some cases:
         if not self.salesforce_account:
-            return None
+            return False
         if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
-            return None
+            return False
 
         client = get_devhub_api(devhub_username=self.sf_username)
         try:
