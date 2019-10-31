@@ -371,6 +371,7 @@ const OrgCards = ({
 
   let deleteAction: (...args: any[]) => void = openConnectModal;
   let createAction: (...args: any[]) => void = openConnectModal;
+  let refetchAction: (...args: any[]) => void = openConnectModal;
   if (user && user.valid_token_for) {
     createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
     deleteAction = user.is_devhub_enabled
@@ -383,6 +384,7 @@ const OrgCards = ({
           }
         }
       : openInfoModal;
+    refetchAction = doRefetchOrg;
   }
 
   // When dev org delete has been triggered, wait until it has been refreshed...
@@ -413,7 +415,7 @@ const OrgCards = ({
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
           deleteAction={deleteAction}
-          refreshAction={doRefetchOrg}
+          refreshAction={refetchAction}
         />
         <OrgCard
           orgs={orgs}
@@ -424,7 +426,7 @@ const OrgCards = ({
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
           deleteAction={deleteAction}
-          refreshAction={doRefetchOrg}
+          refreshAction={refetchAction}
         />
       </div>
       <ConnectModal
