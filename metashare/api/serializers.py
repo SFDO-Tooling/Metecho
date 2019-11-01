@@ -154,7 +154,6 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     has_unsaved_changes = serializers.SerializerMethodField()
-    parent_org_id = serializers.SerializerMethodField()
 
     class Meta:
         model = ScratchOrg
@@ -174,7 +173,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "delete_queued_at",
-            "parent_org_id",
+            "owner_sf_id",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -190,9 +189,6 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
 
     def get_has_unsaved_changes(self, obj) -> bool:
         return bool(obj.unsaved_changes)
-
-    def get_parent_org_id(self, obj) -> bool:
-        return obj.config.get("org_id")
 
     def save(self, **kwargs):
         kwargs["owner"] = kwargs.get("owner", self.context["request"].user)
