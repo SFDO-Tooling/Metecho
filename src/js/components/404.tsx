@@ -5,18 +5,14 @@ import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import routes from '@/utils/routes';
-import svgPath from '#/desert.svg';
+import desertSvg from '!svg-inline-loader!#/desert.svg';
 
 export const EmptyIllustration = ({ message }: { message: ReactNode }) => (
   <div className="slds-illustration slds-illustration_large">
-    <svg
-      className="slds-illustration__svg"
-      aria-hidden="true"
-      name="desert"
-      style={{ height: '400px' }}
-    >
-      <use xlinkHref={`${svgPath}#desert`} />
-    </svg>
+    <div
+      className="slds-m-vertical_xx-large"
+      dangerouslySetInnerHTML={{ __html: desertSvg }}
+    />
     <h3 className="slds-illustration__header slds-text-heading_medium">
       ¯\_(ツ)_/¯
     </h3>
