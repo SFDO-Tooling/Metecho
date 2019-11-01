@@ -84,7 +84,7 @@ if [[ ${#JS[@]} -ne 0 || ${#SCSS[@]} -ne 0 || ${#PY[@]} -ne 0 || ${#TEXT[@]} -ne
             ;;
         "not-running")
             echo "Starting container in background..."
-            docker-compose up -d $SERVICE_NAME
+            docker-compose up --detach --no-deps $SERVICE_NAME
             STARTED_BACKGROUND_CONTAINER=1
             ;;
     esac
