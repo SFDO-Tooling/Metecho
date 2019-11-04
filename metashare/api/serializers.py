@@ -188,7 +188,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:
-        return bool(obj.unsaved_changes)
+        return bool(getattr(obj, "unsaved_changes", {}))
 
     def save(self, **kwargs):
         kwargs["owner"] = kwargs.get("owner", self.context["request"].user)

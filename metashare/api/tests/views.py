@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -130,13 +131,80 @@ class TestScratchOrgView:
             assert response.status_code == 200
             assert get_unsaved_changes_job.delay.called
 
-    def test_queue_delete(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+    def test_create(self, client, task_factory, social_account_factory):
+        task = task_factory()
+        social_account_factory(
+            user=client.user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "test-username"},
+        )
+        url = reverse("scratch-org-list")
+        with ExitStack() as stack:
+            stack.enter_context(
+                patch("metashare.api.views.viewsets.ModelViewSet.perform_create")
+            )
+            get_devhub_api = stack.enter_context(
+                patch("metashare.api.models.get_devhub_api")
+            )
+            resp = {"foo": "bar"}
+            sf_client = MagicMock()
+            sf_client.restful.return_value = resp
+            get_devhub_api.return_value = sf_client
+
+            response = client.post(url, {"task": str(task.id), "org_type": "Dev"})
+
+        assert response.status_code == 201, response.content
+
+    def test_create__bad(self, client, task_factory, social_account_factory):
+        task = task_factory()
+        social_account_factory(
+            user=client.user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "test-username"},
+        )
+        url = reverse("scratch-org-list")
+        with ExitStack() as stack:
+            stack.enter_context(
+                patch("metashare.api.views.viewsets.ModelViewSet.perform_create")
+            )
+            get_devhub_api = stack.enter_context(
+                patch("metashare.api.models.get_devhub_api")
+            )
+            sf_client = MagicMock()
+            sf_client.restful.return_value = None
+            get_devhub_api.return_value = sf_client
+
+            response = client.post(url, {"task": str(task.id), "org_type": "Dev"})
+
+        assert response.status_code == 403, response.content
+
+    def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
+        social_account_factory(
+            user=client.user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "test-username"},
+        )
+        scratch_org = scratch_org_factory(owner_sf_id="test-username")
         with patch("metashare.api.models.ScratchOrg.queue_delete"):
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.delete(url)
 
             assert response.status_code == 204
+
+    def test_queue_delete__bad(
+        self, client, scratch_org_factory, social_account_factory
+    ):
+        social_account_factory(
+            user=client.user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "test-username"},
+        )
+        scratch_org = scratch_org_factory(owner_sf_id="other-test-username")
+        with patch("metashare.api.models.ScratchOrg.queue_delete"):
+            url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+            response = client.delete(url)
+
+            assert response.status_code == 403
 
     def test_redirect(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory()

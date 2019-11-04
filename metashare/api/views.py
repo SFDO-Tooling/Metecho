@@ -4,6 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ResponseError
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -116,8 +117,22 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ScratchOrgFilter
 
+    def perform_create(self, *args, **kwargs):
+        if self.request.user.is_devhub_enabled:
+            super().perform_create(*args, **kwargs)
+        else:
+            raise PermissionDenied(
+                "User is not connected to a DevHub-enabled SalesForce organization."
+            )
+
     def perform_destroy(self, instance):
-        instance.queue_delete()
+        if self.request.user.sf_username == instance.owner_sf_id:
+            instance.queue_delete()
+        else:
+            raise PermissionDenied(
+                "User is not connected to the same SalesForce organization that "
+                "created the ScratchOrg."
+            )
 
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
