@@ -143,6 +143,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
+            "owner": request.user,
             "org_type": SCRATCH_ORG_TYPES.Dev,
             "url__isnull": False,
             "delete_queued_at__isnull": True,
@@ -165,6 +166,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # the middle.
         instance = self.get_object()
         conditions = [
+            instance.owner == request.user,
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
             instance.url is not None,
             instance.delete_queued_at is None,

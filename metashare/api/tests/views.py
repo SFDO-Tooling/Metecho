@@ -117,6 +117,7 @@ class TestScratchOrgView:
             delete_queued_at=None,
             currently_capturing_changes=False,
             currently_refreshing_changes=False,
+            owner=client.user,
         )
         with patch(
             "metashare.api.jobs.get_unsaved_changes_job"
@@ -134,6 +135,7 @@ class TestScratchOrgView:
             delete_queued_at=None,
             currently_capturing_changes=False,
             currently_refreshing_changes=False,
+            owner=client.user,
         )
         with patch(
             "metashare.api.jobs.get_unsaved_changes_job"
