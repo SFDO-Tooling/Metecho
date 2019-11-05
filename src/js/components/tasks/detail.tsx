@@ -61,7 +61,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
-    userIsOwner = devOrg && devOrg.owner === user.id;
+    userIsOwner = Boolean(devOrg && devOrg.owner === user.id);
     currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
   }
@@ -236,7 +236,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           isOpen={connectModalOpen}
           toggleModal={setConnectModalOpen}
         />
-        {devOrg && devOrg.has_unsaved_changes && (
+        {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
             orgId={devOrg.id}
             changeset={devOrg.unsaved_changes}

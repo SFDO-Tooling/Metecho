@@ -49,7 +49,7 @@ jobs:
           name: Lint
           command: |
             . venv/bin/activate
-            yarn lint
+            yarn lint:nofix
 
   test-client:
     working_directory: ~/metashare

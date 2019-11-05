@@ -52,10 +52,16 @@ const CustomDomainForm = ({
 
 const ConnectModal = ({
   user,
+  heading,
+  tagline,
+  ignoreConnection,
   isOpen,
   toggleModal,
 }: {
   user: User;
+  heading?: string;
+  tagline?: JSX.Element;
+  ignoreConnection?: boolean;
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
 }) => {
@@ -106,21 +112,23 @@ const ConnectModal = ({
 
   return (
     <Modal
-      isOpen={!(user && user.valid_token_for) && isOpen}
-      heading={i18n.t('Connect to Salesforce')}
+      isOpen={isOpen && (ignoreConnection || !(user && user.valid_token_for))}
+      heading={heading || i18n.t('Connect to Salesforce')}
       tagline={
-        <Trans i18nKey="devHubInfo">
-          Connection to a Salesforce org with Dev Hub enabled is required to
-          create or modify a Dev or QA scratch org. Learn how to{' '}
-          <ExternalLink url="https://developer.salesforce.com/signup">
-            create a Developer Edition org
-          </ExternalLink>{' '}
-          and{' '}
-          <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
-            enable Dev Hub
-          </ExternalLink>
-          .
-        </Trans>
+        tagline || (
+          <Trans i18nKey="devHubInfo">
+            Connection to a Salesforce org with Dev Hub enabled is required to
+            create or modify a Dev or QA scratch org. Learn how to{' '}
+            <ExternalLink url="https://developer.salesforce.com/signup">
+              create a Developer Edition org
+            </ExternalLink>{' '}
+            and{' '}
+            <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
+              enable Dev Hub
+            </ExternalLink>
+            .
+          </Trans>
+        )
       }
       footer={
         isCustomDomain && [
