@@ -10,6 +10,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import FourOhFour from '@/components/404';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
+import SubmitModal from '@/components/tasks/submit';
 import ConnectModal from '@/components/user/connect';
 import {
   DetailPageLayout,
@@ -32,8 +33,6 @@ import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
-
-import SubmitModal from './submit';
 
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
