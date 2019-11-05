@@ -201,6 +201,11 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["GET"])
     def redirect(self, request, pk=None):
-        instance = self.get_object()
-        url = instance.get_login_url()
+        scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": "Requesting user did not create scratch org."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)

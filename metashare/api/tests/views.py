@@ -221,11 +221,20 @@ class TestScratchOrgView:
 
             assert response.status_code == 403
 
-    def test_redirect(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+    def test_redirect__good(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(owner=client.user)
         with patch("metashare.api.models.ScratchOrg.get_login_url") as get_login_url:
             get_login_url.return_value = "https://example.com"
             url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
             response = client.get(url)
 
             assert response.status_code == 302
+
+    def test_redirect__bad(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch("metashare.api.models.ScratchOrg.get_login_url") as get_login_url:
+            get_login_url.return_value = "https://example.com"
+            url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
+            response = client.get(url)
+
+            assert response.status_code == 403
