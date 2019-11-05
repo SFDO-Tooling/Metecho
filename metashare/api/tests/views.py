@@ -72,7 +72,7 @@ def test_repository_view(client, repository_factory, git_hub_repository_factory)
 @pytest.mark.django_db
 class TestScratchOrgView:
     def test_commit_happy_path(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(org_type="Dev")
+        scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"
         ) as commit_changes_from_org_job:
@@ -84,7 +84,7 @@ class TestScratchOrgView:
             assert response.status_code == 202
             assert commit_changes_from_org_job.delay.called
 
-    def test_commit_sad_path(self, client, scratch_org_factory):
+    def test_commit_sad_path__422(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(org_type="Dev")
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"
@@ -95,6 +95,19 @@ class TestScratchOrgView:
                 format="json",
             )
             assert response.status_code == 422
+            assert not commit_changes_from_org_job.delay.called
+
+    def test_commit_sad_path__403(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(org_type="Dev")
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
+                {"commit_message": "Test message", "changes": {}},
+                format="json",
+            )
+            assert response.status_code == 403
             assert not commit_changes_from_org_job.delay.called
 
     def test_list_fetch_changes(self, client, scratch_org_factory):

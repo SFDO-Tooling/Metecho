@@ -19,6 +19,12 @@ function dce {
     RUNNING=`is_running`
     case "$RUNNING" in
         "running")
+            # XXX: I have discovered a truly marvelous bug which this margin is
+            # too small to contain. But in seriousness: if the container is
+            # "running" because of `docker-compose run` instead of
+            # `docker-compose up`, then `docker-compose exec` will fail. For my
+            # server-side purposes, I tend to not ever run `up`, only `run
+            # bash`, and so this reliably fails. I should fix this!
             docker-compose exec -T $SERVICE_NAME $@
             ;;
         "not-running")

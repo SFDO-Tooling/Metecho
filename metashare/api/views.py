@@ -185,6 +185,11 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
 
         scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": "Requesting user did not create scratch org."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         commit_message = serializer.validated_data["commit_message"]
         desired_changes = serializer.validated_data["changes"]
         scratch_org.queue_commit_changes(request.user, desired_changes, commit_message)
