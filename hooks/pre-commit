@@ -7,7 +7,7 @@ SERVICE_NAME=web
 STARTED_BACKGROUND_CONTAINER=0
 
 function is_running {
-    RUNNING=`docker-compose top $SERVICE_NAME` 
+    RUNNING=`docker-compose top $SERVICE_NAME`
     if [[ -n "$RUNNING" ]]; then
         echo "running"
     else
@@ -19,7 +19,13 @@ function dce {
     RUNNING=`is_running`
     case "$RUNNING" in
         "running")
-            docker-compose exec -T web $@
+            # XXX: I have discovered a truly marvelous bug which this margin is
+            # too small to contain. But in seriousness: if the container is
+            # "running" because of `docker-compose run` instead of
+            # `docker-compose up`, then `docker-compose exec` will fail. For my
+            # server-side purposes, I tend to not ever run `up`, only `run
+            # bash`, and so this reliably fails. I should fix this!
+            docker-compose exec -T $SERVICE_NAME $@
             ;;
         "not-running")
             echo "Something went wrong; are you sure the container is running?"
@@ -43,6 +49,7 @@ JS=()
 SCSS=()
 PY=()
 PYI=()
+TEXT=()
 OTHER=()
 
 for FILENAME in $STAGED_FILES
@@ -66,13 +73,16 @@ do
         pyi)
             PYI+=($FILENAME)
             ;;
+        json|md|yml)
+            TEXT+=($FILENAME)
+            ;;
         *)
             OTHER+=($FILENAME)
             ;;
     esac
 done
 
-if [[ ${#JS[@]} -ne 0 || ${#SCSS[@]} -ne 0 || ${#PY[@]} -ne 0 ]]; then
+if [[ ${#JS[@]} -ne 0 || ${#SCSS[@]} -ne 0 || ${#PY[@]} -ne 0 || ${#TEXT[@]} -ne 0 ]]; then
     RUNNING=`is_running`
     case "$RUNNING" in
         "running")
@@ -80,7 +90,7 @@ if [[ ${#JS[@]} -ne 0 || ${#SCSS[@]} -ne 0 || ${#PY[@]} -ne 0 ]]; then
             ;;
         "not-running")
             echo "Starting container in background..."
-            docker-compose up -d $SERVICE_NAME
+            docker-compose up --detach --no-deps $SERVICE_NAME
             STARTED_BACKGROUND_CONTAINER=1
             ;;
     esac
@@ -102,4 +112,9 @@ if [[ ${#PY[@]} -ne 0 ]]; then
     dce black ${PY[@]}
     dce flake8 ${PY[@]}
     git add ${PY[@]}
+fi
+
+if [[ ${#TEXT[@]} -ne 0 ]]; then
+    dce ./node_modules/.bin/prettier --write ${TEXT[@]}
+    git add ${TEXT[@]}
 fi

@@ -10,18 +10,18 @@ interface Props {
 }
 
 class ErrorBoundary extends Component<Props, { hasError: boolean }> {
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
   }
 
   /* istanbul ignore next */
-  public componentDidCatch(error: Error, info: {}) {
+  componentDidCatch(error: Error, info: {}) {
     this.setState({ hasError: true });
     logError(error, info);
   }
 
-  public render() {
+  render() {
     if (this.state.hasError) {
       return (
         <EmptyIllustration

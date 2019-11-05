@@ -68,8 +68,8 @@ class RepositoryFactory(factory.django.DjangoModelFactory):
         model = Repository
 
     name = factory.Sequence("Repository {}".format)
-    repo_owner = "test"
-    repo_name = "repo"
+    repo_owner = factory.Sequence("user_{}".format)
+    repo_name = factory.Sequence("repo_{}".format)
     repo_id = factory.Sequence(lambda n: n)
 
 

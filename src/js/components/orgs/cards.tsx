@@ -292,6 +292,7 @@ const OrgCards = ({
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [connectAgainModalOpen, setConnectAgainModalOpen] = useState(false);
   const [
     confirmDeleteModalOpen,
     setConfirmDeleteModalOpen,
@@ -362,27 +363,38 @@ const OrgCards = ({
 
   const openConnectModal = () => {
     setInfoModalOpen(false);
+    setConnectAgainModalOpen(false);
     setConnectModalOpen(true);
   };
   const openInfoModal = () => {
     setConnectModalOpen(false);
+    setConnectAgainModalOpen(false);
     setInfoModalOpen(true);
+  };
+  const openConnectAgainModal = () => {
+    setConnectModalOpen(false);
+    setInfoModalOpen(false);
+    setConnectAgainModalOpen(true);
   };
 
   let deleteAction: (...args: any[]) => void = openConnectModal;
   let createAction: (...args: any[]) => void = openConnectModal;
+  let refetchAction: (...args: any[]) => void = openConnectModal;
   if (user && user.valid_token_for) {
     createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
-    deleteAction = user.is_devhub_enabled
-      ? (org: Org) => {
-          if (org.org_type === ORG_TYPES.DEV) {
-            setIsWaitingToDeleteDevOrg(true);
-            doRefetchOrg(org);
-          } else {
-            deleteOrg(org);
-          }
+    deleteAction = (org: Org) => {
+      if (org.owner_sf_id === user.sf_username) {
+        if (org.org_type === ORG_TYPES.DEV) {
+          setIsWaitingToDeleteDevOrg(true);
+          doRefetchOrg(org);
+        } else {
+          deleteOrg(org);
         }
-      : openInfoModal;
+      } else {
+        openConnectAgainModal();
+      }
+    };
+    refetchAction = doRefetchOrg;
   }
 
   // When dev org delete has been triggered, wait until it has been refreshed...
@@ -413,7 +425,7 @@ const OrgCards = ({
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
           deleteAction={deleteAction}
-          refreshAction={doRefetchOrg}
+          refreshAction={refetchAction}
         />
         <OrgCard
           orgs={orgs}
@@ -424,13 +436,23 @@ const OrgCards = ({
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
           deleteAction={deleteAction}
-          refreshAction={doRefetchOrg}
+          refreshAction={refetchAction}
         />
       </div>
       <ConnectModal
         user={user as User}
         isOpen={connectModalOpen}
         toggleModal={setConnectModalOpen}
+      />
+      <ConnectModal
+        user={user as User}
+        heading={i18n.t('Salesforce User Does Not Have Required Permissions')}
+        tagline={i18n.t(
+          'The connected Salesforce user must be the same Salesforce user who created the scratch org.',
+        )}
+        ignoreConnection
+        isOpen={connectAgainModalOpen}
+        toggleModal={setConnectAgainModalOpen}
       />
       <ConnectionInfoModal
         user={user as User}
