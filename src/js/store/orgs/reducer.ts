@@ -15,6 +15,7 @@ export interface Org {
   task: string;
   org_type: OrgTypes;
   owner: string;
+  owner_sf_id: string;
   last_modified_at: string | null;
   expires_at: string | null;
   latest_commit: string;
@@ -165,7 +166,10 @@ const reducer = (
           ...taskOrgs,
           [org.org_type]: {
             ...org,
-            currently_refreshing_changes: action.type !== 'REFETCH_ORG_FAILED',
+            currently_refreshing_changes:
+              action.type === 'REFETCH_ORG_SUCCEEDED'
+                ? org.currently_refreshing_changes
+                : action.type !== 'REFETCH_ORG_FAILED',
           },
         },
       };

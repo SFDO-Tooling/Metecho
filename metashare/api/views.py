@@ -122,7 +122,8 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             super().perform_create(*args, **kwargs)
         else:
             raise PermissionDenied(
-                "User is not connected to a DevHub-enabled SalesForce organization."
+                "User is not connected to a Salesforce organization "
+                "with Dev Hub enabled."
             )
 
     def perform_destroy(self, instance):
@@ -130,7 +131,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             instance.queue_delete()
         else:
             raise PermissionDenied(
-                "User is not connected to the same SalesForce organization that "
+                "User is not connected to Salesforce as the same Salesforce user who "
                 "created the ScratchOrg."
             )
 
