@@ -13,7 +13,7 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test.each([['USER_LOGGED_OUT'], ['REFETCH_DATA_SUCCEEDED']])(
+  test.each([['USER_LOGGED_OUT']])(
     'returns initial state on %s action',
     (action) => {
       const repository1 = {
