@@ -2,8 +2,7 @@
 User
 ====
 
-This is a degenerate endpoint that just shows some details of the
-current user.
+This is a degenerate endpoint that just shows some details of the current user.
 
 Retrieve
 --------
