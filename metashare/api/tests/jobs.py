@@ -10,6 +10,7 @@ from ..jobs import (
     _create_org_and_run_flow,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
+    create_pr,
     delete_scratch_org,
     get_unsaved_changes,
     refresh_github_repositories_for_user,
@@ -257,3 +258,16 @@ class TestErrorHandling:
                 commit_changes_from_org(scratch_org, user, {}, "message")
 
             assert async_to_sync.called
+
+
+@pytest.mark.django_db
+def test_create_pr(user_factory, task_factory):
+    user = user_factory()
+    task = task_factory()
+    with patch(f"{PATCH_ROOT}.get_repo_info") as get_repo_info:
+        repository = MagicMock()
+        get_repo_info.return_value = repository
+
+        create_pr(user, task)
+
+        assert repository.create_pull.called

@@ -124,6 +124,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "branch_url",
+            "has_unmerged_commits",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

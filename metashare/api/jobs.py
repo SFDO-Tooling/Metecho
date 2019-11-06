@@ -179,6 +179,10 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         repository = get_repo_info(user, repo_id=repo_id)
         commit = repository.branch(branch).commit
 
+        scratch_org.task.refresh_from_db()
+        scratch_org.task.has_unmerged_commits = True
+        scratch_org.task.save()
+
         scratch_org.refresh_from_db()
         scratch_org.last_modified_at = now()
         scratch_org.latest_commit = commit.sha
@@ -218,6 +222,20 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
 
 
 commit_changes_from_org_job = job(commit_changes_from_org)
+
+
+def create_pr(user, task):
+    repo_id = task.project.repository.get_repo_id(user)
+    repository = get_repo_info(user, repo_id=repo_id)
+    repository.create_pull(
+        task.name,
+        task.project.branch_name,  # base
+        task.branch_name,  # head
+        body=task.description,
+    )
+
+
+create_pr_job = job(create_pr)
 
 
 def delete_scratch_org(scratch_org):
