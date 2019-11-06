@@ -185,11 +185,12 @@ class GitHubRepository(mixins.HashIdMixin, models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
-    repo_id = models.IntegerField(unique=True)
+    repo_id = models.IntegerField()
     repo_url = models.URLField()
 
     class Meta:
         verbose_name_plural = "GitHub repositories"
+        unique_together = (("user", "repo_id"),)
 
     def __str__(self):
         return self.repo_url
