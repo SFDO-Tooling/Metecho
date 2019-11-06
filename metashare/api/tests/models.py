@@ -52,6 +52,39 @@ class TestTask:
         task = Task(name="Test Task")
         assert str(task) == "Test Task"
 
+    def test_notify_changed(self, task_factory):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metashare.api.jobs.create_pr_job"))
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.models.async_to_sync")
+            )
+            task = task_factory()
+            task.notify_changed()
+
+            assert async_to_sync.called
+
+    def test_finalize_task_update(self, task_factory):
+        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_task_update()
+
+            assert async_to_sync.called
+
+    def test_queue_create_pr(self, task_factory, user_factory):
+        with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
+            task = task_factory()
+            user = user_factory()
+            task.queue_create_pr(user)
+
+            assert create_pr_job.delay.called
+
+    def test_finalize_create_pr(self, task_factory):
+        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_create_pr()
+
+            assert async_to_sync.called
+
 
 @pytest.mark.django_db
 class TestUser:

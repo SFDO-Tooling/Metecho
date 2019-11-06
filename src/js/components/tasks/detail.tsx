@@ -1,6 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -31,16 +32,14 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
-  const [readyForReview, setReadyForReview] = useState(true); // true for now
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
-  const [openingReview, setOpeningReview] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -57,6 +56,8 @@ const TaskDetail = (props: RouteComponentProps) => {
   const { orgs } = useFetchOrgsIfMissing(task, props);
   const user = useSelector(selectUserState) as User;
 
+  const readyToSubmit = Boolean(task && task.has_unmerged_commits);
+  const currentlySubmitting = Boolean(task && task.currently_submitting);
   let currentlyFetching,
     currentlyCommitting,
     orgHasChanges,
@@ -70,6 +71,25 @@ const TaskDetail = (props: RouteComponentProps) => {
     currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
   }
 
+  // Subscribe to task WS only once, and unsubscribe on unmount
+  const taskId = task && task.id;
+  useEffect(() => {
+    if (taskId && window.socket) {
+      window.socket.subscribe({
+        model: OBJECT_TYPES.TASK,
+        id: taskId,
+      });
+    }
+    return () => {
+      if (taskId && window.socket) {
+        window.socket.unsubscribe({
+          model: OBJECT_TYPES.TASK,
+          id: taskId,
+        });
+      }
+    };
+  }, [taskId]);
+
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
     const changesFetched =
@@ -82,10 +102,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         setCaptureModalOpen(true);
       }
     }
-    if (openingReview && !submitModalOpen) {
-      setOpeningReview(false);
-    }
-  }, [fetchingChanges, devOrg, submitModalOpen, openingReview]);
+  }, [fetchingChanges, devOrg]);
 
   const doRefetchOrg = useCallback((org: Org) => {
     dispatch(refetchOrg(org));
@@ -95,22 +112,8 @@ const TaskDetail = (props: RouteComponentProps) => {
     setConnectModalOpen(true);
   };
   const openSubmitModal = () => {
-    setOpeningReview(true);
     setSubmitModalOpen(true);
   };
-
-  let action = openConnectModal;
-  if (readyForReview) {
-    action = openSubmitModal;
-  } else if (user.valid_token_for) {
-    action = () => {
-      /* istanbul ignore else */
-      if (devOrg) {
-        setFetchingChanges(true);
-        doRefetchOrg(devOrg);
-      }
-    };
-  }
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -188,24 +191,75 @@ const TaskDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
-  let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
-  if (currentlyCommitting) {
-    buttonText = (
+  let submitButton = null;
+  if (readyToSubmit) {
+    const isPrimary = !(userIsOwner && orgHasChanges);
+    const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
-        label={i18n.t('Capturing Selected Changes…')}
-        variant="inverse"
+        label={i18n.t('Submitting Task for Review…')}
+        variant={isPrimary ? 'inverse' : 'base'}
       />
+    ) : (
+      i18n.t('Submit Task for Review')
     );
-  } else if (fetchingChanges || currentlyFetching) {
-    buttonText = (
-      <LabelWithSpinner
-        label={i18n.t('Checking for Uncaptured Changes…')}
-        variant="inverse"
+    submitButton = (
+      <Button
+        label={submitButtonText}
+        className={classNames('slds-size_full slds-m-bottom_x-large', {
+          'slds-m-left_none': !isPrimary,
+        })}
+        variant={isPrimary ? 'brand' : 'outline-brand'}
+        onClick={openSubmitModal}
+        disabled={currentlySubmitting}
       />
     );
   }
-  if (readyForReview) {
-    buttonText = i18n.t('Submit Task for Review');
+
+  let primaryButton = null;
+  let secondaryButton = null;
+  if (userIsOwner && orgHasChanges) {
+    const captureButtonAction = user.valid_token_for
+      ? () => {
+          /* istanbul ignore else */
+          if (devOrg) {
+            setFetchingChanges(true);
+            doRefetchOrg(devOrg);
+          }
+        }
+      : openConnectModal;
+    let captureButtonText: JSX.Element = i18n.t('Capture Task Changes');
+    if (currentlyCommitting) {
+      captureButtonText = (
+        <LabelWithSpinner
+          label={i18n.t('Capturing Selected Changes…')}
+          variant="inverse"
+        />
+      );
+    } else if (fetchingChanges || currentlyFetching) {
+      captureButtonText = (
+        <LabelWithSpinner
+          label={i18n.t('Checking for Uncaptured Changes…')}
+          variant="inverse"
+        />
+      );
+    }
+    primaryButton = (
+      <Button
+        label={captureButtonText}
+        className={classNames('slds-size_full', {
+          'slds-m-bottom_medium': readyToSubmit,
+          'slds-m-bottom_x-large': !readyToSubmit,
+        })}
+        variant="brand"
+        onClick={captureButtonAction}
+        disabled={fetchingChanges || currentlyFetching || currentlyCommitting}
+      />
+    );
+    if (readyToSubmit) {
+      secondaryButton = submitButton;
+    }
+  } else if (readyToSubmit) {
+    primaryButton = submitButton;
   }
 
   return (
@@ -231,20 +285,8 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        {(userIsOwner && orgHasChanges) || readyForReview ? (
-          <Button
-            label={buttonText}
-            className="slds-size_full slds-m-bottom_x-large"
-            variant="brand"
-            onClick={action}
-            disabled={
-              fetchingChanges ||
-              currentlyFetching ||
-              currentlyCommitting ||
-              readyForReview
-            }
-          />
-        ) : null}
+        {primaryButton}
+        {secondaryButton}
 
         {orgs ? (
           <OrgCards orgs={orgs} task={task} project={project} />
@@ -264,10 +306,12 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setCaptureModalOpen}
           />
         )}
-        <SubmitModal
-          isOpen={submitModalOpen}
-          toggleModal={setSubmitModalOpen}
-        />
+        {readyToSubmit && (
+          <SubmitModal
+            isOpen={submitModalOpen}
+            toggleModal={setSubmitModalOpen}
+          />
+        )}
       </DetailPageLayout>
     </DocumentTitle>
   );

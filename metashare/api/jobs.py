@@ -63,7 +63,7 @@ def _create_branches_on_github(*, user, repo_id, project, task):
             base_branch=project_branch_name,
         )
         task.branch_name = task_branch_name
-        task.finalize_branch_update()
+        task.finalize_task_update()
 
     return task_branch_name
 
@@ -181,7 +181,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
 
         scratch_org.task.refresh_from_db()
         scratch_org.task.has_unmerged_commits = True
-        scratch_org.task.save()
+        scratch_org.task.finalize_task_update()
 
         scratch_org.refresh_from_db()
         scratch_org.last_modified_at = now()
@@ -224,15 +224,25 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
 commit_changes_from_org_job = job(commit_changes_from_org)
 
 
-def create_pr(user, task):
-    repo_id = task.project.repository.get_repo_id(user)
-    repository = get_repo_info(user, repo_id=repo_id)
-    repository.create_pull(
-        task.name,
-        task.project.branch_name,  # base
-        task.branch_name,  # head
-        body=task.description,
-    )
+def create_pr(task, user):
+    try:
+        repo_id = task.project.repository.get_repo_id(user)
+        repository = get_repo_info(user, repo_id=repo_id)
+        repository.create_pull(
+            task.name,
+            task.project.branch_name,  # base
+            task.branch_name,  # head
+            body=task.description,
+        )
+    except Exception as e:
+        task.refresh_from_db()
+        task.finalize_create_pr(e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        task.refresh_from_db()
+        task.finalize_create_pr()
 
 
 create_pr_job = job(create_pr)

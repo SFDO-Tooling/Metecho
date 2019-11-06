@@ -24,7 +24,9 @@ Retrieve
         "old_slugs": [],
         "project": "3Lw7OwK",
         "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project__test-task",
-        "assignee": null
+        "assignee": null,
+        "has_unmerged_commits": true,
+        "currently_creating_pr": false
       }
       ...
     ]

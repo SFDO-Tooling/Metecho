@@ -111,10 +111,8 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["POST"])
     def create_pr(self, request, pk=None):
-        from .jobs import create_pr_job
-
         instance = self.get_object()
-        create_pr_job.delay(self.request.user, instance)
+        instance.queue_create_pr(request.user)
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
         )

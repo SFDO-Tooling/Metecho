@@ -249,6 +249,7 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     )
     branch_name = models.SlugField(max_length=100, null=True, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
+    currently_creating_pr = models.BooleanField(default=False)
 
     slug_class = TaskSlug
 
@@ -258,13 +259,38 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
-    def finalize_branch_update(self):
+    def notify_changed(self):
         from .serializers import TaskSerializer
 
-        self.save()
         payload = TaskSerializer(self).data
         message = {"type": "TASK_UPDATE", "payload": payload}
+
         async_to_sync(push.push_message_about_instance)(self, message)
+
+    def finalize_task_update(self):
+        self.save()
+        self.notify_changed()
+
+    def queue_create_pr(self, user):
+        from .jobs import create_pr_job
+
+        self.currently_creating_pr = True
+        self.save()
+        self.notify_changed()
+
+        create_pr_job.delay(self, user)
+
+    def finalize_create_pr(self, error=None):
+        from .serializers import TaskSerializer
+
+        self.currently_creating_pr = False
+        self.save()
+        if error is None:
+            self.notify_changed()
+        else:
+            payload = {"message": str(error), "model": TaskSerializer(self).data}
+            message = {"type": "TASK_CREATE_PR_FAILED", "payload": payload}
+            async_to_sync(push.push_message_about_instance)(self, message)
 
     class Meta:
         ordering = ("-created_at", "name")

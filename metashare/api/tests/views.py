@@ -244,9 +244,8 @@ class TestScratchOrgView:
 class TestTaskView:
     def test_create_pr(self, client, task_factory):
         task = task_factory()
-        with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
-            response = client.post(
-                reverse("task-create-pr", kwargs={"pk": str(task.id)}), format="json"
-            )
+        with patch("metashare.api.models.Task.queue_create_pr"):
+            url = reverse("task-create-pr", kwargs={"pk": str(task.id)})
+            response = client.post(url, format="json")
+
             assert response.status_code == 202
-            assert create_pr_job.delay.called

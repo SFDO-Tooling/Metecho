@@ -170,14 +170,9 @@ describe('<OrgCards/>', () => {
         const { getByText } = setup();
         fireEvent.click(getByText('Create Org'));
 
-        expect(window.socket.subscribe).toHaveBeenCalledTimes(2);
         expect(window.socket.subscribe).toHaveBeenCalledWith({
           model: 'project',
           id: 'project-id',
-        });
-        expect(window.socket.subscribe).toHaveBeenCalledWith({
-          model: 'task',
-          id: 'task-id',
         });
       });
     });

@@ -338,13 +338,6 @@ const OrgCards = ({
           id: project.id,
         });
       }
-      /* istanbul ignore else */
-      if (!task.branch_url) {
-        window.socket.subscribe({
-          model: OBJECT_TYPES.TASK,
-          id: task.id,
-        });
-      }
     }
     dispatch(
       createObject({
