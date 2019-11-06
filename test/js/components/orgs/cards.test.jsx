@@ -40,6 +40,7 @@ const defaultOrgs = {
     url: '/test/org/url/',
     unsaved_changes: { Foo: ['Bar'] },
     has_unsaved_changes: true,
+    owner_sf_id: 'username',
   },
   QA: null,
 };
@@ -48,6 +49,7 @@ const defaultState = {
     id: 'user-id',
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
+    sf_username: 'username',
   },
 };
 
@@ -214,6 +216,18 @@ describe('<OrgCards/>', () => {
       expect(refetchOrg).toHaveBeenCalledWith(defaultOrgs.Dev);
     });
 
+    describe('not connected to sf org', () => {
+      test('opens connect modal', () => {
+        const { getByText } = setup({
+          initialState: { user: { id: 'user-id' } },
+        });
+        fireEvent.click(getByText('check again'));
+
+        expect(refetchOrg).not.toHaveBeenCalled();
+        expect(getByText('Use Custom Domain')).toBeVisible();
+      });
+    });
+
     describe('refetching org', () => {
       test('displays spinner and message', () => {
         const { getByText } = setup({
@@ -278,20 +292,22 @@ describe('<OrgCards/>', () => {
         });
       });
 
-      describe('dev hub not enabled', () => {
-        test('opens warning modal', () => {
+      describe('not user who created org', () => {
+        test('opens connect modal', () => {
           const { getByTitle, getByText } = setup({
             orgs,
             initialState: {
               ...defaultState,
-              user: { ...defaultState.user, is_devhub_enabled: false },
+              user: { ...defaultState.user, sf_username: 'other-user' },
             },
           });
           fireEvent.click(getByText('Actions'));
           fireEvent.click(getByTitle('Delete'));
 
           expect(deleteObject).not.toHaveBeenCalled();
-          expect(getByText('Enable Dev Hub')).toBeVisible();
+          expect(
+            getByText('Salesforce User Does Not Have Required Permissions'),
+          ).toBeVisible();
         });
       });
     });

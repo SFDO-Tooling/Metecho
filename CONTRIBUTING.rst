@@ -110,7 +110,7 @@ will see you can run e.g.::
     $ ./derrick test:js  # run JS tests
     $ ./derrick test:js:watch  # run JS tests and watches for changes
     $ ./derrick add:js <package>  # add a yarn/npm package to dependencies
-    $ ./derrick add:py <package>  # add a Python package to dependencies
+    $ ./derrick lock:py  # update requirements *.txt from *.in files
     $ ./derrick migrate <app> <prefix>  # run Django migrations
     $ ./derrick migrations <app>  # add new Django migrations (``makemigrations``)
     $ ./derrick messages <locale>  # build messages for i18n
@@ -205,5 +205,4 @@ automatically parsed, but will log errors while the app is running if they're
 missing from the served translation files. To resolve, add the missing key:value
 translations to ``locales/<language>/translation.json``.
 
-.. _GNU gettext toolset: https://www.gnu.org/software/gettext/
 .. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector

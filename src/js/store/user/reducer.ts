@@ -8,7 +8,7 @@ export interface User {
   sf_username: string | null;
   org_name: string | null;
   org_type: string | null;
-  is_devhub_enabled: boolean | null;
+  is_devhub_enabled: boolean;
   is_staff: boolean;
 }
 

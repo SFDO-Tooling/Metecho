@@ -9,9 +9,9 @@ export interface UrlParams {
 }
 
 export class ApiError extends Error {
-  public response?: Response;
+  response?: Response;
 
-  public body?: string | { [key: string]: any };
+  body?: string | { [key: string]: any };
 }
 
 // these HTTP methods do not require CSRF protection

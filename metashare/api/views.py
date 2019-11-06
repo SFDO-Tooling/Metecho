@@ -4,6 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ResponseError
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -116,8 +117,23 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ScratchOrgFilter
 
+    def perform_create(self, *args, **kwargs):
+        if self.request.user.is_devhub_enabled:
+            super().perform_create(*args, **kwargs)
+        else:
+            raise PermissionDenied(
+                "User is not connected to a Salesforce organization "
+                "with Dev Hub enabled."
+            )
+
     def perform_destroy(self, instance):
-        instance.queue_delete()
+        if self.request.user.sf_username == instance.owner_sf_id:
+            instance.queue_delete()
+        else:
+            raise PermissionDenied(
+                "User is not connected to Salesforce as the same Salesforce user who "
+                "created the ScratchOrg."
+            )
 
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
@@ -128,6 +144,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
+            "owner": request.user,
             "org_type": SCRATCH_ORG_TYPES.Dev,
             "url__isnull": False,
             "delete_queued_at__isnull": True,
@@ -150,6 +167,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # the middle.
         instance = self.get_object()
         conditions = [
+            instance.owner == request.user,
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
             instance.url is not None,
             instance.delete_queued_at is None,
@@ -170,6 +188,11 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
 
         scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": "Requesting user did not create scratch org."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         commit_message = serializer.validated_data["commit_message"]
         desired_changes = serializer.validated_data["changes"]
         scratch_org.queue_commit_changes(request.user, desired_changes, commit_message)
@@ -179,6 +202,11 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["GET"])
     def redirect(self, request, pk=None):
-        instance = self.get_object()
-        url = instance.get_login_url()
+        scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": "Requesting user did not create scratch org."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)

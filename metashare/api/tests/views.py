@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -71,7 +72,7 @@ def test_repository_view(client, repository_factory, git_hub_repository_factory)
 @pytest.mark.django_db
 class TestScratchOrgView:
     def test_commit_happy_path(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(org_type="Dev")
+        scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"
         ) as commit_changes_from_org_job:
@@ -83,7 +84,7 @@ class TestScratchOrgView:
             assert response.status_code == 202
             assert commit_changes_from_org_job.delay.called
 
-    def test_commit_sad_path(self, client, scratch_org_factory):
+    def test_commit_sad_path__422(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(org_type="Dev")
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"
@@ -96,6 +97,19 @@ class TestScratchOrgView:
             assert response.status_code == 422
             assert not commit_changes_from_org_job.delay.called
 
+    def test_commit_sad_path__403(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(org_type="Dev")
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
+                {"commit_message": "Test message", "changes": {}},
+                format="json",
+            )
+            assert response.status_code == 403
+            assert not commit_changes_from_org_job.delay.called
+
     def test_list_fetch_changes(self, client, scratch_org_factory):
         scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Dev,
@@ -103,6 +117,7 @@ class TestScratchOrgView:
             delete_queued_at=None,
             currently_capturing_changes=False,
             currently_refreshing_changes=False,
+            owner=client.user,
         )
         with patch(
             "metashare.api.jobs.get_unsaved_changes_job"
@@ -120,6 +135,7 @@ class TestScratchOrgView:
             delete_queued_at=None,
             currently_capturing_changes=False,
             currently_refreshing_changes=False,
+            owner=client.user,
         )
         with patch(
             "metashare.api.jobs.get_unsaved_changes_job"
@@ -130,19 +146,95 @@ class TestScratchOrgView:
             assert response.status_code == 200
             assert get_unsaved_changes_job.delay.called
 
-    def test_queue_delete(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+    def test_create(self, client, task_factory, social_account_factory):
+        task = task_factory()
+        social_account_factory(
+            user=client.user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "test-username"},
+        )
+        url = reverse("scratch-org-list")
+        with ExitStack() as stack:
+            stack.enter_context(
+                patch("metashare.api.views.viewsets.ModelViewSet.perform_create")
+            )
+            get_devhub_api = stack.enter_context(
+                patch("metashare.api.models.get_devhub_api")
+            )
+            resp = {"foo": "bar"}
+            sf_client = MagicMock()
+            sf_client.restful.return_value = resp
+            get_devhub_api.return_value = sf_client
+
+            response = client.post(url, {"task": str(task.id), "org_type": "Dev"})
+
+        assert response.status_code == 201, response.content
+
+    def test_create__bad(self, client, task_factory, social_account_factory):
+        task = task_factory()
+        social_account_factory(
+            user=client.user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "test-username"},
+        )
+        url = reverse("scratch-org-list")
+        with ExitStack() as stack:
+            stack.enter_context(
+                patch("metashare.api.views.viewsets.ModelViewSet.perform_create")
+            )
+            get_devhub_api = stack.enter_context(
+                patch("metashare.api.models.get_devhub_api")
+            )
+            sf_client = MagicMock()
+            sf_client.restful.return_value = None
+            get_devhub_api.return_value = sf_client
+
+            response = client.post(url, {"task": str(task.id), "org_type": "Dev"})
+
+        assert response.status_code == 403, response.content
+
+    def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
+        social_account_factory(
+            user=client.user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "test-username"},
+        )
+        scratch_org = scratch_org_factory(owner_sf_id="test-username")
         with patch("metashare.api.models.ScratchOrg.queue_delete"):
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.delete(url)
 
             assert response.status_code == 204
 
-    def test_redirect(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+    def test_queue_delete__bad(
+        self, client, scratch_org_factory, social_account_factory
+    ):
+        social_account_factory(
+            user=client.user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "test-username"},
+        )
+        scratch_org = scratch_org_factory(owner_sf_id="other-test-username")
+        with patch("metashare.api.models.ScratchOrg.queue_delete"):
+            url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+            response = client.delete(url)
+
+            assert response.status_code == 403
+
+    def test_redirect__good(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(owner=client.user)
         with patch("metashare.api.models.ScratchOrg.get_login_url") as get_login_url:
             get_login_url.return_value = "https://example.com"
             url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
             response = client.get(url)
 
             assert response.status_code == 302
+
+    def test_redirect__bad(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch("metashare.api.models.ScratchOrg.get_login_url") as get_login_url:
+            get_login_url.return_value = "https://example.com"
+            url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
+            response = client.get(url)
+
+            assert response.status_code == 403

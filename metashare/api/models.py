@@ -1,4 +1,3 @@
-import requests
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
@@ -18,11 +17,13 @@ from model_utils import Choices
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
+from simple_salesforce.exceptions import SalesforceError
 
 from . import gh
 from . import model_mixins as mixins
 from . import push
 from .constants import ORGANIZATION_DETAILS
+from .sf_run_flow import get_devhub_api
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
@@ -134,20 +135,19 @@ class User(mixins.HashIdMixin, AbstractUser):
     @cached_property
     def is_devhub_enabled(self):
         # We can shortcut and avoid making an HTTP request in some cases:
-        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
-            return None
-
-        token, _ = self.sf_token
-        if token is None:
-            return None
-        instance_url = self.salesforce_account.extra_data["instance_url"]
-        url = f"{instance_url}/services/data/v45.0/sobjects/ScratchOrgInfo"
-        resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
-        if resp.status_code == 200:
-            return True
-        if resp.status_code == 404:
+        if not self.salesforce_account:
             return False
-        return None
+        if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
+            return False
+
+        client = get_devhub_api(devhub_username=self.sf_username)
+        try:
+            resp = client.restful("sobjects/ScratchOrgInfo")
+            if resp:
+                return True
+            return False
+        except SalesforceError:
+            return False
 
 
 class RepositorySlug(AbstractSlug):
@@ -185,11 +185,12 @@ class GitHubRepository(mixins.HashIdMixin, models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
-    repo_id = models.IntegerField(unique=True)
+    repo_id = models.IntegerField()
     repo_url = models.URLField()
 
     class Meta:
         verbose_name_plural = "GitHub repositories"
+        unique_together = (("user", "repo_id"),)
 
     def __str__(self):
         return self.repo_url
@@ -290,6 +291,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
     currently_capturing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
+    owner_sf_id = StringField(blank=True)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True

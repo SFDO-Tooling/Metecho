@@ -254,21 +254,6 @@ describe('<TaskDetail/>', () => {
         expect(getByText('Use Custom Domain')).toBeVisible();
       });
     });
-
-    describe('dev hub not enabled', () => {
-      test('opens warning modal', () => {
-        const { getByText } = setup({
-          initialState: {
-            ...defaultState,
-            user: { ...defaultState.user, is_devhub_enabled: false },
-          },
-        });
-        fireEvent.click(getByText('Capture Task Changes'));
-
-        expect(refetchOrg).not.toHaveBeenCalled();
-        expect(getByText('Enable Dev Hub')).toBeVisible();
-      });
-    });
   });
 
   describe('commiting changes', () => {

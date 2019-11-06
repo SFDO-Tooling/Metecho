@@ -11,7 +11,6 @@ services:
       - postgres
       - redis
     links:
-      - 'postgres:db'
       - redis
     env_file:
       - .env
@@ -22,10 +21,10 @@ services:
       - .:/app:cached
       - /app/node_modules
     ports:
-      - '0.0.0.0:8080:8080'
+      - '8080:8080'
       # Open this port to attach to remote debuggers in the Python process,
       # if need-be:
-      - '0.0.0.0:33284:33284' # Spells "DEBUG" in phone-number
+      - '33284:33284' # Spells "DEBUG" in phone-number
     stdin_open: true
     tty: true
 

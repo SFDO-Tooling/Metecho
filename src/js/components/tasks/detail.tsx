@@ -11,7 +11,6 @@ import FourOhFour from '@/components/404';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
 import ConnectModal from '@/components/user/connect';
-import { ConnectionInfoModal } from '@/components/user/info';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -37,7 +36,6 @@ import routes from '@/utils/routes';
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [connectModalOpen, setConnectModalOpen] = useState(false);
-  const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
@@ -63,7 +61,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
-    userIsOwner = devOrg && devOrg.owner === user.id;
+    userIsOwner = Boolean(devOrg && devOrg.owner === user.id);
     currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
   }
@@ -87,26 +85,18 @@ const TaskDetail = (props: RouteComponentProps) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openConnectModal = () => {
-    setInfoModalOpen(false);
     setConnectModalOpen(true);
   };
-  const openInfoModal = () => {
-    setConnectModalOpen(false);
-    setInfoModalOpen(true);
-  };
 
-  let action = openConnectModal;
-  if (user.valid_token_for) {
-    action = user.is_devhub_enabled
-      ? () => {
-          /* istanbul ignore else */
-          if (devOrg) {
-            setFetchingChanges(true);
-            doRefetchOrg(devOrg);
-          }
+  const action = user.valid_token_for
+    ? () => {
+        /* istanbul ignore else */
+        if (devOrg) {
+          setFetchingChanges(true);
+          doRefetchOrg(devOrg);
         }
-      : openInfoModal;
-  }
+      }
+    : openConnectModal;
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -246,16 +236,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           isOpen={connectModalOpen}
           toggleModal={setConnectModalOpen}
         />
-        <ConnectionInfoModal
-          user={user}
-          isOpen={infoModalOpen}
-          toggleModal={setInfoModalOpen}
-          onDisconnect={openConnectModal}
-          successText={i18n.t(
-            'Please close this message and try capturing task changes again.',
-          )}
-        />
-        {devOrg && devOrg.has_unsaved_changes && (
+        {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
             orgId={devOrg.id}
             changeset={devOrg.unsaved_changes}
