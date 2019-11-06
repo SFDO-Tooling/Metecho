@@ -1,6 +1,6 @@
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { RepositoriesAction } from '@/store/repositories/actions';
-import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
+import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 export interface Repository {
@@ -28,10 +28,9 @@ const defaultState = {
 
 const reducer = (
   repositories: RepositoriesState = defaultState,
-  action: RepositoriesAction | ObjectsAction | LogoutAction | RefetchDataAction,
+  action: RepositoriesAction | ObjectsAction | LogoutAction,
 ): RepositoriesState => {
   switch (action.type) {
-    case 'REFETCH_DATA_SUCCEEDED':
     case 'USER_LOGGED_OUT':
       return { ...defaultState };
     case 'REFRESH_REPOS_REQUESTED':
