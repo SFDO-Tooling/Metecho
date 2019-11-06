@@ -33,7 +33,7 @@ PACKAGE_XML = """<?xml version="1.0" encoding="UTF-8"?>
         <members>*</members>
         <name>Settings</name>
     </types>
-    <version>46.0</version>
+    <version>47.0</version>
 </Package>"""
 
 
@@ -72,7 +72,7 @@ def get_devhub_api(*, devhub_username):
         instance_url=jwt["instance_url"],
         session_id=jwt["access_token"],
         client_id="MetaShare",
-        version="46.0",
+        version="47.0",
     )
 
 
