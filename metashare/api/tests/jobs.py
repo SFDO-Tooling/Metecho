@@ -209,7 +209,7 @@ class TestErrorHandling:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
-                patch("metashare.api.models.async_to_sync")
+                patch("metashare.api.model_mixins.async_to_sync")
             )
             _create_branches_on_github = stack.enter_context(
                 patch(f"{PATCH_ROOT}._create_branches_on_github")
@@ -230,7 +230,7 @@ class TestErrorHandling:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
-                patch("metashare.api.models.async_to_sync")
+                patch("metashare.api.model_mixins.async_to_sync")
             )
             get_latest_revision_numbers = stack.enter_context(
                 patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
@@ -246,11 +246,11 @@ class TestErrorHandling:
         user = user_factory()
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.model_mixins.async_to_sync")
+            )
             commit_changes_to_github = stack.enter_context(
                 patch(f"{PATCH_ROOT}.commit_changes_to_github")
-            )
-            async_to_sync = stack.enter_context(
-                patch("metashare.api.models.async_to_sync")
             )
             commit_changes_to_github.side_effect = Exception
 
@@ -285,7 +285,9 @@ def test_create_pr__error(user_factory, task_factory):
         get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         get_repo_info.return_value = repository
         repository.create_pull = MagicMock(side_effect=Exception)
-        async_to_sync = stack.enter_context(patch("metashare.api.models.async_to_sync"))
+        async_to_sync = stack.enter_context(
+            patch("metashare.api.model_mixins.async_to_sync")
+        )
 
         with pytest.raises(Exception):
             create_pr(task, user)
