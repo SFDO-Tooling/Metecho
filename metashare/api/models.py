@@ -250,6 +250,7 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     branch_name = models.SlugField(max_length=100, null=True, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
+    pr_number = models.IntegerField(null=True, blank=True)
 
     slug_class = TaskSlug
 

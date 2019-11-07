@@ -112,6 +112,7 @@ class TaskSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(), allow_null=True
     )
     branch_url = serializers.SerializerMethodField()
+    pr_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -126,6 +127,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "branch_url",
             "has_unmerged_commits",
             "currently_creating_pr",
+            "pr_url",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -142,6 +144,15 @@ class TaskSerializer(serializers.ModelSerializer):
         branch = obj.branch_name
         if repo_owner and repo_name and branch:
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
+        return None
+
+    def get_pr_url(self, obj) -> Optional[str]:
+        repo = obj.project.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        pr_number = obj.pr_number
+        if repo_owner and repo_name and pr_number:
+            return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
 
 

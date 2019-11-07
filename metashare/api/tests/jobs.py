@@ -264,13 +264,16 @@ class TestErrorHandling:
 def test_create_pr(user_factory, task_factory):
     user = user_factory()
     task = task_factory()
-    with patch(f"{PATCH_ROOT}.get_repo_info") as get_repo_info:
-        repository = MagicMock()
+    with ExitStack() as stack:
+        pr = MagicMock(number=123)
+        repository = MagicMock(**{"create_pull.return_value": pr})
+        get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         get_repo_info.return_value = repository
 
         create_pr(task, user)
 
         assert repository.create_pull.called
+        assert task.pr_number == 123
 
 
 @pytest.mark.django_db
@@ -281,8 +284,7 @@ def test_create_pr__error(user_factory, task_factory):
         repository = MagicMock()
         get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         get_repo_info.return_value = repository
-        repository.create_pull = MagicMock()
-        repository.create_pull.side_effect = Exception
+        repository.create_pull = MagicMock(side_effect=Exception)
         async_to_sync = stack.enter_context(patch("metashare.api.models.async_to_sync"))
 
         with pytest.raises(Exception):

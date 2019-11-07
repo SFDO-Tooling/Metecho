@@ -228,12 +228,14 @@ def create_pr(task, user):
     try:
         repo_id = task.project.repository.get_repo_id(user)
         repository = get_repo_info(user, repo_id=repo_id)
-        repository.create_pull(
-            task.name,
-            task.project.branch_name,  # base
-            task.branch_name,  # head
+        pr = repository.create_pull(
+            title=task.name,
+            base=task.project.branch_name,
+            head=task.branch_name,
             body=task.description,
         )
+        task.refresh_from_db()
+        task.pr_number = pr.number
     except Exception as e:
         task.refresh_from_db()
         task.finalize_create_pr(e)
@@ -241,7 +243,6 @@ def create_pr(task, user):
         logger.error(tb)
         raise
     else:
-        task.refresh_from_db()
         task.finalize_create_pr()
 
 

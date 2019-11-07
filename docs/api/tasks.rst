@@ -26,7 +26,8 @@ Retrieve
         "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project__test-task",
         "assignee": null,
         "has_unmerged_commits": true,
-        "currently_creating_pr": false
+        "currently_creating_pr": false,
+        "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357"
       }
       ...
     ]

@@ -13,6 +13,7 @@ export interface Task {
   branch_url: string | null;
   has_unmerged_commits: boolean;
   currently_submitting: boolean;
+  pr_url: string | null;
 }
 
 export interface TaskState {
