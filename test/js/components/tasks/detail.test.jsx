@@ -239,21 +239,6 @@ describe('<TaskDetail/>', () => {
 
       expect(getByText('Select the changes to capture')).toBeVisible();
     });
-
-    describe('not connected to sf org', () => {
-      test('opens connect modal', () => {
-        const { getByText } = setup({
-          initialState: {
-            ...defaultState,
-            user: { ...defaultState.user, valid_token_for: null },
-          },
-        });
-        fireEvent.click(getByText('Capture Task Changes'));
-
-        expect(refetchOrg).not.toHaveBeenCalled();
-        expect(getByText('Use Custom Domain')).toBeVisible();
-      });
-    });
   });
 
   describe('commiting changes', () => {

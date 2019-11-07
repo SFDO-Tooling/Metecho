@@ -12,7 +12,6 @@ import FourOhFour from '@/components/404';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
 import SubmitModal from '@/components/tasks/submit';
-import ConnectModal from '@/components/user/connect';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -37,7 +36,6 @@ import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
-  const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
 
@@ -58,11 +56,11 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   const readyToSubmit = Boolean(task && task.has_unmerged_commits);
   const currentlySubmitting = Boolean(task && task.currently_submitting);
-  let currentlyFetching,
-    currentlyCommitting,
-    orgHasChanges,
-    userIsOwner,
-    devOrg: Org | null | undefined;
+  let currentlyFetching = false;
+  let currentlyCommitting = false;
+  let orgHasChanges = false;
+  let userIsOwner = false;
+  let devOrg: Org | null | undefined;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
@@ -98,19 +96,16 @@ const TaskDetail = (props: RouteComponentProps) => {
     if (changesFetched && devOrg) {
       setFetchingChanges(false);
       /* istanbul ignore else */
-      if (devOrg.has_unsaved_changes) {
+      if (devOrg.has_unsaved_changes && !submitModalOpen) {
         setCaptureModalOpen(true);
       }
     }
-  }, [fetchingChanges, devOrg]);
+  }, [fetchingChanges, devOrg, submitModalOpen]);
 
   const doRefetchOrg = useCallback((org: Org) => {
     dispatch(refetchOrg(org));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const openConnectModal = () => {
-    setConnectModalOpen(true);
-  };
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
   };
@@ -191,7 +186,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
-  let submitButton = null;
+  let submitButton: React.ReactNode = null;
   if (readyToSubmit) {
     const isPrimary = !(userIsOwner && orgHasChanges);
     const submitButtonText = currentlySubmitting ? (
@@ -215,18 +210,16 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
-  let primaryButton = null;
-  let secondaryButton = null;
+  let primaryButton: React.ReactNode = null;
+  let secondaryButton: React.ReactNode = null;
   if (userIsOwner && orgHasChanges) {
-    const captureButtonAction = user.valid_token_for
-      ? () => {
-          /* istanbul ignore else */
-          if (devOrg) {
-            setFetchingChanges(true);
-            doRefetchOrg(devOrg);
-          }
-        }
-      : openConnectModal;
+    const captureButtonAction = () => {
+      /* istanbul ignore else */
+      if (devOrg) {
+        setFetchingChanges(true);
+        doRefetchOrg(devOrg);
+      }
+    };
     let captureButtonText: JSX.Element = i18n.t('Capture Task Changes');
     if (currentlyCommitting) {
       captureButtonText = (
@@ -293,11 +286,6 @@ const TaskDetail = (props: RouteComponentProps) => {
         ) : (
           <SpinnerWrapper />
         )}
-        <ConnectModal
-          user={user}
-          isOpen={connectModalOpen}
-          toggleModal={setConnectModalOpen}
-        />
         {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
             orgId={devOrg.id}
