@@ -211,18 +211,6 @@ describe('<OrgCards/>', () => {
       expect(refetchOrg).toHaveBeenCalledWith(defaultOrgs.Dev);
     });
 
-    describe('not connected to sf org', () => {
-      test('opens connect modal', () => {
-        const { getByText } = setup({
-          initialState: { user: { id: 'user-id' } },
-        });
-        fireEvent.click(getByText('check again'));
-
-        expect(refetchOrg).not.toHaveBeenCalled();
-        expect(getByText('Use Custom Domain')).toBeVisible();
-      });
-    });
-
     describe('refetching org', () => {
       test('displays spinner and message', () => {
         const { getByText } = setup({
