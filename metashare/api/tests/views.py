@@ -246,6 +246,23 @@ class TestTaskView:
         task = task_factory()
         with patch("metashare.api.models.Task.queue_create_pr"):
             url = reverse("task-create-pr", kwargs={"pk": str(task.id)})
-            response = client.post(url, format="json")
+            response = client.post(
+                url,
+                {
+                    "critical_changes": "",
+                    "additional_changes": "",
+                    "issues": "",
+                    "notes": "",
+                },
+                format="json",
+            )
 
-            assert response.status_code == 202
+            assert response.status_code == 202, response.json()
+
+    def test_create_pr__error(self, client, task_factory):
+        task = task_factory()
+        with patch("metashare.api.models.Task.queue_create_pr"):
+            url = reverse("task-create-pr", kwargs={"pk": str(task.id)})
+            response = client.post(url, {}, format="json")
+
+            assert response.status_code == 422

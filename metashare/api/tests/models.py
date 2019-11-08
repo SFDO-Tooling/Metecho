@@ -74,7 +74,9 @@ class TestTask:
         with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
             task = task_factory()
             user = user_factory()
-            task.queue_create_pr(user)
+            task.queue_create_pr(
+                user, critical_changes="", additional_changes="", issues="", notes=""
+            )
 
             assert create_pr_job.delay.called
 

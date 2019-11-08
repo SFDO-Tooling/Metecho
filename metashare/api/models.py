@@ -277,14 +277,23 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         self.save()
         self.notify_changed()
 
-    def queue_create_pr(self, user):
+    def queue_create_pr(
+        self, user, *, critical_changes, additional_changes, issues, notes
+    ):
         from .jobs import create_pr_job
 
         self.currently_creating_pr = True
         self.save()
         self.notify_changed()
 
-        create_pr_job.delay(self, user)
+        create_pr_job.delay(
+            self,
+            user,
+            critical_changes=critical_changes,
+            additional_changes=additional_changes,
+            issues=issues,
+            notes=notes,
+        )
 
     def finalize_create_pr(self, error=None):
         self.currently_creating_pr = False

@@ -156,6 +156,13 @@ class TaskSerializer(serializers.ModelSerializer):
         return None
 
 
+class CreatePrSerializer(serializers.Serializer):
+    critical_changes = serializers.CharField(allow_blank=True)
+    additional_changes = serializers.CharField(allow_blank=True)
+    issues = serializers.CharField(allow_blank=True)
+    notes = serializers.CharField(allow_blank=True)
+
+
 class ScratchOrgSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     task = serializers.PrimaryKeyRelatedField(

@@ -270,7 +270,9 @@ def test_create_pr(user_factory, task_factory):
         get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         get_repo_info.return_value = repository
 
-        create_pr(task, user)
+        create_pr(
+            task, user, critical_changes="", additional_changes="", issues="", notes=""
+        )
 
         assert repository.create_pull.called
         assert task.pr_number == 123
@@ -290,6 +292,13 @@ def test_create_pr__error(user_factory, task_factory):
         )
 
         with pytest.raises(Exception):
-            create_pr(task, user)
+            create_pr(
+                task,
+                user,
+                critical_changes="",
+                additional_changes="",
+                issues="",
+                notes="",
+            )
 
         assert async_to_sync.called

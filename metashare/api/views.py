@@ -14,6 +14,7 @@ from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
     CommitSerializer,
+    CreatePrSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
@@ -111,8 +112,13 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["POST"])
     def create_pr(self, request, pk=None):
+        serializer = CreatePrSerializer(data=self.request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
         instance = self.get_object()
-        instance.queue_create_pr(request.user)
+        instance.queue_create_pr(request.user, **serializer.validated_data)
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
         )
