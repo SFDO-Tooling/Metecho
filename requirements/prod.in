@@ -23,7 +23,7 @@ markdown==3.1.1
 newrelic==5.2.1.129
 psycopg2-binary==2.8.4
 pyOpenSSL==19.0.0
-sentry-sdk==0.13.1
+sentry-sdk==0.13.2
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.9.0.tar.gz
 simple-salesforce==0.74.2
