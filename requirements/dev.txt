@@ -50,7 +50,7 @@ pygments==2.4.2           # via ipython, sphinx
 pyparsing==2.4.2          # via packaging
 pytest-asyncio==0.10.0
 pytest-cov==2.8.1
-pytest-django==3.6.0
+pytest-django==3.7.0
 pytest-factoryboy==2.0.3
 pytest-mock==1.11.2
 pytest==5.2.2
