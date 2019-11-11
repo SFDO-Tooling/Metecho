@@ -1,4 +1,3 @@
-from collections import namedtuple
 from enum import Enum
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -8,9 +7,6 @@ from django.utils.translation import gettext as _
 
 from .api.constants import CHANNELS_GROUP_NAME
 from .consumer_utils import clear_message_semaphore
-
-Request = namedtuple("Request", "user")
-
 
 KNOWN_MODELS = {"user", "project", "task", "scratchorg"}
 
