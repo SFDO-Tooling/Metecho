@@ -231,7 +231,7 @@ def create_pr(
         repo_id = task.project.repository.get_repo_id(user)
         repository = get_repo_info(user, repo_id=repo_id)
         sections = [
-            notes if notes else "",
+            notes,
             f"# Critical Changes\n\n{critical_changes}" if critical_changes else "",
             f"# Changes\n\n{additional_changes}" if additional_changes else "",
             f"# Issues Closed\n\n{issues}" if issues else "",
