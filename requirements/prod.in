@@ -1,4 +1,4 @@
-Django==2.2.6
+Django==2.2.7
 Pillow==6.2.1
 Werkzeug==0.16.0
 bleach==3.1.0
