@@ -157,6 +157,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class CreatePrSerializer(serializers.Serializer):
+    title = serializers.CharField()
     critical_changes = serializers.CharField(allow_blank=True)
     additional_changes = serializers.CharField(allow_blank=True)
     issues = serializers.CharField(allow_blank=True)

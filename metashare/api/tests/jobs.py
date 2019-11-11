@@ -271,7 +271,13 @@ def test_create_pr(user_factory, task_factory):
         get_repo_info.return_value = repository
 
         create_pr(
-            task, user, critical_changes="", additional_changes="", issues="", notes=""
+            task,
+            user,
+            title="My PR",
+            critical_changes="",
+            additional_changes="",
+            issues="",
+            notes="",
         )
 
         assert repository.create_pull.called
@@ -295,6 +301,7 @@ def test_create_pr__error(user_factory, task_factory):
             create_pr(
                 task,
                 user,
+                title="My PR",
                 critical_changes="",
                 additional_changes="",
                 issues="",

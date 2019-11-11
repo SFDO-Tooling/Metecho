@@ -249,6 +249,7 @@ class TestTaskView:
             response = client.post(
                 url,
                 {
+                    "title": "My PR",
                     "critical_changes": "",
                     "additional_changes": "",
                     "issues": "",

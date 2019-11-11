@@ -224,27 +224,21 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
 commit_changes_from_org_job = job(commit_changes_from_org)
 
 
-def create_pr(task, user, *, critical_changes, additional_changes, issues, notes):
+def create_pr(
+    task, user, *, title, critical_changes, additional_changes, issues, notes
+):
     try:
         repo_id = task.project.repository.get_repo_id(user)
         repository = get_repo_info(user, repo_id=repo_id)
         sections = [
-            f"## Description\n\n{task.description}" if task.description else "",
-            f"## Critical Changes\n\n{critical_changes}" if critical_changes else "",
-            (
-                f"## Additional Changes\n\n{additional_changes}"
-                if additional_changes
-                else ""
-            ),
-            f"## Issues\n\n{issues}" if issues else "",
-            f"## Notes\n\n{notes}" if notes else "",
+            notes if notes else "",
+            f"# Critical Changes\n\n{critical_changes}" if critical_changes else "",
+            f"# Changes\n\n{additional_changes}" if additional_changes else "",
+            f"# Issues Closed\n\n{issues}" if issues else "",
         ]
         body = "\n\n".join([section for section in sections if section])
         pr = repository.create_pull(
-            title=task.name,
-            base=task.project.branch_name,
-            head=task.branch_name,
-            body=body,
+            title=title, base=task.project.branch_name, head=task.branch_name, body=body
         )
         task.refresh_from_db()
         task.pr_number = pr.number

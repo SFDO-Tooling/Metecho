@@ -54,8 +54,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   const { orgs } = useFetchOrgsIfMissing(task, props);
   const user = useSelector(selectUserState) as User;
 
-  const readyToSubmit = Boolean(task && task.has_unmerged_commits);
-  const currentlySubmitting = Boolean(task && task.currently_submitting);
+  const readyToSubmit = Boolean(
+    task && task.has_unmerged_commits && !task.pr_url,
+  );
+  const currentlySubmitting = Boolean(task && task.currently_creating_pr);
   let currentlyFetching = false;
   let currentlyCommitting = false;
   let orgHasChanges = false;
@@ -168,9 +170,9 @@ const TaskDetail = (props: RouteComponentProps) => {
         variant="text-destructive"
         disabled
       />
-      {task.branch_url ? (
+      {task.pr_url || task.branch_url ? (
         <ExternalLink
-          url={task.branch_url}
+          url={(task.pr_url || task.branch_url) as string}
           className="slds-button slds-button_outline-brand"
         >
           <Icon
@@ -180,7 +182,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             className="slds-button__icon slds-button__icon_left"
             containerClassName="slds-icon_container slds-current-color"
           />
-          {i18n.t('View Branch')}
+          {task.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
         </ExternalLink>
       ) : null}
     </PageHeaderControl>
@@ -296,6 +298,8 @@ const TaskDetail = (props: RouteComponentProps) => {
         )}
         {readyToSubmit && (
           <SubmitModal
+            taskId={task.id}
+            taskName={task.name}
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />

@@ -12,7 +12,7 @@ export interface Task {
   description: string;
   branch_url: string | null;
   has_unmerged_commits: boolean;
-  currently_submitting: boolean;
+  currently_creating_pr: boolean;
   pr_url: string | null;
 }
 
