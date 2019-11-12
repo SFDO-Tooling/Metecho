@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
 import { ObjectsAction } from '@/store/actions';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
@@ -50,15 +52,38 @@ const reducer = (
         object,
         objectType,
       }: { object: Task; objectType: ObjectTypes } = action.payload;
-      if (objectType === OBJECT_TYPES.TASK && object) {
-        const projectTasks = tasks[object.project] || [];
-        // Do not store if (somehow) we already know about this task
-        if (!projectTasks.filter((t) => object.id === t.id).length) {
-          return {
-            ...tasks,
-            // Prepend new task (tasks are ordered by `-created_at`)
-            [object.project]: [object, ...projectTasks],
-          };
+      switch (objectType) {
+        case OBJECT_TYPES.TASK: {
+          if (object) {
+            const projectTasks = tasks[object.project] || [];
+            // Do not store if (somehow) we already know about this task
+            if (!projectTasks.filter((t) => object.id === t.id).length) {
+              return {
+                ...tasks,
+                // Prepend new task (tasks are ordered by `-created_at`)
+                [object.project]: [object, ...projectTasks],
+              };
+            }
+          }
+          return tasks;
+        }
+        case OBJECT_TYPES.TASK_PR: {
+          if (object) {
+            const projectTasks = tasks[object.project] || [];
+            const existingTask = projectTasks.find((t) => t.id === object.id);
+            if (existingTask) {
+              return {
+                ...tasks,
+                [object.project]: projectTasks.map((t) => {
+                  if (t.id === object.id) {
+                    return { ...object, currently_creating_pr: true };
+                  }
+                  return t;
+                }),
+              };
+            }
+          }
+          return tasks;
         }
       }
       return tasks;
@@ -82,6 +107,23 @@ const reducer = (
         ...tasks,
         [task.project]: [task, ...projectTasks],
       };
+    }
+    case 'TASK_CREATE_PR_FAILED': {
+      const task = action.payload;
+      const projectTasks = tasks[task.project] || [];
+      const existingTask = projectTasks.find((t) => t.id === task.id);
+      if (existingTask) {
+        return {
+          ...tasks,
+          [task.project]: projectTasks.map((t) => {
+            if (t.id === task.id) {
+              return { ...task, currently_creating_pr: false };
+            }
+            return t;
+          }),
+        };
+      }
+      return tasks;
     }
   }
   return tasks;

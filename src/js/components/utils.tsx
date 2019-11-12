@@ -533,7 +533,7 @@ export const useForm = ({
         /* istanbul ignore else */
         if (isMounted.current && Object.keys(fieldErrors).length) {
           setErrors(fieldErrors);
-        } else if (err.response && err.response.status === 400) {
+        } else if (err.response && err.response.status === 422) {
           // If no inline errors to show, fallback to default global error toast
           dispatch(addError(err.message));
         } else {

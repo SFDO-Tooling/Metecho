@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ResponseError
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -118,6 +118,8 @@ class TaskViewSet(viewsets.ModelViewSet):
                 serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
         instance = self.get_object()
+        if instance.pr_number is not None:
+            raise ValidationError("Task has already been submitted for review.")
         instance.queue_create_pr(request.user, **serializer.validated_data)
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
