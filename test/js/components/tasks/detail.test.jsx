@@ -70,6 +70,7 @@ const defaultState = {
         old_slugs: ['old-slug'],
         project: 'project1',
         description: 'Task Description',
+        has_unmerged_commits: false,
       },
     ],
   },
@@ -126,6 +127,38 @@ describe('<TaskDetail/>', () => {
     expect(getByText('Task Orgs')).toBeVisible();
   });
 
+  describe('with websocket', () => {
+    beforeEach(() => {
+      window.socket = { subscribe: jest.fn(), unsubscribe: jest.fn() };
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(window, 'socket');
+    });
+
+    test('subscribes to task', () => {
+      setup();
+
+      expect(window.socket.subscribe).toHaveBeenCalledWith({
+        model: 'task',
+        id: 'task1',
+      });
+    });
+
+    test('unsubscribes from task on unmount', () => {
+      const { unmount } = setup();
+
+      expect(window.socket.unsubscribe).not.toHaveBeenCalled();
+
+      unmount();
+
+      expect(window.socket.unsubscribe).toHaveBeenCalledWith({
+        model: 'task',
+        id: 'task1',
+      });
+    });
+  });
+
   test('renders view branch button if branch_url exists', () => {
     const { getByText, getByTitle } = setup({
       initialState: {
@@ -144,7 +177,26 @@ describe('<TaskDetail/>', () => {
 
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByText('View Branch')).toBeVisible();
-    expect(getByText('Task Description')).toBeVisible();
+  });
+
+  test('renders view pr button if pr_url exists', () => {
+    const { getByText, getByTitle } = setup({
+      initialState: {
+        ...defaultState,
+        tasks: {
+          ...defaultState.tasks,
+          project1: [
+            {
+              ...defaultState.tasks.project1[0],
+              pr_url: 'my-pr-url',
+            },
+          ],
+        },
+      },
+    });
+
+    expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByText('View Pull Request')).toBeVisible();
   });
 
   describe('tasks not found', () => {
@@ -261,5 +313,79 @@ describe('<TaskDetail/>', () => {
 
       expect(getAllByText('Capturing Selected Changes…').length).toEqual(2);
     });
+  });
+
+  describe('"Submit Task for Review" click', () => {
+    test('opens modal', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            ...defaultState.tasks,
+            project1: [
+              {
+                ...defaultState.tasks.project1[0],
+                has_unmerged_commits: true,
+              },
+            ],
+          },
+        },
+      });
+      fireEvent.click(getByText('Submit Task for Review'));
+
+      expect(getByText('Submit this task for review')).toBeVisible();
+    });
+  });
+
+  describe('submitting task for review', () => {
+    test('renders loading button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            ...defaultState.tasks,
+            project1: [
+              {
+                ...defaultState.tasks.project1[0],
+                has_unmerged_commits: true,
+                currently_creating_pr: true,
+              },
+            ],
+          },
+        },
+      });
+
+      expect(getByText('Submitting Task for Review…')).toBeVisible();
+    });
+  });
+
+  test('renders loading button in primary position', () => {
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        tasks: {
+          ...defaultState.tasks,
+          project1: [
+            {
+              ...defaultState.tasks.project1[0],
+              has_unmerged_commits: true,
+              currently_creating_pr: true,
+            },
+          ],
+        },
+        orgs: {
+          ...defaultState.orgs,
+          task1: {
+            ...defaultState.orgs.task1,
+            Dev: {
+              ...defaultState.orgs.task1.Dev,
+              has_unsaved_changes: false,
+            },
+          },
+        },
+      },
+    });
+
+    expect(getByText('Submitting Task for Review…')).toBeVisible();
   });
 });

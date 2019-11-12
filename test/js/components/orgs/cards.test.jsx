@@ -166,7 +166,7 @@ describe('<OrgCards/>', () => {
         Reflect.deleteProperty(window, 'socket');
       });
 
-      test('subscribes to project/task', () => {
+      test('subscribes to project', () => {
         const { getByText } = setup();
         fireEvent.click(getByText('Create Org'));
 

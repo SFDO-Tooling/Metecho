@@ -117,7 +117,9 @@ describe('apiFetch', () => {
           hasForm: true,
         });
       } catch (err) {
-        expect(err.message).toEqual(`Bad Request: ${JSON.stringify(response)}`);
+        expect(err.message).toEqual(
+          `Unprocessable Entity: ${JSON.stringify(response)}`,
+        );
         expect(addError).not.toHaveBeenCalled();
       }
     });

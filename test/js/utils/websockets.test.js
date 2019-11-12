@@ -13,7 +13,7 @@ import {
 } from '@/store/orgs/actions';
 import { updateProject } from '@/store/projects/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { updateTask } from '@/store/tasks/actions';
+import { createPR, createPRFailed, updateTask } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
 jest.mock('@/store/actions');
@@ -24,6 +24,8 @@ jest.mock('@/store/tasks/actions');
 const actions = {
   commitFailed,
   commitSucceeded,
+  createPR,
+  createPRFailed,
   deleteFailed,
   deleteOrg,
   fetchObjects,
@@ -67,6 +69,8 @@ describe('getAction', () => {
   test.each([
     ['PROJECT_UPDATE', 'updateProject'],
     ['TASK_UPDATE', 'updateTask'],
+    ['TASK_CREATE_PR', 'createPR'],
+    ['TASK_CREATE_PR_FAILED', 'createPRFailed'],
     ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
     ['SCRATCH_ORG_DELETE', 'deleteOrg'],

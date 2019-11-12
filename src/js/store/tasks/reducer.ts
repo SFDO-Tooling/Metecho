@@ -70,18 +70,23 @@ const reducer = (
         case OBJECT_TYPES.TASK_PR: {
           if (object) {
             const projectTasks = tasks[object.project] || [];
+            const newTask = { ...object, currently_creating_pr: true };
             const existingTask = projectTasks.find((t) => t.id === object.id);
             if (existingTask) {
               return {
                 ...tasks,
                 [object.project]: projectTasks.map((t) => {
                   if (t.id === object.id) {
-                    return { ...object, currently_creating_pr: true };
+                    return newTask;
                   }
                   return t;
                 }),
               };
             }
+            return {
+              ...tasks,
+              [object.project]: [newTask, ...projectTasks],
+            };
           }
           return tasks;
         }
