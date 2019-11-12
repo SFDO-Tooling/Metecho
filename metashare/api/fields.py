@@ -1,6 +1,7 @@
 import bleach
 from django.core.validators import RegexValidator, _lazy_re_compile
 from django.db import models
+from django.forms.fields import CharField as CharFormField
 from django.utils.translation import gettext_lazy as _
 from markdown import markdown
 from rest_framework.fields import CharField
@@ -21,7 +22,7 @@ class MarkdownField(CharField):
         return render_clean_markdown(value)
 
 
-branch_unicode_re = _lazy_re_compile(r"^[-\w]+\Z/")
+branch_unicode_re = _lazy_re_compile(r"^[-\w/]+\Z")
 validate_unicode_branch = RegexValidator(
     branch_unicode_re,
     _(
@@ -30,6 +31,14 @@ validate_unicode_branch = RegexValidator(
     ),
     "invalid",
 )
+
+
+# A Form field
+class BranchFormField(CharFormField):
+    default_validators = [validate_unicode_branch]
+
+    def __init__(self, *, allow_unicode=False, **kwargs):  # pragma: nocover
+        super().__init__(**kwargs)
 
 
 # A Model field
@@ -41,4 +50,7 @@ class BranchField(models.SlugField):
         kwargs["max_length"] = 100
         kwargs["null"] = True
         kwargs["blank"] = True
-        return super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+    def formfield(self, **kwargs):  # pragma: nocover
+        return super().formfield(**{"form_class": BranchFormField, **kwargs})
