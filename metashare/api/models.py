@@ -23,6 +23,7 @@ from . import gh
 from . import model_mixins as mixins
 from . import push
 from .constants import ORGANIZATION_DETAILS
+from .fields import BranchField
 from .sf_run_flow import get_devhub_api
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
@@ -205,7 +206,7 @@ class ProjectSlug(AbstractSlug):
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = models.SlugField(max_length=100, null=True, blank=True)
+    branch_name = BranchField()
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -247,7 +248,7 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         blank=True,
         related_name="assigned_tasks",
     )
-    branch_name = models.SlugField(max_length=100, null=True, blank=True)
+    branch_name = BranchField()
 
     slug_class = TaskSlug
 
