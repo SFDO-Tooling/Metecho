@@ -112,6 +112,7 @@ class TaskSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(), allow_null=True
     )
     branch_url = serializers.SerializerMethodField()
+    branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -124,9 +125,10 @@ class TaskSerializer(serializers.ModelSerializer):
             "assignee",
             "slug",
             "old_slugs",
-            "branch_url",
             "has_unmerged_commits",
             "currently_creating_pr",
+            "branch_url",
+            "branch_diff_url",
             "pr_url",
         )
         validators = (
@@ -144,6 +146,20 @@ class TaskSerializer(serializers.ModelSerializer):
         branch = obj.branch_name
         if repo_owner and repo_name and branch:
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
+        return None
+
+    def get_branch_diff_url(self, obj) -> Optional[str]:
+        project = obj.project
+        project_branch = project.branch_name
+        repo = project.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        branch = obj.branch_name
+        if repo_owner and repo_name and project_branch and branch:
+            return (
+                f"https://github.com/{repo_owner}/{repo_name}/compare/"
+                f"{project_branch}...{branch}"
+            )
         return None
 
     def get_pr_url(self, obj) -> Optional[str]:

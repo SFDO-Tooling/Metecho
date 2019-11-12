@@ -28,7 +28,7 @@
     "isort": "isort -rc manage.py metashare/ config/",
     "black": "black manage.py metashare/ config/",
     "lint": "run-p lint:py lint:js lint:sass prettier:other",
-    "lint:nofix": "run-p flake8 eslint:nofix lint:sass:nofix",
+    "lint:nofix": "run-p flake8 eslint:nofix lint:sass:nofix tsc",
     "lint:js": "run-s prettier:js eslint tsc",
     "lint:py": "run-s isort black flake8",
     "lint:sass:nofix": "stylelint '**/*.scss'",

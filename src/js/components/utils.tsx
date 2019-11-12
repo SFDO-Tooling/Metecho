@@ -179,11 +179,13 @@ export const LabelWithSpinner = ({
 
 export const ExternalLink = ({
   url,
+  showButtonIcon = false,
   shortenGithub = false,
   children,
   ...props
 }: {
   url: string;
+  showButtonIcon?: boolean;
   shortenGithub?: boolean;
   children?: ReactNode;
   [key: string]: any;
@@ -199,7 +201,18 @@ export const ExternalLink = ({
         {url.slice(GITHUB_REPO_PREFIX.length)}
       </>
     ) : (
-      children
+      <>
+        {showButtonIcon && (
+          <Icon
+            category="utility"
+            name="new_window"
+            size="xx-small"
+            className="slds-button__icon slds-button__icon_left"
+            containerClassName="slds-icon_container slds-current-color"
+          />
+        )}
+        {children}
+      </>
     )}
   </a>
 );

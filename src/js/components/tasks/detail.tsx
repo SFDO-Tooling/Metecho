@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -173,15 +172,9 @@ const TaskDetail = (props: RouteComponentProps) => {
       {task.pr_url || task.branch_url ? (
         <ExternalLink
           url={(task.pr_url || task.branch_url) as string}
+          showButtonIcon
           className="slds-button slds-button_outline-brand"
         >
-          <Icon
-            category="utility"
-            name="new_window"
-            size="xx-small"
-            className="slds-button__icon slds-button__icon_left"
-            containerClassName="slds-icon_container slds-current-color"
-          />
           {task.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
         </ExternalLink>
       ) : null}
@@ -300,6 +293,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           <SubmitModal
             taskId={task.id}
             taskName={task.name}
+            taskDiffUrl={task.branch_diff_url}
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />

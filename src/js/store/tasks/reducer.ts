@@ -10,9 +10,10 @@ export interface Task {
   old_slugs: string[];
   project: string;
   description: string;
-  branch_url: string | null;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
+  branch_url: string | null;
+  branch_diff_url: string | null;
   pr_url: string | null;
 }
 

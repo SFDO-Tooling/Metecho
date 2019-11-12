@@ -17,11 +17,18 @@ import { OBJECT_TYPES } from '@/utils/constants';
 interface Props {
   taskId: string;
   taskName: string;
+  taskDiffUrl: string | null;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SubmitModal = ({ taskId, taskName, isOpen, toggleModal }: Props) => {
+const SubmitModal = ({
+  taskId,
+  taskName,
+  taskDiffUrl,
+  isOpen,
+  toggleModal,
+}: Props) => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);
@@ -200,14 +207,15 @@ const SubmitModal = ({ taskId, taskName, isOpen, toggleModal }: Props) => {
               slds-medium-size_6-of-12
               slds-large-size_4-of-12"
           >
-            <Button
-              iconCategory="utility"
-              iconName="new_window"
-              iconPosition="left"
-              label={i18n.t('Compare Changes')}
-              variant="outline-brand"
-              disabled
-            />
+            {taskDiffUrl && (
+              <ExternalLink
+                url={taskDiffUrl}
+                showButtonIcon
+                className="slds-button slds-button_outline-brand"
+              >
+                {i18n.t('Compare Changes')}
+              </ExternalLink>
+            )}
             <h3 className="slds-m-vertical_medium slds-text-heading_small">
               {i18n.t('Markdown Guide')}
             </h3>
