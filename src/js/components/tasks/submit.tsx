@@ -211,12 +211,14 @@ const SubmitModal = ({
               <ExternalLink
                 url={taskDiffUrl}
                 showButtonIcon
-                className="slds-button slds-button_outline-brand"
+                className="slds-button
+                  slds-button_outline-brand
+                  slds-m-bottom_medium"
               >
                 {i18n.t('Compare Changes')}
               </ExternalLink>
             )}
-            <h3 className="slds-m-vertical_medium slds-text-heading_small">
+            <h3 className="slds-m-bottom_medium slds-text-heading_small">
               {i18n.t('Markdown Guide')}
             </h3>
             <div className="markdown-block slds-m-vertical_medium">
