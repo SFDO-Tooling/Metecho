@@ -23,8 +23,8 @@ from . import gh
 from . import model_mixins as mixins
 from . import push
 from .constants import ORGANIZATION_DETAILS
-from .fields import BranchField
 from .sf_run_flow import get_devhub_api
+from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 
@@ -206,7 +206,9 @@ class ProjectSlug(AbstractSlug):
 class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    branch_name = BranchField()
+    branch_name = models.CharField(
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
+    )
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -248,7 +250,9 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         blank=True,
         related_name="assigned_tasks",
     )
-    branch_name = BranchField()
+    branch_name = models.CharField(
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
+    )
 
     slug_class = TaskSlug
 
