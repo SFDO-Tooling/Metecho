@@ -232,9 +232,12 @@ def create_pr(
         repository = get_repo_info(user, repo_id=repo_id)
         sections = [
             notes,
-            f"# Critical Changes\n\n{critical_changes}" if critical_changes else "",
-            f"# Changes\n\n{additional_changes}" if additional_changes else "",
-            f"# Issues Closed\n\n{issues}" if issues else "",
+            "# Critical Changes",
+            critical_changes,
+            "# Changes",
+            additional_changes,
+            "# Issues Closed",
+            issues,
         ]
         body = "\n\n".join([section for section in sections if section])
         pr = repository.create_pull(
