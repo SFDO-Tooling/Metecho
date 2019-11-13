@@ -1,3 +1,5 @@
+from django.core.validators import RegexValidator, _lazy_re_compile
+from django.utils.translation import gettext_lazy as _
 from rest_framework.validators import UniqueTogetherValidator, qs_filter
 
 
@@ -28,3 +30,14 @@ class CaseInsensitiveUniqueTogetherValidator(UniqueTogetherValidator):
             for field_name in self.fields
         }
         return qs_filter(queryset, **filter_kwargs)
+
+
+branch_unicode_re = _lazy_re_compile(r"^[-\w/]+\Z")
+validate_unicode_branch = RegexValidator(
+    branch_unicode_re,
+    _(
+        "Enter a valid 'branch' consisting of Unicode letters, numbers, underscores, "
+        "slashes, or hyphens."
+    ),
+    "invalid",
+)
