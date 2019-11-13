@@ -1,6 +1,5 @@
 import Sockette from 'sockette';
 
-import { fetchObjects } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
@@ -12,13 +11,14 @@ import {
   updateOrg,
 } from '@/store/orgs/actions';
 import { updateProject } from '@/store/projects/actions';
+import { reposRefreshed } from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { createPR, createPRFailed, updateTask } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
-jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
 jest.mock('@/store/projects/actions');
+jest.mock('@/store/repositories/actions');
 jest.mock('@/store/tasks/actions');
 
 const actions = {
@@ -28,7 +28,7 @@ const actions = {
   createPRFailed,
   deleteFailed,
   deleteOrg,
-  fetchObjects,
+  reposRefreshed,
   provisionOrg,
   provisionFailed,
   updateOrg,
@@ -89,15 +89,11 @@ describe('getAction', () => {
   });
 
   describe('USER_REPOS_REFRESH', () => {
-    test('fetches repositories', () => {
+    test('calls reposRefreshed', () => {
       const event = { type: 'USER_REPOS_REFRESH' };
       sockets.getAction(event);
 
-      expect(fetchObjects).toHaveBeenCalledTimes(1);
-      expect(fetchObjects).toHaveBeenCalledWith({
-        objectType: 'repository',
-        reset: true,
-      });
+      expect(reposRefreshed).toHaveBeenCalledTimes(1);
     });
   });
 

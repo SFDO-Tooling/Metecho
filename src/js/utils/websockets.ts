@@ -1,7 +1,6 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
-import { fetchObjects } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
@@ -15,11 +14,11 @@ import {
 import { Org } from '@/store/orgs/reducer';
 import { updateProject } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
+import { reposRefreshed } from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import { createPR, createPRFailed, updateTask } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
 import {
-  OBJECT_TYPES,
   ObjectTypes,
   WEBSOCKET_ACTIONS,
   WebsocketActions,
@@ -138,7 +137,7 @@ export const getAction = (event: EventType) => {
   }
   switch (event.type) {
     case 'USER_REPOS_REFRESH':
-      return fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true });
+      return reposRefreshed();
     case 'PROJECT_UPDATE':
       return updateProject(event.payload);
     case 'TASK_UPDATE':
