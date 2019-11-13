@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
+import { ReposRefreshed } from '@/store/repositories/actions';
 import { UserAction } from '@/store/user/actions';
 
 export interface User {
@@ -10,11 +13,12 @@ export interface User {
   org_type: string | null;
   is_devhub_enabled: boolean;
   is_staff: boolean;
+  currently_fetching_repos: boolean;
 }
 
 const reducer = (
-  state: User | null = null,
-  action: UserAction,
+  user: User | null = null,
+  action: UserAction | ReposRefreshed,
 ): User | null => {
   switch (action.type) {
     case 'USER_LOGGED_IN':
@@ -23,8 +27,10 @@ const reducer = (
       return action.payload;
     case 'USER_LOGGED_OUT':
       return null;
+    case 'REPOS_REFRESHED':
+      return user ? { ...user, currently_fetching_repos: false } : user;
   }
-  return state;
+  return user;
 };
 
 export default reducer;

@@ -1,8 +1,14 @@
 import fetchMock from 'fetch-mock';
 
+import { fetchObjects } from '@/store/actions';
 import * as actions from '@/store/repositories/actions';
+import { OBJECT_TYPES } from '@/utils/constants';
 
 import { storeWithThunk } from './../../utils';
+
+jest.mock('@/store/actions');
+
+fetchObjects.mockReturnValue({ type: 'TEST', payload: {} });
 
 describe('refreshRepos', () => {
   let url;
@@ -70,5 +76,21 @@ describe('reposRefreshing', () => {
     const expected = { type: 'REFRESHING_REPOS' };
 
     expect(actions.reposRefreshing()).toEqual(expected);
+  });
+});
+
+describe('reposRefreshed', () => {
+  test('dispatches ReposRefreshed action', () => {
+    const store = storeWithThunk({});
+    const ReposRefreshed = {
+      type: 'REPOS_REFRESHED',
+    };
+    store.dispatch(actions.reposRefreshed());
+
+    expect(store.getActions()[0]).toEqual(ReposRefreshed);
+    expect(fetchObjects).toHaveBeenCalledWith({
+      objectType: OBJECT_TYPES.REPOSITORY,
+      reset: true,
+    });
   });
 });

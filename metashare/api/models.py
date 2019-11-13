@@ -39,6 +39,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 
 class User(mixins.HashIdMixin, AbstractUser):
     objects = UserManager()
+    currently_fetching_repos = models.BooleanField(default=False)
 
     def refresh_repositories(self):
         repos = gh.get_all_org_repos(self)
@@ -49,6 +50,8 @@ class User(mixins.HashIdMixin, AbstractUser):
                 for repo in repos
             ]
         )
+        self.currently_fetching_repos = False
+        self.save()
         self.notify_repositories_updated()
 
     def notify_repositories_updated(self):

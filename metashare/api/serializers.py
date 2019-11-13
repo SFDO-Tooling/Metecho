@@ -33,6 +33,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "org_type",
             "is_devhub_enabled",
             "sf_username",
+            "currently_fetching_repos",
         )
 
 

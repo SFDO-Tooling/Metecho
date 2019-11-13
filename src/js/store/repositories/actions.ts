@@ -1,5 +1,7 @@
 import { ThunkResult } from '@/store';
+import { fetchObjects } from '@/store/actions';
 import apiFetch from '@/utils/api';
+import { OBJECT_TYPES } from '@/utils/constants';
 
 interface RefreshReposRequested {
   type: 'REFRESH_REPOS_REQUESTED';
@@ -13,12 +15,16 @@ interface RefreshReposRejected {
 interface ReposRefreshing {
   type: 'REFRESHING_REPOS';
 }
+export interface ReposRefreshed {
+  type: 'REPOS_REFRESHED';
+}
 
 export type RepositoriesAction =
   | RefreshReposRequested
   | RefreshReposAccepted
   | RefreshReposRejected
-  | ReposRefreshing;
+  | ReposRefreshing
+  | ReposRefreshed;
 
 export const refreshRepos = (): ThunkResult => async (dispatch) => {
   dispatch({ type: 'REFRESH_REPOS_REQUESTED' });
@@ -40,3 +46,10 @@ export const refreshRepos = (): ThunkResult => async (dispatch) => {
 export const reposRefreshing = (): ReposRefreshing => ({
   type: 'REFRESHING_REPOS',
 });
+
+export const reposRefreshed = (): ThunkResult => (dispatch) => {
+  dispatch({ type: 'REPOS_REFRESHED' });
+  return dispatch(
+    fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
+  );
+};
