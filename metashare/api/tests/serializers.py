@@ -84,7 +84,7 @@ class TestProjectSerializer:
             }
         )
         assert not serializer.is_valid()
-        assert [str(err) for err in serializer.errors["non_field_errors"]] == [
+        assert [str(err) for err in serializer.errors["name"]] == [
             "A project with this name already exists."
         ]
 
@@ -101,7 +101,7 @@ class TestProjectSerializer:
             }
         )
         assert not serializer.is_valid()
-        assert [str(err) for err in serializer.errors["non_field_errors"]] == [
+        assert [str(err) for err in serializer.errors["name"]] == [
             "A project with this name already exists."
         ]
 
