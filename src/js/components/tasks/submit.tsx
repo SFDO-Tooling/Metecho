@@ -127,7 +127,7 @@ const SubmitModal = ({
             className="slds-col
               slds-size_1-of-1
               slds-medium-size_6-of-12
-              slds-large-size_8-of-12"
+              slds-large-size_7-of-12"
           >
             <div className="slds-form-element__help slds-p-bottom_small">
               <Trans i18nKey="releaseNotesInfo">
@@ -174,22 +174,6 @@ const SubmitModal = ({
               onChange={handleInputChange}
             />
             <Textarea
-              id="task-issues"
-              label={i18n.t(
-                'Which, if any, issues were closed (including issue #number)',
-              )}
-              placeholder={i18n.t(
-                '- Fixes #102\n- Resolves #100\n- This release closes #101',
-              )}
-              className="task-submit-textarea
-                slds-form-element_stacked
-                slds-p-left_none"
-              name="issues"
-              value={inputs.issues}
-              errorText={errors.issues}
-              onChange={handleInputChange}
-            />
-            <Textarea
               id="task-notes"
               label={i18n.t('Developer notes')}
               className="task-submit-textarea
@@ -205,7 +189,7 @@ const SubmitModal = ({
             className="slds-col
               slds-size_1-of-1
               slds-medium-size_6-of-12
-              slds-large-size_4-of-12"
+              slds-large-size_5-of-12"
           >
             {taskDiffUrl && (
               <ExternalLink
@@ -230,21 +214,21 @@ const SubmitModal = ({
               <pre>**{i18n.t('This becomes bold text')}**</pre>
             </div>
             <div className="markdown-block slds-m-vertical_medium">
-              <pre>- {i18n.t('Unordered list with asterisk or hyphen')}</pre>
+              <pre>- {i18n.t('Unordered list')}</pre>
               {/* prettier-ignore */}
-              <pre>  - {i18n.t('Double space to nest list items')}</pre>
+              <pre>  - {i18n.t('Double space to nest')}</pre>
             </div>
             <div className="markdown-block slds-m-vertical_medium">
-              <pre>- [x] {i18n.t('Completed checklist item')}</pre>
-              <pre>- [ ] {i18n.t('Incomplete checklist item')}</pre>
+              <pre>- [x] {i18n.t('Completed item')}</pre>
+              <pre>- [ ] {i18n.t('Incomplete item')}</pre>
             </div>
             <p className="slds-m-top_medium">
               <b>{i18n.t('Example')}</b>
             </p>
-            <pre>## {i18n.t('Stops gogobob from refreshing')}</pre>
+            <pre>## {i18n.t('Stops widget from refreshing')}</pre>
             <pre>{i18n.t('This includes')}:</pre>
             <div className="markdown-block">
-              <pre>- {i18n.t('Renders incomplete bobble as such')}</pre>
+              <pre>- {i18n.t('Renders incomplete bobble')}</pre>
               <pre>- {i18n.t('Prevents fire from building')}</pre>
               {/* prettier-ignore */}
               <pre>  - {i18n.t('Prevents fire duplication')}</pre>
