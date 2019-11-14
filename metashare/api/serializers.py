@@ -11,6 +11,23 @@ from .validators import CaseInsensitiveUniqueTogetherValidator
 User = get_user_model()
 
 
+class FormattableDict:
+    """
+    Stupid hack to get a dict error message into a
+    CaseInsensitiveUniqueTogetherValidator, so the error can be assigned
+    to a particular key.
+    """
+
+    def __init__(self, key, msg):
+        self.key = key
+        self.msg = msg
+
+    def format(self, *args, **kwargs):
+        return {
+            self.key: self.msg.format(*args, **kwargs),
+        }
+
+
 class HashidPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
     def to_representation(self, value):
         if self.pk_field is not None:
@@ -89,7 +106,9 @@ class ProjectSerializer(serializers.ModelSerializer):
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Project.objects.all(),
                 fields=("name", "repository"),
-                message=_("A project with this name already exists."),
+                message=FormattableDict(
+                    "name", _("A project with this name already exists.")
+                ),
             ),
         )
 
@@ -136,7 +155,9 @@ class TaskSerializer(serializers.ModelSerializer):
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Task.objects.all(),
                 fields=("name", "project"),
-                message=_("A task with this name already exists."),
+                message=FormattableDict(
+                    "name", _("A task with this name already exists.")
+                ),
             ),
         )
 
