@@ -127,7 +127,7 @@ def get_org_result(
         "ConnectedAppConsumerKey": SF_CLIENT_ID,
         "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
         "Description": f"{repo_owner}/{repo_name} {repo_branch}",
-        "DurationDays": scratch_org_config.days,
+        "DurationDays": 30,  # Override whatever is in scratch_org_config.days
         "Edition": scratch_org_definition["edition"],
         "Features": ";".join(scratch_org_definition.get("features", [])),
         "HasSampleData": scratch_org_definition.get("hasSampleData", False),
