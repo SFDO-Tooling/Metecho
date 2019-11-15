@@ -8,6 +8,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from requests.exceptions import HTTPError
 
 from ..sf_run_flow import (
     capitalize,
@@ -30,14 +31,30 @@ def test_capitalize():
     assert capitalize("fooBar") == "FooBar"
 
 
-def test_refresh_access_token():
-    with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
-        OrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
+class TestRefreshAccessToken:
+    def test_good(self):
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
+            OrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
-        refresh_access_token(config=MagicMock(), org_name=MagicMock())
+            refresh_access_token(config=MagicMock(), org_name=MagicMock())
 
-        assert OrgConfig.called
+            assert OrgConfig.called
+
+    def test_bad(self):
+        with ExitStack() as stack:
+            get_current_job = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_current_job")
+            )
+            get_current_job.return_value = MagicMock(id=123)
+            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
+            jwt_session.side_effect = HTTPError(
+                "Error message.", response=MagicMock(status_code=422)
+            )
+            stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
+
+            with pytest.raises(HTTPError, match=".*job ID.*"):
+                refresh_access_token(config=MagicMock(), org_name=MagicMock())
 
 
 def test_get_devhub_api():

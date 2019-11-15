@@ -9,6 +9,8 @@ from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from cumulusci.utils import cd
 from django.conf import settings
+from requests.exceptions import HTTPError
+from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
 # Salesforce connected app
@@ -52,13 +54,24 @@ def refresh_access_token(*, config, org_name):
     which we don't want now -- this is a total hack which I'll try to
     smooth over with some improvements in CumulusCI
     """
-    org_config = OrgConfig(config, org_name)
-    org_config.refresh_oauth_token = Mock()
-    info = jwt_session(
-        SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
-    )
-    org_config.config["access_token"] = info["access_token"]
-    return org_config
+    try:
+        org_config = OrgConfig(config, org_name)
+        org_config.refresh_oauth_token = Mock()
+        info = jwt_session(
+            SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
+        )
+        org_config.config["access_token"] = info["access_token"]
+        return org_config
+    except HTTPError as err:
+        additional_context = ". Are you certain that the organization still exists?"
+
+        if get_current_job():
+            job_id = get_current_job().id
+            additional_context += f" If you need support, your job ID is {job_id}."
+
+        raise err.__class__(
+            err.args[0] + additional_context, *err.args[1:],
+        )
 
 
 def get_devhub_api(*, devhub_username):
