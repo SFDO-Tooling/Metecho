@@ -447,6 +447,16 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
                 self, error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
             )
 
+    def remove_scratch_org(self):
+        from .serializers import ScratchOrgSerializer
+
+        payload = ScratchOrgSerializer(self).data
+        message = {"type": "SCRATCH_ORG_REMOVED", "payload": payload}
+        async_to_sync(push.push_message_about_instance)(self, message)
+        # Use super().delete to avoid accidentally sending a
+        # SCRATCH_ORG_DELETE event:
+        super().delete()
+
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):

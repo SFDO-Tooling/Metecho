@@ -48,7 +48,7 @@ def capitalize(s):
     return s[0].upper() + s[1:]
 
 
-def refresh_access_token(*, config, org_name):
+def refresh_access_token(*, config, org_name, scratch_org):
     """
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
     which we don't want now -- this is a total hack which I'll try to
@@ -68,6 +68,9 @@ def refresh_access_token(*, config, org_name):
         if get_current_job():
             job_id = get_current_job().id
             additional_context += f" If you need support, your job ID is {job_id}."
+
+        # TODO: Delete scratch org.
+        scratch_org.remove_scratch_org()
 
         raise err.__class__(
             err.args[0] + additional_context, *err.args[1:],
@@ -186,12 +189,12 @@ def get_access_token(*, org_result, scratch_org_config):
     ] = auth_result["access_token"]
 
 
-def deploy_org_settings(*, cci, org_name, scratch_org_config):
+def deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
     """Do a Metadata API deployment to configure org settings
     as specified in the scratch org definition file.
     """
     org_config = refresh_access_token(
-        config=scratch_org_config.config, org_name=org_name
+        config=scratch_org_config.config, org_name=org_name, scratch_org=scratch_org,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
@@ -200,7 +203,9 @@ def deploy_org_settings(*, cci, org_name, scratch_org_config):
     return org_config
 
 
-def create_org(*, repo_owner, repo_name, repo_url, repo_branch, user, project_path):
+def create_org(
+    *, repo_owner, repo_name, repo_url, repo_branch, user, project_path, scratch_org
+):
     """Create a new scratch org"""
     org_name = "dev"
     devhub_username = user.sf_username
@@ -234,7 +239,10 @@ def create_org(*, repo_owner, repo_name, repo_url, repo_branch, user, project_pa
     )
     get_access_token(org_result=org_result, scratch_org_config=scratch_org_config)
     org_config = deploy_org_settings(
-        cci=cci, org_name=org_name, scratch_org_config=scratch_org_config
+        cci=cci,
+        org_name=org_name,
+        scratch_org_config=scratch_org_config,
+        scratch_org=scratch_org,
     )
 
     return (scratch_org_config, cci, org_config)

@@ -376,6 +376,13 @@ class TestScratchOrg:
             assert scratch_org.get_login_url() == "https://example.com"
             assert jwt_session.called
 
+    def test_remove_scratch_org(self, scratch_org_factory):
+        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory()
+            scratch_org.remove_scratch_org()
+
+            assert async_to_sync.called
+
 
 @pytest.mark.django_db
 class TestGitHubRepository:

@@ -37,7 +37,9 @@ class TestRefreshAccessToken:
             stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
             OrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
-            refresh_access_token(config=MagicMock(), org_name=MagicMock())
+            refresh_access_token(
+                config=MagicMock(), org_name=MagicMock(), scratch_org=MagicMock()
+            )
 
             assert OrgConfig.called
 
@@ -53,8 +55,13 @@ class TestRefreshAccessToken:
             )
             stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
+            scratch_org = MagicMock()
             with pytest.raises(HTTPError, match=".*job ID.*"):
-                refresh_access_token(config=MagicMock(), org_name=MagicMock())
+                refresh_access_token(
+                    config=MagicMock(), org_name=MagicMock(), scratch_org=scratch_org
+                )
+
+            assert scratch_org.remove_scratch_org.called
 
 
 def test_get_devhub_api():
@@ -133,7 +140,10 @@ class TestDeployOrgSettings:
             scratch_org_definition.get.return_value = settings
 
             deploy_org_settings(
-                cci=MagicMock(), org_name=MagicMock(), scratch_org_config=MagicMock()
+                cci=MagicMock(),
+                org_name=MagicMock(),
+                scratch_org_config=MagicMock(),
+                scratch_org=MagicMock(),
             )
             assert DeployOrgSettings.called
 
@@ -158,6 +168,7 @@ def test_create_org_and_run_flow():
             repo_branch=MagicMock(),
             user=MagicMock(),
             project_path=MagicMock(),
+            scratch_org=MagicMock(),
         )
         run_flow(
             cci=MagicMock(),
