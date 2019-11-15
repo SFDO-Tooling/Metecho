@@ -138,3 +138,11 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
                 counter += 1
             else:
                 raise
+
+
+def create_updates_hook_for_repo(repo):
+    repo.create_hook(
+        "MetaShare update hook",
+        # TODO: make this a correct URL
+        {"url": "", "content_type": "json"},
+    )

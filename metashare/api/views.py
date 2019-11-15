@@ -5,11 +5,13 @@ from github3.exceptions import ResponseError
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
+
+# from .gh import get_repo_info
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
@@ -91,6 +93,14 @@ class RepositoryViewSet(viewsets.ModelViewSet):
                 pass
 
         return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
+
+    @action(methods=["POST"], detail=True, permission_classes=[AllowAny])
+    def hook(self, request, pk=None):
+        # repository = self.get_object()
+        # repo = get_repo_info(self.request.user, repository.repo_id)
+        return Response("", status=200)
+        # branch = ""
+        # list(repo.commits(sha=branch.latest_sha()))
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
