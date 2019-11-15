@@ -63,7 +63,7 @@ def refresh_access_token(*, config, org_name):
         org_config.config["access_token"] = info["access_token"]
         return org_config
     except HTTPError as err:
-        additional_context = ". Are you certain that the organization still exists?"
+        additional_context = ". Are you certain that the org still exists?"
 
         if get_current_job():
             job_id = get_current_job().id
