@@ -127,7 +127,8 @@ const SubmitModal = ({
             className="slds-col
               slds-size_1-of-1
               slds-medium-size_6-of-12
-              slds-large-size_7-of-12"
+              slds-large-size_8-of-12
+              slds-p-bottom_medium"
           >
             <div className="slds-form-element__help slds-p-bottom_small">
               <Trans i18nKey="releaseNotesInfo">
@@ -138,7 +139,7 @@ const SubmitModal = ({
             <Input
               id="task-title"
               label={i18n.t('Title')}
-              className="slds-form-element_stacked slds-p-left_none"
+              className="slds-p-bottom_small"
               name="title"
               value={inputs.title}
               required
@@ -152,9 +153,7 @@ const SubmitModal = ({
               label={i18n.t(
                 'Describe any critical changes which might impact existing functionality',
               )}
-              className="task-submit-textarea
-                slds-form-element_stacked
-                slds-p-left_none"
+              className="task-submit-textarea slds-p-bottom_small"
               name="critical_changes"
               value={inputs.critical_changes}
               errorText={errors.critical_changes}
@@ -165,9 +164,7 @@ const SubmitModal = ({
               label={i18n.t(
                 'Describe additional changes including instructions for users for any post-upgrade tasks',
               )}
-              className="task-submit-textarea
-                slds-form-element_stacked
-                slds-p-left_none"
+              className="task-submit-textarea slds-p-bottom_small"
               name="additional_changes"
               value={inputs.additional_changes}
               errorText={errors.additional_changes}
@@ -176,9 +173,7 @@ const SubmitModal = ({
             <Textarea
               id="task-notes"
               label={i18n.t('Developer notes')}
-              className="task-submit-textarea
-                slds-form-element_stacked
-                slds-p-left_none"
+              className="task-submit-textarea slds-p-bottom_small"
               name="notes"
               value={inputs.notes}
               errorText={errors.notes}
@@ -189,7 +184,7 @@ const SubmitModal = ({
             className="slds-col
               slds-size_1-of-1
               slds-medium-size_6-of-12
-              slds-large-size_5-of-12"
+              slds-large-size_4-of-12"
           >
             {taskDiffUrl && (
               <ExternalLink
@@ -202,49 +197,51 @@ const SubmitModal = ({
                 {i18n.t('Compare Changes')}
               </ExternalLink>
             )}
-            <h3 className="slds-m-bottom_medium slds-text-heading_small">
-              {i18n.t('Markdown Guide')}
-            </h3>
-            <div className="markdown-block slds-m-vertical_medium">
-              <pre>## {i18n.t('Heading')}</pre>
-              <pre>### {i18n.t('Subheading')}</pre>
+            <div className="submit-guide">
+              <h3 className="slds-m-bottom_medium slds-text-heading_small">
+                {i18n.t('Markdown Guide')}
+              </h3>
+              <div className="markdown-block slds-m-vertical_medium">
+                <pre>## {i18n.t('Heading')}</pre>
+                <pre>### {i18n.t('Subheading')}</pre>
+              </div>
+              <div className="markdown-block slds-m-vertical_medium">
+                <pre>*{i18n.t('This becomes italic text')}*</pre>
+                <pre>**{i18n.t('This becomes bold text')}**</pre>
+              </div>
+              <div className="markdown-block slds-m-vertical_medium">
+                <pre>- {i18n.t('Unordered list')}</pre>
+                {/* prettier-ignore */}
+                <pre>  - {i18n.t('Double space to nest')}</pre>
+              </div>
+              <div className="markdown-block slds-m-vertical_medium">
+                <pre>- [x] {i18n.t('Completed item')}</pre>
+                <pre>- [ ] {i18n.t('Incomplete item')}</pre>
+              </div>
+              <p className="slds-m-top_medium">
+                <b>{i18n.t('Example')}</b>
+              </p>
+              <pre>## {i18n.t('Stops widget from refreshing')}</pre>
+              <pre>{i18n.t('This includes')}:</pre>
+              <div className="markdown-block">
+                <pre>- {i18n.t('Renders incomplete bobble')}</pre>
+                <pre>- {i18n.t('Prevents fire from building')}</pre>
+                {/* prettier-ignore */}
+                <pre>  - {i18n.t('Prevents fire duplication')}</pre>
+                {/* prettier-ignore */}
+                <pre>  - {i18n.t('Prevents fire spread')}</pre>
+              </div>
+              <div className="slds-m-vertical_x-large">---</div>
+              <p>
+                <Trans i18nKey="markdownGuide">
+                  For more options, view this{' '}
+                  <ExternalLink url="https://guides.github.com/features/mastering-markdown/">
+                    Markdown Guide
+                  </ExternalLink>
+                  .
+                </Trans>
+              </p>
             </div>
-            <div className="markdown-block slds-m-vertical_medium">
-              <pre>*{i18n.t('This becomes italic text')}*</pre>
-              <pre>**{i18n.t('This becomes bold text')}**</pre>
-            </div>
-            <div className="markdown-block slds-m-vertical_medium">
-              <pre>- {i18n.t('Unordered list')}</pre>
-              {/* prettier-ignore */}
-              <pre>  - {i18n.t('Double space to nest')}</pre>
-            </div>
-            <div className="markdown-block slds-m-vertical_medium">
-              <pre>- [x] {i18n.t('Completed item')}</pre>
-              <pre>- [ ] {i18n.t('Incomplete item')}</pre>
-            </div>
-            <p className="slds-m-top_medium">
-              <b>{i18n.t('Example')}</b>
-            </p>
-            <pre>## {i18n.t('Stops widget from refreshing')}</pre>
-            <pre>{i18n.t('This includes')}:</pre>
-            <div className="markdown-block">
-              <pre>- {i18n.t('Renders incomplete bobble')}</pre>
-              <pre>- {i18n.t('Prevents fire from building')}</pre>
-              {/* prettier-ignore */}
-              <pre>  - {i18n.t('Prevents fire duplication')}</pre>
-              {/* prettier-ignore */}
-              <pre>  - {i18n.t('Prevents fire spread')}</pre>
-            </div>
-            <div className="slds-m-vertical_x-large">---</div>
-            <p>
-              <Trans i18nKey="markdownGuide">
-                For more options, view this{' '}
-                <ExternalLink url="https://guides.github.com/features/mastering-markdown/">
-                  Markdown Guide
-                </ExternalLink>
-                .
-              </Trans>
-            </p>
           </div>
         </div>
         {/* Clicking hidden button allows for native browser form validation */}
