@@ -68,7 +68,7 @@ pyasn1==0.4.7             # via pyasn1-modules, service-identity
 pycparser==2.19           # via cffi, cumulusci
 pyhamcrest==1.9.0         # via twisted
 pyjwt==1.7.1              # via cumulusci
-pyopenssl==19.0.0
+pyopenssl==19.1.0
 python-dateutil==2.8.0    # via cumulusci, faker, github3-py, github3.py
 python3-openid==3.1.0     # via django-allauth
 pytz==2019.3              # via cumulusci, django

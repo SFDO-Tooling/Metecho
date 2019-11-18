@@ -51,7 +51,7 @@ py==1.8.0                 # via pytest
 pycodestyle==2.5.0        # via flake8
 pyflakes==2.1.1           # via flake8
 pygments==2.4.2           # via ipython, sphinx
-pyopenssl==19.0.0         # via requests
+pyopenssl==19.1.0         # via requests
 pyparsing==2.4.2          # via packaging
 pytest-asyncio==0.10.0
 pytest-cov==2.8.1
