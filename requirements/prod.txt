@@ -13,7 +13,7 @@ autobahn==19.10.1         # via daphne
 automat==0.7.0            # via twisted
 bleach==3.1.0
 certifi==2019.9.11        # via cumulusci, requests, sentry-sdk
-cffi==1.13.1              # via cryptography, cumulusci
+cffi==1.13.2              # via cryptography, cumulusci
 channels-redis==2.4.1
 channels==2.3.1
 chardet==3.0.4            # via cumulusci, requests
@@ -21,7 +21,7 @@ click==7.0                # via cumulusci, rq
 coloredlogs==10.0         # via cumulusci
 constantly==15.1.0        # via twisted
 cryptography==2.8         # via autobahn, cumulusci, jwcrypto, pyopenssl, requests, secretstorage, service-identity
-cumulusci==3.1.0
+cumulusci==3.1.1
 daphne==2.3.0             # via channels
 defusedxml==0.6.0         # via python3-openid
 dj-database-url==0.5.0
@@ -59,7 +59,7 @@ lxml==4.4.1               # via cumulusci
 markdown==3.1.1
 markupsafe==1.1.1         # via cumulusci, jinja2
 msgpack==0.6.2            # via channels-redis
-newrelic==5.2.2.130
+newrelic==5.2.3.131
 oauthlib==3.1.0           # via requests-oauthlib
 pillow==6.2.1
 psycopg2-binary==2.8.4
@@ -68,8 +68,8 @@ pyasn1==0.4.7             # via pyasn1-modules, service-identity
 pycparser==2.19           # via cffi, cumulusci
 pyhamcrest==1.9.0         # via twisted
 pyjwt==1.7.1              # via cumulusci
-pyopenssl==19.0.0
-python-dateutil==2.8.0    # via cumulusci, faker, github3-py, github3.py
+pyopenssl==19.1.0
+python-dateutil==2.8.1    # via cumulusci, faker, github3-py, github3.py
 python3-openid==3.1.0     # via django-allauth
 pytz==2019.3              # via cumulusci, django
 pyyaml==5.1.2             # via cumulusci
@@ -90,7 +90,7 @@ sentry-sdk==0.13.2
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.9.0.tar.gz
 simple-salesforce==0.74.2
-six==1.12.0               # via autobahn, automat, bleach, cryptography, cumulusci, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
+six==1.13.0               # via autobahn, automat, bleach, cryptography, cumulusci, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
 sqlalchemy==1.3.10        # via cumulusci
 sqlparse==0.3.0           # via django
 terminaltables==3.1.0     # via cumulusci
