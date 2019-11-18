@@ -101,6 +101,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "old_slugs",
             "repository",
             "branch_url",
+            "commits",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -144,6 +145,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "branch_url",
+            "commits",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

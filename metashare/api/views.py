@@ -10,8 +10,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
-
-# from .gh import get_repo_info
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
@@ -96,11 +94,15 @@ class RepositoryViewSet(viewsets.ModelViewSet):
 
     @action(methods=["POST"], detail=True, permission_classes=[AllowAny])
     def hook(self, request, pk=None):
-        # repository = self.get_object()
-        # repo = get_repo_info(self.request.user, repository.repo_id)
-        return Response("", status=200)
-        # branch = ""
-        # list(repo.commits(sha=branch.latest_sha()))
+        repository = self.model.objects.get(pk=pk)
+        user = repository.get_a_matching_user()
+        if not user:
+            return Response(
+                {"error": f"No matching user for repository {pk}."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        repository.refresh_commits(user)
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

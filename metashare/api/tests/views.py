@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.urls import reverse
+from github3.exceptions import ResponseError
 
 from ..models import SCRATCH_ORG_TYPES
 
@@ -41,32 +42,85 @@ def test_user_refresh_view(client):
 
 
 @pytest.mark.django_db
-def test_repository_view(client, repository_factory, git_hub_repository_factory):
-    git_hub_repository_factory(
-        user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
-    )
-    repo = repository_factory(repo_name="repo", repo_id=123)
-    repository_factory(repo_name="repo2", repo_id=456)
-    repository_factory(repo_name="repo3", repo_id=None)
-    response = client.get(reverse("repository-list"))
+class TestRepositoryView:
+    def test_get_queryset(self, client, repository_factory, git_hub_repository_factory):
+        git_hub_repository_factory(
+            user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
+        )
+        repo = repository_factory(repo_name="repo", repo_id=123)
+        repository_factory(repo_name="repo2", repo_id=456)
+        repository_factory(repo_name="repo3", repo_id=None)
+        with patch("metashare.api.model_mixins.get_repo_info") as get_repo_info:
+            get_repo_info.return_value = MagicMock(id=789)
+            response = client.get(reverse("repository-list"))
 
-    assert response.status_code == 200
-    assert response.json() == {
-        "count": 1,
-        "previous": None,
-        "next": None,
-        "results": [
-            {
-                "id": str(repo.id),
-                "name": str(repo.name),
-                "description": "",
-                "is_managed": False,
-                "slug": str(repo.slug),
-                "old_slugs": [],
-                "repo_url": f"https://github.com/{repo.repo_owner}/{repo.repo_name}",
-            }
-        ],
-    }
+        assert response.status_code == 200
+        assert response.json() == {
+            "count": 1,
+            "previous": None,
+            "next": None,
+            "results": [
+                {
+                    "id": str(repo.id),
+                    "name": str(repo.name),
+                    "description": "",
+                    "is_managed": False,
+                    "slug": str(repo.slug),
+                    "old_slugs": [],
+                    "repo_url": (
+                        f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
+                    ),
+                }
+            ],
+        }
+
+    def test_get_queryset__bad(
+        self, client, repository_factory, git_hub_repository_factory
+    ):
+        git_hub_repository_factory(
+            user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
+        )
+        repo = repository_factory(repo_name="repo", repo_id=123)
+        repository_factory(repo_name="repo2", repo_id=456)
+        repository_factory(repo_name="repo3", repo_id=None)
+        with patch("metashare.api.model_mixins.get_repo_info") as get_repo_info:
+            get_repo_info.side_effect = ResponseError(MagicMock())
+            response = client.get(reverse("repository-list"))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "count": 1,
+            "previous": None,
+            "next": None,
+            "results": [
+                {
+                    "id": str(repo.id),
+                    "name": str(repo.name),
+                    "description": "",
+                    "is_managed": False,
+                    "slug": str(repo.slug),
+                    "old_slugs": [],
+                    "repo_url": (
+                        f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
+                    ),
+                }
+            ],
+        }
+
+    def test_hook__good(self, client, repository_factory, git_hub_repository_factory):
+        repo = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123)
+        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
+            response = client.post(
+                reverse("repository-hook", kwargs={"pk": str(repo.id)})
+            )
+            assert refresh_commits_job.delay.called
+            assert response.status_code == 202
+
+    def test_hook__bad(self, client, repository_factory):
+        repo = repository_factory()
+        response = client.post(reverse("repository-hook", kwargs={"pk": str(repo.id)}))
+        assert response.status_code == 500
 
 
 @pytest.mark.django_db

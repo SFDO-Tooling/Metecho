@@ -12,6 +12,7 @@ from ..jobs import (
     create_branches_on_github_then_create_scratch_org,
     delete_scratch_org,
     get_unsaved_changes,
+    refresh_commits,
     refresh_github_repositories_for_user,
 )
 from ..models import SCRATCH_ORG_TYPES
@@ -257,3 +258,39 @@ class TestErrorHandling:
                 commit_changes_from_org(scratch_org, user, {}, "message")
 
             assert async_to_sync.called
+
+
+@pytest.mark.django_db
+def test_refresh_commits(
+    user_factory, repository_factory, project_factory, task_factory
+):
+    user = user_factory()
+    repository = repository_factory()
+    project = project_factory(repository=repository, branch_name="project")
+    task_factory(project=project, branch_name="task")
+    with ExitStack() as stack:
+        commit1 = MagicMock(
+            **{
+                "sha": "abcd1234",
+                "author.avatar_url": "https://example.com/img.png",
+                "author.login": "test_user",
+                "committer.avatar_url": "https://example.com/img.png",
+                "committer.login": "test_user",
+                "message": "Test message 1",
+            }
+        )
+        commit2 = MagicMock(
+            **{
+                "sha": "1234abcd",
+                "author.avatar_url": None,
+                "author.login": None,
+                "committer.avatar_url": None,
+                "committer.login": None,
+                "message": "Test message 2",
+            }
+        )
+        repo = MagicMock(**{"commits.return_value": [commit1, commit2]})
+        get_repo_info = stack.enter_context(patch("metashare.api.jobs.get_repo_info"))
+        get_repo_info.return_value = repo
+
+        refresh_commits(user=user, repository=repository)

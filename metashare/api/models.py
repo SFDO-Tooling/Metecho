@@ -184,6 +184,21 @@ class Repository(
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
 
+    def get_a_matching_user(self):
+        github_repository = GitHubRepository.objects.filter(
+            repo_id=self.repo_id
+        ).first()
+
+        if github_repository:
+            return github_repository.user
+
+        return None
+
+    def refresh_commits(self, user):
+        from .jobs import refresh_commits_job
+
+        refresh_commits_job.delay(user=user, repository=self)
+
 
 class GitHubRepository(mixins.HashIdMixin, models.Model):
     user = models.ForeignKey(
@@ -210,8 +225,9 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
+    commits = JSONField(default=list)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -254,8 +270,9 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         related_name="assigned_tasks",
     )
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
+    commits = JSONField(default=list)
 
     slug_class = TaskSlug
 
