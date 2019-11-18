@@ -417,9 +417,9 @@ class TestScratchOrg:
             assert jwt_session.called
 
     def test_remove_scratch_org(self, scratch_org_factory):
-        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             scratch_org = scratch_org_factory()
-            scratch_org.remove_scratch_org()
+            scratch_org.remove_scratch_org(error=Exception)
 
             assert async_to_sync.called
 

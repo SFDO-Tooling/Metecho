@@ -100,6 +100,13 @@ interface OrgDeleteFailedEvent {
     model: Org;
   };
 }
+interface OrgRemovedEvent {
+  type: 'SCRATCH_ORG_REMOVE';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
 interface CommitSucceededEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES';
   payload: Org;
@@ -124,6 +131,7 @@ type ModelEvent =
   | OrgUpdateFailedEvent
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
+  | OrgRemovedEvent
   | CommitSucceededEvent
   | CommitFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
@@ -155,7 +163,12 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
       return updateFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
-      return deleteOrg(event.payload);
+      return deleteOrg({ org: event.payload });
+    case 'SCRATCH_ORG_REMOVE':
+      return deleteOrg({
+        org: event.payload.model,
+        message: event.payload.message,
+      });
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES':

@@ -462,12 +462,8 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
 
-    def remove_scratch_org(self):
-        from .serializers import ScratchOrgSerializer
-
-        payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_REMOVED", "payload": payload}
-        async_to_sync(push.push_message_about_instance)(self, message)
+    def remove_scratch_org(self, error):
+        self.notify_error(error, "SCRATCH_ORG_REMOVE")
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
         self.delete(should_finalize=False)
