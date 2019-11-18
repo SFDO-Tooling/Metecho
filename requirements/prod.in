@@ -20,7 +20,7 @@ djangorestframework==3.10.3
 github3-py==1.3.0
 logfmt==0.4
 markdown==3.1.1
-newrelic==5.2.2.130
+newrelic==5.2.3.131
 psycopg2-binary==2.8.4
 pyOpenSSL==19.1.0
 sentry-sdk==0.13.2
