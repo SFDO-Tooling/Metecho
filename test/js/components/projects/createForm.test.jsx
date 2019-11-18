@@ -150,13 +150,13 @@ describe('<ProjectForm/>', () => {
         expect(queryByText('What is happening')).toBeNull();
       });
 
-      test('calls addError with non-form errors on 400', async () => {
+      test('calls addError with non-form errors on 422', async () => {
         createObject.mockReturnValueOnce(() =>
           // eslint-disable-next-line prefer-promise-reject-errors
           Promise.reject({
             body: 'Nope',
             response: {
-              status: 400,
+              status: 422,
             },
             message: 'This is an error.',
           }),

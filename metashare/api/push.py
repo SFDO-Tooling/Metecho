@@ -10,6 +10,8 @@ Websocket notifications you can subscribe to:
 
     task.:id
         TASK_UPDATE
+        TASK_CREATE_PR
+        TASK_CREATE_PR_FAILED
 
     scratchorg.:id
         SCRATCH_ORG_PROVISION

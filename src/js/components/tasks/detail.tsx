@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Icon from '@salesforce/design-system-react/components/icon';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -10,7 +10,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import FourOhFour from '@/components/404';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
-import ConnectModal from '@/components/user/connect';
+import SubmitModal from '@/components/tasks/submit';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -30,13 +30,13 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
-  const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -53,11 +53,15 @@ const TaskDetail = (props: RouteComponentProps) => {
   const { orgs } = useFetchOrgsIfMissing(task, props);
   const user = useSelector(selectUserState) as User;
 
-  let currentlyFetching,
-    currentlyCommitting,
-    orgHasChanges,
-    userIsOwner,
-    devOrg: Org | null | undefined;
+  const readyToSubmit = Boolean(
+    task && task.has_unmerged_commits && !task.pr_url,
+  );
+  const currentlySubmitting = Boolean(task && task.currently_creating_pr);
+  let currentlyFetching = false;
+  let currentlyCommitting = false;
+  let orgHasChanges = false;
+  let userIsOwner = false;
+  let devOrg: Org | null | undefined;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
@@ -65,6 +69,25 @@ const TaskDetail = (props: RouteComponentProps) => {
     currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
   }
+
+  // Subscribe to task WS only once, and unsubscribe on unmount
+  const taskId = task && task.id;
+  useEffect(() => {
+    if (taskId && window.socket) {
+      window.socket.subscribe({
+        model: OBJECT_TYPES.TASK,
+        id: taskId,
+      });
+    }
+    return () => {
+      if (taskId && window.socket) {
+        window.socket.unsubscribe({
+          model: OBJECT_TYPES.TASK,
+          id: taskId,
+        });
+      }
+    };
+  }, [taskId]);
 
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
@@ -74,29 +97,19 @@ const TaskDetail = (props: RouteComponentProps) => {
     if (changesFetched && devOrg) {
       setFetchingChanges(false);
       /* istanbul ignore else */
-      if (devOrg.has_unsaved_changes) {
+      if (devOrg.has_unsaved_changes && !submitModalOpen) {
         setCaptureModalOpen(true);
       }
     }
-  }, [fetchingChanges, devOrg]);
+  }, [fetchingChanges, devOrg, submitModalOpen]);
 
   const doRefetchOrg = useCallback((org: Org) => {
     dispatch(refetchOrg(org));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const openConnectModal = () => {
-    setConnectModalOpen(true);
+  const openSubmitModal = () => {
+    setSubmitModalOpen(true);
   };
-
-  const action = user.valid_token_for
-    ? () => {
-        /* istanbul ignore else */
-        if (devOrg) {
-          setFetchingChanges(true);
-          doRefetchOrg(devOrg);
-        }
-      }
-    : openConnectModal;
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -156,39 +169,85 @@ const TaskDetail = (props: RouteComponentProps) => {
         variant="text-destructive"
         disabled
       />
-      {task.branch_url ? (
+      {task.pr_url || task.branch_url ? (
         <ExternalLink
-          url={task.branch_url}
+          url={(task.pr_url || task.branch_url) as string}
+          showButtonIcon
           className="slds-button slds-button_outline-brand"
         >
-          <Icon
-            category="utility"
-            name="new_window"
-            size="xx-small"
-            className="slds-button__icon slds-button__icon_left"
-            containerClassName="slds-icon_container slds-current-color"
-          />
-          {i18n.t('View Branch')}
+          {task.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
         </ExternalLink>
       ) : null}
     </PageHeaderControl>
   );
 
-  let buttonText: string | React.ReactNode = i18n.t('Capture Task Changes');
-  if (currentlyCommitting) {
-    buttonText = (
+  let submitButton: React.ReactNode = null;
+  if (readyToSubmit) {
+    const isPrimary = !(userIsOwner && orgHasChanges);
+    const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
-        label={i18n.t('Capturing Selected Changes…')}
-        variant="inverse"
+        label={i18n.t('Submitting Task for Review…')}
+        variant={isPrimary ? 'inverse' : 'base'}
+      />
+    ) : (
+      i18n.t('Submit Task for Review')
+    );
+    submitButton = (
+      <Button
+        label={submitButtonText}
+        className={classNames('slds-size_full slds-m-bottom_x-large', {
+          'slds-m-left_none': !isPrimary,
+        })}
+        variant={isPrimary ? 'brand' : 'outline-brand'}
+        onClick={openSubmitModal}
+        disabled={currentlySubmitting}
       />
     );
-  } else if (fetchingChanges || currentlyFetching) {
-    buttonText = (
-      <LabelWithSpinner
-        label={i18n.t('Checking for Uncaptured Changes…')}
-        variant="inverse"
+  }
+
+  let primaryButton: React.ReactNode = null;
+  let secondaryButton: React.ReactNode = null;
+  if (userIsOwner && orgHasChanges) {
+    const captureButtonAction = () => {
+      /* istanbul ignore else */
+      if (devOrg) {
+        setFetchingChanges(true);
+        doRefetchOrg(devOrg);
+      }
+    };
+    let captureButtonText: JSX.Element = i18n.t('Capture Task Changes');
+    if (currentlyCommitting) {
+      captureButtonText = (
+        <LabelWithSpinner
+          label={i18n.t('Capturing Selected Changes…')}
+          variant="inverse"
+        />
+      );
+    } else if (fetchingChanges || currentlyFetching) {
+      captureButtonText = (
+        <LabelWithSpinner
+          label={i18n.t('Checking for Uncaptured Changes…')}
+          variant="inverse"
+        />
+      );
+    }
+    primaryButton = (
+      <Button
+        label={captureButtonText}
+        className={classNames('slds-size_full', {
+          'slds-m-bottom_medium': readyToSubmit,
+          'slds-m-bottom_x-large': !readyToSubmit,
+        })}
+        variant="brand"
+        onClick={captureButtonAction}
+        disabled={fetchingChanges || currentlyFetching || currentlyCommitting}
       />
     );
+    if (readyToSubmit) {
+      secondaryButton = submitButton;
+    }
+  } else if (readyToSubmit) {
+    primaryButton = submitButton;
   }
 
   return (
@@ -214,34 +273,29 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        {userIsOwner && orgHasChanges ? (
-          <Button
-            label={buttonText}
-            className="slds-size_full slds-m-bottom_x-large"
-            variant="brand"
-            onClick={action}
-            disabled={
-              fetchingChanges || currentlyFetching || currentlyCommitting
-            }
-          />
-        ) : null}
+        {primaryButton}
+        {secondaryButton}
 
         {orgs ? (
           <OrgCards orgs={orgs} task={task} project={project} />
         ) : (
           <SpinnerWrapper />
         )}
-        <ConnectModal
-          user={user}
-          isOpen={connectModalOpen}
-          toggleModal={setConnectModalOpen}
-        />
         {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
             orgId={devOrg.id}
             changeset={devOrg.unsaved_changes}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
+          />
+        )}
+        {readyToSubmit && (
+          <SubmitModal
+            taskId={task.id}
+            taskName={task.name}
+            taskDiffUrl={task.branch_diff_url}
+            isOpen={submitModalOpen}
+            toggleModal={setSubmitModalOpen}
           />
         )}
       </DetailPageLayout>

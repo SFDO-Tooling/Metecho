@@ -16,7 +16,7 @@ import { updateProject } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
 import { reposRefreshed } from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { updateTask } from '@/store/tasks/actions';
+import { createPR, createPRFailed, updateTask } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
 import {
   ObjectTypes,
@@ -55,6 +55,17 @@ interface ProjectUpdatedEvent {
 interface TaskUpdatedEvent {
   type: 'TASK_UPDATE';
   payload: Task;
+}
+interface TaskCreatePREvent {
+  type: 'TASK_CREATE_PR';
+  payload: Task;
+}
+interface TaskCreatePRFailedEvent {
+  type: 'TASK_CREATE_PR_FAILED';
+  payload: {
+    message?: string;
+    model: Task;
+  };
 }
 interface OrgProvisionedEvent {
   type: 'SCRATCH_ORG_PROVISION';
@@ -105,6 +116,8 @@ type ModelEvent =
   | ReposRefreshedEvent
   | ProjectUpdatedEvent
   | TaskUpdatedEvent
+  | TaskCreatePREvent
+  | TaskCreatePRFailedEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
@@ -129,6 +142,10 @@ export const getAction = (event: EventType) => {
       return updateProject(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload);
+    case 'TASK_CREATE_PR':
+      return createPR(event.payload);
+    case 'TASK_CREATE_PR_FAILED':
+      return createPRFailed(event.payload);
     case 'SCRATCH_ORG_PROVISION':
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
