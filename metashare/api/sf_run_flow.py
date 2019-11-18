@@ -69,9 +69,7 @@ def refresh_access_token(*, config, org_name, scratch_org):
             job_id = get_current_job().id
             additional_context += f" If you need support, your job ID is {job_id}."
 
-        # TODO: Delete scratch org.
         scratch_org.remove_scratch_org()
-
         raise err.__class__(
             err.args[0] + additional_context, *err.args[1:],
         )

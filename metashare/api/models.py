@@ -361,13 +361,13 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
 
         async_to_sync(push.push_message_about_instance)(self, message)
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, should_finalize=True, **kwargs):
         # If the scratch org has no `last_modified_at`, it did not
         # successfully complete the initial flow run on Salesforce, and
         # therefore we don't need to notify of its destruction; this
         # should only happen when it is destroyed during provisioning or
         # the initial flow run.
-        if self.last_modified_at:
+        if self.last_modified_at and should_finalize:
             self.finalize_delete()
         super().delete(*args, **kwargs)
 
@@ -453,9 +453,9 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         payload = ScratchOrgSerializer(self).data
         message = {"type": "SCRATCH_ORG_REMOVED", "payload": payload}
         async_to_sync(push.push_message_about_instance)(self, message)
-        # Use super().delete to avoid accidentally sending a
+        # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
-        super().delete()
+        self.delete(should_finalize=False)
 
 
 @receiver(user_logged_in)
