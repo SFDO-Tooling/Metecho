@@ -338,13 +338,6 @@ const OrgCards = ({
           id: project.id,
         });
       }
-      /* istanbul ignore else */
-      if (!task.branch_url) {
-        window.socket.subscribe({
-          model: OBJECT_TYPES.TASK,
-          id: task.id,
-        });
-      }
     }
     dispatch(
       createObject({
@@ -379,7 +372,6 @@ const OrgCards = ({
 
   let deleteAction: (...args: any[]) => void = openConnectModal;
   let createAction: (...args: any[]) => void = openConnectModal;
-  let refetchAction: (...args: any[]) => void = openConnectModal;
   if (user && user.valid_token_for) {
     createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
     deleteAction = (org: Org) => {
@@ -394,7 +386,6 @@ const OrgCards = ({
         openConnectAgainModal();
       }
     };
-    refetchAction = doRefetchOrg;
   }
 
   // When dev org delete has been triggered, wait until it has been refreshed...
@@ -425,7 +416,7 @@ const OrgCards = ({
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
           deleteAction={deleteAction}
-          refreshAction={refetchAction}
+          refreshAction={doRefetchOrg}
         />
         <OrgCard
           orgs={orgs}
@@ -436,7 +427,7 @@ const OrgCards = ({
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
           deleteAction={deleteAction}
-          refreshAction={refetchAction}
+          refreshAction={doRefetchOrg}
         />
       </div>
       <ConnectModal

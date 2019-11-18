@@ -1,6 +1,10 @@
 // Form Elements
 // =============
 
+.task-submit-textarea {
+  min-height: $size-xx-small;
+}
+
 .form-grid {
   display: grid;
   // needs a non-percentage and non fr

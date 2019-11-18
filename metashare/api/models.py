@@ -19,10 +19,9 @@ from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 from simple_salesforce.exceptions import SalesforceError
 
-from . import gh
-from . import model_mixins as mixins
-from . import push
+from . import gh, push
 from .constants import ORGANIZATION_DETAILS
+from .model_mixins import HashIdMixin, PopulateRepoIdMixin, PushMixin, TimestampsMixin
 from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
 
@@ -37,7 +36,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
     pass
 
 
-class User(mixins.HashIdMixin, AbstractUser):
+class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
 
@@ -161,11 +160,7 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    mixins.PopulateRepoId,
-    mixins.HashIdMixin,
-    mixins.TimestampsMixin,
-    SlugMixin,
-    models.Model,
+    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -185,7 +180,7 @@ class Repository(
         unique_together = (("repo_owner", "repo_name"),)
 
 
-class GitHubRepository(mixins.HashIdMixin, models.Model):
+class GitHubRepository(HashIdMixin, models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="repositories"
     )
@@ -206,7 +201,7 @@ class ProjectSlug(AbstractSlug):
     )
 
 
-class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
@@ -225,13 +220,20 @@ class Project(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Mode
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
-    def finalize_branch_update(self):
+    # begin PushMixin configuration:
+    push_update_type = "PROJECT_UPDATE"
+    push_error_type = None
+
+    def get_serialized_representation(self):
         from .serializers import ProjectSerializer
 
+        return ProjectSerializer(self).data
+
+    # end PushMixin configuration
+
+    def finalize_branch_update(self):
         self.save()
-        payload = ProjectSerializer(self).data
-        message = {"type": "PROJECT_UPDATE", "payload": payload}
-        async_to_sync(push.push_message_about_instance)(self, message)
+        self.notify_changed()
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -242,7 +244,7 @@ class TaskSlug(AbstractSlug):
     parent = models.ForeignKey("Task", on_delete=models.PROTECT, related_name="slugs")
 
 
-class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
+class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
@@ -254,8 +256,11 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
         related_name="assigned_tasks",
     )
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
+        max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
+    has_unmerged_commits = models.BooleanField(default=False)
+    currently_creating_pr = models.BooleanField(default=False)
+    pr_number = models.IntegerField(null=True, blank=True)
 
     slug_class = TaskSlug
 
@@ -265,13 +270,47 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
-    def finalize_branch_update(self):
+    # begin PushMixin configuration:
+    push_update_type = "TASK_UPDATE"
+    push_error_type = "TASK_CREATE_PR_FAILED"
+
+    def get_serialized_representation(self):
         from .serializers import TaskSerializer
 
+        return TaskSerializer(self).data
+
+    # end PushMixin configuration
+
+    def finalize_task_update(self):
         self.save()
-        payload = TaskSerializer(self).data
-        message = {"type": "TASK_UPDATE", "payload": payload}
-        async_to_sync(push.push_message_about_instance)(self, message)
+        self.notify_changed()
+
+    def queue_create_pr(
+        self, user, *, title, critical_changes, additional_changes, issues, notes
+    ):
+        from .jobs import create_pr_job
+
+        self.currently_creating_pr = True
+        self.save()
+        self.notify_changed()
+
+        create_pr_job.delay(
+            self,
+            user,
+            title=title,
+            critical_changes=critical_changes,
+            additional_changes=additional_changes,
+            issues=issues,
+            notes=notes,
+        )
+
+    def finalize_create_pr(self, error=None):
+        self.currently_creating_pr = False
+        self.save()
+        if error is None:
+            self.notify_changed("TASK_CREATE_PR")
+        else:
+            self.notify_error(error)
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -281,7 +320,7 @@ class Task(mixins.HashIdMixin, mixins.TimestampsMixin, SlugMixin, models.Model):
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
-class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
+class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -330,13 +369,16 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         org_config = self.get_refreshed_org_config()
         return org_config.start_url
 
-    def notify_changed(self):
+    # begin PushMixin configuration:
+    push_update_type = "SCRATCH_ORG_UPDATE"
+    push_error_type = "SCRATCH_ORG_ERROR"
+
+    def get_serialized_representation(self):
         from .serializers import ScratchOrgSerializer
 
-        payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_UPDATE", "payload": payload}
+        return ScratchOrgSerializer(self).data
 
-        async_to_sync(push.push_message_about_instance)(self, message)
+    # end PushMixin configuration
 
     def queue_delete(self):
         from .jobs import delete_scratch_org_job
@@ -354,12 +396,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         delete_scratch_org_job.delay(self)
 
     def finalize_delete(self):
-        from .serializers import ScratchOrgSerializer
-
-        payload = ScratchOrgSerializer(self).data
-        message = {"type": "SCRATCH_ORG_DELETE", "payload": payload}
-
-        async_to_sync(push.push_message_about_instance)(self, message)
+        self.notify_changed("SCRATCH_ORG_DELETE")
 
     def delete(self, *args, **kwargs):
         # If the scratch org has no `last_modified_at`, it did not
@@ -377,21 +414,11 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         create_branches_on_github_then_create_scratch_org_job.delay(scratch_org=self)
 
     def finalize_provision(self, error=None):
-        from .serializers import ScratchOrgSerializer
-
         if error is None:
             self.save()
-            async_to_sync(push.push_message_about_instance)(
-                self,
-                {
-                    "type": "SCRATCH_ORG_PROVISION",
-                    "payload": ScratchOrgSerializer(self).data,
-                },
-            )
+            self.notify_changed("SCRATCH_ORG_PROVISION")
         else:
-            async_to_sync(push.report_scratch_org_error)(
-                self, error, "SCRATCH_ORG_PROVISION_FAILED"
-            )
+            self.notify_scratch_org_error(error, "SCRATCH_ORG_PROVISION_FAILED")
             # If the scratch org has already been created on Salesforce,
             # we need to delete it there as well.
             if self.url:
@@ -416,9 +443,7 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         else:
             self.unsaved_changes = {}
             self.save()
-            async_to_sync(push.report_scratch_org_error)(
-                self, error, "SCRATCH_ORG_FETCH_CHANGES_FAILED"
-            )
+            self.notify_scratch_org_error(error, "SCRATCH_ORG_FETCH_CHANGES_FAILED")
 
     def queue_commit_changes(self, user, desired_changes, commit_message):
         from .jobs import commit_changes_from_org_job
@@ -430,22 +455,12 @@ class ScratchOrg(mixins.HashIdMixin, mixins.TimestampsMixin, models.Model):
         commit_changes_from_org_job.delay(self, user, desired_changes, commit_message)
 
     def finalize_commit_changes(self, error=None):
-        from .serializers import ScratchOrgSerializer
-
         self.currently_capturing_changes = False
         self.save()
         if error is None:
-            async_to_sync(push.push_message_about_instance)(
-                self,
-                {
-                    "type": "SCRATCH_ORG_COMMIT_CHANGES",
-                    "payload": ScratchOrgSerializer(self).data,
-                },
-            )
+            self.notify_changed("SCRATCH_ORG_COMMIT_CHANGES")
         else:
-            async_to_sync(push.report_scratch_org_error)(
-                self, error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED"
-            )
+            self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
 
 
 @receiver(user_logged_in)
