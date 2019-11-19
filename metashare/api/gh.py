@@ -2,7 +2,9 @@
 GitHub utilities
 """
 
+import binascii
 import contextlib
+import hmac
 import itertools
 import logging
 import os
@@ -11,7 +13,9 @@ import zipfile
 from glob import glob
 
 from cumulusci.utils import temporary_dir
+from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.urls import reverse
 from github3 import login
 from github3.exceptions import UnprocessableEntity
 
@@ -140,9 +144,23 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
                 raise
 
 
-def create_updates_hook_for_repo(repo):
-    repo.create_hook(
-        "MetaShare update hook",
-        # TODO: make this a correct URL
-        {"url": "", "content_type": "json"},
+def create_updates_hook_for_repo(*, user, repository):
+    if settings.GITHUB_HOOK_ROOT_URL is None:
+        return
+
+    url = settings.GITHUB_HOOK_ROOT_URL + reverse(
+        "repository-hook", kwargs={"pk": str(repository.pk)}
     )
+    secret = binascii.hexlify(os.urandom(24)).decode("utf-8")
+    repo = get_repo_info(user=user, repo_id=repository.repo_id)
+    repo.create_hook("web", {"url": url, "content_type": "json", "secret": secret})
+    repository.hook_secret = secret
+    # As this is called from Repository.save, this secret will be saved
+    # a moment later.
+
+
+def validate_gh_hook_signature(
+    *, hook_secret: bytes, signature: bytes, message: bytes
+) -> bool:
+    local_signature = "sha1=" + hmac.new(hook_secret, message, "sha1").hexdigest()
+    return hmac.compare_digest(local_signature, signature)

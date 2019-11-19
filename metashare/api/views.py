@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
+from .gh import validate_gh_hook_signature
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
@@ -95,6 +96,17 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     @action(methods=["POST"], detail=True, permission_classes=[AllowAny])
     def hook(self, request, pk=None):
         repository = self.model.objects.get(pk=pk)
+        valid_signature = False
+        if repository.hook_secret:
+            valid_signature = validate_gh_hook_signature(
+                hook_secret=repository.hook_secret.encode("utf-8"),
+                signature=request.META.get("HTTP_X_HUB_SIGNATURE", ""),
+                message=request.body,
+            )
+        if not valid_signature:
+            return Response(
+                {"error": "Invalid signature."}, status=status.HTTP_403_FORBIDDEN
+            )
         user = repository.get_a_matching_user()
         if not user:
             return Response(

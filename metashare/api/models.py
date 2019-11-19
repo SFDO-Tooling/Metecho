@@ -173,6 +173,7 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    hook_secret = StringField(null=True, editable=False)
 
     slug_class = RepositorySlug
 
@@ -183,6 +184,13 @@ class Repository(
         verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
+
+    def save(self, *args, **kwargs):
+        if self.repo_id and not self.hook_secret:
+            user = self.get_a_matching_user()
+            if user:
+                gh.create_updates_hook_for_repo(user=user, repository=self)
+        return super().save(*args, **kwargs)
 
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(

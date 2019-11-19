@@ -31,6 +31,36 @@ class TestRepository:
             assert get_repo_info.called
             assert gh_repo.repo_id == 123
 
+    def test_create_github_webhook(
+        self, repository_factory, git_hub_repository_factory, settings
+    ):
+        settings.GITHUB_HOOK_ROOT_URL = "http://example.com"
+        with patch("metashare.api.gh.get_repo_info") as get_repo_info:
+            repo = MagicMock()
+            get_repo_info.return_value = repo
+
+            git_hub_repository_factory(repo_id=123)
+            repository = repository_factory(hook_secret=None, repo_id=123)
+
+            assert repo.create_hook.called
+            repository.refresh_from_db()
+            assert repository.hook_secret is not None
+
+    def test_create_github_webhook__none(
+        self, repository_factory, git_hub_repository_factory, settings
+    ):
+        settings.GITHUB_HOOK_ROOT_URL = None
+        with patch("metashare.api.gh.get_repo_info") as get_repo_info:
+            repo = MagicMock()
+            get_repo_info.return_value = repo
+
+            git_hub_repository_factory(repo_id=123)
+            repository = repository_factory(hook_secret=None, repo_id=123)
+
+            assert not repo.create_hook.called
+            repository.refresh_from_db()
+            assert repository.hook_secret is None
+
     def test_get_a_matching_user__none(self, repository_factory):
         repo = repository_factory()
         assert repo.get_a_matching_user() is None

@@ -108,18 +108,36 @@ class TestRepositoryView:
         }
 
     def test_hook__good(self, client, repository_factory, git_hub_repository_factory):
-        repo = repository_factory(repo_id=123)
+        repo = repository_factory(repo_id=123, hook_secret="secret key")
         git_hub_repository_factory(repo_id=123)
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
-                reverse("repository-hook", kwargs={"pk": str(repo.id)})
+                reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+                # The sha1 hexdigest of the request body x the secret
+                # key above:
+                HTTP_X_HUB_SIGNATURE="sha1=4df289f9c3bc6fd0ce6a1cb76d430321c1ec8d9c",
             )
             assert refresh_commits_job.delay.called
             assert response.status_code == 202
 
-    def test_hook__bad(self, client, repository_factory):
-        repo = repository_factory()
-        response = client.post(reverse("repository-hook", kwargs={"pk": str(repo.id)}))
+    def test_hook__403(self, client, repository_factory):
+        repo = repository_factory(hook_secret="bleep bloop")
+        response = client.post(
+            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            # This is NOT the sha1 hexdigest of the request body x the
+            # secret key above:
+            HTTP_X_HUB_SIGNATURE="sha1=4df289f9c3bc6fd0ce6a1cb76d430321c1ec8d9c",
+        )
+        assert response.status_code == 403
+
+    def test_hook__500(self, client, repository_factory):
+        repo = repository_factory(hook_secret="secret key")
+        response = client.post(
+            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            # The sha1 hexdigest of the request body x the secret key
+            # above:
+            HTTP_X_HUB_SIGNATURE="sha1=4df289f9c3bc6fd0ce6a1cb76d430321c1ec8d9c",
+        )
         assert response.status_code == 500
 
 

@@ -204,6 +204,8 @@ ADMIN_API_ALLOWED_SUBNETS = env(
     type_=ipv4_networks,
 )
 
+GITHUB_HOOK_ROOT_URL = env("GITHUB_HOOK_ROOT_URL", default=None)
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
