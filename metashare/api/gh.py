@@ -163,4 +163,5 @@ def validate_gh_hook_signature(
     *, hook_secret: bytes, signature: bytes, message: bytes
 ) -> bool:
     local_signature = "sha1=" + hmac.new(hook_secret, message, "sha1").hexdigest()
+    print("======>", local_signature)
     return hmac.compare_digest(local_signature, signature)

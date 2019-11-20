@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -206,6 +206,21 @@ class Repository(
         from .jobs import refresh_commits_job
 
         refresh_commits_job.delay(user=user, repository=self)
+
+    @transaction.atomic
+    def add_commits(self, commits, ref):
+        # TODO: this is only works if the ref starts with this string:
+        prefix_len = len("refs/heads/")
+        ref = ref[prefix_len:]
+        matching_projects = self.projects.filter(branch_name=ref)
+        matching_tasks = Task.objects.filter(branch_name=ref, project__repository=self)
+        for project in matching_projects:
+            project.commits += commits
+            project.save()
+
+        for task in matching_tasks:
+            task.commits += commits
+            task.save()
 
 
 class GitHubRepository(mixins.HashIdMixin, models.Model):

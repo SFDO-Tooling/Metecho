@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django_filters.rest_framework import DjangoFilterBackend
@@ -16,6 +18,7 @@ from .paginators import CustomPaginator
 from .serializers import (
     CommitSerializer,
     FullUserSerializer,
+    HookSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
     RepositorySerializer,
@@ -113,7 +116,17 @@ class RepositoryViewSet(viewsets.ModelViewSet):
                 {"error": f"No matching user for repository {pk}."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        repository.refresh_commits(user)
+        serializer = HookSerializer(data=json.loads(request.data["payload"]))
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+        if serializer.validated_data["forced"]:
+            repository.refresh_commits(user)
+        else:
+            repository.add_commits(
+                serializer.validated_data["commits"], serializer.validated_data["ref"]
+            )
         return Response(status=status.HTTP_202_ACCEPTED)
 
 

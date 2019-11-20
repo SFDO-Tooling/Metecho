@@ -1,3 +1,4 @@
+import json
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
@@ -107,26 +108,111 @@ class TestRepositoryView:
             ],
         }
 
-    def test_hook__good(self, client, repository_factory, git_hub_repository_factory):
+    def test_hook__202__not_forced(
+        self,
+        client,
+        repository_factory,
+        git_hub_repository_factory,
+        project_factory,
+        task_factory,
+    ):
+        repo = repository_factory(repo_id=123, hook_secret="secret key")
+        git_hub_repository_factory(repo_id=123)
+        project = project_factory(repository=repo, branch_name="master")
+        task = task_factory(project=project, branch_name="master")
+        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
+            response = client.post(
+                reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+                json.dumps(
+                    {
+                        "payload": json.dumps(
+                            {
+                                "ref": "refs/heads/master",
+                                "forced": False,
+                                "commits": [
+                                    {
+                                        "id": "123",
+                                        "author": {
+                                            "name": "Test",
+                                            "email": "test@example.com",
+                                        },
+                                        "committer": {
+                                            "name": "Test",
+                                            "email": "test@example.com",
+                                        },
+                                        "timestamp": "2019-11-20 21:32:53.668260+00:00",
+                                        "message": "Message",
+                                    }
+                                ],
+                            }
+                        )
+                    }
+                ),
+                content_type="application/json",
+                # The sha1 hexdigest of the request body x the secret
+                # key above:
+                HTTP_X_HUB_SIGNATURE="sha1=b947c4672579f5d268837379038b020e08ed2f6f",
+            )
+            assert response.status_code == 202, response.content
+            assert not refresh_commits_job.delay.called
+            project.refresh_from_db()
+            assert len(project.commits) == 1
+            task.refresh_from_db()
+            assert len(task.commits) == 1
+
+    def test_hook__202__forced(
+        self, client, repository_factory, git_hub_repository_factory
+    ):
         repo = repository_factory(repo_id=123, hook_secret="secret key")
         git_hub_repository_factory(repo_id=123)
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
                 reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+                json.dumps(
+                    {
+                        "payload": json.dumps(
+                            {"ref": "refs/heads/master", "forced": True, "commits": []}
+                        )
+                    }
+                ),
+                content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=4df289f9c3bc6fd0ce6a1cb76d430321c1ec8d9c",
+                HTTP_X_HUB_SIGNATURE="sha1=ecfb50b77a8ea763a45851ad79930443be9656ad",
             )
+            assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
-            assert response.status_code == 202
+
+    def test_hook__422(self, client, repository_factory, git_hub_repository_factory):
+        repo = repository_factory(repo_id=123, hook_secret="secret key")
+        git_hub_repository_factory(repo_id=123)
+        response = client.post(
+            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            json.dumps(
+                {"payload": json.dumps({"ref": "refs/heads/master", "commits": []})}
+            ),
+            content_type="application/json",
+            # This is NOT the sha1 hexdigest of the request body x the
+            # secret key above:
+            HTTP_X_HUB_SIGNATURE="sha1=924d6781b12339b700bc79e7c8c6fe6e051a08d1",
+        )
+        assert response.status_code == 422, response.json()
 
     def test_hook__403(self, client, repository_factory):
         repo = repository_factory(hook_secret="bleep bloop")
         response = client.post(
             reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            json.dumps(
+                {
+                    "payload": json.dumps(
+                        {"ref": "refs/heads/master", "forced": False, "commits": []}
+                    )
+                }
+            ),
+            content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=4df289f9c3bc6fd0ce6a1cb76d430321c1ec8d9c",
+            HTTP_X_HUB_SIGNATURE="sha1=abe3868964305b53dc80bed60bdca7f8d2a70b97",
         )
         assert response.status_code == 403
 
@@ -134,9 +220,17 @@ class TestRepositoryView:
         repo = repository_factory(hook_secret="secret key")
         response = client.post(
             reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            json.dumps(
+                {
+                    "payload": json.dumps(
+                        {"ref": "refs/heads/master", "forced": False, "commits": []}
+                    )
+                }
+            ),
+            content_type="application/json",
             # The sha1 hexdigest of the request body x the secret key
             # above:
-            HTTP_X_HUB_SIGNATURE="sha1=4df289f9c3bc6fd0ce6a1cb76d430321c1ec8d9c",
+            HTTP_X_HUB_SIGNATURE="sha1=52bf5b0b015bf7f5d1a55d025d1c5b5710d966a8",
         )
         assert response.status_code == 500
 
