@@ -9,6 +9,7 @@ from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from cumulusci.utils import cd
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from requests.exceptions import HTTPError
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
@@ -63,11 +64,11 @@ def refresh_access_token(*, config, org_name, scratch_org):
         org_config.config["access_token"] = info["access_token"]
         return org_config
     except HTTPError as err:
-        error_msg = "Are you certain that the org still exists?"
+        error_msg = _("Are you certain that the org still exists?")
 
         if get_current_job():
             job_id = get_current_job().id
-            error_msg += f" If you need support, your job ID is {job_id}."
+            error_msg += _(f" If you need support, your job ID is {job_id}.")
         else:
             error_msg += f" {err.args[0]}"
 
