@@ -7,7 +7,7 @@ SERVICE_NAME=web
 STARTED_BACKGROUND_CONTAINER=0
 
 function is_running {
-    RUNNING=`docker-compose top $SERVICE_NAME`
+    RUNNING=`docker-compose top $SERVICE_NAME | grep "$SERVICE_NAME"_1`
     if [[ -n "$RUNNING" ]]; then
         echo "running"
     else
