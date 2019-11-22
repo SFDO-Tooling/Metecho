@@ -63,6 +63,22 @@ class TestRefreshAccessToken:
 
             assert scratch_org.remove_scratch_org.called
 
+    def test_bad__no_job(self):
+        with ExitStack() as stack:
+            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
+            jwt_session.side_effect = HTTPError(
+                "Error message.", response=MagicMock(status_code=422)
+            )
+            stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
+
+            scratch_org = MagicMock()
+            with pytest.raises(HTTPError, match=".*org still exists*"):
+                refresh_access_token(
+                    config=MagicMock(), org_name=MagicMock(), scratch_org=scratch_org
+                )
+
+            assert scratch_org.remove_scratch_org.called
+
 
 def test_get_devhub_api():
     with ExitStack() as stack:

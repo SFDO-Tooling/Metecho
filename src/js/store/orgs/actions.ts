@@ -200,6 +200,15 @@ export const deleteOrg = ({
 }): ThunkResult => (dispatch, getState) => {
   /* istanbul ignore else */
   if (window.socket) {
+    // This unsubscription is important. In the case of an expired or deleted
+    // org, the initial generic error event is often followed immediately by
+    // another websocket error event specific to the action being attempted.
+    // This could cause the org to be re-created in the store if the second
+    // event is actually received. In practice this unsubscription should
+    // prevent that, but another solution could be for the reducer to ignore
+    // orgs that have already been removed.
+    //
+    // See https://github.com/oddbird/MetaShare/pull/79#discussion_r347644315
     window.socket.unsubscribe({
       model: OBJECT_TYPES.ORG,
       id: org.id,
