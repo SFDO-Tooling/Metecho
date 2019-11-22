@@ -64,15 +64,15 @@ def refresh_access_token(*, config, org_name, scratch_org):
         org_config.config["access_token"] = info["access_token"]
         return org_config
     except HTTPError as err:
-        error_msg = "Are you certain that the org still exists?"
+        error_msg = _("Are you certain that the org still exists?")
 
         if get_current_job():
             job_id = get_current_job().id
-            error_msg += f" If you need support, your job ID is {job_id}."
+            error_msg += _(f" If you need support, your job ID is {job_id}.")
         else:
             error_msg += f" {err.args[0]}"
 
-        err = err.__class__(_(error_msg), *err.args[1:],)
+        err = err.__class__(error_msg, *err.args[1:],)
         scratch_org.remove_scratch_org(err)
         raise err
 
