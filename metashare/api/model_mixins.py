@@ -1,6 +1,8 @@
+from asgiref.sync import async_to_sync
 from django.db import models
 from hashid_field import HashidAutoField
 
+from . import push
 from .gh import get_repo_info
 
 
@@ -19,7 +21,7 @@ class TimestampsMixin(models.Model):
     edited_at = models.DateTimeField(auto_now=True)
 
 
-class PopulateRepoId:
+class PopulateRepoIdMixin:
     def get_repo_id(self, user):
         """
         We need to get the repo ID as a particular user, and not all
@@ -38,3 +40,36 @@ class PopulateRepoId:
         self.repo_id = repo.id
         self.save()
         return self.repo_id
+
+
+class PushMixin:
+    """
+    Expects the following attributes:
+        push_update_type: str
+        push_error_type: str
+        get_serialized_representation: Callable[self]
+    """
+
+    def _push_message(self, type_, message):
+        async_to_sync(push.push_message_about_instance)(
+            self, {"type": type_, "payload": message}
+        )
+
+    def notify_changed(self, type_=None):
+        self._push_message(
+            type_ or self.push_update_type, self.get_serialized_representation()
+        )
+
+    def notify_error(self, error, type_=None):
+        self._push_message(
+            type_ or self.push_error_type,
+            {"message": str(error), "model": self.get_serialized_representation()},
+        )
+
+    def notify_scratch_org_error(self, error, type_):
+        """
+        This is only used in the ScratchOrg model currently, but it
+        follows the pattern enough that I waned to move it into this
+        mixin.
+        """
+        async_to_sync(push.report_scratch_org_error)(self, error, type_)

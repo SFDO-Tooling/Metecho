@@ -8,3 +8,5 @@ API Reference
    user
    repositories
    projects
+   tasks
+   scratch-orgs

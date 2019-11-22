@@ -358,7 +358,7 @@ describe('deleteFailed', () => {
 });
 
 describe('commitSucceeded', () => {
-  test('adds error message', () => {
+  test('adds success message', () => {
     const store = storeWithThunk({
       tasks: {
         'project-id': [
@@ -384,7 +384,7 @@ describe('commitSucceeded', () => {
     expect(allActions[1]).toEqual(action);
   });
 
-  test('adds error message [no known task]', () => {
+  test('adds success message [no known task]', () => {
     const store = storeWithThunk({
       tasks: {},
     });

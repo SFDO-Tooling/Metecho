@@ -166,18 +166,13 @@ describe('<OrgCards/>', () => {
         Reflect.deleteProperty(window, 'socket');
       });
 
-      test('subscribes to project/task', () => {
+      test('subscribes to project', () => {
         const { getByText } = setup();
         fireEvent.click(getByText('Create Org'));
 
-        expect(window.socket.subscribe).toHaveBeenCalledTimes(2);
         expect(window.socket.subscribe).toHaveBeenCalledWith({
           model: 'project',
           id: 'project-id',
-        });
-        expect(window.socket.subscribe).toHaveBeenCalledWith({
-          model: 'task',
-          id: 'task-id',
         });
       });
     });
@@ -214,18 +209,6 @@ describe('<OrgCards/>', () => {
 
       expect(refetchOrg).toHaveBeenCalledTimes(1);
       expect(refetchOrg).toHaveBeenCalledWith(defaultOrgs.Dev);
-    });
-
-    describe('not connected to sf org', () => {
-      test('opens connect modal', () => {
-        const { getByText } = setup({
-          initialState: { user: { id: 'user-id' } },
-        });
-        fireEvent.click(getByText('check again'));
-
-        expect(refetchOrg).not.toHaveBeenCalled();
-        expect(getByText('Use Custom Domain')).toBeVisible();
-      });
     });
 
     describe('refetching org', () => {
