@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
+from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ResponseError
 from rest_framework import generics, status, viewsets
@@ -119,7 +120,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             )
         instance = self.get_object()
         if instance.pr_number is not None:
-            raise ValidationError("Task has already been submitted for review.")
+            raise ValidationError(_("Task has already been submitted for review."))
         instance.queue_create_pr(request.user, **serializer.validated_data)
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
@@ -138,8 +139,10 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             super().perform_create(*args, **kwargs)
         else:
             raise PermissionDenied(
-                "User is not connected to a Salesforce organization "
-                "with Dev Hub enabled."
+                _(
+                    "User is not connected to a Salesforce organization "
+                    "with Dev Hub enabled."
+                )
             )
 
     def perform_destroy(self, instance):
@@ -147,8 +150,10 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             instance.queue_delete()
         else:
             raise PermissionDenied(
-                "User is not connected to Salesforce as the same Salesforce user who "
-                "created the ScratchOrg."
+                _(
+                    "User is not connected to Salesforce as the same Salesforce user "
+                    "who created the ScratchOrg."
+                )
             )
 
     def list(self, request, *args, **kwargs):
@@ -206,7 +211,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": "Requesting user did not create scratch org."},
+                {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         commit_message = serializer.validated_data["commit_message"]
@@ -221,7 +226,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": "Requesting user did not create scratch org."},
+                {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         url = scratch_org.get_login_url()

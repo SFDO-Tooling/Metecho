@@ -24,7 +24,9 @@ def build_package_xml(scratch_org, package_xml_path, desired_changes):
 
 def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     repo_id = scratch_org.task.project.repository.get_repo_id(user)
-    org_config = refresh_access_token(config=scratch_org.config, org_name="dev")
+    org_config = refresh_access_token(
+        config=scratch_org.config, org_name="dev", scratch_org=scratch_org
+    )
     repository = get_repo_info(user, repo_id=repo_id)
     branch = repository.default_branch
     cci = BaseCumulusCI(
@@ -65,9 +67,11 @@ def commit_changes_to_github(
         )
 
 
-def get_salesforce_connection(*, config, base_url=""):
+def get_salesforce_connection(*, config, scratch_org, base_url=""):
     org_name = "dev"
-    org_config = refresh_access_token(config=config, org_name=org_name)
+    org_config = refresh_access_token(
+        config=config, org_name=org_name, scratch_org=scratch_org
+    )
 
     conn = simple_salesforce.Salesforce(
         instance_url=org_config.instance_url,
@@ -83,7 +87,9 @@ def get_salesforce_connection(*, config, base_url=""):
 
 
 def get_latest_revision_numbers(scratch_org):
-    conn = get_salesforce_connection(config=scratch_org.config, base_url="tooling/")
+    conn = get_salesforce_connection(
+        config=scratch_org.config, scratch_org=scratch_org, base_url="tooling/"
+    )
 
     # Store the results here on the org, and if any of these are > number than earlier
     # version, there are changes.

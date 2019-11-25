@@ -281,7 +281,7 @@ describe('deleteOrg', () => {
     const store = storeWithThunk({});
     const org = { id: 'org-id' };
     const action = { type: 'SCRATCH_ORG_DELETE', payload: org };
-    store.dispatch(actions.deleteOrg(org));
+    store.dispatch(actions.deleteOrg({ org }));
 
     expect(store.getActions()).toEqual([action]);
     expect(window.socket.unsubscribe).toHaveBeenCalledWith({
@@ -308,12 +308,39 @@ describe('deleteOrg', () => {
         task: 'task-id',
       };
       const orgAction = { type: 'SCRATCH_ORG_DELETE', payload: org };
-      store.dispatch(actions.deleteOrg(org));
+      store.dispatch(actions.deleteOrg({ org }));
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
         'Successfully deleted Dev org for task “My Task”.',
+      );
+      expect(allActions[1]).toEqual(orgAction);
+    });
+
+    test('adds error message if exists', () => {
+      const store = storeWithThunk({
+        user: { id: 'user-id' },
+        tasks: {
+          'project-id': [
+            { id: 'task-id', name: 'My Task', project: 'project-id' },
+          ],
+        },
+      });
+      const org = {
+        id: 'org-id',
+        owner: 'user-id',
+        url: '/test/url/',
+        org_type: 'Dev',
+        task: 'task-id',
+      };
+      const orgAction = { type: 'SCRATCH_ORG_DELETE', payload: org };
+      store.dispatch(actions.deleteOrg({ org, message: 'Broke the widget.' }));
+      const allActions = store.getActions();
+
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toEqual(
+        'Uh oh. There was an error communicating with your scratch org.',
       );
       expect(allActions[1]).toEqual(orgAction);
     });

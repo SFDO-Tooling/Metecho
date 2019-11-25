@@ -73,7 +73,6 @@ describe('getAction', () => {
     ['TASK_CREATE_PR_FAILED', 'createPRFailed'],
     ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
-    ['SCRATCH_ORG_DELETE', 'deleteOrg'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['SCRATCH_ORG_UPDATE', 'updateOrg'],
     ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed'],
@@ -94,6 +93,27 @@ describe('getAction', () => {
       sockets.getAction(event);
 
       expect(reposRefreshed).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('SCRATCH_ORG_DELETE', () => {
+    test('calls deleteOrg', () => {
+      const payload = { foo: 'bar' };
+      const event = { type: 'SCRATCH_ORG_DELETE', payload };
+      sockets.getAction(event);
+
+      expect(deleteOrg).toHaveBeenCalledWith({ org: payload });
+    });
+  });
+
+  describe('SCRATCH_ORG_REMOVE', () => {
+    test('calls deleteOrg', () => {
+      const model = { foo: 'bar' };
+      const message = 'Error things.';
+      const event = { type: 'SCRATCH_ORG_REMOVE', payload: { model, message } };
+      sockets.getAction(event);
+
+      expect(deleteOrg).toHaveBeenCalledWith({ org: model, message });
     });
   });
 
