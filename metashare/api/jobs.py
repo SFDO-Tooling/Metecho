@@ -84,6 +84,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
         repo_branch=repo_branch,
         user=user,
         project_path=project_path,
+        scratch_org=scratch_org,
     )
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to

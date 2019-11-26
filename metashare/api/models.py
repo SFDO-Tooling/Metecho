@@ -442,13 +442,13 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def finalize_delete(self):
         self.notify_changed("SCRATCH_ORG_DELETE")
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, should_finalize=True, **kwargs):
         # If the scratch org has no `last_modified_at`, it did not
         # successfully complete the initial flow run on Salesforce, and
         # therefore we don't need to notify of its destruction; this
         # should only happen when it is destroyed during provisioning or
         # the initial flow run.
-        if self.last_modified_at:
+        if self.last_modified_at and should_finalize:
             self.finalize_delete()
         super().delete(*args, **kwargs)
 
@@ -505,6 +505,12 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             self.notify_changed("SCRATCH_ORG_COMMIT_CHANGES")
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
+
+    def remove_scratch_org(self, error):
+        self.notify_error(error, "SCRATCH_ORG_REMOVE")
+        # set should_finalize=False to avoid accidentally sending a
+        # SCRATCH_ORG_DELETE event:
+        self.delete(should_finalize=False)
 
 
 @receiver(user_logged_in)
