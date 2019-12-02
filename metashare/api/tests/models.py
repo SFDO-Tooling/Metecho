@@ -52,6 +52,46 @@ class TestTask:
         task = Task(name="Test Task")
         assert str(task) == "Test Task"
 
+    def test_notify_changed(self, task_factory):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metashare.api.jobs.create_pr_job"))
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.model_mixins.async_to_sync")
+            )
+            task = task_factory()
+            task.notify_changed()
+
+            assert async_to_sync.called
+
+    def test_finalize_task_update(self, task_factory):
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_task_update()
+
+            assert async_to_sync.called
+
+    def test_queue_create_pr(self, task_factory, user_factory):
+        with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
+            task = task_factory()
+            user = user_factory()
+            task.queue_create_pr(
+                user,
+                title="My PR",
+                critical_changes="",
+                additional_changes="",
+                issues="",
+                notes="",
+            )
+
+            assert create_pr_job.delay.called
+
+    def test_finalize_create_pr(self, task_factory):
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_create_pr()
+
+            assert async_to_sync.called
+
 
 @pytest.mark.django_db
 class TestUser:
@@ -316,7 +356,7 @@ class TestScratchOrg:
                 )
             )
             async_to_sync = stack.enter_context(
-                patch("metashare.api.models.async_to_sync")
+                patch("metashare.api.model_mixins.async_to_sync")
             )
             scratch_org = scratch_org_factory()
             scratch_org.notify_changed()
@@ -333,7 +373,7 @@ class TestScratchOrg:
             assert delete_scratch_org_job.delay.called
 
     def test_notify_delete(self, scratch_org_factory):
-        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.delete()
 
@@ -349,7 +389,7 @@ class TestScratchOrg:
             assert get_unsaved_changes_job.delay.called
 
     def test_finalize_provision(self, scratch_org_factory):
-        with patch("metashare.api.models.async_to_sync") as async_to_sync:
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             scratch_org = scratch_org_factory()
             scratch_org.finalize_provision()
 
@@ -357,7 +397,7 @@ class TestScratchOrg:
 
     def test_finalize_provision__flow_error(self, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metashare.api.models.async_to_sync"))
+            stack.enter_context(patch("metashare.api.model_mixins.async_to_sync"))
             delete_queued = stack.enter_context(
                 patch("metashare.api.jobs.delete_scratch_org_job")
             )
@@ -375,6 +415,13 @@ class TestScratchOrg:
             scratch_org = scratch_org_factory()
             assert scratch_org.get_login_url() == "https://example.com"
             assert jwt_session.called
+
+    def test_remove_scratch_org(self, scratch_org_factory):
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory()
+            scratch_org.remove_scratch_org(error=Exception)
+
+            assert async_to_sync.called
 
 
 @pytest.mark.django_db

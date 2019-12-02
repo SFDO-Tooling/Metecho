@@ -39,9 +39,9 @@ import reducer from '@/store';
 import { fetchObjects } from '@/store/actions';
 import { clearErrors } from '@/store/errors/actions';
 import { reposRefreshing } from '@/store/repositories/actions';
-import { selectRepositories } from '@/store/repositories/selectors';
 import { clearToasts } from '@/store/toasts/actions';
 import { login, refetchAllData } from '@/store/user/actions';
+import { User } from '@/store/user/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 import { log, logError } from '@/utils/logging';
 import routes, { routePatterns } from '@/utils/routes';
@@ -156,7 +156,7 @@ initializeI18n((i18nError?: string) => {
     const userString = el.getAttribute('data-user');
     if (userString) {
       try {
-        user = JSON.parse(userString);
+        user = JSON.parse(userString) as User;
       } catch (err) {
         // swallow error
       }
@@ -190,18 +190,13 @@ initializeI18n((i18nError?: string) => {
     };
 
     // If logged in, fetch repositories before rendering App
-    if (user) {
+    if (user && user.currently_fetching_repos) {
+      appStore.dispatch(reposRefreshing());
+      renderApp();
+    } else if (user) {
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
         fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
-      ).finally(() => {
-        const repos = selectRepositories(appStore.getState());
-        if (!repos.length) {
-          (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-            reposRefreshing(),
-          );
-        }
-        renderApp();
-      });
+      ).finally(renderApp);
     } else {
       renderApp();
     }

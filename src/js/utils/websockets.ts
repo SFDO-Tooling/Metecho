@@ -1,7 +1,6 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
-import { fetchObjects } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
@@ -15,11 +14,11 @@ import {
 import { Org } from '@/store/orgs/reducer';
 import { updateProject } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
+import { reposRefreshed } from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { updateTask } from '@/store/tasks/actions';
+import { createPR, createPRFailed, updateTask } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
 import {
-  OBJECT_TYPES,
   ObjectTypes,
   WEBSOCKET_ACTIONS,
   WebsocketActions,
@@ -57,6 +56,17 @@ interface TaskUpdatedEvent {
   type: 'TASK_UPDATE';
   payload: Task;
 }
+interface TaskCreatePREvent {
+  type: 'TASK_CREATE_PR';
+  payload: Task;
+}
+interface TaskCreatePRFailedEvent {
+  type: 'TASK_CREATE_PR_FAILED';
+  payload: {
+    message?: string;
+    model: Task;
+  };
+}
 interface OrgProvisionedEvent {
   type: 'SCRATCH_ORG_PROVISION';
   payload: Org;
@@ -90,6 +100,13 @@ interface OrgDeleteFailedEvent {
     model: Org;
   };
 }
+interface OrgRemovedEvent {
+  type: 'SCRATCH_ORG_REMOVE';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
 interface CommitSucceededEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES';
   payload: Org;
@@ -106,12 +123,15 @@ type ModelEvent =
   | ReposRefreshedEvent
   | ProjectUpdatedEvent
   | TaskUpdatedEvent
+  | TaskCreatePREvent
+  | TaskCreatePRFailedEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
   | OrgUpdateFailedEvent
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
+  | OrgRemovedEvent
   | CommitSucceededEvent
   | CommitFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
@@ -125,11 +145,15 @@ export const getAction = (event: EventType) => {
   }
   switch (event.type) {
     case 'USER_REPOS_REFRESH':
-      return fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true });
+      return reposRefreshed();
     case 'PROJECT_UPDATE':
       return updateProject(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload);
+    case 'TASK_CREATE_PR':
+      return createPR(event.payload);
+    case 'TASK_CREATE_PR_FAILED':
+      return createPRFailed(event.payload);
     case 'SCRATCH_ORG_PROVISION':
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
@@ -139,7 +163,12 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
       return updateFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
-      return deleteOrg(event.payload);
+      return deleteOrg({ org: event.payload });
+    case 'SCRATCH_ORG_REMOVE':
+      return deleteOrg({
+        org: event.payload.model,
+        message: event.payload.message,
+      });
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES':

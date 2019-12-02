@@ -2,8 +2,7 @@
 User
 ====
 
-This is a degenerate endpoint that just shows some details of the
-current user.
+This is a degenerate endpoint that just shows some details of the current user.
 
 Retrieve
 --------
@@ -25,5 +24,6 @@ Retrieve
      "org_name": "OddBird",
      "org_type": "Developer Edition",
      "is_devhub_enabled": true,
-     "is_staff": false
+     "is_staff": false,
+     "currently_fetching_repos": false
    }

@@ -6,22 +6,22 @@
 #
 aioredis==1.3.0           # via channels-redis
 asgiref==3.2.2            # via channels, channels-redis, daphne
-asn1crypto==1.1.0         # via cryptography, cumulusci
+asn1crypto==1.2.0         # via cumulusci
 async-timeout==3.0.1      # via aioredis
 attrs==19.3.0             # via automat, service-identity, twisted
 autobahn==19.10.1         # via daphne
 automat==0.7.0            # via twisted
 bleach==3.1.0
 certifi==2019.9.11        # via cumulusci, requests, sentry-sdk
-cffi==1.12.3              # via cryptography, cumulusci
+cffi==1.13.2              # via cryptography, cumulusci
 channels-redis==2.4.1
 channels==2.3.1
 chardet==3.0.4            # via cumulusci, requests
 click==7.0                # via cumulusci, rq
 coloredlogs==10.0         # via cumulusci
 constantly==15.1.0        # via twisted
-cryptography==2.7         # via autobahn, cumulusci, jwcrypto, pyopenssl, requests, secretstorage, service-identity
-cumulusci==3.0.2
+cryptography==2.8         # via autobahn, cumulusci, jwcrypto, pyopenssl, requests, secretstorage, service-identity
+cumulusci==3.1.2
 daphne==2.3.0             # via channels
 defusedxml==0.6.0         # via python3-openid
 dj-database-url==0.5.0
@@ -30,13 +30,13 @@ django-filter==2.2.0
 django-filters==0.2.1
 django-hashid-field==2.1.6
 django-js-reverse==0.9.1
-django-log-request-id==1.3.2
+django-log-request-id==1.4.0
 django-model-utils==3.2.0
 django-parler==2.0
 django-redis==4.10.0
 django-rq==2.1.0
-django-storages==1.7.2
-django==2.2.6
+django-storages==1.8
+django==2.2.7
 djangorestframework==3.10.3
 docutils==0.15.2          # via cumulusci
 entrypoints==0.3          # via keyring
@@ -59,7 +59,7 @@ lxml==4.4.1               # via cumulusci
 markdown==3.1.1
 markupsafe==1.1.1         # via cumulusci, jinja2
 msgpack==0.6.2            # via channels-redis
-newrelic==5.2.1.129
+newrelic==5.2.3.131
 oauthlib==3.1.0           # via requests-oauthlib
 pillow==6.2.1
 psycopg2-binary==2.8.4
@@ -68,8 +68,8 @@ pyasn1==0.4.7             # via pyasn1-modules, service-identity
 pycparser==2.19           # via cffi, cumulusci
 pyhamcrest==1.9.0         # via twisted
 pyjwt==1.7.1              # via cumulusci
-pyopenssl==19.0.0
-python-dateutil==2.8.0    # via cumulusci, faker, github3-py, github3.py
+pyopenssl==19.1.0
+python-dateutil==2.8.1    # via cumulusci, faker, github3-py, github3.py
 python3-openid==3.1.0     # via django-allauth
 pytz==2019.3              # via cumulusci, django
 pyyaml==5.1.2             # via cumulusci
@@ -86,12 +86,12 @@ salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
 secretstorage==3.1.1      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sentry-sdk==0.13.1
+sentry-sdk==0.13.3
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.9.0.tar.gz
 simple-salesforce==0.74.2
-six==1.12.0               # via autobahn, automat, bleach, cryptography, cumulusci, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
-sqlalchemy==1.3.10        # via cumulusci
+six==1.13.0               # via autobahn, automat, bleach, cryptography, cumulusci, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
+sqlalchemy==1.3.11        # via cumulusci
 sqlparse==0.3.0           # via django
 terminaltables==3.1.0     # via cumulusci
 text-unidecode==1.3       # via faker
@@ -99,7 +99,7 @@ twisted==19.7.0           # via daphne
 txaio==18.8.1             # via autobahn
 unicodecsv==0.14.1        # via cumulusci, salesforce-bulk
 uritemplate==3.0.0        # via cumulusci, github3-py, github3.py
-urllib3==1.25.6           # via cumulusci, requests, selenium, sentry-sdk
+urllib3==1.25.7           # via cumulusci, requests, selenium, sentry-sdk
 webencodings==0.5.1       # via bleach
 werkzeug==0.16.0
 whitenoise==4.1.4
@@ -107,4 +107,4 @@ xmltodict==0.12.0         # via cumulusci
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.6.0        # via markdown, pyhamcrest, zope.interface
+# setuptools==42.0.1        # via markdown, pyhamcrest, zope.interface

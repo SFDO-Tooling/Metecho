@@ -1,6 +1,5 @@
 import Sockette from 'sockette';
 
-import { fetchObjects } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
@@ -12,21 +11,24 @@ import {
   updateOrg,
 } from '@/store/orgs/actions';
 import { updateProject } from '@/store/projects/actions';
+import { reposRefreshed } from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { updateTask } from '@/store/tasks/actions';
+import { createPR, createPRFailed, updateTask } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
-jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
 jest.mock('@/store/projects/actions');
+jest.mock('@/store/repositories/actions');
 jest.mock('@/store/tasks/actions');
 
 const actions = {
   commitFailed,
   commitSucceeded,
+  createPR,
+  createPRFailed,
   deleteFailed,
   deleteOrg,
-  fetchObjects,
+  reposRefreshed,
   provisionOrg,
   provisionFailed,
   updateOrg,
@@ -67,9 +69,10 @@ describe('getAction', () => {
   test.each([
     ['PROJECT_UPDATE', 'updateProject'],
     ['TASK_UPDATE', 'updateTask'],
+    ['TASK_CREATE_PR', 'createPR'],
+    ['TASK_CREATE_PR_FAILED', 'createPRFailed'],
     ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
-    ['SCRATCH_ORG_DELETE', 'deleteOrg'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
     ['SCRATCH_ORG_UPDATE', 'updateOrg'],
     ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed'],
@@ -85,15 +88,32 @@ describe('getAction', () => {
   });
 
   describe('USER_REPOS_REFRESH', () => {
-    test('fetches repositories', () => {
+    test('calls reposRefreshed', () => {
       const event = { type: 'USER_REPOS_REFRESH' };
       sockets.getAction(event);
 
-      expect(fetchObjects).toHaveBeenCalledTimes(1);
-      expect(fetchObjects).toHaveBeenCalledWith({
-        objectType: 'repository',
-        reset: true,
-      });
+      expect(reposRefreshed).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('SCRATCH_ORG_DELETE', () => {
+    test('calls deleteOrg', () => {
+      const payload = { foo: 'bar' };
+      const event = { type: 'SCRATCH_ORG_DELETE', payload };
+      sockets.getAction(event);
+
+      expect(deleteOrg).toHaveBeenCalledWith({ org: payload });
+    });
+  });
+
+  describe('SCRATCH_ORG_REMOVE', () => {
+    test('calls deleteOrg', () => {
+      const model = { foo: 'bar' };
+      const message = 'Error things.';
+      const event = { type: 'SCRATCH_ORG_REMOVE', payload: { model, message } };
+      sockets.getAction(event);
+
+      expect(deleteOrg).toHaveBeenCalledWith({ org: model, message });
     });
   });
 

@@ -191,41 +191,65 @@ export const updateFailed = ({
   });
 };
 
-export const deleteOrg = (payload: Org): ThunkResult => (
-  dispatch,
-  getState,
-) => {
+export const deleteOrg = ({
+  org,
+  message,
+}: {
+  org: Org;
+  message?: string;
+}): ThunkResult => (dispatch, getState) => {
   /* istanbul ignore else */
   if (window.socket) {
+    // This unsubscription is important. In the case of an expired or deleted
+    // org, the initial generic error event is often followed immediately by
+    // another websocket error event specific to the action being attempted.
+    // This could cause the org to be re-created in the store if the second
+    // event is actually received. In practice this unsubscription should
+    // prevent that, but another solution could be for the reducer to ignore
+    // orgs that have already been removed.
+    //
+    // See https://github.com/oddbird/MetaShare/pull/79#discussion_r347644315
     window.socket.unsubscribe({
       model: OBJECT_TYPES.ORG,
-      id: payload.id,
+      id: org.id,
     });
   }
   const state = getState();
   const user = state.user;
-  if (user && user.id === payload.owner) {
-    const task = selectTaskById(state, payload.task);
-    let msg = {
-      [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev org.'),
-      [ORG_TYPES.QA]: i18n.t('Successfully deleted QA org.'),
-    };
-    /* istanbul ignore else */
-    if (task) {
-      msg = {
-        [ORG_TYPES.DEV]: `${i18n.t('Successfully deleted Dev org for task')} “${
-          task.name
-        }”.`,
-        [ORG_TYPES.QA]: `${i18n.t('Successfully deleted QA org for task')} “${
-          task.name
-        }”.`,
+  if (user && user.id === org.owner) {
+    if (message) {
+      dispatch(
+        addToast({
+          heading: i18n.t(
+            'Uh oh. There was an error communicating with your scratch org.',
+          ),
+          details: message,
+          variant: 'error',
+        }),
+      );
+    } else {
+      const task = selectTaskById(state, org.task);
+      let msg = {
+        [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev org.'),
+        [ORG_TYPES.QA]: i18n.t('Successfully deleted QA org.'),
       };
+      /* istanbul ignore else */
+      if (task) {
+        msg = {
+          [ORG_TYPES.DEV]: `${i18n.t(
+            'Successfully deleted Dev org for task',
+          )} “${task.name}”.`,
+          [ORG_TYPES.QA]: `${i18n.t('Successfully deleted QA org for task')} “${
+            task.name
+          }”.`,
+        };
+      }
+      dispatch(addToast({ heading: msg[org.org_type] }));
     }
-    dispatch(addToast({ heading: msg[payload.org_type] }));
   }
   return dispatch({
     type: 'SCRATCH_ORG_DELETE',
-    payload,
+    payload: org,
   });
 };
 

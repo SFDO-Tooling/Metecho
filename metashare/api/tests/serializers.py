@@ -84,7 +84,7 @@ class TestProjectSerializer:
             }
         )
         assert not serializer.is_valid()
-        assert [str(err) for err in serializer.errors["non_field_errors"]] == [
+        assert [str(err) for err in serializer.errors["name"]] == [
             "A project with this name already exists."
         ]
 
@@ -101,7 +101,7 @@ class TestProjectSerializer:
             }
         )
         assert not serializer.is_valid()
-        assert [str(err) for err in serializer.errors["non_field_errors"]] == [
+        assert [str(err) for err in serializer.errors["name"]] == [
             "A project with this name already exists."
         ]
 
@@ -132,6 +132,33 @@ class TestTaskSerializer:
         task = task_factory(name="Test task")
         serializer = TaskSerializer(task)
         assert serializer.data["branch_url"] is None
+
+    def test_branch_diff_url__present(self, project_factory, task_factory):
+        project = project_factory(branch_name="test-project")
+        task = task_factory(project=project, branch_name="test-task")
+        serializer = TaskSerializer(task)
+        owner = task.project.repository.repo_owner
+        name = task.project.repository.repo_name
+        expected = f"https://github.com/{owner}/{name}/compare/test-project...test-task"
+        assert serializer.data["branch_diff_url"] == expected
+
+    def test_branch_diff_url__missing(self, task_factory):
+        task = task_factory(name="Test task")
+        serializer = TaskSerializer(task)
+        assert serializer.data["branch_diff_url"] is None
+
+    def test_pr_url__present(self, task_factory):
+        task = task_factory(name="Test task", pr_number=123)
+        serializer = TaskSerializer(task)
+        owner = task.project.repository.repo_owner
+        name = task.project.repository.repo_name
+        expected = f"https://github.com/{owner}/{name}/pull/123"
+        assert serializer.data["pr_url"] == expected
+
+    def test_pr_url__missing(self, task_factory):
+        task = task_factory(name="Test task")
+        serializer = TaskSerializer(task)
+        assert serializer.data["pr_url"] is None
 
 
 @pytest.mark.django_db

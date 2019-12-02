@@ -12,6 +12,7 @@ def render_clean_markdown(raw_md):
     return bleach.clean(markdown(raw_md), tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS)
 
 
+# A Serializer field.
 class MarkdownField(CharField):
     def to_representation(self, value):
         return render_clean_markdown(value)

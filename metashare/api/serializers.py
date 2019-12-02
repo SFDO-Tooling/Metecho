@@ -11,6 +11,23 @@ from .validators import CaseInsensitiveUniqueTogetherValidator
 User = get_user_model()
 
 
+class FormattableDict:
+    """
+    Stupid hack to get a dict error message into a
+    CaseInsensitiveUniqueTogetherValidator, so the error can be assigned
+    to a particular key.
+    """
+
+    def __init__(self, key, msg):
+        self.key = key
+        self.msg = msg
+
+    def format(self, *args, **kwargs):
+        return {
+            self.key: self.msg.format(*args, **kwargs),
+        }
+
+
 class HashidPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
     def to_representation(self, value):
         if self.pk_field is not None:
@@ -33,6 +50,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "org_type",
             "is_devhub_enabled",
             "sf_username",
+            "currently_fetching_repos",
         )
 
 
@@ -88,7 +106,9 @@ class ProjectSerializer(serializers.ModelSerializer):
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Project.objects.all(),
                 fields=("name", "repository"),
-                message=_("A project with this name already exists."),
+                message=FormattableDict(
+                    "name", _("A project with this name already exists.")
+                ),
             ),
         )
 
@@ -112,6 +132,8 @@ class TaskSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(), allow_null=True
     )
     branch_url = serializers.SerializerMethodField()
+    branch_diff_url = serializers.SerializerMethodField()
+    pr_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -123,13 +145,19 @@ class TaskSerializer(serializers.ModelSerializer):
             "assignee",
             "slug",
             "old_slugs",
+            "has_unmerged_commits",
+            "currently_creating_pr",
             "branch_url",
+            "branch_diff_url",
+            "pr_url",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Task.objects.all(),
                 fields=("name", "project"),
-                message=_("A task with this name already exists."),
+                message=FormattableDict(
+                    "name", _("A task with this name already exists.")
+                ),
             ),
         )
 
@@ -141,6 +169,37 @@ class TaskSerializer(serializers.ModelSerializer):
         if repo_owner and repo_name and branch:
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
         return None
+
+    def get_branch_diff_url(self, obj) -> Optional[str]:
+        project = obj.project
+        project_branch = project.branch_name
+        repo = project.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        branch = obj.branch_name
+        if repo_owner and repo_name and project_branch and branch:
+            return (
+                f"https://github.com/{repo_owner}/{repo_name}/compare/"
+                f"{project_branch}...{branch}"
+            )
+        return None
+
+    def get_pr_url(self, obj) -> Optional[str]:
+        repo = obj.project.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        pr_number = obj.pr_number
+        if repo_owner and repo_name and pr_number:
+            return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
+        return None
+
+
+class CreatePrSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    critical_changes = serializers.CharField(allow_blank=True)
+    additional_changes = serializers.CharField(allow_blank=True)
+    issues = serializers.CharField(allow_blank=True)
+    notes = serializers.CharField(allow_blank=True)
 
 
 class ScratchOrgSerializer(serializers.ModelSerializer):

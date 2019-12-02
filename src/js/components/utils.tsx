@@ -179,11 +179,13 @@ export const LabelWithSpinner = ({
 
 export const ExternalLink = ({
   url,
+  showButtonIcon = false,
   shortenGithub = false,
   children,
   ...props
 }: {
   url: string;
+  showButtonIcon?: boolean;
   shortenGithub?: boolean;
   children?: ReactNode;
   [key: string]: any;
@@ -199,7 +201,18 @@ export const ExternalLink = ({
         {url.slice(GITHUB_REPO_PREFIX.length)}
       </>
     ) : (
-      children
+      <>
+        {showButtonIcon && (
+          <Icon
+            category="utility"
+            name="new_window"
+            size="xx-small"
+            className="slds-button__icon slds-button__icon_left"
+            containerClassName="slds-icon_container slds-current-color"
+          />
+        )}
+        {children}
+      </>
     )}
   </a>
 );
@@ -520,7 +533,7 @@ export const useForm = ({
         /* istanbul ignore else */
         if (isMounted.current && Object.keys(fieldErrors).length) {
           setErrors(fieldErrors);
-        } else if (err.response && err.response.status === 400) {
+        } else if (err.response && err.response.status === 422) {
           // If no inline errors to show, fallback to default global error toast
           dispatch(addError(err.message));
         } else {

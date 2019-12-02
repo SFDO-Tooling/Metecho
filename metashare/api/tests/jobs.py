@@ -10,6 +10,7 @@ from ..jobs import (
     _create_org_and_run_flow,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
+    create_pr,
     delete_scratch_org,
     get_unsaved_changes,
     refresh_github_repositories_for_user,
@@ -208,7 +209,7 @@ class TestErrorHandling:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
-                patch("metashare.api.models.async_to_sync")
+                patch("metashare.api.model_mixins.async_to_sync")
             )
             _create_branches_on_github = stack.enter_context(
                 patch(f"{PATCH_ROOT}._create_branches_on_github")
@@ -229,7 +230,7 @@ class TestErrorHandling:
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
-                patch("metashare.api.models.async_to_sync")
+                patch("metashare.api.model_mixins.async_to_sync")
             )
             get_latest_revision_numbers = stack.enter_context(
                 patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
@@ -245,11 +246,11 @@ class TestErrorHandling:
         user = user_factory()
         scratch_org = scratch_org_factory()
         with ExitStack() as stack:
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.model_mixins.async_to_sync")
+            )
             commit_changes_to_github = stack.enter_context(
                 patch(f"{PATCH_ROOT}.commit_changes_to_github")
-            )
-            async_to_sync = stack.enter_context(
-                patch("metashare.api.models.async_to_sync")
             )
             commit_changes_to_github.side_effect = Exception
 
@@ -257,3 +258,54 @@ class TestErrorHandling:
                 commit_changes_from_org(scratch_org, user, {}, "message")
 
             assert async_to_sync.called
+
+
+@pytest.mark.django_db
+def test_create_pr(user_factory, task_factory):
+    user = user_factory()
+    task = task_factory()
+    with ExitStack() as stack:
+        pr = MagicMock(number=123)
+        repository = MagicMock(**{"create_pull.return_value": pr})
+        get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        get_repo_info.return_value = repository
+
+        create_pr(
+            task,
+            user,
+            title="My PR",
+            critical_changes="",
+            additional_changes="",
+            issues="",
+            notes="",
+        )
+
+        assert repository.create_pull.called
+        assert task.pr_number == 123
+
+
+@pytest.mark.django_db
+def test_create_pr__error(user_factory, task_factory):
+    user = user_factory()
+    task = task_factory()
+    with ExitStack() as stack:
+        repository = MagicMock()
+        get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        get_repo_info.return_value = repository
+        repository.create_pull = MagicMock(side_effect=Exception)
+        async_to_sync = stack.enter_context(
+            patch("metashare.api.model_mixins.async_to_sync")
+        )
+
+        with pytest.raises(Exception):
+            create_pr(
+                task,
+                user,
+                title="My PR",
+                critical_changes="",
+                additional_changes="",
+                issues="",
+                notes="",
+            )
+
+        assert async_to_sync.called

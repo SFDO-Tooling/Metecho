@@ -16,12 +16,12 @@ describe('reducer', () => {
         slug: 'task-1',
         name: 'Task 1',
         description: 'This is a test task.',
-        project: 'r1',
+        project: 'p1',
       };
       const expected = {};
       const actual = reducer(
         {
-          r1: [task1],
+          p1: [task1],
         },
         { type: action },
       );
@@ -70,7 +70,7 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "task"', () => {
       const task = {
-        id: 'r1',
+        id: 't1',
         slug: 'task-1',
         name: 'Task 1',
         project: 'project-1',
@@ -90,68 +90,150 @@ describe('reducer', () => {
   });
 
   describe('CREATE_OBJECT_SUCCEEDED', () => {
-    test('adds task to list', () => {
-      const task1 = {
-        id: 'r1',
-        slug: 'task-1',
-        name: 'Task 1',
-        project: 'project-1',
-      };
-      const expected = {
-        'project-1': [task1],
-      };
+    describe('OBJECT_TYPES.TASK', () => {
+      test('adds task to list', () => {
+        const task = {
+          id: 't1',
+          slug: 'task-1',
+          name: 'Task 1',
+          project: 'project-1',
+        };
+        const expected = {
+          'project-1': [task],
+        };
+        const actual = reducer(
+          {},
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              object: task,
+              objectType: 'task',
+            },
+          },
+        );
+
+        expect(actual).toEqual(expected);
+      });
+
+      test('does not add duplicate task', () => {
+        const task = {
+          id: 't1',
+          slug: 'task-1',
+          name: 'Task 1',
+          project: 'project-1',
+        };
+        const expected = {
+          'project-1': [task],
+        };
+        const actual = reducer(expected, {
+          type: 'CREATE_OBJECT_SUCCEEDED',
+          payload: {
+            object: task,
+            objectType: 'task',
+          },
+        });
+
+        expect(actual).toEqual(expected);
+      });
+
+      test('ignores if no object', () => {
+        const actual = reducer(
+          {},
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              objectType: 'task',
+            },
+          },
+        );
+
+        expect(actual).toEqual({});
+      });
+    });
+
+    describe('OBJECT_TYPES.TASK_PR', () => {
+      test('sets currently_creating_pr: true', () => {
+        const task = {
+          id: 't1',
+          slug: 'task-1',
+          name: 'Task 1',
+          project: 'project-1',
+          currently_creating_pr: false,
+        };
+        const task2 = {
+          id: 't2',
+          project: 'project-1',
+        };
+        const expected = {
+          'project-1': [{ ...task, currently_creating_pr: true }, task2],
+        };
+        const actual = reducer(
+          { 'project-1': [task, task2] },
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              object: task,
+              objectType: 'task_pr',
+            },
+          },
+        );
+
+        expect(actual).toEqual(expected);
+      });
+
+      test('adds task to list if no existing task', () => {
+        const task = {
+          id: 't1',
+          slug: 'task-1',
+          name: 'Task 1',
+          project: 'project-1',
+          currently_creating_pr: false,
+        };
+        const expected = {
+          'project-1': [{ ...task, currently_creating_pr: true }],
+        };
+        const actual = reducer(
+          {},
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              object: task,
+              objectType: 'task_pr',
+            },
+          },
+        );
+
+        expect(actual).toEqual(expected);
+      });
+
+      test('ignores if no object', () => {
+        const actual = reducer(
+          {},
+          {
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              objectType: 'task_pr',
+            },
+          },
+        );
+
+        expect(actual).toEqual({});
+      });
+    });
+
+    test('ignores if objectType unknown', () => {
       const actual = reducer(
         {},
         {
           type: 'CREATE_OBJECT_SUCCEEDED',
           payload: {
-            object: task1,
-            objectType: 'task',
+            object: {},
+            objectType: 'other-object',
           },
         },
       );
 
-      expect(actual).toEqual(expected);
-    });
-
-    test('does not add duplicate task', () => {
-      const task1 = {
-        id: 'r1',
-        slug: 'task-1',
-        name: 'Task 1',
-        project: 'project-1',
-      };
-      const expected = {
-        'project-1': [task1],
-      };
-      const actual = reducer(expected, {
-        type: 'CREATE_OBJECT_SUCCEEDED',
-        payload: {
-          object: task1,
-          objectType: 'task',
-        },
-      });
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('ignores if objectType !== "task"', () => {
-      const task = {
-        id: 'r1',
-        slug: 'task-1',
-        name: 'Task 1',
-        project: 'project-1',
-      };
-      const expected = {};
-      const actual = reducer(expected, {
-        type: 'CREATE_OBJECT_SUCCEEDED',
-        payload: {
-          object: task,
-          objectType: 'other-object',
-        },
-      });
-
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual({});
     });
   });
 
@@ -200,6 +282,53 @@ describe('reducer', () => {
       );
 
       expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('TASK_CREATE_PR_FAILED', () => {
+    test('sets currently_creating_pr: false', () => {
+      const task = {
+        id: 't1',
+        slug: 'task-1',
+        name: 'Task 1',
+        project: 'project-1',
+        currently_creating_pr: true,
+      };
+      const task2 = {
+        id: 't2',
+        project: 'project-1',
+      };
+      const expected = {
+        'project-1': [{ ...task, currently_creating_pr: false }, task2],
+      };
+      const actual = reducer(
+        { 'project-1': [task, task2] },
+        {
+          type: 'TASK_CREATE_PR_FAILED',
+          payload: task,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if no existing task', () => {
+      const task = {
+        id: 't1',
+        slug: 'task-1',
+        name: 'Task 1',
+        project: 'project-1',
+        currently_creating_pr: true,
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'TASK_CREATE_PR_FAILED',
+          payload: task,
+        },
+      );
+
+      expect(actual).toEqual({});
     });
   });
 });
