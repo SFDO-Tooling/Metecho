@@ -36,7 +36,7 @@ django-parler==2.0
 django-redis==4.10.0
 django-rq==2.1.0
 django-storages==1.8
-django==2.2.7
+django==2.2.8
 djangorestframework==3.10.3
 docutils==0.15.2          # via cumulusci
 entrypoints==0.3          # via keyring
@@ -59,7 +59,7 @@ lxml==4.4.1               # via cumulusci
 markdown==3.1.1
 markupsafe==1.1.1         # via cumulusci, jinja2
 msgpack==0.6.2            # via channels-redis
-newrelic==5.2.3.131
+newrelic==5.4.0.132
 oauthlib==3.1.0           # via requests-oauthlib
 pillow==6.2.1
 psycopg2-binary==2.8.4
@@ -86,7 +86,7 @@ salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
 secretstorage==3.1.1      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sentry-sdk==0.13.3
+sentry-sdk==0.13.4
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.9.0.tar.gz
 simple-salesforce==0.74.2
@@ -107,4 +107,4 @@ xmltodict==0.12.0         # via cumulusci
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==42.0.1        # via markdown, pyhamcrest, zope.interface
+# setuptools==42.0.2        # via markdown, pyhamcrest, zope.interface
