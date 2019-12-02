@@ -101,6 +101,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "old_slugs",
             "repository",
             "branch_url",
+            "currently_creating_pr",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

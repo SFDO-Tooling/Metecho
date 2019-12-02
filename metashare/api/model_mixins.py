@@ -73,3 +73,34 @@ class PushMixin:
         mixin.
         """
         async_to_sync(push.report_scratch_org_error)(self, error, type_)
+
+
+class CreatePrMixin:
+    create_pr_event = ""  # Implement this
+
+    def queue_create_pr(
+        self, user, *, title, critical_changes, additional_changes, issues, notes
+    ):
+        from .jobs import create_pr_job
+
+        self.currently_creating_pr = True
+        self.save()
+        self.notify_changed()
+
+        create_pr_job.delay(
+            self,
+            user,
+            title=title,
+            critical_changes=critical_changes,
+            additional_changes=additional_changes,
+            issues=issues,
+            notes=notes,
+        )
+
+    def finalize_create_pr(self, error=None):
+        self.currently_creating_pr = False
+        self.save()
+        if error is None:
+            self.notify_changed(self.create_pr_event)
+        else:
+            self.notify_error(error)

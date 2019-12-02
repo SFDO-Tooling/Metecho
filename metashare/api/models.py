@@ -21,7 +21,13 @@ from simple_salesforce.exceptions import SalesforceError
 
 from . import gh, push
 from .constants import ORGANIZATION_DETAILS
-from .model_mixins import HashIdMixin, PopulateRepoIdMixin, PushMixin, TimestampsMixin
+from .model_mixins import (
+    CreatePrMixin,
+    HashIdMixin,
+    PopulateRepoIdMixin,
+    PushMixin,
+    TimestampsMixin,
+)
 from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
 
@@ -201,18 +207,23 @@ class ProjectSlug(AbstractSlug):
     )
 
 
-class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
+class Project(
+    CreatePrMixin, PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
         max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
     )
+    currently_creating_pr = models.BooleanField(default=False)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
     )
 
     slug_class = ProjectSlug
+
+    create_pr_event = "PROJECT_CREATE_PR"
 
     def __str__(self):
         return self.name
@@ -244,7 +255,9 @@ class TaskSlug(AbstractSlug):
     parent = models.ForeignKey("Task", on_delete=models.PROTECT, related_name="slugs")
 
 
-class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
+class Task(
+    CreatePrMixin, PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+):
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
@@ -263,6 +276,8 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     pr_number = models.IntegerField(null=True, blank=True)
 
     slug_class = TaskSlug
+
+    create_pr_event = "PROJECT_CREATE_PR"
 
     def __str__(self):
         return self.name
@@ -284,33 +299,6 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     def finalize_task_update(self):
         self.save()
         self.notify_changed()
-
-    def queue_create_pr(
-        self, user, *, title, critical_changes, additional_changes, issues, notes
-    ):
-        from .jobs import create_pr_job
-
-        self.currently_creating_pr = True
-        self.save()
-        self.notify_changed()
-
-        create_pr_job.delay(
-            self,
-            user,
-            title=title,
-            critical_changes=critical_changes,
-            additional_changes=additional_changes,
-            issues=issues,
-            notes=notes,
-        )
-
-    def finalize_create_pr(self, error=None):
-        self.currently_creating_pr = False
-        self.save()
-        if error is None:
-            self.notify_changed("TASK_CREATE_PR")
-        else:
-            self.notify_error(error)
 
     class Meta:
         ordering = ("-created_at", "name")
