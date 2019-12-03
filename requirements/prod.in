@@ -1,4 +1,4 @@
-Django==2.2.8
+Django==3.0.0
 Pillow==6.2.1
 Werkzeug==0.16.0
 bleach==3.1.0
@@ -25,6 +25,6 @@ psycopg2-binary==2.8.4
 pyOpenSSL==19.1.0
 sentry-sdk==0.13.4
 service_identity==18.1.0
-https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.9.0.tar.gz
+https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/master.tar.gz
 simple-salesforce==0.74.2
 whitenoise==4.1.4

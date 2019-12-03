@@ -5,7 +5,7 @@
 #    pip-compile --output-file=requirements/prod.txt requirements/prod.in
 #
 aioredis==1.3.0           # via channels-redis
-asgiref==3.2.2            # via channels, channels-redis, daphne
+asgiref==3.2.2            # via channels, channels-redis, daphne, django
 asn1crypto==1.2.0         # via cumulusci
 async-timeout==3.0.1      # via aioredis
 attrs==19.3.0             # via automat, service-identity, twisted
@@ -36,7 +36,7 @@ django-parler==2.0
 django-redis==4.10.0
 django-rq==2.1.0
 django-storages==1.8
-django==2.2.8
+django==3.0
 djangorestframework==3.10.3
 docutils==0.15.2          # via cumulusci
 entrypoints==0.3          # via keyring
@@ -88,7 +88,7 @@ secretstorage==3.1.1      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
 sentry-sdk==0.13.4
 service_identity==18.1.0
-https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.9.0.tar.gz
+https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/master.tar.gz
 simple-salesforce==0.74.2
 six==1.13.0               # via autobahn, automat, bleach, cryptography, cumulusci, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
 sqlalchemy==1.3.11        # via cumulusci
