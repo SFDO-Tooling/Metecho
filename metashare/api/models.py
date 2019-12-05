@@ -26,6 +26,8 @@ from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
+SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+TASK_STATUSES = Choices("Unstarted", "In progress", "Completed",)
 
 
 class UserQuerySet(models.QuerySet):
@@ -261,6 +263,9 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
+    status = models.CharField(
+        choices=TASK_STATUSES, default=TASK_STATUSES.Unstarted, max_length=16
+    )
 
     slug_class = TaskSlug
 
@@ -315,9 +320,6 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)
-
-
-SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
 class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
