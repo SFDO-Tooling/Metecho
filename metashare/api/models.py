@@ -204,7 +204,7 @@ class Repository(
 
     @transaction.atomic
     def add_commits(self, commits, ref):
-        # TODO: this is only works if the ref starts with this string:
+        # TODO: this only works if the ref starts with this string:
         prefix_len = len("refs/heads/")
         ref = ref[prefix_len:]
         matching_projects = self.projects.filter(branch_name=ref)
@@ -270,7 +270,7 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     # end PushMixin configuration
 
-    def finalize_branch_update(self):
+    def finalize_project_update(self):
         self.save()
         self.notify_changed()
 
@@ -322,10 +322,6 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     # end PushMixin configuration
 
     def finalize_task_update(self):
-        self.save()
-        self.notify_changed()
-
-    def finalize_branch_update(self):
         self.save()
         self.notify_changed()
 

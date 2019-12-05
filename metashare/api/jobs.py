@@ -51,7 +51,7 @@ def _create_branches_on_github(*, user, repo_id, project, task):
             base_branch=repository.default_branch,
         )
         project.branch_name = project_branch_name
-        project.finalize_branch_update()
+        project.finalize_project_update()
 
     # Make task branch, with latest from task:
     task.refresh_from_db()
@@ -323,7 +323,7 @@ def refresh_commits(*, user, repository):
             _commit_to_json(commit) for commit in repo.commits(sha=branch.latest_sha())
         ]
         project.save()
-        project.finalize_branch_update()
+        project.finalize_project_update()
 
         tasks = project.tasks.filter(branch_name__isnull=False)
         for task in tasks:
@@ -333,7 +333,7 @@ def refresh_commits(*, user, repository):
                 for commit in repo.commits(sha=branch.latest_sha())
             ]
             task.save()
-            task.finalize_branch_update()
+            task.finalize_task_update()
 
 
 refresh_commits_job = job(refresh_commits)
