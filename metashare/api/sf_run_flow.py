@@ -64,15 +64,26 @@ def refresh_access_token(*, config, org_name, scratch_org):
         org_config.config["access_token"] = info["access_token"]
         return org_config
     except HTTPError as err:
-        error_msg = "Are you certain that the org still exists?"
-
         if get_current_job():
             job_id = get_current_job().id
-            error_msg += f" If you need support, your job ID is {job_id}."
+            # This error is user-facing, and so for makemessages to
+            # pick it up correctly, we need it to be a single,
+            # unbroken, string literal (even though adjacent string
+            # literals should be parsed by the AST into a single
+            # string literal and picked up by makemessages, but
+            # that's a gripe for another day). We have relatively
+            # few errors that propagate directly from the backend
+            # like this, but when we do, this is the pattern we
+            # should use.
+            #
+            # This is also why we repeat the first sentence.
+            error_msg = _(
+                f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: E501
+            )
         else:
-            error_msg += f" {err.args[0]}"
+            error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
 
-        err = err.__class__(_(error_msg), *err.args[1:],)
+        err = err.__class__(error_msg, *err.args[1:],)
         scratch_org.remove_scratch_org(err)
         raise err
 
