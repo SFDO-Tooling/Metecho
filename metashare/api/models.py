@@ -216,6 +216,7 @@ class Project(
         max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
     )
     currently_creating_pr = models.BooleanField(default=False)
+    pr_number = models.IntegerField(null=True, blank=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"

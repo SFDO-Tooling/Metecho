@@ -90,6 +90,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         queryset=Repository.objects.all(), pk_field=serializers.CharField()
     )
     branch_url = serializers.SerializerMethodField()
+    pr_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -102,6 +103,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "repository",
             "branch_url",
             "currently_creating_pr",
+            "pr_url",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -120,6 +122,15 @@ class ProjectSerializer(serializers.ModelSerializer):
         branch = obj.branch_name
         if repo_owner and repo_name and branch:
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
+        return None
+
+    def get_pr_url(self, obj) -> Optional[str]:
+        repo = obj.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        pr_number = obj.pr_number
+        if repo_owner and repo_name and pr_number:
+            return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
 
 
