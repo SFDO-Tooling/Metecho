@@ -207,18 +207,20 @@ class Repository(
         branch_prefix = "refs/heads/"
         if not ref.startswith(branch_prefix):
             self.refresh_commits(user)
+        else:
+            prefix_len = len(branch_prefix)
+            ref = ref[prefix_len:]
+            matching_projects = self.projects.filter(branch_name=ref)
+            matching_tasks = Task.objects.filter(
+                branch_name=ref, project__repository=self
+            )
+            for project in matching_projects:
+                project.commits += commits
+                project.save()
 
-        prefix_len = len(branch_prefix)
-        ref = ref[prefix_len:]
-        matching_projects = self.projects.filter(branch_name=ref)
-        matching_tasks = Task.objects.filter(branch_name=ref, project__repository=self)
-        for project in matching_projects:
-            project.commits += commits
-            project.save()
-
-        for task in matching_tasks:
-            task.commits += commits
-            task.save()
+            for task in matching_tasks:
+                task.commits += commits
+                task.save()
 
 
 class GitHubRepository(HashIdMixin, models.Model):
