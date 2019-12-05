@@ -153,7 +153,11 @@ def create_updates_hook_for_repo(*, user, repository):
     )
     secret = binascii.hexlify(os.urandom(24)).decode("utf-8")
     repo = get_repo_info(user=user, repo_id=repository.repo_id)
-    repo.create_hook("web", {"url": url, "content_type": "json", "secret": secret})
+    repo.create_hook(
+        "web",
+        {"url": url, "content_type": "json", "secret": secret},
+        events=["push", "pull_request"],
+    )
     repository.hook_secret = secret
     # As this is called from Repository.save, this secret will be saved
     # a moment later.
@@ -163,5 +167,7 @@ def validate_gh_hook_signature(
     *, hook_secret: bytes, signature: bytes, message: bytes
 ) -> bool:
     local_signature = "sha1=" + hmac.new(hook_secret, message, "sha1").hexdigest()
-    print("======>", local_signature)
+    # Uncomment this when writing webhook tests to confirm the signature
+    # for the test:
+    # print("======>", local_signature)
     return hmac.compare_digest(local_signature, signature)

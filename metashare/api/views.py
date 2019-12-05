@@ -20,9 +20,10 @@ from .serializers import (
     CommitSerializer,
     CreatePrSerializer,
     FullUserSerializer,
-    HookSerializer,
     MinimalUserSerializer,
+    PrHookSerializer,
     ProjectSerializer,
+    PushHookSerializer,
     RepositorySerializer,
     ScratchOrgSerializer,
     TaskSerializer,
@@ -98,9 +99,7 @@ class RepositoryViewSet(viewsets.ModelViewSet):
 
         return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
 
-    @action(methods=["POST"], detail=True, permission_classes=[AllowAny])
-    def hook(self, request, pk=None):
-        repository = self.model.objects.get(pk=pk)
+    def _validate_hook_signature(self, request, repository):
         valid_signature = False
         if repository.hook_secret:
             valid_signature = validate_gh_hook_signature(
@@ -112,16 +111,13 @@ class RepositoryViewSet(viewsets.ModelViewSet):
             return Response(
                 {"error": "Invalid signature."}, status=status.HTTP_403_FORBIDDEN
             )
+
+    def _handle_push_serializer(self, pk, repository, serializer):
         user = repository.get_a_matching_user()
         if not user:
             return Response(
                 {"error": f"No matching user for repository {pk}."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-        serializer = HookSerializer(data=json.loads(request.data["payload"]))
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
         if serializer.validated_data["forced"]:
             repository.refresh_commits(user)
@@ -132,6 +128,48 @@ class RepositoryViewSet(viewsets.ModelViewSet):
                 user=user,
             )
         return Response(status=status.HTTP_202_ACCEPTED)
+
+    def _handle_pr_serializer(self, repository, serializer):
+        pr_number = serializer.validated_data["number"]
+        action = serializer.validated_data["action"]
+        merged = serializer.validated_data["pull_request"]["merged"]
+
+        if not (merged and action == "closed"):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        related_task = Task.objects.filter(pr_number=pr_number).first()
+        if not related_task:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        related_task.finalize_status_completed()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["POST"], detail=True, permission_classes=[AllowAny])
+    def hook(self, request, pk=None):
+        repository = self.model.objects.get(pk=pk)
+
+        # Validate signature:
+        err = self._validate_hook_signature(request, repository)
+        if err:
+            return err
+
+        # Update commits in associated Projects and Tasks:
+        data = json.loads(request.data["payload"])
+        push_serializer = PushHookSerializer(data=data)
+        pr_serializer = PrHookSerializer(data=data)
+
+        if push_serializer.is_valid():
+            return self._handle_push_serializer(pk, repository, push_serializer)
+        elif pr_serializer.is_valid():
+            return self._handle_pr_serializer(repository, pr_serializer)
+        else:
+            return Response(
+                {
+                    "pr_errors": pr_serializer.errors,
+                    "push_errors": push_serializer.errors,
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

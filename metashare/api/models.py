@@ -335,6 +335,11 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         self.save()
         self.notify_changed()
 
+    def finalize_status_completed(self):
+        self.status = TASK_STATUSES.Completed
+        self.save()
+        self.notify_changed()
+
     def queue_create_pr(
         self, user, *, title, critical_changes, additional_changes, issues, notes
     ):

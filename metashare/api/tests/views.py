@@ -6,7 +6,7 @@ import pytest
 from django.urls import reverse
 from github3.exceptions import ResponseError
 
-from ..models import SCRATCH_ORG_TYPES
+from ..models import SCRATCH_ORG_TYPES, TASK_STATUSES
 
 
 @pytest.mark.django_db
@@ -233,6 +233,84 @@ class TestRepositoryView:
             HTTP_X_HUB_SIGNATURE="sha1=52bf5b0b015bf7f5d1a55d025d1c5b5710d966a8",
         )
         assert response.status_code == 500
+
+    def test_hook__202__pr__not_merged(
+        self, client, repository_factory, git_hub_repository_factory
+    ):
+        repo = repository_factory(repo_id=123, hook_secret="secret key")
+        git_hub_repository_factory(repo_id=123)
+        response = client.post(
+            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            json.dumps(
+                {
+                    "payload": json.dumps(
+                        {
+                            "number": 1,
+                            "action": "closed",
+                            "pull_request": {"merged": False},
+                        },
+                    )
+                }
+            ),
+            content_type="application/json",
+            # The sha1 hexdigest of the request body x the secret
+            # key above:
+            HTTP_X_HUB_SIGNATURE="sha1=3164a2651f615f4da07ff0bb9c3ec9a386a531a3",
+        )
+        assert response.status_code == 204, response.content
+
+    def test_hook__202__pr__no_task(
+        self, client, repository_factory, git_hub_repository_factory
+    ):
+        repo = repository_factory(repo_id=123, hook_secret="secret key")
+        git_hub_repository_factory(repo_id=123)
+        response = client.post(
+            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            json.dumps(
+                {
+                    "payload": json.dumps(
+                        {
+                            "number": 1,
+                            "action": "closed",
+                            "pull_request": {"merged": True},
+                        },
+                    )
+                }
+            ),
+            content_type="application/json",
+            # The sha1 hexdigest of the request body x the secret
+            # key above:
+            HTTP_X_HUB_SIGNATURE="sha1=2d3c5c3ab0422ca76b5b9a9c6af0331accc1c910",
+        )
+        assert response.status_code == 204, response.content
+
+    def test_hook__202__pr__update_task(
+        self, client, repository_factory, git_hub_repository_factory, task_factory
+    ):
+        repo = repository_factory(repo_id=123, hook_secret="secret key")
+        git_hub_repository_factory(repo_id=123)
+        task = task_factory(project__repository=repo, pr_number=1)
+        response = client.post(
+            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            json.dumps(
+                {
+                    "payload": json.dumps(
+                        {
+                            "number": 1,
+                            "action": "closed",
+                            "pull_request": {"merged": True},
+                        },
+                    )
+                }
+            ),
+            content_type="application/json",
+            # The sha1 hexdigest of the request body x the secret
+            # key above:
+            HTTP_X_HUB_SIGNATURE="sha1=2d3c5c3ab0422ca76b5b9a9c6af0331accc1c910",
+        )
+        assert response.status_code == 200, response.content
+        task.refresh_from_db()
+        assert task.status == TASK_STATUSES.Completed
 
 
 @pytest.mark.django_db

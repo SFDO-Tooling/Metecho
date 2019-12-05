@@ -88,6 +88,18 @@ class AuthorCommitSerializer(serializers.Serializer):
     email = serializers.CharField(required=False)
 
 
+class PrSerializer(serializers.Serializer):
+    merged = serializers.BooleanField()
+    # All other fields are ignored by default.
+
+
+class PrHookSerializer(serializers.Serializer):
+    action = serializers.CharField()
+    number = serializers.IntegerField()
+    pull_request = PrSerializer()
+    # All other fields are ignored by default.
+
+
 class CommitSerializer(serializers.Serializer):
     id = serializers.CharField()
     timestamp = serializers.CharField()
@@ -96,7 +108,7 @@ class CommitSerializer(serializers.Serializer):
     message = serializers.CharField()
 
 
-class HookSerializer(serializers.Serializer):
+class PushHookSerializer(serializers.Serializer):
     forced = serializers.BooleanField()
     ref = serializers.CharField()
     commits = serializers.ListField(child=CommitSerializer())

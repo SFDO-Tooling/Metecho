@@ -5,7 +5,7 @@ import pytest
 from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
-from ..models import Project, Repository, Task, user_logged_in_handler
+from ..models import TASK_STATUSES, Project, Repository, Task, user_logged_in_handler
 
 
 @pytest.mark.django_db
@@ -113,6 +113,15 @@ class TestTask:
             task.notify_changed()
 
             assert async_to_sync.called
+
+    def test_finalize_status_completed(self, task_factory):
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_status_completed()
+
+            task.refresh_from_db()
+            assert async_to_sync.called
+            assert task.status == TASK_STATUSES.Completed
 
     def test_finalize_task_update(self, task_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
