@@ -26,7 +26,7 @@ flake8==3.7.9
 imagesize==1.1.0          # via sphinx
 inflection==0.3.1         # via pytest-factoryboy
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.9.0
+ipython==7.10.1
 isort==4.3.21
 jedi==0.15.1              # via ipython
 jinja2==2.10.3            # via sphinx
@@ -51,7 +51,7 @@ pytest-cov==2.8.1
 pytest-django==3.7.0
 pytest-factoryboy==2.0.3
 pytest-mock==1.12.1
-pytest==5.3.0
+pytest==5.3.1
 pytz==2019.3              # via babel
 regex==2019.11.1          # via black
 remote-pdb==2.0.0
@@ -74,4 +74,4 @@ typed-ast==1.4.0          # via black
 wcwidth==0.1.7            # via prompt-toolkit, pytest
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==42.0.1        # via ipython, sphinx
+# setuptools==42.0.2        # via ipython, sphinx
