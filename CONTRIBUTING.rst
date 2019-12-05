@@ -184,6 +184,23 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 .. _integrated terminal: https://code.visualstudio.com/docs/editor/integrated-terminal
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
 
+GitHub webhooks
+---------------
+
+To test GitHub webhooks in development, you will need to use the tool
+``ngrok``, which sets up a tunnel from the internet-at-large to your
+computer. Run it like so::
+
+   $ ngrok http --host-header=localhost:8080 8080
+
+and you will get output that indicates the name of the ngrok tunnel,
+which will look like ``https://<some hash>.ngrok.io``. Add that to your
+settings by setting the environment variable ``GITHUB_HOOK_ROOT_URL``
+and (re)starting the server.
+
+In production, this environment variable should be set to the scheme and
+domain of the production server.
+
 Internationalization
 --------------------
 

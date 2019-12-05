@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -170,6 +170,7 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    hook_secret = StringField(null=True, editable=False)
 
     slug_class = RepositorySlug
 
@@ -180,6 +181,48 @@ class Repository(
         verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
+
+    def save(self, *args, **kwargs):
+        if self.repo_id and not self.hook_secret:
+            user = self.get_a_matching_user()
+            if user:
+                gh.create_updates_hook_for_repo(user=user, repository=self)
+        return super().save(*args, **kwargs)
+
+    def get_a_matching_user(self):
+        github_repository = GitHubRepository.objects.filter(
+            repo_id=self.repo_id
+        ).first()
+
+        if github_repository:
+            return github_repository.user
+
+        return None
+
+    def refresh_commits(self, user):
+        from .jobs import refresh_commits_job
+
+        refresh_commits_job.delay(user=user, repository=self)
+
+    @transaction.atomic
+    def add_commits(self, *, commits, ref, user):
+        branch_prefix = "refs/heads/"
+        if not ref.startswith(branch_prefix):
+            self.refresh_commits(user)
+        else:
+            prefix_len = len(branch_prefix)
+            ref = ref[prefix_len:]
+            matching_projects = self.projects.filter(branch_name=ref)
+            matching_tasks = Task.objects.filter(
+                branch_name=ref, project__repository=self
+            )
+            for project in matching_projects:
+                project.commits += commits
+                project.save()
+
+            for task in matching_tasks:
+                task.commits += commits
+                task.save()
 
 
 class GitHubRepository(HashIdMixin, models.Model):
@@ -207,8 +250,9 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
+    commits = JSONField(default=list)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -233,7 +277,7 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     # end PushMixin configuration
 
-    def finalize_branch_update(self):
+    def finalize_project_update(self):
         self.save()
         self.notify_changed()
 
@@ -260,6 +304,7 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
+    commits = JSONField(default=list)
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)

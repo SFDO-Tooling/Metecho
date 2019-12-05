@@ -2,6 +2,7 @@ import logging
 import traceback
 
 from asgiref.sync import async_to_sync
+from django.db import transaction
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django_rq import job
@@ -50,7 +51,7 @@ def _create_branches_on_github(*, user, repo_id, project, task):
             base_branch=repository.default_branch,
         )
         project.branch_name = project_branch_name
-        project.finalize_branch_update()
+        project.finalize_project_update()
 
     # Make task branch, with latest from task:
     task.refresh_from_db()
@@ -293,3 +294,53 @@ def refresh_github_repositories_for_user(user):
 
 
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
+
+
+def _commit_to_json(commit):
+    return {
+        "sha": commit.sha,
+        "author": {
+            "avatar_url": commit.author.avatar_url if commit.author else "",
+            "login": commit.author.login if commit.author else "",
+        },
+        "committer": {
+            "avatar_url": commit.committer.avatar_url if commit.committer else "",
+            "login": commit.committer.login if commit.committer else "",
+        },
+        "message": commit.message,
+    }
+
+
+# This avoids partially-applied saving:
+@transaction.atomic
+def refresh_commits(*, user, repository):
+    """
+    This should only run when we're notified of a force-commit. It's the
+    nuclear option.
+    """
+    repo = get_repo_info(user, repository.repo_id)
+
+    projects = repository.projects.filter(branch_name__isnull=False)
+    for project in projects:
+        branch = repo.branch(project.branch_name)
+        project.commits = [
+            _commit_to_json(commit) for commit in repo.commits(sha=branch.latest_sha())
+        ]
+        project.save()
+        project.finalize_project_update()
+
+        project_commits_set = set(commit["sha"] for commit in project.commits)
+
+        tasks = project.tasks.filter(branch_name__isnull=False)
+        for task in tasks:
+            branch = repo.branch(task.branch_name)
+            task.commits = [
+                _commit_to_json(commit)
+                for commit in repo.commits(sha=branch.latest_sha())
+                if commit.sha not in project_commits_set
+            ]
+            task.save()
+            task.finalize_task_update()
+
+
+refresh_commits_job = job(refresh_commits)

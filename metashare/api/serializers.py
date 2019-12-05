@@ -83,6 +83,26 @@ class RepositorySerializer(serializers.ModelSerializer):
         return f"https://github.com/{obj.repo_owner}/{obj.repo_name}"
 
 
+class AuthorCommitSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False)
+    email = serializers.CharField(required=False)
+
+
+class CommitSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    timestamp = serializers.CharField()
+    author = AuthorCommitSerializer()
+    committer = AuthorCommitSerializer()
+    message = serializers.CharField()
+
+
+class HookSerializer(serializers.Serializer):
+    forced = serializers.BooleanField()
+    ref = serializers.CharField()
+    commits = serializers.ListField(child=CommitSerializer())
+    # All other fields are ignored by default.
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description = MarkdownField(allow_blank=True)
@@ -101,6 +121,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "old_slugs",
             "repository",
             "branch_url",
+            "commits",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -148,6 +169,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "has_unmerged_commits",
             "currently_creating_pr",
             "branch_url",
+            "commits",
             "branch_diff_url",
             "pr_url",
             "status",
