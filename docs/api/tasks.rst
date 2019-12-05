@@ -28,7 +28,8 @@ Retrieve
         "has_unmerged_commits": true,
         "currently_creating_pr": false,
         "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-project...feature/test-project__test-task",
-        "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357"
+        "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
+        "status": "Unstarted"
       }
       ...
     ]

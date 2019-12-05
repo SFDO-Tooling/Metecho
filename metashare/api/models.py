@@ -317,6 +317,12 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         else:
             self.notify_error(error)
 
+    def finalize_provision(self):
+        if self.status != TASK_STATUSES["In progress"]:
+            self.status = TASK_STATUSES["In progress"]
+            self.save()
+            self.notify_changed()
+
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)
@@ -419,6 +425,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed("SCRATCH_ORG_PROVISION")
+            self.task.finalize_provision()
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_PROVISION_FAILED")
             # If the scratch org has already been created on Salesforce,
@@ -442,6 +449,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed()
+            self.task.finalize_provision()
         else:
             self.unsaved_changes = {}
             self.save()
