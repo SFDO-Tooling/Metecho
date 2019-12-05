@@ -127,7 +127,9 @@ class RepositoryViewSet(viewsets.ModelViewSet):
             repository.refresh_commits(user)
         else:
             repository.add_commits(
-                serializer.validated_data["commits"], serializer.validated_data["ref"]
+                commits=serializer.validated_data["commits"],
+                ref=serializer.validated_data["ref"],
+                user=user,
             )
         return Response(status=status.HTTP_202_ACCEPTED)
 

@@ -76,6 +76,12 @@ class TestRepository:
             repo.refresh_commits(None)
             assert refresh_commits_job.delay.called
 
+    def test_add_commits(self, repository_factory, user_factory):
+        repo = repository_factory()
+        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
+            repo.add_commits(commits=[], ref="not a branch?", user=None)
+            assert refresh_commits_job.delay.called
+
 
 @pytest.mark.django_db
 class TestProject:

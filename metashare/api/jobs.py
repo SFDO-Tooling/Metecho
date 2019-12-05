@@ -314,6 +314,10 @@ def _commit_to_json(commit):
 # This avoids partially-applied saving:
 @transaction.atomic
 def refresh_commits(*, user, repository):
+    """
+    This should only run when we're notified of a force-commit. It's the
+    nuclear option.
+    """
     repo = get_repo_info(user, repository.repo_id)
 
     projects = repository.projects.filter(branch_name__isnull=False)
@@ -325,12 +329,15 @@ def refresh_commits(*, user, repository):
         project.save()
         project.finalize_project_update()
 
+        project_commits_set = set(commit["sha"] for commit in project.commits)
+
         tasks = project.tasks.filter(branch_name__isnull=False)
         for task in tasks:
             branch = repo.branch(task.branch_name)
             task.commits = [
                 _commit_to_json(commit)
                 for commit in repo.commits(sha=branch.latest_sha())
+                if commit.sha not in project_commits_set
             ]
             task.save()
             task.finalize_task_update()

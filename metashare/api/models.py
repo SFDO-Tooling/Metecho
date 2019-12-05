@@ -203,9 +203,12 @@ class Repository(
         refresh_commits_job.delay(user=user, repository=self)
 
     @transaction.atomic
-    def add_commits(self, commits, ref):
-        # TODO: this only works if the ref starts with this string:
-        prefix_len = len("refs/heads/")
+    def add_commits(self, *, commits, ref, user):
+        branch_prefix = "refs/heads/"
+        if not ref.startswith(branch_prefix):
+            self.refresh_commits(user)
+
+        prefix_len = len(branch_prefix)
         ref = ref[prefix_len:]
         matching_projects = self.projects.filter(branch_name=ref)
         matching_tasks = Task.objects.filter(branch_name=ref, project__repository=self)
