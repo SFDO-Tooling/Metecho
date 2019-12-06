@@ -205,7 +205,7 @@ ADMIN_API_ALLOWED_SUBNETS = env(
 )
 
 GITHUB_HOOK_SECRET = env(
-    "GITHUB_HOOK_SECRET", default=None, type_=lambda x: bytes(x, encoding="utf-8")
+    "GITHUB_HOOK_SECRET", default=b"", type_=lambda x: bytes(x, encoding="utf-8")
 )
 # The ID of the user that GitHub webhook actions should authenticate as:
 GITHUB_USER_ID = env("GITHUB_USER_ID", default=1, type_=int)
