@@ -110,48 +110,44 @@ class TestRepositoryView:
 
     def test_hook__202__not_forced(
         self,
+        settings,
         client,
         repository_factory,
         git_hub_repository_factory,
         project_factory,
         task_factory,
     ):
+        settings.GITHUB_USER_ID = client.user.pk
         repo = repository_factory(repo_id=123, hook_secret="secret key")
         git_hub_repository_factory(repo_id=123)
         project = project_factory(repository=repo, branch_name="master")
         task = task_factory(project=project, branch_name="master")
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
-                reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+                reverse("hook"),
                 json.dumps(
                     {
-                        "payload": json.dumps(
+                        "ref": "refs/heads/master",
+                        "forced": False,
+                        "repository": {"id": 123},
+                        "commits": [
                             {
-                                "ref": "refs/heads/master",
-                                "forced": False,
-                                "commits": [
-                                    {
-                                        "id": "123",
-                                        "author": {
-                                            "name": "Test",
-                                            "email": "test@example.com",
-                                        },
-                                        "committer": {
-                                            "name": "Test",
-                                            "email": "test@example.com",
-                                        },
-                                        "timestamp": "2019-11-20 21:32:53.668260+00:00",
-                                        "message": "Message",
-                                    }
-                                ],
+                                "id": "123",
+                                "author": {"name": "Test", "email": "test@example.com"},
+                                "committer": {
+                                    "name": "Test",
+                                    "email": "test@example.com",
+                                },
+                                "timestamp": "2019-11-20 21:32:53.668260+00:00",
+                                "message": "Message",
                             }
-                        )
+                        ],
                     }
                 ),
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=b947c4672579f5d268837379038b020e08ed2f6f",
+                HTTP_X_HUB_SIGNATURE="sha1=0040b77964a10b7237f3f481f0b1ab2c657f2d50",
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
@@ -161,78 +157,107 @@ class TestRepositoryView:
             assert len(task.commits) == 1
 
     def test_hook__202__forced(
-        self, client, repository_factory, git_hub_repository_factory
+        self, settings, client, repository_factory, git_hub_repository_factory
     ):
-        repo = repository_factory(repo_id=123, hook_secret="secret key")
+        settings.GITHUB_USER_ID = client.user.pk
+        repository_factory(repo_id=123, hook_secret="secret key")
         git_hub_repository_factory(repo_id=123)
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
-                reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+                reverse("hook"),
                 json.dumps(
                     {
-                        "payload": json.dumps(
-                            {"ref": "refs/heads/master", "forced": True, "commits": []}
-                        )
+                        "ref": "refs/heads/master",
+                        "forced": True,
+                        "repository": {"id": 123},
+                        "commits": [],
                     }
                 ),
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=ecfb50b77a8ea763a45851ad79930443be9656ad",
+                HTTP_X_HUB_SIGNATURE="sha1=0976ebd605b24263b0faec4d4be52183a678390c",
             )
             assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
 
-    def test_hook__422(self, client, repository_factory, git_hub_repository_factory):
-        repo = repository_factory(repo_id=123, hook_secret="secret key")
+    def test_hook__422(
+        self, settings, client, repository_factory, git_hub_repository_factory
+    ):
+        settings.GITHUB_USER_ID = client.user.pk
+        repository_factory(repo_id=123, hook_secret="secret key")
         git_hub_repository_factory(repo_id=123)
         response = client.post(
-            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            reverse("hook"),
             json.dumps(
-                {"payload": json.dumps({"ref": "refs/heads/master", "commits": []})}
+                {"ref": "refs/heads/master", "repository": {"id": 123}, "commits": []}
             ),
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=924d6781b12339b700bc79e7c8c6fe6e051a08d1",
+            HTTP_X_HUB_SIGNATURE="sha1=7b07fdb83d596133f6c49ec99c8ba3f0c6aa3bf3",
         )
         assert response.status_code == 422, response.json()
 
-    def test_hook__403(self, client, repository_factory):
-        repo = repository_factory(hook_secret="bleep bloop")
+    def test_hook__404(self, settings, client, repository_factory):
+        settings.GITHUB_USER_ID = client.user.pk
+        repository_factory(hook_secret="bleep bloop")
         response = client.post(
-            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            reverse("hook"),
             json.dumps(
                 {
-                    "payload": json.dumps(
-                        {"ref": "refs/heads/master", "forced": False, "commits": []}
-                    )
+                    "ref": "refs/heads/master",
+                    "forced": False,
+                    "repository": {"id": 123},
+                    "commits": [],
                 }
             ),
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=abe3868964305b53dc80bed60bdca7f8d2a70b97",
+            HTTP_X_HUB_SIGNATURE="sha1=b50e8d609b6b9f227649698a8684010e1ace0e8c",
         )
-        assert response.status_code == 403
+        assert response.status_code == 404
 
-    def test_hook__500(self, client, repository_factory):
-        repo = repository_factory(hook_secret="secret key")
+    def test_hook__500(self, settings, client, repository_factory):
+        settings.GITHUB_USER_ID = client.user.pk
+        repository_factory(repo_id=123, hook_secret="secret key")
         response = client.post(
-            reverse("repository-hook", kwargs={"pk": str(repo.id)}),
+            reverse("hook"),
             json.dumps(
                 {
-                    "payload": json.dumps(
-                        {"ref": "refs/heads/master", "forced": False, "commits": []}
-                    )
+                    "ref": "refs/heads/master",
+                    "forced": False,
+                    "repository": {"id": 123},
+                    "commits": [],
                 }
             ),
             content_type="application/json",
             # The sha1 hexdigest of the request body x the secret key
             # above:
-            HTTP_X_HUB_SIGNATURE="sha1=52bf5b0b015bf7f5d1a55d025d1c5b5710d966a8",
+            HTTP_X_HUB_SIGNATURE="sha1=b50e8d609b6b9f227649698a8684010e1ace0e8c",
         )
         assert response.status_code == 500
+
+    def test_hook__403(self, settings, client, repository_factory):
+        settings.GITHUB_USER_ID = client.user.pk
+        repository_factory(repo_id=123, hook_secret="secret key")
+        response = client.post(
+            reverse("hook"),
+            json.dumps(
+                {
+                    "ref": "refs/heads/master",
+                    "forced": False,
+                    "repository": {"id": 123},
+                    "commits": [],
+                }
+            ),
+            content_type="application/json",
+            # The sha1 hexdigest of the request body x the secret key
+            # above:
+            HTTP_X_HUB_SIGNATURE="sha1=b5aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae8c",
+        )
+        assert response.status_code == 403
 
 
 @pytest.mark.django_db

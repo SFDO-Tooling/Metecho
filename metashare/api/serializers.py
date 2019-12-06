@@ -96,11 +96,23 @@ class CommitSerializer(serializers.Serializer):
     message = serializers.CharField()
 
 
+class HookRepositorySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
+
 class HookSerializer(serializers.Serializer):
     forced = serializers.BooleanField()
     ref = serializers.CharField()
     commits = serializers.ListField(child=CommitSerializer())
+    repository = HookRepositorySerializer()
     # All other fields are ignored by default.
+
+    def is_force_push(self):
+        return self.validated_data["forced"]
+
+    def get_matching_repository(self):
+        repo_id = self.validated_data["repository"]["id"]
+        return Repository.objects.filter(repo_id=repo_id).first()
 
 
 class ProjectSerializer(serializers.ModelSerializer):

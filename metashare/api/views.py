@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
@@ -8,12 +6,12 @@ from github3.exceptions import ResponseError
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
-from .gh import validate_gh_hook_signature
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
@@ -37,6 +35,38 @@ class CurrentUserObjectMixin:
 
     def get_object(self):
         return self.get_queryset().get()
+
+
+class HookView(APIView):
+    authentication_classes = (GitHubHookAuthentication,)
+
+    def post(self, request):
+        serializer = HookSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        repository = serializer.get_matching_repository()
+        if not repository:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        user = repository.get_a_matching_user()
+        if not user:
+            return Response(
+                {"error": f"No matching user for repository {repository.pk}."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        if serializer.is_force_push():
+            repository.refresh_commits(user)
+        else:
+            repository.add_commits(
+                commits=serializer.validated_data["commits"],
+                ref=serializer.validated_data["ref"],
+                user=user,
+            )
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
@@ -97,41 +127,6 @@ class RepositoryViewSet(viewsets.ModelViewSet):
                 pass
 
         return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
-
-    @action(methods=["POST"], detail=True, permission_classes=[AllowAny])
-    def hook(self, request, pk=None):
-        repository = self.model.objects.get(pk=pk)
-        valid_signature = False
-        if repository.hook_secret:
-            valid_signature = validate_gh_hook_signature(
-                hook_secret=repository.hook_secret.encode("utf-8"),
-                signature=request.META.get("HTTP_X_HUB_SIGNATURE", ""),
-                message=request.body,
-            )
-        if not valid_signature:
-            return Response(
-                {"error": "Invalid signature."}, status=status.HTTP_403_FORBIDDEN
-            )
-        user = repository.get_a_matching_user()
-        if not user:
-            return Response(
-                {"error": f"No matching user for repository {pk}."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-        serializer = HookSerializer(data=json.loads(request.data["payload"]))
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
-        if serializer.validated_data["forced"]:
-            repository.refresh_commits(user)
-        else:
-            repository.add_commits(
-                commits=serializer.validated_data["commits"],
-                ref=serializer.validated_data["ref"],
-                user=user,
-            )
-        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

@@ -180,13 +180,6 @@ class Repository(
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
 
-    def save(self, *args, **kwargs):
-        if self.repo_id and not self.hook_secret:
-            user = self.get_a_matching_user()
-            if user:
-                gh.create_updates_hook_for_repo(user=user, repository=self)
-        return super().save(*args, **kwargs)
-
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
             repo_id=self.repo_id
