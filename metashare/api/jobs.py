@@ -299,6 +299,7 @@ refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_u
 def _commit_to_json(commit):
     return {
         "sha": commit.sha,
+        "timestamp": commit.timestamp,
         "author": {
             "avatar_url": commit.author.avatar_url if commit.author else "",
             "login": commit.author.login if commit.author else "",
