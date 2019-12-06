@@ -147,7 +147,7 @@ class TestRepositoryView:
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=0040b77964a10b7237f3f481f0b1ab2c657f2d50",
+                HTTP_X_HUB_SIGNATURE="sha1=a414e52ed6e5e28a8939113deca6ef3ada246b6b",
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
@@ -176,7 +176,7 @@ class TestRepositoryView:
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=0976ebd605b24263b0faec4d4be52183a678390c",
+                HTTP_X_HUB_SIGNATURE="sha1=e3b9c7be188843156ad1585d6f16007497e89ee9",
             )
             assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
@@ -195,7 +195,7 @@ class TestRepositoryView:
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=7b07fdb83d596133f6c49ec99c8ba3f0c6aa3bf3",
+            HTTP_X_HUB_SIGNATURE="sha1=19a76cd9d2ce25c44678fcd78f8a954c4130e3f4",
         )
         assert response.status_code == 422, response.json()
 
@@ -215,7 +215,7 @@ class TestRepositoryView:
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=b50e8d609b6b9f227649698a8684010e1ace0e8c",
+            HTTP_X_HUB_SIGNATURE="sha1=364f36e283407985440c2a00aeaa2d27a3e81712",
         )
         assert response.status_code == 404
 
@@ -235,7 +235,7 @@ class TestRepositoryView:
             content_type="application/json",
             # The sha1 hexdigest of the request body x the secret key
             # above:
-            HTTP_X_HUB_SIGNATURE="sha1=b50e8d609b6b9f227649698a8684010e1ace0e8c",
+            HTTP_X_HUB_SIGNATURE="sha1=364f36e283407985440c2a00aeaa2d27a3e81712",
         )
         assert response.status_code == 500
 
