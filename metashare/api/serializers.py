@@ -102,6 +102,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "old_slugs",
             "repository",
             "branch_url",
+            "has_unmerged_commits",
             "currently_creating_pr",
             "pr_url",
         )

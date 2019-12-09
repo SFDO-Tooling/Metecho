@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React from 'react';
+import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -22,6 +22,16 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
+
+  // Submit modal related:
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const openSubmitModal = () => {
+    setSubmitModalOpen(true);
+  };
+  const currentlySubmitting = Boolean(project && project.currently_creating_pr);
+  const readyToSubmit = Boolean(
+    project && project.has_unmerged_commits && !project.pr_url,
+  );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -76,7 +86,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
           label={i18n.t('Submit Project')}
           className="slds-size_full slds-m-bottom_x-large"
           variant="outline-brand"
-          disabled
+          onClick={openSubmitModal}
+          disabled={currentlySubmitting}
         />
         {tasks ? (
           <>
@@ -101,6 +112,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
         ) : (
           // Fetching tasks from API
           <SpinnerWrapper />
+        )}
+        {readyToSubmit && (
+          <SubmitModal
+            taskId={task.id}
+            taskName={task.name}
+            taskDiffUrl={task.branch_diff_url}
+            isOpen={submitModalOpen}
+            toggleModal={setSubmitModalOpen}
+          />
         )}
       </DetailPageLayout>
     </DocumentTitle>

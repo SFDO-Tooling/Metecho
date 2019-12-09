@@ -215,6 +215,7 @@ class Project(
     branch_name = models.CharField(
         max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
     )
+    has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
 
