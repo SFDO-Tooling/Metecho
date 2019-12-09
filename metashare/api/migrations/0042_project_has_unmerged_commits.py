@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0041_project_pr_number'),
+        ("api", "0041_project_pr_number"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='has_unmerged_commits',
+            model_name="project",
+            name="has_unmerged_commits",
             field=models.BooleanField(default=False),
         ),
     ]

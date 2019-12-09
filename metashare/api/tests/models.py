@@ -5,7 +5,7 @@ import pytest
 from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
-from ..models import Project, Repository, Task, user_logged_in_handler
+from ..models import TASK_STATUSES, Project, Repository, Task, user_logged_in_handler
 
 
 @pytest.mark.django_db
@@ -30,6 +30,27 @@ class TestRepository:
             gh_repo.refresh_from_db()
             assert get_repo_info.called
             assert gh_repo.repo_id == 123
+
+    def test_get_a_matching_user__none(self, repository_factory):
+        repo = repository_factory()
+        assert repo.get_a_matching_user() is None
+
+    def test_get_a_matching_user(self, repository_factory, git_hub_repository_factory):
+        repo = repository_factory(repo_id=123)
+        gh_repo = git_hub_repository_factory(repo_id=123)
+        assert repo.get_a_matching_user() == gh_repo.user
+
+    def test_refresh_commits(self, repository_factory, user_factory):
+        repo = repository_factory()
+        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
+            repo.refresh_commits(None)
+            assert refresh_commits_job.delay.called
+
+    def test_add_commits(self, repository_factory, user_factory):
+        repo = repository_factory()
+        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
+            repo.add_commits(commits=[], ref="not a branch?", user=None)
+            assert refresh_commits_job.delay.called
 
 
 @pytest.mark.django_db
@@ -62,6 +83,15 @@ class TestTask:
             task.notify_changed()
 
             assert async_to_sync.called
+
+    def test_finalize_status_completed(self, task_factory):
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_status_completed()
+
+            task.refresh_from_db()
+            assert async_to_sync.called
+            assert task.status == TASK_STATUSES.Completed
 
     def test_finalize_task_update(self, task_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:

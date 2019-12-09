@@ -5,6 +5,15 @@ import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
+export interface Commit {
+  sha: string;
+  timestamp: string;
+  message: string;
+  author: {
+    avatar_url: string;
+  };
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -17,6 +26,7 @@ export interface Task {
   branch_url: string | null;
   branch_diff_url: string | null;
   pr_url: string | null;
+  commits: Commit[];
 }
 
 export interface TaskState {

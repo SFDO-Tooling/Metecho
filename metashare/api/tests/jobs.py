@@ -1,3 +1,4 @@
+from collections import namedtuple
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
@@ -13,10 +14,13 @@ from ..jobs import (
     create_pr,
     delete_scratch_org,
     get_unsaved_changes,
+    refresh_commits,
     refresh_github_repositories_for_user,
 )
 from ..models import SCRATCH_ORG_TYPES
 
+AuthorCommitter = namedtuple("AuthorCommitter", ("avatar_url", "login"))
+Commit = namedtuple("Commit", ("sha", "author", "committer", "message", "timestamp",))
 PATCH_ROOT = "metashare.api.jobs"
 
 
@@ -258,6 +262,50 @@ class TestErrorHandling:
                 commit_changes_from_org(scratch_org, user, {}, "message")
 
             assert async_to_sync.called
+
+
+@pytest.mark.django_db
+def test_refresh_commits(
+    user_factory, repository_factory, project_factory, task_factory
+):
+    user = user_factory()
+    repository = repository_factory()
+    project = project_factory(repository=repository, branch_name="project")
+    task_factory(project=project, branch_name="task")
+    with ExitStack() as stack:
+        commit1 = Commit(
+            **{
+                "sha": "abcd1234",
+                "author": AuthorCommitter(
+                    **{
+                        "avatar_url": "https://example.com/img.png",
+                        "login": "test_user",
+                    }
+                ),
+                "committer": AuthorCommitter(
+                    **{
+                        "avatar_url": "https://example.com/img.png",
+                        "login": "test_user",
+                    }
+                ),
+                "message": "Test message 1",
+                "timestamp": "2019-12-09 13:00",
+            }
+        )
+        commit2 = Commit(
+            **{
+                "sha": "1234abcd",
+                "author": None,
+                "committer": None,
+                "message": "Test message 2",
+                "timestamp": "2019-12-09 12:30",
+            }
+        )
+        repo = MagicMock(**{"commits.return_value": [commit1, commit2]})
+        get_repo_info = stack.enter_context(patch("metashare.api.jobs.get_repo_info"))
+        get_repo_info.return_value = repo
+
+        refresh_commits(user=user, repository=repository)
 
 
 @pytest.mark.django_db

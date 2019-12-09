@@ -204,6 +204,12 @@ ADMIN_API_ALLOWED_SUBNETS = env(
     type_=ipv4_networks,
 )
 
+GITHUB_HOOK_SECRET = env(
+    "GITHUB_HOOK_SECRET", default="", type_=lambda x: bytes(x, encoding="utf-8")
+)
+# The ID of the user that GitHub webhook actions should authenticate as:
+GITHUB_USER_ID = env("GITHUB_USER_ID", default=1, type_=int)
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 

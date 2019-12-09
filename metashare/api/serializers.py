@@ -83,6 +83,53 @@ class RepositorySerializer(serializers.ModelSerializer):
         return f"https://github.com/{obj.repo_owner}/{obj.repo_name}"
 
 
+class HookSerializerMixin:
+    def get_matching_repository(self):
+        repo_id = self.validated_data["repository"]["id"]
+        return Repository.objects.filter(repo_id=repo_id).first()
+
+
+class HookRepositorySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
+
+class AuthorCommitSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False)
+    email = serializers.CharField(required=False)
+
+
+class PrSerializer(serializers.Serializer):
+    merged = serializers.BooleanField()
+    # All other fields are ignored by default.
+
+
+class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
+    action = serializers.CharField()
+    number = serializers.IntegerField()
+    pull_request = PrSerializer()
+    repository = HookRepositorySerializer()
+    # All other fields are ignored by default.
+
+
+class CommitSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    timestamp = serializers.CharField()
+    author = AuthorCommitSerializer()
+    committer = AuthorCommitSerializer()
+    message = serializers.CharField()
+
+
+class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
+    forced = serializers.BooleanField()
+    ref = serializers.CharField()
+    commits = serializers.ListField(child=CommitSerializer())
+    repository = HookRepositorySerializer()
+    # All other fields are ignored by default.
+
+    def is_force_push(self):
+        return self.validated_data["forced"]
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description = MarkdownField(allow_blank=True)
@@ -105,6 +152,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "has_unmerged_commits",
             "currently_creating_pr",
             "pr_url",
+            "commits",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -161,8 +209,10 @@ class TaskSerializer(serializers.ModelSerializer):
             "has_unmerged_commits",
             "currently_creating_pr",
             "branch_url",
+            "commits",
             "branch_diff_url",
             "pr_url",
+            "status",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

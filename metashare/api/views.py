@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
@@ -18,7 +19,9 @@ from .serializers import (
     CreatePrSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
+    PrHookSerializer,
     ProjectSerializer,
+    PushHookSerializer,
     RepositorySerializer,
     ScratchOrgSerializer,
     TaskSerializer,
@@ -52,6 +55,67 @@ class CreatePrMixin:
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
         )
+
+
+class HookView(APIView):
+    authentication_classes = (GitHubHookAuthentication,)
+
+    def _handle_push_serializer(self, serializer):
+        repository = serializer.get_matching_repository()
+        if not repository:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        user = repository.get_a_matching_user()
+        if not user:
+            return Response(
+                {"error": f"No matching user for repository {repository.pk}."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if serializer.is_force_push():
+            repository.refresh_commits(user)
+        else:
+            repository.add_commits(
+                commits=serializer.validated_data["commits"],
+                ref=serializer.validated_data["ref"],
+                user=user,
+            )
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    def _handle_pr_serializer(self, serializer):
+        repository = serializer.get_matching_repository()
+        if not repository:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        pr_number = serializer.validated_data["number"]
+        action = serializer.validated_data["action"]
+        merged = serializer.validated_data["pull_request"]["merged"]
+
+        if not (merged and action == "closed"):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        related_task = Task.objects.filter(pr_number=pr_number).first()
+        if not related_task:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        related_task.finalize_status_completed()
+        return Response(status=status.HTTP_200_OK)
+
+    def post(self, request):
+        push_serializer = PushHookSerializer(data=request.data)
+        pr_serializer = PrHookSerializer(data=request.data)
+
+        if push_serializer.is_valid():
+            return self._handle_push_serializer(push_serializer)
+        elif pr_serializer.is_valid():
+            return self._handle_pr_serializer(pr_serializer)
+        else:
+            return Response(
+                {
+                    "pr_errors": pr_serializer.errors,
+                    "push_errors": push_serializer.errors,
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
 
 
 class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
