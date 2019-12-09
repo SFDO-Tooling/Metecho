@@ -1,6 +1,11 @@
 import React from 'react';
 
-const CommitList = ({ task, commits }) => {
+import { Commit, Task } from '@/store/tasks/reducer';
+
+const CommitList = ({ task, commits }: { task: Task; commits: Commit[] }) => {
+  if (!task.branch_url) {
+    return null;
+  }
   const baseUrl = new URL(task.branch_url);
   const basePath = baseUrl.pathname
     .split('/')
@@ -14,7 +19,7 @@ const CommitList = ({ task, commits }) => {
     // TODO: make this humanized and relative:
     const relativeTimestamp = commit.timestamp;
     return (
-      <tr>
+      <tr key={shortSha}>
         <td>
           <a href={commitLink}>{shortSha}</a>
         </td>
