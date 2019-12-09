@@ -1,3 +1,4 @@
+from collections import namedtuple
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
@@ -18,6 +19,8 @@ from ..jobs import (
 )
 from ..models import SCRATCH_ORG_TYPES
 
+AuthorCommitter = namedtuple("AuthorCommitter", ("avatar_url", "login"))
+Commit = namedtuple("Commit", ("sha", "author", "committer", "message", "timestamp",))
 PATCH_ROOT = "metashare.api.jobs"
 
 
@@ -270,24 +273,32 @@ def test_refresh_commits(
     project = project_factory(repository=repository, branch_name="project")
     task_factory(project=project, branch_name="task")
     with ExitStack() as stack:
-        commit1 = MagicMock(
+        commit1 = Commit(
             **{
                 "sha": "abcd1234",
-                "author.avatar_url": "https://example.com/img.png",
-                "author.login": "test_user",
-                "committer.avatar_url": "https://example.com/img.png",
-                "committer.login": "test_user",
+                "author": AuthorCommitter(
+                    **{
+                        "avatar_url": "https://example.com/img.png",
+                        "login": "test_user",
+                    }
+                ),
+                "committer": AuthorCommitter(
+                    **{
+                        "avatar_url": "https://example.com/img.png",
+                        "login": "test_user",
+                    }
+                ),
                 "message": "Test message 1",
+                "timestamp": "2019-12-09 13:00",
             }
         )
-        commit2 = MagicMock(
+        commit2 = Commit(
             **{
                 "sha": "1234abcd",
-                "author.avatar_url": None,
-                "author.login": None,
-                "committer.avatar_url": None,
-                "committer.login": None,
+                "author": None,
+                "committer": None,
                 "message": "Test message 2",
+                "timestamp": "2019-12-09 12:30",
             }
         )
         repo = MagicMock(**{"commits.return_value": [commit1, commit2]})

@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import CommitList from '@/components/commits/list';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
 import SubmitModal from '@/components/tasks/submit';
@@ -298,6 +299,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
           />
         )}
+        <CommitList task={task} commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>
   );

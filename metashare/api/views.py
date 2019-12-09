@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
@@ -8,12 +6,12 @@ from github3.exceptions import ResponseError
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
-from .gh import validate_gh_hook_signature
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
@@ -38,6 +36,67 @@ class CurrentUserObjectMixin:
 
     def get_object(self):
         return self.get_queryset().get()
+
+
+class HookView(APIView):
+    authentication_classes = (GitHubHookAuthentication,)
+
+    def _handle_push_serializer(self, serializer):
+        repository = serializer.get_matching_repository()
+        if not repository:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        user = repository.get_a_matching_user()
+        if not user:
+            return Response(
+                {"error": f"No matching user for repository {repository.pk}."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        if serializer.is_force_push():
+            repository.refresh_commits(user)
+        else:
+            repository.add_commits(
+                commits=serializer.validated_data["commits"],
+                ref=serializer.validated_data["ref"],
+                user=user,
+            )
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    def _handle_pr_serializer(self, serializer):
+        repository = serializer.get_matching_repository()
+        if not repository:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        pr_number = serializer.validated_data["number"]
+        action = serializer.validated_data["action"]
+        merged = serializer.validated_data["pull_request"]["merged"]
+
+        if not (merged and action == "closed"):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        related_task = Task.objects.filter(pr_number=pr_number).first()
+        if not related_task:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        related_task.finalize_status_completed()
+        return Response(status=status.HTTP_200_OK)
+
+    def post(self, request):
+        push_serializer = PushHookSerializer(data=request.data)
+        pr_serializer = PrHookSerializer(data=request.data)
+
+        if push_serializer.is_valid():
+            return self._handle_push_serializer(push_serializer)
+        elif pr_serializer.is_valid():
+            return self._handle_pr_serializer(pr_serializer)
+        else:
+            return Response(
+                {
+                    "pr_errors": pr_serializer.errors,
+                    "push_errors": push_serializer.errors,
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
 
 
 class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
@@ -98,78 +157,6 @@ class RepositoryViewSet(viewsets.ModelViewSet):
                 pass
 
         return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
-
-    def _validate_hook_signature(self, request, repository):
-        valid_signature = False
-        if repository.hook_secret:
-            valid_signature = validate_gh_hook_signature(
-                hook_secret=repository.hook_secret.encode("utf-8"),
-                signature=request.META.get("HTTP_X_HUB_SIGNATURE", ""),
-                message=request.body,
-            )
-        if not valid_signature:
-            return Response(
-                {"error": "Invalid signature."}, status=status.HTTP_403_FORBIDDEN
-            )
-
-    def _handle_push_serializer(self, pk, repository, serializer):
-        user = repository.get_a_matching_user()
-        if not user:
-            return Response(
-                {"error": f"No matching user for repository {pk}."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-        if serializer.validated_data["forced"]:
-            repository.refresh_commits(user)
-        else:
-            repository.add_commits(
-                commits=serializer.validated_data["commits"],
-                ref=serializer.validated_data["ref"],
-                user=user,
-            )
-        return Response(status=status.HTTP_202_ACCEPTED)
-
-    def _handle_pr_serializer(self, repository, serializer):
-        pr_number = serializer.validated_data["number"]
-        action = serializer.validated_data["action"]
-        merged = serializer.validated_data["pull_request"]["merged"]
-
-        if not (merged and action == "closed"):
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        related_task = Task.objects.filter(pr_number=pr_number).first()
-        if not related_task:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        related_task.finalize_status_completed()
-        return Response(status=status.HTTP_200_OK)
-
-    @action(methods=["POST"], detail=True, permission_classes=[AllowAny])
-    def hook(self, request, pk=None):
-        repository = self.model.objects.get(pk=pk)
-
-        # Validate signature:
-        err = self._validate_hook_signature(request, repository)
-        if err:
-            return err
-
-        # Update commits in associated Projects and Tasks:
-        data = json.loads(request.data["payload"])
-        push_serializer = PushHookSerializer(data=data)
-        pr_serializer = PrHookSerializer(data=data)
-
-        if push_serializer.is_valid():
-            return self._handle_push_serializer(pk, repository, push_serializer)
-        elif pr_serializer.is_valid():
-            return self._handle_pr_serializer(repository, pr_serializer)
-        else:
-            return Response(
-                {
-                    "pr_errors": pr_serializer.errors,
-                    "push_errors": push_serializer.errors,
-                },
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            )
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

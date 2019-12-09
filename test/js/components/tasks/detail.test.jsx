@@ -71,6 +71,7 @@ const defaultState = {
         project: 'project1',
         description: 'Task Description',
         has_unmerged_commits: false,
+        commits: [],
       },
     ],
   },
@@ -168,7 +169,7 @@ describe('<TaskDetail/>', () => {
           project1: [
             {
               ...defaultState.tasks.project1[0],
-              branch_url: 'my-url',
+              branch_url: 'https://github.com/example/repo',
             },
           ],
         },
