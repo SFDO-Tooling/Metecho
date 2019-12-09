@@ -1,7 +1,7 @@
 -c prod.txt
-Sphinx==2.2.1
+Sphinx==2.2.2
 black==19.10b0
-coveralls==1.8.2
+coveralls==1.9.2
 django-extensions==2.2.5
 doc8==0.8.0
 factory_boy==2.12.0
@@ -12,7 +12,7 @@ pytest-asyncio==0.10.0
 pytest-cov==2.8.1
 pytest-django==3.7.0
 pytest-factoryboy==2.0.3
-pytest-mock==1.12.1
+pytest-mock==1.13.0
 pytest==5.3.1
 remote-pdb==2.0.0
 sphinxcontrib-httpdomain==1.7.0
