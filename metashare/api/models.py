@@ -415,6 +415,7 @@ class Task(
 
     def finalize_status_completed(self):
         self.status = TASK_STATUSES.Completed
+        self.has_unmerged_commits = False
         self.save()
         self.notify_changed()
 

@@ -6,6 +6,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import TaskForm from '@/components/tasks/createForm';
+import SubmitModal from '@/components/tasks/submit';
 import TaskTable from '@/components/tasks/table';
 import {
   DetailPageLayout,
@@ -32,6 +33,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const readyToSubmit = Boolean(
     project && project.has_unmerged_commits && !project.pr_url,
   );
+  console.debug('Ready to Submit', readyToSubmit);
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -87,7 +89,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           className="slds-size_full slds-m-bottom_x-large"
           variant="outline-brand"
           onClick={openSubmitModal}
-          disabled={currentlySubmitting}
+          disabled={!readyToSubmit || currentlySubmitting}
         />
         {tasks ? (
           <>
@@ -115,9 +117,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
         )}
         {readyToSubmit && (
           <SubmitModal
-            taskId={task.id}
-            taskName={task.name}
-            taskDiffUrl={task.branch_diff_url}
+            taskId={project.id}
+            taskName={project.name}
+            taskDiffUrl={project.branch_diff_url}
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />

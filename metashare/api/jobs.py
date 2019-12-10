@@ -334,11 +334,15 @@ def refresh_commits(*, user, repository):
     ]
     repository.save()
     repository.finalize_repository_update()
+    repository_commits_set = set(commit["sha"] for commit in repository.commits)
+
     projects = repository.projects.filter(branch_name__isnull=False)
     for project in projects:
         branch = repo.branch(project.branch_name)
         project.commits = [
-            _commit_to_json(commit) for commit in repo.commits(sha=branch.latest_sha())
+            _commit_to_json(commit)
+            for commit in repo.commits(sha=branch.latest_sha())
+            if commit.sha not in repository_commits_set
         ]
         project.save()
         project.finalize_project_update()
@@ -351,7 +355,10 @@ def refresh_commits(*, user, repository):
             task.commits = [
                 _commit_to_json(commit)
                 for commit in repo.commits(sha=branch.latest_sha())
-                if commit.sha not in project_commits_set
+                if (
+                    commit.sha not in project_commits_set
+                    and commit.sha not in repository_commits_set
+                )
             ]
             task.save()
             task.finalize_task_update()
