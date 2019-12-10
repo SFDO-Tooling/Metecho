@@ -27,6 +27,7 @@ export interface Task {
   branch_diff_url: string | null;
   pr_url: string | null;
   commits: Commit[];
+  status: string;
 }
 
 export interface TaskState {
