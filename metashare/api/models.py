@@ -168,7 +168,12 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    PushMixin,
+    PopulateRepoIdMixin,
+    HashIdMixin,
+    TimestampsMixin,
+    SlugMixin,
+    models.Model,
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -176,9 +181,23 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
-    hook_secret = StringField(null=True, editable=False)
+    commits = JSONField(default=list)
+    branch_name = models.CharField(
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
+    )
 
     slug_class = RepositorySlug
+
+    # begin PushMixin configuration:
+    push_update_type = "REPOSITORY_UPDATE"
+    push_error_type = None
+
+    def get_serialized_representation(self):
+        from .serializers import RepositorySerializer
+
+        return RepositorySerializer(self).data
+
+    # end PushMixin configuration
 
     def __str__(self):
         return self.name
@@ -187,6 +206,10 @@ class Repository(
         verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
+
+    def finalize_repository_update(self):
+        self.save()
+        self.notify_changed()
 
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
@@ -211,10 +234,16 @@ class Repository(
         else:
             prefix_len = len(branch_prefix)
             ref = ref[prefix_len:]
+            matching_repo = self if self.branch_name == ref else None
             matching_projects = self.projects.filter(branch_name=ref)
             matching_tasks = Task.objects.filter(
                 branch_name=ref, project__repository=self
             )
+
+            if matching_repo:
+                self.commits += commits
+                self.save()
+
             for project in matching_projects:
                 project.commits += commits
                 project.save()
@@ -283,7 +312,46 @@ class Project(
 
     # end PushMixin configuration
 
+    def queue_create_pr(
+        self, user, *, title, critical_changes, additional_changes, issues, notes
+    ):
+        from .jobs import create_pr_job
+
+        self.currently_creating_pr = True
+        self.save()
+        self.notify_changed()
+
+        repo_id = self.repository.get_repo_id(user)
+        base = self.branch_name
+        head = self.repository.branch_name
+
+        create_pr_job.delay(
+            self,
+            user,
+            repo_id=repo_id,
+            base=base,
+            head=head,
+            title=title,
+            critical_changes=critical_changes,
+            additional_changes=additional_changes,
+            issues=issues,
+            notes=notes,
+        )
+
+    def finalize_create_pr(self, error=None):
+        self.currently_creating_pr = False
+        self.save()
+        if error is None:
+            self.notify_changed("PROJECT_CREATE_PR")
+        else:
+            self.notify_error(error)
+
     def finalize_project_update(self):
+        self.save()
+        self.notify_changed()
+
+    def finalize_status_completed(self):
+        self.has_unmerged_commits = False
         self.save()
         self.notify_changed()
 
@@ -359,9 +427,16 @@ class Task(
         self.save()
         self.notify_changed()
 
+        repo_id = self.project.repository.get_repo_id(user)
+        base = self.project.branch_name
+        head = self.branch_name
+
         create_pr_job.delay(
             self,
             user,
+            repo_id=repo_id,
+            base=base,
+            head=head,
             title=title,
             critical_changes=critical_changes,
             additional_changes=additional_changes,

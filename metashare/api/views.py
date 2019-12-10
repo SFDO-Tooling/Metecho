@@ -87,18 +87,21 @@ class HookView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         pr_number = serializer.validated_data["number"]
-        action = serializer.validated_data["action"]
-        merged = serializer.validated_data["pull_request"]["merged"]
+        merged = serializer.is_merge()
 
-        if not (merged and action == "closed"):
+        if not merged:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         related_task = Task.objects.filter(pr_number=pr_number).first()
-        if not related_task:
+        related_project = Project.objects.filter(pr_number=pr_number).first()
+        if related_task:
+            related_task.finalize_status_completed()
+            return Response(status=status.HTTP_200_OK)
+        elif related_project:
+            related_project.finalize_status_completed()
+            return Response(status=status.HTTP_200_OK)
+        else:
             return Response(status=status.HTTP_204_NO_CONTENT)
-
-        related_task.finalize_status_completed()
-        return Response(status=status.HTTP_200_OK)
 
     def post(self, request):
         push_serializer = PushHookSerializer(data=request.data)

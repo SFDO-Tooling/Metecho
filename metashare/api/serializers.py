@@ -110,6 +110,12 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
     repository = HookRepositorySerializer()
     # All other fields are ignored by default.
 
+    def is_merge(self):
+        return (
+            self.validated_data["action"] == "closed"
+            and self.validated_data["pull_request"]["merged"]
+        )
+
 
 class CommitSerializer(serializers.Serializer):
     id = serializers.CharField()
