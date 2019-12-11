@@ -206,7 +206,7 @@ class Repository(
         else:
             prefix_len = len(branch_prefix)
             ref = ref[prefix_len:]
-            matching_self = self if self.branch_name == ref else None
+            matching_self = self.branch_name == ref
             matching_projects = self.projects.filter(branch_name=ref)
             matching_tasks = Task.objects.filter(
                 branch_name=ref, project__repository=self
