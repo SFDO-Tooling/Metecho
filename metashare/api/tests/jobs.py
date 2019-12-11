@@ -22,8 +22,8 @@ from ..models import SCRATCH_ORG_TYPES
 AuthorCommitter = namedtuple("AuthorCommitter", ("avatar_url", "login"))
 Commit = namedtuple(
     "Commit",
-    ("sha", "author", "committer", "message", "commit"),
-    defaults=("", None, None, "", None),
+    ("sha", "author", "committer", "message", "commit", "html_url"),
+    defaults=("", None, None, "", None, None),
 )
 PATCH_ROOT = "metashare.api.jobs"
 
@@ -294,6 +294,7 @@ def test_refresh_commits(
                 ),
                 "message": "Test message 1",
                 "commit": Commit(**{"author": {"date": "2019-12-09 13:00"}}),
+                "html_url": "https://github.com/test/user/foo",
             }
         )
         commit2 = Commit(
@@ -303,6 +304,7 @@ def test_refresh_commits(
                 "committer": None,
                 "message": "Test message 2",
                 "commit": Commit(**{"author": {"date": "2019-12-09 12:30"}}),
+                "html_url": "https://github.com/test/user/foo",
             }
         )
         repo = MagicMock(**{"commits.return_value": [commit1, commit2]})

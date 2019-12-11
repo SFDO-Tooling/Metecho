@@ -140,6 +140,7 @@ class TestRepositoryView:
                                 },
                                 "timestamp": "2019-11-20 21:32:53.668260+00:00",
                                 "message": "Message",
+                                "url": "https://github.com/test/user/foo",
                             }
                         ],
                     }
@@ -147,7 +148,7 @@ class TestRepositoryView:
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=a414e52ed6e5e28a8939113deca6ef3ada246b6b",
+                HTTP_X_HUB_SIGNATURE="sha1=28358fd24da5eb241e1a55b91d1631188074c71d",
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
