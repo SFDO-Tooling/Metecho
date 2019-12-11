@@ -309,6 +309,7 @@ def _commit_to_json(commit):
             "login": commit.committer.login if commit.committer else "",
         },
         "message": commit.message,
+        "url": commit.html_url,
     }
 
 

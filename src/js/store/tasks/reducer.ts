@@ -13,6 +13,7 @@ export interface Commit {
     avatar_url: string;
     login: string;
   };
+  url: string;
 }
 
 export interface Task {

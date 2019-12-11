@@ -1,33 +1,25 @@
+import { format, formatDistanceToNow } from 'date-fns';
 import React from 'react';
 
-import { Commit, Task } from '@/store/tasks/reducer';
+import { ExternalLink } from '@/components/utils';
+import { Commit } from '@/store/tasks/reducer';
 
-const CommitList = ({ task, commits }: { task: Task; commits: Commit[] }) => {
-  if (!task.branch_url) {
-    return null;
-  }
-  const baseUrl = new URL(task.branch_url);
-  const basePath = baseUrl.pathname
-    .split('/')
-    .slice(0, 3)
-    .join('/');
-  baseUrl.pathname = basePath;
-  const baseUrlString = baseUrl.toString();
+const CommitList = ({ commits }: { commits: Commit[] }) => {
   const tableRows = commits.map((commit) => {
-    const shortSha = commit.sha.slice(0, 7);
-    const commitLink = `${baseUrlString}/commit/${commit.sha}`;
-    // TODO: make this humanized and relative:
-    const relativeTimestamp = commit.timestamp;
+    const shortSha = commit.sha.substring(0, 7);
+    const timestamp = new Date(commit.timestamp);
     return (
       <tr key={shortSha}>
         <td>
-          <a href={commitLink}>{shortSha}</a>
+          <ExternalLink url={commit.url}>{shortSha}</ExternalLink>
         </td>
         <td>
           <img src={commit.author.avatar_url} />
         </td>
         <td>{commit.message}</td>
-        <td>{relativeTimestamp}</td>
+        <td title={format(timestamp, 'PPpp')}>
+          {formatDistanceToNow(timestamp, { addSuffix: true })}
+        </td>
       </tr>
     );
   });
