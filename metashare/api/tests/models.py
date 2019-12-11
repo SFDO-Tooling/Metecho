@@ -46,7 +46,7 @@ class TestRepository:
             repo.refresh_commits(None)
             assert refresh_commits_job.delay.called
 
-    def test_add_commits(self, repository_factory, user_factory):
+    def test_add_commits__refresh_instead(self, repository_factory, user_factory):
         repo = repository_factory()
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
             repo.add_commits(commits=[], ref="not a branch?", user=None)
@@ -65,6 +65,28 @@ class TestProject:
         repository = repository_factory()
         project = Project(name="Test Project", repository=repository)
         assert str(project) == "Test Project"
+
+    def test_get_repo_id(self, repository_factory, project_factory):
+        user = MagicMock()
+        repo = repository_factory(repo_id=123)
+        project = project_factory(repository=repo)
+        assert project.get_repo_id(user) == 123
+
+    def test_get_base(self, project_factory):
+        project = project_factory(branch_name="base-branch")
+        assert project.get_base() == "base-branch"
+
+    def test_get_head(self, project_factory):
+        project = project_factory(repository__branch_name="head-branch")
+        assert project.get_head() == "head-branch"
+
+    def test_finalize_status_completed(self, project_factory):
+        project = project_factory(has_unmerged_commits=True)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            project.finalize_status_completed()
+            project.refresh_from_db()
+            assert not project.has_unmerged_commits
+            assert async_to_sync.called
 
 
 @pytest.mark.django_db

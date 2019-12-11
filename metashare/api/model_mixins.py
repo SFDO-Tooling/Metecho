@@ -76,6 +76,14 @@ class PushMixin:
 
 
 class CreatePrMixin:
+    """
+    Expects these to be on the model:
+        create_pr_event: str
+        get_repo_id: Fn(user: User) -> int
+        get_base: Fn() -> str
+        get_head: Fn() -> str
+    """
+
     create_pr_event = ""  # Implement this
 
     def queue_create_pr(
@@ -87,9 +95,16 @@ class CreatePrMixin:
         self.save()
         self.notify_changed()
 
+        repo_id = self.get_repo_id(user)
+        base = self.get_base()
+        head = self.get_head()
+
         create_pr_job.delay(
             self,
             user,
+            repo_id=repo_id,
+            base=base,
+            head=head,
             title=title,
             critical_changes=critical_changes,
             additional_changes=additional_changes,

@@ -293,8 +293,6 @@ class Project(
 
     slug_class = ProjectSlug
 
-    create_pr_event = "PROJECT_CREATE_PR"
-
     def __str__(self):
         return self.name
 
@@ -312,39 +310,19 @@ class Project(
 
     # end PushMixin configuration
 
-    def queue_create_pr(
-        self, user, *, title, critical_changes, additional_changes, issues, notes
-    ):
-        from .jobs import create_pr_job
+    # begin CreatePrMixin configuration:
+    create_pr_event = "PROJECT_PR_CREATE"
 
-        self.currently_creating_pr = True
-        self.save()
-        self.notify_changed()
+    def get_repo_id(self, user):
+        return self.repository.get_repo_id(user)
 
-        repo_id = self.repository.get_repo_id(user)
-        base = self.branch_name
-        head = self.repository.branch_name
+    def get_base(self):
+        return self.branch_name
 
-        create_pr_job.delay(
-            self,
-            user,
-            repo_id=repo_id,
-            base=base,
-            head=head,
-            title=title,
-            critical_changes=critical_changes,
-            additional_changes=additional_changes,
-            issues=issues,
-            notes=notes,
-        )
+    def get_head(self):
+        return self.repository.branch_name
 
-    def finalize_create_pr(self, error=None):
-        self.currently_creating_pr = False
-        self.save()
-        if error is None:
-            self.notify_changed("PROJECT_CREATE_PR")
-        else:
-            self.notify_error(error)
+    # end CreatePrMixin configuration
 
     def finalize_project_update(self):
         self.save()
@@ -390,8 +368,6 @@ class Task(
 
     slug_class = TaskSlug
 
-    create_pr_event = "PROJECT_CREATE_PR"
-
     def __str__(self):
         return self.name
 
@@ -409,6 +385,20 @@ class Task(
 
     # end PushMixin configuration
 
+    # begin CreatePrMixin configuration:
+    create_pr_event = "TASK_PR_CREATE"
+
+    def get_repo_id(self, user):
+        return self.project.repository.get_repo_id(user)
+
+    def get_base(self):
+        return self.branch_name
+
+    def get_head(self):
+        return self.project.branch_name
+
+    # end CreatePrMixin configuration
+
     def finalize_task_update(self):
         self.save()
         self.notify_changed()
@@ -418,40 +408,6 @@ class Task(
         self.has_unmerged_commits = False
         self.save()
         self.notify_changed()
-
-    def queue_create_pr(
-        self, user, *, title, critical_changes, additional_changes, issues, notes
-    ):
-        from .jobs import create_pr_job
-
-        self.currently_creating_pr = True
-        self.save()
-        self.notify_changed()
-
-        repo_id = self.project.repository.get_repo_id(user)
-        base = self.project.branch_name
-        head = self.branch_name
-
-        create_pr_job.delay(
-            self,
-            user,
-            repo_id=repo_id,
-            base=base,
-            head=head,
-            title=title,
-            critical_changes=critical_changes,
-            additional_changes=additional_changes,
-            issues=issues,
-            notes=notes,
-        )
-
-    def finalize_create_pr(self, error=None):
-        self.currently_creating_pr = False
-        self.save()
-        if error is None:
-            self.notify_changed("TASK_CREATE_PR")
-        else:
-            self.notify_error(error)
 
     def finalize_provision(self):
         if self.status != TASK_STATUSES["In progress"]:
