@@ -64,58 +64,59 @@ const TimestampTableCell = ({ item, ...props }: TableCellProps) => {
 };
 TimestampTableCell.displayName = DataTableCell.displayName;
 
-const CommitList = ({ commits }: { commits: Commit[] }) => (
-  <>
-    <h2
-      className="slds-text-heading_medium
+const CommitList = ({ commits }: { commits: Commit[] }) =>
+  commits.length ? (
+    <>
+      <h2
+        className="slds-text-heading_medium
         slds-m-top_large
         slds-m-bottom_x-small"
-    >
-      Commit History
-    </h2>
-    <DataTable
-      items={commits}
-      id="task-commits-table"
-      className="slds-table_header-hidden"
-      fixedLayout
-      noRowHover
-    >
-      <DataTableColumn
-        key="sha"
-        label={i18n.t('Commit')}
-        property="id"
-        primaryColumn
-        truncate
-        width="15%"
       >
-        <CommitTableCell />
-      </DataTableColumn>
-      <DataTableColumn
-        key="author"
-        label={i18n.t('Author')}
-        property="author"
-        width="8%"
+        Commit History
+      </h2>
+      <DataTable
+        items={commits}
+        id="task-commits-table"
+        className="slds-table_header-hidden"
+        fixedLayout
+        noRowHover
       >
-        <AuthorTableCell />
-      </DataTableColumn>
-      <DataTableColumn
-        key="message"
-        label={i18n.t('Message')}
-        property="message"
-        truncate
-        width="52%"
-      />
-      <DataTableColumn
-        key="timestamp"
-        label={i18n.t('Timestamp')}
-        property="timestamp"
-        truncate
-        width="25%"
-      >
-        <TimestampTableCell />
-      </DataTableColumn>
-    </DataTable>
-  </>
-);
+        <DataTableColumn
+          key="sha"
+          label={i18n.t('Commit')}
+          property="id"
+          primaryColumn
+          truncate
+          width="15%"
+        >
+          <CommitTableCell />
+        </DataTableColumn>
+        <DataTableColumn
+          key="author"
+          label={i18n.t('Author')}
+          property="author"
+          width="8%"
+        >
+          <AuthorTableCell />
+        </DataTableColumn>
+        <DataTableColumn
+          key="message"
+          label={i18n.t('Message')}
+          property="message"
+          truncate
+          width="52%"
+        />
+        <DataTableColumn
+          key="timestamp"
+          label={i18n.t('Timestamp')}
+          property="timestamp"
+          truncate
+          width="25%"
+        >
+          <TimestampTableCell />
+        </DataTableColumn>
+      </DataTable>
+    </>
+  ) : null;
 
 export default CommitList;

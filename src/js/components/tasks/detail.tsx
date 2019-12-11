@@ -299,7 +299,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
           />
         )}
-        {task.commits.length && <CommitList commits={task.commits} />}
+        <CommitList commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>
   );
