@@ -208,11 +208,11 @@ class Repository(
             )
             for project in matching_projects:
                 project.commits += commits
-                project.save()
+                project.finalize_project_update()
 
             for task in matching_tasks:
                 task.commits += commits
-                task.save()
+                task.finalize_task_update()
 
 
 class GitHubRepository(HashIdMixin, models.Model):
