@@ -134,10 +134,6 @@ class TestRepositoryView:
                             {
                                 "id": "123",
                                 "author": {"name": "Test", "email": "test@example.com"},
-                                "committer": {
-                                    "name": "Test",
-                                    "email": "test@example.com",
-                                },
                                 "timestamp": "2019-11-20 21:32:53.668260+00:00",
                                 "message": "Message",
                                 "url": "https://github.com/test/user/foo",
@@ -148,7 +144,7 @@ class TestRepositoryView:
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=28358fd24da5eb241e1a55b91d1631188074c71d",
+                HTTP_X_HUB_SIGNATURE="sha1=effe7f2d4a433ed1898eba2308953cd61809d92f",
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called

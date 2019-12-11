@@ -19,11 +19,11 @@ from ..jobs import (
 )
 from ..models import SCRATCH_ORG_TYPES
 
-AuthorCommitter = namedtuple("AuthorCommitter", ("avatar_url", "login"))
+Author = namedtuple("Author", ("avatar_url", "login"))
 Commit = namedtuple(
     "Commit",
-    ("sha", "author", "committer", "message", "commit", "html_url"),
-    defaults=("", None, None, "", None, None),
+    ("sha", "author", "message", "commit", "html_url"),
+    defaults=("", None, "", None, ""),
 )
 PATCH_ROOT = "metashare.api.jobs"
 
@@ -280,13 +280,7 @@ def test_refresh_commits(
         commit1 = Commit(
             **{
                 "sha": "abcd1234",
-                "author": AuthorCommitter(
-                    **{
-                        "avatar_url": "https://example.com/img.png",
-                        "login": "test_user",
-                    }
-                ),
-                "committer": AuthorCommitter(
+                "author": Author(
                     **{
                         "avatar_url": "https://example.com/img.png",
                         "login": "test_user",
@@ -301,7 +295,6 @@ def test_refresh_commits(
             **{
                 "sha": "1234abcd",
                 "author": None,
-                "committer": None,
                 "message": "Test message 2",
                 "commit": Commit(**{"author": {"date": "2019-12-09 12:30"}}),
                 "html_url": "https://github.com/test/user/foo",
