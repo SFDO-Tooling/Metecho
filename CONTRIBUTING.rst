@@ -198,6 +198,9 @@ like ``https://<some hash>.ngrok.io``. You will need to adjust the GitHub app to
 point to your ngrok tunnel. This means that it's a one-person-at-a-time thing,
 which is a problem for which we don't yet have a solution.
 
+As an OddBird, you can access the app at
+`<https://github.com/organizations/oddbird/settings/apps/metashare-dev>`_.
+
 Internationalization
 --------------------
 
