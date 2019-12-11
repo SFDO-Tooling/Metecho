@@ -6,7 +6,7 @@ import { Commit } from '@/store/tasks/reducer';
 
 const CommitList = ({ commits }: { commits: Commit[] }) => {
   const tableRows = commits.map((commit) => {
-    const shortSha = commit.sha.substring(0, 7);
+    const shortSha = commit.id.substring(0, 7);
     const timestamp = new Date(commit.timestamp);
     return (
       <tr key={shortSha}>

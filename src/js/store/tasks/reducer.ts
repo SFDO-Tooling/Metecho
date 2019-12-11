@@ -6,12 +6,13 @@ import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Commit {
-  sha: string;
+  id: string;
   timestamp: string;
   message: string;
   author: {
+    name: string;
+    email: string;
     avatar_url: string;
-    login: string;
   };
   url: string;
 }

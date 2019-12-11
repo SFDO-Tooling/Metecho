@@ -86,14 +86,15 @@ class RepositorySerializer(serializers.ModelSerializer):
 class AuthorCommitSerializer(serializers.Serializer):
     name = serializers.CharField(required=False)
     email = serializers.CharField(required=False)
+    username = serializers.CharField(required=False)
 
 
 class CommitSerializer(serializers.Serializer):
     id = serializers.CharField()
     timestamp = serializers.CharField()
     author = AuthorCommitSerializer()
-    committer = AuthorCommitSerializer()
     message = serializers.CharField()
+    url = serializers.CharField()
 
 
 class HookRepositorySerializer(serializers.Serializer):
