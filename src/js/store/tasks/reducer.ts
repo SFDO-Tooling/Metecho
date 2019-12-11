@@ -11,6 +11,7 @@ export interface Commit {
   message: string;
   author: {
     avatar_url: string;
+    login: string;
   };
 }
 
