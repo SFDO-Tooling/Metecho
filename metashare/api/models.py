@@ -168,6 +168,10 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    commits = JSONField(default=list)
+    branch_name = models.CharField(
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
+    )
 
     slug_class = RepositorySlug
 
@@ -202,17 +206,25 @@ class Repository(
         else:
             prefix_len = len(branch_prefix)
             ref = ref[prefix_len:]
+            matching_self = self if self.branch_name == ref else None
             matching_projects = self.projects.filter(branch_name=ref)
             matching_tasks = Task.objects.filter(
                 branch_name=ref, project__repository=self
             )
+
+            if matching_self:
+                self.commits += commits
+                self.save()
+
             for project in matching_projects:
-                project.commits += commits
-                project.finalize_project_update()
+                project.add_commits(commits)
 
             for task in matching_tasks:
-                task.commits += commits
-                task.finalize_task_update()
+                task.add_commits(commits)
+
+    @property
+    def commit_set(self):
+        return set(c["id"] for c in self.commits)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
@@ -270,6 +282,16 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     def finalize_project_update(self):
         self.save()
         self.notify_changed()
+
+    def add_commits(self, commits):
+        commit_set = self.repository.commit_set
+        self.commits += [c for c in commits if c["id"] not in commit_set]
+        self.save()
+        self.notify_changed()
+
+    @property
+    def commit_set(self):
+        return set(c["id"] for c in self.commits)
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -348,6 +370,12 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
             self.notify_changed("TASK_CREATE_PR")
         else:
             self.notify_error(error)
+
+    def add_commits(self, commits):
+        commit_set = self.project.commit_set | self.project.repository.commit_set
+        self.commits += [c for c in commits if c["id"] not in commit_set]
+        self.save()
+        self.notify_changed()
 
     class Meta:
         ordering = ("-created_at", "name")

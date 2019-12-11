@@ -108,7 +108,10 @@ class TestRepositoryView:
             ],
         }
 
-    def test_hook__202__not_forced(
+
+@pytest.mark.django_db
+class TestHookView:
+    def test_202__not_forced(
         self,
         settings,
         client,
@@ -118,7 +121,7 @@ class TestRepositoryView:
         task_factory,
     ):
         settings.GITHUB_USER_ID = client.user.pk
-        repo = repository_factory(repo_id=123)
+        repo = repository_factory(repo_id=123, branch_name="master")
         git_hub_repository_factory(repo_id=123)
         project = project_factory(repository=repo, branch_name="master")
         task = task_factory(project=project, branch_name="master")
@@ -148,12 +151,14 @@ class TestRepositoryView:
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
+            repo.refresh_from_db()
+            assert len(repo.commits) == 1
             project.refresh_from_db()
-            assert len(project.commits) == 1
+            assert len(project.commits) == 0
             task.refresh_from_db()
-            assert len(task.commits) == 1
+            assert len(task.commits) == 0
 
-    def test_hook__202__forced(
+    def test_202__forced(
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_USER_ID = client.user.pk
@@ -178,7 +183,7 @@ class TestRepositoryView:
             assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
 
-    def test_hook__422(
+    def test_422(
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_USER_ID = client.user.pk
@@ -196,7 +201,7 @@ class TestRepositoryView:
         )
         assert response.status_code == 422, response.json()
 
-    def test_hook__404(self, settings, client, repository_factory):
+    def test_404(self, settings, client, repository_factory):
         settings.GITHUB_USER_ID = client.user.pk
         repository_factory()
         response = client.post(
@@ -216,7 +221,7 @@ class TestRepositoryView:
         )
         assert response.status_code == 404
 
-    def test_hook__500(self, settings, client, repository_factory):
+    def test_500(self, settings, client, repository_factory):
         settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
         response = client.post(
@@ -236,7 +241,7 @@ class TestRepositoryView:
         )
         assert response.status_code == 500
 
-    def test_hook__403(self, settings, client, repository_factory):
+    def test_403(self, settings, client, repository_factory):
         settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
         response = client.post(
