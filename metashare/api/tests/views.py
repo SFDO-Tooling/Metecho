@@ -118,7 +118,7 @@ class TestRepositoryView:
         task_factory,
     ):
         settings.GITHUB_USER_ID = client.user.pk
-        repo = repository_factory(repo_id=123, hook_secret="secret key")
+        repo = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
         project = project_factory(repository=repo, branch_name="master")
         task = task_factory(project=project, branch_name="master")
@@ -160,7 +160,7 @@ class TestRepositoryView:
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_USER_ID = client.user.pk
-        repository_factory(repo_id=123, hook_secret="secret key")
+        repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
@@ -185,7 +185,7 @@ class TestRepositoryView:
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_USER_ID = client.user.pk
-        repository_factory(repo_id=123, hook_secret="secret key")
+        repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
         response = client.post(
             reverse("hook"),
@@ -201,7 +201,7 @@ class TestRepositoryView:
 
     def test_hook__404(self, settings, client, repository_factory):
         settings.GITHUB_USER_ID = client.user.pk
-        repository_factory(hook_secret="bleep bloop")
+        repository_factory()
         response = client.post(
             reverse("hook"),
             json.dumps(
@@ -221,7 +221,7 @@ class TestRepositoryView:
 
     def test_hook__500(self, settings, client, repository_factory):
         settings.GITHUB_USER_ID = client.user.pk
-        repository_factory(repo_id=123, hook_secret="secret key")
+        repository_factory(repo_id=123)
         response = client.post(
             reverse("hook"),
             json.dumps(
@@ -241,7 +241,7 @@ class TestRepositoryView:
 
     def test_hook__403(self, settings, client, repository_factory):
         settings.GITHUB_USER_ID = client.user.pk
-        repository_factory(repo_id=123, hook_secret="secret key")
+        repository_factory(repo_id=123)
         response = client.post(
             reverse("hook"),
             json.dumps(

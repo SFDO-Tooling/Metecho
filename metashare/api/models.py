@@ -168,7 +168,6 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
-    hook_secret = StringField(null=True, editable=False)
 
     slug_class = RepositorySlug
 

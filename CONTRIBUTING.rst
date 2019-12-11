@@ -193,11 +193,10 @@ computer. Run it like so::
 
    $ ngrok http --host-header=localhost:8080 8080
 
-and you will get output that indicates the name of the ngrok tunnel,
-which will look like ``https://<some hash>.ngrok.io``. You will need to
-adjust the GitHub app to point to your ngrok tunnel. This does mean that
-it's a one-person-at-a-time thing, which is a problem for which I don't
-yet have a solution.
+You will get output that indicates the name of the ngrok tunnel, which will look
+like ``https://<some hash>.ngrok.io``. You will need to adjust the GitHub app to
+point to your ngrok tunnel. This means that it's a one-person-at-a-time thing,
+which is a problem for which we don't yet have a solution.
 
 Internationalization
 --------------------

@@ -299,7 +299,7 @@ refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_u
 def _commit_to_json(commit):
     return {
         "sha": commit.sha,
-        "timestamp": commit.timestamp,
+        "timestamp": commit.commit.author.get("date", ""),
         "author": {
             "avatar_url": commit.author.avatar_url if commit.author else "",
             "login": commit.author.login if commit.author else "",
@@ -327,7 +327,6 @@ def refresh_commits(*, user, repository):
         project.commits = [
             _commit_to_json(commit) for commit in repo.commits(sha=branch.latest_sha())
         ]
-        project.save()
         project.finalize_project_update()
 
         project_commits_set = set(commit["sha"] for commit in project.commits)
@@ -340,7 +339,6 @@ def refresh_commits(*, user, repository):
                 for commit in repo.commits(sha=branch.latest_sha())
                 if commit.sha not in project_commits_set
             ]
-            task.save()
             task.finalize_task_update()
 
 
