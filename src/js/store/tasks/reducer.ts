@@ -12,7 +12,8 @@ export interface Commit {
   author: {
     name: string;
     email: string;
-    avatar_url: string;
+    username: string;
+    avatar_url?: string;
   };
   url: string;
 }
