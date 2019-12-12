@@ -160,7 +160,12 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    PushMixin,
+    PopulateRepoIdMixin,
+    HashIdMixin,
+    TimestampsMixin,
+    SlugMixin,
+    models.Model,
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -183,6 +188,21 @@ class Repository(
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
 
+    # begin PushMixin configuration:
+    push_update_type = "REPOSITORY_UPDATE"
+    push_error_type = None
+
+    def get_serialized_representation(self):
+        from .serializers import RepositorySerializer
+
+        return RepositorySerializer(self).data
+
+    # end PushMixin configuration
+
+    def finalize_repository_update(self):
+        self.save()
+        self.notify_changed()
+
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
             repo_id=self.repo_id
@@ -193,16 +213,16 @@ class Repository(
 
         return None
 
-    def refresh_commits(self, user):
+    def queue_refresh_commits(self):
         from .jobs import refresh_commits_job
 
-        refresh_commits_job.delay(user=user, repository=self)
+        refresh_commits_job.delay(repository=self)
 
     @transaction.atomic
-    def add_commits(self, *, commits, ref, user):
+    def add_commits(self, *, commits, ref):
         branch_prefix = "refs/heads/"
         if not ref.startswith(branch_prefix):
-            self.refresh_commits(user)
+            self.queue_refresh_commits()
         else:
             prefix_len = len(branch_prefix)
             ref = ref[prefix_len:]
@@ -213,7 +233,7 @@ class Repository(
             )
 
             if matching_self:
-                self.commits += commits
+                self.commits += [gh.normalize_commit(c) for c in commits]
                 self.save()
 
             for project in matching_projects:
@@ -285,7 +305,9 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     def add_commits(self, commits):
         commit_set = self.repository.commit_set
-        self.commits += [c for c in commits if c["id"] not in commit_set]
+        self.commits += [
+            gh.normalize_commit(c) for c in commits if c["id"] not in commit_set
+        ]
         self.save()
         self.notify_changed()
 
@@ -373,7 +395,9 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     def add_commits(self, commits):
         commit_set = self.project.commit_set | self.project.repository.commit_set
-        self.commits += [c for c in commits if c["id"] not in commit_set]
+        self.commits += [
+            gh.normalize_commit(c) for c in commits if c["id"] not in commit_set
+        ]
         self.save()
         self.notify_changed()
 
