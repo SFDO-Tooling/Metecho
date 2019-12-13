@@ -2,6 +2,7 @@ import Avatar from '@salesforce/design-system-react/components/avatar';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import classNames from 'classnames';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React from 'react';
@@ -14,21 +15,25 @@ interface TableCellProps {
   item?: Commit;
 }
 
-const CommitTableCell = ({ item, ...props }: TableCellProps) => {
+const CommitTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
     return null;
   }
   const shortSha = item.id.substring(0, 7);
   return (
-    <DataTableCell {...props} title={item.id}>
+    <DataTableCell
+      {...props}
+      title={item.id}
+      className={classNames(className, 'commits-table-cell')}
+    >
       <ExternalLink url={item.url}>{shortSha}</ExternalLink>
     </DataTableCell>
   );
 };
 CommitTableCell.displayName = DataTableCell.displayName;
 
-const AuthorTableCell = ({ item, ...props }: TableCellProps) => {
+const AuthorTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
     return null;
@@ -38,7 +43,11 @@ const AuthorTableCell = ({ item, ...props }: TableCellProps) => {
     author = `${author} (${item.author.name})`;
   }
   return (
-    <DataTableCell {...props} title={author}>
+    <DataTableCell
+      {...props}
+      title={author}
+      className={classNames(className, 'commits-table-cell')}
+    >
       <Avatar
         imgAlt={author}
         imgSrc={item.author.avatar_url}
@@ -50,14 +59,32 @@ const AuthorTableCell = ({ item, ...props }: TableCellProps) => {
 };
 AuthorTableCell.displayName = DataTableCell.displayName;
 
-const TimestampTableCell = ({ item, ...props }: TableCellProps) => {
+const MessageTableCell = ({
+  children,
+  className,
+  ...props
+}: TableCellProps) => (
+  <DataTableCell
+    {...props}
+    className={classNames(className, 'commits-table-cell')}
+  >
+    {children}
+  </DataTableCell>
+);
+MessageTableCell.displayName = DataTableCell.displayName;
+
+const TimestampTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
     return null;
   }
   const timestamp = new Date(item.timestamp);
   return (
-    <DataTableCell {...props} title={format(timestamp, 'PPpp')}>
+    <DataTableCell
+      {...props}
+      title={format(timestamp, 'PPpp')}
+      className={classNames(className, 'commits-table-cell')}
+    >
       {formatDistanceToNow(timestamp, { addSuffix: true })}
     </DataTableCell>
   );
@@ -105,7 +132,9 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
           property="message"
           truncate
           width="52%"
-        />
+        >
+          <MessageTableCell />
+        </DataTableColumn>
         <DataTableColumn
           key="timestamp"
           label={i18n.t('Timestamp')}
