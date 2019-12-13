@@ -145,5 +145,30 @@ def validate_gh_hook_signature(
     *, hook_secret: bytes, signature: bytes, message: bytes
 ) -> bool:
     local_signature = "sha1=" + hmac.new(hook_secret, message, "sha1").hexdigest()
-    print("\033[1;92m======>", local_signature, "\033[0m")
+    # print("\033[1;92m======>", local_signature, "\033[0m")
     return hmac.compare_digest(local_signature, signature)
+
+
+def normalize_commit(commit):
+    """
+    This takes commits either in the JSON format provided by a GitHub
+    webhook, or the object format provided by github3.py, and returns a
+    normalized Python dict.
+    """
+    # TODO: make this right.
+    if isinstance(commit, dict):
+        return commit
+    else:
+        # If github3.py object:
+        return {
+            "id": commit.sha,
+            "timestamp": commit.commit.author.get("date", ""),
+            "author": {
+                "name": commit.commit.author.get("name", ""),
+                "email": commit.commit.author.get("email", ""),
+                "username": commit.author.login if commit.author else "",
+                "avatar_url": commit.author.avatar_url if commit.author else "",
+            },
+            "message": commit.message,
+            "url": commit.html_url,
+        }

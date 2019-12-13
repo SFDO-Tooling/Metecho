@@ -2,6 +2,7 @@ import logging
 import traceback
 
 from asgiref.sync import async_to_sync
+from django.conf import settings
 from django.db import transaction
 from django.utils.text import slugify
 from django.utils.timezone import now
@@ -11,6 +12,7 @@ from .gh import (
     get_cumulus_prefix,
     get_repo_info,
     local_github_checkout,
+    normalize_commit,
     try_to_make_branch,
 )
 from .push import report_scratch_org_error
@@ -182,6 +184,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         commit = repository.branch(branch).commit
 
         scratch_org.task.refresh_from_db()
+        scratch_org.task.add_ms_git_sha(commit.sha)
         scratch_org.task.has_unmerged_commits = True
         scratch_org.task.finalize_task_update()
 
@@ -296,49 +299,45 @@ def refresh_github_repositories_for_user(user):
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
 
 
-def _commit_to_json(commit):
-    return {
-        "id": commit.sha,
-        "timestamp": commit.commit.author.get("date", ""),
-        "author": {
-            "name": commit.commit.author.get("name", ""),
-            "email": commit.commit.author.get("email", ""),
-            "username": commit.author.login if commit.author else "",
-            "avatar_url": commit.author.avatar_url if commit.author else "",
-        },
-        "message": commit.message,
-        "url": commit.html_url,
-    }
-
-
 # This avoids partially-applied saving:
 @transaction.atomic
-def refresh_commits(*, user, repository):
+def refresh_commits(*, repository, branch_name):
     """
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
-    repo = get_repo_info(user, repository.repo_id)
+    from .models import User, Project, Task
 
-    projects = repository.projects.filter(branch_name__isnull=False)
+    user = User.objects.get(pk=settings.GITHUB_USER_ID)
+    repo = get_repo_info(user, repository.repo_id)
+    commits = repo.commits(repo.branch(branch_name).latest_sha())
+
+    matching_self = repository.branch_name == branch_name
+    if matching_self:
+        repository.commits = [normalize_commit(c) for c in commits]
+        repository.finalize_repository_update()
+
+    projects = Project.objects.filter(repository=repository, branch_name=branch_name)
     for project in projects:
-        branch = repo.branch(project.branch_name)
+        parent_commits_set = project.repository.commit_set
         project.commits = [
-            _commit_to_json(commit) for commit in repo.commits(sha=branch.latest_sha())
+            normalize_commit(commit)
+            for commit in commits
+            if commit.sha not in parent_commits_set
         ]
         project.finalize_project_update()
 
-        project_commits_set = set(commit["id"] for commit in project.commits)
-
-        tasks = project.tasks.filter(branch_name__isnull=False)
-        for task in tasks:
-            branch = repo.branch(task.branch_name)
-            task.commits = [
-                _commit_to_json(commit)
-                for commit in repo.commits(sha=branch.latest_sha())
-                if commit.sha not in project_commits_set
-            ]
-            task.finalize_task_update()
+    tasks = Task.objects.filter(project__repository=repository, branch_name=branch_name)
+    for task in tasks:
+        parent_commits_set = (
+            task.project.commit_set | task.project.repository.commit_set
+        )
+        task.commits = [
+            normalize_commit(commit)
+            for commit in commits
+            if commit.sha not in parent_commits_set
+        ]
+        task.finalize_task_update()
 
 
 refresh_commits_job = job(refresh_commits)

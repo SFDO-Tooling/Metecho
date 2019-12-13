@@ -3,6 +3,7 @@ from typing import Optional
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from .fields import MarkdownField
 from .models import Project, Repository, ScratchOrg, Task
@@ -114,6 +115,18 @@ class HookSerializer(serializers.Serializer):
     def get_matching_repository(self):
         repo_id = self.validated_data["repository"]["id"]
         return Repository.objects.filter(repo_id=repo_id).first()
+
+    def process_hook(self):
+        repository = self.get_matching_repository()
+        if not repository:
+            raise NotFound("No matching repository.")
+
+        if self.is_force_push():
+            repository.queue_refresh_commits()
+        else:
+            repository.add_commits(
+                commits=self.validated_data["commits"], ref=self.validated_data["ref"],
+            )
 
 
 class ProjectSerializer(serializers.ModelSerializer):

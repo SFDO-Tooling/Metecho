@@ -41,32 +41,19 @@ class HookView(APIView):
     authentication_classes = (GitHubHookAuthentication,)
 
     def post(self, request):
-        serializer = HookSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
+        # To support the various formats that GitHub can post to this endpoint:
+        # TODO: we can route this based on the X-GitHub-Event header.
+        serializers = {"push": HookSerializer(data=request.data)}
+        errors = {}
+        for key, serializer in serializers.items():
+            if not serializer.is_valid():
+                errors[key] = serializer.errors
+            else:
+                serializer.process_hook()
+                return Response(status=status.HTTP_202_ACCEPTED)
 
-        repository = serializer.get_matching_repository()
-        if not repository:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        user = repository.get_a_matching_user()
-        if not user:
-            return Response(
-                {"error": f"No matching user for repository {repository.pk}."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        if serializer.is_force_push():
-            repository.refresh_commits(user)
-        else:
-            repository.add_commits(
-                commits=serializer.validated_data["commits"],
-                ref=serializer.validated_data["ref"],
-                user=user,
-            )
-        return Response(status=status.HTTP_202_ACCEPTED)
+        # We only get here if no serializer has matched and processed the request:
+        return Response(errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):

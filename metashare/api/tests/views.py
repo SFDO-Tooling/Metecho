@@ -221,26 +221,6 @@ class TestHookView:
         )
         assert response.status_code == 404
 
-    def test_500(self, settings, client, repository_factory):
-        settings.GITHUB_USER_ID = client.user.pk
-        repository_factory(repo_id=123)
-        response = client.post(
-            reverse("hook"),
-            json.dumps(
-                {
-                    "ref": "refs/heads/master",
-                    "forced": False,
-                    "repository": {"id": 123},
-                    "commits": [],
-                }
-            ),
-            content_type="application/json",
-            # The sha1 hexdigest of the request body x the secret key
-            # above:
-            HTTP_X_HUB_SIGNATURE="sha1=364f36e283407985440c2a00aeaa2d27a3e81712",
-        )
-        assert response.status_code == 500
-
     def test_403(self, settings, client, repository_factory):
         settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
