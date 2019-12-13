@@ -44,6 +44,9 @@ class TestCreateBranchesOnGitHub:
             )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
+            repository.branch.return_value = MagicMock(
+                **{"latest_sha.return_value": "123abc"}
+            )
             get_repo_info.return_value = repository
 
             _create_branches_on_github(
@@ -309,10 +312,6 @@ class TestRefreshCommits:
             get_repo_info.return_value = repo
 
             refresh_commits(repository=repository, branch_name="master")
-            repository.refresh_from_db()
-            assert len(repository.commits) == 2
-            project.refresh_from_db()
-            assert len(project.commits) == 0
             task.refresh_from_db()
             assert len(task.commits) == 0
 
@@ -355,10 +354,6 @@ class TestRefreshCommits:
             get_repo_info.return_value = repo
 
             refresh_commits(repository=repository, branch_name="project")
-            repository.refresh_from_db()
-            assert len(repository.commits) == 0
-            project.refresh_from_db()
-            assert len(project.commits) == 2
             task.refresh_from_db()
             assert len(task.commits) == 0
 
@@ -401,10 +396,6 @@ class TestRefreshCommits:
             get_repo_info.return_value = repo
 
             refresh_commits(repository=repository, branch_name="task")
-            repository.refresh_from_db()
-            assert len(repository.commits) == 0
-            project.refresh_from_db()
-            assert len(project.commits) == 0
             task.refresh_from_db()
             assert len(task.commits) == 2
 

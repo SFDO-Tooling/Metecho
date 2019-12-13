@@ -160,12 +160,7 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    PushMixin,
-    PopulateRepoIdMixin,
-    HashIdMixin,
-    TimestampsMixin,
-    SlugMixin,
-    models.Model,
+    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model,
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -173,7 +168,6 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
-    commits = JSONField(default=list)
     branch_name = models.CharField(
         max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
@@ -187,21 +181,6 @@ class Repository(
         verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
-
-    # begin PushMixin configuration:
-    push_update_type = "REPOSITORY_UPDATE"
-    push_error_type = None
-
-    def get_serialized_representation(self):
-        from .serializers import RepositorySerializer
-
-        return RepositorySerializer(self).data
-
-    # end PushMixin configuration
-
-    def finalize_repository_update(self):
-        self.save()
-        self.notify_changed()
 
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
@@ -226,26 +205,12 @@ class Repository(
         else:
             prefix_len = len(branch_prefix)
             ref = ref[prefix_len:]
-            matching_self = self.branch_name == ref
-            matching_projects = self.projects.filter(branch_name=ref)
             matching_tasks = Task.objects.filter(
                 branch_name=ref, project__repository=self
             )
 
-            if matching_self:
-                self.commits += [gh.normalize_commit(c) for c in commits]
-                self.save()
-                self.notify_changed()
-
-            for project in matching_projects:
-                project.add_commits(commits)
-
             for task in matching_tasks:
                 task.add_commits(commits)
-
-    @property
-    def commit_set(self):
-        return set(c["id"] for c in self.commits)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
@@ -275,7 +240,6 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     branch_name = models.CharField(
         max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
-    commits = JSONField(default=list)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -304,18 +268,6 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         self.save()
         self.notify_changed()
 
-    def add_commits(self, commits):
-        commit_set = self.repository.commit_set
-        self.commits += [
-            gh.normalize_commit(c) for c in commits if c["id"] not in commit_set
-        ]
-        self.save()
-        self.notify_changed()
-
-    @property
-    def commit_set(self):
-        return set(c["id"] for c in self.commits)
-
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "repository"),)
@@ -340,6 +292,7 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
     commits = JSONField(default=list)
+    origin_sha = StringField(null=True, blank=True)
     ms_commits = JSONField(default=list)
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
@@ -396,10 +349,7 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
             self.notify_error(error)
 
     def add_commits(self, commits):
-        commit_set = self.project.commit_set | self.project.repository.commit_set
-        self.commits += [
-            gh.normalize_commit(c) for c in commits if c["id"] not in commit_set
-        ]
+        self.commits += [gh.normalize_commit(c) for c in commits]
         self.save()
         self.notify_changed()
 

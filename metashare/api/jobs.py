@@ -66,6 +66,7 @@ def _create_branches_on_github(*, user, repo_id, project, task):
             base_branch=project_branch_name,
         )
         task.branch_name = task_branch_name
+        task.origin_sha = repository.branch(project_branch_name).latest_sha()
         task.finalize_task_update()
 
     return task_branch_name
@@ -306,37 +307,16 @@ def refresh_commits(*, repository, branch_name):
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
-    from .models import User, Project, Task
+    from .models import User, Task
 
     user = User.objects.get(pk=settings.GITHUB_USER_ID)
     repo = get_repo_info(user, repository.repo_id)
     commits = repo.commits(repo.branch(branch_name).latest_sha())
 
-    matching_self = repository.branch_name == branch_name
-    if matching_self:
-        repository.commits = [normalize_commit(c) for c in commits]
-        repository.finalize_repository_update()
-
-    projects = Project.objects.filter(repository=repository, branch_name=branch_name)
-    for project in projects:
-        parent_commits_set = project.repository.commit_set
-        project.commits = [
-            normalize_commit(commit)
-            for commit in commits
-            if commit.sha not in parent_commits_set
-        ]
-        project.finalize_project_update()
-
     tasks = Task.objects.filter(project__repository=repository, branch_name=branch_name)
     for task in tasks:
-        parent_commits_set = (
-            task.project.commit_set | task.project.repository.commit_set
-        )
-        task.commits = [
-            normalize_commit(commit)
-            for commit in commits
-            if commit.sha not in parent_commits_set
-        ]
+        # TODO: Make this right:
+        task.commits = [normalize_commit(commit) for commit in commits]
         task.finalize_task_update()
 
 

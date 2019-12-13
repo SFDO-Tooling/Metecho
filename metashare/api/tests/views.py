@@ -151,12 +151,8 @@ class TestHookView:
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
-            repo.refresh_from_db()
-            assert len(repo.commits) == 1
-            project.refresh_from_db()
-            assert len(project.commits) == 0
             task.refresh_from_db()
-            assert len(task.commits) == 0
+            assert len(task.commits) == 1
 
     def test_202__forced(
         self, settings, client, repository_factory, git_hub_repository_factory
