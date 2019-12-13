@@ -184,6 +184,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         commit = repository.branch(branch).commit
 
         scratch_org.task.refresh_from_db()
+        scratch_org.task.add_ms_git_sha(commit.sha)
         scratch_org.task.has_unmerged_commits = True
         scratch_org.task.finalize_task_update()
 

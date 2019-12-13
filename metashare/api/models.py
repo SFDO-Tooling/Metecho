@@ -235,6 +235,7 @@ class Repository(
             if matching_self:
                 self.commits += [gh.normalize_commit(c) for c in commits]
                 self.save()
+                self.notify_changed()
 
             for project in matching_projects:
                 project.add_commits(commits)
@@ -339,6 +340,7 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
     commits = JSONField(default=list)
+    ms_commits = JSONField(default=list)
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
@@ -400,6 +402,9 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         ]
         self.save()
         self.notify_changed()
+
+    def add_ms_git_sha(self, sha):
+        self.ms_commits.append(sha)
 
     class Meta:
         ordering = ("-created_at", "name")
