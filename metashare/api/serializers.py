@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from django.contrib.auth import get_user_model
@@ -10,6 +11,7 @@ from .models import Project, Repository, ScratchOrg, Task
 from .validators import CaseInsensitiveUniqueTogetherValidator
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class FormattableDict:
@@ -121,11 +123,19 @@ class HookSerializer(serializers.Serializer):
         if not repository:
             raise NotFound("No matching repository.")
 
+        ref = self.validated_data["ref"]
+        branch_prefix = "refs/heads/"
+        if not ref.startswith(branch_prefix):
+            logger.error(f"Received an invalid ref: {ref}")
+            return
+        prefix_len = len(branch_prefix)
+        ref = ref[prefix_len:]
+
         if self.is_force_push():
-            repository.queue_refresh_commits()
+            repository.queue_refresh_commits(ref=ref)
         else:
             repository.add_commits(
-                commits=self.validated_data["commits"], ref=self.validated_data["ref"],
+                commits=self.validated_data["commits"], ref=ref,
             )
 
 

@@ -192,25 +192,17 @@ class Repository(
 
         return None
 
-    def queue_refresh_commits(self):
+    def queue_refresh_commits(self, *, ref):
         from .jobs import refresh_commits_job
 
-        refresh_commits_job.delay(repository=self)
+        refresh_commits_job.delay(repository=self, branch_name=ref)
 
     @transaction.atomic
     def add_commits(self, *, commits, ref):
-        branch_prefix = "refs/heads/"
-        if not ref.startswith(branch_prefix):
-            self.queue_refresh_commits()
-        else:
-            prefix_len = len(branch_prefix)
-            ref = ref[prefix_len:]
-            matching_tasks = Task.objects.filter(
-                branch_name=ref, project__repository=self
-            )
+        matching_tasks = Task.objects.filter(branch_name=ref, project__repository=self)
 
-            for task in matching_tasks:
-                task.add_commits(commits)
+        for task in matching_tasks:
+            task.add_commits(commits)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
