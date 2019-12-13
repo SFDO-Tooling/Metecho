@@ -25,7 +25,7 @@ const CommitTableCell = ({ item, className, ...props }: TableCellProps) => {
     <DataTableCell
       {...props}
       title={item.id}
-      className={classNames(className, 'commits-table-cell')}
+      className={classNames(className, 'commits-sha')}
     >
       <ExternalLink url={item.url}>{shortSha}</ExternalLink>
     </DataTableCell>
@@ -46,7 +46,7 @@ const AuthorTableCell = ({ item, className, ...props }: TableCellProps) => {
     <DataTableCell
       {...props}
       title={author}
-      className={classNames(className, 'commits-table-cell')}
+      className={classNames(className, 'commits-author')}
     >
       <Avatar
         imgAlt={author}
@@ -66,7 +66,7 @@ const MessageTableCell = ({
 }: TableCellProps) => (
   <DataTableCell
     {...props}
-    className={classNames(className, 'commits-table-cell')}
+    className={classNames(className, 'commits-message')}
   >
     {children}
   </DataTableCell>
@@ -83,7 +83,7 @@ const TimestampTableCell = ({ item, className, ...props }: TableCellProps) => {
     <DataTableCell
       {...props}
       title={format(timestamp, 'PPpp')}
-      className={classNames(className, 'commits-table-cell')}
+      className={classNames(className, 'commits-timestamp')}
     >
       {formatDistanceToNow(timestamp, { addSuffix: true })}
     </DataTableCell>
@@ -105,7 +105,6 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
         items={commits}
         id="task-commits-table"
         className="slds-table_header-hidden"
-        fixedLayout
         noRowHover
       >
         <DataTableColumn
@@ -113,8 +112,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
           label={i18n.t('Commit')}
           property="id"
           primaryColumn
-          truncate
-          width="15%"
+          width="0"
         >
           <CommitTableCell />
         </DataTableColumn>
@@ -122,7 +120,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
           key="author"
           label={i18n.t('Author')}
           property="author"
-          width="8%"
+          width="2.5rem"
         >
           <AuthorTableCell />
         </DataTableColumn>
@@ -130,8 +128,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
           key="message"
           label={i18n.t('Message')}
           property="message"
-          truncate
-          width="52%"
+          width="100%"
         >
           <MessageTableCell />
         </DataTableColumn>
@@ -139,8 +136,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
           key="timestamp"
           label={i18n.t('Timestamp')}
           property="timestamp"
-          truncate
-          width="25%"
+          width="0"
         >
           <TimestampTableCell />
         </DataTableColumn>
