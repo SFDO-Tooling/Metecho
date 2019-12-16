@@ -90,6 +90,7 @@ class AuthorCommitSerializer(serializers.Serializer):
     name = serializers.CharField(required=False)
     email = serializers.CharField(required=False)
     username = serializers.CharField(required=False)
+    avatar_url = serializers.CharField(required=False)
 
 
 class CommitSerializer(serializers.Serializer):

@@ -27,22 +27,7 @@ Retrieve
           "slug": "test-project",
           "old_slugs": [],
           "repository": "zVQYrye",
-          "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project",
-          "commits": [
-            {
-              "id": "617a512",
-              "timestamp": "2019-02-01T19:47:49Z",
-              "author": {
-                "name": "Full Name",
-                "username": "username",
-                "email": "user@example.com",
-                "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
-              },
-              "message": "Some commit message",
-              "url": "https://github.com/SFDO-Tooling/commit/617a512"
-            },
-            ...
-          ]
+          "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project"
         }
         ...
       ]

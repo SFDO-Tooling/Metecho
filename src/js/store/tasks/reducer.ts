@@ -13,7 +13,7 @@ export interface Commit {
     name: string;
     email: string;
     username: string;
-    avatar_url?: string;
+    avatar_url: string;
   };
   url: string;
 }
