@@ -21,7 +21,7 @@ class CaseInsensitiveUniqueTogetherValidator(UniqueTogetherValidator):
         sources = [serializer.fields[field_name].source for field_name in self.fields]
 
         # If this is an update, then any unprovided field should
-        # have it's value set based on the existing instance attribute.
+        # have its value set based on the existing instance attribute.
         if serializer.instance is not None:
             for source in sources:
                 if source not in attrs:
