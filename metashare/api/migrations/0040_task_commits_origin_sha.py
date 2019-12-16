@@ -16,12 +16,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="task",
             name="commits",
-            field=django.contrib.postgres.fields.jsonb.JSONField(default=list),
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                default=list, blank=True
+            ),
         ),
         migrations.AddField(
             model_name="task",
             name="ms_commits",
-            field=django.contrib.postgres.fields.jsonb.JSONField(default=list),
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                default=list, blank=True
+            ),
         ),
         migrations.AddField(
             model_name="task",

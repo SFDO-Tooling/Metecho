@@ -280,9 +280,9 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
-    commits = JSONField(default=list)
+    commits = JSONField(default=list, blank=True)
     origin_sha = StringField(null=True, blank=True)
-    ms_commits = JSONField(default=list)
+    ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
