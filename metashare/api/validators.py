@@ -17,6 +17,9 @@ class CaseInsensitiveUniqueTogetherValidator(UniqueTogetherValidator):
         """
         Filter the queryset to all instances matching the given attributes.
         """
+        # This is a modified version of `UniqueTogetherValidator.filter_queryset`,
+        # modifed to preprocess field names for case-insensitive matching.
+
         # field names => field sources
         sources = [serializer.fields[field_name].source for field_name in self.fields]
 
