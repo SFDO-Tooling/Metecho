@@ -37,7 +37,7 @@ django-redis==4.11.0
 django-rq==2.2.0
 django-storages==1.8
 django==2.2.8
-djangorestframework==3.10.3
+djangorestframework==3.11.0
 docutils==0.15.2          # via cumulusci
 factory-boy==2.12.0       # via cumulusci
 faker==2.0.3              # via factory-boy
