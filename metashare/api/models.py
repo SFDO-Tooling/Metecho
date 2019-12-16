@@ -168,9 +168,6 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
-    branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
-    )
 
     slug_class = RepositorySlug
 

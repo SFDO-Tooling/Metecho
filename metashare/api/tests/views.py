@@ -121,16 +121,16 @@ class TestHookView:
         task_factory,
     ):
         settings.GITHUB_USER_ID = client.user.pk
-        repo = repository_factory(repo_id=123, branch_name="master")
+        repo = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
-        project = project_factory(repository=repo, branch_name="master")
-        task = task_factory(project=project, branch_name="master")
+        project = project_factory(repository=repo, branch_name="test-project")
+        task = task_factory(project=project, branch_name="test-task")
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
                 reverse("hook"),
                 json.dumps(
                     {
-                        "ref": "refs/heads/master",
+                        "ref": "refs/heads/test-task",
                         "forced": False,
                         "repository": {"id": 123},
                         "commits": [
@@ -147,7 +147,7 @@ class TestHookView:
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=effe7f2d4a433ed1898eba2308953cd61809d92f",
+                HTTP_X_HUB_SIGNATURE="sha1=9d0540594d02f791211bf4c5a63df9afdfbeaeb1",
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
