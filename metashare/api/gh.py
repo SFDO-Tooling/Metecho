@@ -158,6 +158,18 @@ def normalize_commit(commit):
     # TODO: make this right.
     if isinstance(commit, dict):
         return commit
+        return {
+            "id": commit["id"],
+            "timestamp": commit["timestamp"],
+            "author": {
+                "name": commit["author"]["name"],
+                "email": commit["author"]["email"],
+                "username": commit["author"]["username"],
+                "avatar_url": commit["author"]["avatar_url"],
+            },
+            "message": commit["message"],
+            "url": commit["url"],
+        }
     else:
         # If github3.py object:
         return {
