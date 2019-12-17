@@ -313,8 +313,9 @@ def refresh_commits(*, repository, branch_name):
         logger.warning(f"No matching user for repository {repository.pk}")
         return
     repo = get_repo_info(user, repository.repo_id)
-    commits = repo.commits(repo.branch(branch_name).latest_sha())
-    commits = [commit for commit in commits]
+    # We get this as a GitHubIterator, but we want to slice it later, so
+    # we will convert it to a list:
+    commits = list(repo.commits(repo.branch(branch_name).latest_sha()))
 
     tasks = Task.objects.filter(project__repository=repository, branch_name=branch_name)
     for task in tasks:
