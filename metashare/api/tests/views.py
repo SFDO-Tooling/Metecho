@@ -120,6 +120,7 @@ class TestHookView:
         project_factory,
         task_factory,
     ):
+        settings.GITHUB_HOOK_SECRET = b""
         settings.GITHUB_USER_ID = client.user.pk
         repo = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
@@ -165,6 +166,7 @@ class TestHookView:
     def test_202__forced(
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
+        settings.GITHUB_HOOK_SECRET = b""
         settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
@@ -191,6 +193,7 @@ class TestHookView:
     def test_422(
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
+        settings.GITHUB_HOOK_SECRET = b""
         settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
@@ -212,6 +215,7 @@ class TestHookView:
         assert response.status_code == 422, response.json()
 
     def test_404(self, settings, client, repository_factory):
+        settings.GITHUB_HOOK_SECRET = b""
         settings.GITHUB_USER_ID = client.user.pk
         repository_factory()
         response = client.post(
@@ -233,6 +237,7 @@ class TestHookView:
         assert response.status_code == 404
 
     def test_403(self, settings, client, repository_factory):
+        settings.GITHUB_HOOK_SECRET = b""
         settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
         response = client.post(
