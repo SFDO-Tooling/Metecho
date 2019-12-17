@@ -338,7 +338,9 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
             self.notify_error(error)
 
     def add_commits(self, commits, sender):
-        self.commits += [gh.normalize_commit(c, sender=sender) for c in commits]
+        self.commits = [
+            gh.normalize_commit(c, sender=sender) for c in commits
+        ] + self.commits
         self.save()
         self.notify_changed()
 

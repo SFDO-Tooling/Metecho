@@ -155,7 +155,7 @@ class TestHookView:
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=6a5d470ca262a2522635f1adb71a13b18446dd54",
+                HTTP_X_HUB_SIGNATURE="sha1=927b6e00fbe04a960cebd4df40443126cf292eb0",
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
@@ -183,7 +183,7 @@ class TestHookView:
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=01453662feaae85e7bb81452ffa7d3659294852d",
+                HTTP_X_HUB_SIGNATURE="sha1=c6f19f6d8ee4217184f30dfa0eed2d5331f777bf",
             )
             assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
@@ -207,7 +207,7 @@ class TestHookView:
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=6fc6f8c254a19276680948251ccb9644995c3692",
+            HTTP_X_HUB_SIGNATURE="sha1=ba3e7fb7d8398246a0feb81d4b62908d2d7eb8f6",
         )
         assert response.status_code == 422, response.json()
 
@@ -228,7 +228,7 @@ class TestHookView:
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=4129db8949c2aa1b82f850a68cc384019c0d73d0",
+            HTTP_X_HUB_SIGNATURE="sha1=7464632a73b7a2044ca1ed3fcc54a406f36d7a40",
         )
         assert response.status_code == 404
 

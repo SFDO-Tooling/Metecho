@@ -8,7 +8,9 @@ class Command(BaseCommand):
     help = "Remove and resync all stored commits from GitHub."
 
     def handle(self, *args, **options):
-        for task in Task.objects.exclude(branch_name__isnull=True):
+        for task in Task.objects.filter(
+            branch_name__isnull=False, origin_sha__isnull=False
+        ):
             refresh_commits(
                 repository=task.project.repository, branch_name=task.branch_name
             )
