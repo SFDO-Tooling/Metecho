@@ -43,6 +43,7 @@ Docker-based development
     SF_CLIENT_KEY=...
     SF_CLIENT_ID=...
     SF_CLIENT_SECRET=...
+    GITHUB_HOOK_SECRET=...
 
    Note that none of the values should be quoted, and while ``SF_CLIENT_KEY`` is
    an RSA private key, it must have newlines replaced with ``\n`` in order to
@@ -82,6 +83,11 @@ user a superuser. You can do that easily via the ``promote_superuser``
 management command::
 
     $ docker-compose run --rm web python manage.py promote_superuser <your email>
+
+You will also need, when you log in, to make sure that the GitHub app
+that provides MetaShare with webhook updates and GitHub API access **is
+enabled for any Organizations you are testing against**. By default it
+will only install for the user you are logging in as.
 
 Setting up the database
 -----------------------
@@ -200,6 +206,15 @@ which is a problem for which we don't yet have a solution.
 
 As an OddBird, you can access the app at
 `<https://github.com/organizations/oddbird/settings/apps/metashare-dev>`_.
+
+You will also need to designate a user as "the GitHub user", by setting
+their User model's primary key in an environment variable,
+``GITHUB_USER_ID``. By default, this is 1, which should be the first
+user in your database. This user is only used in
+``metashare.api.authentication.GitHubHookAuthentication``, because
+Django needs any successful authentication to return a user. It is good
+practice in a real deployment to make this be a dedicated user, not
+otherwise able to log in with a password.
 
 Internationalization
 --------------------
