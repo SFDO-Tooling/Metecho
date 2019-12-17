@@ -195,11 +195,11 @@ class Repository(
         refresh_commits_job.delay(repository=self, branch_name=ref)
 
     @transaction.atomic
-    def add_commits(self, *, commits, ref):
+    def add_commits(self, *, commits, ref, sender):
         matching_tasks = Task.objects.filter(branch_name=ref, project__repository=self)
 
         for task in matching_tasks:
-            task.add_commits(commits)
+            task.add_commits(commits, sender)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
@@ -337,8 +337,8 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         else:
             self.notify_error(error)
 
-    def add_commits(self, commits):
-        self.commits += [gh.normalize_commit(c) for c in commits]
+    def add_commits(self, commits, sender):
+        self.commits += [gh.normalize_commit(c, sender=sender) for c in commits]
         self.save()
         self.notify_changed()
 

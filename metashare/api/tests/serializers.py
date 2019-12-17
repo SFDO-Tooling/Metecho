@@ -192,6 +192,7 @@ class TestHookSerializer:
             "ref": "not a branch?",
             "commits": [],
             "repository": {"id": 123},
+            "sender": {},
         }
         serializer = HookSerializer(data=data)
         assert serializer.is_valid(), serializer.errors

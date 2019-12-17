@@ -105,9 +105,15 @@ class HookRepositorySerializer(serializers.Serializer):
     id = serializers.IntegerField()
 
 
+class HookSenderSerializer(serializers.Serializer):
+    login = serializers.CharField(required=False)
+    avatar_url = serializers.CharField(required=False)
+
+
 class HookSerializer(serializers.Serializer):
     forced = serializers.BooleanField()
     ref = serializers.CharField()
+    sender = HookSenderSerializer()
     commits = serializers.ListField(child=CommitSerializer())
     repository = HookRepositorySerializer()
     # All other fields are ignored by default.
@@ -135,8 +141,9 @@ class HookSerializer(serializers.Serializer):
         if self.is_force_push():
             repository.queue_refresh_commits(ref=ref)
         else:
+            sender = self.validated_data["sender"]
             repository.add_commits(
-                commits=self.validated_data["commits"], ref=ref,
+                commits=self.validated_data["commits"], ref=ref, sender=sender,
             )
 
 

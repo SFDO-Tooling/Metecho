@@ -136,18 +136,26 @@ class TestHookView:
                         "commits": [
                             {
                                 "id": "123",
-                                "author": {"name": "Test", "email": "test@example.com"},
+                                "author": {
+                                    "name": "Test",
+                                    "email": "test@example.com",
+                                    "username": "test123",
+                                },
                                 "timestamp": "2019-11-20 21:32:53.668260+00:00",
                                 "message": "Message",
                                 "url": "https://github.com/test/user/foo",
                             }
                         ],
+                        "sender": {
+                            "login": "test123",
+                            "avatar_url": "https://avatar_url/",
+                        },
                     }
                 ),
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=9d0540594d02f791211bf4c5a63df9afdfbeaeb1",
+                HTTP_X_HUB_SIGNATURE="sha1=6a5d470ca262a2522635f1adb71a13b18446dd54",
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
@@ -169,12 +177,13 @@ class TestHookView:
                         "forced": True,
                         "repository": {"id": 123},
                         "commits": [],
+                        "sender": {},
                     }
                 ),
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=e3b9c7be188843156ad1585d6f16007497e89ee9",
+                HTTP_X_HUB_SIGNATURE="sha1=01453662feaae85e7bb81452ffa7d3659294852d",
             )
             assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
@@ -188,12 +197,17 @@ class TestHookView:
         response = client.post(
             reverse("hook"),
             json.dumps(
-                {"ref": "refs/heads/master", "repository": {"id": 123}, "commits": []}
+                {
+                    "ref": "refs/heads/master",
+                    "repository": {"id": 123},
+                    "commits": [],
+                    "sender": {},
+                }
             ),
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=19a76cd9d2ce25c44678fcd78f8a954c4130e3f4",
+            HTTP_X_HUB_SIGNATURE="sha1=6fc6f8c254a19276680948251ccb9644995c3692",
         )
         assert response.status_code == 422, response.json()
 
@@ -208,12 +222,13 @@ class TestHookView:
                     "forced": False,
                     "repository": {"id": 123},
                     "commits": [],
+                    "sender": {},
                 }
             ),
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=364f36e283407985440c2a00aeaa2d27a3e81712",
+            HTTP_X_HUB_SIGNATURE="sha1=4129db8949c2aa1b82f850a68cc384019c0d73d0",
         )
         assert response.status_code == 404
 
@@ -228,6 +243,7 @@ class TestHookView:
                     "forced": False,
                     "repository": {"id": 123},
                     "commits": [],
+                    "sender": {},
                 }
             ),
             content_type="application/json",

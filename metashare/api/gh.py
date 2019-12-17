@@ -149,15 +149,18 @@ def validate_gh_hook_signature(
     return hmac.compare_digest(local_signature, signature)
 
 
-def normalize_commit(commit):
+def normalize_commit(commit, **kwargs):
     """
     This takes commits either in the JSON format provided by a GitHub
     webhook, or the object format provided by github3.py, and returns a
     normalized Python dict.
     """
-    # TODO: make this right.
     if isinstance(commit, dict):
-        return commit
+        # If GitHub webhook payload:
+        sender = kwargs.get("sender", {})
+        avatar_url = ""
+        if sender["avatar_url"] and sender["login"] == commit["author"]["username"]:
+            avatar_url = sender["avatar_url"]
         return {
             "id": commit["id"],
             "timestamp": commit["timestamp"],
@@ -165,7 +168,7 @@ def normalize_commit(commit):
                 "name": commit["author"]["name"],
                 "email": commit["author"]["email"],
                 "username": commit["author"]["username"],
-                "avatar_url": commit["author"]["avatar_url"],
+                "avatar_url": avatar_url,
             },
             "message": commit["message"],
             "url": commit["url"],
