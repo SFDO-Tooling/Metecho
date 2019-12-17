@@ -2,7 +2,6 @@ import logging
 import traceback
 
 from asgiref.sync import async_to_sync
-from django.conf import settings
 from django.db import transaction
 from django.utils.text import slugify
 from django.utils.timezone import now
@@ -307,9 +306,12 @@ def refresh_commits(*, repository, branch_name):
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
-    from .models import User, Task
+    from .models import Task
 
-    user = User.objects.get(pk=settings.GITHUB_USER_ID)
+    user = repository.get_a_matching_user()
+    if user is None:
+        logger.warning(f"No matching user for repository {repository.pk}")
+        return
     repo = get_repo_info(user, repository.repo_id)
     commits = repo.commits(repo.branch(branch_name).latest_sha())
 

@@ -273,12 +273,55 @@ class TestErrorHandling:
 
 @pytest.mark.django_db
 class TestRefreshCommits:
-    def test_task(
-        self, settings, user_factory, repository_factory, project_factory, task_factory
+    def test_task__no_user(self, repository_factory, project_factory, task_factory):
+        repository = repository_factory()
+        project = project_factory(repository=repository)
+        task = task_factory(project=project, branch_name="task", origin_sha="1234abcd")
+        with ExitStack() as stack:
+            commit1 = Commit(
+                **{
+                    "sha": "abcd1234",
+                    "author": Author(
+                        **{
+                            "avatar_url": "https://example.com/img.png",
+                            "login": "test_user",
+                        }
+                    ),
+                    "message": "Test message 1",
+                    "commit": Commit(**{"author": {"date": "2019-12-09 13:00"}}),
+                    "html_url": "https://github.com/test/user/foo",
+                }
+            )
+            commit2 = Commit(
+                **{
+                    "sha": "1234abcd",
+                    "author": None,
+                    "message": "Test message 2",
+                    "commit": Commit(**{"author": {"date": "2019-12-09 12:30"}}),
+                    "html_url": "https://github.com/test/user/foo",
+                }
+            )
+            repo = MagicMock(**{"commits.return_value": [commit1, commit2]})
+            get_repo_info = stack.enter_context(
+                patch("metashare.api.jobs.get_repo_info")
+            )
+            get_repo_info.return_value = repo
+
+            refresh_commits(repository=repository, branch_name="task")
+            task.refresh_from_db()
+            assert len(task.commits) == 0
+
+    def test_task__user(
+        self,
+        user_factory,
+        repository_factory,
+        project_factory,
+        task_factory,
+        git_hub_repository_factory,
     ):
         user = user_factory()
-        settings.GITHUB_USER_ID = user.pk
-        repository = repository_factory()
+        repository = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123, user=user)
         project = project_factory(repository=repository)
         task = task_factory(project=project, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:
