@@ -314,12 +314,13 @@ def refresh_commits(*, repository, branch_name):
         return
     repo = get_repo_info(user, repository.repo_id)
     commits = repo.commits(repo.branch(branch_name).latest_sha())
+    commits = [commit for commit in commits]
 
     tasks = Task.objects.filter(project__repository=repository, branch_name=branch_name)
     for task in tasks:
         origin_sha_index = [commit.sha for commit in commits].index(task.origin_sha)
         task.commits = [
-            normalize_commit(commit) for commit in commits[origin_sha_index:]
+            normalize_commit(commit) for commit in commits[:origin_sha_index]
         ]
         task.finalize_task_update()
 
