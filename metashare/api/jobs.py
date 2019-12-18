@@ -314,8 +314,11 @@ def refresh_commits(*, repository, branch_name):
         return
     repo = get_repo_info(user, repository.repo_id)
     # We get this as a GitHubIterator, but we want to slice it later, so
-    # we will convert it to a list:
-    commits = list(repo.commits(repo.branch(branch_name).latest_sha()))
+    # we will convert it to a list.
+    # We limit it to 1000 commits to avoid hammering the API, and on the
+    # assumption that we will find the origin of the task branch within
+    # that limit.
+    commits = list(repo.commits(repo.branch(branch_name).latest_sha(), number=1000))
 
     tasks = Task.objects.filter(project__repository=repository, branch_name=branch_name)
     for task in tasks:
