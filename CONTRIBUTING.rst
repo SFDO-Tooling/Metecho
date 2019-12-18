@@ -209,15 +209,6 @@ a solution.
 As an OddBird, you can access the app at
 `<https://github.com/organizations/oddbird/settings/apps/metashare-dev>`_.
 
-You will also need to designate a user as "the GitHub user", by setting
-their User model's primary key in an environment variable,
-``GITHUB_USER_ID``. By default, this is 1, which should be the first
-user in your database. This user is only used in
-``metashare.api.authentication.GitHubHookAuthentication``, because
-Django needs any successful authentication to return a user. It is good
-practice in a real deployment to make this be a dedicated user, not
-otherwise able to log in with a password.
-
 Internationalization
 --------------------
 

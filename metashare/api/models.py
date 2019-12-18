@@ -33,7 +33,8 @@ class UserQuerySet(models.QuerySet):
 
 
 class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
-    pass
+    def get_or_create_github_user(self):
+        return self.get_or_create(username=settings.GITHUB_USER_NAME,)[0]
 
 
 class User(HashIdMixin, AbstractUser):

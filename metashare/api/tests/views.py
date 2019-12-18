@@ -121,7 +121,6 @@ class TestHookView:
         task_factory,
     ):
         settings.GITHUB_HOOK_SECRET = b""
-        settings.GITHUB_USER_ID = client.user.pk
         repo = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
         project = project_factory(repository=repo, branch_name="test-project")
@@ -167,7 +166,6 @@ class TestHookView:
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_HOOK_SECRET = b""
-        settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
@@ -194,7 +192,6 @@ class TestHookView:
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_HOOK_SECRET = b""
-        settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
         response = client.post(
@@ -216,7 +213,6 @@ class TestHookView:
 
     def test_404(self, settings, client, repository_factory):
         settings.GITHUB_HOOK_SECRET = b""
-        settings.GITHUB_USER_ID = client.user.pk
         repository_factory()
         response = client.post(
             reverse("hook"),
@@ -238,7 +234,6 @@ class TestHookView:
 
     def test_403(self, settings, client, repository_factory):
         settings.GITHUB_HOOK_SECRET = b""
-        settings.GITHUB_USER_ID = client.user.pk
         repository_factory(repo_id=123)
         response = client.post(
             reverse("hook"),
