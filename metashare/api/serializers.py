@@ -115,10 +115,27 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
     repository = HookRepositorySerializer()
     # All other fields are ignored by default.
 
+    def _is_merged(self):
+        return (
+            self.validated_data["action"] == "closed"
+            and self.validated_data["pull_request"]["merged"]
+        )
+
+    def _get_matching_task(self, repository):
+        return Task.objects.filter(
+            project__repository=repository, pr_number=self.validated_data["number"]
+        ).first()
+
     def process_hook(self):
         repository = self.get_matching_repository()
         if not repository:
             raise NotFound("No matching repository.")
+
+        if self._is_merged():
+            task = self._get_matching_task(repository)
+            if task is None:
+                return
+            task.finalize_status_completed()
 
 
 class CommitSerializer(serializers.Serializer):

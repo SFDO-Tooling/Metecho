@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from rest_framework.exceptions import NotFound
 
+from ..models import TASK_STATUSES
 from ..serializers import (
     HashidPrimaryKeyRelatedField,
     PrHookSerializer,
@@ -205,7 +206,7 @@ class TestPushHookSerializer:
 
 @pytest.mark.django_db
 class TestPrHookSerializer:
-    def test_process_hook__no_matching_repository(self, repository_factory):
+    def test_process_hook__no_matching_repository(self):
         data = {
             "action": "closed",
             "number": 123,
@@ -216,3 +217,37 @@ class TestPrHookSerializer:
         assert serializer.is_valid(), serializer.errors
         with pytest.raises(NotFound):
             serializer.process_hook()
+
+    def test_process_hook__no_matching_task(self, repository_factory):
+        repository_factory(repo_id=123)
+        data = {
+            "action": "closed",
+            "number": 456,
+            "pull_request": {"merged": True},
+            "repository": {"id": 123},
+        }
+        serializer = PrHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        serializer.process_hook()
+
+    def test_process_hook__mark_matching_tasks_as_completed(
+        self, repository_factory, task_factory
+    ):
+        repository = repository_factory(repo_id=123)
+        task = task_factory(
+            pr_number=456,
+            project__repository=repository,
+            status=TASK_STATUSES["In progress"],
+        )
+        data = {
+            "action": "closed",
+            "number": 456,
+            "pull_request": {"merged": True},
+            "repository": {"id": 123},
+        }
+        serializer = PrHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        serializer.process_hook()
+
+        task.refresh_from_db()
+        assert task.status == TASK_STATUSES.Completed
