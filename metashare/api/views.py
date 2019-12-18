@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
@@ -17,6 +18,7 @@ from .serializers import (
     CommitSerializer,
     CreatePrSerializer,
     FullUserSerializer,
+    HookSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
     RepositorySerializer,
@@ -33,6 +35,25 @@ class CurrentUserObjectMixin:
 
     def get_object(self):
         return self.get_queryset().get()
+
+
+class HookView(APIView):
+    authentication_classes = (GitHubHookAuthentication,)
+
+    def post(self, request):
+        # To support the various formats that GitHub can post to this endpoint:
+        # TODO: we can route this based on the X-GitHub-Event header.
+        serializers = {"push": HookSerializer(data=request.data)}
+        errors = {}
+        for key, serializer in serializers.items():
+            if not serializer.is_valid():
+                errors[key] = serializer.errors
+            else:
+                serializer.process_hook()
+                return Response(status=status.HTTP_202_ACCEPTED)
+
+        # We only get here if no serializer has matched and processed the request:
+        return Response(errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):

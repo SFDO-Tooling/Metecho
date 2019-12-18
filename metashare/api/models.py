@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -33,7 +33,8 @@ class UserQuerySet(models.QuerySet):
 
 
 class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
-    pass
+    def get_or_create_github_user(self):
+        return self.get_or_create(username=settings.GITHUB_USER_NAME,)[0]
 
 
 class User(HashIdMixin, AbstractUser):
@@ -160,7 +161,7 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model,
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -178,6 +179,28 @@ class Repository(
         verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
+
+    def get_a_matching_user(self):
+        github_repository = GitHubRepository.objects.filter(
+            repo_id=self.repo_id
+        ).first()
+
+        if github_repository:
+            return github_repository.user
+
+        return None
+
+    def queue_refresh_commits(self, *, ref):
+        from .jobs import refresh_commits_job
+
+        refresh_commits_job.delay(repository=self, branch_name=ref)
+
+    @transaction.atomic
+    def add_commits(self, *, commits, ref, sender):
+        matching_tasks = Task.objects.filter(branch_name=ref, project__repository=self)
+
+        for task in matching_tasks:
+            task.add_commits(commits, sender)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
@@ -205,7 +228,7 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
 
     repository = models.ForeignKey(
@@ -231,7 +254,7 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     # end PushMixin configuration
 
-    def finalize_branch_update(self):
+    def finalize_project_update(self):
         self.save()
         self.notify_changed()
 
@@ -258,6 +281,9 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
+    commits = JSONField(default=list, blank=True)
+    origin_sha = StringField(null=True, blank=True)
+    ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
@@ -311,6 +337,16 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
             self.notify_changed("TASK_CREATE_PR")
         else:
             self.notify_error(error)
+
+    def add_commits(self, commits, sender):
+        self.commits = [
+            gh.normalize_commit(c, sender=sender) for c in commits
+        ] + self.commits
+        self.save()
+        self.notify_changed()
+
+    def add_ms_git_sha(self, sha):
+        self.ms_commits.append(sha)
 
     class Meta:
         ordering = ("-created_at", "name")

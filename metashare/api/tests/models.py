@@ -31,6 +31,21 @@ class TestRepository:
             assert get_repo_info.called
             assert gh_repo.repo_id == 123
 
+    def test_get_a_matching_user__none(self, repository_factory):
+        repo = repository_factory()
+        assert repo.get_a_matching_user() is None
+
+    def test_get_a_matching_user(self, repository_factory, git_hub_repository_factory):
+        repo = repository_factory(repo_id=123)
+        gh_repo = git_hub_repository_factory(repo_id=123)
+        assert repo.get_a_matching_user() == gh_repo.user
+
+    def test_refresh_commits(self, repository_factory, user_factory):
+        repo = repository_factory()
+        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
+            repo.queue_refresh_commits(ref="master")
+            assert refresh_commits_job.delay.called
+
 
 @pytest.mark.django_db
 class TestProject:

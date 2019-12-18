@@ -87,6 +87,7 @@ PROJECT_ROOT = Path(__file__).absolute().parent.parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 HASHID_FIELD_SALT = env("DJANGO_HASHID_SALT")
+HASHID_FIELD_ALLOW_INT_LOOKUP = True
 DB_ENCRYPTION_KEY = env("DB_ENCRYPTION_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -203,6 +204,12 @@ ADMIN_API_ALLOWED_SUBNETS = env(
     default="127.0.0.1/32,172.16.0.0/12",
     type_=ipv4_networks,
 )
+
+GITHUB_HOOK_SECRET = env(
+    "GITHUB_HOOK_SECRET", default="", type_=lambda x: bytes(x, encoding="utf-8")
+)
+# The username of the user that GitHub webhook actions should authenticate as:
+GITHUB_USER_NAME = env("GITHUB_USER_NAME", default="GitHub user")
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

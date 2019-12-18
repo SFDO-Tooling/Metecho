@@ -1,0 +1,26 @@
+// Commit History
+// ==============
+
+// override padding for slds table th first and last columns
+#task-commits-table {
+  .commits-sha {
+    padding-left: 0.5rem;
+  }
+
+  .commits-timestamp {
+    padding-right: 0.5rem;
+  }
+}
+
+.commits-message {
+  max-width: 10px; // needs any max-width to work
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  // A div is being added inside to wrap content
+  // truncate on the table cell w/non-fixed layout
+  // only works on cell contents, not in nested divs
+  & > div {
+    display: contents;
+  }
+}
