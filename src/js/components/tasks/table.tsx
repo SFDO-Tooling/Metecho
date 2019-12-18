@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Task } from '@/store/tasks/reducer';
 import routes from '@/utils/routes';
 
-interface DataCellProps {
+interface TableCellProps {
   [key: string]: any;
   item?: Task;
   repositorySlug?: string;
@@ -22,13 +22,13 @@ interface Props {
   tasks: Task[];
 }
 
-const NameDataCell = ({
+const NameTableCell = ({
   repositorySlug,
   projectSlug,
   item,
   children,
   ...props
-}: DataCellProps) => (
+}: TableCellProps) => (
   <DataTableCell {...props}>
     {repositorySlug && projectSlug && item && (
       <Link to={routes.task_detail(repositorySlug, projectSlug, item.slug)}>
@@ -37,14 +37,14 @@ const NameDataCell = ({
     )}
   </DataTableCell>
 );
-NameDataCell.displayName = DataTableCell.displayName;
+NameTableCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ item, ...props }: DataCellProps) => (
   <DataTableCell {...props}>{item && i18n.t(item.status)}</DataTableCell>
 );
 StatusTableCell.displayName = DataTableCell.displayName;
 
-const AssigneeTableCell = ({ ...props }: DataCellProps) => (
+const AssigneeTableCell = ({ ...props }: TableCellProps) => (
   <DataTableCell {...props}>
     <Icon
       title={i18n.t('Assign Team Member')}
@@ -67,7 +67,7 @@ const TaskTable = ({ repositorySlug, projectSlug, tasks }: Props) =>
         primaryColumn
         truncate
       >
-        <NameDataCell
+        <NameTableCell
           repositorySlug={repositorySlug}
           projectSlug={projectSlug}
         />

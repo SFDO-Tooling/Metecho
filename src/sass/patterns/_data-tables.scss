@@ -1,0 +1,12 @@
+.slds-table_header-hidden {
+  thead {
+    clip: rect(0 0 0 0);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    margin: -1px;
+    text-transform: none;
+    white-space: nowrap;
+    width: 1px;
+  }
+}

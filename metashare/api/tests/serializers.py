@@ -1,10 +1,13 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from rest_framework.exceptions import NotFound
 
 from ..serializers import (
     HashidPrimaryKeyRelatedField,
+    PrHookSerializer,
     ProjectSerializer,
+    PushHookSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
 )
@@ -180,3 +183,36 @@ def test_ScratchOrgSerializer(rf, user_factory, task_factory):
         instance = serializer.save()
 
     assert instance.owner == user
+
+
+@pytest.mark.django_db
+class TestPushHookSerializer:
+    def test_process_hook(self, repository_factory):
+        repository_factory(repo_id=123)
+        data = {
+            "forced": False,
+            "ref": "not a branch?",
+            "commits": [],
+            "repository": {"id": 123},
+            "sender": {},
+        }
+        serializer = PushHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        with patch("metashare.api.serializers.logger") as logger:
+            serializer.process_hook()
+            assert logger.error.called
+
+
+@pytest.mark.django_db
+class TestPrHookSerializer:
+    def test_process_hook__no_matching_repository(self, repository_factory):
+        data = {
+            "action": "closed",
+            "number": 123,
+            "pull_request": {"merged": False},
+            "repository": {"id": 123},
+        }
+        serializer = PrHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        with pytest.raises(NotFound):
+            serializer.process_hook()

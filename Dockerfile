@@ -20,6 +20,9 @@ COPY ./requirements /requirements
 RUN pip install --no-cache-dir -r requirements/prod.txt
 RUN if [ "${BUILD_ENV}" = "development" ]; then pip install --no-cache-dir -r requirements/dev.txt; fi
 
+# Install sfdx
+RUN mkdir sfdx && wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1 && ./sfdx/install && rm -rf sfdx
+
 # JS client setup:
 COPY ./package.json /app/package.json
 COPY ./yarn.lock /app/yarn.lock

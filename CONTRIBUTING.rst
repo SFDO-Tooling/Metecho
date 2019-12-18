@@ -43,6 +43,7 @@ Docker-based development
     SF_CLIENT_KEY=...
     SF_CLIENT_ID=...
     SF_CLIENT_SECRET=...
+    GITHUB_HOOK_SECRET=...
 
    Note that none of the values should be quoted, and while ``SF_CLIENT_KEY`` is
    an RSA private key, it must have newlines replaced with ``\n`` in order to
@@ -82,6 +83,11 @@ user a superuser. You can do that easily via the ``promote_superuser``
 management command::
 
     $ docker-compose run --rm web python manage.py promote_superuser <your email>
+
+You will also need, when you log in, to make sure that the GitHub app
+that provides MetaShare with webhook updates and GitHub API access **is
+enabled for any Organizations you are testing against**. By default it
+will only install for the user you are logging in as.
 
 Setting up the database
 -----------------------
@@ -193,11 +199,15 @@ computer. Run it like so::
 
    $ ngrok http --host-header=localhost:8080 8080
 
-and you will get output that indicates the name of the ngrok tunnel,
-which will look like ``https://<some hash>.ngrok.io``. You will need to
-adjust the GitHub app to point to your ngrok tunnel. This does mean that
-it's a one-person-at-a-time thing, which is a problem for which I don't
-yet have a solution.
+You will get output that indicates the name of the ngrok tunnel, which will look
+like ``https://<some hash>.ngrok.io``. You will need to adjust the GitHub app to
+point to the ``/api/hook/`` path of your ngrok tunnel (e.g.
+``https://<some hash>.ngrok.io/api/hook/``). This means that it's a
+one-person-at-a-time thing, which is a problem for which we don't yet have
+a solution.
+
+As an OddBird, you can access the app at
+`<https://github.com/organizations/oddbird/settings/apps/metashare-dev>`_.
 
 Internationalization
 --------------------

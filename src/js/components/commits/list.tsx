@@ -1,45 +1,147 @@
+import Avatar from '@salesforce/design-system-react/components/avatar';
+import DataTable from '@salesforce/design-system-react/components/data-table';
+import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
+import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import classNames from 'classnames';
+import { format, formatDistanceToNow } from 'date-fns';
+import i18n from 'i18next';
 import React from 'react';
 
-import { Commit, Task } from '@/store/tasks/reducer';
+import { ExternalLink } from '@/components/utils';
+import { Commit } from '@/store/tasks/reducer';
 
-const CommitList = ({ task, commits }: { task: Task; commits: Commit[] }) => {
-  if (!task.branch_url) {
+interface TableCellProps {
+  [key: string]: any;
+  item?: Commit;
+}
+
+const CommitTableCell = ({ item, className, ...props }: TableCellProps) => {
+  /* istanbul ignore if */
+  if (!item) {
     return null;
   }
-  const baseUrl = new URL(task.branch_url);
-  const basePath = baseUrl.pathname
-    .split('/')
-    .slice(0, 3)
-    .join('/');
-  baseUrl.pathname = basePath;
-  const baseUrlString = baseUrl.toString();
-  const tableRows = commits.map((commit) => {
-    const shortSha = commit.sha.slice(0, 7);
-    const commitLink = `${baseUrlString}/commit/${commit.sha}`;
-    // TODO: make this humanized and relative:
-    const relativeTimestamp = commit.timestamp;
-    return (
-      <tr key={shortSha}>
-        <td>
-          <a href={commitLink}>{shortSha}</a>
-        </td>
-        <td>
-          <img src={commit.author.avatar_url} />
-        </td>
-        <td>{commit.message}</td>
-        <td>{relativeTimestamp}</td>
-      </tr>
-    );
-  });
+  const shortSha = item.id.substring(0, 7);
   return (
-    <>
-      <h2 className="slds-text-heading_medium">Commit History</h2>
-      <table>
-        <thead></thead>
-        <tbody>{tableRows}</tbody>
-      </table>
-    </>
+    <DataTableCell
+      {...props}
+      title={item.id}
+      className={classNames(className, 'commits-sha')}
+    >
+      <ExternalLink url={item.url}>{shortSha}</ExternalLink>
+    </DataTableCell>
   );
 };
+CommitTableCell.displayName = DataTableCell.displayName;
+
+const AuthorTableCell = ({ item, className, ...props }: TableCellProps) => {
+  /* istanbul ignore if */
+  if (!item) {
+    return null;
+  }
+  let author = item.author.username;
+  if (item.author.name && item.author.name !== author) {
+    author = `${author} (${item.author.name})`;
+  }
+  return (
+    <DataTableCell
+      {...props}
+      title={author}
+      className={classNames(className, 'commits-author')}
+    >
+      <Avatar
+        imgAlt={author}
+        imgSrc={item.author.avatar_url}
+        title={author}
+        size="small"
+      />
+    </DataTableCell>
+  );
+};
+AuthorTableCell.displayName = DataTableCell.displayName;
+
+const MessageTableCell = ({
+  children,
+  className,
+  ...props
+}: TableCellProps) => (
+  <DataTableCell
+    {...props}
+    className={classNames(className, 'commits-message')}
+  >
+    {children}
+  </DataTableCell>
+);
+MessageTableCell.displayName = DataTableCell.displayName;
+
+const TimestampTableCell = ({ item, className, ...props }: TableCellProps) => {
+  /* istanbul ignore if */
+  if (!item) {
+    return null;
+  }
+  const timestamp = new Date(item.timestamp);
+  return (
+    <DataTableCell
+      {...props}
+      title={format(timestamp, 'PPpp')}
+      className={classNames(className, 'commits-timestamp')}
+    >
+      {formatDistanceToNow(timestamp, { addSuffix: true })}
+    </DataTableCell>
+  );
+};
+TimestampTableCell.displayName = DataTableCell.displayName;
+
+const CommitList = ({ commits }: { commits: Commit[] }) =>
+  commits.length ? (
+    <>
+      <h2
+        className="slds-text-heading_medium
+        slds-m-top_large
+        slds-m-bottom_x-small"
+      >
+        Commit History
+      </h2>
+      <DataTable
+        items={commits}
+        id="task-commits-table"
+        className="slds-table_header-hidden"
+        noRowHover
+      >
+        <DataTableColumn
+          key="sha"
+          label={i18n.t('Commit')}
+          property="id"
+          primaryColumn
+          width="0"
+        >
+          <CommitTableCell />
+        </DataTableColumn>
+        <DataTableColumn
+          key="author"
+          label={i18n.t('Author')}
+          property="author"
+          width="2.5rem"
+        >
+          <AuthorTableCell />
+        </DataTableColumn>
+        <DataTableColumn
+          key="message"
+          label={i18n.t('Message')}
+          property="message"
+          width="100%"
+        >
+          <MessageTableCell />
+        </DataTableColumn>
+        <DataTableColumn
+          key="timestamp"
+          label={i18n.t('Timestamp')}
+          property="timestamp"
+          width="0"
+        >
+          <TimestampTableCell />
+        </DataTableColumn>
+      </DataTable>
+    </>
+  ) : null;
 
 export default CommitList;

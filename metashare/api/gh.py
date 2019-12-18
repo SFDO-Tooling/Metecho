@@ -147,5 +147,45 @@ def validate_gh_hook_signature(
     local_signature = "sha1=" + hmac.new(hook_secret, message, "sha1").hexdigest()
     # Uncomment this when writing webhook tests to confirm the signature
     # for the test:
-    print("\033[1;92m======>", local_signature, "\033[0m")
+    # print("\033[1;92m======>", local_signature, "\033[0m")
     return hmac.compare_digest(local_signature, signature)
+
+
+def normalize_commit(commit, **kwargs):
+    """
+    This takes commits either in the JSON format provided by a GitHub
+    webhook, or the object format provided by github3.py, and returns a
+    normalized Python dict.
+    """
+    if isinstance(commit, dict):
+        # If GitHub webhook payload:
+        sender = kwargs.get("sender", {})
+        avatar_url = ""
+        if sender["avatar_url"] and sender["login"] == commit["author"]["username"]:
+            avatar_url = sender["avatar_url"]
+        return {
+            "id": commit["id"],
+            "timestamp": commit["timestamp"],
+            "author": {
+                "name": commit["author"]["name"],
+                "email": commit["author"]["email"],
+                "username": commit["author"]["username"],
+                "avatar_url": avatar_url,
+            },
+            "message": commit["message"],
+            "url": commit["url"],
+        }
+    else:
+        # If github3.py object:
+        return {
+            "id": commit.sha,
+            "timestamp": commit.commit.author.get("date", ""),
+            "author": {
+                "name": commit.commit.author.get("name", ""),
+                "email": commit.commit.author.get("email", ""),
+                "username": commit.author.login if commit.author else "",
+                "avatar_url": commit.author.avatar_url if commit.author else "",
+            },
+            "message": commit.message,
+            "url": commit.html_url,
+        }

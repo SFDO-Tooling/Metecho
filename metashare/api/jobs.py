@@ -11,6 +11,7 @@ from .gh import (
     get_cumulus_prefix,
     get_repo_info,
     local_github_checkout,
+    normalize_commit,
     try_to_make_branch,
 )
 from .push import report_scratch_org_error
@@ -64,6 +65,7 @@ def _create_branches_on_github(*, user, repo_id, project, task):
             base_branch=project_branch_name,
         )
         task.branch_name = task_branch_name
+        task.origin_sha = repository.branch(project_branch_name).latest_sha()
         task.finalize_task_update()
 
     return task_branch_name
@@ -182,6 +184,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
         commit = repository.branch(branch).commit
 
         scratch_org.task.refresh_from_db()
+        scratch_org.task.add_ms_git_sha(commit.sha)
         scratch_org.task.has_unmerged_commits = True
         scratch_org.task.finalize_task_update()
 
@@ -296,52 +299,34 @@ def refresh_github_repositories_for_user(user):
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
 
 
-def _commit_to_json(commit):
-    return {
-        "sha": commit.sha,
-        "timestamp": commit.timestamp,
-        "author": {
-            "avatar_url": commit.author.avatar_url if commit.author else "",
-            "login": commit.author.login if commit.author else "",
-        },
-        "committer": {
-            "avatar_url": commit.committer.avatar_url if commit.committer else "",
-            "login": commit.committer.login if commit.committer else "",
-        },
-        "message": commit.message,
-    }
-
-
 # This avoids partially-applied saving:
 @transaction.atomic
-def refresh_commits(*, user, repository):
+def refresh_commits(*, repository, branch_name):
     """
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
+    from .models import Task
+
+    user = repository.get_a_matching_user()
+    if user is None:
+        logger.warning(f"No matching user for repository {repository.pk}")
+        return
     repo = get_repo_info(user, repository.repo_id)
+    # We get this as a GitHubIterator, but we want to slice it later, so
+    # we will convert it to a list.
+    # We limit it to 1000 commits to avoid hammering the API, and on the
+    # assumption that we will find the origin of the task branch within
+    # that limit.
+    commits = list(repo.commits(repo.branch(branch_name).latest_sha(), number=1000))
 
-    projects = repository.projects.filter(branch_name__isnull=False)
-    for project in projects:
-        branch = repo.branch(project.branch_name)
-        project.commits = [
-            _commit_to_json(commit) for commit in repo.commits(sha=branch.latest_sha())
+    tasks = Task.objects.filter(project__repository=repository, branch_name=branch_name)
+    for task in tasks:
+        origin_sha_index = [commit.sha for commit in commits].index(task.origin_sha)
+        task.commits = [
+            normalize_commit(commit) for commit in commits[:origin_sha_index]
         ]
-        project.save()
-        project.finalize_project_update()
-
-        project_commits_set = set(commit["sha"] for commit in project.commits)
-
-        tasks = project.tasks.filter(branch_name__isnull=False)
-        for task in tasks:
-            branch = repo.branch(task.branch_name)
-            task.commits = [
-                _commit_to_json(commit)
-                for commit in repo.commits(sha=branch.latest_sha())
-                if commit.sha not in project_commits_set
-            ]
-            task.save()
-            task.finalize_task_update()
+        task.finalize_task_update()
 
 
 refresh_commits_job = job(refresh_commits)

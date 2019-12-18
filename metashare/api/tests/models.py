@@ -43,13 +43,7 @@ class TestRepository:
     def test_refresh_commits(self, repository_factory, user_factory):
         repo = repository_factory()
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
-            repo.refresh_commits(None)
-            assert refresh_commits_job.delay.called
-
-    def test_add_commits(self, repository_factory, user_factory):
-        repo = repository_factory()
-        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
-            repo.add_commits(commits=[], ref="not a branch?", user=None)
+            repo.queue_refresh_commits(ref="master")
             assert refresh_commits_job.delay.called
 
 

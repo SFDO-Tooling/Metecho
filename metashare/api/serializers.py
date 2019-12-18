@@ -1,14 +1,17 @@
+import logging
 from typing import Optional
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from .fields import MarkdownField
 from .models import Project, Repository, ScratchOrg, Task
 from .validators import CaseInsensitiveUniqueTogetherValidator
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class FormattableDict:
@@ -89,13 +92,15 @@ class HookSerializerMixin:
         return Repository.objects.filter(repo_id=repo_id).first()
 
 
-class HookRepositorySerializer(serializers.Serializer):
+class HookRepositorySerializer(HookSerializerMixin, serializers.Serializer):
     id = serializers.IntegerField()
 
 
 class AuthorCommitSerializer(serializers.Serializer):
     name = serializers.CharField(required=False)
     email = serializers.CharField(required=False)
+    username = serializers.CharField(required=False)
+    avatar_url = serializers.CharField(required=False)
 
 
 class PrSerializer(serializers.Serializer):
@@ -110,24 +115,56 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
     repository = HookRepositorySerializer()
     # All other fields are ignored by default.
 
+    def process_hook(self):
+        repository = self.get_matching_repository()
+        if not repository:
+            raise NotFound("No matching repository.")
+
 
 class CommitSerializer(serializers.Serializer):
     id = serializers.CharField()
     timestamp = serializers.CharField()
     author = AuthorCommitSerializer()
-    committer = AuthorCommitSerializer()
     message = serializers.CharField()
+    url = serializers.CharField()
+
+
+class HookSenderSerializer(serializers.Serializer):
+    login = serializers.CharField(required=False)
+    avatar_url = serializers.CharField(required=False)
 
 
 class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
     forced = serializers.BooleanField()
     ref = serializers.CharField()
+    sender = HookSenderSerializer()
     commits = serializers.ListField(child=CommitSerializer())
     repository = HookRepositorySerializer()
     # All other fields are ignored by default.
 
     def is_force_push(self):
         return self.validated_data["forced"]
+
+    def process_hook(self):
+        repository = self.get_matching_repository()
+        if not repository:
+            raise NotFound("No matching repository.")
+
+        ref = self.validated_data["ref"]
+        branch_prefix = "refs/heads/"
+        if not ref.startswith(branch_prefix):
+            logger.error(f"Received an invalid ref: {ref}")
+            return
+        prefix_len = len(branch_prefix)
+        ref = ref[prefix_len:]
+
+        if self.is_force_push():
+            repository.queue_refresh_commits(ref=ref)
+        else:
+            sender = self.validated_data["sender"]
+            repository.add_commits(
+                commits=self.validated_data["commits"], ref=ref, sender=sender,
+            )
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -148,7 +185,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             "old_slugs",
             "repository",
             "branch_url",
-            "commits",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
