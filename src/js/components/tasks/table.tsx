@@ -39,7 +39,7 @@ const NameTableCell = ({
 );
 NameTableCell.displayName = DataTableCell.displayName;
 
-const StatusTableCell = ({ item, ...props }: DataCellProps) => (
+const StatusTableCell = ({ item, ...props }: TableCellProps) => (
   <DataTableCell {...props}>{item && i18n.t(item.status)}</DataTableCell>
 );
 StatusTableCell.displayName = DataTableCell.displayName;
