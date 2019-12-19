@@ -318,6 +318,7 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     def finalize_status_completed(self):
         self.status = TASK_STATUSES.Completed
+        self.has_unmerged_commits = False
         self.save()
         self.notify_changed()
 
