@@ -316,6 +316,52 @@ describe('<TaskDetail/>', () => {
     });
   });
 
+  describe('pr is closed', () => {
+    test('renders "Submit Task for Review" button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            ...defaultState.tasks,
+            project1: [
+              {
+                ...defaultState.tasks.project1[0],
+                has_unmerged_commits: true,
+                pr_url: 'my-pr-url',
+                pr_is_open: false,
+              },
+            ],
+          },
+        },
+      });
+
+      expect(getByText('Submit Task for Review')).toBeVisible();
+    });
+  });
+
+  describe('pr is open', () => {
+    test('does not render "Submit Task for Review" button', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            ...defaultState.tasks,
+            project1: [
+              {
+                ...defaultState.tasks.project1[0],
+                has_unmerged_commits: true,
+                pr_url: 'my-pr-url',
+                pr_is_open: true,
+              },
+            ],
+          },
+        },
+      });
+
+      expect(queryByText('Submit Task for Review')).toBeNull();
+    });
+  });
+
   describe('"Submit Task for Review" click', () => {
     test('opens modal', () => {
       const { getByText } = setup({
