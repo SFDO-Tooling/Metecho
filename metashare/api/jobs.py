@@ -250,6 +250,7 @@ def create_pr(
         )
         task.refresh_from_db()
         task.pr_number = pr.number
+        task.pr_is_open = True
     except Exception as e:
         task.refresh_from_db()
         task.finalize_create_pr(e)

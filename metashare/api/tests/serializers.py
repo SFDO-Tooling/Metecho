@@ -4,7 +4,6 @@ import pytest
 
 from ..serializers import (
     HashidPrimaryKeyRelatedField,
-    HookSerializer,
     ProjectSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
@@ -181,21 +180,3 @@ def test_ScratchOrgSerializer(rf, user_factory, task_factory):
         instance = serializer.save()
 
     assert instance.owner == user
-
-
-@pytest.mark.django_db
-class TestHookSerializer:
-    def test_process_hook(self, repository_factory):
-        repository_factory(repo_id=123)
-        data = {
-            "forced": False,
-            "ref": "not a branch?",
-            "commits": [],
-            "repository": {"id": 123},
-            "sender": {},
-        }
-        serializer = HookSerializer(data=data)
-        assert serializer.is_valid(), serializer.errors
-        with patch("metashare.api.serializers.logger") as logger:
-            serializer.process_hook()
-            assert logger.error.called

@@ -145,6 +145,8 @@ def validate_gh_hook_signature(
     *, hook_secret: bytes, signature: bytes, message: bytes
 ) -> bool:
     local_signature = "sha1=" + hmac.new(hook_secret, message, "sha1").hexdigest()
+    # Uncomment this when writing webhook tests to confirm the signature
+    # for the test:
     # print("\033[1;92m======>", local_signature, "\033[0m")
     return hmac.compare_digest(local_signature, signature)
 

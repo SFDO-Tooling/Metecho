@@ -55,7 +55,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
 
   const readyToSubmit = Boolean(
-    task && task.has_unmerged_commits && !task.pr_url,
+    task && task.has_unmerged_commits && !task.pr_is_open,
   );
   const currentlySubmitting = Boolean(task && task.currently_creating_pr);
   let currentlyFetching = false;

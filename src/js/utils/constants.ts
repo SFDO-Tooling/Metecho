@@ -32,3 +32,11 @@ export const WEBSOCKET_ACTIONS = {
   SUBSCRIBE: 'SUBSCRIBE' as 'SUBSCRIBE',
   UNSUBSCRIBE: 'UNSUBSCRIBE' as 'UNSUBSCRIBE',
 };
+
+export type TaskStatuses = 'Planned' | 'In progress' | 'Completed';
+
+export const TASK_STATUSES = {
+  PLANNED: 'Planned' as 'Planned',
+  IN_PROGRESS: 'In progress' as 'In progress',
+  COMPLETED: 'Completed' as 'Completed',
+};

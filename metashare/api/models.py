@@ -26,6 +26,10 @@ from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
+SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+TASK_STATUSES = Choices(
+    ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
+)
 
 
 class UserQuerySet(models.QuerySet):
@@ -287,6 +291,10 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
+    pr_is_open = models.BooleanField(default=False)
+    status = models.CharField(
+        choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
+    )
 
     slug_class = TaskSlug
 
@@ -308,6 +316,23 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     # end PushMixin configuration
 
     def finalize_task_update(self):
+        self.save()
+        self.notify_changed()
+
+    def finalize_status_completed(self):
+        self.status = TASK_STATUSES.Completed
+        self.has_unmerged_commits = False
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_closed(self):
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_reopened(self):
+        self.pr_is_open = True
         self.save()
         self.notify_changed()
 
@@ -338,6 +363,18 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         else:
             self.notify_error(error)
 
+    def finalize_provision(self):
+        if self.status == TASK_STATUSES.Planned:
+            self.status = TASK_STATUSES["In progress"]
+            self.save()
+            self.notify_changed()
+
+    def finalize_commit_changes(self):
+        if self.status != TASK_STATUSES["In progress"]:
+            self.status = TASK_STATUSES["In progress"]
+            self.save()
+            self.notify_changed()
+
     def add_commits(self, commits, sender):
         self.commits = [
             gh.normalize_commit(c, sender=sender) for c in commits
@@ -351,9 +388,6 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)
-
-
-SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
 class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
@@ -453,6 +487,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed("SCRATCH_ORG_PROVISION")
+            self.task.finalize_provision()
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_PROVISION_FAILED")
             # If the scratch org has already been created on Salesforce,
@@ -495,6 +530,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.save()
         if error is None:
             self.notify_changed("SCRATCH_ORG_COMMIT_CHANGES")
+            self.task.finalize_commit_changes()
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
 
