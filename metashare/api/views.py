@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 
 from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
+from .hook_serializers import PrHookSerializer, PushHookSerializer
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
@@ -19,9 +20,7 @@ from .serializers import (
     CreatePrSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
-    PrHookSerializer,
     ProjectSerializer,
-    PushHookSerializer,
     RepositorySerializer,
     ScratchOrgSerializer,
     TaskSerializer,
