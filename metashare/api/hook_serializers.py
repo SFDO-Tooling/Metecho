@@ -43,6 +43,9 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
     def _is_merged(self):
         return self._is_closed() and self.validated_data["pull_request"]["merged"]
 
+    def _is_reopened(self):
+        return self.validated_data["action"] == "reopened"
+
     def _get_matching_task(self, repository):
         return Task.objects.filter(
             project__repository=repository, pr_number=self.validated_data["number"]
@@ -53,11 +56,13 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
         if not repository:
             raise NotFound("No matching repository.")
 
-        if self._is_closed():
+        if self._is_closed() or self._is_reopened():
             task = self._get_matching_task(repository)
             if task is None:
                 return
-            if self._is_merged():
+            if self._is_reopened():
+                task.finalize_pr_reopened()
+            elif self._is_merged():
                 task.finalize_status_completed()
             else:
                 task.finalize_pr_closed()

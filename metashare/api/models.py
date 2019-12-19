@@ -331,6 +331,11 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         self.save()
         self.notify_changed()
 
+    def finalize_pr_reopened(self):
+        self.pr_is_open = True
+        self.save()
+        self.notify_changed()
+
     def queue_create_pr(
         self, user, *, title, critical_changes, additional_changes, issues, notes
     ):
