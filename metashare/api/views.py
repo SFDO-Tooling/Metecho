@@ -42,21 +42,21 @@ class HookView(APIView):
 
     def post(self, request):
         # To support the various formats that GitHub can post to this endpoint:
-        # TODO: we can route this based on the X-GitHub-Event header.
         serializers = {
-            "push": PushHookSerializer(data=request.data),
-            "pr": PrHookSerializer(data=request.data),
+            "push": PushHookSerializer,
+            "pull_request": PrHookSerializer,
         }
-        errors = {}
-        for key, serializer in serializers.items():
-            if not serializer.is_valid():
-                errors[key] = serializer.errors
-            else:
-                serializer.process_hook()
-                return Response(status=status.HTTP_202_ACCEPTED)
+        serializer_class = serializers.get(request.META.get("HTTP_X_GITHUB_EVENT"))
+        if serializer_class is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer = serializer_class(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
 
-        # We only get here if no serializer has matched and processed the request:
-        return Response(errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        serializer.process_hook()
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):

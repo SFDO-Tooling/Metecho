@@ -111,7 +111,7 @@ class TestRepositoryView:
 
 @pytest.mark.django_db
 class TestHookView:
-    def test_202__not_forced(
+    def test_202__push_not_forced(
         self,
         settings,
         client,
@@ -156,13 +156,29 @@ class TestHookView:
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
                 HTTP_X_HUB_SIGNATURE="sha1=6a5d470ca262a2522635f1adb71a13b18446dd54",
+                HTTP_X_GITHUB_EVENT="push",
             )
             assert response.status_code == 202, response.content
             assert not refresh_commits_job.delay.called
             task.refresh_from_db()
             assert len(task.commits) == 1
 
-    def test_202__forced(
+    def test_400__no_handler(
+        self, settings, client,
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        response = client.post(
+            reverse("hook"),
+            json.dumps({}),
+            content_type="application/json",
+            # The sha1 hexdigest of the request body x the secret
+            # key above:
+            HTTP_X_HUB_SIGNATURE="sha1=9b9585ab4f87eff122c8cd8e6fd94d358ed56f22",
+            HTTP_X_GITHUB_EVENT="some unknown event",
+        )
+        assert response.status_code == 400, response.content
+
+    def test_202__push_forced(
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_HOOK_SECRET = b""
@@ -184,11 +200,12 @@ class TestHookView:
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
                 HTTP_X_HUB_SIGNATURE="sha1=01453662feaae85e7bb81452ffa7d3659294852d",
+                HTTP_X_GITHUB_EVENT="push",
             )
             assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
 
-    def test_422(
+    def test_422__push_error(
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_HOOK_SECRET = b""
@@ -208,10 +225,11 @@ class TestHookView:
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
             HTTP_X_HUB_SIGNATURE="sha1=6fc6f8c254a19276680948251ccb9644995c3692",
+            HTTP_X_GITHUB_EVENT="push",
         )
         assert response.status_code == 422, response.json()
 
-    def test_404(self, settings, client, repository_factory):
+    def test_404__push_no_matching_repo(self, settings, client, repository_factory):
         settings.GITHUB_HOOK_SECRET = b""
         repository_factory()
         response = client.post(
@@ -229,10 +247,11 @@ class TestHookView:
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
             HTTP_X_HUB_SIGNATURE="sha1=4129db8949c2aa1b82f850a68cc384019c0d73d0",
+            HTTP_X_GITHUB_EVENT="push",
         )
         assert response.status_code == 404
 
-    def test_403(self, settings, client, repository_factory):
+    def test_403__push_bad_signature(self, settings, client, repository_factory):
         settings.GITHUB_HOOK_SECRET = b""
         repository_factory(repo_id=123)
         response = client.post(
@@ -250,6 +269,7 @@ class TestHookView:
             # The sha1 hexdigest of the request body x the secret key
             # above:
             HTTP_X_HUB_SIGNATURE="sha1=b5aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae8c",
+            HTTP_X_GITHUB_EVENT="push",
         )
         assert response.status_code == 403
 
