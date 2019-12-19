@@ -15,11 +15,11 @@ class Migration(migrations.Migration):
             name="status",
             field=models.CharField(
                 choices=[
-                    ("Unstarted", "Unstarted"),
+                    ("Planned", "Planned"),
                     ("In progress", "In progress"),
                     ("Completed", "Completed"),
                 ],
-                default="Unstarted",
+                default="Planned",
                 max_length=16,
             ),
         ),

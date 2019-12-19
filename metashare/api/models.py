@@ -27,7 +27,7 @@ from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
-TASK_STATUSES = Choices("Unstarted", "In progress", "Completed",)
+TASK_STATUSES = Choices("Planned", "In progress", "Completed",)
 
 
 class UserQuerySet(models.QuerySet):
@@ -290,7 +290,7 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     status = models.CharField(
-        choices=TASK_STATUSES, default=TASK_STATUSES.Unstarted, max_length=16
+        choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
 
     slug_class = TaskSlug
