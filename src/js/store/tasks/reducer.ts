@@ -3,7 +3,7 @@
 import { ObjectsAction } from '@/store/actions';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
-import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes, TaskStatuses } from '@/utils/constants';
 
 export interface Commit {
   id: string;
@@ -31,7 +31,7 @@ export interface Task {
   branch_diff_url: string | null;
   pr_url: string | null;
   commits: Commit[];
-  status: string;
+  status: TaskStatuses;
 }
 
 export interface TaskState {
