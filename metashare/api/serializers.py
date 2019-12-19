@@ -152,6 +152,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "branch_diff_url",
             "pr_url",
             "status",
+            "pr_is_open",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

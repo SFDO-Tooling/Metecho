@@ -291,6 +291,7 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
+    pr_is_open = models.BooleanField(default=False)
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
@@ -321,6 +322,12 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     def finalize_status_completed(self):
         self.status = TASK_STATUSES.Completed
         self.has_unmerged_commits = False
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_closed(self):
+        self.pr_is_open = False
         self.save()
         self.notify_changed()
 
