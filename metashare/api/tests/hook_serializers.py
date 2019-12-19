@@ -72,3 +72,45 @@ class TestPrHookSerializer:
 
         task.refresh_from_db()
         assert task.status == TASK_STATUSES.Completed
+
+    def test_process_hook__closed_not_merged(self, repository_factory, task_factory):
+        repository = repository_factory(repo_id=123)
+        task = task_factory(
+            pr_number=456,
+            project__repository=repository,
+            status=TASK_STATUSES["In progress"],
+        )
+        data = {
+            "action": "closed",
+            "number": 456,
+            "pull_request": {"merged": False},
+            "repository": {"id": 123},
+        }
+        serializer = PrHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        serializer.process_hook()
+
+        task.refresh_from_db()
+        assert task.status == TASK_STATUSES["In progress"]
+        assert not task.pr_is_open
+
+    def test_process_hook__reopened(self, repository_factory, task_factory):
+        repository = repository_factory(repo_id=123)
+        task = task_factory(
+            pr_number=456,
+            project__repository=repository,
+            status=TASK_STATUSES["In progress"],
+        )
+        data = {
+            "action": "reopened",
+            "number": 456,
+            "pull_request": {"merged": False},
+            "repository": {"id": 123},
+        }
+        serializer = PrHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        serializer.process_hook()
+
+        task.refresh_from_db()
+        assert task.status == TASK_STATUSES["In progress"]
+        assert task.pr_is_open
