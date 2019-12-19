@@ -81,7 +81,7 @@ class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
     repository = HookRepositorySerializer()
     # All other fields are ignored by default.
 
-    def is_force_push(self):
+    def _is_force_push(self):
         return self.validated_data["forced"]
 
     def process_hook(self):
@@ -97,7 +97,7 @@ class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
         prefix_len = len(branch_prefix)
         ref = ref[prefix_len:]
 
-        if self.is_force_push():
+        if self._is_force_push():
             repository.queue_refresh_commits(ref=ref)
         else:
             sender = self.validated_data["sender"]
