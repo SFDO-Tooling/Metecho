@@ -13,6 +13,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
@@ -27,7 +28,11 @@ from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
-TASK_STATUSES = Choices("Planned", "In progress", "Completed",)
+TASK_STATUSES = Choices(
+    ("Planned", _("Planned")),
+    ("In progress", _("In progress")),
+    ("Completed", _("Completed")),
+)
 
 
 class UserQuerySet(models.QuerySet):
