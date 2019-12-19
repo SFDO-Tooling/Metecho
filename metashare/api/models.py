@@ -349,6 +349,12 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
             self.notify_error(error)
 
     def finalize_provision(self):
+        if self.status == TASK_STATUSES.Planned:
+            self.status = TASK_STATUSES["In progress"]
+            self.save()
+            self.notify_changed()
+
+    def finalize_commit_changes(self):
         if self.status != TASK_STATUSES["In progress"]:
             self.status = TASK_STATUSES["In progress"]
             self.save()
@@ -490,7 +496,6 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed()
-            self.task.finalize_provision()
         else:
             self.unsaved_changes = {}
             self.save()
@@ -510,6 +515,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.save()
         if error is None:
             self.notify_changed("SCRATCH_ORG_COMMIT_CHANGES")
+            self.task.finalize_commit_changes()
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
 
