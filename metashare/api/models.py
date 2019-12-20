@@ -264,7 +264,7 @@ class Project(
 
     # begin PushMixin configuration:
     push_update_type = "PROJECT_UPDATE"
-    push_error_type = None
+    push_error_type = "PROJECT_CREATE_PR_FAILED"
 
     def get_serialized_representation(self):
         from .serializers import ProjectSerializer
@@ -274,7 +274,7 @@ class Project(
     # end PushMixin configuration
 
     # begin CreatePrMixin configuration:
-    create_pr_event = "PROJECT_PR_CREATE"
+    create_pr_event = "PROJECT_CREATE_PR"
 
     def get_repo_id(self, user):
         return self.repository.get_repo_id(user)
@@ -363,7 +363,7 @@ class Task(
     # end PushMixin configuration
 
     # begin CreatePrMixin configuration:
-    create_pr_event = "TASK_PR_CREATE"
+    create_pr_event = "TASK_CREATE_PR"
 
     def get_repo_id(self, user):
         return self.project.repository.get_repo_id(user)
