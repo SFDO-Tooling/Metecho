@@ -15,17 +15,19 @@ import {
 import { OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
-  taskId: string;
-  taskName: string;
-  taskDiffUrl: string | null;
+  instanceId: string;
+  instanceName: string;
+  instanceDiffUrl: string | null;
+  instanceType: string;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SubmitModal = ({
-  taskId,
-  taskName,
-  taskDiffUrl,
+  instanceId,
+  instanceName,
+  instanceDiffUrl,
+  instanceType,
   isOpen,
   toggleModal,
 }: Props) => {
@@ -48,6 +50,27 @@ const SubmitModal = ({
     }
   };
 
+  let obejctType;
+  switch (instanceType) {
+    case 'task':
+      objectType = {
+        /* eslint-enable @typescript-eslint/camelcase */
+        objectType: OBJECT_TYPES.TASK_PR,
+        url: window.api_urls.task_create_pr(instanceId),
+      };
+      break;
+    case 'project':
+      objectType = {
+        /* eslint-enable @typescript-eslint/camelcase */
+        objectType: OBJECT_TYPES.PROJECT_PR,
+        url: window.api_urls.project_create_pr(projectId),
+      };
+      break;
+    default:
+      console.warning('Invalid instance type for SubmitModal');
+      return null;
+  }
+
   const {
     inputs,
     errors,
@@ -57,17 +80,15 @@ const SubmitModal = ({
   } = useForm({
     /* eslint-disable @typescript-eslint/camelcase */
     fields: {
-      title: taskName,
+      title: instanceName,
       critical_changes: '',
       additional_changes: '',
       issues: '',
       notes: '',
     },
-    /* eslint-enable @typescript-eslint/camelcase */
-    objectType: OBJECT_TYPES.TASK_PR,
-    url: window.api_urls.task_create_pr(taskId),
     onSuccess: handleSuccess,
     onError: handleError,
+    ...objectType,
   });
 
   const handleSubmitClicked = () => {
@@ -186,9 +207,9 @@ const SubmitModal = ({
               slds-medium-size_6-of-12
               slds-large-size_4-of-12"
           >
-            {taskDiffUrl && (
+            {instanceDiffUrl && (
               <ExternalLink
-                url={taskDiffUrl}
+                url={instanceDiffUrl}
                 showButtonIcon
                 className="slds-button
                   slds-button_outline-brand

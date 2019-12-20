@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
