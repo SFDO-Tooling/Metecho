@@ -51,12 +51,8 @@ pytest-cov==2.8.1
 pytest-django==3.7.0
 pytest-factoryboy==2.0.3
 pytest-mock==1.13.0
-<<<<<<< HEAD
 pytest-sugar==0.9.2
-pytest==5.3.1
-=======
 pytest==5.3.2
->>>>>>> master
 pytz==2019.3              # via babel
 regex==2019.11.1          # via black
 remote-pdb==2.0.0
