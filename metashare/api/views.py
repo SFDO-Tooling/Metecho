@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 
 from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
+from .hook_serializers import PrHookSerializer, PushHookSerializer
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
@@ -19,9 +20,7 @@ from .serializers import (
     CreatePrSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
-    PrHookSerializer,
     ProjectSerializer,
-    PushHookSerializer,
     RepositorySerializer,
     ScratchOrgSerializer,
     TaskSerializer,
@@ -60,65 +59,23 @@ class CreatePrMixin:
 class HookView(APIView):
     authentication_classes = (GitHubHookAuthentication,)
 
-    def _handle_push_serializer(self, serializer):
-        repository = serializer.get_matching_repository()
-        if not repository:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        user = repository.get_a_matching_user()
-        if not user:
-            return Response(
-                {"error": f"No matching user for repository {repository.pk}."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-        if serializer.is_force_push():
-            repository.refresh_commits(user)
-        else:
-            repository.add_commits(
-                commits=serializer.validated_data["commits"],
-                ref=serializer.validated_data["ref"],
-                user=user,
-            )
-        return Response(status=status.HTTP_202_ACCEPTED)
-
-    def _handle_pr_serializer(self, serializer):
-        repository = serializer.get_matching_repository()
-        if not repository:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        pr_number = serializer.validated_data["number"]
-        merged = serializer.is_merge()
-
-        if not merged:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        related_task = Task.objects.filter(pr_number=pr_number).first()
-        related_project = Project.objects.filter(pr_number=pr_number).first()
-        if related_task:
-            related_task.finalize_status_completed()
-            return Response(status=status.HTTP_200_OK)
-        elif related_project:
-            related_project.finalize_status_completed()
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
     def post(self, request):
-        push_serializer = PushHookSerializer(data=request.data)
-        pr_serializer = PrHookSerializer(data=request.data)
-
-        if push_serializer.is_valid():
-            return self._handle_push_serializer(push_serializer)
-        elif pr_serializer.is_valid():
-            return self._handle_pr_serializer(pr_serializer)
-        else:
+        # To support the various formats that GitHub can post to this endpoint:
+        serializers = {
+            "push": PushHookSerializer,
+            "pull_request": PrHookSerializer,
+        }
+        serializer_class = serializers.get(request.META.get("HTTP_X_GITHUB_EVENT"))
+        if serializer_class is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer = serializer_class(data=request.data)
+        if not serializer.is_valid():
             return Response(
-                {
-                    "pr_errors": pr_serializer.errors,
-                    "push_errors": push_serializer.errors,
-                },
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
+
+        serializer.process_hook()
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):

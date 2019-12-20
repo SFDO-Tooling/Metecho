@@ -3,15 +3,19 @@
 import { ObjectsAction } from '@/store/actions';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
-import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes, TaskStatuses } from '@/utils/constants';
 
 export interface Commit {
-  sha: string;
+  id: string;
   timestamp: string;
   message: string;
   author: {
+    name: string;
+    email: string;
+    username: string;
     avatar_url: string;
   };
+  url: string;
 }
 
 export interface Task {
@@ -26,7 +30,9 @@ export interface Task {
   branch_url: string | null;
   branch_diff_url: string | null;
   pr_url: string | null;
+  pr_is_open: boolean;
   commits: Commit[];
+  status: TaskStatuses;
 }
 
 export interface TaskState {

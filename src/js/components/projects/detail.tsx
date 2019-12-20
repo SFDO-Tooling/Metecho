@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -34,6 +35,29 @@ const ProjectDetail = (props: RouteComponentProps) => {
     project && project.has_unmerged_commits && !project.pr_url,
   );
   console.debug('Ready to Submit', readyToSubmit);
+
+  // Subscribe to individual task WS channels once, and unsubscribe on unmount
+  const taskIds = tasks && tasks.map((t) => t.id);
+  useEffect(() => {
+    if (taskIds && window.socket) {
+      for (const id of taskIds) {
+        window.socket.subscribe({
+          model: OBJECT_TYPES.TASK,
+          id,
+        });
+      }
+    }
+    return () => {
+      if (taskIds && window.socket) {
+        for (const id of taskIds) {
+          window.socket.unsubscribe({
+            model: OBJECT_TYPES.TASK,
+            id,
+          });
+        }
+      }
+    };
+  }, [taskIds]);
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,

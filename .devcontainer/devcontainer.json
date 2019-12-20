@@ -17,7 +17,6 @@
     "ms-python.python",
     "ms-vscode.sublime-keybindings",
     "naumovs.color-highlight",
-    "shinnn.stylelint",
     "stkb.rewrap",
     "syler.sass-indented",
     "tyriar.sort-lines",
@@ -28,23 +27,13 @@
     "editor.tabSize": 2,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll": true
+    },
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
     "javascript.suggestionActions.enabled": false,
-    "eslint.autoFixOnSave": true,
-    "eslint.validate": [
-      "javascript",
-      "javascriptreact",
-      {
-        "language": "typescript",
-        "autoFix": true
-      },
-      {
-        "language": "typescriptreact",
-        "autoFix": true
-      }
-    ],
     "typescript.preferences.quoteStyle": "single",
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
@@ -56,7 +45,6 @@
     "restructuredtext.linter.extraArgs": ["--max-line-length 80"],
     "restructuredtext.confPath": "${workspaceFolder}/docs",
     "[javascript]": {
-      "editor.formatOnSave": false,
       "editor.rulers": [80]
     },
     "[restructuredtext]": {
@@ -66,15 +54,12 @@
       "editor.rulers": [80]
     },
     "[javascriptreact]": {
-      "editor.formatOnSave": false,
       "editor.rulers": [80]
     },
     "[typescript]": {
-      "editor.formatOnSave": false,
       "editor.rulers": [80]
     },
     "[typescriptreact]": {
-      "editor.formatOnSave": false,
       "editor.rulers": [80]
     },
     "[python]": {

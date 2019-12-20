@@ -58,6 +58,33 @@ const defaultState = {
         old_slugs: [],
         project: 'project1',
         description: 'Task Description',
+        status: 'Completed',
+      },
+      {
+        id: 'task2',
+        name: 'Task 2',
+        slug: 'task-2',
+        old_slugs: [],
+        project: 'project1',
+        description: 'Task Description',
+        status: 'In progress',
+      },
+      {
+        id: 'task3',
+        name: 'Task 3',
+        slug: 'task-3',
+        old_slugs: [],
+        project: 'project1',
+        description: 'Task Description',
+        status: 'Planned',
+      },
+      {
+        id: 'task4',
+        name: 'Task 4',
+        slug: 'task-4',
+        old_slugs: [],
+        project: 'project1',
+        description: 'Task Description',
       },
     ],
   },
@@ -73,14 +100,14 @@ describe('<ProjectDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug, projectSlug } = opts;
     const context = {};
-    const { getByText, getByTitle, queryByText } = renderWithRedux(
+    const response = renderWithRedux(
       <StaticRouter context={context}>
         <ProjectDetail match={{ params: { repositorySlug, projectSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { getByText, getByTitle, queryByText, context };
+    return { ...response, context };
   };
 
   test('renders project detail and tasks list', () => {
@@ -90,6 +117,40 @@ describe('<ProjectDetail/>', () => {
     expect(getByText('Project Description')).toBeVisible();
     expect(getByText('Tasks for Project 1')).toBeVisible();
     expect(getByText('Task 1')).toBeVisible();
+  });
+
+  describe('with websocket', () => {
+    beforeEach(() => {
+      window.socket = { subscribe: jest.fn(), unsubscribe: jest.fn() };
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(window, 'socket');
+    });
+
+    test('subscribes to task', () => {
+      setup();
+
+      expect(window.socket.subscribe).toHaveBeenCalledTimes(4);
+      expect(window.socket.subscribe).toHaveBeenCalledWith({
+        model: 'task',
+        id: 'task1',
+      });
+    });
+
+    test('unsubscribes from task on unmount', () => {
+      const { unmount } = setup();
+
+      expect(window.socket.unsubscribe).not.toHaveBeenCalled();
+
+      unmount();
+
+      expect(window.socket.subscribe).toHaveBeenCalledTimes(4);
+      expect(window.socket.unsubscribe).toHaveBeenCalledWith({
+        model: 'task',
+        id: 'task1',
+      });
+    });
   });
 
   test('renders with form expanded if no tasks', () => {

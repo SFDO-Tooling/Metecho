@@ -33,7 +33,9 @@ from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
-TASK_STATUSES = Choices("Unstarted", "In progress", "Completed",)
+TASK_STATUSES = Choices(
+    ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
+)
 
 
 class UserQuerySet(models.QuerySet):
@@ -41,7 +43,8 @@ class UserQuerySet(models.QuerySet):
 
 
 class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
-    pass
+    def get_or_create_github_user(self):
+        return self.get_or_create(username=settings.GITHUB_USER_NAME,)[0]
 
 
 class User(HashIdMixin, AbstractUser):
@@ -168,12 +171,7 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    PushMixin,
-    PopulateRepoIdMixin,
-    HashIdMixin,
-    TimestampsMixin,
-    SlugMixin,
-    models.Model,
+    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -181,10 +179,6 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
-    commits = JSONField(default=list)
-    branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
-    )
 
     slug_class = RepositorySlug
 
@@ -221,36 +215,17 @@ class Repository(
 
         return None
 
-    def refresh_commits(self, user):
+    def queue_refresh_commits(self, *, ref):
         from .jobs import refresh_commits_job
 
-        refresh_commits_job.delay(user=user, repository=self)
+        refresh_commits_job.delay(repository=self, branch_name=ref)
 
     @transaction.atomic
-    def add_commits(self, *, commits, ref, user):
-        branch_prefix = "refs/heads/"
-        if not ref.startswith(branch_prefix):
-            self.refresh_commits(user)
-        else:
-            prefix_len = len(branch_prefix)
-            ref = ref[prefix_len:]
-            matching_repo = self if self.branch_name == ref else None
-            matching_projects = self.projects.filter(branch_name=ref)
-            matching_tasks = Task.objects.filter(
-                branch_name=ref, project__repository=self
-            )
+    def add_commits(self, *, commits, ref, sender):
+        matching_tasks = Task.objects.filter(branch_name=ref, project__repository=self)
 
-            if matching_repo:
-                self.commits += commits
-                self.save()
-
-            for project in matching_projects:
-                project.commits += commits
-                project.save()
-
-            for task in matching_tasks:
-                task.commits += commits
-                task.save()
+        for task in matching_tasks:
+            task.add_commits(commits, sender)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
@@ -285,7 +260,6 @@ class Project(
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
-    commits = JSONField(default=list)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -358,12 +332,15 @@ class Task(
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
-    commits = JSONField(default=list)
+    commits = JSONField(default=list, blank=True)
+    origin_sha = StringField(null=True, blank=True)
+    ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
+    pr_is_open = models.BooleanField(default=False)
     status = models.CharField(
-        choices=TASK_STATUSES, default=TASK_STATUSES.Unstarted, max_length=16
+        choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
 
     slug_class = TaskSlug
@@ -406,14 +383,41 @@ class Task(
     def finalize_status_completed(self):
         self.status = TASK_STATUSES.Completed
         self.has_unmerged_commits = False
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_closed(self):
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_reopened(self):
+        self.pr_is_open = True
         self.save()
         self.notify_changed()
 
     def finalize_provision(self):
+        if self.status == TASK_STATUSES.Planned:
+            self.status = TASK_STATUSES["In progress"]
+            self.save()
+            self.notify_changed()
+
+    def finalize_commit_changes(self):
         if self.status != TASK_STATUSES["In progress"]:
             self.status = TASK_STATUSES["In progress"]
             self.save()
             self.notify_changed()
+
+    def add_commits(self, commits, sender):
+        self.commits = [
+            gh.normalize_commit(c, sender=sender) for c in commits
+        ] + self.commits
+        self.save()
+        self.notify_changed()
+
+    def add_ms_git_sha(self, sha):
+        self.ms_commits.append(sha)
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -541,7 +545,6 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed()
-            self.task.finalize_provision()
         else:
             self.unsaved_changes = {}
             self.save()
@@ -561,6 +564,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.save()
         if error is None:
             self.notify_changed("SCRATCH_ORG_COMMIT_CHANGES")
+            self.task.finalize_commit_changes()
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
 

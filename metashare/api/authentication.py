@@ -16,5 +16,5 @@ class GitHubHookAuthentication(authentication.BaseAuthentication):
         )
         if not valid_signature:
             raise exceptions.AuthenticationFailed("Invalid signature")
-        user = User.objects.get(pk=settings.GITHUB_USER_ID)
+        user = User.objects.get_or_create_github_user()
         return (user, None)

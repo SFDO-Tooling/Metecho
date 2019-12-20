@@ -29,22 +29,23 @@ Retrieve
         "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project__test-task",
         "commits": [
           {
-            "sha": "some sha",
+            "id": "617a512",
+            "timestamp": "2019-02-01T19:47:49Z",
             "author": {
-              "login": "username",
+              "name": "Full Name",
+              "username": "username",
+              "email": "user@example.com",
               "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
             },
             "message": "Some commit message",
-            "committer": {
-              "login": "username",
-              "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
-            }
+            "url": "https://github.com/SFDO-Tooling/commit/617a512"
           },
           ...
         ],
         "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-project...feature/test-project__test-task",
         "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
-        "status": "Unstarted"
+        "pr_is_open": true,
+        "status": "Planned"
       }
       ...
     ]
