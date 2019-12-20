@@ -66,15 +66,6 @@ class TestProject:
         project = project_factory(repository=repo)
         assert project.get_repo_id(user) == 123
 
-    def test_get_base(self, project_factory):
-        project = project_factory(branch_name="base-branch")
-        assert project.get_base() == "base-branch"
-
-    @pytest.mark.xfail
-    def test_get_head(self, project_factory):
-        project = project_factory(repository__branch_name="head-branch")
-        assert project.get_head() == "head-branch"
-
     def test_finalize_status_completed(self, project_factory):
         project = project_factory(has_unmerged_commits=True)
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
@@ -82,6 +73,21 @@ class TestProject:
             project.refresh_from_db()
             assert not project.has_unmerged_commits
             assert async_to_sync.called
+
+    def test_queue_create_pr(self, project_factory, user_factory):
+        with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
+            project = project_factory()
+            user = user_factory()
+            project.queue_create_pr(
+                user,
+                title="My PR",
+                critical_changes="",
+                additional_changes="",
+                issues="",
+                notes="",
+            )
+
+            assert create_pr_job.delay.called
 
 
 @pytest.mark.django_db

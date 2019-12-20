@@ -179,19 +179,11 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    branch_name = models.CharField(
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
+    )
 
     slug_class = RepositorySlug
-
-    # begin PushMixin configuration:
-    push_update_type = "REPOSITORY_UPDATE"
-    push_error_type = None
-
-    def get_serialized_representation(self):
-        from .serializers import RepositorySerializer
-
-        return RepositorySerializer(self).data
-
-    # end PushMixin configuration
 
     def __str__(self):
         return self.name
@@ -200,10 +192,6 @@ class Repository(
         verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
-
-    def finalize_repository_update(self):
-        self.save()
-        self.notify_changed()
 
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
@@ -260,6 +248,7 @@ class Project(
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
+    pr_is_open = models.BooleanField(default=False)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -298,12 +287,23 @@ class Project(
 
     # end CreatePrMixin configuration
 
+    def finalize_pr_closed(self):
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_reopened(self):
+        self.pr_is_open = True
+        self.save()
+        self.notify_changed()
+
     def finalize_project_update(self):
         self.save()
         self.notify_changed()
 
     def finalize_status_completed(self):
         self.has_unmerged_commits = False
+        self.pr_is_open = False
         self.save()
         self.notify_changed()
 

@@ -314,7 +314,7 @@ def refresh_commits(*, repository, branch_name):
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
-    from .models import Project, Task
+    from .models import Task
 
     user = repository.get_a_matching_user()
     if user is None:
@@ -327,14 +327,6 @@ def refresh_commits(*, repository, branch_name):
     # assumption that we will find the origin of the task branch within
     # that limit.
     commits = list(repo.commits(repo.branch(branch_name).latest_sha(), number=1000))
-
-    projects = Project.objects.filter(repository=repository, branch_name=branch_name)
-    for project in projects:
-        origin_sha_index = [commit.sha for commit in commits].index(project.origin_sha)
-        project.commits = [
-            normalize_commit(commit) for commit in commits[:origin_sha_index]
-        ]
-        project.finalize_project_update()
 
     tasks = Task.objects.filter(project__repository=repository, branch_name=branch_name)
     for task in tasks:

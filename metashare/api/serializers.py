@@ -105,6 +105,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "has_unmerged_commits",
             "currently_creating_pr",
             "pr_url",
+            "pr_is_open",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
