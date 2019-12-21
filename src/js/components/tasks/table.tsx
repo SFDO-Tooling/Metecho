@@ -65,6 +65,7 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   return (
     <DataTableCell
       {...props}
+      title={displayStatus || item.status}
       className={classNames(className, 'project-task-status')}
     >
       {icon}
