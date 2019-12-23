@@ -197,6 +197,15 @@ class Repository(
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
 
+    def save(self, *args, **kwargs):
+        if not self.branch_name:
+            user = self.get_a_matching_user()
+            if user:
+                repo = gh.get_repo_info(user, repo_id=self.id)
+                self.branch_name = repo.default_branch
+
+        super().save(*args, **kwargs)
+
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
             repo_id=self.repo_id

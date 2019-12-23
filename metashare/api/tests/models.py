@@ -46,6 +46,16 @@ class TestRepository:
             repo.queue_refresh_commits(ref="some branch")
             assert refresh_commits_job.delay.called
 
+    def test_save(self, repository_factory, git_hub_repository_factory):
+        with patch("metashare.api.gh.get_repo_info") as get_repo_info:
+            get_repo_info.return_value = MagicMock(default_branch="main-branch")
+            git_hub_repository_factory(repo_id=123)
+            repo = repository_factory(branch_name=None, repo_id=123)
+            repo.save()
+            assert get_repo_info.called
+            repo.refresh_from_db()
+            assert repo.branch_name == "main-branch"
+
 
 @pytest.mark.django_db
 class TestProject:
