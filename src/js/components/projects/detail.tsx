@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useEffect, useState } from 'react';
@@ -11,6 +12,7 @@ import SubmitModal from '@/components/tasks/submit';
 import TaskTable from '@/components/tasks/table';
 import {
   DetailPageLayout,
+  ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
@@ -118,6 +120,28 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const onRenderHeaderActions = () => (
+    <PageHeaderControl>
+      <Button
+        iconCategory="utility"
+        iconName="delete"
+        iconPosition="left"
+        label={i18n.t('Delete Project')}
+        variant="text-destructive"
+        disabled
+      />
+      {project.pr_url || project.branch_url ? (
+        <ExternalLink
+          url={(project.pr_url || project.branch_url) as string}
+          showButtonIcon
+          className="slds-button slds-button_outline-brand"
+        >
+          {project.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
+        </ExternalLink>
+      ) : null}
+    </PageHeaderControl>
+  );
+
   return (
     <DocumentTitle
       title={`${project.name} | ${repository.name} | ${i18n.t('MetaShare')}`}
@@ -133,6 +157,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           },
           { name: project.name },
         ]}
+        onRenderHeaderActions={onRenderHeaderActions}
       >
         {submitButton}
         {tasks ? (
