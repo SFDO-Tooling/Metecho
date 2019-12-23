@@ -15,7 +15,7 @@ bleach==3.1.0
 certifi==2019.11.28       # via cumulusci, requests, sentry-sdk
 cffi==1.13.2              # via cryptography, cumulusci
 channels-redis==2.4.1
-channels==2.3.1
+channels==2.4.0
 chardet==3.0.4            # via cumulusci, requests
 click==7.0                # via cumulusci, rq
 coloredlogs==10.0         # via cumulusci
@@ -25,7 +25,7 @@ cumulusci==3.2.0
 daphne==2.3.0             # via channels
 defusedxml==0.6.0         # via python3-openid
 dj-database-url==0.5.0
-django-allauth==0.40.0
+django-allauth==0.41.0
 django-filter==2.2.0
 django-filters==0.2.1
 django-hashid-field==3.0.0
@@ -58,7 +58,7 @@ lxml==4.4.2               # via cumulusci
 markdown==3.1.1
 markupsafe==1.1.1         # via cumulusci, jinja2
 msgpack==0.6.2            # via channels-redis
-newrelic==5.4.0.132
+newrelic==5.4.1.134
 oauthlib==3.1.0           # via requests-oauthlib
 pillow==6.2.1
 psycopg2-binary==2.8.4

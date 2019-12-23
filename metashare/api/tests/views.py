@@ -1,8 +1,10 @@
+import json
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.urls import reverse
+from github3.exceptions import ResponseError
 
 from ..models import SCRATCH_ORG_TYPES
 
@@ -41,32 +43,235 @@ def test_user_refresh_view(client):
 
 
 @pytest.mark.django_db
-def test_repository_view(client, repository_factory, git_hub_repository_factory):
-    git_hub_repository_factory(
-        user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
-    )
-    repo = repository_factory(repo_name="repo", repo_id=123)
-    repository_factory(repo_name="repo2", repo_id=456)
-    repository_factory(repo_name="repo3", repo_id=None)
-    response = client.get(reverse("repository-list"))
+class TestRepositoryView:
+    def test_get_queryset(self, client, repository_factory, git_hub_repository_factory):
+        git_hub_repository_factory(
+            user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
+        )
+        repo = repository_factory(repo_name="repo", repo_id=123)
+        repository_factory(repo_name="repo2", repo_id=456)
+        repository_factory(repo_name="repo3", repo_id=None)
+        with patch("metashare.api.model_mixins.get_repo_info") as get_repo_info:
+            get_repo_info.return_value = MagicMock(id=789)
+            response = client.get(reverse("repository-list"))
 
-    assert response.status_code == 200
-    assert response.json() == {
-        "count": 1,
-        "previous": None,
-        "next": None,
-        "results": [
-            {
-                "id": str(repo.id),
-                "name": str(repo.name),
-                "description": "",
-                "is_managed": False,
-                "slug": str(repo.slug),
-                "old_slugs": [],
-                "repo_url": f"https://github.com/{repo.repo_owner}/{repo.repo_name}",
-            }
-        ],
-    }
+        assert response.status_code == 200
+        assert response.json() == {
+            "count": 1,
+            "previous": None,
+            "next": None,
+            "results": [
+                {
+                    "id": str(repo.id),
+                    "name": str(repo.name),
+                    "description": "",
+                    "is_managed": False,
+                    "slug": str(repo.slug),
+                    "old_slugs": [],
+                    "repo_url": (
+                        f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
+                    ),
+                }
+            ],
+        }
+
+    def test_get_queryset__bad(
+        self, client, repository_factory, git_hub_repository_factory
+    ):
+        git_hub_repository_factory(
+            user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
+        )
+        repo = repository_factory(repo_name="repo", repo_id=123)
+        repository_factory(repo_name="repo2", repo_id=456)
+        repository_factory(repo_name="repo3", repo_id=None)
+        with patch("metashare.api.model_mixins.get_repo_info") as get_repo_info:
+            get_repo_info.side_effect = ResponseError(MagicMock())
+            response = client.get(reverse("repository-list"))
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "count": 1,
+            "previous": None,
+            "next": None,
+            "results": [
+                {
+                    "id": str(repo.id),
+                    "name": str(repo.name),
+                    "description": "",
+                    "is_managed": False,
+                    "slug": str(repo.slug),
+                    "old_slugs": [],
+                    "repo_url": (
+                        f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
+                    ),
+                }
+            ],
+        }
+
+
+@pytest.mark.django_db
+class TestHookView:
+    def test_202__push_not_forced(
+        self,
+        settings,
+        client,
+        repository_factory,
+        git_hub_repository_factory,
+        project_factory,
+        task_factory,
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        repo = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123)
+        project = project_factory(repository=repo, branch_name="test-project")
+        task = task_factory(project=project, branch_name="test-task")
+        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
+            response = client.post(
+                reverse("hook"),
+                json.dumps(
+                    {
+                        "ref": "refs/heads/test-task",
+                        "forced": False,
+                        "repository": {"id": 123},
+                        "commits": [
+                            {
+                                "id": "123",
+                                "author": {
+                                    "name": "Test",
+                                    "email": "test@example.com",
+                                    "username": "test123",
+                                },
+                                "timestamp": "2019-11-20 21:32:53.668260+00:00",
+                                "message": "Message",
+                                "url": "https://github.com/test/user/foo",
+                            }
+                        ],
+                        "sender": {
+                            "login": "test123",
+                            "avatar_url": "https://avatar_url/",
+                        },
+                    }
+                ),
+                content_type="application/json",
+                # The sha1 hexdigest of the request body x the secret
+                # key above:
+                HTTP_X_HUB_SIGNATURE="sha1=6a5d470ca262a2522635f1adb71a13b18446dd54",
+                HTTP_X_GITHUB_EVENT="push",
+            )
+            assert response.status_code == 202, response.content
+            assert not refresh_commits_job.delay.called
+            task.refresh_from_db()
+            assert len(task.commits) == 1
+
+    def test_400__no_handler(
+        self, settings, client,
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        response = client.post(
+            reverse("hook"),
+            json.dumps({}),
+            content_type="application/json",
+            # The sha1 hexdigest of the request body x the secret
+            # key above:
+            HTTP_X_HUB_SIGNATURE="sha1=9b9585ab4f87eff122c8cd8e6fd94d358ed56f22",
+            HTTP_X_GITHUB_EVENT="some unknown event",
+        )
+        assert response.status_code == 400, response.content
+
+    def test_202__push_forced(
+        self, settings, client, repository_factory, git_hub_repository_factory
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123)
+        with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
+            response = client.post(
+                reverse("hook"),
+                json.dumps(
+                    {
+                        "ref": "refs/heads/master",
+                        "forced": True,
+                        "repository": {"id": 123},
+                        "commits": [],
+                        "sender": {},
+                    }
+                ),
+                content_type="application/json",
+                # The sha1 hexdigest of the request body x the secret
+                # key above:
+                HTTP_X_HUB_SIGNATURE="sha1=01453662feaae85e7bb81452ffa7d3659294852d",
+                HTTP_X_GITHUB_EVENT="push",
+            )
+            assert response.status_code == 202, response.content
+            assert refresh_commits_job.delay.called
+
+    def test_422__push_error(
+        self, settings, client, repository_factory, git_hub_repository_factory
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123)
+        response = client.post(
+            reverse("hook"),
+            json.dumps(
+                {
+                    "ref": "refs/heads/master",
+                    "repository": {"id": 123},
+                    "commits": [],
+                    "sender": {},
+                }
+            ),
+            content_type="application/json",
+            # This is NOT the sha1 hexdigest of the request body x the
+            # secret key above:
+            HTTP_X_HUB_SIGNATURE="sha1=6fc6f8c254a19276680948251ccb9644995c3692",
+            HTTP_X_GITHUB_EVENT="push",
+        )
+        assert response.status_code == 422, response.json()
+
+    def test_404__push_no_matching_repo(self, settings, client, repository_factory):
+        settings.GITHUB_HOOK_SECRET = b""
+        repository_factory()
+        response = client.post(
+            reverse("hook"),
+            json.dumps(
+                {
+                    "ref": "refs/heads/master",
+                    "forced": False,
+                    "repository": {"id": 123},
+                    "commits": [],
+                    "sender": {},
+                }
+            ),
+            content_type="application/json",
+            # This is NOT the sha1 hexdigest of the request body x the
+            # secret key above:
+            HTTP_X_HUB_SIGNATURE="sha1=4129db8949c2aa1b82f850a68cc384019c0d73d0",
+            HTTP_X_GITHUB_EVENT="push",
+        )
+        assert response.status_code == 404
+
+    def test_403__push_bad_signature(self, settings, client, repository_factory):
+        settings.GITHUB_HOOK_SECRET = b""
+        repository_factory(repo_id=123)
+        response = client.post(
+            reverse("hook"),
+            json.dumps(
+                {
+                    "ref": "refs/heads/master",
+                    "forced": False,
+                    "repository": {"id": 123},
+                    "commits": [],
+                    "sender": {},
+                }
+            ),
+            content_type="application/json",
+            # The sha1 hexdigest of the request body x the secret key
+            # above:
+            HTTP_X_HUB_SIGNATURE="sha1=b5aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae8c",
+            HTTP_X_GITHUB_EVENT="push",
+        )
+        assert response.status_code == 403
 
 
 @pytest.mark.django_db

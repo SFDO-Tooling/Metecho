@@ -1,3 +1,4 @@
+from collections import namedtuple
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
@@ -13,10 +14,17 @@ from ..jobs import (
     create_pr,
     delete_scratch_org,
     get_unsaved_changes,
+    refresh_commits,
     refresh_github_repositories_for_user,
 )
 from ..models import SCRATCH_ORG_TYPES
 
+Author = namedtuple("Author", ("avatar_url", "login"))
+Commit = namedtuple(
+    "Commit",
+    ("sha", "author", "message", "commit", "html_url"),
+    defaults=("", None, "", None, ""),
+)
 PATCH_ROOT = "metashare.api.jobs"
 
 
@@ -36,6 +44,9 @@ class TestCreateBranchesOnGitHub:
             )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
+            repository.branch.return_value = MagicMock(
+                **{"latest_sha.return_value": "123abc"}
+            )
             get_repo_info.return_value = repository
 
             _create_branches_on_github(
@@ -258,6 +269,94 @@ class TestErrorHandling:
                 commit_changes_from_org(scratch_org, user, {}, "message")
 
             assert async_to_sync.called
+
+
+@pytest.mark.django_db
+class TestRefreshCommits:
+    def test_task__no_user(self, repository_factory, project_factory, task_factory):
+        repository = repository_factory()
+        project = project_factory(repository=repository)
+        task = task_factory(project=project, branch_name="task", origin_sha="1234abcd")
+        with ExitStack() as stack:
+            commit1 = Commit(
+                **{
+                    "sha": "abcd1234",
+                    "author": Author(
+                        **{
+                            "avatar_url": "https://example.com/img.png",
+                            "login": "test_user",
+                        }
+                    ),
+                    "message": "Test message 1",
+                    "commit": Commit(**{"author": {"date": "2019-12-09 13:00"}}),
+                    "html_url": "https://github.com/test/user/foo",
+                }
+            )
+            commit2 = Commit(
+                **{
+                    "sha": "1234abcd",
+                    "author": None,
+                    "message": "Test message 2",
+                    "commit": Commit(**{"author": {"date": "2019-12-09 12:30"}}),
+                    "html_url": "https://github.com/test/user/foo",
+                }
+            )
+            repo = MagicMock(**{"commits.return_value": [commit1, commit2]})
+            get_repo_info = stack.enter_context(
+                patch("metashare.api.jobs.get_repo_info")
+            )
+            get_repo_info.return_value = repo
+
+            refresh_commits(repository=repository, branch_name="task")
+            task.refresh_from_db()
+            assert len(task.commits) == 0
+
+    def test_task__user(
+        self,
+        user_factory,
+        repository_factory,
+        project_factory,
+        task_factory,
+        git_hub_repository_factory,
+    ):
+        user = user_factory()
+        repository = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123, user=user)
+        project = project_factory(repository=repository)
+        task = task_factory(project=project, branch_name="task", origin_sha="1234abcd")
+        with ExitStack() as stack:
+            commit1 = Commit(
+                **{
+                    "sha": "abcd1234",
+                    "author": Author(
+                        **{
+                            "avatar_url": "https://example.com/img.png",
+                            "login": "test_user",
+                        }
+                    ),
+                    "message": "Test message 1",
+                    "commit": Commit(**{"author": {"date": "2019-12-09 13:00"}}),
+                    "html_url": "https://github.com/test/user/foo",
+                }
+            )
+            commit2 = Commit(
+                **{
+                    "sha": "1234abcd",
+                    "author": None,
+                    "message": "Test message 2",
+                    "commit": Commit(**{"author": {"date": "2019-12-09 12:30"}}),
+                    "html_url": "https://github.com/test/user/foo",
+                }
+            )
+            repo = MagicMock(**{"commits.return_value": [commit1, commit2]})
+            get_repo_info = stack.enter_context(
+                patch("metashare.api.jobs.get_repo_info")
+            )
+            get_repo_info.return_value = repo
+
+            refresh_commits(repository=repository, branch_name="task")
+            task.refresh_from_db()
+            assert len(task.commits) == 1
 
 
 @pytest.mark.django_db

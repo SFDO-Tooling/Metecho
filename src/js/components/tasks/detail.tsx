@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import CommitList from '@/components/commits/list';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
 import SubmitModal from '@/components/tasks/submit';
@@ -54,7 +55,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
 
   const readyToSubmit = Boolean(
-    task && task.has_unmerged_commits && !task.pr_url,
+    task && task.has_unmerged_commits && !task.pr_is_open,
   );
   const currentlySubmitting = Boolean(task && task.currently_creating_pr);
   let currentlyFetching = false;
@@ -298,6 +299,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
           />
         )}
+        <CommitList commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>
   );
