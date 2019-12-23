@@ -38,7 +38,7 @@ class CurrentUserObjectMixin:
 
 
 class CreatePrMixin:
-    error_pr_exists = _("Task has already been submitted for review.")
+    error_pr_exists = ""  # Implement this
 
     @action(detail=True, methods=["POST"])
     def create_pr(self, request, pk=None):

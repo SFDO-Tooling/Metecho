@@ -180,7 +180,11 @@ class Repository(
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
+        max_length=100,
+        blank=True,
+        null=True,
+        validators=[validate_unicode_branch],
+        default="master",
     )
 
     slug_class = RepositorySlug
@@ -280,10 +284,10 @@ class Project(
         return self.repository.get_repo_id(user)
 
     def get_base(self):
-        return self.branch_name
+        return self.repository.branch_name
 
     def get_head(self):
-        return self.repository.branch_name
+        return self.branch_name
 
     # end CreatePrMixin configuration
 
@@ -369,10 +373,10 @@ class Task(
         return self.project.repository.get_repo_id(user)
 
     def get_base(self):
-        return self.branch_name
+        return self.project.branch_name
 
     def get_head(self):
-        return self.project.branch_name
+        return self.branch_name
 
     # end CreatePrMixin configuration
 

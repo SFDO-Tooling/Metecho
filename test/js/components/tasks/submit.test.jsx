@@ -20,9 +20,10 @@ afterEach(() => {
 describe('<SubmitModal/>', () => {
   const setup = (options) => {
     const defaults = {
-      taskId: 'task-id',
-      taskName: 'My Task',
-      taskDiffUrl: 'my-diff-url',
+      instanceId: 'task-id',
+      instanceName: 'My Task',
+      instanceDiffUrl: 'my-diff-url',
+      instanceType: 'task',
     };
     const opts = Object.assign({}, defaults, options);
     const toggleModal = jest.fn();
@@ -40,7 +41,7 @@ describe('<SubmitModal/>', () => {
     test('closes modal', () => {
       const { getByText, toggleModal } = setup();
 
-      expect(getByText('Submit this task for review')).toBeVisible();
+      expect(getByText('Submit Task for Review')).toBeVisible();
       expect(getByText('Cancel')).toBeVisible();
 
       fireEvent.click(getByText('Cancel'));

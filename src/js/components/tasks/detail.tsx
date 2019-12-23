@@ -292,9 +292,10 @@ const TaskDetail = (props: RouteComponentProps) => {
         )}
         {readyToSubmit && (
           <SubmitModal
-            taskId={task.id}
-            taskName={task.name}
-            taskDiffUrl={task.branch_diff_url}
+            instanceId={task.id}
+            instanceName={task.name}
+            instanceDiffUrl={task.branch_diff_url}
+            instanceType={'task'}
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />

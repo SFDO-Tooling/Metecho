@@ -18,7 +18,7 @@ interface Props {
   instanceId: string;
   instanceName: string;
   instanceDiffUrl: string | null;
-  instanceType: string;
+  instanceType: 'task' | 'project';
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -50,7 +50,7 @@ const SubmitModal = ({
     }
   };
 
-  let obejctType;
+  let objectType;
   switch (instanceType) {
     case 'task':
       objectType = {
@@ -63,12 +63,9 @@ const SubmitModal = ({
       objectType = {
         /* eslint-enable @typescript-eslint/camelcase */
         objectType: OBJECT_TYPES.PROJECT_PR,
-        url: window.api_urls.project_create_pr(projectId),
+        url: window.api_urls.project_create_pr(instanceId),
       };
       break;
-    default:
-      console.warning('Invalid instance type for SubmitModal');
-      return null;
   }
 
   const {

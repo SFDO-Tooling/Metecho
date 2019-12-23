@@ -32,7 +32,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   };
   const currentlySubmitting = Boolean(project && project.currently_creating_pr);
   const readyToSubmit = Boolean(
-    project && project.has_unmerged_commits && !project.pr_url,
+    project && project.has_unmerged_commits && !project.pr_is_open,
   );
   console.debug('Ready to Submit', readyToSubmit);
 
@@ -113,7 +113,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           className="slds-size_full slds-m-bottom_x-large"
           variant="outline-brand"
           onClick={openSubmitModal}
-          disabled={!readyToSubmit || currentlySubmitting}
+          disabled={currentlySubmitting}
         />
         {tasks ? (
           <>
@@ -141,9 +141,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
         )}
         {readyToSubmit && (
           <SubmitModal
-            taskId={project.id}
-            taskName={project.name}
-            taskDiffUrl={project.branch_diff_url}
+            instanceId={project.id}
+            instanceName={project.name}
+            instanceDiffUrl={project.branch_diff_url}
+            instanceType={'project'}
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />

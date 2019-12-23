@@ -90,6 +90,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         queryset=Repository.objects.all(), pk_field=serializers.CharField()
     )
     branch_url = serializers.SerializerMethodField()
+    branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -102,6 +103,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "old_slugs",
             "repository",
             "branch_url",
+            "branch_diff_url",
             "has_unmerged_commits",
             "currently_creating_pr",
             "pr_url",
@@ -116,6 +118,19 @@ class ProjectSerializer(serializers.ModelSerializer):
                 ),
             ),
         )
+
+    def get_branch_diff_url(self, obj) -> Optional[str]:
+        repo = obj.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        repository_branch = repo.branch_name
+        branch = obj.branch_name
+        if repo_owner and repo_name and repository_branch and branch:
+            return (
+                f"https://github.com/{repo_owner}/{repo_name}/compare/"
+                f"{repository_branch}...{branch}"
+            )
+        return None
 
     def get_branch_url(self, obj) -> Optional[str]:
         repo = obj.repository

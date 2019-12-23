@@ -13,6 +13,7 @@ export interface Project {
   branch_url: string | null;
   branch_diff_url: string | null;
   pr_url: string | null;
+  pr_is_open: boolean;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
 }
