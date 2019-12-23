@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -12,6 +13,7 @@ import {
   DetailPageLayout,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
+  LabelWithSpinner,
   SpinnerWrapper,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
@@ -92,6 +94,30 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  let submitButton: React.ReactNode = null;
+  if (readyToSubmit) {
+    const isPrimary = true;
+    const submitButtonText = currentlySubmitting ? (
+      <LabelWithSpinner
+        label={i18n.t('Submitting Project for Review…')}
+        variant={isPrimary ? 'inverse' : 'base'}
+      />
+    ) : (
+      i18n.t('Submit Project for Review')
+    );
+    submitButton = (
+      <Button
+        label={submitButtonText}
+        className={classNames('slds-size_full slds-m-bottom_x-large', {
+          'slds-m-left_none': !isPrimary,
+        })}
+        variant={isPrimary ? 'brand' : 'outline-brand'}
+        onClick={openSubmitModal}
+        disabled={currentlySubmitting}
+      />
+    );
+  }
+
   return (
     <DocumentTitle
       title={`${project.name} | ${repository.name} | ${i18n.t('MetaShare')}`}
@@ -108,13 +134,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           { name: project.name },
         ]}
       >
-        <Button
-          label={i18n.t('Submit Project')}
-          className="slds-size_full slds-m-bottom_x-large"
-          variant="outline-brand"
-          onClick={openSubmitModal}
-          disabled={currentlySubmitting}
-        />
+        {submitButton}
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
