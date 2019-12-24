@@ -60,7 +60,7 @@ requests[security]==2.22.0  # via coveralls, sphinx
 restructuredtext-lint==1.3.0  # via doc8
 six==1.13.0               # via django-extensions, doc8, packaging, prompt-toolkit, sphinxcontrib-httpdomain, stevedore, traitlets
 snowballstemmer==2.0.0    # via sphinx
-sphinx==2.3.0
+sphinx==2.3.1
 sphinxcontrib-applehelp==1.0.1  # via sphinx
 sphinxcontrib-devhelp==1.0.1  # via sphinx
 sphinxcontrib-htmlhelp==1.0.2  # via sphinx
