@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -224,6 +225,102 @@ describe('<ProjectDetail/>', () => {
         filters: { project: 'project1' },
         objectType: 'task',
       });
+    });
+  });
+
+  describe('"Submit Project for Review" click', () => {
+    test('opens modal', () => {
+      const { getByText, getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  has_unmerged_commits: true,
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getByText('Submit Project for Review'));
+
+      getAllByText('Submit Project for Review').forEach((element) => {
+        expect(element).toBeVisible();
+      });
+    });
+  });
+
+  describe('submitting project for review', () => {
+    test('renders loading button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  has_unmerged_commits: true,
+                  currently_creating_pr: true,
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('Submitting Project for Review…')).toBeVisible();
+    });
+
+    test('renders external links for onRenderHeaderActions', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  has_unmerged_commits: true,
+                  currently_creating_pr: true,
+                  pr_url: 'https://example.com/',
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('Submitting Project for Review…')).toBeVisible();
+    });
+
+    test('renders external links for onRenderHeaderActions with branch_url', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  has_unmerged_commits: true,
+                  currently_creating_pr: true,
+                  branch_url: 'https://example.com/',
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('Submitting Project for Review…')).toBeVisible();
     });
   });
 });

@@ -98,11 +98,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
 
   let submitButton: React.ReactNode = null;
   if (readyToSubmit) {
-    const isPrimary = true;
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
         label={i18n.t('Submitting Project for Review…')}
-        variant={isPrimary ? 'inverse' : 'base'}
+        variant="inverse"
       />
     ) : (
       i18n.t('Submit Project for Review')
@@ -110,10 +109,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
     submitButton = (
       <Button
         label={submitButtonText}
-        className={classNames('slds-size_full slds-m-bottom_x-large', {
-          'slds-m-left_none': !isPrimary,
-        })}
-        variant={isPrimary ? 'brand' : 'outline-brand'}
+        className={classNames('slds-size_full slds-m-bottom_x-large')}
+        variant="brand"
         onClick={openSubmitModal}
         disabled={currentlySubmitting}
       />
