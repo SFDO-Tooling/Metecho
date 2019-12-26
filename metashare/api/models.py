@@ -21,7 +21,13 @@ from simple_salesforce.exceptions import SalesforceError
 
 from . import gh, push
 from .constants import ORGANIZATION_DETAILS
-from .model_mixins import HashIdMixin, PopulateRepoIdMixin, PushMixin, TimestampsMixin
+from .model_mixins import (
+    CreatePrMixin,
+    HashIdMixin,
+    PopulateRepoIdMixin,
+    PushMixin,
+    TimestampsMixin,
+)
 from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
 
@@ -165,7 +171,7 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model,
+    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -173,6 +179,13 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    branch_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        validators=[validate_unicode_branch],
+        default="master",
+    )
 
     slug_class = RepositorySlug
 
@@ -183,6 +196,15 @@ class Repository(
         verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
+
+    def save(self, *args, **kwargs):
+        if not self.branch_name:
+            user = self.get_a_matching_user()
+            if user:
+                repo = gh.get_repo_info(user, repo_id=self.id)
+                self.branch_name = repo.default_branch
+
+        super().save(*args, **kwargs)
 
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
@@ -228,12 +250,18 @@ class ProjectSlug(AbstractSlug):
     )
 
 
-class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
+class Project(
+    CreatePrMixin, PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
         max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
+    has_unmerged_commits = models.BooleanField(default=False)
+    currently_creating_pr = models.BooleanField(default=False)
+    pr_number = models.IntegerField(null=True, blank=True)
+    pr_is_open = models.BooleanField(default=False)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -249,7 +277,7 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     # begin PushMixin configuration:
     push_update_type = "PROJECT_UPDATE"
-    push_error_type = None
+    push_error_type = "PROJECT_CREATE_PR_FAILED"
 
     def get_serialized_representation(self):
         from .serializers import ProjectSerializer
@@ -258,7 +286,37 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     # end PushMixin configuration
 
+    # begin CreatePrMixin configuration:
+    create_pr_event = "PROJECT_CREATE_PR"
+
+    def get_repo_id(self, user):
+        return self.repository.get_repo_id(user)
+
+    def get_base(self):
+        return self.repository.branch_name
+
+    def get_head(self):
+        return self.branch_name
+
+    # end CreatePrMixin configuration
+
+    def finalize_pr_closed(self):
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_reopened(self):
+        self.pr_is_open = True
+        self.save()
+        self.notify_changed()
+
     def finalize_project_update(self):
+        self.save()
+        self.notify_changed()
+
+    def finalize_status_completed(self):
+        self.has_unmerged_commits = False
+        self.pr_is_open = False
         self.save()
         self.notify_changed()
 
@@ -271,7 +329,9 @@ class TaskSlug(AbstractSlug):
     parent = models.ForeignKey("Task", on_delete=models.PROTECT, related_name="slugs")
 
 
-class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
+class Task(
+    CreatePrMixin, PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+):
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
@@ -315,6 +375,20 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     # end PushMixin configuration
 
+    # begin CreatePrMixin configuration:
+    create_pr_event = "TASK_CREATE_PR"
+
+    def get_repo_id(self, user):
+        return self.project.repository.get_repo_id(user)
+
+    def get_base(self):
+        return self.project.branch_name
+
+    def get_head(self):
+        return self.branch_name
+
+    # end CreatePrMixin configuration
+
     def finalize_task_update(self):
         self.save()
         self.notify_changed()
@@ -325,6 +399,9 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         self.pr_is_open = False
         self.save()
         self.notify_changed()
+        self.project.has_unmerged_commits = True
+        self.project.save()
+        self.project.notify_changed()
 
     def finalize_pr_closed(self):
         self.pr_is_open = False
@@ -335,33 +412,6 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         self.pr_is_open = True
         self.save()
         self.notify_changed()
-
-    def queue_create_pr(
-        self, user, *, title, critical_changes, additional_changes, issues, notes
-    ):
-        from .jobs import create_pr_job
-
-        self.currently_creating_pr = True
-        self.save()
-        self.notify_changed()
-
-        create_pr_job.delay(
-            self,
-            user,
-            title=title,
-            critical_changes=critical_changes,
-            additional_changes=additional_changes,
-            issues=issues,
-            notes=notes,
-        )
-
-    def finalize_create_pr(self, error=None):
-        self.currently_creating_pr = False
-        self.save()
-        if error is None:
-            self.notify_changed("TASK_CREATE_PR")
-        else:
-            self.notify_error(error)
 
     def finalize_provision(self):
         if self.status == TASK_STATUSES.Planned:

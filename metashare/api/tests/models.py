@@ -40,11 +40,21 @@ class TestRepository:
         gh_repo = git_hub_repository_factory(repo_id=123)
         assert repo.get_a_matching_user() == gh_repo.user
 
-    def test_refresh_commits(self, repository_factory, user_factory):
+    def test_queue_refresh_commits(self, repository_factory, user_factory):
         repo = repository_factory()
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
-            repo.queue_refresh_commits(ref="master")
+            repo.queue_refresh_commits(ref="some branch")
             assert refresh_commits_job.delay.called
+
+    def test_save(self, repository_factory, git_hub_repository_factory):
+        with patch("metashare.api.gh.get_repo_info") as get_repo_info:
+            get_repo_info.return_value = MagicMock(default_branch="main-branch")
+            git_hub_repository_factory(repo_id=123)
+            repo = repository_factory(branch_name=None, repo_id=123)
+            repo.save()
+            assert get_repo_info.called
+            repo.refresh_from_db()
+            assert repo.branch_name == "main-branch"
 
 
 @pytest.mark.django_db
@@ -59,6 +69,35 @@ class TestProject:
         repository = repository_factory()
         project = Project(name="Test Project", repository=repository)
         assert str(project) == "Test Project"
+
+    def test_get_repo_id(self, repository_factory, project_factory):
+        user = MagicMock()
+        repo = repository_factory(repo_id=123)
+        project = project_factory(repository=repo)
+        assert project.get_repo_id(user) == 123
+
+    def test_finalize_status_completed(self, project_factory):
+        project = project_factory(has_unmerged_commits=True)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            project.finalize_status_completed()
+            project.refresh_from_db()
+            assert not project.has_unmerged_commits
+            assert async_to_sync.called
+
+    def test_queue_create_pr(self, project_factory, user_factory):
+        with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
+            project = project_factory()
+            user = user_factory()
+            project.queue_create_pr(
+                user,
+                title="My PR",
+                critical_changes="",
+                additional_changes="",
+                issues="",
+                notes="",
+            )
+
+            assert create_pr_job.delay.called
 
 
 @pytest.mark.django_db

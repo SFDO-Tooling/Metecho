@@ -230,10 +230,19 @@ commit_changes_from_org_job = job(commit_changes_from_org)
 
 
 def create_pr(
-    task, user, *, title, critical_changes, additional_changes, issues, notes
+    instance,
+    user,
+    *,
+    repo_id,
+    base,
+    head,
+    title,
+    critical_changes,
+    additional_changes,
+    issues,
+    notes,
 ):
     try:
-        repo_id = task.project.repository.get_repo_id(user)
         repository = get_repo_info(user, repo_id=repo_id)
         sections = [
             notes,
@@ -245,20 +254,18 @@ def create_pr(
             issues,
         ]
         body = "\n\n".join([section for section in sections if section])
-        pr = repository.create_pull(
-            title=title, base=task.project.branch_name, head=task.branch_name, body=body
-        )
-        task.refresh_from_db()
-        task.pr_number = pr.number
-        task.pr_is_open = True
+        pr = repository.create_pull(title=title, base=base, head=head, body=body)
+        instance.refresh_from_db()
+        instance.pr_number = pr.number
+        instance.pr_is_open = True
     except Exception as e:
-        task.refresh_from_db()
-        task.finalize_create_pr(e)
+        instance.refresh_from_db()
+        instance.finalize_create_pr(e)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        task.finalize_create_pr()
+        instance.finalize_create_pr()
 
 
 create_pr_job = job(create_pr)

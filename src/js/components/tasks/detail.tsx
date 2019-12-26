@@ -11,7 +11,6 @@ import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
-import SubmitModal from '@/components/tasks/submit';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -25,13 +24,14 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
+import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
@@ -70,25 +70,6 @@ const TaskDetail = (props: RouteComponentProps) => {
     currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
   }
-
-  // Subscribe to task WS only once, and unsubscribe on unmount
-  const taskId = task && task.id;
-  useEffect(() => {
-    if (taskId && window.socket) {
-      window.socket.subscribe({
-        model: OBJECT_TYPES.TASK,
-        id: taskId,
-      });
-    }
-    return () => {
-      if (taskId && window.socket) {
-        window.socket.unsubscribe({
-          model: OBJECT_TYPES.TASK,
-          id: taskId,
-        });
-      }
-    };
-  }, [taskId]);
 
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
@@ -277,11 +258,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         {primaryButton}
         {secondaryButton}
 
-        {orgs ? (
-          <OrgCards orgs={orgs} task={task} project={project} />
-        ) : (
-          <SpinnerWrapper />
-        )}
+        {orgs ? <OrgCards orgs={orgs} task={task} /> : <SpinnerWrapper />}
         {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
             orgId={devOrg.id}
@@ -292,9 +269,10 @@ const TaskDetail = (props: RouteComponentProps) => {
         )}
         {readyToSubmit && (
           <SubmitModal
-            taskId={task.id}
-            taskName={task.name}
-            taskDiffUrl={task.branch_diff_url}
+            instanceId={task.id}
+            instanceName={task.name}
+            instanceDiffUrl={task.branch_diff_url}
+            instanceType="task"
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />

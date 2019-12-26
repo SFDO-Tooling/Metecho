@@ -1,6 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
+import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
+import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -9,14 +11,16 @@ import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import {
   DetailPageLayout,
+  ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
+  LabelWithSpinner,
   SpinnerWrapper,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
-import { OBJECT_TYPES } from '@/utils/constants';
+import SubmitModal from '@/components/utils/submitModal';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -24,28 +28,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
 
-  // Subscribe to individual task WS channels once, and unsubscribe on unmount
-  const taskIds = tasks && tasks.map((t) => t.id);
-  useEffect(() => {
-    if (taskIds && window.socket) {
-      for (const id of taskIds) {
-        window.socket.subscribe({
-          model: OBJECT_TYPES.TASK,
-          id,
-        });
-      }
-    }
-    return () => {
-      if (taskIds && window.socket) {
-        for (const id of taskIds) {
-          window.socket.unsubscribe({
-            model: OBJECT_TYPES.TASK,
-            id,
-          });
-        }
-      }
-    };
-  }, [taskIds]);
+  // Submit modal related:
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const openSubmitModal = () => {
+    setSubmitModalOpen(true);
+  };
+  const currentlySubmitting = Boolean(project && project.currently_creating_pr);
+  const readyToSubmit = Boolean(
+    project && project.has_unmerged_commits && !project.pr_is_open,
+  );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -80,6 +71,49 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  let submitButton: React.ReactNode = null;
+  if (readyToSubmit) {
+    const submitButtonText = currentlySubmitting ? (
+      <LabelWithSpinner
+        label={i18n.t('Submitting Project for Review…')}
+        variant="inverse"
+      />
+    ) : (
+      i18n.t('Submit Project for Review')
+    );
+    submitButton = (
+      <Button
+        label={submitButtonText}
+        className={classNames('slds-size_full slds-m-bottom_x-large')}
+        variant="brand"
+        onClick={openSubmitModal}
+        disabled={currentlySubmitting}
+      />
+    );
+  }
+
+  const onRenderHeaderActions = () => (
+    <PageHeaderControl>
+      <Button
+        iconCategory="utility"
+        iconName="delete"
+        iconPosition="left"
+        label={i18n.t('Delete Project')}
+        variant="text-destructive"
+        disabled
+      />
+      {project.pr_url || project.branch_url ? (
+        <ExternalLink
+          url={(project.pr_url || project.branch_url) as string}
+          showButtonIcon
+          className="slds-button slds-button_outline-brand"
+        >
+          {project.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
+        </ExternalLink>
+      ) : null}
+    </PageHeaderControl>
+  );
+
   return (
     <DocumentTitle
       title={`${project.name} | ${repository.name} | ${i18n.t('MetaShare')}`}
@@ -95,13 +129,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
           },
           { name: project.name },
         ]}
+        onRenderHeaderActions={onRenderHeaderActions}
       >
-        <Button
-          label={i18n.t('Submit Project')}
-          className="slds-size_full slds-m-bottom_x-large"
-          variant="outline-brand"
-          disabled
-        />
+        {submitButton}
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
@@ -125,6 +155,16 @@ const ProjectDetail = (props: RouteComponentProps) => {
         ) : (
           // Fetching tasks from API
           <SpinnerWrapper />
+        )}
+        {readyToSubmit && (
+          <SubmitModal
+            instanceId={project.id}
+            instanceName={project.name}
+            instanceDiffUrl={project.branch_diff_url}
+            instanceType="project"
+            isOpen={submitModalOpen}
+            toggleModal={setSubmitModalOpen}
+          />
         )}
       </DetailPageLayout>
     </DocumentTitle>

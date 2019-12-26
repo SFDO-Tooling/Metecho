@@ -3,7 +3,7 @@ import logging
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from .models import Repository, Task
+from .models import Project, Repository, Task
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +46,15 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
     def _is_reopened(self):
         return self.validated_data["action"] == "reopened"
 
-    def _get_matching_task(self, repository):
-        return Task.objects.filter(
-            project__repository=repository, pr_number=self.validated_data["number"]
-        ).first()
+    def _get_matching_instance(self, repository):
+        return (
+            Task.objects.filter(
+                project__repository=repository, pr_number=self.validated_data["number"]
+            ).first()
+            or Project.objects.filter(
+                repository=repository, pr_number=self.validated_data["number"]
+            ).first()
+        )
 
     def process_hook(self):
         repository = self.get_matching_repository()
@@ -57,15 +62,15 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
             raise NotFound("No matching repository.")
 
         if self._is_closed() or self._is_reopened():
-            task = self._get_matching_task(repository)
-            if task is None:
+            instance = self._get_matching_instance(repository)
+            if instance is None:
                 return
             if self._is_reopened():
-                task.finalize_pr_reopened()
+                instance.finalize_pr_reopened()
             elif self._is_merged():
-                task.finalize_status_completed()
+                instance.finalize_status_completed()
             else:
-                task.finalize_pr_closed()
+                instance.finalize_pr_closed()
 
 
 class CommitSerializer(serializers.Serializer):

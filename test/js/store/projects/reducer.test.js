@@ -432,4 +432,63 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
   });
+
+  describe('PROJECT_CREATE_PR_FAILED', () => {
+    test('sets currently_creating_pr: false', () => {
+      const project = {
+        id: 'p1',
+        repository: 'repository-1',
+        name: 'Project 1',
+        currently_creating_pr: true,
+      };
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const editedProject = { ...project, currently_creating_pr: false };
+      const expected = {
+        'repository-1': {
+          projects: [editedProject, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(
+        {
+          'repository-1': {
+            projects: [project, project2],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+        {
+          type: 'PROJECT_CREATE_PR_FAILED',
+          payload: project,
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if no existing project', () => {
+      const project = {
+        id: 'p1',
+        repository: 'repository-1',
+        name: 'Project 1',
+        currently_creating_pr: true,
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'PROJECT_CREATE_PR_FAILED',
+          payload: project,
+        },
+      );
+
+      expect(actual).toEqual({});
+    });
+  });
 });

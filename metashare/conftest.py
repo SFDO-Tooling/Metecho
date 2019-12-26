@@ -71,6 +71,7 @@ class RepositoryFactory(factory.django.DjangoModelFactory):
     repo_owner = factory.Sequence("user_{}".format)
     repo_name = factory.Sequence("repo_{}".format)
     repo_id = factory.Sequence(lambda n: n)
+    branch_name = "master"
 
 
 @register

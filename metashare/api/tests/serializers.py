@@ -117,6 +117,19 @@ class TestProjectSerializer:
         )
         assert serializer.is_valid(), serializer.errors
 
+    def test_pr_url__present(self, project_factory):
+        project = project_factory(name="Test project", pr_number=123)
+        serializer = ProjectSerializer(project)
+        owner = project.repository.repo_owner
+        name = project.repository.repo_name
+        expected = f"https://github.com/{owner}/{name}/pull/123"
+        assert serializer.data["pr_url"] == expected
+
+    def test_pr_url__missing(self, project_factory):
+        project = project_factory(name="Test project")
+        serializer = ProjectSerializer(project)
+        assert serializer.data["pr_url"] is None
+
 
 @pytest.mark.django_db
 class TestTaskSerializer:
