@@ -102,13 +102,13 @@ export const fetchObjects = ({
   url,
   filters = {},
   reset = false,
-  shouldSubscribeToObject = () => false,
+  shouldSubscribeToObject = false,
 }: {
   objectType: ObjectTypes;
   url?: string;
   filters?: ObjectFilters;
   reset?: boolean;
-  shouldSubscribeToObject?: (response: any) => boolean;
+  shouldSubscribeToObject?: boolean | ((response: any) => boolean);
 }): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
@@ -130,7 +130,12 @@ export const fetchObjects = ({
     if (window.socket) {
       const arr = Array.isArray(response) ? response : response.results;
       for (const object of arr) {
-        if (shouldSubscribeToObject(object) && object && object.id) {
+        const shouldSubscribe =
+          (typeof shouldSubscribeToObject === 'boolean' &&
+            shouldSubscribeToObject) ||
+          (typeof shouldSubscribeToObject === 'function' &&
+            shouldSubscribeToObject(object));
+        if (object && object.id && shouldSubscribe) {
           window.socket.subscribe({
             model: objectType,
             id: object.id,
@@ -199,13 +204,13 @@ export const createObject = ({
   url,
   data = {},
   hasForm = false,
-  shouldSubscribeToObject = () => false,
+  shouldSubscribeToObject = false,
 }: {
   objectType: ObjectTypes;
   url?: string;
   data?: ObjectData;
   hasForm?: boolean;
-  shouldSubscribeToObject?: (object: any) => boolean;
+  shouldSubscribeToObject?: boolean | ((object: any) => boolean);
 }): ThunkResult => async (dispatch) => {
   if (!url) {
     const urlFn = window.api_urls[`${objectType}_list`];
@@ -233,12 +238,12 @@ export const createObject = ({
       },
       hasForm,
     });
-    if (
-      object &&
-      object.id &&
-      window.socket &&
-      shouldSubscribeToObject(object)
-    ) {
+    const shouldSubscribe =
+      (typeof shouldSubscribeToObject === 'boolean' &&
+        shouldSubscribeToObject) ||
+      (typeof shouldSubscribeToObject === 'function' &&
+        shouldSubscribeToObject(object));
+    if (object && object.id && window.socket && shouldSubscribe) {
       window.socket.subscribe({
         model: objectType,
         id: object.id,
@@ -260,11 +265,11 @@ export const createObject = ({
 export const deleteObject = ({
   objectType,
   object,
-  shouldSubscribeToObject = () => false,
+  shouldSubscribeToObject = false,
 }: {
   objectType: ObjectTypes;
   object: { id: string; [key: string]: any };
-  shouldSubscribeToObject?: (object: any) => boolean;
+  shouldSubscribeToObject?: boolean | ((object: any) => boolean);
 }): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_detail`];
   let baseUrl;
@@ -284,7 +289,12 @@ export const deleteObject = ({
       dispatch,
       opts: { method: 'DELETE' },
     });
-    if (shouldSubscribeToObject(object) && window.socket) {
+    const shouldSubscribe =
+      (typeof shouldSubscribeToObject === 'boolean' &&
+        shouldSubscribeToObject) ||
+      (typeof shouldSubscribeToObject === 'function' &&
+        shouldSubscribeToObject(object));
+    if (window.socket && shouldSubscribe) {
       window.socket.subscribe({
         model: objectType,
         id: object.id,

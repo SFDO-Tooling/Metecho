@@ -144,16 +144,14 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup();
       fireEvent.click(getByText('Create Org'));
 
-      expect(createObject).toHaveBeenCalledTimes(1);
-
-      const args = createObject.mock.calls[0][0];
-
-      expect(args.objectType).toEqual('scratch_org');
-      expect(args.data).toEqual({
-        org_type: 'QA',
-        task: 'task-id',
+      expect(createObject).toHaveBeenCalledWith({
+        objectType: 'scratch_org',
+        data: {
+          org_type: 'QA',
+          task: 'task-id',
+        },
+        shouldSubscribeToObject: true,
       });
-      expect(args.shouldSubscribeToObject()).toBe(true);
       expect(getByText('Creating Org…')).toBeVisible();
     });
 

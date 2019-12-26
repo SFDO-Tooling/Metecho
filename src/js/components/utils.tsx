@@ -430,6 +430,7 @@ export const useFetchTasksIfMissing = (
         fetchObjects({
           objectType: OBJECT_TYPES.TASK,
           filters: { project: project.id },
+          shouldSubscribeToObject: true,
         }),
       );
     }
@@ -481,7 +482,7 @@ export const useForm = ({
   additionalData?: { [key: string]: any };
   onSuccess?: (...args: any[]) => any;
   onError?: (...args: any[]) => any;
-  shouldSubscribeToObject?: (...args: any[]) => boolean;
+  shouldSubscribeToObject?: boolean | ((...args: any[]) => boolean);
 }) => {
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();

@@ -31,7 +31,7 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
+import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
@@ -70,25 +70,6 @@ const TaskDetail = (props: RouteComponentProps) => {
     currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
   }
-
-  // Subscribe to task WS only once, and unsubscribe on unmount
-  const taskId = task && task.id;
-  useEffect(() => {
-    if (taskId && window.socket) {
-      window.socket.subscribe({
-        model: OBJECT_TYPES.TASK,
-        id: taskId,
-      });
-    }
-    return () => {
-      if (taskId && window.socket) {
-        window.socket.unsubscribe({
-          model: OBJECT_TYPES.TASK,
-          id: taskId,
-        });
-      }
-    };
-  }, [taskId]);
 
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {

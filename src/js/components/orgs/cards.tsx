@@ -344,7 +344,7 @@ const OrgCards = ({
         objectType: OBJECT_TYPES.ORG,
         // eslint-disable-next-line @typescript-eslint/camelcase
         data: { task: task.id, org_type: type },
-        shouldSubscribeToObject: () => true,
+        shouldSubscribeToObject: true,
       }),
     ).finally(() => {
       /* istanbul ignore else */
