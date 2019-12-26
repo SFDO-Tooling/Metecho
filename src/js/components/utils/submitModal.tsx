@@ -50,7 +50,7 @@ const SubmitModal = ({
     }
   };
 
-  let objectType;
+  let objectType, heading, submittingLabel, toSubmitLabel;
   switch (instanceType) {
     case 'task':
       objectType = {
@@ -58,6 +58,9 @@ const SubmitModal = ({
         objectType: OBJECT_TYPES.TASK_PR,
         url: window.api_urls.task_create_pr(instanceId),
       };
+      heading = i18n.t('Submit this task for review');
+      submittingLabel = i18n.t('Submitting Task for Review…');
+      toSubmitLabel = i18n.t('Submit Task for Review');
       break;
     case 'project':
       objectType = {
@@ -65,6 +68,9 @@ const SubmitModal = ({
         objectType: OBJECT_TYPES.PROJECT_PR,
         url: window.api_urls.project_create_pr(instanceId),
       };
+      heading = i18n.t('Submit this project for review');
+      submittingLabel = i18n.t('Submitting Project for Review…');
+      toSubmitLabel = i18n.t('Submit Project for Review');
       break;
   }
 
@@ -101,7 +107,7 @@ const SubmitModal = ({
     resetForm();
   };
 
-  const submitTask = (e: React.FormEvent<HTMLFormElement>) => {
+  const submitInstance = (e: React.FormEvent<HTMLFormElement>) => {
     setSubmittingReview(true);
     handleSubmit(e);
   };
@@ -111,7 +117,7 @@ const SubmitModal = ({
       isOpen={isOpen}
       size="medium"
       disableClose={submittingReview}
-      heading={i18n.t('Submit this task for review')}
+      heading={heading}
       footer={[
         <Button
           key="cancel"
@@ -124,12 +130,9 @@ const SubmitModal = ({
           type="submit"
           label={
             submittingReview ? (
-              <LabelWithSpinner
-                label={i18n.t('Submitting Task for Review…')}
-                variant="inverse"
-              />
+              <LabelWithSpinner label={submittingLabel} variant="inverse" />
             ) : (
-              i18n.t('Submit Task for Review')
+              toSubmitLabel
             )
           }
           variant="brand"
@@ -139,7 +142,7 @@ const SubmitModal = ({
       ]}
       onRequestClose={handleClose}
     >
-      <form className="slds-form slds-p-around_large" onSubmit={submitTask}>
+      <form className="slds-form slds-p-around_large" onSubmit={submitInstance}>
         <div className="slds-grid slds-wrap slds-gutters">
           <div
             className="slds-col
