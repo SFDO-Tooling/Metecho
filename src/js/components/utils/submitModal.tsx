@@ -158,7 +158,7 @@ const SubmitModal = ({
               </Trans>
             </div>
             <Input
-              id="task-title"
+              id="pr-title"
               label={i18n.t('Title')}
               className="slds-p-bottom_small"
               name="title"
@@ -170,31 +170,31 @@ const SubmitModal = ({
               onChange={handleInputChange}
             />
             <Textarea
-              id="task-critical-changes"
+              id="pr-critical-changes"
               label={i18n.t(
                 'Describe any critical changes which might impact existing functionality',
               )}
-              className="task-submit-textarea slds-p-bottom_small"
+              className="pr-submit-textarea slds-p-bottom_small"
               name="critical_changes"
               value={inputs.critical_changes}
               errorText={errors.critical_changes}
               onChange={handleInputChange}
             />
             <Textarea
-              id="task-additional-changes"
+              id="pr-additional-changes"
               label={i18n.t(
                 'Describe additional changes including instructions for users for any post-upgrade tasks',
               )}
-              className="task-submit-textarea slds-p-bottom_small"
+              className="pr-submit-textarea slds-p-bottom_small"
               name="additional_changes"
               value={inputs.additional_changes}
               errorText={errors.additional_changes}
               onChange={handleInputChange}
             />
             <Textarea
-              id="task-notes"
+              id="pr-notes"
               label={i18n.t('Developer notes')}
-              className="task-submit-textarea slds-p-bottom_small"
+              className="pr-submit-textarea slds-p-bottom_small"
               name="notes"
               value={inputs.notes}
               errorText={errors.notes}
