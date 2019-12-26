@@ -2,14 +2,16 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
+import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import i18n from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Task } from '@/store/tasks/reducer';
+import { TASK_STATUSES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
-interface DataCellProps {
+interface TableCellProps {
   [key: string]: any;
   item?: Task;
   repositorySlug?: string;
@@ -22,13 +24,13 @@ interface Props {
   tasks: Task[];
 }
 
-const NameDataCell = ({
+const NameTableCell = ({
   repositorySlug,
   projectSlug,
   item,
   children,
   ...props
-}: DataCellProps) => (
+}: TableCellProps) => (
   <DataTableCell {...props}>
     {repositorySlug && projectSlug && item && (
       <Link to={routes.task_detail(repositorySlug, projectSlug, item.slug)}>
@@ -37,14 +39,40 @@ const NameDataCell = ({
     )}
   </DataTableCell>
 );
-NameDataCell.displayName = DataTableCell.displayName;
+NameTableCell.displayName = DataTableCell.displayName;
 
-const StatusTableCell = ({ ...props }: DataCellProps) => (
-  <DataTableCell {...props}>{i18n.t('Unchanged')}</DataTableCell>
-);
+const StatusTableCell = ({ item, ...props }: TableCellProps) => {
+  /* istanbul ignore if */
+  if (!item) {
+    return null;
+  }
+  let displayStatus, icon;
+  switch (item.status) {
+    case TASK_STATUSES.PLANNED:
+      displayStatus = i18n.t('Planned');
+      icon = <ProgressRing value={0} />;
+      break;
+    case TASK_STATUSES.IN_PROGRESS:
+      displayStatus = i18n.t('In Progress');
+      icon = <ProgressRing value={40} flowDirection="fill" theme="active" />;
+      break;
+    case TASK_STATUSES.COMPLETED:
+      displayStatus = i18n.t('Complete');
+      icon = <ProgressRing value={100} theme="complete" hasIcon />;
+      break;
+  }
+  return (
+    <DataTableCell {...props}>
+      {icon}
+      <span className="slds-m-left_x-small">
+        {displayStatus || item.status}
+      </span>
+    </DataTableCell>
+  );
+};
 StatusTableCell.displayName = DataTableCell.displayName;
 
-const AssigneeTableCell = ({ ...props }: DataCellProps) => (
+const AssigneeTableCell = ({ ...props }: TableCellProps) => (
   <DataTableCell {...props}>
     <Icon
       title={i18n.t('Assign Team Member')}
@@ -67,7 +95,7 @@ const TaskTable = ({ repositorySlug, projectSlug, tasks }: Props) =>
         primaryColumn
         truncate
       >
-        <NameDataCell
+        <NameTableCell
           repositorySlug={repositorySlug}
           projectSlug={projectSlug}
         />

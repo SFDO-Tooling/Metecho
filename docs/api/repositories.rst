@@ -23,11 +23,11 @@ Retrieve
         {
           "id": "zVQYrye",
           "name": "Test Repository",
-          "slug": "test-repository",
-          "old_slugs": [],
           "repo_url": "https://github.com/SFDO-Tooling/test-repository",
           "description": "<p>This is safely rendered Markdown.</p>",
-          "is_managed": false
+          "is_managed": false,
+          "slug": "test-repository",
+          "old_slugs": []
         }
         ...
       ]

@@ -43,6 +43,7 @@ Docker-based development
     SF_CLIENT_KEY=...
     SF_CLIENT_ID=...
     SF_CLIENT_SECRET=...
+    GITHUB_HOOK_SECRET=...
 
    Note that none of the values should be quoted, and while ``SF_CLIENT_KEY`` is
    an RSA private key, it must have newlines replaced with ``\n`` in order to
@@ -82,6 +83,11 @@ user a superuser. You can do that easily via the ``promote_superuser``
 management command::
 
     $ docker-compose run --rm web python manage.py promote_superuser <your email>
+
+You will also need, when you log in, to make sure that the GitHub app
+that provides MetaShare with webhook updates and GitHub API access **is
+enabled for any Organizations you are testing against**. By default it
+will only install for the user you are logging in as.
 
 Setting up the database
 -----------------------
@@ -184,6 +190,25 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 .. _integrated terminal: https://code.visualstudio.com/docs/editor/integrated-terminal
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
 
+GitHub webhooks
+---------------
+
+To test GitHub webhooks in development, you will need to use the tool
+``ngrok``, which sets up a tunnel from the internet-at-large to your
+computer. Run it like so::
+
+   $ ngrok http --host-header=localhost:8080 8080
+
+You will get output that indicates the name of the ngrok tunnel, which will look
+like ``https://<some hash>.ngrok.io``. You will need to adjust the GitHub app to
+point to the ``/api/hook/`` path of your ngrok tunnel (e.g.
+``https://<some hash>.ngrok.io/api/hook/``). This means that it's a
+one-person-at-a-time thing, which is a problem for which we don't yet have
+a solution.
+
+As an OddBird, you can access the app at
+`<https://github.com/organizations/oddbird/settings/apps/metashare-dev>`_.
+
 Internationalization
 --------------------
 
@@ -204,5 +229,10 @@ Strings with dynamic content (i.e. known only at runtime) cannot be
 automatically parsed, but will log errors while the app is running if they're
 missing from the served translation files. To resolve, add the missing key:value
 translations to ``locales/<language>/translation.json``.
+
+This applies to the server code too, except no error will be raised. Therefore,
+you should use string literals everywhere in server-side code that might be
+exposed to the front end, to properly generate translation files. See error
+message handling in ``metashare/api/sf_run_flow.py`` for an example.
 
 .. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector

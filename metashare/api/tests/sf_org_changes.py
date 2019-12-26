@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from ..sf_org_changes import (
-    build_package_xml,
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
@@ -14,15 +13,6 @@ from ..sf_org_changes import (
 PATCH_ROOT = "metashare.api.sf_org_changes"
 
 
-def test_build_package_xml():
-    with patch(f"{PATCH_ROOT}.open") as open_mock:
-        scratch_org = MagicMock(unsaved_changes=["test:value"])
-        desired_changes = {"name": ["member"]}
-        build_package_xml(scratch_org, "package_xml_path", desired_changes)
-
-        assert open_mock.called
-
-
 @pytest.mark.django_db
 def test_run_retrieve_task(user_factory, scratch_org_factory):
     user = user_factory()
@@ -30,16 +20,15 @@ def test_run_retrieve_task(user_factory, scratch_org_factory):
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
         stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.build_package_xml"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-        RetrieveUnpackaged = stack.enter_context(
-            patch(f"{PATCH_ROOT}.RetrieveUnpackaged")
+        retrieve_components = stack.enter_context(
+            patch(f"{PATCH_ROOT}.retrieve_components")
         )
 
         desired_changes = {"name": ["member"]}
         run_retrieve_task(user, scratch_org, ".", desired_changes)
 
-        assert RetrieveUnpackaged.called
+        assert retrieve_components.called
 
 
 @pytest.mark.django_db

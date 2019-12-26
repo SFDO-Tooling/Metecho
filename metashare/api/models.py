@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -26,6 +26,10 @@ from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
+SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+TASK_STATUSES = Choices(
+    ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
+)
 
 
 class UserQuerySet(models.QuerySet):
@@ -33,7 +37,8 @@ class UserQuerySet(models.QuerySet):
 
 
 class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
-    pass
+    def get_or_create_github_user(self):
+        return self.get_or_create(username=settings.GITHUB_USER_NAME,)[0]
 
 
 class User(HashIdMixin, AbstractUser):
@@ -160,7 +165,7 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model,
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -178,6 +183,28 @@ class Repository(
         verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
+
+    def get_a_matching_user(self):
+        github_repository = GitHubRepository.objects.filter(
+            repo_id=self.repo_id
+        ).first()
+
+        if github_repository:
+            return github_repository.user
+
+        return None
+
+    def queue_refresh_commits(self, *, ref):
+        from .jobs import refresh_commits_job
+
+        refresh_commits_job.delay(repository=self, branch_name=ref)
+
+    @transaction.atomic
+    def add_commits(self, *, commits, ref, sender):
+        matching_tasks = Task.objects.filter(branch_name=ref, project__repository=self)
+
+        for task in matching_tasks:
+            task.add_commits(commits, sender)
 
 
 class GitHubRepository(HashIdMixin, models.Model):
@@ -205,7 +232,7 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch],
+        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
 
     repository = models.ForeignKey(
@@ -231,7 +258,7 @@ class Project(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
 
     # end PushMixin configuration
 
-    def finalize_branch_update(self):
+    def finalize_project_update(self):
         self.save()
         self.notify_changed()
 
@@ -258,9 +285,16 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
+    commits = JSONField(default=list, blank=True)
+    origin_sha = StringField(null=True, blank=True)
+    ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
+    pr_is_open = models.BooleanField(default=False)
+    status = models.CharField(
+        choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
+    )
 
     slug_class = TaskSlug
 
@@ -282,6 +316,23 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
     # end PushMixin configuration
 
     def finalize_task_update(self):
+        self.save()
+        self.notify_changed()
+
+    def finalize_status_completed(self):
+        self.status = TASK_STATUSES.Completed
+        self.has_unmerged_commits = False
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_closed(self):
+        self.pr_is_open = False
+        self.save()
+        self.notify_changed()
+
+    def finalize_pr_reopened(self):
+        self.pr_is_open = True
         self.save()
         self.notify_changed()
 
@@ -312,12 +363,31 @@ class Task(PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model):
         else:
             self.notify_error(error)
 
+    def finalize_provision(self):
+        if self.status == TASK_STATUSES.Planned:
+            self.status = TASK_STATUSES["In progress"]
+            self.save()
+            self.notify_changed()
+
+    def finalize_commit_changes(self):
+        if self.status != TASK_STATUSES["In progress"]:
+            self.status = TASK_STATUSES["In progress"]
+            self.save()
+            self.notify_changed()
+
+    def add_commits(self, commits, sender):
+        self.commits = [
+            gh.normalize_commit(c, sender=sender) for c in commits
+        ] + self.commits
+        self.save()
+        self.notify_changed()
+
+    def add_ms_git_sha(self, sha):
+        self.ms_commits.append(sha)
+
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)
-
-
-SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 
 
 class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
@@ -417,6 +487,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed("SCRATCH_ORG_PROVISION")
+            self.task.finalize_provision()
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_PROVISION_FAILED")
             # If the scratch org has already been created on Salesforce,
@@ -459,6 +530,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.save()
         if error is None:
             self.notify_changed("SCRATCH_ORG_COMMIT_CHANGES")
+            self.task.finalize_commit_changes()
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
 

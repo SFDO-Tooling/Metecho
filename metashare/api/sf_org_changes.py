@@ -1,25 +1,16 @@
+import json
 import os.path
 from collections import defaultdict
 
 import simple_salesforce
-from cumulusci.core.config import BaseGlobalConfig, TaskConfig
+from cumulusci.core.config import BaseGlobalConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.tasks.github.util import CommitDir
-from cumulusci.tasks.metadata.package import PackageXmlGenerator
-from cumulusci.tasks.salesforce.RetrieveUnpackaged import RetrieveUnpackaged
-from cumulusci.tasks.salesforce.sourcetracking import MetadataType
+from cumulusci.tasks.salesforce.sourcetracking import retrieve_components
 from django.conf import settings
 
 from .gh import get_repo_info, local_github_checkout
 from .sf_run_flow import refresh_access_token
-
-
-def build_package_xml(scratch_org, package_xml_path, desired_changes):
-    types = [MetadataType(name, members) for (name, members) in desired_changes.items()]
-    api_version = BaseGlobalConfig().project__package__api_version
-    package_xml = PackageXmlGenerator(".", api_version, types=types)()
-    with open(package_xml_path, "w") as f:
-        f.write(package_xml)
 
 
 def run_retrieve_task(user, scratch_org, project_path, desired_changes):
@@ -38,18 +29,54 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
             "commit": branch,
         }
     )
-    package_xml_path = os.path.join(project_path, "src", "package.xml")
-    build_package_xml(scratch_org, package_xml_path, desired_changes)
-    task_config = TaskConfig(
-        {
-            "options": {
-                "path": os.path.join(project_path, "src"),
-                "package_xml": package_xml_path,
+
+    # Determine default package directory
+    # Use src for mdapi format,
+    # or the default package directory from sfdx-project.json for sfdx format
+    # (This chunk is copied from CumulusCI, where we need to refactor things
+    # so we can reuse it. Given that it's already tested there, I'm going to
+    # pragma: no cover some of it.)
+    package_directories = []
+    default_package_directory = None
+    package_xml_opts = {}
+    sfdx_project_json = os.path.join(project_path, "sfdx-project.json")
+    if os.path.exists(sfdx_project_json):
+        with open(sfdx_project_json, "r") as f:  # pragma: no cover
+            sfdx_project = json.load(f)
+            for package_directory in sfdx_project.get("packageDirectories", []):
+                package_directories.append(package_directory["path"])
+                if package_directory.get("default"):
+                    default_package_directory = package_directory["path"]
+    if (
+        default_package_directory
+        and cci.project_config.project__source_format == "sfdx"
+    ):  # pragma: no cover
+        path = os.path.join(project_path, default_package_directory)
+        md_format = False
+    else:
+        path = os.path.join(project_path, "src")
+        md_format = True
+        package_xml_opts.update(
+            {
+                "package_name": cci.project_config.project__package__name,
+                "install_class": cci.project_config.project__package__install_class,
+                "uninstall_class": cci.project_config.project__package__uninstall_class,
             }
-        }
+        )
+
+    components = []
+    for mdtype, members in desired_changes.items():
+        for name in members:
+            components.append({"MemberName": name, "MemberType": mdtype})
+    retrieve_components(
+        components,
+        org_config,
+        path,
+        md_format,
+        extra_package_xml_opts=package_xml_opts,
+        namespace_tokenize=False,
+        api_version=cci.project_config.project__package__api_version,
     )
-    task = RetrieveUnpackaged(cci.project_config, task_config, org_config)
-    task()
 
 
 def commit_changes_to_github(
