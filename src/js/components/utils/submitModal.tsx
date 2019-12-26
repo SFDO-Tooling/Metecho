@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
@@ -54,7 +56,6 @@ const SubmitModal = ({
   switch (instanceType) {
     case 'task':
       objectType = {
-        /* eslint-enable @typescript-eslint/camelcase */
         objectType: OBJECT_TYPES.TASK_PR,
         url: window.api_urls.task_create_pr(instanceId),
       };
@@ -64,7 +65,6 @@ const SubmitModal = ({
       break;
     case 'project':
       objectType = {
-        /* eslint-enable @typescript-eslint/camelcase */
         objectType: OBJECT_TYPES.PROJECT_PR,
         url: window.api_urls.project_create_pr(instanceId),
       };
@@ -81,7 +81,6 @@ const SubmitModal = ({
     handleSubmit,
     resetForm,
   } = useForm({
-    /* eslint-disable @typescript-eslint/camelcase */
     fields: {
       title: instanceName,
       critical_changes: '',
