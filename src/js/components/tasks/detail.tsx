@@ -11,7 +11,6 @@ import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
-import SubmitModal from '@/components/tasks/submit';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -25,6 +24,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';

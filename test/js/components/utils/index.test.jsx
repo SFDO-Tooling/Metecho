@@ -6,7 +6,7 @@ import { LabelWithSpinner, PrivateRoute, useForm } from '@/components/utils';
 import { createObject } from '@/store/actions';
 import routes from '@/utils/routes';
 
-import { renderHookWithRedux, renderWithRedux } from './../utils';
+import { renderHookWithRedux, renderWithRedux } from './../../utils';
 
 jest.mock('@/store/actions');
 

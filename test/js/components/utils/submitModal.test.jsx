@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import SubmitModal from '@/components/tasks/submit';
+import SubmitModal from '@/components/utils/submitModal';
 import { createObject } from '@/store/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';

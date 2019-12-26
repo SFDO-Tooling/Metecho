@@ -8,7 +8,6 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import TaskForm from '@/components/tasks/createForm';
-import SubmitModal from '@/components/tasks/submit';
 import TaskTable from '@/components/tasks/table';
 import {
   DetailPageLayout,
@@ -21,6 +20,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import SubmitModal from '@/components/utils/submitModal';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
