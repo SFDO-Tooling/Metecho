@@ -20,7 +20,6 @@ import { ThunkDispatch } from '@/store';
 import { createObject, deleteObject } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
-import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
@@ -279,15 +278,7 @@ const OrgCard = ({
   );
 };
 
-const OrgCards = ({
-  orgs,
-  task,
-  project,
-}: {
-  orgs: OrgsByTask;
-  task: Task;
-  project: Project;
-}) => {
+const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
   const user = useSelector(selectUserState);
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
@@ -329,16 +320,6 @@ const OrgCards = ({
 
   const createOrg = useCallback((type: OrgTypes) => {
     setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
-    // Subscribe to project/task for possible branch creation...
-    if (window.socket) {
-      /* istanbul ignore else */
-      if (!project.branch_url) {
-        window.socket.subscribe({
-          model: OBJECT_TYPES.PROJECT,
-          id: project.id,
-        });
-      }
-    }
     dispatch(
       createObject({
         objectType: OBJECT_TYPES.ORG,

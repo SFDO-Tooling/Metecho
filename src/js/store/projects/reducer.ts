@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { ProjectAction } from '@/store/projects/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
@@ -163,6 +165,30 @@ const reducer = (
           projects: [...repositoryProjects.projects, project],
         },
       };
+    }
+    case 'PROJECT_CREATE_PR_FAILED': {
+      const project = action.payload;
+      const repositoryProjects = projects[project.repository] || {
+        ...defaultState,
+      };
+      const existingProject = repositoryProjects.projects.find(
+        (p) => p.id === project.id,
+      );
+      if (existingProject) {
+        return {
+          ...projects,
+          [project.repository]: {
+            ...repositoryProjects,
+            projects: repositoryProjects.projects.map((p) => {
+              if (p.id === project.id) {
+                return { ...project, currently_creating_pr: false };
+              }
+              return p;
+            }),
+          },
+        };
+      }
+      return projects;
     }
   }
   return projects;

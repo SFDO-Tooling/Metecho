@@ -258,11 +258,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         {primaryButton}
         {secondaryButton}
 
-        {orgs ? (
-          <OrgCards orgs={orgs} task={task} project={project} />
-        ) : (
-          <SpinnerWrapper />
-        )}
+        {orgs ? <OrgCards orgs={orgs} task={task} /> : <SpinnerWrapper />}
         {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
             orgId={devOrg.id}

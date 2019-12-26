@@ -48,7 +48,7 @@ class CreatePrMixin:
                 serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
         instance = self.get_object()
-        if instance.pr_number is not None:
+        if instance.pr_is_open:
             raise ValidationError(self.error_pr_exists)
         instance.queue_create_pr(request.user, **serializer.validated_data)
         return Response(

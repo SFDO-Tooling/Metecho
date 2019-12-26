@@ -20,7 +20,7 @@ export const updateTask = (payload: Task): TaskUpdated => ({
   payload,
 });
 
-export const createPR = (payload: Task): ThunkResult => (dispatch) => {
+export const createTaskPR = (payload: Task): ThunkResult => (dispatch) => {
   dispatch(
     addToast({
       heading: `${i18n.t('Successfully submitted task for review')}: “${
@@ -37,7 +37,7 @@ export const createPR = (payload: Task): ThunkResult => (dispatch) => {
   });
 };
 
-export const createPRFailed = ({
+export const createTaskPRFailed = ({
   model,
   message,
 }: {

@@ -10,7 +10,7 @@ describe('updateTask', () => {
   });
 });
 
-describe('createPR', () => {
+describe('createTaskPR', () => {
   test('adds success message', () => {
     const store = storeWithThunk({});
     const task = {
@@ -22,7 +22,7 @@ describe('createPR', () => {
       type: 'TASK_UPDATE',
       payload: task,
     };
-    store.dispatch(actions.createPR(task));
+    store.dispatch(actions.createTaskPR(task));
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -44,7 +44,7 @@ describe('createPR', () => {
       type: 'TASK_UPDATE',
       payload: task,
     };
-    store.dispatch(actions.createPR(task));
+    store.dispatch(actions.createTaskPR(task));
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -57,7 +57,7 @@ describe('createPR', () => {
   });
 });
 
-describe('createPRFailed', () => {
+describe('createTaskPRFailed', () => {
   test('adds error message', () => {
     const store = storeWithThunk({});
     const task = {
@@ -69,7 +69,7 @@ describe('createPRFailed', () => {
       payload: task,
     };
     store.dispatch(
-      actions.createPRFailed({ model: task, message: 'error msg' }),
+      actions.createTaskPRFailed({ model: task, message: 'error msg' }),
     );
     const allActions = store.getActions();
 

@@ -160,10 +160,12 @@ export const fetchObject = ({
   objectType,
   url,
   filters = {},
+  shouldSubscribeToObject = false,
 }: {
   objectType: ObjectTypes;
   url?: string;
   filters?: ObjectFilters;
+  shouldSubscribeToObject?: boolean | ((object: any) => boolean);
 }): ThunkResult => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
@@ -186,6 +188,17 @@ export const fetchObject = ({
       response && response.results && response.results.length
         ? response.results[0]
         : null;
+    const shouldSubscribe =
+      (typeof shouldSubscribeToObject === 'boolean' &&
+        shouldSubscribeToObject) ||
+      (typeof shouldSubscribeToObject === 'function' &&
+        shouldSubscribeToObject(object));
+    if (object && object.id && window.socket && shouldSubscribe) {
+      window.socket.subscribe({
+        model: objectType,
+        id: object.id,
+      });
+    }
     return dispatch({
       type: 'FETCH_OBJECT_SUCCEEDED',
       payload: { object, filters, objectType, url: baseUrl },

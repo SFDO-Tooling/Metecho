@@ -399,6 +399,9 @@ class Task(
         self.pr_is_open = False
         self.save()
         self.notify_changed()
+        self.project.has_unmerged_commits = True
+        self.project.save()
+        self.project.notify_changed()
 
     def finalize_pr_closed(self):
         self.pr_is_open = False

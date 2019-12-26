@@ -140,6 +140,7 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObject).toHaveBeenCalledWith({
         filters: { repository: 'r1', slug: 'other-project' },
         objectType: 'project',
+        shouldSubscribeToObject: true,
       });
     });
   });

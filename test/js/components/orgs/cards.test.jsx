@@ -155,26 +155,6 @@ describe('<OrgCards/>', () => {
       expect(getByText('Creating Org…')).toBeVisible();
     });
 
-    describe('with websocket', () => {
-      beforeEach(() => {
-        window.socket = { subscribe: jest.fn() };
-      });
-
-      afterEach(() => {
-        Reflect.deleteProperty(window, 'socket');
-      });
-
-      test('subscribes to project', () => {
-        const { getByText } = setup();
-        fireEvent.click(getByText('Create Org'));
-
-        expect(window.socket.subscribe).toHaveBeenCalledWith({
-          model: 'project',
-          id: 'project-id',
-        });
-      });
-    });
-
     describe('not connected to sf org', () => {
       test('opens connect modal', () => {
         const { getByText } = setup({ initialState: { user: {} } });

@@ -29,6 +29,7 @@ export default (
         fetchObject({
           objectType: OBJECT_TYPES.PROJECT,
           filters: { repository: repository.id, slug: projectSlug },
+          shouldSubscribeToObject: true,
         }),
       );
     }
