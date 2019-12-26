@@ -277,7 +277,7 @@ describe('<ProjectDetail/>', () => {
       expect(getByText('Submitting Project for Review…')).toBeVisible();
     });
 
-    test('renders external links for onRenderHeaderActions', () => {
+    test('renders view pr button if pr_url exists', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
@@ -287,8 +287,6 @@ describe('<ProjectDetail/>', () => {
               projects: [
                 {
                   ...defaultState.projects.r1.projects[0],
-                  has_unmerged_commits: true,
-                  currently_creating_pr: true,
                   pr_url: 'https://example.com/',
                 },
               ],
@@ -297,10 +295,10 @@ describe('<ProjectDetail/>', () => {
         },
       });
 
-      expect(getByText('Submitting Project for Review…')).toBeVisible();
+      expect(getByText('View Pull Request')).toBeVisible();
     });
 
-    test('renders external links for onRenderHeaderActions with branch_url', () => {
+    test('renders view branch button if branch_url exists', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
@@ -310,8 +308,6 @@ describe('<ProjectDetail/>', () => {
               projects: [
                 {
                   ...defaultState.projects.r1.projects[0],
-                  has_unmerged_commits: true,
-                  currently_creating_pr: true,
                   branch_url: 'https://example.com/',
                 },
               ],
@@ -320,7 +316,7 @@ describe('<ProjectDetail/>', () => {
         },
       });
 
-      expect(getByText('Submitting Project for Review…')).toBeVisible();
+      expect(getByText('View Branch')).toBeVisible();
     });
   });
 });

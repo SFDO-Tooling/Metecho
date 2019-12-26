@@ -364,7 +364,7 @@ describe('<TaskDetail/>', () => {
 
   describe('"Submit Task for Review" click', () => {
     test('opens modal', () => {
-      const { getByText, getAllByText } = setup({
+      const { getByText } = setup({
         initialState: {
           ...defaultState,
           tasks: {
@@ -380,9 +380,7 @@ describe('<TaskDetail/>', () => {
       });
       fireEvent.click(getByText('Submit Task for Review'));
 
-      getAllByText('Submit Task for Review').forEach((element) => {
-        expect(element).toBeVisible();
-      });
+      expect(getByText('Submit this task for review')).toBeVisible();
     });
   });
 

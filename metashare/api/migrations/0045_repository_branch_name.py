@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
             name="branch_name",
             field=models.CharField(
                 blank=True,
+                default="master",
                 max_length=100,
                 null=True,
                 validators=[

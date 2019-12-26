@@ -38,7 +38,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const readyToSubmit = Boolean(
     project && project.has_unmerged_commits && !project.pr_is_open,
   );
-  console.debug('Ready to Submit', readyToSubmit);
 
   // Subscribe to individual task WS channels once, and unsubscribe on unmount
   const taskIds = tasks && tasks.map((t) => t.id);
@@ -186,7 +185,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
             instanceId={project.id}
             instanceName={project.name}
             instanceDiffUrl={project.branch_diff_url}
-            instanceType={'project'}
+            instanceType="project"
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />

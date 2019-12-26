@@ -30,6 +30,7 @@ Retrieve
           "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project",
           "has_unmerged_commits": true,
           "currently_creating_pr": false,
+          "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/master...feature/test-project",
           "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
           "pr_is_open": true
         }

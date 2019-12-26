@@ -295,7 +295,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             instanceId={task.id}
             instanceName={task.name}
             instanceDiffUrl={task.branch_diff_url}
-            instanceType={'task'}
+            instanceType="task"
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />
