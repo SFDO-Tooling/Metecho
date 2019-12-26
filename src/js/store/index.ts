@@ -23,11 +23,6 @@ export interface AppState {
   user: User | null;
 }
 
-export interface Action {
-  type: string;
-  payload?: any;
-}
-
 export type ThunkResult = ThunkAction<
   Promise<any> | AnyAction,
   AppState,
@@ -36,7 +31,7 @@ export type ThunkResult = ThunkAction<
 >;
 export type ThunkDispatch = ReduxThunkDispatch<AppState, void, AnyAction>;
 
-const reducer: Reducer<AppState, Action> = combineReducers({
+const reducer: Reducer<AppState> = combineReducers({
   toasts: toastsReducer,
   errors: errorsReducer,
   orgs: orgReducer,
