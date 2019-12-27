@@ -104,8 +104,12 @@ class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
 
         ref = self.validated_data["ref"]
         branch_prefix = "refs/heads/"
+        tag_prefix = "refs/tags/"
+        if ref.startswith(tag_prefix):
+            logger.info(f"Received a tag ref, aborting: {ref}")
+            return
         if not ref.startswith(branch_prefix):
-            logger.error(f"Received an invalid ref: {ref}")
+            logger.warn(f"Received an invalid ref: {ref}")
             return
         prefix_len = len(branch_prefix)
         ref = ref[prefix_len:]
