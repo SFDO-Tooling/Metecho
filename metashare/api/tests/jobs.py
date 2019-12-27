@@ -418,22 +418,33 @@ def test_create_pr__error(user_factory, task_factory):
 
 
 @pytest.mark.django_db
-def test_populate_github_users(
-    user_factory, repository_factory, git_hub_repository_factory,
-):
-    user = user_factory()
-    repository = repository_factory(repo_id=123)
-    git_hub_repository_factory(repo_id=123, user=user)
-    with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
-        collab1 = MagicMock(
-            id=123, login="test-user-1", avatar_url="http://example.com/avatar1.png",
-        )
-        collab2 = MagicMock(
-            id=456, login="test-user-2", avatar_url="http://example.com/avatar2.png",
-        )
-        repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
-        get_repo_info.return_value = repo
+class TestPopulateGithubUsers:
+    def test_user_present(
+        self,
+        user_factory, repository_factory, git_hub_repository_factory,
+    ):
+        user = user_factory()
+        repository = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123, user=user)
+        with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
+            collab1 = MagicMock(
+                id=123, login="test-user-1", avatar_url="http://example.com/avatar1.png",
+            )
+            collab2 = MagicMock(
+                id=456, login="test-user-2", avatar_url="http://example.com/avatar2.png",
+            )
+            repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
+            get_repo_info.return_value = repo
 
-        populate_github_users(repository)
-        repository.refresh_from_db()
-        assert len(repository.github_users) == 2
+            populate_github_users(repository)
+            repository.refresh_from_db()
+            assert len(repository.github_users) == 2
+
+    def test_user_missing(
+        self,
+        repository_factory
+    ):
+        repository = repository_factory(repo_id=123)
+        with patch("metashare.api.jobs.logger") as logger:
+            populate_github_users(repository)
+            assert logger.warning.called
