@@ -10,10 +10,18 @@ import {
   updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
-import { updateProject } from '@/store/projects/actions';
+import {
+  createProjectPR,
+  createProjectPRFailed,
+  updateProject,
+} from '@/store/projects/actions';
 import { reposRefreshed } from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { createPR, createPRFailed, updateTask } from '@/store/tasks/actions';
+import {
+  createTaskPR,
+  createTaskPRFailed,
+  updateTask,
+} from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
 jest.mock('@/store/orgs/actions');
@@ -24,8 +32,10 @@ jest.mock('@/store/tasks/actions');
 const actions = {
   commitFailed,
   commitSucceeded,
-  createPR,
-  createPRFailed,
+  createProjectPR,
+  createProjectPRFailed,
+  createTaskPR,
+  createTaskPRFailed,
   deleteFailed,
   deleteOrg,
   reposRefreshed,
@@ -68,9 +78,11 @@ afterEach(() => {
 describe('getAction', () => {
   test.each([
     ['PROJECT_UPDATE', 'updateProject'],
+    ['PROJECT_CREATE_PR', 'createProjectPR'],
+    ['PROJECT_CREATE_PR_FAILED', 'createProjectPRFailed'],
     ['TASK_UPDATE', 'updateTask'],
-    ['TASK_CREATE_PR', 'createPR'],
-    ['TASK_CREATE_PR_FAILED', 'createPRFailed'],
+    ['TASK_CREATE_PR', 'createTaskPR'],
+    ['TASK_CREATE_PR_FAILED', 'createTaskPRFailed'],
     ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],

@@ -5,7 +5,8 @@ export type ObjectTypes =
   | 'task'
   | 'scratch_org'
   | 'scratch_org_commit'
-  | 'task_pr';
+  | 'task_pr'
+  | 'project_pr';
 
 export const OBJECT_TYPES = {
   USER: 'user' as 'user',
@@ -15,6 +16,7 @@ export const OBJECT_TYPES = {
   ORG: 'scratch_org' as 'scratch_org',
   COMMIT: 'scratch_org_commit' as 'scratch_org_commit',
   TASK_PR: 'task_pr' as 'task_pr',
+  PROJECT_PR: 'project_pr' as 'project_pr',
 };
 
 export const GITHUB_REPO_PREFIX = 'https://github.com';
