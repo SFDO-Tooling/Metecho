@@ -296,6 +296,67 @@ describe('fetchObject', () => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
     });
+
+    describe('with shouldSubscribeToObject', () => {
+      let store, filters, repository;
+
+      beforeEach(() => {
+        window.socket = { subscribe: jest.fn() };
+        store = storeWithThunk({});
+        filters = { slug: 'repository-1' };
+        repository = {
+          id: 'r1',
+          name: 'Repository 1',
+          slug: 'repository-1',
+        };
+      });
+
+      afterEach(() => {
+        Reflect.deleteProperty(window, 'socket');
+      });
+
+      test('subscribes to socket if test passes', () => {
+        fetchMock.getOnce(addUrlParams(url, filters), {
+          results: [repository],
+        });
+
+        expect.assertions(2);
+        return store
+          .dispatch(
+            actions.fetchObject({
+              objectType: 'repository',
+              filters,
+              shouldSubscribeToObject: () => true,
+            }),
+          )
+          .then(() => {
+            expect(window.socket.subscribe).toHaveBeenCalledTimes(1);
+            expect(window.socket.subscribe).toHaveBeenCalledWith({
+              model: 'repository',
+              id: 'r1',
+            });
+          });
+      });
+
+      test('does not subscribe if test fails', () => {
+        fetchMock.getOnce(addUrlParams(url, filters), {
+          results: [repository],
+        });
+
+        expect.assertions(1);
+        return store
+          .dispatch(
+            actions.fetchObject({
+              objectType: 'repository',
+              filters,
+              shouldSubscribeToObject: () => false,
+            }),
+          )
+          .then(() => {
+            expect(window.socket.subscribe).not.toHaveBeenCalled();
+          });
+      });
+    });
   });
 
   test('throws error if no url', () => {

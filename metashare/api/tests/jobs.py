@@ -372,6 +372,9 @@ def test_create_pr(user_factory, task_factory):
         create_pr(
             task,
             user,
+            repo_id=123,
+            base="master",
+            head="feature",
             title="My PR",
             critical_changes="",
             additional_changes="",
@@ -400,6 +403,9 @@ def test_create_pr__error(user_factory, task_factory):
             create_pr(
                 task,
                 user,
+                repo_id=123,
+                base="master",
+                head="feature",
                 title="My PR",
                 critical_changes="",
                 additional_changes="",

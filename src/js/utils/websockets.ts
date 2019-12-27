@@ -12,11 +12,19 @@ import {
   updateOrg,
 } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
-import { updateProject } from '@/store/projects/actions';
+import {
+  createProjectPR,
+  createProjectPRFailed,
+  updateProject,
+} from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
 import { reposRefreshed } from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
-import { createPR, createPRFailed, updateTask } from '@/store/tasks/actions';
+import {
+  createTaskPR,
+  createTaskPRFailed,
+  updateTask,
+} from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
 import {
   ObjectTypes,
@@ -51,6 +59,17 @@ interface ReposRefreshedEvent {
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
   payload: Project;
+}
+interface ProjectCreatePREvent {
+  type: 'PROJECT_CREATE_PR';
+  payload: Project;
+}
+interface ProjectCreatePRFailedEvent {
+  type: 'PROJECT_CREATE_PR_FAILED';
+  payload: {
+    message?: string;
+    model: Project;
+  };
 }
 interface TaskUpdatedEvent {
   type: 'TASK_UPDATE';
@@ -122,6 +141,8 @@ type ModelEvent =
   | ErrorEvent
   | ReposRefreshedEvent
   | ProjectUpdatedEvent
+  | ProjectCreatePREvent
+  | ProjectCreatePRFailedEvent
   | TaskUpdatedEvent
   | TaskCreatePREvent
   | TaskCreatePRFailedEvent
@@ -148,12 +169,16 @@ export const getAction = (event: EventType) => {
       return reposRefreshed();
     case 'PROJECT_UPDATE':
       return updateProject(event.payload);
+    case 'PROJECT_CREATE_PR':
+      return createProjectPR(event.payload);
+    case 'PROJECT_CREATE_PR_FAILED':
+      return createProjectPRFailed(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload);
     case 'TASK_CREATE_PR':
-      return createPR(event.payload);
+      return createTaskPR(event.payload);
     case 'TASK_CREATE_PR_FAILED':
-      return createPRFailed(event.payload);
+      return createTaskPRFailed(event.payload);
     case 'SCRATCH_ORG_PROVISION':
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':

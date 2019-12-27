@@ -160,6 +160,7 @@ describe('<RepoDetail />', () => {
         filters: { repository: 'r1' },
         objectType: 'project',
         reset: true,
+        shouldSubscribeToObject: true,
       });
     });
   });

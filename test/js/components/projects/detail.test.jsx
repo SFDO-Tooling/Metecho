@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -119,40 +120,6 @@ describe('<ProjectDetail/>', () => {
     expect(getByText('Task 1')).toBeVisible();
   });
 
-  describe('with websocket', () => {
-    beforeEach(() => {
-      window.socket = { subscribe: jest.fn(), unsubscribe: jest.fn() };
-    });
-
-    afterEach(() => {
-      Reflect.deleteProperty(window, 'socket');
-    });
-
-    test('subscribes to task', () => {
-      setup();
-
-      expect(window.socket.subscribe).toHaveBeenCalledTimes(4);
-      expect(window.socket.subscribe).toHaveBeenCalledWith({
-        model: 'task',
-        id: 'task1',
-      });
-    });
-
-    test('unsubscribes from task on unmount', () => {
-      const { unmount } = setup();
-
-      expect(window.socket.unsubscribe).not.toHaveBeenCalled();
-
-      unmount();
-
-      expect(window.socket.subscribe).toHaveBeenCalledTimes(4);
-      expect(window.socket.unsubscribe).toHaveBeenCalledWith({
-        model: 'task',
-        id: 'task1',
-      });
-    });
-  });
-
   test('renders with form expanded if no tasks', () => {
     const { getByText, queryByText } = setup({
       initialState: {
@@ -173,6 +140,7 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObject).toHaveBeenCalledWith({
         filters: { repository: 'r1', slug: 'other-project' },
         objectType: 'project',
+        shouldSubscribeToObject: true,
       });
     });
   });
@@ -223,7 +191,100 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'project1' },
         objectType: 'task',
+        shouldSubscribeToObject: true,
       });
+    });
+  });
+
+  describe('"Submit Project for Review" click', () => {
+    test('opens modal', () => {
+      const { getByText, getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  has_unmerged_commits: true,
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getByText('Submit Project for Review'));
+
+      getAllByText('Submit Project for Review').forEach((element) => {
+        expect(element).toBeVisible();
+      });
+    });
+  });
+
+  describe('submitting project for review', () => {
+    test('renders loading button', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  has_unmerged_commits: true,
+                  currently_creating_pr: true,
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('Submitting Project for Review…')).toBeVisible();
+    });
+
+    test('renders view pr button if pr_url exists', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  pr_url: 'https://example.com/',
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('View Pull Request')).toBeVisible();
+    });
+
+    test('renders view branch button if branch_url exists', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  branch_url: 'https://example.com/',
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('View Branch')).toBeVisible();
     });
   });
 });

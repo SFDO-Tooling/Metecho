@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import SubmitModal from '@/components/tasks/submit';
+import SubmitModal from '@/components/utils/submitModal';
 import { createObject } from '@/store/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -20,9 +20,10 @@ afterEach(() => {
 describe('<SubmitModal/>', () => {
   const setup = (options) => {
     const defaults = {
-      taskId: 'task-id',
-      taskName: 'My Task',
-      taskDiffUrl: 'my-diff-url',
+      instanceId: 'task-id',
+      instanceName: 'My Task',
+      instanceDiffUrl: 'my-diff-url',
+      instanceType: 'task',
     };
     const opts = Object.assign({}, defaults, options);
     const toggleModal = jest.fn();
