@@ -1,7 +1,15 @@
 // Task Tables
 // ===========
 
+// add a tiny top margin to create visual appearance of centered text
 .project-task-status {
-  align-items: center;
-  display: flex;
+  > div {
+    align-items: center;
+    display: flex;
+  }
+}
+
+// add a tiny top margin to create visual appearance of centered text
+.project-task-status-text {
+  margin-top: $spacing-xxx-small;
 }
