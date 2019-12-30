@@ -77,6 +77,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             "is_managed",
             "slug",
             "old_slugs",
+            "github_users",
         )
 
     def get_repo_url(self, obj) -> Optional[str]:
