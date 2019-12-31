@@ -109,6 +109,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "currently_creating_pr",
             "pr_url",
             "pr_is_open",
+            "assigned_users",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

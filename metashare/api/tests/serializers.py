@@ -36,6 +36,7 @@ class TestProjectSerializer:
                 "description": "Test `project`",
                 "branch_name": "some-branch",
                 "repository": str(repository.id),
+                "assigned_users": [],
             },
             context={"request": request},
         )
@@ -81,6 +82,7 @@ class TestProjectSerializer:
                 "repository": str(repository.id),
                 "name": "Duplicate Me",
                 "description": "Blorp",
+                "assigned_users": [],
             }
         )
         assert not serializer.is_valid()
@@ -98,6 +100,7 @@ class TestProjectSerializer:
                 "repository": str(repository.id),
                 "name": "duplicate me",
                 "description": "Blorp",
+                "assigned_users": [],
             }
         )
         assert not serializer.is_valid()
