@@ -128,38 +128,6 @@ describe('<TaskDetail/>', () => {
     expect(getByText('Task Orgs')).toBeVisible();
   });
 
-  describe('with websocket', () => {
-    beforeEach(() => {
-      window.socket = { subscribe: jest.fn(), unsubscribe: jest.fn() };
-    });
-
-    afterEach(() => {
-      Reflect.deleteProperty(window, 'socket');
-    });
-
-    test('subscribes to task', () => {
-      setup();
-
-      expect(window.socket.subscribe).toHaveBeenCalledWith({
-        model: 'task',
-        id: 'task1',
-      });
-    });
-
-    test('unsubscribes from task on unmount', () => {
-      const { unmount } = setup();
-
-      expect(window.socket.unsubscribe).not.toHaveBeenCalled();
-
-      unmount();
-
-      expect(window.socket.unsubscribe).toHaveBeenCalledWith({
-        model: 'task',
-        id: 'task1',
-      });
-    });
-  });
-
   test('renders view branch button if branch_url exists', () => {
     const { getByText, getByTitle } = setup({
       initialState: {
@@ -210,6 +178,7 @@ describe('<TaskDetail/>', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'project1' },
         objectType: 'task',
+        shouldSubscribeToObject: true,
       });
     });
   });

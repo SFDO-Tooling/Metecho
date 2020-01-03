@@ -90,6 +90,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         queryset=Repository.objects.all(), pk_field=serializers.CharField()
     )
     branch_url = serializers.SerializerMethodField()
+    branch_diff_url = serializers.SerializerMethodField()
+    pr_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -101,6 +103,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             "old_slugs",
             "repository",
             "branch_url",
+            "branch_diff_url",
+            "has_unmerged_commits",
+            "currently_creating_pr",
+            "pr_url",
+            "pr_is_open",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -112,6 +119,19 @@ class ProjectSerializer(serializers.ModelSerializer):
             ),
         )
 
+    def get_branch_diff_url(self, obj) -> Optional[str]:
+        repo = obj.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        repository_branch = repo.branch_name
+        branch = obj.branch_name
+        if repo_owner and repo_name and repository_branch and branch:
+            return (
+                f"https://github.com/{repo_owner}/{repo_name}/compare/"
+                f"{repository_branch}...{branch}"
+            )
+        return None
+
     def get_branch_url(self, obj) -> Optional[str]:
         repo = obj.repository
         repo_owner = repo.repo_owner
@@ -119,6 +139,15 @@ class ProjectSerializer(serializers.ModelSerializer):
         branch = obj.branch_name
         if repo_owner and repo_name and branch:
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
+        return None
+
+    def get_pr_url(self, obj) -> Optional[str]:
+        repo = obj.repository
+        repo_owner = repo.repo_owner
+        repo_name = repo.repo_name
+        pr_number = obj.pr_number
+        if repo_owner and repo_name and pr_number:
+            return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
 
 

@@ -9,7 +9,7 @@ from ..models import TASK_STATUSES
 
 @pytest.mark.django_db
 class TestPushHookSerializer:
-    def test_process_hook(self, repository_factory):
+    def test_process_hook__weird_ref(self, repository_factory):
         repository_factory(repo_id=123)
         data = {
             "forced": False,
@@ -22,7 +22,22 @@ class TestPushHookSerializer:
         assert serializer.is_valid(), serializer.errors
         with patch("metashare.api.hook_serializers.logger") as logger:
             serializer.process_hook()
-            assert logger.error.called
+            assert logger.warn.called
+
+    def test_process_hook__tag(self, repository_factory):
+        repository_factory(repo_id=123)
+        data = {
+            "forced": False,
+            "ref": "refs/tags/v0.1",
+            "commits": [],
+            "repository": {"id": 123},
+            "sender": {},
+        }
+        serializer = PushHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        with patch("metashare.api.hook_serializers.logger") as logger:
+            serializer.process_hook()
+            assert logger.info.called
 
 
 @pytest.mark.django_db
@@ -114,3 +129,59 @@ class TestPrHookSerializer:
         task.refresh_from_db()
         assert task.status == TASK_STATUSES["In progress"]
         assert task.pr_is_open
+
+    def test_process_hook__close_matching_projects(
+        self, repository_factory, project_factory
+    ):
+        repository = repository_factory(repo_id=123)
+        project = project_factory(pr_number=456, repository=repository, pr_is_open=True)
+        data = {
+            "action": "closed",
+            "number": 456,
+            "pull_request": {"merged": True},
+            "repository": {"id": 123},
+        }
+        serializer = PrHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        serializer.process_hook()
+
+        project.refresh_from_db()
+        assert not project.pr_is_open
+
+    def test_process_hook__project_closed_not_merged(
+        self, repository_factory, project_factory
+    ):
+        repository = repository_factory(repo_id=123)
+        project = project_factory(
+            pr_number=456, repository=repository, pr_is_open=True,
+        )
+        data = {
+            "action": "closed",
+            "number": 456,
+            "pull_request": {"merged": False},
+            "repository": {"id": 123},
+        }
+        serializer = PrHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        serializer.process_hook()
+
+        project.refresh_from_db()
+        assert not project.pr_is_open
+
+    def test_process_hook__project_reopened(self, repository_factory, project_factory):
+        repository = repository_factory(repo_id=123)
+        project = project_factory(
+            pr_number=456, repository=repository, pr_is_open=True,
+        )
+        data = {
+            "action": "reopened",
+            "number": 456,
+            "pull_request": {"merged": False},
+            "repository": {"id": 123},
+        }
+        serializer = PrHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        serializer.process_hook()
+
+        project.refresh_from_db()
+        assert project.pr_is_open

@@ -7,6 +7,8 @@ Websocket notifications you can subscribe to:
 
     project.:id
         PROJECT_UPDATE
+        PROJECT_CREATE_PR
+        PROJECT_CREATE_PR_FAILED
 
     task.:id
         TASK_UPDATE

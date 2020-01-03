@@ -120,7 +120,7 @@ initializeI18n((i18nError?: string) => {
     // Create store
     const appStore = createStore(
       reducer,
-      {},
+      undefined,
       composeWithDevTools(applyMiddleware(thunk, logger)),
     );
 

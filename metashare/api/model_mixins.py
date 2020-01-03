@@ -73,3 +73,49 @@ class PushMixin:
         mixin.
         """
         async_to_sync(push.report_scratch_org_error)(self, error, type_)
+
+
+class CreatePrMixin:
+    """
+    Expects these to be on the model:
+        create_pr_event: str
+        get_repo_id: Fn(user: User) -> int
+        get_base: Fn() -> str
+        get_head: Fn() -> str
+    """
+
+    create_pr_event = ""  # Implement this
+
+    def queue_create_pr(
+        self, user, *, title, critical_changes, additional_changes, issues, notes
+    ):
+        from .jobs import create_pr_job
+
+        self.currently_creating_pr = True
+        self.save()
+        self.notify_changed()
+
+        repo_id = self.get_repo_id(user)
+        base = self.get_base()
+        head = self.get_head()
+
+        create_pr_job.delay(
+            self,
+            user,
+            repo_id=repo_id,
+            base=base,
+            head=head,
+            title=title,
+            critical_changes=critical_changes,
+            additional_changes=additional_changes,
+            issues=issues,
+            notes=notes,
+        )
+
+    def finalize_create_pr(self, error=None):
+        self.currently_creating_pr = False
+        self.save()
+        if error is None:
+            self.notify_changed(self.create_pr_event)
+        else:
+            self.notify_error(error)

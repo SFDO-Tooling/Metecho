@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
@@ -15,17 +17,19 @@ import {
 import { OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
-  taskId: string;
-  taskName: string;
-  taskDiffUrl: string | null;
+  instanceId: string;
+  instanceName: string;
+  instanceDiffUrl: string | null;
+  instanceType: 'task' | 'project';
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SubmitModal = ({
-  taskId,
-  taskName,
-  taskDiffUrl,
+  instanceId,
+  instanceName,
+  instanceDiffUrl,
+  instanceType,
   isOpen,
   toggleModal,
 }: Props) => {
@@ -48,6 +52,28 @@ const SubmitModal = ({
     }
   };
 
+  let objectType, heading, submittingLabel, toSubmitLabel;
+  switch (instanceType) {
+    case 'task':
+      objectType = {
+        objectType: OBJECT_TYPES.TASK_PR,
+        url: window.api_urls.task_create_pr(instanceId),
+      };
+      heading = i18n.t('Submit this task for review');
+      submittingLabel = i18n.t('Submitting Task for Review…');
+      toSubmitLabel = i18n.t('Submit Task for Review');
+      break;
+    case 'project':
+      objectType = {
+        objectType: OBJECT_TYPES.PROJECT_PR,
+        url: window.api_urls.project_create_pr(instanceId),
+      };
+      heading = i18n.t('Submit this project for review');
+      submittingLabel = i18n.t('Submitting Project for Review…');
+      toSubmitLabel = i18n.t('Submit Project for Review');
+      break;
+  }
+
   const {
     inputs,
     errors,
@@ -55,19 +81,16 @@ const SubmitModal = ({
     handleSubmit,
     resetForm,
   } = useForm({
-    /* eslint-disable @typescript-eslint/camelcase */
     fields: {
-      title: taskName,
+      title: instanceName,
       critical_changes: '',
       additional_changes: '',
       issues: '',
       notes: '',
     },
-    /* eslint-enable @typescript-eslint/camelcase */
-    objectType: OBJECT_TYPES.TASK_PR,
-    url: window.api_urls.task_create_pr(taskId),
     onSuccess: handleSuccess,
     onError: handleError,
+    ...objectType,
   });
 
   const handleSubmitClicked = () => {
@@ -83,7 +106,7 @@ const SubmitModal = ({
     resetForm();
   };
 
-  const submitTask = (e: React.FormEvent<HTMLFormElement>) => {
+  const submitInstance = (e: React.FormEvent<HTMLFormElement>) => {
     setSubmittingReview(true);
     handleSubmit(e);
   };
@@ -93,7 +116,7 @@ const SubmitModal = ({
       isOpen={isOpen}
       size="medium"
       disableClose={submittingReview}
-      heading={i18n.t('Submit this task for review')}
+      heading={heading}
       footer={[
         <Button
           key="cancel"
@@ -106,12 +129,9 @@ const SubmitModal = ({
           type="submit"
           label={
             submittingReview ? (
-              <LabelWithSpinner
-                label={i18n.t('Submitting Task for Review…')}
-                variant="inverse"
-              />
+              <LabelWithSpinner label={submittingLabel} variant="inverse" />
             ) : (
-              i18n.t('Submit Task for Review')
+              toSubmitLabel
             )
           }
           variant="brand"
@@ -121,7 +141,7 @@ const SubmitModal = ({
       ]}
       onRequestClose={handleClose}
     >
-      <form className="slds-form slds-p-around_large" onSubmit={submitTask}>
+      <form className="slds-form slds-p-around_large" onSubmit={submitInstance}>
         <div className="slds-grid slds-wrap slds-gutters">
           <div
             className="slds-col
@@ -137,7 +157,7 @@ const SubmitModal = ({
               </Trans>
             </div>
             <Input
-              id="task-title"
+              id="pr-title"
               label={i18n.t('Title')}
               className="slds-p-bottom_small"
               name="title"
@@ -149,31 +169,31 @@ const SubmitModal = ({
               onChange={handleInputChange}
             />
             <Textarea
-              id="task-critical-changes"
+              id="pr-critical-changes"
               label={i18n.t(
                 'Describe any critical changes which might impact existing functionality',
               )}
-              className="task-submit-textarea slds-p-bottom_small"
+              className="pr-submit-textarea slds-p-bottom_small"
               name="critical_changes"
               value={inputs.critical_changes}
               errorText={errors.critical_changes}
               onChange={handleInputChange}
             />
             <Textarea
-              id="task-additional-changes"
+              id="pr-additional-changes"
               label={i18n.t(
                 'Describe additional changes including instructions for users for any post-upgrade tasks',
               )}
-              className="task-submit-textarea slds-p-bottom_small"
+              className="pr-submit-textarea slds-p-bottom_small"
               name="additional_changes"
               value={inputs.additional_changes}
               errorText={errors.additional_changes}
               onChange={handleInputChange}
             />
             <Textarea
-              id="task-notes"
+              id="pr-notes"
               label={i18n.t('Developer notes')}
-              className="task-submit-textarea slds-p-bottom_small"
+              className="pr-submit-textarea slds-p-bottom_small"
               name="notes"
               value={inputs.notes}
               errorText={errors.notes}
@@ -186,9 +206,9 @@ const SubmitModal = ({
               slds-medium-size_6-of-12
               slds-large-size_4-of-12"
           >
-            {taskDiffUrl && (
+            {instanceDiffUrl && (
               <ExternalLink
-                url={taskDiffUrl}
+                url={instanceDiffUrl}
                 showButtonIcon
                 className="slds-button
                   slds-button_outline-brand

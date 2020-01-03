@@ -37,6 +37,25 @@ class CurrentUserObjectMixin:
         return self.get_queryset().get()
 
 
+class CreatePrMixin:
+    error_pr_exists = ""  # Implement this
+
+    @action(detail=True, methods=["POST"])
+    def create_pr(self, request, pk=None):
+        serializer = CreatePrSerializer(data=self.request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+        instance = self.get_object()
+        if instance.pr_is_open:
+            raise ValidationError(self.error_pr_exists)
+        instance.queue_create_pr(request.user, **serializer.validated_data)
+        return Response(
+            self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
+        )
+
+
 class HookView(APIView):
     authentication_classes = (GitHubHookAuthentication,)
 
@@ -119,36 +138,23 @@ class RepositoryViewSet(viewsets.ModelViewSet):
         return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
+class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProjectSerializer
     pagination_class = CustomPaginator
     queryset = Project.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
+    error_pr_exists = _("Project has already been submitted for review.")
 
 
-class TaskViewSet(viewsets.ModelViewSet):
+class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
     queryset = Task.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
-
-    @action(detail=True, methods=["POST"])
-    def create_pr(self, request, pk=None):
-        serializer = CreatePrSerializer(data=self.request.data)
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
-        instance = self.get_object()
-        if instance.pr_number is not None:
-            raise ValidationError(_("Task has already been submitted for review."))
-        instance.queue_create_pr(request.user, **serializer.validated_data)
-        return Response(
-            self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
-        )
+    error_pr_exists = _("Task has already been submitted for review.")
 
 
 class ScratchOrgViewSet(viewsets.ModelViewSet):
