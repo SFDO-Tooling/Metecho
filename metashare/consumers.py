@@ -1,6 +1,6 @@
-from channels.db import database_sync_to_async
 from enum import Enum
 
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
