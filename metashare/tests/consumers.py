@@ -1,4 +1,5 @@
 import pytest
+from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 
 from ..api.push import report_error
@@ -8,7 +9,7 @@ from ..consumers import PushNotificationConsumer
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__report_error(user_factory):
-    user = user_factory()
+    user = await database_sync_to_async(user_factory)()
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -34,7 +35,7 @@ async def test_push_notification_consumer__report_error(user_factory):
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__unsubscribe(user_factory):
-    user = user_factory()
+    user = await database_sync_to_async(user_factory)()
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -59,7 +60,7 @@ async def test_push_notification_consumer__unsubscribe(user_factory):
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_push_notification_consumer__invalid_subscription(user_factory):
-    user = user_factory()
+    user = await database_sync_to_async(user_factory)()
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user

@@ -76,4 +76,4 @@ typed-ast==1.4.0          # via black
 wcwidth==0.1.7            # via prompt-toolkit, pytest
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools
+# setuptools==44.0.0        # via ipython, sphinx
