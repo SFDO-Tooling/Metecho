@@ -8,6 +8,7 @@ from django.core.management import call_command
 @pytest.mark.django_db
 def test_populate_social_apps__success():
     out = StringIO()
+    SocialApp.objects.all().delete()
     call_command(
         "populate_social_apps",
         stdout=out,
