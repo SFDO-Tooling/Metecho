@@ -9,7 +9,7 @@ from ..models import TASK_STATUSES
 
 @pytest.mark.django_db
 class TestPushHookSerializer:
-    def test_process_hook(self, repository_factory):
+    def test_process_hook__weird_ref(self, repository_factory):
         repository_factory(repo_id=123)
         data = {
             "forced": False,
@@ -22,7 +22,22 @@ class TestPushHookSerializer:
         assert serializer.is_valid(), serializer.errors
         with patch("metashare.api.hook_serializers.logger") as logger:
             serializer.process_hook()
-            assert logger.error.called
+            assert logger.warn.called
+
+    def test_process_hook__tag(self, repository_factory):
+        repository_factory(repo_id=123)
+        data = {
+            "forced": False,
+            "ref": "refs/tags/v0.1",
+            "commits": [],
+            "repository": {"id": 123},
+            "sender": {},
+        }
+        serializer = PushHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+        with patch("metashare.api.hook_serializers.logger") as logger:
+            serializer.process_hook()
+            assert logger.info.called
 
 
 @pytest.mark.django_db
