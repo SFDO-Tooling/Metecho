@@ -27,7 +27,14 @@ Retrieve
           "description": "<p>This is safely rendered Markdown.</p>",
           "is_managed": false,
           "slug": "test-repository",
-          "old_slugs": []
+          "old_slugs": [],
+          "github_users": [
+            {
+              "id": "12345",
+              "login": "username",
+              "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
+            }
+          ]
         }
         ...
       ]
