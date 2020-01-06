@@ -384,7 +384,6 @@ class Task(
     #   }
     github_users = JSONField(default=list, blank=True)
 
-
     slug_class = TaskSlug
 
     def __str__(self):

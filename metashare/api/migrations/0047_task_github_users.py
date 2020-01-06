@@ -7,13 +7,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0046_auto_20200106_1744'),
+        ("api", "0046_auto_20200106_1744"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='github_users',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=list),
+            model_name="task",
+            name="github_users",
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                blank=True, default=list
+            ),
         ),
     ]
