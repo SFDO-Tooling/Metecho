@@ -60,7 +60,7 @@ markupsafe==1.1.1         # via cumulusci, jinja2
 msgpack==0.6.2            # via channels-redis
 newrelic==5.4.1.134
 oauthlib==3.1.0           # via requests-oauthlib
-pillow==6.2.1
+pillow==7.0.0
 psycopg2-binary==2.8.4
 pyasn1-modules==0.2.7     # via service-identity
 pyasn1==0.4.7             # via pyasn1-modules, service-identity
