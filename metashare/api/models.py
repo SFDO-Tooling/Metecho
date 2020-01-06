@@ -376,6 +376,15 @@ class Task(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
 
+    # User data is shaped like this:
+    #   {
+    #     "id": int,
+    #     "login": str,
+    #     "avatar_url": str,
+    #   }
+    github_users = JSONField(default=list, blank=True)
+
+
     slug_class = TaskSlug
 
     def __str__(self):

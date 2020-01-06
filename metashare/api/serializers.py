@@ -184,6 +184,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_url",
             "status",
             "pr_is_open",
+            "github_users",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
