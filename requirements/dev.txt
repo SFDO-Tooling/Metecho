@@ -13,7 +13,7 @@ black==19.10b0
 chardet==3.0.4            # via doc8
 click==7.0                # via black
 coverage==4.5.4           # via coveralls, pytest-cov
-coveralls==1.9.2
+coveralls==1.10.0
 decorator==4.4.0          # via ipython, traitlets
 django-extensions==2.2.5
 doc8==0.8.0
@@ -26,7 +26,7 @@ flake8==3.7.9
 imagesize==1.1.0          # via sphinx
 inflection==0.3.1         # via pytest-factoryboy
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.11.0
+ipython==7.11.1
 isort==4.3.21
 jedi==0.15.1              # via ipython
 jinja2==2.10.3            # via sphinx
@@ -50,7 +50,7 @@ pytest-asyncio==0.10.0
 pytest-cov==2.8.1
 pytest-django==3.7.0
 pytest-factoryboy==2.0.3
-pytest-mock==1.13.0
+pytest-mock==2.0.0
 pytest-sugar==0.9.2
 pytest==5.3.2
 pytz==2019.3              # via babel
