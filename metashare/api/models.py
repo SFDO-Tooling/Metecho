@@ -279,12 +279,13 @@ class Project(
         Repository, on_delete=models.PROTECT, related_name="projects"
     )
 
-    # The intent here is to assign users to a project, based on the GitHub user data
-    # from the Repository.github_users. However, if a user in that list has never signed
-    # in to our system, I'll need to consider the correct action.
-    assigned_users = models.ManyToManyField(
-        User, related_name="assigned_projects", blank=True
-    )
+    # User data is shaped like this:
+    #   {
+    #     "id": int,
+    #     "login": str,
+    #     "avatar_url": str,
+    #   }
+    github_users = JSONField(default=list, blank=True)
 
     slug_class = ProjectSlug
 
