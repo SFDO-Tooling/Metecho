@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
-from channels.db import database_sync_to_async
 
 import pytest
+from channels.db import database_sync_to_async
 
 from ..push import report_error, report_scratch_org_error
 

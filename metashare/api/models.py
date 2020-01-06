@@ -186,6 +186,13 @@ class Repository(
         validators=[validate_unicode_branch],
         default="master",
     )
+    # User data is shaped like this:
+    #   {
+    #     "id": int,
+    #     "login": str,
+    #     "avatar_url": str,
+    #   }
+    github_users = JSONField(default=list, blank=True)
 
     slug_class = RepositorySlug
 
@@ -215,6 +222,11 @@ class Repository(
             return github_repository.user
 
         return None
+
+    def queue_populate_github_users(self):
+        from .jobs import populate_github_users_job
+
+        populate_github_users_job.delay(self)
 
     def queue_refresh_commits(self, *, ref):
         from .jobs import refresh_commits_job
@@ -266,6 +278,14 @@ class Project(
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
     )
+
+    # User data is shaped like this:
+    #   {
+    #     "id": int,
+    #     "login": str,
+    #     "avatar_url": str,
+    #   }
+    github_users = JSONField(default=list, blank=True)
 
     slug_class = ProjectSlug
 

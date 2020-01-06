@@ -77,6 +77,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             "is_managed",
             "slug",
             "old_slugs",
+            "github_users",
         )
 
     def get_repo_url(self, obj) -> Optional[str]:
@@ -108,6 +109,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "currently_creating_pr",
             "pr_url",
             "pr_is_open",
+            "github_users",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
