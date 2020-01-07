@@ -7,7 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0046_auto_20200106_1744"),
+        ("api", "0046_repo_project_github_users"),
     ]
 
     operations = [

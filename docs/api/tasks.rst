@@ -45,7 +45,14 @@ Retrieve
         "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-project...feature/test-project__test-task",
         "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
         "pr_is_open": true,
-        "status": "Planned"
+        "status": "Planned",
+        "github_users": [
+          {
+            "id": "12345",
+            "login": "username",
+            "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
+          }
+        ]
       }
       ...
     ]
