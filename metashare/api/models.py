@@ -50,6 +50,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
+    devhub_username = StringField(null=True, blank=True)
 
     def refresh_repositories(self):
         repos = gh.get_all_org_repos(self)
@@ -120,6 +121,8 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def sf_username(self):
+        if self.devhub_username:
+            return self.devhub_username
         try:
             return self.salesforce_account.extra_data["preferred_username"]
         except (AttributeError, KeyError):
