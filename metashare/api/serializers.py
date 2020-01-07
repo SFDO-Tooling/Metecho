@@ -6,10 +6,7 @@ from rest_framework import serializers
 
 from .fields import MarkdownField
 from .models import Project, Repository, ScratchOrg, Task
-from .validators import (
-    CaseInsensitiveUniqueTogetherValidator,
-    repository_github_user_validator,
-)
+from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
 
@@ -122,7 +119,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                     "name", _("A project with this name already exists.")
                 ),
             ),
-            repository_github_user_validator,
+            GitHubUserValidator(parent_field="repository"),
         )
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
@@ -198,6 +195,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     "name", _("A task with this name already exists.")
                 ),
             ),
+            GitHubUserValidator(parent_field="project"),
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
