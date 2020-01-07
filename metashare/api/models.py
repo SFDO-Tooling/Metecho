@@ -171,7 +171,12 @@ class RepositorySlug(AbstractSlug):
 
 
 class Repository(
-    PopulateRepoIdMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    PushMixin,
+    PopulateRepoIdMixin,
+    HashIdMixin,
+    TimestampsMixin,
+    SlugMixin,
+    models.Model,
 ):
     repo_owner = StringField()
     repo_name = StringField()
@@ -196,6 +201,17 @@ class Repository(
 
     slug_class = RepositorySlug
 
+    # begin PushMixin configuration:
+    push_update_type = "REPOSITORY_UPDATE"
+    push_error_type = "REPOSITORY_UPDATE_ERROR"
+
+    def get_serialized_representation(self):
+        from .serializers import RepositorySerializer
+
+        return RepositorySerializer(self).data
+
+    # end PushMixin configuration
+
     def __str__(self):
         return self.name
 
@@ -210,6 +226,9 @@ class Repository(
             if user:
                 repo = gh.get_repo_info(user, repo_id=self.id)
                 self.branch_name = repo.default_branch
+
+        if not self.github_users:
+            self.queue_populate_github_users()
 
         super().save(*args, **kwargs)
 
@@ -227,6 +246,10 @@ class Repository(
         from .jobs import populate_github_users_job
 
         populate_github_users_job.delay(self)
+
+    def finalize_populate_github_users(self):
+        self.save()
+        self.notify_changed()
 
     def queue_refresh_commits(self, *, ref):
         from .jobs import refresh_commits_job
