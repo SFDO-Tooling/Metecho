@@ -227,6 +227,9 @@ class Repository(
                 repo = gh.get_repo_info(user, repo_id=self.id)
                 self.branch_name = repo.default_branch
 
+        if not self.github_users:
+            self.queue_populate_github_users()
+
         super().save(*args, **kwargs)
 
     def get_a_matching_user(self):
