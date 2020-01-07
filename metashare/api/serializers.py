@@ -119,7 +119,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                     "name", _("A project with this name already exists.")
                 ),
             ),
-            GitHubUserValidator(parent_field="repository"),
+            GitHubUserValidator(parent="repository"),
         )
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
@@ -195,7 +195,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     "name", _("A task with this name already exists.")
                 ),
             ),
-            GitHubUserValidator(parent_field="project"),
+            GitHubUserValidator(parent="project"),
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
