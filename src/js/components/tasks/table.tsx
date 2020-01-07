@@ -3,6 +3,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -41,7 +42,7 @@ const NameTableCell = ({
 );
 NameTableCell.displayName = DataTableCell.displayName;
 
-const StatusTableCell = ({ item, ...props }: TableCellProps) => {
+const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
     return null;
@@ -62,9 +63,13 @@ const StatusTableCell = ({ item, ...props }: TableCellProps) => {
       break;
   }
   return (
-    <DataTableCell {...props}>
+    <DataTableCell
+      {...props}
+      title={displayStatus || item.status}
+      className={classNames(className, 'project-task-status')}
+    >
       {icon}
-      <span className="slds-m-left_x-small">
+      <span className="slds-m-left_x-small project-task-status-text">
         {displayStatus || item.status}
       </span>
     </DataTableCell>
