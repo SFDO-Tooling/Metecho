@@ -39,3 +39,11 @@ Retrieve
         ...
       ]
     }
+
+.. sourcecode:: http
+
+   POST /api/repositories/zVQUrye/refresh_github_users/ HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED

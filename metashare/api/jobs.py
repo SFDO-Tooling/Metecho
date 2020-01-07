@@ -358,7 +358,7 @@ def populate_github_users(repository):
     # doesn't subscribe to Repositories. Maybe we should re-evaluate
     # this, but for now, we assume that Repositories don't refresh
     # GitHub users frequently enough to merit a websocket push.
-    repository.save()
+    repository.finalize_populate_github_users()
 
 
 populate_github_users_job = job(populate_github_users)
