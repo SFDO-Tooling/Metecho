@@ -115,10 +115,29 @@ class TestProjectSerializer:
         project = project_factory(repository=repository, name="Duplicate me")
         serializer = ProjectSerializer(
             instance=project,
-            data={"repository": str(repository.id), "description": "Blorp"},
+            data={
+                "repository": str(repository.id),
+                "description": "Blorp",
+                "github_users": [],
+            },
             partial=True,
         )
         assert serializer.is_valid(), serializer.errors
+
+    def test_invalid_github_user_value(self, repository_factory, project_factory):
+        repository = repository_factory()
+        project = project_factory(repository=repository, name="Duplicate me")
+        serializer = ProjectSerializer(
+            instance=project,
+            data={
+                "repository": str(repository.id),
+                "description": "Blorp",
+                "github_users": [{"test": "value"}],
+            },
+            partial=True,
+        )
+        assert not serializer.is_valid()
+        assert "non_field_errors" in serializer.errors
 
     def test_pr_url__present(self, project_factory):
         project = project_factory(name="Test project", pr_number=123)
