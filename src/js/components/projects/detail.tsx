@@ -23,6 +23,8 @@ import {
 import SubmitModal from '@/components/utils/submitModal';
 import routes from '@/utils/routes';
 
+import RepositoryGitHubUsers from './RepositoryGitHubUsers';
+
 const ProjectDetail = (props: RouteComponentProps) => {
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -131,6 +133,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
+        <h2>Available users</h2>
+        <RepositoryGitHubUsers users={repository.github_users} />
+        <h2>Assgined users</h2>
+        <RepositoryGitHubUsers users={project.github_users} />
         {submitButton}
         {tasks ? (
           <>
