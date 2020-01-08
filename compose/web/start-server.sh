@@ -4,7 +4,7 @@ if [ -z ${PORT+x} ];
 then
     # PORT unset, we presume this is local dev:
     python manage.py migrate
-    DJANGO_ALLOW_ASYNC_UNSAFE=true yarn serve
+    yarn serve
 else
     # PORT set, we presume this is Heroku:
     yarn django:serve:prod
