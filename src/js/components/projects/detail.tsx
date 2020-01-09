@@ -7,7 +7,7 @@ import DocumentTitle from 'react-document-title';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import RepositoryGitHubUsers from '@/components/projects/repositoryGitHubUsers';
+import { AvailableUserCards, AssignedUserCards } from '@/components/projects/repositoryGitHubUsers';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import {
@@ -21,6 +21,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import { setUsersOnProject } from '@/store/projects/actions';
 import SubmitModal from '@/components/utils/submitModal';
 import routes from '@/utils/routes';
 
@@ -28,6 +29,22 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
+
+  // Assign users modal related:
+  const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
+  const openAvailableUserModal = () => {
+    setAssignUsersModalOpen(true);
+  }
+  const closeAvailableUserModal = () => {
+    setAssignUsersModalOpen(false);
+  }
+  const setProjectUsers = (users) => {
+    setUsersOnProject({
+      ...project,
+      github_users: users
+    });
+    setAssignUsersModalOpen(false);
+  }
 
   // Submit modal related:
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -132,10 +149,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
-        <h2>Available users</h2>
-        <RepositoryGitHubUsers users={repository.github_users} />
-        <h2>Assigned users</h2>
-        <RepositoryGitHubUsers users={project.github_users} />
+        <Button
+          label="Add new member"
+          className={classNames('slds-size_full slds-m-bottom_x-large')}
+          onClick={openAvailableUserModal}
+        />
+        <AvailableUserCards isOpen={assignUsersModalOpen} onRequestClose={closeAvailableUserModal} setUsers={setProjectUsers} users={repository.github_users} />
         {submitButton}
         {tasks ? (
           <>

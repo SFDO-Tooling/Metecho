@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 
+import apiFetch from '@/utils/api';
 import { ThunkResult } from '@/store';
 import { Project } from '@/store/projects/reducer';
 import { addToast } from '@/store/toasts/actions';
@@ -19,6 +20,21 @@ export const updateProject = (payload: Project): ProjectUpdated => ({
   type: 'PROJECT_UPDATE',
   payload,
 });
+
+export const setUsersOnProject = (payload: Project): ThunkResult => async (dispatch) => {
+  try {
+    await apiFetch({
+      url: window.api_urls.project_detail(payload.id),
+      dispatch,
+      opts: {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      },
+    });
+  } catch {
+  }
+  dispatch({type: 'PROJECT_UPDATE', payload})
+}
 
 export const createProjectPR = (payload: Project): ThunkResult => (
   dispatch,
