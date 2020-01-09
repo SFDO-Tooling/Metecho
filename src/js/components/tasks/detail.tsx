@@ -34,6 +34,8 @@ import { selectUserState } from '@/store/user/selectors';
 import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
+import StatusPath from './statusPath';
+
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
@@ -254,6 +256,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           { name: task.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
+        sidebar={<StatusPath />}
       >
         {primaryButton}
         {secondaryButton}

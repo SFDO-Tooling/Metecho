@@ -1,0 +1,23 @@
+.slds-path__item.status-path__item {
+  min-width: auto;
+  &.slds-is-current.slds-is-active {
+    background-color: $brand-background-primary;
+  }
+}
+
+.slds-path__nav .slds-is-active {
+  &:before,
+  &:after {
+    background-color: $brand-background-primary;
+  }
+  &:first-child {
+    &:before,
+    &:after {
+      background: $brand-background-primary;
+    }
+  }
+}
+
+.slds-text-longform ul {
+  list-style: none;
+}
