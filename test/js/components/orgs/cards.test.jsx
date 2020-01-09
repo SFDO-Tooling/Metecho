@@ -40,7 +40,6 @@ const defaultOrgs = {
     url: '/test/org/url/',
     unsaved_changes: { Foo: ['Bar'] },
     has_unsaved_changes: true,
-    owner_sf_id: 'username',
   },
   QA: null,
 };
@@ -49,7 +48,6 @@ const defaultState = {
     id: 'user-id',
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
-    sf_username: 'username',
   },
 };
 
@@ -250,25 +248,6 @@ describe('<OrgCards/>', () => {
 
           expect(deleteObject).not.toHaveBeenCalled();
           expect(getByText('Use Custom Domain')).toBeVisible();
-        });
-      });
-
-      describe('not user who created org', () => {
-        test('opens connect modal', () => {
-          const { getByTitle, getByText } = setup({
-            orgs,
-            initialState: {
-              ...defaultState,
-              user: { ...defaultState.user, sf_username: 'other-user' },
-            },
-          });
-          fireEvent.click(getByText('Actions'));
-          fireEvent.click(getByTitle('Delete'));
-
-          expect(deleteObject).not.toHaveBeenCalled();
-          expect(
-            getByText('Salesforce User Does Not Have Required Permissions'),
-          ).toBeVisible();
         });
       });
     });

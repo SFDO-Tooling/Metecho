@@ -176,14 +176,11 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
 
     def perform_destroy(self, instance):
-        if self.request.user.sf_username == instance.owner_sf_id:
+        if self.request.user == instance.owner:
             instance.queue_delete()
         else:
             raise PermissionDenied(
-                _(
-                    "User is not connected to Salesforce as the same Salesforce user "
-                    "who created the ScratchOrg."
-                )
+                _("User is not the same user who created the ScratchOrg.")
             )
 
     def list(self, request, *args, **kwargs):
