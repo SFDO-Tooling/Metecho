@@ -7,6 +7,7 @@ import DocumentTitle from 'react-document-title';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import RepositoryGitHubUsers from '@/components/projects/repositoryGitHubUsers';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import {
@@ -22,8 +23,6 @@ import {
 } from '@/components/utils';
 import SubmitModal from '@/components/utils/submitModal';
 import routes from '@/utils/routes';
-
-import RepositoryGitHubUsers from './RepositoryGitHubUsers';
 
 const ProjectDetail = (props: RouteComponentProps) => {
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
@@ -135,7 +134,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
       >
         <h2>Available users</h2>
         <RepositoryGitHubUsers users={repository.github_users} />
-        <h2>Assgined users</h2>
+        <h2>Assigned users</h2>
         <RepositoryGitHubUsers users={project.github_users} />
         {submitButton}
         {tasks ? (

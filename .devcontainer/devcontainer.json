@@ -28,7 +28,7 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
-      "source.fixAll": true
+      "source.fixAll.eslint": true
     },
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
@@ -64,6 +64,11 @@
     },
     "[python]": {
       "editor.rulers": [88]
+    },
+    "[scss]": {
+      "editor.codeActionsOnSave": {
+        "source.fixAll.stylelint": true
+      }
     },
     "files.exclude": {
       "**/.git": true,
