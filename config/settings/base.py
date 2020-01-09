@@ -95,6 +95,9 @@ DEBUG = env("DJANGO_DEBUG", default=False, type_=boolish)
 
 MODE = env("DJANGO_MODE", default="dev" if DEBUG else "prod")
 
+if MODE == "dev":
+    environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "127.0.0.1:8000",
