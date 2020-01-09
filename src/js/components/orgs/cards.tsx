@@ -283,7 +283,6 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [connectAgainModalOpen, setConnectAgainModalOpen] = useState(false);
   const [
     confirmDeleteModalOpen,
     setConfirmDeleteModalOpen,
@@ -337,18 +336,11 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
 
   const openConnectModal = () => {
     setInfoModalOpen(false);
-    setConnectAgainModalOpen(false);
     setConnectModalOpen(true);
   };
   const openInfoModal = () => {
     setConnectModalOpen(false);
-    setConnectAgainModalOpen(false);
     setInfoModalOpen(true);
-  };
-  const openConnectAgainModal = () => {
-    setConnectModalOpen(false);
-    setInfoModalOpen(false);
-    setConnectAgainModalOpen(true);
   };
 
   let deleteAction: (...args: any[]) => void = openConnectModal;
@@ -356,15 +348,11 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
   if (user && user.valid_token_for) {
     createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
     deleteAction = (org: Org) => {
-      if (org.owner_sf_id === user.sf_username) {
-        if (org.org_type === ORG_TYPES.DEV) {
-          setIsWaitingToDeleteDevOrg(true);
-          doRefetchOrg(org);
-        } else {
-          deleteOrg(org);
-        }
+      if (org.org_type === ORG_TYPES.DEV) {
+        setIsWaitingToDeleteDevOrg(true);
+        doRefetchOrg(org);
       } else {
-        openConnectAgainModal();
+        deleteOrg(org);
       }
     };
   }
@@ -415,16 +403,6 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
         user={user as User}
         isOpen={connectModalOpen}
         toggleModal={setConnectModalOpen}
-      />
-      <ConnectModal
-        user={user as User}
-        heading={i18n.t('Salesforce User Does Not Have Required Permissions')}
-        tagline={i18n.t(
-          'The connected Salesforce user must be the same Salesforce user who created the scratch org.',
-        )}
-        ignoreConnection
-        isOpen={connectAgainModalOpen}
-        toggleModal={setConnectAgainModalOpen}
       />
       <ConnectionInfoModal
         user={user as User}
