@@ -24,12 +24,12 @@
     "xabikos.javascriptsnippets"
   ],
   "settings": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
@@ -66,6 +66,7 @@
       "editor.rulers": [88]
     },
     "[scss]": {
+      "editor.rulers": [80],
       "editor.codeActionsOnSave": {
         "source.fixAll.stylelint": true
       }
