@@ -61,6 +61,24 @@ const ProjectDetail = (props: RouteComponentProps) => {
     },
     [project, dispatch],
   );
+  const removeUser = useCallback(
+    (user: GitHubUser) => {
+      if (!project) {
+        return;
+      }
+      const users = project.github_users.filter(
+        (possibleUser: GitHubUser) => user !== possibleUser,
+      );
+      dispatch(
+        setUsersOnProject({
+          ...project,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          github_users: users,
+        }),
+      );
+    },
+    [project, dispatch],
+  );
 
   // Submit modal related:
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -176,6 +194,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
           isOpen={assignUsersModalOpen}
           onRequestClose={closeAvailableUserModal}
           setUsers={setProjectUsers}
+        />
+        <AssignedUserCards
+          users={project.github_users}
+          removeUser={removeUser}
         />
         {submitButton}
         {tasks ? (

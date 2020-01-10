@@ -2,21 +2,20 @@ import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import DataTable from '@salesforce/design-system-react/components/data-table';
-import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import DataTableRowActions from '@salesforce/design-system-react/components/data-table/row-actions';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
 import { GitHubUser } from '@/store/repositories/reducer';
 
-// TODO:
-// - Insert these in the correct place in the document.
-// - The list of Repo users should probably be a modal, and a separate
-//   component, compared to the list of Project users, yes?
-
-const UserCard = ({ user }: { user: GitHubUser }) => (
+const UserCard = ({
+  user,
+  removeUser,
+}: {
+  user: GitHubUser;
+  removeUser: (user: GitHubUser) => void;
+}) => (
   <div
     className="slds-size_1-of-1
       slds-large-size_1-of-2
@@ -26,14 +25,21 @@ const UserCard = ({ user }: { user: GitHubUser }) => (
       bodyClassName="slds-card__body_inner"
       icon={<Avatar imgSrc={user.avatar_url} size="x-small" />}
       heading={user.login}
+      headerActions={<Button label="Remove" onClick={() => removeUser(user)} />}
     />
   </div>
 );
 
-export const AssignedUserCards = ({ users }: { users: GitHubUser[] }) => (
+export const AssignedUserCards = ({
+  users,
+  removeUser,
+}: {
+  users: GitHubUser[];
+  removeUser: (user: GitHubUser) => void;
+}) => (
   <ul>
     {users.map((user) => (
-      <UserCard key={user.id} user={user} />
+      <UserCard key={user.id} user={user} removeUser={removeUser} />
     ))}
   </ul>
 );
