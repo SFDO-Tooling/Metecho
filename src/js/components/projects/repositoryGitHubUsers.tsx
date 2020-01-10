@@ -6,14 +6,17 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import DataTableRowActions from '@salesforce/design-system-react/components/data-table/row-actions';
 import Modal from '@salesforce/design-system-react/components/modal';
+import i18n from 'i18next';
 import React, { useState } from 'react';
+
+import { GitHubUser } from '@/store/repositories/reducer';
 
 // TODO:
 // - Insert these in the correct place in the document.
 // - The list of Repo users should probably be a modal, and a separate
 //   component, compared to the list of Project users, yes?
 
-const UserCard = ({ user }) => (
+const UserCard = ({ user }: { user: GitHubUser }) => (
   <div
     className="slds-size_1-of-1
       slds-large-size_1-of-2
@@ -27,24 +30,35 @@ const UserCard = ({ user }) => (
   </div>
 );
 
-export const AssignedUserCards = ({ users }) => (
+export const AssignedUserCards = ({ users }: { users: GitHubUser[] }) => (
   <ul>
     {users.map((user) => (
-      <UserCard user={user} />
+      <UserCard key={user.id} user={user} />
     ))}
   </ul>
 );
 
 export const AvailableUserCards = ({
+  allUsers,
   users,
   isOpen,
   onRequestClose,
   setUsers,
+}: {
+  allUsers: GitHubUser[];
+  users: GitHubUser[];
+  isOpen: boolean;
+  onRequestClose: () => void;
+  setUsers: (users: GitHubUser[]) => void;
 }) => {
-  const [selection, setSelection] = useState(users.github_users);
-  const updateSelection = (event, data) => {
+  const [selection, setSelection] = useState(users);
+  const updateSelection = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    data: { selection: GitHubUser[] },
+  ) => {
     setSelection(data.selection);
   };
+  const handleSubmit = () => setUsers(selection);
 
   return (
     <Modal
@@ -52,26 +66,31 @@ export const AvailableUserCards = ({
       onRequestClose={onRequestClose}
       heading="Available users"
       footer={[
-        <Button label="Cancel" onClick={onRequestClose} />,
         <Button
-          label="Save"
+          key="cancel"
+          label={i18n.t('Cancel')}
+          onClick={onRequestClose}
+        />,
+        <Button
+          key="submit"
+          type="submit"
+          label={i18n.t('Save')}
           variant="brand"
-          onClick={() => setUsers(selection)}
+          onClick={handleSubmit}
         />,
       ]}
     >
       <DataTable
-        items={users}
+        items={allUsers}
         selectRows="checkbox"
         selection={selection}
         onRowChange={updateSelection}
       >
-        <DataTableColumn label="GitHub username" property="login" primaryColumn>
-          <DataTableCell />
-        </DataTableColumn>
-        <DataTableColumn label="Full name" property="login" primaryColumn>
-          <DataTableCell />
-        </DataTableColumn>
+        <DataTableColumn
+          label="GitHub Username"
+          property="login"
+          primaryColumn
+        />
       </DataTable>
     </Modal>
   );

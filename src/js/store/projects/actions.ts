@@ -25,18 +25,21 @@ export const setUsersOnProject = (payload: Project): ThunkResult => async (
   dispatch,
 ) => {
   try {
-    await apiFetch({
+    const response = await apiFetch({
       url: window.api_urls.project_detail(payload.id),
       dispatch,
       opts: {
         method: 'PUT',
         body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
     });
+    dispatch({ type: 'PROJECT_UPDATE', payload: response });
   } catch (error) {
     console.warn(error);
   }
-  dispatch({ type: 'PROJECT_UPDATE', payload });
 };
 
 export const createProjectPR = (payload: Project): ThunkResult => (
