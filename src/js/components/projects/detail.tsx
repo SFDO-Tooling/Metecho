@@ -7,7 +7,10 @@ import DocumentTitle from 'react-document-title';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import { AvailableUserCards, AssignedUserCards } from '@/components/projects/repositoryGitHubUsers';
+import {
+  AssignedUserCards,
+  AvailableUserCards,
+} from '@/components/projects/repositoryGitHubUsers';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import {
@@ -21,8 +24,8 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
-import { setUsersOnProject } from '@/store/projects/actions';
 import SubmitModal from '@/components/utils/submitModal';
+import { setUsersOnProject } from '@/store/projects/actions';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -34,17 +37,17 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
   const openAvailableUserModal = () => {
     setAssignUsersModalOpen(true);
-  }
+  };
   const closeAvailableUserModal = () => {
     setAssignUsersModalOpen(false);
-  }
+  };
   const setProjectUsers = (users) => {
     setUsersOnProject({
       ...project,
-      github_users: users
+      github_users: users,
     });
     setAssignUsersModalOpen(false);
-  }
+  };
 
   // Submit modal related:
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -154,7 +157,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
           className={classNames('slds-size_full slds-m-bottom_x-large')}
           onClick={openAvailableUserModal}
         />
-        <AvailableUserCards isOpen={assignUsersModalOpen} onRequestClose={closeAvailableUserModal} setUsers={setProjectUsers} users={repository.github_users} />
+        <AvailableUserCards
+          isOpen={assignUsersModalOpen}
+          onRequestClose={closeAvailableUserModal}
+          setUsers={setProjectUsers}
+          users={repository.github_users}
+        />
         {submitButton}
         {tasks ? (
           <>

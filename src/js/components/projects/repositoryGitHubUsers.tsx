@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
-import Avatar from '@salesforce/design-system-react/components/avatar';
-import Modal from '@salesforce/design-system-react/components/modal'; 
-import DataTable from '@salesforce/design-system-react/components/data-table'; 
-import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
+import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import DataTableRowActions from '@salesforce/design-system-react/components/data-table/row-actions';
+import Modal from '@salesforce/design-system-react/components/modal';
+import React, { useState } from 'react';
 
 // TODO:
 // - Insert these in the correct place in the document.
@@ -21,62 +21,55 @@ const UserCard = ({ user }) => (
   >
     <Card
       bodyClassName="slds-card__body_inner"
-      icon={<Avatar imgSrc={user.avatar_url} size="x-small"/>}
+      icon={<Avatar imgSrc={user.avatar_url} size="x-small" />}
       heading={user.login}
     />
   </div>
 );
 
-export const AssignedUserCards = ({ users }) => {
-  return (
-    <ul>
-      {users.map((user) => (
-        <UserCard user={user} />
-      ))}
-    </ul>
-  );
-};
+export const AssignedUserCards = ({ users }) => (
+  <ul>
+    {users.map((user) => (
+      <UserCard user={user} />
+    ))}
+  </ul>
+);
 
-
-export const AvailableUserCards = ({ users, isOpen, onRequestClose, setUsers }) => {
-  const addToProject = (user) => {
-    // What pattern are we using here? Should this go through the store,
-    // triggering an API call incidentally, or just send an API call directly?
-  };
-
+export const AvailableUserCards = ({
+  users,
+  isOpen,
+  onRequestClose,
+  setUsers,
+}) => {
   const [selection, setSelection] = useState(users.github_users);
   const updateSelection = (event, data) => {
-		setSelection(data.selection);
-  }
+    setSelection(data.selection);
+  };
 
   return (
     <Modal
       isOpen={isOpen}
-		  onRequestClose={onRequestClose}
+      onRequestClose={onRequestClose}
       heading="Available users"
       footer={[
         <Button label="Cancel" onClick={onRequestClose} />,
-        <Button label="Save" variant="brand" onClick={() => setUsers(selection)} />,
+        <Button
+          label="Save"
+          variant="brand"
+          onClick={() => setUsers(selection)}
+        />,
       ]}
     >
       <DataTable
         items={users}
         selectRows="checkbox"
-				selection={selection}
+        selection={selection}
         onRowChange={updateSelection}
       >
-        <DataTableColumn
-          label="GitHub username"
-          property="login"
-          primaryColumn
-        >
+        <DataTableColumn label="GitHub username" property="login" primaryColumn>
           <DataTableCell />
         </DataTableColumn>
-        <DataTableColumn
-          label="Full name"
-          property="login"
-          primaryColumn
-        >
+        <DataTableColumn label="Full name" property="login" primaryColumn>
           <DataTableCell />
         </DataTableColumn>
       </DataTable>
