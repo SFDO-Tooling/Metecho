@@ -67,7 +67,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         return;
       }
       const users = project.github_users.filter(
-        (possibleUser: GitHubUser) => user !== possibleUser,
+        (possibleUser: GitHubUser) => user.id !== possibleUser.id,
       );
       dispatch(
         setUsersOnProject({
