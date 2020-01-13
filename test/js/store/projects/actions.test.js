@@ -1,4 +1,5 @@
 import fetchMock from 'fetch-mock';
+
 import * as actions from '@/store/projects/actions';
 
 import { storeWithThunk } from './../../utils';
@@ -17,13 +18,19 @@ describe('setUsersOnProject', () => {
     const project = {
       id: 'project-id',
       name: 'My Project',
-      github_users: [{id: '123456', login: 'TestGitHubUser', avatar_url: 'https://example.com/avatar.png'}],
+      github_users: [
+        {
+          id: '123456',
+          login: 'TestGitHubUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
+      ],
     };
     const action = {
       type: 'PROJECT_UPDATE',
       payload: project,
     };
-    fetchMock.putOnce(window.api_urls.project_detail(project.id), project)
+    fetchMock.putOnce(window.api_urls.project_detail(project.id), project);
     await store.dispatch(actions.setUsersOnProject(project));
     const allActions = store.getActions();
 
@@ -34,15 +41,17 @@ describe('setUsersOnProject', () => {
     const project = {
       id: 'project-id',
       name: 'My Project',
-      github_users: [{id: '123456', login: 'TestGitHubUser', avatar_url: 'https://example.com/avatar.png'}],
+      github_users: [
+        {
+          id: '123456',
+          login: 'TestGitHubUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
+      ],
     };
-    const action = {
-      type: 'PROJECT_UPDATE',
-      payload: project,
-    };
-    fetchMock.putOnce(window.api_urls.project_detail(project.id), 500)
+    fetchMock.putOnce(window.api_urls.project_detail(project.id), 500);
     await store.dispatch(actions.setUsersOnProject(project));
-    expect(window.console.error).toHaveBeenCalled();
+    return expect(window.console.error).toHaveBeenCalled();
   });
 });
 

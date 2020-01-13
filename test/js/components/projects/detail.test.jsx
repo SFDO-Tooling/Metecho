@@ -28,7 +28,13 @@ const defaultState = {
         old_slugs: [],
         description: 'This is a test repository.',
         repo_url: 'https://github.com/test/test-repo',
-        github_users: [{id: '123456', login: 'TestGitHubUser', avatar_url: 'https://example.com/avatar.png'}],
+        github_users: [
+          {
+            id: '123456',
+            login: 'TestGitHubUser',
+            avatar_url: 'https://example.com/avatar.png',
+          },
+        ],
       },
     ],
     notFound: ['different-repository'],
@@ -244,7 +250,7 @@ describe('<ProjectDetail/>', () => {
     // TODO: How do you test if project missing?
 
     test('remoteUser', () => {
-      const { getByText, queryByText, store } = setup({
+      const { getByText, store } = setup({
         initialState: {
           ...defaultState,
           projects: {
@@ -257,7 +263,13 @@ describe('<ProjectDetail/>', () => {
                   repository: 'r1',
                   description: 'Project Description',
                   old_slugs: ['old-slug'],
-                  github_users: [{id: '123456', login: 'TestGitHubUser', avatar_url: 'https://example.com/avatar.png'}],
+                  github_users: [
+                    {
+                      id: '123456',
+                      login: 'TestGitHubUser',
+                      avatar_url: 'https://example.com/avatar.png',
+                    },
+                  ],
                 },
               ],
               next: null,
