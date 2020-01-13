@@ -28,6 +28,7 @@ const defaultState = {
         old_slugs: [],
         description: 'This is a test repository.',
         repo_url: 'https://github.com/test/test-repo',
+        github_users: [{id: '123456', login: 'TestGitHubUser', avatar_url: 'https://example.com/avatar.png'}],
       },
     ],
     notFound: ['different-repository'],
@@ -43,6 +44,7 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           old_slugs: ['old-slug'],
+          github_users: [],
         },
       ],
       next: null,
@@ -192,6 +194,96 @@ describe('<ProjectDetail/>', () => {
         filters: { project: 'project1' },
         objectType: 'task',
         shouldSubscribeToObject: true,
+      });
+    });
+  });
+
+  describe('Toggle available users modal', () => {
+    test('openAvailableUserModal', () => {
+      const { getByText } = setup();
+
+      fireEvent.click(getByText('Add new member'));
+
+      expect(getByText('GitHub Username')).toBeVisible();
+    });
+
+    test('closeAvailableUserModal', () => {
+      const { getByText, queryByText } = setup();
+
+      fireEvent.click(getByText('Add new member'));
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('GitHub Username')).toBeNull();
+    });
+  });
+
+  describe('Change project assigned users', () => {
+    test('setProjectUsers', () => {
+      const { getByText, queryByText, store } = setup();
+      const project = {
+        id: 'project1',
+        slug: 'project-1',
+        name: 'Project 1',
+        repository: 'r1',
+        description: 'Project Description',
+        old_slugs: ['old-slug'],
+        github_users: [],
+      };
+
+      fireEvent.click(getByText('Add new member'));
+      fireEvent.click(getByText('Save'));
+      const allActions = store.getActions();
+
+      expect(queryByText('GitHub Username')).toBeNull();
+      // TODO: allActions appears to be empty, to my surprise.
+      expect(allActions[0]).toEqual({
+        type: 'PROJECT_UPDATE',
+        project,
+      });
+    });
+    // TODO: How do you test if project missing?
+
+    test('remoteUser', () => {
+      const { getByText, queryByText, store } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              projects: [
+                {
+                  id: 'project1',
+                  slug: 'project-1',
+                  name: 'Project 1',
+                  repository: 'r1',
+                  description: 'Project Description',
+                  old_slugs: ['old-slug'],
+                  github_users: [{id: '123456', login: 'TestGitHubUser', avatar_url: 'https://example.com/avatar.png'}],
+                },
+              ],
+              next: null,
+              notFound: ['different-project'],
+              fetched: true,
+            },
+          },
+        },
+      });
+      const project = {
+        id: 'project1',
+        slug: 'project-1',
+        name: 'Project 1',
+        repository: 'r1',
+        description: 'Project Description',
+        old_slugs: ['old-slug'],
+        github_users: [],
+      };
+
+      fireEvent.click(getByText('Remove'));
+      const allActions = store.getActions();
+
+      // TODO: allActions appears to be empty, to my surprise.
+      expect(allActions[0]).toEqual({
+        type: 'PROJECT_UPDATE',
+        project,
       });
     });
   });

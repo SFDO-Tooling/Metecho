@@ -36,7 +36,7 @@ export const setUsersOnProject = (payload: Project): ThunkResult => async (
         },
       },
     });
-    dispatch({ type: 'PROJECT_UPDATE', payload: response });
+    return dispatch({ type: 'PROJECT_UPDATE', payload: response });
   } catch (error) {
     console.warn(error);
   }
