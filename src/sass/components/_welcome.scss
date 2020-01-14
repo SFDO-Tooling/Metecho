@@ -23,7 +23,11 @@
 
 .welcome-tile {
   // arbitrary height for vertically centering content in tile
-  @media (min-height: 1000px) {
+  @media (min-height: 700px) {
     justify-content: center;
   }
+}
+
+.welcome-icon {
+  fill: $color-background-success-dark;
 }
