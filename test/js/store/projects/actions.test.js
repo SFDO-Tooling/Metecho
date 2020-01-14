@@ -36,7 +36,7 @@ describe('setUsersOnProject', () => {
 
     expect(allActions[0]).toEqual(action);
   });
-  test('logs an error if an error happens', async () => {
+  test('logs an error if an error happens', () => {
     const store = storeWithThunk({});
     const project = {
       id: 'project-id',
@@ -50,8 +50,9 @@ describe('setUsersOnProject', () => {
       ],
     };
     fetchMock.putOnce(window.api_urls.project_detail(project.id), 500);
-    await store.dispatch(actions.setUsersOnProject(project));
-    return expect(window.console.error).toHaveBeenCalled();
+    return store.dispatch(actions.setUsersOnProject(project)).catch(() => {
+      expect(window.console.error).toHaveBeenCalled();
+    });
   });
 });
 
