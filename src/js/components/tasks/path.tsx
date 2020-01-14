@@ -1,32 +1,24 @@
 import classNames from 'classnames';
-import i18n from 'i18next';
-import React, { useState } from 'react';
+import React from 'react';
 const statusLabels = ['Planned', 'In Progress', 'Review', 'Merged'];
 
-// mocking for now //
-const hasDev = false;
-const hasReviewer = false;
-
-const StatusPath = () => {
-  const status = {
-    active: !hasDev && !hasReviewer,
-    complete: false,
-    disabled: false,
-    merged: false,
-  };
-
+interface TaskStatusPathProps {
+  status: string;
+}
+const TaskStatusPath = ({ status }: TaskStatusPathProps) => {
   const statusClass = {
-    'slds-is-current': status.active,
-    'slds-is-active': status.active,
-    'slds-is-incomplete': status.complete,
-    'slds-is-complete': status.merged,
+    'slds-is-current': status === 'Planned',
+    'slds-is-active': status === 'Planned',
+    'slds-is-incomplete': status === 'In progress',
+    'slds-is-complete': status === 'Complete',
   };
+
   return (
-    <div className="slds-path">
+    <div className="ms-task-status-path slds-path">
       <div className="slds-grid slds-path__track">
         <div className="slds-grid slds-path">
           <ul
-            className="slds-path__nav status-path__list slds-m-left_none"
+            className="ms-task-status-path__list slds-path__nav slds-m-left_none"
             role="listbox"
             aria-orientation="horizontal"
           >
@@ -34,8 +26,8 @@ const StatusPath = () => {
               <li
                 key={label}
                 className={classNames(
+                  'ms-task-status-path__item',
                   'slds-path__item',
-                  'status-path__item',
                   statusClass,
                 )}
                 role="presentation"
@@ -46,9 +38,13 @@ const StatusPath = () => {
                   id="path-1"
                   role="option"
                 >
-                  <span className="slds-path__stage">
-                    <span className="slds-assistive-text">Current Stage:</span>
-                  </span>
+                  {status === 'In Progress' && (
+                    <span className="slds-path__stage">
+                      <span className="slds-assistive-text">
+                        Current Stage:
+                      </span>
+                    </span>
+                  )}
                   <span className="slds-path__title">{label}</span>
                 </a>
               </li>
@@ -60,4 +56,4 @@ const StatusPath = () => {
   );
 };
 
-export default StatusPath;
+export default TaskStatusPath;
