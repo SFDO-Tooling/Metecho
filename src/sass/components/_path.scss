@@ -1,4 +1,4 @@
-.slds-path__item.status-path__item {
+.ms-task-status-path__item.slds-path__item {
   min-width: auto;
   &.slds-is-current.slds-is-active {
     background-color: $brand-background-primary;
@@ -18,6 +18,6 @@
   }
 }
 
-.slds-text-longform ul {
+.slds-text-longform ul > .ms-task-status-path__list {
   list-style: none;
 }
