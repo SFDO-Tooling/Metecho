@@ -87,19 +87,20 @@ const DetailPageLayout = ({
         <div
           className="slds-col
             slds-size_1-of-1
-            slds-medium-size_1-of-3
-            slds-text-longform"
+            slds-medium-size_1-of-3"
         >
-          {!descriptionHasTitle && (
-            <h2 className="slds-text-heading_medium">{title}</h2>
-          )}
-          {/* This description is pre-cleaned by the API */}
-          {description && (
-            <p
-              className="markdown"
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
-          )}
+          <div className="slds-text-longform">
+            {!descriptionHasTitle && (
+              <h2 className="slds-text-heading_medium">{title}</h2>
+            )}
+            {/* This description is pre-cleaned by the API */}
+            {description && (
+              <p
+                className="markdown"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
+            )}
+          </div>
           {sidebar}
         </div>
       </div>
