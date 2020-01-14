@@ -4,18 +4,22 @@ import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
 import { fetchObject, fetchObjects } from '@/store/actions';
+import { setUsersOnProject } from '@/store/projects/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
+jest.mock('@/store/projects/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+setUsersOnProject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
+  setUsersOnProject.mockClear();
 });
 
 const defaultState = {
@@ -225,32 +229,19 @@ describe('<ProjectDetail/>', () => {
 
   describe('Change project assigned users', () => {
     test('setProjectUsers', () => {
-      const { getByText, queryByText, store } = setup();
-      const project = {
-        id: 'project1',
-        slug: 'project-1',
-        name: 'Project 1',
-        repository: 'r1',
-        description: 'Project Description',
-        old_slugs: ['old-slug'],
-        github_users: [],
-      };
+      const { getByText, queryByText } = setup();
 
       fireEvent.click(getByText('Add new member'));
+      fireEvent.click(getByText('TestGitHubUser'));
       fireEvent.click(getByText('Save'));
-      const allActions = store.getActions();
 
       expect(queryByText('GitHub Username')).toBeNull();
-      // TODO: allActions appears to be empty, to my surprise.
-      expect(allActions[0]).toEqual({
-        type: 'PROJECT_UPDATE',
-        project,
-      });
+      expect(setUsersOnProject).toHaveBeenCalled();
     });
     // TODO: How do you test if project missing?
 
     test('removeUser', () => {
-      const { getByText, store } = setup({
+      const { getByText } = setup({
         initialState: {
           ...defaultState,
           projects: {
@@ -279,24 +270,9 @@ describe('<ProjectDetail/>', () => {
           },
         },
       });
-      const project = {
-        id: 'project1',
-        slug: 'project-1',
-        name: 'Project 1',
-        repository: 'r1',
-        description: 'Project Description',
-        old_slugs: ['old-slug'],
-        github_users: [],
-      };
 
       fireEvent.click(getByText('Remove'));
-      const allActions = store.getActions();
-
-      // TODO: allActions appears to be empty, to my surprise.
-      expect(allActions[0]).toEqual({
-        type: 'PROJECT_UPDATE',
-        project,
-      });
+      expect(setUsersOnProject).toHaveBeenCalled();
     });
   });
 
