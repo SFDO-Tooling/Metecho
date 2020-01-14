@@ -249,7 +249,7 @@ describe('<ProjectDetail/>', () => {
     });
     // TODO: How do you test if project missing?
 
-    test('remoteUser', () => {
+    test('removeUser', () => {
       const { getByText, store } = setup({
         initialState: {
           ...defaultState,
