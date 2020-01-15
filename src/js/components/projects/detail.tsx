@@ -47,6 +47,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   };
   const setProjectUsers = useCallback(
     (users: GitHubUser[]) => {
+      /* istanbul ignore if */
       if (!project) {
         return;
       }
@@ -63,6 +64,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   );
   const removeUser = useCallback(
     (user: GitHubUser) => {
+      /* istanbul ignore if */
       if (!project) {
         return;
       }
