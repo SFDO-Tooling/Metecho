@@ -3,6 +3,7 @@ import i18n from 'i18next';
 import { ThunkResult } from '@/store';
 import { Task } from '@/store/tasks/reducer';
 import { addToast } from '@/store/toasts/actions';
+import apiFetch from '@/utils/api';
 
 interface TaskUpdated {
   type: 'TASK_UPDATE';
@@ -19,6 +20,28 @@ export const updateTask = (payload: Task): TaskUpdated => ({
   type: 'TASK_UPDATE',
   payload,
 });
+
+export const setUsersOnTask = (payload: Task): ThunkResult => async (
+  dispatch,
+) => {
+  try {
+    const response = await apiFetch({
+      url: window.api_urls.task_detail(payload.id),
+      dispatch,
+      opts: {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    });
+    return dispatch({ type: 'TASK_UPDATE', payload: response });
+  } catch (error) {
+    console.warn(error);
+    throw error;
+  }
+};
 
 export const createTaskPR = (payload: Task): ThunkResult => (dispatch) => {
   dispatch(

@@ -238,7 +238,6 @@ describe('<ProjectDetail/>', () => {
       expect(queryByText('GitHub Username')).toBeNull();
       expect(setUsersOnProject).toHaveBeenCalled();
     });
-    // TODO: How do you test if project missing?
 
     test('removeUser', () => {
       const { getByText } = setup({

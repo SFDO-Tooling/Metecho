@@ -12,6 +12,10 @@ import CommitList from '@/components/commits/list';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
 import {
+  AssignedUserCards,
+  AvailableUserCards,
+} from '@/components/projects/repositoryGitHubUsers';
+import {
   DetailPageLayout,
   ExternalLink,
   getProjectLoadingOrNotFound,
@@ -28,6 +32,8 @@ import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
+import { GitHubUser } from '@/store/repositories/reducer';
+import { setUsersOnTask } from '@/store/tasks/actions';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
@@ -53,6 +59,51 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
   const { orgs } = useFetchOrgsIfMissing(task, props);
   const user = useSelector(selectUserState) as User;
+
+  // Assign users modal related:
+  const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
+  const openAvailableUserModal = () => {
+    setAssignUsersModalOpen(true);
+  };
+  const closeAvailableUserModal = () => {
+    setAssignUsersModalOpen(false);
+  };
+  const setTaskUsers = useCallback(
+    (users: GitHubUser[]) => {
+      /* istanbul ignore if */
+      if (!task) {
+        return;
+      }
+      dispatch(
+        setUsersOnTask({
+          ...task,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          github_users: users,
+        }),
+      );
+      setAssignUsersModalOpen(false);
+    },
+    [task, dispatch],
+  );
+  const removeUser = useCallback(
+    (githubUser: GitHubUser) => {
+      /* istanbul ignore if */
+      if (!task) {
+        return;
+      }
+      const users = task.github_users.filter(
+        (possibleUser: GitHubUser) => githubUser.id !== possibleUser.id,
+      );
+      dispatch(
+        setUsersOnTask({
+          ...task,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          github_users: users,
+        }),
+      );
+    },
+    [task, dispatch],
+  );
 
   const readyToSubmit = Boolean(
     task && task.has_unmerged_commits && !task.pr_is_open,
@@ -255,6 +306,19 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
+        <Button
+          label="Add new member"
+          className={classNames('slds-size_full slds-m-bottom_x-large')}
+          onClick={openAvailableUserModal}
+        />
+        <AvailableUserCards
+          allUsers={project.github_users}
+          users={task.github_users}
+          isOpen={assignUsersModalOpen}
+          onRequestClose={closeAvailableUserModal}
+          setUsers={setTaskUsers}
+        />
+        <AssignedUserCards users={task.github_users} removeUser={removeUser} />
         {primaryButton}
         {secondaryButton}
 

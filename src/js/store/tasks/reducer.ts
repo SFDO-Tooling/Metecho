@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import { ObjectsAction } from '@/store/actions';
+import { GitHubUser } from '@/store/repositories/reducer';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes, TaskStatuses } from '@/utils/constants';
@@ -32,6 +33,7 @@ export interface Task {
   pr_url: string | null;
   pr_is_open: boolean;
   commits: Commit[];
+  github_users: GitHubUser[];
   status: TaskStatuses;
 }
 
