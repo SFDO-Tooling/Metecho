@@ -4,18 +4,22 @@ import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
 import { fetchObject, fetchObjects } from '@/store/actions';
+import { setUsersOnProject } from '@/store/projects/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
+jest.mock('@/store/projects/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+setUsersOnProject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
+  setUsersOnProject.mockClear();
 });
 
 const defaultState = {
@@ -28,6 +32,13 @@ const defaultState = {
         old_slugs: [],
         description: 'This is a test repository.',
         repo_url: 'https://github.com/test/test-repo',
+        github_users: [
+          {
+            id: '123456',
+            login: 'TestGitHubUser',
+            avatar_url: 'https://example.com/avatar.png',
+          },
+        ],
       },
     ],
     notFound: ['different-repository'],
@@ -43,6 +54,7 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           old_slugs: ['old-slug'],
+          github_users: [],
         },
       ],
       next: null,
@@ -193,6 +205,74 @@ describe('<ProjectDetail/>', () => {
         objectType: 'task',
         shouldSubscribeToObject: true,
       });
+    });
+  });
+
+  describe('Toggle available users modal', () => {
+    test('openAvailableUserModal', () => {
+      const { getByText } = setup();
+
+      fireEvent.click(getByText('Add new member'));
+
+      expect(getByText('GitHub Username')).toBeVisible();
+    });
+
+    test('closeAvailableUserModal', () => {
+      const { getByText, queryByText } = setup();
+
+      fireEvent.click(getByText('Add new member'));
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('GitHub Username')).toBeNull();
+    });
+  });
+
+  describe('Change project assigned users', () => {
+    test('setProjectUsers', () => {
+      const { getByText, queryByText } = setup();
+
+      fireEvent.click(getByText('Add new member'));
+      fireEvent.click(getByText('TestGitHubUser'));
+      fireEvent.click(getByText('Save'));
+
+      expect(queryByText('GitHub Username')).toBeNull();
+      expect(setUsersOnProject).toHaveBeenCalled();
+    });
+    // TODO: How do you test if project missing?
+
+    test('removeUser', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              projects: [
+                {
+                  id: 'project1',
+                  slug: 'project-1',
+                  name: 'Project 1',
+                  repository: 'r1',
+                  description: 'Project Description',
+                  old_slugs: ['old-slug'],
+                  github_users: [
+                    {
+                      id: '123456',
+                      login: 'TestGitHubUser',
+                      avatar_url: 'https://example.com/avatar.png',
+                    },
+                  ],
+                },
+              ],
+              next: null,
+              notFound: ['different-project'],
+              fetched: true,
+            },
+          },
+        },
+      });
+
+      fireEvent.click(getByText('Remove'));
+      expect(setUsersOnProject).toHaveBeenCalled();
     });
   });
 

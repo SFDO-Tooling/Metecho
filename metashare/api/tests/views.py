@@ -419,11 +419,9 @@ class TestScratchOrgView:
 
     def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
         social_account_factory(
-            user=client.user,
-            provider="salesforce-production",
-            extra_data={"preferred_username": "test-username"},
+            user=client.user, provider="salesforce-production",
         )
-        scratch_org = scratch_org_factory(owner_sf_id="test-username")
+        scratch_org = scratch_org_factory(owner=client.user)
         with patch("metashare.api.models.ScratchOrg.queue_delete"):
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.delete(url)

@@ -348,7 +348,7 @@ def populate_github_users(repository):
     repo = get_repo_info(user, repository.repo_id)
     repository.github_users = [
         {
-            "id": collaborator.id,
+            "id": str(collaborator.id),
             "login": collaborator.login,
             "avatar_url": collaborator.avatar_url,
         }

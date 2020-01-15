@@ -1,3 +1,5 @@
+import fetchMock from 'fetch-mock';
+
 import * as actions from '@/store/projects/actions';
 
 import { storeWithThunk } from './../../utils';
@@ -7,6 +9,50 @@ describe('updateProject', () => {
     const expected = { type: 'PROJECT_UPDATE', payload: {} };
 
     expect(actions.updateProject({})).toEqual(expected);
+  });
+});
+
+describe('setUsersOnProject', () => {
+  test('PUTs to API', async () => {
+    const store = storeWithThunk({});
+    const project = {
+      id: 'project-id',
+      name: 'My Project',
+      github_users: [
+        {
+          id: '123456',
+          login: 'TestGitHubUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
+      ],
+    };
+    const action = {
+      type: 'PROJECT_UPDATE',
+      payload: project,
+    };
+    fetchMock.putOnce(window.api_urls.project_detail(project.id), project);
+    await store.dispatch(actions.setUsersOnProject(project));
+    const allActions = store.getActions();
+
+    expect(allActions[0]).toEqual(action);
+  });
+  test('logs an error if an error happens', () => {
+    const store = storeWithThunk({});
+    const project = {
+      id: 'project-id',
+      name: 'My Project',
+      github_users: [
+        {
+          id: '123456',
+          login: 'TestGitHubUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
+      ],
+    };
+    fetchMock.putOnce(window.api_urls.project_detail(project.id), 500);
+    return store.dispatch(actions.setUsersOnProject(project)).catch(() => {
+      expect(window.console.error).toHaveBeenCalled();
+    });
   });
 });
 

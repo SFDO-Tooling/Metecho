@@ -193,7 +193,7 @@ class Repository(
     )
     # User data is shaped like this:
     #   {
-    #     "id": int,
+    #     "id": str,
     #     "login": str,
     #     "avatar_url": str,
     #   }
@@ -304,7 +304,7 @@ class Project(
 
     # User data is shaped like this:
     #   {
-    #     "id": int,
+    #     "id": str,
     #     "login": str,
     #     "avatar_url": str,
     #   }

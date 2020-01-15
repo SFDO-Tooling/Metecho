@@ -2,6 +2,7 @@
 
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { ProjectAction } from '@/store/projects/actions';
+import { GitHubUser } from '@/store/repositories/reducer';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
@@ -18,6 +19,7 @@ export interface Project {
   pr_is_open: boolean;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
+  github_users: GitHubUser[];
 }
 export interface ProjectsByRepositoryState {
   projects: Project[];

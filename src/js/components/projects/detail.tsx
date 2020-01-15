@@ -2,11 +2,16 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import {
+  AssignedUserCards,
+  AvailableUserCards,
+} from '@/components/projects/repositoryGitHubUsers';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import {
@@ -21,12 +26,61 @@ import {
   useFetchTasksIfMissing,
 } from '@/components/utils';
 import SubmitModal from '@/components/utils/submitModal';
+import { ThunkDispatch } from '@/store';
+import { setUsersOnProject } from '@/store/projects/actions';
+import { GitHubUser } from '@/store/repositories/reducer';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
+  const dispatch = useDispatch<ThunkDispatch>();
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
+
+  // Assign users modal related:
+  const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
+  const openAvailableUserModal = () => {
+    setAssignUsersModalOpen(true);
+  };
+  const closeAvailableUserModal = () => {
+    setAssignUsersModalOpen(false);
+  };
+  const setProjectUsers = useCallback(
+    (users: GitHubUser[]) => {
+      /* istanbul ignore if */
+      if (!project) {
+        return;
+      }
+      dispatch(
+        setUsersOnProject({
+          ...project,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          github_users: users,
+        }),
+      );
+      setAssignUsersModalOpen(false);
+    },
+    [project, dispatch],
+  );
+  const removeUser = useCallback(
+    (user: GitHubUser) => {
+      /* istanbul ignore if */
+      if (!project) {
+        return;
+      }
+      const users = project.github_users.filter(
+        (possibleUser: GitHubUser) => user.id !== possibleUser.id,
+      );
+      dispatch(
+        setUsersOnProject({
+          ...project,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          github_users: users,
+        }),
+      );
+    },
+    [project, dispatch],
+  );
 
   // Submit modal related:
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -131,6 +185,22 @@ const ProjectDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
       >
+        <Button
+          label="Add new member"
+          className={classNames('slds-size_full slds-m-bottom_x-large')}
+          onClick={openAvailableUserModal}
+        />
+        <AvailableUserCards
+          allUsers={repository.github_users}
+          users={project.github_users}
+          isOpen={assignUsersModalOpen}
+          onRequestClose={closeAvailableUserModal}
+          setUsers={setProjectUsers}
+        />
+        <AssignedUserCards
+          users={project.github_users}
+          removeUser={removeUser}
+        />
         {submitButton}
         {tasks ? (
           <>

@@ -9,13 +9,13 @@
     "bibhasdn.django-html",
     "coenraads.bracket-pair-colorizer-2",
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
     "formulahendry.auto-rename-tag",
     "lextudio.restructuredtext",
     "ms-azuretools.vscode-docker",
     "ms-python.python",
     "ms-vscode.sublime-keybindings",
     "naumovs.color-highlight",
+    "prettier.prettier-vscode",
     "stkb.rewrap",
     "stylelint.vscode-stylelint",
     "syler.sass-indented",
@@ -24,12 +24,12 @@
     "xabikos.javascriptsnippets"
   ],
   "settings": {
-    "editor.tabSize": 2,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
-      "source.fixAll": true
+      "source.fixAll.eslint": true
     },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
@@ -64,6 +64,12 @@
     },
     "[python]": {
       "editor.rulers": [88]
+    },
+    "[scss]": {
+      "editor.rulers": [80],
+      "editor.codeActionsOnSave": {
+        "source.fixAll.stylelint": true
+      }
     },
     "files.exclude": {
       "**/.git": true,
