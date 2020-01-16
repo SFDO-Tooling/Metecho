@@ -23,11 +23,11 @@ const UserCard = ({
   removeUser: (user: GitHubUser) => void;
 }) => (
   <div
-    className="slds-size_1-of-1
-      slds-large-size_1-of-2
-      slds-p-around_x-small"
+    className="slds-col slds-size_1-of-1
+  slds-large-size_1-of-2 slds-p-around_x-small card-col"
   >
     <Card
+      className="card-in-list"
       bodyClassName="slds-card__body_inner"
       icon={<Avatar imgSrc={user.avatar_url} size="x-small" />}
       heading={user.login}
@@ -43,11 +43,11 @@ export const AssignedUserCards = ({
   users: GitHubUser[];
   removeUser: (user: GitHubUser) => void;
 }) => (
-  <ul>
+  <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
     {users.map((user) => (
       <UserCard key={user.id} user={user} removeUser={removeUser} />
     ))}
-  </ul>
+  </div>
 );
 
 const UserTableCell = ({ item, ...props }: TableCellProps) => {

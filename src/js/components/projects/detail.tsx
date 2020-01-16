@@ -185,12 +185,20 @@ const ProjectDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={[
-          <Button
-            key="addmember"
-            label="Add new member"
-            className={classNames('slds-size_full slds-m-bottom_x-large')}
-            onClick={openAvailableUserModal}
-          />,
+          <div
+            key="addmember-section"
+            className="slds-m-bottom_x-large add-member"
+          >
+            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+              {i18n.t('Collaborators')}
+            </h2>
+            <Button
+              key="addmember"
+              label="Add new member"
+              className={classNames('slds-button_outline-brand')}
+              onClick={openAvailableUserModal}
+            />
+          </div>,
           <AvailableUserCards
             key="availablemembers"
             allUsers={repository.github_users}
