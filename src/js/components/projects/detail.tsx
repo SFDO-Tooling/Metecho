@@ -184,23 +184,28 @@ const ProjectDetail = (props: RouteComponentProps) => {
           { name: project.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
+        sidebar={[
+          <Button
+            key="addmember"
+            label="Add new member"
+            className={classNames('slds-size_full slds-m-bottom_x-large')}
+            onClick={openAvailableUserModal}
+          />,
+          <AvailableUserCards
+            key="availablemembers"
+            allUsers={repository.github_users}
+            users={project.github_users}
+            isOpen={assignUsersModalOpen}
+            onRequestClose={closeAvailableUserModal}
+            setUsers={setProjectUsers}
+          />,
+          <AssignedUserCards
+            key="addedmembers"
+            users={project.github_users}
+            removeUser={removeUser}
+          />,
+        ]}
       >
-        <Button
-          label="Add new member"
-          className={classNames('slds-size_full slds-m-bottom_x-large')}
-          onClick={openAvailableUserModal}
-        />
-        <AvailableUserCards
-          allUsers={repository.github_users}
-          users={project.github_users}
-          isOpen={assignUsersModalOpen}
-          onRequestClose={closeAvailableUserModal}
-          setUsers={setProjectUsers}
-        />
-        <AssignedUserCards
-          users={project.github_users}
-          removeUser={removeUser}
-        />
         {submitButton}
         {tasks ? (
           <>
