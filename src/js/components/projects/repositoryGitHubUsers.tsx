@@ -2,12 +2,19 @@ import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import DataTable from '@salesforce/design-system-react/components/data-table';
+import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
 import { GitHubUser } from '@/store/repositories/reducer';
+
+interface TableCellProps {
+  [key: string]: any;
+  item?: GitHubUser;
+}
 
 const UserCard = ({
   user,
@@ -44,6 +51,29 @@ export const AssignedUserCards = ({
   </ul>
 );
 
+const UserTableCell = ({ item, className, ...props }: TableCellProps) => {
+  /* istanbul ignore if */
+  if (!item) {
+    return 'hello';
+  }
+  let member = item.login;
+  if (item.login && item.login !== member) {
+    member = `${member} (${item.login})`;
+  }
+  return (
+    <DataTableCell {...props} title={member} className="team-member-grid">
+      <Avatar
+        imgAlt={member}
+        imgSrc={item.avatar_url}
+        title={member}
+        size="small"
+      />
+      <span className="team-member-username">{member}</span>
+    </DataTableCell>
+  );
+};
+UserTableCell.displayName = DataTableCell.displayName;
+
 export const AvailableUserCards = ({
   allUsers,
   users,
@@ -70,7 +100,7 @@ export const AvailableUserCards = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      heading="Available users"
+      heading="Add New Member"
       footer={[
         <Button
           key="cancel"
@@ -80,7 +110,7 @@ export const AvailableUserCards = ({
         <Button
           key="submit"
           type="submit"
-          label={i18n.t('Save')}
+          label={i18n.t('Add Member')}
           variant="brand"
           onClick={handleSubmit}
         />,
@@ -93,10 +123,13 @@ export const AvailableUserCards = ({
         onRowChange={updateSelection}
       >
         <DataTableColumn
-          label="GitHub Username"
-          property="login"
+          label={i18n.t('GitHub Username')}
           primaryColumn
-        />
+          width="240"
+        >
+          <UserTableCell />
+        </DataTableColumn>
+        <DataTableColumn label={i18n.t('Full Name')} property="name" />
       </DataTable>
     </Modal>
   );
