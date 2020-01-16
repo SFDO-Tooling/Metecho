@@ -50,7 +50,7 @@ export const AssignedUserCards = ({
   </ul>
 );
 
-const UserTableCell = ({ item, className, ...props }: TableCellProps) => {
+const UserTableCell = ({ item, ...props }: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
     return null;
