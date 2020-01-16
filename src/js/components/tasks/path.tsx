@@ -1,17 +1,46 @@
+import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
+import i18n from 'i18next';
 import React from 'react';
-const statusLabels = ['Planned', 'In Progress', 'Review', 'Merged'];
+import { Task } from 'src/js/store/tasks/reducer';
+
+import { TASK_STATUSES } from '@/utils/constants';
 
 interface TaskStatusPathProps {
-  status: string;
+  task: Task;
 }
-const TaskStatusPath = ({ status }: TaskStatusPathProps) => {
-  const statusClass = {
-    'slds-is-current': status === 'Planned',
-    'slds-is-active': status === 'Planned',
-    'slds-is-incomplete': status === 'In progress',
-    'slds-is-complete': status === 'Complete',
-  };
+const TaskStatusPath = ({ task }: TaskStatusPathProps) => {
+  const { status } = task;
+  const readyForDev = status === TASK_STATUSES.PLANNED;
+  const readyForReview =
+    status === TASK_STATUSES.IN_PROGRESS && !task.pr_is_open;
+  // disabled is for showing the checkmark
+  const test = [
+    {
+      label: 'Planned',
+      isNext: false,
+      active: readyForDev,
+      complete: status === TASK_STATUSES.IN_PROGRESS || TASK_STATUSES.COMPLETED,
+    },
+    {
+      label: 'In Progress',
+      isNext: readyForDev,
+      active: readyForReview,
+      complete: task.pr_is_open,
+    },
+    {
+      label: 'Review',
+      active: task.pr_is_open,
+      isNext: readyForReview,
+      complete: task.pr_is_open && status !== TASK_STATUSES.COMPLETED,
+    },
+    {
+      label: 'Merged',
+      isNext: readyForReview,
+      active: false,
+      complete: false,
+    },
+  ];
 
   return (
     <div className="ms-task-status-path slds-path">
@@ -22,13 +51,19 @@ const TaskStatusPath = ({ status }: TaskStatusPathProps) => {
             role="listbox"
             aria-orientation="horizontal"
           >
-            {statusLabels.map((label) => (
+            {test.map(({ label, active, isNext, complete }) => (
               <li
                 key={label}
                 className={classNames(
                   'ms-task-status-path__item',
                   'slds-path__item',
-                  statusClass,
+                  {
+                    'slds-is-current': active,
+                    'slds-is-active': active,
+                    'slds-is-incomplete': !isNext,
+                    'slds-is-complete': label === 'Merged' && active,
+                    'ms-path-checked': complete,
+                  },
                 )}
                 role="presentation"
               >
@@ -45,7 +80,21 @@ const TaskStatusPath = ({ status }: TaskStatusPathProps) => {
                       </span>
                     </span>
                   )}
-                  <span className="slds-path__title">{label}</span>
+                  <span className="slds-path__title">
+                    {complete ? (
+                      <Icon
+                        category="utility"
+                        name="check"
+                        assistiveText={{
+                          label: i18n.t('Step Complete'),
+                        }}
+                        size="xx-small"
+                        className="slds-m-bottom_xx-small"
+                      />
+                    ) : (
+                      label
+                    )}
+                  </span>
                 </a>
               </li>
             ))}

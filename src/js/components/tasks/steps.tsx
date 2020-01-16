@@ -40,7 +40,7 @@ const TaskStatusSteps = ({ status }: TaskStatusPathProps) => {
   ];
 
   return (
-    <RadioGroup label="Next Staps" disabled={true} name="steps">
+    <RadioGroup label="Next Staps" disabled={false} name="steps">
       {steps.map(({ label, step, key }) => (
         <Radio
           key={key}

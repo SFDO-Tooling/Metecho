@@ -258,7 +258,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={[
-          <TaskStatusPath key="status" status={task.status} />,
+          <TaskStatusPath key="status" task={task} />,
           <TaskStatusSteps key="steps" status={task.status} />,
         ]}
       >
