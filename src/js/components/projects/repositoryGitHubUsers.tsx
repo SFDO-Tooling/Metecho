@@ -55,19 +55,16 @@ const UserTableCell = ({ item, ...props }: TableCellProps) => {
   if (!item) {
     return null;
   }
-  let member = item.login;
-  if (item.login && item.login !== member) {
-    member = `${member} (${item.login})`;
-  }
+  const { login } = item;
   return (
-    <DataTableCell {...props} title={member} className="team-member-grid">
+    <DataTableCell {...props} title={login} className="team-member-grid">
       <Avatar
-        imgAlt={member}
+        imgAlt={login}
         imgSrc={item.avatar_url}
-        title={member}
+        title={login}
         size="small"
       />
-      <span className="team-member-username">{member}</span>
+      <span className="team-member-username">{login}</span>
     </DataTableCell>
   );
 };
