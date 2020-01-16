@@ -165,7 +165,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     filterset_class = ScratchOrgFilter
 
     def perform_create(self, *args, **kwargs):
-        if self.request.user.is_devhub_enabled:
+        if self.request.user.is_devhub_enabled or self.request.user.devhub_username:
             super().perform_create(*args, **kwargs)
         else:
             raise PermissionDenied(
