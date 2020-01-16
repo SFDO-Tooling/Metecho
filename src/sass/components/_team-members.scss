@@ -1,0 +1,13 @@
+// Team Member
+// ===========
+
+.team-member-grid {
+  > div {
+    align-items: center;
+    display: flex;
+  }
+}
+
+.team-member-username {
+  margin-left: $spacing-x-small;
+}
