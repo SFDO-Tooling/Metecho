@@ -29,7 +29,7 @@ const UserCard = ({
     <Card
       className="card-in-list"
       bodyClassName="slds-card__body_inner"
-      icon={<Avatar imgSrc={user.avatar_url} size="x-small" />}
+      icon={<Avatar imgSrc={user.avatar_url} size="medium" />}
       heading={user.login}
       headerActions={<Button label="Remove" onClick={() => removeUser(user)} />}
     />
