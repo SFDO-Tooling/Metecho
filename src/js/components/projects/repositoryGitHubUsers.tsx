@@ -5,7 +5,6 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
-import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
@@ -54,7 +53,7 @@ export const AssignedUserCards = ({
 const UserTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
-    return 'hello';
+    return null;
   }
   let member = item.login;
   if (item.login && item.login !== member) {
