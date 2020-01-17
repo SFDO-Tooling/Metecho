@@ -187,9 +187,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
         sidebar={[
           <div
             key="addmember-section"
-            className="slds-m-bottom_x-large add-member"
+            className="slds-m-bottom_medium add-member"
           >
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+            <h2 className="slds-text-heading_medium slds-p-bottom_small">
               {i18n.t('Collaborators')}
             </h2>
             <Button

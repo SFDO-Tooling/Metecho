@@ -1,6 +1,8 @@
 // Team Member
 // ===========
 
+// Add/Edit Team Members Modal
+// ---------------------------
 .team-member-grid {
   > div {
     align-items: center;
@@ -10,4 +12,12 @@
 
 .team-member-username {
   margin-left: $spacing-x-small;
+}
+
+// Assigned Team Member Cards
+// --------------------------
+.card-in-list {
+  h2 {
+    font-size: $font-size-3;
+  }
 }
