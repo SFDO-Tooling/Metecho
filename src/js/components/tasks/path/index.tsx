@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Task } from 'src/js/store/tasks/reducer';
+
+import { usePrev } from '@/components/utils';
+import { Task } from '@/store/tasks/reducer';
 
 import Path from './path';
 import PathItem from './pathItem';
@@ -15,8 +17,17 @@ const TaskStatusPath = ({ task }: TaskStatusPathProps) => {
     { label: 'Merged', status: 'Completed' },
   ];
   const [currentStep, setCurrentStep] = useState(0);
-  //   const [prevSteps, setPrevSteps] = useState([]); // @todo: set to an array of previous steps
-
+  const [previousSteps, setPreviousSteps] = useState([]);
+  const stepsRef = usePrev(currentStep);
+  // add previous steps as complete
+  useEffect(() => {
+    if (currentStep >= 1) {
+      setPreviousSteps((oldArray) =>
+        [...oldArray, stepsRef].filter((item) => item !== currentStep),
+      );
+    }
+  }, [currentStep, stepsRef]);
+  // set the active step index
   useEffect(() => {
     const currentIdx = steps.findIndex((step) => step.status === task.status);
     if (task.pr_is_open) {
@@ -27,7 +38,11 @@ const TaskStatusPath = ({ task }: TaskStatusPathProps) => {
   }, [steps, task]);
 
   return (
-    <Path current={currentStep} status={task.status} previousSteps={[]}>
+    <Path
+      current={currentStep}
+      status={task.status}
+      previousSteps={previousSteps}
+    >
       {steps.map(({ label }, index) => (
         <PathItem title={label} key={index} />
       ))}

@@ -5,7 +5,7 @@ interface PathProps {
   current: number;
   children: ReactNode;
   status: string;
-  previousSteps: Array<string>;
+  previousSteps: any;
 }
 const Path = ({ current, children, status, previousSteps }: PathProps) => {
   const filteredChildren = React.Children.toArray(children).filter((c) =>
