@@ -28,10 +28,19 @@ const UserCard = ({
   >
     <Card
       className="card-in-list"
-      bodyClassName="slds-card__body_inner"
-      icon={<Avatar imgSrc={user.avatar_url} size="medium" />}
+      icon={<Avatar imgSrc={user.avatar_url} size="small" />}
       heading={user.login}
-      headerActions={<Button label="Remove" onClick={() => removeUser(user)} />}
+      headerActions={
+        <Button
+          assistiveText={{ icon: 'Remove' }}
+          iconCategory="utility"
+          iconName="close"
+          iconSize="small"
+          iconVariant="border-filled"
+          variant="icon"
+          onClick={() => removeUser(user)}
+        />
+      }
     />
   </div>
 );
@@ -43,7 +52,7 @@ export const AssignedUserCards = ({
   users: GitHubUser[];
   removeUser: (user: GitHubUser) => void;
 }) => (
-  <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
+  <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
     {users.map((user) => (
       <UserCard key={user.id} user={user} removeUser={removeUser} />
     ))}
@@ -96,7 +105,7 @@ export const AvailableUserCards = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      heading="Add New Member"
+      heading={i18n.t('Add or Remove People to This Project')}
       footer={[
         <Button
           key="cancel"
@@ -106,7 +115,7 @@ export const AvailableUserCards = ({
         <Button
           key="submit"
           type="submit"
-          label={i18n.t('Add Member')}
+          label={i18n.t('Save')}
           variant="brand"
           onClick={handleSubmit}
         />,
@@ -118,14 +127,9 @@ export const AvailableUserCards = ({
         selection={selection}
         onRowChange={updateSelection}
       >
-        <DataTableColumn
-          label={i18n.t('GitHub Username')}
-          primaryColumn
-          width="240"
-        >
+        <DataTableColumn label={i18n.t('GitHub Username')} primaryColumn>
           <UserTableCell />
         </DataTableColumn>
-        <DataTableColumn label={i18n.t('Full Name')} property="name" />
       </DataTable>
     </Modal>
   );

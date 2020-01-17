@@ -194,7 +194,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
             </h2>
             <Button
               key="addmember"
-              label="Add new member"
+              label={i18n.t('Add or Remove Member')}
               className={classNames('slds-button_outline-brand')}
               onClick={openAvailableUserModal}
             />
