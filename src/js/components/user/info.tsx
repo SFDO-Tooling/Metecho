@@ -107,7 +107,7 @@ const UserInfo = ({
       <ul>
         <li>
           <strong>{i18n.t('Dev Hub')}:</strong>{' '}
-          {user.is_devhub_enabled ? (
+          {user.is_devhub_enabled || user.devhub_username ? (
             <span className="slds-text-color_success">{i18n.t('Enabled')}</span>
           ) : (
             <>
@@ -161,7 +161,7 @@ const ConnectionInfo = ({ user }: { user: User }) => (
       <p className="slds-text-heading_small">
         {i18n.t('Connected to Salesforce')}
       </p>
-      {!user.is_devhub_enabled && (
+      {!(user.is_devhub_enabled || user.devhub_username) && (
         <p className="slds-text-color_weak slds-m-top_xx-small">
           <Icon
             assistiveText={{ label: i18n.t('Error') }}
@@ -266,7 +266,7 @@ const UserDropdown = () => {
               </div>
             </header>
             <div className="slds-p-vertical_small slds-p-horizontal_large">
-              {user.valid_token_for ? (
+              {user.valid_token_for || user.devhub_username ? (
                 <ConnectionInfo user={user} />
               ) : (
                 <ConnectToSalesforce toggleModal={setModalOpen} />
