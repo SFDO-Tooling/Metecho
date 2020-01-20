@@ -2,12 +2,18 @@ import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import DataTable from '@salesforce/design-system-react/components/data-table';
+import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
 import { GitHubUser } from '@/store/repositories/reducer';
+
+interface TableCellProps {
+  [key: string]: any;
+  item?: GitHubUser;
+}
 
 const UserCard = ({
   user,
@@ -17,15 +23,24 @@ const UserCard = ({
   removeUser: (user: GitHubUser) => void;
 }) => (
   <div
-    className="slds-size_1-of-1
-      slds-large-size_1-of-2
-      slds-p-around_x-small"
+    className="slds-col slds-size_1-of-1
+  slds-large-size_1-of-2 slds-p-around_x-small card-col"
   >
     <Card
-      bodyClassName="slds-card__body_inner"
-      icon={<Avatar imgSrc={user.avatar_url} size="x-small" />}
+      className="card-in-list"
+      icon={<Avatar imgSrc={user.avatar_url} size="small" />}
       heading={user.login}
-      headerActions={<Button label="Remove" onClick={() => removeUser(user)} />}
+      headerActions={
+        <Button
+          assistiveText={{ icon: 'Remove' }}
+          iconCategory="utility"
+          iconName="close"
+          iconSize="small"
+          iconVariant="border-filled"
+          variant="icon"
+          onClick={() => removeUser(user)}
+        />
+      }
     />
   </div>
 );
@@ -37,12 +52,32 @@ export const AssignedUserCards = ({
   users: GitHubUser[];
   removeUser: (user: GitHubUser) => void;
 }) => (
-  <ul>
+  <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
     {users.map((user) => (
       <UserCard key={user.id} user={user} removeUser={removeUser} />
     ))}
-  </ul>
+  </div>
 );
+
+const UserTableCell = ({ item, ...props }: TableCellProps) => {
+  /* istanbul ignore if */
+  if (!item) {
+    return null;
+  }
+  const { login } = item;
+  return (
+    <DataTableCell {...props} title={login} className="team-member-grid">
+      <Avatar
+        imgAlt={login}
+        imgSrc={item.avatar_url}
+        title={login}
+        size="small"
+      />
+      <span className="team-member-username">{login}</span>
+    </DataTableCell>
+  );
+};
+UserTableCell.displayName = DataTableCell.displayName;
 
 export const AvailableUserCards = ({
   allUsers,
@@ -70,7 +105,7 @@ export const AvailableUserCards = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      heading="Available users"
+      heading={i18n.t('Add or Remove People to This Project')}
       footer={[
         <Button
           key="cancel"
@@ -92,11 +127,9 @@ export const AvailableUserCards = ({
         selection={selection}
         onRowChange={updateSelection}
       >
-        <DataTableColumn
-          label="GitHub Username"
-          property="login"
-          primaryColumn
-        />
+        <DataTableColumn label={i18n.t('GitHub Username')} primaryColumn>
+          <UserTableCell />
+        </DataTableColumn>
       </DataTable>
     </Modal>
   );

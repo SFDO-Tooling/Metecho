@@ -184,23 +184,36 @@ const ProjectDetail = (props: RouteComponentProps) => {
           { name: project.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
+        sidebar={[
+          <div
+            key="addmember-section"
+            className="slds-m-bottom_medium add-member"
+          >
+            <h2 className="slds-text-heading_medium slds-p-bottom_small">
+              {i18n.t('Collaborators')}
+            </h2>
+            <Button
+              key="addmember"
+              label={i18n.t('Add or Remove Member')}
+              className={classNames('slds-button_outline-brand')}
+              onClick={openAvailableUserModal}
+            />
+          </div>,
+          <AvailableUserCards
+            key="availablemembers"
+            allUsers={repository.github_users}
+            users={project.github_users}
+            isOpen={assignUsersModalOpen}
+            onRequestClose={closeAvailableUserModal}
+            setUsers={setProjectUsers}
+          />,
+          <AssignedUserCards
+            key="addedmembers"
+            users={project.github_users}
+            removeUser={removeUser}
+          />,
+        ]}
       >
-        <Button
-          label="Add new member"
-          className={classNames('slds-size_full slds-m-bottom_x-large')}
-          onClick={openAvailableUserModal}
-        />
-        <AvailableUserCards
-          allUsers={repository.github_users}
-          users={project.github_users}
-          isOpen={assignUsersModalOpen}
-          onRequestClose={closeAvailableUserModal}
-          setUsers={setProjectUsers}
-        />
-        <AssignedUserCards
-          users={project.github_users}
-          removeUser={removeUser}
-        />
         {submitButton}
         {tasks ? (
           <>

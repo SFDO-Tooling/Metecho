@@ -233,7 +233,7 @@ describe('<ProjectDetail/>', () => {
 
       fireEvent.click(getByText('Add new member'));
       fireEvent.click(getByText('TestGitHubUser'));
-      fireEvent.click(getByText('Save'));
+      fireEvent.click(getByText('Add Member'));
 
       expect(queryByText('GitHub Username')).toBeNull();
       expect(setUsersOnProject).toHaveBeenCalled();
