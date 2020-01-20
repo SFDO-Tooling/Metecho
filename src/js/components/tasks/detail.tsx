@@ -259,7 +259,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={[
           <TaskStatusPath key="status" task={task} />,
-          <TaskStatusSteps key="steps" status={task.status} />,
+          <TaskStatusSteps key="steps" task={task} />,
         ]}
       >
         {primaryButton}
