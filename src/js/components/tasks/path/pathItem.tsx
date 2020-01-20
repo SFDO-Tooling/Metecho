@@ -18,18 +18,22 @@ const PathItem = ({
   stepIndex,
 }: PathItemProps) => {
   const itemComplete = _.includes(previousSteps, stepIndex);
-  const classes = classNames(
-    activeStep ? ['slds-is-current', 'slds-is-active'] : 'slds-is-incomplete',
-    activeStep === lastIndex ? 'slds-is-complete' : null,
-    itemComplete ? 'ms-path-checked' : null,
-  );
+  const isMerged = lastIndex === stepIndex && activeStep;
+  const isActiveStep =
+    activeStep && !isMerged
+      ? ['slds-is-current', 'slds-is-active']
+      : 'slds-is-incomplete';
+  const activeClasses = isMerged
+    ? ['slds-is-complete', 'ms-task-status-complete']
+    : isActiveStep;
   return (
     <li
       className={classNames(
         'ms-task-status-path__item',
         'slds-path__item',
         'slds-is-incomplete',
-        classes,
+        activeClasses,
+        itemComplete ? 'ms-path-checked' : null,
       )}
       role="presentation"
     >
