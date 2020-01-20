@@ -5,6 +5,7 @@ import React from 'react';
 interface TaskStatusPathProps {
   status: string;
 }
+
 const TaskStatusSteps = ({ status }: TaskStatusPathProps) => {
   const steps = [
     {
@@ -40,15 +41,16 @@ const TaskStatusSteps = ({ status }: TaskStatusPathProps) => {
   ];
 
   return (
-    <RadioGroup label="Next Staps" disabled={false} name="steps">
+    <RadioGroup labels={{ label: 'Next Steps' }} disabled={false} name="steps">
       {steps.map(({ label, step, key }) => (
         <Radio
           key={key}
           id={key}
           labels={{ label }}
           value={key}
-          checked={status === step}
+          checked={step === status}
           variant="base"
+          status={status}
         />
       ))}
     </RadioGroup>
