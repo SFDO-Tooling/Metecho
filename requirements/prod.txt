@@ -20,6 +20,7 @@ chardet==3.0.4            # via cumulusci, requests
 click==7.0                # via cumulusci, rq
 coloredlogs==10.0         # via cumulusci
 constantly==15.1.0        # via twisted
+croniter==0.3.31          # via rq-scheduler
 cryptography==2.8         # via autobahn, cumulusci, jwcrypto, pyopenssl, requests, secretstorage, service-identity
 cumulusci==3.5.1
 daphne==2.3.0             # via channels
@@ -68,7 +69,8 @@ pycparser==2.19           # via cffi, cumulusci
 pyhamcrest==1.9.0         # via twisted
 pyjwt==1.7.1              # via cumulusci
 pyopenssl==19.1.0
-python-dateutil==2.8.1    # via cumulusci, faker, github3-py, github3.py
+python-dateutil==2.8.1    # via croniter, cumulusci, faker, github3-py, github3.py
+python-http-client==3.2.1  # via sendgrid
 python3-openid==3.1.0     # via django-allauth
 pytz==2019.3              # via cumulusci, django
 pyyaml==5.3               # via cumulusci
@@ -79,12 +81,15 @@ requests[security]==2.22.0  # via cumulusci, django-allauth, github3-py, github3
 robotframework-lint==1.0  # via cumulusci
 robotframework-seleniumlibrary==4.1.0  # via cumulusci
 robotframework==3.1.2     # via cumulusci, robotframework-lint, robotframework-seleniumlibrary
-rq==1.1.0                 # via django-rq
+rq-scheduler==0.9.1
+rq==1.1.0                 # via django-rq, rq-scheduler
 rst2ansi==0.1.5           # via cumulusci
 salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
 secretstorage==3.1.1      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
+sendgrid-django==4.2.0
+sendgrid==3.6.5           # via sendgrid-django
 sentry-sdk==0.14.0
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/master.tar.gz
