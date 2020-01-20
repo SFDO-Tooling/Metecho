@@ -1,0 +1,13 @@
+.slds-radio {
+  &.is-next {
+    .slds-radio_faux {
+      border: 4px solid $brand-accessible-active;
+    }
+  }
+  &.is-done {
+    .slds-radio_faux {
+      border: none;
+      background: $brand-primary-transparent-40;
+    }
+  }
+}
