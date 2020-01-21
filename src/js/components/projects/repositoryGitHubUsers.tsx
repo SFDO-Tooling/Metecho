@@ -27,7 +27,7 @@ const UserCard = ({
   slds-large-size_1-of-2 slds-p-around_x-small card-col"
   >
     <Card
-      className="card-in-list"
+      className="team-member-card"
       icon={<Avatar imgSrc={user.avatar_url} size="small" />}
       heading={user.login}
       headerActions={
