@@ -1,6 +1,6 @@
-import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import classNames from 'classnames';
+import i18n from 'i18next';
+import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 
 import { Task } from '@/store/tasks/reducer';
@@ -11,13 +11,13 @@ interface TaskStatusPathProps {
 }
 
 const TaskStatusSteps = ({ task }: TaskStatusPathProps) => {
-  const [completedSteps, setcompletedSteps] = useState([]);
-  const [nextSteps, setNextSteps] = useState([]);
+  const [completedSteps, setcompletedSteps] = useState<number[]>([]);
+  const [nextSteps, setNextSteps] = useState<number[]>([]);
 
   useEffect(() => {
-    const inProgressDone = task.has_unmerged_commits ? [0, 1] : [0, 1, 2, 3]; // @todo this one might be wrong
+    const inProgressDone = task.has_unmerged_commits ? [0, 1] : [0, 1, 2, 3];
     const inProgressNext = task.has_unmerged_commits ? [3] : [4];
-    let done, next;
+    let done: number[], next: number[];
     switch (task.status) {
       case TASK_STATUSES.PLANNED:
         done = [];
@@ -36,38 +36,41 @@ const TaskStatusSteps = ({ task }: TaskStatusPathProps) => {
     setNextSteps(next);
   }, [task]);
   const steps = [
-    'Assign developer',
-    'Assign reviewer',
-    'Create a Scratch Org for development',
-    'Capture task changes',
-    'Submit task changes for review',
-    'Create a QA Org for development',
+    `${i18n.t('Assign developer')}`,
+    `${i18n.t('Assign reviewer')}`,
+    `${i18n.t('Create a Scratch Org for development')}`,
+    `${i18n.t('Capture task changes')}`,
+    `${i18n.t('Submit task changes for review')}`,
+    `${i18n.t('Create a QA Org for development')}`,
   ];
   // @todo render different steps for login as dev or reviewer
 
-  console.log(completedSteps, nextSteps);
   return (
-    <RadioGroup labels={{ label: 'Next Steps' }} disabled={false} name="steps">
+    <>
+      <h3>Next Steps</h3>
       {steps.map((item, index) => {
         const stepIsNext = _.includes(nextSteps, index);
         const stepIsComplete = _.includes(completedSteps, index);
-        const checkedStatus = classNames({
+        const statusClass = {
           'is-next': stepIsNext,
           'is-done': stepIsComplete,
-        });
+        };
+
         return (
-          <Radio
-            key={index}
-            id={item}
-            labels={{ label: item }}
-            value={item}
-            variant="base"
-            status={task.status}
-            className={checkedStatus}
-          />
+          <div className="ms-task-step " key={index}>
+            {/* @todo make this an icon if done */}
+            <span
+              className={classNames(
+                'ms-task-step-status',
+                'slds-m-right_medium',
+                statusClass,
+              )}
+            />
+            <span>{item}</span>
+          </div>
         );
       })}
-    </RadioGroup>
+    </>
   );
 };
 
