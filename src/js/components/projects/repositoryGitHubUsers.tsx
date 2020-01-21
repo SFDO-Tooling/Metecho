@@ -6,7 +6,7 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { GitHubUser } from '@/store/repositories/reducer';
 
@@ -20,25 +20,35 @@ const UserCard = ({
   removeUser,
 }: {
   user: GitHubUser;
-  removeUser: (user: GitHubUser) => void;
+  removeUser: () => void;
 }) => (
   <div
-    className="slds-col slds-size_1-of-1
-  slds-large-size_1-of-2 slds-p-around_x-small card-col"
+    className="slds-size_1-of-1
+      slds-large-size_1-of-2
+      slds-p-around_x-small"
   >
     <Card
+      bodyClassName="slds-card__body_inner"
       className="team-member-card"
-      icon={<Avatar imgSrc={user.avatar_url} size="small" />}
+      icon={
+        <Avatar
+          imgAlt={user.login}
+          imgSrc={user.avatar_url}
+          title={user.login}
+          size="small"
+        />
+      }
       heading={user.login}
       headerActions={
         <Button
-          assistiveText={{ icon: 'Remove' }}
+          assistiveText={{ icon: i18n.t('Remove') }}
           iconCategory="utility"
           iconName="close"
           iconSize="small"
           iconVariant="border-filled"
           variant="icon"
-          onClick={() => removeUser(user)}
+          title={i18n.t('Remove')}
+          onClick={removeUser}
         />
       }
     />
@@ -53,9 +63,10 @@ export const AssignedUserCards = ({
   removeUser: (user: GitHubUser) => void;
 }) => (
   <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
-    {users.map((user) => (
-      <UserCard key={user.id} user={user} removeUser={removeUser} />
-    ))}
+    {users.map((user) => {
+      const doRemoveUser = () => removeUser(user);
+      return <UserCard key={user.id} user={user} removeUser={doRemoveUser} />;
+    })}
   </div>
 );
 
@@ -79,20 +90,33 @@ const UserTableCell = ({ item, ...props }: TableCellProps) => {
 };
 UserTableCell.displayName = DataTableCell.displayName;
 
-export const AvailableUserCards = ({
+export const AssignUsersModal = ({
   allUsers,
   users,
+  projectName,
   isOpen,
   onRequestClose,
   setUsers,
 }: {
   allUsers: GitHubUser[];
   users: GitHubUser[];
+  projectName: string;
   isOpen: boolean;
   onRequestClose: () => void;
   setUsers: (users: GitHubUser[]) => void;
 }) => {
   const [selection, setSelection] = useState(users);
+
+  // When selected users change, update row selection
+  useEffect(() => {
+    setSelection(users);
+  }, [users]);
+
+  // When modal is canceled, reset row selection
+  const handleClose = () => {
+    setSelection(users);
+    onRequestClose();
+  };
   const updateSelection = (
     event: React.ChangeEvent<HTMLInputElement>,
     data: { selection: GitHubUser[] },
@@ -104,14 +128,10 @@ export const AvailableUserCards = ({
   return (
     <Modal
       isOpen={isOpen}
-      onRequestClose={onRequestClose}
-      heading={i18n.t('Add or Remove People to This Project')}
+      size="small"
+      heading={`${i18n.t('Add or Remove Collaborators for')} ${projectName}`}
       footer={[
-        <Button
-          key="cancel"
-          label={i18n.t('Cancel')}
-          onClick={onRequestClose}
-        />,
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
         <Button
           key="submit"
           type="submit"
@@ -120,14 +140,21 @@ export const AvailableUserCards = ({
           onClick={handleSubmit}
         />,
       ]}
+      onRequestClose={handleClose}
     >
       <DataTable
         items={allUsers}
         selectRows="checkbox"
         selection={selection}
         onRowChange={updateSelection}
+        noRowHover
       >
-        <DataTableColumn label={i18n.t('GitHub Username')} primaryColumn>
+        <DataTableColumn
+          label={i18n.t('GitHub Username')}
+          property="login"
+          primaryColumn
+          truncate
+        >
           <UserTableCell />
         </DataTableColumn>
       </DataTable>

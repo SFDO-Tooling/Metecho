@@ -1,11 +1,11 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import { AvailableUserCards } from '@/components/projects/repositoryGitHubUsers';
+import { AssignUsersModal } from '@/components/projects/repositoryGitHubUsers';
 
 import { renderWithRedux } from './../../utils';
 
-describe('AvailableUserCards', () => {
+describe('AssignUsersModal', () => {
   test('responds to checkbox clicks', () => {
     const setUsers = jest.fn();
     const allUsers = [
@@ -16,7 +16,7 @@ describe('AvailableUserCards', () => {
       },
     ];
     const { getAllByRole } = renderWithRedux(
-      <AvailableUserCards
+      <AssignUsersModal
         allUsers={allUsers}
         users={[]}
         isOpen={true}

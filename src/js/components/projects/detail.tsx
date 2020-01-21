@@ -10,7 +10,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import FourOhFour from '@/components/404';
 import {
   AssignedUserCards,
-  AvailableUserCards,
+  AssignUsersModal,
 } from '@/components/projects/repositoryGitHubUsers';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
@@ -27,8 +27,9 @@ import {
 } from '@/components/utils';
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
-import { setUsersOnProject } from '@/store/projects/actions';
+import { updateObject } from '@/store/actions';
 import { GitHubUser } from '@/store/repositories/reducer';
+import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -52,30 +53,36 @@ const ProjectDetail = (props: RouteComponentProps) => {
         return;
       }
       dispatch(
-        setUsersOnProject({
-          ...project,
-          // eslint-disable-next-line @typescript-eslint/camelcase
-          github_users: users,
+        updateObject({
+          objectType: OBJECT_TYPES.PROJECT,
+          data: {
+            ...project,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            github_users: users,
+          },
         }),
       );
       setAssignUsersModalOpen(false);
     },
     [project, dispatch],
   );
-  const removeUser = useCallback(
+  const removeProjectUser = useCallback(
     (user: GitHubUser) => {
       /* istanbul ignore if */
       if (!project) {
         return;
       }
       const users = project.github_users.filter(
-        (possibleUser: GitHubUser) => user.id !== possibleUser.id,
+        (possibleUser) => user.id !== possibleUser.id,
       );
       dispatch(
-        setUsersOnProject({
-          ...project,
-          // eslint-disable-next-line @typescript-eslint/camelcase
-          github_users: users,
+        updateObject({
+          objectType: OBJECT_TYPES.PROJECT,
+          data: {
+            ...project,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            github_users: users,
+          },
         }),
       );
     },
@@ -184,35 +191,32 @@ const ProjectDetail = (props: RouteComponentProps) => {
           { name: project.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
-        sidebar={[
-          <div
-            key="addmember-section"
-            className="slds-m-bottom_medium add-member"
-          >
-            <h2 className="slds-text-heading_medium slds-p-bottom_small">
-              {i18n.t('Collaborators')}
-            </h2>
-            <Button
-              key="addmember"
-              label={i18n.t('Add or Remove Member')}
-              className={classNames('slds-button_outline-brand')}
-              onClick={openAvailableUserModal}
+        sidebar={
+          <>
+            <div className="slds-m-bottom_medium add-member">
+              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                {i18n.t('Collaborators')}
+              </h2>
+              <Button
+                label={i18n.t('Add or Remove Collaborators')}
+                variant="outline-brand"
+                onClick={openAvailableUserModal}
+              />
+            </div>
+            <AssignUsersModal
+              allUsers={repository.github_users}
+              users={project.github_users}
+              projectName={project.name}
+              isOpen={assignUsersModalOpen}
+              onRequestClose={closeAvailableUserModal}
+              setUsers={setProjectUsers}
             />
-          </div>,
-          <AvailableUserCards
-            key="availablemembers"
-            allUsers={repository.github_users}
-            users={project.github_users}
-            isOpen={assignUsersModalOpen}
-            onRequestClose={closeAvailableUserModal}
-            setUsers={setProjectUsers}
-          />,
-          <AssignedUserCards
-            key="addedmembers"
-            users={project.github_users}
-            removeUser={removeUser}
-          />,
-        ]}
+            <AssignedUserCards
+              users={project.github_users}
+              removeUser={removeProjectUser}
+            />
+          </>
+        }
       >
         {submitButton}
         {tasks ? (
