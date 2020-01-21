@@ -27,6 +27,7 @@ daphne==2.3.0             # via channels
 defusedxml==0.6.0         # via python3-openid
 dj-database-url==0.5.0
 django-allauth==0.41.0
+django-anymail[mailgun]==7.0.0
 django-filter==2.2.0
 django-filters==0.2.1
 django-hashid-field==3.1.1
@@ -70,14 +71,13 @@ pyhamcrest==1.9.0         # via twisted
 pyjwt==1.7.1              # via cumulusci
 pyopenssl==19.1.0
 python-dateutil==2.8.1    # via croniter, cumulusci, faker, github3-py, github3.py
-python-http-client==3.2.1  # via sendgrid
 python3-openid==3.1.0     # via django-allauth
 pytz==2019.3              # via cumulusci, django
 pyyaml==5.3               # via cumulusci
 raven==6.10.0             # via cumulusci
 redis==3.3.11             # via django-redis, django-rq, rq
 requests-oauthlib==1.2.0  # via django-allauth
-requests[security]==2.22.0  # via cumulusci, django-allauth, github3-py, github3.py, requests-oauthlib, salesforce-bulk, simple-salesforce
+requests[security]==2.22.0  # via cumulusci, django-allauth, django-anymail, github3-py, github3.py, requests-oauthlib, salesforce-bulk, simple-salesforce
 robotframework-lint==1.0  # via cumulusci
 robotframework-seleniumlibrary==4.1.0  # via cumulusci
 robotframework==3.1.2     # via cumulusci, robotframework-lint, robotframework-seleniumlibrary
@@ -88,13 +88,11 @@ salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
 secretstorage==3.1.1      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sendgrid-django==4.2.0
-sendgrid==3.6.5           # via sendgrid-django
 sentry-sdk==0.14.0
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/master.tar.gz
 simple-salesforce==0.74.2
-six==1.13.0               # via autobahn, automat, bleach, cryptography, cumulusci, django-parler, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
+six==1.13.0               # via autobahn, automat, bleach, cryptography, cumulusci, django-anymail, django-parler, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
 sqlalchemy==1.3.12        # via cumulusci
 sqlparse==0.3.0           # via django
 terminaltables==3.1.0     # via cumulusci

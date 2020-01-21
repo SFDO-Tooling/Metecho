@@ -136,6 +136,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "parler",
+    "anymail",
     "metashare",
     "metashare.multisalesforce",
     "metashare.api",
@@ -269,11 +270,14 @@ USE_TZ = True
 
 # Email settings
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@metashare.org")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    EMAIL_BACKEND = "sgbackend.SendGridBackend"
-    SENDGRID_API_KEY = env("SENDGRID_API_KEY")
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+    ANYMAIL = {
+        "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=""),
+    }
 
 
 # Static files (CSS, JavaScript, Images)
