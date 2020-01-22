@@ -5,14 +5,12 @@ import { StaticRouter } from 'react-router-dom';
 import TaskDetail from '@/components/tasks/detail';
 import { fetchObjects } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
-import { setUsersOnTask } from '@/store/tasks/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
-jest.mock('@/store/tasks/actions');
 
 fetchObjects.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
@@ -20,12 +18,10 @@ fetchObjects.mockReturnValue(() =>
 refetchOrg.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
-setUsersOnTask.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObjects.mockClear();
   refetchOrg.mockClear();
-  setUsersOnTask.mockClear();
 });
 
 const defaultState = {
@@ -43,13 +39,6 @@ const defaultState = {
         old_slugs: [],
         description: 'This is a test repository.',
         repo_url: 'https://github.com/test/test-repo',
-        github_users: [
-          {
-            id: '123456',
-            login: 'TestGitHubUser',
-            avatar_url: 'https://example.com/avatar.png',
-          },
-        ],
       },
     ],
     notFound: ['different-repository'],
@@ -65,13 +54,6 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           old_slugs: [],
-          github_users: [
-            {
-              id: '123456',
-              login: 'TestGitHubUser',
-              avatar_url: 'https://example.com/avatar.png',
-            },
-          ],
         },
       ],
       next: null,
@@ -90,7 +72,6 @@ const defaultState = {
         description: 'Task Description',
         has_unmerged_commits: false,
         commits: [],
-        github_users: [],
       },
     ],
   },
@@ -108,7 +89,6 @@ const defaultState = {
         url: '/test/org/url/',
         unsaved_changes: { Foo: ['Bar'] },
         has_unsaved_changes: true,
-        github_users: [],
       },
       QA: null,
     },
@@ -186,95 +166,6 @@ describe('<TaskDetail/>', () => {
 
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByText('View Pull Request')).toBeVisible();
-  });
-
-  describe('Toggle available users modal', () => {
-    test('openAvailableUserModal', () => {
-      const { getByText } = setup();
-
-      fireEvent.click(getByText('Add new member'));
-
-      expect(getByText('GitHub Username')).toBeVisible();
-    });
-
-    test('closeAvailableUserModal', () => {
-      const { getByText, queryByText } = setup();
-
-      fireEvent.click(getByText('Add new member'));
-      fireEvent.click(getByText('Cancel'));
-
-      expect(queryByText('GitHub Username')).toBeNull();
-    });
-  });
-
-  describe('Change task assigned users', () => {
-    test('setTaskUsers', () => {
-      const { getByText, queryByText } = setup();
-
-      fireEvent.click(getByText('Add new member'));
-      fireEvent.click(getByText('TestGitHubUser'));
-      fireEvent.click(getByText('Save'));
-
-      expect(queryByText('GitHub Username')).toBeNull();
-      expect(setUsersOnTask).toHaveBeenCalled();
-    });
-
-    test('removeUser', () => {
-      const { getByText } = setup({
-        initialState: {
-          ...defaultState,
-          tasks: {
-            project1: [
-              {
-                id: 'task1',
-                name: 'Task 1',
-                slug: 'task-1',
-                old_slugs: ['old-slug'],
-                project: 'project1',
-                description: 'Task Description',
-                has_unmerged_commits: false,
-                commits: [],
-                github_users: [
-                  {
-                    id: '123456',
-                    login: 'TestGitHubUser',
-                    avatar_url: 'https://example.com/avatar.png',
-                  },
-                ],
-              },
-            ],
-          },
-          orgs: {
-            task1: {
-              Dev: {
-                id: 'org-id',
-                task: 'task1',
-                org_type: 'Dev',
-                owner: 'user-id',
-                expires_at: '2019-09-16T12:58:53.721Z',
-                latest_commit: '617a51',
-                latest_commit_url: '/test/commit/url/',
-                latest_commit_at: '2019-08-16T12:58:53.721Z',
-                url: '/test/org/url/',
-                unsaved_changes: { Foo: ['Bar'] },
-                has_unsaved_changes: true,
-                github_users: [
-                  {
-                    id: '123456',
-                    login: 'TestGitHubUser',
-                    avatar_url: 'https://example.com/avatar.png',
-                  },
-                ],
-              },
-              QA: null,
-            },
-          },
-        },
-      });
-
-      fireEvent.click(getByText('Remove'));
-      expect(setUsersOnTask).toHaveBeenCalled();
-    });
   });
 
   describe('tasks not found', () => {

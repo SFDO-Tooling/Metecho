@@ -1,5 +1,3 @@
-import fetchMock from 'fetch-mock';
-
 import * as actions from '@/store/tasks/actions';
 
 import { storeWithThunk } from './../../utils';
@@ -9,50 +7,6 @@ describe('updateTask', () => {
     const expected = { type: 'TASK_UPDATE', payload: {} };
 
     expect(actions.updateTask({})).toEqual(expected);
-  });
-});
-
-describe('setUsersOnTask', () => {
-  test('PUTs to API', async () => {
-    const store = storeWithThunk({});
-    const task = {
-      id: 'task-id',
-      name: 'My Task',
-      github_users: [
-        {
-          id: '123456',
-          login: 'TestGitHubUser',
-          avatar_url: 'https://example.com/avatar.png',
-        },
-      ],
-    };
-    const action = {
-      type: 'TASK_UPDATE',
-      payload: task,
-    };
-    fetchMock.putOnce(window.api_urls.task_detail(task.id), task);
-    await store.dispatch(actions.setUsersOnTask(task));
-    const allActions = store.getActions();
-
-    expect(allActions[0]).toEqual(action);
-  });
-  test('logs an error if an error happens', () => {
-    const store = storeWithThunk({});
-    const task = {
-      id: 'task-id',
-      name: 'My Task',
-      github_users: [
-        {
-          id: '123456',
-          login: 'TestGitHubUser',
-          avatar_url: 'https://example.com/avatar.png',
-        },
-      ],
-    };
-    fetchMock.putOnce(window.api_urls.task_detail(task.id), 500);
-    return store.dispatch(actions.setUsersOnTask(task)).catch(() => {
-      expect(window.console.error).toHaveBeenCalled();
-    });
   });
 });
 
