@@ -160,9 +160,6 @@ class TaskSerializer(serializers.ModelSerializer):
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
-    assignee = HashidPrimaryKeyRelatedField(
-        queryset=User.objects.all(), allow_null=True
-    )
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -174,7 +171,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "project",
-            "assignee",
             "slug",
             "old_slugs",
             "has_unmerged_commits",
@@ -185,7 +181,8 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_url",
             "status",
             "pr_is_open",
-            "github_users",
+            "assigned_dev",
+            "assigned_qa",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

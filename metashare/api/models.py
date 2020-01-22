@@ -378,13 +378,6 @@ class Task(
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    assignee = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="assigned_tasks",
-    )
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
@@ -399,13 +392,14 @@ class Task(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
 
-    # User data is shaped like this:
+    # Assignee user data is shaped like this:
     #   {
     #     "id": str,
     #     "login": str,
     #     "avatar_url": str,
     #   }
-    github_users = JSONField(default=list, blank=True)
+    assigned_dev = JSONField(default=dict, blank=True,)
+    assigned_qa = JSONField(default=dict, blank=True,)
 
     slug_class = TaskSlug
 
