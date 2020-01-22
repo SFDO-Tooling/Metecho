@@ -11,11 +11,19 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RemoveField(model_name="task", name="assignee",),
         migrations.AddField(
             model_name="task",
-            name="github_users",
+            name="assigned_dev",
             field=django.contrib.postgres.fields.jsonb.JSONField(
-                blank=True, default=list
+                blank=True, default=dict
+            ),
+        ),
+        migrations.AddField(
+            model_name="task",
+            name="assigned_qa",
+            field=django.contrib.postgres.fields.jsonb.JSONField(
+                blank=True, default=dict
             ),
         ),
     ]

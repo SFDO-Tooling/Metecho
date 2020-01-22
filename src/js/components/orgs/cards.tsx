@@ -379,7 +379,7 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
         <OrgCard
           orgs={orgs}
           type={ORG_TYPES.DEV}
-          displayType={i18n.t('Dev')}
+          displayType={i18n.t('Developer')}
           userId={user && user.id}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
@@ -390,7 +390,7 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
         <OrgCard
           orgs={orgs}
           type={ORG_TYPES.QA}
-          displayType={i18n.t('QA')}
+          displayType={i18n.t('Reviewer')}
           userId={user && user.id}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}

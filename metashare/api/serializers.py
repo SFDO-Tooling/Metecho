@@ -192,7 +192,6 @@ class TaskSerializer(serializers.ModelSerializer):
                     "name", _("A task with this name already exists.")
                 ),
             ),
-            GitHubUserValidator(parent="project"),
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
