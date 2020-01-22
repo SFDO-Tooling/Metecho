@@ -143,7 +143,7 @@ const reducer = (
       let maybeProject;
       if (action.type === 'PROJECT_UPDATE') {
         maybeProject = action.payload;
-      } else if (action.type === 'UPDATE_OBJECT_SUCCEEDED') {
+      } else {
         const {
           object,
           objectType,
@@ -152,6 +152,7 @@ const reducer = (
           maybeProject = object;
         }
       }
+      /* istanbul ignore if */
       if (!maybeProject) {
         return projects;
       }

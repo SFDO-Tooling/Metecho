@@ -3,23 +3,21 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
-import { fetchObject, fetchObjects } from '@/store/actions';
-import { setUsersOnProject } from '@/store/projects/actions';
+import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
-jest.mock('@/store/projects/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-setUsersOnProject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
-  setUsersOnProject.mockClear();
+  updateObject.mockClear();
 });
 
 const defaultState = {
@@ -209,18 +207,12 @@ describe('<ProjectDetail/>', () => {
   });
 
   describe('Toggle available users modal', () => {
-    test('openAvailableUserModal', () => {
-      const { getByText } = setup();
-
-      fireEvent.click(getByText('Add new member'));
+    test('opens and closes', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Add or Remove Collaborators'));
 
       expect(getByText('GitHub Username')).toBeVisible();
-    });
 
-    test('closeAvailableUserModal', () => {
-      const { getByText, queryByText } = setup();
-
-      fireEvent.click(getByText('Add new member'));
       fireEvent.click(getByText('Cancel'));
 
       expect(queryByText('GitHub Username')).toBeNull();
@@ -230,30 +222,24 @@ describe('<ProjectDetail/>', () => {
   describe('Change project assigned users', () => {
     test('setProjectUsers', () => {
       const { getByText, queryByText } = setup();
-
-      fireEvent.click(getByText('Add new member'));
+      fireEvent.click(getByText('Add or Remove Collaborators'));
       fireEvent.click(getByText('TestGitHubUser'));
-      fireEvent.click(getByText('Add Member'));
+      fireEvent.click(getByText('Save'));
 
       expect(queryByText('GitHub Username')).toBeNull();
-      expect(setUsersOnProject).toHaveBeenCalled();
+      expect(updateObject).toHaveBeenCalled();
     });
-    // TODO: How do you test if project missing?
 
     test('removeUser', () => {
-      const { getByText } = setup({
+      const { getByTitle } = setup({
         initialState: {
           ...defaultState,
           projects: {
             r1: {
+              ...defaultState.projects.r1,
               projects: [
                 {
-                  id: 'project1',
-                  slug: 'project-1',
-                  name: 'Project 1',
-                  repository: 'r1',
-                  description: 'Project Description',
-                  old_slugs: ['old-slug'],
+                  ...defaultState.projects.r1.projects[0],
                   github_users: [
                     {
                       id: '123456',
@@ -263,16 +249,14 @@ describe('<ProjectDetail/>', () => {
                   ],
                 },
               ],
-              next: null,
-              notFound: ['different-project'],
-              fetched: true,
             },
           },
         },
       });
+      fireEvent.click(getByTitle('Remove'));
 
-      fireEvent.click(getByText('Remove'));
-      expect(setUsersOnProject).toHaveBeenCalled();
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
     });
   });
 

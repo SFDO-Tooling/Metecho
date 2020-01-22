@@ -1,9 +1,7 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
 import { AssignUsersModal } from '@/components/projects/repositoryGitHubUsers';
-
-import { renderWithRedux } from './../../utils';
 
 describe('AssignUsersModal', () => {
   test('responds to checkbox clicks', () => {
@@ -15,7 +13,7 @@ describe('AssignUsersModal', () => {
         avatar_url: 'https://example.com/avatar.png',
       },
     ];
-    const { getAllByRole } = renderWithRedux(
+    const { getByText, getAllByLabelText } = render(
       <AssignUsersModal
         allUsers={allUsers}
         users={[]}
@@ -24,12 +22,9 @@ describe('AssignUsersModal', () => {
         setUsers={setUsers}
       />,
     );
-    // We click checkbox 1 because checkbox 0 is the "select all" checkbox in
-    // the header:
-    fireEvent.click(getAllByRole('checkbox')[1]);
-    // This is just the submit button. I don't know a better way to identify
-    // it?
-    fireEvent.click(getAllByRole('button')[2]);
+    fireEvent.click(getAllByLabelText('Select all rows')[1]);
+    fireEvent.click(getByText('Save'));
+
     expect(setUsers).toHaveBeenCalledWith(allUsers);
   });
 });
