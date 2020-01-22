@@ -401,7 +401,7 @@ class Task(
 
     # User data is shaped like this:
     #   {
-    #     "id": int,
+    #     "id": str,
     #     "login": str,
     #     "avatar_url": str,
     #   }
