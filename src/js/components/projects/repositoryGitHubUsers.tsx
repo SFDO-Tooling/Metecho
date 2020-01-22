@@ -123,7 +123,10 @@ export const AssignUsersModal = ({
   ) => {
     setSelection(data.selection);
   };
-  const handleSubmit = () => setUsers(selection);
+  const handleSubmit = () => {
+    setUsers([...selection]);
+    setSelection(users);
+  };
 
   return (
     <Modal
