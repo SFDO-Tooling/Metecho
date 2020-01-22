@@ -146,6 +146,7 @@ export const AssignUsersModal = ({
       onRequestClose={handleClose}
     >
       <DataTable
+        className="align-checkboxes"
         items={allUsers}
         selectRows="checkbox"
         selection={selection}
