@@ -1,0 +1,23 @@
+// Team Member
+// ===========
+
+// Add/Edit Team Members Modal
+// ---------------------------
+.team-member-grid {
+  > div {
+    align-items: center;
+    display: flex;
+  }
+}
+
+.team-member-username {
+  margin-left: $spacing-x-small;
+}
+
+// Assigned Team Member Cards
+// --------------------------
+.team-member-card {
+  h2 {
+    font-size: $font-size-3;
+  }
+}

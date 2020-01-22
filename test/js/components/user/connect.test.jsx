@@ -18,9 +18,24 @@ describe('<ConnectModal />', () => {
   };
 
   describe('login click', () => {
+    let location;
+
+    beforeAll(() => {
+      location = window.location;
+      delete window.location;
+      window.location = {
+        assign: jest.fn(),
+        pathname: location.pathname,
+        origin: location.origin,
+      };
+    });
+
+    afterAll(() => {
+      window.location = location;
+    });
+
     test('updates `window.location.href` on login click', () => {
       const { getAllByText } = setup();
-      jest.spyOn(window.location, 'assign');
       fireEvent.click(getAllByText('Connect to Salesforce')[1]);
       const base = window.api_urls.salesforce_production_login();
       const expected = addUrlParams(base, {
@@ -33,7 +48,21 @@ describe('<ConnectModal />', () => {
   });
 
   describe('CustomDomainForm', () => {
-    let result;
+    let result, location;
+
+    beforeAll(() => {
+      location = window.location;
+      delete window.location;
+      window.location = {
+        assign: jest.fn(),
+        pathname: location.pathname,
+        origin: location.origin,
+      };
+    });
+
+    afterAll(() => {
+      window.location = location;
+    });
 
     beforeEach(() => {
       result = setup();
@@ -59,7 +88,6 @@ describe('<ConnectModal />', () => {
     test('updates window.location.href on submit', () => {
       const { getByLabelText, getByText } = result;
 
-      jest.spyOn(window.location, 'assign');
       const input = getByLabelText('Custom Domain');
       fireEvent.change(input, { target: { value: ' ' } });
       fireEvent.click(getByText('Continue'));
