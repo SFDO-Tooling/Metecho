@@ -11,6 +11,8 @@ import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
 import CaptureModal from '@/components/orgs/capture';
 import OrgCards from '@/components/orgs/cards';
+import TaskStatusPath from '@/components/tasks/path';
+import TaskStatusSteps from '@/components/tasks/steps';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -33,9 +35,6 @@ import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { ORG_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
-
-import TaskStatusPath from './path';
-import TaskStatusSteps from './steps';
 
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
@@ -257,10 +256,12 @@ const TaskDetail = (props: RouteComponentProps) => {
           { name: task.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
-        sidebar={[
-          <TaskStatusPath key="status" task={task} />,
-          <TaskStatusSteps key="steps" task={task} />,
-        ]}
+        sidebar={
+          <>
+            <TaskStatusPath task={task} />
+            <TaskStatusSteps task={task} />
+          </>
+        }
       >
         {primaryButton}
         {secondaryButton}
