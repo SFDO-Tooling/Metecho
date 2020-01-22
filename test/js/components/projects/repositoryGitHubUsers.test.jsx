@@ -1,11 +1,9 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
-import { AvailableUserCards } from '@/components/projects/repositoryGitHubUsers';
+import { AssignUsersModal } from '@/components/projects/repositoryGitHubUsers';
 
-import { renderWithRedux } from './../../utils';
-
-describe('AvailableUserCards', () => {
+describe('AssignUsersModal', () => {
   test('responds to checkbox clicks', () => {
     const setUsers = jest.fn();
     const allUsers = [
@@ -15,8 +13,8 @@ describe('AvailableUserCards', () => {
         avatar_url: 'https://example.com/avatar.png',
       },
     ];
-    const { getAllByRole } = renderWithRedux(
-      <AvailableUserCards
+    const { getByText, getAllByLabelText } = render(
+      <AssignUsersModal
         allUsers={allUsers}
         users={[]}
         isOpen={true}
@@ -24,12 +22,9 @@ describe('AvailableUserCards', () => {
         setUsers={setUsers}
       />,
     );
-    // We click checkbox 1 because checkbox 0 is the "select all" checkbox in
-    // the header:
-    fireEvent.click(getAllByRole('checkbox')[1]);
-    // This is just the submit button. I don't know a better way to identify
-    // it?
-    fireEvent.click(getAllByRole('button')[2]);
+    fireEvent.click(getAllByLabelText('Select all rows')[1]);
+    fireEvent.click(getByText('Save'));
+
     expect(setUsers).toHaveBeenCalledWith(allUsers);
   });
 });

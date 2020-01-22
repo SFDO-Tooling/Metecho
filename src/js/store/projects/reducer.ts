@@ -138,8 +138,25 @@ const reducer = (
       }
       return projects;
     }
-    case 'PROJECT_UPDATE': {
-      const project = action.payload;
+    case 'PROJECT_UPDATE':
+    case 'UPDATE_OBJECT_SUCCEEDED': {
+      let maybeProject;
+      if (action.type === 'PROJECT_UPDATE') {
+        maybeProject = action.payload;
+      } else {
+        const {
+          object,
+          objectType,
+        }: { object: Project; objectType: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.PROJECT && object) {
+          maybeProject = object;
+        }
+      }
+      /* istanbul ignore if */
+      if (!maybeProject) {
+        return projects;
+      }
+      const project = maybeProject;
       const repositoryProjects = projects[project.repository] || {
         ...defaultState,
       };
