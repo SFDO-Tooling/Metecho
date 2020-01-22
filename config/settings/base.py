@@ -279,6 +279,9 @@ else:
         "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=""),
     }
 
+DAYS_BEFORE_ORG_EXPIRY_TO_ALERT = env(
+    "DAYS_BEFORE_ORG_EXPIRY_TO_ALERT", default=3, type_=int
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/

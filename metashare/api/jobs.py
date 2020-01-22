@@ -154,9 +154,11 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
 
     scheduler = get_scheduler("default")
-    a_day_before_expiry = scratch_org.expires_at - timedelta(days=1)
+    before_expiry = scratch_org.expires_at - timedelta(
+        days=settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
+    )
     scheduler.enqueue_at(
-        a_day_before_expiry, alert_user_about_expiring_org(scratch_org, user)
+        before_expiry, alert_user_about_expiring_org(scratch_org, user)
     )
 
 
