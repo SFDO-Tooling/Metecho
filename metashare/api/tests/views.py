@@ -44,6 +44,23 @@ def test_user_refresh_view(client):
 
 @pytest.mark.django_db
 class TestRepositoryView:
+    def test_refresh_github_users(
+        self, client, repository_factory, git_hub_repository_factory
+    ):
+        git_hub_repository_factory(user=client.user, repo_id=123)
+        repository = repository_factory(repo_id=123)
+        with patch(
+            "metashare.api.jobs.populate_github_users_job"
+        ) as populate_github_users_job:
+            response = client.post(
+                reverse(
+                    "repository-refresh-github-users", kwargs={"pk": str(repository.pk)}
+                )
+            )
+
+            assert response.status_code == 202
+            assert populate_github_users_job.delay.called
+
     def test_get_queryset(self, client, repository_factory, git_hub_repository_factory):
         git_hub_repository_factory(
             user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
@@ -71,6 +88,7 @@ class TestRepositoryView:
                     "repo_url": (
                         f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
                     ),
+                    "github_users": [],
                 }
             ],
         }
@@ -104,6 +122,7 @@ class TestRepositoryView:
                     "repo_url": (
                         f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
                     ),
+                    "github_users": [],
                 }
             ],
         }
