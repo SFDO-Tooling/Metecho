@@ -19,8 +19,14 @@ export const getOrgStatusMsg = (org: Org) => {
       });
     }
   }
-  return i18n.t('up-to-date');
+  const msg = {
+    Dev: i18n.t('up-to-date'),
+    QA: i18n.t('Review in MetaShare'), // @todo does this status message ever change? how are we telling if it is in review? (When a PR is open?)
+  };
+  return msg[org.org_type];
 };
+
+export const getQASyncStatus = () => 'Up to Date'; // @todo needToSync ? 'Behind latest: {# of commits}, {org comparison links}
 
 export const getOrgTotalChanges = (changes: Changeset) => {
   const totalChanges = Object.values(changes).flat().length;

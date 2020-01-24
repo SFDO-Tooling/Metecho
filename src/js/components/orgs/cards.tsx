@@ -3,7 +3,6 @@ import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import Modal from '@salesforce/design-system-react/components/modal';
-import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,7 +23,8 @@ import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
-import { getOrgStatusMsg } from '@/utils/helpers';
+
+import OrgContents from './content';
 
 interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
@@ -145,10 +145,14 @@ const OrgCard = ({
     footer = loadingMsg;
   } else if (org) {
     const orgUrl = window.api_urls.scratch_org_redirect(org.id);
-    const expiresAt = org.expires_at && new Date(org.expires_at);
     contents = (
       <ul>
-        {org.latest_commit && (
+        <OrgContents
+          org={org}
+          action={doRefreshAction}
+          ownedByCurrentUser={ownedByCurrentUser}
+        />
+        {/* {org.latest_commit && (
           <li>
             <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
             {org.latest_commit_url ? (
@@ -160,14 +164,7 @@ const OrgCard = ({
             )}
           </li>
         )}
-        {expiresAt && (
-          <li>
-            <strong>{i18n.t('Expires')}:</strong>{' '}
-            <span title={format(expiresAt, 'PPpp')}>
-              {formatDistanceToNow(expiresAt, { addSuffix: true })}
-            </span>
-          </li>
-        )}
+
         {type === ORG_TYPES.DEV && (
           <li>
             <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
@@ -182,7 +179,7 @@ const OrgCard = ({
               </>
             )}
           </li>
-        )}
+        )} */}
       </ul>
     );
     icon = (
