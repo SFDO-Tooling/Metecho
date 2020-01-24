@@ -3,6 +3,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import Modal from '@salesforce/design-system-react/components/modal';
+import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,18 +20,29 @@ import { ThunkDispatch } from '@/store';
 import { createObject, deleteObject } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
-import { Task } from '@/store/tasks/reducer';
+import { Commit, Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
-
-import OrgContents from './content';
+import { getOrgStatusMsg, getUnSyncedCommits } from '@/utils/helpers';
 
 interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
   [ORG_TYPES.QA]: boolean;
 }
 
+interface OrgCardProps {
+  orgs: OrgsByTask;
+  type: OrgTypes;
+  displayType: string;
+  userId: string | null;
+  isCreatingOrg: OrgTypeTracker;
+  isDeletingOrg: OrgTypeTracker;
+  commits?: Commit[];
+  createAction: (type: OrgTypes) => void;
+  deleteAction: (org: Org) => void;
+  refreshAction: (org: Org) => void;
+}
 const OrgTypeTrackerDefault = {
   [ORG_TYPES.DEV]: false,
   [ORG_TYPES.QA]: false,
@@ -94,23 +106,19 @@ const OrgCard = ({
   createAction,
   deleteAction,
   refreshAction,
-}: {
-  orgs: OrgsByTask;
-  type: OrgTypes;
-  displayType: string;
-  userId: string | null;
-  isCreatingOrg: OrgTypeTracker;
-  isDeletingOrg: OrgTypeTracker;
-  createAction: (type: OrgTypes) => void;
-  deleteAction: (org: Org) => void;
-  refreshAction: (org: Org) => void;
-}) => {
+  commits,
+}: OrgCardProps) => {
   const org = orgs[type];
   const ownedByCurrentUser = Boolean(
     userId && org && org.url && userId === org.owner,
   );
   const isCreating = isCreatingOrg[type] || (org && !org.url);
   const isDeleting = isDeletingOrg[type] || (org && org.delete_queued_at);
+  const canSyncDevOrg =
+    ownedByCurrentUser && org && org.org_type === ORG_TYPES.DEV;
+  const { QA, Dev } = orgs;
+  const isSynced = QA?.latest_commit === Dev?.latest_commit;
+
   const doCreateAction = useCallback(() => {
     createAction(type);
   }, [createAction, type]);
@@ -145,15 +153,13 @@ const OrgCard = ({
     footer = loadingMsg;
   } else if (org) {
     const orgUrl = window.api_urls.scratch_org_redirect(org.id);
+    const expiresAt = org.expires_at && new Date(org.expires_at);
     contents = (
       <ul>
-        <OrgContents
-          org={org}
-          action={doRefreshAction}
-          ownedByCurrentUser={ownedByCurrentUser}
-        />
-        {/* {org.latest_commit && (
+        {/* last commit status for dev org */}
+        {type === ORG_TYPES.DEV && (
           <li>
+            {' '}
             <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
             {org.latest_commit_url ? (
               <ExternalLink url={org.latest_commit_url}>
@@ -164,22 +170,46 @@ const OrgCard = ({
             )}
           </li>
         )}
-
-        {type === ORG_TYPES.DEV && (
+        {/* synced status for QA org */}
+        {type === ORG_TYPES.QA &&
+          (isSynced ? (
+            <strong>Up to Date</strong>
+          ) : (
+            <>
+              <strong>Behind Latest:</strong>{' '}
+              {commits && getUnSyncedCommits(commits, org)}
+              commits (
+              <ExternalLink url={org.latest_commit_url}>
+                org comparison
+              </ExternalLink>
+              )
+            </>
+          ))}
+        {/* expiation data for each org */}
+        {expiresAt && (
           <li>
-            <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
-            {ownedByCurrentUser && (
-              <>
-                {' | '}
-                <Button
-                  label={i18n.t('check again')}
-                  variant="link"
-                  onClick={doRefreshAction}
-                />
-              </>
-            )}
+            <strong>{i18n.t('Expires')}:</strong>{' '}
+            <span title={format(expiresAt, 'PPpp')}>
+              {formatDistanceToNow(expiresAt, {
+                addSuffix: true,
+              })}
+            </span>
           </li>
-        )} */}
+        )}
+        <li>
+          {/* status for orgs */}
+          <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
+          {canSyncDevOrg && (
+            <>
+              {' | '}
+              <Button
+                label={i18n.t('check again')}
+                variant="link"
+                onClick={doRefreshAction}
+              />
+            </>
+          )}
+        </li>
       </ul>
     );
     icon = (
@@ -394,6 +424,7 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
           createAction={createAction}
           deleteAction={deleteAction}
           refreshAction={doRefetchOrg}
+          commits={task.commits}
         />
       </div>
       <ConnectModal
