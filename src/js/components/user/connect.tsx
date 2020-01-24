@@ -112,13 +112,13 @@ const ConnectModal = ({
 
   return (
     <Modal
-      isOpen={isOpen && (ignoreConnection || !(user && user.valid_token_for))}
+      isOpen={isOpen && (ignoreConnection || !user?.valid_token_for)}
       heading={heading || i18n.t('Connect to Salesforce')}
       tagline={
         tagline || (
           <Trans i18nKey="devHubInfo">
             Connection to a Salesforce org with Dev Hub enabled is required to
-            create a Dev or QA scratch org. Learn how to{' '}
+            create a Dev or Review scratch org. Learn how to{' '}
             <ExternalLink url="https://developer.salesforce.com/signup">
               create a Developer Edition org
             </ExternalLink>{' '}

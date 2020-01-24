@@ -15,6 +15,15 @@ interface TableCellProps {
   item?: GitHubUser;
 }
 
+export const GitHubUserAvatar = ({ user }: { user: GitHubUser }) => (
+  <Avatar
+    imgAlt={user.login}
+    imgSrc={user.avatar_url}
+    title={user.login}
+    size="small"
+  />
+);
+
 const UserCard = ({
   user,
   removeUser,
@@ -30,14 +39,7 @@ const UserCard = ({
     <Card
       bodyClassName="slds-card__body_inner"
       className="team-member-card"
-      icon={
-        <Avatar
-          imgAlt={user.login}
-          imgSrc={user.avatar_url}
-          title={user.login}
-          size="small"
-        />
-      }
+      icon={<GitHubUserAvatar user={user} />}
       heading={user.login}
       headerActions={
         <Button
@@ -55,7 +57,7 @@ const UserCard = ({
   </div>
 );
 
-export const AssignedUserCards = ({
+export const UserCards = ({
   users,
   removeUser,
 }: {
@@ -78,12 +80,7 @@ const UserTableCell = ({ item, ...props }: TableCellProps) => {
   const { login } = item;
   return (
     <DataTableCell {...props} title={login} className="team-member-grid">
-      <Avatar
-        imgAlt={login}
-        imgSrc={item.avatar_url}
-        title={login}
-        size="small"
-      />
+      <GitHubUserAvatar user={item} />
       <span className="team-member-username">{login}</span>
     </DataTableCell>
   );

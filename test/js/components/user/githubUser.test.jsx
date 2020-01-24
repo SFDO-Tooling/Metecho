@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
-import { AssignUsersModal } from '@/components/projects/repositoryGitHubUsers';
+import { AssignUsersModal } from '@/components/user/githubUser';
 
 describe('AssignUsersModal', () => {
   test('responds to checkbox clicks', () => {

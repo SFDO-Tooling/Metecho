@@ -79,6 +79,11 @@ const defaultState = {
         project: 'project1',
         description: 'Task Description',
         status: 'In progress',
+        assigned_dev: {
+          id: '123456',
+          login: 'TestGitHubUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
       },
       {
         id: 'task3',

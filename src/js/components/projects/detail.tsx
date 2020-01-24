@@ -8,12 +8,9 @@ import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import {
-  AssignedUserCards,
-  AssignUsersModal,
-} from '@/components/projects/repositoryGitHubUsers';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
+import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -94,9 +91,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
   };
-  const currentlySubmitting = Boolean(project && project.currently_creating_pr);
+  const currentlySubmitting = Boolean(project?.currently_creating_pr);
   const readyToSubmit = Boolean(
-    project && project.has_unmerged_commits && !project.pr_is_open,
+    project?.has_unmerged_commits && !project?.pr_is_open,
   );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -211,7 +208,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               onRequestClose={closeAvailableUserModal}
               setUsers={setProjectUsers}
             />
-            <AssignedUserCards
+            <UserCards
               users={project.github_users}
               removeUser={removeProjectUser}
             />

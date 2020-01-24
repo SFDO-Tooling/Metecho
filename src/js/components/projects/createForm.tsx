@@ -35,8 +35,7 @@ const ProjectForm = ({ repository, startOpen = false, history }: Props) => {
     if (
       type === 'CREATE_OBJECT_SUCCEEDED' &&
       objectType === OBJECT_TYPES.PROJECT &&
-      object &&
-      object.slug
+      object?.slug
     ) {
       const url = routes.project_detail(repository.slug, object.slug);
       history.push(url);

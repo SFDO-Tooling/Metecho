@@ -398,8 +398,8 @@ class Task(
     #     "login": str,
     #     "avatar_url": str,
     #   }
-    assigned_dev = JSONField(default=dict, blank=True,)
-    assigned_qa = JSONField(default=dict, blank=True,)
+    assigned_dev = JSONField(null=True, blank=True)
+    assigned_qa = JSONField(null=True, blank=True)
 
     slug_class = TaskSlug
 

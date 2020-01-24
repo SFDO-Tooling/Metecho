@@ -15,15 +15,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="task",
             name="assigned_dev",
-            field=django.contrib.postgres.fields.jsonb.JSONField(
-                blank=True, default=dict
-            ),
+            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="task",
             name="assigned_qa",
-            field=django.contrib.postgres.fields.jsonb.JSONField(
-                blank=True, default=dict
-            ),
+            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True),
         ),
     ]

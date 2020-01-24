@@ -55,9 +55,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
 
   const readyToSubmit = Boolean(
-    task && task.has_unmerged_commits && !task.pr_is_open,
+    task?.has_unmerged_commits && !task?.pr_is_open,
   );
-  const currentlySubmitting = Boolean(task && task.currently_creating_pr);
+  const currentlySubmitting = Boolean(task?.currently_creating_pr);
   let currentlyFetching = false;
   let currentlyCommitting = false;
   let orgHasChanges = false;
@@ -65,10 +65,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   let devOrg: Org | null | undefined;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
-    orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
-    userIsOwner = Boolean(devOrg && devOrg.owner === user.id);
-    currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
-    currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
+    orgHasChanges = Boolean(devOrg?.has_unsaved_changes);
+    userIsOwner = devOrg?.owner === user.id;
+    currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
+    currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
   }
 
   // When capture changes has been triggered, wait until org has been refreshed

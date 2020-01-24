@@ -20,6 +20,7 @@ import { ThunkDispatch } from '@/store';
 import { createObject, deleteObject } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
+import { GitHubUser } from '@/store/repositories/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
@@ -84,11 +85,208 @@ const ConfirmDeleteModal = ({
   );
 };
 
+const OrgIcon = ({
+  org,
+  ownedByCurrentUser,
+  isCreating,
+  isDeleting,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  isCreating: boolean;
+  isDeleting: boolean;
+}) => {
+  if (org && !isCreating) {
+    const orgUrl = window.api_urls.scratch_org_redirect(org.id);
+    if (orgUrl && ownedByCurrentUser && !isDeleting) {
+      return (
+        <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
+          <Icon
+            category="utility"
+            name="link"
+            size="x-small"
+            className="icon-link slds-m-bottom_xxx-small"
+          />
+        </ExternalLink>
+      );
+    }
+    return (
+      <Icon
+        category="utility"
+        name="link"
+        size="x-small"
+        className="slds-m-bottom_xxx-small"
+      />
+    );
+  }
+  return null;
+};
+
+const OrgFooter = ({
+  org,
+  ownedByCurrentUser,
+  isCreating,
+  isDeleting,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  isCreating: boolean;
+  isDeleting: boolean;
+}) => {
+  const loadingMsg = i18n.t(
+    'This process could take a number of minutes. Feel free to leave this page and check back later.',
+  );
+  if (isCreating) {
+    return <>loadingMsg</>;
+  }
+  if (org) {
+    if (isDeleting) {
+      return (
+        <>
+          <SpinnerWrapper size="small" />
+          {i18n.t('Deleting Org…')}
+        </>
+      );
+    }
+    if (ownedByCurrentUser) {
+      if (org.currently_capturing_changes) {
+        return (
+          <>
+            <SpinnerWrapper size="small" />
+            {i18n.t('Capturing Selected Changes…')}
+            <div className="slds-p-top_small">{loadingMsg}</div>
+          </>
+        );
+      }
+      if (org.currently_refreshing_changes) {
+        return (
+          <>
+            <SpinnerWrapper size="small" />
+            {i18n.t('Checking for Uncaptured Changes…')}
+          </>
+        );
+      }
+      const orgUrl = window.api_urls.scratch_org_redirect(org.id);
+      /* istanbul ignore else */
+      // eslint-disable-next-line no-lonely-if
+      if (orgUrl) {
+        return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
+      }
+    }
+  }
+  return null;
+};
+
+const OrgActions = ({
+  org,
+  ownedByCurrentUser,
+  isCreating,
+  isDeleting,
+  doCreateAction,
+  doDeleteAction,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  isCreating: boolean;
+  isDeleting: boolean;
+  doCreateAction: () => void;
+  doDeleteAction: () => void;
+}) => {
+  if (isCreating) {
+    return (
+      <Button
+        label={<LabelWithSpinner label={i18n.t('Creating Org…')} />}
+        disabled
+      />
+    );
+  }
+  if (!org) {
+    return <Button label={i18n.t('Create Org')} onClick={doCreateAction} />;
+  }
+  if (ownedByCurrentUser && !isDeleting) {
+    return (
+      <Dropdown
+        align="right"
+        assistiveText={{ icon: 'Actions' }}
+        buttonClassName="slds-button_icon-x-small"
+        buttonVariant="icon"
+        iconCategory="utility"
+        iconName="down"
+        iconSize="small"
+        iconVariant="border-filled"
+        width="xx-small"
+        options={[{ id: 0, label: i18n.t('Delete') }]}
+        onSelect={doDeleteAction}
+      />
+    );
+  }
+  return null;
+};
+
+const OrgContents = ({
+  org,
+  ownedByCurrentUser,
+  isCreating,
+  isDev,
+  doRefreshAction,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  isCreating: boolean;
+  isDev: boolean;
+  doRefreshAction: () => void;
+}) => {
+  if (!org || isCreating) {
+    return null;
+  }
+  const expiresAt = org.expires_at && new Date(org.expires_at);
+  return (
+    <ul>
+      {org.latest_commit && (
+        <li>
+          <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
+          {org.latest_commit_url ? (
+            <ExternalLink url={org.latest_commit_url}>
+              {org.latest_commit.substring(0, 7)}
+            </ExternalLink>
+          ) : (
+            org.latest_commit.substring(0, 7)
+          )}
+        </li>
+      )}
+      {expiresAt && (
+        <li>
+          <strong>{i18n.t('Expires')}:</strong>{' '}
+          <span title={format(expiresAt, 'PPpp')}>
+            {formatDistanceToNow(expiresAt, { addSuffix: true })}
+          </span>
+        </li>
+      )}
+      {isDev && (
+        <li>
+          <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
+          {ownedByCurrentUser && (
+            <>
+              {' | '}
+              <Button
+                label={i18n.t('check again')}
+                variant="link"
+                onClick={doRefreshAction}
+              />
+            </>
+          )}
+        </li>
+      )}
+    </ul>
+  );
+};
+
 const OrgCard = ({
   orgs,
   type,
   displayType,
   userId,
+  assignedUser,
   isCreatingOrg,
   isDeletingOrg,
   createAction,
@@ -98,7 +296,8 @@ const OrgCard = ({
   orgs: OrgsByTask;
   type: OrgTypes;
   displayType: string;
-  userId: string | null;
+  userId?: string;
+  assignedUser: GitHubUser | null;
   isCreatingOrg: OrgTypeTracker;
   isDeletingOrg: OrgTypeTracker;
   createAction: (type: OrgTypes) => void;
@@ -107,10 +306,10 @@ const OrgCard = ({
 }) => {
   const org = orgs[type];
   const ownedByCurrentUser = Boolean(
-    userId && org && org.url && userId === org.owner,
+    userId && org?.url && userId === org.owner,
   );
-  const isCreating = isCreatingOrg[type] || (org && !org.url);
-  const isDeleting = isDeletingOrg[type] || (org && org.delete_queued_at);
+  const isCreating = Boolean(isCreatingOrg[type] || (org && !org.url));
+  const isDeleting = Boolean(isDeletingOrg[type] || org?.delete_queued_at);
   const doCreateAction = useCallback(() => {
     createAction(type);
   }, [createAction, type]);
@@ -127,138 +326,6 @@ const OrgCard = ({
     }
   }, [refreshAction, org]);
 
-  let contents = null;
-  let icon = null;
-  let actions = null;
-  let footer = null;
-  const loadingMsg = i18n.t(
-    'This process could take a number of minutes. Feel free to leave this page and check back later.',
-  );
-
-  if (isCreating) {
-    actions = (
-      <Button
-        label={<LabelWithSpinner label={i18n.t('Creating Org…')} />}
-        disabled
-      />
-    );
-    footer = loadingMsg;
-  } else if (org) {
-    const orgUrl = window.api_urls.scratch_org_redirect(org.id);
-    const expiresAt = org.expires_at && new Date(org.expires_at);
-    contents = (
-      <ul>
-        {org.latest_commit && (
-          <li>
-            <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
-            {org.latest_commit_url ? (
-              <ExternalLink url={org.latest_commit_url}>
-                {org.latest_commit.substring(0, 7)}
-              </ExternalLink>
-            ) : (
-              org.latest_commit.substring(0, 7)
-            )}
-          </li>
-        )}
-        {expiresAt && (
-          <li>
-            <strong>{i18n.t('Expires')}:</strong>{' '}
-            <span title={format(expiresAt, 'PPpp')}>
-              {formatDistanceToNow(expiresAt, { addSuffix: true })}
-            </span>
-          </li>
-        )}
-        {type === ORG_TYPES.DEV && (
-          <li>
-            <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
-            {ownedByCurrentUser && (
-              <>
-                {' | '}
-                <Button
-                  label={i18n.t('check again')}
-                  variant="link"
-                  onClick={doRefreshAction}
-                />
-              </>
-            )}
-          </li>
-        )}
-      </ul>
-    );
-    icon = (
-      <Icon
-        category="utility"
-        name="link"
-        size="x-small"
-        className="slds-m-bottom_xxx-small"
-      />
-    );
-
-    if (isDeleting) {
-      footer = (
-        <>
-          <SpinnerWrapper size="small" />
-          {i18n.t('Deleting Org…')}
-        </>
-      );
-    } else if (ownedByCurrentUser) {
-      if (org.currently_capturing_changes) {
-        footer = (
-          <>
-            <SpinnerWrapper size="small" />
-            {i18n.t('Capturing Selected Changes…')}
-            <div className="slds-p-top_small">{loadingMsg}</div>
-          </>
-        );
-      } else if (org.currently_refreshing_changes) {
-        footer = (
-          <>
-            <SpinnerWrapper size="small" />
-            {i18n.t('Checking for Uncaptured Changes…')}
-          </>
-        );
-      } else {
-        /* istanbul ignore else */
-        // eslint-disable-next-line no-lonely-if
-        if (orgUrl) {
-          footer = (
-            <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>
-          );
-        }
-      }
-      /* istanbul ignore else */
-      if (orgUrl) {
-        icon = (
-          <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
-            <Icon
-              category="utility"
-              name="link"
-              size="x-small"
-              className="icon-link slds-m-bottom_xxx-small"
-            />
-          </ExternalLink>
-        );
-      }
-      actions = (
-        <Dropdown
-          align="right"
-          assistiveText={{ icon: 'Actions' }}
-          buttonClassName="slds-button_icon-x-small"
-          buttonVariant="icon"
-          iconCategory="utility"
-          iconName="down"
-          iconSize="small"
-          iconVariant="border-filled"
-          width="xx-small"
-          options={[{ id: 0, label: i18n.t('Delete') }]}
-          onSelect={doDeleteAction}
-        />
-      );
-    }
-  } else {
-    actions = <Button label={i18n.t('Create Org')} onClick={doCreateAction} />;
-  }
-
   return (
     <div
       className="slds-size_1-of-1
@@ -267,12 +334,41 @@ const OrgCard = ({
     >
       <Card
         bodyClassName="slds-card__body_inner"
-        icon={icon}
+        icon={
+          <OrgIcon
+            org={org}
+            ownedByCurrentUser={ownedByCurrentUser}
+            isCreating={isCreating}
+            isDeleting={isDeleting}
+          />
+        }
         heading={displayType}
-        headerActions={actions}
-        footer={footer}
+        headerActions={
+          <OrgActions
+            org={org}
+            ownedByCurrentUser={ownedByCurrentUser}
+            isCreating={isCreating}
+            isDeleting={isDeleting}
+            doCreateAction={doCreateAction}
+            doDeleteAction={doDeleteAction}
+          />
+        }
+        footer={
+          <OrgFooter
+            org={org}
+            ownedByCurrentUser={ownedByCurrentUser}
+            isCreating={isCreating}
+            isDeleting={isDeleting}
+          />
+        }
       >
-        {contents}
+        <OrgContents
+          org={org}
+          ownedByCurrentUser={ownedByCurrentUser}
+          isCreating={isCreating}
+          isDev={type === ORG_TYPES.DEV}
+          doRefreshAction={doRefreshAction}
+        />
       </Card>
     </div>
   );
@@ -345,7 +441,7 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
 
   let deleteAction: (...args: any[]) => void = openConnectModal;
   let createAction: (...args: any[]) => void = openConnectModal;
-  if (user && user.valid_token_for) {
+  if (user?.valid_token_for) {
     createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
     deleteAction = (org: Org) => {
       if (org.org_type === ORG_TYPES.DEV) {
@@ -380,7 +476,8 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
           orgs={orgs}
           type={ORG_TYPES.DEV}
           displayType={i18n.t('Developer')}
-          userId={user && user.id}
+          userId={user?.id}
+          assignedUser={task.assigned_dev}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}
@@ -391,7 +488,8 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
           orgs={orgs}
           type={ORG_TYPES.QA}
           displayType={i18n.t('Reviewer')}
-          userId={user && user.id}
+          userId={user?.id}
+          assignedUser={task.assigned_qa}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
           createAction={createAction}

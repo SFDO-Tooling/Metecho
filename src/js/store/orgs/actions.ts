@@ -56,16 +56,16 @@ export const provisionOrg = (payload: Org): ThunkResult => (
     const task = selectTaskById(state, payload.task);
     let msg = {
       [ORG_TYPES.DEV]: i18n.t('Successfully created Dev org.'),
-      [ORG_TYPES.QA]: i18n.t('Successfully created QA org.'),
+      [ORG_TYPES.QA]: i18n.t('Successfully created Review org.'),
     };
     if (task) {
       msg = {
         [ORG_TYPES.DEV]: `${i18n.t('Successfully created Dev org for task')} “${
           task.name
         }”.`,
-        [ORG_TYPES.QA]: `${i18n.t('Successfully created QA org for task')} “${
-          task.name
-        }”.`,
+        [ORG_TYPES.QA]: `${i18n.t(
+          'Successfully created Review org for task',
+        )} “${task.name}”.`,
       };
     }
     dispatch(
@@ -101,7 +101,7 @@ export const provisionFailed = ({
         'Uh oh. There was an error creating your new Dev org.',
       ),
       [ORG_TYPES.QA]: i18n.t(
-        'Uh oh. There was an error creating your new QA org.',
+        'Uh oh. There was an error creating your new Review org.',
       ),
     };
     if (task) {
@@ -110,7 +110,7 @@ export const provisionFailed = ({
           'Uh oh. There was an error creating your new Dev org for task',
         )} “${task.name}”.`,
         [ORG_TYPES.QA]: `${i18n.t(
-          'Uh oh. There was an error creating your new QA org for task',
+          'Uh oh. There was an error creating your new Review org for task',
         )} “${task.name}”.`,
       };
     }
@@ -231,7 +231,7 @@ export const deleteOrg = ({
       const task = selectTaskById(state, org.task);
       let msg = {
         [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev org.'),
-        [ORG_TYPES.QA]: i18n.t('Successfully deleted QA org.'),
+        [ORG_TYPES.QA]: i18n.t('Successfully deleted Review org.'),
       };
       /* istanbul ignore else */
       if (task) {
@@ -239,9 +239,9 @@ export const deleteOrg = ({
           [ORG_TYPES.DEV]: `${i18n.t(
             'Successfully deleted Dev org for task',
           )} “${task.name}”.`,
-          [ORG_TYPES.QA]: `${i18n.t('Successfully deleted QA org for task')} “${
-            task.name
-          }”.`,
+          [ORG_TYPES.QA]: `${i18n.t(
+            'Successfully deleted Review org for task',
+          )} “${task.name}”.`,
         };
       }
       dispatch(addToast({ heading: msg[org.org_type] }));
@@ -269,7 +269,9 @@ export const deleteFailed = ({
       [ORG_TYPES.DEV]: i18n.t(
         'Uh oh. There was an error deleting your Dev org.',
       ),
-      [ORG_TYPES.QA]: i18n.t('Uh oh. There was an error deleting your QA org.'),
+      [ORG_TYPES.QA]: i18n.t(
+        'Uh oh. There was an error deleting your Review org.',
+      ),
     };
     /* istanbul ignore else */
     if (task) {
@@ -278,7 +280,7 @@ export const deleteFailed = ({
           'Uh oh. There was an error deleting your Dev org for task',
         )} “${task.name}”.`,
         [ORG_TYPES.QA]: `${i18n.t(
-          'Uh oh. There was an error deleting your QA org for task',
+          'Uh oh. There was an error deleting your Review org for task',
         )} “${task.name}”.`,
       };
     }
