@@ -46,9 +46,15 @@ const defaultOrgs = {
 const defaultState = {
   user: {
     id: 'user-id',
+    username: 'user-name',
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
   },
+};
+const defaultTask = {
+  id: 'task-id',
+  assigned_dev: { login: 'user-name' },
+  assigned_qa: { login: 'user-name' },
 };
 
 describe('<OrgCards/>', () => {
@@ -56,16 +62,13 @@ describe('<OrgCards/>', () => {
     const defaults = {
       initialState: defaultState,
       orgs: defaultOrgs,
+      task: defaultTask,
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, orgs } = opts;
+    const { initialState, orgs, task } = opts;
     return renderWithRedux(
       <MemoryRouter>
-        <OrgCards
-          orgs={orgs}
-          task={{ id: 'task-id' }}
-          project={{ id: 'project-id' }}
-        />
+        <OrgCards orgs={orgs} task={task} project={{ id: 'project-id' }} />
       </MemoryRouter>,
       initialState,
       storeWithThunk,
@@ -74,13 +77,17 @@ describe('<OrgCards/>', () => {
 
   describe('owned by current user', () => {
     test('renders org cards', () => {
-      const { getByText } = setup();
+      const task = {
+        ...defaultTask,
+        assigned_qa: null,
+      };
+      const { getByText } = setup({ task });
 
       expect(getByText('View Org')).toBeVisible();
       expect(
         getByText('has 1 uncaptured change', { exact: false }),
       ).toBeVisible();
-      expect(getByText('Create Org')).toBeVisible();
+      expect(getByText('Assign')).toBeVisible();
       expect(getByText('check again')).toBeVisible();
       expect(getByText('617a512')).toBeVisible();
     });
@@ -110,11 +117,18 @@ describe('<OrgCards/>', () => {
           has_unsaved_changes: false,
         },
       };
-      const { queryByText, getByText } = setup({ orgs });
+      const task = {
+        ...defaultTask,
+        assigned_qa: {
+          login: 'other-user',
+        },
+      };
+      const { queryByText, getByText } = setup({ orgs, task });
 
       expect(queryByText('View Org')).toBeNull();
       expect(getByText('up-to-date', { exact: false })).toBeVisible();
       expect(queryByText('check again')).toBeNull();
+      expect(getByText('not yet created', { exact: false })).toBeVisible();
     });
   });
 
@@ -155,7 +169,11 @@ describe('<OrgCards/>', () => {
 
     describe('not connected to sf org', () => {
       test('opens connect modal', () => {
-        const { getByText } = setup({ initialState: { user: {} } });
+        const { getByText } = setup({
+          initialState: {
+            user: { ...defaultState.user, valid_token_for: null },
+          },
+        });
         fireEvent.click(getByText('Create Org'));
 
         expect(createObject).not.toHaveBeenCalled();
@@ -222,7 +240,7 @@ describe('<OrgCards/>', () => {
 
       test('deletes org', () => {
         const { getByText } = setup({ orgs });
-        fireEvent.click(getByText('Actions'));
+        fireEvent.click(getByText('Org Actions'));
         fireEvent.click(getByText('Delete'));
 
         expect(deleteObject).toHaveBeenCalledTimes(1);
@@ -243,7 +261,7 @@ describe('<OrgCards/>', () => {
               user: { ...defaultState.user, valid_token_for: null },
             },
           });
-          fireEvent.click(getByText('Actions'));
+          fireEvent.click(getByText('Org Actions'));
           fireEvent.click(getByTitle('Delete'));
 
           expect(deleteObject).not.toHaveBeenCalled();
@@ -264,7 +282,7 @@ describe('<OrgCards/>', () => {
             },
           },
         });
-        fireEvent.click(getByText('Actions'));
+        fireEvent.click(getByText('Org Actions'));
         fireEvent.click(getByText('Delete'));
 
         expect(refetchOrg).toHaveBeenCalledTimes(1);
@@ -284,7 +302,7 @@ describe('<OrgCards/>', () => {
       describe('org has changes', () => {
         test('opens confirm modal', () => {
           const { getByTitle, getByText } = setup();
-          fireEvent.click(getByText('Actions'));
+          fireEvent.click(getByText('Org Actions'));
           fireEvent.click(getByTitle('Delete'));
 
           expect(deleteObject).not.toHaveBeenCalled();
@@ -296,7 +314,7 @@ describe('<OrgCards/>', () => {
 
           beforeEach(() => {
             result = setup();
-            fireEvent.click(result.getByText('Actions'));
+            fireEvent.click(result.getByText('Org Actions'));
             fireEvent.click(result.getByTitle('Delete'));
           });
 

@@ -3,12 +3,14 @@ import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import Modal from '@salesforce/design-system-react/components/modal';
+import classNames from 'classnames';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import ConnectModal from '@/components/user/connect';
+import { UserCard } from '@/components/user/githubUser';
 import { ConnectionInfoModal } from '@/components/user/info';
 import {
   ExternalLink,
@@ -85,41 +87,56 @@ const ConfirmDeleteModal = ({
   );
 };
 
-const OrgIcon = ({
-  org,
-  ownedByCurrentUser,
-  isCreating,
-  isDeleting,
-}: {
-  org: Org | null;
-  ownedByCurrentUser: boolean;
-  isCreating: boolean;
-  isDeleting: boolean;
-}) => {
-  if (org && !isCreating) {
-    const orgUrl = window.api_urls.scratch_org_redirect(org.id);
-    if (orgUrl && ownedByCurrentUser && !isDeleting) {
-      return (
-        <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
-          <Icon
-            category="utility"
-            name="link"
-            size="x-small"
-            className="icon-link slds-m-bottom_xxx-small"
-          />
-        </ExternalLink>
-      );
-    }
+const UserActions = ({ assignedUser }: { assignedUser: GitHubUser | null }) => {
+  if (assignedUser) {
     return (
-      <Icon
-        category="utility"
-        name="link"
-        size="x-small"
-        className="slds-m-bottom_xxx-small"
+      <Dropdown
+        align="right"
+        assistiveText={{ icon: 'User Actions' }}
+        buttonClassName="slds-button_icon-x-small"
+        buttonVariant="icon"
+        iconCategory="utility"
+        iconName="down"
+        iconSize="small"
+        iconVariant="border-filled"
+        width="xx-small"
+        options={[{ id: 0, label: i18n.t('Remove') }]}
       />
     );
   }
-  return null;
+  return <Button label={i18n.t('Assign')} />;
+};
+
+const OrgIcon = ({
+  orgId,
+  ownedByCurrentUser,
+  isDeleting,
+}: {
+  orgId: string;
+  ownedByCurrentUser: boolean;
+  isDeleting: boolean;
+}) => {
+  const orgUrl = window.api_urls.scratch_org_redirect(orgId);
+  if (orgUrl && ownedByCurrentUser && !isDeleting) {
+    return (
+      <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
+        <Icon
+          category="utility"
+          name="link"
+          size="x-small"
+          className="icon-link slds-m-bottom_xxx-small"
+        />
+      </ExternalLink>
+    );
+  }
+  return (
+    <Icon
+      category="utility"
+      name="link"
+      size="x-small"
+      className="slds-m-bottom_xxx-small"
+    />
+  );
 };
 
 const OrgFooter = ({
@@ -137,34 +154,23 @@ const OrgFooter = ({
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
   if (isCreating) {
-    return <>loadingMsg</>;
+    return <>{loadingMsg}</>;
   }
   if (org) {
     if (isDeleting) {
-      return (
-        <>
-          <SpinnerWrapper size="small" />
-          {i18n.t('Deleting Org…')}
-        </>
-      );
+      return <>{i18n.t('Deleting Org…')}</>;
     }
     if (ownedByCurrentUser) {
       if (org.currently_capturing_changes) {
         return (
           <>
-            <SpinnerWrapper size="small" />
             {i18n.t('Capturing Selected Changes…')}
             <div className="slds-p-top_small">{loadingMsg}</div>
           </>
         );
       }
       if (org.currently_refreshing_changes) {
-        return (
-          <>
-            <SpinnerWrapper size="small" />
-            {i18n.t('Checking for Uncaptured Changes…')}
-          </>
-        );
+        return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
       }
       const orgUrl = window.api_urls.scratch_org_redirect(org.id);
       /* istanbul ignore else */
@@ -180,6 +186,7 @@ const OrgFooter = ({
 const OrgActions = ({
   org,
   ownedByCurrentUser,
+  assignedToCurrentUser,
   isCreating,
   isDeleting,
   doCreateAction,
@@ -187,6 +194,7 @@ const OrgActions = ({
 }: {
   org: Org | null;
   ownedByCurrentUser: boolean;
+  assignedToCurrentUser: boolean;
   isCreating: boolean;
   isDeleting: boolean;
   doCreateAction: () => void;
@@ -200,14 +208,14 @@ const OrgActions = ({
       />
     );
   }
-  if (!org) {
+  if (!org && assignedToCurrentUser) {
     return <Button label={i18n.t('Create Org')} onClick={doCreateAction} />;
   }
   if (ownedByCurrentUser && !isDeleting) {
     return (
       <Dropdown
         align="right"
-        assistiveText={{ icon: 'Actions' }}
+        assistiveText={{ icon: 'Org Actions' }}
         buttonClassName="slds-button_icon-x-small"
         buttonVariant="icon"
         iconCategory="utility"
@@ -226,16 +234,27 @@ const OrgActions = ({
 const OrgContents = ({
   org,
   ownedByCurrentUser,
+  assignedToCurrentUser,
   isCreating,
-  isDev,
+  type,
   doRefreshAction,
 }: {
   org: Org | null;
   ownedByCurrentUser: boolean;
+  assignedToCurrentUser: boolean;
   isCreating: boolean;
-  isDev: boolean;
+  type: OrgTypes;
   doRefreshAction: () => void;
 }) => {
+  if (!org && !assignedToCurrentUser) {
+    return (
+      <ul>
+        <li>
+          <strong>{i18n.t('Status')}:</strong> {i18n.t('not yet created')}
+        </li>
+      </ul>
+    );
+  }
   if (!org || isCreating) {
     return null;
   }
@@ -262,7 +281,7 @@ const OrgContents = ({
           </span>
         </li>
       )}
-      {isDev && (
+      {type === ORG_TYPES.DEV && (
         <li>
           <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
           {ownedByCurrentUser && (
@@ -281,11 +300,29 @@ const OrgContents = ({
   );
 };
 
+const OrgSpinner = ({
+  org,
+  ownedByCurrentUser,
+  isDeleting,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  isDeleting: boolean;
+}) => {
+  if (
+    (org && isDeleting) ||
+    (ownedByCurrentUser &&
+      (org?.currently_capturing_changes || org?.currently_refreshing_changes))
+  ) {
+    return <SpinnerWrapper size="small" />;
+  }
+  return null;
+};
+
 const OrgCard = ({
   orgs,
   type,
-  displayType,
-  userId,
+  user,
   assignedUser,
   isCreatingOrg,
   isDeletingOrg,
@@ -295,8 +332,7 @@ const OrgCard = ({
 }: {
   orgs: OrgsByTask;
   type: OrgTypes;
-  displayType: string;
-  userId?: string;
+  user: User | null;
   assignedUser: GitHubUser | null;
   isCreatingOrg: OrgTypeTracker;
   isDeletingOrg: OrgTypeTracker;
@@ -304,12 +340,14 @@ const OrgCard = ({
   deleteAction: (org: Org) => void;
   refreshAction: (org: Org) => void;
 }) => {
-  const org = orgs[type];
-  const ownedByCurrentUser = Boolean(
-    userId && org?.url && userId === org.owner,
+  const userId = user?.id;
+  const username = user?.username;
+  const assignedToCurrentUser = Boolean(
+    user && username === assignedUser?.login,
   );
-  const isCreating = Boolean(isCreatingOrg[type] || (org && !org.url));
-  const isDeleting = Boolean(isDeletingOrg[type] || org?.delete_queued_at);
+  const org = assignedToCurrentUser ? orgs[type] : null;
+  const ownedByCurrentUser = Boolean(user && org?.url && userId === org.owner);
+
   const doCreateAction = useCallback(() => {
     createAction(type);
   }, [createAction, type]);
@@ -326,6 +364,13 @@ const OrgCard = ({
     }
   }, [refreshAction, org]);
 
+  const isCreating = Boolean(isCreatingOrg[type] || (org && !org.url));
+  const isDeleting = Boolean(isDeletingOrg[type] || org?.delete_queued_at);
+  const heading =
+    type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
+  const orgHeading =
+    type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org');
+
   return (
     <div
       className="slds-size_1-of-1
@@ -333,26 +378,10 @@ const OrgCard = ({
         slds-p-around_x-small"
     >
       <Card
+        className={classNames({ 'has-nested-card': assignedUser })}
         bodyClassName="slds-card__body_inner"
-        icon={
-          <OrgIcon
-            org={org}
-            ownedByCurrentUser={ownedByCurrentUser}
-            isCreating={isCreating}
-            isDeleting={isDeleting}
-          />
-        }
-        heading={displayType}
-        headerActions={
-          <OrgActions
-            org={org}
-            ownedByCurrentUser={ownedByCurrentUser}
-            isCreating={isCreating}
-            isDeleting={isDeleting}
-            doCreateAction={doCreateAction}
-            doDeleteAction={doDeleteAction}
-          />
-        }
+        heading={heading}
+        headerActions={<UserActions assignedUser={assignedUser} />}
         footer={
           <OrgFooter
             org={org}
@@ -362,13 +391,54 @@ const OrgCard = ({
           />
         }
       >
-        <OrgContents
-          org={org}
-          ownedByCurrentUser={ownedByCurrentUser}
-          isCreating={isCreating}
-          isDev={type === ORG_TYPES.DEV}
-          doRefreshAction={doRefreshAction}
-        />
+        {assignedUser && (
+          <>
+            <div className="slds-m-bottom_small">
+              <UserCard user={assignedUser} className="nested-card" />
+            </div>
+            <hr className="slds-m-vertical_none" />
+            <Card
+              className="nested-card"
+              bodyClassName="slds-card__body_inner"
+              heading={orgHeading}
+              icon={
+                org &&
+                !isCreating && (
+                  <OrgIcon
+                    orgId={org.id}
+                    ownedByCurrentUser={ownedByCurrentUser}
+                    isDeleting={isDeleting}
+                  />
+                )
+              }
+              headerActions={
+                <OrgActions
+                  org={org}
+                  ownedByCurrentUser={ownedByCurrentUser}
+                  assignedToCurrentUser={assignedToCurrentUser}
+                  isCreating={isCreating}
+                  isDeleting={isDeleting}
+                  doCreateAction={doCreateAction}
+                  doDeleteAction={doDeleteAction}
+                />
+              }
+            >
+              <OrgContents
+                org={org}
+                ownedByCurrentUser={ownedByCurrentUser}
+                assignedToCurrentUser={assignedToCurrentUser}
+                isCreating={isCreating}
+                type={type}
+                doRefreshAction={doRefreshAction}
+              />
+              <OrgSpinner
+                org={org}
+                ownedByCurrentUser={ownedByCurrentUser}
+                isDeleting={isDeleting}
+              />
+            </Card>
+          </>
+        )}
       </Card>
     </div>
   );
@@ -475,8 +545,7 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
         <OrgCard
           orgs={orgs}
           type={ORG_TYPES.DEV}
-          displayType={i18n.t('Developer')}
-          userId={user?.id}
+          user={user}
           assignedUser={task.assigned_dev}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
@@ -487,8 +556,7 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
         <OrgCard
           orgs={orgs}
           type={ORG_TYPES.QA}
-          displayType={i18n.t('Reviewer')}
-          userId={user?.id}
+          user={user}
           assignedUser={task.assigned_qa}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}

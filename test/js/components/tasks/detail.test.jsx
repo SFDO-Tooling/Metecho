@@ -27,6 +27,7 @@ afterEach(() => {
 const defaultState = {
   user: {
     id: 'user-id',
+    username: 'user-name',
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -72,6 +73,9 @@ const defaultState = {
         description: 'Task Description',
         has_unmerged_commits: false,
         commits: [],
+        assigned_dev: {
+          login: 'user-name',
+        },
       },
     ],
   },

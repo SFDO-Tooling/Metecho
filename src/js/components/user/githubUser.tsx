@@ -5,6 +5,7 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useEffect, useState } from 'react';
 
@@ -24,24 +25,22 @@ export const GitHubUserAvatar = ({ user }: { user: GitHubUser }) => (
   />
 );
 
-const UserCard = ({
+export const UserCard = ({
   user,
   removeUser,
+  className,
 }: {
   user: GitHubUser;
-  removeUser: () => void;
+  removeUser?: () => void;
+  className?: string;
 }) => (
-  <div
-    className="slds-size_1-of-1
-      slds-large-size_1-of-2
-      slds-p-around_x-small"
-  >
-    <Card
-      bodyClassName="slds-card__body_inner"
-      className="team-member-card"
-      icon={<GitHubUserAvatar user={user} />}
-      heading={user.login}
-      headerActions={
+  <Card
+    className={classNames(className, 'team-member-card')}
+    bodyClassName="slds-card__body_inner"
+    icon={<GitHubUserAvatar user={user} />}
+    heading={user.login}
+    headerActions={
+      removeUser && (
         <Button
           assistiveText={{ icon: i18n.t('Remove') }}
           iconCategory="utility"
@@ -52,9 +51,9 @@ const UserCard = ({
           title={i18n.t('Remove')}
           onClick={removeUser}
         />
-      }
-    />
-  </div>
+      )
+    }
+  />
 );
 
 export const UserCards = ({
@@ -67,7 +66,16 @@ export const UserCards = ({
   <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
     {users.map((user) => {
       const doRemoveUser = () => removeUser(user);
-      return <UserCard key={user.id} user={user} removeUser={doRemoveUser} />;
+      return (
+        <div
+          key={user.id}
+          className="slds-size_1-of-1
+            slds-large-size_1-of-2
+            slds-p-around_x-small"
+        >
+          <UserCard user={user} removeUser={doRemoveUser} />
+        </div>
+      );
     })}
   </div>
 );
