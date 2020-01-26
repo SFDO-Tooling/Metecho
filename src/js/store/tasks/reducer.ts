@@ -112,8 +112,25 @@ const reducer = (
       }
       return tasks;
     }
-    case 'TASK_UPDATE': {
-      const task = action.payload;
+    case 'TASK_UPDATE':
+    case 'UPDATE_OBJECT_SUCCEEDED': {
+      let maybeTask;
+      if (action.type === 'TASK_UPDATE') {
+        maybeTask = action.payload;
+      } else {
+        const {
+          object,
+          objectType,
+        }: { object: Task; objectType: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.TASK && object) {
+          maybeTask = object;
+        }
+      }
+      /* istanbul ignore if */
+      if (!maybeTask) {
+        return tasks;
+      }
+      const task = maybeTask;
       const projectTasks = tasks[task.project] || [];
       const existingTask = projectTasks.find((t) => t.id === task.id);
       if (existingTask) {

@@ -12,6 +12,20 @@
 
 .team-member-username {
   margin-left: $spacing-x-small;
+
+  .team-member-button-selected & {
+    color: $color-text-default;
+  }
+}
+
+.team-member-button-selected {
+  background-color: $color-background-row-active;
+}
+
+.team-member-button {
+  &:hover {
+    border: 1px solid;
+  }
 }
 
 // Assigned Team Member Cards

@@ -1,7 +1,10 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
-import { AssignUsersModal } from '@/components/user/githubUser';
+import {
+  AssignUserModal,
+  AssignUsersModal,
+} from '@/components/user/githubUser';
 
 describe('AssignUsersModal', () => {
   test('responds to checkbox clicks', () => {
@@ -16,9 +19,8 @@ describe('AssignUsersModal', () => {
     const { getByText, getAllByLabelText } = render(
       <AssignUsersModal
         allUsers={allUsers}
-        users={[]}
+        selectedUsers={[]}
         isOpen={true}
-        onRequestClose={jest.fn()}
         setUsers={setUsers}
       />,
     );
@@ -26,5 +28,29 @@ describe('AssignUsersModal', () => {
     fireEvent.click(getByText('Save'));
 
     expect(setUsers).toHaveBeenCalledWith(allUsers);
+  });
+});
+
+describe('AssignUserModal', () => {
+  test('responds to user click', () => {
+    const setUser = jest.fn();
+    const allUsers = [
+      {
+        id: '123456',
+        login: 'test user',
+        avatar_url: 'https://example.com/avatar.png',
+      },
+    ];
+    const { getByText } = render(
+      <AssignUserModal
+        allUsers={allUsers}
+        selectedUser={null}
+        isOpen={true}
+        setUser={setUser}
+      />,
+    );
+    fireEvent.click(getByText('test user'));
+
+    expect(setUser).toHaveBeenCalledWith(allUsers[0]);
   });
 });
