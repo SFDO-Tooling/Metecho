@@ -97,7 +97,7 @@ def alert_user_about_expiring_org(org, user):
             send_mail(
                 "MetaShare Scratch Org Expiring with Uncommitted Changes",
                 render_to_string(
-                    "scratch_org_expiry_email.html",
+                    "scratch_org_expiry_email.txt",
                     {
                         "repo_name": org.task.project.repository.name,
                         "project_name": org.task.project.name,
