@@ -743,4 +743,5 @@ const OrgCards = ({
   );
 };
 
+OrgCard.displayName = 'OrgCard';
 export default OrgCards;
