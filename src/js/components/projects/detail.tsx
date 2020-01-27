@@ -217,7 +217,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_medium add-member">
+            <div className="slds-m-bottom_medium">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
                 {i18n.t('Collaborators')}
               </h2>
