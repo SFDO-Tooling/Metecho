@@ -21,7 +21,7 @@ click==7.0                # via cumulusci, rq
 coloredlogs==10.0         # via cumulusci
 constantly==15.1.0        # via twisted
 cryptography==2.8         # via autobahn, cumulusci, jwcrypto, pyopenssl, requests, secretstorage, service-identity
-cumulusci==3.5.1
+cumulusci==3.5.3
 daphne==2.3.0             # via channels
 defusedxml==0.6.0         # via python3-openid
 dj-database-url==0.5.0
@@ -38,7 +38,7 @@ django-rq==2.2.0
 django-storages==1.8
 django==3.0.2
 djangorestframework==3.11.0
-docutils==0.15.2          # via cumulusci
+docutils==0.16            # via cumulusci
 factory-boy==2.12.0       # via cumulusci
 faker==2.0.3              # via factory-boy
 github3-py==1.3.0
@@ -85,11 +85,11 @@ salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
 secretstorage==3.1.1      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sentry-sdk==0.14.0
+sentry-sdk==0.14.1
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/master.tar.gz
 simple-salesforce==0.74.2
-six==1.13.0               # via autobahn, automat, bleach, cryptography, cumulusci, django-parler, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
+six==1.14.0               # via autobahn, automat, bleach, cryptography, cumulusci, django-parler, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
 sqlalchemy==1.3.12        # via cumulusci
 sqlparse==0.3.0           # via django
 terminaltables==3.1.0     # via cumulusci
@@ -100,10 +100,10 @@ unicodecsv==0.14.1        # via cumulusci, salesforce-bulk
 uritemplate==3.0.1        # via cumulusci, github3-py, github3.py
 urllib3==1.25.7           # via cumulusci, requests, selenium, sentry-sdk
 webencodings==0.5.1       # via bleach
-werkzeug==0.16.0
+werkzeug==0.16.1
 whitenoise==5.0.1
 xmltodict==0.12.0         # via cumulusci
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==45.1.0        # via markdown, pyhamcrest, zope.interface
+# setuptools
