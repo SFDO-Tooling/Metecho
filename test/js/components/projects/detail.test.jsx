@@ -286,7 +286,7 @@ describe('<ProjectDetail/>', () => {
       const { getAllByText, baseElement } = setup();
       fireEvent.click(getAllByText('Assign Reviewer')[0]);
       fireEvent.click(
-        baseElement.querySelector('.team-member-button[title="OtherUser"]'),
+        baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
       );
 
       expect(updateObject).toHaveBeenCalled();
