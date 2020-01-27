@@ -16,6 +16,7 @@ from ..jobs import (
     create_pr,
     delete_scratch_org,
     get_unsaved_changes,
+    populate_github_users,
     refresh_commits,
     refresh_github_repositories_for_user,
 )
@@ -438,3 +439,36 @@ def test_create_pr__error(user_factory, task_factory):
             )
 
         assert async_to_sync.called
+
+
+@pytest.mark.django_db
+class TestPopulateGithubUsers:
+    def test_user_present(
+        self, user_factory, repository_factory, git_hub_repository_factory,
+    ):
+        user = user_factory()
+        repository = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123, user=user)
+        with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
+            collab1 = MagicMock(
+                id=123,
+                login="test-user-1",
+                avatar_url="http://example.com/avatar1.png",
+            )
+            collab2 = MagicMock(
+                id=456,
+                login="test-user-2",
+                avatar_url="http://example.com/avatar2.png",
+            )
+            repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
+            get_repo_info.return_value = repo
+
+            populate_github_users(repository)
+            repository.refresh_from_db()
+            assert len(repository.github_users) == 2
+
+    def test_user_missing(self, repository_factory):
+        repository = repository_factory(repo_id=123)
+        with patch("metashare.api.jobs.logger") as logger:
+            populate_github_users(repository)
+            assert logger.warning.called

@@ -10,13 +10,28 @@ import { renderWithRedux } from './../../utils';
 
 describe('<Login />', () => {
   describe('login click', () => {
+    let location;
+
+    beforeAll(() => {
+      location = window.location;
+      delete window.location;
+      window.location = {
+        assign: jest.fn(),
+        pathname: location.pathname,
+        origin: location.origin,
+      };
+    });
+
+    afterAll(() => {
+      window.location = location;
+    });
+
     test('updates `window.location.href` on login click', () => {
       const { getByText } = renderWithRedux(
         <MemoryRouter>
           <Login />
         </MemoryRouter>,
       );
-      jest.spyOn(window.location, 'assign');
       fireEvent.click(getByText('Log In With GitHub'));
       const base = window.api_urls.github_login();
       const expected = addUrlParams(base, { next: window.location.pathname });
@@ -30,7 +45,6 @@ describe('<Login />', () => {
           <LoginButton label="Hi" from={{ pathname: '/custom' }} />
         </MemoryRouter>,
       );
-      jest.spyOn(window.location, 'assign');
       fireEvent.click(getByText('Hi'));
       const base = window.api_urls.github_login();
       const expected = addUrlParams(base, { next: '/custom' });
@@ -44,7 +58,6 @@ describe('<Login />', () => {
           <LoginButton />
         </StaticRouter>,
       );
-      jest.spyOn(window.location, 'assign');
       fireEvent.click(getByText('Log In With GitHub'));
       const base = window.api_urls.github_login();
       const expected = addUrlParams(base, { next: '/custom' });
@@ -69,15 +82,23 @@ describe('<Login />', () => {
   });
 
   describe('GitHub URL not found', () => {
-    let URLS;
+    let URLS, location;
 
     beforeAll(() => {
+      location = window.location;
+      delete window.location;
+      window.location = {
+        assign: jest.fn(),
+        pathname: location.pathname,
+        origin: location.origin,
+      };
       URLS = window.api_urls;
       window.api_urls = {};
     });
 
     afterAll(() => {
       window.api_urls = URLS;
+      window.location = location;
     });
 
     test('disables login btn', () => {
@@ -86,7 +107,6 @@ describe('<Login />', () => {
           <Login />
         </MemoryRouter>,
       );
-      jest.spyOn(window.location, 'assign');
       fireEvent.click(getByText('Log In With GitHub'));
 
       expect(window.location.assign).not.toHaveBeenCalled();
