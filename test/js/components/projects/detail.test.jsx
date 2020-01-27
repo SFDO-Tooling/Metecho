@@ -3,7 +3,7 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
-import { fetchObject, fetchObjects } from '@/store/actions';
+import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -12,10 +12,12 @@ jest.mock('@/store/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
+  updateObject.mockClear();
 });
 
 const defaultState = {
@@ -28,6 +30,20 @@ const defaultState = {
         old_slugs: [],
         description: 'This is a test repository.',
         repo_url: 'https://github.com/test/test-repo',
+        github_users: [
+          {
+            id: '123456',
+            login: 'TestGitHubUser',
+          },
+          {
+            id: '234567',
+            login: 'OtherUser',
+          },
+          {
+            id: '345678',
+            login: 'ThirdUser',
+          },
+        ],
       },
     ],
     notFound: ['different-repository'],
@@ -43,6 +59,16 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           old_slugs: ['old-slug'],
+          github_users: [
+            {
+              id: '123456',
+              login: 'TestGitHubUser',
+            },
+            {
+              id: '234567',
+              login: 'OtherUser',
+            },
+          ],
         },
       ],
       next: null,
@@ -69,6 +95,11 @@ const defaultState = {
         project: 'project1',
         description: 'Task Description',
         status: 'In progress',
+        assigned_dev: {
+          id: '123456',
+          login: 'TestGitHubUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
       },
       {
         id: 'task3',
@@ -193,6 +224,98 @@ describe('<ProjectDetail/>', () => {
         objectType: 'task',
         shouldSubscribeToObject: true,
       });
+    });
+  });
+
+  describe('Toggle available users modal', () => {
+    test('opens and closes', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Add or Remove Collaborators'));
+
+      expect(getByText('GitHub Username')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('GitHub Username')).toBeNull();
+    });
+  });
+
+  describe('Change project assigned users', () => {
+    test('setProjectUsers', () => {
+      const { getByText } = setup();
+      fireEvent.click(getByText('Add or Remove Collaborators'));
+      fireEvent.click(getByText('Select row 3'));
+      fireEvent.click(getByText('Save'));
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.github_users).toHaveLength(3);
+    });
+
+    test('removeUser', () => {
+      const { getByTitle } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  github_users: [
+                    {
+                      id: '123456',
+                      login: 'TestGitHubUser',
+                      avatar_url: 'https://example.com/avatar.png',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getByTitle('Remove'));
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+    });
+  });
+
+  describe('Change task assigned user', () => {
+    test('assignUser', () => {
+      const { getAllByText, baseElement } = setup();
+      fireEvent.click(getAllByText('Assign Reviewer')[0]);
+      fireEvent.click(
+        baseElement.querySelector('.team-member-button[title="OtherUser"]'),
+      );
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
+        'OtherUser',
+      );
+    });
+
+    test('closes modal if no users to assign', () => {
+      const { getByText, getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  github_users: [],
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getAllByText('Assign Reviewer')[0]);
+      fireEvent.click(getByText('Add collaborators to the project'));
+
+      expect(getByText('GitHub Username')).toBeVisible();
     });
   });
 

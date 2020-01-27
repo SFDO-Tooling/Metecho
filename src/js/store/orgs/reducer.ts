@@ -63,17 +63,13 @@ const reducer = (
           ...orgs,
           [task]: {
             [ORG_TYPES.DEV]:
-              (response &&
-                (response as Org[]).find(
-                  (org) => org.org_type === ORG_TYPES.DEV,
-                )) ||
-              null,
+              (response as Org[])?.find(
+                (org) => org.org_type === ORG_TYPES.DEV,
+              ) || null,
             [ORG_TYPES.QA]:
-              (response &&
-                (response as Org[]).find(
-                  (org) => org.org_type === ORG_TYPES.QA,
-                )) ||
-              null,
+              (response as Org[])?.find(
+                (org) => org.org_type === ORG_TYPES.QA,
+              ) || null,
           },
         };
       }

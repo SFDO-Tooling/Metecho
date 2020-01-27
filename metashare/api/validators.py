@@ -1,5 +1,6 @@
 from django.core.validators import RegexValidator, _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator, qs_filter
 
 
@@ -46,3 +47,15 @@ validate_unicode_branch = RegexValidator(
     ),
     "invalid",
 )
+
+
+class GitHubUserValidator:
+    def __init__(self, *, parent):
+        self.parent = parent
+
+    def __call__(self, cleaned_data):
+        parent = cleaned_data.get(self.parent)
+        github_users = cleaned_data.get("github_users", [])
+        for user in github_users:
+            if user not in parent.github_users:
+                raise ValidationError(f"Invalid github_users value: {user}")

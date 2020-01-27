@@ -36,7 +36,7 @@ const ConnectToSalesforce = ({
       />
       <Tooltip
         content={i18n.t(
-          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or QA scratch org.',
+          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Review scratch org.',
         )}
         variant="learnMore"
         position="overflowBoundaryElement"
@@ -199,7 +199,7 @@ export const ConnectionInfoModal = ({
 
   return (
     <Modal
-      isOpen={Boolean(user && user.valid_token_for && isOpen)}
+      isOpen={Boolean(user?.valid_token_for && isOpen)}
       heading={
         user.is_devhub_enabled
           ? i18n.t('Dev Hub Enabled')

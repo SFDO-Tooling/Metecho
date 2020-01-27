@@ -40,6 +40,14 @@ class TestRepository:
         gh_repo = git_hub_repository_factory(repo_id=123)
         assert repo.get_a_matching_user() == gh_repo.user
 
+    def test_queue_populate_github_users(self, repository_factory, user_factory):
+        repo = repository_factory()
+        with patch(
+            "metashare.api.jobs.populate_github_users_job"
+        ) as populate_github_users_job:
+            repo.queue_populate_github_users()
+            assert populate_github_users_job.delay.called
+
     def test_queue_refresh_commits(self, repository_factory, user_factory):
         repo = repository_factory()
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:

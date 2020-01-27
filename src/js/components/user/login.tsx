@@ -1,10 +1,11 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import WelcomeMatTile from '@salesforce/design-system-react/components/welcome-mat/tile';
+import { Location } from 'history';
 import i18n from 'i18next';
 import React, { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
-import { withRouter } from 'react-router';
+import { StaticContext, withRouter } from 'react-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { selectUserState } from '@/store/user/selectors';
@@ -12,7 +13,8 @@ import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
 import welcomeMatBG from '#/welcome-mat-bg.png';
 
-interface Props extends RouteComponentProps {
+interface Props
+  extends RouteComponentProps<{}, StaticContext, { from?: Location }> {
   id?: string;
   label?: string | ReactElement;
   from?: { pathname?: string };
@@ -23,7 +25,7 @@ export const LoginButton = withRouter(
     const handleClick = () => {
       /* istanbul ignore else */
       if (window.api_urls.github_login) {
-        let { pathname } = (location.state && location.state.from) || from;
+        let { pathname } = location.state?.from || from;
         if (!pathname) {
           pathname = window.location.pathname;
         }

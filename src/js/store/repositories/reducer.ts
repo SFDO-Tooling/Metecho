@@ -3,6 +3,12 @@ import { RepositoriesAction } from '@/store/repositories/actions';
 import { LogoutAction } from '@/store/user/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
 
+export interface GitHubUser {
+  id: string;
+  login: string;
+  avatar_url: string;
+}
+
 export interface Repository {
   id: string;
   name: string;
@@ -11,6 +17,7 @@ export interface Repository {
   repo_url: string;
   description: string;
   is_managed: boolean;
+  github_users: GitHubUser[];
 }
 export interface RepositoriesState {
   repositories: Repository[];

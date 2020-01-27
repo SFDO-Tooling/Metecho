@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from .fields import MarkdownField
 from .models import Project, Repository, ScratchOrg, Task
-from .validators import CaseInsensitiveUniqueTogetherValidator
+from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
 
@@ -77,6 +77,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             "is_managed",
             "slug",
             "old_slugs",
+            "github_users",
         )
 
     def get_repo_url(self, obj) -> Optional[str]:
@@ -108,6 +109,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "currently_creating_pr",
             "pr_url",
             "pr_is_open",
+            "github_users",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -117,6 +119,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                     "name", _("A project with this name already exists.")
                 ),
             ),
+            GitHubUserValidator(parent="repository"),
         )
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
@@ -157,9 +160,6 @@ class TaskSerializer(serializers.ModelSerializer):
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
-    assignee = HashidPrimaryKeyRelatedField(
-        queryset=User.objects.all(), allow_null=True
-    )
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -171,7 +171,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "project",
-            "assignee",
             "slug",
             "old_slugs",
             "has_unmerged_commits",
@@ -182,6 +181,8 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_url",
             "status",
             "pr_is_open",
+            "assigned_dev",
+            "assigned_qa",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

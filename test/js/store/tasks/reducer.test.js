@@ -285,6 +285,62 @@ describe('reducer', () => {
     });
   });
 
+  describe('UPDATE_OBJECT_SUCCEEDED', () => {
+    test('updates existing task', () => {
+      const task = {
+        id: 't1',
+        project: 'project-1',
+        name: 'Task Name',
+      };
+      const task2 = {
+        id: 't2',
+        project: 'project-1',
+      };
+      const editedTask = { ...task, name: 'Edited Task Name' };
+      const expected = {
+        'project-1': [editedTask, task2],
+      };
+      const actual = reducer(
+        {
+          'project-1': [task, task2],
+        },
+        {
+          type: 'UPDATE_OBJECT_SUCCEEDED',
+          payload: { object: editedTask, objectType: 'task' },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if unknown objectType', () => {
+      const task = {
+        id: 't1',
+        project: 'project-1',
+        name: 'Task Name',
+      };
+      const task2 = {
+        id: 't2',
+        project: 'project-1',
+      };
+      const editedTask = { ...task, name: 'Edited Task Name' };
+      const expected = {
+        'project-1': [task, task2],
+      };
+      const actual = reducer(
+        {
+          'project-1': [task, task2],
+        },
+        {
+          type: 'UPDATE_OBJECT_SUCCEEDED',
+          payload: { object: editedTask, objectType: 'foobar' },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('TASK_CREATE_PR_FAILED', () => {
     test('sets currently_creating_pr: false', () => {
       const task = {

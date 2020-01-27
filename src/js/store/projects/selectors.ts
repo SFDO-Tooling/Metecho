@@ -35,7 +35,7 @@ export const selectProjectSlug = (
 export const selectProjectNotFound = createSelector(
   [selectProjectsByRepository, selectProjectSlug],
   (projects, projectSlug): boolean =>
-    Boolean(projectSlug && projects && projects.notFound.includes(projectSlug)),
+    Boolean(projectSlug && projects?.notFound.includes(projectSlug)),
 );
 
 export const selectProject = createSelector(
