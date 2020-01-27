@@ -88,7 +88,7 @@ const DetailPageLayout = ({
             slds-size_1-of-1
             slds-medium-size_1-of-3"
         >
-          <div className="slds-text-longform">
+          <div className="slds-text-longform slds-m-bottom_x-large">
             {!descriptionHasTitle && (
               <h2 className="slds-text-heading_medium">{title}</h2>
             )}

@@ -47,7 +47,9 @@ const TaskStatusSteps = ({ task }: TaskStatusPathProps) => {
 
   return (
     <>
-      <h3>Next Steps</h3>
+      <h3 className="slds-text-heading_medium slds-m-bottom_small">
+        Next Steps
+      </h3>
       {steps.map((item, index) => {
         const stepIsNext = _.includes(nextSteps, index);
         const stepIsComplete = _.includes(completedSteps, index);
