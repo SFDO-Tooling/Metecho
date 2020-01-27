@@ -3,12 +3,15 @@ import Card from '@salesforce/design-system-react/components/card';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import Modal from '@salesforce/design-system-react/components/modal';
+import classNames from 'classnames';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import ConnectModal from '@/components/user/connect';
+import { AssignUserModal, UserCard } from '@/components/user/githubUser';
 import { ConnectionInfoModal } from '@/components/user/info';
 import {
   ExternalLink,
@@ -17,14 +20,15 @@ import {
   useIsMounted,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { createObject, deleteObject } from '@/store/actions';
+import { createObject, deleteObject, updateObject } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
-import { Commit, Task } from '@/store/tasks/reducer';
+import { GitHubUser } from '@/store/repositories/reducer';
+import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
-import { getOrgStatusMsg, getUnSyncedCommits } from '@/utils/helpers';
+import { getOrgStatusMsg, pluralize } from '@/utils/helpers';
 
 interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
@@ -34,15 +38,25 @@ interface OrgTypeTracker {
 interface OrgCardProps {
   orgs: OrgsByTask;
   type: OrgTypes;
-  displayType: string;
-  userId: string | null;
+  user: User | null;
+  assignedUser: GitHubUser | null;
+  projectUsers: GitHubUser[];
+  projectUrl: string;
+  taskCommits?: string[];
   isCreatingOrg: OrgTypeTracker;
   isDeletingOrg: OrgTypeTracker;
-  commits?: Commit[];
+  assignUserAction: ({
+    type,
+    assignee,
+  }: {
+    type: OrgTypes;
+    assignee: GitHubUser | null;
+  }) => void;
   createAction: (type: OrgTypes) => void;
   deleteAction: (org: Org) => void;
   refreshAction: (org: Org) => void;
 }
+
 const OrgTypeTrackerDefault = {
   [ORG_TYPES.DEV]: false,
   [ORG_TYPES.QA]: false,
@@ -96,70 +110,216 @@ const ConfirmDeleteModal = ({
   );
 };
 
-const OrgCard = ({
-  orgs,
+const UserActions = ({
   type,
-  displayType,
-  userId,
-  isCreatingOrg,
-  isDeletingOrg,
-  createAction,
-  deleteAction,
-  refreshAction,
-  commits,
-}: OrgCardProps) => {
-  const org = orgs[type];
-  const ownedByCurrentUser = Boolean(
-    userId && org && org.url && userId === org.owner,
+  assignedUser,
+  openAssignUserModal,
+  setUser,
+}: {
+  type: OrgTypes;
+  assignedUser: GitHubUser | null;
+  openAssignUserModal: () => void;
+  setUser: (user: GitHubUser | null) => void;
+}) => {
+  if (assignedUser) {
+    const actions =
+      type === ORG_TYPES.QA
+        ? [i18n.t('Edit Reviewer'), i18n.t('Remove Reviewer')]
+        : [i18n.t('Edit Developer'), i18n.t('Remove Developer')];
+    const handleSelect = (option: { id: string; label: string }) => {
+      switch (option.id) {
+        case 'edit':
+          openAssignUserModal();
+          break;
+        case 'remove':
+          setUser(null);
+          break;
+      }
+    };
+    return (
+      <Dropdown
+        align="right"
+        assistiveText={{ icon: i18n.t('User Actions') }}
+        buttonClassName="slds-button_icon-x-small"
+        buttonVariant="icon"
+        iconCategory="utility"
+        iconName="down"
+        iconSize="small"
+        iconVariant="border-filled"
+        width="xx-small"
+        options={[
+          { id: 'edit', label: actions[0] },
+          { id: 'remove', label: actions[1] },
+        ]}
+        onSelect={handleSelect}
+      />
+    );
+  }
+  return <Button label={i18n.t('Assign')} onClick={openAssignUserModal} />;
+};
+
+const OrgIcon = ({
+  orgId,
+  ownedByCurrentUser,
+  isDeleting,
+}: {
+  orgId: string;
+  ownedByCurrentUser: boolean;
+  isDeleting: boolean;
+}) => {
+  const orgUrl = window.api_urls.scratch_org_redirect(orgId);
+  if (orgUrl && ownedByCurrentUser && !isDeleting) {
+    return (
+      <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
+        <Icon
+          category="utility"
+          name="link"
+          size="x-small"
+          className="icon-link slds-m-bottom_xxx-small"
+        />
+      </ExternalLink>
+    );
+  }
+  return (
+    <Icon
+      category="utility"
+      name="link"
+      size="x-small"
+      className="slds-m-bottom_xxx-small"
+    />
   );
-  const isCreating = isCreatingOrg[type] || (org && !org.url);
-  const isDeleting = isDeletingOrg[type] || (org && org.delete_queued_at);
-  const canSyncDevOrg =
-    ownedByCurrentUser && org && org.org_type === ORG_TYPES.DEV;
-  const { QA, Dev } = orgs;
-  const isSynced = QA?.latest_commit === Dev?.latest_commit;
+};
 
-  const doCreateAction = useCallback(() => {
-    createAction(type);
-  }, [createAction, type]);
-  const doDeleteAction = useCallback(() => {
-    /* istanbul ignore else */
-    if (org) {
-      deleteAction(org);
-    }
-  }, [deleteAction, org]);
-  const doRefreshAction = useCallback(() => {
-    /* istanbul ignore else */
-    if (org) {
-      refreshAction(org);
-    }
-  }, [refreshAction, org]);
-
-  let contents = null;
-  let icon = null;
-  let actions = null;
-  let footer = null;
+const OrgFooter = ({
+  org,
+  ownedByCurrentUser,
+  isCreating,
+  isDeleting,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  isCreating: boolean;
+  isDeleting: boolean;
+}) => {
   const loadingMsg = i18n.t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
-
   if (isCreating) {
-    actions = (
+    return <>{loadingMsg}</>;
+  }
+  if (org) {
+    if (isDeleting) {
+      return <>{i18n.t('Deleting Org…')}</>;
+    }
+    if (ownedByCurrentUser) {
+      if (org.currently_capturing_changes) {
+        return (
+          <>
+            {i18n.t('Capturing Selected Changes…')}
+            <div className="slds-p-top_small">{loadingMsg}</div>
+          </>
+        );
+      }
+      if (org.currently_refreshing_changes) {
+        return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
+      }
+      const orgUrl = window.api_urls.scratch_org_redirect(org.id);
+      /* istanbul ignore else */
+      // eslint-disable-next-line no-lonely-if
+      if (orgUrl) {
+        return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
+      }
+    }
+  }
+  return null;
+};
+
+const OrgActions = ({
+  org,
+  ownedByCurrentUser,
+  assignedToCurrentUser,
+  isCreating,
+  isDeleting,
+  doCreateAction,
+  doDeleteAction,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  assignedToCurrentUser: boolean;
+  isCreating: boolean;
+  isDeleting: boolean;
+  doCreateAction: () => void;
+  doDeleteAction: () => void;
+}) => {
+  if (isCreating) {
+    return (
       <Button
         label={<LabelWithSpinner label={i18n.t('Creating Org…')} />}
         disabled
       />
     );
-    footer = loadingMsg;
-  } else if (org) {
-    const orgUrl = window.api_urls.scratch_org_redirect(org.id);
-    const expiresAt = org.expires_at && new Date(org.expires_at);
-    contents = (
+  }
+  if (!org && assignedToCurrentUser) {
+    return <Button label={i18n.t('Create Org')} onClick={doCreateAction} />;
+  }
+  if (ownedByCurrentUser && !isDeleting) {
+    return (
+      <Dropdown
+        align="right"
+        assistiveText={{ icon: i18n.t('Org Actions') }}
+        buttonClassName="slds-button_icon-x-small"
+        buttonVariant="icon"
+        iconCategory="utility"
+        iconName="down"
+        iconSize="small"
+        iconVariant="border-filled"
+        width="xx-small"
+        options={[{ id: 0, label: i18n.t('Delete Org') }]}
+        onSelect={doDeleteAction}
+      />
+    );
+  }
+  return null;
+};
+
+const OrgInfo = ({
+  org,
+  ownedByCurrentUser,
+  assignedToCurrentUser,
+  isCreating,
+  type,
+  taskCommits,
+  doRefreshAction,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  assignedToCurrentUser: boolean;
+  isCreating: boolean;
+  type: OrgTypes;
+  taskCommits: string[];
+  doRefreshAction: () => void;
+}) => {
+  if (!org && !assignedToCurrentUser) {
+    return (
       <ul>
-        {/* last commit status for dev org */}
-        {type === ORG_TYPES.DEV && (
+        <li>
+          <strong>{i18n.t('Status')}:</strong> {i18n.t('not yet created')}
+        </li>
+      </ul>
+    );
+  }
+  if (!org || isCreating) {
+    return null;
+  }
+  const canSyncDevOrg = type === ORG_TYPES.DEV && ownedByCurrentUser;
+  const expiresAt = org.expires_at && new Date(org.expires_at);
+  let commitStatus = null;
+  if (org.latest_commit) {
+    switch (type) {
+      case ORG_TYPES.DEV: {
+        // last commit status for dev org
+        commitStatus = (
           <li>
-            {' '}
             <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
             {org.latest_commit_url ? (
               <ExternalLink url={org.latest_commit_url}>
@@ -169,143 +329,256 @@ const OrgCard = ({
               org.latest_commit.substring(0, 7)
             )}
           </li>
-        )}
-        {/* synced status for QA org */}
-        {type === ORG_TYPES.QA &&
-          (isSynced ? (
-            <strong>Up to Date</strong>
-          ) : (
-            <>
-              <strong>Behind Latest:</strong>{' '}
-              {commits && getUnSyncedCommits(commits, org)}
-              commits (
-              <ExternalLink url={org.latest_commit_url}>
-                org comparison
-              </ExternalLink>
-              )
-            </>
-          ))}
-        {/* expiation data for each org */}
-        {expiresAt && (
+        );
+        break;
+      }
+      case ORG_TYPES.QA: {
+        // synced status for QA org
+        const orgCommitIdx = taskCommits.indexOf(org.latest_commit);
+        const isSynced = orgCommitIdx <= 0;
+        commitStatus = isSynced ? (
           <li>
-            <strong>{i18n.t('Expires')}:</strong>{' '}
-            <span title={format(expiresAt, 'PPpp')}>
-              {formatDistanceToNow(expiresAt, {
-                addSuffix: true,
-              })}
-            </span>
+            <strong>Up to Date</strong>
           </li>
-        )}
-        <li>
-          {/* status for orgs */}
-          <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
-          {canSyncDevOrg && (
-            <>
-              {' | '}
-              <Button
-                label={i18n.t('check again')}
-                variant="link"
-                onClick={doRefreshAction}
-              />
-            </>
-          )}
-        </li>
-      </ul>
-    );
-    icon = (
-      <Icon
-        category="utility"
-        name="link"
-        size="x-small"
-        className="slds-m-bottom_xxx-small"
-      />
-    );
-
-    if (isDeleting) {
-      footer = (
-        <>
-          <SpinnerWrapper size="small" />
-          {i18n.t('Deleting Org…')}
-        </>
-      );
-    } else if (ownedByCurrentUser) {
-      if (org.currently_capturing_changes) {
-        footer = (
-          <>
-            <SpinnerWrapper size="small" />
-            {i18n.t('Capturing Selected Changes…')}
-            <div className="slds-p-top_small">{loadingMsg}</div>
-          </>
+        ) : (
+          <li>
+            <strong>Behind Latest:</strong> {orgCommitIdx}
+            {pluralize(orgCommitIdx, 'commit')} (
+            <ExternalLink url={org.latest_commit_url}>
+              org comparison
+            </ExternalLink>
+            )
+          </li>
         );
-      } else if (org.currently_refreshing_changes) {
-        footer = (
-          <>
-            <SpinnerWrapper size="small" />
-            {i18n.t('Checking for Uncaptured Changes…')}
-          </>
-        );
-      } else {
-        /* istanbul ignore else */
-        // eslint-disable-next-line no-lonely-if
-        if (orgUrl) {
-          footer = (
-            <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>
-          );
-        }
+        break;
       }
-      /* istanbul ignore else */
-      if (orgUrl) {
-        icon = (
-          <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
-            <Icon
-              category="utility"
-              name="link"
-              size="x-small"
-              className="icon-link slds-m-bottom_xxx-small"
-            />
-          </ExternalLink>
-        );
-      }
-      actions = (
-        <Dropdown
-          align="right"
-          assistiveText={{ icon: 'Actions' }}
-          buttonClassName="slds-button_icon-x-small"
-          buttonVariant="icon"
-          iconCategory="utility"
-          iconName="down"
-          iconSize="small"
-          iconVariant="border-filled"
-          width="xx-small"
-          options={[{ id: 0, label: i18n.t('Delete') }]}
-          onSelect={doDeleteAction}
-        />
-      );
     }
-  } else {
-    actions = <Button label={i18n.t('Create Org')} onClick={doCreateAction} />;
   }
 
   return (
-    <div
-      className="slds-size_1-of-1
-        slds-large-size_1-of-2
-        slds-p-around_x-small"
-    >
-      <Card
-        bodyClassName="slds-card__body_inner"
-        icon={icon}
-        heading={displayType}
-        headerActions={actions}
-        footer={footer}
-      >
-        {contents}
-      </Card>
-    </div>
+    <ul>
+      {commitStatus}
+      {/* expiration date for each org */}
+      {expiresAt && (
+        <li>
+          <strong>{i18n.t('Expires')}:</strong>{' '}
+          <span title={format(expiresAt, 'PPpp')}>
+            {formatDistanceToNow(expiresAt, { addSuffix: true })}
+          </span>
+        </li>
+      )}
+      {/* status for orgs */}
+      <li>
+        <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
+        {canSyncDevOrg && (
+          <>
+            {' | '}
+            <Button
+              label={i18n.t('check again')}
+              variant="link"
+              onClick={doRefreshAction}
+            />
+          </>
+        )}
+      </li>
+    </ul>
   );
 };
 
-const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
+const OrgSpinner = ({
+  org,
+  ownedByCurrentUser,
+  isDeleting,
+}: {
+  org: Org | null;
+  ownedByCurrentUser: boolean;
+  isDeleting: boolean;
+}) => {
+  if (
+    (org && isDeleting) ||
+    (ownedByCurrentUser &&
+      (org?.currently_capturing_changes || org?.currently_refreshing_changes))
+  ) {
+    return <SpinnerWrapper size="small" />;
+  }
+  return null;
+};
+
+const OrgCard = withRouter(
+  ({
+    orgs,
+    type,
+    user,
+    assignedUser,
+    projectUsers,
+    projectUrl,
+    taskCommits,
+    isCreatingOrg,
+    isDeletingOrg,
+    assignUserAction,
+    createAction,
+    deleteAction,
+    refreshAction,
+    history,
+  }: OrgCardProps & RouteComponentProps) => {
+    const userId = user?.id;
+    const username = user?.username;
+    const assignedToCurrentUser = Boolean(
+      user && username === assignedUser?.login,
+    );
+    const org = assignedToCurrentUser ? orgs[type] : null;
+    const ownedByCurrentUser = Boolean(
+      user && org?.url && userId === org.owner,
+    );
+
+    const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
+    const openAssignUserModal = () => {
+      setAssignUserModalOpen(true);
+    };
+    const closeAssignUserModal = () => {
+      setAssignUserModalOpen(false);
+    };
+
+    const doAssignUserAction = useCallback(
+      (assignee: GitHubUser | null) => {
+        assignUserAction({ type, assignee });
+        closeAssignUserModal();
+      },
+      [assignUserAction, type],
+    );
+    const doCreateAction = useCallback(() => {
+      createAction(type);
+    }, [createAction, type]);
+    const doDeleteAction = useCallback(() => {
+      /* istanbul ignore else */
+      if (org) {
+        deleteAction(org);
+      }
+    }, [deleteAction, org]);
+    const doRefreshAction = useCallback(() => {
+      /* istanbul ignore else */
+      if (org) {
+        refreshAction(org);
+      }
+    }, [refreshAction, org]);
+
+    const isCreating = Boolean(isCreatingOrg[type] || (org && !org.url));
+    const isDeleting = Boolean(isDeletingOrg[type] || org?.delete_queued_at);
+    const heading =
+      type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
+    const orgHeading =
+      type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org');
+    const userModalHeading =
+      type === ORG_TYPES.QA
+        ? i18n.t('Assign Reviewer')
+        : i18n.t('Assign Developer');
+
+    const handleEmptyMessageClick = useCallback(() => {
+      history.push(projectUrl);
+    }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return (
+      <div
+        className="slds-size_1-of-1
+        slds-large-size_1-of-2
+        slds-p-around_x-small"
+      >
+        <Card
+          className={classNames({ 'has-nested-card': assignedUser })}
+          bodyClassName="slds-card__body_inner"
+          heading={heading}
+          headerActions={
+            <UserActions
+              type={type}
+              assignedUser={assignedUser}
+              openAssignUserModal={openAssignUserModal}
+              setUser={doAssignUserAction}
+            />
+          }
+          footer={
+            <OrgFooter
+              org={org}
+              ownedByCurrentUser={ownedByCurrentUser}
+              isCreating={isCreating}
+              isDeleting={isDeleting}
+            />
+          }
+        >
+          {assignedUser && (
+            <>
+              <div className="slds-m-bottom_small">
+                <UserCard user={assignedUser} className="nested-card" />
+              </div>
+              <hr className="slds-m-vertical_none" />
+              <Card
+                className="nested-card"
+                bodyClassName="slds-card__body_inner"
+                heading={orgHeading}
+                icon={
+                  org &&
+                  !isCreating && (
+                    <OrgIcon
+                      orgId={org.id}
+                      ownedByCurrentUser={ownedByCurrentUser}
+                      isDeleting={isDeleting}
+                    />
+                  )
+                }
+                headerActions={
+                  <OrgActions
+                    org={org}
+                    ownedByCurrentUser={ownedByCurrentUser}
+                    assignedToCurrentUser={assignedToCurrentUser}
+                    isCreating={isCreating}
+                    isDeleting={isDeleting}
+                    doCreateAction={doCreateAction}
+                    doDeleteAction={doDeleteAction}
+                  />
+                }
+              >
+                <OrgInfo
+                  org={org}
+                  ownedByCurrentUser={ownedByCurrentUser}
+                  assignedToCurrentUser={assignedToCurrentUser}
+                  isCreating={isCreating}
+                  type={type}
+                  taskCommits={taskCommits || []}
+                  doRefreshAction={doRefreshAction}
+                />
+                <OrgSpinner
+                  org={org}
+                  ownedByCurrentUser={ownedByCurrentUser}
+                  isDeleting={isDeleting}
+                />
+              </Card>
+            </>
+          )}
+        </Card>
+        <AssignUserModal
+          allUsers={projectUsers}
+          selectedUser={assignedUser}
+          heading={userModalHeading}
+          isOpen={assignUserModalOpen}
+          emptyMessageAction={handleEmptyMessageClick}
+          onRequestClose={closeAssignUserModal}
+          setUser={doAssignUserAction}
+        />
+      </div>
+    );
+  },
+);
+
+const OrgCards = ({
+  orgs,
+  task,
+  projectUsers,
+  projectUrl,
+}: {
+  orgs: OrgsByTask;
+  task: Task;
+  projectUsers: GitHubUser[];
+  projectUrl: string;
+}) => {
   const user = useSelector(selectUserState);
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
@@ -322,6 +595,22 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
   );
   const [isWaitingToDeleteDevOrg, setIsWaitingToDeleteDevOrg] = useState(false);
   const dispatch = useDispatch<ThunkDispatch>();
+
+  const assignUser = useCallback(
+    ({ type, assignee }: { type: OrgTypes; assignee: GitHubUser | null }) => {
+      const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.TASK,
+          data: {
+            ...task,
+            [userType]: assignee,
+          },
+        }),
+      );
+    },
+    [task], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const devOrg = orgs[ORG_TYPES.DEV];
 
@@ -372,7 +661,7 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
 
   let deleteAction: (...args: any[]) => void = openConnectModal;
   let createAction: (...args: any[]) => void = openConnectModal;
-  if (user && user.valid_token_for) {
+  if (user?.valid_token_for) {
     createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
     deleteAction = (org: Org) => {
       if (org.org_type === ORG_TYPES.DEV) {
@@ -406,10 +695,13 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
         <OrgCard
           orgs={orgs}
           type={ORG_TYPES.DEV}
-          displayType={i18n.t('Dev')}
-          userId={user && user.id}
+          user={user}
+          assignedUser={task.assigned_dev}
+          projectUsers={projectUsers}
+          projectUrl={projectUrl}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
+          assignUserAction={assignUser}
           createAction={createAction}
           deleteAction={deleteAction}
           refreshAction={doRefetchOrg}
@@ -417,14 +709,17 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
         <OrgCard
           orgs={orgs}
           type={ORG_TYPES.QA}
-          displayType={i18n.t('QA')}
-          userId={user && user.id}
+          user={user}
+          assignedUser={task.assigned_qa}
+          projectUsers={projectUsers}
+          projectUrl={projectUrl}
+          taskCommits={task.commits.map((c) => c.id)}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
+          assignUserAction={assignUser}
           createAction={createAction}
           deleteAction={deleteAction}
           refreshAction={doRefetchOrg}
-          commits={task.commits}
         />
       </div>
       <ConnectModal

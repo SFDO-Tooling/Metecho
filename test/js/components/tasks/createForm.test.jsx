@@ -84,7 +84,6 @@ describe('<TaskForm/>', () => {
           name: 'Name of Task',
           description: 'This is the description',
           project: 'r1',
-          assignee: null,
         },
         hasForm: true,
       });
@@ -105,7 +104,6 @@ describe('<TaskForm/>', () => {
                 name: 'Name of Task',
                 description: '',
                 project: 'r1',
-                assignee: null,
               },
             },
           }),

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import { ObjectsAction } from '@/store/actions';
+import { GitHubUser } from '@/store/repositories/reducer';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { OBJECT_TYPES, ObjectTypes, TaskStatuses } from '@/utils/constants';
@@ -32,6 +33,8 @@ export interface Task {
   pr_url: string | null;
   pr_is_open: boolean;
   commits: Commit[];
+  assigned_dev: GitHubUser | null;
+  assigned_qa: GitHubUser | null;
   status: TaskStatuses;
 }
 
@@ -109,8 +112,25 @@ const reducer = (
       }
       return tasks;
     }
-    case 'TASK_UPDATE': {
-      const task = action.payload;
+    case 'TASK_UPDATE':
+    case 'UPDATE_OBJECT_SUCCEEDED': {
+      let maybeTask;
+      if (action.type === 'TASK_UPDATE') {
+        maybeTask = action.payload;
+      } else {
+        const {
+          object,
+          objectType,
+        }: { object: Task; objectType: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.TASK && object) {
+          maybeTask = object;
+        }
+      }
+      /* istanbul ignore if */
+      if (!maybeTask) {
+        return tasks;
+      }
+      const task = maybeTask;
       const projectTasks = tasks[task.project] || [];
       const existingTask = projectTasks.find((t) => t.id === task.id);
       if (existingTask) {

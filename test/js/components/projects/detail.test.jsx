@@ -34,7 +34,14 @@ const defaultState = {
           {
             id: '123456',
             login: 'TestGitHubUser',
-            avatar_url: 'https://example.com/avatar.png',
+          },
+          {
+            id: '234567',
+            login: 'OtherUser',
+          },
+          {
+            id: '345678',
+            login: 'ThirdUser',
           },
         ],
       },
@@ -52,7 +59,16 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           old_slugs: ['old-slug'],
-          github_users: [],
+          github_users: [
+            {
+              id: '123456',
+              login: 'TestGitHubUser',
+            },
+            {
+              id: '234567',
+              login: 'OtherUser',
+            },
+          ],
         },
       ],
       next: null,
@@ -79,6 +95,11 @@ const defaultState = {
         project: 'project1',
         description: 'Task Description',
         status: 'In progress',
+        assigned_dev: {
+          id: '123456',
+          login: 'TestGitHubUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
       },
       {
         id: 'task3',
@@ -221,13 +242,13 @@ describe('<ProjectDetail/>', () => {
 
   describe('Change project assigned users', () => {
     test('setProjectUsers', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText } = setup();
       fireEvent.click(getByText('Add or Remove Collaborators'));
-      fireEvent.click(getByText('TestGitHubUser'));
+      fireEvent.click(getByText('Select row 3'));
       fireEvent.click(getByText('Save'));
 
-      expect(queryByText('GitHub Username')).toBeNull();
       expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.github_users).toHaveLength(3);
     });
 
     test('removeUser', () => {
@@ -257,6 +278,44 @@ describe('<ProjectDetail/>', () => {
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+    });
+  });
+
+  describe('Change task assigned user', () => {
+    test('assignUser', () => {
+      const { getAllByText, baseElement } = setup();
+      fireEvent.click(getAllByText('Assign Reviewer')[0]);
+      fireEvent.click(
+        baseElement.querySelector('.team-member-button[title="OtherUser"]'),
+      );
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
+        'OtherUser',
+      );
+    });
+
+    test('closes modal if no users to assign', () => {
+      const { getByText, getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  github_users: [],
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getAllByText('Assign Reviewer')[0]);
+      fireEvent.click(getByText('Add collaborators to the project'));
+
+      expect(getByText('GitHub Username')).toBeVisible();
     });
   });
 

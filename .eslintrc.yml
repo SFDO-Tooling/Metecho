@@ -9,15 +9,21 @@ env:
   node: true
 settings:
   import/resolver:
+    node:
+      extensions:
+        - .ts
+        - .tsx
+        - .js
+        - .jsx
     typescript: {}
     webpack:
       config:
         resolve:
           extensions:
-            - .js
-            - .jsx
             - .ts
             - .tsx
+            - .js
+            - .jsx
           modules:
             - src
             - static

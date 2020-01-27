@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/browser';
 let config;
 try {
   const el = document.getElementById('js-sentry-setup');
-  if (el && el.innerHTML) {
+  if (el?.innerHTML) {
     config = JSON.parse(el.innerHTML);
   }
 } catch (err) {
@@ -11,7 +11,7 @@ try {
   // and stopping execution. Intentionally swallow Error and continue.
 }
 
-if (config && config.dsn) {
+if (config?.dsn) {
   window.Sentry = Sentry;
 
   // Configure Sentry

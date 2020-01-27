@@ -27,6 +27,7 @@ afterEach(() => {
 const defaultState = {
   user: {
     id: 'user-id',
+    username: 'user-name',
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -39,6 +40,12 @@ const defaultState = {
         old_slugs: [],
         description: 'This is a test repository.',
         repo_url: 'https://github.com/test/test-repo',
+        github_users: [
+          {
+            id: 'user-1',
+            login: 'user-name',
+          },
+        ],
       },
     ],
     notFound: ['different-repository'],
@@ -54,6 +61,12 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           old_slugs: [],
+          github_users: [
+            {
+              id: 'user-1',
+              login: 'user-name',
+            },
+          ],
         },
       ],
       next: null,
@@ -72,6 +85,10 @@ const defaultState = {
         description: 'Task Description',
         has_unmerged_commits: false,
         commits: [],
+        assigned_dev: {
+          login: 'user-name',
+        },
+        assigned_qa: null,
       },
     ],
   },

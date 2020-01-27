@@ -8,12 +8,9 @@ import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import {
-  AssignedUserCards,
-  AssignUsersModal,
-} from '@/components/projects/repositoryGitHubUsers';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
+import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -29,7 +26,8 @@ import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
 import { GitHubUser } from '@/store/repositories/reducer';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { Task } from '@/store/tasks/reducer';
+import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -38,12 +36,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
 
-  // Assign users modal related:
+  // "Assign users to project" modal related:
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
-  const openAvailableUserModal = () => {
+  const openAssignUsersModal = () => {
     setAssignUsersModalOpen(true);
   };
-  const closeAvailableUserModal = () => {
+  const closeAssignUsersModal = () => {
     setAssignUsersModalOpen(false);
   };
   const setProjectUsers = useCallback(
@@ -89,14 +87,40 @@ const ProjectDetail = (props: RouteComponentProps) => {
     [project, dispatch],
   );
 
-  // Submit modal related:
+  // "Assign user to task" modal related:
+  const assignUser = useCallback(
+    ({
+      task,
+      type,
+      assignee,
+    }: {
+      task: Task;
+      type: OrgTypes;
+      assignee: GitHubUser | null;
+    }) => {
+      /* istanbul ignore next */
+      const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.TASK,
+          data: {
+            ...task,
+            [userType]: assignee,
+          },
+        }),
+      );
+    },
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // "Submit" modal related:
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
   };
-  const currentlySubmitting = Boolean(project && project.currently_creating_pr);
+  const currentlySubmitting = Boolean(project?.currently_creating_pr);
   const readyToSubmit = Boolean(
-    project && project.has_unmerged_commits && !project.pr_is_open,
+    project?.has_unmerged_commits && !project?.pr_is_open,
   );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -200,18 +224,20 @@ const ProjectDetail = (props: RouteComponentProps) => {
               <Button
                 label={i18n.t('Add or Remove Collaborators')}
                 variant="outline-brand"
-                onClick={openAvailableUserModal}
+                onClick={openAssignUsersModal}
               />
             </div>
             <AssignUsersModal
               allUsers={repository.github_users}
-              users={project.github_users}
-              projectName={project.name}
+              selectedUsers={project.github_users}
+              heading={`${i18n.t('Add or Remove Collaborators for')} ${
+                project.name
+              }`}
               isOpen={assignUsersModalOpen}
-              onRequestClose={closeAvailableUserModal}
+              onRequestClose={closeAssignUsersModal}
               setUsers={setProjectUsers}
             />
-            <AssignedUserCards
+            <UserCards
               users={project.github_users}
               removeUser={removeProjectUser}
             />
@@ -237,6 +263,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
               repositorySlug={repository.slug}
               projectSlug={project.slug}
               tasks={tasks}
+              projectUsers={project.github_users}
+              openAssignProjectUsersModal={openAssignUsersModal}
+              assignUserAction={assignUser}
             />
           </>
         ) : (

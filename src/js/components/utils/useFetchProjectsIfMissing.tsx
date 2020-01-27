@@ -19,7 +19,7 @@ export default (
   );
 
   useEffect(() => {
-    if (repository && (!projects || !projects.fetched)) {
+    if (repository && !projects?.fetched) {
       // Fetch projects from API
       dispatch(
         fetchObjects({

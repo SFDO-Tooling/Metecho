@@ -70,7 +70,6 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     fields: { name: '', description: '' },
     objectType: OBJECT_TYPES.TASK,
     additionalData: {
-      assignee: null,
       project: project.id,
     },
     onSuccess,
