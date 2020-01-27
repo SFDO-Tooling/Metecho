@@ -171,6 +171,37 @@ export const AssignUsersModal = ({
   );
 };
 
+const GitHubUserButton = ({
+  user,
+  isSelected,
+  ...props
+}: {
+  user: GitHubUser;
+  isSelected?: boolean;
+  [key: string]: any;
+}) => (
+  <Button
+    className={classNames(
+      'slds-size_full',
+      'slds-p-around_xx-small',
+      'team-member-button',
+      {
+        'is-selected': isSelected,
+      },
+    )}
+    title={user.login}
+    label={
+      <>
+        <GitHubUserAvatar user={user} />
+        <span className="team-member-username">{user.login}</span>
+      </>
+    }
+    variant="base"
+    disabled={isSelected}
+    {...props}
+  />
+);
+
 export const AssignUserModal = ({
   allUsers,
   selectedUser,
@@ -198,21 +229,7 @@ export const AssignUserModal = ({
             <div className="slds-text-title slds-m-bottom_xx-small">
               {i18n.t('Currently Assigned')}
             </div>
-            <Button
-              className="slds-size_full
-              slds-p-around_xx-small
-              team-member-button-selected"
-              label={
-                <>
-                  <GitHubUserAvatar user={selectedUser} />
-                  <span className="team-member-username">
-                    {selectedUser.login}
-                  </span>
-                </>
-              }
-              variant="base"
-              disabled
-            />
+            <GitHubUserButton user={selectedUser} isSelected />
           </div>
           <hr className="slds-m-vertical_none slds-m-horizontal_small" />
         </>
@@ -220,20 +237,8 @@ export const AssignUserModal = ({
       {filteredUsers.length ? (
         <ul className="slds-p-around_small">
           {filteredUsers.map((user) => (
-            <li key={user.id} title={user.login}>
-              <Button
-                className="slds-size_full
-                  slds-p-around_xx-small
-                  team-member-button"
-                label={
-                  <>
-                    <GitHubUserAvatar user={user} />
-                    <span className="team-member-username">{user.login}</span>
-                  </>
-                }
-                variant="base"
-                onClick={() => setUser(user)}
-              />
+            <li key={user.id}>
+              <GitHubUserButton user={user} onClick={() => setUser(user)} />
             </li>
           ))}
         </ul>

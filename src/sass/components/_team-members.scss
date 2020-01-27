@@ -13,16 +13,16 @@
 .team-member-username {
   margin-left: $spacing-x-small;
 
-  .team-member-button-selected & {
+  .team-member-button.is-selected & {
     color: $color-text-default;
   }
 }
 
-.team-member-button-selected {
+.team-member-button.is-selected {
   background-color: $color-background-row-active;
 }
 
-.team-member-button {
+.team-member-button:not(.is-selected) {
   &:hover {
     border: 1px solid;
   }

@@ -39,7 +39,7 @@ const AuthorTableCell = ({ item, className, ...props }: TableCellProps) => {
     return null;
   }
   let author = item.author.username;
-  const name = item.author?.name;
+  const name = item.author.name;
   if (name && name !== author) {
     author = `${author} (${name})`;
   }

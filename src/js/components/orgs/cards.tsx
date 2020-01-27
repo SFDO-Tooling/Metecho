@@ -117,7 +117,7 @@ const UserActions = ({
     return (
       <Dropdown
         align="right"
-        assistiveText={{ icon: 'User Actions' }}
+        assistiveText={{ icon: i18n.t('User Actions') }}
         buttonClassName="slds-button_icon-x-small"
         buttonVariant="icon"
         iconCategory="utility"
@@ -244,7 +244,7 @@ const OrgActions = ({
     return (
       <Dropdown
         align="right"
-        assistiveText={{ icon: 'Org Actions' }}
+        assistiveText={{ icon: i18n.t('Org Actions') }}
         buttonClassName="slds-button_icon-x-small"
         buttonVariant="icon"
         iconCategory="utility"
@@ -260,7 +260,7 @@ const OrgActions = ({
   return null;
 };
 
-const OrgContents = ({
+const OrgInfo = ({
   org,
   ownedByCurrentUser,
   assignedToCurrentUser,
@@ -498,7 +498,7 @@ const OrgCard = withRouter(
                   />
                 }
               >
-                <OrgContents
+                <OrgInfo
                   org={org}
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
