@@ -54,11 +54,13 @@ const defaultState = {
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
   },
+  isSynced: true,
 };
 const defaultTask = {
   id: 'task-id',
   assigned_dev: { id: 'user-id', login: 'user-name' },
   assigned_qa: { id: 'user-id', login: 'user-name' },
+  commits: [],
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
@@ -215,7 +217,7 @@ describe('<OrgCards/>', () => {
   });
 
   describe('QA org', () => {
-    test('renders without status', () => {
+    test('renders "up to date" when synced', () => {
       const orgs = {
         ...defaultOrgs,
         Dev: null,
@@ -224,12 +226,11 @@ describe('<OrgCards/>', () => {
           org_type: 'QA',
         },
       };
-      const { queryByText, getByText } = setup({ orgs });
+      const { debug, queryByText, getByText } = setup({ orgs });
 
       expect(getByText('View Org')).toBeVisible();
-      expect(
-        queryByText('has 1 uncaptured change', { exact: false }),
-      ).toBeNull();
+      debug();
+      expect(queryByText('Up to Date', { exact: false })).toBeVisible();
     });
   });
 
