@@ -162,23 +162,31 @@ const OrgIcon = ({
   orgId,
   ownedByCurrentUser,
   isDeleting,
+  isSynced,
 }: {
   orgId: string;
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
+  isSynced?: boolean;
 }) => {
   const orgUrl = window.api_urls.scratch_org_redirect(orgId);
   if (orgUrl && ownedByCurrentUser && !isDeleting) {
-    return (
-      <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
-        <Icon
-          category="utility"
-          name="link"
-          size="x-small"
-          className="icon-link slds-m-bottom_xxx-small"
-        />
-      </ExternalLink>
+    const iconLink = (
+      <Icon
+        category="utility"
+        name="link"
+        size="x-small"
+        className="icon-link slds-m-bottom_xxx-small"
+      />
     );
+    const viewOrgLink = isSynced ? (
+      <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
+        {iconLink}
+      </ExternalLink>
+    ) : (
+      <span onClick={() => console.log('maybe refresh org')}>{iconLink}</span>
+    );
+    return viewOrgLink;
   }
   return (
     <Icon
@@ -200,6 +208,7 @@ const OrgFooter = ({
   ownedByCurrentUser: boolean;
   isCreating: boolean;
   isDeleting: boolean;
+  isSynced?: boolean;
 }) => {
   const loadingMsg = i18n.t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
@@ -476,7 +485,9 @@ const OrgCard = withRouter(
     const handleEmptyMessageClick = useCallback(() => {
       history.push(projectUrl);
     }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
-
+    const commitIdx =
+      taskCommits && org ? taskCommits.indexOf(org?.latest_commit) : -1; // return false otherwise?
+    const isSynced = commitIdx <= 0;
     return (
       <div
         className="slds-size_1-of-1
@@ -501,6 +512,7 @@ const OrgCard = withRouter(
               ownedByCurrentUser={ownedByCurrentUser}
               isCreating={isCreating}
               isDeleting={isDeleting}
+              isSynced={isSynced}
             />
           }
         >
@@ -521,6 +533,7 @@ const OrgCard = withRouter(
                       orgId={org.id}
                       ownedByCurrentUser={ownedByCurrentUser}
                       isDeleting={isDeleting}
+                      isSynced={isSynced}
                     />
                   )
                 }
