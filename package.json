@@ -43,8 +43,10 @@
     "test:py:report-coverage": "$VIRTUAL_ENV/bin/coveralls",
     "test:py:check-coverage": "coverage3 report --fail-under=100",
     "test": "run-s test:js test:py",
+    "packtracker": "packtracker-upload --stats=webpack-stats.json --output-path=dist/prod",
     "build": "webpack --config webpack.dev.js",
-    "prod": "webpack --config webpack.prod.js"
+    "prod": "webpack --config webpack.prod.js",
+    "prod:stats": "webpack --config webpack.prod.js --json > webpack-stats.json"
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.11.1",
