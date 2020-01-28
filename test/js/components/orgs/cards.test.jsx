@@ -181,7 +181,7 @@ describe('<OrgCards/>', () => {
     });
   });
 
-  describe('Edit Reviewer click', () => {
+  describe('Change Reviewer click', () => {
     test('updates assigned user', () => {
       const task = {
         ...defaultTask,
@@ -189,7 +189,7 @@ describe('<OrgCards/>', () => {
       };
       const { getByText } = setup({ task });
       fireEvent.click(getByText('User Actions'));
-      fireEvent.click(getByText('Edit Reviewer'));
+      fireEvent.click(getByText('Change Reviewer'));
       fireEvent.click(getByText('other-user'));
 
       expect(updateObject).toHaveBeenCalled();

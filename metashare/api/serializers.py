@@ -282,6 +282,15 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
     def get_has_unsaved_changes(self, obj) -> bool:
         return bool(getattr(obj, "unsaved_changes", {}))
 
+    def validate(self, data):
+        if ScratchOrg.objects.filter(
+            task=data["task"], org_type=data["org_type"]
+        ).exists():
+            raise serializers.ValidationError(
+                "A ScratchOrg of this type already exists for this task."
+            )
+        return data
+
     def save(self, **kwargs):
         kwargs["owner"] = kwargs.get("owner", self.context["request"].user)
         return super().save(**kwargs)

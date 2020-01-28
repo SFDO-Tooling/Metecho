@@ -125,8 +125,8 @@ const UserActions = ({
   if (assignedUser) {
     const actions =
       type === ORG_TYPES.QA
-        ? [i18n.t('Edit Reviewer'), i18n.t('Remove Reviewer')]
-        : [i18n.t('Edit Developer'), i18n.t('Remove Developer')];
+        ? [i18n.t('Change Reviewer'), i18n.t('Remove Reviewer')]
+        : [i18n.t('Change Developer'), i18n.t('Remove Developer')];
     const handleSelect = (option: { id: string; label: string }) => {
       switch (option.id) {
         case 'edit':
@@ -515,8 +515,8 @@ const OrgCard = withRouter(
     return (
       <div
         className="slds-size_1-of-1
-        slds-large-size_1-of-2
-        slds-p-around_x-small"
+          slds-large-size_1-of-2
+          slds-p-around_x-small"
       >
         <Card
           className={classNames({ 'has-nested-card': assignedUser })}

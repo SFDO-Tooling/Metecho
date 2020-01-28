@@ -42,8 +42,10 @@
     "test:py:report-coverage": "$VIRTUAL_ENV/bin/coveralls",
     "test:py:check-coverage": "coverage3 report --fail-under=100",
     "test": "run-s test:js test:py",
+    "packtracker": "packtracker-upload --stats=webpack-stats.json --output-path=dist/prod",
     "build": "webpack --config webpack.dev.js",
-    "prod": "webpack --config webpack.prod.js"
+    "prod": "webpack --config webpack.prod.js",
+    "prod:stats": "webpack --config webpack.prod.js --json > webpack-stats.json"
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.11.2",
@@ -105,7 +107,7 @@
     "coveralls": "^3.0.9",
     "css-loader": "^3.4.2",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.9.0",
+    "eslint-config-prettier": "^6.10.0",
     "eslint-import-resolver-typescript": "^2.0.0",
     "eslint-import-resolver-webpack": "^0.12.1",
     "eslint-plugin-import": "^2.20.0",
@@ -134,7 +136,7 @@
     "stylelint-config-prettier": "^8.0.1",
     "stylelint-config-recommended": "^3.0.0",
     "stylelint-prettier": "^1.1.2",
-    "stylelint-scss": "^3.14.0",
+    "stylelint-scss": "^3.14.2",
     "svg-inline-loader": "^0.8.0",
     "typescript": "^3.7.5",
     "url-loader": "^3.0.0",

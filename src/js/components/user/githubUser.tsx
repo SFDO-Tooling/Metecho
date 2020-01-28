@@ -235,13 +235,18 @@ export const AssignUserModal = ({
         </>
       )}
       {filteredUsers.length ? (
-        <ul className="slds-p-around_small">
-          {filteredUsers.map((user) => (
-            <li key={user.id}>
-              <GitHubUserButton user={user} onClick={() => setUser(user)} />
-            </li>
-          ))}
-        </ul>
+        <div className="slds-p-around_small">
+          <div className="slds-text-title slds-m-bottom_xx-small">
+            {i18n.t('Assign To User')}
+          </div>
+          <ul>
+            {filteredUsers.map((user) => (
+              <li key={user.id}>
+                <GitHubUserButton user={user} onClick={() => setUser(user)} />
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <div className="slds-p-around_medium">
           {i18n.t('There are no collaborators on this project')}.{' '}
