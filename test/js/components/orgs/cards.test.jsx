@@ -133,13 +133,17 @@ describe('<OrgCards/>', () => {
         ...defaultOrgs,
         Dev: {
           ...defaultOrgs.Dev,
-          owner: 'other-user',
+          owner: 'other-user-id',
+          owner_username: 'other-user',
           unsaved_changes: {},
           has_unsaved_changes: false,
         },
       };
       const task = {
         ...defaultTask,
+        assigned_dev: {
+          login: 'other-user',
+        },
         assigned_qa: {
           login: 'other-user',
         },
@@ -149,6 +153,23 @@ describe('<OrgCards/>', () => {
       expect(queryByText('View Org')).toBeNull();
       expect(getByText('up-to-date', { exact: false })).toBeVisible();
       expect(queryByText('check again')).toBeNull();
+      expect(getByText('not yet created', { exact: false })).toBeVisible();
+    });
+  });
+
+  describe('not owned by assigned user', () => {
+    test('renders org cards', () => {
+      const orgs = {
+        ...defaultOrgs,
+        Dev: {
+          ...defaultOrgs.Dev,
+          owner: 'other-user',
+          owner_username: 'other-user',
+        },
+      };
+      const { queryByText, getByText } = setup({ orgs });
+
+      expect(queryByText('View Org')).toBeNull();
       expect(getByText('not yet created', { exact: false })).toBeVisible();
     });
   });
@@ -241,7 +262,7 @@ describe('<OrgCards/>', () => {
 
         expect(updateObject).not.toHaveBeenCalled();
         expect(
-          getByText('Confirm Remove Reviewer and Delete Scratch Org'),
+          getByText('Confirm Change Reviewer and Delete Review Org'),
         ).toBeVisible();
       });
 
@@ -253,13 +274,13 @@ describe('<OrgCards/>', () => {
             fireEvent.click(getByText('Remove Developer'));
 
             expect(
-              getByText('Confirm Remove Developer and Delete Scratch Org'),
+              getByText('Confirm Change Developer and Delete Dev Org'),
             ).toBeVisible();
 
             fireEvent.click(getByText('Cancel'));
 
             expect(
-              queryByText('Confirm Remove Developer and Delete Scratch Org'),
+              queryByText('Confirm Change Developer and Delete Dev Org'),
             ).toBeNull();
           });
         });

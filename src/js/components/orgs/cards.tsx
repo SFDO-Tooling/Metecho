@@ -29,6 +29,7 @@ import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 import { getOrgStatusMsg } from '@/utils/helpers';
+import { logError } from '@/utils/logging';
 
 interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
@@ -115,8 +116,8 @@ const ConfirmRemoveUserModal = ({
   };
   const heading =
     type === ORG_TYPES.QA
-      ? i18n.t('Confirm Remove Reviewer and Delete Scratch Org')
-      : i18n.t('Confirm Remove Developer and Delete Scratch Org');
+      ? i18n.t('Confirm Change Reviewer and Delete Review Org')
+      : i18n.t('Confirm Change Developer and Delete Dev Org');
 
   return (
     <Modal
@@ -136,14 +137,10 @@ const ConfirmRemoveUserModal = ({
     >
       <div className="slds-p-vertical_medium">
         {type === ORG_TYPES.QA
-          ? i18n.t(
-              'The current Reviewer has already created a scratch org for this task.',
-            )
-          : i18n.t(
-              'The current Developer has already created a scratch org for this task.',
-            )}{' '}
+          ? i18n.t('There is an existing Review Org for this task.')
+          : i18n.t('There is an existing Dev Org for this task.')}{' '}
         {i18n.t(
-          'Removing them from this role will also delete their scratch org. Are you sure you want to do that?',
+          'Changing this role will also delete the org. Are you sure you want to do that?',
         )}
       </div>
     </Modal>
@@ -302,7 +299,7 @@ const OrgActions = ({
   if (!org && assignedToCurrentUser) {
     return <Button label={i18n.t('Create Org')} onClick={doCreateAction} />;
   }
-  if (ownedByCurrentUser && !isDeleting) {
+  if (org && ownedByCurrentUser && !isDeleting) {
     return (
       <Dropdown
         align="right"
@@ -326,6 +323,7 @@ const OrgInfo = ({
   org,
   ownedByCurrentUser,
   assignedToCurrentUser,
+  ownedByWrongUser,
   isCreating,
   type,
   doRefreshAction,
@@ -333,11 +331,12 @@ const OrgInfo = ({
   org: Org | null;
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
+  ownedByWrongUser: boolean;
   isCreating: boolean;
   type: OrgTypes;
   doRefreshAction: () => void;
 }) => {
-  if (!org && !assignedToCurrentUser) {
+  if (!org && (!assignedToCurrentUser || ownedByWrongUser)) {
     return (
       <ul>
         <li>
@@ -442,15 +441,26 @@ const OrgCard = withRouter(
     ) => void;
     refreshAction: (org: Org) => void;
   } & RouteComponentProps) => {
-    const userId = user?.id;
-    const username = user?.username;
     const assignedToCurrentUser = Boolean(
-      user && username === assignedUser?.login,
+      user && user.username === assignedUser?.login,
     );
-    org = assignedToCurrentUser ? org : null;
     const ownedByCurrentUser = Boolean(
-      user && org?.url && userId === org.owner,
+      org?.url && user && user.id === org?.owner,
     );
+    const ownedByWrongUser = Boolean(
+      org?.url && org?.owner_username !== assignedUser?.login,
+    );
+    // If (somehow) there's an org owned by someone else, do not show org.
+    if (ownedByWrongUser) {
+      logError(
+        'A scratch org exists for this task, but is not owned by the assigned user.',
+        {
+          org,
+          assignedUser,
+        },
+      );
+      org = null;
+    }
 
     const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
     const openAssignUserModal = () => {
@@ -546,21 +556,24 @@ const OrgCard = withRouter(
                   )
                 }
                 headerActions={
-                  <OrgActions
-                    org={org}
-                    ownedByCurrentUser={ownedByCurrentUser}
-                    assignedToCurrentUser={assignedToCurrentUser}
-                    isCreating={isCreating}
-                    isDeleting={isDeleting}
-                    doCreateAction={doCreateAction}
-                    doDeleteAction={doDeleteAction}
-                  />
+                  ownedByWrongUser ? null : (
+                    <OrgActions
+                      org={org}
+                      ownedByCurrentUser={ownedByCurrentUser}
+                      assignedToCurrentUser={assignedToCurrentUser}
+                      isCreating={isCreating}
+                      isDeleting={isDeleting}
+                      doCreateAction={doCreateAction}
+                      doDeleteAction={doDeleteAction}
+                    />
+                  )
                 }
               >
                 <OrgInfo
                   org={org}
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
+                  ownedByWrongUser={ownedByWrongUser}
                   isCreating={isCreating}
                   type={type}
                   doRefreshAction={doRefreshAction}
@@ -708,10 +721,9 @@ const OrgCards = ({
     setConfirmRemoveUserModalOpen(null);
   };
   const assignUserAction = ({ type, assignee }: RemoveUserTracker) => {
-    const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
     const orgOwner = orgs[type]?.owner_username;
-    const taskOwner = task[userType]?.login;
-    if (orgOwner && orgOwner === taskOwner) {
+    const newAssigned = assignee?.login;
+    if (orgs[type] && (!orgOwner || orgOwner !== newAssigned)) {
       setConfirmRemoveUserModalOpen({ type, assignee });
     } else {
       assignUser({ type, assignee });
