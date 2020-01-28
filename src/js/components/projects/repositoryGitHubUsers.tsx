@@ -145,6 +145,21 @@ export const AssignUsersModal = ({
       ]}
       onRequestClose={handleClose}
     >
+      <div className="slds-grid slds-wrap slds-p-around_small">
+        <div className="slds-col slds-medium-size_2-of-3">
+          <p>
+            Only people who have been given access to the GitHub repository will
+            appear in the list below. Visit GitHub to give access to additional
+            people.
+          </p>
+        </div>
+        <div className="slds-col slds-medium-size_1-of-3 slds-text-align_right">
+          <Button
+            label={i18n.t('Re-sync Collaborators')}
+            variant="outline-brand"
+          />
+        </div>
+      </div>
       <DataTable
         className="align-checkboxes"
         items={allUsers}
