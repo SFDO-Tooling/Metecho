@@ -30,6 +30,7 @@ import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 import { getOrgStatusMsg, pluralize } from '@/utils/helpers';
 
+import RefreshOrgModal from './refresh';
 interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
   [ORG_TYPES.QA]: boolean;
@@ -163,11 +164,14 @@ const OrgIcon = ({
   ownedByCurrentUser,
   isDeleting,
   isSynced,
+  openRefreshOrgModal,
+  closeRefreshOrgModal,
 }: {
   orgId: string;
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
   isSynced?: boolean;
+  openRefreshOrgModal: () => void;
 }) => {
   const orgUrl = window.api_urls.scratch_org_redirect(orgId);
   if (orgUrl && ownedByCurrentUser && !isDeleting) {
@@ -184,7 +188,16 @@ const OrgIcon = ({
         {iconLink}
       </ExternalLink>
     ) : (
-      <span onClick={() => console.log('maybe refresh org')}>{iconLink}</span>
+      <Button
+        variant="icon"
+        iconName="link"
+        iconSize="x-small"
+        iconVariant="bare"
+        assistiveText={{ label: i18n.t('View Org') }}
+        onClick={openRefreshOrgModal}
+      >
+        {iconLink}
+      </Button>
     );
     return viewOrgLink;
   }
@@ -203,6 +216,7 @@ const OrgFooter = ({
   ownedByCurrentUser,
   isCreating,
   isDeleting,
+  isSynced,
 }: {
   org: Org | null;
   ownedByCurrentUser: boolean;
@@ -236,7 +250,10 @@ const OrgFooter = ({
       /* istanbul ignore else */
       // eslint-disable-next-line no-lonely-if
       if (orgUrl) {
-        return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
+        if (isSynced) {
+          return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
+        }
+        return <Button>{i18n.t('View Org')}</Button>;
       }
     }
   }
@@ -447,7 +464,14 @@ const OrgCard = withRouter(
     const closeAssignUserModal = () => {
       setAssignUserModalOpen(false);
     };
-
+    // refresh org modal
+    const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
+    const openRefreshOrgModal = () => {
+      setRefreshOrgModalOpen(true);
+    };
+    const closeRefreshOrgModal = () => {
+      setRefreshOrgModalOpen(false);
+    };
     const doAssignUserAction = useCallback(
       (assignee: GitHubUser | null) => {
         assignUserAction({ type, assignee });
@@ -534,6 +558,7 @@ const OrgCard = withRouter(
                       ownedByCurrentUser={ownedByCurrentUser}
                       isDeleting={isDeleting}
                       isSynced={isSynced}
+                      openRefreshOrgModal={openRefreshOrgModal}
                     />
                   )
                 }
@@ -575,6 +600,13 @@ const OrgCard = withRouter(
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
+        />
+        <RefreshOrgModal
+          refreshOrgModalOpen={refreshOrgModalOpen}
+          // refreshOrgModalOpen={true}
+          closeRefreshOrgModal={closeRefreshOrgModal}
+          orgUrl={window.api_urls.scratch_org_redirect(org?.id)}
+          delinquentCommits={4}
         />
       </div>
     );
