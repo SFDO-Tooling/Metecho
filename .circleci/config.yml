@@ -1,4 +1,5 @@
 version: 2.1
+
 jobs:
   build:
     working_directory: ~/metashare
@@ -22,7 +23,10 @@ jobs:
             pip install -r requirements/dev.txt
       - run:
           name: Compile Front-End Assets
-          command: yarn prod
+          command: yarn prod --json > webpack-stats.json
+      - run:
+          name: Upload Webpack Stats to packtracker.io
+          command: yarn packtracker
       - persist_to_workspace:
           root: .
           paths:

@@ -42,6 +42,7 @@
     "test:py:report-coverage": "$VIRTUAL_ENV/bin/coveralls",
     "test:py:check-coverage": "coverage3 report --fail-under=100",
     "test": "run-s test:js test:py",
+    "packtracker": "packtracker-upload --stats=webpack-stats.json --output-path=dist/prod",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js"
   },
@@ -81,6 +82,7 @@
     "@babel/preset-env": "^7.8.3",
     "@babel/preset-react": "^7.8.3",
     "@babel/preset-typescript": "^7.8.3",
+    "@packtracker/webpack-plugin": "^2.2.0",
     "@testing-library/jest-dom": "^5.0.1",
     "@testing-library/react": "^9.4.0",
     "@testing-library/react-hooks": "^3.2.1",
