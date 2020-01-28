@@ -151,13 +151,13 @@ const TaskDetail = (props: RouteComponentProps) => {
         variant="text-destructive"
         disabled
       />
-      {task.pr_url || task.branch_url ? (
+      {task.pr_url || task.branch_diff_url ? (
         <ExternalLink
-          url={(task.pr_url || task.branch_url) as string}
+          url={(task.pr_url || task.branch_diff_url) as string}
           showButtonIcon
           className="slds-button slds-button_outline-brand"
         >
-          {task.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
+          {task.pr_url ? i18n.t('View Pull Request') : i18n.t('View Diff')}
         </ExternalLink>
       ) : null}
     </PageHeaderControl>

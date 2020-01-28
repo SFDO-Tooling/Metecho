@@ -123,12 +123,12 @@ describe('<TaskDetail/>', () => {
 
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByText('Task Description')).toBeVisible();
-    expect(queryByText('View Branch')).toBeNull();
+    expect(queryByText('View Diff')).toBeNull();
     expect(getByTitle('View Org')).toBeVisible();
     expect(getByText('Task Orgs')).toBeVisible();
   });
 
-  test('renders view branch button if branch_url exists', () => {
+  test('renders view branch button if branch_diff_url exists', () => {
     const { getByText, getByTitle } = setup({
       initialState: {
         ...defaultState,
@@ -137,7 +137,7 @@ describe('<TaskDetail/>', () => {
           project1: [
             {
               ...defaultState.tasks.project1[0],
-              branch_url: 'https://github.com/example/repo',
+              branch_diff_url: 'https://github.com/example/repo',
             },
           ],
         },
@@ -145,7 +145,7 @@ describe('<TaskDetail/>', () => {
     });
 
     expect(getByTitle('Task 1')).toBeVisible();
-    expect(getByText('View Branch')).toBeVisible();
+    expect(getByText('View Diff')).toBeVisible();
   });
 
   test('renders view pr button if pr_url exists', () => {
