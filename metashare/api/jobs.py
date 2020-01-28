@@ -98,6 +98,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = scratch_org_config.config
     scratch_org.owner_sf_id = user.sf_username
+    scratch_org.owner_sf_id = user.username
     scratch_org.save()
     run_flow(
         cci=cci,

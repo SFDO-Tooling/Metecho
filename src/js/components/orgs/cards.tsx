@@ -35,6 +35,11 @@ interface OrgTypeTracker {
   [ORG_TYPES.QA]: boolean;
 }
 
+interface RemoveUserTracker {
+  type: OrgTypes;
+  assignee: GitHubUser | null;
+}
+
 const OrgTypeTrackerDefault = {
   [ORG_TYPES.DEV]: false,
   [ORG_TYPES.QA]: false,
@@ -66,7 +71,7 @@ const ConfirmDeleteModal = ({
   return (
     <Modal
       isOpen={Boolean(confirmDeleteModalOpen)}
-      heading={i18n.t('Confirm Delete Org')}
+      heading={i18n.t('Confirm Delete Org With Uncaptured Changes')}
       prompt="warning"
       onRequestClose={handleClose}
       footer={[
@@ -81,7 +86,64 @@ const ConfirmDeleteModal = ({
     >
       <div className="slds-p-vertical_medium">
         {i18n.t(
-          'Are you sure you want to delete this org with uncaptured changes?',
+          'This scratch org has uncaptured changes which will be lost. Are you sure you want to delete this org?',
+        )}
+      </div>
+    </Modal>
+  );
+};
+
+const ConfirmRemoveUserModal = ({
+  confirmRemoveUserModalOpen,
+  orgs,
+  handleClose,
+  handleDelete,
+}: {
+  confirmRemoveUserModalOpen: RemoveUserTracker | null;
+  orgs: OrgsByTask;
+  handleClose: () => void;
+  handleDelete: (org: Org, shouldRemoveUser?: RemoveUserTracker | null) => void;
+}) => {
+  const type = confirmRemoveUserModalOpen?.type;
+  const handleSubmit = () => {
+    const org = type && orgs[type];
+    handleClose();
+    /* istanbul ignore else */
+    if (org && confirmRemoveUserModalOpen) {
+      handleDelete(org, { ...confirmRemoveUserModalOpen });
+    }
+  };
+  const heading =
+    type === ORG_TYPES.QA
+      ? i18n.t('Confirm Remove Reviewer and Delete Scratch Org')
+      : i18n.t('Confirm Remove Developer and Delete Scratch Org');
+
+  return (
+    <Modal
+      isOpen={Boolean(confirmRemoveUserModalOpen)}
+      heading={heading}
+      prompt="warning"
+      onRequestClose={handleClose}
+      footer={[
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
+        <Button
+          key="submit"
+          label={i18n.t('Confirm')}
+          variant="brand"
+          onClick={handleSubmit}
+        />,
+      ]}
+    >
+      <div className="slds-p-vertical_medium">
+        {type === ORG_TYPES.QA
+          ? i18n.t(
+              'The current Reviewer has already created a scratch org for this task.',
+            )
+          : i18n.t(
+              'The current Developer has already created a scratch org for this task.',
+            )}{' '}
+        {i18n.t(
+          'Removing them from this role will also delete their scratch org. Are you sure you want to do that?',
         )}
       </div>
     </Modal>
@@ -350,7 +412,7 @@ const OrgSpinner = ({
 
 const OrgCard = withRouter(
   ({
-    orgs,
+    org,
     type,
     user,
     assignedUser,
@@ -364,23 +426,20 @@ const OrgCard = withRouter(
     refreshAction,
     history,
   }: {
-    orgs: OrgsByTask;
+    org: Org | null;
     type: OrgTypes;
     user: User | null;
     assignedUser: GitHubUser | null;
     projectUsers: GitHubUser[];
     projectUrl: string;
-    isCreatingOrg: OrgTypeTracker;
-    isDeletingOrg: OrgTypeTracker;
-    assignUserAction: ({
-      type,
-      assignee,
-    }: {
-      type: OrgTypes;
-      assignee: GitHubUser | null;
-    }) => void;
+    isCreatingOrg: boolean;
+    isDeletingOrg: boolean;
+    assignUserAction: ({ type, assignee }: RemoveUserTracker) => void;
     createAction: (type: OrgTypes) => void;
-    deleteAction: (org: Org) => void;
+    deleteAction: (
+      org: Org,
+      shouldRemoveUser?: RemoveUserTracker | null,
+    ) => void;
     refreshAction: (org: Org) => void;
   } & RouteComponentProps) => {
     const userId = user?.id;
@@ -388,7 +447,7 @@ const OrgCard = withRouter(
     const assignedToCurrentUser = Boolean(
       user && username === assignedUser?.login,
     );
-    const org = assignedToCurrentUser ? orgs[type] : null;
+    org = assignedToCurrentUser ? org : null;
     const ownedByCurrentUser = Boolean(
       user && org?.url && userId === org.owner,
     );
@@ -403,8 +462,8 @@ const OrgCard = withRouter(
 
     const doAssignUserAction = useCallback(
       (assignee: GitHubUser | null) => {
-        assignUserAction({ type, assignee });
         closeAssignUserModal();
+        assignUserAction({ type, assignee });
       },
       [assignUserAction, type],
     );
@@ -424,8 +483,8 @@ const OrgCard = withRouter(
       }
     }, [refreshAction, org]);
 
-    const isCreating = Boolean(isCreatingOrg[type] || (org && !org.url));
-    const isDeleting = Boolean(isDeletingOrg[type] || org?.delete_queued_at);
+    const isCreating = Boolean(isCreatingOrg || (org && !org.url));
+    const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
     const heading =
       type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
     const orgHeading =
@@ -548,30 +607,22 @@ const OrgCards = ({
     confirmDeleteModalOpen,
     setConfirmDeleteModalOpen,
   ] = useState<OrgTypes | null>(null);
+  const [isWaitingToDeleteDevOrg, setIsWaitingToDeleteDevOrg] = useState(false);
+  const [
+    confirmRemoveUserModalOpen,
+    setConfirmRemoveUserModalOpen,
+  ] = useState<RemoveUserTracker | null>(null);
+  const [
+    isWaitingToRemoveUser,
+    setIsWaitingToRemoveUser,
+  ] = useState<RemoveUserTracker | null>(null);
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
     OrgTypeTrackerDefault,
   );
   const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
     OrgTypeTrackerDefault,
   );
-  const [isWaitingToDeleteDevOrg, setIsWaitingToDeleteDevOrg] = useState(false);
   const dispatch = useDispatch<ThunkDispatch>();
-
-  const assignUser = useCallback(
-    ({ type, assignee }: { type: OrgTypes; assignee: GitHubUser | null }) => {
-      const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.TASK,
-          data: {
-            ...task,
-            [userType]: assignee,
-          },
-        }),
-      );
-    },
-    [task], // eslint-disable-line react-hooks/exhaustive-deps
-  );
 
   const devOrg = orgs[ORG_TYPES.DEV];
 
@@ -620,19 +671,52 @@ const OrgCards = ({
     setInfoModalOpen(true);
   };
 
-  let deleteAction: (...args: any[]) => void = openConnectModal;
+  const deleteAction = (
+    org: Org,
+    shouldRemoveUser?: RemoveUserTracker | null,
+  ) => {
+    setIsWaitingToRemoveUser(shouldRemoveUser || null);
+    if (org.org_type === ORG_TYPES.DEV) {
+      setIsWaitingToDeleteDevOrg(true);
+      doRefetchOrg(org);
+    } else {
+      deleteOrg(org);
+    }
+  };
   let createAction: (...args: any[]) => void = openConnectModal;
   if (user?.valid_token_for) {
     createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
-    deleteAction = (org: Org) => {
-      if (org.org_type === ORG_TYPES.DEV) {
-        setIsWaitingToDeleteDevOrg(true);
-        doRefetchOrg(org);
-      } else {
-        deleteOrg(org);
-      }
-    };
   }
+
+  const assignUser = useCallback(
+    ({ type, assignee }: RemoveUserTracker) => {
+      const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.TASK,
+          data: {
+            ...task,
+            [userType]: assignee,
+          },
+        }),
+      );
+    },
+    [task], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const closeConfirmRemoveUserModal = () => {
+    setConfirmRemoveUserModalOpen(null);
+  };
+  const assignUserAction = ({ type, assignee }: RemoveUserTracker) => {
+    const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
+    const orgOwner = orgs[type]?.owner_username;
+    const taskOwner = task[userType]?.login;
+    if (orgOwner && orgOwner === taskOwner) {
+      setConfirmRemoveUserModalOpen({ type, assignee });
+    } else {
+      assignUser({ type, assignee });
+    }
+  };
 
   // When dev org delete has been triggered, wait until it has been refreshed...
   useEffect(() => {
@@ -649,34 +733,46 @@ const OrgCards = ({
     }
   }, [deleteOrg, isWaitingToDeleteDevOrg, devOrg]);
 
+  // After org is deleted, check if we also need to update the assigned user...
+  useEffect(() => {
+    if (isWaitingToRemoveUser) {
+      const { type, assignee } = isWaitingToRemoveUser;
+      const readyToUpdateUser = !orgs[type];
+      if (readyToUpdateUser) {
+        setIsWaitingToRemoveUser(null);
+        assignUser({ type, assignee });
+      }
+    }
+  }, [assignUser, isWaitingToRemoveUser, orgs]);
+
   return (
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Orgs')}</h2>
       <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
         <OrgCard
-          orgs={orgs}
+          org={orgs[ORG_TYPES.DEV]}
           type={ORG_TYPES.DEV}
           user={user}
           assignedUser={task.assigned_dev}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
-          isCreatingOrg={isCreatingOrg}
-          isDeletingOrg={isDeletingOrg}
-          assignUserAction={assignUser}
+          isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
+          isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
+          assignUserAction={assignUserAction}
           createAction={createAction}
           deleteAction={deleteAction}
           refreshAction={doRefetchOrg}
         />
         <OrgCard
-          orgs={orgs}
+          org={orgs[ORG_TYPES.QA]}
           type={ORG_TYPES.QA}
           user={user}
           assignedUser={task.assigned_qa}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
-          isCreatingOrg={isCreatingOrg}
-          isDeletingOrg={isDeletingOrg}
-          assignUserAction={assignUser}
+          isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
+          isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
+          assignUserAction={assignUserAction}
           createAction={createAction}
           deleteAction={deleteAction}
           refreshAction={doRefetchOrg}
@@ -698,6 +794,12 @@ const OrgCards = ({
         toggleModal={setConfirmDeleteModalOpen}
         orgs={orgs}
         handleDelete={deleteOrg}
+      />
+      <ConfirmRemoveUserModal
+        confirmRemoveUserModalOpen={confirmRemoveUserModalOpen}
+        orgs={orgs}
+        handleClose={closeConfirmRemoveUserModal}
+        handleDelete={deleteAction}
       />
     </>
   );
