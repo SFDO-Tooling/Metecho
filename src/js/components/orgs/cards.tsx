@@ -165,7 +165,6 @@ const OrgIcon = ({
   isDeleting,
   isSynced,
   openRefreshOrgModal,
-  closeRefreshOrgModal,
 }: {
   orgId: string;
   ownedByCurrentUser: boolean;
@@ -217,12 +216,14 @@ const OrgFooter = ({
   isCreating,
   isDeleting,
   isSynced,
+  openRefreshOrgModal,
 }: {
   org: Org | null;
   ownedByCurrentUser: boolean;
   isCreating: boolean;
   isDeleting: boolean;
   isSynced?: boolean;
+  openRefreshOrgModal: () => void;
 }) => {
   const loadingMsg = i18n.t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
@@ -253,7 +254,11 @@ const OrgFooter = ({
         if (isSynced) {
           return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
         }
-        return <Button>{i18n.t('View Org')}</Button>;
+        return (
+          <Button onClick={openRefreshOrgModal} variant="base">
+            {i18n.t('View Org')}
+          </Button>
+        );
       }
     }
   }
@@ -314,7 +319,8 @@ const OrgInfo = ({
   assignedToCurrentUser,
   isCreating,
   type,
-  taskCommits,
+  isSynced,
+  orgCommitIdx,
   doRefreshAction,
 }: {
   org: Org | null;
@@ -322,7 +328,8 @@ const OrgInfo = ({
   assignedToCurrentUser: boolean;
   isCreating: boolean;
   type: OrgTypes;
-  taskCommits: string[];
+  isSynced?: boolean;
+  orgCommitIdx?: number | undefined;
   doRefreshAction: () => void;
 }) => {
   if (!org && !assignedToCurrentUser) {
@@ -360,8 +367,6 @@ const OrgInfo = ({
       }
       case ORG_TYPES.QA: {
         // synced status for QA org
-        const orgCommitIdx = taskCommits.indexOf(org.latest_commit);
-        const isSynced = orgCommitIdx <= 0;
         commitStatus = isSynced ? (
           <li>
             <strong>Up to Date</strong>
@@ -369,7 +374,7 @@ const OrgInfo = ({
         ) : (
           <li>
             <strong>Behind Latest:</strong> {orgCommitIdx}
-            {pluralize(orgCommitIdx, 'commit')} (
+            {orgCommitIdx && pluralize(orgCommitIdx, 'commit')} (
             <ExternalLink url={org.latest_commit_url}>
               org comparison
             </ExternalLink>
@@ -497,10 +502,6 @@ const OrgCard = withRouter(
 
     const isCreating = Boolean(isCreatingOrg[type] || (org && !org.url));
     const isDeleting = Boolean(isDeletingOrg[type] || org?.delete_queued_at);
-    const heading =
-      type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
-    const orgHeading =
-      type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org');
     const userModalHeading =
       type === ORG_TYPES.QA
         ? i18n.t('Assign Reviewer')
@@ -509,9 +510,22 @@ const OrgCard = withRouter(
     const handleEmptyMessageClick = useCallback(() => {
       history.push(projectUrl);
     }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
-    const commitIdx =
-      taskCommits && org ? taskCommits.indexOf(org?.latest_commit) : -1; // return false otherwise?
-    const isSynced = commitIdx <= 0;
+    const orgCommitIdx =
+      org && taskCommits && taskCommits.indexOf(org.latest_commit);
+    const isSynced = orgCommitIdx ? orgCommitIdx <= 0 : true;
+    console.log(isSynced, orgCommitIdx);
+    const heading =
+      type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
+    const OrgHeading = () => (
+      <div className="slds-grid slds-grid--vertical-align-center">
+        <div className="slds-col slds-size_4-of-6">
+          {type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org')}
+        </div>
+        {type === ORG_TYPES.QA && !isSynced && (
+          <Button class="slds-col slds-size_4-of-6">Refresh Org</Button>
+        )}
+      </div>
+    );
     return (
       <div
         className="slds-size_1-of-1
@@ -537,6 +551,7 @@ const OrgCard = withRouter(
               isCreating={isCreating}
               isDeleting={isDeleting}
               isSynced={isSynced}
+              openRefreshOrgModal={openRefreshOrgModal}
             />
           }
         >
@@ -549,7 +564,7 @@ const OrgCard = withRouter(
               <Card
                 className="nested-card"
                 bodyClassName="slds-card__body_inner"
-                heading={orgHeading}
+                heading={<OrgHeading />}
                 icon={
                   org &&
                   !isCreating && (
@@ -580,7 +595,8 @@ const OrgCard = withRouter(
                   assignedToCurrentUser={assignedToCurrentUser}
                   isCreating={isCreating}
                   type={type}
-                  taskCommits={taskCommits || []}
+                  isSynced={isSynced}
+                  orgCommitIdx={orgCommitIdx}
                   doRefreshAction={doRefreshAction}
                 />
                 <OrgSpinner
@@ -758,13 +774,13 @@ const OrgCards = ({
           assignedUser={task.assigned_qa}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
-          taskCommits={task.commits.map((c) => c.id)}
           isCreatingOrg={isCreatingOrg}
           isDeletingOrg={isDeletingOrg}
           assignUserAction={assignUser}
           createAction={createAction}
           deleteAction={deleteAction}
           refreshAction={doRefetchOrg}
+          taskCommits={task.commits.map((c) => c.id) || []}
         />
       </div>
       <ConnectModal
