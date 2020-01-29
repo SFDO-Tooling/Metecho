@@ -262,7 +262,6 @@ const OrgFooter = ({
       }
       const orgUrl = window.api_urls.scratch_org_redirect(org.id);
       /* istanbul ignore else */
-      // eslint-disable-next-line no-lonely-if
       if (orgUrl) {
         return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
       }
