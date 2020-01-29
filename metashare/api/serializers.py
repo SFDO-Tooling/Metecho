@@ -177,6 +177,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "currently_creating_pr",
             "branch_url",
             "commits",
+            "origin_sha",
             "branch_diff_url",
             "pr_url",
             "status",
