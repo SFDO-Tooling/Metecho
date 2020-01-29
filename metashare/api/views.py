@@ -199,7 +199,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             "currently_capturing_changes": False,
             "currently_refreshing_changes": False,
         }
-        if not request.GET.get("get_unsaved_changes"):
+        if not request.query_params.get("get_unsaved_changes"):
             filters["owner"] = request.user
         for instance in queryset.filter(**filters):
             instance.queue_get_unsaved_changes()
@@ -223,7 +223,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             not instance.currently_capturing_changes,
             not instance.currently_refreshing_changes,
         ]
-        if not request.GET.get("get_unsaved_changes"):
+        if not request.query_params.get("get_unsaved_changes"):
             conditions.append(instance.owner == request.user)
         if all(conditions):
             instance.queue_get_unsaved_changes()
