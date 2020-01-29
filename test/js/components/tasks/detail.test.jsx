@@ -256,13 +256,11 @@ describe('<TaskDetail/>', () => {
 
       expect(queryByText('Task Team & Orgs')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledTimes(1);
-
-      const args = fetchObjects.mock.calls[0][0];
-
-      expect(args.objectType).toEqual('scratch_org');
-      expect(args.filters).toEqual({ task: 'task1' });
-      expect(args.shouldSubscribeToObject({})).toBe(false);
-      expect(args.shouldSubscribeToObject({ owner: 'user-id' })).toBe(true);
+      expect(fetchObjects).toHaveBeenCalledWith({
+        objectType: 'scratch_org',
+        filters: { task: 'task1' },
+        shouldSubscribeToObject: true,
+      });
     });
   });
 
