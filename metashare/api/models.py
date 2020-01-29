@@ -254,6 +254,7 @@ class Repository(
     def queue_refresh_commits(self, *, ref):
         from .jobs import refresh_commits_job
 
+        Task.objects.filter(project__repository=self).update(review_valid=False)
         refresh_commits_job.delay(repository=self, branch_name=ref)
 
     @transaction.atomic
@@ -395,6 +396,8 @@ class Task(
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+    review_submitted_at = models.DateTimeField(null=True)
+    review_valid = models.BooleanField(default=False)
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
@@ -469,11 +472,18 @@ class Task(
             self.notify_changed()
 
     def add_commits(self, commits, sender):
+        self.review_valid = False
         self.commits = [
             gh.normalize_commit(c, sender=sender) for c in commits
         ] + self.commits
         self.save()
         self.notify_changed()
+
+    def submit_review(self, data):
+        # TODO: Actually implement this!
+        self.review_sumitted_at = timezone.now()
+        self.review_valid = True
+        self.save()
 
     def add_ms_git_sha(self, sha):
         self.ms_commits.append(sha)
@@ -502,6 +512,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     owner_sf_id = StringField(blank=True)
+    has_ever_been_visited = models.BooleanField(default=False)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -514,6 +525,10 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             self.queue_provision()
 
         return ret
+
+    def mark_visited(self):
+        self.has_ever_been_visited = True
+        self.save()
 
     def get_refreshed_org_config(self):
         org_config = OrgConfig(self.config, "dev")

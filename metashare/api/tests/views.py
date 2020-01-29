@@ -507,3 +507,17 @@ class TestTaskView:
             )
 
             assert response.status_code == 400
+
+    def test_review__good(self, client, task_factory):
+        task = task_factory()
+        response = client.post(
+            reverse("task-review", kwargs={"pk": str(task.id)}), {"notes": ""}
+        )
+
+        assert response.status_code == 202
+
+    def test_review__bad(self, client, task_factory):
+        task = task_factory()
+        response = client.post(reverse("task-review", kwargs={"pk": str(task.id)}), {})
+
+        assert response.status_code == 422

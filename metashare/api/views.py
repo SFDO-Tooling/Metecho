@@ -22,6 +22,7 @@ from .serializers import (
     MinimalUserSerializer,
     ProjectSerializer,
     RepositorySerializer,
+    ReviewSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
 )
@@ -162,6 +163,18 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for review.")
 
+    @action(detail=True, methods=["POST"])
+    def review(self, request, pk=None):
+        serializer = ReviewSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        task = self.get_object()
+        task.submit_review(serializer.data)
+        return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
+
 
 class ScratchOrgViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -262,5 +275,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
                 {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        scratch_org.mark_visited()
         url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)

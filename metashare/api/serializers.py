@@ -186,6 +186,8 @@ class TaskSerializer(serializers.ModelSerializer):
             "commits",
             "branch_diff_url",
             "pr_url",
+            "review_submitted_at",
+            "review_valid",
             "status",
             "pr_is_open",
         )
@@ -237,6 +239,10 @@ class CreatePrSerializer(serializers.Serializer):
     critical_changes = serializers.CharField(allow_blank=True)
     additional_changes = serializers.CharField(allow_blank=True)
     issues = serializers.CharField(allow_blank=True)
+    notes = serializers.CharField(allow_blank=True)
+
+
+class ReviewSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
 
 

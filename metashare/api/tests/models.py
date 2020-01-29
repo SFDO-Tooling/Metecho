@@ -163,6 +163,13 @@ class TestTask:
 
             assert async_to_sync.called
 
+    def test_submit_review(self, task_factory):
+        task = task_factory()
+        task.submit_review(None)
+
+        assert task.review_sumitted_at is not None
+        assert task.review_valid
+
 
 @pytest.mark.django_db
 class TestUser:
