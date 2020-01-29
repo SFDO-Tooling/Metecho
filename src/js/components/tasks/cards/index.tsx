@@ -221,7 +221,7 @@ const OrgCards = ({
           assignedUser={task.assigned_qa}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
-          taskCommits={task.commits.map((c) => c.id) || []}
+          taskCommits={task.commits.map((c) => c.id).concat([task.origin_sha])}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}
