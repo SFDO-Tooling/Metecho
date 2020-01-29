@@ -1,0 +1,37 @@
+// Collaborators
+// =============
+
+// Add/Edit Collaborator Modal
+// ---------------------------
+.collaborator-grid {
+  > div {
+    align-items: center;
+    display: flex;
+  }
+}
+
+.collaborator-username {
+  margin-left: $spacing-x-small;
+
+  .collaborator-button.is-selected & {
+    color: $color-text-default;
+  }
+}
+
+.collaborator-button.is-selected {
+  background-color: $color-background-row-active;
+}
+
+.collaborator-button:not(.is-selected) {
+  &:hover {
+    border: 1px solid;
+  }
+}
+
+// Assigned Collaborator Cards
+// ---------------------------
+.collaborator-card {
+  h2 {
+    font-size: $font-size-3;
+  }
+}

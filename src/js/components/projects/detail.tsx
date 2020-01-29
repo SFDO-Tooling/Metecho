@@ -25,8 +25,8 @@ import {
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
-import { GitHubUser } from '@/store/repositories/reducer';
 import { Task } from '@/store/tasks/reducer';
+import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 import routes from '@/utils/routes';
 
@@ -217,7 +217,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_medium add-member">
+            <div className="slds-m-bottom_medium">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
                 {i18n.t('Collaborators')}
               </h2>

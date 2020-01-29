@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useEffect, useState } from 'react';
 
-import { GitHubUser } from '@/store/repositories/reducer';
+import { GitHubUser } from '@/store/user/reducer';
 
 interface TableCellProps {
   [key: string]: any;
@@ -35,7 +35,7 @@ export const UserCard = ({
   className?: string;
 }) => (
   <Card
-    className={classNames(className, 'team-member-card')}
+    className={classNames(className, 'collaborator-card')}
     bodyClassName="slds-card__body_inner"
     icon={<GitHubUserAvatar user={user} />}
     heading={user.login}
@@ -63,7 +63,7 @@ export const UserCards = ({
   users: GitHubUser[];
   removeUser: (user: GitHubUser) => void;
 }) => (
-  <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
+  <div className="slds-grid slds-wrap slds-grid_pull-padded-xx-small">
     {users.map((user) => {
       const doRemoveUser = () => removeUser(user);
       return (
@@ -71,7 +71,7 @@ export const UserCards = ({
           key={user.id}
           className="slds-size_1-of-1
             slds-large-size_1-of-2
-            slds-p-around_x-small"
+            slds-p-around_xx-small"
         >
           <UserCard user={user} removeUser={doRemoveUser} />
         </div>
@@ -87,9 +87,9 @@ const UserTableCell = ({ item, ...props }: TableCellProps) => {
   }
   const { login } = item;
   return (
-    <DataTableCell {...props} title={login} className="team-member-grid">
+    <DataTableCell {...props} title={login} className="collaborator-grid">
       <GitHubUserAvatar user={item} />
-      <span className="team-member-username">{login}</span>
+      <span className="collaborator-username">{login}</span>
     </DataTableCell>
   );
 };
@@ -184,7 +184,7 @@ const GitHubUserButton = ({
     className={classNames(
       'slds-size_full',
       'slds-p-around_xx-small',
-      'team-member-button',
+      'collaborator-button',
       {
         'is-selected': isSelected,
       },
@@ -193,7 +193,7 @@ const GitHubUserButton = ({
     label={
       <>
         <GitHubUserAvatar user={user} />
-        <span className="team-member-username">{user.login}</span>
+        <span className="collaborator-username">{user.login}</span>
       </>
     }
     variant="base"
@@ -235,13 +235,18 @@ export const AssignUserModal = ({
         </>
       )}
       {filteredUsers.length ? (
-        <ul className="slds-p-around_small">
-          {filteredUsers.map((user) => (
-            <li key={user.id}>
-              <GitHubUserButton user={user} onClick={() => setUser(user)} />
-            </li>
-          ))}
-        </ul>
+        <div className="slds-p-around_small">
+          <div className="slds-text-title slds-m-bottom_xx-small">
+            {i18n.t('Assign To User')}
+          </div>
+          <ul>
+            {filteredUsers.map((user) => (
+              <li key={user.id}>
+                <GitHubUserButton user={user} onClick={() => setUser(user)} />
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <div className="slds-p-around_medium">
           {i18n.t('There are no collaborators on this project')}.{' '}

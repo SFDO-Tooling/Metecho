@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import { ObjectsAction } from '@/store/actions';
-import { GitHubUser } from '@/store/repositories/reducer';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
+import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ObjectTypes, TaskStatuses } from '@/utils/constants';
 
 export interface Commit {

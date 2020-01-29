@@ -266,6 +266,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_capturing_changes",
             "delete_queued_at",
             "owner_sf_id",
+            "owner_username",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -281,6 +282,15 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
 
     def get_has_unsaved_changes(self, obj) -> bool:
         return bool(getattr(obj, "unsaved_changes", {}))
+
+    def validate(self, data):
+        if ScratchOrg.objects.filter(
+            task=data["task"], org_type=data["org_type"]
+        ).exists():
+            raise serializers.ValidationError(
+                _("A ScratchOrg of this type already exists for this task.")
+            )
+        return data
 
     def save(self, **kwargs):
         kwargs["owner"] = kwargs.get("owner", self.context["request"].user)
