@@ -21,11 +21,21 @@ const OrgInfo = ({
   type: OrgTypes;
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
-  ownedByWrongUser: boolean;
+  ownedByWrongUser: Org | null;
   isCreating: boolean;
   doCheckForOrgChanges: () => void;
 }) => {
-  if (!org && (!assignedToCurrentUser || ownedByWrongUser)) {
+  if (ownedByWrongUser) {
+    return (
+      <ul>
+        <li>
+          <strong>{i18n.t('Status')}:</strong> {i18n.t('owned by user')}{' '}
+          <strong>{ownedByWrongUser.owner_username}</strong>
+        </li>
+      </ul>
+    );
+  }
+  if (!org && !assignedToCurrentUser) {
     return (
       <ul>
         <li>

@@ -185,6 +185,7 @@
   "orgStatusMsg_plural": "orgStatusMsg",
   "orgTotalChangesMsg": "orgTotalChangesMsg",
   "orgTotalChangesMsg_plural": "orgTotalChangesMsg",
+  "owned by user": "owned by user",
   "pageCannotBeFound": "That page cannot be found. Try the <2>home page</2>?",
   "projectNotFound": "We can’t find the project you’re looking for. Try <2>another project</2> from that repository?",
   "releaseNotesInfo": "Details entered will be used when publishing release notes. Please use Markdown to format your notes.",

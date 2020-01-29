@@ -4,7 +4,7 @@ import { ThunkResult } from '@/store';
 import { Org } from '@/store/orgs/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
-import apiFetch from '@/utils/api';
+import apiFetch, { addUrlParams } from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 
 interface OrgProvisioned {
@@ -139,7 +139,11 @@ export const refetchOrg = (org: Org): ThunkResult => async (dispatch) => {
     if (!url) {
       throw new Error(`No URL found for org: ${org.id}`);
     }
-    const response = await apiFetch({ url, dispatch });
+    const response = await apiFetch({
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      url: addUrlParams(url, { get_unsaved_changes: true }),
+      dispatch,
+    });
     if (!response) {
       return dispatch({
         type: 'REFETCH_ORG_FAILED',

@@ -193,13 +193,14 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
-            "owner": request.user,
             "org_type": SCRATCH_ORG_TYPES.Dev,
             "url__isnull": False,
             "delete_queued_at__isnull": True,
             "currently_capturing_changes": False,
             "currently_refreshing_changes": False,
         }
+        if not request.GET.get("get_unsaved_changes"):
+            filters["owner"] = request.user
         for instance in queryset.filter(**filters):
             instance.queue_get_unsaved_changes()
 
@@ -216,13 +217,14 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # the middle.
         instance = self.get_object()
         conditions = [
-            instance.owner == request.user,
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
             instance.url is not None,
             instance.delete_queued_at is None,
             not instance.currently_capturing_changes,
             not instance.currently_refreshing_changes,
         ]
+        if not request.GET.get("get_unsaved_changes"):
+            conditions.append(instance.owner == request.user)
         if all(conditions):
             instance.queue_get_unsaved_changes()
         serializer = self.get_serializer(instance)

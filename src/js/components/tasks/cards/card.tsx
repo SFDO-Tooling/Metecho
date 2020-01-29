@@ -50,9 +50,12 @@ const OrgCard = ({
 } & RouteComponentProps) => {
   const assignedToCurrentUser = user.username === assignedUser?.login;
   const ownedByCurrentUser = Boolean(org?.url && user.id === org?.owner);
-  const ownedByWrongUser = Boolean(
-    org?.url && org?.owner_username !== assignedUser?.login,
-  );
+  const ownedByWrongUser =
+    org?.url && org.owner_username !== assignedUser?.login ? org : null;
+  const isCreating = Boolean(isCreatingOrg || (org && !org.url));
+  const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
+  const isRefreshing = Boolean(org?.currently_refreshing_changes);
+
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
     logError(
@@ -84,11 +87,12 @@ const OrgCard = ({
     handleCreate(type);
   }, [handleCreate, type]);
   const doDeleteOrg = useCallback(() => {
+    const orgToDelete = org || ownedByWrongUser;
     /* istanbul ignore else */
-    if (org) {
-      handleDelete(org);
+    if (orgToDelete) {
+      handleDelete(orgToDelete);
     }
-  }, [handleDelete, org]);
+  }, [handleDelete, org, ownedByWrongUser]);
   const doCheckForOrgChanges = useCallback(() => {
     /* istanbul ignore else */
     if (org) {
@@ -99,9 +103,6 @@ const OrgCard = ({
   const handleEmptyMessageClick = useCallback(() => {
     history.push(projectUrl);
   }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const isCreating = Boolean(isCreatingOrg || (org && !org.url));
-  const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
 
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
@@ -136,6 +137,7 @@ const OrgCard = ({
             ownedByCurrentUser={ownedByCurrentUser}
             isCreating={isCreating}
             isDeleting={isDeleting}
+            isRefreshing={isRefreshing}
           />
         }
       >
@@ -160,17 +162,16 @@ const OrgCard = ({
                 )
               }
               headerActions={
-                ownedByWrongUser ? null : (
-                  <OrgActions
-                    org={org}
-                    ownedByCurrentUser={ownedByCurrentUser}
-                    assignedToCurrentUser={assignedToCurrentUser}
-                    isCreating={isCreating}
-                    isDeleting={isDeleting}
-                    doCreateOrg={doCreateOrg}
-                    doDeleteOrg={doDeleteOrg}
-                  />
-                )
+                <OrgActions
+                  org={org}
+                  ownedByCurrentUser={ownedByCurrentUser}
+                  assignedToCurrentUser={assignedToCurrentUser}
+                  ownedByWrongUser={ownedByWrongUser}
+                  isCreating={isCreating}
+                  isDeleting={isDeleting}
+                  doCreateOrg={doCreateOrg}
+                  doDeleteOrg={doDeleteOrg}
+                />
               }
             >
               <OrgInfo
@@ -186,6 +187,7 @@ const OrgCard = ({
                 org={org}
                 ownedByCurrentUser={ownedByCurrentUser}
                 isDeleting={isDeleting}
+                isRefreshing={isRefreshing}
               />
             </Card>
           </>

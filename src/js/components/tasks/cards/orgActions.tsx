@@ -10,6 +10,7 @@ const OrgActions = ({
   org,
   ownedByCurrentUser,
   assignedToCurrentUser,
+  ownedByWrongUser,
   isCreating,
   isDeleting,
   doCreateOrg,
@@ -18,6 +19,7 @@ const OrgActions = ({
   org: Org | null;
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
+  ownedByWrongUser: Org | null;
   isCreating: boolean;
   isDeleting: boolean;
   doCreateOrg: () => void;
@@ -32,11 +34,7 @@ const OrgActions = ({
     );
   }
 
-  if (!org && assignedToCurrentUser) {
-    return <Button label={i18n.t('Create Org')} onClick={doCreateOrg} />;
-  }
-
-  if (org && ownedByCurrentUser && !isDeleting) {
+  if (!isDeleting && (ownedByWrongUser || (org && ownedByCurrentUser))) {
     return (
       <Dropdown
         align="right"
@@ -52,6 +50,10 @@ const OrgActions = ({
         onSelect={doDeleteOrg}
       />
     );
+  }
+
+  if (!org && assignedToCurrentUser) {
+    return <Button label={i18n.t('Create Org')} onClick={doCreateOrg} />;
   }
 
   return null;

@@ -6,7 +6,7 @@ from django.db import migrations
 
 def set_org_owner_username(apps, schema_editor):
     ScratchOrg = apps.get_model("api", "ScratchOrg")
-    for instance in ScratchOrg.objects.filter(owner_username=''):
+    for instance in ScratchOrg.objects.filter(owner_username=""):
         instance.owner_username = instance.owner.username
         instance.save()
 

@@ -170,7 +170,7 @@ describe('<OrgCards/>', () => {
       const { queryByText, getByText } = setup({ orgs });
 
       expect(queryByText('View Org')).toBeNull();
-      expect(getByText('not yet created', { exact: false })).toBeVisible();
+      expect(getByText('owned by user', { exact: false })).toBeVisible();
     });
   });
 
@@ -440,6 +440,8 @@ describe('<OrgCards/>', () => {
           Dev: null,
           QA: {
             ...defaultOrgs.Dev,
+            owner: 'other-user-id',
+            owner_username: 'other-user',
             org_type: 'QA',
             unsaved_changes: {},
             has_unsaved_changes: false,
