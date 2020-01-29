@@ -181,14 +181,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
                 )
             )
 
-    def perform_destroy(self, instance):
-        if self.request.user == instance.owner:
-            instance.queue_delete()
-        else:
-            raise PermissionDenied(
-                _("User is not the same user who created the ScratchOrg.")
-            )
-
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
         # rest_framework.mixins.RetrieveModelMixin, because I needed to
