@@ -11,7 +11,7 @@ const Footer = ({
   isCreating,
   isDeleting,
   isRefreshing,
-  isSynced,
+  reviewOrgOutOfDate,
   openRefreshOrgModal,
 }: {
   org: Org | null;
@@ -19,7 +19,7 @@ const Footer = ({
   isCreating: boolean;
   isDeleting: boolean;
   isRefreshing: boolean;
-  isSynced?: boolean;
+  reviewOrgOutOfDate: boolean;
   openRefreshOrgModal: () => void;
 }) => {
   const loadingMsg = i18n.t(
@@ -47,14 +47,14 @@ const Footer = ({
     const orgUrl = window.api_urls.scratch_org_redirect(org.id);
     /* istanbul ignore else */
     if (orgUrl) {
-      if (isSynced) {
-        return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
+      if (reviewOrgOutOfDate) {
+        return (
+          <Button onClick={openRefreshOrgModal} variant="base">
+            {i18n.t('View Org')}
+          </Button>
+        );
       }
-      return (
-        <Button onClick={openRefreshOrgModal} variant="base">
-          {i18n.t('View Org')}
-        </Button>
-      );
+      return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
     }
   }
 

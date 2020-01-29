@@ -15,7 +15,7 @@ const OrgInfo = ({
   assignedToCurrentUser,
   ownedByWrongUser,
   isCreating,
-  isSynced,
+  reviewOrgOutOfDate,
   orgCommitIdx,
   doCheckForOrgChanges,
 }: {
@@ -25,7 +25,7 @@ const OrgInfo = ({
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
   isCreating: boolean;
-  isSynced?: boolean;
+  reviewOrgOutOfDate: boolean;
   orgCommitIdx: number;
   doCheckForOrgChanges: () => void;
 }) => {
@@ -74,11 +74,7 @@ const OrgInfo = ({
       }
       case ORG_TYPES.QA: {
         // synced status for QA org
-        commitStatus = isSynced ? (
-          <li>
-            <strong>Up to Date</strong>
-          </li>
-        ) : (
+        commitStatus = reviewOrgOutOfDate ? (
           <li>
             <strong>Behind Latest:</strong> {orgCommitIdx}
             {orgCommitIdx && pluralize(orgCommitIdx, 'commit')} (
@@ -86,6 +82,10 @@ const OrgInfo = ({
               org comparison
             </ExternalLink>
             )
+          </li>
+        ) : (
+          <li>
+            <strong>Up to Date</strong>
           </li>
         );
         break;

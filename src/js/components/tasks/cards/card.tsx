@@ -121,8 +121,10 @@ const OrgCard = ({
 
   const orgCommitIdx =
     org && taskCommits ? taskCommits.indexOf(org.latest_commit) : -1;
-  const isSynced = orgCommitIdx ? orgCommitIdx <= 0 : true;
-  console.log(isSynced, orgCommitIdx);
+  const reviewOrgOutOfDate = Boolean(
+    type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
+  );
+  console.log(reviewOrgOutOfDate, orgCommitIdx);
 
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
@@ -131,7 +133,7 @@ const OrgCard = ({
       <div className="slds-col slds-size_4-of-6">
         {type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org')}
       </div>
-      {type === ORG_TYPES.QA && !isSynced && (
+      {reviewOrgOutOfDate && (
         <Button class="slds-col slds-size_4-of-6">Refresh Org</Button>
       )}
     </div>
@@ -166,7 +168,7 @@ const OrgCard = ({
             isCreating={isCreating}
             isDeleting={isDeleting}
             isRefreshing={isRefreshing}
-            isSynced={isSynced}
+            reviewOrgOutOfDate={reviewOrgOutOfDate}
             openRefreshOrgModal={openRefreshOrgModal}
           />
         }
@@ -188,7 +190,7 @@ const OrgCard = ({
                     orgId={org.id}
                     ownedByCurrentUser={ownedByCurrentUser}
                     isDeleting={isDeleting}
-                    isSynced={isSynced}
+                    reviewOrgOutOfDate={reviewOrgOutOfDate}
                     openRefreshOrgModal={openRefreshOrgModal}
                   />
                 )
@@ -213,7 +215,7 @@ const OrgCard = ({
                 assignedToCurrentUser={assignedToCurrentUser}
                 ownedByWrongUser={ownedByWrongUser}
                 isCreating={isCreating}
-                isSynced={isSynced}
+                reviewOrgOutOfDate={reviewOrgOutOfDate}
                 orgCommitIdx={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
               />

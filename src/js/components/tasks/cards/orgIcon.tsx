@@ -9,13 +9,13 @@ const OrgIcon = ({
   orgId,
   ownedByCurrentUser,
   isDeleting,
-  isSynced,
+  reviewOrgOutOfDate,
   openRefreshOrgModal,
 }: {
   orgId: string;
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
-  isSynced?: boolean;
+  reviewOrgOutOfDate: boolean;
   openRefreshOrgModal: () => void;
 }) => {
   const orgUrl = window.api_urls.scratch_org_redirect(orgId);
@@ -29,11 +29,7 @@ const OrgIcon = ({
         className="icon-link slds-m-bottom_xxx-small"
       />
     );
-    const viewOrgLink = isSynced ? (
-      <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
-        {iconLink}
-      </ExternalLink>
-    ) : (
+    const viewOrgLink = reviewOrgOutOfDate ? (
       <Button
         variant="icon"
         iconName="link"
@@ -44,6 +40,10 @@ const OrgIcon = ({
       >
         {iconLink}
       </Button>
+    ) : (
+      <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
+        {iconLink}
+      </ExternalLink>
     );
     return viewOrgLink;
   }
