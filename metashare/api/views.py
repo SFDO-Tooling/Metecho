@@ -181,6 +181,9 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
                 )
             )
 
+    def perform_destroy(self, instance):
+        instance.queue_delete()
+
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
         # rest_framework.mixins.RetrieveModelMixin, because I needed to
