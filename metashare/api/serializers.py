@@ -288,7 +288,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             task=data["task"], org_type=data["org_type"]
         ).exists():
             raise serializers.ValidationError(
-                "A ScratchOrg of this type already exists for this task."
+                _("A ScratchOrg of this type already exists for this task.")
             )
         return data
 
