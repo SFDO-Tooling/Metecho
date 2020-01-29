@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import OrgCards from '@/components/orgs/cards';
+import OrgCards from '@/components/tasks/cards';
 import { createObject, deleteObject, updateObject } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
 

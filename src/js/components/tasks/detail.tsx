@@ -9,8 +9,8 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
-import CaptureModal from '@/components/orgs/capture';
-import OrgCards from '@/components/orgs/cards';
+import CaptureModal from '@/components/tasks/captureOrgChanges';
+import OrgCards from '@/components/tasks/cards';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -58,6 +58,9 @@ const TaskDetail = (props: RouteComponentProps) => {
     task?.has_unmerged_commits && !task?.pr_is_open,
   );
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
+  const userIsAssignedDev = Boolean(
+    user.username === task?.assigned_dev?.login,
+  );
   let currentlyFetching = false;
   let currentlyCommitting = false;
   let orgHasChanges = false;
@@ -66,7 +69,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges = Boolean(devOrg?.has_unsaved_changes);
-    userIsOwner = devOrg?.owner === user.id;
+    userIsOwner = Boolean(userIsAssignedDev && devOrg?.owner === user.id);
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
   }

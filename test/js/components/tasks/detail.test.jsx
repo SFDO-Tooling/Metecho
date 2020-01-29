@@ -143,7 +143,7 @@ describe('<TaskDetail/>', () => {
     expect(getByText('Task Description')).toBeVisible();
     expect(queryByText('View Branch')).toBeNull();
     expect(getByTitle('View Org')).toBeVisible();
-    expect(getByText('Task Orgs')).toBeVisible();
+    expect(getByText('Task Team & Orgs')).toBeVisible();
   });
 
   test('renders view branch button if branch_url exists', () => {
@@ -254,7 +254,7 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(queryByText('Task Orgs')).toBeNull();
+      expect(queryByText('Task Team & Orgs')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledTimes(1);
 
       const args = fetchObjects.mock.calls[0][0];
