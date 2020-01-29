@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useEffect, useState } from 'react';
 
-import { GitHubUser } from '@/store/repositories/reducer';
+import { GitHubUser } from '@/store/user/reducer';
 
 interface TableCellProps {
   [key: string]: any;

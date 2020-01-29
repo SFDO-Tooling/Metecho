@@ -99,6 +99,7 @@ const defaultState = {
         task: 'task1',
         org_type: 'Dev',
         owner: 'user-id',
+        owner_username: 'user-name',
         expires_at: '2019-09-16T12:58:53.721Z',
         latest_commit: '617a51',
         latest_commit_url: '/test/commit/url/',
@@ -142,7 +143,7 @@ describe('<TaskDetail/>', () => {
     expect(getByText('Task Description')).toBeVisible();
     expect(queryByText('View Branch')).toBeNull();
     expect(getByTitle('View Org')).toBeVisible();
-    expect(getByText('Task Orgs')).toBeVisible();
+    expect(getByText('Task Team & Orgs')).toBeVisible();
   });
 
   test('renders view branch button if branch_url exists', () => {
@@ -253,15 +254,13 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(queryByText('Task Orgs')).toBeNull();
+      expect(queryByText('Task Team & Orgs')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledTimes(1);
-
-      const args = fetchObjects.mock.calls[0][0];
-
-      expect(args.objectType).toEqual('scratch_org');
-      expect(args.filters).toEqual({ task: 'task1' });
-      expect(args.shouldSubscribeToObject({})).toBe(false);
-      expect(args.shouldSubscribeToObject({ owner: 'user-id' })).toBe(true);
+      expect(fetchObjects).toHaveBeenCalledWith({
+        objectType: 'scratch_org',
+        filters: { task: 'task1' },
+        shouldSubscribeToObject: true,
+      });
     });
   });
 

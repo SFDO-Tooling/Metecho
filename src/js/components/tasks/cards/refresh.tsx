@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import React from 'react';
 
-import { ExternalLink } from '../utils';
+import { ExternalLink } from '@/components/utils';
 
 // number of commits behind
 // refresh org action (which doesnt exist)

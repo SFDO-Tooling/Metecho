@@ -25,8 +25,8 @@ import {
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
-import { GitHubUser } from '@/store/repositories/reducer';
 import { Task } from '@/store/tasks/reducer';
+import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 import routes from '@/utils/routes';
 

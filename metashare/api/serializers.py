@@ -266,6 +266,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_capturing_changes",
             "delete_queued_at",
             "owner_sf_id",
+            "owner_username",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -287,7 +288,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             task=data["task"], org_type=data["org_type"]
         ).exists():
             raise serializers.ValidationError(
-                "A ScratchOrg of this type already exists for this task."
+                _("A ScratchOrg of this type already exists for this task.")
             )
         return data
 

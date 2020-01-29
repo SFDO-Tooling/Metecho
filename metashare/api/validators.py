@@ -58,4 +58,4 @@ class GitHubUserValidator:
         github_users = cleaned_data.get("github_users", [])
         for user in github_users:
             if user not in parent.github_users:
-                raise ValidationError(f"Invalid github_users value: {user}")
+                raise ValidationError(_(f"Invalid github_users value: {user}"))

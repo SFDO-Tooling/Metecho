@@ -2,8 +2,8 @@
 
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { ProjectAction } from '@/store/projects/actions';
-import { GitHubUser } from '@/store/repositories/reducer';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
+import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Project {
