@@ -20,10 +20,3 @@
     max-height: unset;
   }
 }
-
-.welcome-tile {
-  // arbitrary height for vertically centering content in tile
-  @media (min-height: 700px) {
-    justify-content: center;
-  }
-}

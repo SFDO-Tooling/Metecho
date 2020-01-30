@@ -89,7 +89,7 @@ const Login = () => {
             slds-grid_vertical
             slds-p-left_xx-large
             slds-p-right_xx-large
-            welcome-tile"
+            slds-grid_align-center"
         >
           <h3 className="slds-text-heading_large slds-p-bottom_medium">
             {i18n.t('What is MetaShare?')}
