@@ -20,6 +20,7 @@ export interface User {
   is_devhub_enabled: boolean;
   is_staff: boolean;
   currently_fetching_repos: boolean;
+  devhub_username: string | null;
 }
 
 const reducer = (
