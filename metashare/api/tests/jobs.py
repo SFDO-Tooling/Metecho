@@ -84,23 +84,21 @@ class TestCreateBranchesOnGitHub:
 
 @pytest.mark.django_db
 class TestAlertUserAboutExpiringOrg:
-    def test_missing_model(self, scratch_org_factory, user_factory):
+    def test_missing_model(self, scratch_org_factory):
         scratch_org = scratch_org_factory()
-        user = user_factory()
-        user.delete()
+        scratch_org.delete()
         with patch(f"{PATCH_ROOT}.send_mail") as send_mail:
-            assert alert_user_about_expiring_org(scratch_org, user) is None
+            assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
             assert not send_mail.called
 
-    def test_good(self, scratch_org_factory, user_factory):
+    def test_good(self, scratch_org_factory):
         scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
-        user = user_factory()
         with ExitStack() as stack:
             send_mail = stack.enter_context(patch(f"{PATCH_ROOT}.send_mail"))
             get_unsaved_changes = stack.enter_context(
                 patch(f"{PATCH_ROOT}.get_unsaved_changes")
             )
-            assert alert_user_about_expiring_org(scratch_org, user) is None
+            assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
             assert get_unsaved_changes.called
             assert send_mail.called
 

@@ -8,7 +8,6 @@ from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django_rq import get_scheduler, job
@@ -77,12 +76,13 @@ def _create_branches_on_github(*, user, repo_id, project, task):
     return task_branch_name
 
 
-def alert_user_about_expiring_org(org, user):
+def alert_user_about_expiring_org(*, org, days):
     from .models import User, ScratchOrg
 
     # if scratch org is there
     try:
         org.refresh_from_db()
+        user = org.owner
         user.refresh_from_db()
     except (ScratchOrg.DoesNotExist, User.DoesNotExist):
         return
@@ -91,7 +91,10 @@ def alert_user_about_expiring_org(org, user):
     get_unsaved_changes(org)
     if org.unsaved_changes:
         domain = Site.objects.first().domain
-        path = reverse("task-detail", kwargs={"pk": str(org.task.id)})
+        task = org.task
+        project = task.project
+        repo = project.repository
+        path = f"/repositories/{repo.slug}/{project.slug}/{task.slug}/"
         metashare_link = f"https://{domain}{path}"
         # email user
         send_mail(
@@ -99,9 +102,10 @@ def alert_user_about_expiring_org(org, user):
             render_to_string(
                 "scratch_org_expiry_email.txt",
                 {
-                    "repo_name": org.task.project.repository.name,
-                    "project_name": org.task.project.name,
-                    "task_name": org.task.name,
+                    "repo_name": repo.name,
+                    "project_name": project.name,
+                    "task_name": task.name,
+                    "days": days,
                     "expiry_date": org.expires_at,
                     "user_name": user.username,
                     "metashare_link": metashare_link,
@@ -152,11 +156,10 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
 
     scheduler = get_scheduler("default")
-    before_expiry = scratch_org.expires_at - timedelta(
-        days=settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
-    )
+    days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
+    before_expiry = scratch_org.expires_at - timedelta(days=days)
     scheduler.enqueue_at(
-        before_expiry, alert_user_about_expiring_org, scratch_org, user
+        before_expiry, alert_user_about_expiring_org, org=scratch_org, days=days,
     )
 
 

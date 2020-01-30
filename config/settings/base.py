@@ -180,7 +180,6 @@ TEMPLATES = [
     {
         "NAME": "email",
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # This gets overridden in settings.production:
         "DIRS": [str(PROJECT_ROOT / "email_templates")],
         "APP_DIRS": False,
         "OPTIONS": {"autoescape": False},
