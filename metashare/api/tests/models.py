@@ -40,6 +40,14 @@ class TestRepository:
         gh_repo = git_hub_repository_factory(repo_id=123)
         assert repo.get_a_matching_user() == gh_repo.user
 
+    def test_queue_populate_github_users(self, repository_factory, user_factory):
+        repo = repository_factory()
+        with patch(
+            "metashare.api.jobs.populate_github_users_job"
+        ) as populate_github_users_job:
+            repo.queue_populate_github_users()
+            assert populate_github_users_job.delay.called
+
     def test_queue_refresh_commits(self, repository_factory, user_factory):
         repo = repository_factory()
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
@@ -206,6 +214,15 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.salesforce_account is None
 
+    def test_sf_username(self, user_factory, social_account_factory):
+        user = user_factory(devhub_username="sample username")
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "not me!"},
+        )
+        assert user.sf_username == "sample username"
+
     def test_instance_url(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
@@ -312,6 +329,10 @@ class TestUser:
 
         user = user_factory(socialaccount_set=[])
         assert user.full_org_type is None
+
+    def test_is_devhub_enabled__shortcut_true(self, user_factory):
+        user = user_factory(devhub_username="sample username")
+        assert user.is_devhub_enabled
 
     def test_is_devhub_enabled__shortcut_false(
         self, user_factory, social_account_factory

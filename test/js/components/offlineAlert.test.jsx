@@ -4,15 +4,26 @@ import React from 'react';
 import OfflineAlert from '@/components/offlineAlert';
 
 describe('<OfflineAlert />', () => {
+  let location;
   const setup = () => {
     const { getByText } = render(<OfflineAlert />);
     return { getByText };
   };
 
+  beforeAll(() => {
+    location = window.location;
+    delete window.location;
+    window.location = {
+      reload: jest.fn(),
+    };
+  });
+
+  afterAll(() => {
+    window.location = location;
+  });
+
   test('calls window.location.reload on click', () => {
     const { getByText } = setup();
-
-    jest.spyOn(window.location, 'reload');
     fireEvent.click(getByText('reload the page.'));
 
     expect(window.location.reload).toHaveBeenCalledTimes(1);

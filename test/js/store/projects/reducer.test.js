@@ -433,6 +433,90 @@ describe('reducer', () => {
     });
   });
 
+  describe('UPDATE_OBJECT_SUCCEEDED', () => {
+    test('updates existing project', () => {
+      const project = {
+        id: 'p1',
+        repository: 'repository-1',
+        name: 'Project 1',
+      };
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const editedProject = { ...project, name: 'Edited Project Name' };
+      const expected = {
+        'repository-1': {
+          projects: [editedProject, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(
+        {
+          'repository-1': {
+            projects: [project, project2],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+        {
+          type: 'UPDATE_OBJECT_SUCCEEDED',
+          payload: {
+            objectType: 'project',
+            object: editedProject,
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if unknown objectType', () => {
+      const project = {
+        id: 'p1',
+        repository: 'repository-1',
+        name: 'Project 1',
+      };
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const editedProject = { ...project, name: 'Edited Project Name' };
+      const expected = {
+        'repository-1': {
+          projects: [project, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(
+        {
+          'repository-1': {
+            projects: [project, project2],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+        {
+          type: 'UPDATE_OBJECT_SUCCEEDED',
+          payload: {
+            objectType: 'foobar',
+            object: editedProject,
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('PROJECT_CREATE_PR_FAILED', () => {
     test('sets currently_creating_pr: false', () => {
       const project = {

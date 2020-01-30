@@ -24,6 +24,7 @@ Retrieve
      "org_name": "OddBird",
      "org_type": "Developer Edition",
      "is_devhub_enabled": true,
+     "devhub_username": null,
      "sf_username": "user@domain.com",
      "currently_fetching_repos": false
    }

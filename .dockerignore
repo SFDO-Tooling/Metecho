@@ -79,5 +79,6 @@ sdist/
 staticfiles/
 var/
 venv/
+webpack-stats.json
 wheels/
 yarn-error.log

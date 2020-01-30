@@ -15,16 +15,27 @@ afterEach(() => {
 });
 
 describe('<Errors />', () => {
+  let location;
   const setup = () => {
     const errors = [{ id: 'err1', message: 'This is an error.' }];
     const { getByText } = renderWithRedux(<Errors />, { errors });
     return { getByText };
   };
 
+  beforeAll(() => {
+    location = window.location;
+    delete window.location;
+    window.location = {
+      reload: jest.fn(),
+    };
+  });
+
+  afterAll(() => {
+    window.location = location;
+  });
+
   test('calls window.location.reload on link click', () => {
     const { getByText } = setup();
-
-    jest.spyOn(window.location, 'reload');
     fireEvent.click(getByText('reload the page.'));
 
     expect(window.location.reload).toHaveBeenCalledTimes(1);
