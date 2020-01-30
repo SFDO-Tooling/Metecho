@@ -99,7 +99,7 @@ const defaultState = {
         task: 'task1',
         org_type: 'Dev',
         owner: 'user-id',
-        owner_username: 'user-name',
+        owner_gh_username: 'user-name',
         expires_at: '2019-09-16T12:58:53.721Z',
         latest_commit: '617a51',
         latest_commit_url: '/test/commit/url/',
