@@ -25,6 +25,7 @@ def test_serialize(user_factory):
                 "is_devhub_enabled": False,
                 "sf_username": None,
                 "currently_fetching_repos": True,
+                "devhub_username": None,
             }
         )
     )

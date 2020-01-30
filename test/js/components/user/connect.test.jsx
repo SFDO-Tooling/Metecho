@@ -13,7 +13,7 @@ describe('<ConnectModal />', () => {
     };
     const opts = { ...defaults, ...options };
     return render(
-      <ConnectModal isOpen={opts.isOpen} toggleModal={toggleModal} />,
+      <ConnectModal user={{}} isOpen={opts.isOpen} toggleModal={toggleModal} />,
     );
   };
 
