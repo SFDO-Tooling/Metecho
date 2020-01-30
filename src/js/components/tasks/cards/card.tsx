@@ -142,10 +142,12 @@ const OrgCard = ({
         }
       >
         {assignedUser && (
+          <div className="slds-m-bottom_small">
+            <UserCard user={assignedUser} className="nested-card" />
+          </div>
+        )}
+        {(assignedUser || ownedByWrongUser) && (
           <>
-            <div className="slds-m-bottom_small">
-              <UserCard user={assignedUser} className="nested-card" />
-            </div>
             <hr className="slds-m-vertical_none" />
             <Card
               className="nested-card"
