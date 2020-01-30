@@ -1,4 +1,5 @@
 version: 2.1
+
 jobs:
   build:
     working_directory: ~/metashare
@@ -22,10 +23,12 @@ jobs:
             pip install -r requirements/dev.txt
       - run:
           name: Compile Front-End Assets
-          command: yarn prod
+          command: yarn prod:stats
       - persist_to_workspace:
           root: .
           paths:
+            - ./webpack-stats.json
+            - ./dist
             - ./venv
             - ./node_modules
       - save_cache:
@@ -138,6 +141,21 @@ jobs:
             yarn test:js:check-coverage
             yarn test:py:check-coverage
 
+  report-webpack-stats:
+    working_directory: ~/metashare
+    docker:
+      - image: oddbirds/pyjs
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install packtracker.io Plugin
+          command: yarn global add @packtracker/webpack-plugin
+      - run:
+          name: Upload Webpack Stats to packtracker.io
+          command: yarn packtracker
+
   build-docs:
     working_directory: ~/metashare
     docker:
@@ -174,3 +192,6 @@ workflows:
           requires:
             - test-client
             - test-python
+      - report-webpack-stats:
+          requires:
+            - build
