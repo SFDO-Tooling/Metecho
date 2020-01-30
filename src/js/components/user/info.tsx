@@ -101,15 +101,13 @@ const UserInfo = ({
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const devHubEnabled = Boolean(user.is_devhub_enabled || user.devhub_username);
-
   return (
     <>
       {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
       <ul>
         <li>
           <strong>{i18n.t('Dev Hub')}:</strong>{' '}
-          {devHubEnabled ? (
+          {user.is_devhub_enabled ? (
             <span className="slds-text-color_success">{i18n.t('Enabled')}</span>
           ) : (
             <>
@@ -165,7 +163,7 @@ const ConnectionInfo = ({ user }: { user: User }) => (
       <p className="slds-text-heading_small">
         {i18n.t('Connected to Salesforce')}
       </p>
-      {!(user.is_devhub_enabled || user.devhub_username) && (
+      {!user.is_devhub_enabled && (
         <p className="slds-text-color_weak slds-m-top_xx-small">
           <Icon
             assistiveText={{ label: i18n.t('Error') }}
@@ -200,26 +198,27 @@ export const ConnectionInfoModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
-  const devHubEnabled = Boolean(user.is_devhub_enabled || user.devhub_username);
   const isConnected = Boolean(user.valid_token_for || user.devhub_username);
 
   return (
     <Modal
       isOpen={isConnected && isOpen}
       heading={
-        devHubEnabled ? i18n.t('Dev Hub Enabled') : i18n.t('Enable Dev Hub')
+        user.is_devhub_enabled
+          ? i18n.t('Dev Hub Enabled')
+          : i18n.t('Enable Dev Hub')
       }
       tagline={
-        devHubEnabled ? (
+        user.is_devhub_enabled ? (
           successText ||
           i18n.t('Please close this message and try your action again.')
         ) : (
           <ConnectionInfoWarning />
         )
       }
-      prompt={devHubEnabled ? 'success' : 'warning'}
+      prompt={user.is_devhub_enabled ? 'success' : 'warning'}
       footer={
-        devHubEnabled && [
+        user.is_devhub_enabled && [
           <Button
             key="close"
             label={i18n.t('Continue')}

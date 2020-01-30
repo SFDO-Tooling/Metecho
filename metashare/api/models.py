@@ -152,6 +152,8 @@ class User(HashIdMixin, AbstractUser):
     @cached_property
     def is_devhub_enabled(self):
         # We can shortcut and avoid making an HTTP request in some cases:
+        if self.devhub_username:
+            return True
         if not self.salesforce_account:
             return False
         if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
