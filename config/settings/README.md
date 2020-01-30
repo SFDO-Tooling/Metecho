@@ -71,3 +71,5 @@ these are small enough to simply put behind an additional environment variable.
 
 - `web`: the asgi server that handles HTTP and WebSockets
 - `worker`: the main worker type
+- `scheduler`: the town clock, that implements cron scheduling for jobs on any
+  work queue
