@@ -345,7 +345,7 @@ const OrgCards = ({ orgs, task }: { orgs: OrgsByTask; task: Task }) => {
 
   let deleteAction: (...args: any[]) => void = openConnectModal;
   let createAction: (...args: any[]) => void = openConnectModal;
-  if (user && user.valid_token_for) {
+  if (user && (user.valid_token_for || user.devhub_username)) {
     createAction = user.is_devhub_enabled ? createOrg : openInfoModal;
     deleteAction = (org: Org) => {
       if (org.org_type === ORG_TYPES.DEV) {

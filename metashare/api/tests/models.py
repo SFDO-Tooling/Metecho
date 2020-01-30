@@ -214,6 +214,15 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.salesforce_account is None
 
+    def test_sf_username(self, user_factory, social_account_factory):
+        user = user_factory(devhub_username="sample username")
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "not me!"},
+        )
+        assert user.sf_username == "sample username"
+
     def test_instance_url(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
@@ -320,6 +329,10 @@ class TestUser:
 
         user = user_factory(socialaccount_set=[])
         assert user.full_org_type is None
+
+    def test_is_devhub_enabled__shortcut_true(self, user_factory):
+        user = user_factory(devhub_username="sample username")
+        assert user.is_devhub_enabled
 
     def test_is_devhub_enabled__shortcut_false(
         self, user_factory, social_account_factory
