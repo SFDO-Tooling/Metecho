@@ -196,6 +196,11 @@ const OrgCards = ({
     }
   }, [assignUser, isWaitingToRemoveUser, orgs]);
 
+  const taskCommits = task.commits.map((c) => c.id);
+  if (task.origin_sha) {
+    taskCommits.push(task.origin_sha);
+  }
+
   return (
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Team & Orgs')}</h2>
@@ -221,7 +226,7 @@ const OrgCards = ({
           assignedUser={task.assigned_qa}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
-          taskCommits={task.commits.map((c) => c.id).concat([task.origin_sha])}
+          taskCommits={taskCommits}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}
