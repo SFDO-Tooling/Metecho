@@ -636,6 +636,11 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         # SCRATCH_ORG_DELETE event:
         self.delete(should_finalize=False)
 
+    def queue_refresh_org(self):
+        from .jobs import refresh_scratch_org_job
+
+        refresh_scratch_org_job.delay(self)
+
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
