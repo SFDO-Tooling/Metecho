@@ -158,7 +158,7 @@ const OrgCards = ({
   }
 
   const handleAssignUser = ({ type, assignee }: AssignedUserTracker) => {
-    const orgOwner = orgs[type]?.owner_username;
+    const orgOwner = orgs[type]?.owner_gh_username;
     const newAssigned = assignee?.login;
     if (orgs[type] && (!orgOwner || orgOwner !== newAssigned)) {
       setConfirmRemoveUserModalOpen({ type, assignee });

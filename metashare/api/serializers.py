@@ -266,8 +266,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "delete_queued_at",
-            "owner_sf_id",
-            "owner_username",
+            "owner_sf_username",
+            "owner_gh_username",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},

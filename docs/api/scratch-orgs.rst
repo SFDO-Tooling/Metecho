@@ -32,8 +32,8 @@ Retrieve
         "currently_refreshing_changes": false,
         "currently_capturing_changes": false,
         "delete_queued_at": null,
-        "owner_sf_id": "user@domain.com",
-        "owner_username": "user123"
+        "owner_sf_username": "user@domain.com",
+        "owner_gh_username": "user123"
       }
       ...
     ]

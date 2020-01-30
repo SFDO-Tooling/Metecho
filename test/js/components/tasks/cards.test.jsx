@@ -37,7 +37,7 @@ const defaultOrgs = {
     task: 'task-id',
     org_type: 'Dev',
     owner: 'user-id',
-    owner_username: 'user-name',
+    owner_gh_username: 'user-name',
     expires_at: '2019-09-16T12:58:53.721Z',
     latest_commit: '617a512-longlong',
     latest_commit_url: '/test/commit/url/',
@@ -136,7 +136,7 @@ describe('<OrgCards/>', () => {
         Dev: {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
-          owner_username: 'other-user',
+          owner_gh_username: 'other-user',
           unsaved_changes: {},
           has_unsaved_changes: false,
         },
@@ -166,7 +166,7 @@ describe('<OrgCards/>', () => {
         Dev: {
           ...defaultOrgs.Dev,
           owner: 'other-user',
-          owner_username: 'other-user',
+          owner_gh_username: 'other-user',
         },
       };
       const { queryByText, getByText } = setup({ orgs });
@@ -442,7 +442,7 @@ describe('<OrgCards/>', () => {
           QA: {
             ...defaultOrgs.Dev,
             owner: 'other-user-id',
-            owner_username: 'other-user',
+            owner_gh_username: 'other-user',
             org_type: 'QA',
             unsaved_changes: {},
             has_unsaved_changes: false,
