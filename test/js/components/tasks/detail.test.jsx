@@ -146,7 +146,7 @@ describe('<TaskDetail/>', () => {
     expect(getByText('Task Team & Orgs')).toBeVisible();
   });
 
-  test('renders view branch button if branch_url exists', () => {
+  test('renders view changes if has_unmerged_commits, branch_diff_url', () => {
     const { getByText, getByTitle } = setup({
       initialState: {
         ...defaultState,
@@ -155,7 +155,8 @@ describe('<TaskDetail/>', () => {
           project1: [
             {
               ...defaultState.tasks.project1[0],
-              branch_url: 'https://github.com/example/repo',
+              branch_diff_url: 'https://github.com/example/repo',
+              has_unmerged_commits: true,
             },
           ],
         },
@@ -163,7 +164,7 @@ describe('<TaskDetail/>', () => {
     });
 
     expect(getByTitle('Task 1')).toBeVisible();
-    expect(getByText('View Branch')).toBeVisible();
+    expect(getByText('View Changes')).toBeVisible();
   });
 
   test('renders view pr button if pr_url exists', () => {

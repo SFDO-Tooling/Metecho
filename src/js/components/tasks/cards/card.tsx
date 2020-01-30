@@ -183,7 +183,6 @@ const OrgCard = ({
             <hr className="slds-m-vertical_none" />
             <Card
               className="nested-card"
-              bodyClassName="slds-card__body_inner"
               heading={<OrgHeading />}
               icon={
                 org &&

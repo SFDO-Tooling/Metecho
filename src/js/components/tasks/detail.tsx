@@ -32,6 +32,7 @@ import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { ORG_TYPES } from '@/utils/constants';
+import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
@@ -144,6 +145,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const { branchLink, branchLinkText } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       <Button
@@ -154,13 +156,13 @@ const TaskDetail = (props: RouteComponentProps) => {
         variant="text-destructive"
         disabled
       />
-      {task.pr_url || task.branch_url ? (
+      {branchLink ? (
         <ExternalLink
-          url={(task.pr_url || task.branch_url) as string}
+          url={branchLink}
           showButtonIcon
           className="slds-button slds-button_outline-brand"
         >
-          {task.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
+          {branchLinkText}
         </ExternalLink>
       ) : null}
     </PageHeaderControl>

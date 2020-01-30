@@ -264,7 +264,7 @@ describe('<OrgCards/>', () => {
 
         expect(updateObject).not.toHaveBeenCalled();
         expect(
-          getByText('Confirm Change Reviewer and Delete Review Org'),
+          getByText('Confirm Changing Reviewer and Deleting Review Org'),
         ).toBeVisible();
       });
 
@@ -276,13 +276,13 @@ describe('<OrgCards/>', () => {
             fireEvent.click(getByText('Remove Developer'));
 
             expect(
-              getByText('Confirm Change Developer and Delete Dev Org'),
+              getByText('Confirm Changing Developer and Deleting Dev Org'),
             ).toBeVisible();
 
             fireEvent.click(getByText('Cancel'));
 
             expect(
-              queryByText('Confirm Change Developer and Delete Dev Org'),
+              queryByText('Confirm Changing Developer and Deleting Dev Org'),
             ).toBeNull();
           });
         });

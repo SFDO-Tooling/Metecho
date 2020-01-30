@@ -139,12 +139,14 @@ const UserInfo = ({
           </li>
         )}
       </ul>
-      <Button
-        label={i18n.t('Disconnect from Salesforce')}
-        variant="link"
-        className="slds-m-top_small"
-        onClick={doDisconnect}
-      />
+      {!user.devhub_username && (
+        <Button
+          label={i18n.t('Disconnect from Salesforce')}
+          variant="link"
+          className="slds-m-top_small"
+          onClick={doDisconnect}
+        />
+      )}
     </>
   );
 };
@@ -196,10 +198,11 @@ export const ConnectionInfoModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
+  const isConnected = Boolean(user.valid_token_for || user.devhub_username);
 
   return (
     <Modal
-      isOpen={Boolean(user?.valid_token_for && isOpen)}
+      isOpen={isConnected && isOpen}
       heading={
         user.is_devhub_enabled
           ? i18n.t('Dev Hub Enabled')
@@ -266,7 +269,7 @@ const UserDropdown = () => {
               </div>
             </header>
             <div className="slds-p-vertical_small slds-p-horizontal_large">
-              {user.valid_token_for ? (
+              {user.valid_token_for || user.devhub_username ? (
                 <ConnectionInfo user={user} />
               ) : (
                 <ConnectToSalesforce toggleModal={setModalOpen} />
