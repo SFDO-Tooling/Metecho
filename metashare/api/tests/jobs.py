@@ -89,14 +89,19 @@ class TestAlertUserAboutExpiringOrg:
         user = user_factory()
         user.delete()
         with patch(f"{PATCH_ROOT}.send_mail") as send_mail:
-            assert alert_user_about_expiring_org(scratch_org, user)() is None
+            assert alert_user_about_expiring_org(scratch_org, user) is None
             assert not send_mail.called
 
     def test_good(self, scratch_org_factory, user_factory):
         scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
         user = user_factory()
-        with patch(f"{PATCH_ROOT}.send_mail") as send_mail:
-            assert alert_user_about_expiring_org(scratch_org, user)() is None
+        with ExitStack() as stack:
+            send_mail = stack.enter_context(patch(f"{PATCH_ROOT}.send_mail"))
+            get_unsaved_changes = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_unsaved_changes")
+            )
+            assert alert_user_about_expiring_org(scratch_org, user) is None
+            assert get_unsaved_changes.called
             assert send_mail.called
 
 
@@ -111,6 +116,7 @@ def test_create_org_and_run_flow():
         )
         run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
@@ -157,6 +163,7 @@ def test_create_branches_on_github_then_create_scratch_org():
         _create_org_and_run_flow = stack.enter_context(
             patch(f"{PATCH_ROOT}._create_org_and_run_flow")
         )
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
 
         create_branches_on_github_then_create_scratch_org(scratch_org=MagicMock())
 

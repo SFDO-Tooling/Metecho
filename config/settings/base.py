@@ -159,6 +159,7 @@ MIDDLEWARE = [
 
 TEMPLATES = [
     {
+        "NAME": "django",
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         # This gets overridden in settings.production:
         "DIRS": [str(PROJECT_ROOT / "dist"), str(PROJECT_ROOT / "templates")],
@@ -175,7 +176,15 @@ TEMPLATES = [
                 "metashare.context_processors.env",
             ]
         },
-    }
+    },
+    {
+        "NAME": "email",
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        # This gets overridden in settings.production:
+        "DIRS": [str(PROJECT_ROOT / "email_templates")],
+        "APP_DIRS": False,
+        "OPTIONS": {"autoescape": False},
+    },
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -277,6 +286,7 @@ else:
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
     ANYMAIL = {
         "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=""),
+        "MAILGUN_SENDER_DOMAIN": env("MAILGUN_DOMAIN", default=None),
     }
 
 DAYS_BEFORE_ORG_EXPIRY_TO_ALERT = env(
