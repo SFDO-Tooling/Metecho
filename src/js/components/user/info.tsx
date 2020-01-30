@@ -101,13 +101,15 @@ const UserInfo = ({
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const devHubEnabled = Boolean(user.is_devhub_enabled || user.devhub_username);
+
   return (
     <>
       {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
       <ul>
         <li>
           <strong>{i18n.t('Dev Hub')}:</strong>{' '}
-          {user.is_devhub_enabled || user.devhub_username ? (
+          {devHubEnabled ? (
             <span className="slds-text-color_success">{i18n.t('Enabled')}</span>
           ) : (
             <>
@@ -139,12 +141,14 @@ const UserInfo = ({
           </li>
         )}
       </ul>
-      <Button
-        label={i18n.t('Disconnect from Salesforce')}
-        variant="link"
-        className="slds-m-top_small"
-        onClick={doDisconnect}
-      />
+      {!user.devhub_username && (
+        <Button
+          label={i18n.t('Disconnect from Salesforce')}
+          variant="link"
+          className="slds-m-top_small"
+          onClick={doDisconnect}
+        />
+      )}
     </>
   );
 };
@@ -196,26 +200,26 @@ export const ConnectionInfoModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
+  const devHubEnabled = Boolean(user.is_devhub_enabled || user.devhub_username);
+  const isConnected = Boolean(user.valid_token_for || user.devhub_username);
 
   return (
     <Modal
-      isOpen={Boolean(user && user.valid_token_for && isOpen)}
+      isOpen={isConnected && isOpen}
       heading={
-        user.is_devhub_enabled
-          ? i18n.t('Dev Hub Enabled')
-          : i18n.t('Enable Dev Hub')
+        devHubEnabled ? i18n.t('Dev Hub Enabled') : i18n.t('Enable Dev Hub')
       }
       tagline={
-        user.is_devhub_enabled ? (
+        devHubEnabled ? (
           successText ||
           i18n.t('Please close this message and try your action again.')
         ) : (
           <ConnectionInfoWarning />
         )
       }
-      prompt={user.is_devhub_enabled ? 'success' : 'warning'}
+      prompt={devHubEnabled ? 'success' : 'warning'}
       footer={
-        user.is_devhub_enabled && [
+        devHubEnabled && [
           <Button
             key="close"
             label={i18n.t('Continue')}
