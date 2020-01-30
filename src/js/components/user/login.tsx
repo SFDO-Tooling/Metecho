@@ -10,6 +10,7 @@ import { selectUserState } from '@/store/user/selectors';
 import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
 import welcomeMatBG from '#/welcome-mat-bg.png';
+import welcomeMatFG from '#/welcome-mat-fg.png';
 
 interface Props extends RouteComponentProps {
   id?: string;
@@ -101,13 +102,13 @@ const Login = () => {
           <h4 className="slds-text-heading_small slds-p-bottom_small">
             {i18n.t('What can I do with MetaShare?')}
           </h4>
-          <ul>
+          <ul className="slds-m-bottom_x-large">
             <li className="slds-p-bottom_small">
               <Icon
                 category="utility"
                 name="adduser"
                 size="x-small"
-                className="slds-m-right_x-small welcome-icon"
+                className="slds-m-right_x-small slds-icon-text-default"
               />
               {i18n.t('Assign projects and tasks to members of your team.')}
             </li>
@@ -116,7 +117,7 @@ const Login = () => {
                 category="utility"
                 name="magicwand"
                 size="x-small"
-                className="slds-m-right_x-small welcome-icon"
+                className="slds-m-right_x-small slds-icon-text-default"
               />
               {i18n.t('Easily create a scratch org with the existing project.')}
             </li>
@@ -125,13 +126,17 @@ const Login = () => {
                 category="utility"
                 name="upload"
                 size="x-small"
-                className="slds-m-right_x-small welcome-icon"
+                className="slds-m-right_x-small slds-icon-text-default"
               />
               {i18n.t(
                 'Make changes and capture them into a repository on GitHub.',
               )}
             </li>
           </ul>
+          <img
+            src={welcomeMatFG}
+            alt="screenshots of MetaShare app interface"
+          />
         </div>
       </div>
     </div>
