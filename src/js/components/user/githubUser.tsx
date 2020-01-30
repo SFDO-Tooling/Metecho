@@ -7,13 +7,14 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { GitHubUser } from '@/store/user/reducer';
 
 interface TableCellProps {
   [key: string]: any;
   item?: GitHubUser;
+  handleUserClick: (user: GitHubUser) => void;
 }
 
 export const GitHubUserAvatar = ({ user }: { user: GitHubUser }) => (
@@ -36,7 +37,6 @@ export const UserCard = ({
 }) => (
   <Card
     className={classNames(className, 'collaborator-card')}
-    bodyClassName="slds-card__body_inner"
     icon={<GitHubUserAvatar user={user} />}
     heading={user.login}
     headerActions={
@@ -80,16 +80,18 @@ export const UserCards = ({
   </div>
 );
 
-const UserTableCell = ({ item, ...props }: TableCellProps) => {
+const UserTableCell = ({ item, handleUserClick, ...props }: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
     return null;
   }
   const { login } = item;
+  const handleClick = () => {
+    handleUserClick(item);
+  };
   return (
-    <DataTableCell {...props} title={login} className="collaborator-grid">
-      <GitHubUserAvatar user={item} />
-      <span className="collaborator-username">{login}</span>
+    <DataTableCell {...props} title={login}>
+      <GitHubUserButton user={item} onClick={handleClick} />
     </DataTableCell>
   );
 };
@@ -117,6 +119,18 @@ export const AssignUsersModal = ({
   useEffect(() => {
     reset();
   }, [selectedUsers]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleUserClick = useCallback(
+    (user: GitHubUser) => {
+      const isSelected = selection.findIndex((u) => u.id === user.id) > -1;
+      if (isSelected) {
+        setSelection(selection.filter((u) => u.id !== user.id));
+      } else {
+        setSelection([...selection, user]);
+      }
+    },
+    [selection],
+  );
 
   // When modal is canceled, reset row selection
   const handleClose = () => {
@@ -159,12 +173,12 @@ export const AssignUsersModal = ({
         noRowHover
       >
         <DataTableColumn
-          label={i18n.t('GitHub Username')}
+          label={i18n.t('GitHub Users')}
           property="login"
           primaryColumn
           truncate
         >
-          <UserTableCell />
+          <UserTableCell handleUserClick={handleUserClick} />
         </DataTableColumn>
       </DataTable>
     </Modal>
@@ -237,7 +251,7 @@ export const AssignUserModal = ({
       {filteredUsers.length ? (
         <div className="slds-p-around_small">
           <div className="slds-text-title slds-m-bottom_xx-small">
-            {i18n.t('Assign To User')}
+            {i18n.t('Assign To GitHub User')}
           </div>
           <ul>
             {filteredUsers.map((user) => (

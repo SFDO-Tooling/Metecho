@@ -32,8 +32,8 @@ const ConfirmRemoveUserModal = ({
   };
   const heading =
     type === ORG_TYPES.QA
-      ? i18n.t('Confirm Change Reviewer and Delete Review Org')
-      : i18n.t('Confirm Change Developer and Delete Dev Org');
+      ? i18n.t('Confirm Changing Reviewer and Deleting Review Org')
+      : i18n.t('Confirm Changing Developer and Deleting Dev Org');
 
   return (
     <Modal
