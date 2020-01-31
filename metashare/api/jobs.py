@@ -10,6 +10,7 @@ from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
 from furl import furl
 
@@ -108,7 +109,7 @@ def alert_user_about_expiring_org(*, org, days):
         metashare_link = f"{scheme}://{domain}{path}"
         # email user
         send_mail(
-            "MetaShare Scratch Org Expiring with Uncommitted Changes",
+            _("MetaShare Scratch Org Expiring with Uncommitted Changes"),
             render_to_string(
                 "scratch_org_expiry_email.txt",
                 {
