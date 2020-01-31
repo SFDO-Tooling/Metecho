@@ -55,13 +55,14 @@ const defaultState = {
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
   },
-  isSynced: true,
+  taskCommits: [],
 };
 const defaultTask = {
   id: 'task-id',
   assigned_dev: { id: 'user-id', login: 'user-name' },
   assigned_qa: { id: 'user-id', login: 'user-name' },
   commits: [],
+  origin_sha: '',
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
@@ -353,11 +354,36 @@ describe('<OrgCards/>', () => {
           org_type: 'QA',
         },
       };
-      const { debug, queryByText, getByText } = setup({ orgs });
+      const { getByText } = setup({ orgs });
 
       expect(getByText('View Org')).toBeVisible();
+      // expect(queryByText('Up to Date', { exact: false })).toBeVisible();
+    });
+    test('opens refresh org modal', () => {
+      const orgs = {
+        ...defaultOrgs,
+        QA: {
+          ...defaultOrgs.QA,
+          id: 'qa-org-id',
+          task: 'task-id',
+          org_type: 'QA',
+          owner: 'user-id',
+          owner_gh_username: 'user-name',
+          expires_at: '2019-09-16T12:58:53.721Z',
+          latest_commit: '617a512-longlong',
+          latest_commit_url: '/test/commit/url/',
+          latest_commit_at: '2019-08-16T12:58:53.721Z',
+          url: '/test/org/url/',
+          unsaved_changes: { Foo: ['Bar'] },
+          has_unsaved_changes: true,
+        },
+      };
+      const { debug, getByTitle, queryAllByText } = setup({ orgs });
+      const footer = queryAllByText('View Org');
+
+      fireEvent.click(footer[1]);
       debug();
-      expect(queryByText('Up to Date', { exact: false })).toBeVisible();
+      fireEvent.click(getByTitle('Close'));
     });
   });
 

@@ -124,8 +124,6 @@ const OrgCard = ({
   const reviewOrgOutOfDate = Boolean(
     type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
   );
-  console.log(reviewOrgOutOfDate, orgCommitIdx);
-
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
   const OrgHeading = () => (
