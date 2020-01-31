@@ -104,13 +104,13 @@ To populate the database with sample data for development, run::
     $ ./derrick truncate
     $ ./derrick populate
 
-To make it such that org-expiry emails send with correct links, you'll
-need to set up the default Site in the Django admin. Assuming you've
-already set your user up as a superuser, you can go to
-`http://localhost:8080/admin/sites/site/1/change/`_ and set the "Domain
-name" field appropriately (to ``localhost:8080``). If you are setting up
-a deployed production or staging instance, set this value to the domain
-from which you are serving that instance.
+To allow automated emails to send with correct links, you'll need to set up the
+default ``Site`` object in the Django admin. Assuming you've already set your
+user up as a superuser, go to
+`<http://localhost:8080/admin/sites/site/1/change/>`_ and set the "Domain name"
+field appropriately (to ``localhost:8080``). If you are setting up a deployed
+production or staging instance, set this value to the domain from which you are
+serving that instance.
 
 Docker development tasks
 ------------------------
