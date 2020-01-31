@@ -55,14 +55,14 @@ const defaultState = {
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
   },
-  taskCommits: [],
+  taskCommits: ['sdfsdf', 'kjfs'],
 };
 const defaultTask = {
   id: 'task-id',
   assigned_dev: { id: 'user-id', login: 'user-name' },
   assigned_qa: { id: 'user-id', login: 'user-name' },
   commits: [],
-  origin_sha: '',
+  origin_sha: 'ksksdm',
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
@@ -378,11 +378,11 @@ describe('<OrgCards/>', () => {
           has_unsaved_changes: true,
         },
       };
-      const { debug, getByTitle, queryAllByText } = setup({ orgs });
+      const { getByTitle, queryAllByText } = setup({ orgs });
       const footer = queryAllByText('View Org');
 
       fireEvent.click(footer[1]);
-      debug();
+
       fireEvent.click(getByTitle('Close'));
     });
   });
