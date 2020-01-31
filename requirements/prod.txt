@@ -43,6 +43,7 @@ djangorestframework==3.11.0
 docutils==0.16            # via cumulusci
 factory-boy==2.12.0       # via cumulusci
 faker==2.0.3              # via factory-boy
+furl==2.1.0
 github3-py==1.3.0
 github3.py==1.3.0         # via cumulusci
 hashids==1.2.0            # via django-hashid-field
@@ -62,6 +63,7 @@ markupsafe==1.1.1         # via cumulusci, jinja2
 msgpack==0.6.2            # via channels-redis
 newrelic==5.4.1.134
 oauthlib==3.1.0           # via requests-oauthlib
+orderedmultidict==1.0.1   # via furl
 pillow==7.0.0
 psycopg2-binary==2.8.4
 pyasn1-modules==0.2.7     # via service-identity
@@ -92,7 +94,7 @@ sentry-sdk==0.14.1
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/master.tar.gz
 simple-salesforce==0.74.2
-six==1.14.0               # via autobahn, automat, bleach, cryptography, cumulusci, django-anymail, django-parler, faker, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
+six==1.14.0               # via autobahn, automat, bleach, cryptography, cumulusci, django-anymail, django-parler, faker, furl, orderedmultidict, pyhamcrest, pyopenssl, python-dateutil, salesforce-bulk, txaio
 sqlalchemy==1.3.12        # via cumulusci
 sqlparse==0.3.0           # via django
 terminaltables==3.1.0     # via cumulusci

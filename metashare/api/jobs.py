@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django_rq import get_scheduler, job
+from furl import furl
 
 from .gh import (
     get_cumulus_prefix,
@@ -90,12 +91,21 @@ def alert_user_about_expiring_org(*, org, days):
     # and has unsaved changes
     get_unsaved_changes(org)
     if org.unsaved_changes:
-        domain = Site.objects.first().domain
+        # just to ensure it's properly formatted
+        raw_domain = Site.objects.first().domain
+        domain = furl(raw_domain).netloc or raw_domain
+
+        should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith(
+            "localhost"
+        )
+        scheme = "http" if should_be_http else "https"
+
         task = org.task
         project = task.project
         repo = project.repository
         path = f"/repositories/{repo.slug}/{project.slug}/{task.slug}/"
-        metashare_link = f"https://{domain}{path}"
+
+        metashare_link = f"{scheme}://{domain}{path}"
         # email user
         send_mail(
             "MetaShare Scratch Org Expiring with Uncommitted Changes",
