@@ -19,3 +19,18 @@
     padding-right: 0;
   }
 }
+
+.table-row-targets {
+  .slds-checkbox__label {
+    padding: $spacing-medium $spacing-large;
+  }
+
+  &.slds-table_cell-buffer tr > th:first-child,
+  &.slds-table_cell-buffer tr > td:first-child,
+  &.slds-table--cell-buffer tr > th:first-child,
+  &.slds-table--cell-buffer tr > td:first-child,
+  &.slds-table th:first-child,
+  &.slds-table td:first-child {
+    padding: 0;
+  }
+}

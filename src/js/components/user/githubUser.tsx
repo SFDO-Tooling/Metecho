@@ -90,7 +90,7 @@ const UserTableCell = ({ item, handleUserClick, ...props }: TableCellProps) => {
     handleUserClick(item);
   };
   return (
-    <DataTableCell {...props} title={login}>
+    <DataTableCell {...props} title={login} className="slds-p-around_none">
       <GitHubUserButton user={item} onClick={handleClick} />
     </DataTableCell>
   );
@@ -165,12 +165,11 @@ export const AssignUsersModal = ({
       onRequestClose={handleClose}
     >
       <DataTable
-        className="align-checkboxes"
+        className="align-checkboxes table-row-targets"
         items={allUsers}
         selectRows="checkbox"
         selection={selection}
         onRowChange={updateSelection}
-        noRowHover
       >
         <DataTableColumn
           label={i18n.t('GitHub Users')}
@@ -197,7 +196,7 @@ const GitHubUserButton = ({
   <Button
     className={classNames(
       'slds-size_full',
-      'slds-p-around_xx-small',
+      'slds-p-around_x-small',
       'collaborator-button',
       {
         'is-selected': isSelected,
