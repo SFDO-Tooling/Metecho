@@ -32,6 +32,7 @@ const OrgIcon = ({
     const viewOrgLink = reviewOrgOutOfDate ? (
       <Button
         variant="icon"
+        iconCategory="utility"
         iconName="link"
         iconSize="x-small"
         iconVariant="bare"

@@ -90,8 +90,11 @@
   "Prevents fire duplication": "Prevents fire duplication",
   "Prevents fire from building": "Prevents fire from building",
   "Prevents fire spread": "Prevents fire spread",
+  "Proceed to Outdated Org": "Proceed to Outdated Org",
   "Project Name": "Project Name",
   "Projects for": "Projects for",
+  "Refresh QA Org": "Refresh QA Org",
+  "refreshQaOrg": "<0>Recommended</0> - This option will recreate your Org with the new changes, allowing you to review the most recent version.",
   "Remove": "Remove",
   "Remove Developer": "Remove Developer",
   "Remove Reviewer": "Remove Reviewer",
@@ -195,5 +198,6 @@
   "repositoryListHelper": "Contributor access on GitHub is required to view repositories. If you do not see the repository you’re looking for below, confirm that you are logged into the correct account or contact an admin on GitHub.",
   "repositoryNotFound": "We can’t find the repository you’re looking for. Try the <2>list of all repositories</2>?",
   "taskNotFound": "We can’t find the task you’re looking for. Try <2>another task</2> from that project?",
-  "up-to-date": "up-to-date"
+  "up-to-date": "up-to-date",
+  "viewOutdatedQaOrg": "You may proceed with the outdated org, but be aware that you will not be reviewing the current version"
 }

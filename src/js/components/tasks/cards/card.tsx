@@ -239,10 +239,9 @@ const OrgCard = ({
       />
       <RefreshOrgModal
         refreshOrgModalOpen={refreshOrgModalOpen}
-        // refreshOrgModalOpen={true}
         closeRefreshOrgModal={closeRefreshOrgModal}
         orgUrl={window.api_urls.scratch_org_redirect(org?.id)}
-        delinquentCommits={4}
+        delinquentCommits={orgCommitIdx}
       />
     </div>
   );

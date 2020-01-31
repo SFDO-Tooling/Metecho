@@ -1,11 +1,12 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
+import i18n from 'i18next';
 import React from 'react';
+import { Trans } from 'react-i18next';
 
 import { ExternalLink } from '@/components/utils';
 
-// number of commits behind
-// refresh org action (which doesnt exist)
+// todo @refresh org action
 const RefreshOrgModal = ({
   delinquentCommits,
   orgUrl,
@@ -20,7 +21,7 @@ const RefreshOrgModal = ({
   <Modal
     isOpen={refreshOrgModalOpen}
     onRequestClose={closeRefreshOrgModal}
-    heading={`QA Behind Latet: ${delinquentCommits} Commits`}
+    heading={`QA Behind Latest: ${delinquentCommits} Commits`}
   >
     <div className="slds-form slds-p-around_large">
       <div className="slds-grid slds-wrap slds-gutters">
@@ -29,24 +30,27 @@ const RefreshOrgModal = ({
               slds-size_1-of-1
               slds-p-bottom_medium"
         >
-          <p className="slds-p-vertical_medium slds-is-relative">
+          <Trans i18nKey="refreshQaOrg">
             <b>Recommended</b> - This option will recreate your Org with the new
             changes, allowing you to review the most recent version.
-          </p>
-          <Button variant="brand" className="slds-size_full hide-separator">
-            Refresh QA Org
+          </Trans>
+          <Button
+            variant="brand"
+            className="slds-size_full slds-m-vertical_medium"
+          >
+            {i18n.t('Refresh QA Org')}
           </Button>
-          <p className="slds-p-vertical_medium slds-is-relative">
+          <Trans i18nKey="viewOutdatedQaOrg">
             You may proceed with the outdated org, but be aware that you will
             not be reviewing the current version
-          </p>
+          </Trans>
           <ExternalLink url={orgUrl}>
             {' '}
             <Button
               variant="outline-brand"
-              className="slds-size_full hide-separator"
+              className="slds-size_full slds-m-top_medium"
             >
-              Proceed to Outdated Org
+              {i18n.t('Proceed to Outdated Org')}
             </Button>
           </ExternalLink>
         </div>
