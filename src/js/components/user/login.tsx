@@ -111,7 +111,7 @@ const Login = () => {
             {i18n.t('What can I do with MetaShare?')}
           </h3>
           <ul className="slds-m-bottom_x-large">
-            <li className="slds-p-bottom_small">
+            <li className="slds-p-bottom_small slds-grid">
               <Icon
                 category="utility"
                 name="adduser"
@@ -120,7 +120,7 @@ const Login = () => {
               />
               {i18n.t('Assign projects and tasks to members of your team.')}
             </li>
-            <li className="slds-p-bottom_small">
+            <li className="slds-p-bottom_small slds-grid">
               <Icon
                 category="utility"
                 name="magicwand"
@@ -129,7 +129,7 @@ const Login = () => {
               />
               {i18n.t('Easily create a scratch org with the existing project.')}
             </li>
-            <li className="slds-p-bottom_small">
+            <li className="slds-p-bottom_small slds-grid">
               <Icon
                 category="utility"
                 name="upload"
