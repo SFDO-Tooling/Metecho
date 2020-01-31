@@ -92,21 +92,22 @@ def alert_user_about_expiring_org(*, org, days):
     # and has unsaved changes
     get_unsaved_changes(org)
     if org.unsaved_changes:
-        # just to ensure it's properly formatted
-        raw_domain = Site.objects.first().domain
-        domain = furl(raw_domain).netloc or raw_domain
+        task = org.task
+        project = task.project
+        repo = project.repository
 
+        domain = Site.objects.first().domain
         should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith(
             "localhost"
         )
         scheme = "http" if should_be_http else "https"
+        # just to ensure it's properly formatted
+        metashare_link = (
+            furl(f"{scheme}://{domain}")
+            .set(path=["repositories", repo.slug, project.slug, task.slug])
+            .url
+        )
 
-        task = org.task
-        project = task.project
-        repo = project.repository
-        path = f"/repositories/{repo.slug}/{project.slug}/{task.slug}/"
-
-        metashare_link = f"{scheme}://{domain}{path}"
         # email user
         send_mail(
             _("MetaShare Scratch Org Expiring with Uncommitted Changes"),
