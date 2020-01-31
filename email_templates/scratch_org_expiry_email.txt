@@ -1,7 +1,9 @@
-{% blocktrans days_s=days|pluralize %}
-Expiry Alert from MetaShare
+{% load i18n %}{% trans "Expiry Alert from MetaShare" %}
 
-Your development scratch org for "{{ task_name }}" on {{ repo_name }} project "{{ project_name }}" is set to expire in {{ days }} day{{ days_s }} on {{ expiry_date }} You have uncommitted changes on your org that will be deleted. If you do not want to lose these changes, please log into MetaShare as user "{{ user_name }}", navigate to the task, and click the "Capture Task Changes" button. We appreciate your contribution to the Salesforce community. Thanks!
-
-{{ metashare_link }}
+{% blocktrans count counter=days %}
+Your development scratch org for "{{ task_name }}" on {{ repo_name }} project "{{ project_name }}" is set to expire in {{ days }} day on {{ expiry_date }} You have uncommitted changes on your org that will be deleted. If you do not want to lose these changes, please log into MetaShare as user "{{ user_name }}", navigate to the task, and click the "Capture Task Changes" button. We appreciate your contribution to the Salesforce community. Thanks!
+{% plural %}
+Your development scratch org for "{{ task_name }}" on {{ repo_name }} project "{{ project_name }}" is set to expire in {{ days }} days on {{ expiry_date }} You have uncommitted changes on your org that will be deleted. If you do not want to lose these changes, please log into MetaShare as user "{{ user_name }}", navigate to the task, and click the "Capture Task Changes" button. We appreciate your contribution to the Salesforce community. Thanks!
 {% endblocktrans %}
+
+{% trans metashare_link %}
