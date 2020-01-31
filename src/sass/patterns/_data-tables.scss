@@ -20,15 +20,18 @@
   }
 }
 
+// Override LDS table cell padding to make click target fill the whole row
 .table-row-targets {
+  label {
+    cursor: pointer;
+  }
+
   .slds-checkbox__label {
     padding: $spacing-medium $spacing-large;
   }
 
   &.slds-table_cell-buffer tr > th:first-child,
   &.slds-table_cell-buffer tr > td:first-child,
-  &.slds-table--cell-buffer tr > th:first-child,
-  &.slds-table--cell-buffer tr > td:first-child,
   &.slds-table th:first-child,
   &.slds-table td:first-child {
     padding: 0;
