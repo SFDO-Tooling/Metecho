@@ -82,6 +82,13 @@ class User(HashIdMixin, AbstractUser):
             return None
 
     @property
+    def avatar_url(self):
+        try:
+            return self.github_account.get_avatar_url()
+        except (AttributeError, KeyError, TypeError):
+            return None
+
+    @property
     def org_id(self):
         try:
             return self.salesforce_account.extra_data["organization_id"]
@@ -138,6 +145,10 @@ class User(HashIdMixin, AbstractUser):
             )
         except (InvalidToken, AttributeError):
             return (None, None)
+
+    @property
+    def github_account(self):
+        return self.socialaccount_set.filter(provider="github").first()
 
     @property
     def salesforce_account(self):
