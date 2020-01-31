@@ -125,7 +125,6 @@
   "This process could take a number of minutes. Feel free to leave this page and check back later.": "This process could take a number of minutes. Feel free to leave this page and check back later.",
   "Timestamp": "Timestamp",
   "Title": "Title",
-  "To get started log in with your GitHub account": "To get started log in with your GitHub account",
   "To go to your company’s login page, enter the custom domain name.": "To go to your company’s login page, enter the custom domain name.",
   "Type": "Type",
   "Uh oh, we've encountered an error. You may need to": "Uh oh, we've encountered an error. You may need to",
@@ -154,9 +153,8 @@
   "View pull request.": "View pull request.",
   "View your new org.": "View your new org.",
   "Welcome to MetaShare!": "Welcome to MetaShare!",
-  "What is MetaShare?": "What is MetaShare?",
   "What can I do with MetaShare?": "What can I do with MetaShare?",
-  "Welcome to MetaShare, the web-based tool for collaborating on Salesforce projects.": "Welcome to MetaShare, the web-based tool for collaborating on Salesforce projects.",
+  "What is MetaShare?": "What is MetaShare?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "You are in offline mode. We are trying to reconnect, but you may need to",
   "anErrorOccurred": "An error occurred. Try the <1>home page</1>?",
   "check again": "check again",
@@ -178,5 +176,6 @@
   "repositoryListHelper": "Contributor access on GitHub is required to view repositories. If you do not see the repository you’re looking for below, confirm that you are logged into the correct account or contact an admin on GitHub.",
   "repositoryNotFound": "We can’t find the repository you’re looking for. Try the <2>list of all repositories</2>?",
   "taskNotFound": "We can’t find the task you’re looking for. Try <2>another task</2> from that project?",
-  "up-to-date": "up-to-date"
+  "up-to-date": "up-to-date",
+  "welcomeMessage": "<0>To get started</0> log in with your GitHub account."
 }

@@ -3,6 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import { Location } from 'history';
 import i18n from 'i18next';
 import React, { ReactElement } from 'react';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { StaticContext, withRouter } from 'react-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
@@ -68,14 +69,19 @@ const Login = () => {
           style={{ backgroundImage: `url(${welcomeMatBG})` }}
         >
           <div className="slds-welcome-mat__info-content">
-            <h2 className="slds-welcome-mat__info-title">
+            <h1 className="slds-welcome-mat__info-title">
               {i18n.t('Welcome to MetaShare!')}
-            </h2>
+            </h1>
             <div
               className="slds-welcome-mat__info-description
                 slds-text-longform"
             >
-              <p>{i18n.t('To get started log in with your GitHub account')}</p>
+              <p>
+                <Trans i18nKey="welcomeMessage">
+                  <strong>To get started</strong> log in with your GitHub
+                  account.
+                </Trans>
+              </p>
             </div>
             <div className="slds-welcome-mat__info-actions">
               <LoginButton />
@@ -93,24 +99,24 @@ const Login = () => {
             slds-p-right_xx-large
             slds-grid_align-center"
         >
-          <h3 className="slds-text-heading_large slds-p-bottom_medium">
+          <h2 className="slds-text-heading_large slds-p-bottom_medium">
             {i18n.t('What is MetaShare?')}
-          </h3>
+          </h2>
           <p className="slds-p-bottom_xx-large">
             {i18n.t(
               'MetaShare is a tool to help collaborate on sharable Salesforce projects.',
             )}
           </p>
-          <h4 className="slds-text-heading_small slds-p-bottom_small">
+          <h3 className="slds-text-heading_small slds-p-bottom_small">
             {i18n.t('What can I do with MetaShare?')}
-          </h4>
+          </h3>
           <ul className="slds-m-bottom_x-large">
             <li className="slds-p-bottom_small">
               <Icon
                 category="utility"
                 name="adduser"
                 size="x-small"
-                className="slds-m-right_x-small slds-icon-text-default"
+                className="slds-m-right_x-small"
               />
               {i18n.t('Assign projects and tasks to members of your team.')}
             </li>
@@ -119,7 +125,7 @@ const Login = () => {
                 category="utility"
                 name="magicwand"
                 size="x-small"
-                className="slds-m-right_x-small slds-icon-text-default"
+                className="slds-m-right_x-small"
               />
               {i18n.t('Easily create a scratch org with the existing project.')}
             </li>
@@ -128,7 +134,7 @@ const Login = () => {
                 category="utility"
                 name="upload"
                 size="x-small"
-                className="slds-m-right_x-small slds-icon-text-default"
+                className="slds-m-right_x-small"
               />
               {i18n.t(
                 'Make changes and capture them into a repository on GitHub.',
