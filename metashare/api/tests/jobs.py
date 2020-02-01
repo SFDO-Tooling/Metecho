@@ -1,5 +1,6 @@
 from collections import namedtuple
 from contextlib import ExitStack
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,6 +10,7 @@ from simple_salesforce.exceptions import SalesforceGeneralError
 from ..jobs import (
     _create_branches_on_github,
     _create_org_and_run_flow,
+    alert_user_about_expiring_org,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
     create_pr,
@@ -81,13 +83,39 @@ class TestCreateBranchesOnGitHub:
             assert not repository.create_branch_ref.called
 
 
+@pytest.mark.django_db
+class TestAlertUserAboutExpiringOrg:
+    def test_missing_model(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        scratch_org.delete()
+        with patch(f"{PATCH_ROOT}.send_mail") as send_mail:
+            assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
+            assert not send_mail.called
+
+    def test_good(self, scratch_org_factory):
+        scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
+        with ExitStack() as stack:
+            send_mail = stack.enter_context(patch(f"{PATCH_ROOT}.send_mail"))
+            get_unsaved_changes = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_unsaved_changes")
+            )
+            assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
+            assert get_unsaved_changes.called
+            assert send_mail.called
+
+
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.get_latest_revision_numbers"))
         create_org = stack.enter_context(patch(f"{PATCH_ROOT}.create_org"))
-        create_org.return_value = (MagicMock(), MagicMock(), MagicMock())
+        create_org.return_value = (
+            MagicMock(expires=datetime(2020, 1, 1, 12, 0)),
+            MagicMock(),
+            MagicMock(),
+        )
         run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
@@ -134,6 +162,7 @@ def test_create_branches_on_github_then_create_scratch_org():
         _create_org_and_run_flow = stack.enter_context(
             patch(f"{PATCH_ROOT}._create_org_and_run_flow")
         )
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
 
         create_branches_on_github_then_create_scratch_org(scratch_org=MagicMock())
 

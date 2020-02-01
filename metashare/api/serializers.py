@@ -44,6 +44,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email",
+            "avatar_url",
             "is_staff",
             "valid_token_for",
             "org_name",
@@ -60,7 +61,7 @@ class MinimalUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username")
+        fields = ("id", "username", "avatar_url")
 
 
 class RepositorySerializer(serializers.ModelSerializer):
