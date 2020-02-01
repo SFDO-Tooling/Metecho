@@ -196,7 +196,7 @@ const GitHubUserButton = ({
   <Button
     className={classNames(
       'slds-size_full',
-      'slds-p-around_x-small',
+      'slds-p-around_xx-small',
       'collaborator-button',
       {
         'is-selected': isSelected,
