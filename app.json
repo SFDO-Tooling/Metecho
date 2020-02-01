@@ -51,6 +51,9 @@
     },
     "worker": {
       "quantity": 1
+    },
+    "scheduler": {
+      "quantity": 1
     }
   },
   "addons": ["heroku-postgresql", "heroku-redis", "newrelic", "sentry"],

@@ -1,0 +1,39 @@
+// Collaborators
+// =============
+
+// Add/Edit Collaborator Modal
+// ---------------------------
+.collaborator-username {
+  margin-left: $spacing-x-small;
+
+  .collaborator-button.is-selected & {
+    color: $color-text-default;
+  }
+}
+
+.collaborator-button {
+  &.is-selected {
+    background-color: $color-background-row-active;
+  }
+
+  &:not(.is-selected) {
+    &:hover {
+      border: 1px solid;
+    }
+  }
+
+  // don't show a border on tables with checkboxes
+  .table-row-targets & {
+    &:hover {
+      border-color: transparent;
+    }
+  }
+}
+
+// Assigned Collaborator Cards
+// ---------------------------
+.collaborator-card {
+  h2 {
+    font-size: $font-size-3;
+  }
+}

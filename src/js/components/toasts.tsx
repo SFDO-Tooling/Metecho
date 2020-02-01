@@ -44,8 +44,9 @@ const Toasts = () => {
   const toasts = useSelector(selectToasts);
   return (
     <ToastContainer className="half-container">
-      {toasts &&
-        toasts.map((toast) => <ToastMessage key={toast.id} toast={toast} />)}
+      {toasts?.map((toast) => (
+        <ToastMessage key={toast.id} toast={toast} />
+      ))}
     </ToastContainer>
   );
 };

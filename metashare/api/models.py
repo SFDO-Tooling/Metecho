@@ -82,6 +82,13 @@ class User(HashIdMixin, AbstractUser):
             return None
 
     @property
+    def avatar_url(self):
+        try:
+            return self.github_account.get_avatar_url()
+        except (AttributeError, KeyError, TypeError):
+            return None
+
+    @property
     def org_id(self):
         try:
             return self.salesforce_account.extra_data["organization_id"]
@@ -138,6 +145,10 @@ class User(HashIdMixin, AbstractUser):
             )
         except (InvalidToken, AttributeError):
             return (None, None)
+
+    @property
+    def github_account(self):
+        return self.socialaccount_set.filter(provider="github").first()
 
     @property
     def salesforce_account(self):
@@ -383,13 +394,6 @@ class Task(
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    assignee = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="assigned_tasks",
-    )
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
@@ -403,6 +407,15 @@ class Task(
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
+
+    # Assignee user data is shaped like this:
+    #   {
+    #     "id": str,
+    #     "login": str,
+    #     "avatar_url": str,
+    #   }
+    assigned_dev = JSONField(null=True, blank=True)
+    assigned_qa = JSONField(null=True, blank=True)
 
     slug_class = TaskSlug
 
@@ -506,7 +519,8 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     currently_capturing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
-    owner_sf_id = StringField(blank=True)
+    owner_sf_username = StringField(blank=True)
+    owner_gh_username = StringField(blank=True)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True

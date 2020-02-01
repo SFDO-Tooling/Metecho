@@ -36,7 +36,7 @@ const ConnectToSalesforce = ({
       />
       <Tooltip
         content={i18n.t(
-          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or QA scratch org.',
+          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Review scratch org.',
         )}
         variant="learnMore"
         position="overflowBoundaryElement"
@@ -251,12 +251,23 @@ const UserDropdown = () => {
                 slds-m-bottom_x-small"
             >
               <div className="slds-p-vertical_small slds-p-horizontal_large">
-                <Icon
-                  className="slds-is-absolute"
-                  category="utility"
-                  name="user"
-                  size="small"
-                />
+                {user.avatar_url ? (
+                  <div className="slds-is-absolute">
+                    <Avatar
+                      imgSrc={user.avatar_url}
+                      imgAlt={user.username}
+                      title={user.username}
+                      size="small"
+                    />
+                  </div>
+                ) : (
+                  <Icon
+                    className="slds-is-absolute"
+                    category="utility"
+                    name="user"
+                    size="small"
+                  />
+                )}
                 <div className="slds-p-left_x-large">
                   <h2
                     id="user-info-heading"
@@ -281,9 +292,16 @@ const UserDropdown = () => {
         ariaLabelledby="user-info-heading"
         hasNoCloseButton
       >
-        <Button variant="icon">
-          <Avatar />
-        </Button>
+        <Button
+          variant="icon"
+          label={
+            <Avatar
+              imgSrc={user.avatar_url}
+              imgAlt={user.username}
+              title={user.username}
+            />
+          }
+        />
       </Popover>
       <ConnectModal user={user} isOpen={modalOpen} toggleModal={setModalOpen} />
     </>

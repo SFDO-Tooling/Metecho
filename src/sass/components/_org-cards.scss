@@ -1,0 +1,16 @@
+.has-nested-card {
+  > .slds-card__header {
+    margin-bottom: 0;
+  }
+
+  > .slds-card__body {
+    margin-top: 0;
+  }
+}
+
+.nested-card {
+  .slds-card__header {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

@@ -35,7 +35,9 @@ const Errors = () => {
   const errors = useSelector(selectErrors);
   return (
     <ToastContainer className="half-container">
-      {errors && errors.map((err) => <ErrorToast key={err.id} error={err} />)}
+      {errors?.map((err) => (
+        <ErrorToast key={err.id} error={err} />
+      ))}
     </ToastContainer>
   );
 };
