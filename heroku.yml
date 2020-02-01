@@ -9,6 +9,10 @@ run:
     command:
       - python manage.py rqworker default
     image: web
+  scheduler:
+    command:
+      - python manage.py rqscheduler
+    image: web
 release:
   command:
     - python manage.py migrate --noinput
