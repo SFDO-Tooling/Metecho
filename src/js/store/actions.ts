@@ -135,7 +135,7 @@ export const fetchObjects = ({
             shouldSubscribeToObject) ||
           (typeof shouldSubscribeToObject === 'function' &&
             shouldSubscribeToObject(object));
-        if (object && object.id && shouldSubscribe) {
+        if (object?.id && shouldSubscribe) {
           window.socket.subscribe({
             model: objectType,
             id: object.id,
@@ -184,16 +184,13 @@ export const fetchObject = ({
       url: addUrlParams(baseUrl, { ...filters }),
       dispatch,
     });
-    const object =
-      response && response.results && response.results.length
-        ? response.results[0]
-        : null;
+    const object = response?.results?.length ? response.results[0] : null;
     const shouldSubscribe =
       (typeof shouldSubscribeToObject === 'boolean' &&
         shouldSubscribeToObject) ||
       (typeof shouldSubscribeToObject === 'function' &&
         shouldSubscribeToObject(object));
-    if (object && object.id && window.socket && shouldSubscribe) {
+    if (object?.id && window.socket && shouldSubscribe) {
       window.socket.subscribe({
         model: objectType,
         id: object.id,
@@ -256,7 +253,7 @@ export const createObject = ({
         shouldSubscribeToObject) ||
       (typeof shouldSubscribeToObject === 'function' &&
         shouldSubscribeToObject(object));
-    if (object && object.id && window.socket && shouldSubscribe) {
+    if (object?.id && window.socket && shouldSubscribe) {
       window.socket.subscribe({
         model: objectType,
         id: object.id,

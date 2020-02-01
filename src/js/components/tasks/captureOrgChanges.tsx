@@ -110,7 +110,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     } else {
       /* istanbul ignore else */
       // eslint-disable-next-line no-lonely-if
-      if (changes && changes.includes(change)) {
+      if (changes?.includes(change)) {
         changes.splice(changes.indexOf(change), 1);
       }
     }
@@ -219,10 +219,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
               ) => handleSelectGroup(groupName, checked);
               let checkedChildren = 0;
               for (const child of children) {
-                if (
-                  (inputs as Inputs).changes[groupName] &&
-                  (inputs as Inputs).changes[groupName].includes(child)
-                ) {
+                if ((inputs as Inputs).changes[groupName]?.includes(child)) {
                   checkedChildren = checkedChildren + 1;
                 }
               }
@@ -262,10 +259,9 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                         className="slds-p-left_xx-large"
                         name="changes"
                         checked={Boolean(
-                          (inputs as Inputs).changes[groupName] &&
-                            (inputs as Inputs).changes[groupName].includes(
-                              change,
-                            ),
+                          (inputs as Inputs).changes[groupName]?.includes(
+                            change,
+                          ),
                         )}
                         onChange={(
                           event: React.ChangeEvent<HTMLInputElement>,
