@@ -4,10 +4,10 @@ import sfdo_template_helpers.fields.string
 from django.db import migrations
 
 
-def set_org_owner_username(apps, schema_editor):
+def set_org_owner_gh_username(apps, schema_editor):
     ScratchOrg = apps.get_model("api", "ScratchOrg")
-    for instance in ScratchOrg.objects.filter(owner_username=""):
-        instance.owner_username = instance.owner.username
+    for instance in ScratchOrg.objects.filter(owner_gh_username=""):
+        instance.owner_gh_username = instance.owner.username
         instance.save()
 
 
@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="scratchorg",
-            name="owner_username",
+            name="owner_gh_username",
             field=sfdo_template_helpers.fields.string.StringField(blank=True),
         ),
-        migrations.RunPython(set_org_owner_username, migrations.RunPython.noop),
+        migrations.RunPython(set_org_owner_gh_username, migrations.RunPython.noop),
     ]

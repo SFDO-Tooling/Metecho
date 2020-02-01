@@ -51,7 +51,7 @@ const OrgCard = ({
   const assignedToCurrentUser = user.username === assignedUser?.login;
   const ownedByCurrentUser = Boolean(org?.url && user.id === org?.owner);
   const ownedByWrongUser =
-    org?.url && org.owner_username !== assignedUser?.login ? org : null;
+    org?.url && org.owner_gh_username !== assignedUser?.login ? org : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshing = Boolean(org?.currently_refreshing_changes);
@@ -142,14 +142,15 @@ const OrgCard = ({
         }
       >
         {assignedUser && (
+          <div className="slds-m-bottom_small">
+            <UserCard user={assignedUser} className="nested-card" />
+          </div>
+        )}
+        {(assignedUser || ownedByWrongUser) && (
           <>
-            <div className="slds-m-bottom_small">
-              <UserCard user={assignedUser} className="nested-card" />
-            </div>
             <hr className="slds-m-vertical_none" />
             <Card
               className="nested-card"
-              bodyClassName="slds-card__body_inner"
               heading={orgHeading}
               icon={
                 org &&

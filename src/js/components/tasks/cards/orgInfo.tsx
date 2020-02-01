@@ -30,7 +30,7 @@ const OrgInfo = ({
       <ul>
         <li>
           <strong>{i18n.t('Status')}:</strong> {i18n.t('owned by user')}{' '}
-          <strong>{ownedByWrongUser.owner_username}</strong>
+          <strong>{ownedByWrongUser.owner_gh_username}</strong>
         </li>
       </ul>
     );

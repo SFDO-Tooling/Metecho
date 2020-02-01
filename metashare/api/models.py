@@ -50,6 +50,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
+    devhub_username = StringField(null=True, blank=True)
 
     def refresh_repositories(self):
         repos = gh.get_all_org_repos(self)
@@ -77,6 +78,13 @@ class User(HashIdMixin, AbstractUser):
     def _get_org_property(self, key):
         try:
             return self.salesforce_account.extra_data[ORGANIZATION_DETAILS][key]
+        except (AttributeError, KeyError, TypeError):
+            return None
+
+    @property
+    def avatar_url(self):
+        try:
+            return self.github_account.get_avatar_url()
         except (AttributeError, KeyError, TypeError):
             return None
 
@@ -120,6 +128,8 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def sf_username(self):
+        if self.devhub_username:
+            return self.devhub_username
         try:
             return self.salesforce_account.extra_data["preferred_username"]
         except (AttributeError, KeyError):
@@ -137,6 +147,10 @@ class User(HashIdMixin, AbstractUser):
             return (None, None)
 
     @property
+    def github_account(self):
+        return self.socialaccount_set.filter(provider="github").first()
+
+    @property
     def salesforce_account(self):
         return self.socialaccount_set.filter(provider__startswith="salesforce-").first()
 
@@ -149,6 +163,8 @@ class User(HashIdMixin, AbstractUser):
     @cached_property
     def is_devhub_enabled(self):
         # We can shortcut and avoid making an HTTP request in some cases:
+        if self.devhub_username:
+            return True
         if not self.salesforce_account:
             return False
         if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
@@ -503,8 +519,8 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     currently_capturing_changes = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
-    owner_sf_id = StringField(blank=True)
-    owner_username = StringField(blank=True)
+    owner_sf_username = StringField(blank=True)
+    owner_gh_username = StringField(blank=True)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True

@@ -44,6 +44,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email",
+            "avatar_url",
             "is_staff",
             "valid_token_for",
             "org_name",
@@ -51,6 +52,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "is_devhub_enabled",
             "sf_username",
             "currently_fetching_repos",
+            "devhub_username",
         )
 
 
@@ -59,7 +61,7 @@ class MinimalUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username")
+        fields = ("id", "username", "avatar_url")
 
 
 class RepositorySerializer(serializers.ModelSerializer):
@@ -265,8 +267,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "delete_queued_at",
-            "owner_sf_id",
-            "owner_username",
+            "owner_sf_username",
+            "owner_gh_username",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},

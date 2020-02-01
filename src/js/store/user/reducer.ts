@@ -13,6 +13,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  avatar_url: string | null;
   valid_token_for: string | null;
   sf_username: string | null;
   org_name: string | null;
@@ -20,6 +21,7 @@ export interface User {
   is_devhub_enabled: boolean;
   is_staff: boolean;
   currently_fetching_repos: boolean;
+  devhub_username: string | null;
 }
 
 const reducer = (

@@ -227,30 +227,39 @@ describe('<ProjectDetail/>', () => {
     });
   });
 
-  describe('Toggle available users modal', () => {
+  describe('<AssignUsersModal />', () => {
     test('opens and closes', () => {
       const { getByText, queryByText } = setup();
       fireEvent.click(getByText('Add or Remove Collaborators'));
 
-      expect(getByText('GitHub Username')).toBeVisible();
+      expect(getByText('GitHub Users')).toBeVisible();
 
       fireEvent.click(getByText('Cancel'));
 
-      expect(queryByText('GitHub Username')).toBeNull();
+      expect(queryByText('GitHub Users')).toBeNull();
+    });
+
+    test('updates users', () => {
+      const { getByText, baseElement } = setup();
+      fireEvent.click(getByText('Add or Remove Collaborators'));
+      fireEvent.click(
+        baseElement.querySelector(
+          '.collaborator-button[title="TestGitHubUser"]',
+        ),
+      );
+      fireEvent.click(
+        baseElement.querySelector('.collaborator-button[title="ThirdUser"]'),
+      );
+      fireEvent.click(getByText('Save'));
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(
+        updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
+      ).toEqual(['OtherUser', 'ThirdUser']);
     });
   });
 
   describe('Change project assigned users', () => {
-    test('setProjectUsers', () => {
-      const { getByText } = setup();
-      fireEvent.click(getByText('Add or Remove Collaborators'));
-      fireEvent.click(getByText('Select row 3'));
-      fireEvent.click(getByText('Save'));
-
-      expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.github_users).toHaveLength(3);
-    });
-
     test('removeUser', () => {
       const { getByTitle } = setup({
         initialState: {
@@ -315,7 +324,7 @@ describe('<ProjectDetail/>', () => {
       fireEvent.click(getAllByText('Assign Reviewer')[0]);
       fireEvent.click(getByText('Add collaborators to the project'));
 
-      expect(getByText('GitHub Username')).toBeVisible();
+      expect(getByText('GitHub Users')).toBeVisible();
     });
   });
 

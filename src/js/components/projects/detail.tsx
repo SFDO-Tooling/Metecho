@@ -28,6 +28,7 @@ import { updateObject } from '@/store/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -177,6 +178,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       <Button
@@ -187,13 +189,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
         variant="text-destructive"
         disabled
       />
-      {project.pr_url || project.branch_url ? (
+      {branchLink ? (
         <ExternalLink
-          url={(project.pr_url || project.branch_url) as string}
+          url={branchLink}
           showButtonIcon
           className="slds-button slds-button_outline-brand"
         >
-          {project.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
+          {branchLinkText}
         </ExternalLink>
       ) : null}
     </PageHeaderControl>

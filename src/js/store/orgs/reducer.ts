@@ -15,8 +15,8 @@ export interface Org {
   task: string;
   org_type: OrgTypes;
   owner: string;
-  owner_sf_id: string;
-  owner_username: string;
+  owner_sf_username: string;
+  owner_gh_username: string;
   last_modified_at: string | null;
   expires_at: string | null;
   latest_commit: string;
