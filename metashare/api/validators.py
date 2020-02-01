@@ -49,9 +49,13 @@ validate_unicode_branch = RegexValidator(
 )
 
 
-def repository_github_user_validator(cleaned_data):
-    repository = cleaned_data["repository"]
-    github_users = cleaned_data["github_users"]
-    for user in github_users:
-        if user not in repository.github_users:
-            raise ValidationError(f"Invalid github_users value: {user}")
+class GitHubUserValidator:
+    def __init__(self, *, parent):
+        self.parent = parent
+
+    def __call__(self, cleaned_data):
+        parent = cleaned_data.get(self.parent)
+        github_users = cleaned_data.get("github_users", [])
+        for user in github_users:
+            if user not in parent.github_users:
+                raise ValidationError(_(f"Invalid github_users value: {user}"))

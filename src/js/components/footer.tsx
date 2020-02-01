@@ -26,7 +26,9 @@ const Footer = ({ logoSrc }: { logoSrc: string }) => {
         data-testid="footer-logo"
       />
       <div className="footer-item slds-grid">
-        <p>{i18n.t('Copyright 2019 Salesforce.org. All rights reserved.')}</p>
+        <p>
+          {i18n.t('Copyright 2019–2020 Salesforce.org. All rights reserved.')}
+        </p>
       </div>
     </footer>
   );

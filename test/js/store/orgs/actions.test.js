@@ -1,6 +1,7 @@
 import fetchMock from 'fetch-mock';
 
 import * as actions from '@/store/orgs/actions';
+import { addUrlParams } from '@/utils/api';
 
 import { storeWithThunk } from './../../utils';
 
@@ -139,11 +140,13 @@ describe('refetchOrg', () => {
   let url, payload;
 
   beforeAll(() => {
-    url = window.api_urls.scratch_org_detail('org-id');
+    url = addUrlParams(window.api_urls.scratch_org_detail('org-id'), {
+      get_unsaved_changes: true,
+    });
     const org = {
       id: 'org-id',
     };
-    payload = { org, url };
+    payload = { org, url: window.api_urls.scratch_org_detail('org-id') };
   });
 
   test('GETs org from api', () => {

@@ -1,14 +1,8 @@
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { RepositoriesAction } from '@/store/repositories/actions';
 import { LogoutAction } from '@/store/user/actions';
+import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
-
-export interface GitHubUser {
-  id: string;
-  login: string;
-  avatar_url: string;
-  name: string;
-}
 
 export interface Repository {
   id: string;

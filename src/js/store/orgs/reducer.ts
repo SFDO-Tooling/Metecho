@@ -15,7 +15,8 @@ export interface Org {
   task: string;
   org_type: OrgTypes;
   owner: string;
-  owner_sf_id: string;
+  owner_sf_username: string;
+  owner_gh_username: string;
   last_modified_at: string | null;
   expires_at: string | null;
   latest_commit: string;
@@ -63,17 +64,13 @@ const reducer = (
           ...orgs,
           [task]: {
             [ORG_TYPES.DEV]:
-              (response &&
-                (response as Org[]).find(
-                  (org) => org.org_type === ORG_TYPES.DEV,
-                )) ||
-              null,
+              (response as Org[])?.find(
+                (org) => org.org_type === ORG_TYPES.DEV,
+              ) || null,
             [ORG_TYPES.QA]:
-              (response &&
-                (response as Org[]).find(
-                  (org) => org.org_type === ORG_TYPES.QA,
-                )) ||
-              null,
+              (response as Org[])?.find(
+                (org) => org.org_type === ORG_TYPES.QA,
+              ) || null,
           },
         };
       }

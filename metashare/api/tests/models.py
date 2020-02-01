@@ -202,7 +202,18 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.org_type is None
 
-    def test_social_account(self, user_factory, social_account_factory):
+    def test_github_account(self, user_factory):
+        user = user_factory()
+        assert user.github_account is not None
+        assert (
+            user.github_account
+            == user.socialaccount_set.filter(provider="github").first()
+        )
+
+        user.socialaccount_set.all().delete()
+        assert user.salesforce_account is None
+
+    def test_salesforce_account(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
         assert user.salesforce_account is not None
@@ -213,6 +224,18 @@ class TestUser:
 
         user.socialaccount_set.all().delete()
         assert user.salesforce_account is None
+
+    def test_avatar_url(self, user_factory, social_account_factory):
+        user = user_factory()
+        user.socialaccount_set.all().delete()
+        assert not user.avatar_url
+
+        social_account_factory(
+            user=user,
+            provider="github",
+            extra_data={"avatar_url": "https://example.com/avatar/"},
+        )
+        assert user.avatar_url == "https://example.com/avatar/"
 
     def test_sf_username(self, user_factory, social_account_factory):
         user = user_factory(devhub_username="sample username")

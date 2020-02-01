@@ -197,21 +197,35 @@ class TestTaskSerializer:
 
 
 @pytest.mark.django_db
-def test_ScratchOrgSerializer(rf, user_factory, task_factory):
-    user = user_factory()
-    task = task_factory()
+class TestScratchOrgSerializer:
+    def test_valid(self, rf, user_factory, task_factory):
+        user = user_factory()
+        task = task_factory()
 
-    r = rf.get("/")
-    r.user = user
+        r = rf.get("/")
+        r.user = user
 
-    serializer = ScratchOrgSerializer(
-        data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
-    )
-    assert serializer.is_valid()
-    create_branches_on_github_then_create_scratch_org_job = (
-        "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
-    )
-    with patch(create_branches_on_github_then_create_scratch_org_job):
-        instance = serializer.save()
+        serializer = ScratchOrgSerializer(
+            data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
+        )
+        assert serializer.is_valid()
+        create_branches_on_github_then_create_scratch_org_job = (
+            "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
+        )
+        with patch(create_branches_on_github_then_create_scratch_org_job):
+            instance = serializer.save()
 
-    assert instance.owner == user
+        assert instance.owner == user
+
+    def test_invalid(self, rf, user_factory, task_factory, scratch_org_factory):
+        user = user_factory()
+        task = task_factory()
+        scratch_org_factory(task=task, org_type="Dev")
+
+        r = rf.get("/")
+        r.user = user
+
+        serializer = ScratchOrgSerializer(
+            data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
+        )
+        assert not serializer.is_valid()

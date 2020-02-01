@@ -26,7 +26,7 @@ export const LoginButton = withRouter(
     const handleClick = () => {
       /* istanbul ignore else */
       if (window.api_urls.github_login) {
-        let { pathname } = (location.state && location.state.from) || from;
+        let { pathname } = location.state?.from || from;
         if (!pathname) {
           pathname = window.location.pathname;
         }

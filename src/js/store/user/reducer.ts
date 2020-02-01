@@ -3,10 +3,17 @@
 import { ReposRefreshed } from '@/store/repositories/actions';
 import { UserAction } from '@/store/user/actions';
 
+export interface GitHubUser {
+  id: string;
+  login: string;
+  avatar_url: string;
+}
+
 export interface User {
   id: string;
   username: string;
   email: string;
+  avatar_url: string | null;
   valid_token_for: string | null;
   sf_username: string | null;
   org_name: string | null;
