@@ -1,11 +1,18 @@
 import logging
 import traceback
+from datetime import timedelta
 
 from asgiref.sync import async_to_sync
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.mail import send_mail
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.timezone import now
-from django_rq import job
+from django.utils.translation import gettext_lazy as _
+from django_rq import get_scheduler, job
+from furl import furl
 
 from .gh import (
     get_cumulus_prefix,
@@ -71,6 +78,57 @@ def _create_branches_on_github(*, user, repo_id, project, task):
     return task_branch_name
 
 
+def alert_user_about_expiring_org(*, org, days):
+    from .models import User, ScratchOrg
+
+    # if scratch org is there
+    try:
+        org.refresh_from_db()
+        user = org.owner
+        user.refresh_from_db()
+    except (ScratchOrg.DoesNotExist, User.DoesNotExist):
+        return
+
+    # and has unsaved changes
+    get_unsaved_changes(org)
+    if org.unsaved_changes:
+        task = org.task
+        project = task.project
+        repo = project.repository
+
+        domain = Site.objects.first().domain
+        should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith(
+            "localhost"
+        )
+        scheme = "http" if should_be_http else "https"
+        # just to ensure it's properly formatted
+        metashare_link = (
+            furl(f"{scheme}://{domain}")
+            .set(path=["repositories", repo.slug, project.slug, task.slug])
+            .url
+        )
+
+        # email user
+        send_mail(
+            _("MetaShare Scratch Org Expiring with Uncommitted Changes"),
+            render_to_string(
+                "scratch_org_expiry_email.txt",
+                {
+                    "repo_name": repo.name,
+                    "project_name": project.name,
+                    "task_name": task.name,
+                    "days": days,
+                    "expiry_date": org.expires_at,
+                    "user_name": user.username,
+                    "metashare_link": metashare_link,
+                },
+            ),
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+
+
 def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project_path):
     from .models import SCRATCH_ORG_TYPES
 
@@ -108,6 +166,13 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.refresh_from_db()
     scratch_org.last_modified_at = now()
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
+
+    scheduler = get_scheduler("default")
+    days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
+    before_expiry = scratch_org.expires_at - timedelta(days=days)
+    scheduler.enqueue_at(
+        before_expiry, alert_user_about_expiring_org, org=scratch_org, days=days,
+    )
 
 
 def create_branches_on_github_then_create_scratch_org(*, scratch_org):
