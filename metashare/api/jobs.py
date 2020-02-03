@@ -101,7 +101,6 @@ def alert_user_about_expiring_org(*, org, days):
             "localhost"
         )
         scheme = "http" if should_be_http else "https"
-        # just to ensure it's properly formatted
         metashare_link = (
             furl(f"{scheme}://{domain}")
             .set(path=["repositories", repo.slug, project.slug, task.slug])
