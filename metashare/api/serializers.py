@@ -267,6 +267,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "has_unsaved_changes",
             "currently_refreshing_changes",
             "currently_capturing_changes",
+            "currently_refreshing_org",
             "delete_queued_at",
             "owner_sf_username",
             "owner_gh_username",
@@ -281,6 +282,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "unsaved_changes": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
+            "currently_refreshing_org": {"read_only": True},
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:

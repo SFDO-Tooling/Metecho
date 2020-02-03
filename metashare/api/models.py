@@ -517,6 +517,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     )
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_capturing_changes = models.BooleanField(default=False)
+    currently_refreshing_org = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     owner_sf_username = StringField(blank=True)
@@ -655,7 +656,15 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def queue_refresh_org(self):
         from .jobs import refresh_scratch_org_job
 
+        self.currently_refreshing_org = True
+        self.save()
+        self.notify_changed()
         refresh_scratch_org_job.delay(self)
+
+    def finalize_refresh_org(self):
+        self.currently_refreshing_org = False
+        self.save()
+        self.notify_changed()
 
 
 @receiver(user_logged_in)
