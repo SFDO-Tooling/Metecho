@@ -1,5 +1,7 @@
+from django import forms
 from django.contrib import admin
 from django.contrib.postgres.fields import JSONField
+from django.contrib.sites.admin import SiteAdmin
 from django.forms.widgets import Textarea
 
 from .models import (
@@ -66,3 +68,16 @@ class TaskSlugAdmin(admin.ModelAdmin):
 class ScratchOrgAdmin(admin.ModelAdmin):
     list_display = ("owner", "org_type", "task")
     formfield_overrides = {JSONField: {"widget": JSONWidget}}
+
+
+class SiteAdminForm(forms.ModelForm):
+    def clean_domain(self):
+        data = self.cleaned_data["domain"]
+        if "/" in data:
+            raise forms.ValidationError(
+                "Please enter a bare domain, with no scheme or path components."
+            )
+        return data
+
+
+SiteAdmin.form = SiteAdminForm
