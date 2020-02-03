@@ -224,6 +224,7 @@ def refresh_scratch_org(scratch_org):
             repo_branch=commit_ish,
             project_path=repo_root,
         )
+    scratch_org.finalize_refresh_org()
 
 
 refresh_scratch_org_job = job(refresh_scratch_org)
