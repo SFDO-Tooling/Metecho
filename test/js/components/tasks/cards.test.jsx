@@ -55,13 +55,12 @@ const defaultState = {
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
   },
-  taskCommits: ['sdfsdf', 'kjfs'],
 };
 const defaultTask = {
   id: 'task-id',
   assigned_dev: { id: 'user-id', login: 'user-name' },
   assigned_qa: { id: 'user-id', login: 'user-name' },
-  commits: [],
+  commits: ['sdfsdf', 'kjfs'],
   origin_sha: 'ksksdm',
 };
 const defaultProjectUsers = [
@@ -344,20 +343,47 @@ describe('<OrgCards/>', () => {
     });
   });
 
+  describe('Commit Status', () => {
+    test('no status without latest_commit', () => {
+      const orgs = {
+        ...defaultOrgs,
+        Dev: {
+          ...defaultOrgs.Dev,
+          latest_commit: null,
+        },
+      };
+      const { queryByText } = setup({ orgs });
+
+      expect(queryByText('Deployed Commit')).toBeNull();
+    });
+  });
   describe('QA org', () => {
     test('renders "up to date" when synced', () => {
+      const task = {
+        ...defaultTask,
+        commits: [],
+      };
       const orgs = {
         ...defaultOrgs,
         Dev: null,
         QA: {
-          ...defaultOrgs.Dev,
-          org_type: 'QA',
+          ...defaultOrgs.QA,
+          id: 'org-id',
+          task: 'task-id',
+          org_type: 'Dev',
+          owner: 'user-id',
+          owner_gh_username: 'user-name',
+          expires_at: '2019-09-16T12:58:53.721Z',
+          latest_commit: '617a512-longlong',
+          latest_commit_url: '/test/commit/url/',
+          latest_commit_at: '2019-08-16T12:58:53.721Z',
+          url: '/test/org/url/',
+          unsaved_changes: { Foo: ['Bar'] },
+          has_unsaved_changes: true,
         },
       };
-      const { getByText } = setup({ orgs });
-
-      expect(getByText('View Org')).toBeVisible();
-      // expect(queryByText('Up to Date', { exact: false })).toBeVisible();
+      const { debug } = setup({ task, orgs });
+      debug();
     });
     test('opens refresh org modal', () => {
       const orgs = {

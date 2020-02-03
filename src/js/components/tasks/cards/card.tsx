@@ -126,12 +126,13 @@ const OrgCard = ({
   );
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
+  const canRefreshQaOrg = reviewOrgOutOfDate || !isCreating;
   const OrgHeading = () => (
     <div className="slds-grid slds-grid--vertical-align-center">
       <div className="slds-col slds-size_4-of-6">
         {type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org')}
       </div>
-      {reviewOrgOutOfDate && (
+      {canRefreshQaOrg && (
         <Button class="slds-col slds-size_4-of-6">Refresh Org</Button>
       )}
     </div>
