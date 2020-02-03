@@ -171,7 +171,6 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObject).toHaveBeenCalledWith({
         filters: { repository: 'r1', slug: 'other-project' },
         objectType: 'project',
-        shouldSubscribeToObject: true,
       });
     });
   });
@@ -222,7 +221,6 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'project1' },
         objectType: 'task',
-        shouldSubscribeToObject: true,
       });
     });
   });

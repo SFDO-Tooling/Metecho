@@ -16,7 +16,7 @@ export default ({
   additionalData = {},
   onSuccess = () => {},
   onError = () => {},
-  shouldSubscribeToObject,
+  shouldSubscribeToObject = true,
 }: {
   fields: { [key: string]: any };
   objectType: ObjectTypes;

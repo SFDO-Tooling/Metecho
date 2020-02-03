@@ -69,6 +69,7 @@ describe('<SubmitModal/>', () => {
           notes: '',
         },
         hasForm: true,
+        shouldSubscribeToObject: false,
       });
     });
   });

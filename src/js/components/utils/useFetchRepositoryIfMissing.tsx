@@ -28,6 +28,7 @@ export default (routeProps: RouteComponentProps) => {
         fetchObject({
           objectType: OBJECT_TYPES.REPOSITORY,
           filters: { slug: repositorySlug },
+          shouldSubscribeToObject: false,
         }),
       );
     }

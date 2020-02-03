@@ -195,7 +195,11 @@ initializeI18n((i18nError?: string) => {
       renderApp();
     } else if (user) {
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-        fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
+        fetchObjects({
+          objectType: OBJECT_TYPES.REPOSITORY,
+          reset: true,
+          shouldSubscribeToObject: false,
+        }),
       ).finally(renderApp);
     } else {
       renderApp();

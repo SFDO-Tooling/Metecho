@@ -106,6 +106,7 @@ describe('<RepositoryList />', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         url: 'next-url',
         objectType: 'repository',
+        shouldSubscribeToObject: false,
       });
     });
 

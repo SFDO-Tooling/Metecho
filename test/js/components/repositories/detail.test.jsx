@@ -106,6 +106,7 @@ describe('<RepoDetail />', () => {
       expect(fetchObject).toHaveBeenCalledWith({
         filters: { slug: 'other-repository' },
         objectType: 'repository',
+        shouldSubscribeToObject: false,
       });
     });
   });
@@ -160,7 +161,6 @@ describe('<RepoDetail />', () => {
         filters: { repository: 'r1' },
         objectType: 'project',
         reset: true,
-        shouldSubscribeToObject: true,
       });
     });
   });
@@ -174,7 +174,7 @@ describe('<RepoDetail />', () => {
             r1: {
               projects: [
                 {
-                  branch_url: 'branch-url',
+                  branch_url: 'branchv-url',
                   description: 'repository description',
                   id: 'project1',
                   name: 'Project 1',

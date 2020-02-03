@@ -52,6 +52,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
           fetchObjects({
             objectType: OBJECT_TYPES.REPOSITORY,
             url: next,
+            shouldSubscribeToObject: false,
           }),
         ).finally(() => {
           /* istanbul ignore else */

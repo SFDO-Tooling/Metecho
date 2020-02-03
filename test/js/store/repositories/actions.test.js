@@ -91,6 +91,7 @@ describe('reposRefreshed', () => {
     expect(fetchObjects).toHaveBeenCalledWith({
       objectType: OBJECT_TYPES.REPOSITORY,
       reset: true,
+      shouldSubscribeToObject: false,
     });
   });
 });

@@ -50,6 +50,10 @@ export const reposRefreshing = (): ReposRefreshing => ({
 export const reposRefreshed = (): ThunkResult => (dispatch) => {
   dispatch({ type: 'REPOS_REFRESHED' });
   return dispatch(
-    fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
+    fetchObjects({
+      objectType: OBJECT_TYPES.REPOSITORY,
+      reset: true,
+      shouldSubscribeToObject: false,
+    }),
   );
 };
