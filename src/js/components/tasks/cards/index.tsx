@@ -9,7 +9,7 @@ import { ConnectionInfoModal } from '@/components/user/info';
 import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { createObject, deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
@@ -56,6 +56,9 @@ const OrgCards = ({
     OrgTypeTrackerDefault,
   );
   const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
+    OrgTypeTrackerDefault,
+  );
+  const [isRefreshingOrg, setIsRefreshingOrg] = useState<OrgTypeTracker>(
     OrgTypeTrackerDefault,
   );
   const dispatch = useDispatch<ThunkDispatch>();
@@ -160,6 +163,18 @@ const OrgCards = ({
     }
   };
 
+  const handleRefresh = (type: OrgTypes) => {
+    // set refetching org to true
+    setIsRefreshingOrg({ ...isRefreshingOrg, [type]: true });
+    // dispatch refetchObject
+    dispatch(refreshOrg(orgs[type])).finally(() => {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        // finally, refetching org to false
+        setIsRefreshingOrg({ ...isRefreshingOrg, [type]: false });
+      }
+    });
+  };
   const devOrg = orgs[ORG_TYPES.DEV];
 
   // When dev org delete has been triggered, wait until it has been refreshed...
@@ -207,10 +222,12 @@ const OrgCards = ({
           projectUrl={projectUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
+          isRefreshingOrg={isRefreshingOrg[ORG_TYPES.DEV]}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
+          handleRefresh={handleRefresh}
         />
         <OrgCard
           org={orgs[ORG_TYPES.QA]}
@@ -222,10 +239,12 @@ const OrgCards = ({
           taskCommits={taskCommits}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
+          isRefreshingOrg={isRefreshingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
+          handleRefresh={handleRefresh}
         />
       </div>
       <ConnectModal

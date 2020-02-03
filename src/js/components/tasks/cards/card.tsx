@@ -36,6 +36,8 @@ interface OrgCardProps {
     shouldRemoveUser?: AssignedUserTracker | null,
   ) => void;
   handleCheckForOrgChanges: (org: Org) => void;
+  handleRefresh: (type: OrgTypes) => void;
+  isRefreshingOrg: (type: OrgTypes) => void;
 }
 
 const OrgCard = ({
@@ -52,7 +54,9 @@ const OrgCard = ({
   handleCreate,
   handleDelete,
   handleCheckForOrgChanges,
+  handleRefresh,
   history,
+  isRefreshingOrg,
 }: OrgCardProps & RouteComponentProps) => {
   const assignedToCurrentUser = user.username === assignedUser?.login;
   const ownedByCurrentUser = Boolean(org?.url && user.id === org?.owner);
@@ -61,6 +65,8 @@ const OrgCard = ({
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshing = Boolean(org?.currently_refreshing_changes);
+
+  // for now, set different refreshOrg flag
 
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
@@ -98,6 +104,9 @@ const OrgCard = ({
     },
     [handleAssignUser, type],
   );
+  const doRefreshOrg = useCallback(() => {
+    handleRefresh(type);
+  }, [handleRefresh, type]);
   const doCreateOrg = useCallback(() => {
     handleCreate(type);
   }, [handleCreate, type]);
@@ -126,14 +135,21 @@ const OrgCard = ({
   );
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
-  const canRefreshQaOrg = reviewOrgOutOfDate || !isCreating;
+  const canRefreshQaOrg =
+    type === ORG_TYPES.QA && reviewOrgOutOfDate && !isCreating;
   const OrgHeading = () => (
     <div className="slds-grid slds-grid--vertical-align-center">
       <div className="slds-col slds-size_4-of-6">
         {type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org')}
       </div>
       {canRefreshQaOrg && (
-        <Button class="slds-col slds-size_4-of-6">Refresh Org</Button>
+        <Button
+          class="slds-col slds-size_4-of-6"
+          onClick={doRefreshOrg}
+          disabled={isRefreshingOrg}
+        >
+          {isRefreshingOrg ? 'Refreshing Org...' : 'Refresh Org'}
+        </Button>
       )}
     </div>
   );
@@ -141,7 +157,6 @@ const OrgCard = ({
     type === ORG_TYPES.QA
       ? i18n.t('Assign Reviewer')
       : i18n.t('Assign Developer');
-
   return (
     <div
       className="slds-size_1-of-1

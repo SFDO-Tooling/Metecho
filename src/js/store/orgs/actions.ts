@@ -35,6 +35,10 @@ interface CommitEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES' | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
   payload: Org;
 }
+interface RefreshOrg {
+  type: 'REFRESH_ORG_STARTED' | 'REFRESH_ORG_SUCCEEDED' | 'REFRESH_ORG_FAILED';
+  payload: { org: Org; url: string; response?: any };
+}
 
 export type OrgsAction =
   | OrgProvisioned
@@ -43,7 +47,8 @@ export type OrgsAction =
   | OrgUpdated
   | OrgDeleted
   | OrgDeleteFailed
-  | CommitEvent;
+  | CommitEvent
+  | RefreshOrg;
 
 export const provisionOrg = (payload: Org): ThunkResult => (
   dispatch,
@@ -347,4 +352,38 @@ export const commitFailed = ({
     type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
     payload: model,
   });
+};
+
+export const refreshOrg = (org: Org): ThunkResult => async (dispatch) => {
+  const url = window.api_urls.scratch_org_refresh(org.id);
+  dispatch({
+    type: 'REFRESH_ORG_STARTED',
+    payload: { org, url },
+  });
+  try {
+    const response = await apiFetch({
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      url: addUrlParams(url),
+      dispatch,
+      opts: {
+        method: 'POST',
+        body: JSON.stringify(org),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    });
+    if (!response) {
+      return dispatch({
+        type: 'REFRESH_ORG_FAILED',
+        payload: { org, url, response },
+      });
+    }
+    return dispatch({
+      type: 'REFRESH_ORG_SUCCEEDED',
+      payload: { org: response, url },
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };
