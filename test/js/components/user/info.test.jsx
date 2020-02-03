@@ -92,6 +92,7 @@ describe('<UserDropdown />', () => {
       const { getByText } = setup({
         user: {
           username: 'Test User',
+          avatar_url: 'http://avatar.com',
           valid_token_for: 'token',
           sf_username: 'user@domain.com',
           org_name: 'Test Org',

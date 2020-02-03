@@ -18,6 +18,7 @@ def test_serialize(user_factory):
                 "id": str(user.id),
                 "username": "template_tags@example.com",
                 "email": "template_tags@example.com",
+                "avatar_url": None,
                 "is_staff": False,
                 "valid_token_for": None,
                 "org_name": None,
