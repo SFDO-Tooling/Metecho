@@ -495,11 +495,17 @@ class TestTaskView:
 
     def test_review__good(self, client, task_factory):
         task = task_factory()
-        response = client.post(
-            reverse("task-review", kwargs={"pk": str(task.id)}), {"notes": ""}
-        )
+        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
+            data = {
+                "notes": "",
+                "status": "APPROVE",
+            }
+            response = client.post(
+                reverse("task-review", kwargs={"pk": str(task.id)}), data
+            )
 
-        assert response.status_code == 202
+            assert response.status_code == 202
+            assert submit_review_job.delay.called
 
     def test_review__bad(self, client, task_factory):
         task = task_factory()

@@ -241,6 +241,7 @@ class CreatePrSerializer(serializers.Serializer):
 
 class ReviewSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
+    status = serializers.ChoiceField(choices=["APPROVE", "REQUEST_CHANGES", "COMMENT"])
 
 
 class ScratchOrgSerializer(serializers.ModelSerializer):

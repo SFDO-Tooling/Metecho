@@ -497,11 +497,19 @@ class Task(
         self.save()
         self.notify_changed()
 
-    def submit_review(self, data):
-        # TODO: Actually implement this!
-        self.review_sumitted_at = timezone.now()
-        self.review_valid = True
+    def queue_submit_review(self, *, user, data):
+        from .jobs import submit_review_job
+
+        submit_review_job.delay(user=user, task=self, data=data)
+
+    def finalize_submit_review(self, timestamp, err=None):
+        self.review_submitted_at = timestamp
+        if err:
+            self.review_valid = False
+        else:
+            self.review_valid = True
         self.save()
+        self.notify_changed()
 
     def add_ms_git_sha(self, sha):
         self.ms_commits.append(sha)

@@ -19,6 +19,7 @@ from ..jobs import (
     populate_github_users,
     refresh_commits,
     refresh_github_repositories_for_user,
+    submit_review,
 )
 from ..models import SCRATCH_ORG_TYPES
 
@@ -477,3 +478,35 @@ class TestPopulateGithubUsers:
         with patch("metashare.api.jobs.logger") as logger:
             populate_github_users(repository)
             assert logger.warning.called
+
+
+@pytest.mark.django_db
+class TestSubmitReview:
+    def test_good(self,):
+        with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
+            task = MagicMock()
+            pr = MagicMock()
+            repository = MagicMock(**{"pull_request.return_value": pr})
+            get_repo_info.return_value = repository
+            submit_review(
+                user=None, task=task, data={"notes": "Notes", "status": "APPROVE"},
+            )
+
+            assert task.finalize_submit_review.called
+            assert task.finalize_submit_review.call_args.args
+            assert not task.finalize_submit_review.call_args.kwargs
+
+    def test_bad(self,):
+        with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
+            task = MagicMock()
+            pr = MagicMock()
+            pr.create_review.side_effect = ValueError()
+            repository = MagicMock(**{"pull_request.return_value": pr})
+            get_repo_info.return_value = repository
+            submit_review(
+                user=None, task=task, data={"notes": "Notes", "status": "APPROVE"},
+            )
+
+            assert task.finalize_submit_review.called
+            assert task.finalize_submit_review.call_args.args
+            assert task.finalize_submit_review.call_args.kwargs

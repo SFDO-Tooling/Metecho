@@ -172,7 +172,7 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
             )
 
         task = self.get_object()
-        task.submit_review(serializer.data)
+        task.queue_submit_review(user=request.user, data=serializer.data)
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 
 

@@ -1,4 +1,5 @@
 from contextlib import ExitStack
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -163,12 +164,35 @@ class TestTask:
 
             assert async_to_sync.called
 
-    def test_submit_review(self, task_factory):
+    def test_queue_submit_review(self, user_factory, task_factory):
+        user = user_factory()
         task = task_factory()
-        task.submit_review(None)
+        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
+            task.queue_submit_review(
+                user=user, data={"notes": "Foo", "status": "APPROVE"},
+            )
 
-        assert task.review_sumitted_at is not None
-        assert task.review_valid
+            assert submit_review_job.delay.called
+
+    def test_finalize_submit_review(self, task_factory):
+        now = datetime(2020, 12, 31, 12, 0)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_submit_review(now)
+
+            task.refresh_from_db()
+            assert async_to_sync.called
+            assert task.review_valid
+
+    def test_finalize_submit_review__error(self, task_factory):
+        now = datetime(2020, 12, 31, 12, 0)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_submit_review(now, ValueError)
+
+            task.refresh_from_db()
+            assert async_to_sync.called
+            assert not task.review_valid
 
 
 @pytest.mark.django_db
