@@ -6,27 +6,31 @@ import React from 'react';
 import { ExternalLink } from '@/components/utils';
 import { Org } from '@/store/orgs/reducer';
 import { ORG_TYPES, OrgTypes } from '@/utils/constants';
-import { getOrgStatusMsg, pluralize } from '@/utils/helpers';
+import { getOrgBehindLatestMsg, getOrgStatusMsg } from '@/utils/helpers';
 
 const OrgInfo = ({
   org,
   type,
+  repoUrl,
+  taskCommits,
   ownedByCurrentUser,
   assignedToCurrentUser,
   ownedByWrongUser,
   isCreating,
   reviewOrgOutOfDate,
-  orgCommitIdx,
+  missingCommits,
   doCheckForOrgChanges,
 }: {
   org: Org | null;
   type: OrgTypes;
+  repoUrl: string;
+  taskCommits?: string[];
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
   isCreating: boolean;
   reviewOrgOutOfDate: boolean;
-  orgCommitIdx: number;
+  missingCommits: number;
   doCheckForOrgChanges: () => void;
 }) => {
   if (ownedByWrongUser) {
@@ -51,9 +55,9 @@ const OrgInfo = ({
   if (!org || isCreating) {
     return null;
   }
-  const canSyncDevOrg = type === ORG_TYPES.DEV && ownedByCurrentUser;
   const expiresAt = org.expires_at && new Date(org.expires_at);
   let commitStatus = null;
+  let compareChangesUrl = null;
   if (org.latest_commit) {
     switch (type) {
       case ORG_TYPES.DEV: {
@@ -74,18 +78,31 @@ const OrgInfo = ({
       }
       case ORG_TYPES.QA: {
         // synced status for QA org
+        if (reviewOrgOutOfDate && taskCommits?.length) {
+          // eslint-disable-next-line max-len
+          compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${taskCommits[0]}`;
+        }
         commitStatus = reviewOrgOutOfDate ? (
           <li>
-            <strong>Behind Latest:</strong> {orgCommitIdx}
-            {orgCommitIdx && pluralize(orgCommitIdx, 'commit')} (
-            <ExternalLink url={org.latest_commit_url}>
-              org comparison
-            </ExternalLink>
-            )
+            <strong>
+              {i18n.t('Behind Latest')}
+              {missingCommits > 0 ? ':' : ''}
+            </strong>{' '}
+            {getOrgBehindLatestMsg(missingCommits)}
+            {compareChangesUrl ? (
+              <>
+                {' '}
+                (
+                <ExternalLink url={compareChangesUrl}>
+                  {i18n.t('view changes')}
+                </ExternalLink>
+                )
+              </>
+            ) : null}
           </li>
         ) : (
           <li>
-            <strong>Up to Date</strong>
+            <strong>{i18n.t('Up to Date')}</strong>
           </li>
         );
         break;
@@ -106,19 +123,21 @@ const OrgInfo = ({
         </li>
       )}
       {/* status for orgs */}
-      <li>
-        <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
-        {canSyncDevOrg && (
-          <>
-            {' | '}
-            <Button
-              label={i18n.t('check again')}
-              variant="link"
-              onClick={doCheckForOrgChanges}
-            />
-          </>
-        )}
-      </li>
+      {type === ORG_TYPES.DEV && (
+        <li>
+          <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
+          {ownedByCurrentUser && (
+            <>
+              {' | '}
+              <Button
+                label={i18n.t('check again')}
+                variant="link"
+                onClick={doCheckForOrgChanges}
+              />
+            </>
+          )}
+        </li>
+      )}
     </ul>
   );
 };

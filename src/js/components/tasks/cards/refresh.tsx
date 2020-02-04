@@ -5,58 +5,60 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 
 import { ExternalLink } from '@/components/utils';
+import { getOrgBehindLatestMsg } from '@/utils/helpers';
 
 // todo @refresh org action
 const RefreshOrgModal = ({
-  delinquentCommits,
   orgUrl,
-  refreshOrgModalOpen,
+  missingCommits,
+  isOpen,
   closeRefreshOrgModal,
 }: {
-  delinquentCommits: number;
   orgUrl: string;
-  refreshOrgModalOpen: boolean;
+  missingCommits: number;
+  isOpen: boolean;
   closeRefreshOrgModal: () => void;
-}) => (
-  <Modal
-    isOpen={refreshOrgModalOpen}
-    onRequestClose={closeRefreshOrgModal}
-    heading={`QA Behind Latest: ${delinquentCommits} Commits`}
-  >
-    <div className="slds-form slds-p-around_large">
-      <div className="slds-grid slds-wrap slds-gutters">
-        <div
-          className="slds-col
-              slds-size_1-of-1
-              slds-p-bottom_medium"
+}) => {
+  let heading = i18n.t('Review Org Behind Latest');
+  if (missingCommits > 0) {
+    heading = `${heading}: ${getOrgBehindLatestMsg(missingCommits, true)}`;
+  }
+  return (
+    <Modal
+      isOpen={isOpen}
+      heading={heading}
+      size="small"
+      onRequestClose={closeRefreshOrgModal}
+    >
+      <div className="slds-p-around_large">
+        <Trans i18nKey="refreshReviewOrgMsg">
+          <strong>[Recommended]</strong> This option will re-create your Review
+          Org with the latest changes, allowing you to review the most recent
+          version.
+        </Trans>
+        <Button
+          label={i18n.t('Refresh Review Org')}
+          variant="brand"
+          className="slds-size_full slds-m-top_medium"
+        />
+        <hr className="slds-m-vertical_large" />
+        <Trans i18nKey="viewOutdatedOrg">
+          You may proceed with the outdated org, but be aware that you will not
+          be reviewing the latest changes.
+        </Trans>
+        <ExternalLink
+          url={orgUrl}
+          className="slds-button
+            slds-size_full
+            slds-button_outline-brand
+            slds-m-top_medium
+            slds-m-horizontal_none"
         >
-          <Trans i18nKey="refreshQaOrg">
-            <b>Recommended</b> - This option will recreate your Org with the new
-            changes, allowing you to review the most recent version.
-          </Trans>
-          <Button
-            variant="brand"
-            className="slds-size_full slds-m-vertical_medium"
-          >
-            {i18n.t('Refresh QA Org')}
-          </Button>
-          <Trans i18nKey="viewOutdatedQaOrg">
-            You may proceed with the outdated org, but be aware that you will
-            not be reviewing the current version
-          </Trans>
-          <ExternalLink url={orgUrl}>
-            {' '}
-            <Button
-              variant="outline-brand"
-              className="slds-size_full slds-m-top_medium"
-            >
-              {i18n.t('Proceed to Outdated Org')}
-            </Button>
-          </ExternalLink>
-        </div>
+          {i18n.t('Proceed to Outdated Org')}
+        </ExternalLink>
       </div>
-    </div>
-  </Modal>
-);
+    </Modal>
+  );
+};
 
 export default RefreshOrgModal;

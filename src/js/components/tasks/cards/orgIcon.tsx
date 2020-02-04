@@ -29,24 +29,19 @@ const OrgIcon = ({
         className="icon-link slds-m-bottom_xxx-small"
       />
     );
-    const viewOrgLink = reviewOrgOutOfDate ? (
+    return reviewOrgOutOfDate ? (
       <Button
-        variant="icon"
-        iconCategory="utility"
-        iconName="link"
-        iconSize="x-small"
-        iconVariant="bare"
-        assistiveText={{ label: i18n.t('View Org') }}
+        label={iconLink}
+        variant="link"
+        title={i18n.t('View Org')}
+        assistiveText={{ icon: i18n.t('View Org') }}
         onClick={openRefreshOrgModal}
-      >
-        {iconLink}
-      </Button>
+      />
     ) : (
       <ExternalLink url={orgUrl} title={i18n.t('View Org')}>
         {iconLink}
       </ExternalLink>
     );
-    return viewOrgLink;
   }
 
   return (

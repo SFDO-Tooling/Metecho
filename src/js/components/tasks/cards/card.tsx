@@ -1,4 +1,3 @@
-import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -26,6 +25,7 @@ interface OrgCardProps {
   assignedUser: GitHubUser | null;
   projectUsers: GitHubUser[];
   projectUrl: string;
+  repoUrl: string;
   taskCommits?: string[];
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
@@ -45,6 +45,7 @@ const OrgCard = ({
   assignedUser,
   projectUsers,
   projectUrl,
+  repoUrl,
   taskCommits,
   isCreatingOrg,
   isDeletingOrg,
@@ -60,7 +61,7 @@ const OrgCard = ({
     org?.url && org.owner_gh_username !== assignedUser?.login ? org : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
-  const isRefreshing = Boolean(org?.currently_refreshing_changes);
+  const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
 
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
@@ -126,17 +127,8 @@ const OrgCard = ({
   );
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
-  const canRefreshQaOrg = reviewOrgOutOfDate || !isCreating;
-  const OrgHeading = () => (
-    <div className="slds-grid slds-grid--vertical-align-center">
-      <div className="slds-col slds-size_4-of-6">
-        {type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org')}
-      </div>
-      {canRefreshQaOrg && (
-        <Button class="slds-col slds-size_4-of-6">Refresh Org</Button>
-      )}
-    </div>
-  );
+  const orgHeading =
+    type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org');
   const userModalHeading =
     type === ORG_TYPES.QA
       ? i18n.t('Assign Reviewer')
@@ -166,7 +158,7 @@ const OrgCard = ({
             ownedByCurrentUser={ownedByCurrentUser}
             isCreating={isCreating}
             isDeleting={isDeleting}
-            isRefreshing={isRefreshing}
+            isRefreshingChanges={isRefreshingChanges}
             reviewOrgOutOfDate={reviewOrgOutOfDate}
             openRefreshOrgModal={openRefreshOrgModal}
           />
@@ -182,7 +174,7 @@ const OrgCard = ({
             <hr className="slds-m-vertical_none" />
             <Card
               className="nested-card"
-              heading={<OrgHeading />}
+              heading={orgHeading}
               icon={
                 org &&
                 !isCreating && (
@@ -211,19 +203,21 @@ const OrgCard = ({
               <OrgInfo
                 org={org}
                 type={type}
+                taskCommits={taskCommits}
+                repoUrl={repoUrl}
                 ownedByCurrentUser={ownedByCurrentUser}
                 assignedToCurrentUser={assignedToCurrentUser}
                 ownedByWrongUser={ownedByWrongUser}
                 isCreating={isCreating}
                 reviewOrgOutOfDate={reviewOrgOutOfDate}
-                orgCommitIdx={orgCommitIdx}
+                missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
               />
               <OrgSpinner
                 org={org}
                 ownedByCurrentUser={ownedByCurrentUser}
                 isDeleting={isDeleting}
-                isRefreshing={isRefreshing}
+                isRefreshingChanges={isRefreshingChanges}
               />
             </Card>
           </>
@@ -238,15 +232,16 @@ const OrgCard = ({
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
       />
-      <RefreshOrgModal
-        refreshOrgModalOpen={refreshOrgModalOpen}
-        closeRefreshOrgModal={closeRefreshOrgModal}
-        orgUrl={window.api_urls.scratch_org_redirect(org?.id)}
-        delinquentCommits={orgCommitIdx}
-      />
+      {reviewOrgOutOfDate && (
+        <RefreshOrgModal
+          orgUrl={window.api_urls.scratch_org_redirect(org?.id)}
+          missingCommits={orgCommitIdx}
+          isOpen={refreshOrgModalOpen}
+          closeRefreshOrgModal={closeRefreshOrgModal}
+        />
+      )}
     </div>
   );
 };
-OrgCard.displayName = 'OrgCard';
 
 export default withRouter(OrgCard);

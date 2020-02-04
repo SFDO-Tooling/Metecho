@@ -52,7 +52,7 @@ export const provisionOrg = (payload: Org): ThunkResult => (
   const state = getState();
   const user = state.user;
   /* istanbul ignore else */
-  if (user?.id === payload.owner) {
+  if (user && user.id === payload.owner) {
     const task = selectTaskById(state, payload.task);
     let msg = {
       [ORG_TYPES.DEV]: i18n.t('Successfully created Dev org.'),
