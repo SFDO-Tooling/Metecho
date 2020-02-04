@@ -37,3 +37,49 @@ Retrieve
       }
       ...
     ]
+
+Commit
+------
+
+.. sourcecode:: http
+
+   POST /api/scratch-orgs/:id/commit HTTP/1.1
+
+   {
+     "commit_message": "This is a sample message.",
+     "changes": {
+       "MemberType": ["MemberName1", "MemberName2"]
+     }
+   }
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED
+
+Redirect
+--------
+
+.. sourcecode:: http
+
+   GET /api/scratch-orgs/:id/redirect HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 302 FOUND
+
+Review
+------
+
+.. sourcecode:: http
+
+   POST /api/scratch-orgs/:id/review HTTP/1.1
+
+   {
+     "notes": "This is a sample review message.",
+     "status": "APPROVE",
+     "delete_org_on_submit": false
+   }
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED

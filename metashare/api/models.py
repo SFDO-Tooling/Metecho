@@ -497,20 +497,6 @@ class Task(
         self.save()
         self.notify_changed()
 
-    def queue_submit_review(self, *, user, data):
-        from .jobs import submit_review_job
-
-        submit_review_job.delay(user=user, task=self, data=data)
-
-    def finalize_submit_review(self, timestamp, err=None):
-        self.review_submitted_at = timestamp
-        if err:
-            self.review_valid = False
-        else:
-            self.review_valid = True
-        self.save()
-        self.notify_changed()
-
     def add_ms_git_sha(self, sha):
         self.ms_commits.append(sha)
 
@@ -674,6 +660,27 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
         self.delete(should_finalize=False)
+
+    def queue_submit_review(self, *, user, data):
+        from .jobs import submit_review_job
+
+        submit_review_job.delay(user=user, scratch_org=self, data=data)
+
+    def finalize_submit_review(self, timestamp, err=None, delete_org=False):
+        """
+        This could be on the task, as it relates only to updating the
+        task, but that would make a strange and hard-to-follow asymmetry
+        with the queue_submit_review method above.
+        """
+        self.task.review_submitted_at = timestamp
+        if err:
+            self.task.review_valid = False
+        else:
+            self.task.review_valid = True
+            if delete_org:
+                self.queue_delete()
+        self.task.save()
+        self.task.notify_changed()
 
 
 @receiver(user_logged_in)

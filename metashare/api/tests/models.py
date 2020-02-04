@@ -164,36 +164,6 @@ class TestTask:
 
             assert async_to_sync.called
 
-    def test_queue_submit_review(self, user_factory, task_factory):
-        user = user_factory()
-        task = task_factory()
-        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
-            task.queue_submit_review(
-                user=user, data={"notes": "Foo", "status": "APPROVE"},
-            )
-
-            assert submit_review_job.delay.called
-
-    def test_finalize_submit_review(self, task_factory):
-        now = datetime(2020, 12, 31, 12, 0)
-        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
-            task = task_factory()
-            task.finalize_submit_review(now)
-
-            task.refresh_from_db()
-            assert async_to_sync.called
-            assert task.review_valid
-
-    def test_finalize_submit_review__error(self, task_factory):
-        now = datetime(2020, 12, 31, 12, 0)
-        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
-            task = task_factory()
-            task.finalize_submit_review(now, ValueError)
-
-            task.refresh_from_db()
-            assert async_to_sync.called
-            assert not task.review_valid
-
 
 @pytest.mark.django_db
 class TestUser:
@@ -560,6 +530,45 @@ class TestScratchOrg:
             scratch_org.remove_scratch_org(error=Exception)
 
             assert async_to_sync.called
+
+    def test_queue_submit_review(self, user_factory, scratch_org_factory):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
+            scratch_org.queue_submit_review(
+                user=user, data={"notes": "Foo", "status": "APPROVE"},
+            )
+
+            assert submit_review_job.delay.called
+
+    def test_finalize_submit_review(self, scratch_org_factory):
+        now = datetime(2020, 12, 31, 12, 0)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory()
+            scratch_org.finalize_submit_review(now)
+
+            assert async_to_sync.called
+            assert scratch_org.task.review_valid
+
+    def test_finalize_submit_review__delete_org(self, scratch_org_factory):
+        now = datetime(2020, 12, 31, 12, 0)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory()
+            scratch_org.queue_delete = MagicMock()
+            scratch_org.finalize_submit_review(now, delete_org=True)
+
+            assert async_to_sync.called
+            assert scratch_org.queue_delete.called
+            assert scratch_org.task.review_valid
+
+    def test_finalize_submit_review__error(self, scratch_org_factory):
+        now = datetime(2020, 12, 31, 12, 0)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            scratch_org = scratch_org_factory()
+            scratch_org.finalize_submit_review(now, err=ValueError)
+
+            assert async_to_sync.called
+            assert not scratch_org.task.review_valid
 
 
 @pytest.mark.django_db

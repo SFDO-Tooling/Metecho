@@ -430,14 +430,18 @@ def populate_github_users(repository):
 populate_github_users_job = job(populate_github_users)
 
 
-def submit_review(*, user, task, data):
+def submit_review(*, user, scratch_org, data):
     try:
-        repository = get_repo_info(user, repo_id=task.project.repository.repo_id)
-        pr = repository.pull_request(task.pr_nuber)
+        repository = get_repo_info(
+            user, repo_id=scratch_org.task.project.repository.repo_id
+        )
+        pr = repository.pull_request(scratch_org.task.pr_nuber)
         pr.create_review(data["notes"], event=data["status"])
-        task.finalize_submit_review(now())
+        scratch_org.finalize_submit_review(
+            now(), delete_org=data["delete_org_on_submit"]
+        )
     except Exception as e:
-        task.finalize_submit_review(now(), err=e)
+        scratch_org.finalize_submit_review(now(), err=e)
 
 
 submit_review_job = job(submit_review)

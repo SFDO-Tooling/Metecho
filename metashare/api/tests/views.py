@@ -446,6 +446,29 @@ class TestScratchOrgView:
 
             assert response.status_code == 403
 
+    def test_review__good(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
+            data = {
+                "notes": "",
+                "status": "APPROVE",
+                "delete_org_on_submit": False,
+            }
+            response = client.post(
+                reverse("scratch-org-review", kwargs={"pk": str(scratch_org.id)}), data
+            )
+
+            assert response.status_code == 202
+            assert submit_review_job.delay.called
+
+    def test_review__bad(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        response = client.post(
+            reverse("scratch-org-review", kwargs={"pk": str(scratch_org.id)}), {}
+        )
+
+        assert response.status_code == 422
+
 
 @pytest.mark.django_db
 class TestTaskView:
@@ -492,23 +515,3 @@ class TestTaskView:
             )
 
             assert response.status_code == 400
-
-    def test_review__good(self, client, task_factory):
-        task = task_factory()
-        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
-            data = {
-                "notes": "",
-                "status": "APPROVE",
-            }
-            response = client.post(
-                reverse("task-review", kwargs={"pk": str(task.id)}), data
-            )
-
-            assert response.status_code == 202
-            assert submit_review_job.delay.called
-
-    def test_review__bad(self, client, task_factory):
-        task = task_factory()
-        response = client.post(reverse("task-review", kwargs={"pk": str(task.id)}), {})
-
-        assert response.status_code == 422
