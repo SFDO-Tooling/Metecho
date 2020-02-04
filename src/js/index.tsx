@@ -198,7 +198,6 @@ initializeI18n((i18nError?: string) => {
         fetchObjects({
           objectType: OBJECT_TYPES.REPOSITORY,
           reset: true,
-          shouldSubscribeToObject: false,
         }),
       ).finally(renderApp);
     } else {

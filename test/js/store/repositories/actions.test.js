@@ -91,7 +91,97 @@ describe('reposRefreshed', () => {
     expect(fetchObjects).toHaveBeenCalledWith({
       objectType: OBJECT_TYPES.REPOSITORY,
       reset: true,
-      shouldSubscribeToObject: false,
     });
+  });
+});
+
+describe('refreshGitHubUsers', () => {
+  const repoId = 'repo-id';
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.repository_refresh_github_users(repoId);
+  });
+
+  test('dispatches RefreshGitHubUsers actions', () => {
+    const store = storeWithThunk({});
+    fetchMock.postOnce(url, 202);
+    const RefreshGitHubUsersRequested = {
+      type: 'REFRESH_GH_USERS_REQUESTED',
+      payload: repoId,
+    };
+    const RefreshGitHubUsersAccepted = {
+      type: 'REFRESH_GH_USERS_ACCEPTED',
+      payload: repoId,
+    };
+
+    expect.assertions(1);
+    return store.dispatch(actions.refreshGitHubUsers(repoId)).then(() => {
+      expect(store.getActions()).toEqual([
+        RefreshGitHubUsersRequested,
+        RefreshGitHubUsersAccepted,
+      ]);
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches REFRESH_GH_USERS_REJECTED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, {
+        status: 500,
+        body: { non_field_errors: ['Foobar'] },
+      });
+      const started = {
+        type: 'REFRESH_GH_USERS_REQUESTED',
+        payload: repoId,
+      };
+      const failed = {
+        type: 'REFRESH_GH_USERS_REJECTED',
+        payload: repoId,
+      };
+
+      expect.assertions(5);
+      return store.dispatch(actions.refreshGitHubUsers(repoId)).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual(['Foobar']);
+        expect(allActions[2]).toEqual(failed);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
+describe('updateRepo', () => {
+  test('returns RepoUpdated', () => {
+    const expected = { type: 'REPOSITORY_UPDATE', payload: {} };
+
+    expect(actions.updateRepo({})).toEqual(expected);
+  });
+});
+
+describe('repoError', () => {
+  test('adds error message and updates repo', () => {
+    const store = storeWithThunk({});
+    const repo = {
+      id: 'repo-id',
+      name: 'My Repo',
+    };
+    const action = {
+      type: 'REPOSITORY_UPDATE',
+      payload: repo,
+    };
+    store.dispatch(actions.repoError({ model: repo, message: 'error msg' }));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error re-syncing collaborators for this repository: “My Repo”.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[1]).toEqual(action);
   });
 });

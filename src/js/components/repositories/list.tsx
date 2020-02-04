@@ -52,7 +52,6 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
           fetchObjects({
             objectType: OBJECT_TYPES.REPOSITORY,
             url: next,
-            shouldSubscribeToObject: false,
           }),
         ).finally(() => {
           /* istanbul ignore else */
@@ -153,7 +152,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                 />
               ) : (
                 <Button
-                  label={i18n.t('Sync GitHub Repositories')}
+                  label={i18n.t('Re-Sync GitHub Repositories')}
                   variant="outline-brand"
                   iconCategory="utility"
                   iconName="refresh"

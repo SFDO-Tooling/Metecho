@@ -125,20 +125,40 @@ describe('logout', () => {
 
 describe('refetchAllData', () => {
   describe('success', () => {
-    test('GETs user from api', () => {
+    test('GETs user from api, re-fetches repos', () => {
       const store = storeWithThunk({});
       const user = { id: 'me' };
       fetchMock.getOnce(window.api_urls.user(), user);
+      fetchMock.getOnce(window.api_urls.repository_list(), []);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
       const loggedIn = {
         type: 'USER_LOGGED_IN',
         payload: user,
       };
+      const refreshingRepos = { type: 'REFRESHING_REPOS' };
+      const refreshedRepos = { type: 'REPOS_REFRESHED' };
+      const repoPayload = {
+        filters: {},
+        objectType: 'repository',
+        reset: true,
+        url: window.api_urls.repository_list(),
+      };
+      const fetchingRepos = {
+        type: 'FETCH_OBJECTS_STARTED',
+        payload: repoPayload,
+      };
 
       expect.assertions(1);
       return store.dispatch(actions.refetchAllData()).then(() => {
-        expect(store.getActions()).toEqual([started, loggedIn, succeeded]);
+        expect(store.getActions()).toEqual([
+          started,
+          loggedIn,
+          refreshingRepos,
+          refreshedRepos,
+          fetchingRepos,
+          succeeded,
+        ]);
       });
     });
 

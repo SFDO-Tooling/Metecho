@@ -106,7 +106,6 @@ describe('<RepositoryList />', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         url: 'next-url',
         objectType: 'repository',
-        shouldSubscribeToObject: false,
       });
     });
 
@@ -130,7 +129,7 @@ describe('<RepositoryList />', () => {
   describe('sync repos clicked', () => {
     test('syncs repos', () => {
       const { getByText } = setup();
-      const btn = getByText('Sync GitHub Repositories');
+      const btn = getByText('Re-Sync GitHub Repositories');
 
       expect(btn).toBeVisible();
 

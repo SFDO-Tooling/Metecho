@@ -8,7 +8,9 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Trans } from 'react-i18next';
 
+import { LabelWithSpinner, SpinnerWrapper } from '@/components/utils';
 import { GitHubUser } from '@/store/user/reducer';
 
 interface TableCellProps {
@@ -104,6 +106,8 @@ export const AssignUsersModal = ({
   isOpen,
   onRequestClose,
   setUsers,
+  isRefreshing,
+  refreshUsers,
 }: {
   allUsers: GitHubUser[];
   selectedUsers: GitHubUser[];
@@ -111,6 +115,8 @@ export const AssignUsersModal = ({
   isOpen: boolean;
   onRequestClose: () => void;
   setUsers: (users: GitHubUser[]) => void;
+  isRefreshing: boolean;
+  refreshUsers: () => void;
 }) => {
   const [selection, setSelection] = useState(selectedUsers);
   const reset = () => setSelection(selectedUsers);
@@ -162,39 +168,68 @@ export const AssignUsersModal = ({
           onClick={handleSubmit}
         />,
       ]}
+      size="small"
       onRequestClose={handleClose}
     >
-      <div className="slds-grid slds-wrap slds-p-around_small">
-        <div className="slds-col slds-medium-size_2-of-3">
+      <div
+        className="slds-grid
+          slds-grid_vertical-align-start
+          slds-p-around_medium"
+      >
+        <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
           <p>
-            Only people who have been given access to the GitHub repository will
-            appear in the list below. Visit GitHub to give access to additional
-            people.
+            <Trans i18nKey="projectCollaborators">
+              Only users who have access to the GitHub repository for this
+              project will appear in the list below. Visit GitHub to invite
+              additional collaborators to this repository.
+            </Trans>
           </p>
         </div>
-        <div className="slds-col slds-medium-size_1-of-3 slds-text-align_right">
-          <Button
-            label={i18n.t('Re-sync Collaborators')}
-            variant="outline-brand"
-          />
+        <div
+          className="slds-grid
+            slds-grow
+            slds-shrink-none
+            slds-grid_align-end"
+        >
+          {isRefreshing ? (
+            <Button
+              label={
+                <LabelWithSpinner label={i18n.t('Syncing Collaborators…')} />
+              }
+              variant="outline-brand"
+              disabled
+            />
+          ) : (
+            <Button
+              label={i18n.t('Re-Sync Collaborators')}
+              variant="outline-brand"
+              iconCategory="utility"
+              iconName="refresh"
+              iconPosition="left"
+              onClick={refreshUsers}
+            />
+          )}
         </div>
       </div>
-      <DataTable
-        className="align-checkboxes table-row-targets"
-        items={allUsers}
-        selectRows="checkbox"
-        selection={selection}
-        onRowChange={updateSelection}
-      >
-        <DataTableColumn
-          label={i18n.t('GitHub Users')}
-          property="login"
-          primaryColumn
-          truncate
+      <div className="slds-is-relative">
+        <DataTable
+          className="align-checkboxes table-row-targets"
+          items={allUsers}
+          selectRows="checkbox"
+          selection={selection}
+          onRowChange={updateSelection}
         >
-          <UserTableCell handleUserClick={handleUserClick} />
-        </DataTableColumn>
-      </DataTable>
+          <DataTableColumn
+            label={i18n.t('GitHub Users')}
+            property="login"
+            primaryColumn
+            truncate
+          >
+            <UserTableCell handleUserClick={handleUserClick} />
+          </DataTableColumn>
+        </DataTable>
+        {isRefreshing && <SpinnerWrapper />}
+      </div>
     </Modal>
   );
 };
