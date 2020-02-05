@@ -78,6 +78,7 @@ describe('<CaptureModal/>', () => {
           changes: defaultChangeset,
         },
         hasForm: true,
+        shouldSubscribeToObject: false,
       });
     });
   });

@@ -26,7 +26,6 @@ export default (
           objectType: OBJECT_TYPES.PROJECT,
           filters: { repository: repository.id },
           reset: true,
-          shouldSubscribeToObject: true,
         }),
       );
     }

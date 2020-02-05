@@ -477,3 +477,21 @@ class TestPopulateGithubUsers:
         with patch("metashare.api.jobs.logger") as logger:
             populate_github_users(repository)
             assert logger.warning.called
+
+    def test__error(self, user_factory, repository_factory, git_hub_repository_factory):
+        user = user_factory()
+        repository = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123, user=user)
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_repo_info.side_effect = Exception
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.model_mixins.async_to_sync")
+            )
+            logger = stack.enter_context(patch("metashare.api.jobs.logger"))
+
+            with pytest.raises(Exception):
+                populate_github_users(repository)
+
+            assert logger.error.called
+            assert async_to_sync.called

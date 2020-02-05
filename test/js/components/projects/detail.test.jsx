@@ -4,20 +4,24 @@ import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
 import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
+import { refreshGitHubUsers } from '@/store/repositories/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
+jest.mock('@/store/repositories/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
   updateObject.mockClear();
+  refreshGitHubUsers.mockClear();
 });
 
 const defaultState = {
@@ -171,7 +175,6 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObject).toHaveBeenCalledWith({
         filters: { repository: 'r1', slug: 'other-project' },
         objectType: 'project',
-        shouldSubscribeToObject: true,
       });
     });
   });
@@ -222,7 +225,6 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'project1' },
         objectType: 'task',
-        shouldSubscribeToObject: true,
       });
     });
   });
@@ -257,10 +259,20 @@ describe('<ProjectDetail/>', () => {
         updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
       ).toEqual(['OtherUser', 'ThirdUser']);
     });
+
+    describe('"re-sync collaborators" click', () => {
+      test('updates users', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Add or Remove Collaborators'));
+        fireEvent.click(getByText('Re-Sync Collaborators'));
+
+        expect(refreshGitHubUsers).toHaveBeenCalledWith('r1');
+      });
+    });
   });
 
-  describe('Change project assigned users', () => {
-    test('removeUser', () => {
+  describe('removeProjectUser', () => {
+    test('removes user from project', () => {
       const { getByTitle } = setup({
         initialState: {
           ...defaultState,
@@ -290,8 +302,8 @@ describe('<ProjectDetail/>', () => {
     });
   });
 
-  describe('Change task assigned user', () => {
-    test('assignUser', () => {
+  describe('task assignUser', () => {
+    test('updates task assigned user', () => {
       const { getAllByText, baseElement } = setup();
       fireEvent.click(getAllByText('Assign Reviewer')[0]);
       fireEvent.click(
