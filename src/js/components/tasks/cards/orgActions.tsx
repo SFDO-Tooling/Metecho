@@ -11,6 +11,7 @@ const OrgActions = ({
   ownedByCurrentUser,
   assignedToCurrentUser,
   ownedByWrongUser,
+  reviewOrgOutOfDate,
   isCreating,
   isDeleting,
   doCreateOrg,
@@ -20,6 +21,7 @@ const OrgActions = ({
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
+  reviewOrgOutOfDate: boolean;
   isCreating: boolean;
   isDeleting: boolean;
   doCreateOrg: () => void;
@@ -36,19 +38,28 @@ const OrgActions = ({
 
   if (!isDeleting && (ownedByWrongUser || (org && ownedByCurrentUser))) {
     return (
-      <Dropdown
-        align="right"
-        assistiveText={{ icon: i18n.t('Org Actions') }}
-        buttonClassName="slds-button_icon-x-small"
-        buttonVariant="icon"
-        iconCategory="utility"
-        iconName="down"
-        iconSize="small"
-        iconVariant="border-filled"
-        width="xx-small"
-        options={[{ id: 0, label: i18n.t('Delete Org') }]}
-        onSelect={doDeleteOrg}
-      />
+      <>
+        {reviewOrgOutOfDate && ownedByCurrentUser && (
+          <Button
+            label={i18n.t('Refresh Org')}
+            variant="brand"
+            className="slds-m-right_small"
+          />
+        )}
+        <Dropdown
+          align="right"
+          assistiveText={{ icon: i18n.t('Org Actions') }}
+          buttonClassName="slds-button_icon-x-small"
+          buttonVariant="icon"
+          iconCategory="utility"
+          iconName="down"
+          iconSize="small"
+          iconVariant="border-filled"
+          width="xx-small"
+          options={[{ id: 0, label: i18n.t('Delete Org') }]}
+          onSelect={doDeleteOrg}
+        />
+      </>
     );
   }
 
