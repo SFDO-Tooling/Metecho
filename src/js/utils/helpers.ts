@@ -21,11 +21,24 @@ export const getOrgStatusMsg = (org: Org) => {
       });
     }
   }
-  const msg = {
-    Dev: i18n.t('up-to-date'),
-    QA: i18n.t('Review in MetaShare'), // @todo this status changes per Sondra's msg)
-  };
-  return msg[org.org_type];
+  return i18n.t('up to date');
+};
+
+export const getOrgBehindLatestMsg = (
+  missingCommits: number,
+  titleCase?: boolean,
+) => {
+  /* istanbul ignore else */
+  if (missingCommits > 0) {
+    const msgDefault = titleCase
+      ? `${missingCommits} ${pluralize(missingCommits, 'Commit')}`
+      : `${missingCommits} ${pluralize(missingCommits, 'commit')}`;
+    const name = titleCase ? 'orgBehindTitle' : 'orgBehindMsg';
+    return i18n.t(name, msgDefault, {
+      count: missingCommits,
+    });
+  }
+  return '';
 };
 
 export const getOrgTotalChanges = (changes: Changeset) => {

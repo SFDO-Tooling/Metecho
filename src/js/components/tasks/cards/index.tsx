@@ -36,11 +36,13 @@ const OrgCards = ({
   task,
   projectUsers,
   projectUrl,
+  repoUrl,
 }: {
   orgs: OrgsByTask;
   task: Task;
   projectUsers: GitHubUser[];
   projectUrl: string;
+  repoUrl: string;
 }) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
@@ -220,6 +222,7 @@ const OrgCards = ({
           assignedUser={task.assigned_dev}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
+          repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
           isRefreshingOrg={isRefreshingOrg[ORG_TYPES.DEV]}
@@ -236,6 +239,7 @@ const OrgCards = ({
           assignedUser={task.assigned_qa}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
+          repoUrl={repoUrl}
           taskCommits={taskCommits}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}

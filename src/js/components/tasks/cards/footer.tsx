@@ -10,7 +10,7 @@ const Footer = ({
   ownedByCurrentUser,
   isCreating,
   isDeleting,
-  isRefreshing,
+  isRefreshingChanges,
   reviewOrgOutOfDate,
   openRefreshOrgModal,
 }: {
@@ -18,7 +18,7 @@ const Footer = ({
   ownedByCurrentUser: boolean;
   isCreating: boolean;
   isDeleting: boolean;
-  isRefreshing: boolean;
+  isRefreshingChanges: boolean;
   reviewOrgOutOfDate: boolean;
   openRefreshOrgModal: () => void;
 }) => {
@@ -32,7 +32,7 @@ const Footer = ({
   if (isDeleting) {
     return <>{i18n.t('Deleting Org…')}</>;
   }
-  if (isRefreshing) {
+  if (isRefreshingChanges) {
     return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
   }
   if (org && ownedByCurrentUser) {
@@ -49,9 +49,11 @@ const Footer = ({
     if (orgUrl) {
       if (reviewOrgOutOfDate) {
         return (
-          <Button onClick={openRefreshOrgModal} variant="base">
-            {i18n.t('View Org')}
-          </Button>
+          <Button
+            label={i18n.t('View Org')}
+            variant="link"
+            onClick={openRefreshOrgModal}
+          />
         );
       }
       return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
