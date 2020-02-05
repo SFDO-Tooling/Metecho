@@ -161,9 +161,10 @@ const OrgCards = ({
     }
   };
 
-  const handleRefresh = (id: string) => {
-    console.log(id);
-  };
+  const handleRefresh = useCallback((id: string) => {
+    dispatch(refreshOrg(id));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const devOrg = orgs[ORG_TYPES.DEV];
 
   // When dev org delete has been triggered, wait until it has been refreshed...
