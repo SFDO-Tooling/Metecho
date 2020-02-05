@@ -8,7 +8,10 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Trans } from 'react-i18next';
 
+import { EmptyIllustration } from '@/components/404';
+import { LabelWithSpinner, SpinnerWrapper } from '@/components/utils';
 import { GitHubUser } from '@/store/user/reducer';
 
 interface TableCellProps {
@@ -104,6 +107,8 @@ export const AssignUsersModal = ({
   isOpen,
   onRequestClose,
   setUsers,
+  isRefreshing,
+  refreshUsers,
 }: {
   allUsers: GitHubUser[];
   selectedUsers: GitHubUser[];
@@ -111,6 +116,8 @@ export const AssignUsersModal = ({
   isOpen: boolean;
   onRequestClose: () => void;
   setUsers: (users: GitHubUser[]) => void;
+  isRefreshing: boolean;
+  refreshUsers: () => void;
 }) => {
   const [selection, setSelection] = useState(selectedUsers);
   const reset = () => setSelection(selectedUsers);
@@ -152,34 +159,101 @@ export const AssignUsersModal = ({
     <Modal
       isOpen={isOpen}
       heading={heading}
-      footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
-        <Button
-          key="submit"
-          type="submit"
-          label={i18n.t('Save')}
-          variant="brand"
-          onClick={handleSubmit}
-        />,
-      ]}
+      footer={
+        allUsers.length
+          ? [
+              <Button
+                key="cancel"
+                label={i18n.t('Cancel')}
+                onClick={handleClose}
+              />,
+              <Button
+                key="submit"
+                type="submit"
+                label={i18n.t('Save')}
+                variant="brand"
+                onClick={handleSubmit}
+              />,
+            ]
+          : null
+      }
+      size="small"
       onRequestClose={handleClose}
     >
-      <DataTable
-        className="align-checkboxes table-row-targets"
-        items={allUsers}
-        selectRows="checkbox"
-        selection={selection}
-        onRowChange={updateSelection}
+      <div
+        className="slds-grid
+          slds-grid_vertical-align-start
+          slds-p-around_medium"
       >
-        <DataTableColumn
-          label={i18n.t('GitHub Users')}
-          property="login"
-          primaryColumn
-          truncate
+        <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
+          <p>
+            <Trans i18nKey="projectCollaborators">
+              Only users who have access to the GitHub repository for this
+              project will appear in the list below. Visit GitHub to invite
+              additional collaborators to this repository.
+            </Trans>
+          </p>
+        </div>
+        <div
+          className="slds-grid
+            slds-grow
+            slds-shrink-none
+            slds-grid_align-end"
         >
-          <UserTableCell handleUserClick={handleUserClick} />
-        </DataTableColumn>
-      </DataTable>
+          {isRefreshing ? (
+            <Button
+              label={
+                <LabelWithSpinner label={i18n.t('Syncing Collaborators…')} />
+              }
+              variant="outline-brand"
+              disabled
+            />
+          ) : (
+            <Button
+              label={i18n.t('Re-Sync Collaborators')}
+              variant="outline-brand"
+              iconCategory="utility"
+              iconName="refresh"
+              iconPosition="left"
+              onClick={refreshUsers}
+            />
+          )}
+        </div>
+      </div>
+      <div className="slds-is-relative">
+        {allUsers.length ? (
+          <DataTable
+            className="align-checkboxes table-row-targets"
+            items={allUsers}
+            selectRows="checkbox"
+            selection={selection}
+            onRowChange={updateSelection}
+          >
+            <DataTableColumn
+              label={i18n.t('GitHub Users')}
+              property="login"
+              primaryColumn
+              truncate
+            >
+              <UserTableCell handleUserClick={handleUserClick} />
+            </DataTableColumn>
+          </DataTable>
+        ) : (
+          <div className="slds-p-around_medium">
+            <EmptyIllustration
+              message={
+                <Trans i18nKey="noGitHubUsers">
+                  We couldn’t find any GitHub users who have access to this
+                  repository. Try re-syncing the list of available
+                  collaborators, or contact an admin for this repository on
+                  GitHub.
+                </Trans>
+              }
+            />
+          </div>
+        )}
+        {isRefreshing && <SpinnerWrapper />}
+      </div>
     </Modal>
   );
 };

@@ -197,7 +197,6 @@ describe('<TaskDetail/>', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'project1' },
         objectType: 'task',
-        shouldSubscribeToObject: true,
       });
     });
   });
@@ -260,7 +259,6 @@ describe('<TaskDetail/>', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         objectType: 'scratch_org',
         filters: { task: 'task1' },
-        shouldSubscribeToObject: true,
       });
     });
   });
