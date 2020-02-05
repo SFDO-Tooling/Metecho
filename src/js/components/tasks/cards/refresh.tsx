@@ -7,17 +7,18 @@ import { Trans } from 'react-i18next';
 import { ExternalLink } from '@/components/utils';
 import { getOrgBehindLatestMsg } from '@/utils/helpers';
 
-// todo @refresh org action
 const RefreshOrgModal = ({
   orgUrl,
   missingCommits,
   isOpen,
   closeRefreshOrgModal,
+  doRefreshOrg,
 }: {
   orgUrl: string;
   missingCommits: number;
   isOpen: boolean;
   closeRefreshOrgModal: () => void;
+  doRefreshOrg: (id: string) => void;
 }) => {
   let heading = i18n.t('Review Org Behind Latest');
   if (missingCommits > 0) {
@@ -40,6 +41,7 @@ const RefreshOrgModal = ({
           label={i18n.t('Refresh Review Org')}
           variant="brand"
           className="slds-size_full slds-m-top_medium"
+          onClick={doRefreshOrg}
         />
         <hr className="slds-m-vertical_large" />
         <Trans i18nKey="viewOutdatedOrg">

@@ -60,9 +60,6 @@ const OrgCards = ({
   const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
     OrgTypeTrackerDefault,
   );
-  const [isRefreshingOrg, setIsRefreshingOrg] = useState<OrgTypeTracker>(
-    OrgTypeTrackerDefault,
-  );
   const dispatch = useDispatch<ThunkDispatch>();
 
   const checkForOrgChanges = useCallback((org: Org) => {
@@ -164,17 +161,8 @@ const OrgCards = ({
     }
   };
 
-  const handleRefresh = (type: OrgTypes) => {
-    // set refetching org to true
-    setIsRefreshingOrg({ ...isRefreshingOrg, [type]: true });
-    // dispatch refetchObject
-    dispatch(refreshOrg(orgs[type])).finally(() => {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        // finally, refetching org to false
-        setIsRefreshingOrg({ ...isRefreshingOrg, [type]: false });
-      }
-    });
+  const handleRefresh = (id: string) => {
+    console.log(id);
   };
   const devOrg = orgs[ORG_TYPES.DEV];
 
@@ -224,7 +212,6 @@ const OrgCards = ({
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
-          isRefreshingOrg={isRefreshingOrg[ORG_TYPES.DEV]}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}
@@ -242,7 +229,6 @@ const OrgCards = ({
           taskCommits={taskCommits}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
-          isRefreshingOrg={isRefreshingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}

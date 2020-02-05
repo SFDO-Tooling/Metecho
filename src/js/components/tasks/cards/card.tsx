@@ -29,7 +29,6 @@ interface OrgCardProps {
   taskCommits?: string[];
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
-  isRefreshingOrg: boolean;
   handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
   handleCreate: (type: OrgTypes) => void;
   handleDelete: (
@@ -37,7 +36,7 @@ interface OrgCardProps {
     shouldRemoveUser?: AssignedUserTracker | null,
   ) => void;
   handleCheckForOrgChanges: (org: Org) => void;
-  handleRefresh: (org: Org) => void;
+  handleRefresh: (id: string) => void;
 }
 
 const OrgCard = ({
@@ -51,7 +50,6 @@ const OrgCard = ({
   taskCommits,
   isCreatingOrg,
   isDeletingOrg,
-  isRefreshingOrg,
   handleAssignUser,
   handleCreate,
   handleDelete,
@@ -66,7 +64,7 @@ const OrgCard = ({
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
-
+  const isRefreshingOrg = Boolean(org?.currently_refreshing_changes);
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
     logError(
@@ -106,7 +104,7 @@ const OrgCard = ({
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
     if (org?.org_type === ORG_TYPES.QA) {
-      handleRefresh(org);
+      handleRefresh(org.id);
     }
   }, [handleRefresh, org]);
   const doCreateOrg = useCallback(() => {
@@ -171,6 +169,7 @@ const OrgCard = ({
             isRefreshingChanges={isRefreshingChanges}
             reviewOrgOutOfDate={reviewOrgOutOfDate}
             openRefreshOrgModal={openRefreshOrgModal}
+            isRefreshingOrg={isRefreshingOrg}
           />
         }
       >
@@ -249,8 +248,9 @@ const OrgCard = ({
         <RefreshOrgModal
           orgUrl={window.api_urls.scratch_org_redirect(org?.id)}
           missingCommits={orgCommitIdx}
-          isOpen={refreshOrgModalOpen}
+          isOpen={refreshOrgModalOpen && !isRefreshingOrg}
           closeRefreshOrgModal={closeRefreshOrgModal}
+          doRefreshOrg={doRefreshOrg}
         />
       )}
     </div>
