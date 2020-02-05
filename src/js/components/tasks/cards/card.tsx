@@ -1,4 +1,3 @@
-import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -30,6 +29,7 @@ interface OrgCardProps {
   taskCommits?: string[];
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
+  isRefreshingOrg: boolean;
   handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
   handleCreate: (type: OrgTypes) => void;
   handleDelete: (
@@ -37,8 +37,7 @@ interface OrgCardProps {
     shouldRemoveUser?: AssignedUserTracker | null,
   ) => void;
   handleCheckForOrgChanges: (org: Org) => void;
-  handleRefresh: (type: OrgTypes) => void;
-  isRefreshingOrg: (type: OrgTypes) => void;
+  handleRefresh: (org: Org) => void;
 }
 
 const OrgCard = ({
@@ -52,13 +51,13 @@ const OrgCard = ({
   taskCommits,
   isCreatingOrg,
   isDeletingOrg,
+  isRefreshingOrg,
   handleAssignUser,
   handleCreate,
   handleDelete,
   handleCheckForOrgChanges,
   handleRefresh,
   history,
-  isRefreshingOrg,
 }: OrgCardProps & RouteComponentProps) => {
   const assignedToCurrentUser = user.username === assignedUser?.login;
   const ownedByCurrentUser = Boolean(org?.url && user.id === org?.owner);
@@ -67,8 +66,6 @@ const OrgCard = ({
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
-
-  // for now, set different refreshOrg flag
 
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
@@ -107,8 +104,11 @@ const OrgCard = ({
     [handleAssignUser, type],
   );
   const doRefreshOrg = useCallback(() => {
-    handleRefresh(type);
-  }, [handleRefresh, type]);
+    /* istanbul ignore else */
+    if (org?.org_type === ORG_TYPES.QA) {
+      handleRefresh(org);
+    }
+  }, [handleRefresh, org]);
   const doCreateOrg = useCallback(() => {
     handleCreate(type);
   }, [handleCreate, type]);
@@ -137,30 +137,13 @@ const OrgCard = ({
   );
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
-  const canRefreshQaOrg =
-    type === ORG_TYPES.QA && reviewOrgOutOfDate && !isCreating;
-  const OrgHeading = () => (
-    <div className="slds-grid slds-grid--vertical-align-center">
-      <div className="slds-col slds-size_4-of-6">
-        {type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org')}
-      </div>
-      {canRefreshQaOrg && (
-        <Button
-          class="slds-col slds-size_4-of-6"
-          onClick={doRefreshOrg}
-          disabled={isRefreshingOrg}
-        >
-          {isRefreshingOrg ? 'Refreshing Org...' : 'Refresh Org'}
-        </Button>
-      )}
-    </div>
-  );
-  // const orgHeading =
-  //   type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org');
+  const orgHeading =
+    type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org');
   const userModalHeading =
     type === ORG_TYPES.QA
       ? i18n.t('Assign Reviewer')
       : i18n.t('Assign Developer');
+
   return (
     <div
       className="slds-size_1-of-1
@@ -201,7 +184,7 @@ const OrgCard = ({
             <hr className="slds-m-vertical_none" />
             <Card
               className="nested-card"
-              heading={<OrgHeading />}
+              heading={orgHeading}
               icon={
                 org &&
                 !isCreating && (
@@ -223,8 +206,10 @@ const OrgCard = ({
                   reviewOrgOutOfDate={reviewOrgOutOfDate}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
+                  isRefreshingOrg={isRefreshingOrg}
                   doCreateOrg={doCreateOrg}
                   doDeleteOrg={doDeleteOrg}
+                  doRefreshOrg={doRefreshOrg}
                 />
               }
             >
