@@ -89,6 +89,7 @@ describe('<ProjectForm/>', () => {
           repository: 'r1',
         },
         hasForm: true,
+        shouldSubscribeToObject: true,
       });
     });
 

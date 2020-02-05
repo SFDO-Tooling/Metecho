@@ -406,24 +406,29 @@ refresh_commits_job = job(refresh_commits)
 
 
 def populate_github_users(repository):
-    user = repository.get_a_matching_user()
-    if user is None:
-        logger.warning(f"No matching user for repository {repository.pk}")
-        return
-    repo = get_repo_info(user, repository.repo_id)
-    repository.github_users = [
-        {
-            "id": str(collaborator.id),
-            "login": collaborator.login,
-            "avatar_url": collaborator.avatar_url,
-        }
-        for collaborator in repo.collaborators()
-    ]
-    # We don't use the finalize_* pattern here because the frontend
-    # doesn't subscribe to Repositories. Maybe we should re-evaluate
-    # this, but for now, we assume that Repositories don't refresh
-    # GitHub users frequently enough to merit a websocket push.
-    repository.finalize_populate_github_users()
+    try:
+        user = repository.get_a_matching_user()
+        if user is None:
+            logger.warning(f"No matching user for repository {repository.pk}")
+            return
+        repo = get_repo_info(user, repository.repo_id)
+        repository.refresh_from_db()
+        repository.github_users = [
+            {
+                "id": str(collaborator.id),
+                "login": collaborator.login,
+                "avatar_url": collaborator.avatar_url,
+            }
+            for collaborator in repo.collaborators()
+        ]
+    except Exception as e:
+        repository.refresh_from_db()
+        repository.finalize_populate_github_users(e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        repository.finalize_populate_github_users()
 
 
 populate_github_users_job = job(populate_github_users)

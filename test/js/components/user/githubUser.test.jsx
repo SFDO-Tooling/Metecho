@@ -22,12 +22,31 @@ describe('AssignUsersModal', () => {
         selectedUsers={[]}
         isOpen={true}
         setUsers={setUsers}
+        isRefreshing={false}
+        refreshUsers={() => {}}
       />,
     );
     fireEvent.click(getAllByLabelText('Select all rows')[1]);
     fireEvent.click(getByText('Save'));
 
     expect(setUsers).toHaveBeenCalledWith(allUsers);
+  });
+
+  describe('is re-syncing collaborators', () => {
+    test('displays loading spinner', () => {
+      const { getByText } = render(
+        <AssignUsersModal
+          allUsers={[]}
+          selectedUsers={[]}
+          isOpen={true}
+          setUsers={() => {}}
+          isRefreshing={true}
+          refreshUsers={() => {}}
+        />,
+      );
+
+      expect(getByText('Syncing Collaborators…')).toBeVisible();
+    });
   });
 });
 

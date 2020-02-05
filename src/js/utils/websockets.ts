@@ -18,7 +18,12 @@ import {
   updateProject,
 } from '@/store/projects/actions';
 import { Project } from '@/store/projects/reducer';
-import { reposRefreshed } from '@/store/repositories/actions';
+import {
+  repoError,
+  reposRefreshed,
+  updateRepo,
+} from '@/store/repositories/actions';
+import { Repository } from '@/store/repositories/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   createTaskPR,
@@ -55,6 +60,17 @@ interface ErrorEvent {
 }
 interface ReposRefreshedEvent {
   type: 'USER_REPOS_REFRESH';
+}
+interface RepoUpdatedEvent {
+  type: 'REPOSITORY_UPDATE';
+  payload: Repository;
+}
+interface RepoUpdateErrorEvent {
+  type: 'REPOSITORY_UPDATE_ERROR';
+  payload: {
+    message?: string;
+    model: Repository;
+  };
 }
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
@@ -140,6 +156,8 @@ interface CommitFailedEvent {
 type ModelEvent =
   | ErrorEvent
   | ReposRefreshedEvent
+  | RepoUpdatedEvent
+  | RepoUpdateErrorEvent
   | ProjectUpdatedEvent
   | ProjectCreatePREvent
   | ProjectCreatePRFailedEvent
@@ -173,6 +191,10 @@ export const getAction = (event: EventType) => {
       return createProjectPR(event.payload);
     case 'PROJECT_CREATE_PR_FAILED':
       return createProjectPRFailed(event.payload);
+    case 'REPOSITORY_UPDATE':
+      return updateRepo(event.payload);
+    case 'REPOSITORY_UPDATE_ERROR':
+      return repoError(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload);
     case 'TASK_CREATE_PR':

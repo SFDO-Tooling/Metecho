@@ -116,7 +116,7 @@ describe('reducer', () => {
         description: 'This is a test repository.',
       };
       const repository2 = {
-        id: 'p2',
+        id: 'r2',
         slug: 'repository-2',
         name: 'Repository 2',
         description: 'This is another test repository.',
@@ -203,7 +203,7 @@ describe('reducer', () => {
         name: 'Repository 1',
       };
       const repository2 = {
-        id: 'p2',
+        id: 'r2',
         slug: 'repository-2',
         name: 'Repository 2',
       };
@@ -277,7 +277,7 @@ describe('reducer', () => {
         name: 'Repository 1',
       };
       const repository2 = {
-        id: 'p2',
+        id: 'r2',
         slug: 'repository-2',
         name: 'Repository 2',
       };
@@ -290,6 +290,119 @@ describe('reducer', () => {
           objectType: 'other-object',
         },
       });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_GH_USERS_REQUESTED', () => {
+    const repository = {
+      id: 'r1',
+      slug: 'repository-1',
+      name: 'Repository 1',
+    };
+    const repository2 = {
+      id: 'r2',
+      slug: 'repository-2',
+      name: 'Repository 2',
+    };
+
+    test('sets currently_refreshing_gh_users: true', () => {
+      const expected = {
+        repositories: [
+          { ...repository, currently_refreshing_gh_users: true },
+          repository2,
+        ],
+      };
+      const actual = reducer(
+        { repositories: [repository, repository2] },
+        { type: 'REFRESH_GH_USERS_REQUESTED', payload: 'r1' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if payload is not known repo id', () => {
+      const expected = { repositories: [repository, repository2] };
+      const actual = reducer(expected, {
+        type: 'REFRESH_GH_USERS_REQUESTED',
+        payload: 'unknown',
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_GH_USERS_REJECTED', () => {
+    const repository = {
+      id: 'r1',
+      slug: 'repository-1',
+      name: 'Repository 1',
+      currently_refreshing_gh_users: true,
+    };
+    const repository2 = {
+      id: 'r2',
+      slug: 'repository-2',
+      name: 'Repository 2',
+    };
+
+    test('sets currently_refreshing_gh_users: false', () => {
+      const expected = {
+        repositories: [
+          { ...repository, currently_refreshing_gh_users: false },
+          repository2,
+        ],
+      };
+      const actual = reducer(
+        { repositories: [repository, repository2] },
+        { type: 'REFRESH_GH_USERS_REJECTED', payload: 'r1' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REPOSITORY_UPDATE', () => {
+    const repository = {
+      id: 'r1',
+      slug: 'repository-1',
+      name: 'Repository 1',
+    };
+    const repository2 = {
+      id: 'r2',
+      slug: 'repository-2',
+      name: 'Repository 2',
+    };
+
+    test('updates known repository', () => {
+      const changedRepo = {
+        ...repository,
+        name: 'Changed Repo',
+      };
+      const expected = {
+        repositories: [changedRepo, repository2],
+      };
+      const actual = reducer(
+        { repositories: [repository, repository2] },
+        { type: 'REPOSITORY_UPDATE', payload: changedRepo },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('adds unknown repository', () => {
+      const repository3 = {
+        id: 'r3',
+        slug: 'repository-3',
+        name: 'Repository 3',
+      };
+      const expected = {
+        repositories: [repository, repository2, repository3],
+      };
+      const actual = reducer(
+        { repositories: [repository, repository2] },
+        { type: 'REPOSITORY_UPDATE', payload: repository3 },
+      );
 
       expect(actual).toEqual(expected);
     });

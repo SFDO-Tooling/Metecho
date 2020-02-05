@@ -1,4 +1,5 @@
 import { ThunkResult } from '@/store';
+import { reposRefreshed, reposRefreshing } from '@/store/repositories/actions';
 import { User } from '@/store/user/reducer';
 import apiFetch from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -86,6 +87,8 @@ export const refetchAllData = (): ThunkResult => async (dispatch) => {
       return dispatch({ type: 'USER_LOGGED_OUT' });
     }
     dispatch(login(payload));
+    dispatch(reposRefreshing());
+    dispatch(reposRefreshed());
     return dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
   } catch (err) {
     dispatch({ type: 'REFETCH_DATA_FAILED' });
