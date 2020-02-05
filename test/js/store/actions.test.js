@@ -98,7 +98,11 @@ describe('fetchObjects with `reset: true`', () => {
         expect.assertions(1);
         return store
           .dispatch(
-            actions.fetchObjects({ objectType: 'repository', reset: true }),
+            actions.fetchObjects({
+              objectType: 'repository',
+              reset: true,
+              shouldSubscribeToObject: false,
+            }),
           )
           .then(() => {
             expect(window.socket.subscribe).not.toHaveBeenCalled();
@@ -491,7 +495,12 @@ describe('createObject', () => {
 
         expect.assertions(1);
         return store
-          .dispatch(actions.createObject({ objectType: 'project' }))
+          .dispatch(
+            actions.createObject({
+              objectType: 'project',
+              shouldSubscribeToObject: false,
+            }),
+          )
           .then(() => {
             expect(window.socket.subscribe).not.toHaveBeenCalled();
           });

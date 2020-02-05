@@ -102,7 +102,7 @@ export const fetchObjects = ({
   url,
   filters = {},
   reset = false,
-  shouldSubscribeToObject = false,
+  shouldSubscribeToObject = true,
 }: {
   objectType: ObjectTypes;
   url?: string;
@@ -160,7 +160,7 @@ export const fetchObject = ({
   objectType,
   url,
   filters = {},
-  shouldSubscribeToObject = false,
+  shouldSubscribeToObject = true,
 }: {
   objectType: ObjectTypes;
   url?: string;
@@ -214,7 +214,7 @@ export const createObject = ({
   url,
   data = {},
   hasForm = false,
-  shouldSubscribeToObject = false,
+  shouldSubscribeToObject = true,
 }: {
   objectType: ObjectTypes;
   url?: string;

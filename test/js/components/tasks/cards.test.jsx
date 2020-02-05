@@ -415,7 +415,6 @@ describe('<OrgCards/>', () => {
           org_type: 'QA',
           task: 'task-id',
         },
-        shouldSubscribeToObject: true,
       });
       expect(getByText('Creating Org…')).toBeVisible();
     });

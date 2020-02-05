@@ -25,6 +25,7 @@ import {
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
+import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
@@ -87,6 +88,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
     },
     [project, dispatch],
   );
+  const doRefreshGitHubUsers = useCallback(() => {
+    /* istanbul ignore if */
+    if (!repository) {
+      return;
+    }
+    dispatch(refreshGitHubUsers(repository.id));
+  }, [repository, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // "Assign user to task" modal related:
   const assignUser = useCallback(
@@ -238,6 +246,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
               isOpen={assignUsersModalOpen}
               onRequestClose={closeAssignUsersModal}
               setUsers={setProjectUsers}
+              isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
+              refreshUsers={doRefreshGitHubUsers}
             />
             <UserCards
               users={project.github_users}

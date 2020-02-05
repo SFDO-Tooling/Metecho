@@ -90,6 +90,7 @@ const SubmitModal = ({
     },
     onSuccess: handleSuccess,
     onError: handleError,
+    shouldSubscribeToObject: false,
     ...objectType,
   });
 

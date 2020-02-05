@@ -27,7 +27,6 @@ export default (
         fetchObjects({
           objectType: OBJECT_TYPES.ORG,
           filters: { task: task.id },
-          shouldSubscribeToObject: true,
         }),
       );
     }
