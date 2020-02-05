@@ -27,6 +27,7 @@ export interface Org {
   has_unsaved_changes: boolean;
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
+  currently_refreshing_org: boolean;
   delete_queued_at: string | null;
 }
 
