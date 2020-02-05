@@ -220,6 +220,7 @@ const OrgCard = ({
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
                   ownedByWrongUser={ownedByWrongUser}
+                  reviewOrgOutOfDate={reviewOrgOutOfDate}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
                   doCreateOrg={doCreateOrg}
