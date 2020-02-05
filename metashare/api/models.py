@@ -1,5 +1,4 @@
 from allauth.account.signals import user_logged_in
-from allauth.socialaccount.models import SocialAccount
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from cumulusci.core.config import OrgConfig
@@ -124,13 +123,6 @@ class User(HashIdMixin, AbstractUser):
     def instance_url(self):
         try:
             return self.salesforce_account.extra_data["instance_url"]
-        except (AttributeError, KeyError):
-            return None
-
-    @property
-    def gh_username(self):
-        try:
-            return self.github_account.extra_data["login"]
         except (AttributeError, KeyError):
             return None
 
@@ -440,32 +432,26 @@ class Task(
 
     def set_owner_values(self):
         # Dev:
-        new_matching_sa = (
+        new_matching_user = (
             self.assigned_dev
-            and SocialAccount.objects.filter(
-                provider="github", uid=str(self.assigned_dev["id"]),
-            ).first()
+            and User.objects.filter(username=str(self.assigned_dev["login"]),).first()
         )
-        if new_matching_sa:
-            new_matching_user = new_matching_sa.user
+        if new_matching_user:
             ScratchOrg.objects.filter(task=self, org_type=SCRATCH_ORG_TYPES.Dev).update(
                 owner=new_matching_user,
                 owner_sf_username=new_matching_user.sf_username,
-                owner_gh_username=new_matching_user.gh_username,
+                owner_gh_username=new_matching_user.username,
             )
         # QA:
-        new_matching_sa = (
+        new_matching_user = (
             self.assigned_qa
-            and SocialAccount.objects.filter(
-                provider="github", uid=str(self.assigned_qa["id"]),
-            ).first()
+            and User.objects.filter(username=str(self.assigned_qa["login"]),).first()
         )
-        if new_matching_sa:
-            new_matching_user = new_matching_sa.user
+        if new_matching_user:
             ScratchOrg.objects.filter(task=self, org_type=SCRATCH_ORG_TYPES.QA).update(
                 owner=new_matching_user,
                 owner_sf_username=new_matching_user.sf_username,
-                owner_gh_username=new_matching_user.gh_username,
+                owner_gh_username=new_matching_user.username,
             )
 
     def __str__(self):

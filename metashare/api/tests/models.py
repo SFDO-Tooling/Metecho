@@ -183,20 +183,14 @@ class TestTask:
         task = task_factory()
         scratch_org_dev = scratch_org_factory(task=task, org_type="Dev")
         scratch_org_qa = scratch_org_factory(task=task, org_type="QA")
-        user = user_factory(socialaccount_set=[])
+        user = user_factory(username="test username", socialaccount_set=[])
         social_account_factory(
             user=user,
             provider="salesforce-production",
             extra_data={"preferred_username": "test username"},
         )
-        social_account_factory(
-            user=user,
-            provider="github",
-            extra_data={"id": 123456, "login": "test github username"},
-            uid="123456",
-        )
-        task.assigned_dev = {"id": "123456"}
-        task.assigned_qa = {"id": "123456"}
+        task.assigned_dev = {"id": "123456", "login": "test username"}
+        task.assigned_qa = {"id": "123456", "login": "test username"}
         task.save()
         scratch_org_dev.refresh_from_db()
         scratch_org_qa.refresh_from_db()
@@ -276,20 +270,6 @@ class TestUser:
             extra_data={"avatar_url": "https://example.com/avatar/"},
         )
         assert user.avatar_url == "https://example.com/avatar/"
-
-    def test_gh_username(self, user_factory, social_account_factory):
-        user = user_factory(devhub_username="not me!", socialaccount_set=[])
-        social_account_factory(
-            user=user, provider="github", extra_data={"login": "sample username"},
-        )
-        assert user.gh_username == "sample username"
-
-    def test_gh_username__bad(self, user_factory, social_account_factory):
-        user = user_factory(devhub_username="not me!", socialaccount_set=[])
-        social_account_factory(
-            user=user, provider="github", extra_data={},
-        )
-        assert user.gh_username is None
 
     def test_sf_username(self, user_factory, social_account_factory):
         user = user_factory(devhub_username="sample username")
