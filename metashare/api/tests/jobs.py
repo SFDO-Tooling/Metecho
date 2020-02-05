@@ -171,18 +171,35 @@ def test_create_branches_on_github_then_create_scratch_org():
 
 
 @pytest.mark.django_db
-def test_refresh_scratch_org(scratch_org_factory):
-    scratch_org = scratch_org_factory()
-    with ExitStack() as stack:
-        delete_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-        _create_org_and_run_flow = stack.enter_context(
-            patch(f"{PATCH_ROOT}._create_org_and_run_flow")
-        )
-        refresh_scratch_org(scratch_org)
+class TestRefreshScratchOrg:
+    def test_refresh_scratch_org(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            delete_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+            _create_org_and_run_flow = stack.enter_context(
+                patch(f"{PATCH_ROOT}._create_org_and_run_flow")
+            )
+            refresh_scratch_org(scratch_org)
 
-        assert delete_org.called
-        assert _create_org_and_run_flow.called
+            assert delete_org.called
+            assert _create_org_and_run_flow.called
+
+    def test_refresh_scratch_org__error(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            delete_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
+            delete_org.side_effect = Exception
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.model_mixins.async_to_sync")
+            )
+            logger = stack.enter_context(patch("metashare.api.jobs.logger"))
+
+            with pytest.raises(Exception):
+                refresh_scratch_org(scratch_org)
+
+            assert async_to_sync.called
+            assert logger.error.called
 
 
 @pytest.mark.django_db

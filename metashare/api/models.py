@@ -661,10 +661,13 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.notify_changed()
         refresh_scratch_org_job.delay(self)
 
-    def finalize_refresh_org(self):
+    def finalize_refresh_org(self, error=None):
         self.currently_refreshing_org = False
         self.save()
-        self.notify_changed()
+        if error is None:
+            self.notify_changed("SCRATCH_ORG_REFRESH")
+        else:
+            self.notify_scratch_org_error(error, "SCRATCH_ORG_REFRESH_FAILED")
 
 
 @receiver(user_logged_in)

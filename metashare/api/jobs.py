@@ -209,21 +209,30 @@ create_branches_on_github_then_create_scratch_org_job = job(
 
 
 def refresh_scratch_org(scratch_org):
-    user = scratch_org.owner
-    repo_id = scratch_org.task.project.repository.get_repo_id(user)
-    commit_ish = scratch_org.task.branch_name
+    try:
+        scratch_org.refresh_from_db()
+        user = scratch_org.owner
+        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        commit_ish = scratch_org.task.branch_name
 
-    delete_org(scratch_org)
+        delete_org(scratch_org)
 
-    with local_github_checkout(user, repo_id, commit_ish) as repo_root:
-        _create_org_and_run_flow(
-            scratch_org,
-            user=user,
-            repo_id=repo_id,
-            repo_branch=commit_ish,
-            project_path=repo_root,
-        )
-    scratch_org.finalize_refresh_org()
+        with local_github_checkout(user, repo_id, commit_ish) as repo_root:
+            _create_org_and_run_flow(
+                scratch_org,
+                user=user,
+                repo_id=repo_id,
+                repo_branch=commit_ish,
+                project_path=repo_root,
+            )
+    except Exception as e:
+        scratch_org.refresh_from_db()
+        scratch_org.finalize_refresh_org(e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        scratch_org.finalize_refresh_org()
 
 
 refresh_scratch_org_job = job(refresh_scratch_org)

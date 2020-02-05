@@ -25,6 +25,8 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_REMOVE
         SCRATCH_ORG_COMMIT_CHANGES
         SCRATCH_ORG_COMMIT_CHANGES_FAILED
+        SCRATCH_ORG_REFRESH
+        SCRATCH_ORG_REFRESH_FAILED
 """
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
