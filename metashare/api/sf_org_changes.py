@@ -130,7 +130,7 @@ def get_latest_revision_numbers(scratch_org):
     for record in records:
         record_dict[record["MemberType"]][record["MemberName"]] = record["RevisionNum"]
 
-    return record_dict
+    return {k: dict(v) for k, v in record_dict.items()}
 
 
 def compare_revisions(old_revision, new_revision):

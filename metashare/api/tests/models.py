@@ -65,6 +65,20 @@ class TestRepository:
             repo.refresh_from_db()
             assert repo.branch_name == "main-branch"
 
+    def test_finalize_populate_github_users(self, repository_factory):
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            repo = repository_factory()
+            repo.finalize_populate_github_users()
+
+            assert async_to_sync.called
+
+    def test_finalize_populate_github_users__error(self, repository_factory):
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            repo = repository_factory()
+            repo.finalize_populate_github_users(error=True)
+
+            assert async_to_sync.called
+
 
 @pytest.mark.django_db
 class TestProject:

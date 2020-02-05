@@ -86,6 +86,7 @@ describe('<TaskForm/>', () => {
           project: 'r1',
         },
         hasForm: true,
+        shouldSubscribeToObject: true,
       });
     });
 

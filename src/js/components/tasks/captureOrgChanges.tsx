@@ -64,6 +64,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     url: window.api_urls.scratch_org_commit(orgId),
     onSuccess: handleSuccess,
     onError: handleError,
+    shouldSubscribeToObject: false,
   });
 
   const setChanges = (changes: Changeset) => {

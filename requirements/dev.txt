@@ -26,7 +26,7 @@ flake8==3.7.9
 imagesize==1.1.0          # via sphinx
 inflection==0.3.1         # via pytest-factoryboy
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.11.1
+ipython==7.12.0
 isort==4.3.21
 jedi==0.15.1              # via ipython
 jinja2==2.10.3            # via sphinx
@@ -52,7 +52,7 @@ pytest-django==3.8.0
 pytest-factoryboy==2.0.3
 pytest-mock==2.0.0
 pytest-sugar==0.9.2
-pytest==5.3.4
+pytest==5.3.5
 pytz==2019.3              # via babel
 regex==2019.11.1          # via black
 remote-pdb==2.0.0

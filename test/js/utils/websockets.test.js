@@ -15,7 +15,11 @@ import {
   createProjectPRFailed,
   updateProject,
 } from '@/store/projects/actions';
-import { reposRefreshed } from '@/store/repositories/actions';
+import {
+  repoError,
+  reposRefreshed,
+  updateRepo,
+} from '@/store/repositories/actions';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   createTaskPR,
@@ -38,12 +42,14 @@ const actions = {
   createTaskPRFailed,
   deleteFailed,
   deleteOrg,
-  reposRefreshed,
-  provisionOrg,
   provisionFailed,
-  updateOrg,
+  provisionOrg,
+  repoError,
+  reposRefreshed,
   updateFailed,
+  updateOrg,
   updateProject,
+  updateRepo,
   updateTask,
 };
 for (const action of Object.values(actions)) {
@@ -77,6 +83,8 @@ afterEach(() => {
 
 describe('getAction', () => {
   test.each([
+    ['REPOSITORY_UPDATE', 'updateRepo'],
+    ['REPOSITORY_UPDATE_ERROR', 'repoError'],
     ['PROJECT_UPDATE', 'updateProject'],
     ['PROJECT_CREATE_PR', 'createProjectPR'],
     ['PROJECT_CREATE_PR_FAILED', 'createProjectPRFailed'],

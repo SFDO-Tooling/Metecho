@@ -217,6 +217,9 @@ class Repository(
 
     slug_class = RepositorySlug
 
+    def subscribable_by(self, user):  # pragma: nocover
+        return True
+
     # begin PushMixin configuration:
     push_update_type = "REPOSITORY_UPDATE"
     push_error_type = "REPOSITORY_UPDATE_ERROR"
@@ -263,9 +266,12 @@ class Repository(
 
         populate_github_users_job.delay(self)
 
-    def finalize_populate_github_users(self):
+    def finalize_populate_github_users(self, error=None):
         self.save()
-        self.notify_changed()
+        if error is None:
+            self.notify_changed()
+        else:
+            self.notify_error(error)
 
     def queue_refresh_commits(self, *, ref):
         from .jobs import refresh_commits_job
