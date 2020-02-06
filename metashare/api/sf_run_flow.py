@@ -10,6 +10,7 @@ from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from cumulusci.utils import cd
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django_rq import get_scheduler
 from requests.exceptions import HTTPError
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
@@ -284,3 +285,7 @@ def delete_org(scratch_org):
     active_scratch_org_id = records.get("Id")
     if active_scratch_org_id:
         devhub_api.ActiveScratchOrg.delete(active_scratch_org_id)
+
+    if scratch_org.expiry_job_id:
+        scheduler = get_scheduler("default")
+        scheduler.cancel(scratch_org.expiry_job_id)

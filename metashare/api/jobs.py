@@ -164,6 +164,9 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
         project_path=project_path,
     )
     scratch_org.refresh_from_db()
+    # We don't need to explicitly save the following, because this
+    # function is called in a context that will eventually call a
+    # finalize_* method, which will save the model.
     scratch_org.last_modified_at = now()
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
 
@@ -173,7 +176,6 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.expiry_job_id = scheduler.enqueue_at(
         before_expiry, alert_user_about_expiring_org, org=scratch_org, days=days,
     ).id
-    scratch_org.save()
 
 
 def create_branches_on_github_then_create_scratch_org(*, scratch_org):
@@ -217,9 +219,6 @@ def refresh_scratch_org(scratch_org):
         commit_ish = scratch_org.task.branch_name
 
         delete_org(scratch_org)
-        if scratch_org.expiry_job_id:
-            scheduler = get_scheduler("default")
-            scheduler.cancel(scratch_org.expiry_job_id)
 
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             _create_org_and_run_flow(

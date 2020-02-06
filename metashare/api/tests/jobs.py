@@ -173,11 +173,10 @@ def test_create_branches_on_github_then_create_scratch_org():
 @pytest.mark.django_db
 class TestRefreshScratchOrg:
     def test_refresh_scratch_org(self, scratch_org_factory):
-        scratch_org = scratch_org_factory(expiry_job_id="abcd1234")
+        scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             delete_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
             _create_org_and_run_flow = stack.enter_context(
                 patch(f"{PATCH_ROOT}._create_org_and_run_flow")
             )

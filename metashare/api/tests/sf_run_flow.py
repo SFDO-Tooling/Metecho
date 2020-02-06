@@ -196,9 +196,12 @@ def test_create_org_and_run_flow():
 
 @pytest.mark.django_db
 def test_delete_org(scratch_org_factory):
-    scratch_org = scratch_org_factory(config={"org_id": "some-id"})
+    scratch_org = scratch_org_factory(
+        config={"org_id": "some-id"}, expiry_job_id="abcd1234"
+    )
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         devhub_api = MagicMock()
         get_devhub_api = stack.enter_context(patch(f"{PATCH_ROOT}.get_devhub_api"))
         get_devhub_api.return_value = devhub_api
