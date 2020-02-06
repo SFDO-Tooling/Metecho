@@ -123,25 +123,19 @@ jobs:
       - image: oddbirds/pyjs
     environment:
       COVERALLS_PARALLEL: true
-    parameters:
-      coveralls_token:
-        type: env_var_name
-        default: COVERALLS_REPO_TOKEN
     steps:
       - checkout
       - attach_workspace:
           at: .
-      - when:
-          condition: <<parameters.coveralls_token>>
-          steps:
-            - run: echo <<parameters.coveralls_token>>
-            - run:
-                name: Report Test Coverage
-                command: |
-                  . venv/bin/activate
-                  yarn test:js:report-coverage
-                  yarn test:py:report-coverage
-                  curl -k "https://coveralls.io/webhook?repo_token=${<<parameters.coveralls_token>>}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+      - run:
+          name: Report Test Coverage
+          command: |
+            if [ -n "${COVERALLS_REPO_TOKEN}" ]; then
+              . venv/bin/activate
+              yarn test:js:report-coverage
+              yarn test:py:report-coverage
+              curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+            fi
       - run:
           name: Check Test Coverage
           command: |
@@ -153,24 +147,22 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: oddbirds/pyjs
-    parameters:
-      packtracker_token:
-        type: env_var_name
-        default: PT_PROJECT_TOKEN
     steps:
-      - when:
-          condition: <<parameters.packtracker_token>>
-          steps:
-            - checkout
-            - attach_workspace:
-                at: .
-            - run: echo <<parameters.packtracker_token>>
-            - run:
-                name: Install packtracker.io Plugin
-                command: yarn global add @packtracker/webpack-plugin
-            - run:
-                name: Upload Webpack Stats to packtracker.io
-                command: yarn packtracker
+      - run:
+          name: Check if packtracker.io is configured
+          command: |
+            if [ -z "${PT_PROJECT_TOKEN}" ]; then
+                circleci-agent step halt
+            fi
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install packtracker.io Plugin
+          command: yarn global add @packtracker/webpack-plugin
+      - run:
+          name: Upload Webpack Stats to packtracker.io
+          command: yarn packtracker
 
   build-docs:
     working_directory: ~/metashare
