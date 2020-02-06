@@ -4,7 +4,7 @@ import { StaticRouter } from 'react-router-dom';
 
 import OrgCards from '@/components/tasks/cards';
 import { createObject, deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
@@ -23,12 +23,16 @@ updateObject.mockReturnValue(() =>
 refetchOrg.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
+refreshOrg.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 
 afterEach(() => {
   createObject.mockClear();
   deleteObject.mockClear();
   updateObject.mockClear();
   refetchOrg.mockClear();
+  refreshOrg.mockClear();
 });
 
 const defaultOrgs = {
@@ -60,8 +64,8 @@ const defaultTask = {
   id: 'task-id',
   assigned_dev: { id: 'user-id', login: 'user-name' },
   assigned_qa: { id: 'user-id', login: 'user-name' },
-  commits: ['sdfsdf', 'kjfs'],
-  origin_sha: 'ksksdm',
+  commits: [{ id: '617a512-longlong' }, { id: 'other' }],
+  origin_sha: 'parent',
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
@@ -153,7 +157,7 @@ describe('<OrgCards/>', () => {
       const { queryByText, getByText } = setup({ orgs, task });
 
       expect(queryByText('View Org')).toBeNull();
-      expect(getByText('up-to-date', { exact: false })).toBeVisible();
+      expect(getByText('up to date', { exact: false })).toBeVisible();
       expect(queryByText('check again')).toBeNull();
       expect(getByText('not yet created', { exact: false })).toBeVisible();
     });
@@ -348,59 +352,95 @@ describe('<OrgCards/>', () => {
       expect(queryByText('Deployed Commit')).toBeNull();
     });
   });
+
   describe('QA org', () => {
-    test('renders "up to date" when synced', () => {
-      const task = {
-        ...defaultTask,
-        commits: [],
-      };
-      const orgs = {
-        ...defaultOrgs,
-        Dev: null,
-        QA: {
-          ...defaultOrgs.QA,
-          id: 'org-id',
-          task: 'task-id',
-          org_type: 'Dev',
-          owner: 'user-id',
-          owner_gh_username: 'user-name',
-          expires_at: '2019-09-16T12:58:53.721Z',
-          latest_commit: '617a512-longlong',
-          latest_commit_url: '/test/commit/url/',
-          latest_commit_at: '2019-08-16T12:58:53.721Z',
-          url: '/test/org/url/',
-          unsaved_changes: { Foo: ['Bar'] },
-          has_unsaved_changes: true,
-        },
-      };
-      const { debug } = setup({ task, orgs });
-      debug();
+    const orgs = {
+      ...defaultOrgs,
+      Dev: null,
+      QA: {
+        ...defaultOrgs.Dev,
+        org_type: 'QA',
+        latest_commit: 'other',
+      },
+    };
+
+    describe('up to date', () => {
+      test('renders "Up to Date"', () => {
+        const { getByText } = setup({
+          task: { ...defaultTask, commits: [] },
+          orgs: { ...orgs, QA: { ...orgs.QA, latest_commit: 'parent' } },
+        });
+
+        expect(getByText('Up to Date')).toBeVisible();
+      });
     });
-    test('opens refresh org modal', () => {
-      const orgs = {
-        ...defaultOrgs,
-        QA: {
-          ...defaultOrgs.QA,
-          id: 'qa-org-id',
-          task: 'task-id',
-          org_type: 'QA',
-          owner: 'user-id',
-          owner_gh_username: 'user-name',
-          expires_at: '2019-09-16T12:58:53.721Z',
-          latest_commit: '617a512-longlong',
-          latest_commit_url: '/test/commit/url/',
-          latest_commit_at: '2019-08-16T12:58:53.721Z',
-          url: '/test/org/url/',
-          unsaved_changes: { Foo: ['Bar'] },
-          has_unsaved_changes: true,
-        },
-      };
-      const { getByTitle, queryAllByText } = setup({ orgs });
-      const footer = queryAllByText('View Org');
 
-      fireEvent.click(footer[1]);
+    describe('out of date', () => {
+      test('renders "Behind Latest"', () => {
+        const { getByText } = setup({ orgs });
 
-      fireEvent.click(getByTitle('Close'));
+        expect(getByText('Behind Latest', { exact: false })).toBeVisible();
+        expect(getByText('view changes')).toBeVisible();
+      });
+
+      describe('unknown commits list', () => {
+        test('does not render compare changes link', () => {
+          const { getByText, queryByText } = setup({
+            task: { ...defaultTask, commits: [], origin_sha: null },
+            orgs,
+          });
+
+          expect(getByText('Behind Latest', { exact: false })).toBeVisible();
+          expect(queryByText('view changes')).toBeNull();
+        });
+      });
+
+      describe('View Org click', () => {
+        test('opens refresh org modal', () => {
+          const { getByText, getByTitle, queryByText } = setup({ orgs });
+          fireEvent.click(getByText('View Org'));
+
+          expect(getByText('Review Org Behind Latest: 1 Commit')).toBeVisible();
+
+          fireEvent.click(getByTitle('Close'));
+
+          expect(queryByText('Review Org Behind Latest: 1 Commit')).toBeNull();
+        });
+
+        test('displays modal even if unsure how many commits behind', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: { ...orgs.QA, latest_commit: 'not-a-commit-we-know-about' },
+            },
+          });
+          fireEvent.click(getByText('View Org'));
+
+          expect(getByText('Review Org Behind Latest')).toBeVisible();
+        });
+      });
+
+      describe('Refresh Org click', () => {
+        test('calls refreshOrg action', () => {
+          const { getByText } = setup({ orgs });
+          fireEvent.click(getByText('Refresh Org'));
+
+          expect(refreshOrg).toHaveBeenCalledWith(orgs.QA);
+        });
+      });
+
+      describe('currently refreshing', () => {
+        test('calls refreshOrg action', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: { ...orgs.QA, currently_refreshing_org: true },
+            },
+          });
+
+          expect(getByText('Refreshing Org…')).toBeVisible();
+        });
+      });
     });
   });
 

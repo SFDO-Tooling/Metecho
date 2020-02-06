@@ -401,6 +401,7 @@ export const orgRefreshed = (payload: Org): ThunkResult => (
 ) => {
   const state = getState();
   const user = state.user;
+  /* istanbul ignore else */
   if (user && user.id === payload.owner) {
     const task = selectTaskById(state, payload.task);
     dispatch(
@@ -425,6 +426,7 @@ export const refreshError = ({
 }): ThunkResult => (dispatch, getState) => {
   const state = getState();
   const user = state.user;
+  /* istanbul ignore else */
   if (user && user.id === model.owner) {
     const task = selectTaskById(state, model.task);
     dispatch(

@@ -222,6 +222,7 @@ describe('updateOrg', () => {
 describe('updateFailed', () => {
   test('adds error message', () => {
     const store = storeWithThunk({
+      user: { id: 'user-id' },
       tasks: {
         'project-id': [
           { id: 'task-id', name: 'My Task', project: 'project-id' },
@@ -231,6 +232,7 @@ describe('updateFailed', () => {
     const org = {
       id: 'org-id',
       task: 'task-id',
+      owner: 'user-id',
     };
     const action = {
       type: 'SCRATCH_ORG_UPDATE',
@@ -249,10 +251,11 @@ describe('updateFailed', () => {
   });
 
   test('adds error message (no task)', () => {
-    const store = storeWithThunk({ tasks: {} });
+    const store = storeWithThunk({ tasks: {}, user: { id: 'user-id' } });
     const org = {
       id: 'org-id',
       task: 'task-id',
+      owner: 'user-id',
     };
     const action = {
       type: 'SCRATCH_ORG_UPDATE',
@@ -390,21 +393,23 @@ describe('deleteFailed', () => {
 describe('commitSucceeded', () => {
   test('adds success message', () => {
     const store = storeWithThunk({
+      user: { id: 'user-id' },
       tasks: {
         'project-id': [
           { id: 'task-id', name: 'My Task', project: 'project-id' },
         ],
       },
     });
-    const commit = {
-      id: 'commit-id',
+    const org = {
+      id: 'org-id',
       task: 'task-id',
+      owner: 'user-id',
     };
     const action = {
       type: 'SCRATCH_ORG_COMMIT_CHANGES',
-      payload: commit,
+      payload: org,
     };
-    store.dispatch(actions.commitSucceeded(commit));
+    store.dispatch(actions.commitSucceeded(org));
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -416,17 +421,19 @@ describe('commitSucceeded', () => {
 
   test('adds success message [no known task]', () => {
     const store = storeWithThunk({
+      user: { id: 'user-id' },
       tasks: {},
     });
-    const commit = {
-      id: 'commit-id',
+    const org = {
+      id: 'org-id',
       task: 'task-id',
+      owner: 'user-id',
     };
     const action = {
       type: 'SCRATCH_ORG_COMMIT_CHANGES',
-      payload: commit,
+      payload: org,
     };
-    store.dispatch(actions.commitSucceeded(commit));
+    store.dispatch(actions.commitSucceeded(org));
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -440,23 +447,23 @@ describe('commitSucceeded', () => {
 describe('commitFailed', () => {
   test('adds error message', () => {
     const store = storeWithThunk({
+      user: { id: 'user-id' },
       tasks: {
         'project-id': [
           { id: 'task-id', name: 'My Task', project: 'project-id' },
         ],
       },
     });
-    const commit = {
+    const org = {
       id: 'commit-id',
       task: 'task-id',
+      owner: 'user-id',
     };
     const action = {
       type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
-      payload: commit,
+      payload: org,
     };
-    store.dispatch(
-      actions.commitFailed({ model: commit, message: 'error msg' }),
-    );
+    store.dispatch(actions.commitFailed({ model: org, message: 'error msg' }));
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -470,24 +477,197 @@ describe('commitFailed', () => {
 
   test('adds error message [no known task]', () => {
     const store = storeWithThunk({
+      user: { id: 'user-id' },
       tasks: {},
     });
-    const commit = {
-      id: 'commit-id',
+    const org = {
+      id: 'org-id',
       task: 'task-id',
+      owner: 'user-id',
     };
     const action = {
       type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
-      payload: commit,
+      payload: org,
     };
-    store.dispatch(
-      actions.commitFailed({ model: commit, message: 'error msg' }),
-    );
+    store.dispatch(actions.commitFailed({ model: org, message: 'error msg' }));
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
       'Uh oh. There was an error capturing changes from your scratch org.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[1]).toEqual(action);
+  });
+});
+
+describe('refreshOrg', () => {
+  const org = {
+    id: 'org-id',
+  };
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.scratch_org_refresh(org.id);
+  });
+
+  test('dispatches refreshOrg actions', () => {
+    const store = storeWithThunk({});
+    fetchMock.postOnce(url, 202);
+    const refreshOrgRequested = {
+      type: 'SCRATCH_ORG_REFRESH_REQUESTED',
+      payload: org,
+    };
+    const refreshOrgAccepted = {
+      type: 'SCRATCH_ORG_REFRESH_ACCEPTED',
+      payload: org,
+    };
+
+    expect.assertions(1);
+    return store.dispatch(actions.refreshOrg(org)).then(() => {
+      expect(store.getActions()).toEqual([
+        refreshOrgRequested,
+        refreshOrgAccepted,
+      ]);
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches SCRATCH_ORG_REFRESH_REJECTED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, {
+        status: 500,
+        body: { non_field_errors: ['Foobar'] },
+      });
+      const started = {
+        type: 'SCRATCH_ORG_REFRESH_REQUESTED',
+        payload: org,
+      };
+      const failed = {
+        type: 'SCRATCH_ORG_REFRESH_REJECTED',
+        payload: org,
+      };
+
+      expect.assertions(5);
+      return store.dispatch(actions.refreshOrg(org)).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual(['Foobar']);
+        expect(allActions[2]).toEqual(failed);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
+describe('orgRefreshed', () => {
+  test('adds success message', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {
+        'project-id': [
+          { id: 'task-id', name: 'My Task', project: 'project-id' },
+        ],
+      },
+    });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+      owner: 'user-id',
+    };
+    const action = {
+      type: 'SCRATCH_ORG_UPDATE',
+      payload: org,
+    };
+    store.dispatch(actions.orgRefreshed(org));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Successfully refreshed your scratch org on task “My Task”.',
+    );
+    expect(allActions[1]).toEqual(action);
+  });
+
+  test('adds success message [no known task]', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {},
+    });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+      owner: 'user-id',
+    };
+    const action = {
+      type: 'SCRATCH_ORG_UPDATE',
+      payload: org,
+    };
+    store.dispatch(actions.orgRefreshed(org));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Successfully refreshed your scratch org.',
+    );
+    expect(allActions[1]).toEqual(action);
+  });
+});
+
+describe('refreshError', () => {
+  test('adds error message', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {
+        'project-id': [
+          { id: 'task-id', name: 'My Task', project: 'project-id' },
+        ],
+      },
+    });
+    const org = {
+      id: 'commit-id',
+      task: 'task-id',
+      owner: 'user-id',
+    };
+    const action = {
+      type: 'SCRATCH_ORG_UPDATE',
+      payload: org,
+    };
+    store.dispatch(actions.refreshError({ model: org, message: 'error msg' }));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error refreshing your scratch org on task “My Task”.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[1]).toEqual(action);
+  });
+
+  test('adds error message [no known task]', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {},
+    });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+      owner: 'user-id',
+    };
+    const action = {
+      type: 'SCRATCH_ORG_UPDATE',
+      payload: org,
+    };
+    store.dispatch(actions.refreshError({ model: org, message: 'error msg' }));
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error refreshing your scratch org.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
