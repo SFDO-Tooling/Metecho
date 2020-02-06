@@ -161,8 +161,8 @@ const OrgCards = ({
     }
   };
 
-  const handleRefresh = useCallback((id: string) => {
-    dispatch(refreshOrg(id));
+  const handleRefresh = useCallback((org: Org) => {
+    dispatch(refreshOrg(org));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const devOrg = orgs[ORG_TYPES.DEV];

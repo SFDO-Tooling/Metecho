@@ -210,6 +210,24 @@ const reducer = (
         },
       };
     }
+    case 'SCRATCH_ORG_REFRESH_REQUESTED':
+    case 'SCRATCH_ORG_REFRESH_REJECTED': {
+      const org = action.payload;
+      const taskOrgs = orgs[org.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [org.task]: {
+          ...taskOrgs,
+          [ORG_TYPES.QA]: {
+            ...org,
+            currently_refreshing_org: true,
+          },
+        },
+      };
+    }
   }
   return orgs;
 };

@@ -36,7 +36,7 @@ interface OrgCardProps {
     shouldRemoveUser?: AssignedUserTracker | null,
   ) => void;
   handleCheckForOrgChanges: (org: Org) => void;
-  handleRefresh: (id: string) => void;
+  handleRefresh: (org: Org) => void;
 }
 
 const OrgCard = ({
@@ -104,7 +104,7 @@ const OrgCard = ({
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
     if (org?.org_type === ORG_TYPES.QA) {
-      handleRefresh(org.id);
+      handleRefresh(org);
     }
   }, [handleRefresh, org]);
   const doCreateOrg = useCallback(() => {

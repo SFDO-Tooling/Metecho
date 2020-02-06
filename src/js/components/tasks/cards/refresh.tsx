@@ -18,7 +18,7 @@ const RefreshOrgModal = ({
   missingCommits: number;
   isOpen: boolean;
   closeRefreshOrgModal: () => void;
-  doRefreshOrg: (id: string) => void;
+  doRefreshOrg: () => void;
 }) => {
   let heading = i18n.t('Review Org Behind Latest');
   if (missingCommits > 0) {

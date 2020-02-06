@@ -8,6 +8,7 @@ import {
   deleteOrg,
   provisionFailed,
   provisionOrg,
+  refreshError,
   updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
@@ -153,6 +154,17 @@ interface CommitFailedEvent {
     model: Org;
   };
 }
+interface OrgRefreshEvent {
+  type: 'SCRATCH_ORG_REFRESH';
+  payload: Org;
+}
+interface OrgRefreshFailedEvent {
+  type: 'SCRATCH_ORG_REFRESH_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
 type ModelEvent =
   | ErrorEvent
   | ReposRefreshedEvent
@@ -172,7 +184,9 @@ type ModelEvent =
   | OrgDeleteFailedEvent
   | OrgRemovedEvent
   | CommitSucceededEvent
-  | CommitFailedEvent;
+  | CommitFailedEvent
+  | OrgRefreshEvent
+  | OrgRefreshFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
@@ -222,6 +236,10 @@ export const getAction = (event: EventType) => {
       return commitSucceeded(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
       return commitFailed(event.payload);
+    case 'SCRATCH_ORG_REFRESH':
+      return updateOrg(event.payload);
+    case 'SCRATCH_ORG_REFRESH_FAILED':
+      return refreshError(event.payload);
   }
   return null;
 };

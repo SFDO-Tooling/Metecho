@@ -46,12 +46,14 @@ interface OrgRefreshFailed {
 }
 interface OrgRefreshRequested {
   type: 'SCRATCH_ORG_REFRESH_REQUESTED';
+  payload: Org;
 }
 interface OrgRefreshAccepted {
   type: 'SCRATCH_ORG_REFRESH_ACCEPTED';
 }
 interface OrgRefreshRejected {
   type: 'SCRATCH_ORG_REFRESH_REJECTED';
+  payload: Org;
 }
 
 export type OrgsAction =
@@ -372,37 +374,44 @@ export const commitFailed = ({
   });
 };
 
-export const refreshOrg = (id: string): ThunkResult => async (dispatch) => {
-  const url = window.api_urls.scratch_org_refresh(id);
-  await console.log(id);
-  // dispatch({
-  //   type: 'REFRESH_ORG_STARTED',
-  //   payload: { id, url },
-  // });
-  // try {
-  //   const response = await apiFetch({
-  //     // eslint-disable-next-line @typescript-eslint/camelcase
-  //     url: addUrlParams(url),
-  //     dispatch,
-  //     opts: {
-  //       method: 'POST',
-  //       body: JSON.stringify(org),
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     },
-  //   });
-  //   if (!response) {
-  //     return dispatch({
-  //       type: 'REFRESH_ORG_FAILED',
-  //       payload: { org, url, response },
-  //     });
-  //   }
-  //   return dispatch({
-  //     type: 'REFRESH_ORG_SUCCEEDED',
-  //     payload: { org: response, url },
-  //   });
-  // } catch (err) {
-  //   console.log(err);
-  // }
+export const refreshOrg = (org: Org): ThunkResult => async (dispatch) => {
+  dispatch({ type: 'SCRATCH_ORG_REFRESH_REQUESTED', payload: org });
+  try {
+    await apiFetch({
+      url: window.api_urls.scratch_org_refresh(org.id),
+      dispatch,
+      opts: {
+        method: 'POST',
+      },
+    });
+    return dispatch({
+      type: 'SCRATCH_ORG_REFRESH_ACCEPTED',
+      payload: org,
+    });
+  } catch (err) {
+    dispatch({
+      type: 'SCRATCH_ORG_REFRESH_REJECTED',
+      payload: org,
+    });
+    throw err;
+  }
+};
+
+export const refreshError = ({
+  model,
+  message,
+}: {
+  model: Org;
+  message?: string;
+}): ThunkResult => (dispatch) => {
+  dispatch(
+    addToast({
+      heading: `${i18n.t(
+        'Uh oh. There was an error refreshing commits for this task',
+      )}: “${model.task}”.`,
+      details: message,
+      variant: 'error',
+    }),
+  );
+  return dispatch(updateOrg(model));
 };
