@@ -4,7 +4,6 @@ import React from 'react';
 
 import { ExternalLink } from '@/components/utils';
 import { Org } from '@/store/orgs/reducer';
-import { ORG_TYPES } from '@/utils/constants';
 
 const Footer = ({
   org,
@@ -12,17 +11,17 @@ const Footer = ({
   isCreating,
   isDeleting,
   isRefreshingChanges,
+  isRefreshingOrg,
   reviewOrgOutOfDate,
   openRefreshOrgModal,
-  isRefreshingOrg,
 }: {
   org: Org | null;
   ownedByCurrentUser: boolean;
   isCreating: boolean;
   isDeleting: boolean;
   isRefreshingChanges: boolean;
-  reviewOrgOutOfDate: boolean;
   isRefreshingOrg: boolean;
+  reviewOrgOutOfDate: boolean;
   openRefreshOrgModal: () => void;
 }) => {
   const loadingMsg = i18n.t(
@@ -38,7 +37,7 @@ const Footer = ({
   if (isRefreshingChanges) {
     return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
   }
-  if (org?.org_type === ORG_TYPES.QA && isRefreshingOrg) {
+  if (isRefreshingOrg) {
     return <>{i18n.t('Refreshing Org…')}</>;
   }
   if (org && ownedByCurrentUser) {

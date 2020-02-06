@@ -221,9 +221,10 @@ const reducer = (
         ...orgs,
         [org.task]: {
           ...taskOrgs,
-          [ORG_TYPES.QA]: {
+          [org.org_type]: {
             ...org,
-            currently_refreshing_org: true,
+            currently_refreshing_org:
+              action.type === 'SCRATCH_ORG_REFRESH_REQUESTED',
           },
         },
       };

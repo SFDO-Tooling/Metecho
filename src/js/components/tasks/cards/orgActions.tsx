@@ -40,16 +40,11 @@ const OrgActions = ({
     );
   }
 
-  if (isRefreshingOrg) {
-    return (
-      <Button
-        label={<LabelWithSpinner label={i18n.t('Refreshing Org…')} />}
-        disabled
-      />
-    );
+  if (isRefreshingOrg || isDeleting) {
+    return null;
   }
 
-  if (!isDeleting && (ownedByWrongUser || (org && ownedByCurrentUser))) {
+  if (ownedByWrongUser || (org && ownedByCurrentUser)) {
     return (
       <>
         {reviewOrgOutOfDate && ownedByCurrentUser && (

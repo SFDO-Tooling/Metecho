@@ -66,6 +66,10 @@ const OrgCards = ({
     dispatch(refetchOrg(org));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleRefresh = useCallback((org: Org) => {
+    dispatch(refreshOrg(org));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const deleteOrg = useCallback((org: Org) => {
     setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
     dispatch(
@@ -161,10 +165,6 @@ const OrgCards = ({
     }
   };
 
-  const handleRefresh = useCallback((org: Org) => {
-    dispatch(refreshOrg(org));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   const devOrg = orgs[ORG_TYPES.DEV];
 
   // When dev org delete has been triggered, wait until it has been refreshed...
@@ -217,7 +217,6 @@ const OrgCards = ({
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
-          handleRefresh={handleRefresh}
         />
         <OrgCard
           org={orgs[ORG_TYPES.QA]}

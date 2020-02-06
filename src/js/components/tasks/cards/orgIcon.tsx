@@ -9,15 +9,15 @@ const OrgIcon = ({
   orgId,
   ownedByCurrentUser,
   isDeleting,
-  reviewOrgOutOfDate,
   isRefreshingOrg,
+  reviewOrgOutOfDate,
   openRefreshOrgModal,
 }: {
   orgId: string;
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
-  reviewOrgOutOfDate: boolean;
   isRefreshingOrg: boolean;
+  reviewOrgOutOfDate: boolean;
   openRefreshOrgModal: () => void;
 }) => {
   const orgUrl = window.api_urls.scratch_org_redirect(orgId);

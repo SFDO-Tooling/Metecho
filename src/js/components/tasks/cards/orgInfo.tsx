@@ -17,9 +17,9 @@ const OrgInfo = ({
   assignedToCurrentUser,
   ownedByWrongUser,
   isCreating,
+  isRefreshingOrg,
   reviewOrgOutOfDate,
   missingCommits,
-  isRefreshingOrg,
   doCheckForOrgChanges,
 }: {
   org: Org | null;
@@ -30,9 +30,9 @@ const OrgInfo = ({
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
   isCreating: boolean;
+  isRefreshingOrg: boolean;
   reviewOrgOutOfDate: boolean;
   missingCommits: number;
-  isRefreshingOrg: boolean;
   doCheckForOrgChanges: () => void;
 }) => {
   if (ownedByWrongUser) {
