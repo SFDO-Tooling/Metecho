@@ -123,17 +123,25 @@ jobs:
       - image: oddbirds/pyjs
     environment:
       COVERALLS_PARALLEL: true
+    parameters:
+      coveralls_token:
+        type: env_var_name
+        default: COVERALLS_REPO_TOKEN
     steps:
       - checkout
       - attach_workspace:
           at: .
-      - run:
-          name: Report Test Coverage
-          command: |
-            . venv/bin/activate
-            yarn test:js:report-coverage
-            yarn test:py:report-coverage
-            curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+      - when:
+          condition: <<parameters.coveralls_token>>
+          steps:
+            - run: echo <<parameters.coveralls_token>>
+            - run:
+                name: Report Test Coverage
+                command: |
+                  . venv/bin/activate
+                  yarn test:js:report-coverage
+                  yarn test:py:report-coverage
+                  curl -k "https://coveralls.io/webhook?repo_token=${<<parameters.coveralls_token>>}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
       - run:
           name: Check Test Coverage
           command: |
@@ -151,11 +159,12 @@ jobs:
         default: PT_PROJECT_TOKEN
     steps:
       - when:
-          condition: << parameters.packtracker_token >>
+          condition: <<parameters.packtracker_token>>
           steps:
             - checkout
             - attach_workspace:
                 at: .
+            - run: echo <<parameters.packtracker_token>>
             - run:
                 name: Install packtracker.io Plugin
                 command: yarn global add @packtracker/webpack-plugin
