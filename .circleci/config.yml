@@ -145,16 +145,23 @@ jobs:
     working_directory: ~/metashare
     docker:
       - image: oddbirds/pyjs
+    parameters:
+      packtracker_token:
+        type: env_var_name
+        default: PT_PROJECT_TOKEN
     steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: Install packtracker.io Plugin
-          command: yarn global add @packtracker/webpack-plugin
-      - run:
-          name: Upload Webpack Stats to packtracker.io
-          command: yarn packtracker
+      - when:
+          condition: << parameters.packtracker_token >>
+          steps:
+            - checkout
+            - attach_workspace:
+                at: .
+            - run:
+                name: Install packtracker.io Plugin
+                command: yarn global add @packtracker/webpack-plugin
+            - run:
+                name: Upload Webpack Stats to packtracker.io
+                command: yarn packtracker
 
   build-docs:
     working_directory: ~/metashare
