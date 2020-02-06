@@ -265,7 +265,9 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["POST"])
     def refresh(self, request, pk=None):
         scratch_org = self.get_object()
-        if not self.request.user.is_devhub_enabled:
+        has_devhub = self.request.user.is_devhub_enabled
+        is_owner = request.user == scratch_org.owner
+        if not has_devhub or not is_owner:
             return Response(
                 {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
