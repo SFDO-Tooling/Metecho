@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Icon from '@salesforce/design-system-react/components/icon';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React from 'react';
@@ -86,6 +87,14 @@ const OrgInfo = ({
         }
         commitStatus = reviewOrgOutOfDate ? (
           <li>
+            <Icon
+              category="utility"
+              name="warning"
+              colorVariant="warning"
+              size="x-small"
+              className="slds-m-bottom_xx-small"
+              containerClassName="slds-m-right_xx-small"
+            />
             <strong>
               {i18n.t('Behind Latest')}
               {missingCommits > 0 ? ':' : ''}
