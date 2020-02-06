@@ -675,6 +675,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             self.notify_changed("SCRATCH_ORG_REFRESH")
         else:
             self.notify_scratch_org_error(error, "SCRATCH_ORG_REFRESH_FAILED")
+            self.queue_delete()
 
 
 @receiver(user_logged_in)

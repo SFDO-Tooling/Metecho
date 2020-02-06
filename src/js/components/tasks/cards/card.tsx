@@ -233,7 +233,6 @@ const OrgCard = ({
                 ownedByCurrentUser={ownedByCurrentUser}
                 isDeleting={isDeleting}
                 isRefreshingChanges={isRefreshingChanges}
-                isRefreshingOrg={isRefreshingOrg}
               />
             </Card>
           </>

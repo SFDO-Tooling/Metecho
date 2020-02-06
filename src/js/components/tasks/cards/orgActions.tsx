@@ -40,7 +40,16 @@ const OrgActions = ({
     );
   }
 
-  if (isRefreshingOrg || isDeleting) {
+  if (isRefreshingOrg) {
+    return (
+      <Button
+        label={<LabelWithSpinner label={i18n.t('Refreshing Org…')} />}
+        disabled
+      />
+    );
+  }
+
+  if (isDeleting) {
     return null;
   }
 

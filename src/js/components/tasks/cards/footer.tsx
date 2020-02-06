@@ -38,7 +38,7 @@ const Footer = ({
     return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
   }
   if (isRefreshingOrg) {
-    return <>{i18n.t('Refreshing Org…')}</>;
+    return null;
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_capturing_changes) {
