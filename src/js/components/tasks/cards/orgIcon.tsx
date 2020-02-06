@@ -10,17 +10,19 @@ const OrgIcon = ({
   ownedByCurrentUser,
   isDeleting,
   reviewOrgOutOfDate,
+  isRefreshingOrg,
   openRefreshOrgModal,
 }: {
   orgId: string;
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
   reviewOrgOutOfDate: boolean;
+  isRefreshingOrg: boolean;
   openRefreshOrgModal: () => void;
 }) => {
   const orgUrl = window.api_urls.scratch_org_redirect(orgId);
 
-  if (orgUrl && ownedByCurrentUser && !isDeleting) {
+  if (orgUrl && ownedByCurrentUser && !isDeleting && !isRefreshingOrg) {
     const iconLink = (
       <Icon
         category="utility"

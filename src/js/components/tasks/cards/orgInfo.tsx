@@ -19,6 +19,7 @@ const OrgInfo = ({
   isCreating,
   reviewOrgOutOfDate,
   missingCommits,
+  isRefreshingOrg,
   doCheckForOrgChanges,
 }: {
   org: Org | null;
@@ -31,6 +32,7 @@ const OrgInfo = ({
   isCreating: boolean;
   reviewOrgOutOfDate: boolean;
   missingCommits: number;
+  isRefreshingOrg: boolean;
   doCheckForOrgChanges: () => void;
 }) => {
   if (ownedByWrongUser) {
@@ -52,7 +54,7 @@ const OrgInfo = ({
       </ul>
     );
   }
-  if (!org || isCreating) {
+  if (!org || isCreating || isRefreshingOrg) {
     return null;
   }
   const expiresAt = org.expires_at && new Date(org.expires_at);

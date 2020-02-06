@@ -193,6 +193,7 @@ const OrgCard = ({
                     isDeleting={isDeleting}
                     reviewOrgOutOfDate={reviewOrgOutOfDate}
                     openRefreshOrgModal={openRefreshOrgModal}
+                    isRefreshingOrg={isRefreshingOrg}
                   />
                 )
               }
@@ -224,12 +225,14 @@ const OrgCard = ({
                 reviewOrgOutOfDate={reviewOrgOutOfDate}
                 missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
+                isRefreshingOrg={isRefreshingOrg}
               />
               <OrgSpinner
                 org={org}
                 ownedByCurrentUser={ownedByCurrentUser}
                 isDeleting={isDeleting}
                 isRefreshingChanges={isRefreshingChanges}
+                isRefreshingOrg={isRefreshingOrg}
               />
             </Card>
           </>
