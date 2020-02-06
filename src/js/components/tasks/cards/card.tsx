@@ -64,7 +64,7 @@ const OrgCard = ({
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
-  const isRefreshingOrg = Boolean(org?.currently_refreshing_changes);
+  const isRefreshingOrg = Boolean(org?.currently_refreshing_org);
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
     logError(
