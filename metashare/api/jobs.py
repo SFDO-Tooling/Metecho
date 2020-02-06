@@ -170,9 +170,10 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
     before_expiry = scratch_org.expires_at - timedelta(days=days)
-    scheduler.enqueue_at(
+    scratch_org.expiry_job_id = scheduler.enqueue_at(
         before_expiry, alert_user_about_expiring_org, org=scratch_org, days=days,
-    )
+    ).id
+    scratch_org.save()
 
 
 def create_branches_on_github_then_create_scratch_org(*, scratch_org):
@@ -216,6 +217,9 @@ def refresh_scratch_org(scratch_org):
         commit_ish = scratch_org.task.branch_name
 
         delete_org(scratch_org)
+        if scratch_org.expiry_job_id:
+            scheduler = get_scheduler("default")
+            scheduler.cancel(scratch_org.expiry_job_id)
 
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             _create_org_and_run_flow(
