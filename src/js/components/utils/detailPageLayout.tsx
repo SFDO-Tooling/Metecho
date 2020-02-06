@@ -31,8 +31,7 @@ const DetailPageLayout = ({
   children?: ReactNode;
 }) => {
   const descriptionHasTitle =
-    description &&
-    (description.startsWith('<h1>') || description.startsWith('<h2>'));
+    description?.startsWith('<h1>') || description?.startsWith('<h2>');
 
   return (
     <>

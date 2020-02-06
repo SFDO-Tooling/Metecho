@@ -1,18 +1,21 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
-import WelcomeMatTile from '@salesforce/design-system-react/components/welcome-mat/tile';
+import { Location } from 'history';
 import i18n from 'i18next';
 import React, { ReactElement } from 'react';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { withRouter } from 'react-router';
+import { StaticContext, withRouter } from 'react-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { selectUserState } from '@/store/user/selectors';
 import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
 import welcomeMatBG from '#/welcome-mat-bg.png';
+import welcomeMatFG from '#/welcome-mat-fg.png';
 
-interface Props extends RouteComponentProps {
+interface Props
+  extends RouteComponentProps<{}, StaticContext, { from?: Location }> {
   id?: string;
   label?: string | ReactElement;
   from?: { pathname?: string };
@@ -23,7 +26,7 @@ export const LoginButton = withRouter(
     const handleClick = () => {
       /* istanbul ignore else */
       if (window.api_urls.github_login) {
-        let { pathname } = (location.state && location.state.from) || from;
+        let { pathname } = location.state?.from || from;
         if (!pathname) {
           pathname = window.location.pathname;
         }
@@ -66,17 +69,18 @@ const Login = () => {
           style={{ backgroundImage: `url(${welcomeMatBG})` }}
         >
           <div className="slds-welcome-mat__info-content">
-            <h2 className="slds-welcome-mat__info-title">
+            <h1 className="slds-welcome-mat__info-title">
               {i18n.t('Welcome to MetaShare!')}
-            </h2>
+            </h1>
             <div
               className="slds-welcome-mat__info-description
                 slds-text-longform"
             >
               <p>
-                {i18n.t(
-                  'Welcome to MetaShare, the web-based tool for collaborating on Salesforce projects.',
-                )}
+                <Trans i18nKey="welcomeMessage">
+                  <strong>To get started</strong> log in with your GitHub
+                  account.
+                </Trans>
               </p>
             </div>
             <div className="slds-welcome-mat__info-actions">
@@ -93,37 +97,53 @@ const Login = () => {
             slds-grid_vertical
             slds-p-left_xx-large
             slds-p-right_xx-large
-            welcome-tile"
+            slds-grid_align-center"
         >
-          <WelcomeMatTile
-            title={i18n.t('Welcome to MetaShare!')}
-            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet."
-            icon={<Icon category="utility" name="animal_and_nature" />}
-            variant="info-only"
-          />
-          <WelcomeMatTile
-            title="What can you do with MetaShare"
-            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet. Making one just a little longer to test lengths. Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet. Chocolate bar marzipan soufflé marshmallow sugar plum tiramisu."
-            icon={<Icon category="utility" name="call" />}
-            variant="info-only"
-          />
-          <WelcomeMatTile
-            title="Who can use do with MetaShare"
-            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet. Gummi bears bear claw lemon drops tootsie roll danish ice cream sugar macaroon chocolate cookie sweet ice cream caramels. biscuit lollipop marshmallow chocolate chocolate bar biscuit."
-            icon={<Icon category="utility" name="upload" />}
-            variant="info-only"
-          />
-          <WelcomeMatTile
-            title="Where you can use MetaShare"
-            description="Lorem ipsum dolor, a shorter one. Gummi bears bear claw lemon drops tootsie roll danish ice cream sugar biscuit lollipop marshmallow."
-            icon={<Icon category="utility" name="magicwand" />}
-            variant="info-only"
-          />
-          <WelcomeMatTile
-            title="How to use MetaShare to its fullest potential"
-            description="Lorem ipsum dolor sit amet, lorem ipsum dolor sit amet and a slightly longer one that may wrap in some cases. Soufflé donut jelly beans sugar plum oat cake. muffin chocolate candy chocolate chocolate bar marzipan soufflé marshmallow sugar plum tiramisu. Cake powder licorice topping. halvah powder muffin biscuit."
-            icon={<Icon category="utility" name="knowledge_base" />}
-            variant="info-only"
+          <h2 className="slds-text-heading_large slds-p-bottom_medium">
+            {i18n.t('What is MetaShare?')}
+          </h2>
+          <p className="slds-p-bottom_xx-large">
+            {i18n.t(
+              'MetaShare is a tool to help collaborate on sharable Salesforce projects.',
+            )}
+          </p>
+          <h3 className="slds-text-heading_small slds-p-bottom_small">
+            {i18n.t('What can I do with MetaShare?')}
+          </h3>
+          <ul className="slds-m-bottom_x-large">
+            <li className="slds-p-bottom_small slds-grid">
+              <Icon
+                category="utility"
+                name="adduser"
+                size="x-small"
+                className="slds-m-right_x-small"
+              />
+              {i18n.t('Assign projects and tasks to members of your team.')}
+            </li>
+            <li className="slds-p-bottom_small slds-grid">
+              <Icon
+                category="utility"
+                name="magicwand"
+                size="x-small"
+                className="slds-m-right_x-small"
+              />
+              {i18n.t('Easily create a scratch org with the existing project.')}
+            </li>
+            <li className="slds-p-bottom_small slds-grid">
+              <Icon
+                category="utility"
+                name="upload"
+                size="x-small"
+                className="slds-m-right_x-small"
+              />
+              {i18n.t(
+                'Make changes and capture them into a repository on GitHub.',
+              )}
+            </li>
+          </ul>
+          <img
+            src={welcomeMatFG}
+            alt="screenshots of MetaShare app interface"
           />
         </div>
       </div>

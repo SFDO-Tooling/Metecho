@@ -1,11 +1,18 @@
 import logging
 import traceback
+from datetime import timedelta
 
 from asgiref.sync import async_to_sync
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.mail import send_mail
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.timezone import now
-from django_rq import job
+from django.utils.translation import gettext_lazy as _
+from django_rq import get_scheduler, job
+from furl import furl
 
 from .gh import (
     get_cumulus_prefix,
@@ -71,6 +78,56 @@ def _create_branches_on_github(*, user, repo_id, project, task):
     return task_branch_name
 
 
+def alert_user_about_expiring_org(*, org, days):
+    from .models import User, ScratchOrg
+
+    # if scratch org is there
+    try:
+        org.refresh_from_db()
+        user = org.owner
+        user.refresh_from_db()
+    except (ScratchOrg.DoesNotExist, User.DoesNotExist):
+        return
+
+    # and has unsaved changes
+    get_unsaved_changes(org)
+    if org.unsaved_changes:
+        task = org.task
+        project = task.project
+        repo = project.repository
+
+        domain = Site.objects.first().domain
+        should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith(
+            "localhost"
+        )
+        scheme = "http" if should_be_http else "https"
+        metashare_link = (
+            furl(f"{scheme}://{domain}")
+            .set(path=["repositories", repo.slug, project.slug, task.slug])
+            .url
+        )
+
+        # email user
+        send_mail(
+            _("MetaShare Scratch Org Expiring with Uncommitted Changes"),
+            render_to_string(
+                "scratch_org_expiry_email.txt",
+                {
+                    "repo_name": repo.name,
+                    "project_name": project.name,
+                    "task_name": task.name,
+                    "days": days,
+                    "expiry_date": org.expires_at,
+                    "user_name": user.username,
+                    "metashare_link": metashare_link,
+                },
+            ),
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+
+
 def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project_path):
     from .models import SCRATCH_ORG_TYPES
 
@@ -97,7 +154,8 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = scratch_org_config.config
-    scratch_org.owner_sf_id = user.sf_username
+    scratch_org.owner_sf_username = user.sf_username
+    scratch_org.owner_gh_username = user.username
     scratch_org.save()
     run_flow(
         cci=cci,
@@ -108,6 +166,13 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.refresh_from_db()
     scratch_org.last_modified_at = now()
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
+
+    scheduler = get_scheduler("default")
+    days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
+    before_expiry = scratch_org.expires_at - timedelta(days=days)
+    scheduler.enqueue_at(
+        before_expiry, alert_user_about_expiring_org, org=scratch_org, days=days,
+    )
 
 
 def create_branches_on_github_then_create_scratch_org(*, scratch_org):
@@ -338,3 +403,32 @@ def refresh_commits(*, repository, branch_name):
 
 
 refresh_commits_job = job(refresh_commits)
+
+
+def populate_github_users(repository):
+    try:
+        user = repository.get_a_matching_user()
+        if user is None:
+            logger.warning(f"No matching user for repository {repository.pk}")
+            return
+        repo = get_repo_info(user, repository.repo_id)
+        repository.refresh_from_db()
+        repository.github_users = [
+            {
+                "id": str(collaborator.id),
+                "login": collaborator.login,
+                "avatar_url": collaborator.avatar_url,
+            }
+            for collaborator in repo.collaborators()
+        ]
+    except Exception as e:
+        repository.refresh_from_db()
+        repository.finalize_populate_github_users(e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        repository.finalize_populate_github_users()
+
+
+populate_github_users_job = job(populate_github_users)

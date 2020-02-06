@@ -48,19 +48,19 @@ interface FetchObjectFailed {
   type: 'FETCH_OBJECT_FAILED';
   payload: ObjectPayload;
 }
-interface CreateObjectStarted {
-  type: 'CREATE_OBJECT_STARTED';
+interface CreateUpdateObjectStarted {
+  type: 'CREATE_OBJECT_STARTED' | 'UPDATE_OBJECT_STARTED';
   payload: { data: ObjectData } & CreateObjectPayload;
 }
-interface CreateObjectSucceeded {
-  type: 'CREATE_OBJECT_SUCCEEDED';
+interface CreateUpdateObjectSucceeded {
+  type: 'CREATE_OBJECT_SUCCEEDED' | 'UPDATE_OBJECT_SUCCEEDED';
   payload: {
     data: ObjectData;
     object: any;
   } & CreateObjectPayload;
 }
-interface CreateObjectFailed {
-  type: 'CREATE_OBJECT_FAILED';
+interface CreateUpdateObjectFailed {
+  type: 'CREATE_OBJECT_FAILED' | 'UPDATE_OBJECT_FAILED';
   payload: { data: ObjectData } & CreateObjectPayload;
 }
 interface DeleteObjectAction {
@@ -78,9 +78,9 @@ export type ObjectsAction =
   | FetchObjectStarted
   | FetchObjectSucceeded
   | FetchObjectFailed
-  | CreateObjectStarted
-  | CreateObjectSucceeded
-  | CreateObjectFailed
+  | CreateUpdateObjectStarted
+  | CreateUpdateObjectSucceeded
+  | CreateUpdateObjectFailed
   | DeleteObjectAction;
 
 export type ObjectsActionType = ({
@@ -102,7 +102,7 @@ export const fetchObjects = ({
   url,
   filters = {},
   reset = false,
-  shouldSubscribeToObject = false,
+  shouldSubscribeToObject = true,
 }: {
   objectType: ObjectTypes;
   url?: string;
@@ -135,7 +135,7 @@ export const fetchObjects = ({
             shouldSubscribeToObject) ||
           (typeof shouldSubscribeToObject === 'function' &&
             shouldSubscribeToObject(object));
-        if (object && object.id && shouldSubscribe) {
+        if (object?.id && shouldSubscribe) {
           window.socket.subscribe({
             model: objectType,
             id: object.id,
@@ -160,7 +160,7 @@ export const fetchObject = ({
   objectType,
   url,
   filters = {},
-  shouldSubscribeToObject = false,
+  shouldSubscribeToObject = true,
 }: {
   objectType: ObjectTypes;
   url?: string;
@@ -184,16 +184,13 @@ export const fetchObject = ({
       url: addUrlParams(baseUrl, { ...filters }),
       dispatch,
     });
-    const object =
-      response && response.results && response.results.length
-        ? response.results[0]
-        : null;
+    const object = response?.results?.length ? response.results[0] : null;
     const shouldSubscribe =
       (typeof shouldSubscribeToObject === 'boolean' &&
         shouldSubscribeToObject) ||
       (typeof shouldSubscribeToObject === 'function' &&
         shouldSubscribeToObject(object));
-    if (object && object.id && window.socket && shouldSubscribe) {
+    if (object?.id && window.socket && shouldSubscribe) {
       window.socket.subscribe({
         model: objectType,
         id: object.id,
@@ -217,7 +214,7 @@ export const createObject = ({
   url,
   data = {},
   hasForm = false,
-  shouldSubscribeToObject = false,
+  shouldSubscribeToObject = true,
 }: {
   objectType: ObjectTypes;
   url?: string;
@@ -256,7 +253,7 @@ export const createObject = ({
         shouldSubscribeToObject) ||
       (typeof shouldSubscribeToObject === 'function' &&
         shouldSubscribeToObject(object));
-    if (object && object.id && window.socket && shouldSubscribe) {
+    if (object?.id && window.socket && shouldSubscribe) {
       window.socket.subscribe({
         model: objectType,
         id: object.id,
@@ -321,6 +318,50 @@ export const deleteObject = ({
     dispatch({
       type: 'DELETE_OBJECT_FAILED',
       payload: { objectType, url: baseUrl, object },
+    });
+    throw err;
+  }
+};
+
+export const updateObject = ({
+  objectType,
+  data,
+}: {
+  objectType: ObjectTypes;
+  data: { id: string; [key: string]: any };
+}): ThunkResult => async (dispatch) => {
+  const urlFn = window.api_urls[`${objectType}_detail`];
+  let baseUrl;
+  if (urlFn && data.id) {
+    baseUrl = urlFn(data.id);
+  }
+  dispatch({
+    type: 'UPDATE_OBJECT_STARTED',
+    payload: { objectType, url: baseUrl, data },
+  });
+  try {
+    if (!baseUrl) {
+      throw new Error(`No URL found for object: ${objectType}`);
+    }
+    const object = await apiFetch({
+      url: baseUrl,
+      dispatch,
+      opts: {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    });
+    return dispatch({
+      type: 'UPDATE_OBJECT_SUCCEEDED',
+      payload: { objectType, url: baseUrl, data, object },
+    });
+  } catch (err) {
+    dispatch({
+      type: 'UPDATE_OBJECT_FAILED',
+      payload: { objectType, url: baseUrl, data },
     });
     throw err;
   }

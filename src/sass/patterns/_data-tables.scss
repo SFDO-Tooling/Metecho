@@ -10,3 +10,28 @@
     width: 1px;
   }
 }
+
+// Override React LDS table header action cell padding
+//   to help line up checkboxes.
+.align-checkboxes {
+  .slds-th__action {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+// Override LDS table cell padding to make click target fill the whole row
+.table-row-targets {
+  label {
+    cursor: pointer;
+  }
+
+  .slds-checkbox__label {
+    padding: $spacing-small $spacing-medium;
+  }
+
+  &.slds-table th:first-child,
+  &.slds-table td:first-child {
+    padding: 0;
+  }
+}

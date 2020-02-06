@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from channels.db import database_sync_to_async
 
 from ..push import report_error, report_scratch_org_error
 
@@ -19,7 +20,7 @@ async def test_report_error(user_factory):
     with patch(
         f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
     ) as push_message:
-        user = user_factory()
+        user = await database_sync_to_async(user_factory)()
         await report_error(user)
         assert push_message.called
 

@@ -270,7 +270,7 @@ def run_flow(*, cci, org_config, flow_name, project_path):
 def delete_org(scratch_org):
     """Delete a scratch org by deleting its ActiveScratchOrg record
     in the Dev Hub org."""
-    devhub_username = scratch_org.owner.sf_username
+    devhub_username = scratch_org.owner_sf_username
     org_id = scratch_org.config["org_id"]
     devhub_api = get_devhub_api(devhub_username=devhub_username)
 

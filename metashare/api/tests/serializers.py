@@ -36,6 +36,7 @@ class TestProjectSerializer:
                 "description": "Test `project`",
                 "branch_name": "some-branch",
                 "repository": str(repository.id),
+                "github_users": [],
             },
             context={"request": request},
         )
@@ -81,6 +82,7 @@ class TestProjectSerializer:
                 "repository": str(repository.id),
                 "name": "Duplicate Me",
                 "description": "Blorp",
+                "github_users": [],
             }
         )
         assert not serializer.is_valid()
@@ -98,6 +100,7 @@ class TestProjectSerializer:
                 "repository": str(repository.id),
                 "name": "duplicate me",
                 "description": "Blorp",
+                "github_users": [],
             }
         )
         assert not serializer.is_valid()
@@ -112,10 +115,29 @@ class TestProjectSerializer:
         project = project_factory(repository=repository, name="Duplicate me")
         serializer = ProjectSerializer(
             instance=project,
-            data={"repository": str(repository.id), "description": "Blorp"},
+            data={
+                "repository": str(repository.id),
+                "description": "Blorp",
+                "github_users": [],
+            },
             partial=True,
         )
         assert serializer.is_valid(), serializer.errors
+
+    def test_invalid_github_user_value(self, repository_factory, project_factory):
+        repository = repository_factory()
+        project = project_factory(repository=repository, name="Duplicate me")
+        serializer = ProjectSerializer(
+            instance=project,
+            data={
+                "repository": str(repository.id),
+                "description": "Blorp",
+                "github_users": [{"test": "value"}],
+            },
+            partial=True,
+        )
+        assert not serializer.is_valid()
+        assert "non_field_errors" in serializer.errors
 
     def test_pr_url__present(self, project_factory):
         project = project_factory(name="Test project", pr_number=123)
@@ -175,21 +197,35 @@ class TestTaskSerializer:
 
 
 @pytest.mark.django_db
-def test_ScratchOrgSerializer(rf, user_factory, task_factory):
-    user = user_factory()
-    task = task_factory()
+class TestScratchOrgSerializer:
+    def test_valid(self, rf, user_factory, task_factory):
+        user = user_factory()
+        task = task_factory()
 
-    r = rf.get("/")
-    r.user = user
+        r = rf.get("/")
+        r.user = user
 
-    serializer = ScratchOrgSerializer(
-        data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
-    )
-    assert serializer.is_valid()
-    create_branches_on_github_then_create_scratch_org_job = (
-        "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
-    )
-    with patch(create_branches_on_github_then_create_scratch_org_job):
-        instance = serializer.save()
+        serializer = ScratchOrgSerializer(
+            data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
+        )
+        assert serializer.is_valid()
+        create_branches_on_github_then_create_scratch_org_job = (
+            "metashare.api.jobs.create_branches_on_github_then_create_scratch_org_job"
+        )
+        with patch(create_branches_on_github_then_create_scratch_org_job):
+            instance = serializer.save()
 
-    assert instance.owner == user
+        assert instance.owner == user
+
+    def test_invalid(self, rf, user_factory, task_factory, scratch_org_factory):
+        user = user_factory()
+        task = task_factory()
+        scratch_org_factory(task=task, org_type="Dev")
+
+        r = rf.get("/")
+        r.user = user
+
+        serializer = ScratchOrgSerializer(
+            data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
+        )
+        assert not serializer.is_valid()

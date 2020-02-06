@@ -3,19 +3,25 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
-import { fetchObject, fetchObjects } from '@/store/actions';
+import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
+import { refreshGitHubUsers } from '@/store/repositories/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
+jest.mock('@/store/repositories/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
+  updateObject.mockClear();
+  refreshGitHubUsers.mockClear();
 });
 
 const defaultState = {
@@ -28,6 +34,20 @@ const defaultState = {
         old_slugs: [],
         description: 'This is a test repository.',
         repo_url: 'https://github.com/test/test-repo',
+        github_users: [
+          {
+            id: '123456',
+            login: 'TestGitHubUser',
+          },
+          {
+            id: '234567',
+            login: 'OtherUser',
+          },
+          {
+            id: '345678',
+            login: 'ThirdUser',
+          },
+        ],
       },
     ],
     notFound: ['different-repository'],
@@ -43,6 +63,16 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           old_slugs: ['old-slug'],
+          github_users: [
+            {
+              id: '123456',
+              login: 'TestGitHubUser',
+            },
+            {
+              id: '234567',
+              login: 'OtherUser',
+            },
+          ],
         },
       ],
       next: null,
@@ -69,6 +99,11 @@ const defaultState = {
         project: 'project1',
         description: 'Task Description',
         status: 'In progress',
+        assigned_dev: {
+          id: '123456',
+          login: 'TestGitHubUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
       },
       {
         id: 'task3',
@@ -140,7 +175,6 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObject).toHaveBeenCalledWith({
         filters: { repository: 'r1', slug: 'other-project' },
         objectType: 'project',
-        shouldSubscribeToObject: true,
       });
     });
   });
@@ -191,8 +225,118 @@ describe('<ProjectDetail/>', () => {
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'project1' },
         objectType: 'task',
-        shouldSubscribeToObject: true,
       });
+    });
+  });
+
+  describe('<AssignUsersModal />', () => {
+    test('opens and closes', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Add or Remove Collaborators'));
+
+      expect(getByText('GitHub Users')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('GitHub Users')).toBeNull();
+    });
+
+    test('updates users', () => {
+      const { getByText, baseElement } = setup();
+      fireEvent.click(getByText('Add or Remove Collaborators'));
+      fireEvent.click(
+        baseElement.querySelector(
+          '.collaborator-button[title="TestGitHubUser"]',
+        ),
+      );
+      fireEvent.click(
+        baseElement.querySelector('.collaborator-button[title="ThirdUser"]'),
+      );
+      fireEvent.click(getByText('Save'));
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(
+        updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
+      ).toEqual(['OtherUser', 'ThirdUser']);
+    });
+
+    describe('"re-sync collaborators" click', () => {
+      test('updates users', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Add or Remove Collaborators'));
+        fireEvent.click(getByText('Re-Sync Collaborators'));
+
+        expect(refreshGitHubUsers).toHaveBeenCalledWith('r1');
+      });
+    });
+  });
+
+  describe('removeProjectUser', () => {
+    test('removes user from project', () => {
+      const { getByTitle } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  github_users: [
+                    {
+                      id: '123456',
+                      login: 'TestGitHubUser',
+                      avatar_url: 'https://example.com/avatar.png',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getByTitle('Remove'));
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+    });
+  });
+
+  describe('task assignUser', () => {
+    test('updates task assigned user', () => {
+      const { getAllByText, baseElement } = setup();
+      fireEvent.click(getAllByText('Assign Reviewer')[0]);
+      fireEvent.click(
+        baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+      );
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
+        'OtherUser',
+      );
+    });
+
+    test('closes modal if no users to assign', () => {
+      const { getByText, getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  github_users: [],
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getAllByText('Assign Reviewer')[0]);
+      fireEvent.click(getByText('Add collaborators to the project'));
+
+      expect(getByText('GitHub Users')).toBeVisible();
     });
   });
 

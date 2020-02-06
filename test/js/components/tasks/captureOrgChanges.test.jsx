@@ -2,10 +2,10 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import CaptureModal from '@/components/orgs/capture';
+import CaptureModal from '@/components/tasks/captureOrgChanges';
 import { createObject } from '@/store/actions';
 
-import { renderWithRedux, storeWithThunk } from './../../utils';
+import { renderWithRedux, storeWithThunk } from '../../utils';
 
 jest.mock('@/store/actions');
 
@@ -78,6 +78,7 @@ describe('<CaptureModal/>', () => {
           changes: defaultChangeset,
         },
         hasForm: true,
+        shouldSubscribeToObject: false,
       });
     });
   });

@@ -9,8 +9,8 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
-import CaptureModal from '@/components/orgs/capture';
-import OrgCards from '@/components/orgs/cards';
+import CaptureModal from '@/components/tasks/captureOrgChanges';
+import OrgCards from '@/components/tasks/cards';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -32,6 +32,7 @@ import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
 import { ORG_TYPES } from '@/utils/constants';
+import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
@@ -55,9 +56,12 @@ const TaskDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
 
   const readyToSubmit = Boolean(
-    task && task.has_unmerged_commits && !task.pr_is_open,
+    task?.has_unmerged_commits && !task?.pr_is_open,
   );
-  const currentlySubmitting = Boolean(task && task.currently_creating_pr);
+  const currentlySubmitting = Boolean(task?.currently_creating_pr);
+  const userIsAssignedDev = Boolean(
+    user.username === task?.assigned_dev?.login,
+  );
   let currentlyFetching = false;
   let currentlyCommitting = false;
   let orgHasChanges = false;
@@ -65,10 +69,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   let devOrg: Org | null | undefined;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
-    orgHasChanges = Boolean(devOrg && devOrg.has_unsaved_changes);
-    userIsOwner = Boolean(devOrg && devOrg.owner === user.id);
-    currentlyFetching = Boolean(devOrg && devOrg.currently_refreshing_changes);
-    currentlyCommitting = Boolean(devOrg && devOrg.currently_capturing_changes);
+    orgHasChanges = Boolean(devOrg?.has_unsaved_changes);
+    userIsOwner = Boolean(userIsAssignedDev && devOrg?.owner === user.id);
+    currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
+    currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
   }
 
   // When capture changes has been triggered, wait until org has been refreshed
@@ -141,6 +145,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const { branchLink, branchLinkText } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       <Button
@@ -151,13 +156,13 @@ const TaskDetail = (props: RouteComponentProps) => {
         variant="text-destructive"
         disabled
       />
-      {task.pr_url || task.branch_url ? (
+      {branchLink ? (
         <ExternalLink
-          url={(task.pr_url || task.branch_url) as string}
+          url={branchLink}
           showButtonIcon
           className="slds-button slds-button_outline-brand"
         >
-          {task.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
+          {branchLinkText}
         </ExternalLink>
       ) : null}
     </PageHeaderControl>
@@ -258,7 +263,16 @@ const TaskDetail = (props: RouteComponentProps) => {
         {primaryButton}
         {secondaryButton}
 
-        {orgs ? <OrgCards orgs={orgs} task={task} /> : <SpinnerWrapper />}
+        {orgs ? (
+          <OrgCards
+            orgs={orgs}
+            task={task}
+            projectUsers={project.github_users}
+            projectUrl={routes.project_detail(repository.slug, project.slug)}
+          />
+        ) : (
+          <SpinnerWrapper />
+        )}
         {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
             orgId={devOrg.id}

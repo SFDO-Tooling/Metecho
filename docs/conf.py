@@ -46,7 +46,7 @@ master_doc = "index"
 
 # General information about the project.
 project = u"MetaShare"
-copyright = u"2019, Salesforce.org"
+copyright = u"2019–2020, Salesforce.org"
 author = u"Salesforce.org"
 
 # The version info for the project you're documenting, acts as replacement for

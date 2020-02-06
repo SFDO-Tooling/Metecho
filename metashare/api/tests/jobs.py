@@ -1,5 +1,6 @@
 from collections import namedtuple
 from contextlib import ExitStack
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,11 +10,13 @@ from simple_salesforce.exceptions import SalesforceGeneralError
 from ..jobs import (
     _create_branches_on_github,
     _create_org_and_run_flow,
+    alert_user_about_expiring_org,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
     create_pr,
     delete_scratch_org,
     get_unsaved_changes,
+    populate_github_users,
     refresh_commits,
     refresh_github_repositories_for_user,
 )
@@ -79,13 +82,39 @@ class TestCreateBranchesOnGitHub:
             assert not repository.create_branch_ref.called
 
 
+@pytest.mark.django_db
+class TestAlertUserAboutExpiringOrg:
+    def test_missing_model(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        scratch_org.delete()
+        with patch(f"{PATCH_ROOT}.send_mail") as send_mail:
+            assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
+            assert not send_mail.called
+
+    def test_good(self, scratch_org_factory):
+        scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
+        with ExitStack() as stack:
+            send_mail = stack.enter_context(patch(f"{PATCH_ROOT}.send_mail"))
+            get_unsaved_changes = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_unsaved_changes")
+            )
+            assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
+            assert get_unsaved_changes.called
+            assert send_mail.called
+
+
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.get_latest_revision_numbers"))
         create_org = stack.enter_context(patch(f"{PATCH_ROOT}.create_org"))
-        create_org.return_value = (MagicMock(), MagicMock(), MagicMock())
+        create_org.return_value = (
+            MagicMock(expires=datetime(2020, 1, 1, 12, 0)),
+            MagicMock(),
+            MagicMock(),
+        )
         run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
@@ -132,6 +161,7 @@ def test_create_branches_on_github_then_create_scratch_org():
         _create_org_and_run_flow = stack.enter_context(
             patch(f"{PATCH_ROOT}._create_org_and_run_flow")
         )
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
 
         create_branches_on_github_then_create_scratch_org(scratch_org=MagicMock())
 
@@ -414,3 +444,54 @@ def test_create_pr__error(user_factory, task_factory):
             )
 
         assert async_to_sync.called
+
+
+@pytest.mark.django_db
+class TestPopulateGithubUsers:
+    def test_user_present(
+        self, user_factory, repository_factory, git_hub_repository_factory,
+    ):
+        user = user_factory()
+        repository = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123, user=user)
+        with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
+            collab1 = MagicMock(
+                id=123,
+                login="test-user-1",
+                avatar_url="http://example.com/avatar1.png",
+            )
+            collab2 = MagicMock(
+                id=456,
+                login="test-user-2",
+                avatar_url="http://example.com/avatar2.png",
+            )
+            repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
+            get_repo_info.return_value = repo
+
+            populate_github_users(repository)
+            repository.refresh_from_db()
+            assert len(repository.github_users) == 2
+
+    def test_user_missing(self, repository_factory):
+        repository = repository_factory(repo_id=123)
+        with patch("metashare.api.jobs.logger") as logger:
+            populate_github_users(repository)
+            assert logger.warning.called
+
+    def test__error(self, user_factory, repository_factory, git_hub_repository_factory):
+        user = user_factory()
+        repository = repository_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123, user=user)
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_repo_info.side_effect = Exception
+            async_to_sync = stack.enter_context(
+                patch("metashare.api.model_mixins.async_to_sync")
+            )
+            logger = stack.enter_context(patch("metashare.api.jobs.logger"))
+
+            with pytest.raises(Exception):
+                populate_github_users(repository)
+
+            assert logger.error.called
+            assert async_to_sync.called

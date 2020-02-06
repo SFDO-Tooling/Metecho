@@ -26,6 +26,7 @@ describe('useForm', () => {
         testing: '',
       },
       hasForm: true,
+      shouldSubscribeToObject: true,
     });
   });
 });

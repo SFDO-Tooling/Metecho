@@ -64,12 +64,11 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
 
     /* istanbul ignore next */
     const scrollHeight =
-      (document.documentElement && document.documentElement.scrollHeight) ||
-      (document.body && document.body.scrollHeight) ||
+      document.documentElement?.scrollHeight ||
+      document.body?.scrollHeight ||
       Infinity;
     const clientHeight =
-      (document.documentElement && document.documentElement.clientHeight) ||
-      window.innerHeight;
+      document.documentElement?.clientHeight || window.innerHeight;
     // Fetch more repositories if within 100px of bottom of page...
     const scrolledToBottom = scrollHeight - Math.ceil(y + clientHeight) <= 100;
 
@@ -153,7 +152,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                 />
               ) : (
                 <Button
-                  label={i18n.t('Sync GitHub Repositories')}
+                  label={i18n.t('Re-Sync GitHub Repositories')}
                   variant="outline-brand"
                   iconCategory="utility"
                   iconName="refresh"

@@ -5,6 +5,10 @@ Websocket notifications you can subscribe to:
         BACKEND_ERROR
         USER_REPOS_REFRESH
 
+    repository.:id
+        REPOSITORY_UPDATE
+        REPOSITORY_UPDATE_ERROR
+
     project.:id
         PROJECT_UPDATE
         PROJECT_CREATE_PR
@@ -19,6 +23,7 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_PROVISION
         SCRATCH_ORG_PROVISION_FAILED
         SCRATCH_ORG_UPDATE
+        SCRATCH_ORG_ERROR
         SCRATCH_ORG_FETCH_CHANGES_FAILED
         SCRATCH_ORG_DELETE
         SCRATCH_ORG_DELETE_FAILED

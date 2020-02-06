@@ -1,5 +1,6 @@
 from enum import Enum
 
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.apps import apps
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -8,7 +9,7 @@ from django.utils.translation import gettext as _
 from .api.constants import CHANNELS_GROUP_NAME
 from .consumer_utils import clear_message_semaphore
 
-KNOWN_MODELS = {"user", "project", "task", "scratchorg"}
+KNOWN_MODELS = {"user", "repository", "project", "task", "scratchorg"}
 
 
 class Actions(Enum):
@@ -40,6 +41,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(event["content"])
             return
 
+    @database_sync_to_async
     def get_instance(self, *, model, id, **kwargs):
         Model = apps.get_model("api", model)
         return Model.objects.get(pk=id)
@@ -48,7 +50,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         # Just used to sub/unsub to notification channels.
         is_valid, content = self.is_valid(content)
         is_known_model = self.is_known_model(content.get("model", None))
-        has_good_permissions = self.has_good_permissions(content)
+        has_good_permissions = await self.has_good_permissions(content)
         all_good = is_valid and is_known_model and has_good_permissions
         if not all_good:
             await self.send_json({"error": _("Invalid subscription.")})
@@ -94,7 +96,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     def is_known_model(self, model):
         return model in KNOWN_MODELS
 
-    def has_good_permissions(self, content):
+    async def has_good_permissions(self, content):
         possible_exceptions = (
             AttributeError,
             KeyError,
@@ -105,7 +107,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             TypeError,
         )
         try:
-            obj = self.get_instance(**content)
+            obj = await self.get_instance(**content)
             return obj.subscribable_by(self.scope["user"])
         except possible_exceptions:
             return False

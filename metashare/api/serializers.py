@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from .fields import MarkdownField
 from .models import Project, Repository, ScratchOrg, Task
-from .validators import CaseInsensitiveUniqueTogetherValidator
+from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
 
@@ -44,6 +44,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email",
+            "avatar_url",
             "is_staff",
             "valid_token_for",
             "org_name",
@@ -51,6 +52,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "is_devhub_enabled",
             "sf_username",
             "currently_fetching_repos",
+            "devhub_username",
         )
 
 
@@ -59,7 +61,7 @@ class MinimalUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username")
+        fields = ("id", "username", "avatar_url")
 
 
 class RepositorySerializer(serializers.ModelSerializer):
@@ -77,6 +79,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             "is_managed",
             "slug",
             "old_slugs",
+            "github_users",
         )
 
     def get_repo_url(self, obj) -> Optional[str]:
@@ -108,6 +111,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "currently_creating_pr",
             "pr_url",
             "pr_is_open",
+            "github_users",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -117,6 +121,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                     "name", _("A project with this name already exists.")
                 ),
             ),
+            GitHubUserValidator(parent="repository"),
         )
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
@@ -157,9 +162,6 @@ class TaskSerializer(serializers.ModelSerializer):
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
-    assignee = HashidPrimaryKeyRelatedField(
-        queryset=User.objects.all(), allow_null=True
-    )
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
@@ -171,7 +173,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "project",
-            "assignee",
             "slug",
             "old_slugs",
             "has_unmerged_commits",
@@ -182,6 +183,8 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_url",
             "status",
             "pr_is_open",
+            "assigned_dev",
+            "assigned_qa",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -264,7 +267,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "delete_queued_at",
-            "owner_sf_id",
+            "owner_sf_username",
+            "owner_gh_username",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -280,6 +284,15 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
 
     def get_has_unsaved_changes(self, obj) -> bool:
         return bool(getattr(obj, "unsaved_changes", {}))
+
+    def validate(self, data):
+        if ScratchOrg.objects.filter(
+            task=data["task"], org_type=data["org_type"]
+        ).exists():
+            raise serializers.ValidationError(
+                _("A ScratchOrg of this type already exists for this task.")
+            )
+        return data
 
     def save(self, **kwargs):
         kwargs["owner"] = kwargs.get("owner", self.context["request"].user)

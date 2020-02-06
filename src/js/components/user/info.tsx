@@ -36,7 +36,7 @@ const ConnectToSalesforce = ({
       />
       <Tooltip
         content={i18n.t(
-          'Connection to a Salesforce org with Dev Hub enabled is required to create or modify a Dev or QA scratch org.',
+          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Review scratch org.',
         )}
         variant="learnMore"
         position="overflowBoundaryElement"
@@ -62,7 +62,7 @@ const ConnectToSalesforce = ({
 const ConnectionInfoWarning = () => (
   <Trans i18nKey="devHubNotEnabled">
     This Salesforce org does not have Dev Hub enabled or your user does not have
-    permission to create or modify scratch orgs. Learn how to{' '}
+    permission to create scratch orgs. Learn how to{' '}
     <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
       enable Dev Hub
     </ExternalLink>
@@ -139,12 +139,14 @@ const UserInfo = ({
           </li>
         )}
       </ul>
-      <Button
-        label={i18n.t('Disconnect from Salesforce')}
-        variant="link"
-        className="slds-m-top_small"
-        onClick={doDisconnect}
-      />
+      {!user.devhub_username && (
+        <Button
+          label={i18n.t('Disconnect from Salesforce')}
+          variant="link"
+          className="slds-m-top_small"
+          onClick={doDisconnect}
+        />
+      )}
     </>
   );
 };
@@ -196,10 +198,11 @@ export const ConnectionInfoModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
+  const isConnected = Boolean(user.valid_token_for || user.devhub_username);
 
   return (
     <Modal
-      isOpen={Boolean(user && user.valid_token_for && isOpen)}
+      isOpen={isConnected && isOpen}
       heading={
         user.is_devhub_enabled
           ? i18n.t('Dev Hub Enabled')
@@ -248,12 +251,23 @@ const UserDropdown = () => {
                 slds-m-bottom_x-small"
             >
               <div className="slds-p-vertical_small slds-p-horizontal_large">
-                <Icon
-                  className="slds-is-absolute"
-                  category="utility"
-                  name="user"
-                  size="small"
-                />
+                {user.avatar_url ? (
+                  <div className="slds-is-absolute">
+                    <Avatar
+                      imgSrc={user.avatar_url}
+                      imgAlt={user.username}
+                      title={user.username}
+                      size="small"
+                    />
+                  </div>
+                ) : (
+                  <Icon
+                    className="slds-is-absolute"
+                    category="utility"
+                    name="user"
+                    size="small"
+                  />
+                )}
                 <div className="slds-p-left_x-large">
                   <h2
                     id="user-info-heading"
@@ -266,7 +280,7 @@ const UserDropdown = () => {
               </div>
             </header>
             <div className="slds-p-vertical_small slds-p-horizontal_large">
-              {user.valid_token_for ? (
+              {user.valid_token_for || user.devhub_username ? (
                 <ConnectionInfo user={user} />
               ) : (
                 <ConnectToSalesforce toggleModal={setModalOpen} />
@@ -278,9 +292,16 @@ const UserDropdown = () => {
         ariaLabelledby="user-info-heading"
         hasNoCloseButton
       >
-        <Button variant="icon">
-          <Avatar />
-        </Button>
+        <Button
+          variant="icon"
+          label={
+            <Avatar
+              imgSrc={user.avatar_url}
+              imgAlt={user.username}
+              title={user.username}
+            />
+          }
+        />
       </Popover>
       <ConnectModal user={user} isOpen={modalOpen} toggleModal={setModalOpen} />
     </>

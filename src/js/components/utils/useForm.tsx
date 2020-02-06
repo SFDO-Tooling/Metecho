@@ -16,7 +16,7 @@ export default ({
   additionalData = {},
   onSuccess = () => {},
   onError = () => {},
-  shouldSubscribeToObject,
+  shouldSubscribeToObject = true,
 }: {
   fields: { [key: string]: any };
   objectType: ObjectTypes;
@@ -61,22 +61,17 @@ export default ({
       })
       .catch((err: ApiError) => {
         onError(err);
-        const allErrors =
-          err.body && typeof err.body === 'object' ? err.body : {};
+        const allErrors = typeof err?.body === 'object' ? err.body : {};
         const fieldErrors: typeof errors = {};
         for (const field of Object.keys(allErrors)) {
-          if (
-            Object.keys(fields).includes(field) &&
-            allErrors[field] &&
-            allErrors[field].length
-          ) {
+          if (Object.keys(fields).includes(field) && allErrors[field]?.length) {
             fieldErrors[field] = allErrors[field].join(', ');
           }
         }
         /* istanbul ignore else */
         if (isMounted.current && Object.keys(fieldErrors).length) {
           setErrors(fieldErrors);
-        } else if (err.response && err.response.status === 422) {
+        } else if (err.response?.status === 422) {
           // If no inline errors to show, fallback to default global error toast
           dispatch(addError(err.message));
         } else {

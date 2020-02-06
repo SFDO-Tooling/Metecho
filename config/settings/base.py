@@ -95,6 +95,9 @@ DEBUG = env("DJANGO_DEBUG", default=False, type_=boolish)
 
 MODE = env("DJANGO_MODE", default="dev" if DEBUG else "prod")
 
+if MODE == "dev":
+    environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "127.0.0.1:8000",
@@ -133,6 +136,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "parler",
+    "anymail",
     "metashare",
     "metashare.multisalesforce",
     "metashare.api",
@@ -155,6 +159,7 @@ MIDDLEWARE = [
 
 TEMPLATES = [
     {
+        "NAME": "django",
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         # This gets overridden in settings.production:
         "DIRS": [str(PROJECT_ROOT / "dist"), str(PROJECT_ROOT / "templates")],
@@ -171,7 +176,14 @@ TEMPLATES = [
                 "metashare.context_processors.env",
             ]
         },
-    }
+    },
+    {
+        "NAME": "email",
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [str(PROJECT_ROOT / "email_templates")],
+        "APP_DIRS": False,
+        "OPTIONS": {"autoescape": False},
+    },
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -263,6 +275,22 @@ USE_L10N = True
 
 USE_TZ = True
 
+
+# Email settings
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@metashare.org")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+    ANYMAIL = {
+        "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=""),
+        "MAILGUN_SENDER_DOMAIN": env("MAILGUN_DOMAIN", default=None),
+    }
+
+DAYS_BEFORE_ORG_EXPIRY_TO_ALERT = env(
+    "DAYS_BEFORE_ORG_EXPIRY_TO_ALERT", default=3, type_=int
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/

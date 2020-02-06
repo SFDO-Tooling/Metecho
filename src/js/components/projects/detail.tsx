@@ -2,13 +2,15 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
+import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -21,21 +23,113 @@ import {
   useFetchTasksIfMissing,
 } from '@/components/utils';
 import SubmitModal from '@/components/utils/submitModal';
+import { ThunkDispatch } from '@/store';
+import { updateObject } from '@/store/actions';
+import { refreshGitHubUsers } from '@/store/repositories/actions';
+import { Task } from '@/store/tasks/reducer';
+import { GitHubUser } from '@/store/user/reducer';
+import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
+  const dispatch = useDispatch<ThunkDispatch>();
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
 
-  // Submit modal related:
+  // "Assign users to project" modal related:
+  const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
+  const openAssignUsersModal = () => {
+    setAssignUsersModalOpen(true);
+  };
+  const closeAssignUsersModal = () => {
+    setAssignUsersModalOpen(false);
+  };
+  const setProjectUsers = useCallback(
+    (users: GitHubUser[]) => {
+      /* istanbul ignore if */
+      if (!project) {
+        return;
+      }
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.PROJECT,
+          data: {
+            ...project,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            github_users: users,
+          },
+        }),
+      );
+      setAssignUsersModalOpen(false);
+    },
+    [project, dispatch],
+  );
+  const removeProjectUser = useCallback(
+    (user: GitHubUser) => {
+      /* istanbul ignore if */
+      if (!project) {
+        return;
+      }
+      const users = project.github_users.filter(
+        (possibleUser) => user.id !== possibleUser.id,
+      );
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.PROJECT,
+          data: {
+            ...project,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            github_users: users,
+          },
+        }),
+      );
+    },
+    [project, dispatch],
+  );
+  const doRefreshGitHubUsers = useCallback(() => {
+    /* istanbul ignore if */
+    if (!repository) {
+      return;
+    }
+    dispatch(refreshGitHubUsers(repository.id));
+  }, [repository, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // "Assign user to task" modal related:
+  const assignUser = useCallback(
+    ({
+      task,
+      type,
+      assignee,
+    }: {
+      task: Task;
+      type: OrgTypes;
+      assignee: GitHubUser | null;
+    }) => {
+      /* istanbul ignore next */
+      const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.TASK,
+          data: {
+            ...task,
+            [userType]: assignee,
+          },
+        }),
+      );
+    },
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // "Submit" modal related:
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
   };
-  const currentlySubmitting = Boolean(project && project.currently_creating_pr);
+  const currentlySubmitting = Boolean(project?.currently_creating_pr);
   const readyToSubmit = Boolean(
-    project && project.has_unmerged_commits && !project.pr_is_open,
+    project?.has_unmerged_commits && !project?.pr_is_open,
   );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -92,6 +186,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       <Button
@@ -102,13 +197,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
         variant="text-destructive"
         disabled
       />
-      {project.pr_url || project.branch_url ? (
+      {branchLink ? (
         <ExternalLink
-          url={(project.pr_url || project.branch_url) as string}
+          url={branchLink}
           showButtonIcon
           className="slds-button slds-button_outline-brand"
         >
-          {project.pr_url ? i18n.t('View Pull Request') : i18n.t('View Branch')}
+          {branchLinkText}
         </ExternalLink>
       ) : null}
     </PageHeaderControl>
@@ -130,6 +225,36 @@ const ProjectDetail = (props: RouteComponentProps) => {
           { name: project.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
+        sidebar={
+          <>
+            <div className="slds-m-bottom_medium">
+              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                {i18n.t('Collaborators')}
+              </h2>
+              <Button
+                label={i18n.t('Add or Remove Collaborators')}
+                variant="outline-brand"
+                onClick={openAssignUsersModal}
+              />
+            </div>
+            <AssignUsersModal
+              allUsers={repository.github_users}
+              selectedUsers={project.github_users}
+              heading={`${i18n.t('Add or Remove Collaborators for')} ${
+                project.name
+              }`}
+              isOpen={assignUsersModalOpen}
+              onRequestClose={closeAssignUsersModal}
+              setUsers={setProjectUsers}
+              isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
+              refreshUsers={doRefreshGitHubUsers}
+            />
+            <UserCards
+              users={project.github_users}
+              removeUser={removeProjectUser}
+            />
+          </>
+        }
       >
         {submitButton}
         {tasks ? (
@@ -150,6 +275,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
               repositorySlug={repository.slug}
               projectSlug={project.slug}
               tasks={tasks}
+              projectUsers={project.github_users}
+              openAssignProjectUsersModal={openAssignUsersModal}
+              assignUserAction={assignUser}
             />
           </>
         ) : (

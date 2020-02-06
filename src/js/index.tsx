@@ -143,7 +143,7 @@ initializeI18n((i18nError?: string) => {
     let GLOBALS = {};
     try {
       const globalsEl = document.getElementById('js-globals');
-      if (globalsEl && globalsEl.textContent) {
+      if (globalsEl?.textContent) {
         GLOBALS = JSON.parse(globalsEl.textContent);
       }
     } catch (err) {
@@ -190,7 +190,7 @@ initializeI18n((i18nError?: string) => {
     };
 
     // If logged in, fetch repositories before rendering App
-    if (user && user.currently_fetching_repos) {
+    if (user?.currently_fetching_repos) {
       appStore.dispatch(reposRefreshing());
       renderApp();
     } else if (user) {

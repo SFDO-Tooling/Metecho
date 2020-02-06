@@ -137,6 +137,12 @@ class RepositoryViewSet(viewsets.ModelViewSet):
 
         return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
 
+    @action(detail=True, methods=["POST"])
+    def refresh_github_users(self, request, pk=None):
+        instance = self.get_object()
+        instance.queue_populate_github_users()
+        return Response(status=status.HTTP_202_ACCEPTED)
+
 
 class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -176,15 +182,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
 
     def perform_destroy(self, instance):
-        if self.request.user.sf_username == instance.owner_sf_id:
-            instance.queue_delete()
-        else:
-            raise PermissionDenied(
-                _(
-                    "User is not connected to Salesforce as the same Salesforce user "
-                    "who created the ScratchOrg."
-                )
-            )
+        instance.queue_delete()
 
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
@@ -195,13 +193,14 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
-            "owner": request.user,
             "org_type": SCRATCH_ORG_TYPES.Dev,
             "url__isnull": False,
             "delete_queued_at__isnull": True,
             "currently_capturing_changes": False,
             "currently_refreshing_changes": False,
         }
+        if not request.query_params.get("get_unsaved_changes"):
+            filters["owner"] = request.user
         for instance in queryset.filter(**filters):
             instance.queue_get_unsaved_changes()
 
@@ -218,13 +217,14 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # the middle.
         instance = self.get_object()
         conditions = [
-            instance.owner == request.user,
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
             instance.url is not None,
             instance.delete_queued_at is None,
             not instance.currently_capturing_changes,
             not instance.currently_refreshing_changes,
         ]
+        if not request.query_params.get("get_unsaved_changes"):
+            conditions.append(instance.owner == request.user)
         if all(conditions):
             instance.queue_get_unsaved_changes()
         serializer = self.get_serializer(instance)

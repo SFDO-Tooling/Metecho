@@ -19,14 +19,13 @@ export default (
   );
 
   useEffect(() => {
-    if (repository && (!projects || !projects.fetched)) {
+    if (repository && !projects?.fetched) {
       // Fetch projects from API
       dispatch(
         fetchObjects({
           objectType: OBJECT_TYPES.PROJECT,
           filters: { repository: repository.id },
           reset: true,
-          shouldSubscribeToObject: true,
         }),
       );
     }

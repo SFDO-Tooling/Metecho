@@ -44,6 +44,23 @@ def test_user_refresh_view(client):
 
 @pytest.mark.django_db
 class TestRepositoryView:
+    def test_refresh_github_users(
+        self, client, repository_factory, git_hub_repository_factory
+    ):
+        git_hub_repository_factory(user=client.user, repo_id=123)
+        repository = repository_factory(repo_id=123)
+        with patch(
+            "metashare.api.jobs.populate_github_users_job"
+        ) as populate_github_users_job:
+            response = client.post(
+                reverse(
+                    "repository-refresh-github-users", kwargs={"pk": str(repository.pk)}
+                )
+            )
+
+            assert response.status_code == 202
+            assert populate_github_users_job.delay.called
+
     def test_get_queryset(self, client, repository_factory, git_hub_repository_factory):
         git_hub_repository_factory(
             user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
@@ -71,6 +88,7 @@ class TestRepositoryView:
                     "repo_url": (
                         f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
                     ),
+                    "github_users": [],
                 }
             ],
         }
@@ -104,6 +122,7 @@ class TestRepositoryView:
                     "repo_url": (
                         f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
                     ),
+                    "github_users": [],
                 }
             ],
         }
@@ -400,31 +419,14 @@ class TestScratchOrgView:
 
     def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
         social_account_factory(
-            user=client.user,
-            provider="salesforce-production",
-            extra_data={"preferred_username": "test-username"},
+            user=client.user, provider="salesforce-production",
         )
-        scratch_org = scratch_org_factory(owner_sf_id="test-username")
+        scratch_org = scratch_org_factory(owner=client.user)
         with patch("metashare.api.models.ScratchOrg.queue_delete"):
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.delete(url)
 
             assert response.status_code == 204
-
-    def test_queue_delete__bad(
-        self, client, scratch_org_factory, social_account_factory
-    ):
-        social_account_factory(
-            user=client.user,
-            provider="salesforce-production",
-            extra_data={"preferred_username": "test-username"},
-        )
-        scratch_org = scratch_org_factory(owner_sf_id="other-test-username")
-        with patch("metashare.api.models.ScratchOrg.queue_delete"):
-            url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
-            response = client.delete(url)
-
-            assert response.status_code == 403
 
     def test_redirect__good(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(owner=client.user)

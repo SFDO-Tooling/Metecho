@@ -98,7 +98,11 @@ describe('fetchObjects with `reset: true`', () => {
         expect.assertions(1);
         return store
           .dispatch(
-            actions.fetchObjects({ objectType: 'repository', reset: true }),
+            actions.fetchObjects({
+              objectType: 'repository',
+              reset: true,
+              shouldSubscribeToObject: false,
+            }),
           )
           .then(() => {
             expect(window.socket.subscribe).not.toHaveBeenCalled();
@@ -491,7 +495,12 @@ describe('createObject', () => {
 
         expect.assertions(1);
         return store
-          .dispatch(actions.createObject({ objectType: 'project' }))
+          .dispatch(
+            actions.createObject({
+              objectType: 'project',
+              shouldSubscribeToObject: false,
+            }),
+          )
           .then(() => {
             expect(window.socket.subscribe).not.toHaveBeenCalled();
           });
@@ -675,6 +684,92 @@ describe('deleteObject', () => {
 
       expect.assertions(5);
       return store.dispatch(actions.deleteObject(objectPayload)).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
+describe('updateObject', () => {
+  let url, objectPayload;
+
+  beforeAll(() => {
+    url = window.api_urls.project_detail('project-id');
+    const project = {
+      id: 'project-id',
+    };
+    objectPayload = {
+      objectType: 'project',
+      url,
+      data: { ...project, foo: 'bar' },
+    };
+  });
+
+  describe('success', () => {
+    test('sends PUT to api', () => {
+      const store = storeWithThunk({});
+      fetchMock.putOnce(url, objectPayload.data);
+      const started = {
+        type: 'UPDATE_OBJECT_STARTED',
+        payload: objectPayload,
+      };
+      const succeeded = {
+        type: 'UPDATE_OBJECT_SUCCEEDED',
+        payload: { ...objectPayload, object: objectPayload.data },
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.updateObject(objectPayload)).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  test('throws error if no url', () => {
+    const store = storeWithThunk({});
+    const payload = {
+      objectType: 'foo',
+      url: undefined,
+      data: {},
+    };
+    const started = {
+      type: 'UPDATE_OBJECT_STARTED',
+      payload,
+    };
+    const failed = {
+      type: 'UPDATE_OBJECT_FAILED',
+      payload,
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.updateObject({ objectType: 'foo', data: {} }))
+      .catch(() => {
+        expect(store.getActions()).toEqual([started, failed]);
+      });
+  });
+
+  describe('error', () => {
+    test('dispatches UPDATE_OBJECT_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.putOnce(url, 500);
+      const started = {
+        type: 'UPDATE_OBJECT_STARTED',
+        payload: objectPayload,
+      };
+      const failed = {
+        type: 'UPDATE_OBJECT_FAILED',
+        payload: objectPayload,
+      };
+
+      expect.assertions(5);
+      return store.dispatch(actions.updateObject(objectPayload)).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);

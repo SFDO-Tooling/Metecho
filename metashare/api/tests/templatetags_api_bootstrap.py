@@ -18,6 +18,7 @@ def test_serialize(user_factory):
                 "id": str(user.id),
                 "username": "template_tags@example.com",
                 "email": "template_tags@example.com",
+                "avatar_url": None,
                 "is_staff": False,
                 "valid_token_for": None,
                 "org_name": None,
@@ -25,6 +26,7 @@ def test_serialize(user_factory):
                 "is_devhub_enabled": False,
                 "sf_username": None,
                 "currently_fetching_repos": True,
+                "devhub_username": None,
             }
         )
     )

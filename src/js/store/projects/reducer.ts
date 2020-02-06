@@ -3,6 +3,7 @@
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { ProjectAction } from '@/store/projects/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
+import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 export interface Project {
@@ -18,6 +19,7 @@ export interface Project {
   pr_is_open: boolean;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
+  github_users: GitHubUser[];
 }
 export interface ProjectsByRepositoryState {
   projects: Project[];
@@ -136,8 +138,25 @@ const reducer = (
       }
       return projects;
     }
-    case 'PROJECT_UPDATE': {
-      const project = action.payload;
+    case 'PROJECT_UPDATE':
+    case 'UPDATE_OBJECT_SUCCEEDED': {
+      let maybeProject;
+      if (action.type === 'PROJECT_UPDATE') {
+        maybeProject = action.payload;
+      } else {
+        const {
+          object,
+          objectType,
+        }: { object: Project; objectType: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.PROJECT && object) {
+          maybeProject = object;
+        }
+      }
+      /* istanbul ignore if */
+      if (!maybeProject) {
+        return projects;
+      }
+      const project = maybeProject;
       const repositoryProjects = projects[project.repository] || {
         ...defaultState,
       };

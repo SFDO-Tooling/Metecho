@@ -53,7 +53,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
 
   const fetchMoreProjects = () => {
     /* istanbul ignore else */
-    if (projects && projects.next) {
+    if (projects?.next) {
       /* istanbul ignore else */
       if (isMounted.current) {
         setFetchingProjects(true);
