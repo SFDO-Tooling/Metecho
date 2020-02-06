@@ -20,6 +20,11 @@ const RefreshOrgModal = ({
   closeRefreshOrgModal: () => void;
   doRefreshOrg: () => void;
 }) => {
+  const handleSubmit = () => {
+    doRefreshOrg();
+    closeRefreshOrgModal();
+  };
+
   let heading = i18n.t('Review Org Behind Latest');
   if (missingCommits > 0) {
     heading = `${heading}: ${getOrgBehindLatestMsg(missingCommits, true)}`;
@@ -41,7 +46,7 @@ const RefreshOrgModal = ({
           label={i18n.t('Refresh Review Org')}
           variant="brand"
           className="slds-size_full slds-m-top_medium"
-          onClick={doRefreshOrg}
+          onClick={handleSubmit}
         />
         <hr className="slds-m-vertical_large" />
         <Trans i18nKey="viewOutdatedOrg">

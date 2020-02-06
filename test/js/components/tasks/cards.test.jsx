@@ -423,7 +423,8 @@ describe('<OrgCards/>', () => {
       describe('Refresh Org click', () => {
         test('calls refreshOrg action', () => {
           const { getByText } = setup({ orgs });
-          fireEvent.click(getByText('Refresh Org'));
+          fireEvent.click(getByText('View Org'));
+          fireEvent.click(getByText('Refresh Review Org'));
 
           expect(refreshOrg).toHaveBeenCalledWith(orgs.QA);
         });
