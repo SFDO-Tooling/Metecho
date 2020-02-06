@@ -130,10 +130,12 @@ jobs:
       - run:
           name: Report Test Coverage
           command: |
-            . venv/bin/activate
-            yarn test:js:report-coverage
-            yarn test:py:report-coverage
-            curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+            if [ -n "${COVERALLS_REPO_TOKEN}" ]; then
+              . venv/bin/activate
+              yarn test:js:report-coverage
+              yarn test:py:report-coverage
+              curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+            fi
       - run:
           name: Check Test Coverage
           command: |
@@ -146,6 +148,12 @@ jobs:
     docker:
       - image: oddbirds/pyjs
     steps:
+      - run:
+          name: Check if packtracker.io is configured
+          command: |
+            if [ -z "${PT_PROJECT_TOKEN}" ]; then
+                circleci-agent step halt
+            fi
       - checkout
       - attach_workspace:
           at: .
