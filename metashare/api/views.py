@@ -246,7 +246,13 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
         commit_message = serializer.validated_data["commit_message"]
         desired_changes = serializer.validated_data["changes"]
-        scratch_org.queue_commit_changes(request.user, desired_changes, commit_message)
+        target_directory = serializer.validated_data["target_directory"]
+        scratch_org.queue_commit_changes(
+            user=request.user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
+        )
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )

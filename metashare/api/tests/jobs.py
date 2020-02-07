@@ -234,8 +234,15 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
 
         desired_changes = {"name": ["member"]}
         commit_message = "test message"
+        target_directory = "src"
         assert scratch_org.latest_revision_numbers == {}
-        commit_changes_from_org(scratch_org, user, desired_changes, commit_message)
+        commit_changes_from_org(
+            scratch_org=scratch_org,
+            user=user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
+        )
 
         assert commit_changes_to_github.called
         assert scratch_org.latest_revision_numbers == {"name": {"member": 1}}
@@ -296,7 +303,13 @@ class TestErrorHandling:
             commit_changes_to_github.side_effect = Exception
 
             with pytest.raises(Exception):
-                commit_changes_from_org(scratch_org, user, {}, "message")
+                commit_changes_from_org(
+                    scratch_org=scratch_org,
+                    user=user,
+                    desired_changes={},
+                    commit_message="message",
+                    target_directory="src",
+                )
 
             assert async_to_sync.called
 

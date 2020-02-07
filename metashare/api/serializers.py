@@ -305,3 +305,4 @@ class CommitSerializer(serializers.Serializer):
     changes = serializers.DictField(
         child=serializers.ListField(child=serializers.CharField())
     )
+    target_directory = serializers.CharField()

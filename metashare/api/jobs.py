@@ -229,7 +229,9 @@ def get_unsaved_changes(scratch_org):
 get_unsaved_changes_job = job(get_unsaved_changes)
 
 
-def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
+def commit_changes_from_org(
+    *, scratch_org, user, desired_changes, commit_message, target_directory
+):
     scratch_org.refresh_from_db()
     branch = scratch_org.task.branch_name
 
@@ -242,6 +244,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
             branch=branch,
             desired_changes=desired_changes,
             commit_message=commit_message,
+            target_directory=target_directory,
         )
 
         # Update

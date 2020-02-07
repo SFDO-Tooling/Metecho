@@ -26,7 +26,7 @@ def test_run_retrieve_task(user_factory, scratch_org_factory):
         )
 
         desired_changes = {"name": ["member"]}
-        run_retrieve_task(user, scratch_org, ".", desired_changes)
+        run_retrieve_task(user, scratch_org, ".", desired_changes, "src")
 
         assert retrieve_components.called
 
@@ -54,6 +54,7 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
             branch="test-branch",
             desired_changes=desired_changes,
             commit_message="test message",
+            target_directory="src",
         )
 
         assert CommitDir.called

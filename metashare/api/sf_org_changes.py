@@ -13,7 +13,9 @@ from .gh import get_repo_info, local_github_checkout
 from .sf_run_flow import refresh_access_token
 
 
-def run_retrieve_task(user, scratch_org, project_path, desired_changes):
+def run_retrieve_task(
+    user, scratch_org, project_path, desired_changes, target_directory
+):
     repo_id = scratch_org.task.project.repository.get_repo_id(user)
     org_config = refresh_access_token(
         config=scratch_org.config, org_name="dev", scratch_org=scratch_org
@@ -51,10 +53,10 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
         default_package_directory
         and cci.project_config.project__source_format == "sfdx"
     ):  # pragma: no cover
-        path = os.path.join(project_path, default_package_directory)
+        # path = os.path.join(project_path, default_package_directory)
         md_format = False
     else:
-        path = os.path.join(project_path, "src")
+        # path = os.path.join(project_path, "src")
         md_format = True
         package_xml_opts.update(
             {
@@ -71,7 +73,7 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     retrieve_components(
         components,
         org_config,
-        path,
+        target_directory,
         md_format,
         extra_package_xml_opts=package_xml_opts,
         namespace_tokenize=False,
@@ -80,13 +82,22 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
 
 
 def commit_changes_to_github(
-    *, user, scratch_org, repo_id, branch, desired_changes, commit_message
+    *,
+    user,
+    scratch_org,
+    repo_id,
+    branch,
+    desired_changes,
+    commit_message,
+    target_directory
 ):
     with local_github_checkout(user, repo_id) as project_path:
         # This won't return anything in-memory, but rather it will emit
         # files which we then copy into a source checkout, and then
         # commit and push all that.
-        run_retrieve_task(user, scratch_org, project_path, desired_changes)
+        run_retrieve_task(
+            user, scratch_org, project_path, desired_changes, target_directory
+        )
         repo = get_repo_info(user, repo_id=repo_id)
         author = {"name": user.username, "email": user.email}
         CommitDir(repo, author=author)(

@@ -302,7 +302,11 @@ class TestScratchOrgView:
         ) as commit_changes_from_org_job:
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
-                {"commit_message": "Test message", "changes": {}},
+                {
+                    "commit_message": "Test message",
+                    "changes": {},
+                    "target_directory": "src",
+                },
                 format="json",
             )
             assert response.status_code == 202
@@ -328,7 +332,11 @@ class TestScratchOrgView:
         ) as commit_changes_from_org_job:
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
-                {"commit_message": "Test message", "changes": {}},
+                {
+                    "commit_message": "Test message",
+                    "changes": {},
+                    "target_directory": "src",
+                },
                 format="json",
             )
             assert response.status_code == 403
