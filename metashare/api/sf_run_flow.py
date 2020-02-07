@@ -216,11 +216,19 @@ def deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
 
 
 def create_org(
-    *, repo_owner, repo_name, repo_url, repo_branch, user, project_path, scratch_org
+    *,
+    repo_owner,
+    repo_name,
+    repo_url,
+    repo_branch,
+    user,
+    project_path,
+    scratch_org,
+    sf_username=None,
 ):
     """Create a new scratch org"""
     org_name = "dev"
-    devhub_username = user.sf_username
+    devhub_username = sf_username or user.sf_username
     email = user.email  # TODO: check that this is reliably right.
 
     cci = BaseCumulusCI(

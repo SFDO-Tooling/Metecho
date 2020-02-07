@@ -146,6 +146,7 @@ def _create_org_and_run_flow(
         user=user,
         project_path=project_path,
         scratch_org=scratch_org,
+        sf_username=sf_username,
     )
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to

@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.urls import reverse
 from github3.exceptions import ResponseError
-from rest_framework.test import APIClient
 
 from ..models import SCRATCH_ORG_TYPES
 
@@ -447,11 +446,7 @@ class TestScratchOrgView:
 
             assert response.status_code == 403
 
-    def test_refresh__good(self, user_factory, scratch_org_factory):
-        client = APIClient()
-        user = user_factory(devhub_username="test username")
-        client.force_login(user)
-        client.user = user
+    def test_refresh__good(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(owner=client.user)
         with ExitStack() as stack:
             refresh_scratch_org_job = stack.enter_context(

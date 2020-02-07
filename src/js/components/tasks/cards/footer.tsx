@@ -28,7 +28,7 @@ const Footer = ({
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
 
-  if (isCreating) {
+  if (isCreating || isRefreshingOrg) {
     return <>{loadingMsg}</>;
   }
   if (isDeleting) {
@@ -36,9 +36,6 @@ const Footer = ({
   }
   if (isRefreshingChanges) {
     return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
-  }
-  if (isRefreshingOrg) {
-    return null;
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_capturing_changes) {
