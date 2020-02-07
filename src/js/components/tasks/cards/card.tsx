@@ -10,6 +10,7 @@ import OrgActions from '@/components/tasks/cards/orgActions';
 import OrgIcon from '@/components/tasks/cards/orgIcon';
 import OrgInfo from '@/components/tasks/cards/orgInfo';
 import OrgSpinner from '@/components/tasks/cards/orgSpinner';
+import RefreshOrgModal from '@/components/tasks/cards/refresh';
 import UserActions from '@/components/tasks/cards/userActions';
 import { AssignUserModal, UserCard } from '@/components/user/githubUser';
 import { Org } from '@/store/orgs/reducer';
@@ -17,27 +18,15 @@ import { GitHubUser, User } from '@/store/user/reducer';
 import { ORG_TYPES, OrgTypes } from '@/utils/constants';
 import { logError } from '@/utils/logging';
 
-const OrgCard = ({
-  org,
-  type,
-  user,
-  assignedUser,
-  projectUsers,
-  projectUrl,
-  isCreatingOrg,
-  isDeletingOrg,
-  handleAssignUser,
-  handleCreate,
-  handleDelete,
-  handleCheckForOrgChanges,
-  history,
-}: {
+interface OrgCardProps {
   org: Org | null;
   type: OrgTypes;
   user: User;
   assignedUser: GitHubUser | null;
   projectUsers: GitHubUser[];
   projectUrl: string;
+  repoUrl: string;
+  taskCommits?: string[];
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
   handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
@@ -47,14 +36,35 @@ const OrgCard = ({
     shouldRemoveUser?: AssignedUserTracker | null,
   ) => void;
   handleCheckForOrgChanges: (org: Org) => void;
-} & RouteComponentProps) => {
+  handleRefresh?: (org: Org) => void;
+}
+
+const OrgCard = ({
+  org,
+  type,
+  user,
+  assignedUser,
+  projectUsers,
+  projectUrl,
+  repoUrl,
+  taskCommits,
+  isCreatingOrg,
+  isDeletingOrg,
+  handleAssignUser,
+  handleCreate,
+  handleDelete,
+  handleCheckForOrgChanges,
+  handleRefresh,
+  history,
+}: OrgCardProps & RouteComponentProps) => {
   const assignedToCurrentUser = user.username === assignedUser?.login;
   const ownedByCurrentUser = Boolean(org?.url && user.id === org?.owner);
   const ownedByWrongUser =
     org?.url && org.owner_gh_username !== assignedUser?.login ? org : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
-  const isRefreshing = Boolean(org?.currently_refreshing_changes);
+  const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
+  const isRefreshingOrg = Boolean(org?.currently_refreshing_org);
 
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
@@ -76,6 +86,15 @@ const OrgCard = ({
     setAssignUserModalOpen(false);
   };
 
+  // refresh org modal
+  const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
+  const openRefreshOrgModal = () => {
+    setRefreshOrgModalOpen(true);
+  };
+  const closeRefreshOrgModal = () => {
+    setRefreshOrgModalOpen(false);
+  };
+
   const doAssignUser = useCallback(
     (assignee: GitHubUser | null) => {
       closeAssignUserModal();
@@ -83,6 +102,12 @@ const OrgCard = ({
     },
     [handleAssignUser, type],
   );
+  const doRefreshOrg = useCallback(() => {
+    /* istanbul ignore else */
+    if (org?.org_type === ORG_TYPES.QA && handleRefresh) {
+      handleRefresh(org);
+    }
+  }, [handleRefresh, org]);
   const doCreateOrg = useCallback(() => {
     handleCreate(type);
   }, [handleCreate, type]);
@@ -104,6 +129,11 @@ const OrgCard = ({
     history.push(projectUrl);
   }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const orgCommitIdx =
+    org && taskCommits ? taskCommits.indexOf(org.latest_commit) : -1;
+  const reviewOrgOutOfDate = Boolean(
+    type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
+  );
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
   const orgHeading =
@@ -137,7 +167,10 @@ const OrgCard = ({
             ownedByCurrentUser={ownedByCurrentUser}
             isCreating={isCreating}
             isDeleting={isDeleting}
-            isRefreshing={isRefreshing}
+            isRefreshingChanges={isRefreshingChanges}
+            isRefreshingOrg={isRefreshingOrg}
+            reviewOrgOutOfDate={reviewOrgOutOfDate}
+            openRefreshOrgModal={openRefreshOrgModal}
           />
         }
       >
@@ -159,6 +192,9 @@ const OrgCard = ({
                     orgId={org.id}
                     ownedByCurrentUser={ownedByCurrentUser}
                     isDeleting={isDeleting}
+                    isRefreshingOrg={isRefreshingOrg}
+                    reviewOrgOutOfDate={reviewOrgOutOfDate}
+                    openRefreshOrgModal={openRefreshOrgModal}
                   />
                 )
               }
@@ -168,27 +204,35 @@ const OrgCard = ({
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
                   ownedByWrongUser={ownedByWrongUser}
+                  reviewOrgOutOfDate={reviewOrgOutOfDate}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
+                  isRefreshingOrg={isRefreshingOrg}
                   doCreateOrg={doCreateOrg}
                   doDeleteOrg={doDeleteOrg}
+                  doRefreshOrg={doRefreshOrg}
                 />
               }
             >
               <OrgInfo
                 org={org}
                 type={type}
+                taskCommits={taskCommits}
+                repoUrl={repoUrl}
                 ownedByCurrentUser={ownedByCurrentUser}
                 assignedToCurrentUser={assignedToCurrentUser}
                 ownedByWrongUser={ownedByWrongUser}
                 isCreating={isCreating}
+                isRefreshingOrg={isRefreshingOrg}
+                reviewOrgOutOfDate={reviewOrgOutOfDate}
+                missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
               />
               <OrgSpinner
                 org={org}
                 ownedByCurrentUser={ownedByCurrentUser}
                 isDeleting={isDeleting}
-                isRefreshing={isRefreshing}
+                isRefreshingChanges={isRefreshingChanges}
               />
             </Card>
           </>
@@ -203,6 +247,15 @@ const OrgCard = ({
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
       />
+      {reviewOrgOutOfDate && (
+        <RefreshOrgModal
+          orgUrl={window.api_urls.scratch_org_redirect(org?.id)}
+          missingCommits={orgCommitIdx}
+          isOpen={refreshOrgModalOpen && !isRefreshingOrg}
+          closeRefreshOrgModal={closeRefreshOrgModal}
+          doRefreshOrg={doRefreshOrg}
+        />
+      )}
     </div>
   );
 };

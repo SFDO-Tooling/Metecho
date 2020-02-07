@@ -11,19 +11,25 @@ const OrgActions = ({
   ownedByCurrentUser,
   assignedToCurrentUser,
   ownedByWrongUser,
+  reviewOrgOutOfDate,
   isCreating,
   isDeleting,
+  isRefreshingOrg,
   doCreateOrg,
   doDeleteOrg,
+  doRefreshOrg,
 }: {
   org: Org | null;
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
+  reviewOrgOutOfDate: boolean;
   isCreating: boolean;
   isDeleting: boolean;
+  isRefreshingOrg: boolean;
   doCreateOrg: () => void;
   doDeleteOrg: () => void;
+  doRefreshOrg: () => void;
 }) => {
   if (isCreating) {
     return (
@@ -34,21 +40,44 @@ const OrgActions = ({
     );
   }
 
-  if (!isDeleting && (ownedByWrongUser || (org && ownedByCurrentUser))) {
+  if (isRefreshingOrg) {
     return (
-      <Dropdown
-        align="right"
-        assistiveText={{ icon: i18n.t('Org Actions') }}
-        buttonClassName="slds-button_icon-x-small"
-        buttonVariant="icon"
-        iconCategory="utility"
-        iconName="down"
-        iconSize="small"
-        iconVariant="border-filled"
-        width="xx-small"
-        options={[{ id: 0, label: i18n.t('Delete Org') }]}
-        onSelect={doDeleteOrg}
+      <Button
+        label={<LabelWithSpinner label={i18n.t('Refreshing Org…')} />}
+        disabled
       />
+    );
+  }
+
+  if (isDeleting) {
+    return null;
+  }
+
+  if (ownedByWrongUser || (org && ownedByCurrentUser)) {
+    return (
+      <>
+        {reviewOrgOutOfDate && ownedByCurrentUser && (
+          <Button
+            label={i18n.t('Refresh Org')}
+            variant="brand"
+            className="slds-m-right_small"
+            onClick={doRefreshOrg}
+          />
+        )}
+        <Dropdown
+          align="right"
+          assistiveText={{ icon: i18n.t('Org Actions') }}
+          buttonClassName="slds-button_icon-x-small"
+          buttonVariant="icon"
+          iconCategory="utility"
+          iconName="down"
+          iconSize="small"
+          iconVariant="border-filled"
+          width="xx-small"
+          options={[{ id: 0, label: i18n.t('Delete Org') }]}
+          onSelect={doDeleteOrg}
+        />
+      </>
     );
   }
 

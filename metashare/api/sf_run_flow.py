@@ -10,6 +10,7 @@ from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from cumulusci.utils import cd
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django_rq import get_scheduler
 from requests.exceptions import HTTPError
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
@@ -215,11 +216,19 @@ def deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
 
 
 def create_org(
-    *, repo_owner, repo_name, repo_url, repo_branch, user, project_path, scratch_org
+    *,
+    repo_owner,
+    repo_name,
+    repo_url,
+    repo_branch,
+    user,
+    project_path,
+    scratch_org,
+    sf_username=None,
 ):
     """Create a new scratch org"""
     org_name = "dev"
-    devhub_username = user.sf_username
+    devhub_username = sf_username or user.sf_username
     email = user.email  # TODO: check that this is reliably right.
 
     cci = BaseCumulusCI(
@@ -284,3 +293,7 @@ def delete_org(scratch_org):
     active_scratch_org_id = records.get("Id")
     if active_scratch_org_id:
         devhub_api.ActiveScratchOrg.delete(active_scratch_org_id)
+
+    if scratch_org.expiry_job_id:
+        scheduler = get_scheduler("default")
+        scheduler.cancel(scratch_org.expiry_job_id)

@@ -35,6 +35,13 @@ interface CommitEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES' | 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
   payload: Org;
 }
+interface OrgRefresh {
+  type:
+    | 'SCRATCH_ORG_REFRESH_REQUESTED'
+    | 'SCRATCH_ORG_REFRESH_ACCEPTED'
+    | 'SCRATCH_ORG_REFRESH_REJECTED';
+  payload: Org;
+}
 
 export type OrgsAction =
   | OrgProvisioned
@@ -43,7 +50,8 @@ export type OrgsAction =
   | OrgUpdated
   | OrgDeleted
   | OrgDeleteFailed
-  | CommitEvent;
+  | CommitEvent
+  | OrgRefresh;
 
 export const provisionOrg = (payload: Org): ThunkResult => (
   dispatch,
@@ -175,20 +183,25 @@ export const updateFailed = ({
   model: Org;
   message?: string;
 }): ThunkResult => (dispatch, getState) => {
-  const task = selectTaskById(getState(), model.task);
-  dispatch(
-    addToast({
-      heading: task
-        ? `${i18n.t(
-            'Uh oh. There was an error checking for changes on your scratch org for task',
-          )} “${task.name}”.`
-        : i18n.t(
-            'Uh oh. There was an error checking for changes on your scratch org.',
-          ),
-      details: message,
-      variant: 'error',
-    }),
-  );
+  const state = getState();
+  const user = state.user;
+  /* istanbul ignore else */
+  if (user && user.id === model.owner) {
+    const task = selectTaskById(state, model.task);
+    dispatch(
+      addToast({
+        heading: task
+          ? `${i18n.t(
+              'Uh oh. There was an error checking for changes on your scratch org for task',
+            )} “${task.name}”.`
+          : i18n.t(
+              'Uh oh. There was an error checking for changes on your scratch org.',
+            ),
+        details: message,
+        variant: 'error',
+      }),
+    );
+  }
   return dispatch({
     type: 'SCRATCH_ORG_UPDATE',
     payload: model,
@@ -306,16 +319,21 @@ export const commitSucceeded = (payload: Org): ThunkResult => (
   dispatch,
   getState,
 ) => {
-  const task = selectTaskById(getState(), payload.task);
-  dispatch(
-    addToast({
-      heading: task
-        ? `${i18n.t(
-            'Successfully captured changes from your scratch org on task',
-          )} “${task.name}”.`
-        : i18n.t('Successfully captured changes from your scratch org.'),
-    }),
-  );
+  const state = getState();
+  const user = state.user;
+  /* istanbul ignore else */
+  if (user && user.id === payload.owner) {
+    const task = selectTaskById(state, payload.task);
+    dispatch(
+      addToast({
+        heading: task
+          ? `${i18n.t(
+              'Successfully captured changes from your scratch org on task',
+            )} “${task.name}”.`
+          : i18n.t('Successfully captured changes from your scratch org.'),
+      }),
+    );
+  }
   return dispatch({
     type: 'SCRATCH_ORG_COMMIT_CHANGES',
     payload,
@@ -329,22 +347,99 @@ export const commitFailed = ({
   model: Org;
   message?: string;
 }): ThunkResult => (dispatch, getState) => {
-  const task = selectTaskById(getState(), model.task);
-  dispatch(
-    addToast({
-      heading: task
-        ? `${i18n.t(
-            'Uh oh. There was an error capturing changes from your scratch org on task',
-          )} “${task.name}”.`
-        : i18n.t(
-            'Uh oh. There was an error capturing changes from your scratch org.',
-          ),
-      details: message,
-      variant: 'error',
-    }),
-  );
+  const state = getState();
+  const user = state.user;
+  /* istanbul ignore else */
+  if (user && user.id === model.owner) {
+    const task = selectTaskById(state, model.task);
+    dispatch(
+      addToast({
+        heading: task
+          ? `${i18n.t(
+              'Uh oh. There was an error capturing changes from your scratch org on task',
+            )} “${task.name}”.`
+          : i18n.t(
+              'Uh oh. There was an error capturing changes from your scratch org.',
+            ),
+        details: message,
+        variant: 'error',
+      }),
+    );
+  }
   return dispatch({
     type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
     payload: model,
   });
+};
+
+export const refreshOrg = (org: Org): ThunkResult => async (dispatch) => {
+  dispatch({ type: 'SCRATCH_ORG_REFRESH_REQUESTED', payload: org });
+  try {
+    await apiFetch({
+      url: window.api_urls.scratch_org_refresh(org.id),
+      dispatch,
+      opts: {
+        method: 'POST',
+      },
+    });
+    return dispatch({
+      type: 'SCRATCH_ORG_REFRESH_ACCEPTED',
+      payload: org,
+    });
+  } catch (err) {
+    dispatch({
+      type: 'SCRATCH_ORG_REFRESH_REJECTED',
+      payload: org,
+    });
+    throw err;
+  }
+};
+
+export const orgRefreshed = (payload: Org): ThunkResult => (
+  dispatch,
+  getState,
+) => {
+  const state = getState();
+  const user = state.user;
+  /* istanbul ignore else */
+  if (user && user.id === payload.owner) {
+    const task = selectTaskById(state, payload.task);
+    dispatch(
+      addToast({
+        heading: task
+          ? `${i18n.t('Successfully refreshed your scratch org on task')} “${
+              task.name
+            }”.`
+          : i18n.t('Successfully refreshed your scratch org.'),
+      }),
+    );
+  }
+  return dispatch(updateOrg(payload));
+};
+
+export const refreshError = ({
+  model,
+  message,
+}: {
+  model: Org;
+  message?: string;
+}): ThunkResult => (dispatch, getState) => {
+  const state = getState();
+  const user = state.user;
+  /* istanbul ignore else */
+  if (user && user.id === model.owner) {
+    const task = selectTaskById(state, model.task);
+    dispatch(
+      addToast({
+        heading: task
+          ? `${i18n.t(
+              'Uh oh. There was an error refreshing your scratch org on task',
+            )} “${task.name}”.`
+          : i18n.t('Uh oh. There was an error refreshing your scratch org.'),
+        details: message,
+        variant: 'error',
+      }),
+    );
+  }
+  return dispatch(updateOrg(model));
 };
