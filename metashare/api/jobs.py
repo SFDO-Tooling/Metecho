@@ -128,7 +128,9 @@ def alert_user_about_expiring_org(*, org, days):
         )
 
 
-def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project_path):
+def _create_org_and_run_flow(
+    scratch_org, *, user, repo_id, repo_branch, project_path, sf_username=None
+):
     from .models import SCRATCH_ORG_TYPES
 
     cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
@@ -144,6 +146,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
         user=user,
         project_path=project_path,
         scratch_org=scratch_org,
+        sf_username=sf_username,
     )
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
@@ -154,7 +157,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = scratch_org_config.config
-    scratch_org.owner_sf_username = user.sf_username
+    scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
     run_flow(
@@ -217,6 +220,7 @@ def refresh_scratch_org(scratch_org):
         user = scratch_org.owner
         repo_id = scratch_org.task.project.repository.get_repo_id(user)
         commit_ish = scratch_org.task.branch_name
+        sf_username = scratch_org.owner_sf_username
 
         delete_org(scratch_org)
 
@@ -227,6 +231,7 @@ def refresh_scratch_org(scratch_org):
                 repo_id=repo_id,
                 repo_branch=commit_ish,
                 project_path=repo_root,
+                sf_username=sf_username,
             )
     except Exception as e:
         scratch_org.refresh_from_db()
