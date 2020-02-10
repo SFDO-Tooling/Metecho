@@ -10,6 +10,7 @@ from simple_salesforce.exceptions import SalesforceGeneralError
 from ..jobs import (
     _create_branches_on_github,
     _create_org_and_run_flow,
+    _get_valid_target_directories,
     alert_user_about_expiring_org,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
@@ -103,6 +104,21 @@ class TestAlertUserAboutExpiringOrg:
             assert send_mail.called
 
 
+def test_get_valid_target_directories():
+    with ExitStack() as stack:
+        open_mock = stack.enter_context(patch(f"{PATCH_ROOT}.open"))
+        file_mock = MagicMock()
+        file_mock.readlines.return_value = '{"packageDirectories":["package"]}'
+        open_context_manager = MagicMock()
+        open_context_manager.__enter__.return_value = file_mock
+        open_mock.return_value = open_context_manager
+        stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
+        scratch_org_config = MagicMock(**{"config.source_format": "sfdx"})
+
+        assert _get_valid_target_directories(scratch_org_config) == ["package"]
+
+
 def test_create_org_and_run_flow():
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.get_latest_revision_numbers"))
@@ -115,6 +131,8 @@ def test_create_org_and_run_flow():
         run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),

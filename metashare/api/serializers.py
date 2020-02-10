@@ -269,6 +269,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "delete_queued_at",
             "owner_sf_username",
             "owner_gh_username",
+            "valid_target_directories",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -280,6 +281,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "unsaved_changes": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
+            "valid_target_directories": {"read_only": True},
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:

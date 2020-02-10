@@ -527,6 +527,9 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
+    valid_target_directories = JSONField(
+        default=list, encoder=DjangoJSONEncoder, blank=True
+    )
 
     def subscribable_by(self, user):  # pragma: nocover
         return True

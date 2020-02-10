@@ -1,4 +1,7 @@
+import json
 import logging
+import os
+import os.path
 import traceback
 from datetime import timedelta
 
@@ -128,6 +131,34 @@ def alert_user_about_expiring_org(*, org, days):
         )
 
 
+def _get_valid_target_directories(scratch_org_config):
+    """
+    Expects to be called from within a `local_github_checkout`.
+    """
+    if scratch_org_config.config.source_format == "sfdx":
+        with open("sfdx-project.json") as f:
+            sfdx_project = json.loads(f.readlines())
+            package_directories = sfdx_project["packageDirectories"]
+    else:
+        package_directories = ["src"]
+
+    package_directories.extend(
+        [dirname for dirname in os.listdir("unpackaged/pre") if os.path.isdir(dirname)]
+    )
+    package_directories.extend(
+        [dirname for dirname in os.listdir("unpackaged/post") if os.path.isdir(dirname)]
+    )
+    package_directories.extend(
+        [
+            dirname
+            for dirname in os.listdir("unpackaged/config")
+            if os.path.isdir(dirname)
+        ]
+    )
+
+    return package_directories
+
+
 def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project_path):
     from .models import SCRATCH_ORG_TYPES
 
@@ -148,6 +179,9 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
     # delete the org later, even if the initial flow run fails.
+    scratch_org.valid_target_directories = _get_valid_target_directories(
+        scratch_org_config
+    )
     scratch_org.url = scratch_org_config.instance_url
     scratch_org.expires_at = scratch_org_config.expires
     scratch_org.latest_commit = commit.sha
