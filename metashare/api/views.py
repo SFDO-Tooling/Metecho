@@ -277,3 +277,16 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
+
+    @action(detail=True, methods=["POST"])
+    def refresh(self, request, pk=None):
+        scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": _("Requesting user did not create scratch org.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        scratch_org.queue_refresh_org()
+        return Response(
+            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )

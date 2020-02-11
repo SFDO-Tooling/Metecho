@@ -179,10 +179,12 @@ class TaskSerializer(serializers.ModelSerializer):
             "currently_creating_pr",
             "branch_url",
             "commits",
+            "origin_sha",
             "branch_diff_url",
             "pr_url",
             "review_submitted_at",
             "review_valid",
+            "review_status",
             "status",
             "pr_is_open",
             "assigned_dev",
@@ -274,6 +276,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "has_unsaved_changes",
             "currently_refreshing_changes",
             "currently_capturing_changes",
+            "currently_refreshing_org",
             "delete_queued_at",
             "owner_sf_username",
             "owner_gh_username",
@@ -288,6 +291,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "unsaved_changes": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
+            "currently_refreshing_org": {"read_only": True},
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:

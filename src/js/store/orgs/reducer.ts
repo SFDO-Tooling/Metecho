@@ -27,6 +27,7 @@ export interface Org {
   has_unsaved_changes: boolean;
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
+  currently_refreshing_org: boolean;
   delete_queued_at: string | null;
   has_ever_been_visited: boolean;
 }
@@ -207,6 +208,25 @@ const reducer = (
         [org.task]: {
           ...taskOrgs,
           [org.org_type]: org,
+        },
+      };
+    }
+    case 'SCRATCH_ORG_REFRESH_REQUESTED':
+    case 'SCRATCH_ORG_REFRESH_REJECTED': {
+      const org = action.payload;
+      const taskOrgs = orgs[org.task] || {
+        [ORG_TYPES.DEV]: null,
+        [ORG_TYPES.QA]: null,
+      };
+      return {
+        ...orgs,
+        [org.task]: {
+          ...taskOrgs,
+          [org.org_type]: {
+            ...org,
+            currently_refreshing_org:
+              action.type === 'SCRATCH_ORG_REFRESH_REQUESTED',
+          },
         },
       };
     }

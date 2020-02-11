@@ -36,6 +36,9 @@ SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 TASK_STATUSES = Choices(
     ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
 )
+TASK_REVIEW_STATUS = Choices(
+    ("Approved", "Approved"), ("Changes requested", "Changes requested"),
+)
 
 
 class UserQuerySet(models.QuerySet):
@@ -411,8 +414,12 @@ class Task(
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+    currently_submitting_review = models.BooleanField(default=False)
     review_submitted_at = models.DateTimeField(null=True)
     review_valid = models.BooleanField(default=False)
+    review_status = models.CharField(
+        choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
+    )
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
@@ -527,11 +534,13 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     )
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_capturing_changes = models.BooleanField(default=False)
+    currently_refreshing_org = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
+    expiry_job_id = StringField(null=True, blank=True)
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
-    has_ever_been_visited = models.BooleanField(default=False)
+    has_been_visited = models.BooleanField(default=False)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -546,7 +555,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         return ret
 
     def mark_visited(self):
-        self.has_ever_been_visited = True
+        self.has_been_visited = True
         self.save()
 
     def get_refreshed_org_config(self):
@@ -670,6 +679,9 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def queue_submit_review(self, *, user, data):
         from .jobs import submit_review_job
 
+        self.task.currently_submitting_review = True
+        self.task.save()
+        self.task.notify_changed()
         submit_review_job.delay(user=user, scratch_org=self, data=data)
 
     def finalize_submit_review(self, timestamp, err=None, delete_org=False):
@@ -679,6 +691,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         with the queue_submit_review method above.
         """
         self.task.review_submitted_at = timestamp
+        self.task.currently_submitting_review = True
         if err:
             self.task.review_valid = False
         else:
@@ -687,6 +700,24 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
                 self.queue_delete()
         self.task.save()
         self.task.notify_changed()
+
+    def queue_refresh_org(self):
+        from .jobs import refresh_scratch_org_job
+
+        self.has_been_visited = False
+        self.currently_refreshing_org = True
+        self.save()
+        self.notify_changed()
+        refresh_scratch_org_job.delay(self)
+
+    def finalize_refresh_org(self, error=None):
+        self.currently_refreshing_org = False
+        self.save()
+        if error is None:
+            self.notify_changed("SCRATCH_ORG_REFRESH")
+        else:
+            self.notify_scratch_org_error(error, "SCRATCH_ORG_REFRESH_FAILED")
+            self.queue_delete()
 
 
 @receiver(user_logged_in)
