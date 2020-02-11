@@ -439,7 +439,7 @@ def submit_review(*, user, scratch_org, data):
         repository = get_repo_info(
             user, repo_id=scratch_org.task.project.repository.repo_id
         )
-        pr = repository.pull_request(scratch_org.task.pr_nuber)
+        pr = repository.pull_request(scratch_org.task.pr_number)
         pr.create_review(data["notes"], event=data["status"])
         scratch_org.finalize_submit_review(
             now(), delete_org=data["delete_org_on_submit"]
