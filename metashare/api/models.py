@@ -36,6 +36,9 @@ SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 TASK_STATUSES = Choices(
     ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
 )
+TASK_REVIEW_STATUS = Choices(
+    ("Approved", "Approved"), ("Changes requested", "Changes requested"),
+)
 
 
 class UserQuerySet(models.QuerySet):
@@ -413,6 +416,9 @@ class Task(
     pr_is_open = models.BooleanField(default=False)
     review_submitted_at = models.DateTimeField(null=True)
     review_valid = models.BooleanField(default=False)
+    review_status = models.CharField(
+        choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
+    )
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )

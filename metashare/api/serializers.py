@@ -184,6 +184,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_url",
             "review_submitted_at",
             "review_valid",
+            "review_status",
             "status",
             "pr_is_open",
             "assigned_dev",
