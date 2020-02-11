@@ -414,6 +414,7 @@ class Task(
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+    currently_submitting_review = models.BooleanField(default=False)
     review_submitted_at = models.DateTimeField(null=True)
     review_valid = models.BooleanField(default=False)
     review_status = models.CharField(
@@ -678,6 +679,9 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def queue_submit_review(self, *, user, data):
         from .jobs import submit_review_job
 
+        self.task.currently_submitting_review = True
+        self.task.save()
+        self.task.notify_changed()
         submit_review_job.delay(user=user, scratch_org=self, data=data)
 
     def finalize_submit_review(self, timestamp, err=None, delete_org=False):
@@ -687,6 +691,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         with the queue_submit_review method above.
         """
         self.task.review_submitted_at = timestamp
+        self.task.currently_submitting_review = True
         if err:
             self.task.review_valid = False
         else:
