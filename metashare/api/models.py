@@ -531,7 +531,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
-    has_ever_been_visited = models.BooleanField(default=False)
+    has_been_visited = models.BooleanField(default=False)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -546,7 +546,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         return ret
 
     def mark_visited(self):
-        self.has_ever_been_visited = True
+        self.has_been_visited = True
         self.save()
 
     def get_refreshed_org_config(self):
