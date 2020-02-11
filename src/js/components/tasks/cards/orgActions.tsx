@@ -12,9 +12,11 @@ const OrgActions = ({
   assignedToCurrentUser,
   ownedByWrongUser,
   reviewOrgOutOfDate,
+  readyForReview,
   isCreating,
   isDeleting,
   isRefreshingOrg,
+  openSubmitReviewModal,
   doCreateOrg,
   doDeleteOrg,
   doRefreshOrg,
@@ -24,9 +26,11 @@ const OrgActions = ({
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
   reviewOrgOutOfDate: boolean;
+  readyForReview?: boolean;
   isCreating: boolean;
   isDeleting: boolean;
   isRefreshingOrg: boolean;
+  openSubmitReviewModal: () => void;
   doCreateOrg: () => void;
   doDeleteOrg: () => void;
   doRefreshOrg: () => void;
@@ -62,6 +66,16 @@ const OrgActions = ({
             variant="brand"
             className="slds-m-right_small"
             onClick={doRefreshOrg}
+          />
+        )}
+        {/* @todo show this btn if type is qa and task.open_pr*/}
+        {readyForReview && (
+          <Button
+            label={i18n.t('Submit Review')}
+            variant="outline-brand"
+            className="slds-m-right_small"
+            disabled={!org?.has_been_visited}
+            onClick={openSubmitReviewModal}
           />
         )}
         <Dropdown

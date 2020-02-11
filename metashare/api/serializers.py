@@ -280,6 +280,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "delete_queued_at",
             "owner_sf_username",
             "owner_gh_username",
+            "has_been_visited",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},

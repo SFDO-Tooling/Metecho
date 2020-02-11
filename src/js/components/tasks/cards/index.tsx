@@ -227,6 +227,7 @@ const OrgCards = ({
           projectUrl={projectUrl}
           repoUrl={repoUrl}
           taskCommits={taskCommits}
+          readyForReview={task.pr_is_open}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}

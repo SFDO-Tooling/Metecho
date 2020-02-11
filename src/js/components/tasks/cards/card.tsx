@@ -18,6 +18,8 @@ import { GitHubUser, User } from '@/store/user/reducer';
 import { ORG_TYPES, OrgTypes } from '@/utils/constants';
 import { logError } from '@/utils/logging';
 
+import SubmitReviewModal from './submitReview';
+
 interface OrgCardProps {
   org: Org | null;
   type: OrgTypes;
@@ -27,6 +29,7 @@ interface OrgCardProps {
   projectUrl: string;
   repoUrl: string;
   taskCommits?: string[];
+  readyForReview?: boolean;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
   handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
@@ -48,6 +51,7 @@ const OrgCard = ({
   projectUrl,
   repoUrl,
   taskCommits,
+  readyForReview,
   isCreatingOrg,
   isDeletingOrg,
   handleAssignUser,
@@ -95,6 +99,14 @@ const OrgCard = ({
     setRefreshOrgModalOpen(false);
   };
 
+  const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
+  const openSubmitReviewModal = () => {
+    setSubmitReviewModalOpen(true);
+  };
+  const closeSubmitReviewModal = () => {
+    setSubmitReviewModalOpen(false);
+  };
+
   const doAssignUser = useCallback(
     (assignee: GitHubUser | null) => {
       closeAssignUserModal();
@@ -124,7 +136,9 @@ const OrgCard = ({
       handleCheckForOrgChanges(org);
     }
   }, [handleCheckForOrgChanges, org]);
-
+  const doSubmitReview = () => {
+    console.log('submit review');
+  };
   const handleEmptyMessageClick = useCallback(() => {
     history.push(projectUrl);
   }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -205,8 +219,10 @@ const OrgCard = ({
                   assignedToCurrentUser={assignedToCurrentUser}
                   ownedByWrongUser={ownedByWrongUser}
                   reviewOrgOutOfDate={reviewOrgOutOfDate}
+                  readyForReview={readyForReview}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
+                  openSubmitReviewModal={openSubmitReviewModal}
                   isRefreshingOrg={isRefreshingOrg}
                   doCreateOrg={doCreateOrg}
                   doDeleteOrg={doDeleteOrg}
@@ -254,6 +270,13 @@ const OrgCard = ({
           isOpen={refreshOrgModalOpen && !isRefreshingOrg}
           closeRefreshOrgModal={closeRefreshOrgModal}
           doRefreshOrg={doRefreshOrg}
+        />
+      )}
+      {true && (
+        <SubmitReviewModal
+          isOpen={submitReviewModalOpen}
+          handleCancel={closeSubmitReviewModal}
+          doSubmitReview={doSubmitReview}
         />
       )}
     </div>
