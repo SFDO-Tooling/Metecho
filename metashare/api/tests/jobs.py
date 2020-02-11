@@ -552,7 +552,8 @@ class TestSubmitReview:
             assert scratch_org.finalize_submit_review.called
             assert scratch_org.finalize_submit_review.call_args.args
             assert scratch_org.finalize_submit_review.call_args.kwargs == {
-                "delete_org": False
+                "status": "APPROVE",
+                "delete_org": False,
             }
 
     def test_bad(self,):

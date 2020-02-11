@@ -684,7 +684,9 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.task.notify_changed()
         submit_review_job.delay(user=user, scratch_org=self, data=data)
 
-    def finalize_submit_review(self, timestamp, err=None, delete_org=False):
+    def finalize_submit_review(
+        self, timestamp, err=None, status=None, delete_org=False
+    ):
         """
         This could be on the task, as it relates only to updating the
         task, but that would make a strange and hard-to-follow asymmetry
@@ -695,6 +697,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if err:
             self.task.review_valid = False
         else:
+            self.task.review_status = status
             self.task.review_valid = True
             if delete_org:
                 self.queue_delete()
