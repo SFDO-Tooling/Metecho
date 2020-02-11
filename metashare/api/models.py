@@ -691,7 +691,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         with the queue_submit_review method above.
         """
         self.task.review_submitted_at = timestamp
-        self.task.currently_submitting_review = True
+        self.task.currently_submitting_review = False
         if err:
             self.task.review_valid = False
         else:
