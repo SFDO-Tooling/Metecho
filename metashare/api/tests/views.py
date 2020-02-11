@@ -469,6 +469,29 @@ class TestScratchOrgView:
 
         assert response.status_code == 422
 
+    def test_refresh__good(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(owner=client.user)
+        with ExitStack() as stack:
+            refresh_scratch_org_job = stack.enter_context(
+                patch("metashare.api.jobs.refresh_scratch_org_job")
+            )
+            url = reverse("scratch-org-refresh", kwargs={"pk": str(scratch_org.id)})
+            response = client.post(url)
+
+            assert response.status_code == 202
+            assert refresh_scratch_org_job.delay.called
+
+    def test_refresh__bad(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        with patch(
+            "metashare.api.jobs.refresh_scratch_org_job"
+        ) as refresh_scratch_org_job:
+            url = reverse("scratch-org-refresh", kwargs={"pk": str(scratch_org.id)})
+            response = client.post(url)
+
+            assert response.status_code == 403
+            assert not refresh_scratch_org_job.delay.called
+
 
 @pytest.mark.django_db
 class TestTaskView:

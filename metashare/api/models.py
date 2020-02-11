@@ -527,8 +527,10 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     )
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_capturing_changes = models.BooleanField(default=False)
+    currently_refreshing_org = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
+    expiry_job_id = StringField(null=True, blank=True)
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
     has_been_visited = models.BooleanField(default=False)
@@ -687,6 +689,23 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
                 self.queue_delete()
         self.task.save()
         self.task.notify_changed()
+
+    def queue_refresh_org(self):
+        from .jobs import refresh_scratch_org_job
+
+        self.currently_refreshing_org = True
+        self.save()
+        self.notify_changed()
+        refresh_scratch_org_job.delay(self)
+
+    def finalize_refresh_org(self, error=None):
+        self.currently_refreshing_org = False
+        self.save()
+        if error is None:
+            self.notify_changed("SCRATCH_ORG_REFRESH")
+        else:
+            self.notify_scratch_org_error(error, "SCRATCH_ORG_REFRESH_FAILED")
+            self.queue_delete()
 
 
 @receiver(user_logged_in)
