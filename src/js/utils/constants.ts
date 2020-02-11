@@ -42,3 +42,8 @@ export const TASK_STATUSES = {
   IN_PROGRESS: 'In progress' as 'In progress',
   COMPLETED: 'Completed' as 'Completed',
 };
+
+export const REVIEW_STATUS = {
+  APPROVE: 'Approve' as 'Approve',
+  REQUEST_CHANGES: 'Request Changes' as 'Request Changes',
+};

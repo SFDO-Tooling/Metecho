@@ -36,6 +36,8 @@ export interface Task {
   assigned_dev: GitHubUser | null;
   assigned_qa: GitHubUser | null;
   status: TaskStatuses;
+  review_submitted_at: string;
+  review_valid: boolean;
 }
 
 export interface TaskState {

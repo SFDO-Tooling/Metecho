@@ -28,6 +28,7 @@ export interface Org {
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
   delete_queued_at: string | null;
+  has_ever_been_visited: boolean;
 }
 
 export interface Changeset {
