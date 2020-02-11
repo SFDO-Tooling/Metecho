@@ -114,7 +114,7 @@ def test_get_valid_target_directories():
         open_mock.return_value = open_context_manager
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
         stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
-        scratch_org_config = MagicMock(**{"config.source_format": "sfdx"})
+        scratch_org_config = {"source_format": "sfdx"}
 
         assert _get_valid_target_directories(scratch_org_config) == ["package"]
 
@@ -151,9 +151,13 @@ def test_get_unsaved_changes(scratch_org_factory):
         latest_revision_numbers={"TypeOne": {"NameOne": 10}}
     )
 
-    with patch(
-        f"{PATCH_ROOT}.get_latest_revision_numbers"
-    ) as get_latest_revision_numbers:
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
+        get_latest_revision_numbers = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
+        )
         get_latest_revision_numbers.return_value = {
             "TypeOne": {"NameOne": 13},
             "TypeTwo": {"NameTwo": 10},

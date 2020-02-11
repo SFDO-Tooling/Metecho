@@ -135,7 +135,7 @@ def _get_valid_target_directories(scratch_org_config):
     """
     Expects to be called from within a `local_github_checkout`.
     """
-    if scratch_org_config.config.source_format == "sfdx":
+    if scratch_org_config.get("source_format") == "sfdx":
         with open("sfdx-project.json") as f:
             sfdx_project = json.loads(f.readlines())
             package_directories = sfdx_project["packageDirectories"]
@@ -180,7 +180,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     # Save these values on org creation so that we have what we need to
     # delete the org later, even if the initial flow run fails.
     scratch_org.valid_target_directories = _get_valid_target_directories(
-        scratch_org_config
+        scratch_org_config.config
     )
     scratch_org.url = scratch_org_config.instance_url
     scratch_org.expires_at = scratch_org_config.expires
@@ -248,6 +248,13 @@ def get_unsaved_changes(scratch_org):
         old_revision_numbers = scratch_org.latest_revision_numbers
         new_revision_numbers = get_latest_revision_numbers(scratch_org)
         unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
+        user = scratch_org.owner
+        repo_id = scratch_org.task.project.repository.repo_id
+        commit_ish = scratch_org.task.branch_name
+        with local_github_checkout(user, repo_id, commit_ish):
+            scratch_org.valid_target_directories = _get_valid_target_directories(
+                scratch_org.config
+            )
         scratch_org.refresh_from_db()
         scratch_org.unsaved_changes = unsaved_changes
     except Exception as e:
