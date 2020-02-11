@@ -243,7 +243,7 @@ class CreatePrSerializer(serializers.Serializer):
 
 class ReviewSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
-    status = serializers.ChoiceField(choices=["APPROVE", "REQUEST_CHANGES", "COMMENT"])
+    status = serializers.ChoiceField(choices=["APPROVE", "REQUEST_CHANGES"])
     delete_org_on_submit = serializers.BooleanField()
 
 

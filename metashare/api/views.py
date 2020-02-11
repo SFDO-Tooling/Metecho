@@ -238,7 +238,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
-
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
@@ -271,7 +270,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
-
         scratch_org = self.get_object()
         scratch_org.queue_submit_review(user=request.user, data=serializer.data)
         return Response(
