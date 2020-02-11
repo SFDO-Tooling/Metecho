@@ -443,6 +443,38 @@ describe('<OrgCards/>', () => {
         });
       });
     });
+
+    describe('submitting a review', () => {
+      test('opens submit review modal', () => {
+        const { getByText, queryByText } = setup({
+          task: { ...defaultTask, commits: [], pr_is_open: true },
+          orgs: {
+            ...orgs,
+            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+          },
+        });
+        fireEvent.click(getByText('Submit Review'));
+
+        expect(queryByText('Submit Review Results')).toBeVisible();
+
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Submit Review Results')).toBeNull();
+      });
+
+      test('submits task for review', () => {
+        const { getByText, queryByText } = setup({
+          task: { ...defaultTask, commits: [], pr_is_open: true },
+          orgs: {
+            ...orgs,
+            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+          },
+        });
+
+        fireEvent.click(getByText('Submit Review'));
+        fireEvent.click(queryByText('Submit'));
+      });
+    });
   });
 
   describe('create org click', () => {

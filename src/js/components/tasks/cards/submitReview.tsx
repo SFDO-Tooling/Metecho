@@ -13,8 +13,13 @@ const SubmitReviewModal = ({ isOpen, handleCancel, doSubmitReview }: Props) => (
     heading="Submit Review Results"
     onRequestClose={handleCancel}
     footer={[
-      <Button key="cancel" onClick={handleCancel} />,
-      <Button key="submit" onClick={doSubmitReview} />,
+      <Button key="cancel" onClick={handleCancel} label="Cancel" />,
+      <Button
+        key="submit"
+        onClick={doSubmitReview}
+        label="Submit"
+        variant="brand"
+      />,
     ]}
   >
     <div>Submit Form Goes here!</div>
