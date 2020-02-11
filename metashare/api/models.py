@@ -693,6 +693,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def queue_refresh_org(self):
         from .jobs import refresh_scratch_org_job
 
+        self.has_been_visited = False
         self.currently_refreshing_org = True
         self.save()
         self.notify_changed()
