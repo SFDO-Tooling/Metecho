@@ -7,22 +7,28 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import React, { useState } from 'react';
 
+import { Review } from '@/store/tasks/reducer';
+
 interface Props {
   isOpen: boolean;
   handleCancel: () => void;
-  doSubmitReview: () => void;
+  submitReview: (data: Review) => void;
 }
 
-const handleSuccess = () => {
-  console.log('handleSuccess');
-};
-const handleError = () => {
-  console.log('handleErr');
-};
-
-const SubmitReviewModal = ({ isOpen, handleCancel, doSubmitReview }: Props) => {
+const SubmitReviewModal = ({ isOpen, handleCancel, submitReview }: Props) => {
   const [status, setStatus] = useState('Approve');
   const [doDeleteOrg, setDoDeleteOrg] = useState(true);
+  const [notes, setNotes] = useState('');
+
+  const handleSubmit = () => {
+    const data = {
+      notes,
+      status,
+      delete_org_on_submit: doDeleteOrg,
+    };
+    submitReview(data);
+    // reset();
+  };
   return (
     <Modal
       isOpen={isOpen}
@@ -33,7 +39,7 @@ const SubmitReviewModal = ({ isOpen, handleCancel, doSubmitReview }: Props) => {
         <Button key="cancel" onClick={handleCancel} label="Cancel" />,
         <Button
           key="submit"
-          onClick={doSubmitReview}
+          onClick={handleSubmit}
           label="Submit"
           variant="brand"
         />,
@@ -58,7 +64,7 @@ const SubmitReviewModal = ({ isOpen, handleCancel, doSubmitReview }: Props) => {
             />
             <Radio
               id="require-changes"
-              labels={{ label: 'Require Changes' }}
+              labels={{ label: 'Request Changes' }}
               className="slds-form-element_stacked slds-p-left_none"
               checked={status === 'Request Changes'}
               onChange={() => setStatus('Request Changes')}
@@ -67,6 +73,8 @@ const SubmitReviewModal = ({ isOpen, handleCancel, doSubmitReview }: Props) => {
               id="description"
               label="Review Description"
               className="submit-textarea slds-form-element_stacked"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
             />
 
             <Checkbox

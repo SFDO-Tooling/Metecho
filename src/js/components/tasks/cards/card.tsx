@@ -2,7 +2,9 @@ import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { Review } from 'src/js/store/tasks/reducer';
 
 import { AssignedUserTracker } from '@/components/tasks/cards';
 import Footer from '@/components/tasks/cards/footer';
@@ -13,6 +15,8 @@ import OrgSpinner from '@/components/tasks/cards/orgSpinner';
 import RefreshOrgModal from '@/components/tasks/cards/refresh';
 import UserActions from '@/components/tasks/cards/userActions';
 import { AssignUserModal, UserCard } from '@/components/user/githubUser';
+import { ThunkDispatch } from '@/store';
+import { submitTaskForReview } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
 import { ORG_TYPES, OrgTypes } from '@/utils/constants';
@@ -81,6 +85,7 @@ const OrgCard = ({
     );
     org = null;
   }
+  const dispatch = useDispatch<ThunkDispatch>();
 
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
   const openAssignUserModal = () => {
@@ -136,9 +141,12 @@ const OrgCard = ({
       handleCheckForOrgChanges(org);
     }
   }, [handleCheckForOrgChanges, org]);
-  const doSubmitReview = () => {
-    console.log('submit review');
-  };
+  const doSubmitReview = useCallback(
+    (review: Review) => {
+      dispatch(submitTaskForReview(review));
+    },
+    [dispatch],
+  );
   const handleEmptyMessageClick = useCallback(() => {
     history.push(projectUrl);
   }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -276,7 +284,7 @@ const OrgCard = ({
         <SubmitReviewModal
           isOpen={submitReviewModalOpen}
           handleCancel={closeSubmitReviewModal}
-          doSubmitReview={doSubmitReview}
+          submitReview={doSubmitReview}
         />
       )}
     </div>

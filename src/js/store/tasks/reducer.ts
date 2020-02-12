@@ -45,6 +45,12 @@ export interface TaskState {
   [key: string]: Task[];
 }
 
+export interface Review {
+  notes: string;
+  status: string;
+  delete_org_on_submit: boolean;
+}
+
 const defaultState = {};
 
 const reducer = (

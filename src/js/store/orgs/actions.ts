@@ -7,6 +7,8 @@ import { addToast } from '@/store/toasts/actions';
 import apiFetch, { addUrlParams } from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 
+import { Review } from '../tasks/reducer';
+
 interface OrgProvisioned {
   type: 'SCRATCH_ORG_PROVISION';
   payload: Org;
@@ -442,4 +444,11 @@ export const refreshError = ({
     );
   }
   return dispatch(updateOrg(model));
+};
+
+export const submitTaskForReview = (payload: Review): ThunkResult => (
+  dispatch,
+  getState,
+) => {
+  console.log(payload);
 };
