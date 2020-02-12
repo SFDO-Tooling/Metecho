@@ -31,6 +31,7 @@ Retrieve
         "has_unsaved_changes": false,
         "currently_refreshing_changes": false,
         "currently_capturing_changes": false,
+        "currently_refreshing_org": false,
         "delete_queued_at": null,
         "owner_sf_username": "user@domain.com",
         "owner_gh_username": "user123"
