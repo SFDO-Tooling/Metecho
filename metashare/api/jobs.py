@@ -480,6 +480,19 @@ def submit_review(*, user, scratch_org, data):
         pr = repository.pull_request(scratch_org.task.pr_number)
         # We always COMMENT so as not to change the PR's status:
         pr.create_review(data["notes"], event="COMMENT")
+        if scratch_org.latest_commit:
+            state_for_status = {
+                # "": "pending",
+                # "": "error",
+                "APPROVED": "success",
+                "CHANGES_REQUESTED": "failure",
+            }.get(data["status"])
+            repository.create_status(
+                scratch_org.latest_commit,
+                state_for_status,
+                description=data["notes"],
+                context="MetaShare Review",
+            )
         scratch_org.finalize_submit_review(
             now(), status=data["status"], delete_org=data["delete_org_on_submit"]
         )
