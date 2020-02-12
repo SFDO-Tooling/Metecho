@@ -484,7 +484,7 @@ def submit_review(*, user, scratch_org, data):
             state_for_status = {
                 # "": "pending",
                 # "": "error",
-                "APPROVED": "success",
+                "APPROVE": "success",
                 "CHANGES_REQUESTED": "failure",
             }.get(data["status"])
             repository.create_status(
