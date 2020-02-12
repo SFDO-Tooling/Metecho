@@ -272,7 +272,7 @@ const OrgCard = ({
           doRefreshOrg={doRefreshOrg}
         />
       )}
-      {true && (
+      {readyForReview && (
         <SubmitReviewModal
           isOpen={submitReviewModalOpen}
           handleCancel={closeSubmitReviewModal}
