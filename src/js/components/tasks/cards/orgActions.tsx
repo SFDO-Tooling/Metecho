@@ -68,7 +68,6 @@ const OrgActions = ({
             onClick={doRefreshOrg}
           />
         )}
-        {/* @todo show this btn if type is qa and task.open_pr*/}
         {readyForReview && (
           <Button
             label={i18n.t('Submit Review')}

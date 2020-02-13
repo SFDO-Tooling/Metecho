@@ -198,7 +198,7 @@ const OrgCards = ({
   if (task.origin_sha) {
     taskCommits.push(task.origin_sha);
   }
-
+  const readyForReview = (task?.assigned_dev && task?.pr_is_open) || false;
   return (
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Team & Orgs')}</h2>
@@ -227,7 +227,7 @@ const OrgCards = ({
           projectUrl={projectUrl}
           repoUrl={repoUrl}
           taskCommits={taskCommits}
-          readyForReview={task.pr_is_open}
+          readyForReview={readyForReview}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}

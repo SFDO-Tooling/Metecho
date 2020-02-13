@@ -39,6 +39,7 @@ export interface Task {
   status: TaskStatuses;
   review_submitted_at: string;
   review_valid: boolean;
+  currently_submitting_review: boolean;
 }
 
 export interface TaskState {

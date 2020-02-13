@@ -446,9 +446,32 @@ export const refreshError = ({
   return dispatch(updateOrg(model));
 };
 
-export const submitTaskForReview = (payload: Review): ThunkResult => (
-  dispatch,
-  getState,
-) => {
-  console.log(payload);
+export const submitTaskForReview = (
+  org: Org,
+  review: Review,
+): ThunkResult => async (dispatch) => {
+  dispatch({ type: 'SUBMIT_REVIEW_REQUESTED', payload: review });
+  try {
+    await apiFetch({
+      url: window.api_urls.scratch_org_review(org.id),
+      dispatch,
+      opts: {
+        method: 'POST',
+        body: JSON.stringify(review),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    });
+    return dispatch({
+      type: 'SUBMIT_REVIEW_ACCEPTED',
+      payload: review,
+    });
+  } catch (err) {
+    dispatch({
+      type: 'SUBMIT_REVIEW_REJECTED',
+      payload: org,
+    });
+    throw err;
+  }
 };

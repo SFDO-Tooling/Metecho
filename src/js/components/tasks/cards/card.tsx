@@ -141,12 +141,12 @@ const OrgCard = ({
       handleCheckForOrgChanges(org);
     }
   }, [handleCheckForOrgChanges, org]);
-  const doSubmitReview = useCallback(
-    (review: Review) => {
-      dispatch(submitTaskForReview(review));
-    },
-    [dispatch],
-  );
+  const doSubmitReview = useCallback((review: Review) => {
+    if (org) {
+      dispatch(submitTaskForReview(org, review));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const handleEmptyMessageClick = useCallback(() => {
     history.push(projectUrl);
   }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps

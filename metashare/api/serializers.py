@@ -189,6 +189,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_is_open",
             "assigned_dev",
             "assigned_qa",
+            "currently_submitting_review",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(

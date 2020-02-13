@@ -8,6 +8,7 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import React, { useState } from 'react';
 
 import { Review } from '@/store/tasks/reducer';
+import { REVIEW_STATUS } from '@/utils/constants';
 
 interface Props {
   isOpen: boolean;
@@ -16,7 +17,7 @@ interface Props {
 }
 
 const SubmitReviewModal = ({ isOpen, handleCancel, submitReview }: Props) => {
-  const [status, setStatus] = useState('Approve');
+  const [status, setStatus] = useState('APPROVE');
   const [doDeleteOrg, setDoDeleteOrg] = useState(true);
   const [notes, setNotes] = useState('');
 
@@ -45,10 +46,7 @@ const SubmitReviewModal = ({ isOpen, handleCancel, submitReview }: Props) => {
         />,
       ]}
     >
-      <form
-        onSubmit={() => console.log('submit')}
-        className="slds-form slds-p-around_medium"
-      >
+      <form onSubmit={handleSubmit} className="slds-form slds-p-around_medium">
         <div className="slds-grid slds-wrap slds-gutters">
           <div
             className="slds-col
@@ -59,15 +57,15 @@ const SubmitReviewModal = ({ isOpen, handleCancel, submitReview }: Props) => {
               id="approve"
               labels={{ label: 'Approve' }}
               className="slds-form-element_stacked slds-p-left_none"
-              checked={status === 'Approve'}
-              onChange={() => setStatus('Approve')}
+              checked={status === 'APPROVE'}
+              onChange={() => setStatus('APPROVE')}
             />
             <Radio
               id="require-changes"
               labels={{ label: 'Request Changes' }}
               className="slds-form-element_stacked slds-p-left_none"
-              checked={status === 'Request Changes'}
-              onChange={() => setStatus('Request Changes')}
+              checked={status === 'REQUEST_CHANGES'}
+              onChange={() => setStatus('REQUEST_CHANGES')}
             />
             <Textarea
               id="description"
