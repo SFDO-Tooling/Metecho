@@ -8,15 +8,14 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import React, { useState } from 'react';
 
 import { Review } from '@/store/tasks/reducer';
-import { REVIEW_STATUS } from '@/utils/constants';
 
 interface Props {
   isOpen: boolean;
-  handleCancel: () => void;
+  handleClose: () => void;
   submitReview: (data: Review) => void;
 }
 
-const SubmitReviewModal = ({ isOpen, handleCancel, submitReview }: Props) => {
+const SubmitReviewModal = ({ isOpen, handleClose, submitReview }: Props) => {
   const [status, setStatus] = useState('APPROVE');
   const [doDeleteOrg, setDoDeleteOrg] = useState(true);
   const [notes, setNotes] = useState('');
@@ -28,16 +27,16 @@ const SubmitReviewModal = ({ isOpen, handleCancel, submitReview }: Props) => {
       delete_org_on_submit: doDeleteOrg,
     };
     submitReview(data);
-    // reset();
+    handleClose();
   };
   return (
     <Modal
       isOpen={isOpen}
       heading="Submit Review Results"
-      onRequestClose={handleCancel}
+      onRequestClose={handleClose}
       align="top"
       footer={[
-        <Button key="cancel" onClick={handleCancel} label="Cancel" />,
+        <Button key="cancel" onClick={handleClose} label="Cancel" />,
         <Button
           key="submit"
           onClick={handleSubmit}
