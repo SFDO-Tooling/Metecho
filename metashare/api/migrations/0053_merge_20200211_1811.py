@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0052_auto_20200211_1752"),
+        ("api", "0052_rename_scratchorg_has_been_visited"),
         ("api", "0052_scratchorg_expiry_job_id"),
     ]
 

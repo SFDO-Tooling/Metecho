@@ -21,6 +21,7 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
+from .models import TASK_REVIEW_STATUS
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -474,6 +475,7 @@ populate_github_users_job = job(populate_github_users)
 
 def submit_review(*, user, scratch_org, data):
     try:
+        scratch_org.refresh_from_db()
         repository = get_repo_info(
             user, repo_id=scratch_org.task.project.repository.repo_id
         )
@@ -484,8 +486,8 @@ def submit_review(*, user, scratch_org, data):
             state_for_status = {
                 # "": "pending",
                 # "": "error",
-                "APPROVE": "success",
-                "CHANGES_REQUESTED": "failure",
+                TASK_REVIEW_STATUS.Approved: "success",
+                TASK_REVIEW_STATUS["Changes requested"]: "failure",
             }.get(data["status"])
             repository.create_status(
                 scratch_org.latest_commit,
@@ -493,11 +495,17 @@ def submit_review(*, user, scratch_org, data):
                 description=data["notes"],
                 context="MetaShare Review",
             )
+    except Exception as e:
+        scratch_org.task.refresh_from_db()
+        scratch_org.finalize_submit_review(now(), err=e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        scratch_org.task.refresh_from_db()
         scratch_org.finalize_submit_review(
             now(), status=data["status"], delete_org=data["delete_org_on_submit"]
         )
-    except Exception as e:
-        scratch_org.finalize_submit_review(now(), err=e)
 
 
 submit_review_job = job(submit_review)

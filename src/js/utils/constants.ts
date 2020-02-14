@@ -43,7 +43,9 @@ export const TASK_STATUSES = {
   COMPLETED: 'Completed' as 'Completed',
 };
 
-export const REVIEW_STATUS = {
-  APPROVE: 'Approve' as 'Approve',
-  REQUEST_CHANGES: 'Request Changes' as 'Request Changes',
+export type ReviewStatuses = 'Approved' | 'Changes requested';
+
+export const REVIEW_STATUSES = {
+  APPROVED: 'Approved' as 'Approved',
+  CHANGES_REQUESTED: 'Changes requested' as 'Changes requested',
 };

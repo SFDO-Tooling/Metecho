@@ -415,7 +415,7 @@ class Task(
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
     currently_submitting_review = models.BooleanField(default=False)
-    review_submitted_at = models.DateTimeField(null=True)
+    review_submitted_at = models.DateTimeField(null=True, blank=True)
     review_valid = models.BooleanField(default=False)
     review_status = models.CharField(
         choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
@@ -557,6 +557,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def mark_visited(self):
         self.has_been_visited = True
         self.save()
+        self.notify_changed()
 
     def get_refreshed_org_config(self):
         org_config = OrgConfig(self.config, "dev")

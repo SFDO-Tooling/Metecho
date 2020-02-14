@@ -2,12 +2,11 @@ import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
 import { Org } from '@/store/orgs/reducer';
+import { Review } from '@/store/tasks/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
 import apiFetch, { addUrlParams } from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
-
-import { Review } from '../tasks/reducer';
 
 interface OrgProvisioned {
   type: 'SCRATCH_ORG_PROVISION';
@@ -446,32 +445,31 @@ export const refreshError = ({
   return dispatch(updateOrg(model));
 };
 
-export const submitTaskForReview = (
-  org: Org,
-  review: Review,
-): ThunkResult => async (dispatch) => {
-  dispatch({ type: 'SUBMIT_REVIEW_REQUESTED', payload: review });
-  try {
-    await apiFetch({
-      url: window.api_urls.scratch_org_review(org.id),
-      dispatch,
-      opts: {
-        method: 'POST',
-        body: JSON.stringify(review),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    });
-    return dispatch({
-      type: 'SUBMIT_REVIEW_ACCEPTED',
-      payload: review,
-    });
-  } catch (err) {
-    dispatch({
-      type: 'SUBMIT_REVIEW_REJECTED',
-      payload: org,
-    });
-    throw err;
-  }
-};
+// export const submitReview = (org: Org, review: Review): ThunkResult => async (
+//   dispatch,
+// ) => {
+//   dispatch({ type: 'SUBMIT_REVIEW_REQUESTED', payload: review });
+//   try {
+//     await apiFetch({
+//       url: window.api_urls.scratch_org_review(org.id),
+//       dispatch,
+//       opts: {
+//         method: 'POST',
+//         body: JSON.stringify(review),
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//       },
+//     });
+//     return dispatch({
+//       type: 'SUBMIT_REVIEW_ACCEPTED',
+//       payload: review,
+//     });
+//   } catch (err) {
+//     dispatch({
+//       type: 'SUBMIT_REVIEW_REJECTED',
+//       payload: org,
+//     });
+//     throw err;
+//   }
+// };

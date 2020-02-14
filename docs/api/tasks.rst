@@ -51,7 +51,11 @@ Retrieve
         "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-project...feature/test-project__test-task",
         "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
         "pr_is_open": true,
-        "status": "Planned"
+        "status": "Planned",
+        "currently_submitting_review": false,
+        "review_submitted_at": "2019-03-01T19:47:49Z",
+        "review_valid": true,
+        "review_status": "Approved"
       }
       ...
     ]

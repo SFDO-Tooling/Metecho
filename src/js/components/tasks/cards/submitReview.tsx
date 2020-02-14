@@ -4,83 +4,170 @@ import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
+import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import React, { useState } from 'react';
+import i18n from 'i18next';
+import React, { useRef, useState } from 'react';
 
-import { Review } from '@/store/tasks/reducer';
+import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
+import { REVIEW_STATUSES } from '@/utils/constants';
 
 interface Props {
+  orgUrl: string;
   isOpen: boolean;
   handleClose: () => void;
-  submitReview: (data: Review) => void;
 }
 
-const SubmitReviewModal = ({ isOpen, handleClose, submitReview }: Props) => {
-  const [status, setStatus] = useState('APPROVE');
-  const [doDeleteOrg, setDoDeleteOrg] = useState(true);
-  const [notes, setNotes] = useState('');
+const SubmitReviewModal = ({ orgUrl, isOpen, handleClose }: Props) => {
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const isMounted = useIsMounted();
+  const submitButton = useRef<HTMLButtonElement | null>(null);
 
-  const handleSubmit = () => {
-    const data = {
-      notes,
-      status,
-      delete_org_on_submit: doDeleteOrg,
-    };
-    submitReview(data);
-    handleClose();
+  const handleSuccess = () => {
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      setSubmittingReview(false);
+      handleClose();
+    }
   };
+
+  /* istanbul ignore next */
+  const handleError = () => {
+    if (isMounted.current) {
+      setSubmittingReview(false);
+    }
+  };
+
+  const {
+    inputs,
+    errors,
+    handleInputChange,
+    handleSubmit,
+    resetForm,
+  } = useForm({
+    fields: {
+      notes: '',
+      status: REVIEW_STATUSES.APPROVED,
+      delete_org_on_submit: false,
+    },
+    onSuccess: handleSuccess,
+    onError: handleError,
+    shouldSubscribeToObject: false,
+    url: orgUrl,
+  });
+
+  const handleSubmitClicked = () => {
+    // Click hidden button inside form to activate native browser validation
+    /* istanbul ignore else */
+    if (submitButton.current) {
+      submitButton.current.click();
+    }
+  };
+
+  const doSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    setSubmittingReview(true);
+    handleSubmit(e);
+  };
+
+  const doClose = () => {
+    handleClose();
+    resetForm();
+  };
+
   return (
     <Modal
       isOpen={isOpen}
-      heading="Submit Review Results"
-      onRequestClose={handleClose}
-      align="top"
+      heading={i18n.t('Submit Task Review')}
+      size="small"
+      disableClose={submittingReview}
+      onRequestClose={doClose}
       footer={[
-        <Button key="cancel" onClick={handleClose} label="Cancel" />,
+        <Button
+          key="cancel"
+          label={i18n.t('Cancel')}
+          onClick={doClose}
+          disabled={submittingReview}
+        />,
         <Button
           key="submit"
-          onClick={handleSubmit}
-          label="Submit"
+          type="submit"
+          label={
+            submittingReview ? (
+              <LabelWithSpinner
+                label={i18n.t('Submitting Review…')}
+                variant="inverse"
+              />
+            ) : (
+              i18n.t('Submit Review')
+            )
+          }
           variant="brand"
+          onClick={handleSubmitClicked}
+          disabled={submittingReview}
         />,
       ]}
     >
-      <form onSubmit={handleSubmit} className="slds-form slds-p-around_medium">
+      <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
         <div className="slds-grid slds-wrap slds-gutters">
           <div
             className="slds-col
               slds-size_1-of-1
               slds-p-bottom_medium"
           >
-            <Radio
-              id="approve"
-              labels={{ label: 'Approve' }}
-              className="slds-form-element_stacked slds-p-left_none"
-              checked={status === 'APPROVE'}
-              onChange={() => setStatus('APPROVE')}
-            />
-            <Radio
-              id="require-changes"
-              labels={{ label: 'Request Changes' }}
-              className="slds-form-element_stacked slds-p-left_none"
-              checked={status === 'REQUEST_CHANGES'}
-              onChange={() => setStatus('REQUEST_CHANGES')}
-            />
+            <RadioGroup
+              assistiveText={{
+                label: i18n.t('Task review status'),
+                required: i18n.t('Required'),
+              }}
+              labels={{ error: errors.status }}
+              name="status"
+              required
+              onChange={handleInputChange}
+            >
+              <Radio
+                id="approve"
+                labels={{ label: i18n.t('Approve') }}
+                className="slds-p-bottom_small"
+                checked={inputs.status === REVIEW_STATUSES.APPROVED}
+                value={REVIEW_STATUSES.APPROVED}
+                name="status"
+              />
+              <Radio
+                id="request-changes"
+                labels={{ label: i18n.t('Request changes') }}
+                className="slds-p-bottom_small"
+                checked={inputs.status === REVIEW_STATUSES.CHANGES_REQUESTED}
+                value={REVIEW_STATUSES.CHANGES_REQUESTED}
+                name="status"
+              />
+            </RadioGroup>
             <Textarea
-              id="description"
-              label="Review Description"
-              className="submit-textarea slds-form-element_stacked"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              id="notes"
+              label={i18n.t('Review Description')}
+              className="submit-textarea"
+              name="notes"
+              value={inputs.notes}
+              errorText={errors.notes}
+              onChange={handleInputChange}
             />
-
             <Checkbox
-              labels={{ label: 'Delete Review Org upon submit' }}
-              checked={doDeleteOrg}
-              onChange={() => setDoDeleteOrg(!doDeleteOrg)}
+              id="delete-org"
+              labels={{ label: 'Delete Review Org' }}
+              className="slds-p-top_small"
+              name="delete_org_on_submit"
+              checked={inputs.delete_org_on_submit}
+              errorText={errors.delete_org_on_submit}
+              onChange={handleInputChange}
             />
           </div>
         </div>
+        {/* Clicking hidden button allows for native browser form validation */}
+        <button
+          ref={submitButton}
+          type="submit"
+          style={{ display: 'none' }}
+          disabled={submittingReview}
+        />
       </form>
     </Modal>
   );

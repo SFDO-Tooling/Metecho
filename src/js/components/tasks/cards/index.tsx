@@ -194,11 +194,6 @@ const OrgCards = ({
     }
   }, [assignUser, isWaitingToRemoveUser, orgs]);
 
-  const taskCommits = task.commits.map((c) => c.id);
-  if (task.origin_sha) {
-    taskCommits.push(task.origin_sha);
-  }
-  const readyForReview = (task?.assigned_dev && task?.pr_is_open) || false;
   return (
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Team & Orgs')}</h2>
@@ -207,7 +202,7 @@ const OrgCards = ({
           org={orgs[ORG_TYPES.DEV]}
           type={ORG_TYPES.DEV}
           user={user}
-          assignedUser={task.assigned_dev}
+          task={task}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
           repoUrl={repoUrl}
@@ -222,12 +217,10 @@ const OrgCards = ({
           org={orgs[ORG_TYPES.QA]}
           type={ORG_TYPES.QA}
           user={user}
-          assignedUser={task.assigned_qa}
+          task={task}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
           repoUrl={repoUrl}
-          taskCommits={taskCommits}
-          readyForReview={readyForReview}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}

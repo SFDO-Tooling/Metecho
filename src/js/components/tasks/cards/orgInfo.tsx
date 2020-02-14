@@ -6,12 +6,14 @@ import React from 'react';
 
 import { ExternalLink } from '@/components/utils';
 import { Org } from '@/store/orgs/reducer';
-import { ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { Task } from '@/store/tasks/reducer';
+import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '@/utils/constants';
 import { getOrgBehindLatestMsg, getOrgStatusMsg } from '@/utils/helpers';
 
 const OrgInfo = ({
   org,
   type,
+  task,
   repoUrl,
   taskCommits,
   ownedByCurrentUser,
@@ -19,12 +21,14 @@ const OrgInfo = ({
   ownedByWrongUser,
   isCreating,
   isRefreshingOrg,
+  isSubmittingReview,
   reviewOrgOutOfDate,
   missingCommits,
   doCheckForOrgChanges,
 }: {
   org: Org | null;
   type: OrgTypes;
+  task: Task;
   repoUrl: string;
   taskCommits?: string[];
   ownedByCurrentUser: boolean;
@@ -32,6 +36,7 @@ const OrgInfo = ({
   ownedByWrongUser: Org | null;
   isCreating: boolean;
   isRefreshingOrg: boolean;
+  isSubmittingReview: boolean;
   reviewOrgOutOfDate: boolean;
   missingCommits: number;
   doCheckForOrgChanges: () => void;
@@ -46,6 +51,7 @@ const OrgInfo = ({
       </ul>
     );
   }
+
   if (!org && !assignedToCurrentUser) {
     return (
       <ul>
@@ -55,13 +61,19 @@ const OrgInfo = ({
       </ul>
     );
   }
-  if (!org || isCreating || isRefreshingOrg) {
+
+  if (!(org || task.review_status) || isCreating || isRefreshingOrg) {
     return null;
   }
-  const expiresAt = org.expires_at && new Date(org.expires_at);
+
+  const expiresAt = org?.expires_at && new Date(org.expires_at);
+  const reviewSubmittedAt =
+    task.review_submitted_at && new Date(task.review_submitted_at);
   let commitStatus = null;
   let compareChangesUrl = null;
-  if (org.latest_commit) {
+  let orgStatus = null;
+
+  if (org?.latest_commit) {
     switch (type) {
       case ORG_TYPES.DEV: {
         // last commit status for dev org
@@ -121,7 +133,65 @@ const OrgInfo = ({
     }
   }
 
-  return (
+  switch (type) {
+    case ORG_TYPES.DEV: {
+      if (org) {
+        orgStatus = (
+          <>
+            {getOrgStatusMsg(org)}
+            {ownedByCurrentUser && (
+              <>
+                {' | '}
+                <Button
+                  label={i18n.t('check again')}
+                  variant="link"
+                  onClick={doCheckForOrgChanges}
+                />
+              </>
+            )}
+          </>
+        );
+      }
+      break;
+    }
+    case ORG_TYPES.QA: {
+      if (isSubmittingReview) {
+        orgStatus = i18n.t('Submitting review…');
+      } else if (task.review_status) {
+        if (task.review_status === REVIEW_STATUSES.APPROVED) {
+          if (task.review_valid) {
+            orgStatus = (
+              <span className="slds-text-color_success">
+                {i18n.t('Approved')}
+              </span>
+            );
+          } else {
+            orgStatus = i18n.t('Review out of date');
+          }
+        } else if (task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED) {
+          orgStatus = i18n.t('Changes requested');
+        }
+        if (reviewSubmittedAt) {
+          orgStatus = (
+            <>
+              {orgStatus}
+              {` | ${i18n.t('Submitted review')} ${formatDistanceToNow(
+                reviewSubmittedAt,
+                {
+                  addSuffix: true,
+                },
+              )}`}
+            </>
+          );
+        }
+      } else if (task.pr_is_open) {
+        orgStatus = i18n.t('Pending review');
+      }
+      break;
+    }
+  }
+
+  return org || orgStatus ? (
     <ul>
       {commitStatus}
       {/* expiration date for each org */}
@@ -133,24 +203,13 @@ const OrgInfo = ({
           </span>
         </li>
       )}
-      {/* status for orgs */}
-      {type === ORG_TYPES.DEV && (
+      {orgStatus ? (
         <li>
-          <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}
-          {ownedByCurrentUser && (
-            <>
-              {' | '}
-              <Button
-                label={i18n.t('check again')}
-                variant="link"
-                onClick={doCheckForOrgChanges}
-              />
-            </>
-          )}
+          <strong>{i18n.t('Status')}:</strong> {orgStatus}
         </li>
-      )}
+      ) : null}
     </ul>
-  );
+  ) : null;
 };
 
 export default OrgInfo;

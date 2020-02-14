@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .fields import MarkdownField
-from .models import Project, Repository, ScratchOrg, Task
+from .models import TASK_REVIEW_STATUS, Project, Repository, ScratchOrg, Task
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
@@ -244,7 +244,7 @@ class CreatePrSerializer(serializers.Serializer):
 
 class ReviewSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
-    status = serializers.ChoiceField(choices=["APPROVE", "REQUEST_CHANGES"])
+    status = serializers.ChoiceField(choices=TASK_REVIEW_STATUS)
     delete_org_on_submit = serializers.BooleanField()
 
 

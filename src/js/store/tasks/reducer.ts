@@ -4,7 +4,12 @@ import { ObjectsAction } from '@/store/actions';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { GitHubUser } from '@/store/user/reducer';
-import { OBJECT_TYPES, ObjectTypes, TaskStatuses } from '@/utils/constants';
+import {
+  OBJECT_TYPES,
+  ObjectTypes,
+  ReviewStatuses,
+  TaskStatuses,
+} from '@/utils/constants';
 
 export interface Commit {
   id: string;
@@ -37,9 +42,10 @@ export interface Task {
   assigned_dev: GitHubUser | null;
   assigned_qa: GitHubUser | null;
   status: TaskStatuses;
-  review_submitted_at: string;
-  review_valid: boolean;
   currently_submitting_review: boolean;
+  review_submitted_at: string | null;
+  review_valid: boolean;
+  review_status: ReviewStatuses;
 }
 
 export interface TaskState {
