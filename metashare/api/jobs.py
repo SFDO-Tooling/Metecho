@@ -473,16 +473,14 @@ def populate_github_users(repository):
 populate_github_users_job = job(populate_github_users)
 
 
-def submit_review(*, user, scratch_org, data):
+def submit_review(*, user, task, data):
     try:
-        scratch_org.refresh_from_db()
-        repository = get_repo_info(
-            user, repo_id=scratch_org.task.project.repository.repo_id
-        )
-        pr = repository.pull_request(scratch_org.task.pr_number)
+        task.refresh_from_db()
+        repository = get_repo_info(user, repo_id=task.project.repository.repo_id)
+        pr = repository.pull_request(task.pr_number)
         # We always COMMENT so as not to change the PR's status:
         pr.create_review(data["notes"], event="COMMENT")
-        if scratch_org.latest_commit:
+        if task.commits:
             state_for_status = {
                 # "": "pending",
                 # "": "error",
@@ -490,20 +488,20 @@ def submit_review(*, user, scratch_org, data):
                 TASK_REVIEW_STATUS["Changes requested"]: "failure",
             }.get(data["status"])
             repository.create_status(
-                scratch_org.latest_commit,
+                task.commits[0],
                 state_for_status,
                 description=data["notes"],
                 context="MetaShare Review",
             )
     except Exception as e:
-        scratch_org.task.refresh_from_db()
-        scratch_org.finalize_submit_review(now(), err=e)
+        task.refresh_from_db()
+        task.finalize_submit_review(now(), err=e)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.task.refresh_from_db()
-        scratch_org.finalize_submit_review(
+        task.refresh_from_db()
+        task.finalize_submit_review(
             now(), status=data["status"], delete_org=data["delete_org_on_submit"]
         )
 

@@ -533,15 +533,15 @@ class TestPopulateGithubUsers:
 
 @pytest.mark.django_db
 class TestSubmitReview:
-    def test_good(self,):
+    def test_good(self):
         with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
-            scratch_org = MagicMock()
+            task = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
             submit_review(
                 user=None,
-                scratch_org=scratch_org,
+                task=task,
                 data={
                     "notes": "Notes",
                     "status": "APPROVE",
@@ -549,26 +549,25 @@ class TestSubmitReview:
                 },
             )
 
-            assert scratch_org.finalize_submit_review.called
-            assert scratch_org.finalize_submit_review.call_args.args
-            assert scratch_org.finalize_submit_review.call_args.kwargs == {
+            assert task.finalize_submit_review.called
+            assert task.finalize_submit_review.call_args.args
+            assert task.finalize_submit_review.call_args.kwargs == {
                 "status": "APPROVE",
                 "delete_org": False,
             }
 
-    def test_bad(self,):
+    def test_bad(self):
         with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
-            scratch_org = MagicMock()
+            task = MagicMock()
             pr = MagicMock()
             pr.create_review.side_effect = ValueError()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
-            submit_review(
-                user=None,
-                scratch_org=scratch_org,
-                data={"notes": "Notes", "status": "APPROVE"},
-            )
+            with pytest.raises(ValueError):
+                submit_review(
+                    user=None, task=task, data={"notes": "Notes", "status": "APPROVE"},
+                )
 
-            assert scratch_org.finalize_submit_review.called
-            assert scratch_org.finalize_submit_review.call_args.args
-            assert "err" in scratch_org.finalize_submit_review.call_args.kwargs
+            assert task.finalize_submit_review.called
+            assert task.finalize_submit_review.call_args.args
+            assert "err" in task.finalize_submit_review.call_args.kwargs

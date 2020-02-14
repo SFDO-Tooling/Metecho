@@ -163,6 +163,17 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for review.")
 
+    @action(detail=True, methods=["POST"])
+    def review(self, request, pk=None):
+        serializer = ReviewSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+        task = self.get_object()
+        task.queue_submit_review(user=request.user, data=serializer.data)
+        return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
+
 
 class ScratchOrgViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -262,19 +273,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         scratch_org.mark_visited()
         url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)
-
-    @action(detail=True, methods=["POST"])
-    def review(self, request, pk=None):
-        serializer = ReviewSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
-        scratch_org = self.get_object()
-        scratch_org.queue_submit_review(user=request.user, data=serializer.data)
-        return Response(
-            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
-        )
 
     @action(detail=True, methods=["POST"])
     def refresh(self, request, pk=None):

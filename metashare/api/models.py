@@ -513,6 +513,29 @@ class Task(
     def add_ms_git_sha(self, sha):
         self.ms_commits.append(sha)
 
+    def queue_submit_review(self, *, user, data):
+        from .jobs import submit_review_job
+
+        self.currently_submitting_review = True
+        self.save()
+        self.notify_changed()
+        submit_review_job.delay(user=user, task=self, data=data)
+
+    def finalize_submit_review(
+        self, timestamp, err=None, status=None, delete_org=False
+    ):
+        self.review_submitted_at = timestamp
+        self.currently_submitting_review = False
+        if err:
+            self.review_valid = False
+        else:
+            self.review_status = status
+            self.review_valid = True
+            if delete_org:
+                self.queue_delete()
+        self.save()
+        self.notify_changed()
+
     class Meta:
         ordering = ("-created_at", "name")
         unique_together = (("name", "project"),)
@@ -676,34 +699,6 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
         self.delete(should_finalize=False)
-
-    def queue_submit_review(self, *, user, data):
-        from .jobs import submit_review_job
-
-        self.task.currently_submitting_review = True
-        self.task.save()
-        self.task.notify_changed()
-        submit_review_job.delay(user=user, scratch_org=self, data=data)
-
-    def finalize_submit_review(
-        self, timestamp, err=None, status=None, delete_org=False
-    ):
-        """
-        This could be on the task, as it relates only to updating the
-        task, but that would make a strange and hard-to-follow asymmetry
-        with the queue_submit_review method above.
-        """
-        self.task.review_submitted_at = timestamp
-        self.task.currently_submitting_review = False
-        if err:
-            self.task.review_valid = False
-        else:
-            self.task.review_status = status
-            self.task.review_valid = True
-            if delete_org:
-                self.queue_delete()
-        self.task.save()
-        self.task.notify_changed()
 
     def queue_refresh_org(self):
         from .jobs import refresh_scratch_org_job
