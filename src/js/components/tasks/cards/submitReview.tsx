@@ -10,15 +10,23 @@ import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
 
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
-import { REVIEW_STATUSES } from '@/utils/constants';
+import { REVIEW_STATUSES, ReviewStatuses } from '@/utils/constants';
 
 interface Props {
-  orgUrl: string;
+  orgExists: boolean;
+  url: string;
+  reviewStatus: ReviewStatuses | null;
   isOpen: boolean;
   handleClose: () => void;
 }
 
-const SubmitReviewModal = ({ orgUrl, isOpen, handleClose }: Props) => {
+const SubmitReviewModal = ({
+  orgExists,
+  url,
+  reviewStatus,
+  isOpen,
+  handleClose,
+}: Props) => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);
@@ -47,13 +55,13 @@ const SubmitReviewModal = ({ orgUrl, isOpen, handleClose }: Props) => {
   } = useForm({
     fields: {
       notes: '',
-      status: REVIEW_STATUSES.APPROVED,
+      status: reviewStatus || REVIEW_STATUSES.APPROVED,
       delete_org_on_submit: false,
     },
     onSuccess: handleSuccess,
     onError: handleError,
     shouldSubscribeToObject: false,
-    url: orgUrl,
+    url,
   });
 
   const handleSubmitClicked = () => {
@@ -150,15 +158,17 @@ const SubmitReviewModal = ({ orgUrl, isOpen, handleClose }: Props) => {
               errorText={errors.notes}
               onChange={handleInputChange}
             />
-            <Checkbox
-              id="delete-org"
-              labels={{ label: 'Delete Review Org' }}
-              className="slds-p-top_small"
-              name="delete_org_on_submit"
-              checked={inputs.delete_org_on_submit}
-              errorText={errors.delete_org_on_submit}
-              onChange={handleInputChange}
-            />
+            {orgExists && (
+              <Checkbox
+                id="delete-org"
+                labels={{ label: 'Delete Review Org' }}
+                className="slds-p-top_small"
+                name="delete_org_on_submit"
+                checked={inputs.delete_org_on_submit}
+                errorText={errors.delete_org_on_submit}
+                onChange={handleInputChange}
+              />
+            )}
           </div>
         </div>
         {/* Clicking hidden button allows for native browser form validation */}

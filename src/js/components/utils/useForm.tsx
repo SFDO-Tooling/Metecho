@@ -35,7 +35,6 @@ export default ({
     setErrors({});
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target);
     setInputs({ ...inputs, [e.target.name]: e.target.value });
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

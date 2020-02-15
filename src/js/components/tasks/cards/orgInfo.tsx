@@ -184,7 +184,7 @@ const OrgInfo = ({
             </>
           );
         }
-      } else if (task.pr_is_open) {
+      } else if (org && task.pr_is_open) {
         orgStatus = i18n.t('Pending review');
       }
       break;

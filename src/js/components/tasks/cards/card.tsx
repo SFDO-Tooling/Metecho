@@ -288,7 +288,9 @@ const OrgCard = ({
       )}
       {readyForReview && (
         <SubmitReviewModal
-          orgUrl={window.api_urls.scratch_org_review(org?.id)}
+          orgExists={Boolean(org)}
+          url={window.api_urls.task_review(task.id)}
+          reviewStatus={task.review_valid ? task.review_status : null}
           isOpen={submitReviewModalOpen && !isSubmittingReview}
           handleClose={closeSubmitReviewModal}
         />

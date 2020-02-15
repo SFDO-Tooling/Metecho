@@ -424,7 +424,8 @@ def refresh_commits(*, repository, branch_name):
     if user is None:
         logger.warning(f"No matching user for repository {repository.pk}")
         return
-    repo = get_repo_info(user, repository.repo_id)
+    repo_id = repository.get_repo_id(user)
+    repo = get_repo_info(user, repo_id=repo_id)
     # We get this as a GitHubIterator, but we want to slice it later, so
     # we will convert it to a list.
     # We limit it to 1000 commits to avoid hammering the API, and on the
@@ -450,7 +451,8 @@ def populate_github_users(repository):
         if user is None:
             logger.warning(f"No matching user for repository {repository.pk}")
             return
-        repo = get_repo_info(user, repository.repo_id)
+        repo_id = repository.get_repo_id(user)
+        repo = get_repo_info(user, repo_id=repo_id)
         repository.refresh_from_db()
         repository.github_users = [
             {
@@ -476,11 +478,10 @@ populate_github_users_job = job(populate_github_users)
 def submit_review(*, user, task, data):
     try:
         task.refresh_from_db()
-        repository = get_repo_info(user, repo_id=task.project.repository.repo_id)
-        pr = repository.pull_request(task.pr_number)
-        # We always COMMENT so as not to change the PR's status:
-        pr.create_review(data["notes"], event="COMMENT")
-        if task.commits:
+        if task.commits and task.pr_is_open:
+            repo_id = task.project.repository.get_repo_id(user)
+            repository = get_repo_info(user, repo_id=repo_id)
+            pr = repository.pull_request(task.pr_number)
             state_for_status = {
                 # "": "pending",
                 # "": "error",
@@ -488,11 +489,13 @@ def submit_review(*, user, task, data):
                 TASK_REVIEW_STATUS["Changes requested"]: "failure",
             }.get(data["status"])
             repository.create_status(
-                task.commits[0],
+                task.commits[0].get("id"),
                 state_for_status,
                 description=data["notes"],
                 context="MetaShare Review",
             )
+            # We always COMMENT so as not to change the PR's status:
+            pr.create_review(data["notes"], event="COMMENT")
     except Exception as e:
         task.refresh_from_db()
         task.finalize_submit_review(now(), err=e)

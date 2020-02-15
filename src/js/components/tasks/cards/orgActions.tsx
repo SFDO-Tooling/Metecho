@@ -77,8 +77,8 @@ const OrgActions = ({
   if (
     readyForReview &&
     !reviewOrgOutOfDate &&
-    (!org || ownedByCurrentUser) &&
-    assignedToCurrentUser
+    assignedToCurrentUser &&
+    (!org || ownedByCurrentUser)
   ) {
     if (task.review_valid) {
       submitReviewBtn = (
@@ -98,7 +98,7 @@ const OrgActions = ({
           onClick={openSubmitReviewModal}
         />
       );
-    } else {
+    } else if (org && ownedByCurrentUser) {
       submitReviewBtn = (
         <Tooltip
           content={i18n.t('View your org before submitting a review.')}

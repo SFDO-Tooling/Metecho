@@ -30,6 +30,8 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   createTaskPR,
   createTaskPRFailed,
+  submitReview,
+  submitReviewFailed,
   updateTask,
 } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
@@ -99,6 +101,17 @@ interface TaskCreatePREvent {
 }
 interface TaskCreatePRFailedEvent {
   type: 'TASK_CREATE_PR_FAILED';
+  payload: {
+    message?: string;
+    model: Task;
+  };
+}
+interface TaskSubmitReviewEvent {
+  type: 'TASK_SUBMIT_REVIEW';
+  payload: Task;
+}
+interface TaskSubmitReviewFailedEvent {
+  type: 'TASK_SUBMIT_REVIEW_FAILED';
   payload: {
     message?: string;
     model: Task;
@@ -177,6 +190,8 @@ type ModelEvent =
   | TaskUpdatedEvent
   | TaskCreatePREvent
   | TaskCreatePRFailedEvent
+  | TaskSubmitReviewEvent
+  | TaskSubmitReviewFailedEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
@@ -216,6 +231,10 @@ export const getAction = (event: EventType) => {
       return createTaskPR(event.payload);
     case 'TASK_CREATE_PR_FAILED':
       return createTaskPRFailed(event.payload);
+    case 'TASK_SUBMIT_REVIEW':
+      return submitReview(event.payload);
+    case 'TASK_SUBMIT_REVIEW_FAILED':
+      return submitReviewFailed(event.payload);
     case 'SCRATCH_ORG_PROVISION':
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':

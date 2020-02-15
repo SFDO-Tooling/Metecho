@@ -524,17 +524,18 @@ class Task(
     def finalize_submit_review(
         self, timestamp, err=None, status=None, delete_org=False
     ):
-        self.review_submitted_at = timestamp
         self.currently_submitting_review = False
         if err:
-            self.review_valid = False
+            self.save()
+            self.notify_error(err, "TASK_SUBMIT_REVIEW_FAILED")
         else:
+            self.review_submitted_at = timestamp
             self.review_status = status
             self.review_valid = True
+            self.save()
+            self.notify_changed("TASK_SUBMIT_REVIEW")
             if delete_org:
                 self.queue_delete()
-        self.save()
-        self.notify_changed()
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -695,7 +696,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
 
     def remove_scratch_org(self, error):
-        self.notify_error(error, "SCRATCH_ORG_REMOVE")
+        self.notify_scratch_org_error(error, "SCRATCH_ORG_REMOVE")
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
         self.delete(should_finalize=False)
