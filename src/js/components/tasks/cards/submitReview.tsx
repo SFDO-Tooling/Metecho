@@ -117,17 +117,14 @@ const SubmitReviewModal = ({
     >
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
         <div className="slds-grid slds-wrap slds-gutters">
-          <div
-            className="slds-col
-              slds-size_1-of-1
-              slds-p-bottom_medium"
-          >
+          <div className="slds-col slds-size_1-of-1">
             <RadioGroup
               assistiveText={{
                 label: i18n.t('Task review status'),
                 required: i18n.t('Required'),
               }}
               labels={{ error: errors.status }}
+              className="slds-p-bottom_x-small"
               name="status"
               required
               onChange={handleInputChange}
@@ -135,7 +132,6 @@ const SubmitReviewModal = ({
               <Radio
                 id="approve"
                 labels={{ label: i18n.t('Approve') }}
-                className="slds-p-bottom_small"
                 checked={inputs.status === REVIEW_STATUSES.APPROVED}
                 value={REVIEW_STATUSES.APPROVED}
                 name="status"
@@ -143,7 +139,6 @@ const SubmitReviewModal = ({
               <Radio
                 id="request-changes"
                 labels={{ label: i18n.t('Request changes') }}
-                className="slds-p-bottom_small"
                 checked={inputs.status === REVIEW_STATUSES.CHANGES_REQUESTED}
                 value={REVIEW_STATUSES.CHANGES_REQUESTED}
                 name="status"
