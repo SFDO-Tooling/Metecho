@@ -60,7 +60,6 @@ export default ({
         onSuccess(...args);
       })
       .catch((err: ApiError) => {
-        onError(err);
         const allErrors = typeof err?.body === 'object' ? err.body : {};
         const fieldErrors: typeof errors = {};
         for (const field of Object.keys(allErrors)) {
@@ -68,6 +67,7 @@ export default ({
             fieldErrors[field] = allErrors[field].join(', ');
           }
         }
+        onError(err, fieldErrors);
         /* istanbul ignore else */
         if (isMounted.current && Object.keys(fieldErrors).length) {
           setErrors(fieldErrors);
