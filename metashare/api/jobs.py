@@ -142,19 +142,30 @@ def _get_valid_target_directories(scratch_org_config):
     else:
         package_directories = ["src"]
 
-    package_directories.extend(
-        [dirname for dirname in os.listdir("unpackaged/pre") if os.path.isdir(dirname)]
-    )
-    package_directories.extend(
-        [dirname for dirname in os.listdir("unpackaged/post") if os.path.isdir(dirname)]
-    )
-    package_directories.extend(
-        [
-            dirname
-            for dirname in os.listdir("unpackaged/config")
-            if os.path.isdir(dirname)
-        ]
-    )
+    if os.path.isdir("unpackaged/pre"):
+        package_directories.extend(
+            [
+                dirname
+                for dirname in os.listdir("unpackaged/pre")
+                if os.path.isdir(dirname)
+            ]
+        )
+    if os.path.isdir("unpackaged/post"):
+        package_directories.extend(
+            [
+                dirname
+                for dirname in os.listdir("unpackaged/post")
+                if os.path.isdir(dirname)
+            ]
+        )
+    if os.path.isdir("unpackaged/config"):
+        package_directories.extend(
+            [
+                dirname
+                for dirname in os.listdir("unpackaged/config")
+                if os.path.isdir(dirname)
+            ]
+        )
 
     return package_directories
 
