@@ -89,7 +89,7 @@ def commit_changes_to_github(
     branch,
     desired_changes,
     commit_message,
-    target_directory
+    target_directory,
 ):
     with local_github_checkout(user, repo_id) as project_path:
         # This won't return anything in-memory, but rather it will emit

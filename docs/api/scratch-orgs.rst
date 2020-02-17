@@ -34,7 +34,8 @@ Retrieve
         "currently_refreshing_org": false,
         "delete_queued_at": null,
         "owner_sf_username": "user@domain.com",
-        "owner_gh_username": "user123"
+        "owner_gh_username": "user123",
+        "valid_target_directories": ["src"]
       }
       ...
     ]
