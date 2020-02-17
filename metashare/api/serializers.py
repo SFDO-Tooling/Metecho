@@ -185,6 +185,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "review_submitted_at",
             "review_valid",
             "review_status",
+            "review_sha",
             "status",
             "pr_is_open",
             "assigned_dev",

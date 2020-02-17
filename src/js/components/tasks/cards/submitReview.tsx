@@ -13,7 +13,7 @@ import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
 import { REVIEW_STATUSES, ReviewStatuses } from '@/utils/constants';
 
 interface Props {
-  orgExists: boolean;
+  orgId?: string;
   url: string;
   reviewStatus: ReviewStatuses | null;
   isOpen: boolean;
@@ -21,7 +21,7 @@ interface Props {
 }
 
 const SubmitReviewModal = ({
-  orgExists,
+  orgId,
   url,
   reviewStatus,
   isOpen,
@@ -56,12 +56,15 @@ const SubmitReviewModal = ({
     fields: {
       notes: '',
       status: reviewStatus || REVIEW_STATUSES.APPROVED,
-      delete_org_on_submit: false,
+      delete_org: false,
+    },
+    url,
+    additionalData: {
+      org: orgId || null,
     },
     onSuccess: handleSuccess,
     onError: handleError,
     shouldSubscribeToObject: false,
-    url,
   });
 
   const handleSubmitClicked = () => {
@@ -153,17 +156,17 @@ const SubmitReviewModal = ({
               errorText={errors.notes}
               onChange={handleInputChange}
             />
-            {orgExists && (
+            {orgId ? (
               <Checkbox
                 id="delete-org"
                 labels={{ label: 'Delete Review Org' }}
                 className="slds-p-top_small"
-                name="delete_org_on_submit"
-                checked={inputs.delete_org_on_submit}
-                errorText={errors.delete_org_on_submit}
+                name="delete_org"
+                checked={inputs.delete_org}
+                errorText={errors.delete_org}
                 onChange={handleInputChange}
               />
-            )}
+            ) : null}
           </div>
         </div>
         {/* Clicking hidden button allows for native browser form validation */}

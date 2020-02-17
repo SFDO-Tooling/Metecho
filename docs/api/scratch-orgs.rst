@@ -79,7 +79,8 @@ Review
    {
      "notes": "This is a sample review message.",
      "status": "APPROVE",
-     "delete_org_on_submit": false
+     "delete_org": false,
+     "org": "n1057Rw"
    }
 
 .. sourcecode:: http

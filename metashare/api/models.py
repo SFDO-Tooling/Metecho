@@ -527,10 +527,9 @@ class Task(
         submit_review_job.delay(user=user, task=self, data=data)
 
     def finalize_submit_review(
-        self, timestamp, sha=None, err=None, status=None, delete_org=False, org=None
+        self, timestamp, err=None, sha=None, status=None, delete_org=False, org=None
     ):
         self.currently_submitting_review = False
-        self.review_sha = sha
         if err:
             self.save()
             self.notify_error(err, "TASK_SUBMIT_REVIEW_FAILED")
@@ -538,6 +537,7 @@ class Task(
             self.review_submitted_at = timestamp
             self.review_status = status
             self.review_valid = True
+            self.review_sha = sha
             self.save()
             self.notify_changed("TASK_SUBMIT_REVIEW")
             deletable_org = (

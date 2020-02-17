@@ -171,7 +171,7 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
                 serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
         task = self.get_object()
-        task.queue_submit_review(user=request.user, data=serializer.data)
+        task.queue_submit_review(user=request.user, data=serializer.validated_data)
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 
 

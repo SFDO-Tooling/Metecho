@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import OrderedDict, namedtuple
 from contextlib import ExitStack
 from datetime import datetime
 from unittest.mock import MagicMock, patch
@@ -536,7 +536,9 @@ class TestSubmitReview:
     def test_good(self, task_factory, user_factory):
         with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
             user = user_factory()
-            task = task_factory(pr_is_open=True, commits=[{"id": "none"}])
+            task = task_factory(
+                pr_is_open=True, review_valid=True, review_sha="test_sha"
+            )
             task.finalize_submit_review = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
@@ -544,15 +546,22 @@ class TestSubmitReview:
             submit_review(
                 user=user,
                 task=task,
-                data={"notes": "Notes", "status": "APPROVE", "delete_org": None},
+                data=OrderedDict(
+                    [
+                        ("notes", "Notes"),
+                        ("status", "APPROVE"),
+                        ("delete_org", False),
+                        ("org", None),
+                    ]
+                ),
             )
 
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
             assert task.finalize_submit_review.call_args.kwargs == {
-                "sha": "none",
+                "sha": "test_sha",
                 "status": "APPROVE",
-                "delete_org": None,
+                "delete_org": False,
                 "org": None,
             }, task.finalize_submit_review.call_args.kwargs
 
@@ -565,8 +574,8 @@ class TestSubmitReview:
                 patch("metashare.api.model_mixins.get_repo_info")
             )
             user = user_factory()
-            task = task_factory(pr_is_open=True, commits=[{"id": "badsha"}])
-            scratch_org = scratch_org_factory(task=task, latest_commit="testsha")
+            task = task_factory(pr_is_open=True, review_valid=True, review_sha="none")
+            scratch_org = scratch_org_factory(task=task, latest_commit="test_sha")
             task.finalize_submit_review = MagicMock()
             task.project.repository.get_repo_id = MagicMock()
             pr = MagicMock()
@@ -575,20 +584,22 @@ class TestSubmitReview:
             submit_review(
                 user=user,
                 task=task,
-                data={
-                    "notes": "Notes",
-                    "status": "APPROVE",
-                    "delete_org": None,
-                    "org": scratch_org,
-                },
+                data=OrderedDict(
+                    [
+                        ("notes", "Notes"),
+                        ("status", "APPROVE"),
+                        ("delete_org", False),
+                        ("org", scratch_org),
+                    ]
+                ),
             )
 
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
             assert task.finalize_submit_review.call_args.kwargs == {
-                "sha": "testsha",
+                "sha": "test_sha",
                 "status": "APPROVE",
-                "delete_org": None,
+                "delete_org": False,
                 "org": scratch_org,
             }, task.finalize_submit_review.call_args.kwargs
 
@@ -610,17 +621,19 @@ class TestSubmitReview:
             submit_review(
                 user=user,
                 task=task,
-                data={"notes": "Notes", "status": "APPROVE", "delete_org": None},
+                data=OrderedDict(
+                    [
+                        ("notes", "Notes"),
+                        ("status", "APPROVE"),
+                        ("delete_org", False),
+                        ("org", None),
+                    ]
+                ),
             )
 
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
-            assert task.finalize_submit_review.call_args.kwargs == {
-                "sha": None,
-                "status": "APPROVE",
-                "delete_org": None,
-                "org": None,
-            }, task.finalize_submit_review.call_args.kwargs
+            # assert "err" in task.finalize_submit_review.call_args.kwargs
 
     def test_bad(self):
         with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
@@ -631,7 +644,16 @@ class TestSubmitReview:
             get_repo_info.return_value = repository
             with pytest.raises(ValueError):
                 submit_review(
-                    user=None, task=task, data={"notes": "Notes", "status": "APPROVE"},
+                    user=None,
+                    task=task,
+                    data=OrderedDict(
+                        [
+                            ("notes", "Notes"),
+                            ("status", "APPROVE"),
+                            ("delete_org", False),
+                            ("org", None),
+                        ]
+                    ),
                 )
 
             assert task.finalize_submit_review.called

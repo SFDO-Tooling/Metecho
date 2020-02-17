@@ -35,7 +35,11 @@ export default ({
     setErrors({});
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputs({ ...inputs, [e.target.name]: e.target.value });
+    let value: boolean | string = e.target.value;
+    if (e.target.type === 'checkbox') {
+      value = e.target.checked;
+    }
+    setInputs({ ...inputs, [e.target.name]: value });
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -55,7 +55,8 @@ Retrieve
         "currently_submitting_review": false,
         "review_submitted_at": "2019-03-01T19:47:49Z",
         "review_valid": true,
-        "review_status": "Approved"
+        "review_status": "Approved",
+        "review_sha": "617a512"
       }
       ...
     ]

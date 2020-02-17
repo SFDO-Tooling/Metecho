@@ -46,16 +46,11 @@ export interface Task {
   review_submitted_at: string | null;
   review_valid: boolean;
   review_status: ReviewStatuses;
+  review_sha: string | null;
 }
 
 export interface TaskState {
   [key: string]: Task[];
-}
-
-export interface Review {
-  notes: string;
-  status: string;
-  delete_org_on_submit: boolean;
 }
 
 const defaultState = {};

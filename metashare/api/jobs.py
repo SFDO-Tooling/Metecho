@@ -477,18 +477,17 @@ populate_github_users_job = job(populate_github_users)
 def submit_review(*, user, task, data):
     try:
         review_sha = None
+        org = data["org"]
         task.refresh_from_db()
-        if task.commits and task.pr_is_open:
+        if org:
+            review_sha = org.latest_commit
+        elif task.review_valid:
+            review_sha = task.review_sha
+
+        if task.commits and task.pr_is_open and review_sha:
             repo_id = task.project.repository.get_repo_id(user)
             repository = get_repo_info(user, repo_id=repo_id)
             pr = repository.pull_request(task.pr_number)
-
-            if data.get("org"):
-                review_sha = data["org"].latest_commit
-            elif task.review_valid:
-                review_sha = task.review_sha
-            else:
-                review_sha = task.commits[0].get("id")
 
             # The values in this dict are the valid values for the
             # `state` arg to repository.create_status. We are not
@@ -517,8 +516,9 @@ def submit_review(*, user, task, data):
                 description=data["notes"],
                 context="MetaShare Review",
             )
-            # We always COMMENT so as not to change the PR's status:
-            pr.create_review(data["notes"], event="COMMENT")
+            if data["notes"]:
+                # We always COMMENT so as not to change the PR's status:
+                pr.create_review(data["notes"], event="COMMENT")
     except Exception as e:
         task.refresh_from_db()
         task.finalize_submit_review(now(), err=e)
@@ -532,7 +532,7 @@ def submit_review(*, user, task, data):
             sha=review_sha,
             status=data["status"],
             delete_org=data["delete_org"],
-            org=data.get("org"),
+            org=org,
         )
 
 
