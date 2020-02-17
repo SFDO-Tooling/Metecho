@@ -4,7 +4,7 @@ import { StaticRouter } from 'react-router-dom';
 
 import OrgCards from '@/components/tasks/cards';
 import { createObject, deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
@@ -23,12 +23,16 @@ updateObject.mockReturnValue(() =>
 refetchOrg.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
+refreshOrg.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 
 afterEach(() => {
   createObject.mockClear();
   deleteObject.mockClear();
   updateObject.mockClear();
   refetchOrg.mockClear();
+  refreshOrg.mockClear();
 });
 
 const defaultOrgs = {
@@ -60,6 +64,8 @@ const defaultTask = {
   id: 'task-id',
   assigned_dev: { id: 'user-id', login: 'user-name' },
   assigned_qa: { id: 'user-id', login: 'user-name' },
+  commits: [{ id: '617a512-longlong' }, { id: 'other' }],
+  origin_sha: 'parent',
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
@@ -151,7 +157,7 @@ describe('<OrgCards/>', () => {
       const { queryByText, getByText } = setup({ orgs, task });
 
       expect(queryByText('View Org')).toBeNull();
-      expect(getByText('up-to-date', { exact: false })).toBeVisible();
+      expect(getByText('up to date', { exact: false })).toBeVisible();
       expect(queryByText('check again')).toBeNull();
       expect(getByText('not yet created', { exact: false })).toBeVisible();
     });
@@ -332,22 +338,110 @@ describe('<OrgCards/>', () => {
     });
   });
 
-  describe('QA org', () => {
-    test('renders without status', () => {
+  describe('Commit Status', () => {
+    test('no status without latest_commit', () => {
       const orgs = {
         ...defaultOrgs,
-        Dev: null,
-        QA: {
+        Dev: {
           ...defaultOrgs.Dev,
-          org_type: 'QA',
+          latest_commit: null,
         },
       };
-      const { queryByText, getByText } = setup({ orgs });
+      const { queryByText } = setup({ orgs });
 
-      expect(getByText('View Org')).toBeVisible();
-      expect(
-        queryByText('has 1 uncaptured change', { exact: false }),
-      ).toBeNull();
+      expect(queryByText('Deployed Commit')).toBeNull();
+    });
+  });
+
+  describe('QA org', () => {
+    const orgs = {
+      ...defaultOrgs,
+      Dev: null,
+      QA: {
+        ...defaultOrgs.Dev,
+        org_type: 'QA',
+        latest_commit: 'other',
+      },
+    };
+
+    describe('up to date', () => {
+      test('renders "Up to Date"', () => {
+        const { getByText } = setup({
+          task: { ...defaultTask, commits: [] },
+          orgs: { ...orgs, QA: { ...orgs.QA, latest_commit: 'parent' } },
+        });
+
+        expect(getByText('Up to Date')).toBeVisible();
+      });
+    });
+
+    describe('out of date', () => {
+      test('renders "Behind Latest"', () => {
+        const { getByText } = setup({ orgs });
+
+        expect(getByText('Behind Latest', { exact: false })).toBeVisible();
+        expect(getByText('view changes')).toBeVisible();
+      });
+
+      describe('unknown commits list', () => {
+        test('does not render compare changes link', () => {
+          const { getByText, queryByText } = setup({
+            task: { ...defaultTask, commits: [], origin_sha: null },
+            orgs,
+          });
+
+          expect(getByText('Behind Latest', { exact: false })).toBeVisible();
+          expect(queryByText('view changes')).toBeNull();
+        });
+      });
+
+      describe('View Org click', () => {
+        test('opens refresh org modal', () => {
+          const { getByText, getByTitle, queryByText } = setup({ orgs });
+          fireEvent.click(getByText('View Org'));
+
+          expect(getByText('Review Org Behind Latest: 1 Commit')).toBeVisible();
+
+          fireEvent.click(getByTitle('Close'));
+
+          expect(queryByText('Review Org Behind Latest: 1 Commit')).toBeNull();
+        });
+
+        test('displays modal even if unsure how many commits behind', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: { ...orgs.QA, latest_commit: 'not-a-commit-we-know-about' },
+            },
+          });
+          fireEvent.click(getByText('View Org'));
+
+          expect(getByText('Review Org Behind Latest')).toBeVisible();
+        });
+      });
+
+      describe('Refresh Org click', () => {
+        test('calls refreshOrg action', () => {
+          const { getByText } = setup({ orgs });
+          fireEvent.click(getByText('View Org'));
+          fireEvent.click(getByText('Refresh Review Org'));
+
+          expect(refreshOrg).toHaveBeenCalledWith(orgs.QA);
+        });
+      });
+
+      describe('currently refreshing', () => {
+        test('calls refreshOrg action', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: { ...orgs.QA, currently_refreshing_org: true },
+            },
+          });
+
+          expect(getByText('Refreshing Org…')).toBeVisible();
+        });
+      });
     });
   });
 

@@ -9,7 +9,7 @@ import { ConnectionInfoModal } from '@/components/user/info';
 import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { createObject, deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
@@ -36,11 +36,13 @@ const OrgCards = ({
   task,
   projectUsers,
   projectUrl,
+  repoUrl,
 }: {
   orgs: OrgsByTask;
   task: Task;
   projectUsers: GitHubUser[];
   projectUrl: string;
+  repoUrl: string;
 }) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
@@ -62,6 +64,10 @@ const OrgCards = ({
 
   const checkForOrgChanges = useCallback((org: Org) => {
     dispatch(refetchOrg(org));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRefresh = useCallback((org: Org) => {
+    dispatch(refreshOrg(org));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const deleteOrg = useCallback((org: Org) => {
@@ -188,6 +194,11 @@ const OrgCards = ({
     }
   }, [assignUser, isWaitingToRemoveUser, orgs]);
 
+  const taskCommits = task.commits.map((c) => c.id);
+  if (task.origin_sha) {
+    taskCommits.push(task.origin_sha);
+  }
+
   return (
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Team & Orgs')}</h2>
@@ -199,6 +210,7 @@ const OrgCards = ({
           assignedUser={task.assigned_dev}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
+          repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
           handleAssignUser={handleAssignUser}
@@ -213,12 +225,15 @@ const OrgCards = ({
           assignedUser={task.assigned_qa}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
+          repoUrl={repoUrl}
+          taskCommits={taskCommits}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
+          handleRefresh={handleRefresh}
         />
       </div>
       <ConnectModal

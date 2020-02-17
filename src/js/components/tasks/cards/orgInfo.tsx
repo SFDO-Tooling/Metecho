@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Icon from '@salesforce/design-system-react/components/icon';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React from 'react';
@@ -6,23 +7,33 @@ import React from 'react';
 import { ExternalLink } from '@/components/utils';
 import { Org } from '@/store/orgs/reducer';
 import { ORG_TYPES, OrgTypes } from '@/utils/constants';
-import { getOrgStatusMsg } from '@/utils/helpers';
+import { getOrgBehindLatestMsg, getOrgStatusMsg } from '@/utils/helpers';
 
 const OrgInfo = ({
   org,
   type,
+  repoUrl,
+  taskCommits,
   ownedByCurrentUser,
   assignedToCurrentUser,
   ownedByWrongUser,
   isCreating,
+  isRefreshingOrg,
+  reviewOrgOutOfDate,
+  missingCommits,
   doCheckForOrgChanges,
 }: {
   org: Org | null;
   type: OrgTypes;
+  repoUrl: string;
+  taskCommits?: string[];
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
   isCreating: boolean;
+  isRefreshingOrg: boolean;
+  reviewOrgOutOfDate: boolean;
+  missingCommits: number;
   doCheckForOrgChanges: () => void;
 }) => {
   if (ownedByWrongUser) {
@@ -44,24 +55,76 @@ const OrgInfo = ({
       </ul>
     );
   }
-  if (!org || isCreating) {
+  if (!org || isCreating || isRefreshingOrg) {
     return null;
   }
   const expiresAt = org.expires_at && new Date(org.expires_at);
+  let commitStatus = null;
+  let compareChangesUrl = null;
+  if (org.latest_commit) {
+    switch (type) {
+      case ORG_TYPES.DEV: {
+        // last commit status for dev org
+        commitStatus = (
+          <li>
+            <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
+            {org.latest_commit_url ? (
+              <ExternalLink url={org.latest_commit_url}>
+                {org.latest_commit.substring(0, 7)}
+              </ExternalLink>
+            ) : (
+              org.latest_commit.substring(0, 7)
+            )}
+          </li>
+        );
+        break;
+      }
+      case ORG_TYPES.QA: {
+        // synced status for QA org
+        if (reviewOrgOutOfDate && taskCommits?.length) {
+          // eslint-disable-next-line max-len
+          compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${taskCommits[0]}`;
+        }
+        commitStatus = reviewOrgOutOfDate ? (
+          <li>
+            <Icon
+              category="utility"
+              name="warning"
+              colorVariant="warning"
+              size="x-small"
+              className="slds-m-bottom_xx-small"
+              containerClassName="slds-m-right_xx-small"
+            />
+            <strong>
+              {i18n.t('Behind Latest')}
+              {missingCommits > 0 ? ':' : ''}
+            </strong>{' '}
+            {getOrgBehindLatestMsg(missingCommits)}
+            {compareChangesUrl ? (
+              <>
+                {' '}
+                (
+                <ExternalLink url={compareChangesUrl}>
+                  {i18n.t('view changes')}
+                </ExternalLink>
+                )
+              </>
+            ) : null}
+          </li>
+        ) : (
+          <li>
+            <strong>{i18n.t('Up to Date')}</strong>
+          </li>
+        );
+        break;
+      }
+    }
+  }
+
   return (
     <ul>
-      {org.latest_commit && (
-        <li>
-          <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
-          {org.latest_commit_url ? (
-            <ExternalLink url={org.latest_commit_url}>
-              {org.latest_commit.substring(0, 7)}
-            </ExternalLink>
-          ) : (
-            org.latest_commit.substring(0, 7)
-          )}
-        </li>
-      )}
+      {commitStatus}
+      {/* expiration date for each org */}
       {expiresAt && (
         <li>
           <strong>{i18n.t('Expires')}:</strong>{' '}
@@ -70,6 +133,7 @@ const OrgInfo = ({
           </span>
         </li>
       )}
+      {/* status for orgs */}
       {type === ORG_TYPES.DEV && (
         <li>
           <strong>{i18n.t('Status')}:</strong> {getOrgStatusMsg(org)}

@@ -159,7 +159,9 @@ def _get_valid_target_directories(scratch_org_config):
     return package_directories
 
 
-def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project_path):
+def _create_org_and_run_flow(
+    scratch_org, *, user, repo_id, repo_branch, project_path, sf_username=None
+):
     from .models import SCRATCH_ORG_TYPES
 
     cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
@@ -175,6 +177,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
         user=user,
         project_path=project_path,
         scratch_org=scratch_org,
+        sf_username=sf_username,
     )
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
@@ -188,7 +191,7 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = scratch_org_config.config
-    scratch_org.owner_sf_username = user.sf_username
+    scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
     run_flow(
@@ -198,15 +201,18 @@ def _create_org_and_run_flow(scratch_org, *, user, repo_id, repo_branch, project
         project_path=project_path,
     )
     scratch_org.refresh_from_db()
+    # We don't need to explicitly save the following, because this
+    # function is called in a context that will eventually call a
+    # finalize_* method, which will save the model.
     scratch_org.last_modified_at = now()
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
 
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
     before_expiry = scratch_org.expires_at - timedelta(days=days)
-    scheduler.enqueue_at(
+    scratch_org.expiry_job_id = scheduler.enqueue_at(
         before_expiry, alert_user_about_expiring_org, org=scratch_org, days=days,
-    )
+    ).id
 
 
 def create_branches_on_github_then_create_scratch_org(*, scratch_org):
@@ -240,6 +246,38 @@ def create_branches_on_github_then_create_scratch_org(*, scratch_org):
 create_branches_on_github_then_create_scratch_org_job = job(
     create_branches_on_github_then_create_scratch_org
 )
+
+
+def refresh_scratch_org(scratch_org):
+    try:
+        scratch_org.refresh_from_db()
+        user = scratch_org.owner
+        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        commit_ish = scratch_org.task.branch_name
+        sf_username = scratch_org.owner_sf_username
+
+        delete_org(scratch_org)
+
+        with local_github_checkout(user, repo_id, commit_ish) as repo_root:
+            _create_org_and_run_flow(
+                scratch_org,
+                user=user,
+                repo_id=repo_id,
+                repo_branch=commit_ish,
+                project_path=repo_root,
+                sf_username=sf_username,
+            )
+    except Exception as e:
+        scratch_org.refresh_from_db()
+        scratch_org.finalize_refresh_org(e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        scratch_org.finalize_refresh_org()
+
+
+refresh_scratch_org_job = job(refresh_scratch_org)
 
 
 def get_unsaved_changes(scratch_org):

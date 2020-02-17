@@ -1,3 +1,4 @@
+import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
 import React from 'react';
 
@@ -9,25 +10,31 @@ const Footer = ({
   ownedByCurrentUser,
   isCreating,
   isDeleting,
-  isRefreshing,
+  isRefreshingChanges,
+  isRefreshingOrg,
+  reviewOrgOutOfDate,
+  openRefreshOrgModal,
 }: {
   org: Org | null;
   ownedByCurrentUser: boolean;
   isCreating: boolean;
   isDeleting: boolean;
-  isRefreshing: boolean;
+  isRefreshingChanges: boolean;
+  isRefreshingOrg: boolean;
+  reviewOrgOutOfDate: boolean;
+  openRefreshOrgModal: () => void;
 }) => {
   const loadingMsg = i18n.t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
 
-  if (isCreating) {
+  if (isCreating || isRefreshingOrg) {
     return <>{loadingMsg}</>;
   }
   if (isDeleting) {
     return <>{i18n.t('Deleting Org…')}</>;
   }
-  if (isRefreshing) {
+  if (isRefreshingChanges) {
     return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
   }
   if (org && ownedByCurrentUser) {
@@ -42,6 +49,15 @@ const Footer = ({
     const orgUrl = window.api_urls.scratch_org_redirect(org.id);
     /* istanbul ignore else */
     if (orgUrl) {
+      if (reviewOrgOutOfDate) {
+        return (
+          <Button
+            label={i18n.t('View Org')}
+            variant="link"
+            onClick={openRefreshOrgModal}
+          />
+        );
+      }
       return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
     }
   }

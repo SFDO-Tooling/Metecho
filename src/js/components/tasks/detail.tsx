@@ -269,6 +269,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             task={task}
             projectUsers={project.github_users}
             projectUrl={routes.project_detail(repository.slug, project.slug)}
+            repoUrl={repository.repo_url}
           />
         ) : (
           <SpinnerWrapper />

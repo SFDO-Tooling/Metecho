@@ -33,6 +33,7 @@ export interface Task {
   pr_url: string | null;
   pr_is_open: boolean;
   commits: Commit[];
+  origin_sha: string | null;
   assigned_dev: GitHubUser | null;
   assigned_qa: GitHubUser | null;
   status: TaskStatuses;
