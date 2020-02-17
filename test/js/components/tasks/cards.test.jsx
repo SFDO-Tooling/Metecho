@@ -454,25 +454,23 @@ describe('<OrgCards/>', () => {
           },
         });
         fireEvent.click(getByText('Submit Review'));
-
-        expect(queryByText('Submit Review Results')).toBeVisible();
+        expect(queryByText('Submit Task Review')).toBeVisible();
 
         fireEvent.click(getByText('Cancel'));
 
-        expect(queryByText('Submit Review Results')).toBeNull();
+        expect(queryByText('Submit Task Review')).toBeNull();
       });
 
       test('submits task for review', () => {
-        const { getByText, queryByText } = setup({
+        const { queryByText, queryAllByText } = setup({
           task: { ...defaultTask, commits: [], pr_is_open: true },
           orgs: {
             ...orgs,
             QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
           },
         });
-
-        fireEvent.click(getByText('Submit Review'));
-        fireEvent.click(queryByText('Submit'));
+        fireEvent.click(queryByText('Submit Review'));
+        fireEvent.click(queryAllByText('Submit Review')[1]);
       });
     });
   });
