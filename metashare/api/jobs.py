@@ -482,6 +482,10 @@ def submit_review(*, user, task, data):
             repo_id = task.project.repository.get_repo_id(user)
             repository = get_repo_info(user, repo_id=repo_id)
             pr = repository.pull_request(task.pr_number)
+            # The values in this dict are the valid values for the
+            # `state` arg to repository.create_status. We are not
+            # currently using all of them, because some of them make no
+            # sense for our system to add to GitHub.
             state_for_status = {
                 # "": "pending",
                 # "": "error",
@@ -505,7 +509,7 @@ def submit_review(*, user, task, data):
     else:
         task.refresh_from_db()
         task.finalize_submit_review(
-            now(), status=data["status"], delete_org=data["delete_org_on_submit"]
+            now(), status=data["status"], delete_org=data["delete_org"]
         )
 
 

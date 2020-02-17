@@ -197,15 +197,18 @@ class TestTask:
             assert async_to_sync.called
             assert task.review_valid
 
-    def test_finalize_submit_review__delete_org(self, task_factory):
+    def test_finalize_submit_review__delete_org(
+        self, task_factory, scratch_org_factory
+    ):
         now = datetime(2020, 12, 31, 12, 0)
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             task = task_factory()
-            task.queue_delete = MagicMock()
-            task.finalize_submit_review(now, delete_org=True)
+            scratch_org = scratch_org_factory(task=task)
+            scratch_org.queue_delete = MagicMock()
+            task.finalize_submit_review(now, delete_org=scratch_org)
 
             assert async_to_sync.called
-            assert task.queue_delete.called
+            assert scratch_org.queue_delete.called
             assert task.review_valid
 
     def test_finalize_submit_review__error(self, task_factory):

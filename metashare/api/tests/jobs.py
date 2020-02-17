@@ -542,18 +542,14 @@ class TestSubmitReview:
             submit_review(
                 user=None,
                 task=task,
-                data={
-                    "notes": "Notes",
-                    "status": "APPROVE",
-                    "delete_org_on_submit": False,
-                },
+                data={"notes": "Notes", "status": "APPROVE", "delete_org": None},
             )
 
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
             assert task.finalize_submit_review.call_args.kwargs == {
                 "status": "APPROVE",
-                "delete_org": False,
+                "delete_org": None,
             }
 
     def test_bad(self):

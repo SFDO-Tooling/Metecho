@@ -521,9 +521,7 @@ class Task(
         self.notify_changed()
         submit_review_job.delay(user=user, task=self, data=data)
 
-    def finalize_submit_review(
-        self, timestamp, err=None, status=None, delete_org=False
-    ):
+    def finalize_submit_review(self, timestamp, err=None, status=None, delete_org=None):
         self.currently_submitting_review = False
         if err:
             self.save()
@@ -535,7 +533,7 @@ class Task(
             self.save()
             self.notify_changed("TASK_SUBMIT_REVIEW")
             if delete_org:
-                self.queue_delete()
+                delete_org.queue_delete()
 
     class Meta:
         ordering = ("-created_at", "name")

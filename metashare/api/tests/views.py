@@ -522,7 +522,7 @@ class TestTaskView:
             data = {
                 "notes": "",
                 "status": "Approved",
-                "delete_org_on_submit": False,
+                "delete_org": "",
             }
             response = client.post(
                 reverse("task-review", kwargs={"pk": str(task.id)}), data

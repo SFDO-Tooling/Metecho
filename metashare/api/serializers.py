@@ -245,7 +245,11 @@ class CreatePrSerializer(serializers.Serializer):
 class ReviewSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
     status = serializers.ChoiceField(choices=TASK_REVIEW_STATUS)
-    delete_org_on_submit = serializers.BooleanField()
+    delete_org = serializers.PrimaryKeyRelatedField(
+        queryset=ScratchOrg.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+    )
 
 
 class ScratchOrgSerializer(serializers.ModelSerializer):
