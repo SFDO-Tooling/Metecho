@@ -1,8 +1,8 @@
 -c prod.txt
-Sphinx==2.4.0
+Sphinx==2.4.1
 black==19.10b0
-coveralls==1.10.0
-django-extensions==2.2.7
+coveralls==1.11.1
+django-extensions==2.2.8
 doc8==0.8.0
 factory_boy==2.12.0
 flake8==3.7.9
