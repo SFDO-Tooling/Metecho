@@ -407,19 +407,24 @@ class Task(
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
+
     commits = JSONField(default=list, blank=True)
     origin_sha = StringField(null=True, blank=True)
     ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
+
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+
     currently_submitting_review = models.BooleanField(default=False)
     review_submitted_at = models.DateTimeField(null=True, blank=True)
     review_valid = models.BooleanField(default=False)
     review_status = models.CharField(
         choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
     )
+    review_sha = StringField(null=True, blank=True)
+
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
@@ -521,8 +526,11 @@ class Task(
         self.notify_changed()
         submit_review_job.delay(user=user, task=self, data=data)
 
-    def finalize_submit_review(self, timestamp, err=None, status=None, delete_org=None):
+    def finalize_submit_review(
+        self, timestamp, sha=None, err=None, status=None, delete_org=False, org=None
+    ):
         self.currently_submitting_review = False
+        self.review_sha = sha
         if err:
             self.save()
             self.notify_error(err, "TASK_SUBMIT_REVIEW_FAILED")
@@ -532,8 +540,11 @@ class Task(
             self.review_valid = True
             self.save()
             self.notify_changed("TASK_SUBMIT_REVIEW")
-            if delete_org:
-                delete_org.queue_delete()
+            deletable_org = (
+                org and org.task == self and org.org_type == SCRATCH_ORG_TYPES.QA
+            )
+            if delete_org and deletable_org:
+                org.queue_delete()
 
     class Meta:
         ordering = ("-created_at", "name")

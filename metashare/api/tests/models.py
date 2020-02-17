@@ -6,7 +6,14 @@ import pytest
 from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
-from ..models import TASK_STATUSES, Project, Repository, Task, user_logged_in_handler
+from ..models import (
+    SCRATCH_ORG_TYPES,
+    TASK_STATUSES,
+    Project,
+    Repository,
+    Task,
+    user_logged_in_handler,
+)
 
 
 @pytest.mark.django_db
@@ -203,9 +210,9 @@ class TestTask:
         now = datetime(2020, 12, 31, 12, 0)
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             task = task_factory()
-            scratch_org = scratch_org_factory(task=task)
+            scratch_org = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
             scratch_org.queue_delete = MagicMock()
-            task.finalize_submit_review(now, delete_org=scratch_org)
+            task.finalize_submit_review(now, delete_org=True, org=scratch_org)
 
             assert async_to_sync.called
             assert scratch_org.queue_delete.called

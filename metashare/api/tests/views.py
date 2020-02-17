@@ -522,13 +522,14 @@ class TestTaskView:
             data = {
                 "notes": "",
                 "status": "Approved",
-                "delete_org": "",
+                "delete_org": False,
+                "org": "",
             }
             response = client.post(
                 reverse("task-review", kwargs={"pk": str(task.id)}), data
             )
 
-            assert response.status_code == 202
+            assert response.status_code == 202, response.json()
             assert submit_review_job.delay.called
 
     def test_review__bad(self, client, task_factory):

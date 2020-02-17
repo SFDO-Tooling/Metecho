@@ -533,14 +533,16 @@ class TestPopulateGithubUsers:
 
 @pytest.mark.django_db
 class TestSubmitReview:
-    def test_good(self):
+    def test_good(self, task_factory, user_factory):
         with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
-            task = MagicMock()
+            user = user_factory()
+            task = task_factory(pr_is_open=True, commits=[{"id": "none"}])
+            task.finalize_submit_review = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
             submit_review(
-                user=None,
+                user=user,
                 task=task,
                 data={"notes": "Notes", "status": "APPROVE", "delete_org": None},
             )
@@ -548,9 +550,77 @@ class TestSubmitReview:
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
             assert task.finalize_submit_review.call_args.kwargs == {
+                "sha": "none",
                 "status": "APPROVE",
                 "delete_org": None,
-            }
+                "org": None,
+            }, task.finalize_submit_review.call_args.kwargs
+
+    def test_good__has_org(self, task_factory, scratch_org_factory, user_factory):
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(
+                patch("metashare.api.jobs.get_repo_info")
+            )
+            get_repo_info = stack.enter_context(
+                patch("metashare.api.model_mixins.get_repo_info")
+            )
+            user = user_factory()
+            task = task_factory(pr_is_open=True, commits=[{"id": "badsha"}])
+            scratch_org = scratch_org_factory(task=task, latest_commit="testsha")
+            task.finalize_submit_review = MagicMock()
+            task.project.repository.get_repo_id = MagicMock()
+            pr = MagicMock()
+            repository = MagicMock(**{"pull_request.return_value": pr})
+            get_repo_info.return_value = repository
+            submit_review(
+                user=user,
+                task=task,
+                data={
+                    "notes": "Notes",
+                    "status": "APPROVE",
+                    "delete_org": None,
+                    "org": scratch_org,
+                },
+            )
+
+            assert task.finalize_submit_review.called
+            assert task.finalize_submit_review.call_args.args
+            assert task.finalize_submit_review.call_args.kwargs == {
+                "sha": "testsha",
+                "status": "APPROVE",
+                "delete_org": None,
+                "org": scratch_org,
+            }, task.finalize_submit_review.call_args.kwargs
+
+    def test_good__review_invalid(self, task_factory, user_factory):
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(
+                patch("metashare.api.jobs.get_repo_info")
+            )
+            get_repo_info = stack.enter_context(
+                patch("metashare.api.model_mixins.get_repo_info")
+            )
+            user = user_factory()
+            task = task_factory(review_valid=False, commits=[{"id": "testsha"}])
+            task.finalize_submit_review = MagicMock()
+            task.project.repository.get_repo_id = MagicMock()
+            pr = MagicMock()
+            repository = MagicMock(**{"pull_request.return_value": pr})
+            get_repo_info.return_value = repository
+            submit_review(
+                user=user,
+                task=task,
+                data={"notes": "Notes", "status": "APPROVE", "delete_org": None},
+            )
+
+            assert task.finalize_submit_review.called
+            assert task.finalize_submit_review.call_args.args
+            assert task.finalize_submit_review.call_args.kwargs == {
+                "sha": None,
+                "status": "APPROVE",
+                "delete_org": None,
+                "org": None,
+            }, task.finalize_submit_review.call_args.kwargs
 
     def test_bad(self):
         with patch("metashare.api.jobs.get_repo_info") as get_repo_info:

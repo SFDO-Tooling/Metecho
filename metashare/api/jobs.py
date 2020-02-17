@@ -476,11 +476,20 @@ populate_github_users_job = job(populate_github_users)
 
 def submit_review(*, user, task, data):
     try:
+        review_sha = None
         task.refresh_from_db()
         if task.commits and task.pr_is_open:
             repo_id = task.project.repository.get_repo_id(user)
             repository = get_repo_info(user, repo_id=repo_id)
             pr = repository.pull_request(task.pr_number)
+
+            if data.get("org"):
+                review_sha = data["org"].latest_commit
+            elif task.review_valid:
+                review_sha = task.review_sha
+            else:
+                review_sha = task.commits[0].get("id")
+
             # The values in this dict are the valid values for the
             # `state` arg to repository.create_status. We are not
             # currently using all of them, because some of them make no
@@ -491,6 +500,7 @@ def submit_review(*, user, task, data):
                 TASK_REVIEW_STATUS.Approved: "success",
                 TASK_REVIEW_STATUS["Changes requested"]: "failure",
             }.get(data["status"])
+
             target_url = get_user_facing_url(
                 path=[
                     "repositories",
@@ -499,8 +509,9 @@ def submit_review(*, user, task, data):
                     task.slug,
                 ]
             )
+
             repository.create_status(
-                task.commits[0].get("id"),
+                review_sha,
                 state_for_status,
                 target_url=target_url,
                 description=data["notes"],
@@ -517,7 +528,11 @@ def submit_review(*, user, task, data):
     else:
         task.refresh_from_db()
         task.finalize_submit_review(
-            now(), status=data["status"], delete_org=data["delete_org"]
+            now(),
+            sha=review_sha,
+            status=data["status"],
+            delete_org=data["delete_org"],
+            org=data.get("org"),
         )
 
 
