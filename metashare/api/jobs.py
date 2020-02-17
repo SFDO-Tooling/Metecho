@@ -33,6 +33,13 @@ from .sf_run_flow import create_org, delete_org, run_flow
 logger = logging.getLogger(__name__)
 
 
+def get_user_facing_url(*, path):
+    domain = Site.objects.first().domain
+    should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith("localhost")
+    scheme = "http" if should_be_http else "https"
+    return furl(f"{scheme}://{domain}").set(path=path).url
+
+
 def _create_branches_on_github(*, user, repo_id, project, task):
     """
     Expects to be called in the context of a local github checkout.
@@ -96,16 +103,8 @@ def alert_user_about_expiring_org(*, org, days):
         task = org.task
         project = task.project
         repo = project.repository
-
-        domain = Site.objects.first().domain
-        should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith(
-            "localhost"
-        )
-        scheme = "http" if should_be_http else "https"
-        metashare_link = (
-            furl(f"{scheme}://{domain}")
-            .set(path=["repositories", repo.slug, project.slug, task.slug])
-            .url
+        metashare_link = get_user_facing_url(
+            path=["repositories", repo.slug, project.slug, task.slug]
         )
 
         # email user
@@ -492,9 +491,18 @@ def submit_review(*, user, task, data):
                 TASK_REVIEW_STATUS.Approved: "success",
                 TASK_REVIEW_STATUS["Changes requested"]: "failure",
             }.get(data["status"])
+            target_url = get_user_facing_url(
+                path=[
+                    "repositories",
+                    task.project.repository.slug,
+                    task.project.slug,
+                    task.slug,
+                ]
+            )
             repository.create_status(
                 task.commits[0].get("id"),
                 state_for_status,
+                target_url=target_url,
                 description=data["notes"],
                 context="MetaShare Review",
             )
