@@ -520,21 +520,20 @@ def submit_review(*, user, task, data):
             ]
         )
 
+        # We filter notes to string.printable to avoid problems
+        # GitHub has with emoji in status descriptions
+        printable = set(string.printable)
+        filtered_notes = "".join(filter(lambda c: c in printable, notes))
         repository.create_status(
             review_sha,
             state_for_status,
             target_url=target_url,
-            description=notes,
+            description=filtered_notes[:25],
             context="MetaShare Review",
         )
         if notes:
-            # We filter notes to string.printable to avoid problems
-            # GitHub has with emoji in create_status
-            printable = set(string.printable)
-            filtered_notes = "".join(filter(lambda c: c in printable, notes))
-
             # We always COMMENT so as not to change the PR's status:
-            pr.create_review(filtered_notes, event="COMMENT")
+            pr.create_review(notes, event="COMMENT")
     except Exception as e:
         task.refresh_from_db()
         task.finalize_submit_review(now(), err=e)
