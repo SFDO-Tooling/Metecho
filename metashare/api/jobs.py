@@ -13,6 +13,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
 from furl import furl
+from rest_framework.exceptions import ValidationError
 
 from .gh import (
     get_cumulus_prefix,
@@ -484,41 +485,43 @@ def submit_review(*, user, task, data):
         elif task.review_valid:
             review_sha = task.review_sha
 
-        if task.commits and task.pr_is_open and review_sha:
-            repo_id = task.project.repository.get_repo_id(user)
-            repository = get_repo_info(user, repo_id=repo_id)
-            pr = repository.pull_request(task.pr_number)
+        if not (task.pr_is_open and review_sha):
+            raise ValidationError(_("Cannot submit review for this task."))
 
-            # The values in this dict are the valid values for the
-            # `state` arg to repository.create_status. We are not
-            # currently using all of them, because some of them make no
-            # sense for our system to add to GitHub.
-            state_for_status = {
-                # "": "pending",
-                # "": "error",
-                TASK_REVIEW_STATUS.Approved: "success",
-                TASK_REVIEW_STATUS["Changes requested"]: "failure",
-            }.get(data["status"])
+        repo_id = task.project.repository.get_repo_id(user)
+        repository = get_repo_info(user, repo_id=repo_id)
+        pr = repository.pull_request(task.pr_number)
 
-            target_url = get_user_facing_url(
-                path=[
-                    "repositories",
-                    task.project.repository.slug,
-                    task.project.slug,
-                    task.slug,
-                ]
-            )
+        # The values in this dict are the valid values for the
+        # `state` arg to repository.create_status. We are not
+        # currently using all of them, because some of them make no
+        # sense for our system to add to GitHub.
+        state_for_status = {
+            # "": "pending",
+            # "": "error",
+            TASK_REVIEW_STATUS.Approved: "success",
+            TASK_REVIEW_STATUS["Changes requested"]: "failure",
+        }.get(data["status"])
 
-            repository.create_status(
-                review_sha,
-                state_for_status,
-                target_url=target_url,
-                description=data["notes"],
-                context="MetaShare Review",
-            )
-            if data["notes"]:
-                # We always COMMENT so as not to change the PR's status:
-                pr.create_review(data["notes"], event="COMMENT")
+        target_url = get_user_facing_url(
+            path=[
+                "repositories",
+                task.project.repository.slug,
+                task.project.slug,
+                task.slug,
+            ]
+        )
+
+        repository.create_status(
+            review_sha,
+            state_for_status,
+            target_url=target_url,
+            description=data["notes"],
+            context="MetaShare Review",
+        )
+        if data["notes"]:
+            # We always COMMENT so as not to change the PR's status:
+            pr.create_review(data["notes"], event="COMMENT")
     except Exception as e:
         task.refresh_from_db()
         task.finalize_submit_review(now(), err=e)

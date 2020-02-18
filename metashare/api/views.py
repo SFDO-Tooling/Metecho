@@ -171,6 +171,13 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
                 serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
         task = self.get_object()
+        org = serializer.validated_data["org"]
+
+        if not task.pr_is_open:
+            raise ValidationError(_("The pull request for this task has been closed."))
+        if not (org or task.review_valid):
+            raise ValidationError(_("Cannot submit review without a Review Org."))
+
         task.queue_submit_review(user=request.user, data=serializer.validated_data)
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 

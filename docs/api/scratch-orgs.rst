@@ -45,7 +45,7 @@ Commit
 
 .. sourcecode:: http
 
-   POST /api/scratch-orgs/:id/commit HTTP/1.1
+   POST /api/scratch-orgs/:id/commit/ HTTP/1.1
 
    {
      "commit_message": "This is a sample message.",
@@ -63,25 +63,18 @@ Redirect
 
 .. sourcecode:: http
 
-   GET /api/scratch-orgs/:id/redirect HTTP/1.1
+   GET /api/scratch-orgs/:id/redirect/ HTTP/1.1
 
 .. sourcecode:: http
 
    HTTP/1.1 302 FOUND
 
-Review
-------
+Refresh
+-------
 
 .. sourcecode:: http
 
-   POST /api/scratch-orgs/:id/review HTTP/1.1
-
-   {
-     "notes": "This is a sample review message.",
-     "status": "APPROVE",
-     "delete_org": false,
-     "org": "n1057Rw"
-   }
+   POST /api/scratch-orgs/:id/refresh/ HTTP/1.1
 
 .. sourcecode:: http
 

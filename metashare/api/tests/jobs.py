@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
+from rest_framework.exceptions import ValidationError
 from simple_salesforce.exceptions import SalesforceGeneralError
 
 from ..jobs import (
@@ -564,6 +565,7 @@ class TestSubmitReview:
                 "delete_org": False,
                 "org": None,
             }, task.finalize_submit_review.call_args.kwargs
+            assert "err" not in task.finalize_submit_review.call_args.kwargs
 
     def test_good__has_org(self, task_factory, scratch_org_factory, user_factory):
         with ExitStack() as stack:
@@ -612,28 +614,31 @@ class TestSubmitReview:
                 patch("metashare.api.model_mixins.get_repo_info")
             )
             user = user_factory()
-            task = task_factory(review_valid=False, commits=[{"id": "testsha"}])
+            task = task_factory(
+                pr_is_open=True, review_valid=False, review_sha="test_sha"
+            )
             task.finalize_submit_review = MagicMock()
             task.project.repository.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
-            submit_review(
-                user=user,
-                task=task,
-                data=OrderedDict(
-                    [
-                        ("notes", "Notes"),
-                        ("status", "APPROVE"),
-                        ("delete_org", False),
-                        ("org", None),
-                    ]
-                ),
-            )
+            with pytest.raises(ValidationError):
+                submit_review(
+                    user=user,
+                    task=task,
+                    data=OrderedDict(
+                        [
+                            ("notes", "Notes"),
+                            ("status", "APPROVE"),
+                            ("delete_org", False),
+                            ("org", None),
+                        ]
+                    ),
+                )
 
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
-            # assert "err" in task.finalize_submit_review.call_args.kwargs
+            assert "err" in task.finalize_submit_review.call_args.kwargs
 
     def test_bad(self):
         with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
