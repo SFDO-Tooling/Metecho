@@ -13,7 +13,6 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
 from furl import furl
-from rest_framework.exceptions import ValidationError
 
 from .gh import (
     get_cumulus_prefix,
@@ -32,6 +31,10 @@ from .sf_org_changes import (
 from .sf_run_flow import create_org, delete_org, run_flow
 
 logger = logging.getLogger(__name__)
+
+
+class TaskReviewIntegrityError(Exception):
+    pass
 
 
 def get_user_facing_url(*, path):
@@ -479,6 +482,10 @@ def submit_review(*, user, task, data):
     try:
         review_sha = None
         org = data["org"]
+        notes = data["notes"]
+        status = data["status"]
+        delete_org = data["delete_org"]
+
         task.refresh_from_db()
         if org:
             review_sha = org.latest_commit
@@ -486,7 +493,7 @@ def submit_review(*, user, task, data):
             review_sha = task.review_sha
 
         if not (task.pr_is_open and review_sha):
-            raise ValidationError(_("Cannot submit review for this task."))
+            raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
 
         repo_id = task.project.repository.get_repo_id(user)
         repository = get_repo_info(user, repo_id=repo_id)
@@ -501,7 +508,7 @@ def submit_review(*, user, task, data):
             # "": "error",
             TASK_REVIEW_STATUS.Approved: "success",
             TASK_REVIEW_STATUS["Changes requested"]: "failure",
-        }.get(data["status"])
+        }.get(status)
 
         target_url = get_user_facing_url(
             path=[
@@ -516,12 +523,12 @@ def submit_review(*, user, task, data):
             review_sha,
             state_for_status,
             target_url=target_url,
-            description=data["notes"],
+            description=notes,
             context="MetaShare Review",
         )
-        if data["notes"]:
+        if notes:
             # We always COMMENT so as not to change the PR's status:
-            pr.create_review(data["notes"], event="COMMENT")
+            pr.create_review(notes, event="COMMENT")
     except Exception as e:
         task.refresh_from_db()
         task.finalize_submit_review(now(), err=e)
@@ -533,8 +540,8 @@ def submit_review(*, user, task, data):
         task.finalize_submit_review(
             now(),
             sha=review_sha,
-            status=data["status"],
-            delete_org=data["delete_org"],
+            status=status,
+            delete_org=delete_org,
             org=org,
         )
 

@@ -1,14 +1,14 @@
-from collections import OrderedDict, namedtuple
+from collections import namedtuple
 from contextlib import ExitStack
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
-from rest_framework.exceptions import ValidationError
 from simple_salesforce.exceptions import SalesforceGeneralError
 
 from ..jobs import (
+    TaskReviewIntegrityError,
     _create_branches_on_github,
     _create_org_and_run_flow,
     alert_user_about_expiring_org,
@@ -547,14 +547,12 @@ class TestSubmitReview:
             submit_review(
                 user=user,
                 task=task,
-                data=OrderedDict(
-                    [
-                        ("notes", "Notes"),
-                        ("status", "APPROVE"),
-                        ("delete_org", False),
-                        ("org", None),
-                    ]
-                ),
+                data={
+                    "notes": "Notes",
+                    "status": "APPROVE",
+                    "delete_org": False,
+                    "org": None,
+                },
             )
 
             assert task.finalize_submit_review.called
@@ -586,14 +584,12 @@ class TestSubmitReview:
             submit_review(
                 user=user,
                 task=task,
-                data=OrderedDict(
-                    [
-                        ("notes", "Notes"),
-                        ("status", "APPROVE"),
-                        ("delete_org", False),
-                        ("org", scratch_org),
-                    ]
-                ),
+                data={
+                    "notes": "Notes",
+                    "status": "APPROVE",
+                    "delete_org": False,
+                    "org": scratch_org,
+                },
             )
 
             assert task.finalize_submit_review.called
@@ -622,18 +618,16 @@ class TestSubmitReview:
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
-            with pytest.raises(ValidationError):
+            with pytest.raises(TaskReviewIntegrityError):
                 submit_review(
                     user=user,
                     task=task,
-                    data=OrderedDict(
-                        [
-                            ("notes", "Notes"),
-                            ("status", "APPROVE"),
-                            ("delete_org", False),
-                            ("org", None),
-                        ]
-                    ),
+                    data={
+                        "notes": "Notes",
+                        "status": "APPROVE",
+                        "delete_org": False,
+                        "org": None,
+                    },
                 )
 
             assert task.finalize_submit_review.called
@@ -651,14 +645,12 @@ class TestSubmitReview:
                 submit_review(
                     user=None,
                     task=task,
-                    data=OrderedDict(
-                        [
-                            ("notes", "Notes"),
-                            ("status", "APPROVE"),
-                            ("delete_org", False),
-                            ("org", None),
-                        ]
-                    ),
+                    data={
+                        "notes": "Notes",
+                        "status": "APPROVE",
+                        "delete_org": False,
+                        "org": None,
+                    },
                 )
 
             assert task.finalize_submit_review.called
