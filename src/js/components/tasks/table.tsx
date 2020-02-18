@@ -14,7 +14,12 @@ import {
 } from '@/components/user/githubUser';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
-import { ORG_TYPES, OrgTypes, TASK_STATUSES } from '@/utils/constants';
+import {
+  ORG_TYPES,
+  OrgTypes,
+  REVIEW_STATUSES,
+  TASK_STATUSES,
+} from '@/utils/constants';
 import routes from '@/utils/routes';
 
 type AssignUserAction = ({
@@ -63,11 +68,13 @@ NameTableCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
+  const status = item?.review_valid ? item.review_status : item?.status;
+
   if (!item) {
     return null;
   }
   let displayStatus, icon;
-  switch (item.status) {
+  switch (status) {
     case TASK_STATUSES.PLANNED:
       displayStatus = i18n.t('Planned');
       icon = <ProgressRing value={0} />;
@@ -80,6 +87,14 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
       displayStatus = i18n.t('Complete');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
       break;
+    case REVIEW_STATUSES.CHANGES_REQUESTED:
+      displayStatus = i18n.t('Changes Requested');
+      icon = <ProgressRing value={60} theme="warning" />;
+      break;
+    case REVIEW_STATUSES.APPROVED:
+      displayStatus = i18n.t('Approved');
+      icon = <ProgressRing value={80} theme="base" />;
+      break;
   }
   return (
     <DataTableCell
@@ -89,7 +104,7 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     >
       {icon}
       <span className="slds-m-left_x-small project-task-status-text">
-        {displayStatus || item.status}
+        {displayStatus || status}
       </span>
     </DataTableCell>
   );
