@@ -60,3 +60,21 @@ Retrieve
       }
       ...
     ]
+
+Review
+------
+
+.. sourcecode:: http
+
+   POST /api/tasks/:id/review/ HTTP/1.1
+
+   {
+     "notes": "This is a sample review message.",
+     "status": "Approved",
+     "delete_org": false,
+     "org": "n1057Rw"
+   }
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED
