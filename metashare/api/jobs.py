@@ -1,4 +1,5 @@
 import logging
+import string
 import traceback
 from datetime import timedelta
 
@@ -527,8 +528,13 @@ def submit_review(*, user, task, data):
             context="MetaShare Review",
         )
         if notes:
+            # We filter notes to string.printable to avoid problems
+            # GitHub has with emoji in create_status
+            printable = set(string.printable)
+            filtered_notes = "".join(filter(lambda c: c in printable, notes))
+
             # We always COMMENT so as not to change the PR's status:
-            pr.create_review(notes, event="COMMENT")
+            pr.create_review(filtered_notes, event="COMMENT")
     except Exception as e:
         task.refresh_from_db()
         task.finalize_submit_review(now(), err=e)
@@ -538,11 +544,7 @@ def submit_review(*, user, task, data):
     else:
         task.refresh_from_db()
         task.finalize_submit_review(
-            now(),
-            sha=review_sha,
-            status=status,
-            delete_org=delete_org,
-            org=org,
+            now(), sha=review_sha, status=status, delete_org=delete_org, org=org,
         )
 
 
