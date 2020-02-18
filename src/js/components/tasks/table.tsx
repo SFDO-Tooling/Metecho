@@ -68,11 +68,10 @@ NameTableCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
-  const status = item?.review_valid ? item.review_status : item?.status;
-
   if (!item) {
     return null;
   }
+  const status = item.review_valid ? item.review_status : item.status;
   let displayStatus, icon;
   switch (status) {
     case TASK_STATUSES.PLANNED:
@@ -89,17 +88,19 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
       break;
     case REVIEW_STATUSES.CHANGES_REQUESTED:
       displayStatus = i18n.t('Changes Requested');
-      icon = <ProgressRing value={60} theme="warning" />;
+      icon = (
+        <ProgressRing value={60} flowDirection="fill" theme="warning" hasIcon />
+      );
       break;
     case REVIEW_STATUSES.APPROVED:
       displayStatus = i18n.t('Approved');
-      icon = <ProgressRing value={80} theme="base" />;
+      icon = <ProgressRing value={80} flowDirection="fill" />;
       break;
   }
   return (
     <DataTableCell
       {...props}
-      title={displayStatus || item.status}
+      title={displayStatus || status}
       className={classNames(className, 'project-task-status')}
     >
       {icon}
