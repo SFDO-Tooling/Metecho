@@ -135,6 +135,7 @@ const OrgInfo = ({
 
   switch (type) {
     case ORG_TYPES.DEV: {
+      /* istanbul ignore else */
       if (org) {
         orgStatus = (
           <>
@@ -169,8 +170,10 @@ const OrgInfo = ({
             orgStatus = i18n.t('Review out of date');
           }
         } else if (task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED) {
+          /* istanbul ignore else */
           orgStatus = i18n.t('Changes requested');
         }
+        /* istanbul ignore else */
         if (reviewSubmittedAt) {
           orgStatus = (
             <>

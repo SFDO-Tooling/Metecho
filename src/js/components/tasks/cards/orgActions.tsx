@@ -99,6 +99,7 @@ const OrgActions = ({
         />
       );
     } else if (org && ownedByCurrentUser) {
+      /* istanbul ignore else */
       submitReviewBtn = (
         <Tooltip
           content={i18n.t('View your org before submitting a review.')}

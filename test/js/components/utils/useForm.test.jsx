@@ -16,14 +16,21 @@ afterEach(() => {
 describe('useForm', () => {
   test('creates a new object', () => {
     const { result } = renderHookWithRedux(() =>
-      useForm({ fields: { testing: '' }, objectType: 'test-type' }),
+      useForm({
+        fields: { testing: '', test: true },
+        objectType: 'test-type',
+      }),
     );
-    result.current.handleSubmit({ preventDefault: jest.fn() });
+    result.current.handleSubmit({
+      preventDefault: jest.fn(),
+      target: { type: 'checkbox', checked: true },
+    });
 
     expect(createObject).toHaveBeenCalledWith({
       objectType: 'test-type',
       data: {
         testing: '',
+        test: true,
       },
       hasForm: true,
       shouldSubscribeToObject: true,
