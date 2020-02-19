@@ -279,7 +279,6 @@ class Repository(
     def queue_refresh_commits(self, *, ref):
         from .jobs import refresh_commits_job
 
-        Task.objects.filter(project__repository=self).update(review_valid=False)
         refresh_commits_job.delay(repository=self, branch_name=ref)
 
     @transaction.atomic
@@ -471,6 +470,14 @@ class Task(
 
     # end CreatePrMixin configuration
 
+    def update_review_valid(self):
+        review_valid = bool(
+            self.review_sha
+            and self.commits
+            and self.review_sha == self.commits[0].get("id")
+        )
+        self.review_valid = review_valid
+
     def finalize_task_update(self):
         self.save()
         self.notify_changed()
@@ -508,10 +515,10 @@ class Task(
             self.notify_changed()
 
     def add_commits(self, commits, sender):
-        self.review_valid = False
         self.commits = [
             gh.normalize_commit(c, sender=sender) for c in commits
         ] + self.commits
+        self.update_review_valid()
         self.save()
         self.notify_changed()
 
@@ -536,8 +543,8 @@ class Task(
         else:
             self.review_submitted_at = timestamp
             self.review_status = status
-            self.review_valid = True
             self.review_sha = sha
+            self.update_review_valid()
             self.save()
             self.notify_changed("TASK_SUBMIT_REVIEW")
             deletable_org = (

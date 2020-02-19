@@ -155,11 +155,16 @@ const OrgInfo = ({
       break;
     }
     case ORG_TYPES.QA: {
+      const isWaitingForReview = org && task.pr_is_open;
       if (isSubmittingReview) {
         orgStatus = i18n.t('Submitting review…');
       } else if (task.review_status) {
-        if (task.review_status === REVIEW_STATUSES.APPROVED) {
-          if (task.review_valid) {
+        const isApproved = task.review_status === REVIEW_STATUSES.APPROVED;
+        const isChangesRequested =
+          task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
+        const isValid = task.review_valid;
+        if (isApproved) {
+          if (isValid) {
             orgStatus = (
               <span className="slds-text-color_success">
                 {i18n.t('Approved')}
@@ -168,7 +173,7 @@ const OrgInfo = ({
           } else {
             orgStatus = i18n.t('Review out of date');
           }
-        } else if (task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED) {
+        } else if (isChangesRequested) {
           orgStatus = i18n.t('Changes requested');
         }
         if (reviewSubmittedAt) {
@@ -184,7 +189,7 @@ const OrgInfo = ({
             </>
           );
         }
-      } else if (org && task.pr_is_open) {
+      } else if (isWaitingForReview) {
         orgStatus = i18n.t('Pending review');
       }
       break;

@@ -443,6 +443,7 @@ def refresh_commits(*, repository, branch_name):
         task.commits = [
             normalize_commit(commit) for commit in commits[:origin_sha_index]
         ]
+        task.update_review_valid()
         task.finalize_task_update()
 
 
