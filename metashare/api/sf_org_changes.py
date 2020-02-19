@@ -128,7 +128,9 @@ def get_latest_revision_numbers(scratch_org):
 
     record_dict = defaultdict(lambda: defaultdict(dict))
     for record in records:
-        record_dict[record["MemberType"]][record["MemberName"]] = record["RevisionCount"]
+        record_dict[record["MemberType"]][record["MemberName"]] = record[
+            "RevisionCount"
+        ]
 
     return {k: dict(v) for k, v in record_dict.items()}
 
