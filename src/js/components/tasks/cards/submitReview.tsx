@@ -7,7 +7,7 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
 import { REVIEW_STATUSES, ReviewStatuses } from '@/utils/constants';
@@ -50,6 +50,7 @@ const SubmitReviewModal = ({
     inputs,
     errors,
     handleInputChange,
+    setInputs,
     handleSubmit,
     resetForm,
   } = useForm({
@@ -66,6 +67,11 @@ const SubmitReviewModal = ({
     onError: handleError,
     shouldSubscribeToObject: false,
   });
+
+  // When reviewStatus changes, update default selection
+  useEffect(() => {
+    setInputs({ ...inputs, status: reviewStatus || REVIEW_STATUSES.APPROVED });
+  }, [reviewStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation

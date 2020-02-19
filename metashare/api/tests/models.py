@@ -198,10 +198,11 @@ class TestTask:
     def test_finalize_submit_review(self, task_factory):
         now = datetime(2020, 12, 31, 12, 0)
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
-            task = task_factory()
-            task.finalize_submit_review(now)
+            task = task_factory(commits=[{"id": "123"}])
+            task.finalize_submit_review(now, sha="123")
 
             assert async_to_sync.called
+            assert task.review_sha == "123"
             assert task.review_valid
 
     def test_finalize_submit_review__delete_org(
@@ -209,13 +210,16 @@ class TestTask:
     ):
         now = datetime(2020, 12, 31, 12, 0)
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
-            task = task_factory()
+            task = task_factory(commits=[{"id": "123"}])
             scratch_org = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
             scratch_org.queue_delete = MagicMock()
-            task.finalize_submit_review(now, delete_org=True, org=scratch_org)
+            task.finalize_submit_review(
+                now, sha="123", delete_org=True, org=scratch_org
+            )
 
             assert async_to_sync.called
             assert scratch_org.queue_delete.called
+            assert task.review_sha == "123"
             assert task.review_valid
 
     def test_finalize_submit_review__error(self, task_factory):
