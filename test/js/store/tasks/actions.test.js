@@ -51,8 +51,8 @@ describe('createTaskPR', () => {
     expect(allActions[0].payload.heading).toEqual(
       'Successfully submitted task for review: “My Task”.',
     );
-    expect(allActions[0].payload.linkText).toBe(undefined);
-    expect(allActions[0].payload.linkUrl).toBe(undefined);
+    expect(allActions[0].payload.linkText).toBeUndefined();
+    expect(allActions[0].payload.linkUrl).toBeUndefined();
     expect(allActions[1]).toEqual(action);
   });
 });
@@ -97,6 +97,7 @@ describe('submitReview', () => {
     };
     store.dispatch(actions.submitReview(task));
     const allActions = store.getActions();
+
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
       'Successfully submitted review for task: “My Task”.',
@@ -123,8 +124,8 @@ describe('submitReview', () => {
     expect(allActions[0].payload.heading).toEqual(
       'Successfully submitted review for task: “My Task”.',
     );
-    expect(allActions[0].payload.linkText).toBe(undefined);
-    expect(allActions[0].payload.linkUrl).toBe(undefined);
+    expect(allActions[0].payload.linkText).toBeUndefined();
+    expect(allActions[0].payload.linkUrl).toBeUndefined();
     expect(allActions[1]).toEqual(action);
   });
 });
