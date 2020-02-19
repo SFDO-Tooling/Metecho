@@ -453,23 +453,47 @@ describe('<OrgCards/>', () => {
           },
         });
         fireEvent.click(getByText('Submit Review'));
-        expect(queryByText('Submit Task Review')).toBeVisible();
+
+        expect(getByText('Submit Task Review')).toBeVisible();
 
         fireEvent.click(getByText('Cancel'));
 
         expect(queryByText('Submit Task Review')).toBeNull();
       });
 
-      test('submits task for review', () => {
-        const { queryByText, queryAllByText } = setup({
-          task: { ...defaultTask, commits: [], pr_is_open: true },
-          orgs: {
-            ...orgs,
-            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
-          },
+      describe('form submit', () => {
+        test('submits task for review', () => {
+          const { getByText, baseElement } = setup({
+            task: { ...defaultTask, commits: [], pr_is_open: true },
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+              },
+            },
+          });
+          fireEvent.click(getByText('Submit Review'));
+          const submit = baseElement.querySelector(
+            '.slds-button[type="submit"]',
+          );
+          fireEvent.click(submit);
+
+          expect(getByText('Submitting Review…')).toBeVisible();
+          expect(createObject).toHaveBeenCalledTimes(1);
+          expect(createObject).toHaveBeenCalledWith({
+            url: window.api_urls.task_review('task-id'),
+            data: {
+              notes: '',
+              status: 'Approved',
+              delete_org: false,
+              org: 'org-id',
+            },
+            hasForm: true,
+            shouldSubscribeToObject: false,
+          });
         });
-        fireEvent.click(queryByText('Submit Review'));
-        fireEvent.click(queryAllByText('Submit Review')[1]);
       });
 
       test('currently submitting', () => {
@@ -490,7 +514,7 @@ describe('<OrgCards/>', () => {
       });
 
       describe('submit review btn', () => {
-        test('enabled', () => {
+        test('updating review', () => {
           const { getByText } = setup({
             task: {
               ...defaultTask,
@@ -499,12 +523,8 @@ describe('<OrgCards/>', () => {
               review_valid: true,
             },
             orgs: {
-              ...orgs,
-              QA: {
-                ...orgs.QA,
-                latest_commit: 'parent',
-                has_been_visited: true,
-              },
+              Dev: null,
+              QA: null,
             },
           });
 
@@ -528,9 +548,8 @@ describe('<OrgCards/>', () => {
               },
             },
           });
-          fireEvent.focus(getByText('Submit Review'));
 
-          expect(getByText('Submit Review')).toHaveAttribute('disabled');
+          expect(getByText('Submit Review')).toBeDisabled();
         });
       });
 
@@ -553,7 +572,7 @@ describe('<OrgCards/>', () => {
               review_valid: true,
             },
           });
-          // debug();
+
           expect(getByText('Approved')).toBeVisible();
         });
 
@@ -576,7 +595,9 @@ describe('<OrgCards/>', () => {
             },
           });
 
-          expect(getByText('Changes requested')).toBeVisible();
+          expect(
+            getByText('Changes requested', { exact: false }),
+          ).toBeVisible();
         });
 
         test('renders "Review out of date" status', () => {
@@ -598,7 +619,9 @@ describe('<OrgCards/>', () => {
             },
           });
 
-          expect(getByText('Review Out of date')).toBeVisible();
+          expect(
+            getByText('Review out of date', { exact: false }),
+          ).toBeVisible();
         });
       });
     });

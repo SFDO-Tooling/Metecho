@@ -98,21 +98,24 @@ const OrgActions = ({
           onClick={openSubmitReviewModal}
         />
       );
-    } else if (org && ownedByCurrentUser) {
+    } else {
       /* istanbul ignore else */
-      submitReviewBtn = (
-        <Tooltip
-          content={i18n.t('View your org before submitting a review.')}
-          position="overflowBoundaryElement"
-        >
-          <Button
-            label={i18n.t('Submit Review')}
-            variant="outline-brand"
-            className="slds-m-right_small"
-            disabled
-          />
-        </Tooltip>
-      );
+      // eslint-disable-next-line no-lonely-if
+      if (org && ownedByCurrentUser) {
+        submitReviewBtn = (
+          <Tooltip
+            content={i18n.t('View your org before submitting a review.')}
+            position="overflowBoundaryElement"
+          >
+            <Button
+              label={i18n.t('Submit Review')}
+              variant="outline-brand"
+              className="slds-m-right_small"
+              disabled
+            />
+          </Tooltip>
+        );
+      }
     }
   }
 

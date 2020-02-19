@@ -174,8 +174,12 @@ const OrgInfo = ({
           } else {
             orgStatus = i18n.t('Review out of date');
           }
-        } /* istanbul ignore else */ else if (isChangesRequested) {
-          orgStatus = i18n.t('Changes requested');
+        } else {
+          /* istanbul ignore else */
+          // eslint-disable-next-line no-lonely-if
+          if (isChangesRequested) {
+            orgStatus = i18n.t('Changes requested');
+          }
         }
         /* istanbul ignore else */
         if (reviewSubmittedAt) {
