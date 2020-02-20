@@ -122,14 +122,14 @@ def get_latest_revision_numbers(scratch_org):
     # version, there are changes.
     # We need to run this right after the setup flow and store that as initial state.
     records = conn.query_all(
-        "SELECT MemberName, MemberType, RevisionCount FROM SourceMember "
+        "SELECT MemberName, MemberType, RevisionCounter FROM SourceMember "
         "WHERE IsNameObsolete=false"
     ).get("records", [])
 
     record_dict = defaultdict(lambda: defaultdict(dict))
     for record in records:
         record_dict[record["MemberType"]][record["MemberName"]] = record[
-            "RevisionCount"
+            "RevisionCounter"
         ]
 
     return {k: dict(v) for k, v in record_dict.items()}
