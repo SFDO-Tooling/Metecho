@@ -118,8 +118,6 @@ def test_create_org_and_run_flow():
         run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
@@ -140,8 +138,6 @@ def test_get_unsaved_changes(scratch_org_factory):
 
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
         )
