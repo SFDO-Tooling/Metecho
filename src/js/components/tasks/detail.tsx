@@ -9,7 +9,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
-import CaptureModal from '@/components/tasks/captureOrgChanges';
+import CaptureModal from '@/components/tasks/capture';
 import OrgCards from '@/components/tasks/cards';
 import {
   DetailPageLayout,
