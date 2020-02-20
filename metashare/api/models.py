@@ -36,6 +36,9 @@ SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 TASK_STATUSES = Choices(
     ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
 )
+TASK_REVIEW_STATUS = Choices(
+    ("Approved", "Approved"), ("Changes requested", "Changes requested"),
+)
 
 
 class UserQuerySet(models.QuerySet):
@@ -403,13 +406,24 @@ class Task(
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
+
     commits = JSONField(default=list, blank=True)
     origin_sha = StringField(null=True, blank=True)
     ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
+
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+
+    currently_submitting_review = models.BooleanField(default=False)
+    review_submitted_at = models.DateTimeField(null=True, blank=True)
+    review_valid = models.BooleanField(default=False)
+    review_status = models.CharField(
+        choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
+    )
+    review_sha = StringField(null=True, blank=True)
+
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
@@ -456,6 +470,14 @@ class Task(
 
     # end CreatePrMixin configuration
 
+    def update_review_valid(self):
+        review_valid = bool(
+            self.review_sha
+            and self.commits
+            and self.review_sha == self.commits[0].get("id")
+        )
+        self.review_valid = review_valid
+
     def finalize_task_update(self):
         self.save()
         self.notify_changed()
@@ -496,11 +518,40 @@ class Task(
         self.commits = [
             gh.normalize_commit(c, sender=sender) for c in commits
         ] + self.commits
+        self.update_review_valid()
         self.save()
         self.notify_changed()
 
     def add_ms_git_sha(self, sha):
         self.ms_commits.append(sha)
+
+    def queue_submit_review(self, *, user, data):
+        from .jobs import submit_review_job
+
+        self.currently_submitting_review = True
+        self.save()
+        self.notify_changed()
+        submit_review_job.delay(user=user, task=self, data=data)
+
+    def finalize_submit_review(
+        self, timestamp, err=None, sha=None, status=None, delete_org=False, org=None
+    ):
+        self.currently_submitting_review = False
+        if err:
+            self.save()
+            self.notify_error(err, "TASK_SUBMIT_REVIEW_FAILED")
+        else:
+            self.review_submitted_at = timestamp
+            self.review_status = status
+            self.review_sha = sha
+            self.update_review_valid()
+            self.save()
+            self.notify_changed("TASK_SUBMIT_REVIEW")
+            deletable_org = (
+                org and org.task == self and org.org_type == SCRATCH_ORG_TYPES.QA
+            )
+            if delete_org and deletable_org:
+                org.queue_delete()
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -529,6 +580,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     expiry_job_id = StringField(null=True, blank=True)
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
+    has_been_visited = models.BooleanField(default=False)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -541,6 +593,11 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             self.queue_provision()
 
         return ret
+
+    def mark_visited(self):
+        self.has_been_visited = True
+        self.save()
+        self.notify_changed()
 
     def get_refreshed_org_config(self):
         org_config = OrgConfig(self.config, "dev")
@@ -655,7 +712,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
 
     def remove_scratch_org(self, error):
-        self.notify_error(error, "SCRATCH_ORG_REMOVE")
+        self.notify_scratch_org_error(error, "SCRATCH_ORG_REMOVE")
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
         self.delete(should_finalize=False)
@@ -663,6 +720,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def queue_refresh_org(self):
         from .jobs import refresh_scratch_org_job
 
+        self.has_been_visited = False
         self.currently_refreshing_org = True
         self.save()
         self.notify_changed()

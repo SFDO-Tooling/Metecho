@@ -18,6 +18,8 @@ Websocket notifications you can subscribe to:
         TASK_UPDATE
         TASK_CREATE_PR
         TASK_CREATE_PR_FAILED
+        TASK_SUBMIT_REVIEW
+        TASK_SUBMIT_REVIEW_FAILED
 
     scratchorg.:id
         SCRATCH_ORG_PROVISION

@@ -216,7 +216,7 @@ export const createObject = ({
   hasForm = false,
   shouldSubscribeToObject = true,
 }: {
-  objectType: ObjectTypes;
+  objectType?: ObjectTypes;
   url?: string;
   data?: ObjectData;
   hasForm?: boolean;
@@ -253,7 +253,7 @@ export const createObject = ({
         shouldSubscribeToObject) ||
       (typeof shouldSubscribeToObject === 'function' &&
         shouldSubscribeToObject(object));
-    if (object?.id && window.socket && shouldSubscribe) {
+    if (object?.id && window.socket && shouldSubscribe && objectType) {
       window.socket.subscribe({
         model: objectType,
         id: object.id,

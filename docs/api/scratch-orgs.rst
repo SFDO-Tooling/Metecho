@@ -34,7 +34,48 @@ Retrieve
         "currently_refreshing_org": false,
         "delete_queued_at": null,
         "owner_sf_username": "user@domain.com",
-        "owner_gh_username": "user123"
+        "owner_gh_username": "user123",
+        "has_been_visited": true
       }
       ...
     ]
+
+Commit
+------
+
+.. sourcecode:: http
+
+   POST /api/scratch-orgs/:id/commit/ HTTP/1.1
+
+   {
+     "commit_message": "This is a sample message.",
+     "changes": {
+       "MemberType": ["MemberName1", "MemberName2"]
+     }
+   }
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED
+
+Redirect
+--------
+
+.. sourcecode:: http
+
+   GET /api/scratch-orgs/:id/redirect/ HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 302 FOUND
+
+Refresh
+-------
+
+.. sourcecode:: http
+
+   POST /api/scratch-orgs/:id/refresh/ HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED

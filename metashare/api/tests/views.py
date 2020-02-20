@@ -515,3 +515,53 @@ class TestTaskView:
             )
 
             assert response.status_code == 400
+
+    def test_review__good(self, client, task_factory):
+        task = task_factory(pr_is_open=True, review_valid=True)
+        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
+            data = {
+                "notes": "",
+                "status": "Approved",
+                "delete_org": False,
+                "org": "",
+            }
+            response = client.post(
+                reverse("task-review", kwargs={"pk": str(task.id)}), data
+            )
+
+            assert response.status_code == 202, response.json()
+            assert submit_review_job.delay.called
+
+    def test_review__bad(self, client, task_factory):
+        task = task_factory(pr_is_open=True, review_valid=True)
+        response = client.post(reverse("task-review", kwargs={"pk": str(task.id)}), {})
+
+        assert response.status_code == 422
+
+    def test_review__bad_pr_closed(self, client, task_factory):
+        task = task_factory(pr_is_open=False, review_valid=True)
+        data = {
+            "notes": "",
+            "status": "Approved",
+            "delete_org": False,
+            "org": "",
+        }
+        response = client.post(
+            reverse("task-review", kwargs={"pk": str(task.id)}), data
+        )
+
+        assert response.status_code == 400
+
+    def test_review__bad_invalid_review(self, client, task_factory):
+        task = task_factory(pr_is_open=True, review_valid=False)
+        data = {
+            "notes": "",
+            "status": "Approved",
+            "delete_org": False,
+            "org": "",
+        }
+        response = client.post(
+            reverse("task-review", kwargs={"pk": str(task.id)}), data
+        )
+
+        assert response.status_code == 400

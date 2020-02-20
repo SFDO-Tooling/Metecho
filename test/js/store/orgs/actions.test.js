@@ -54,8 +54,8 @@ describe('provisionOrg', () => {
       expect(allActions[0].payload.heading).toEqual(
         'Successfully created Dev org.',
       );
-      expect(allActions[0].payload.linkText).toBe(undefined);
-      expect(allActions[0].payload.linkUrl).toBe(undefined);
+      expect(allActions[0].payload.linkText).toBeUndefined();
+      expect(allActions[0].payload.linkUrl).toBeUndefined();
       expect(allActions[1]).toEqual(orgAction);
     });
   });
@@ -129,8 +129,8 @@ describe('provisionFailed', () => {
       expect(allActions[0].payload.heading).toEqual(
         'Uh oh. There was an error creating your new Dev org.',
       );
-      expect(allActions[0].payload.linkText).toBe(undefined);
-      expect(allActions[0].payload.linkUrl).toBe(undefined);
+      expect(allActions[0].payload.linkText).toBeUndefined();
+      expect(allActions[0].payload.linkUrl).toBeUndefined();
       expect(allActions[1]).toEqual(orgAction);
     });
   });
@@ -268,7 +268,7 @@ describe('updateFailed', () => {
     expect(allActions[0].payload.heading).toEqual(
       'Uh oh. There was an error checking for changes on your scratch org.',
     );
-    expect(allActions[0].payload.details).toBe(undefined);
+    expect(allActions[0].payload.details).toBeUndefined();
     expect(allActions[0].payload.variant).toEqual('error');
     expect(allActions[1]).toEqual(action);
   });

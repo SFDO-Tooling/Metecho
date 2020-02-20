@@ -31,6 +31,7 @@ beforeAll(() => {
     scratch_org_refresh: (id) => `/api/scratch_orgs/${id}/refresh/`,
     task_detail: (id) => `/api/tasks/${id}/`,
     task_create_pr: (id) => `/api/tasks/${id}/create_pr/`,
+    task_review: (id) => `/api/tasks/${id}/review/`,
     project_detail: (id) => `/api/projects/${id}/`,
     project_create_pr: (id) => `/api/projects/${id}/create_pr/`,
   };

@@ -40,9 +40,12 @@ Retrieve
       ]
     }
 
+Refresh GitHub Users
+--------------------
+
 .. sourcecode:: http
 
-   POST /api/repositories/zVQUrye/refresh_github_users/ HTTP/1.1
+   POST /api/repositories/:id/refresh_github_users/ HTTP/1.1
 
 .. sourcecode:: http
 

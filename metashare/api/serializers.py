@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .fields import MarkdownField
-from .models import Project, Repository, ScratchOrg, Task
+from .models import TASK_REVIEW_STATUS, Project, Repository, ScratchOrg, Task
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
@@ -182,10 +182,15 @@ class TaskSerializer(serializers.ModelSerializer):
             "origin_sha",
             "branch_diff_url",
             "pr_url",
+            "review_submitted_at",
+            "review_valid",
+            "review_status",
+            "review_sha",
             "status",
             "pr_is_open",
             "assigned_dev",
             "assigned_qa",
+            "currently_submitting_review",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -238,6 +243,17 @@ class CreatePrSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
 
 
+class ReviewSerializer(serializers.Serializer):
+    notes = serializers.CharField(allow_blank=True)
+    status = serializers.ChoiceField(choices=TASK_REVIEW_STATUS)
+    delete_org = serializers.BooleanField()
+    org = serializers.PrimaryKeyRelatedField(
+        queryset=ScratchOrg.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+    )
+
+
 class ScratchOrgSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     task = serializers.PrimaryKeyRelatedField(
@@ -271,6 +287,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "delete_queued_at",
             "owner_sf_username",
             "owner_gh_username",
+            "has_been_visited",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
