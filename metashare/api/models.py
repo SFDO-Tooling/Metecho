@@ -582,7 +582,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     owner_gh_username = StringField(blank=True)
     has_been_visited = models.BooleanField(default=False)
     valid_target_directories = JSONField(
-        default=list, encoder=DjangoJSONEncoder, blank=True
+        default=dict, encoder=DjangoJSONEncoder, blank=True
     )
 
     def subscribable_by(self, user):  # pragma: nocover

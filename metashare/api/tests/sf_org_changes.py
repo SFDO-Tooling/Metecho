@@ -118,7 +118,7 @@ def test_get_valid_target_directories():
     with ExitStack() as stack:
         open_mock = stack.enter_context(patch(f"{PATCH_ROOT}.open"))
         file_mock = MagicMock()
-        file_mock.readlines.return_value = '{"packageDirectories":[{"path":"package"}]}'
+        file_mock.read.return_value = '{"packageDirectories":[{"path":"package"}]}'
         open_context_manager = MagicMock()
         open_context_manager.__enter__.return_value = file_mock
         open_mock.return_value = open_context_manager

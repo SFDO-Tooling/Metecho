@@ -297,7 +297,9 @@ class TestHookView:
 class TestScratchOrgView:
     def test_commit_happy_path(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(
-            org_type="Dev", owner=client.user, valid_target_directories=["src"]
+            org_type="Dev",
+            owner=client.user,
+            valid_target_directories={"source": ["src"]},
         )
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"

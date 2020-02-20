@@ -20,7 +20,7 @@ def get_valid_target_directories(scratch_org_config):
     package_directories = {}
     if scratch_org_config.get("source_format") == "sfdx":
         with open("sfdx-project.json") as f:
-            sfdx_project = json.loads(f.readlines())
+            sfdx_project = json.load(f)
             # sfdx_project["packageDirectories"] will either be an array
             # of length 1, with no constituent object marked as
             # "default", OR an array of length > 1, with exactly one

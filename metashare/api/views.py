@@ -265,7 +265,12 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         commit_message = serializer.validated_data["commit_message"]
         desired_changes = serializer.validated_data["changes"]
         target_directory = serializer.validated_data["target_directory"]
-        if target_directory not in scratch_org.valid_target_directories:
+        valid_target_directories = [
+            item
+            for section in scratch_org.valid_target_directories.values()
+            for item in section
+        ]
+        if target_directory not in valid_target_directories:
             raise ValidationError("Invalid target directory")
         scratch_org.queue_commit_changes(
             user=request.user,
