@@ -57,7 +57,7 @@ const SubmitReviewModal = ({
     fields: {
       notes: '',
       status: reviewStatus || REVIEW_STATUSES.APPROVED,
-      delete_org: false,
+      delete_org: true,
     },
     url,
     additionalData: {

@@ -487,7 +487,7 @@ describe('<OrgCards/>', () => {
             data: {
               notes: '',
               status: 'Approved',
-              delete_org: false,
+              delete_org: true,
               org: 'org-id',
             },
             hasForm: true,
