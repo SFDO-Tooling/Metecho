@@ -14,3 +14,14 @@
     padding-right: 0;
   }
 }
+
+// override min-width and force header to wrap on nested card headers
+.wrap-inner-truncate {
+  .slds-card__header {
+    flex-wrap: wrap;
+  }
+
+  .slds-has-flexi-truncate {
+    min-width: auto;
+  }
+}

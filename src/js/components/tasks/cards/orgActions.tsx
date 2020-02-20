@@ -85,7 +85,7 @@ const OrgActions = ({
         <Button
           label={i18n.t('Update Review')}
           variant="outline-brand"
-          className="slds-m-right_small"
+          className="slds-m-right_x-small"
           onClick={openSubmitReviewModal}
         />
       );
