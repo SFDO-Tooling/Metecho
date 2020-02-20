@@ -401,7 +401,7 @@ describe('reducer', () => {
         },
       );
 
-      expect(actual['task-1'].Dev.delete_queued_at).not.toBe(undefined);
+      expect(actual['task-1'].Dev.delete_queued_at).not.toBeUndefined();
     });
 
     test('ignores if objectType !== "scratch_org"', () => {

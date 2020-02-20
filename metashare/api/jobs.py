@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import os.path
+import string
 import traceback
 from datetime import timedelta
 
@@ -24,6 +25,7 @@ from .gh import (
     normalize_commit,
     try_to_make_branch,
 )
+from .models import TASK_REVIEW_STATUS
 from .push import report_scratch_org_error
 from .sf_org_changes import (
     commit_changes_to_github,
@@ -33,6 +35,17 @@ from .sf_org_changes import (
 from .sf_run_flow import create_org, delete_org, run_flow
 
 logger = logging.getLogger(__name__)
+
+
+class TaskReviewIntegrityError(Exception):
+    pass
+
+
+def get_user_facing_url(*, path):
+    domain = Site.objects.first().domain
+    should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith("localhost")
+    scheme = "http" if should_be_http else "https"
+    return furl(f"{scheme}://{domain}").set(path=path).url
 
 
 def _create_branches_on_github(*, user, repo_id, project, task):
@@ -98,16 +111,8 @@ def alert_user_about_expiring_org(*, org, days):
         task = org.task
         project = task.project
         repo = project.repository
-
-        domain = Site.objects.first().domain
-        should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith(
-            "localhost"
-        )
-        scheme = "http" if should_be_http else "https"
-        metashare_link = (
-            furl(f"{scheme}://{domain}")
-            .set(path=["repositories", repo.slug, project.slug, task.slug])
-            .url
+        metashare_link = get_user_facing_url(
+            path=["repositories", repo.slug, project.slug, task.slug]
         )
 
         # email user
@@ -478,7 +483,8 @@ def refresh_commits(*, repository, branch_name):
     if user is None:
         logger.warning(f"No matching user for repository {repository.pk}")
         return
-    repo = get_repo_info(user, repository.repo_id)
+    repo_id = repository.get_repo_id(user)
+    repo = get_repo_info(user, repo_id=repo_id)
     # We get this as a GitHubIterator, but we want to slice it later, so
     # we will convert it to a list.
     # We limit it to 1000 commits to avoid hammering the API, and on the
@@ -492,6 +498,7 @@ def refresh_commits(*, repository, branch_name):
         task.commits = [
             normalize_commit(commit) for commit in commits[:origin_sha_index]
         ]
+        task.update_review_valid()
         task.finalize_task_update()
 
 
@@ -504,7 +511,8 @@ def populate_github_users(repository):
         if user is None:
             logger.warning(f"No matching user for repository {repository.pk}")
             return
-        repo = get_repo_info(user, repository.repo_id)
+        repo_id = repository.get_repo_id(user)
+        repo = get_repo_info(user, repo_id=repo_id)
         repository.refresh_from_db()
         repository.github_users = [
             {
@@ -525,3 +533,74 @@ def populate_github_users(repository):
 
 
 populate_github_users_job = job(populate_github_users)
+
+
+def submit_review(*, user, task, data):
+    try:
+        review_sha = None
+        org = data["org"]
+        notes = data["notes"]
+        status = data["status"]
+        delete_org = data["delete_org"]
+
+        task.refresh_from_db()
+        if org:
+            review_sha = org.latest_commit
+        elif task.review_valid:
+            review_sha = task.review_sha
+
+        if not (task.pr_is_open and review_sha):
+            raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
+
+        repo_id = task.project.repository.get_repo_id(user)
+        repository = get_repo_info(user, repo_id=repo_id)
+        pr = repository.pull_request(task.pr_number)
+
+        # The values in this dict are the valid values for the
+        # `state` arg to repository.create_status. We are not
+        # currently using all of them, because some of them make no
+        # sense for our system to add to GitHub.
+        state_for_status = {
+            # "": "pending",
+            # "": "error",
+            TASK_REVIEW_STATUS.Approved: "success",
+            TASK_REVIEW_STATUS["Changes requested"]: "failure",
+        }.get(status)
+
+        target_url = get_user_facing_url(
+            path=[
+                "repositories",
+                task.project.repository.slug,
+                task.project.slug,
+                task.slug,
+            ]
+        )
+
+        # We filter notes to string.printable to avoid problems
+        # GitHub has with emoji in status descriptions
+        printable = set(string.printable)
+        filtered_notes = "".join(filter(lambda c: c in printable, notes))
+        repository.create_status(
+            review_sha,
+            state_for_status,
+            target_url=target_url,
+            description=filtered_notes[:25],
+            context="MetaShare Review",
+        )
+        if notes:
+            # We always COMMENT so as not to change the PR's status:
+            pr.create_review(notes, event="COMMENT")
+    except Exception as e:
+        task.refresh_from_db()
+        task.finalize_submit_review(now(), err=e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        task.refresh_from_db()
+        task.finalize_submit_review(
+            now(), sha=review_sha, status=status, delete_org=delete_org, org=org,
+        )
+
+
+submit_review_job = job(submit_review)

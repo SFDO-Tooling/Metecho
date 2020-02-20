@@ -69,7 +69,7 @@ class PushMixin:
     def notify_scratch_org_error(self, error, type_):
         """
         This is only used in the ScratchOrg model currently, but it
-        follows the pattern enough that I waned to move it into this
+        follows the pattern enough that I wanted to move it into this
         mixin.
         """
         async_to_sync(push.report_scratch_org_error)(self, error, type_)

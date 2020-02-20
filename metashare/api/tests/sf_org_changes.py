@@ -73,22 +73,22 @@ def test_get_latest_revision_numbers():
                 {
                     "MemberType": "some-type-1",
                     "MemberName": "some-name-1",
-                    "RevisionNum": 3,
+                    "RevisionCounter": 3,
                 },
                 {
                     "MemberType": "some-type-1",
                     "MemberName": "some-name-2",
-                    "RevisionNum": 3,
+                    "RevisionCounter": 3,
                 },
                 {
                     "MemberType": "some-type-2",
                     "MemberName": "some-name-1",
-                    "RevisionNum": 3,
+                    "RevisionCounter": 3,
                 },
                 {
                     "MemberType": "some-type-2",
                     "MemberName": "some-name-2",
-                    "RevisionNum": 3,
+                    "RevisionCounter": 3,
                 },
             ]
         }
