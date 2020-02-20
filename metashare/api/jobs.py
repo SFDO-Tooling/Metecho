@@ -140,37 +140,49 @@ def _get_valid_target_directories(scratch_org_config):
     """
     Expects to be called from within a `local_github_checkout`.
     """
+    package_directories = {}
     if scratch_org_config.get("source_format") == "sfdx":
         with open("sfdx-project.json") as f:
             sfdx_project = json.loads(f.readlines())
-            package_directories = sfdx_project["packageDirectories"]
+            # sfdx_project["packageDirectories"] will either be an array
+            # of length 1, with no constituent object marked as
+            # "default", OR an array of length > 1, with exactly one
+            # constituent object marked as "default". These two logical
+            # lines will ensure that the default is the first item in
+            # the list at the "source" key of package_directories.
+            package_directories["source"] = [
+                directory["path"]
+                for directory in sfdx_project["packageDirectories"]
+                if directory.get("default")
+            ]
+            package_directories["source"].extend(
+                [
+                    directory["path"]
+                    for directory in sfdx_project["packageDirectories"]
+                    if not directory.get("default")
+                ]
+            )
     else:
-        package_directories = ["src"]
+        package_directories["source"] = ["src"]
 
     if os.path.isdir("unpackaged/pre"):
-        package_directories.extend(
-            [
-                dirname
-                for dirname in os.listdir("unpackaged/pre")
-                if os.path.isdir(dirname)
-            ]
-        )
+        package_directories["pre"] = [
+            dirname
+            for dirname in os.listdir("unpackaged/pre")
+            if os.path.isdir(dirname)
+        ]
     if os.path.isdir("unpackaged/post"):
-        package_directories.extend(
-            [
-                dirname
-                for dirname in os.listdir("unpackaged/post")
-                if os.path.isdir(dirname)
-            ]
-        )
+        package_directories["post"] = [
+            dirname
+            for dirname in os.listdir("unpackaged/post")
+            if os.path.isdir(dirname)
+        ]
     if os.path.isdir("unpackaged/config"):
-        package_directories.extend(
-            [
-                dirname
-                for dirname in os.listdir("unpackaged/config")
-                if os.path.isdir(dirname)
-            ]
-        )
+        package_directories["config"] = [
+            dirname
+            for dirname in os.listdir("unpackaged/config")
+            if os.path.isdir(dirname)
+        ]
 
     return package_directories
 
