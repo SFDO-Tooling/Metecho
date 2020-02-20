@@ -105,11 +105,11 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
         variant="outline-brand"
         onClick={prevPage}
       />,
-      <Button
-        key="page-2-button-2"
-        label={i18n.t('Ignore Selected Changes')}
-        variant="outline-brand"
-      />,
+      // <Button
+      //   key="page-2-button-2"
+      //   label={i18n.t('Ignore Selected Changes')}
+      //   variant="outline-brand"
+      // />,
       <Button
         key="page-2-button-3"
         label={i18n.t('Save & Next')}

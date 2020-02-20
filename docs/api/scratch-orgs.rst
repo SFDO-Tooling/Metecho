@@ -36,7 +36,9 @@ Retrieve
         "owner_sf_username": "user@domain.com",
         "owner_gh_username": "user123",
         "has_been_visited": true,
-        "valid_target_directories": ["src"]
+        "valid_target_directories": {
+          "source": ["src"]
+        }
       }
       ...
     ]

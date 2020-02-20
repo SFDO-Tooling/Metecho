@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             name="valid_target_directories",
             field=django.contrib.postgres.fields.jsonb.JSONField(
                 blank=True,
-                default=list,
+                default=dict,
                 encoder=django.core.serializers.json.DjangoJSONEncoder,
             ),
         ),
