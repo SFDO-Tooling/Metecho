@@ -13,6 +13,57 @@ from .gh import get_repo_info, local_github_checkout
 from .sf_run_flow import refresh_access_token
 
 
+def get_valid_target_directories(scratch_org_config):
+    """
+    Expects to be called from within a `local_github_checkout`.
+    """
+    package_directories = {}
+    if scratch_org_config.get("source_format") == "sfdx":
+        with open("sfdx-project.json") as f:
+            sfdx_project = json.loads(f.readlines())
+            # sfdx_project["packageDirectories"] will either be an array
+            # of length 1, with no constituent object marked as
+            # "default", OR an array of length > 1, with exactly one
+            # constituent object marked as "default". These two logical
+            # lines will ensure that the default is the first item in
+            # the list at the "source" key of package_directories.
+            package_directories["source"] = [
+                directory["path"]
+                for directory in sfdx_project["packageDirectories"]
+                if directory.get("default")
+            ]
+            package_directories["source"].extend(
+                [
+                    directory["path"]
+                    for directory in sfdx_project["packageDirectories"]
+                    if not directory.get("default")
+                ]
+            )
+    else:
+        package_directories["source"] = ["src"]
+
+    if os.path.isdir("unpackaged/pre"):
+        package_directories["pre"] = [
+            dirname
+            for dirname in os.listdir("unpackaged/pre")
+            if os.path.isdir(dirname)
+        ]
+    if os.path.isdir("unpackaged/post"):
+        package_directories["post"] = [
+            dirname
+            for dirname in os.listdir("unpackaged/post")
+            if os.path.isdir(dirname)
+        ]
+    if os.path.isdir("unpackaged/config"):
+        package_directories["config"] = [
+            dirname
+            for dirname in os.listdir("unpackaged/config")
+            if os.path.isdir(dirname)
+        ]
+
+    return package_directories
+
+
 def run_retrieve_task(
     user, scratch_org, project_path, desired_changes, target_directory
 ):
@@ -49,14 +100,21 @@ def run_retrieve_task(
                 package_directories.append(package_directory["path"])
                 if package_directory.get("default"):
                     default_package_directory = package_directory["path"]
+    # TODO: The logic above may be removable, and replaceable with
+    # get_valid_target_directories, but we have to resolve one question:
+    # get_valid_target_directories operates on the assumptions described
+    # in
+    # https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm
+    # and presumes the first value in "packageDirectories" is the
+    # default if there is no explicit default. The logic above in this
+    # function seeks an explicitly marked default, and depends on that.
+    # This requires talking with @davisagli to sort out.
     if (
         default_package_directory
         and cci.project_config.project__source_format == "sfdx"
     ):  # pragma: no cover
-        # path = os.path.join(project_path, default_package_directory)
         md_format = False
     else:
-        # path = os.path.join(project_path, "src")
         md_format = True
         package_xml_opts.update(
             {

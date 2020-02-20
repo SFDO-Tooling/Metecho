@@ -11,7 +11,6 @@ from ..jobs import (
     TaskReviewIntegrityError,
     _create_branches_on_github,
     _create_org_and_run_flow,
-    _get_valid_target_directories,
     alert_user_about_expiring_org,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
@@ -105,23 +104,6 @@ class TestAlertUserAboutExpiringOrg:
             assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
             assert get_unsaved_changes.called
             assert send_mail.called
-
-
-def test_get_valid_target_directories():
-    with ExitStack() as stack:
-        open_mock = stack.enter_context(patch(f"{PATCH_ROOT}.open"))
-        file_mock = MagicMock()
-        file_mock.readlines.return_value = '{"packageDirectories":[{"path":"package"}]}'
-        open_context_manager = MagicMock()
-        open_context_manager.__enter__.return_value = file_mock
-        open_mock.return_value = open_context_manager
-        stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
-        scratch_org_config = {"source_format": "sfdx"}
-
-        actual = _get_valid_target_directories(scratch_org_config)
-
-        assert actual == {"source": ["package"], "pre": [], "post": [], "config": []}
 
 
 def test_create_org_and_run_flow():

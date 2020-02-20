@@ -1,7 +1,4 @@
-import json
 import logging
-import os
-import os.path
 import string
 import traceback
 from datetime import timedelta
@@ -31,6 +28,7 @@ from .sf_org_changes import (
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
+    get_valid_target_directories,
 )
 from .sf_run_flow import create_org, delete_org, run_flow
 
@@ -136,57 +134,6 @@ def alert_user_about_expiring_org(*, org, days):
         )
 
 
-def _get_valid_target_directories(scratch_org_config):
-    """
-    Expects to be called from within a `local_github_checkout`.
-    """
-    package_directories = {}
-    if scratch_org_config.get("source_format") == "sfdx":
-        with open("sfdx-project.json") as f:
-            sfdx_project = json.loads(f.readlines())
-            # sfdx_project["packageDirectories"] will either be an array
-            # of length 1, with no constituent object marked as
-            # "default", OR an array of length > 1, with exactly one
-            # constituent object marked as "default". These two logical
-            # lines will ensure that the default is the first item in
-            # the list at the "source" key of package_directories.
-            package_directories["source"] = [
-                directory["path"]
-                for directory in sfdx_project["packageDirectories"]
-                if directory.get("default")
-            ]
-            package_directories["source"].extend(
-                [
-                    directory["path"]
-                    for directory in sfdx_project["packageDirectories"]
-                    if not directory.get("default")
-                ]
-            )
-    else:
-        package_directories["source"] = ["src"]
-
-    if os.path.isdir("unpackaged/pre"):
-        package_directories["pre"] = [
-            dirname
-            for dirname in os.listdir("unpackaged/pre")
-            if os.path.isdir(dirname)
-        ]
-    if os.path.isdir("unpackaged/post"):
-        package_directories["post"] = [
-            dirname
-            for dirname in os.listdir("unpackaged/post")
-            if os.path.isdir(dirname)
-        ]
-    if os.path.isdir("unpackaged/config"):
-        package_directories["config"] = [
-            dirname
-            for dirname in os.listdir("unpackaged/config")
-            if os.path.isdir(dirname)
-        ]
-
-    return package_directories
-
-
 def _create_org_and_run_flow(
     scratch_org, *, user, repo_id, repo_branch, project_path, sf_username=None
 ):
@@ -210,7 +157,7 @@ def _create_org_and_run_flow(
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
     # delete the org later, even if the initial flow run fails.
-    scratch_org.valid_target_directories = _get_valid_target_directories(
+    scratch_org.valid_target_directories = get_valid_target_directories(
         scratch_org_config.config
     )
     scratch_org.url = scratch_org_config.instance_url
@@ -318,7 +265,7 @@ def get_unsaved_changes(scratch_org):
         repo_id = scratch_org.task.project.repository.repo_id
         commit_ish = scratch_org.task.branch_name
         with local_github_checkout(user, repo_id, commit_ish):
-            scratch_org.valid_target_directories = _get_valid_target_directories(
+            scratch_org.valid_target_directories = get_valid_target_directories(
                 scratch_org.config
             )
         scratch_org.refresh_from_db()

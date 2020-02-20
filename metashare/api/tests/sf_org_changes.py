@@ -7,6 +7,7 @@ from ..sf_org_changes import (
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
+    get_valid_target_directories,
     run_retrieve_task,
 )
 
@@ -111,3 +112,20 @@ def test_compare_revisions__false():
     old = {"type": {"name": 1}}
     new = {"type": {"name": 1}}
     assert not compare_revisions(old, new)
+
+
+def test_get_valid_target_directories():
+    with ExitStack() as stack:
+        open_mock = stack.enter_context(patch(f"{PATCH_ROOT}.open"))
+        file_mock = MagicMock()
+        file_mock.readlines.return_value = '{"packageDirectories":[{"path":"package"}]}'
+        open_context_manager = MagicMock()
+        open_context_manager.__enter__.return_value = file_mock
+        open_mock.return_value = open_context_manager
+        stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
+        scratch_org_config = {"source_format": "sfdx"}
+
+        actual = get_valid_target_directories(scratch_org_config)
+
+        assert actual == {"source": ["package"], "pre": [], "post": [], "config": []}
