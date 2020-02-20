@@ -86,29 +86,12 @@ def run_retrieve_task(
     # Determine default package directory
     # Use src for mdapi format,
     # or the default package directory from sfdx-project.json for sfdx format
-    # (This chunk is copied from CumulusCI, where we need to refactor things
-    # so we can reuse it. Given that it's already tested there, I'm going to
-    # pragma: no cover some of it.)
-    package_directories = []
     default_package_directory = None
+    valid_directories = get_valid_target_directories(org_config)["source"]
+    if valid_directories:
+        default_package_directory = valid_directories[0]
+
     package_xml_opts = {}
-    sfdx_project_json = os.path.join(project_path, "sfdx-project.json")
-    if os.path.exists(sfdx_project_json):
-        with open(sfdx_project_json, "r") as f:  # pragma: no cover
-            sfdx_project = json.load(f)
-            for package_directory in sfdx_project.get("packageDirectories", []):
-                package_directories.append(package_directory["path"])
-                if package_directory.get("default"):
-                    default_package_directory = package_directory["path"]
-    # TODO: The logic above may be removable, and replaceable with
-    # get_valid_target_directories, but we have to resolve one question:
-    # get_valid_target_directories operates on the assumptions described
-    # in
-    # https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm
-    # and presumes the first value in "packageDirectories" is the
-    # default if there is no explicit default. The logic above in this
-    # function seeks an explicitly marked default, and depends on that.
-    # This requires talking with @davisagli to sort out.
     if (
         default_package_directory
         and cci.project_config.project__source_format == "sfdx"
