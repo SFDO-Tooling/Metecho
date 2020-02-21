@@ -94,7 +94,7 @@ const OrgActions = ({
         <Button
           label={i18n.t('Submit Review')}
           variant="outline-brand"
-          className="slds-m-right_small"
+          className="slds-m-right_x-small"
           onClick={openSubmitReviewModal}
         />
       );
@@ -110,7 +110,7 @@ const OrgActions = ({
             <Button
               label={i18n.t('Submit Review')}
               variant="outline-brand"
-              className="slds-m-right_small"
+              className="slds-m-right_x-small"
               disabled
             />
           </Tooltip>
@@ -126,7 +126,7 @@ const OrgActions = ({
           <Button
             label={i18n.t('Refresh Org')}
             variant="brand"
-            className="slds-m-right_small"
+            className="slds-m-right_x-small"
             onClick={doRefreshOrg}
           />
         )}

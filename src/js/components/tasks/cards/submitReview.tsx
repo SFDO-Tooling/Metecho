@@ -57,7 +57,7 @@ const SubmitReviewModal = ({
     fields: {
       notes: '',
       status: reviewStatus || REVIEW_STATUSES.APPROVED,
-      delete_org: true,
+      delete_org: Boolean(orgId),
     },
     url,
     additionalData: {
@@ -72,6 +72,11 @@ const SubmitReviewModal = ({
   useEffect(() => {
     setInputs({ ...inputs, status: reviewStatus || REVIEW_STATUSES.APPROVED });
   }, [reviewStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When orgId changes, update default selection
+  useEffect(() => {
+    setInputs({ ...inputs, delete_org: Boolean(orgId) });
+  }, [orgId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
