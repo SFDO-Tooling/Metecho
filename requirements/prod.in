@@ -1,7 +1,7 @@
 Django==3.0.3
 Pillow==7.0.0
 Werkzeug==1.0.0
-bleach==3.1.0
+bleach==3.1.1
 channels-redis==2.4.2
 channels==2.4.0
 https://github.com/SFDO-Tooling/CumulusCI/archive/master.tar.gz
