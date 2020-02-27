@@ -59,7 +59,10 @@ const TargetDirectoriesForm = ({
         const isLast = idx === orderedDirectories.size - 1;
         const err = hasErrors ? ' ' : undefined;
         return (
-          <div className="slds-p-bottom_x-small slds-p-horizontal_large">
+          <div
+            key={`${key}-${idx}`}
+            className="slds-p-bottom_x-small slds-p-horizontal_large"
+          >
             <RadioGroup
               labels={{
                 label: headings[key],

@@ -161,7 +161,7 @@ const SubmitReviewModal = ({
             <Textarea
               id="notes"
               label={i18n.t('Review Description')}
-              className="submit-textarea"
+              className="ms-textarea"
               name="notes"
               value={inputs.notes}
               errorText={errors.notes}

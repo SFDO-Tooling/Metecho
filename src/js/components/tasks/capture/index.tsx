@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 
 import ChangesForm from '@/components/tasks/capture/changes';
 import TargetDirectoriesForm from '@/components/tasks/capture/directories';
+import CommitMessageForm from '@/components/tasks/capture/message';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
 import { Changeset, TargetDirectories } from '@/store/orgs/reducer';
 import { ApiError } from '@/utils/api';
@@ -101,6 +102,7 @@ const CaptureModal = ({
 
   const dirSelected = Boolean(inputs.target_directory);
   const changesChecked = Object.values(inputs.changes).flat().length;
+  const hasCommitMessage = Boolean(inputs.commit_message);
 
   const handleClose = () => {
     toggleModal(false);
@@ -134,10 +136,14 @@ const CaptureModal = ({
       changeset={changeset}
       inputs={inputs as CommitData}
       errors={errors}
-      handleInputChange={handleInputChange}
       setInputs={setInputs}
     />,
-    <div key="page-3-contents">Page 3</div>,
+    <CommitMessageForm
+      key="page-3-contents"
+      inputs={inputs as CommitData}
+      errors={errors}
+      handleInputChange={handleInputChange}
+    />,
   ];
 
   const footers = [
@@ -191,7 +197,7 @@ const CaptureModal = ({
         }
         variant="brand"
         onClick={submitChanges}
-        disabled={capturingChanges}
+        disabled={capturingChanges || !hasCommitMessage}
       />,
     ],
   ];
