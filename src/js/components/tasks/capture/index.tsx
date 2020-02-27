@@ -1,17 +1,21 @@
+/* eslint-disable @typescript-eslint/camelcase */
+
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import ChangesForm from '@/components/tasks/capture/changes';
+import TargetDirectoriesForm from '@/components/tasks/capture/directories';
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
-import { Changeset } from '@/store/orgs/reducer';
+import { Changeset, TargetDirectories } from '@/store/orgs/reducer';
 import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
   orgId: string;
   changeset: Changeset;
+  directories: TargetDirectories;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -22,7 +26,13 @@ export interface CommitData {
   target_directory: string;
 }
 
-const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
+const CaptureModal = ({
+  orgId,
+  changeset,
+  directories,
+  isOpen,
+  toggleModal,
+}: Props) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const isMounted = useIsMounted();
@@ -69,8 +79,11 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     handleSubmit,
     resetForm,
   } = useForm({
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    fields: { changes: {}, commit_message: '' },
+    fields: {
+      changes: {},
+      commit_message: '',
+      target_directory: directories.source?.[0] || 'src',
+    } as CommitData,
     objectType: OBJECT_TYPES.COMMIT,
     url: window.api_urls.scratch_org_commit(orgId),
     onSuccess: handleSuccess,
@@ -78,6 +91,15 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     shouldSubscribeToObject: false,
   });
 
+  // When directories change, update default selection
+  useEffect(() => {
+    setInputs({
+      ...inputs,
+      target_directory: directories.source?.[0] || 'src',
+    });
+  }, [directories.source]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const dirSelected = Boolean(inputs.target_directory);
   const changesChecked = Object.values(inputs.changes).flat().length;
 
   const handleClose = () => {
@@ -91,12 +113,40 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     handleSubmit(e);
   };
 
+  const headings = [
+    i18n.t('Select the location to capture changes'),
+    `${i18n.t('Select the changes to capture to')}: “${
+      inputs.target_directory
+    }”`,
+    i18n.t('Describe the changes you are capturing'),
+  ];
+
+  const contents = [
+    <TargetDirectoriesForm
+      key="page-1-contents"
+      directories={directories}
+      inputs={inputs as CommitData}
+      errors={errors}
+      handleInputChange={handleInputChange}
+    />,
+    <ChangesForm
+      key="page-2-contents"
+      changeset={changeset}
+      inputs={inputs as CommitData}
+      errors={errors}
+      handleInputChange={handleInputChange}
+      setInputs={setInputs}
+    />,
+    <div key="page-3-contents">Page 3</div>,
+  ];
+
   const footers = [
     <Button
       key="page-1-button-1"
       label={i18n.t('Save & Next')}
       variant="brand"
       onClick={nextPage}
+      disabled={!dirSelected}
     />,
     [
       <Button
@@ -149,20 +199,14 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
   return (
     <Modal
       isOpen={isOpen}
-      size="medium"
+      size="small"
       disableClose={capturingChanges}
-      heading={i18n.t('Select the changes to capture')}
+      heading={headings[pageIndex]}
       footer={footers[pageIndex]}
       directional={pageIndex > 0}
       onRequestClose={handleClose}
     >
-      <ChangesForm
-        changeset={changeset}
-        inputs={inputs as CommitData}
-        errors={errors}
-        handleInputChange={handleInputChange}
-        setInputs={setInputs}
-      />
+      {contents[pageIndex]}
     </Modal>
   );
 };

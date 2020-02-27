@@ -30,12 +30,14 @@ export interface Org {
   currently_refreshing_org: boolean;
   delete_queued_at: string | null;
   has_been_visited: boolean;
-  valid_target_directories: {
-    source?: string[];
-    pre?: string[];
-    post?: string[];
-    config?: string[];
-  };
+  valid_target_directories: TargetDirectories;
+}
+
+export interface TargetDirectories {
+  source?: string[];
+  pre?: string[];
+  post?: string[];
+  config?: string[];
 }
 
 export interface Changeset {

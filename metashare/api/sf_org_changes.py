@@ -9,16 +9,26 @@ from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.salesforce.sourcetracking import retrieve_components
 from django.conf import settings
 
-from .gh import get_repo_info, local_github_checkout
+from .gh import get_repo_info, get_source_format, local_github_checkout
 from .sf_run_flow import refresh_access_token
 
 
-def get_valid_target_directories(scratch_org_config):
+def get_valid_target_directories(user, scratch_org, repo_root):
     """
     Expects to be called from within a `local_github_checkout`.
     """
     package_directories = {}
-    if scratch_org_config.get("source_format") == "sfdx":
+    repo_id = scratch_org.task.project.repository.get_repo_id(user)
+    repository = get_repo_info(user, repo_id=repo_id)
+    source_format = get_source_format(
+        repo_root=repo_root,
+        repo_name=repository.name,
+        repo_url=repository.html_url,
+        repo_owner=repository.owner.login,
+        repo_branch=scratch_org.task.branch_name,
+        repo_commit=repository.branch(scratch_org.task.branch_name).latest_sha(),
+    )
+    if source_format == "sfdx":
         with open("sfdx-project.json") as f:
             sfdx_project = json.load(f)
             # sfdx_project["packageDirectories"] will either be an array
@@ -44,21 +54,21 @@ def get_valid_target_directories(scratch_org_config):
 
     if os.path.isdir("unpackaged/pre"):
         package_directories["pre"] = [
-            dirname
+            "unpackaged/pre/" + dirname
             for dirname in os.listdir("unpackaged/pre")
-            if os.path.isdir(dirname)
+            if os.path.isdir("unpackaged/pre/" + dirname)
         ]
     if os.path.isdir("unpackaged/post"):
         package_directories["post"] = [
-            dirname
+            "unpackaged/post/" + dirname
             for dirname in os.listdir("unpackaged/post")
-            if os.path.isdir(dirname)
+            if os.path.isdir("unpackaged/post/" + dirname)
         ]
     if os.path.isdir("unpackaged/config"):
         package_directories["config"] = [
-            dirname
+            "unpackaged/config/" + dirname
             for dirname in os.listdir("unpackaged/config")
-            if os.path.isdir(dirname)
+            if os.path.isdir("unpackaged/config/" + dirname)
         ]
 
     return package_directories
@@ -87,7 +97,9 @@ def run_retrieve_task(
     # Use src for mdapi format,
     # or the default package directory from sfdx-project.json for sfdx format
     default_package_directory = None
-    valid_directories = get_valid_target_directories(org_config)["source"]
+    valid_directories = get_valid_target_directories(user, scratch_org, project_path)[
+        "source"
+    ]
     if valid_directories:
         default_package_directory = valid_directories[0]
 
