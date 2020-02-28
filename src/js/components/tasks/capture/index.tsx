@@ -95,6 +95,7 @@ const CaptureModal = ({
     err: ApiError,
     fieldErrors: { [key: string]: string },
   ) => {
+    /* istanbul ignore else */
     if (isMounted.current) {
       setCapturingChanges(false);
       if (fieldErrors.target_directory) {
