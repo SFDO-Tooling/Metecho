@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import Button from '@salesforce/design-system-react/components/button';
+import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
+import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 
 import ChangesForm from '@/components/tasks/capture/changes';
 import TargetDirectoriesForm from '@/components/tasks/capture/directories';
@@ -26,6 +28,39 @@ export interface CommitData {
   commit_message: string;
   target_directory: string;
 }
+
+export interface BooleanObject {
+  [key: string]: boolean;
+}
+
+export const ModalCard = ({
+  heading,
+  noBodyPadding,
+  children,
+}: {
+  heading?: JSX.Element;
+  noBodyPadding?: boolean;
+  children: ReactNode;
+}) => (
+  <Card
+    className="slds-card_boundary"
+    bodyClassName={classNames({
+      'slds-m-bottom_none': noBodyPadding,
+    })}
+    heading={heading}
+    hasNoHeader={!heading}
+  >
+    {heading ? <hr className="slds-m-vertical_none" /> : null}
+    <div
+      className={classNames({
+        'slds-p-horizontal_medium': !noBodyPadding,
+        'slds-m-vertical_medium': !noBodyPadding,
+      })}
+    >
+      {children}
+    </div>
+  </Card>
+);
 
 const CaptureModal = ({
   orgId,
@@ -117,9 +152,7 @@ const CaptureModal = ({
 
   const headings = [
     i18n.t('Select the location to capture changes'),
-    `${i18n.t('Select the changes to capture to')}: “${
-      inputs.target_directory
-    }”`,
+    i18n.t('Select the changes to capture'),
     i18n.t('Describe the changes you are capturing'),
   ];
 

@@ -1,19 +1,20 @@
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
-import Card from '@salesforce/design-system-react/components/card';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
-import { CommitData } from '@/components/tasks/capture';
-import { BooleanObject } from '@/components/tasks/capture/changes';
+import {
+  BooleanObject,
+  CommitData,
+  ModalCard,
+} from '@/components/tasks/capture';
+import { UseFormProps } from '@/components/utils/useForm';
 
 interface Props {
   inputs: CommitData;
-  errors: {
-    [key: string]: string;
-  };
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  errors: UseFormProps['errors'];
+  handleInputChange: UseFormProps['handleInputChange'];
 }
 
 const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
@@ -26,13 +27,12 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
     });
   };
 
-  // const totalChanges = Object.values(changeset).flat().length;
-  // const changesChecked = Object.values(inputs.changes).flat().length;
-
   return (
     <form className="slds-form slds-p-around_large">
-      <Card
-        className="slds-card_boundary"
+      <ModalCard heading={i18n.t('Directory')}>
+        {inputs.target_directory}
+      </ModalCard>
+      <ModalCard
         heading={
           <>
             <abbr className="slds-required" title="required">
@@ -42,11 +42,9 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
           </>
         }
       >
-        <hr className="slds-m-vertical_none" />
         <Textarea
           id="commit-message"
           className="ms-textarea"
-          classNameContainer="slds-p-horizontal_medium slds-m-vertical_medium"
           assistiveText={{ label: i18n.t('Commit Message') }}
           name="commit_message"
           value={inputs.commit_message}
@@ -56,16 +54,9 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
           errorText={errors.commit_message}
           onChange={handleInputChange}
         />
-      </Card>
-      <Card className="slds-card_boundary" heading={i18n.t('Directory')}>
-        <hr className="slds-m-vertical_none" />
-        <div className="slds-p-horizontal_medium slds-m-vertical_medium">
-          {inputs.target_directory}
-        </div>
-      </Card>
-      <Card className="slds-card_boundary" heading={i18n.t('Selected Changes')}>
-        <hr className="slds-m-vertical_none" />
-        <div className="slds-p-horizontal_medium slds-m-vertical_medium">
+      </ModalCard>
+      <ModalCard heading={i18n.t('Selected Changes')} noBodyPadding>
+        <div data-form="task-capture">
           {Object.keys(inputs.changes)
             .sort()
             .map((groupName, index) => {
@@ -80,11 +71,9 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
                     onTogglePanel={handleThisPanelToggle}
                     title={groupName}
                     summary={
-                      <div className="form-grid">
-                        {groupName}
-                        <span className="slds-text-body_regular">
-                          ({children.length})
-                        </span>
+                      <div className="form-grid slds-text-body_regular">
+                        <span>{groupName}</span>
+                        <span>({children.length})</span>
                       </div>
                     }
                   >
@@ -101,7 +90,7 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
               );
             })}
         </div>
-      </Card>
+      </ModalCard>
     </form>
   );
 };

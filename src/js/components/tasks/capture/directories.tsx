@@ -4,16 +4,15 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { CommitData } from '@/components/tasks/capture';
+import { CommitData, ModalCard } from '@/components/tasks/capture';
+import { UseFormProps } from '@/components/utils/useForm';
 import { TargetDirectories } from '@/store/orgs/reducer';
 
 interface Props {
   directories: TargetDirectories;
   inputs: CommitData;
-  errors: {
-    [key: string]: string;
-  };
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  errors: UseFormProps['errors'];
+  handleInputChange: UseFormProps['handleInputChange'];
 }
 
 const TargetDirectoriesForm = ({
@@ -54,37 +53,36 @@ const TargetDirectoriesForm = ({
           else entirely.
         </Trans>
       </div>
-      {Array.from(orderedDirectories, ([key, dirs], idx) => {
-        const hasErrors = Boolean(errors.target_directory);
-        const isLast = idx === orderedDirectories.size - 1;
-        const err = hasErrors ? ' ' : undefined;
-        return (
-          <div
-            key={`${key}-${idx}`}
-            className="slds-p-bottom_x-small slds-p-horizontal_large"
-          >
-            <RadioGroup
-              labels={{
-                label: headings[key],
-                error: isLast ? errors.target_directory : err,
-              }}
-              name="target_directory"
-              onChange={handleInputChange}
-            >
-              {dirs.map((dir, dirIdx) => (
-                <Radio
-                  key={`${key}-${dirIdx}`}
-                  id={`${key}-${dirIdx}`}
-                  labels={{ label: dir }}
-                  checked={inputs.target_directory === dir}
-                  value={dir}
-                  name="target_directory"
-                />
-              ))}
-            </RadioGroup>
-          </div>
-        );
-      })}
+      <ModalCard>
+        {Array.from(orderedDirectories, ([key, dirs], idx) => {
+          const hasErrors = Boolean(errors.target_directory);
+          const isLast = idx === orderedDirectories.size - 1;
+          const err = hasErrors ? ' ' : undefined;
+          return (
+            <div key={`${key}-${idx}`} className="slds-p-bottom_x-small">
+              <RadioGroup
+                labels={{
+                  label: headings[key],
+                  error: isLast ? errors.target_directory : err,
+                }}
+                name="target_directory"
+                onChange={handleInputChange}
+              >
+                {dirs.map((dir, dirIdx) => (
+                  <Radio
+                    key={`${key}-${dirIdx}`}
+                    id={`${key}-${dirIdx}`}
+                    labels={{ label: dir }}
+                    checked={inputs.target_directory === dir}
+                    value={dir}
+                    name="target_directory"
+                  />
+                ))}
+              </RadioGroup>
+            </div>
+          );
+        })}
+      </ModalCard>
     </form>
   );
 };

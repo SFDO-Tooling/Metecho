@@ -9,6 +9,15 @@ import { ObjectTypes } from '@/utils/constants';
 
 import useIsMounted from './useIsMounted';
 
+export interface UseFormProps {
+  inputs: { [key: string]: any };
+  errors: { [key: string]: string };
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setInputs: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  resetForm: () => void;
+}
+
 export default ({
   fields,
   objectType,
