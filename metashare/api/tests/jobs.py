@@ -117,6 +117,15 @@ def test_create_org_and_run_flow():
         )
         run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        get_valid_target_directories = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_valid_target_directories")
+        )
+        get_valid_target_directories.return_value = {
+            "source": ["src"],
+            "config": [],
+            "post": [],
+            "pre": [],
+        }
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
@@ -138,6 +147,16 @@ def test_get_unsaved_changes(scratch_org_factory):
 
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+        stack.enter_context(patch(f"metashare.api.sf_org_changes.get_repo_info"))
+        get_valid_target_directories = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_valid_target_directories")
+        )
+        get_valid_target_directories.return_value = {
+            "source": ["src"],
+            "config": [],
+            "post": [],
+            "pre": [],
+        }
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
         )
