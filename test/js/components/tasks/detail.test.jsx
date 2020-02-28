@@ -107,6 +107,7 @@ const defaultState = {
         url: '/test/org/url/',
         unsaved_changes: { Foo: ['Bar'] },
         has_unsaved_changes: true,
+        valid_target_directories: ['src'],
       },
       QA: null,
     },
@@ -274,7 +275,7 @@ describe('<TaskDetail/>', () => {
 
       expect(refetchArgs.id).toEqual('org-id');
 
-      expect(getByText('Select the changes to capture')).toBeVisible();
+      expect(getByText('Capture Task Changes')).toBeVisible();
     });
   });
 
