@@ -51,7 +51,11 @@ class CreatePrMixin:
         instance = self.get_object()
         if instance.pr_is_open:
             raise ValidationError(self.error_pr_exists)
-        instance.queue_create_pr(request.user, **serializer.validated_data)
+        instance.queue_create_pr(
+            request.user,
+            **serializer.validated_data,
+            originating_user_id=str(request.user.id)
+        )
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
         )
@@ -141,7 +145,7 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["POST"])
     def refresh_github_users(self, request, pk=None):
         instance = self.get_object()
-        instance.queue_populate_github_users()
+        instance.queue_populate_github_users(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -178,7 +182,11 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
         if not (org or task.review_valid):
             raise ValidationError(_("Cannot submit review without a Review Org."))
 
-        task.queue_submit_review(user=request.user, data=serializer.validated_data)
+        task.queue_submit_review(
+            user=request.user,
+            data=serializer.validated_data,
+            originating_user_id=str(request.user.id),
+        )
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 
 
@@ -201,7 +209,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
 
     def perform_destroy(self, instance):
-        instance.queue_delete()
+        instance.queue_delete(originating_user_id=str(self.request.user.id))
 
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
@@ -221,7 +229,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         if not request.query_params.get("get_unsaved_changes"):
             filters["owner"] = request.user
         for instance in queryset.filter(**filters):
-            instance.queue_get_unsaved_changes()
+            instance.queue_get_unsaved_changes(originating_user_id=str(request.user.id))
 
         # XXX: If we ever paginate this endpoint, we will need to add
         # pagination logic back in here.
@@ -245,7 +253,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         if not request.query_params.get("get_unsaved_changes"):
             conditions.append(instance.owner == request.user)
         if all(conditions):
-            instance.queue_get_unsaved_changes()
+            instance.queue_get_unsaved_changes(originating_user_id=str(request.user.id))
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -264,7 +272,12 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
         commit_message = serializer.validated_data["commit_message"]
         desired_changes = serializer.validated_data["changes"]
-        scratch_org.queue_commit_changes(request.user, desired_changes, commit_message)
+        scratch_org.queue_commit_changes(
+            request.user,
+            desired_changes,
+            commit_message,
+            originating_user_id=str(request.user.id),
+        )
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
@@ -277,7 +290,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
                 {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        scratch_org.mark_visited()
+        scratch_org.mark_visited(originating_user_id=str(request.user.id))
         url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)
 
@@ -289,7 +302,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
                 {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        scratch_org.queue_refresh_org()
+        scratch_org.queue_refresh_org(originating_user_id=str(request.user.id))
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
