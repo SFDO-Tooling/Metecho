@@ -45,7 +45,7 @@ export const ModalCard = ({
   <Card
     className="slds-card_boundary"
     bodyClassName={classNames({
-      'slds-m-bottom_none': noBodyPadding,
+      'slds-m-vertical_none': noBodyPadding,
     })}
     heading={heading}
     hasNoHeader={!heading}

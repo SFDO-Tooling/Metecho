@@ -1,5 +1,6 @@
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
+import Icon from '@salesforce/design-system-react/components/icon';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useState } from 'react';
@@ -29,8 +30,11 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
 
   return (
     <form className="slds-form slds-p-around_large">
-      <ModalCard heading={i18n.t('Directory')}>
-        {inputs.target_directory}
+      <ModalCard>
+        <pre>
+          <Icon category="utility" name="open_folder" size="small" />
+          <span className="slds-p-left_x-small">{inputs.target_directory}</span>
+        </pre>
       </ModalCard>
       <ModalCard
         heading={
