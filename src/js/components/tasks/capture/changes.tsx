@@ -109,7 +109,8 @@ const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
             className="form-grid
               slds-m-left_xx-small
               slds-p-left_x-large
-              slds-p-vertical_x-small"
+              slds-p-vertical_x-small
+              slds-p-right_medium"
           >
             <Checkbox
               id="select-all"

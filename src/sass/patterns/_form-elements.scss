@@ -7,10 +7,7 @@
 
 .form-grid {
   display: grid;
-  // needs a non-percentage and non fr
-  //   for changes column to be consistent between row types
-  //   16vw is a magic number that works well in changes column
-  grid-template-columns: 1fr 16vw;
+  grid-template-columns: 1fr auto;
 }
 
 [data-form='task-capture'] {
