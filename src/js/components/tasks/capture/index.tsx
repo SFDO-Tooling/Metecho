@@ -54,7 +54,7 @@ export const ModalCard = ({
     <div
       className={classNames({
         'slds-p-horizontal_medium': !noBodyPadding,
-        'slds-m-vertical_x-small': !noBodyPadding,
+        'slds-m-vertical_small': !noBodyPadding,
       })}
     >
       {children}

@@ -122,7 +122,9 @@ const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
               errorText={errors.changes}
               onChange={handleSelectAllChange}
             />
-            <span className="slds-text-body_regular">({totalChanges})</span>
+            <span className="slds-text-body_regular slds-p-top_xxx-small">
+              ({totalChanges})
+            </span>
           </div>
           {Object.keys(changeset)
             .sort()
@@ -159,7 +161,10 @@ const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
                           )}
                           onChange={handleSelectThisGroup}
                         />
-                        <span className="slds-text-body_regular">
+                        <span
+                          className="slds-text-body_regular
+                            slds-p-top_xxx-small"
+                        >
                           ({children.length})
                         </span>
                       </div>
