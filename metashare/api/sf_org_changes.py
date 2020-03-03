@@ -100,16 +100,14 @@ def run_retrieve_task(
     package_xml_opts = {}
     md_format = target_directory not in valid_directories
 
-    # XXX: Should this always run? Previously it was in a conditional,
-    # but @davisagli asked for a change in that logic, which has left
-    # this outside of its previous conditional context.
-    package_xml_opts.update(
-        {
-            "package_name": cci.project_config.project__package__name,
-            "install_class": cci.project_config.project__package__install_class,
-            "uninstall_class": cci.project_config.project__package__uninstall_class,
-        }
-    )
+    if md_format:
+        package_xml_opts.update(
+            {
+                "package_name": cci.project_config.project__package__name,
+                "install_class": cci.project_config.project__package__install_class,
+                "uninstall_class": cci.project_config.project__package__uninstall_class,
+            }
+        )
 
     components = []
     for mdtype, members in desired_changes.items():
