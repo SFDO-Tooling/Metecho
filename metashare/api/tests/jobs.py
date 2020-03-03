@@ -120,12 +120,10 @@ def test_create_org_and_run_flow():
         get_valid_target_directories = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_valid_target_directories")
         )
-        get_valid_target_directories.return_value = {
-            "source": ["src"],
-            "config": [],
-            "post": [],
-            "pre": [],
-        }
+        get_valid_target_directories.return_value = (
+            {"source": ["src"], "config": [], "post": [], "pre": []},
+            False,
+        )
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
@@ -151,12 +149,10 @@ def test_get_unsaved_changes(scratch_org_factory):
         get_valid_target_directories = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_valid_target_directories")
         )
-        get_valid_target_directories.return_value = {
-            "source": ["src"],
-            "config": [],
-            "post": [],
-            "pre": [],
-        }
+        get_valid_target_directories.return_value = (
+            {"source": ["src"], "config": [], "post": [], "pre": []},
+            False,
+        )
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
         )

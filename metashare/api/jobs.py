@@ -157,7 +157,7 @@ def _create_org_and_run_flow(
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
     # delete the org later, even if the initial flow run fails.
-    scratch_org.valid_target_directories = get_valid_target_directories(
+    scratch_org.valid_target_directories, _ = get_valid_target_directories(
         user, scratch_org, project_path
     )
     scratch_org.url = scratch_org_config.instance_url
@@ -265,7 +265,7 @@ def get_unsaved_changes(scratch_org):
         repo_id = scratch_org.task.project.repository.get_repo_id(user)
         commit_ish = scratch_org.task.branch_name
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
-            scratch_org.valid_target_directories = get_valid_target_directories(
+            scratch_org.valid_target_directories, _ = get_valid_target_directories(
                 user, scratch_org, repo_root,
             )
         scratch_org.unsaved_changes = unsaved_changes

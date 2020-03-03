@@ -28,7 +28,8 @@ def get_valid_target_directories(user, scratch_org, repo_root):
         repo_branch=scratch_org.task.branch_name,
         repo_commit=repository.branch(scratch_org.task.branch_name).latest_sha(),
     )
-    if source_format == "sfdx":
+    sfdx = source_format == "sfdx"
+    if sfdx:
         with open("sfdx-project.json") as f:
             sfdx_project = json.load(f)
             # sfdx_project["packageDirectories"] will either be an array
@@ -71,7 +72,7 @@ def get_valid_target_directories(user, scratch_org, repo_root):
             if os.path.isdir("unpackaged/config/" + dirname)
         ]
 
-    return package_directories
+    return package_directories, sfdx
 
 
 def run_retrieve_task(
@@ -93,21 +94,24 @@ def run_retrieve_task(
         }
     )
 
-    valid_directories = get_valid_target_directories(user, scratch_org, project_path)[
-        "source"
-    ]
+    valid_directories, sfdx = get_valid_target_directories(
+        user, scratch_org, project_path
+    )
+    md_format = target_directory not in valid_directories["source"]
 
-    package_xml_opts = {}
-    md_format = target_directory not in valid_directories
+    if sfdx:
+        is_main_project_directory = target_directory in valid_directories["source"]
+    else:
+        is_main_project_directory = target_directory == "src"
 
-    if md_format:  # pragma: no cover
-        package_xml_opts.update(
-            {
-                "package_name": cci.project_config.project__package__name,
-                "install_class": cci.project_config.project__package__install_class,
-                "uninstall_class": cci.project_config.project__package__uninstall_class,
-            }
-        )
+    if is_main_project_directory:
+        package_xml_opts = {
+            "package_name": cci.project_config.project__package__name,
+            "install_class": cci.project_config.project__package__install_class,
+            "uninstall_class": cci.project_config.project__package__uninstall_class,
+        }
+    else:
+        package_xml_opts = {}
 
     components = []
     for mdtype, members in desired_changes.items():

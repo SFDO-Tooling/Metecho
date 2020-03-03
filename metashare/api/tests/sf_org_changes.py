@@ -15,30 +15,75 @@ PATCH_ROOT = "metashare.api.sf_org_changes"
 
 
 @pytest.mark.django_db
-def test_run_retrieve_task(user_factory, scratch_org_factory):
-    user = user_factory()
-    scratch_org = scratch_org_factory()
-    with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-        get_valid_target_directories = stack.enter_context(
-            patch(f"{PATCH_ROOT}.get_valid_target_directories")
-        )
-        get_valid_target_directories.return_value = {
-            "source": ["src"],
-            "config": [],
-            "post": [],
-            "pre": [],
-        }
-        retrieve_components = stack.enter_context(
-            patch(f"{PATCH_ROOT}.retrieve_components")
-        )
+class TestRunRetrieveTask:
+    def test_run_retrieve_task(self, user_factory, scratch_org_factory):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_valid_target_directories = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_valid_target_directories")
+            )
+            get_valid_target_directories.return_value = (
+                {"source": ["src"], "config": [], "post": [], "pre": []},
+                False,
+            )
+            retrieve_components = stack.enter_context(
+                patch(f"{PATCH_ROOT}.retrieve_components")
+            )
 
-        desired_changes = {"name": ["member"]}
-        run_retrieve_task(user, scratch_org, ".", desired_changes, "src")
+            desired_changes = {"name": ["member"]}
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "src")
 
-        assert retrieve_components.called
+            assert retrieve_components.called
+
+    def test_run_retrieve_task__sfdx(self, user_factory, scratch_org_factory):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_valid_target_directories = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_valid_target_directories")
+            )
+            get_valid_target_directories.return_value = (
+                {"source": ["src"], "config": [], "post": [], "pre": []},
+                True,
+            )
+            retrieve_components = stack.enter_context(
+                patch(f"{PATCH_ROOT}.retrieve_components")
+            )
+
+            desired_changes = {"name": ["member"]}
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "src")
+
+            assert retrieve_components.called
+
+    def test_run_retrieve_task__sfdx__non_main(self, user_factory, scratch_org_factory):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_valid_target_directories = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_valid_target_directories")
+            )
+            get_valid_target_directories.return_value = (
+                {"source": ["src"], "config": [], "post": [], "pre": []},
+                True,
+            )
+            retrieve_components = stack.enter_context(
+                patch(f"{PATCH_ROOT}.retrieve_components")
+            )
+
+            desired_changes = {"name": ["member"]}
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "source")
+
+            assert retrieve_components.called
 
 
 @pytest.mark.django_db
@@ -148,7 +193,7 @@ class TestGetValidTargetDirectories:
             user = user_factory()
             repo_root = "."
 
-            actual = get_valid_target_directories(user, scratch_org, repo_root)
+            actual, _ = get_valid_target_directories(user, scratch_org, repo_root)
 
             assert actual == {
                 "source": ["package"],
@@ -180,6 +225,6 @@ class TestGetValidTargetDirectories:
             user = user_factory()
             repo_root = "."
 
-            actual = get_valid_target_directories(user, scratch_org, repo_root)
+            actual, _ = get_valid_target_directories(user, scratch_org, repo_root)
 
             assert actual == {"source": ["src"], "pre": [], "post": [], "config": []}
