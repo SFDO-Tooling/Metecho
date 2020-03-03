@@ -461,6 +461,43 @@ describe('<OrgCards/>', () => {
         expect(queryByText('Submit Task Review')).toBeNull();
       });
 
+      test('updates default fields when props change', () => {
+        let task = { ...defaultTask, commits: [], pr_is_open: true };
+        const theseOrgs = {
+          ...orgs,
+          QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+        };
+        const {
+          getByText,
+          getByLabelText,
+          queryByLabelText,
+          store,
+          rerender,
+        } = setup({
+          task,
+          orgs: theseOrgs,
+        });
+        fireEvent.click(getByText('Submit Review'));
+
+        expect(getByLabelText('Approve')).toBeChecked();
+        expect(getByLabelText('Request changes')).not.toBeChecked();
+
+        task = {
+          ...task,
+          review_valid: true,
+          review_status: 'Changes requested',
+        };
+        setup({ task, orgs, store, rerender });
+
+        expect(getByLabelText('Approve')).not.toBeChecked();
+        expect(getByLabelText('Request changes')).toBeChecked();
+        expect(getByLabelText('Delete Review Org')).toBeChecked();
+
+        setup({ task, orgs: { Dev: null, QA: null }, store, rerender });
+
+        expect(queryByLabelText('Delete Review Org')).toBeNull();
+      });
+
       describe('form submit', () => {
         test('submits task for review', () => {
           const { getByText, baseElement } = setup({

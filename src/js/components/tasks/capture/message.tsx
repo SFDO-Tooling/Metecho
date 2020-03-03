@@ -56,7 +56,6 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
           value={inputs.commit_message}
           required
           aria-required
-          maxLength="50"
           errorText={errors.commit_message}
           onChange={handleInputChange}
         />

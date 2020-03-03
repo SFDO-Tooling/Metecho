@@ -40,12 +40,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
 
   // "Assign users to project" modal related:
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
-  const openAssignUsersModal = () => {
+  const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
-  };
-  const closeAssignUsersModal = () => {
+  }, []);
+  const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
-  };
+  }, []);
   const setProjectUsers = useCallback(
     (users: GitHubUser[]) => {
       /* istanbul ignore if */
@@ -94,7 +94,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
       return;
     }
     dispatch(refreshGitHubUsers(repository.id));
-  }, [repository, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [repository, dispatch]);
 
   // "Assign user to task" modal related:
   const assignUser = useCallback(
@@ -119,7 +119,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         }),
       );
     },
-    [], // eslint-disable-line react-hooks/exhaustive-deps
+    [dispatch],
   );
 
   // "Submit" modal related:

@@ -89,9 +89,12 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   }, [fetchingChanges, devOrg, submitModalOpen]);
 
-  const doRefetchOrg = useCallback((org: Org) => {
-    dispatch(refetchOrg(org));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const doRefetchOrg = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
 
   const openSubmitModal = () => {
     setSubmitModalOpen(true);

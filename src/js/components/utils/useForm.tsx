@@ -37,10 +37,10 @@ export default ({
 }) => {
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
-  const [inputs, setInputs] = useState<{ [key: string]: any }>(fields);
+  const [inputs, setInputs] = useState<{ [key: string]: any }>({ ...fields });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const resetForm = () => {
-    setInputs(fields);
+    setInputs({ ...fields });
     setErrors({});
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -23,25 +23,28 @@ const defaultChangeset = {
 };
 
 describe('<CaptureModal/>', () => {
-  const setup = (options) => {
+  const setup = (options = {}) => {
     const defaults = {
       changeset: defaultChangeset,
+      directories: { config: ['foo/bar'] },
+      rerender: false,
     };
     const opts = Object.assign({}, defaults, options);
-    const { changeset } = opts;
     const toggleModal = jest.fn();
     const result = renderWithRedux(
       <MemoryRouter>
         <CaptureModal
           orgId="org-id"
-          changeset={changeset}
-          directories={{ config: ['foo/bar'] }}
+          changeset={opts.changeset}
+          directories={opts.directories}
           isOpen
           toggleModal={toggleModal}
         />
       </MemoryRouter>,
       {},
       storeWithThunk,
+      opts.rerender,
+      opts.store,
     );
     return { ...result, toggleModal };
   };
@@ -62,6 +65,24 @@ describe('<CaptureModal/>', () => {
     fireEvent.click(getByText('Close'));
 
     expect(toggleModal).toHaveBeenCalledTimes(1);
+  });
+
+  test('updates default fields when props change', () => {
+    const { getByLabelText, queryByLabelText, store, rerender } = setup({
+      directories: { source: ['src'] },
+    });
+
+    expect(getByLabelText('src')).toBeChecked();
+    expect(queryByLabelText('force-app')).toBeNull();
+
+    setup({
+      directories: { source: ['force-app'] },
+      store,
+      rerender,
+    });
+
+    expect(getByLabelText('force-app')).toBeChecked();
+    expect(queryByLabelText('src')).toBeNull();
   });
 
   describe('form submit', () => {

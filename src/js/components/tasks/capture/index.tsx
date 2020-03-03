@@ -5,7 +5,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
 import ChangesForm from '@/components/tasks/capture/changes';
 import TargetDirectoriesForm from '@/components/tasks/capture/directories';
@@ -108,6 +108,8 @@ const CaptureModal = ({
     }
   };
 
+  const defaultDir = directories.source?.[0] || 'src';
+
   const {
     inputs,
     errors,
@@ -119,7 +121,7 @@ const CaptureModal = ({
     fields: {
       changes: {},
       commit_message: '',
-      target_directory: directories.source?.[0] || 'src',
+      target_directory: defaultDir,
     } as CommitData,
     objectType: OBJECT_TYPES.COMMIT,
     url: window.api_urls.scratch_org_commit(orgId),
@@ -129,12 +131,17 @@ const CaptureModal = ({
   });
 
   // When directories change, update default selection
+  const defaultDirectoryRef = useRef(defaultDir);
   useEffect(() => {
-    setInputs({
-      ...inputs,
-      target_directory: directories.source?.[0] || 'src',
-    });
-  }, [directories.source]); // eslint-disable-line react-hooks/exhaustive-deps
+    const prevDefaultDir = defaultDirectoryRef.current;
+    if (defaultDir !== prevDefaultDir) {
+      setInputs({
+        ...inputs,
+        target_directory: defaultDir,
+      });
+      defaultDirectoryRef.current = defaultDir;
+    }
+  }, [defaultDir, inputs, setInputs]);
 
   const dirSelected = Boolean(inputs.target_directory);
   const changesChecked = Object.values(inputs.changes).flat().length;

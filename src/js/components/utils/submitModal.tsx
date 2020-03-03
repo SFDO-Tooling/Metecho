@@ -165,7 +165,6 @@ const SubmitModal = ({
               value={inputs.title}
               required
               aria-required
-              maxLength="50"
               errorText={errors.title}
               onChange={handleInputChange}
             />

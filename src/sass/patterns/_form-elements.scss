@@ -27,4 +27,10 @@
   .slds-is-open > .slds-accordion__summary {
     margin-bottom: $spacing-x-small;
   }
+
+  .grow-inner-item {
+    .slds-accordion__summary-action > .slds-truncate {
+      flex-grow: 1;
+    }
+  }
 }
