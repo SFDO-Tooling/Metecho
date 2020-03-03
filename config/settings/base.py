@@ -217,11 +217,16 @@ ADMIN_API_ALLOWED_SUBNETS = env(
     type_=ipv4_networks,
 )
 
+# GitHub settings:
 GITHUB_HOOK_SECRET = env(
     "GITHUB_HOOK_SECRET", default="", type_=lambda x: bytes(x, encoding="utf-8")
 )
 # The username of the user that GitHub webhook actions should authenticate as:
 GITHUB_USER_NAME = env("GITHUB_USER_NAME", default="GitHub user")
+
+
+# Salesforce Devhub settings:
+DEVHUB_USERNAME = env("DEVHUB_USERNAME", default=None)
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

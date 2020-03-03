@@ -314,6 +314,18 @@ class TestUser:
         )
         assert user.sf_username == "sample username"
 
+    def test_sf_username__global_devhub(
+        self, settings, user_factory, social_account_factory
+    ):
+        settings.DEVHUB_USERNAME = "devhub username"
+        user = user_factory(devhub_username="sample username", use_global_devhub=True)
+        social_account_factory(
+            user=user,
+            provider="salesforce-production",
+            extra_data={"preferred_username": "not me!"},
+        )
+        assert user.sf_username == "devhub username"
+
     def test_instance_url(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")

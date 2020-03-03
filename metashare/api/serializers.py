@@ -53,6 +53,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "sf_username",
             "currently_fetching_repos",
             "devhub_username",
+            "use_global_devhub",
         )
 
 

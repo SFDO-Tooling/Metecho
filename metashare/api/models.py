@@ -54,6 +54,7 @@ class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
     devhub_username = StringField(null=True, blank=True)
+    use_global_devhub = models.BooleanField(default=False)
 
     def refresh_repositories(self):
         repos = gh.get_all_org_repos(self)
@@ -131,6 +132,8 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def sf_username(self):
+        if settings.DEVHUB_USERNAME and self.use_global_devhub:
+            return settings.DEVHUB_USERNAME
         if self.devhub_username:
             return self.devhub_username
         try:
