@@ -93,31 +93,23 @@ def run_retrieve_task(
         }
     )
 
-    # Determine default package directory
-    # Use src for mdapi format,
-    # or the default package directory from sfdx-project.json for sfdx format
-    default_package_directory = None
     valid_directories = get_valid_target_directories(user, scratch_org, project_path)[
         "source"
     ]
-    if valid_directories:
-        default_package_directory = valid_directories[0]
 
     package_xml_opts = {}
-    if (
-        default_package_directory
-        and cci.project_config.project__source_format == "sfdx"
-    ):  # pragma: no cover
-        md_format = False
-    else:
-        md_format = True
-        package_xml_opts.update(
-            {
-                "package_name": cci.project_config.project__package__name,
-                "install_class": cci.project_config.project__package__install_class,
-                "uninstall_class": cci.project_config.project__package__uninstall_class,
-            }
-        )
+    md_format = target_directory not in valid_directories
+
+    # XXX: Should this always run? Previously it was in a conditional,
+    # but @davisagli asked for a change in that logic, which has left
+    # this outside of its previous conditional context.
+    package_xml_opts.update(
+        {
+            "package_name": cci.project_config.project__package__name,
+            "install_class": cci.project_config.project__package__install_class,
+            "uninstall_class": cci.project_config.project__package__uninstall_class,
+        }
+    )
 
     components = []
     for mdtype, members in desired_changes.items():
