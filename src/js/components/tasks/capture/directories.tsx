@@ -45,13 +45,43 @@ const TargetDirectoriesForm = ({
 
   return (
     <form className="slds-form slds-p-around_large">
-      <div className="slds-form-element__help slds-p-bottom_small">
-        <Trans i18nKey="targetDirectoryInfo">
-          Here’s an explanation of what each type of directory is. The Package
-          Directories are this and the Pre-Install and Post-Install Directories
-          are different. The Optional Configuration Directories are something
-          else entirely.
-        </Trans>
+      <div className="slds-form-element__help slds-p-bottom_small slds-text-longform">
+        {orderedDirectories.has('source') && (
+          <p>
+            <Trans i18nKey="targetDirectorySourceInfo">
+              Package Directories hold the main metadata components of the
+              package you are building. These components will be deployed as an
+              unmanaged package during development, but installed as a managed
+              or unlocked package in production.
+            </Trans>
+          </p>
+        )}
+        {orderedDirectories.has('pre') && (
+          <p>
+            <Trans i18nKey="targetDirectoryPreInfo">
+              Pre-Install Directories are for unmanaged metadata components that
+              should always be deployed prior to deploying or installing the
+              package.
+            </Trans>
+          </p>
+        )}
+        {orderedDirectories.has('post') && (
+          <p>
+            <Trans i18nKey="targetDirectoryPostInfo">
+              Post-Install Directories are for unmanaged metadata components
+              that should always be deployed after deploying or installing the
+              package.
+            </Trans>
+          </p>
+        )}
+        {orderedDirectories.has('config') && (
+          <p>
+            <Trans i18nKey="targetDirectoryConfigInfo">
+              Optional Configuration Directories are for additional sets of
+              metadata components that will only be deployed on demand.
+            </Trans>
+          </p>
+        )}
       </div>
       <ModalCard>
         {Array.from(orderedDirectories, ([key, dirs], idx) => {

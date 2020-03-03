@@ -100,7 +100,7 @@ def run_retrieve_task(
     package_xml_opts = {}
     md_format = target_directory not in valid_directories
 
-    if md_format:
+    if md_format:  # pragma: no cover
         package_xml_opts.update(
             {
                 "package_name": cci.project_config.project__package__name,

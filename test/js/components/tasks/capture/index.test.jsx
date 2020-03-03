@@ -26,7 +26,7 @@ describe('<CaptureModal/>', () => {
   const setup = (options = {}) => {
     const defaults = {
       changeset: defaultChangeset,
-      directories: { config: ['foo/bar'] },
+      directories: { config: ['foo/bar'], pre: ['buz/baz'] },
       rerender: false,
     };
     const opts = Object.assign({}, defaults, options);
