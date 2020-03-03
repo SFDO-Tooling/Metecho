@@ -100,7 +100,7 @@ def run_retrieve_task(
     md_format = target_directory not in valid_directories["source"]
 
     if sfdx:
-        is_main_project_directory = target_directory in valid_directories["source"]
+        is_main_project_directory = target_directory == valid_directories["source"][0]
     else:
         is_main_project_directory = target_directory == "src"
 
