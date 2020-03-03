@@ -33,7 +33,9 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
       <ModalCard>
         <pre>
           <Icon category="utility" name="open_folder" size="small" />
-          <span className="slds-p-left_x-small">{inputs.target_directory}</span>
+          <span className="slds-p-left_x-small v-align-center">
+            {inputs.target_directory}
+          </span>
         </pre>
       </ModalCard>
       <ModalCard
@@ -67,7 +69,10 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
               const children = inputs.changes[groupName];
               const handleThisPanelToggle = () => handlePanelToggle(groupName);
               return (
-                <Accordion key={groupName} className="light-bordered-row">
+                <Accordion
+                  key={groupName}
+                  className="light-bordered-row grow-inner-item"
+                >
                   <AccordionPanel
                     expanded={Boolean(expandedPanels[groupName])}
                     key={`${groupName}-panel`}
@@ -75,10 +80,10 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
                     onTogglePanel={handleThisPanelToggle}
                     title={groupName}
                     summary={
-                      <div className="form-grid slds-text-body_regular">
+                      <span className="form-grid slds-text-body_regular">
                         <span>{groupName}</span>
                         <span>({children.length})</span>
-                      </div>
+                      </span>
                     }
                   >
                     {children.sort().map((change) => (

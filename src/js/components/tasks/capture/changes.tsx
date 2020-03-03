@@ -100,7 +100,9 @@ const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
       <ModalCard>
         <pre>
           <Icon category="utility" name="open_folder" size="small" />
-          <span className="slds-p-left_x-small">{inputs.target_directory}</span>
+          <span className="slds-p-left_x-small v-align-center">
+            {inputs.target_directory}
+          </span>
         </pre>
       </ModalCard>
       <ModalCard noBodyPadding>
