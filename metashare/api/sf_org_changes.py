@@ -97,7 +97,7 @@ def run_retrieve_task(
     valid_directories, sfdx = get_valid_target_directories(
         user, scratch_org, project_path
     )
-    md_format = target_directory not in valid_directories["source"]
+    md_format = not (sfdx and target_directory in valid_directories["source"])
 
     if sfdx:
         is_main_project_directory = target_directory == valid_directories["source"][0]
