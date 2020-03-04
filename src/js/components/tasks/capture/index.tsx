@@ -158,89 +158,97 @@ const CaptureModal = ({
     handleSubmit(e);
   };
 
-  const headings = [
-    i18n.t('Select the location to capture changes'),
-    i18n.t('Select the changes to capture'),
-    i18n.t('Describe the changes you are capturing'),
-  ];
-
-  const contents = [
-    <TargetDirectoriesForm
-      key="page-1-contents"
-      directories={directories}
-      inputs={inputs as CommitData}
-      errors={errors}
-      handleInputChange={handleInputChange}
-    />,
-    <ChangesForm
-      key="page-2-contents"
-      changeset={changeset}
-      inputs={inputs as CommitData}
-      errors={errors}
-      setInputs={setInputs}
-    />,
-    <CommitMessageForm
-      key="page-3-contents"
-      inputs={inputs as CommitData}
-      errors={errors}
-      handleInputChange={handleInputChange}
-    />,
-  ];
-
-  const footers = [
-    <Button
-      key="page-1-button-1"
-      label={i18n.t('Save & Next')}
-      variant="brand"
-      onClick={nextPage}
-      disabled={!dirSelected}
-    />,
-    [
-      <Button
-        key="page-2-button-1"
-        label={i18n.t('Go Back')}
-        variant="outline-brand"
-        onClick={prevPage}
-      />,
-      // <Button
-      //   key="page-2-button-2"
-      //   label={i18n.t('Ignore Selected Changes')}
-      //   variant="outline-brand"
-      // />,
-      <Button
-        key="page-2-button-3"
-        label={i18n.t('Save & Next')}
-        variant="brand"
-        onClick={nextPage}
-        disabled={!changesChecked}
-      />,
-    ],
-    [
-      <Button
-        key="page-3-button-1"
-        label={i18n.t('Go Back')}
-        variant="outline-brand"
-        onClick={prevPage}
-        disabled={capturingChanges}
-      />,
-      <Button
-        key="page-3-button-2"
-        type="submit"
-        label={
-          capturingChanges ? (
-            <LabelWithSpinner
-              label={i18n.t('Capturing Selected Changes…')}
-              variant="inverse"
-            />
-          ) : (
-            i18n.t('Capture Selected Changes')
-          )
-        }
-        variant="brand"
-        onClick={submitChanges}
-        disabled={capturingChanges || !hasCommitMessage}
-      />,
-    ],
+  const pages = [
+    {
+      heading: i18n.t('Select the location to capture changes'),
+      contents: (
+        <TargetDirectoriesForm
+          key="page-1-contents"
+          directories={directories}
+          inputs={inputs as CommitData}
+          errors={errors}
+          handleInputChange={handleInputChange}
+        />
+      ),
+      footer: (
+        <Button
+          key="page-1-button-1"
+          label={i18n.t('Save & Next')}
+          variant="brand"
+          onClick={nextPage}
+          disabled={!dirSelected}
+        />
+      ),
+    },
+    {
+      heading: i18n.t('Select the changes to capture'),
+      contents: (
+        <ChangesForm
+          key="page-2-contents"
+          changeset={changeset}
+          inputs={inputs as CommitData}
+          errors={errors}
+          setInputs={setInputs}
+        />
+      ),
+      footer: [
+        <Button
+          key="page-2-button-1"
+          label={i18n.t('Go Back')}
+          variant="outline-brand"
+          onClick={prevPage}
+        />,
+        // <Button
+        //   key="page-2-button-2"
+        //   label={i18n.t('Ignore Selected Changes')}
+        //   variant="outline-brand"
+        // />,
+        <Button
+          key="page-2-button-3"
+          label={i18n.t('Save & Next')}
+          variant="brand"
+          onClick={nextPage}
+          disabled={!changesChecked}
+        />,
+      ],
+    },
+    {
+      heading: i18n.t('Describe the changes you are capturing'),
+      contents: (
+        <CommitMessageForm
+          key="page-3-contents"
+          inputs={inputs as CommitData}
+          errors={errors}
+          handleInputChange={handleInputChange}
+        />
+      ),
+      footer: [
+        <Button
+          key="page-3-button-1"
+          label={i18n.t('Go Back')}
+          variant="outline-brand"
+          onClick={prevPage}
+          disabled={capturingChanges}
+        />,
+        <Button
+          key="page-3-button-2"
+          type="submit"
+          label={
+            capturingChanges ? (
+              <LabelWithSpinner
+                label={i18n.t('Capturing Selected Changes…')}
+                variant="inverse"
+              />
+            ) : (
+              i18n.t('Capture Selected Changes')
+            )
+          }
+          variant="brand"
+          onClick={submitChanges}
+          disabled={capturingChanges || !hasCommitMessage}
+        />,
+      ],
+    },
   ];
 
   return (
@@ -248,12 +256,12 @@ const CaptureModal = ({
       isOpen={isOpen}
       size="small"
       disableClose={capturingChanges}
-      heading={headings[pageIndex]}
-      footer={footers[pageIndex]}
+      heading={pages[pageIndex].heading}
+      footer={pages[pageIndex].footer}
       directional={pageIndex > 0}
       onRequestClose={handleClose}
     >
-      {contents[pageIndex]}
+      {pages[pageIndex].contents}
     </Modal>
   );
 };

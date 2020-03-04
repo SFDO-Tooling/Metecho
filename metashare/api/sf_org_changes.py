@@ -120,7 +120,7 @@ def run_retrieve_task(
     retrieve_components(
         components,
         org_config,
-        target_directory,
+        os.path.realpath(target_directory),
         md_format,
         extra_package_xml_opts=package_xml_opts,
         namespace_tokenize=False,

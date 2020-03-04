@@ -110,7 +110,7 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
     task = factory.SubFactory(TaskFactory)
     owner = factory.SubFactory(UserFactory)
     org_type = "Dev"
-    valid_target_directories = {"source": [], "pre": [], "post": [], "config": []}
+    valid_target_directories = {"source": []}
 
 
 @pytest.fixture
