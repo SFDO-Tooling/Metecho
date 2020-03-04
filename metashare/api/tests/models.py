@@ -318,11 +318,9 @@ class TestUser:
         self, settings, user_factory, social_account_factory
     ):
         settings.DEVHUB_USERNAME = "devhub username"
-        user = user_factory(devhub_username="sample username", use_global_devhub=True)
+        user = user_factory(devhub_username=None, allow_devhub_override=True)
         social_account_factory(
-            user=user,
-            provider="salesforce-production",
-            extra_data={"preferred_username": "not me!"},
+            user=user, provider="salesforce-production", extra_data={},
         )
         assert user.sf_username == "devhub username"
 

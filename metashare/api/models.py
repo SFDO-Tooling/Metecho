@@ -54,7 +54,7 @@ class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
     devhub_username = StringField(null=True, blank=True)
-    use_global_devhub = models.BooleanField(default=False)
+    allow_devhub_override = models.BooleanField(default=False)
 
     def refresh_repositories(self):
         repos = gh.get_all_org_repos(self)
@@ -132,13 +132,13 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def sf_username(self):
-        if settings.DEVHUB_USERNAME and self.use_global_devhub:
-            return settings.DEVHUB_USERNAME
         if self.devhub_username:
             return self.devhub_username
         try:
             return self.salesforce_account.extra_data["preferred_username"]
         except (AttributeError, KeyError):
+            if settings.DEVHUB_USERNAME:
+                return settings.DEVHUB_USERNAME
             return None
 
     @property
