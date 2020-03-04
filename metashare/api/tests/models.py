@@ -1,5 +1,5 @@
 from contextlib import ExitStack
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -562,6 +562,17 @@ class TestScratchOrg:
             scratch_org.queue_get_unsaved_changes()
 
             assert get_unsaved_changes_job.delay.called
+
+    def test_get_unsaved_changes__bail_early(self, scratch_org_factory):
+        with patch(
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
+            scratch_org = scratch_org_factory(
+                last_checked_unsaved_changes_at=now() - timedelta(minutes=1),
+            )
+            scratch_org.queue_get_unsaved_changes()
+
+            assert not get_unsaved_changes_job.delay.called
 
     def test_finalize_provision(self, scratch_org_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
