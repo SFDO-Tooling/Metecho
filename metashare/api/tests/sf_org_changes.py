@@ -7,6 +7,7 @@ from ..sf_org_changes import (
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
+    get_valid_target_directories,
     run_retrieve_task,
 )
 
@@ -14,21 +15,75 @@ PATCH_ROOT = "metashare.api.sf_org_changes"
 
 
 @pytest.mark.django_db
-def test_run_retrieve_task(user_factory, scratch_org_factory):
-    user = user_factory()
-    scratch_org = scratch_org_factory()
-    with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-        retrieve_components = stack.enter_context(
-            patch(f"{PATCH_ROOT}.retrieve_components")
-        )
+class TestRunRetrieveTask:
+    def test_run_retrieve_task(self, user_factory, scratch_org_factory):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_valid_target_directories = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_valid_target_directories")
+            )
+            get_valid_target_directories.return_value = (
+                {"source": ["src"], "config": [], "post": [], "pre": []},
+                False,
+            )
+            retrieve_components = stack.enter_context(
+                patch(f"{PATCH_ROOT}.retrieve_components")
+            )
 
-        desired_changes = {"name": ["member"]}
-        run_retrieve_task(user, scratch_org, ".", desired_changes)
+            desired_changes = {"name": ["member"]}
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "src")
 
-        assert retrieve_components.called
+            assert retrieve_components.called
+
+    def test_run_retrieve_task__sfdx(self, user_factory, scratch_org_factory):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_valid_target_directories = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_valid_target_directories")
+            )
+            get_valid_target_directories.return_value = (
+                {"source": ["src"], "config": [], "post": [], "pre": []},
+                True,
+            )
+            retrieve_components = stack.enter_context(
+                patch(f"{PATCH_ROOT}.retrieve_components")
+            )
+
+            desired_changes = {"name": ["member"]}
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "src")
+
+            assert retrieve_components.called
+
+    def test_run_retrieve_task__sfdx__non_main(self, user_factory, scratch_org_factory):
+        user = user_factory()
+        scratch_org = scratch_org_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_valid_target_directories = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_valid_target_directories")
+            )
+            get_valid_target_directories.return_value = (
+                {"source": ["src"], "config": [], "post": [], "pre": []},
+                True,
+            )
+            retrieve_components = stack.enter_context(
+                patch(f"{PATCH_ROOT}.retrieve_components")
+            )
+
+            desired_changes = {"name": ["member"]}
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "source")
+
+            assert retrieve_components.called
 
 
 @pytest.mark.django_db
@@ -54,6 +109,7 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
             branch="test-branch",
             desired_changes=desired_changes,
             commit_message="test message",
+            target_directory="src",
         )
 
         assert CommitDir.called
@@ -72,22 +128,22 @@ def test_get_latest_revision_numbers():
                 {
                     "MemberType": "some-type-1",
                     "MemberName": "some-name-1",
-                    "RevisionNum": 3,
+                    "RevisionCounter": 3,
                 },
                 {
                     "MemberType": "some-type-1",
                     "MemberName": "some-name-2",
-                    "RevisionNum": 3,
+                    "RevisionCounter": 3,
                 },
                 {
                     "MemberType": "some-type-2",
                     "MemberName": "some-name-1",
-                    "RevisionNum": 3,
+                    "RevisionCounter": 3,
                 },
                 {
                     "MemberType": "some-type-2",
                     "MemberName": "some-name-2",
-                    "RevisionNum": 3,
+                    "RevisionCounter": 3,
                 },
             ]
         }
@@ -110,3 +166,65 @@ def test_compare_revisions__false():
     old = {"type": {"name": 1}}
     new = {"type": {"name": 1}}
     assert not compare_revisions(old, new)
+
+
+@pytest.mark.django_db
+class TestGetValidTargetDirectories:
+    def test_get_valid_target_directories__self(
+        self, user_factory, scratch_org_factory
+    ):
+        with ExitStack() as stack:
+            open_mock = stack.enter_context(patch(f"{PATCH_ROOT}.open"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_source_format = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_source_format")
+            )
+            get_source_format.return_value = "sfdx"
+
+            file_mock = MagicMock()
+            file_mock.read.return_value = '{"packageDirectories":[{"path":"package"}]}'
+            open_context_manager = MagicMock()
+            open_context_manager.__enter__.return_value = file_mock
+            open_mock.return_value = open_context_manager
+            scratch_org = scratch_org_factory(config={"source_format": "sfdx"})
+
+            user = user_factory()
+            repo_root = "."
+
+            actual, _ = get_valid_target_directories(user, scratch_org, repo_root)
+
+            assert actual == {
+                "source": ["package"],
+                "pre": [],
+                "post": [],
+                "config": [],
+            }
+
+    def test_get_valid_target_directories__other(
+        self, user_factory, scratch_org_factory
+    ):
+        with ExitStack() as stack:
+            open_mock = stack.enter_context(patch(f"{PATCH_ROOT}.open"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.os.path"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_source_format = stack.enter_context(
+                patch(f"{PATCH_ROOT}.get_source_format")
+            )
+            get_source_format.return_value = "other"
+
+            file_mock = MagicMock()
+            file_mock.read.return_value = '{"packageDirectories":[{"path":"package"}]}'
+            open_context_manager = MagicMock()
+            open_context_manager.__enter__.return_value = file_mock
+            open_mock.return_value = open_context_manager
+            scratch_org = scratch_org_factory(config={"source_format": "sfdx"})
+
+            user = user_factory()
+            repo_root = "."
+
+            actual, _ = get_valid_target_directories(user, scratch_org, repo_root)
+
+            assert actual == {"source": ["src"], "pre": [], "post": [], "config": []}

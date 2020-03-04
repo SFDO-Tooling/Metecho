@@ -22,6 +22,7 @@ from .serializers import (
     MinimalUserSerializer,
     ProjectSerializer,
     RepositorySerializer,
+    ReviewSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
 )
@@ -162,6 +163,24 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for review.")
 
+    @action(detail=True, methods=["POST"])
+    def review(self, request, pk=None):
+        serializer = ReviewSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+        task = self.get_object()
+        org = serializer.validated_data["org"]
+
+        if not task.pr_is_open:
+            raise ValidationError(_("The pull request for this task has been closed."))
+        if not (org or task.review_valid):
+            raise ValidationError(_("Cannot submit review without a Review Org."))
+
+        task.queue_submit_review(user=request.user, data=serializer.validated_data)
+        return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
+
 
 class ScratchOrgViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -237,7 +256,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
-
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
@@ -246,7 +264,20 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
         commit_message = serializer.validated_data["commit_message"]
         desired_changes = serializer.validated_data["changes"]
-        scratch_org.queue_commit_changes(request.user, desired_changes, commit_message)
+        target_directory = serializer.validated_data["target_directory"]
+        valid_target_directories = [
+            item
+            for section in scratch_org.valid_target_directories.values()
+            for item in section
+        ]
+        if target_directory not in valid_target_directories:
+            raise ValidationError("Invalid target directory")
+        scratch_org.queue_commit_changes(
+            user=request.user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
+        )
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
@@ -259,5 +290,19 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
                 {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        scratch_org.mark_visited()
         url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)
+
+    @action(detail=True, methods=["POST"])
+    def refresh(self, request, pk=None):
+        scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": _("Requesting user did not create scratch org.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        scratch_org.queue_refresh_org()
+        return Response(
+            self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
+        )

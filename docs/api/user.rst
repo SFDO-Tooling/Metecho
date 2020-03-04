@@ -28,3 +28,25 @@ Retrieve
      "sf_username": "user@domain.com",
      "currently_fetching_repos": false
    }
+
+Refresh
+-------
+
+.. sourcecode:: http
+
+   POST /api/user/refresh/ HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED
+
+Disconnect
+----------
+
+.. sourcecode:: http
+
+   POST /api/user/disconnect/ HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 200 OK

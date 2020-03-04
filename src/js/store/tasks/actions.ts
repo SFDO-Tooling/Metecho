@@ -31,10 +31,7 @@ export const createTaskPR = (payload: Task): ThunkResult => (dispatch) => {
       openLinkInNewWindow: true,
     }),
   );
-  return dispatch({
-    type: 'TASK_UPDATE',
-    payload,
-  });
+  return dispatch(updateTask(payload));
 };
 
 export const createTaskPRFailed = ({
@@ -57,4 +54,37 @@ export const createTaskPRFailed = ({
     type: 'TASK_CREATE_PR_FAILED',
     payload: model,
   });
+};
+
+export const submitReview = (payload: Task): ThunkResult => (dispatch) => {
+  dispatch(
+    addToast({
+      heading: `${i18n.t('Successfully submitted review for task')}: “${
+        payload.name
+      }”.`,
+      linkText: payload.pr_url ? i18n.t('View pull request.') : undefined,
+      linkUrl: payload.pr_url ? payload.pr_url : undefined,
+      openLinkInNewWindow: true,
+    }),
+  );
+  return dispatch(updateTask(payload));
+};
+
+export const submitReviewFailed = ({
+  model,
+  message,
+}: {
+  model: Task;
+  message?: string;
+}): ThunkResult => (dispatch) => {
+  dispatch(
+    addToast({
+      heading: `${i18n.t(
+        'Uh oh. There was an error submitting review for task',
+      )}: “${model.name}”.`,
+      details: message,
+      variant: 'error',
+    }),
+  );
+  return dispatch(updateTask(model));
 };

@@ -9,11 +9,75 @@ from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.salesforce.sourcetracking import retrieve_components
 from django.conf import settings
 
-from .gh import get_repo_info, local_github_checkout
+from .gh import get_repo_info, get_source_format, local_github_checkout
 from .sf_run_flow import refresh_access_token
 
 
-def run_retrieve_task(user, scratch_org, project_path, desired_changes):
+def get_valid_target_directories(user, scratch_org, repo_root):
+    """
+    Expects to be called from within a `local_github_checkout`.
+    """
+    package_directories = {}
+    repo_id = scratch_org.task.project.repository.get_repo_id(user)
+    repository = get_repo_info(user, repo_id=repo_id)
+    source_format = get_source_format(
+        repo_root=repo_root,
+        repo_name=repository.name,
+        repo_url=repository.html_url,
+        repo_owner=repository.owner.login,
+        repo_branch=scratch_org.task.branch_name,
+        repo_commit=repository.branch(scratch_org.task.branch_name).latest_sha(),
+    )
+    sfdx = source_format == "sfdx"
+    if sfdx:
+        with open("sfdx-project.json") as f:
+            sfdx_project = json.load(f)
+            # sfdx_project["packageDirectories"] will either be an array
+            # of length 1, with no constituent object marked as
+            # "default", OR an array of length > 1, with exactly one
+            # constituent object marked as "default". These two logical
+            # lines will ensure that the default is the first item in
+            # the list at the "source" key of package_directories.
+            package_directories["source"] = [
+                directory["path"]
+                for directory in sfdx_project["packageDirectories"]
+                if directory.get("default")
+            ]
+            package_directories["source"].extend(
+                [
+                    directory["path"]
+                    for directory in sfdx_project["packageDirectories"]
+                    if not directory.get("default")
+                ]
+            )
+    else:
+        package_directories["source"] = ["src"]
+
+    if os.path.isdir("unpackaged/pre"):
+        package_directories["pre"] = [
+            "unpackaged/pre/" + dirname
+            for dirname in os.listdir("unpackaged/pre")
+            if os.path.isdir("unpackaged/pre/" + dirname)
+        ]
+    if os.path.isdir("unpackaged/post"):
+        package_directories["post"] = [
+            "unpackaged/post/" + dirname
+            for dirname in os.listdir("unpackaged/post")
+            if os.path.isdir("unpackaged/post/" + dirname)
+        ]
+    if os.path.isdir("unpackaged/config"):
+        package_directories["config"] = [
+            "unpackaged/config/" + dirname
+            for dirname in os.listdir("unpackaged/config")
+            if os.path.isdir("unpackaged/config/" + dirname)
+        ]
+
+    return package_directories, sfdx
+
+
+def run_retrieve_task(
+    user, scratch_org, project_path, desired_changes, target_directory
+):
     repo_id = scratch_org.task.project.repository.get_repo_id(user)
     org_config = refresh_access_token(
         config=scratch_org.config, org_name="dev", scratch_org=scratch_org
@@ -30,39 +94,24 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
         }
     )
 
-    # Determine default package directory
-    # Use src for mdapi format,
-    # or the default package directory from sfdx-project.json for sfdx format
-    # (This chunk is copied from CumulusCI, where we need to refactor things
-    # so we can reuse it. Given that it's already tested there, I'm going to
-    # pragma: no cover some of it.)
-    package_directories = []
-    default_package_directory = None
-    package_xml_opts = {}
-    sfdx_project_json = os.path.join(project_path, "sfdx-project.json")
-    if os.path.exists(sfdx_project_json):
-        with open(sfdx_project_json, "r") as f:  # pragma: no cover
-            sfdx_project = json.load(f)
-            for package_directory in sfdx_project.get("packageDirectories", []):
-                package_directories.append(package_directory["path"])
-                if package_directory.get("default"):
-                    default_package_directory = package_directory["path"]
-    if (
-        default_package_directory
-        and cci.project_config.project__source_format == "sfdx"
-    ):  # pragma: no cover
-        path = os.path.join(project_path, default_package_directory)
-        md_format = False
+    valid_directories, sfdx = get_valid_target_directories(
+        user, scratch_org, project_path
+    )
+    md_format = not (sfdx and target_directory in valid_directories["source"])
+
+    if sfdx:
+        is_main_project_directory = target_directory == valid_directories["source"][0]
     else:
-        path = os.path.join(project_path, "src")
-        md_format = True
-        package_xml_opts.update(
-            {
-                "package_name": cci.project_config.project__package__name,
-                "install_class": cci.project_config.project__package__install_class,
-                "uninstall_class": cci.project_config.project__package__uninstall_class,
-            }
-        )
+        is_main_project_directory = target_directory == "src"
+
+    if is_main_project_directory:
+        package_xml_opts = {
+            "package_name": cci.project_config.project__package__name,
+            "install_class": cci.project_config.project__package__install_class,
+            "uninstall_class": cci.project_config.project__package__uninstall_class,
+        }
+    else:
+        package_xml_opts = {}
 
     components = []
     for mdtype, members in desired_changes.items():
@@ -71,7 +120,7 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
     retrieve_components(
         components,
         org_config,
-        path,
+        target_directory,
         md_format,
         extra_package_xml_opts=package_xml_opts,
         namespace_tokenize=False,
@@ -80,13 +129,22 @@ def run_retrieve_task(user, scratch_org, project_path, desired_changes):
 
 
 def commit_changes_to_github(
-    *, user, scratch_org, repo_id, branch, desired_changes, commit_message
+    *,
+    user,
+    scratch_org,
+    repo_id,
+    branch,
+    desired_changes,
+    commit_message,
+    target_directory,
 ):
     with local_github_checkout(user, repo_id) as project_path:
         # This won't return anything in-memory, but rather it will emit
         # files which we then copy into a source checkout, and then
         # commit and push all that.
-        run_retrieve_task(user, scratch_org, project_path, desired_changes)
+        run_retrieve_task(
+            user, scratch_org, project_path, desired_changes, target_directory
+        )
         repo = get_repo_info(user, repo_id=repo_id)
         author = {"name": user.username, "email": user.email}
         CommitDir(repo, author=author)(
@@ -122,13 +180,15 @@ def get_latest_revision_numbers(scratch_org):
     # version, there are changes.
     # We need to run this right after the setup flow and store that as initial state.
     records = conn.query_all(
-        "SELECT MemberName, MemberType, RevisionNum FROM SourceMember "
+        "SELECT MemberName, MemberType, RevisionCounter FROM SourceMember "
         "WHERE IsNameObsolete=false"
     ).get("records", [])
 
     record_dict = defaultdict(lambda: defaultdict(dict))
     for record in records:
-        record_dict[record["MemberType"]][record["MemberName"]] = record["RevisionNum"]
+        record_dict[record["MemberType"]][record["MemberName"]] = record[
+            "RevisionCounter"
+        ]
 
     return {k: dict(v) for k, v in record_dict.items()}
 

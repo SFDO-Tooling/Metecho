@@ -9,7 +9,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
-import CaptureModal from '@/components/tasks/captureOrgChanges';
+import CaptureModal from '@/components/tasks/capture';
 import OrgCards from '@/components/tasks/cards';
 import TaskStatusPath from '@/components/tasks/path';
 import TaskStatusSteps from '@/components/tasks/steps';
@@ -91,9 +91,12 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   }, [fetchingChanges, devOrg, submitModalOpen]);
 
-  const doRefetchOrg = useCallback((org: Org) => {
-    dispatch(refetchOrg(org));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const doRefetchOrg = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
 
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
@@ -277,6 +280,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             task={task}
             projectUsers={project.github_users}
             projectUrl={routes.project_detail(repository.slug, project.slug)}
+            repoUrl={repository.repo_url}
           />
         ) : (
           <SpinnerWrapper />
@@ -285,6 +289,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           <CaptureModal
             orgId={devOrg.id}
             changeset={devOrg.unsaved_changes}
+            directories={devOrg.valid_target_directories}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
           />

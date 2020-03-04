@@ -90,7 +90,7 @@ const UserInfo = ({
         setIsDisconnecting(false);
       }
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, isMounted, onDisconnect]);
   const doRefreshDevHubStatus = useCallback(() => {
     setIsRefreshing(true);
     dispatch(refreshDevHubStatus()).finally(() => {
@@ -99,7 +99,7 @@ const UserInfo = ({
         setIsRefreshing(false);
       }
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, isMounted]);
 
   return (
     <>

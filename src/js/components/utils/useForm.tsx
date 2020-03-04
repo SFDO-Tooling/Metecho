@@ -9,6 +9,15 @@ import { ObjectTypes } from '@/utils/constants';
 
 import useIsMounted from './useIsMounted';
 
+export interface UseFormProps {
+  inputs: { [key: string]: any };
+  errors: { [key: string]: string };
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setInputs: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  resetForm: () => void;
+}
+
 export default ({
   fields,
   objectType,
@@ -19,7 +28,7 @@ export default ({
   shouldSubscribeToObject = true,
 }: {
   fields: { [key: string]: any };
-  objectType: ObjectTypes;
+  objectType?: ObjectTypes;
   url?: string;
   additionalData?: { [key: string]: any };
   onSuccess?: (...args: any[]) => any;
@@ -28,14 +37,18 @@ export default ({
 }) => {
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
-  const [inputs, setInputs] = useState<{ [key: string]: any }>(fields);
+  const [inputs, setInputs] = useState<{ [key: string]: any }>({ ...fields });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const resetForm = () => {
-    setInputs(fields);
+    setInputs({ ...fields });
     setErrors({});
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputs({ ...inputs, [e.target.name]: e.target.value });
+    let value: boolean | string = e.target.value;
+    if (e.target.type === 'checkbox') {
+      value = e.target.checked;
+    }
+    setInputs({ ...inputs, [e.target.name]: value });
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -60,7 +73,6 @@ export default ({
         onSuccess(...args);
       })
       .catch((err: ApiError) => {
-        onError(err);
         const allErrors = typeof err?.body === 'object' ? err.body : {};
         const fieldErrors: typeof errors = {};
         for (const field of Object.keys(allErrors)) {
@@ -68,6 +80,7 @@ export default ({
             fieldErrors[field] = allErrors[field].join(', ');
           }
         }
+        onError(err, fieldErrors);
         /* istanbul ignore else */
         if (isMounted.current && Object.keys(fieldErrors).length) {
           setErrors(fieldErrors);

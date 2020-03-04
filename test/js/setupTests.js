@@ -28,8 +28,10 @@ beforeAll(() => {
     scratch_org_detail: (id) => `/api/scratch_orgs/${id}/`,
     scratch_org_commit: (id) => `/api/scratch_orgs/${id}/commit/`,
     scratch_org_redirect: (id) => `/api/scratch_orgs/${id}/redirect/`,
+    scratch_org_refresh: (id) => `/api/scratch_orgs/${id}/refresh/`,
     task_detail: (id) => `/api/tasks/${id}/`,
     task_create_pr: (id) => `/api/tasks/${id}/create_pr/`,
+    task_review: (id) => `/api/tasks/${id}/review/`,
     project_detail: (id) => `/api/projects/${id}/`,
     project_create_pr: (id) => `/api/projects/${id}/create_pr/`,
   };

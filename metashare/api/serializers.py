@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .fields import MarkdownField
-from .models import Project, Repository, ScratchOrg, Task
+from .models import TASK_REVIEW_STATUS, Project, Repository, ScratchOrg, Task
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
@@ -179,12 +179,18 @@ class TaskSerializer(serializers.ModelSerializer):
             "currently_creating_pr",
             "branch_url",
             "commits",
+            "origin_sha",
             "branch_diff_url",
             "pr_url",
+            "review_submitted_at",
+            "review_valid",
+            "review_status",
+            "review_sha",
             "status",
             "pr_is_open",
             "assigned_dev",
             "assigned_qa",
+            "currently_submitting_review",
         )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -237,6 +243,17 @@ class CreatePrSerializer(serializers.Serializer):
     notes = serializers.CharField(allow_blank=True)
 
 
+class ReviewSerializer(serializers.Serializer):
+    notes = serializers.CharField(allow_blank=True)
+    status = serializers.ChoiceField(choices=TASK_REVIEW_STATUS)
+    delete_org = serializers.BooleanField()
+    org = serializers.PrimaryKeyRelatedField(
+        queryset=ScratchOrg.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+    )
+
+
 class ScratchOrgSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     task = serializers.PrimaryKeyRelatedField(
@@ -266,9 +283,12 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "has_unsaved_changes",
             "currently_refreshing_changes",
             "currently_capturing_changes",
+            "currently_refreshing_org",
             "delete_queued_at",
             "owner_sf_username",
             "owner_gh_username",
+            "has_been_visited",
+            "valid_target_directories",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -280,6 +300,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "unsaved_changes": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
+            "currently_refreshing_org": {"read_only": True},
+            "valid_target_directories": {"read_only": True},
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:
@@ -305,3 +327,4 @@ class CommitSerializer(serializers.Serializer):
     changes = serializers.DictField(
         child=serializers.ListField(child=serializers.CharField())
     )
+    target_directory = serializers.CharField()

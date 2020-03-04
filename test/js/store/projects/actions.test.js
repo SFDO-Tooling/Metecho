@@ -51,8 +51,8 @@ describe('createProjectPR', () => {
     expect(allActions[0].payload.heading).toEqual(
       'Successfully submitted project for review: “My Project”.',
     );
-    expect(allActions[0].payload.linkText).toBe(undefined);
-    expect(allActions[0].payload.linkUrl).toBe(undefined);
+    expect(allActions[0].payload.linkText).toBeUndefined();
+    expect(allActions[0].payload.linkUrl).toBeUndefined();
     expect(allActions[1]).toEqual(action);
   });
 });

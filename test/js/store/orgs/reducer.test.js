@@ -401,7 +401,7 @@ describe('reducer', () => {
         },
       );
 
-      expect(actual['task-1'].Dev.delete_queued_at).not.toBe(undefined);
+      expect(actual['task-1'].Dev.delete_queued_at).not.toBeUndefined();
     });
 
     test('ignores if objectType !== "scratch_org"', () => {
@@ -443,6 +443,63 @@ describe('reducer', () => {
           type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
           payload: org,
         },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('SCRATCH_ORG_REFRESH_REQUESTED', () => {
+    const org = {
+      id: 'org-1',
+      task: 'task-1',
+      org_type: 'QA',
+    };
+    const org2 = {
+      id: 'org-2',
+      task: 'task-1',
+      org_type: 'Dev',
+    };
+
+    test('sets currently_refreshing_org: true', () => {
+      const expected = {
+        'task-1': {
+          QA: { ...org, currently_refreshing_org: true },
+          Dev: org2,
+        },
+      };
+      const actual = reducer(
+        {
+          'task-1': {
+            QA: org,
+            Dev: org2,
+          },
+        },
+        { type: 'SCRATCH_ORG_REFRESH_REQUESTED', payload: org },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('SCRATCH_ORG_REFRESH_REJECTED', () => {
+    const org = {
+      id: 'org-1',
+      task: 'task-1',
+      org_type: 'QA',
+      currently_refreshing_org: true,
+    };
+
+    test('sets currently_refreshing_org: false', () => {
+      const expected = {
+        'task-1': {
+          QA: { ...org, currently_refreshing_org: false },
+          Dev: null,
+        },
+      };
+      const actual = reducer(
+        {},
+        { type: 'SCRATCH_ORG_REFRESH_REJECTED', payload: org },
       );
 
       expect(actual).toEqual(expected);

@@ -4,7 +4,7 @@ import { StaticRouter } from 'react-router-dom';
 
 import OrgCards from '@/components/tasks/cards';
 import { createObject, deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
@@ -23,12 +23,16 @@ updateObject.mockReturnValue(() =>
 refetchOrg.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
+refreshOrg.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 
 afterEach(() => {
   createObject.mockClear();
   deleteObject.mockClear();
   updateObject.mockClear();
   refetchOrg.mockClear();
+  refreshOrg.mockClear();
 });
 
 const defaultOrgs = {
@@ -60,6 +64,9 @@ const defaultTask = {
   id: 'task-id',
   assigned_dev: { id: 'user-id', login: 'user-name' },
   assigned_qa: { id: 'user-id', login: 'user-name' },
+  commits: [{ id: '617a512-longlong' }, { id: 'other' }],
+  origin_sha: 'parent',
+  review_submitted_at: '2019-10-16T12:58:53.721Z',
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
@@ -151,7 +158,7 @@ describe('<OrgCards/>', () => {
       const { queryByText, getByText } = setup({ orgs, task });
 
       expect(queryByText('View Org')).toBeNull();
-      expect(getByText('up-to-date', { exact: false })).toBeVisible();
+      expect(getByText('up to date', { exact: false })).toBeVisible();
       expect(queryByText('check again')).toBeNull();
       expect(getByText('not yet created', { exact: false })).toBeVisible();
     });
@@ -332,22 +339,328 @@ describe('<OrgCards/>', () => {
     });
   });
 
-  describe('QA org', () => {
-    test('renders without status', () => {
+  describe('Commit Status', () => {
+    test('no status without latest_commit', () => {
       const orgs = {
         ...defaultOrgs,
-        Dev: null,
-        QA: {
+        Dev: {
           ...defaultOrgs.Dev,
-          org_type: 'QA',
+          latest_commit: null,
         },
       };
-      const { queryByText, getByText } = setup({ orgs });
+      const { queryByText } = setup({ orgs });
 
-      expect(getByText('View Org')).toBeVisible();
-      expect(
-        queryByText('has 1 uncaptured change', { exact: false }),
-      ).toBeNull();
+      expect(queryByText('Deployed Commit')).toBeNull();
+    });
+  });
+
+  describe('QA org', () => {
+    const orgs = {
+      ...defaultOrgs,
+      Dev: null,
+      QA: {
+        ...defaultOrgs.Dev,
+        org_type: 'QA',
+        latest_commit: 'other',
+      },
+    };
+
+    test('renders "Up to Date"', () => {
+      const { getByText } = setup({
+        task: { ...defaultTask, commits: [] },
+        orgs: { ...orgs, QA: { ...orgs.QA, latest_commit: 'parent' } },
+      });
+
+      expect(getByText('Up to Date')).toBeVisible();
+    });
+
+    describe('out of date', () => {
+      test('renders "Behind Latest"', () => {
+        const { getByText } = setup({ orgs });
+
+        expect(getByText('Behind Latest', { exact: false })).toBeVisible();
+        expect(getByText('view changes')).toBeVisible();
+      });
+
+      describe('unknown commits list', () => {
+        test('does not render compare changes link', () => {
+          const { getByText, queryByText } = setup({
+            task: { ...defaultTask, commits: [], origin_sha: null },
+            orgs,
+          });
+
+          expect(getByText('Behind Latest', { exact: false })).toBeVisible();
+          expect(queryByText('view changes')).toBeNull();
+        });
+      });
+
+      describe('View Org click', () => {
+        test('opens refresh org modal', () => {
+          const { getByText, getByTitle, queryByText } = setup({ orgs });
+          fireEvent.click(getByText('View Org'));
+
+          expect(getByText('Review Org Behind Latest: 1 Commit')).toBeVisible();
+
+          fireEvent.click(getByTitle('Close'));
+
+          expect(queryByText('Review Org Behind Latest: 1 Commit')).toBeNull();
+        });
+
+        test('displays modal even if unsure how many commits behind', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: { ...orgs.QA, latest_commit: 'not-a-commit-we-know-about' },
+            },
+          });
+          fireEvent.click(getByText('View Org'));
+
+          expect(getByText('Review Org Behind Latest')).toBeVisible();
+        });
+      });
+
+      describe('Refresh Org click', () => {
+        test('calls refreshOrg action', () => {
+          const { getByText } = setup({ orgs });
+          fireEvent.click(getByText('View Org'));
+          fireEvent.click(getByText('Refresh Review Org'));
+
+          expect(refreshOrg).toHaveBeenCalledWith(orgs.QA);
+        });
+      });
+
+      describe('currently refreshing', () => {
+        test('calls refreshOrg action', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: { ...orgs.QA, currently_refreshing_org: true },
+            },
+          });
+
+          expect(getByText('Refreshing Org…')).toBeVisible();
+        });
+      });
+    });
+
+    describe('submitting a review', () => {
+      test('opens submit review modal', () => {
+        const { getByText, queryByText } = setup({
+          task: { ...defaultTask, commits: [], pr_is_open: true },
+          orgs: {
+            ...orgs,
+            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+          },
+        });
+        fireEvent.click(getByText('Submit Review'));
+
+        expect(getByText('Submit Task Review')).toBeVisible();
+
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Submit Task Review')).toBeNull();
+      });
+
+      test('updates default fields when props change', () => {
+        let task = { ...defaultTask, commits: [], pr_is_open: true };
+        const theseOrgs = {
+          ...orgs,
+          QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+        };
+        const {
+          getByText,
+          getByLabelText,
+          queryByLabelText,
+          store,
+          rerender,
+        } = setup({
+          task,
+          orgs: theseOrgs,
+        });
+        fireEvent.click(getByText('Submit Review'));
+
+        expect(getByLabelText('Approve')).toBeChecked();
+        expect(getByLabelText('Request changes')).not.toBeChecked();
+
+        task = {
+          ...task,
+          review_valid: true,
+          review_status: 'Changes requested',
+        };
+        setup({ task, orgs, store, rerender });
+
+        expect(getByLabelText('Approve')).not.toBeChecked();
+        expect(getByLabelText('Request changes')).toBeChecked();
+        expect(getByLabelText('Delete Review Org')).toBeChecked();
+
+        setup({ task, orgs: { Dev: null, QA: null }, store, rerender });
+
+        expect(queryByLabelText('Delete Review Org')).toBeNull();
+      });
+
+      describe('form submit', () => {
+        test('submits task for review', () => {
+          const { getByText, baseElement } = setup({
+            task: { ...defaultTask, commits: [], pr_is_open: true },
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+              },
+            },
+          });
+          fireEvent.click(getByText('Submit Review'));
+          const submit = baseElement.querySelector(
+            '.slds-button[type="submit"]',
+          );
+          fireEvent.click(submit);
+
+          expect(getByText('Submitting Review…')).toBeVisible();
+          expect(createObject).toHaveBeenCalledTimes(1);
+          expect(createObject).toHaveBeenCalledWith({
+            url: window.api_urls.task_review('task-id'),
+            data: {
+              notes: '',
+              status: 'Approved',
+              delete_org: true,
+              org: 'org-id',
+            },
+            hasForm: true,
+            shouldSubscribeToObject: false,
+          });
+        });
+      });
+
+      test('currently submitting', () => {
+        const { getByText } = setup({
+          task: {
+            ...defaultTask,
+            commits: [],
+            pr_is_open: true,
+            currently_submitting_review: true,
+          },
+          orgs: {
+            ...orgs,
+            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+          },
+        });
+
+        expect(getByText('Submitting Review…')).toBeVisible();
+      });
+
+      describe('submit review btn', () => {
+        test('updating review', () => {
+          const { getByText } = setup({
+            task: {
+              ...defaultTask,
+              commits: [],
+              pr_is_open: true,
+              review_valid: true,
+            },
+            orgs: {
+              Dev: null,
+              QA: null,
+            },
+          });
+
+          expect(getByText('Update Review')).toBeVisible();
+        });
+
+        test('disabled', () => {
+          const { getByText } = setup({
+            task: {
+              ...defaultTask,
+              commits: [],
+              pr_is_open: true,
+              review_valid: false,
+            },
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: false,
+              },
+            },
+          });
+
+          expect(getByText('Submit Review')).toBeDisabled();
+        });
+      });
+
+      describe('orgStatus', () => {
+        test('renders "Approved" status', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+                url: 'url',
+              },
+            },
+            task: {
+              ...defaultTask,
+              commits: [],
+              review_status: 'Approved',
+              review_valid: true,
+            },
+          });
+
+          expect(getByText('Approved')).toBeVisible();
+        });
+
+        test('renders "Changes requested" status', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+                url: 'url',
+              },
+            },
+            task: {
+              ...defaultTask,
+              commits: [],
+              review_status: 'Changes requested',
+              review_valid: true,
+            },
+          });
+
+          expect(
+            getByText('Changes requested', { exact: false }),
+          ).toBeVisible();
+        });
+
+        test('renders "Review out of date" status', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+                url: 'url',
+              },
+            },
+            task: {
+              ...defaultTask,
+              commits: [],
+              review_status: 'Approved',
+              review_valid: false,
+            },
+          });
+
+          expect(
+            getByText('Review out of date', { exact: false }),
+          ).toBeVisible();
+        });
+      });
     });
   });
 

@@ -5,8 +5,10 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgRefreshed,
   provisionFailed,
   provisionOrg,
+  refreshError,
   updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
@@ -24,6 +26,8 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   createTaskPR,
   createTaskPRFailed,
+  submitReview,
+  submitReviewFailed,
   updateTask,
 } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
@@ -42,8 +46,10 @@ const actions = {
   createTaskPRFailed,
   deleteFailed,
   deleteOrg,
+  orgRefreshed,
   provisionFailed,
   provisionOrg,
+  refreshError,
   repoError,
   reposRefreshed,
   updateFailed,
@@ -51,6 +57,8 @@ const actions = {
   updateProject,
   updateRepo,
   updateTask,
+  submitReview,
+  submitReviewFailed,
 };
 for (const action of Object.values(actions)) {
   action.mockReturnValue({ type: 'TEST', payload: {} });
@@ -98,6 +106,10 @@ describe('getAction', () => {
     ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed'],
     ['SCRATCH_ORG_COMMIT_CHANGES', 'commitSucceeded'],
     ['SCRATCH_ORG_COMMIT_CHANGES_FAILED', 'commitFailed'],
+    ['SCRATCH_ORG_REFRESH', 'orgRefreshed'],
+    ['SCRATCH_ORG_REFRESH_FAILED', 'refreshError'],
+    ['TASK_SUBMIT_REVIEW', 'submitReview'],
+    ['TASK_SUBMIT_REVIEW_FAILED', 'submitReviewFailed'],
   ])('handles %s event', (type, action) => {
     const payload = { foo: 'bar' };
     const msg = { type, payload };

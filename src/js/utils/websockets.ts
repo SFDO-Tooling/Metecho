@@ -6,8 +6,10 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgRefreshed,
   provisionFailed,
   provisionOrg,
+  refreshError,
   updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
@@ -28,6 +30,8 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   createTaskPR,
   createTaskPRFailed,
+  submitReview,
+  submitReviewFailed,
   updateTask,
 } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
@@ -102,6 +106,17 @@ interface TaskCreatePRFailedEvent {
     model: Task;
   };
 }
+interface TaskSubmitReviewEvent {
+  type: 'TASK_SUBMIT_REVIEW';
+  payload: Task;
+}
+interface TaskSubmitReviewFailedEvent {
+  type: 'TASK_SUBMIT_REVIEW_FAILED';
+  payload: {
+    message?: string;
+    model: Task;
+  };
+}
 interface OrgProvisionedEvent {
   type: 'SCRATCH_ORG_PROVISION';
   payload: Org;
@@ -142,6 +157,17 @@ interface OrgRemovedEvent {
     model: Org;
   };
 }
+interface OrgRefreshedEvent {
+  type: 'SCRATCH_ORG_REFRESH';
+  payload: Org;
+}
+interface OrgRefreshFailedEvent {
+  type: 'SCRATCH_ORG_REFRESH_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+  };
+}
 interface CommitSucceededEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES';
   payload: Org;
@@ -164,6 +190,8 @@ type ModelEvent =
   | TaskUpdatedEvent
   | TaskCreatePREvent
   | TaskCreatePRFailedEvent
+  | TaskSubmitReviewEvent
+  | TaskSubmitReviewFailedEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
@@ -171,6 +199,8 @@ type ModelEvent =
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
   | OrgRemovedEvent
+  | OrgRefreshedEvent
+  | OrgRefreshFailedEvent
   | CommitSucceededEvent
   | CommitFailedEvent;
 type EventType = SubscriptionEvent | ModelEvent;
@@ -201,6 +231,10 @@ export const getAction = (event: EventType) => {
       return createTaskPR(event.payload);
     case 'TASK_CREATE_PR_FAILED':
       return createTaskPRFailed(event.payload);
+    case 'TASK_SUBMIT_REVIEW':
+      return submitReview(event.payload);
+    case 'TASK_SUBMIT_REVIEW_FAILED':
+      return submitReviewFailed(event.payload);
     case 'SCRATCH_ORG_PROVISION':
       return provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
@@ -218,6 +252,10 @@ export const getAction = (event: EventType) => {
       });
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
+    case 'SCRATCH_ORG_REFRESH':
+      return orgRefreshed(event.payload);
+    case 'SCRATCH_ORG_REFRESH_FAILED':
+      return refreshError(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES':
       return commitSucceeded(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
