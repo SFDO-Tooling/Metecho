@@ -9,5 +9,5 @@ def test_env(rf):
 
     assert "GLOBALS" in result
     assert "SENTRY_DSN" in result["GLOBALS"]
-    assert "DEVHUB_USERNAME" in result["GLOBALS"]
-    assert result["GLOBALS"]["DEVHUB_USERNAME"] is None
+    assert "DEVHUB_USERNAME_SET" in result["GLOBALS"]
+    assert result["GLOBALS"]["DEVHUB_USERNAME_SET"] is False
