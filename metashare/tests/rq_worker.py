@@ -4,26 +4,6 @@ import pytest
 from django.db import DatabaseError, InterfaceError
 from django_rq import get_worker
 
-try:
-    from newrelic import agent
-except ImportError:
-    agent = None
-else:
-    from ..rq_worker import wrap_job_as_background_task
-
-    def test_wrap_job_as_background_task(mocker):
-        mocker.patch("newrelic.agent.BackgroundTask")
-        mocker.patch("newrelic.agent.application")
-        mock_perform = MagicMock()
-
-        class Job:
-            func_name = "func"
-            perform = mock_perform
-
-        wrap_job_as_background_task(Job)
-        Job().perform()
-        mock_perform.assert_called_once()
-
 
 class TestConnectionClosingWorker:
     def test_close_database__good(self, mocker):

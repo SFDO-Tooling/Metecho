@@ -2,14 +2,7 @@
 import os
 import sys
 
-try:
-    from newrelic import agent
-except ImportError:
-    agent = None
-
 if __name__ == "__main__":
-    if agent is not None:
-        agent.initialize()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
     try:
         from django.core.management import execute_from_command_line
