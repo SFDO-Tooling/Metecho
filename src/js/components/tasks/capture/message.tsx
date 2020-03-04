@@ -31,12 +31,10 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
   return (
     <form className="slds-form slds-p-around_large">
       <ModalCard>
-        <pre>
-          <Icon category="utility" name="open_folder" size="small" />
-          <span className="slds-p-left_x-small v-align-center">
-            {inputs.target_directory}
-          </span>
-        </pre>
+        <Icon category="utility" name="open_folder" size="small" />
+        <code className="slds-p-left_x-small v-align-center">
+          {inputs.target_directory}
+        </code>
       </ModalCard>
       <ModalCard
         heading={
