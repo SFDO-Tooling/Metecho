@@ -559,7 +559,7 @@ class TestScratchOrg:
             "metashare.api.jobs.get_unsaved_changes_job"
         ) as get_unsaved_changes_job:
             scratch_org = scratch_org_factory()
-            scratch_org.queue_get_unsaved_changes()
+            scratch_org.queue_get_unsaved_changes(False)
 
             assert get_unsaved_changes_job.delay.called
 
@@ -570,7 +570,7 @@ class TestScratchOrg:
             scratch_org = scratch_org_factory(
                 last_checked_unsaved_changes_at=now() - timedelta(minutes=1),
             )
-            scratch_org.queue_get_unsaved_changes()
+            scratch_org.queue_get_unsaved_changes(False)
 
             assert not get_unsaved_changes_job.delay.called
 

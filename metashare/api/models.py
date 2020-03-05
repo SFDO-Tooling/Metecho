@@ -677,15 +677,18 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             else:
                 self.delete()
 
-    def queue_get_unsaved_changes(self):
+    def queue_get_unsaved_changes(self, force_get):
         from .jobs import get_unsaved_changes_job
 
         minutes_since_last_check = (
             self.last_checked_unsaved_changes_at is not None
             and timezone.now() - self.last_checked_unsaved_changes_at
         )
-        should_bail = minutes_since_last_check and minutes_since_last_check < timedelta(
-            minutes=settings.ORG_RECHECK_MINUTES
+        should_bail = (
+            not force_get
+            and minutes_since_last_check
+            and minutes_since_last_check
+            < timedelta(minutes=settings.ORG_RECHECK_MINUTES)
         )
         if should_bail:
             return

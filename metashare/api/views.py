@@ -209,6 +209,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # insert the get_unsaved_changes line in the middle.
         queryset = self.filter_queryset(self.get_queryset())
 
+        force_get = request.query_prarams.get("get_unsaved_changes", False)
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
@@ -221,7 +222,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         if not request.query_params.get("get_unsaved_changes"):
             filters["owner"] = request.user
         for instance in queryset.filter(**filters):
-            instance.queue_get_unsaved_changes()
+            instance.queue_get_unsaved_changes(force_get)
 
         # XXX: If we ever paginate this endpoint, we will need to add
         # pagination logic back in here.
@@ -235,6 +236,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # change: we needed to insert the get_unsaved_changes line in
         # the middle.
         instance = self.get_object()
+        force_get = request.query_prarams.get("get_unsaved_changes", False)
         conditions = [
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
             instance.url is not None,
@@ -245,7 +247,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         if not request.query_params.get("get_unsaved_changes"):
             conditions.append(instance.owner == request.user)
         if all(conditions):
-            instance.queue_get_unsaved_changes()
+            instance.queue_get_unsaved_changes(force_get)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
