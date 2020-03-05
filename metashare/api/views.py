@@ -209,7 +209,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # insert the get_unsaved_changes line in the middle.
         queryset = self.filter_queryset(self.get_queryset())
 
-        force_get = request.query_prarams.get("get_unsaved_changes", False)
+        force_get = request.query_params.get("get_unsaved_changes", False)
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
@@ -236,7 +236,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # change: we needed to insert the get_unsaved_changes line in
         # the middle.
         instance = self.get_object()
-        force_get = request.query_prarams.get("get_unsaved_changes", False)
+        force_get = request.query_params.get("get_unsaved_changes", False)
         conditions = [
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
             instance.url is not None,
