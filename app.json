@@ -56,6 +56,6 @@
       "quantity": 1
     }
   },
-  "addons": ["heroku-postgresql", "heroku-redis", "newrelic", "sentry"],
+  "addons": ["heroku-postgresql", "heroku-redis", "sentry"],
   "stack": "container"
 }
