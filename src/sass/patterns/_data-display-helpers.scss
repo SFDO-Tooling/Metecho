@@ -2,7 +2,9 @@
 // ====================
 
 .light-bordered-row {
-  border-top: 1px solid $color-border-separator;
+  &:not(:first-child) {
+    border-top: 1px solid $color-border-separator-alt;
+  }
 }
 
 .vertical-separator {
@@ -17,4 +19,8 @@
   .show-separator + & {
     display: inline;
   }
+}
+
+.v-align-center {
+  vertical-align: middle;
 }

@@ -137,7 +137,7 @@ const AssigneeTableCell = ({
   const handleEmptyMessageClick = useCallback(() => {
     closeAssignUserModal();
     openAssignProjectUsersModal();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [openAssignProjectUsersModal]);
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null) => {
       /* istanbul ignore if */

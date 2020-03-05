@@ -603,6 +603,9 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
     has_been_visited = models.BooleanField(default=False)
+    valid_target_directories = JSONField(
+        default=dict, encoder=DjangoJSONEncoder, blank=True
+    )
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -730,7 +733,13 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             )
 
     def queue_commit_changes(
-        self, user, desired_changes, commit_message, *, originating_user_id
+        self,
+        *,
+        user,
+        desired_changes,
+        commit_message,
+        target_directory,
+        originating_user_id
     ):
         from .jobs import commit_changes_from_org_job
 
@@ -739,10 +748,11 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.notify_changed(originating_user_id=originating_user_id)
 
         commit_changes_from_org_job.delay(
-            self,
-            user,
-            desired_changes,
-            commit_message,
+            scratch_org=self,
+            user=user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
             originating_user_id=originating_user_id,
         )
 

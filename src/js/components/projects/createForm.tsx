@@ -72,7 +72,6 @@ const ProjectForm = ({ repository, startOpen = false, history }: Props) => {
             value={inputs.name}
             required
             aria-required
-            maxLength="50"
             errorText={errors.name}
             onChange={handleInputChange}
           />

@@ -1,16 +1,13 @@
 // Form Elements
 // =============
 
-.submit-textarea {
+.ms-textarea {
   min-height: $size-xx-small;
 }
 
 .form-grid {
   display: grid;
-  // needs a non-percentage and non fr
-  //   for changes column to be consistent between row types
-  //   16vw is a magic number that works well in changes column
-  grid-template-columns: 1fr 16vw;
+  grid-template-columns: 1fr auto;
 }
 
 [data-form='task-capture'] {
@@ -18,22 +15,22 @@
   height: 100%;
 
   .slds-accordion__section {
-    padding: $spacing-x-small;
+    padding: $spacing-x-small $spacing-medium;
   }
 
-  .slds-accordion__summary {
-    @include icon-checkbox-layout;
+  &.has-checkboxes {
+    .slds-accordion__summary {
+      @include icon-checkbox-layout;
+    }
   }
 
   .slds-is-open > .slds-accordion__summary {
     margin-bottom: $spacing-x-small;
   }
-}
 
-.select-header-action-col {
-  @include icon-checkbox-layout;
-
-  .slds-form-element__control {
-    grid-column: 2;
+  .grow-inner-item {
+    .slds-accordion__summary-action > .slds-truncate {
+      flex-grow: 1;
+    }
   }
 }
