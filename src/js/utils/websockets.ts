@@ -74,6 +74,7 @@ interface RepoUpdateErrorEvent {
   payload: {
     message?: string;
     model: Repository;
+    originating_user_id: string;
   };
 }
 interface ProjectUpdatedEvent {
@@ -82,13 +83,17 @@ interface ProjectUpdatedEvent {
 }
 interface ProjectCreatePREvent {
   type: 'PROJECT_CREATE_PR';
-  payload: Project;
+  payload: {
+    model: Project;
+    originating_user_id: string;
+  };
 }
 interface ProjectCreatePRFailedEvent {
   type: 'PROJECT_CREATE_PR_FAILED';
   payload: {
     message?: string;
     model: Project;
+    originating_user_id: string;
   };
 }
 interface TaskUpdatedEvent {
@@ -97,24 +102,32 @@ interface TaskUpdatedEvent {
 }
 interface TaskCreatePREvent {
   type: 'TASK_CREATE_PR';
-  payload: Task;
+  payload: {
+    model: Task;
+    originating_user_id: string;
+  };
 }
 interface TaskCreatePRFailedEvent {
   type: 'TASK_CREATE_PR_FAILED';
   payload: {
     message?: string;
     model: Task;
+    originating_user_id: string;
   };
 }
 interface TaskSubmitReviewEvent {
   type: 'TASK_SUBMIT_REVIEW';
-  payload: Task;
+  payload: {
+    model: Task;
+    originating_user_id: string;
+  };
 }
 interface TaskSubmitReviewFailedEvent {
   type: 'TASK_SUBMIT_REVIEW_FAILED';
   payload: {
     message?: string;
     model: Task;
+    originating_user_id: string;
   };
 }
 interface OrgProvisionedEvent {

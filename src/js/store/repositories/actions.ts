@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
@@ -114,18 +115,26 @@ export const updateRepo = (payload: Repository): RepoUpdated => ({
 export const repoError = ({
   model,
   message,
+  originating_user_id,
 }: {
   model: Repository;
   message?: string;
-}): ThunkResult => (dispatch) => {
-  dispatch(
-    addToast({
-      heading: `${i18n.t(
-        'Uh oh. There was an error re-syncing collaborators for this repository',
-      )}: “${model.name}”.`,
-      details: message,
-      variant: 'error',
-    }),
-  );
+  originating_user_id: string;
+}): ThunkResult => (dispatch, getState) => {
+  const state = getState();
+  const { user } = state;
+
+  if (user?.id === originating_user_id) {
+    dispatch(
+      addToast({
+        heading: `${i18n.t(
+          'Uh oh. There was an error re-syncing collaborators for this repository',
+        )}: “${model.name}”.`,
+        details: message,
+        variant: 'error',
+      }),
+    );
+  }
+
   return dispatch(updateRepo(model));
 };

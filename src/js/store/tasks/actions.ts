@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
@@ -20,71 +21,110 @@ export const updateTask = (payload: Task): TaskUpdated => ({
   payload,
 });
 
-export const createTaskPR = (payload: Task): ThunkResult => (dispatch) => {
-  dispatch(
-    addToast({
-      heading: `${i18n.t('Successfully submitted task for review')}: “${
-        payload.name
-      }”.`,
-      linkText: payload.pr_url ? i18n.t('View pull request.') : undefined,
-      linkUrl: payload.pr_url ? payload.pr_url : undefined,
-      openLinkInNewWindow: true,
-    }),
-  );
-  return dispatch(updateTask(payload));
+export const createTaskPR = ({
+  model,
+  originating_user_id,
+}: {
+  model: Task;
+  originating_user_id: string;
+}): ThunkResult => (dispatch, getState) => {
+  const state = getState();
+  const { user } = state;
+
+  if (user?.id === originating_user_id) {
+    dispatch(
+      addToast({
+        heading: `${i18n.t('Successfully submitted task for review')}: “${
+          model.name
+        }”.`,
+        linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
+        linkUrl: model.pr_url ? model.pr_url : undefined,
+        openLinkInNewWindow: true,
+      }),
+    );
+  }
+
+  return dispatch(updateTask(model));
 };
 
 export const createTaskPRFailed = ({
   model,
   message,
+  originating_user_id,
 }: {
   model: Task;
   message?: string;
-}): ThunkResult => (dispatch) => {
-  dispatch(
-    addToast({
-      heading: `${i18n.t(
-        'Uh oh. There was an error submitting task for review',
-      )}: “${model.name}”.`,
-      details: message,
-      variant: 'error',
-    }),
-  );
+  originating_user_id: string;
+}): ThunkResult => (dispatch, getState) => {
+  const state = getState();
+  const { user } = state;
+
+  if (user?.id === originating_user_id) {
+    dispatch(
+      addToast({
+        heading: `${i18n.t(
+          'Uh oh. There was an error submitting task for review',
+        )}: “${model.name}”.`,
+        details: message,
+        variant: 'error',
+      }),
+    );
+  }
+
   return dispatch({
     type: 'TASK_CREATE_PR_FAILED',
     payload: model,
   });
 };
 
-export const submitReview = (payload: Task): ThunkResult => (dispatch) => {
-  dispatch(
-    addToast({
-      heading: `${i18n.t('Successfully submitted review for task')}: “${
-        payload.name
-      }”.`,
-      linkText: payload.pr_url ? i18n.t('View pull request.') : undefined,
-      linkUrl: payload.pr_url ? payload.pr_url : undefined,
-      openLinkInNewWindow: true,
-    }),
-  );
-  return dispatch(updateTask(payload));
+export const submitReview = ({
+  model,
+  originating_user_id,
+}: {
+  model: Task;
+  originating_user_id: string;
+}): ThunkResult => (dispatch, getState) => {
+  const state = getState();
+  const { user } = state;
+
+  if (user?.id === originating_user_id) {
+    dispatch(
+      addToast({
+        heading: `${i18n.t('Successfully submitted review for task')}: “${
+          model.name
+        }”.`,
+        linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
+        linkUrl: model.pr_url ? model.pr_url : undefined,
+        openLinkInNewWindow: true,
+      }),
+    );
+  }
+
+  return dispatch(updateTask(model));
 };
 
 export const submitReviewFailed = ({
   model,
   message,
+  originating_user_id,
 }: {
   model: Task;
   message?: string;
-}): ThunkResult => (dispatch) => {
-  dispatch(
-    addToast({
-      heading: `${i18n.t(
-        'Uh oh. There was an error submitting review for task',
-      )}: “${model.name}”.`,
-      details: message,
-      variant: 'error',
-    }),
-  );
+  originating_user_id: string;
+}): ThunkResult => (dispatch, getState) => {
+  const state = getState();
+  const { user } = state;
+  if (user?.id === originating_user_id) {
+    dispatch(
+      addToast({
+        heading: `${i18n.t(
+          'Uh oh. There was an error submitting review for task',
+        )}: “${model.name}”.`,
+        details: message,
+        variant: 'error',
+      }),
+    );
+  }
+
   return dispatch(updateTask(model));
 };
