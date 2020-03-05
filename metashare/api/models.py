@@ -584,6 +584,9 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
     has_been_visited = models.BooleanField(default=False)
+    valid_target_directories = JSONField(
+        default=dict, encoder=DjangoJSONEncoder, blank=True
+    )
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -696,14 +699,22 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             self.save()
             self.notify_scratch_org_error(error, "SCRATCH_ORG_FETCH_CHANGES_FAILED")
 
-    def queue_commit_changes(self, user, desired_changes, commit_message):
+    def queue_commit_changes(
+        self, *, user, desired_changes, commit_message, target_directory
+    ):
         from .jobs import commit_changes_from_org_job
 
         self.currently_capturing_changes = True
         self.save()
         self.notify_changed()
 
-        commit_changes_from_org_job.delay(self, user, desired_changes, commit_message)
+        commit_changes_from_org_job.delay(
+            scratch_org=self,
+            user=user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
+        )
 
     def finalize_commit_changes(self, error=None):
         self.currently_capturing_changes = False

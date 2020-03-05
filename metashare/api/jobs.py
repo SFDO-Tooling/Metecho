@@ -28,6 +28,7 @@ from .sf_org_changes import (
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
+    get_valid_target_directories,
 )
 from .sf_run_flow import create_org, delete_org, run_flow
 
@@ -156,6 +157,9 @@ def _create_org_and_run_flow(
     scratch_org.refresh_from_db()
     # Save these values on org creation so that we have what we need to
     # delete the org later, even if the initial flow run fails.
+    scratch_org.valid_target_directories, _ = get_valid_target_directories(
+        user, scratch_org, project_path
+    )
     scratch_org.url = scratch_org_config.instance_url
     scratch_org.expires_at = scratch_org_config.expires
     scratch_org.latest_commit = commit.sha
@@ -257,7 +261,13 @@ def get_unsaved_changes(scratch_org):
         old_revision_numbers = scratch_org.latest_revision_numbers
         new_revision_numbers = get_latest_revision_numbers(scratch_org)
         unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
-        scratch_org.refresh_from_db()
+        user = scratch_org.owner
+        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        commit_ish = scratch_org.task.branch_name
+        with local_github_checkout(user, repo_id, commit_ish) as repo_root:
+            scratch_org.valid_target_directories, _ = get_valid_target_directories(
+                user, scratch_org, repo_root,
+            )
         scratch_org.unsaved_changes = unsaved_changes
     except Exception as e:
         scratch_org.refresh_from_db()
@@ -272,7 +282,9 @@ def get_unsaved_changes(scratch_org):
 get_unsaved_changes_job = job(get_unsaved_changes)
 
 
-def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
+def commit_changes_from_org(
+    *, scratch_org, user, desired_changes, commit_message, target_directory
+):
     scratch_org.refresh_from_db()
     branch = scratch_org.task.branch_name
 
@@ -285,6 +297,7 @@ def commit_changes_from_org(scratch_org, user, desired_changes, commit_message):
             branch=branch,
             desired_changes=desired_changes,
             commit_message=commit_message,
+            target_directory=target_directory,
         )
 
         # Update

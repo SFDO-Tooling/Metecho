@@ -46,6 +46,9 @@ const SubmitReviewModal = ({
     }
   };
 
+  const defaultStatus = reviewStatus || REVIEW_STATUSES.APPROVED;
+  const defaultDeleteOrg = Boolean(orgId);
+
   const {
     inputs,
     errors,
@@ -56,8 +59,8 @@ const SubmitReviewModal = ({
   } = useForm({
     fields: {
       notes: '',
-      status: reviewStatus || REVIEW_STATUSES.APPROVED,
-      delete_org: Boolean(orgId),
+      status: defaultStatus,
+      delete_org: defaultDeleteOrg,
     },
     url,
     additionalData: {
@@ -69,14 +72,24 @@ const SubmitReviewModal = ({
   });
 
   // When reviewStatus changes, update default selection
+  const defaultStatusRef = useRef(defaultStatus);
   useEffect(() => {
-    setInputs({ ...inputs, status: reviewStatus || REVIEW_STATUSES.APPROVED });
-  }, [reviewStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+    const prevDefaultStatus = defaultStatusRef.current;
+    if (defaultStatus !== prevDefaultStatus) {
+      setInputs({ ...inputs, status: defaultStatus });
+      defaultStatusRef.current = defaultStatus;
+    }
+  }, [defaultStatus, inputs, setInputs]);
 
   // When orgId changes, update default selection
+  const defaultDeleteOrgRef = useRef(defaultDeleteOrg);
   useEffect(() => {
-    setInputs({ ...inputs, delete_org: Boolean(orgId) });
-  }, [orgId]); // eslint-disable-line react-hooks/exhaustive-deps
+    const prevDefaultDeleteOrg = defaultDeleteOrgRef.current;
+    if (defaultDeleteOrg !== prevDefaultDeleteOrg) {
+      setInputs({ ...inputs, delete_org: defaultDeleteOrg });
+      defaultDeleteOrgRef.current = defaultDeleteOrg;
+    }
+  }, [defaultDeleteOrg, inputs, setInputs]);
 
   const handleSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
@@ -161,7 +174,7 @@ const SubmitReviewModal = ({
             <Textarea
               id="notes"
               label={i18n.t('Review Description')}
-              className="submit-textarea"
+              className="ms-textarea"
               name="notes"
               value={inputs.notes}
               errorText={errors.notes}

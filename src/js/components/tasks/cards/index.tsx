@@ -62,44 +62,56 @@ const OrgCards = ({
   );
   const dispatch = useDispatch<ThunkDispatch>();
 
-  const checkForOrgChanges = useCallback((org: Org) => {
-    dispatch(refetchOrg(org));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const checkForOrgChanges = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
 
-  const handleRefresh = useCallback((org: Org) => {
-    dispatch(refreshOrg(org));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const handleRefresh = useCallback(
+    (org: Org) => {
+      dispatch(refreshOrg(org));
+    },
+    [dispatch],
+  );
 
-  const deleteOrg = useCallback((org: Org) => {
-    setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
-    dispatch(
-      deleteObject({
-        objectType: OBJECT_TYPES.ORG,
-        object: org,
-      }),
-    ).finally(() => {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: false });
-      }
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const deleteOrg = useCallback(
+    (org: Org) => {
+      setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
+      dispatch(
+        deleteObject({
+          objectType: OBJECT_TYPES.ORG,
+          object: org,
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: false });
+        }
+      });
+    },
+    [dispatch, isDeletingOrg, isMounted],
+  );
 
-  const createOrg = useCallback((type: OrgTypes) => {
-    setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
-    dispatch(
-      createObject({
-        objectType: OBJECT_TYPES.ORG,
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        data: { task: task.id, org_type: type },
-      }),
-    ).finally(() => {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
-      }
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const createOrg = useCallback(
+    (type: OrgTypes) => {
+      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
+      dispatch(
+        createObject({
+          objectType: OBJECT_TYPES.ORG,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          data: { task: task.id, org_type: type },
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
+        }
+      });
+    },
+    [dispatch, isCreatingOrg, isMounted, task.id],
+  );
 
   const assignUser = useCallback(
     ({ type, assignee }: AssignedUserTracker) => {
@@ -114,27 +126,27 @@ const OrgCards = ({
         }),
       );
     },
-    [task], // eslint-disable-line react-hooks/exhaustive-deps
+    [dispatch, task],
   );
 
   const closeConfirmDeleteModal = () => {
     setConfirmDeleteModalOpen(false);
   };
-  const cancelConfirmDeleteModal = () => {
+  const cancelConfirmDeleteModal = useCallback(() => {
     setIsWaitingToDeleteDevOrg(false);
     setIsWaitingToRemoveUser(null);
     closeConfirmDeleteModal();
-  };
-  const openConnectModal = () => {
+  }, []);
+  const openConnectModal = useCallback(() => {
     setInfoModalOpen(false);
     cancelConfirmDeleteModal();
     setConnectModalOpen(true);
-  };
-  const openInfoModal = () => {
+  }, [cancelConfirmDeleteModal]);
+  const openInfoModal = useCallback(() => {
     setConnectModalOpen(false);
     cancelConfirmDeleteModal();
     setInfoModalOpen(true);
-  };
+  }, [cancelConfirmDeleteModal]);
 
   const handleDelete = (
     org: Org,

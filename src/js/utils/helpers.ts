@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 
-import { Changeset, Org } from '@/store/orgs/reducer';
+import { Org } from '@/store/orgs/reducer';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
 
@@ -39,24 +39,6 @@ export const getOrgBehindLatestMsg = (
     });
   }
   return '';
-};
-
-export const getOrgTotalChanges = (changes: Changeset) => {
-  const totalChanges = Object.values(changes).flat().length;
-  const changesMsgDefault = `${totalChanges} total ${pluralize(
-    totalChanges,
-    'change',
-  )}`;
-  return i18n.t('orgTotalChangesMsg', changesMsgDefault, {
-    count: totalChanges,
-  });
-};
-
-export const getOrgChildChanges = (count: number) => {
-  const msgDefault = `${count} ${pluralize(count, 'change')}`;
-  return i18n.t('orgChildChangesMsg', msgDefault, {
-    count,
-  });
 };
 
 export const getBranchLink = (object: Task | Project) => {

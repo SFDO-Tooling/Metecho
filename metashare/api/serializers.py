@@ -289,6 +289,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "owner_sf_username",
             "owner_gh_username",
             "has_been_visited",
+            "valid_target_directories",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -301,6 +302,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
+            "valid_target_directories": {"read_only": True},
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:
@@ -326,3 +328,4 @@ class CommitSerializer(serializers.Serializer):
     changes = serializers.DictField(
         child=serializers.ListField(child=serializers.CharField())
     )
+    target_directory = serializers.CharField()
