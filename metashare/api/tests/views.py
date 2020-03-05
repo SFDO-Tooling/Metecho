@@ -296,17 +296,42 @@ class TestHookView:
 @pytest.mark.django_db
 class TestScratchOrgView:
     def test_commit_happy_path(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(
+            org_type="Dev",
+            owner=client.user,
+            valid_target_directories={"source": ["src"]},
+        )
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
+                {
+                    "commit_message": "Test message",
+                    "changes": {},
+                    "target_directory": "src",
+                },
+                format="json",
+            )
+            assert response.status_code == 202
+            assert commit_changes_from_org_job.delay.called
+
+    def test_commit_invalid_target_directory(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"
         ) as commit_changes_from_org_job:
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
-                {"commit_message": "Test message", "changes": {}},
+                {
+                    "commit_message": "Test message",
+                    "changes": {},
+                    "target_directory": "src",
+                },
                 format="json",
             )
-            assert response.status_code == 202
-            assert commit_changes_from_org_job.delay.called
+            assert response.status_code == 400
+            assert not commit_changes_from_org_job.delay.called
 
     def test_commit_sad_path__422(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(org_type="Dev")
@@ -328,7 +353,11 @@ class TestScratchOrgView:
         ) as commit_changes_from_org_job:
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
-                {"commit_message": "Test message", "changes": {}},
+                {
+                    "commit_message": "Test message",
+                    "changes": {},
+                    "target_directory": "src",
+                },
                 format="json",
             )
             assert response.status_code == 403

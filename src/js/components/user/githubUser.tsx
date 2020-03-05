@@ -120,12 +120,12 @@ export const AssignUsersModal = ({
   refreshUsers: () => void;
 }) => {
   const [selection, setSelection] = useState(selectedUsers);
-  const reset = () => setSelection(selectedUsers);
+  const reset = useCallback(() => setSelection(selectedUsers), [selectedUsers]);
 
   // When selected users change, update row selection
   useEffect(() => {
     reset();
-  }, [selectedUsers]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [reset]);
 
   const handleUserClick = useCallback(
     (user: GitHubUser) => {

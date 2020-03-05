@@ -114,13 +114,28 @@ def local_github_checkout(user, repo_id, commit_ish=None):
             yield repo_root
 
 
-def get_cumulus_prefix(**kwargs):
+def get_project_config(**kwargs):
     """
     Expects to be in a local_github_checkout.
     """
     global_config = GlobalConfig()
-    project_config = global_config.get_project_config(**kwargs)
+    return global_config.get_project_config(**kwargs)
+
+
+def get_cumulus_prefix(**kwargs):
+    """
+    Expects to be in a local_github_checkout.
+    """
+    project_config = get_project_config(**kwargs)
     return project_config.project__git__prefix_feature
+
+
+def get_source_format(**kwargs):
+    """
+    Expects to be in a local_github_checkout.
+    """
+    project_config = get_project_config(**kwargs)
+    return project_config.project__source_format
 
 
 def try_to_make_branch(repository, *, new_branch, base_branch):

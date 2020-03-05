@@ -117,6 +117,13 @@ def test_create_org_and_run_flow():
         )
         run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        get_valid_target_directories = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_valid_target_directories")
+        )
+        get_valid_target_directories.return_value = (
+            {"source": ["src"], "config": [], "post": [], "pre": []},
+            False,
+        )
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
@@ -136,9 +143,19 @@ def test_get_unsaved_changes(scratch_org_factory):
         latest_revision_numbers={"TypeOne": {"NameOne": 10}}
     )
 
-    with patch(
-        f"{PATCH_ROOT}.get_latest_revision_numbers"
-    ) as get_latest_revision_numbers:
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+        stack.enter_context(patch(f"metashare.api.sf_org_changes.get_repo_info"))
+        get_valid_target_directories = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_valid_target_directories")
+        )
+        get_valid_target_directories.return_value = (
+            {"source": ["src"], "config": [], "post": [], "pre": []},
+            False,
+        )
+        get_latest_revision_numbers = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
+        )
         get_latest_revision_numbers.return_value = {
             "TypeOne": {"NameOne": 13},
             "TypeTwo": {"NameTwo": 10},
@@ -269,8 +286,15 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
 
         desired_changes = {"name": ["member"]}
         commit_message = "test message"
+        target_directory = "src"
         assert scratch_org.latest_revision_numbers == {}
-        commit_changes_from_org(scratch_org, user, desired_changes, commit_message)
+        commit_changes_from_org(
+            scratch_org=scratch_org,
+            user=user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
+        )
 
         assert commit_changes_to_github.called
         assert scratch_org.latest_revision_numbers == {"name": {"member": 1}}
@@ -331,7 +355,13 @@ class TestErrorHandling:
             commit_changes_to_github.side_effect = Exception
 
             with pytest.raises(Exception):
-                commit_changes_from_org(scratch_org, user, {}, "message")
+                commit_changes_from_org(
+                    scratch_org=scratch_org,
+                    user=user,
+                    desired_changes={},
+                    commit_message="message",
+                    target_directory="src",
+                )
 
             assert async_to_sync.called
 

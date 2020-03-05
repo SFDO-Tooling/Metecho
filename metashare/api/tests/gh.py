@@ -10,6 +10,7 @@ from ..gh import (
     extract_zip_file,
     get_all_org_repos,
     get_repo_info,
+    get_source_format,
     get_zip_file,
     is_safe_path,
     local_github_checkout,
@@ -184,3 +185,9 @@ class TestTryCreateBranch:
             try_to_make_branch(
                 repository, new_branch="new-branch", base_branch="base-branch"
             )
+
+
+def test_get_source_format():
+    with patch(f"{PATCH_ROOT}.get_project_config") as get_project_config:
+        get_project_config.return_value = MagicMock(project__source_format="sentinel")
+        assert get_source_format() == "sentinel"
