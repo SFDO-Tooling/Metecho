@@ -34,7 +34,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
 
   const doRefreshRepos = useCallback(() => {
     dispatch(refreshRepos());
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   useEffect(() => {
     if (fetchingRepositories || !next) {
@@ -76,8 +76,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
     if (scrolledToBottom) {
       maybeFetchMoreRepositories();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [y, next]);
+  }, [y, next, fetchingRepositories, isMounted, dispatch]);
 
   let contents;
   switch (repositories.length) {

@@ -135,7 +135,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
-    "parler",
     "anymail",
     "metashare",
     "metashare.multisalesforce",
@@ -195,8 +194,6 @@ ASGI_APPLICATION = "metashare.routing.application"
 
 SITE_ID = 1
 
-PARLER_LANGUAGES = {1: ({"code": "en-us"},), "default": {"fallback": "en-us"}}
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -250,6 +247,8 @@ SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True, type_=boolish)
 SESSION_COOKIE_SECURE = env(
     "SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
 )
+SESSION_COOKIE_SAMESITE = env("SESSION_COOKIE_SAMESITE", default="Strict")
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = env(
     "CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
 )
