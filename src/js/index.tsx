@@ -189,11 +189,12 @@ initializeI18n((i18nError?: string) => {
       );
     };
 
-    // If logged in, fetch repositories before rendering App
     if (user?.currently_fetching_repos) {
+      // If user is currently fetching repos, update repo state accordingly
       appStore.dispatch(reposRefreshing());
       renderApp();
     } else if (user) {
+      // If logged in, fetch repositories before rendering App
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
         fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
       ).finally(renderApp);
