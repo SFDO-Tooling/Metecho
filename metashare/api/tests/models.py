@@ -609,7 +609,6 @@ class TestGitHubRepository:
 @pytest.mark.django_db
 def test_login_handler(user_factory):
     user = user_factory()
-    patch_path = "metashare.api.jobs.refresh_github_repositories_for_user_job"
-    with patch(patch_path) as refresh_job:
-        user_logged_in_handler(None, user=user)
-        refresh_job.delay.assert_called_with(user)
+    user.queue_refresh_repositories = MagicMock()
+    user_logged_in_handler(None, user=user)
+    user.queue_refresh_repositories.assert_called_once()
