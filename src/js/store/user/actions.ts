@@ -122,7 +122,6 @@ export const disconnect = (): ThunkResult<Promise<
   }
 };
 
-// eslint-disable-next-line max-len
 export const refreshDevHubStatus = (): ThunkResult<Promise<
   RefreshDevHubSucceeded
 >> => async (dispatch) => {

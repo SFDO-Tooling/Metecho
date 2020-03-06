@@ -250,9 +250,7 @@ class Repository(
                 self.branch_name = repo.default_branch
 
         if not self.github_users:
-            # It's OK if this is None, we can handle that case.
-            user = self.get_a_matching_user()
-            self.queue_populate_github_users(originating_user_id=user)
+            self.queue_populate_github_users(originating_user_id=None)
 
         super().save(*args, **kwargs)
 
