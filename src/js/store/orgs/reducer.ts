@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
@@ -185,7 +183,7 @@ const reducer = (
       const {
         objectType,
         object,
-      }: { objectType: ObjectTypes; object: Org } = action.payload;
+      }: { objectType?: ObjectTypes; object: Org } = action.payload;
       if (objectType === OBJECT_TYPES.ORG && object) {
         const taskOrgs = orgs[object.task] || {
           [ORG_TYPES.DEV]: null,

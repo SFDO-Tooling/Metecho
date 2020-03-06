@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { ReposRefreshed } from '@/store/repositories/actions';
 import { UserAction } from '@/store/user/actions';
 

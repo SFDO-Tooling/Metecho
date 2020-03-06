@@ -672,14 +672,14 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             type_="SCRATCH_ORG_DELETE", originating_user_id=originating_user_id
         )
 
-    def delete(self, *args, should_finalize=True, **kwargs):
+    def delete(self, *args, should_finalize=True, originating_user_id=None, **kwargs):
         # If the scratch org has no `last_modified_at`, it did not
         # successfully complete the initial flow run on Salesforce, and
         # therefore we don't need to notify of its destruction; this
         # should only happen when it is destroyed during provisioning or
         # the initial flow run.
         if self.last_modified_at and should_finalize:
-            self.finalize_delete(originating_user_id=None)
+            self.finalize_delete(originating_user_id=originating_user_id)
         super().delete(*args, **kwargs)
 
     def queue_provision(self, *, originating_user_id):
@@ -707,7 +707,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             if self.url:
                 self.queue_delete(originating_user_id=originating_user_id)
             else:
-                self.delete()
+                self.delete(originating_user_id=originating_user_id)
 
     def queue_get_unsaved_changes(self, *, originating_user_id):
         from .jobs import get_unsaved_changes_job
@@ -780,7 +780,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         )
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
-        self.delete(should_finalize=False)
+        self.delete(should_finalize=False, originating_user_id=originating_user_id)
 
     def queue_refresh_org(self, *, originating_user_id):
         from .jobs import refresh_scratch_org_job

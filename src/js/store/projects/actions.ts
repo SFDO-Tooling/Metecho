@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
+import { isCurrentUser } from '@/store/helpers';
 import { Project } from '@/store/projects/reducer';
 import { addToast } from '@/store/toasts/actions';
 
@@ -21,15 +21,14 @@ export const updateProject = (payload: Project): ProjectUpdated => ({
   payload,
 });
 
-export const createProjectPR = (payload: {
+export const createProjectPR = ({
+  model,
+  originating_user_id,
+}: {
   model: Project;
-  originating_user_id: string;
-}): ThunkResult => (dispatch, getState) => {
-  const { model, originating_user_id } = payload;
-  const state = getState();
-  const { user } = state;
-
-  if (user?.id === originating_user_id) {
+  originating_user_id: string | null;
+}): ThunkResult<ProjectUpdated> => (dispatch, getState) => {
+  if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
         heading: `${i18n.t('Successfully submitted project for review')}: “${
@@ -43,8 +42,8 @@ export const createProjectPR = (payload: {
   }
 
   return dispatch({
-    type: 'PROJECT_UPDATE',
-    payload,
+    type: 'PROJECT_UPDATE' as 'PROJECT_UPDATE',
+    payload: model,
   });
 };
 
@@ -55,12 +54,9 @@ export const createProjectPRFailed = ({
 }: {
   model: Project;
   message?: string;
-  originating_user_id: string;
-}): ThunkResult => (dispatch, getState) => {
-  const state = getState();
-  const { user } = state;
-
-  if (user?.id === originating_user_id) {
+  originating_user_id: string | null;
+}): ThunkResult<ProjectCreatePRFailed> => (dispatch, getState) => {
+  if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
         heading: `${i18n.t(
@@ -72,7 +68,7 @@ export const createProjectPRFailed = ({
     );
   }
   return dispatch({
-    type: 'PROJECT_CREATE_PR_FAILED',
+    type: 'PROJECT_CREATE_PR_FAILED' as 'PROJECT_CREATE_PR_FAILED',
     payload: model,
   });
 };

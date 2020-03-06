@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
-import { fetchObjects } from '@/store/actions';
+import { fetchObjects, FetchObjectsSucceeded } from '@/store/actions';
+import { isCurrentUser } from '@/store/helpers';
 import { Repository } from '@/store/repositories/reducer';
+import { addToast } from '@/store/toasts/actions';
 import apiFetch from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
-
-import { addToast } from '../toasts/actions';
 
 interface RepoUpdated {
   type: 'REPOSITORY_UPDATE';
@@ -57,7 +56,9 @@ export type RepositoriesAction =
   | RefreshGitHubUsersAccepted
   | RefreshGitHubUsersRejected;
 
-export const refreshRepos = (): ThunkResult => async (dispatch) => {
+export const refreshRepos = (): ThunkResult<Promise<
+  RefreshReposAccepted
+>> => async (dispatch) => {
   dispatch({ type: 'REFRESH_REPOS_REQUESTED' });
   try {
     await apiFetch({
@@ -67,7 +68,9 @@ export const refreshRepos = (): ThunkResult => async (dispatch) => {
         method: 'POST',
       },
     });
-    return dispatch({ type: 'REFRESH_REPOS_ACCEPTED' });
+    return dispatch({
+      type: 'REFRESH_REPOS_ACCEPTED' as 'REFRESH_REPOS_ACCEPTED',
+    });
   } catch (err) {
     dispatch({ type: 'REFRESH_REPOS_REJECTED' });
     throw err;
@@ -78,7 +81,9 @@ export const reposRefreshing = (): ReposRefreshing => ({
   type: 'REFRESHING_REPOS',
 });
 
-export const reposRefreshed = (): ThunkResult => (dispatch) => {
+export const reposRefreshed = (): ThunkResult<Promise<
+  FetchObjectsSucceeded
+>> => (dispatch) => {
   dispatch({ type: 'REPOS_REFRESHED' });
   return dispatch(
     fetchObjects({
@@ -88,9 +93,9 @@ export const reposRefreshed = (): ThunkResult => (dispatch) => {
   );
 };
 
-export const refreshGitHubUsers = (repoId: string): ThunkResult => async (
-  dispatch,
-) => {
+export const refreshGitHubUsers = (
+  repoId: string,
+): ThunkResult<Promise<RefreshGitHubUsersAccepted>> => async (dispatch) => {
   dispatch({ type: 'REFRESH_GH_USERS_REQUESTED', payload: repoId });
   try {
     await apiFetch({
@@ -100,7 +105,10 @@ export const refreshGitHubUsers = (repoId: string): ThunkResult => async (
         method: 'POST',
       },
     });
-    return dispatch({ type: 'REFRESH_GH_USERS_ACCEPTED', payload: repoId });
+    return dispatch({
+      type: 'REFRESH_GH_USERS_ACCEPTED' as 'REFRESH_GH_USERS_ACCEPTED',
+      payload: repoId,
+    });
   } catch (err) {
     dispatch({ type: 'REFRESH_GH_USERS_REJECTED', payload: repoId });
     throw err;
@@ -119,12 +127,9 @@ export const repoError = ({
 }: {
   model: Repository;
   message?: string;
-  originating_user_id: string;
-}): ThunkResult => (dispatch, getState) => {
-  const state = getState();
-  const { user } = state;
-
-  if (user?.id === originating_user_id) {
+  originating_user_id: string | null;
+}): ThunkResult<RepoUpdated> => (dispatch, getState) => {
+  if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
         heading: `${i18n.t(

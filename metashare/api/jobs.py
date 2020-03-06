@@ -201,7 +201,11 @@ def create_branches_on_github_then_create_scratch_org(
     try:
         repo_id = project.repository.get_repo_id(user)
         commit_ish = _create_branches_on_github(
-            user=user, repo_id=repo_id, project=project, task=task
+            user=user,
+            repo_id=repo_id,
+            project=project,
+            task=task,
+            originating_user_id=originating_user_id,
         )
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             _create_org_and_run_flow(
@@ -210,7 +214,6 @@ def create_branches_on_github_then_create_scratch_org(
                 repo_id=repo_id,
                 repo_branch=commit_ish,
                 project_path=repo_root,
-                originating_user_id=originating_user_id,
             )
     except Exception as e:
         scratch_org.finalize_provision(error=e, originating_user_id=originating_user_id)
@@ -244,7 +247,6 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
                 repo_branch=commit_ish,
                 project_path=repo_root,
                 sf_username=sf_username,
-                originating_user_id=originating_user_id,
             )
     except Exception as e:
         scratch_org.refresh_from_db()
@@ -414,7 +416,7 @@ create_pr_job = job(create_pr)
 def delete_scratch_org(scratch_org, *, originating_user_id):
     try:
         delete_org(scratch_org)
-        scratch_org.delete()
+        scratch_org.delete(originating_user_id=originating_user_id)
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.delete_queued_at = None

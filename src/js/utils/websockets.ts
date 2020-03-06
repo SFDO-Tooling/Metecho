@@ -67,25 +67,31 @@ interface ReposRefreshedEvent {
 }
 interface RepoUpdatedEvent {
   type: 'REPOSITORY_UPDATE';
-  payload: Repository;
+  payload: {
+    model: Repository;
+    originating_user_id: string | null;
+  };
 }
 interface RepoUpdateErrorEvent {
   type: 'REPOSITORY_UPDATE_ERROR';
   payload: {
     message?: string;
     model: Repository;
-    originating_user_id: string;
+    originating_user_id: string | null;
   };
 }
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
-  payload: Project;
+  payload: {
+    model: Project;
+    originating_user_id: string | null;
+  };
 }
 interface ProjectCreatePREvent {
   type: 'PROJECT_CREATE_PR';
   payload: {
     model: Project;
-    originating_user_id: string;
+    originating_user_id: string | null;
   };
 }
 interface ProjectCreatePRFailedEvent {
@@ -93,18 +99,21 @@ interface ProjectCreatePRFailedEvent {
   payload: {
     message?: string;
     model: Project;
-    originating_user_id: string;
+    originating_user_id: string | null;
   };
 }
 interface TaskUpdatedEvent {
   type: 'TASK_UPDATE';
-  payload: Task;
+  payload: {
+    model: Task;
+    originating_user_id: string | null;
+  };
 }
 interface TaskCreatePREvent {
   type: 'TASK_CREATE_PR';
   payload: {
     model: Task;
-    originating_user_id: string;
+    originating_user_id: string | null;
   };
 }
 interface TaskCreatePRFailedEvent {
@@ -112,14 +121,14 @@ interface TaskCreatePRFailedEvent {
   payload: {
     message?: string;
     model: Task;
-    originating_user_id: string;
+    originating_user_id: string | null;
   };
 }
 interface TaskSubmitReviewEvent {
   type: 'TASK_SUBMIT_REVIEW';
   payload: {
     model: Task;
-    originating_user_id: string;
+    originating_user_id: string | null;
   };
 }
 interface TaskSubmitReviewFailedEvent {
@@ -127,40 +136,52 @@ interface TaskSubmitReviewFailedEvent {
   payload: {
     message?: string;
     model: Task;
-    originating_user_id: string;
+    originating_user_id: string | null;
   };
 }
 interface OrgProvisionedEvent {
   type: 'SCRATCH_ORG_PROVISION';
-  payload: Org;
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
 }
 interface OrgProvisionFailedEvent {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
   };
 }
 interface OrgUpdatedEvent {
   type: 'SCRATCH_ORG_UPDATE';
-  payload: Org;
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
 }
 interface OrgUpdateFailedEvent {
   type: 'SCRATCH_ORG_FETCH_CHANGES_FAILED';
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
   };
 }
 interface OrgDeletedEvent {
   type: 'SCRATCH_ORG_DELETE';
-  payload: Org;
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
 }
 interface OrgDeleteFailedEvent {
   type: 'SCRATCH_ORG_DELETE_FAILED';
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
   };
 }
 interface OrgRemovedEvent {
@@ -168,28 +189,37 @@ interface OrgRemovedEvent {
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
   };
 }
 interface OrgRefreshedEvent {
   type: 'SCRATCH_ORG_REFRESH';
-  payload: Org;
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
 }
 interface OrgRefreshFailedEvent {
   type: 'SCRATCH_ORG_REFRESH_FAILED';
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
   };
 }
 interface CommitSucceededEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES';
-  payload: Org;
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
 }
 interface CommitFailedEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
   };
 }
 type ModelEvent =
@@ -229,17 +259,17 @@ export const getAction = (event: EventType) => {
     case 'USER_REPOS_REFRESH':
       return reposRefreshed();
     case 'PROJECT_UPDATE':
-      return updateProject(event.payload);
+      return updateProject(event.payload.model);
     case 'PROJECT_CREATE_PR':
       return createProjectPR(event.payload);
     case 'PROJECT_CREATE_PR_FAILED':
       return createProjectPRFailed(event.payload);
     case 'REPOSITORY_UPDATE':
-      return updateRepo(event.payload);
+      return updateRepo(event.payload.model);
     case 'REPOSITORY_UPDATE_ERROR':
       return repoError(event.payload);
     case 'TASK_UPDATE':
-      return updateTask(event.payload);
+      return updateTask(event.payload.model);
     case 'TASK_CREATE_PR':
       return createTaskPR(event.payload);
     case 'TASK_CREATE_PR_FAILED':
@@ -253,16 +283,13 @@ export const getAction = (event: EventType) => {
     case 'SCRATCH_ORG_PROVISION_FAILED':
       return provisionFailed(event.payload);
     case 'SCRATCH_ORG_UPDATE':
-      return updateOrg(event.payload);
+      return updateOrg(event.payload.model);
     case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
       return updateFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
-      return deleteOrg({ org: event.payload });
+      return deleteOrg(event.payload);
     case 'SCRATCH_ORG_REMOVE':
-      return deleteOrg({
-        org: event.payload.model,
-        message: event.payload.message,
-      });
+      return deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
       return deleteFailed(event.payload);
     case 'SCRATCH_ORG_REFRESH':
