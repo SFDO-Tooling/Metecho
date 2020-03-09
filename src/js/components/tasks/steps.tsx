@@ -138,7 +138,10 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
                   })}
                 >
                   {hasAssignee && (
-                    <GitHubUserAvatar user={step.assignee as GitHubUser} />
+                    <GitHubUserAvatar
+                      user={step.assignee as GitHubUser}
+                      size="x-small"
+                    />
                   )}
                   {step.complete ? (
                     <Icon
@@ -151,7 +154,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
                         'slds-progress__marker_icon-success',
                         {
                           'slds-m-left_x-large': !hasAssignee,
-                          'slds-m-left_x-small': hasAssignee,
+                          'slds-m-left_small': hasAssignee,
                         },
                       )}
                       title={i18n.t('Complete')}
@@ -161,7 +164,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
                     <div
                       className={classNames('slds-progress__marker', {
                         'slds-m-left_x-large': !hasAssignee,
-                        'slds-m-left_x-small': hasAssignee,
+                        'slds-m-left_small': hasAssignee,
                       })}
                     >
                       {isActive && (
