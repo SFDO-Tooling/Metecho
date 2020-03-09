@@ -267,7 +267,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         sidebar={
           <>
             <TaskStatusPath task={task} />
-            <TaskStatusSteps task={task} />
+            {/* <TaskStatusSteps user={user} task={task} /> */}
           </>
         }
       >

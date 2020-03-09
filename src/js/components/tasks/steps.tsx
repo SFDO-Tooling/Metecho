@@ -4,37 +4,40 @@ import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 
 import { Task } from '@/store/tasks/reducer';
+import { User } from '@/store/user/reducer';
 import { TASK_STATUSES } from '@/utils/constants';
 
 interface TaskStatusPathProps {
+  user: User;
   task: Task;
 }
 
-const TaskStatusSteps = ({ task }: TaskStatusPathProps) => {
-  const [completedSteps, setcompletedSteps] = useState<number[]>([]);
-  const [nextSteps, setNextSteps] = useState<number[]>([]);
+const TaskStatusSteps = ({ user, task }: TaskStatusPathProps) => {
+  // const [completedSteps, setcompletedSteps] = useState<number[]>([]);
+  // const [nextSteps, setNextSteps] = useState<number[]>([]);
 
-  useEffect(() => {
-    const inProgressDone = task.has_unmerged_commits ? [0, 1] : [0, 1, 2, 3];
-    const inProgressNext = task.has_unmerged_commits ? [3] : [4];
-    let done: number[], next: number[];
-    switch (task.status) {
-      case TASK_STATUSES.PLANNED:
-        done = [];
-        next = [0, 1];
-        break;
-      case TASK_STATUSES.IN_PROGRESS:
-        done = inProgressDone;
-        next = inProgressNext;
-        break;
-      case TASK_STATUSES.COMPLETED:
-        done = [0, 1, 2, 3, 4, 5]; // or maybe all the indexes of steps ?
-        next = [];
-        break;
-    }
-    setcompletedSteps(done);
-    setNextSteps(next);
-  }, [task]);
+  // useEffect(() => {
+  //   const inProgressDone = task.has_unmerged_commits ? [0, 1] : [0, 1, 2, 3];
+  //   const inProgressNext = task.has_unmerged_commits ? [3] : [4];
+  //   let done: number[], next: number[];
+  //   switch (task.status) {
+  //     case TASK_STATUSES.PLANNED:
+  //       done = [];
+  //       next = [0, 1];
+  //       break;
+  //     case TASK_STATUSES.IN_PROGRESS:
+  //       done = inProgressDone;
+  //       next = inProgressNext;
+  //       break;
+  //     case TASK_STATUSES.COMPLETED:
+  //       done = [0, 1, 2, 3, 4, 5]; // or maybe all the indexes of steps ?
+  //       next = [];
+  //       break;
+  //   }
+  //   setcompletedSteps(done);
+  //   setNextSteps(next);
+  // }, [task]);
+
   const steps = [
     `${i18n.t('Assign developer')}`,
     `${i18n.t('Assign reviewer')}`,
@@ -47,9 +50,10 @@ const TaskStatusSteps = ({ task }: TaskStatusPathProps) => {
 
   return (
     <>
-      <h3 className="slds-text-heading_medium slds-m-bottom_small">
+      <h3 className="slds-text-heading_medium slds-m-vertical_small">
         Next Steps
       </h3>
+
       {steps.map((item, index) => {
         const stepIsNext = _.includes(nextSteps, index);
         const stepIsComplete = _.includes(completedSteps, index);
