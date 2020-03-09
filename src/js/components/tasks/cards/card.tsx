@@ -18,6 +18,7 @@ import { Org } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
 import { ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { getTaskCommits } from '@/utils/helpers';
 import { logError } from '@/utils/logging';
 
 interface OrgCardProps {
@@ -76,13 +77,6 @@ const OrgCard = ({
   const isSubmittingReview = Boolean(
     type === ORG_TYPES.QA && task.currently_submitting_review,
   );
-
-  // Store list of commit sha/ids, newest to oldest, ending with origin commit.
-  // We consider an org out-of-date if it is not based on the first commit.
-  const taskCommits = task.commits.map((c) => c.id);
-  if (task.origin_sha) {
-    taskCommits.push(task.origin_sha);
-  }
 
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
@@ -155,8 +149,9 @@ const OrgCard = ({
     history.push(projectUrl);
   }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const orgCommitIdx =
-    org && taskCommits ? taskCommits.indexOf(org.latest_commit) : -1;
+  const taskCommits = getTaskCommits(task);
+  const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;
+  // We consider an org out-of-date if it is not based on the first commit.
   const reviewOrgOutOfDate = Boolean(
     type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
   );

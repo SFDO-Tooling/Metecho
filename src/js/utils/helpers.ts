@@ -55,3 +55,13 @@ export const getBranchLink = (object: Task | Project) => {
   }
   return { branchLink, branchLinkText };
 };
+
+export const getTaskCommits = (task: Task) => {
+  // Get list of commit sha/ids, newest to oldest, ending with origin commit.
+  // We consider an org out-of-date if it is not based on the first commit.
+  const taskCommits = task.commits.map((c) => c.id);
+  if (task.origin_sha) {
+    taskCommits.push(task.origin_sha);
+  }
+  return taskCommits;
+};

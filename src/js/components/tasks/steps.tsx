@@ -1,81 +1,186 @@
+import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
+import { GitHubUserAvatar } from '@/components/user/githubUser';
+import { OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
-import { User } from '@/store/user/reducer';
-import { TASK_STATUSES } from '@/utils/constants';
+import { GitHubUser } from '@/store/user/reducer';
+import { ORG_TYPES, REVIEW_STATUSES } from '@/utils/constants';
+import { getTaskCommits } from '@/utils/helpers';
 
 interface TaskStatusPathProps {
-  user: User;
   task: Task;
+  orgs: OrgsByTask;
 }
 
-const TaskStatusSteps = ({ user, task }: TaskStatusPathProps) => {
-  // const [completedSteps, setcompletedSteps] = useState<number[]>([]);
-  // const [nextSteps, setNextSteps] = useState<number[]>([]);
-
-  // useEffect(() => {
-  //   const inProgressDone = task.has_unmerged_commits ? [0, 1] : [0, 1, 2, 3];
-  //   const inProgressNext = task.has_unmerged_commits ? [3] : [4];
-  //   let done: number[], next: number[];
-  //   switch (task.status) {
-  //     case TASK_STATUSES.PLANNED:
-  //       done = [];
-  //       next = [0, 1];
-  //       break;
-  //     case TASK_STATUSES.IN_PROGRESS:
-  //       done = inProgressDone;
-  //       next = inProgressNext;
-  //       break;
-  //     case TASK_STATUSES.COMPLETED:
-  //       done = [0, 1, 2, 3, 4, 5]; // or maybe all the indexes of steps ?
-  //       next = [];
-  //       break;
-  //   }
-  //   setcompletedSteps(done);
-  //   setNextSteps(next);
-  // }, [task]);
+const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
+  const hasDev = Boolean(task.assigned_dev);
+  const hasReviewer = Boolean(task.assigned_qa);
+  const hasReviewApproved =
+    task.review_valid && task.review_status === REVIEW_STATUSES.APPROVED;
+  const hasReviewRejected =
+    task.review_valid &&
+    task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
+  const devOrg = orgs[ORG_TYPES.DEV];
+  const reviewOrg = orgs[ORG_TYPES.QA];
+  const hasDevOrg = Boolean(devOrg);
+  const hasReviewOrg = Boolean(reviewOrg);
+  const hasValidCommits = task.has_unmerged_commits && !hasReviewRejected;
+  const taskCommits = getTaskCommits(task);
+  const reviewOrgOutOfDate =
+    hasReviewOrg && taskCommits.indexOf(reviewOrg?.latest_commit || '') !== 0;
 
   const steps = [
-    `${i18n.t('Assign developer')}`,
-    `${i18n.t('Assign reviewer')}`,
-    `${i18n.t('Create a Scratch Org for development')}`,
-    `${i18n.t('Capture task changes')}`,
-    `${i18n.t('Submit task changes for review')}`,
-    `${i18n.t('Create a QA Org for development')}`,
+    {
+      label: `${i18n.t('Assign a developer')}`,
+      visible: true,
+      active: !hasDev,
+      complete: hasDev || hasValidCommits,
+      assignee: null,
+    },
+    {
+      label: `${i18n.t('Create a Scratch Org for development')}`,
+      visible: true,
+      active: hasDev && !devOrg,
+      complete: (hasDev && hasDevOrg) || hasValidCommits,
+      assignee: task.assigned_dev,
+    },
+    {
+      label: `${i18n.t('Make changes in Dev Org and capture in MetaShare')}`,
+      visible: true,
+      active:
+        hasDev &&
+        hasDevOrg &&
+        (!task.has_unmerged_commits ||
+          devOrg?.has_unsaved_changes ||
+          hasReviewRejected),
+      complete:
+        task.has_unmerged_commits &&
+        (!devOrg?.has_unsaved_changes || hasReviewApproved),
+      assignee: task.assigned_dev,
+    },
+    {
+      label: `${i18n.t('Submit changes for review')}`,
+      visible: true,
+      active: task.has_unmerged_commits && !task.pr_is_open,
+      complete: task.pr_is_open,
+      assignee: null,
+    },
+    {
+      label: `${i18n.t('Assign a reviewer')}`,
+      visible: true,
+      active: !hasReviewer,
+      complete: hasReviewer || task.review_valid,
+      assignee: null,
+    },
+    {
+      label: `${i18n.t('Create a Review Org')}`,
+      visible: !reviewOrgOutOfDate,
+      active: hasReviewer && !hasReviewOrg,
+      complete: (hasReviewer && hasReviewOrg) || task.review_valid,
+      assignee: task.assigned_qa,
+    },
+    {
+      label: `${i18n.t('Refresh Review Org')}`,
+      visible: reviewOrgOutOfDate,
+      active: reviewOrgOutOfDate,
+      complete: false,
+      assignee: task.assigned_qa,
+    },
+    {
+      label: `${i18n.t('Review changes in Review Org')}`,
+      visible: true,
+      active: hasReviewOrg && !reviewOrg?.has_been_visited,
+      complete: Boolean(reviewOrg?.has_been_visited || task.review_valid),
+      assignee: task.assigned_qa,
+    },
+    {
+      label: `${i18n.t('Submit a review')}`,
+      visible: true,
+      active:
+        task.pr_is_open &&
+        hasReviewOrg &&
+        !reviewOrgOutOfDate &&
+        !task.review_valid,
+      complete: task.review_valid,
+      assignee: task.assigned_qa,
+    },
+    {
+      label: `${i18n.t('Merge pull request on GitHub')}`,
+      visible: true,
+      active: task.pr_is_open && hasReviewApproved,
+      complete: false,
+      assignee: null,
+    },
   ];
-  // @todo render different steps for login as dev or reviewer
 
   return (
     <>
       <h3 className="slds-text-heading_medium slds-m-vertical_small">
-        Next Steps
+        {i18n.t('Next Steps')}
       </h3>
 
-      {steps.map((item, index) => {
-        const stepIsNext = _.includes(nextSteps, index);
-        const stepIsComplete = _.includes(completedSteps, index);
-        const statusClass = {
-          'is-next': stepIsNext,
-          'is-done': stepIsComplete,
-        };
-
-        return (
-          <div className="ms-task-step " key={index}>
-            {/* @todo make this an icon if done */}
-            <span
-              className={classNames(
-                'ms-task-step-status',
-                'slds-m-right_medium',
-                statusClass,
-              )}
-            />
-            <span>{item}</span>
-          </div>
-        );
-      })}
+      <div className="slds-progress slds-progress_vertical">
+        <ol className="slds-progress__list">
+          {steps
+            .filter((step) => step.visible)
+            .map((step, idx) => {
+              const isActive = step.active && !step.complete;
+              const hasAssignee = Boolean(step.assignee && !step.complete);
+              return (
+                <li
+                  key={idx}
+                  className={classNames('slds-progress__item', {
+                    'slds-is-completed': step.complete,
+                    'slds-is-active': isActive,
+                  })}
+                >
+                  {hasAssignee && (
+                    <GitHubUserAvatar user={step.assignee as GitHubUser} />
+                  )}
+                  {step.complete ? (
+                    <Icon
+                      category="utility"
+                      name="success"
+                      size="x-small"
+                      containerClassName={classNames(
+                        'slds-progress__marker',
+                        'slds-progress__marker_icon',
+                        'slds-progress__marker_icon-success',
+                        {
+                          'slds-m-left_x-large': !hasAssignee,
+                          'slds-m-left_x-small': hasAssignee,
+                        },
+                      )}
+                      title={i18n.t('Complete')}
+                      assistiveText={{ label: i18n.t('Complete') }}
+                    />
+                  ) : (
+                    <div
+                      className={classNames('slds-progress__marker', {
+                        'slds-m-left_x-large': !hasAssignee,
+                        'slds-m-left_x-small': hasAssignee,
+                      })}
+                    >
+                      {isActive && (
+                        <span className="slds-assistive-text">Active</span>
+                      )}
+                    </div>
+                  )}
+                  <div
+                    className="slds-progress__item_content
+                    slds-grid
+                    slds-grid_align-spread"
+                  >
+                    {step.label}
+                  </div>
+                </li>
+              );
+            })}
+        </ol>
+      </div>
     </>
   );
 };

@@ -33,7 +33,7 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES } from '@/utils/constants';
+import { ORG_TYPES, TASK_STATUSES } from '@/utils/constants';
 import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
@@ -267,7 +267,9 @@ const TaskDetail = (props: RouteComponentProps) => {
         sidebar={
           <>
             <TaskStatusPath task={task} />
-            {/* <TaskStatusSteps user={user} task={task} /> */}
+            {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
+              <TaskStatusSteps task={task} orgs={orgs} />
+            ) : null}
           </>
         }
       >
