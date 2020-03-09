@@ -598,6 +598,13 @@ class TestScratchOrg:
 
             assert async_to_sync.called
 
+    def test_clean_config(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        scratch_org.config = {"access_token": "bad", "anything else": "good"}
+        scratch_org.save()
+        scratch_org.refresh_from_db()
+        assert scratch_org.config == {"anything else": "good"}
+
 
 @pytest.mark.django_db
 class TestGitHubRepository:
