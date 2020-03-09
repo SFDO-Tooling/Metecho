@@ -56,18 +56,32 @@ class User(HashIdMixin, AbstractUser):
     devhub_username = StringField(null=True, blank=True)
     allow_devhub_override = models.BooleanField(default=False)
 
+    def queue_refresh_repositories(self):
+        """Queue a job to refresh repositories unless we're already doing so"""
+        from .jobs import refresh_github_repositories_for_user_job
+
+        if not self.currently_fetching_repos:
+            self.currently_fetching_repos = True
+            self.save()
+            refresh_github_repositories_for_user_job.delay(self)
+
     def refresh_repositories(self):
-        repos = gh.get_all_org_repos(self)
-        GitHubRepository.objects.filter(user=self).delete()
-        GitHubRepository.objects.bulk_create(
-            [
-                GitHubRepository(user=self, repo_id=repo.id, repo_url=repo.html_url)
-                for repo in repos
-            ]
-        )
-        self.currently_fetching_repos = False
-        self.save()
-        self.notify_repositories_updated()
+        try:
+            repos = gh.get_all_org_repos(self)
+            with transaction.atomic():
+                GitHubRepository.objects.filter(user=self).delete()
+                GitHubRepository.objects.bulk_create(
+                    [
+                        GitHubRepository(
+                            user=self, repo_id=repo.id, repo_url=repo.html_url
+                        )
+                        for repo in repos
+                    ]
+                )
+            self.notify_repositories_updated()
+        finally:
+            self.currently_fetching_repos = False
+            self.save()
 
     def notify_repositories_updated(self):
         message = {"type": "USER_REPOS_REFRESH"}
@@ -752,9 +766,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
-    from .jobs import refresh_github_repositories_for_user_job
-
-    refresh_github_repositories_for_user_job.delay(user)
+    user.queue_refresh_repositories()
 
 
 def ensure_slug_handler(sender, *, created, instance, **kwargs):

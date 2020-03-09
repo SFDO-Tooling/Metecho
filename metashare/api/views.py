@@ -94,10 +94,8 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        from .jobs import refresh_github_repositories_for_user_job
-
         user = self.get_object()
-        refresh_github_repositories_for_user_job.delay(user)
+        user.queue_refresh_repositories()
         return Response(status=status.HTTP_202_ACCEPTED)
 
 

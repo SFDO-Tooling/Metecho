@@ -252,7 +252,8 @@ SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True, type_=boolish)
 SESSION_COOKIE_SECURE = env(
     "SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
 )
-SESSION_COOKIE_SAMESITE = env("SESSION_COOKIE_SAMESITE", default="Strict")
+# "Lax" is required for GitHub login redirects to work properly
+SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = env(
     "CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
