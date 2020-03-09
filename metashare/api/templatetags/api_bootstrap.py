@@ -10,10 +10,6 @@ register = template.Library()
 
 @register.filter
 def serialize(user):
-    from ..jobs import refresh_github_repositories_for_user_job
-
     if not user.repositories.exists():
-        user.currently_fetching_repos = True
-        user.save()
-        refresh_github_repositories_for_user_job.delay(user)
+        user.queue_refresh_repositories()
     return escape(json.dumps(FullUserSerializer(user).data))
