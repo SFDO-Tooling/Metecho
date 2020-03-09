@@ -91,18 +91,18 @@ afterEach(() => {
 
 describe('getAction', () => {
   test.each([
-    ['REPOSITORY_UPDATE', 'updateRepo'],
+    // ['REPOSITORY_UPDATE', 'updateRepo'],
     ['REPOSITORY_UPDATE_ERROR', 'repoError'],
-    ['PROJECT_UPDATE', 'updateProject'],
+    // ['PROJECT_UPDATE', 'updateProject'],
     ['PROJECT_CREATE_PR', 'createProjectPR'],
     ['PROJECT_CREATE_PR_FAILED', 'createProjectPRFailed'],
-    ['TASK_UPDATE', 'updateTask'],
+    // ['TASK_UPDATE', 'updateTask'],
     ['TASK_CREATE_PR', 'createTaskPR'],
     ['TASK_CREATE_PR_FAILED', 'createTaskPRFailed'],
     ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
     ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
     ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
-    ['SCRATCH_ORG_UPDATE', 'updateOrg'],
+    // ['SCRATCH_ORG_UPDATE', 'updateOrg'],
     ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed'],
     ['SCRATCH_ORG_COMMIT_CHANGES', 'commitSucceeded'],
     ['SCRATCH_ORG_COMMIT_CHANGES_FAILED', 'commitFailed'],
@@ -130,22 +130,29 @@ describe('getAction', () => {
 
   describe('SCRATCH_ORG_DELETE', () => {
     test('calls deleteOrg', () => {
-      const payload = { foo: 'bar' };
+      const payload = { model: 'bar', originating_user_id: '12345' };
       const event = { type: 'SCRATCH_ORG_DELETE', payload };
       sockets.getAction(event);
 
-      expect(deleteOrg).toHaveBeenCalledWith({ org: payload });
+      expect(deleteOrg).toHaveBeenCalledWith(payload);
     });
   });
 
   describe('SCRATCH_ORG_REMOVE', () => {
     test('calls deleteOrg', () => {
-      const model = { foo: 'bar' };
-      const message = 'Error things.';
-      const event = { type: 'SCRATCH_ORG_REMOVE', payload: { model, message } };
+      // const model = { foo: 'bar' };
+      // const message = 'Error things.';
+      // const originating_user_id = '1234';
+      const payload = {
+        model: 'bar',
+        originating_user_id: '12345',
+        message: 'error',
+      };
+
+      const event = { type: 'SCRATCH_ORG_REMOVE', payload };
       sockets.getAction(event);
 
-      expect(deleteOrg).toHaveBeenCalledWith({ org: model, message });
+      expect(deleteOrg).toHaveBeenCalledWith(payload);
     });
   });
 
@@ -166,6 +173,21 @@ describe('getAction', () => {
   });
 });
 
+describe('private actions', () => {
+  test.each([
+    ['REPOSITORY_UPDATE', 'updateRepo'],
+    ['PROJECT_UPDATE', 'updateProject'],
+    ['TASK_UPDATE', 'updateTask'],
+    ['SCRATCH_ORG_UPDATE', 'updateOrg'],
+  ])('handles %s event', (type, action) => {
+    const payload = { model: 'bar', originating_user_id: '12345' };
+    const msg = { type, payload };
+    sockets.getAction(msg);
+
+    // eslint-disable-next-line import/namespace
+    expect(actions[action]).toHaveBeenCalledWith(payload.model);
+  });
+});
 describe('createSocket', () => {
   test('creates socket with url', () => {
     sockets.createSocket(opts);

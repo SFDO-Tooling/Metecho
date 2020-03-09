@@ -164,7 +164,7 @@ describe('updateRepo', () => {
 
 describe('repoError', () => {
   test('adds error message and updates repo', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const repo = {
       id: 'repo-id',
       name: 'My Repo',
@@ -173,7 +173,13 @@ describe('repoError', () => {
       type: 'REPOSITORY_UPDATE',
       payload: repo,
     };
-    store.dispatch(actions.repoError({ model: repo, message: 'error msg' }));
+    store.dispatch(
+      actions.repoError({
+        model: repo,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -183,5 +189,27 @@ describe('repoError', () => {
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
     expect(allActions[1]).toEqual(action);
+  });
+
+  test('bypasses and updates repo', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
+    const repo = {
+      id: 'repo-id',
+      name: 'My Repo',
+    };
+    const action = {
+      type: 'REPOSITORY_UPDATE',
+      payload: repo,
+    };
+    store.dispatch(
+      actions.repoError({
+        model: repo,
+        message: 'error msg',
+        originating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions).toEqual([action]);
   });
 });
