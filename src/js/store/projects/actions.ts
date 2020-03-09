@@ -28,6 +28,7 @@ export const createProjectPR = ({
   model: Project;
   originating_user_id: string | null;
 }): ThunkResult<ProjectUpdated> => (dispatch, getState) => {
+  /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
@@ -56,6 +57,7 @@ export const createProjectPRFailed = ({
   message?: string;
   originating_user_id: string | null;
 }): ThunkResult<ProjectCreatePRFailed> => (dispatch, getState) => {
+  /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
