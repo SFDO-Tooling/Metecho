@@ -168,14 +168,16 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
                       })}
                     >
                       {isActive && (
-                        <span className="slds-assistive-text">Active</span>
+                        <span className="slds-assistive-text">
+                          {i18n.t('Active')}
+                        </span>
                       )}
                     </div>
                   )}
                   <div
                     className="slds-progress__item_content
-                    slds-grid
-                    slds-grid_align-spread"
+                      slds-grid
+                      slds-grid_align-spread"
                   >
                     {step.label}
                   </div>

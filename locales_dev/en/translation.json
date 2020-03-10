@@ -1,6 +1,7 @@
 {
   "404": "404",
   "A task was successfully created.": "A task was successfully created.",
+  "Active": "Active",
   "Add a Task": "Add a Task",
   "Add a Task for": "Add a Task for",
   "Add collaborators to the project": "Add collaborators to the project",
@@ -54,6 +55,7 @@
   "Create a Review Org": "Create a Review Org",
   "Create a Scratch Org for development": "Create a Scratch Org for development",
   "Creating Org…": "Creating Org…",
+  "Current Stage:": "Current Stage:",
   "Currently Assigned": "Currently Assigned",
   "Custom Domain": "Custom Domain",
   "Delete Org": "Delete Org",
@@ -143,6 +145,7 @@
   "Select the changes to capture": "Select the changes to capture",
   "Select the location to capture changes": "Select the location to capture changes",
   "Selected Changes": "Selected Changes",
+  "Stage Complete": "Stage Complete",
   "Status": "Status",
   "Stops widget from refreshing": "Stops widget from refreshing",
   "Subheading": "Subheading",

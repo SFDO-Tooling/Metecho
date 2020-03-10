@@ -1,5 +1,6 @@
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
+import i18n from 'i18next';
 import React from 'react';
 
 interface PathItemProps {
@@ -44,7 +45,7 @@ const PathItem = ({ steps, idx, activeIdx, isCompleted }: PathItemProps) => {
           <Icon category="utility" name="check" size="x-small" />
           {(isActive || isComplete) && (
             <span className="slds-assistive-text">
-              {isActive ? 'Current Stage:' : 'Stage Complete'}
+              {isActive ? i18n.t('Current Stage:') : i18n.t('Stage Complete')}
             </span>
           )}
         </span>
