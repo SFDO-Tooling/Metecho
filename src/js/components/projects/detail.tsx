@@ -1,5 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
+import ProgressBar from '@salesforce/design-system-react/components/progress-bar';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
@@ -30,7 +31,11 @@ import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
-import { getBranchLink } from '@/utils/helpers';
+import {
+  getBranchLink,
+  getCompletedTasks,
+  getPercentage,
+} from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -132,7 +137,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const readyToSubmit = Boolean(
     project?.has_unmerged_commits && !project?.pr_is_open,
   );
-
+  // ProgressBar related:
+  const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
+  const tasksTotal = tasks?.length || 0;
+  const projectProgress = getPercentage(tasksCompleted, tasksTotal);
+  // Loading states:
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -257,7 +266,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           </>
         }
       >
-        <ProjectStatusPath project={project} tasks={tasks} />
+        <ProjectStatusPath project={project} tasks={tasks || []} />
         {submitButton}
         {tasks ? (
           <>
@@ -273,6 +282,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             <TaskForm project={project} startOpen={!tasks.length} />
+            <ProgressBar
+              id="progress-bar"
+              value={projectProgress}
+              labels={{ label: 'No Tasks Selected' }}
+            />
             <TaskTable
               repositorySlug={repository.slug}
               projectSlug={project.slug}
