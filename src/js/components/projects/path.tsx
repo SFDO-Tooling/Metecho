@@ -29,6 +29,13 @@ const ProjectStatusPath = ({
     if (inReview) {
       activeIdx = 2;
     }
+    if (project.pr_is_open) {
+      activeIdx = 3;
+    }
+    /* if (condition for a merged project) {
+      activeIdx = 4;
+    }
+    */
   }
 
   return <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />;
