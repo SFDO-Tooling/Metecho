@@ -23,6 +23,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
   const hasReviewRejected =
     task.review_valid &&
     task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
+  const readyForReview = task.has_unmerged_commits && task.pr_is_open;
   const devOrg = orgs[ORG_TYPES.DEV];
   const reviewOrg = orgs[ORG_TYPES.QA];
   const hasDevOrg = Boolean(devOrg);
@@ -71,14 +72,14 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
     {
       label: `${i18n.t('Assign a reviewer')}`,
       visible: true,
-      active: !hasReviewer,
+      active: readyForReview && !hasReviewer,
       complete: hasReviewer || task.review_valid,
       assignee: null,
     },
     {
       label: `${i18n.t('Create a Review Org')}`,
       visible: !reviewOrgOutOfDate,
-      active: hasReviewer && !hasReviewOrg,
+      active: readyForReview && hasReviewer && !hasReviewOrg,
       complete: (hasReviewer && hasReviewOrg) || task.review_valid,
       assignee: task.assigned_qa,
     },
