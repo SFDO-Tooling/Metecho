@@ -26,8 +26,8 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
   const readyForReview = task.has_unmerged_commits && task.pr_is_open;
   const devOrg = orgs[ORG_TYPES.DEV];
   const reviewOrg = orgs[ORG_TYPES.QA];
-  const hasDevOrg = Boolean(devOrg);
-  const hasReviewOrg = Boolean(reviewOrg);
+  const hasDevOrg = Boolean(devOrg && devOrg?.url);
+  const hasReviewOrg = Boolean(reviewOrg && reviewOrg?.url);
   const hasValidCommits = task.has_unmerged_commits && !hasReviewRejected;
   const taskCommits = getTaskCommits(task);
   const reviewOrgOutOfDate =
@@ -44,7 +44,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
     {
       label: `${i18n.t('Create a Scratch Org for development')}`,
       visible: true,
-      active: hasDev && !devOrg,
+      active: hasDev && !hasDevOrg,
       complete: (hasDev && hasDevOrg) || hasValidCommits,
       assignee: task.assigned_dev,
     },
@@ -58,8 +58,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
           devOrg?.has_unsaved_changes ||
           hasReviewRejected),
       complete:
-        task.has_unmerged_commits &&
-        (!devOrg?.has_unsaved_changes || hasReviewApproved),
+        hasValidCommits && (!devOrg?.has_unsaved_changes || hasReviewApproved),
       assignee: task.assigned_dev,
     },
     {
@@ -94,7 +93,9 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
       label: `${i18n.t('Review changes in Review Org')}`,
       visible: true,
       active: hasReviewOrg && !reviewOrg?.has_been_visited,
-      complete: Boolean(reviewOrg?.has_been_visited || task.review_valid),
+      complete:
+        Boolean(hasReviewOrg && reviewOrg?.has_been_visited) ||
+        task.review_valid,
       assignee: task.assigned_qa,
     },
     {
