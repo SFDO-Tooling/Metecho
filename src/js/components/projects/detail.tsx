@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import ProjectStatusPath from '@/components/projects/path';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
@@ -256,6 +257,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           </>
         }
       >
+        <ProjectStatusPath project={project} tasks={tasks} />
         {submitButton}
         {tasks ? (
           <>
