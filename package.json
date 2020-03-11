@@ -51,7 +51,7 @@
   "dependencies": {
     "@salesforce-ux/design-system": "2.11.5",
     "@salesforce/design-system-react": "0.10.18",
-    "@sentry/browser": "^5.13.2",
+    "@sentry/browser": "^5.14.0",
     "classnames": "^2.2.6",
     "date-fns": "^2.10.0",
     "i18next": "^19.3.2",

@@ -17,7 +17,7 @@
     "naumovs.color-highlight",
     "prettier.prettier-vscode",
     "stkb.rewrap",
-    "stylelint.vscode-stylelint",
+    // "stylelint.vscode-stylelint",
     "syler.sass-indented",
     "tyriar.sort-lines",
     "wholroyd.jinja",

@@ -39,9 +39,11 @@ import reducer from '@/store';
 import { fetchObjects } from '@/store/actions';
 import { clearErrors } from '@/store/errors/actions';
 import { reposRefreshing } from '@/store/repositories/actions';
+import { selectRepositories } from '@/store/repositories/selectors';
 import { clearToasts } from '@/store/toasts/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import { log, logError } from '@/utils/logging';
 import routes, { routePatterns } from '@/utils/routes';
@@ -152,17 +154,17 @@ initializeI18n((i18nError?: string) => {
     window.GLOBALS = GLOBALS;
 
     // Get logged-in/out status
-    let user;
+    let userData;
     const userString = el.getAttribute('data-user');
     if (userString) {
       try {
-        user = JSON.parse(userString) as User;
+        userData = JSON.parse(userString) as User;
       } catch (err) {
         // swallow error
       }
-      if (user) {
+      if (userData) {
         // Login
-        appStore.dispatch(login(user));
+        appStore.dispatch(login(userData));
       }
     }
     el.removeAttribute('data-user');
@@ -189,15 +191,21 @@ initializeI18n((i18nError?: string) => {
       );
     };
 
-    if (user?.currently_fetching_repos) {
-      // If user is currently fetching repos, update repo state accordingly
-      appStore.dispatch(reposRefreshing());
-      renderApp();
-    } else if (user) {
+    if (userData) {
       // If logged in, fetch repositories before rendering App
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
         fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
-      ).finally(renderApp);
+      ).finally(() => {
+        const state = appStore.getState();
+        const repos = selectRepositories(state);
+        const user = selectUserState(state);
+        // If user has no repos and is currently fetching repos, update state
+        // to show spinner instead of empty repos-list.
+        if (user?.currently_fetching_repos && !repos.length) {
+          appStore.dispatch(reposRefreshing());
+        }
+        renderApp();
+      });
     } else {
       renderApp();
     }
