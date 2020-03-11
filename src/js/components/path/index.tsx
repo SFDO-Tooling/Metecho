@@ -13,7 +13,7 @@ const Path = ({ steps, activeIdx, isCompleted }: PathProps) => (
     <div className="slds-path">
       <div className="slds-grid slds-path__track">
         <ul
-          className="slds-path__nav"
+          className="slds-path__nav slds-col slds-p-left_none slds-p-bottom_medium"
           role="listbox"
           aria-orientation="horizontal"
         >

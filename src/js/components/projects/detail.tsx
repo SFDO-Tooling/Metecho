@@ -1,6 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import ProgressBar from '@salesforce/design-system-react/components/progress-bar';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
@@ -10,6 +9,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import ProjectStatusPath from '@/components/projects/path';
+import ProjectProgress from '@/components/projects/progress';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
@@ -31,11 +31,7 @@ import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
-import {
-  getBranchLink,
-  getCompletedTasks,
-  getPercentage,
-} from '@/utils/helpers';
+import { getBranchLink, getCompletedTasks } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -140,7 +136,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   // ProgressBar related:
   const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
   const tasksTotal = tasks?.length || 0;
-  const projectProgress = getPercentage(tasksCompleted, tasksTotal);
+  const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
   // Loading states:
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -282,11 +278,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             <TaskForm project={project} startOpen={!tasks.length} />
-            <ProgressBar
-              id="progress-bar"
-              value={projectProgress}
-              labels={{ label: 'No Tasks Selected' }}
-            />
+            <ProjectProgress range={projectProgress} />
             <TaskTable
               repositorySlug={repository.slug}
               projectSlug={project.slug}
