@@ -49,26 +49,20 @@ describe('apiFetch', () => {
       fetchMock.getOnce('/test/url/', { status: 500, body: {} });
 
       expect.assertions(2);
-      try {
-        await apiFetch({ url: '/test/url/', dispatch });
-      } catch (err) {
-        expect(err.message).toEqual('Internal Server Error: {}');
-        expect(addError).toHaveBeenCalledWith('Internal Server Error: {}');
-      }
+      await expect(apiFetch({ url: '/test/url/', dispatch })).rejects.toThrow(
+        expect.objectContaining({ message: 'Internal Server Error: {}' }),
+      );
+      expect(addError).toHaveBeenCalledWith('Internal Server Error: {}');
     });
 
     test('throws Error with string response', async () => {
       fetchMock.getOnce('/test/url/', { status: 500, body: 'not cool' });
 
       expect.assertions(2);
-      try {
-        await apiFetch({ url: '/test/url/', dispatch });
-      } catch (err) {
-        expect(err.message).toEqual('Internal Server Error: not cool');
-        expect(addError).toHaveBeenCalledWith(
-          'Internal Server Error: not cool',
-        );
-      }
+      await expect(apiFetch({ url: '/test/url/', dispatch })).rejects.toThrow(
+        expect.objectContaining({ message: 'Internal Server Error: not cool' }),
+      );
+      expect(addError).toHaveBeenCalledWith('Internal Server Error: not cool');
     });
 
     test('throws Error with `detail` response', async () => {
@@ -78,12 +72,10 @@ describe('apiFetch', () => {
       });
 
       expect.assertions(2);
-      try {
-        await apiFetch({ url: '/test/url/', dispatch });
-      } catch (err) {
-        expect(err.message).toEqual('not cool');
-        expect(addError).toHaveBeenCalledWith('not cool');
-      }
+      await expect(apiFetch({ url: '/test/url/', dispatch })).rejects.toThrow(
+        expect.objectContaining({ message: 'not cool' }),
+      );
+      expect(addError).toHaveBeenCalledWith('not cool');
     });
 
     test('throws Error with `non_field_errors` response', async () => {
@@ -93,12 +85,10 @@ describe('apiFetch', () => {
       });
 
       expect.assertions(2);
-      try {
-        await apiFetch({ url: '/test/url/', dispatch });
-      } catch (err) {
-        expect(err.message).toEqual('not cool');
-        expect(addError).toHaveBeenCalledWith('not cool');
-      }
+      await expect(apiFetch({ url: '/test/url/', dispatch })).rejects.toThrow(
+        expect.objectContaining({ message: 'not cool' }),
+      );
+      expect(addError).toHaveBeenCalledWith('not cool');
     });
 
     test('does not add error message on POST with 422 response', async () => {
@@ -109,31 +99,29 @@ describe('apiFetch', () => {
       });
 
       expect.assertions(2);
-      try {
-        await apiFetch({
+      await expect(
+        apiFetch({
           url: '/test/url/',
           dispatch,
           opts: { method: 'POST' },
           hasForm: true,
-        });
-      } catch (err) {
-        expect(err.message).toEqual(
-          `Unprocessable Entity: ${JSON.stringify(response)}`,
-        );
-        expect(addError).not.toHaveBeenCalled();
-      }
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({
+          message: `Unprocessable Entity: ${JSON.stringify(response)}`,
+        }),
+      );
+      expect(addError).not.toHaveBeenCalled();
     });
 
     test('throws network error', async () => {
       fetchMock.getOnce('/test/url/', { throws: new Error('not cool') });
 
       expect.assertions(2);
-      try {
-        await apiFetch({ url: '/test/url/', dispatch });
-      } catch (err) {
-        expect(err.message).toEqual('not cool');
-        expect(addError).not.toHaveBeenCalled();
-      }
+      await expect(apiFetch({ url: '/test/url/', dispatch })).rejects.toThrow(
+        expect.objectContaining({ message: 'not cool' }),
+      );
+      expect(addError).not.toHaveBeenCalled();
     });
   });
 });

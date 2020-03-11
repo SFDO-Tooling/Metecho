@@ -65,12 +65,15 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
             instance = self._get_matching_instance(repository)
             if instance is None:
                 return
+            # In all these, our originating user is None, because this
+            # comes from the GitHub hook, and therefore all users on the
+            # frontend should pay attention to it.
             if self._is_reopened():
-                instance.finalize_pr_reopened()
+                instance.finalize_pr_reopened(originating_user_id=None)
             elif self._is_merged():
-                instance.finalize_status_completed()
+                instance.finalize_status_completed(originating_user_id=None)
             else:
-                instance.finalize_pr_closed()
+                instance.finalize_pr_closed(originating_user_id=None)
 
 
 class CommitSerializer(serializers.Serializer):
@@ -115,7 +118,7 @@ class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
         ref = ref[prefix_len:]
 
         if self._is_force_push():
-            repository.queue_refresh_commits(ref=ref)
+            repository.queue_refresh_commits(ref=ref, originating_user_id=None)
         else:
             sender = self.validated_data["sender"]
             repository.add_commits(

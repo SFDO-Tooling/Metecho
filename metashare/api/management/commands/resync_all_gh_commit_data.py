@@ -12,5 +12,7 @@ class Command(BaseCommand):
             branch_name__isnull=False, origin_sha__isnull=False
         ):
             refresh_commits(
-                repository=task.project.repository, branch_name=task.branch_name
+                repository=task.project.repository,
+                branch_name=task.branch_name,
+                originating_user_id=None,
             )
