@@ -46,7 +46,7 @@ def get_user_facing_url(*, path):
     return furl(f"{scheme}://{domain}").set(path=path).url
 
 
-def _create_branches_on_github(*, user, repo_id, project, task):
+def _create_branches_on_github(*, user, repo_id, project, task, originating_user_id):
     """
     Expects to be called in the context of a local github checkout.
     """
@@ -73,7 +73,7 @@ def _create_branches_on_github(*, user, repo_id, project, task):
             base_branch=repository.default_branch,
         )
         project.branch_name = project_branch_name
-        project.finalize_project_update()
+        project.finalize_project_update(originating_user_id=originating_user_id)
 
     # Make task branch, with latest from task:
     task.refresh_from_db()
@@ -87,7 +87,7 @@ def _create_branches_on_github(*, user, repo_id, project, task):
         )
         task.branch_name = task_branch_name
         task.origin_sha = repository.branch(project_branch_name).latest_sha()
-        task.finalize_task_update()
+        task.finalize_task_update(originating_user_id=originating_user_id)
 
     return task_branch_name
 
@@ -190,7 +190,9 @@ def _create_org_and_run_flow(
     ).id
 
 
-def create_branches_on_github_then_create_scratch_org(*, scratch_org):
+def create_branches_on_github_then_create_scratch_org(
+    *, scratch_org, originating_user_id
+):
     scratch_org.refresh_from_db()
     user = scratch_org.owner
     task = scratch_org.task
@@ -199,7 +201,11 @@ def create_branches_on_github_then_create_scratch_org(*, scratch_org):
     try:
         repo_id = project.repository.get_repo_id(user)
         commit_ish = _create_branches_on_github(
-            user=user, repo_id=repo_id, project=project, task=task
+            user=user,
+            repo_id=repo_id,
+            project=project,
+            task=task,
+            originating_user_id=originating_user_id,
         )
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             _create_org_and_run_flow(
@@ -210,12 +216,12 @@ def create_branches_on_github_then_create_scratch_org(*, scratch_org):
                 project_path=repo_root,
             )
     except Exception as e:
-        scratch_org.finalize_provision(e)
+        scratch_org.finalize_provision(error=e, originating_user_id=originating_user_id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.finalize_provision()
+        scratch_org.finalize_provision(originating_user_id=originating_user_id)
 
 
 create_branches_on_github_then_create_scratch_org_job = job(
@@ -223,7 +229,7 @@ create_branches_on_github_then_create_scratch_org_job = job(
 )
 
 
-def refresh_scratch_org(scratch_org):
+def refresh_scratch_org(scratch_org, *, originating_user_id):
     try:
         scratch_org.refresh_from_db()
         user = scratch_org.owner
@@ -244,18 +250,20 @@ def refresh_scratch_org(scratch_org):
             )
     except Exception as e:
         scratch_org.refresh_from_db()
-        scratch_org.finalize_refresh_org(e)
+        scratch_org.finalize_refresh_org(
+            error=e, originating_user_id=originating_user_id
+        )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.finalize_refresh_org()
+        scratch_org.finalize_refresh_org(originating_user_id=originating_user_id)
 
 
 refresh_scratch_org_job = job(refresh_scratch_org)
 
 
-def get_unsaved_changes(scratch_org):
+def get_unsaved_changes(scratch_org, *, originating_user_id):
     try:
         scratch_org.refresh_from_db()
         old_revision_numbers = scratch_org.latest_revision_numbers
@@ -271,19 +279,29 @@ def get_unsaved_changes(scratch_org):
         scratch_org.unsaved_changes = unsaved_changes
     except Exception as e:
         scratch_org.refresh_from_db()
-        scratch_org.finalize_get_unsaved_changes(e)
+        scratch_org.finalize_get_unsaved_changes(
+            error=e, originating_user_id=originating_user_id
+        )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.finalize_get_unsaved_changes()
+        scratch_org.finalize_get_unsaved_changes(
+            originating_user_id=originating_user_id
+        )
 
 
 get_unsaved_changes_job = job(get_unsaved_changes)
 
 
 def commit_changes_from_org(
-    *, scratch_org, user, desired_changes, commit_message, target_directory
+    *,
+    scratch_org,
+    user,
+    desired_changes,
+    commit_message,
+    target_directory,
+    originating_user_id,
 ):
     scratch_org.refresh_from_db()
     branch = scratch_org.task.branch_name
@@ -307,7 +325,7 @@ def commit_changes_from_org(
         scratch_org.task.refresh_from_db()
         scratch_org.task.add_ms_git_sha(commit.sha)
         scratch_org.task.has_unmerged_commits = True
-        scratch_org.task.finalize_task_update()
+        scratch_org.task.finalize_task_update(originating_user_id=originating_user_id)
 
         scratch_org.refresh_from_db()
         scratch_org.last_modified_at = now()
@@ -339,12 +357,14 @@ def commit_changes_from_org(
         )
     except Exception as e:
         scratch_org.refresh_from_db()
-        scratch_org.finalize_commit_changes(e)
+        scratch_org.finalize_commit_changes(
+            error=e, originating_user_id=originating_user_id
+        )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        scratch_org.finalize_commit_changes()
+        scratch_org.finalize_commit_changes(originating_user_id=originating_user_id)
 
 
 commit_changes_from_org_job = job(commit_changes_from_org)
@@ -362,6 +382,7 @@ def create_pr(
     additional_changes,
     issues,
     notes,
+    originating_user_id,
 ):
     try:
         repository = get_repo_info(user, repo_id=repo_id)
@@ -381,21 +402,21 @@ def create_pr(
         instance.pr_is_open = True
     except Exception as e:
         instance.refresh_from_db()
-        instance.finalize_create_pr(e)
+        instance.finalize_create_pr(error=e, originating_user_id=originating_user_id)
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        instance.finalize_create_pr()
+        instance.finalize_create_pr(originating_user_id=originating_user_id)
 
 
 create_pr_job = job(create_pr)
 
 
-def delete_scratch_org(scratch_org):
+def delete_scratch_org(scratch_org, *, originating_user_id):
     try:
         delete_org(scratch_org)
-        scratch_org.delete()
+        scratch_org.delete(originating_user_id=originating_user_id)
     except Exception as e:
         scratch_org.refresh_from_db()
         scratch_org.delete_queued_at = None
@@ -411,7 +432,10 @@ def delete_scratch_org(scratch_org):
             )
         scratch_org.save()
         async_to_sync(report_scratch_org_error)(
-            scratch_org, e, "SCRATCH_ORG_DELETE_FAILED"
+            scratch_org,
+            error=e,
+            type_="SCRATCH_ORG_DELETE_FAILED",
+            originating_user_id=originating_user_id,
         )
         tb = traceback.format_exc()
         logger.error(tb)
@@ -430,7 +454,7 @@ refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_u
 
 # This avoids partially-applied saving:
 @transaction.atomic
-def refresh_commits(*, repository, branch_name):
+def refresh_commits(*, repository, branch_name, originating_user_id):
     """
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
@@ -457,13 +481,13 @@ def refresh_commits(*, repository, branch_name):
             normalize_commit(commit) for commit in commits[:origin_sha_index]
         ]
         task.update_review_valid()
-        task.finalize_task_update()
+        task.finalize_task_update(originating_user_id=originating_user_id)
 
 
 refresh_commits_job = job(refresh_commits)
 
 
-def populate_github_users(repository):
+def populate_github_users(repository, *, originating_user_id):
     try:
         user = repository.get_a_matching_user()
         if user is None:
@@ -482,18 +506,22 @@ def populate_github_users(repository):
         ]
     except Exception as e:
         repository.refresh_from_db()
-        repository.finalize_populate_github_users(e)
+        repository.finalize_populate_github_users(
+            error=e, originating_user_id=originating_user_id
+        )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        repository.finalize_populate_github_users()
+        repository.finalize_populate_github_users(
+            originating_user_id=originating_user_id
+        )
 
 
 populate_github_users_job = job(populate_github_users)
 
 
-def submit_review(*, user, task, data):
+def submit_review(*, user, task, data, originating_user_id):
     try:
         review_sha = None
         org = data["org"]
@@ -550,14 +578,21 @@ def submit_review(*, user, task, data):
             pr.create_review(notes, event="COMMENT")
     except Exception as e:
         task.refresh_from_db()
-        task.finalize_submit_review(now(), err=e)
+        task.finalize_submit_review(
+            now(), error=e, originating_user_id=originating_user_id
+        )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
         task.refresh_from_db()
         task.finalize_submit_review(
-            now(), sha=review_sha, status=status, delete_org=delete_org, org=org,
+            now(),
+            sha=review_sha,
+            status=status,
+            delete_org=delete_org,
+            org=org,
+            originating_user_id=originating_user_id,
         )
 
 

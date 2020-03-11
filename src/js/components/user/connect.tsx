@@ -97,7 +97,7 @@ const ConnectModal = ({
     const baseUrl = window.api_urls.salesforce_custom_login();
     window.location.assign(
       addUrlParams(baseUrl, {
-        custom_domain: val, // eslint-disable-line @typescript-eslint/camelcase
+        custom_domain: val,
         process: 'connect',
         next: window.location.pathname,
       }),
