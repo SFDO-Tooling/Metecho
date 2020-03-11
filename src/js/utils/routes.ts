@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 const routes = {
   home: () => '/',
   login: () => '/login',
