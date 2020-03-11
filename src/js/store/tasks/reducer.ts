@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { ObjectsAction } from '@/store/actions';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
@@ -81,7 +79,7 @@ const reducer = (
       const {
         object,
         objectType,
-      }: { object: Task; objectType: ObjectTypes } = action.payload;
+      }: { object: Task; objectType?: ObjectTypes } = action.payload;
       switch (objectType) {
         case OBJECT_TYPES.TASK: {
           if (object) {
@@ -132,7 +130,7 @@ const reducer = (
         const {
           object,
           objectType,
-        }: { object: Task; objectType: ObjectTypes } = action.payload;
+        }: { object: Task; objectType?: ObjectTypes } = action.payload;
         if (objectType === OBJECT_TYPES.TASK && object) {
           maybeTask = object;
         }

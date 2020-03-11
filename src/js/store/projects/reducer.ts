@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { ProjectAction } from '@/store/projects/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
@@ -89,7 +87,7 @@ const reducer = (
       const {
         object,
         objectType,
-      }: { object: Project; objectType: ObjectTypes } = action.payload;
+      }: { object: Project; objectType?: ObjectTypes } = action.payload;
       if (objectType === OBJECT_TYPES.PROJECT && object) {
         const repository = projects[object.repository] || { ...defaultState };
         // Do not store if (somehow) we already know about this project
@@ -147,7 +145,7 @@ const reducer = (
         const {
           object,
           objectType,
-        }: { object: Project; objectType: ObjectTypes } = action.payload;
+        }: { object: Project; objectType?: ObjectTypes } = action.payload;
         if (objectType === OBJECT_TYPES.PROJECT && object) {
           maybeProject = object;
         }

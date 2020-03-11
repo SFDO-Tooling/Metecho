@@ -18,6 +18,13 @@ extends:
   - prettier/@typescript-eslint
 rules:
   # TypeScript
+  '@typescript-eslint/camelcase':
+    - 2
+    - properties: never
+      genericType: never
+      ignoreDestructuring: true
+      allow:
+        - originating_user_id
   '@typescript-eslint/explicit-function-return-type': 0
   '@typescript-eslint/no-empty-function': 0
   '@typescript-eslint/no-explicit-any': 0
