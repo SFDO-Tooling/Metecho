@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { RepositoriesAction } from '@/store/repositories/actions';
 import { LogoutAction } from '@/store/user/actions';
