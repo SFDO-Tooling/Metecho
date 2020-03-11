@@ -9,4 +9,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for repository in Repository.objects.all():
-            populate_github_users(repository)
+            populate_github_users(repository, originating_user_id=None)

@@ -87,6 +87,7 @@ const OrgCard = ({
         assignedUser,
       },
     );
+    // eslint-disable-next-line no-param-reassign
     org = null;
   }
 

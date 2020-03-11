@@ -59,7 +59,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
           objectType: OBJECT_TYPES.PROJECT,
           data: {
             ...project,
-            // eslint-disable-next-line @typescript-eslint/camelcase
             github_users: users,
           },
         }),
@@ -82,7 +81,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
           objectType: OBJECT_TYPES.PROJECT,
           data: {
             ...project,
-            // eslint-disable-next-line @typescript-eslint/camelcase
             github_users: users,
           },
         }),

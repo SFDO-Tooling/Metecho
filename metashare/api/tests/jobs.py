@@ -56,7 +56,11 @@ class TestCreateBranchesOnGitHub:
             get_repo_info.return_value = repository
 
             _create_branches_on_github(
-                user=user, repo_id=123, project=project, task=task
+                user=user,
+                repo_id=123,
+                project=project,
+                task=task,
+                originating_user_id="123abc",
             )
 
             assert repository.create_branch_ref.called
@@ -79,7 +83,11 @@ class TestCreateBranchesOnGitHub:
             get_repo_info.return_value = repository
 
             _create_branches_on_github(
-                user=user, repo_id=123, project=project, task=task
+                user=user,
+                repo_id=123,
+                project=project,
+                task=task,
+                originating_user_id="123abc",
             )
 
             assert not repository.create_branch_ref.called
@@ -161,7 +169,7 @@ def test_get_unsaved_changes(scratch_org_factory):
             "TypeTwo": {"NameTwo": 10},
         }
 
-        get_unsaved_changes(scratch_org=scratch_org)
+        get_unsaved_changes(scratch_org=scratch_org, originating_user_id=None)
         scratch_org.refresh_from_db()
 
         assert scratch_org.unsaved_changes == {
@@ -183,7 +191,9 @@ def test_create_branches_on_github_then_create_scratch_org():
         )
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
 
-        create_branches_on_github_then_create_scratch_org(scratch_org=MagicMock())
+        create_branches_on_github_then_create_scratch_org(
+            scratch_org=MagicMock(), originating_user_id=None
+        )
 
         assert _create_branches_on_github.called
         assert _create_org_and_run_flow.called
@@ -199,7 +209,7 @@ class TestRefreshScratchOrg:
             _create_org_and_run_flow = stack.enter_context(
                 patch(f"{PATCH_ROOT}._create_org_and_run_flow")
             )
-            refresh_scratch_org(scratch_org)
+            refresh_scratch_org(scratch_org, originating_user_id=None)
 
             assert delete_org.called
             assert _create_org_and_run_flow.called
@@ -215,7 +225,7 @@ class TestRefreshScratchOrg:
             logger = stack.enter_context(patch("metashare.api.jobs.logger"))
 
             with pytest.raises(Exception):
-                refresh_scratch_org(scratch_org)
+                refresh_scratch_org(scratch_org, originating_user_id=None)
 
             assert async_to_sync.called
             assert logger.error.called
@@ -225,7 +235,7 @@ class TestRefreshScratchOrg:
 def test_delete_scratch_org(scratch_org_factory):
     scratch_org = scratch_org_factory()
     with patch(f"{PATCH_ROOT}.delete_org") as sf_delete_scratch_org:
-        delete_scratch_org(scratch_org)
+        delete_scratch_org(scratch_org, originating_user_id=None)
 
         assert sf_delete_scratch_org.called
 
@@ -246,7 +256,7 @@ def test_delete_scratch_org__exception(scratch_org_factory):
             "https://example.com", 418, "I'M A TEAPOT", [{"error": "Short and stout"}]
         )
         with pytest.raises(SalesforceGeneralError):
-            delete_scratch_org(scratch_org)
+            delete_scratch_org(scratch_org, originating_user_id=None)
 
         scratch_org.refresh_from_db()
         assert scratch_org.delete_queued_at is None
@@ -294,6 +304,7 @@ def test_commit_changes_from_org(scratch_org_factory, user_factory):
             desired_changes=desired_changes,
             commit_message=commit_message,
             target_directory=target_directory,
+            originating_user_id=None,
         )
 
         assert commit_changes_to_github.called
@@ -320,7 +331,7 @@ class TestErrorHandling:
 
             with pytest.raises(Exception):
                 create_branches_on_github_then_create_scratch_org(
-                    scratch_org=scratch_org
+                    scratch_org=scratch_org, originating_user_id=None,
                 )
 
             assert scratch_org.delete.called
@@ -338,7 +349,7 @@ class TestErrorHandling:
             get_latest_revision_numbers.side_effect = Exception
 
             with pytest.raises(Exception):
-                get_unsaved_changes(scratch_org)
+                get_unsaved_changes(scratch_org, originating_user_id=None)
 
             assert async_to_sync.called
 
@@ -361,6 +372,7 @@ class TestErrorHandling:
                     desired_changes={},
                     commit_message="message",
                     target_directory="src",
+                    originating_user_id=None,
                 )
 
             assert async_to_sync.called
@@ -402,7 +414,9 @@ class TestRefreshCommits:
             )
             get_repo_info.return_value = repo
 
-            refresh_commits(repository=repository, branch_name="task")
+            refresh_commits(
+                repository=repository, branch_name="task", originating_user_id=None
+            )
             task.refresh_from_db()
             assert len(task.commits) == 0
 
@@ -449,7 +463,9 @@ class TestRefreshCommits:
             )
             get_repo_info.return_value = repo
 
-            refresh_commits(repository=repository, branch_name="task")
+            refresh_commits(
+                repository=repository, branch_name="task", originating_user_id=None
+            )
             task.refresh_from_db()
             assert len(task.commits) == 1
 
@@ -475,6 +491,7 @@ def test_create_pr(user_factory, task_factory):
             additional_changes="",
             issues="",
             notes="",
+            originating_user_id=None,
         )
 
         assert repository.create_pull.called
@@ -506,6 +523,7 @@ def test_create_pr__error(user_factory, task_factory):
                 additional_changes="",
                 issues="",
                 notes="",
+                originating_user_id=None,
             )
 
         assert async_to_sync.called
@@ -533,14 +551,14 @@ class TestPopulateGithubUsers:
             repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
             get_repo_info.return_value = repo
 
-            populate_github_users(repository)
+            populate_github_users(repository, originating_user_id=None)
             repository.refresh_from_db()
             assert len(repository.github_users) == 2
 
     def test_user_missing(self, repository_factory):
         repository = repository_factory(repo_id=123)
         with patch("metashare.api.jobs.logger") as logger:
-            populate_github_users(repository)
+            populate_github_users(repository, originating_user_id=None)
             assert logger.warning.called
 
     def test__error(self, user_factory, repository_factory, git_hub_repository_factory):
@@ -556,7 +574,7 @@ class TestPopulateGithubUsers:
             logger = stack.enter_context(patch("metashare.api.jobs.logger"))
 
             with pytest.raises(Exception):
-                populate_github_users(repository)
+                populate_github_users(repository, originating_user_id=None)
 
             assert logger.error.called
             assert async_to_sync.called
@@ -583,6 +601,7 @@ class TestSubmitReview:
                     "delete_org": False,
                     "org": None,
                 },
+                originating_user_id=None,
             )
 
             assert task.finalize_submit_review.called
@@ -592,6 +611,7 @@ class TestSubmitReview:
                 "status": "APPROVE",
                 "delete_org": False,
                 "org": None,
+                "originating_user_id": None,
             }, task.finalize_submit_review.call_args.kwargs
             assert "err" not in task.finalize_submit_review.call_args.kwargs
 
@@ -620,6 +640,7 @@ class TestSubmitReview:
                     "delete_org": False,
                     "org": scratch_org,
                 },
+                originating_user_id=None,
             )
 
             assert task.finalize_submit_review.called
@@ -629,6 +650,7 @@ class TestSubmitReview:
                 "status": "APPROVE",
                 "delete_org": False,
                 "org": scratch_org,
+                "originating_user_id": None,
             }, task.finalize_submit_review.call_args.kwargs
 
     def test_good__review_invalid(self, task_factory, user_factory):
@@ -658,11 +680,12 @@ class TestSubmitReview:
                         "delete_org": False,
                         "org": None,
                     },
+                    originating_user_id=None,
                 )
 
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
-            assert "err" in task.finalize_submit_review.call_args.kwargs
+            assert "error" in task.finalize_submit_review.call_args.kwargs
 
     def test_bad(self):
         with patch("metashare.api.jobs.get_repo_info") as get_repo_info:
@@ -681,8 +704,9 @@ class TestSubmitReview:
                         "delete_org": False,
                         "org": None,
                     },
+                    originating_user_id=None,
                 )
 
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
-            assert "err" in task.finalize_submit_review.call_args.kwargs
+            assert "error" in task.finalize_submit_review.call_args.kwargs
