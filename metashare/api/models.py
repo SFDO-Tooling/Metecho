@@ -33,6 +33,7 @@ from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+PROJECT_STATUSES = Choices("Planned", "In progress", "Review", "Merged",)
 TASK_STATUSES = Choices(
     ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
 )
@@ -338,6 +339,10 @@ class Project(
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+    pr_is_merged = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned,
+    )
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -355,6 +360,10 @@ class Project(
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.update_status()
+        return super().save(*args, **kwargs)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -384,6 +393,22 @@ class Project(
 
     # end CreatePrMixin configuration
 
+    def update_status(self):
+        task_statuses = self.tasks.values_list("status", flat=True)
+        should_in_progress = self.status == PROJECT_STATUSES.Planned and any(
+            status == TASK_STATUSES["In progress"] for status in task_statuses
+        )
+        should_review = self.pr_is_open and all(
+            status == TASK_STATUSES.Completed for status in task_statuses
+        )
+        should_merged = self.pr_is_merged
+        if should_in_progress:
+            self.status = PROJECT_STATUSES["In progress"]
+        elif should_review:
+            self.status = PROJECT_STATUSES.Review
+        elif should_merged:
+            self.status = PROJECT_STATUSES.Merged
+
     def finalize_pr_closed(self, *, originating_user_id):
         self.pr_is_open = False
         self.save()
@@ -399,6 +424,7 @@ class Project(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_status_completed(self, *, originating_user_id):
+        self.pr_is_merged = True
         self.has_unmerged_commits = False
         self.pr_is_open = False
         self.save()
@@ -457,6 +483,11 @@ class Task(
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.project.update_status()
+        self.project.save()
+        return super().save(*args, **kwargs)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
