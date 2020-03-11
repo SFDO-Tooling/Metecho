@@ -9,7 +9,7 @@ interface PathProps {
 }
 
 const Path = ({ steps, activeIdx, isCompleted }: PathProps) => (
-  <div className="slds-region_small slds-p-vertical_large">
+  <div className="slds-region_small">
     <div className="slds-path">
       <div className="slds-grid slds-path__track">
         <ul
