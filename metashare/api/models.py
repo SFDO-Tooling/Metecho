@@ -624,12 +624,17 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self.id is None
+        self.clean_config()
         ret = super().save(*args, **kwargs)
 
         if is_new:
             self.queue_provision(originating_user_id=None)
 
         return ret
+
+    def clean_config(self):
+        banned_keys = {"access_token"}
+        self.config = {k: v for (k, v) in self.config.items() if k not in banned_keys}
 
     def mark_visited(self, *, originating_user_id):
         self.has_been_visited = True
