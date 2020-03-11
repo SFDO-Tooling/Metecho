@@ -14,7 +14,10 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
   ];
   let activeIdx;
   let isCompleted = false;
-  const status = task.review_valid ? task.review_status : task.status;
+  const status =
+    task.review_valid && task.status !== TASK_STATUSES.COMPLETED
+      ? task.review_status
+      : task.status;
   switch (status) {
     case TASK_STATUSES.PLANNED:
       activeIdx = 0;

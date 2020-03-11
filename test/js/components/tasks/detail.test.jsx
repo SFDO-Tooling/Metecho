@@ -300,7 +300,7 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(getAllByText('Capturing Selected Changes…').length).toEqual(2);
+      expect(getAllByText('Capturing Selected Changes…')).toHaveLength(2);
     });
   });
 

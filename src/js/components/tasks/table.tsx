@@ -71,7 +71,10 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   if (!item) {
     return null;
   }
-  const status = item.review_valid ? item.review_status : item.status;
+  const status =
+    item.review_valid && item.status !== TASK_STATUSES.COMPLETED
+      ? item.review_status
+      : item.status;
   let displayStatus, icon;
   switch (status) {
     case TASK_STATUSES.PLANNED:

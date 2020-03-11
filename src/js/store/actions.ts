@@ -225,6 +225,7 @@ export const createObject = ({
   if (!url) {
     const urlFn = window.api_urls[`${objectType}_list`];
     if (urlFn) {
+      // eslint-disable-next-line no-param-reassign
       url = urlFn();
     }
   }

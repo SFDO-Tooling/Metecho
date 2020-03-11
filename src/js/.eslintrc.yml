@@ -4,12 +4,10 @@ parser: '@typescript-eslint/parser'
 parserOptions:
   sourceType: module
   ecmaFeatures:
-    impliedStrict: true
     jsx: true
   project: ./tsconfig.json
 env:
   browser: true
-  commonjs: true
   node: false
 plugins:
   - simple-import-sort
