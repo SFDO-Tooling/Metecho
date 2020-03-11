@@ -151,9 +151,10 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
                       name="success"
                       size="x-small"
                       containerClassName={classNames(
+                        'slds-icon_containe',
+                        'slds-icon-utility-success',
                         'slds-progress__marker',
                         'slds-progress__marker_icon',
-                        'slds-progress__marker_icon-success',
                         {
                           'slds-m-left_x-large': !hasAssignee,
                           'slds-m-left_small': hasAssignee,
