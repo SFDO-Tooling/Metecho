@@ -6,41 +6,41 @@ import { addUrlParams } from '@/utils/api';
 import { storeWithThunk } from './../../utils';
 
 describe('provisionOrg', () => {
-  describe('display success message', () => {
-    const org = {
-      id: 'org-id',
-      owner: 'user-id',
-      url: '/test/url/',
-      org_type: 'Dev',
-      task: 'task-id',
-    };
-    const orgAction = {
-      type: 'SCRATCH_ORG_PROVISION',
-      payload: org,
-    };
+  const org = {
+    id: 'org-id',
+    owner: 'user-id',
+    url: '/test/url/',
+    org_type: 'Dev',
+    task: 'task-id',
+  };
+  const orgAction = {
+    type: 'SCRATCH_ORG_PROVISION',
+    payload: org,
+  };
 
-    test('not owned by current user', () => {
-      const store = storeWithThunk({
-        user: { id: 'user-id' },
-        tasks: {
-          'project-id': [
-            { id: 'task-id', name: 'My Task', project: 'project-id' },
-          ],
-        },
-      });
-      store.dispatch(
-        actions.provisionOrg({
-          model: org,
-          orginating_user_id: 'another-user-id',
-        }),
-      );
-      const allActions = store.getActions();
-
-      expect(allActions[0].type).toEqual('SCRATCH_ORG_PROVISION');
-      expect(allActions[0]).toEqual(orgAction);
+  test('triggers action', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {
+        'project-id': [
+          { id: 'task-id', name: 'My Task', project: 'project-id' },
+        ],
+      },
     });
+    store.dispatch(
+      actions.provisionOrg({
+        model: org,
+        orginating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
 
-    test('owned by current user', () => {
+    expect(allActions[0].type).toEqual('SCRATCH_ORG_PROVISION');
+    expect(allActions[0]).toEqual(orgAction);
+  });
+
+  describe('owned by current user', () => {
+    test('adds success message', () => {
       const store = storeWithThunk({
         user: { id: 'user-id' },
         tasks: {
@@ -57,6 +57,7 @@ describe('provisionOrg', () => {
       );
       const allActions = store.getActions();
 
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
         'Successfully created Dev org for task “My Task”.',
       );
@@ -64,28 +65,29 @@ describe('provisionOrg', () => {
       expect(allActions[0].payload.linkUrl).toEqual(
         window.api_urls.scratch_org_redirect(org.id),
       );
-      expect(allActions[1].type).toEqual('SCRATCH_ORG_PROVISION');
+      expect(allActions[1]).toEqual(orgAction);
     });
+  });
 
-    test('does not fail if missing url', () => {
-      const store = storeWithThunk({
-        user: { id: 'user-id' },
-        tasks: {},
-      });
-      store.dispatch(
-        actions.provisionOrg({
-          model: { ...org, url: '' },
-          originating_user_id: 'user-id',
-        }),
-      );
-      const allActions = store.getActions();
-      expect(allActions[0].payload.heading).toEqual(
-        'Successfully created Dev org.',
-      );
-      expect(allActions[0].payload.linkText).toBeUndefined();
-      expect(allActions[0].payload.linkUrl).toBeUndefined();
-      expect(allActions[1].type).toEqual('SCRATCH_ORG_PROVISION');
-    });
+  test('does not fail if missing url', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' }, tasks: {} });
+    const thisOrg = { ...org, url: null };
+    const thisOrgAction = { ...orgAction, payload: thisOrg };
+    store.dispatch(
+      actions.provisionOrg({
+        model: thisOrg,
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Successfully created Dev org.',
+    );
+    expect(allActions[0].payload.linkText).toBeUndefined();
+    expect(allActions[0].payload.linkUrl).toBeUndefined();
+    expect(allActions[1]).toEqual(thisOrgAction);
   });
 });
 
@@ -101,8 +103,8 @@ describe('provisionFailed', () => {
     expect(store.getActions()).toEqual([action]);
   });
 
-  describe('display error message', () => {
-    test('owned by current user', () => {
+  describe('owned by current user', () => {
+    test('adds error message', () => {
       const store = storeWithThunk({
         user: { id: 'user-id' },
         tasks: {
@@ -117,6 +119,10 @@ describe('provisionFailed', () => {
         url: '/test/url/',
         org_type: 'Dev',
         task: 'task-id',
+      };
+      const orgAction = {
+        type: 'SCRATCH_ORG_PROVISION_FAILED',
+        payload: org,
       };
       store.dispatch(
         actions.provisionFailed({
@@ -133,7 +139,7 @@ describe('provisionFailed', () => {
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');
-      expect(allActions[1].type).toEqual('SCRATCH_ORG_PROVISION_FAILED');
+      expect(allActions[1]).toEqual(orgAction);
     });
 
     test('does not fail if missing url', () => {
@@ -144,7 +150,10 @@ describe('provisionFailed', () => {
         org_type: 'Dev',
         task: 'task-id',
       };
-
+      const orgAction = {
+        type: 'SCRATCH_ORG_PROVISION_FAILED',
+        payload: org,
+      };
       store.dispatch(
         actions.provisionFailed({
           model: org,
@@ -160,7 +169,7 @@ describe('provisionFailed', () => {
       );
       expect(allActions[0].payload.linkText).toBeUndefined();
       expect(allActions[0].payload.linkUrl).toBeUndefined();
-      expect(allActions[1].type).toEqual('SCRATCH_ORG_PROVISION_FAILED');
+      expect(allActions[1]).toEqual(orgAction);
     });
   });
 });
@@ -263,6 +272,10 @@ describe('updateFailed', () => {
       task: 'task-id',
       owner: 'user-id',
     };
+    const action = {
+      type: 'SCRATCH_ORG_UPDATE',
+      payload: org,
+    };
     store.dispatch(
       actions.updateFailed({
         model: org,
@@ -278,7 +291,7 @@ describe('updateFailed', () => {
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
-    expect(allActions[1].type).toEqual('SCRATCH_ORG_UPDATE');
+    expect(allActions[1]).toEqual(action);
   });
 
   test('adds error message (no task)', () => {
@@ -288,10 +301,13 @@ describe('updateFailed', () => {
       task: 'task-id',
       owner: 'user-id',
     };
+    const action = {
+      type: 'SCRATCH_ORG_UPDATE',
+      payload: org,
+    };
     store.dispatch(
       actions.updateFailed({
         model: org,
-        message: 'error msg',
         originating_user_id: 'user-id',
       }),
     );
@@ -301,9 +317,9 @@ describe('updateFailed', () => {
     expect(allActions[0].payload.heading).toEqual(
       'Uh oh. There was an error checking for changes on your scratch org.',
     );
-    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.details).toBeUndefined();
     expect(allActions[0].payload.variant).toEqual('error');
-    expect(allActions[1].type).toEqual('SCRATCH_ORG_UPDATE');
+    expect(allActions[1]).toEqual(action);
   });
 });
 
@@ -347,6 +363,7 @@ describe('deleteOrg', () => {
         org_type: 'Dev',
         task: 'task-id',
       };
+      const orgAction = { type: 'SCRATCH_ORG_DELETE', payload: org };
       store.dispatch(
         actions.deleteOrg({
           model: org,
@@ -359,7 +376,7 @@ describe('deleteOrg', () => {
       expect(allActions[0].payload.heading).toEqual(
         'Successfully deleted Dev org for task “My Task”.',
       );
-      expect(allActions[1].type).toEqual('SCRATCH_ORG_DELETE');
+      expect(allActions[1]).toEqual(orgAction);
     });
 
     test('adds error message if exists', () => {
@@ -398,8 +415,8 @@ describe('deleteOrg', () => {
 });
 
 describe('deleteFailed', () => {
-  describe(' adds error message', () => {
-    test('owned by current user', () => {
+  describe('owned by current user', () => {
+    test('adds error message', () => {
       const store = storeWithThunk({
         user: { id: 'user-id' },
         tasks: {
@@ -644,7 +661,7 @@ describe('orgRefreshed', () => {
     };
     const action = {
       type: 'SCRATCH_ORG_UPDATE',
-      payload: { id: 'org-id', task: 'task-id', owner: 'user-id' },
+      payload: org,
     };
     store.dispatch(
       actions.orgRefreshed({ model: org, originating_user_id: 'user-id' }),

@@ -258,16 +258,16 @@ export const getAction = (event: EventType) => {
   switch (event.type) {
     case 'USER_REPOS_REFRESH':
       return reposRefreshed();
+    case 'REPOSITORY_UPDATE':
+      return updateRepo(event.payload.model);
+    case 'REPOSITORY_UPDATE_ERROR':
+      return repoError(event.payload);
     case 'PROJECT_UPDATE':
       return updateProject(event.payload.model);
     case 'PROJECT_CREATE_PR':
       return createProjectPR(event.payload);
     case 'PROJECT_CREATE_PR_FAILED':
       return createProjectPRFailed(event.payload);
-    case 'REPOSITORY_UPDATE':
-      return updateRepo(event.payload.model);
-    case 'REPOSITORY_UPDATE_ERROR':
-      return repoError(event.payload);
     case 'TASK_UPDATE':
       return updateTask(event.payload.model);
     case 'TASK_CREATE_PR':

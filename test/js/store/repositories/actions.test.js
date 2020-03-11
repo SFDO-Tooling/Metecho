@@ -191,7 +191,7 @@ describe('repoError', () => {
     expect(allActions[1]).toEqual(action);
   });
 
-  test('bypasses and updates repo', () => {
+  test('does not add message if not owned by current user', () => {
     const store = storeWithThunk({ user: { id: 'user-id' } });
     const repo = {
       id: 'repo-id',
