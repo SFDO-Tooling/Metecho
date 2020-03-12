@@ -393,20 +393,32 @@ class Project(
 
     # end CreatePrMixin configuration
 
-    def update_status(self):
+    def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)
-        should_in_progress = self.status == PROJECT_STATUSES.Planned and any(
-            status == TASK_STATUSES["In progress"] for status in task_statuses
-        )
-        should_review = self.pr_is_open and all(
+        return any(status == TASK_STATUSES["In progress"] for status in task_statuses)
+
+    def should_update_review(self):
+        task_statuses = self.tasks.values_list("status", flat=True)
+        return self.pr_is_open and all(
             status == TASK_STATUSES.Completed for status in task_statuses
         )
-        should_merged = self.pr_is_merged
-        if should_in_progress:
+
+    def should_update_merged(self):
+        return self.pr_is_merged
+
+    def should_update_status(self):
+        return (
+            self.should_update_in_progress()
+            or self.should_update_review()
+            or self.should_update_merged()
+        )
+
+    def update_status(self):
+        if self.should_update_in_progress():
             self.status = PROJECT_STATUSES["In progress"]
-        elif should_review:
+        elif self.should_update_review():
             self.status = PROJECT_STATUSES.Review
-        elif should_merged:
+        elif self.should_update_merged():
             self.status = PROJECT_STATUSES.Merged
 
     def finalize_pr_closed(self, *, originating_user_id):
@@ -485,9 +497,11 @@ class Task(
         return self.name
 
     def save(self, *args, **kwargs):
-        self.project.update_status()
-        self.project.save()
-        return super().save(*args, **kwargs)
+        ret = super().save(*args, **kwargs)
+        # To update the project's status:
+        if self.project.should_update_status():
+            self.project.save()
+        return ret
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
