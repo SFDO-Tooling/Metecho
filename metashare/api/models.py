@@ -547,10 +547,10 @@ class Task(
         self.status = TASK_STATUSES.Completed
         self.has_unmerged_commits = False
         self.pr_is_open = False
+        self.project.has_unmerged_commits = True
+        # This will save the project, too:
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
-        self.project.has_unmerged_commits = True
-        self.project.save()
         self.project.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_closed(self, *, originating_user_id):
