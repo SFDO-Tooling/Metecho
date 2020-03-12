@@ -3,8 +3,7 @@ import i18n from 'i18next';
 import { Org } from '@/store/orgs/reducer';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
-
-import { TASK_STATUSES } from './constants';
+import { TASK_STATUSES } from '@/utils/constants';
 
 export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
@@ -69,7 +68,7 @@ export const getTaskCommits = (task: Task) => {
 };
 
 export const getPercentage = (complete: number, total: number) =>
-  Number(((complete / total) * 100).toFixed());
+  Math.floor((complete / total) * 100);
 
 export const getCompletedTasks = (tasks: Task[]) =>
   tasks.filter((task) => task.status === TASK_STATUSES.COMPLETED);

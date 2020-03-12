@@ -13,7 +13,7 @@ exports[`<Path /> renders completed list of steps 1`] = `
       >
         <ul
           aria-orientation="horizontal"
-          class="slds-path__nav slds-col slds-p-left_none slds-p-bottom_medium"
+          class="slds-path__nav"
           role="listbox"
         >
           <li
@@ -180,7 +180,7 @@ exports[`<Path /> renders list of steps 1`] = `
       >
         <ul
           aria-orientation="horizontal"
-          class="slds-path__nav slds-col slds-p-left_none slds-p-bottom_medium"
+          class="slds-path__nav"
           role="listbox"
         >
           <li

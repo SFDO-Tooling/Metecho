@@ -260,7 +260,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           </>
         }
       >
-        <ProjectStatusPath project={project} />
+        <ProjectStatusPath status={project.status} />
         {submitButton}
         {tasks ? (
           <>

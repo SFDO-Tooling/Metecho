@@ -1,15 +1,16 @@
 import React from 'react';
 
 import Path from '@/components/path';
-import { Project } from '@/store/projects/reducer';
-import { PROJECT_STATUSES } from '@/utils/constants';
+import { PROJECT_STATUSES, ProjectStatuses } from '@/utils/constants';
 import { getSteps } from '@/utils/helpers';
 
-const ProjectStatusPath = ({ project }: { project: Project }) => {
+interface Props {
+  status: ProjectStatuses;
+}
+const ProjectStatusPath = ({ status }: Props) => {
   let activeIdx = 0;
   let isCompleted = false;
   const steps = getSteps();
-  const status = project.status;
   switch (status) {
     case PROJECT_STATUSES.IN_PROGRESS:
       activeIdx = 1;
@@ -22,7 +23,11 @@ const ProjectStatusPath = ({ project }: { project: Project }) => {
       isCompleted = true;
       break;
   }
-  return <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />;
+  return (
+    <div className="slds-p-vertical_large">
+      <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />
+    </div>
+  );
 };
 
 export default ProjectStatusPath;

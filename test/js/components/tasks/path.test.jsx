@@ -1,12 +1,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import TaskStatusPath from '@/components/tasks/path';
 import ProjectStatusPath from '@/components/projects/path';
+import TaskStatusPath from '@/components/tasks/path';
 import {
+  PROJECT_STATUSES,
   REVIEW_STATUSES,
   TASK_STATUSES,
-  PROJECT_STATUSES,
 } from '@/utils/constants';
 
 const defaultTask = {
@@ -68,7 +68,7 @@ describe('<ProjectStatusPath />', () => {
     ['merged', { status: PROJECT_STATUSES.MERGED }],
   ])('renders steps from project status: %s', (name, opts) => {
     const project = { ...defaultProject, ...opts };
-    const { container } = render(<ProjectStatusPath project={project} />);
+    const { container } = render(<ProjectStatusPath status={project.status} />);
 
     expect(container).toMatchSnapshot();
   });
