@@ -22,6 +22,8 @@ SF_CLIENT_KEY = settings.SF_CLIENT_KEY
 SF_CLIENT_ID = settings.SF_CLIENT_ID
 SF_CLIENT_SECRET = settings.SF_CLIENT_SECRET
 
+DURATION_DAYS = 30
+
 # Deploy org settings metadata -- this should get moved into CumulusCI
 SETTINGS_XML_t = """<?xml version="1.0" encoding="UTF-8"?>
 <{settingsName} xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -85,7 +87,7 @@ def refresh_access_token(*, config, org_name, scratch_org):
             error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
 
         err = err.__class__(error_msg, *err.args[1:],)
-        scratch_org.remove_scratch_org(err)
+        scratch_org.remove_scratch_org(err, originating_user_id=None)
         raise err
 
 
@@ -142,7 +144,7 @@ def get_org_result(
         "ConnectedAppConsumerKey": SF_CLIENT_ID,
         "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
         "Description": f"{repo_owner}/{repo_name} {repo_branch}",
-        "DurationDays": 30,  # Override whatever is in scratch_org_config.days
+        "DurationDays": DURATION_DAYS,  # Override whatever is in scratch_org_config.days
         "Edition": scratch_org_definition["edition"],
         "Features": ";".join(scratch_org_definition.get("features", [])),
         "HasSampleData": scratch_org_definition.get("hasSampleData", False),
@@ -175,6 +177,7 @@ def mutate_scratch_org(*, scratch_org_config, org_result, email):
     scratch_org_config.config.update(scratch_org_config._scratch_info)
     scratch_org_config.config.update(
         {
+            "days": DURATION_DAYS,
             "date_created": datetime.now(),
             "created": True,
             "email": email,
