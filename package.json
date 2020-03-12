@@ -49,9 +49,9 @@
     "prod:stats": "webpack --config webpack.prod.js --json > webpack-stats.json"
   },
   "dependencies": {
-    "@salesforce-ux/design-system": "2.11.5",
+    "@salesforce-ux/design-system": "2.11.6",
     "@salesforce/design-system-react": "0.10.18",
-    "@sentry/browser": "^5.14.0",
+    "@sentry/browser": "^5.14.1",
     "classnames": "^2.2.6",
     "date-fns": "^2.10.0",
     "i18next": "^19.3.2",
@@ -116,7 +116,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.0",
-    "eslint-plugin-simple-import-sort": "^5.0.1",
+    "eslint-plugin-simple-import-sort": "^5.0.2",
     "fetch-mock": "^9.1.1",
     "file-loader": "^5.1.0",
     "html-webpack-plugin": "^3.2.0",
