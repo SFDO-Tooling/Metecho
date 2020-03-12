@@ -1,6 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
+import { addMinutes, isPast, parseISO } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -203,8 +204,22 @@ const TaskDetail = (props: RouteComponentProps) => {
     const captureButtonAction = () => {
       /* istanbul ignore else */
       if (devOrg) {
-        setFetchingChanges(true);
-        doRefetchOrg(devOrg);
+        let shouldCheck = true;
+        const checkAfterMinutes = window.GLOBALS.ORG_RECHECK_MINUTES;
+        if (
+          devOrg.last_checked_unsaved_changes_at !== null &&
+          typeof checkAfterMinutes === 'number'
+        ) {
+          const lastChecked = parseISO(devOrg.last_checked_unsaved_changes_at);
+          const shouldCheckAfter = addMinutes(lastChecked, checkAfterMinutes);
+          shouldCheck = isPast(shouldCheckAfter);
+        }
+        if (devOrg.has_unsaved_changes && !shouldCheck) {
+          setCaptureModalOpen(true);
+        } else {
+          setFetchingChanges(true);
+          doRefetchOrg(devOrg);
+        }
       }
     };
     let captureButtonText: JSX.Element = i18n.t('Capture Task Changes');
