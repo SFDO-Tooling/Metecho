@@ -1,20 +1,14 @@
-import i18n from 'i18next';
 import React from 'react';
 
 import Path from '@/components/path';
 import { Project } from '@/store/projects/reducer';
 import { PROJECT_STATUSES } from '@/utils/constants';
-
-const steps = [
-  i18n.t('Planned'),
-  i18n.t('In progress'),
-  i18n.t('Review'),
-  i18n.t('Merged'),
-];
+import { getSteps } from '@/utils/helpers';
 
 const ProjectStatusPath = ({ project }: { project: Project }) => {
   let activeIdx = 0;
   let isCompleted = false;
+  const steps = getSteps();
   const status = project.status;
   switch (status) {
     case PROJECT_STATUSES.IN_PROGRESS:
