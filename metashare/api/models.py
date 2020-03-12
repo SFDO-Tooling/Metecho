@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
@@ -602,6 +604,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     latest_commit_url = models.URLField(blank=True)
     latest_commit_at = models.DateTimeField(null=True, blank=True)
     url = models.URLField(null=True, blank=True)
+    last_checked_unsaved_changes_at = models.DateTimeField(null=True, blank=True)
     unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     latest_revision_numbers = JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
@@ -726,8 +729,21 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             else:
                 self.delete(originating_user_id=originating_user_id)
 
-    def queue_get_unsaved_changes(self, *, originating_user_id):
+    def queue_get_unsaved_changes(self, *, force_get=False, originating_user_id):
         from .jobs import get_unsaved_changes_job
+
+        minutes_since_last_check = (
+            self.last_checked_unsaved_changes_at is not None
+            and timezone.now() - self.last_checked_unsaved_changes_at
+        )
+        should_bail = (
+            not force_get
+            and minutes_since_last_check
+            and minutes_since_last_check
+            < timedelta(minutes=settings.ORG_RECHECK_MINUTES)
+        )
+        if should_bail:
+            return
 
         self.currently_refreshing_changes = True
         self.save()
@@ -738,6 +754,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def finalize_get_unsaved_changes(self, *, error=None, originating_user_id):
         self.currently_refreshing_changes = False
         if error is None:
+            self.last_checked_unsaved_changes_at = timezone.now()
             self.save()
             self.notify_changed(originating_user_id=originating_user_id)
         else:
