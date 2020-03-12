@@ -5,13 +5,14 @@ import Path from '@/components/path';
 import { Task } from '@/store/tasks/reducer';
 import { REVIEW_STATUSES, TASK_STATUSES } from '@/utils/constants';
 
+const steps = [
+  i18n.t('Planned'),
+  i18n.t('In progress'),
+  i18n.t('Review'),
+  i18n.t('Merged'),
+];
+
 const TaskStatusPath = ({ task }: { task: Task }) => {
-  const steps = [
-    i18n.t('Planned'),
-    i18n.t('In progress'),
-    i18n.t('Review'),
-    i18n.t('Merged'),
-  ];
   let activeIdx;
   let isCompleted = false;
   const status =
@@ -40,7 +41,6 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
       activeIdx = 3;
       break;
   }
-
   return <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />;
 };
 

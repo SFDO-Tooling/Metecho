@@ -3,39 +3,31 @@ import React from 'react';
 
 import Path from '@/components/path';
 import { Project } from '@/store/projects/reducer';
-import { Task } from '@/store/tasks/reducer';
-import { getCompletedTasks } from '@/utils/helpers';
+import { PROJECT_STATUSES } from '@/utils/constants';
 
-const ProjectStatusPath = ({
-  project,
-  tasks,
-}: {
-  project: Project;
-  tasks: Task[];
-}) => {
-  const steps = [
-    i18n.t('Planned'),
-    i18n.t('In progress'),
-    i18n.t('Review'),
-    i18n.t('Merged'),
-  ];
-  const inProgress = tasks?.find((task) => task.status === 'In progress');
-  const allTasksComplete = getCompletedTasks(tasks).length === tasks.length;
-  const isMerged = false; // Maybe a bool field on project for status
-  const isCompleted = false;
+const steps = [
+  i18n.t('Planned'),
+  i18n.t('In progress'),
+  i18n.t('Review'),
+  i18n.t('Merged'),
+];
+
+const ProjectStatusPath = ({ project }: { project: Project }) => {
   let activeIdx = 0;
-  if (tasks?.length > 0) {
-    if (inProgress) {
+  let isCompleted = false;
+  const status = project.status;
+  switch (status) {
+    case PROJECT_STATUSES.IN_PROGRESS:
       activeIdx = 1;
-    }
-    if (project.pr_is_open && allTasksComplete) {
+      break;
+    case PROJECT_STATUSES.REVIEW:
       activeIdx = 2;
-    }
-    if (isMerged) {
+      break;
+    case PROJECT_STATUSES.MERGED:
       activeIdx = 3;
-    }
+      isCompleted = true;
+      break;
   }
-
   return <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />;
 };
 
