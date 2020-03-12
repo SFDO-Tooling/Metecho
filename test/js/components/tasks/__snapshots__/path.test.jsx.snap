@@ -3,164 +3,168 @@
 exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
 <div>
   <div
-    class="slds-region_small"
+    class="slds-p-vertical_large"
   >
     <div
-      class="slds-path"
+      class="slds-region_small"
     >
       <div
-        class="slds-grid slds-path__track"
+        class="slds-path"
       >
-        <ul
-          aria-orientation="horizontal"
-          class="slds-path__nav"
-          role="listbox"
+        <div
+          class="slds-grid slds-path__track"
         >
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
+          <ul
+            aria-orientation="horizontal"
+            class="slds-path__nav"
+            role="listbox"
           >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-0"
-              role="option"
-              tabindex="-1"
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-0"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  Planned
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Planned
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-1"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-1"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  In progress
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                In progress
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-2"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-2"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  Review
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Review
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-current slds-is-active"
-            role="presentation"
-          >
-            <a
-              aria-selected="true"
-              class="slds-path__link"
-              id="path-3"
-              role="option"
-              tabindex="0"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-current slds-is-active"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="true"
+                class="slds-path__link"
+                id="path-3"
+                role="option"
+                tabindex="0"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Current Stage:
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Current Stage:
+                  Merged
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Merged
-              </span>
-            </a>
-          </li>
-        </ul>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -170,154 +174,158 @@ exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`] = `
 <div>
   <div
-    class="slds-region_small"
+    class="slds-p-vertical_large"
   >
     <div
-      class="slds-path"
+      class="slds-region_small"
     >
       <div
-        class="slds-grid slds-path__track"
+        class="slds-path"
       >
-        <ul
-          aria-orientation="horizontal"
-          class="slds-path__nav"
-          role="listbox"
+        <div
+          class="slds-grid slds-path__track"
         >
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
+          <ul
+            aria-orientation="horizontal"
+            class="slds-path__nav"
+            role="listbox"
           >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-0"
-              role="option"
-              tabindex="-1"
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-0"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  Planned
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Planned
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-current slds-is-active"
-            role="presentation"
-          >
-            <a
-              aria-selected="true"
-              class="slds-path__link"
-              id="path-1"
-              role="option"
-              tabindex="0"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-current slds-is-active"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="true"
+                class="slds-path__link"
+                id="path-1"
+                role="option"
+                tabindex="0"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Current Stage:
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Current Stage:
+                  In progress
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                In progress
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-incomplete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-2"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-incomplete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-2"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
-                  >
-                    <use />
-                  </svg>
-                  
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Review
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-incomplete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-3"
-              role="option"
-              tabindex="-1"
+                <span
+                  class="slds-path__title"
+                >
+                  Review
+                </span>
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-incomplete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-3"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
-                  >
-                    <use />
-                  </svg>
-                  
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Merged
-              </span>
-            </a>
-          </li>
-        </ul>
+                <span
+                  class="slds-path__title"
+                >
+                  Merged
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -327,154 +335,158 @@ exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`
 exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
 <div>
   <div
-    class="slds-region_small"
+    class="slds-p-vertical_large"
   >
     <div
-      class="slds-path"
+      class="slds-region_small"
     >
       <div
-        class="slds-grid slds-path__track"
+        class="slds-path"
       >
-        <ul
-          aria-orientation="horizontal"
-          class="slds-path__nav"
-          role="listbox"
+        <div
+          class="slds-grid slds-path__track"
         >
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
+          <ul
+            aria-orientation="horizontal"
+            class="slds-path__nav"
+            role="listbox"
           >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-0"
-              role="option"
-              tabindex="-1"
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-0"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  Planned
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Planned
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-current slds-is-active"
-            role="presentation"
-          >
-            <a
-              aria-selected="true"
-              class="slds-path__link"
-              id="path-1"
-              role="option"
-              tabindex="0"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-current slds-is-active"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="true"
+                class="slds-path__link"
+                id="path-1"
+                role="option"
+                tabindex="0"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Current Stage:
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Current Stage:
+                  In progress
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                In progress
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-incomplete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-2"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-incomplete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-2"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
-                  >
-                    <use />
-                  </svg>
-                  
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Review
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-incomplete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-3"
-              role="option"
-              tabindex="-1"
+                <span
+                  class="slds-path__title"
+                >
+                  Review
+                </span>
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-incomplete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-3"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
-                  >
-                    <use />
-                  </svg>
-                  
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Merged
-              </span>
-            </a>
-          </li>
-        </ul>
+                <span
+                  class="slds-path__title"
+                >
+                  Merged
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -484,164 +496,168 @@ exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
 <div>
   <div
-    class="slds-region_small"
+    class="slds-p-vertical_large"
   >
     <div
-      class="slds-path"
+      class="slds-region_small"
     >
       <div
-        class="slds-grid slds-path__track"
+        class="slds-path"
       >
-        <ul
-          aria-orientation="horizontal"
-          class="slds-path__nav"
-          role="listbox"
+        <div
+          class="slds-grid slds-path__track"
         >
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
+          <ul
+            aria-orientation="horizontal"
+            class="slds-path__nav"
+            role="listbox"
           >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-0"
-              role="option"
-              tabindex="-1"
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-0"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  Planned
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Planned
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-1"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-1"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  In progress
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                In progress
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-2"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-2"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  Review
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Review
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-current slds-is-active slds-is-complete slds-is-won"
-            role="presentation"
-          >
-            <a
-              aria-selected="true"
-              class="slds-path__link"
-              id="path-3"
-              role="option"
-              tabindex="0"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-current slds-is-active slds-is-won"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="true"
+                class="slds-path__link"
+                id="path-3"
+                role="option"
+                tabindex="0"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Current Stage:
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Current Stage:
+                  Merged
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Merged
-              </span>
-            </a>
-          </li>
-        </ul>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -651,149 +667,153 @@ exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
 <div>
   <div
-    class="slds-region_small"
+    class="slds-p-vertical_large"
   >
     <div
-      class="slds-path"
+      class="slds-region_small"
     >
       <div
-        class="slds-grid slds-path__track"
+        class="slds-path"
       >
-        <ul
-          aria-orientation="horizontal"
-          class="slds-path__nav"
-          role="listbox"
+        <div
+          class="slds-grid slds-path__track"
         >
-          <li
-            class="slds-path__item slds-is-current slds-is-active"
-            role="presentation"
+          <ul
+            aria-orientation="horizontal"
+            class="slds-path__nav"
+            role="listbox"
           >
-            <a
-              aria-selected="true"
-              class="slds-path__link"
-              id="path-0"
-              role="option"
-              tabindex="0"
+            <li
+              class="slds-path__item slds-is-current slds-is-active"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="true"
+                class="slds-path__link"
+                id="path-0"
+                role="option"
+                tabindex="0"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Current Stage:
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Current Stage:
+                  Planned
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Planned
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-incomplete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-1"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-incomplete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-1"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
-                  >
-                    <use />
-                  </svg>
-                  
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                In progress
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-incomplete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-2"
-              role="option"
-              tabindex="-1"
+                <span
+                  class="slds-path__title"
+                >
+                  In progress
+                </span>
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-incomplete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-2"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
-                  >
-                    <use />
-                  </svg>
-                  
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Review
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-incomplete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-3"
-              role="option"
-              tabindex="-1"
+                <span
+                  class="slds-path__title"
+                >
+                  Review
+                </span>
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-incomplete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-3"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
-                  >
-                    <use />
-                  </svg>
-                  
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Merged
-              </span>
-            </a>
-          </li>
-        </ul>
+                <span
+                  class="slds-path__title"
+                >
+                  Merged
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -803,159 +823,163 @@ exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: review 1`] = `
 <div>
   <div
-    class="slds-region_small"
+    class="slds-p-vertical_large"
   >
     <div
-      class="slds-path"
+      class="slds-region_small"
     >
       <div
-        class="slds-grid slds-path__track"
+        class="slds-path"
       >
-        <ul
-          aria-orientation="horizontal"
-          class="slds-path__nav"
-          role="listbox"
+        <div
+          class="slds-grid slds-path__track"
         >
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
+          <ul
+            aria-orientation="horizontal"
+            class="slds-path__nav"
+            role="listbox"
           >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-0"
-              role="option"
-              tabindex="-1"
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-0"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  Planned
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Planned
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-complete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-1"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-complete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-1"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Stage Complete
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Stage Complete
+                  In progress
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                In progress
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-current slds-is-active"
-            role="presentation"
-          >
-            <a
-              aria-selected="true"
-              class="slds-path__link"
-              id="path-2"
-              role="option"
-              tabindex="0"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-current slds-is-active"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="true"
+                class="slds-path__link"
+                id="path-2"
+                role="option"
+                tabindex="0"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
+                  <span
+                    class="slds-assistive-text"
                   >
-                    <use />
-                  </svg>
-                  
+                    Current Stage:
+                  </span>
                 </span>
                 <span
-                  class="slds-assistive-text"
+                  class="slds-path__title"
                 >
-                  Current Stage:
+                  Review
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Review
-              </span>
-            </a>
-          </li>
-          <li
-            class="slds-path__item slds-is-incomplete"
-            role="presentation"
-          >
-            <a
-              aria-selected="false"
-              class="slds-path__link"
-              id="path-3"
-              role="option"
-              tabindex="-1"
+              </a>
+            </li>
+            <li
+              class="slds-path__item slds-is-incomplete"
+              role="presentation"
             >
-              <span
-                class="slds-path__stage"
+              <a
+                aria-selected="false"
+                class="slds-path__link"
+                id="path-3"
+                role="option"
+                tabindex="-1"
               >
-                <span>
-                  <svg
-                    aria-hidden="true"
-                    class="slds-icon slds-icon_x-small slds-icon-text-default"
-                  >
-                    <use />
-                  </svg>
-                  
+                <span
+                  class="slds-path__stage"
+                >
+                  <span>
+                    <svg
+                      aria-hidden="true"
+                      class="slds-icon slds-icon_x-small slds-icon-text-default"
+                    >
+                      <use />
+                    </svg>
+                    
+                  </span>
                 </span>
-              </span>
-              <span
-                class="slds-path__title"
-              >
-                Merged
-              </span>
-            </a>
-          </li>
-        </ul>
+                <span
+                  class="slds-path__title"
+                >
+                  Merged
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

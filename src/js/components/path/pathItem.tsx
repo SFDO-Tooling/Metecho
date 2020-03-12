@@ -19,7 +19,7 @@ const PathItem = ({ steps, idx, activeIdx, isCompleted }: PathItemProps) => {
   if (activeIdx !== undefined) {
     isActive = idx === activeIdx;
     isWon = Boolean(isCompleted && idx === steps.length - 1);
-    isComplete = idx < activeIdx || (isActive && isWon);
+    isComplete = idx < activeIdx;
     isIncomplete = idx > activeIdx;
   }
 

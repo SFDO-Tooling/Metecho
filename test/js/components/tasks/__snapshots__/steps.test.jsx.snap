@@ -17,7 +17,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -42,7 +42,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -67,7 +67,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -188,7 +188,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -375,7 +375,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -400,7 +400,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -554,7 +554,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -579,7 +579,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -865,7 +865,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -890,7 +890,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -915,7 +915,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -940,7 +940,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -965,7 +965,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -990,7 +990,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1015,7 +1015,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1040,7 +1040,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1101,7 +1101,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1126,7 +1126,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1151,7 +1151,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1176,7 +1176,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1201,7 +1201,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1226,7 +1226,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1251,7 +1251,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1345,7 +1345,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1370,7 +1370,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1395,7 +1395,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1420,7 +1420,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1445,7 +1445,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1470,7 +1470,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1603,7 +1603,7 @@ exports[`<TaskStatusSteps /> renders steps: review org out-of-date 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1628,7 +1628,7 @@ exports[`<TaskStatusSteps /> renders steps: review org out-of-date 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1653,7 +1653,7 @@ exports[`<TaskStatusSteps /> renders steps: review org out-of-date 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1678,7 +1678,7 @@ exports[`<TaskStatusSteps /> renders steps: review org out-of-date 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1703,7 +1703,7 @@ exports[`<TaskStatusSteps /> renders steps: review org out-of-date 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1869,7 +1869,7 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1894,7 +1894,7 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1919,7 +1919,7 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1944,7 +1944,7 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1969,7 +1969,7 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -1994,7 +1994,7 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2019,7 +2019,7 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2113,7 +2113,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2138,7 +2138,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2202,7 +2202,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2227,7 +2227,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2252,7 +2252,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2277,7 +2277,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2302,7 +2302,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2357,7 +2357,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2382,7 +2382,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2407,7 +2407,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2432,7 +2432,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2457,7 +2457,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2617,7 +2617,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2642,7 +2642,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2667,7 +2667,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg
@@ -2692,7 +2692,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         class="slds-progress__item slds-is-completed"
       >
         <span
-          class="slds-progress__marker slds-progress__marker_icon slds-progress__marker_icon-success slds-m-left_x-large"
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
           title="Complete"
         >
           <svg

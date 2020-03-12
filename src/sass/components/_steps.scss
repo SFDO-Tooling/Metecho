@@ -1,19 +1,13 @@
-.ms-task-step {
-  display: flex;
-  align-items: center;
-  .ms-task-step-status {
-    height: 10px;
-    width: 10px;
-    background: #bbb;
-    border-radius: 50%;
-    display: inline-block;
-    &.is-next {
-      border: 2px solid $brand-accessible-active;
-      background: inherit;
-    }
-    &.is-done {
-      border: none;
-      background: $brand-primary-transparent-40;
+// vertical path bar overrides
+.slds-progress_vertical {
+  .slds-progress__item {
+    &:before,
+    &:after {
+      content: none;
     }
   }
+}
+
+.slds-progress__item.slds-is-active .slds-progress__marker {
+  border-color: $brand-primary-active;
 }

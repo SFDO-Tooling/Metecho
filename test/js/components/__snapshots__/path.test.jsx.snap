@@ -125,7 +125,7 @@ exports[`<Path /> renders completed list of steps 1`] = `
             </a>
           </li>
           <li
-            class="slds-path__item slds-is-current slds-is-active slds-is-complete slds-is-won"
+            class="slds-path__item slds-is-current slds-is-active slds-is-won"
             role="presentation"
           >
             <a
