@@ -11,8 +11,8 @@ describe('updateTask', () => {
 });
 
 describe('createTaskPR', () => {
-  test('adds success message', () => {
-    const store = storeWithThunk({});
+  test('adds success message when user is owner', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const task = {
       id: 'task-id',
       name: 'My Task',
@@ -22,7 +22,9 @@ describe('createTaskPR', () => {
       type: 'TASK_UPDATE',
       payload: task,
     };
-    store.dispatch(actions.createTaskPR(task));
+    store.dispatch(
+      actions.createTaskPR({ model: task, originating_user_id: 'user-id' }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -34,8 +36,30 @@ describe('createTaskPR', () => {
     expect(allActions[1]).toEqual(action);
   });
 
+  test('no success message when user is not owner', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
+    const task = {
+      id: 'task-id',
+      name: 'My Task',
+      pr_url: 'my-pr-url',
+    };
+    const action = {
+      type: 'TASK_UPDATE',
+      payload: task,
+    };
+    store.dispatch(
+      actions.createTaskPR({
+        model: task,
+        originating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions).toEqual([action]);
+  });
+
   test('adds success message [no pr url]', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const task = {
       id: 'task-id',
       name: 'My Task',
@@ -44,7 +68,9 @@ describe('createTaskPR', () => {
       type: 'TASK_UPDATE',
       payload: task,
     };
-    store.dispatch(actions.createTaskPR(task));
+    store.dispatch(
+      actions.createTaskPR({ model: task, originating_user_id: 'user-id' }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -58,8 +84,8 @@ describe('createTaskPR', () => {
 });
 
 describe('createTaskPRFailed', () => {
-  test('adds error message', () => {
-    const store = storeWithThunk({});
+  test('adds error message when user is owner', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const task = {
       id: 'task-id',
       name: 'My Task',
@@ -69,7 +95,11 @@ describe('createTaskPRFailed', () => {
       payload: task,
     };
     store.dispatch(
-      actions.createTaskPRFailed({ model: task, message: 'error msg' }),
+      actions.createTaskPRFailed({
+        model: task,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
     );
     const allActions = store.getActions();
 
@@ -81,11 +111,33 @@ describe('createTaskPRFailed', () => {
     expect(allActions[0].payload.variant).toEqual('error');
     expect(allActions[1]).toEqual(action);
   });
+
+  test('no error message when user is not owner', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
+    const task = {
+      id: 'task-id',
+      name: 'My Task',
+      pr_url: 'my-pr-url',
+    };
+    const action = {
+      type: 'TASK_CREATE_PR_FAILED',
+      payload: task,
+    };
+    store.dispatch(
+      actions.createTaskPRFailed({
+        model: task,
+        originating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions).toEqual([action]);
+  });
 });
 
 describe('submitReview', () => {
-  test('adds success message', () => {
-    const store = storeWithThunk({});
+  test('adds success message when user is owner', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const task = {
       id: 'task-id',
       name: 'My Task',
@@ -95,7 +147,9 @@ describe('submitReview', () => {
       type: 'TASK_UPDATE',
       payload: task,
     };
-    store.dispatch(actions.submitReview(task));
+    store.dispatch(
+      actions.submitReview({ model: task, originating_user_id: 'user-id' }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -107,8 +161,30 @@ describe('submitReview', () => {
     expect(allActions[1]).toEqual(action);
   });
 
+  test('no success message when user is not owner', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
+    const task = {
+      id: 'task-id',
+      name: 'My Task',
+      pr_url: 'my-pr-url',
+    };
+    const action = {
+      type: 'TASK_UPDATE',
+      payload: task,
+    };
+    store.dispatch(
+      actions.submitReview({
+        model: task,
+        originating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions).toEqual([action]);
+  });
+
   test('adds success message [no pr url]', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const task = {
       id: 'task-id',
       name: 'My Task',
@@ -117,7 +193,9 @@ describe('submitReview', () => {
       type: 'TASK_UPDATE',
       payload: task,
     };
-    store.dispatch(actions.submitReview(task));
+    store.dispatch(
+      actions.submitReview({ model: task, originating_user_id: 'user-id' }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -131,8 +209,8 @@ describe('submitReview', () => {
 });
 
 describe('submitReviewFailed', () => {
-  test('adds error message', () => {
-    const store = storeWithThunk({});
+  test('adds error message when user is owner', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const task = {
       id: 'task-id',
       name: 'My Task',
@@ -142,7 +220,11 @@ describe('submitReviewFailed', () => {
       payload: task,
     };
     store.dispatch(
-      actions.submitReviewFailed({ model: task, message: 'error msg' }),
+      actions.submitReviewFailed({
+        model: task,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
     );
     const allActions = store.getActions();
 
@@ -153,5 +235,27 @@ describe('submitReviewFailed', () => {
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
     expect(allActions[1]).toEqual(action);
+  });
+
+  test('no error message when user is not owner', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' } });
+    const task = {
+      id: 'task-id',
+      name: 'My Task',
+    };
+    const action = {
+      type: 'TASK_UPDATE',
+      payload: task,
+    };
+    store.dispatch(
+      actions.submitReviewFailed({
+        model: task,
+        message: 'error msg',
+        originating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions).toEqual([action]);
   });
 });
