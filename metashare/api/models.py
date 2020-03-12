@@ -746,7 +746,6 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             return
 
         self.currently_refreshing_changes = True
-        self.last_checked_unsaved_changes_at = timezone.now()
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -755,6 +754,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     def finalize_get_unsaved_changes(self, *, error=None, originating_user_id):
         self.currently_refreshing_changes = False
         if error is None:
+            self.last_checked_unsaved_changes_at = timezone.now()
             self.save()
             self.notify_changed(originating_user_id=originating_user_id)
         else:
