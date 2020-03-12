@@ -444,4 +444,42 @@ describe('<ProjectDetail/>', () => {
       expect(getByText('View Branch')).toBeVisible();
     });
   });
+  describe('Project status', () => {
+    test('in progress', () => {
+      const { debug, getByText, getByTitle } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            ...defaultState.tasks,
+            project1: [
+              {
+                ...defaultState.tasks.project1[0],
+                status: 'In progress',
+              },
+            ],
+          },
+        },
+      });
+      expect(getByText('In progress')).toBeVisible();
+    });
+
+    test('in review', () => {
+      const { debug, getByText, getByTitle } = setup({
+        initialState: {
+          ...defaultState,
+          tasks: {
+            ...defaultState.tasks,
+            project1: [
+              {
+                ...defaultState.tasks.project1[0],
+                status: 'In progress',
+                review_status: 'Approved',
+              },
+            ],
+          },
+        },
+      });
+      expect(getByText('Review')).toBeVisible();
+    });
+  });
 });
