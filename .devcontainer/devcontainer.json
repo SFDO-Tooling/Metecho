@@ -17,6 +17,7 @@
     "naumovs.color-highlight",
     "prettier.prettier-vscode",
     "stkb.rewrap",
+    // https://github.com/stylelint/vscode-stylelint/issues/57
     // "stylelint.vscode-stylelint",
     "syler.sass-indented",
     "tyriar.sort-lines",
