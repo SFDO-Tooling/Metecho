@@ -9,14 +9,17 @@ $color-background-path-complete: $color-background-path-incomplete-hover;
 $color-background-path-complete-hover: $color-gray-6;
 
 .slds-path__item {
-  min-width: 0;
+  min-width: 3rem;
+  transition: flex 200ms;
 
   &:hover {
-    min-width: auto;
+    flex-grow: 1.5;
   }
 }
 
 .slds-path__nav {
+  flex-grow: 1;
+
   .slds-is-active:not(.slds-is-won) {
     background: $color-background-path-active;
 
@@ -49,6 +52,7 @@ $color-background-path-complete-hover: $color-gray-6;
 
   .slds-is-complete:not(.slds-is-won) {
     background: $color-background-path-complete;
+    flex-grow: 0.5;
 
     &:before,
     &:after {
@@ -57,6 +61,7 @@ $color-background-path-complete-hover: $color-gray-6;
 
     &:hover {
       background: $color-background-path-complete-hover;
+      flex-grow: 1.5;
 
       &:before,
       &:after {
@@ -66,6 +71,12 @@ $color-background-path-complete-hover: $color-gray-6;
 
     .slds-path__link {
       color: $color-text-default;
+    }
+  }
+
+  .slds-is-won {
+    .slds-path__link {
+      color: $color-text-brand-primary;
     }
   }
 }
