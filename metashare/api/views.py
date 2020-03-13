@@ -3,12 +3,13 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ResponseError
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 
 from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
@@ -188,7 +189,14 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
 
 
-class ScratchOrgViewSet(viewsets.ModelViewSet):
+class ScratchOrgViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    # Omit UpdateModelMixin
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
     permission_classes = (IsAuthenticated,)
     serializer_class = ScratchOrgSerializer
     queryset = ScratchOrg.objects.all()
@@ -208,6 +216,15 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         instance.queue_delete(originating_user_id=str(self.request.user.id))
+
+    def destroy(self, request, *args, **kwargs):
+        scratch_org = self.get_object()
+        if not request.user == scratch_org.owner:
+            return Response(
+                {"error": _("Requesting user did not create scratch org.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from

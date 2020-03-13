@@ -254,6 +254,14 @@ class ReviewSerializer(serializers.Serializer):
     )
 
 
+# class UserSensitiveJSONField(serializers.JSONField):
+#     def to_representation(self, value):
+#         user = getattr(self.context.get("request"), "user", None)
+#         if user == self.parent.instance.owner:
+#             return super().to_representation(value)
+#         return super().to_representation({})
+
+
 class ScratchOrgSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     task = serializers.PrimaryKeyRelatedField(
@@ -265,6 +273,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     has_unsaved_changes = serializers.SerializerMethodField()
+    unsaved_changes = serializers.SerializerMethodField()
+    valid_target_directories = serializers.SerializerMethodField()
 
     class Meta:
         model = ScratchOrg
@@ -299,15 +309,25 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "latest_commit_at": {"read_only": True},
             "last_checked_unsaved_changes_at": {"read_only": True},
             "url": {"read_only": True},
-            "unsaved_changes": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
-            "valid_target_directories": {"read_only": True},
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:
         return bool(getattr(obj, "unsaved_changes", {}))
+
+    def get_unsaved_changes(self, obj) -> dict:
+        user = getattr(self.context.get("request"), "user", None)
+        if obj.owner == user:
+            return obj.unsaved_changes
+        return {}
+
+    def get_valid_target_directories(self, obj) -> dict:
+        user = getattr(self.context.get("request"), "user", None)
+        if obj.owner == user:
+            return obj.valid_target_directories
+        return {}
 
     def validate(self, data):
         if ScratchOrg.objects.filter(
