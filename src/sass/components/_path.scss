@@ -8,6 +8,14 @@ $color-background-path-active-hover: $color-border-path-current-hover;
 $color-background-path-complete: $color-background-path-incomplete-hover;
 $color-background-path-complete-hover: $color-gray-6;
 
+.slds-path__item {
+  min-width: 0;
+
+  &:hover {
+    min-width: auto;
+  }
+}
+
 .slds-path__nav {
   .slds-is-active {
     background: $color-background-path-active;
