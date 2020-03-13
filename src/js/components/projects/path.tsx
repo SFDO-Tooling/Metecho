@@ -7,6 +7,7 @@ import { getSteps } from '@/utils/helpers';
 interface Props {
   status: ProjectStatuses;
 }
+
 const ProjectStatusPath = ({ status }: Props) => {
   let activeIdx = 0;
   let isCompleted = false;
@@ -24,7 +25,7 @@ const ProjectStatusPath = ({ status }: Props) => {
       break;
   }
   return (
-    <div className="slds-p-vertical_large">
+    <div className="slds-p-bottom_x-large">
       <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />
     </div>
   );

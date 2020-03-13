@@ -131,11 +131,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const readyToSubmit = Boolean(
     project?.has_unmerged_commits && !project?.pr_is_open,
   );
-  // ProgressBar related:
-  const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
-  const tasksTotal = tasks?.length || 0;
-  const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
-  // Loading states:
+
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -169,6 +165,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  // Progress Bar:
+  const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
+  const tasksTotal = tasks?.length || 0;
+  const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
+
+  // "Submit Project for Review" button:
   let submitButton: React.ReactNode = null;
   if (readyToSubmit) {
     const submitButtonText = currentlySubmitting ? (

@@ -7,19 +7,24 @@ import { getPercentage } from '@/utils/helpers';
 interface Props {
   range: [number, number];
 }
+
 const ProjectProgress = ({ range }: Props) => {
   const [complete, total] = range;
   const value = getPercentage(complete, total);
   return (
     <div className="project-process">
-      <div className="slds-clearfix">
-        <span className="slds-float_right">
+      <div className="slds-clearfix slds-m-bottom_xx-small">
+        <strong className="slds-float_right">
           <Trans i18nKey="tasksComplete">
             {{ complete }} of {{ total }} Complete
           </Trans>
-        </span>
+        </strong>
       </div>
-      <ProgressBar value={value} />
+      <ProgressBar
+        value={value}
+        thickness="small"
+        color={complete === total ? 'success' : undefined}
+      />
     </div>
   );
 };

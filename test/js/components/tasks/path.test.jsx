@@ -1,13 +1,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import ProjectStatusPath from '@/components/projects/path';
 import TaskStatusPath from '@/components/tasks/path';
-import {
-  PROJECT_STATUSES,
-  REVIEW_STATUSES,
-  TASK_STATUSES,
-} from '@/utils/constants';
+import { REVIEW_STATUSES, TASK_STATUSES } from '@/utils/constants';
 
 const defaultTask = {
   id: 'task',
@@ -15,9 +10,6 @@ const defaultTask = {
   review_status: null,
   pr_is_open: false,
   status: TASK_STATUSES.PLANNED,
-};
-const defaultProject = {
-  status: PROJECT_STATUSES.PLANNED,
 };
 
 describe('<TaskStatusPath />', () => {
@@ -55,20 +47,6 @@ describe('<TaskStatusPath />', () => {
   ])('renders steps from task status: %s', (name, opts) => {
     const task = { ...defaultTask, ...opts };
     const { container } = render(<TaskStatusPath task={task} />);
-
-    expect(container).toMatchSnapshot();
-  });
-});
-
-describe('<ProjectStatusPath />', () => {
-  test.each([
-    ['planned', {}],
-    ['in progress', { status: PROJECT_STATUSES.IN_PROGRESS }],
-    ['review', { status: PROJECT_STATUSES.REVIEW }],
-    ['merged', { status: PROJECT_STATUSES.MERGED }],
-  ])('renders steps from project status: %s', (name, opts) => {
-    const project = { ...defaultProject, ...opts };
-    const { container } = render(<ProjectStatusPath status={project.status} />);
 
     expect(container).toMatchSnapshot();
   });
