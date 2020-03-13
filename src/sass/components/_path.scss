@@ -18,7 +18,7 @@ $color-background-path-complete-hover: $color-gray-6;
 }
 
 .slds-path__nav {
-  flex-grow: 1;
+  flex: auto;
 
   .slds-is-active:not(.slds-is-won) {
     background: $color-background-path-active;
