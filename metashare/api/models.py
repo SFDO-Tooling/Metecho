@@ -498,10 +498,11 @@ class Task(
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, originating_user_id=None, **kwargs):
         ret = super().save(*args, **kwargs)
         # To update the project's status:
         if self.project.should_update_status():
+            self.project.notify_changed(originating_user_id=originating_user_id)
             self.project.save()
         return ret
 
@@ -551,7 +552,7 @@ class Task(
         self.pr_is_open = False
         self.project.has_unmerged_commits = True
         # This will save the project, too:
-        self.save()
+        self.save(originating_user_id=originating_user_id)
         self.notify_changed(originating_user_id=originating_user_id)
         self.project.notify_changed(originating_user_id=originating_user_id)
 
@@ -568,13 +569,13 @@ class Task(
     def finalize_provision(self, *, originating_user_id):
         if self.status == TASK_STATUSES.Planned:
             self.status = TASK_STATUSES["In progress"]
-            self.save()
+            self.save(originating_user_id=originating_user_id)
             self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_commit_changes(self, *, originating_user_id):
         if self.status != TASK_STATUSES["In progress"]:
             self.status = TASK_STATUSES["In progress"]
-            self.save()
+            self.save(originating_user_id=originating_user_id)
             self.notify_changed(originating_user_id=originating_user_id)
 
     def add_commits(self, commits, sender):

@@ -133,7 +133,6 @@ class CreatePrMixin:
 
     def finalize_create_pr(self, *, error=None, originating_user_id):
         self.currently_creating_pr = False
-        self.pr_is_merged = False
         self.save()
         if error is None:
             self.notify_changed(

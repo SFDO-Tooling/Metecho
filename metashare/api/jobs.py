@@ -402,6 +402,7 @@ def create_pr(
         instance.pr_is_open = True
     except Exception as e:
         instance.refresh_from_db()
+        instance.pr_is_merged = False
         instance.finalize_create_pr(error=e, originating_user_id=originating_user_id)
         tb = traceback.format_exc()
         logger.error(tb)
