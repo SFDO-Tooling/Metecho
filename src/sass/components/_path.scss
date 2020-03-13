@@ -1,51 +1,13 @@
 // Path Overrides
 // ==============
 
-$color-background-path-current: $brand-background-primary;
-$color-border-path-current: $brand-background-primary;
 $color-text-path-current: $color-text-default;
 $color-background-path-active: $brand-background-primary;
-$color-border-path-activ: $brand-background-primary;
-$color-text-path-active: $color-text-default;
-$color-background-path-active-hover: $color-background-alt-inverse;
+$color-background-path-active-hover: $color-border-path-current-hover;
 $color-background-path-complete: $color-background-path-incomplete-hover;
 $color-background-path-complete-hover: $color-gray-6;
 
 .slds-path__nav {
-  .slds-is-current {
-    background-color: $color-background-path-current;
-
-    &:before,
-    &:after {
-      background-color: $color-background-path-current;
-      background-image: linear-gradient(
-          90deg,
-          $color-border-path-current,
-          $color-border-path-current 0.125rem,
-          transparent 0.125rem
-        ),
-        linear-gradient(
-          90deg,
-          $color-border-path-current,
-          $color-border-path-current 0.125rem,
-          transparent 0.125rem
-        ),
-        linear-gradient(
-          $color-border-path-current,
-          $color-border-path-current 0.125rem,
-          transparent 0.125rem
-        );
-    }
-
-    &:first-child {
-      border-color: $color-border-path-current;
-    }
-
-    .slds-path__link {
-      color: $color-text-path-current;
-    }
-  }
-
   .slds-is-active {
     background: $color-background-path-active;
 
@@ -61,16 +23,19 @@ $color-background-path-complete-hover: $color-gray-6;
       }
 
       &:hover {
-        background: $color-background-path-active-hover;
-
         &:before,
         &:after {
           background: $color-background-path-active-hover;
         }
       }
     }
+
+    .slds-path__link {
+      color: $color-text-path-current;
+    }
   }
 
+  // All but the last completed items are gray
   .slds-is-complete {
     background: $color-background-path-complete;
 
@@ -79,16 +44,30 @@ $color-background-path-complete-hover: $color-gray-6;
       background: $color-background-path-complete;
     }
 
-    .slds-path__link {
-      color: $color-text-default;
-    }
-
     &:hover {
       background: $color-background-path-complete-hover;
 
       &:before,
       &:after {
         background: $color-background-path-complete-hover;
+      }
+    }
+
+    .slds-path__link {
+      color: $color-text-default;
+    }
+
+    // Keep the final "Merged" path item green
+    &:last-child {
+      background: $color-background-success-dark;
+
+      &:before,
+      &:after {
+        background: $color-background-success-dark;
+      }
+
+      .slds-path__link {
+        color: white;
       }
     }
   }
