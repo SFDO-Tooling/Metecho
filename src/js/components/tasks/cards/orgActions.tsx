@@ -109,9 +109,8 @@ const OrgActions = ({
           >
             <Button
               label={i18n.t('Submit Review')}
-              variant="outline-brand"
+              variant="neutral"
               className="slds-m-right_x-small"
-              disabled
             />
           </Tooltip>
         );

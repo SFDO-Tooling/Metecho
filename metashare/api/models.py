@@ -397,7 +397,9 @@ class Project(
 
     def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)
-        return any(status == TASK_STATUSES["In progress"] for status in task_statuses)
+        return task_statuses and not all(
+            status == TASK_STATUSES.Planned for status in task_statuses
+        )
 
     def should_update_review(self):
         task_statuses = self.tasks.values_list("status", flat=True)
@@ -416,12 +418,12 @@ class Project(
         )
 
     def update_status(self):
-        if self.should_update_in_progress():
-            self.status = PROJECT_STATUSES["In progress"]
+        if self.should_update_merged():
+            self.status = PROJECT_STATUSES.Merged
         elif self.should_update_review():
             self.status = PROJECT_STATUSES.Review
-        elif self.should_update_merged():
-            self.status = PROJECT_STATUSES.Merged
+        elif self.should_update_in_progress():
+            self.status = PROJECT_STATUSES["In progress"]
 
     def finalize_pr_closed(self, *, originating_user_id):
         self.pr_is_open = False
@@ -676,7 +678,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         ret = super().save(*args, **kwargs)
 
         if is_new:
-            self.queue_provision(originating_user_id=None)
+            self.queue_provision(originating_user_id=str(self.owner.id))
 
         return ret
 

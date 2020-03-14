@@ -278,15 +278,19 @@ const ProjectDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             <TaskForm project={project} startOpen={!tasks.length} />
-            <ProjectProgress range={projectProgress} />
-            <TaskTable
-              repositorySlug={repository.slug}
-              projectSlug={project.slug}
-              tasks={tasks}
-              projectUsers={project.github_users}
-              openAssignProjectUsersModal={openAssignUsersModal}
-              assignUserAction={assignUser}
-            />
+            {tasks.length ? (
+              <>
+                <ProjectProgress range={projectProgress} />
+                <TaskTable
+                  repositorySlug={repository.slug}
+                  projectSlug={project.slug}
+                  tasks={tasks}
+                  projectUsers={project.github_users}
+                  openAssignProjectUsersModal={openAssignUsersModal}
+                  assignUserAction={assignUser}
+                />
+              </>
+            ) : null}
           </>
         ) : (
           // Fetching tasks from API
