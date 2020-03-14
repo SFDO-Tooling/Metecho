@@ -37,7 +37,7 @@ $color-background-path-complete-hover: $color-gray-6;
       }
 
       .slds-path__link {
-        color: white;
+        color: $color-text-brand-primary;
       }
     }
 
@@ -45,7 +45,7 @@ $color-background-path-complete-hover: $color-gray-6;
       color: $color-text-path-current;
 
       &:hover {
-        color: white;
+        color: $color-text-brand-primary;
       }
     }
   }
