@@ -87,6 +87,7 @@ def refresh_access_token(*, config, org_name, scratch_org):
             error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
 
         err = err.__class__(error_msg, *err.args[1:],)
+        # XXX: Should this have an actual originating_user_id?
         scratch_org.remove_scratch_org(err, originating_user_id=None)
         raise err
 

@@ -585,8 +585,7 @@ class Task(
         ] + self.commits
         self.update_review_valid()
         self.save()
-        # This comes from the GitHub hook, and so should pertain to
-        # everyone:
+        # This comes from the GitHub hook, and so has no originating user:
         self.notify_changed(originating_user_id=None)
 
     def add_ms_git_sha(self, sha):
