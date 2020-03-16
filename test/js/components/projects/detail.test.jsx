@@ -88,6 +88,8 @@ const defaultState = {
         slug: 'task-1',
         project: 'project1',
         description: 'Task Description',
+        review_valid: true,
+        review_status: 'Approved',
         status: 'Completed',
       },
       {

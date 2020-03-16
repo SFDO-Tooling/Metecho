@@ -79,10 +79,10 @@ class User(HashIdMixin, AbstractUser):
                         for repo in repos
                     ]
                 )
-            self.notify_repositories_updated()
         finally:
             self.currently_fetching_repos = False
             self.save()
+            self.notify_repositories_updated()
 
     def notify_repositories_updated(self):
         message = {"type": "USER_REPOS_REFRESH"}

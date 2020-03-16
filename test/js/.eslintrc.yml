@@ -3,15 +3,17 @@
 parserOptions:
   sourceType: module
   ecmaFeatures:
-    impliedStrict: true
     jsx: true
 env:
   browser: true
-  commonjs: true
   jest: true
   node: false
 plugins:
   - simple-import-sort
+  - jest
+extends:
+  - plugin:jest/recommended
+  - plugin:jest/style
 rules:
   # Import
   simple-import-sort/sort: 1

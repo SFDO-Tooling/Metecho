@@ -43,7 +43,7 @@ export interface Task {
   currently_submitting_review: boolean;
   review_submitted_at: string | null;
   review_valid: boolean;
-  review_status: ReviewStatuses;
+  review_status: ReviewStatuses | null;
   review_sha: string | null;
 }
 
