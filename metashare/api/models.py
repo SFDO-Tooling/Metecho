@@ -403,7 +403,7 @@ class Project(
 
     def should_update_review(self):
         task_statuses = self.tasks.values_list("status", flat=True)
-        return self.pr_is_open and all(
+        return task_statuses and all(
             status == TASK_STATUSES.Completed for status in task_statuses
         )
 

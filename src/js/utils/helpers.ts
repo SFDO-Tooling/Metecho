@@ -68,7 +68,7 @@ export const getTaskCommits = (task: Task) => {
 };
 
 export const getPercentage = (complete: number, total: number) =>
-  Math.floor((complete / total) * 100);
+  Math.floor((complete / total) * 100) || 0;
 
 export const getCompletedTasks = (tasks: Task[]) =>
   tasks.filter((task) => task.status === TASK_STATUSES.COMPLETED);

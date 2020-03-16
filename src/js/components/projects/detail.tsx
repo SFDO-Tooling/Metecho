@@ -30,7 +30,12 @@ import { updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
-import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
+import {
+  OBJECT_TYPES,
+  ORG_TYPES,
+  OrgTypes,
+  PROJECT_STATUSES,
+} from '@/utils/constants';
 import { getBranchLink, getCompletedTasks } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
@@ -129,7 +134,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
   };
   const currentlySubmitting = Boolean(project?.currently_creating_pr);
   const readyToSubmit = Boolean(
-    project?.has_unmerged_commits && !project?.pr_is_open,
+    project?.has_unmerged_commits &&
+      !project?.pr_is_open &&
+      project?.status !== PROJECT_STATUSES.MERGED,
   );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -262,12 +269,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
           </>
         }
       >
-        <ProjectStatusPath status={project.status} />
+        <ProjectStatusPath
+          status={project.status}
+          prIsOpen={project.pr_is_open}
+        />
         {submitButton}
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {tasks.length ? (
+              {tasks.length || project.status === PROJECT_STATUSES.MERGED ? (
                 <>
                   {i18n.t('Tasks for')} {project.name}
                 </>
@@ -277,7 +287,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 </>
               )}
             </h2>
-            <TaskForm project={project} startOpen={!tasks.length} />
+            {project.status !== PROJECT_STATUSES.MERGED && (
+              <TaskForm project={project} startOpen={!tasks.length} />
+            )}
             {tasks.length ? (
               <>
                 <ProjectProgress range={projectProgress} />

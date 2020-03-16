@@ -6,9 +6,10 @@ import { getSteps } from '@/utils/helpers';
 
 interface Props {
   status: ProjectStatuses;
+  prIsOpen: boolean;
 }
 
-const ProjectStatusPath = ({ status }: Props) => {
+const ProjectStatusPath = ({ status, prIsOpen }: Props) => {
   let activeIdx = 0;
   let isCompleted = false;
   const steps = getSteps();
@@ -17,7 +18,11 @@ const ProjectStatusPath = ({ status }: Props) => {
       activeIdx = 1;
       break;
     case PROJECT_STATUSES.REVIEW:
-      activeIdx = 2;
+      if (prIsOpen) {
+        activeIdx = 3;
+      } else {
+        activeIdx = 2;
+      }
       break;
     case PROJECT_STATUSES.MERGED:
       activeIdx = 3;

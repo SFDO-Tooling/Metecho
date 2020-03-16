@@ -10,7 +10,7 @@ interface Props {
 
 const ProjectProgress = ({ range }: Props) => {
   const [complete, total] = range;
-  const value = complete > 0 ? getPercentage(complete, total) : 0;
+  const value = getPercentage(complete, total);
   return (
     <div className="project-process">
       <div className="slds-clearfix slds-m-bottom_xx-small">
@@ -23,7 +23,7 @@ const ProjectProgress = ({ range }: Props) => {
       <ProgressBar
         value={value}
         thickness="small"
-        color={complete > 0 && complete === total ? 'success' : undefined}
+        color={value === 100 ? 'success' : undefined}
       />
     </div>
   );

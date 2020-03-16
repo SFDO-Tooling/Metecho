@@ -33,13 +33,15 @@ Retrieve
           "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/master...feature/test-project",
           "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
           "pr_is_open": true,
+          "pr_is_merged": false,
           "github_users": [
             {
               "id": "12345",
               "login": "username",
               "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
             }
-          ]
+          ],
+          "status": "In progress"
         }
         ...
       ]
