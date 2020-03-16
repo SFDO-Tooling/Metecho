@@ -38,6 +38,8 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
       label: `${i18n.t('Assign a developer')}`,
       visible: true,
       active: !hasDev,
+      // Even if no dev is currently assigned,
+      // consider this complete if there are commits and no rejected review
       complete: hasDev || hasValidCommits,
       assignee: null,
     },
@@ -45,18 +47,27 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
       label: `${i18n.t('Create a Scratch Org for development')}`,
       visible: true,
       active: hasDev && !hasDevOrg,
+      // Even if no dev is currently assigned and there's no Dev Org,
+      // consider this complete if there are commits and no rejected review
       complete: (hasDev && hasDevOrg) || hasValidCommits,
       assignee: task.assigned_dev,
     },
     {
       label: `${i18n.t('Make changes in Dev Org and capture in MetaShare')}`,
       visible: true,
+      // Active if we have an assigned Dev, a Dev Org, and any of the following:
+      //   - The task has no commits yet
+      //   - The Dev Org has unsaved changes
+      //   - Changes have been requested via review
       active:
         hasDev &&
         hasDevOrg &&
         (!task.has_unmerged_commits ||
           devOrg?.has_unsaved_changes ||
           hasReviewRejected),
+      // Complete if we have commits (without rejected review) and either:
+      //   - The Dev Org has no unsaved changes
+      //   - Review has been approved
       complete:
         hasValidCommits && (!devOrg?.has_unsaved_changes || hasReviewApproved),
       assignee: task.assigned_dev,
@@ -101,6 +112,8 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
     {
       label: `${i18n.t('Submit a review')}`,
       visible: true,
+      // Complete if Task PR is still open, a up-to-date Review Org exists,
+      // and there isn't already a valid review.
       active:
         task.pr_is_open &&
         hasReviewOrg &&
