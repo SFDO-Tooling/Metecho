@@ -12,11 +12,17 @@ describe('<ProjectStatusPath />', () => {
   test.each([
     ['planned', {}],
     ['in progress', { status: PROJECT_STATUSES.IN_PROGRESS }],
-    ['review', { status: PROJECT_STATUSES.REVIEW }],
+    ['all tasks complete', { status: PROJECT_STATUSES.REVIEW }],
+    ['pr opened', { status: PROJECT_STATUSES.REVIEW, pr_is_open: true }],
     ['merged', { status: PROJECT_STATUSES.MERGED }],
   ])('renders steps from project status: %s', (name, opts) => {
     const project = { ...defaultProject, ...opts };
-    const { container } = render(<ProjectStatusPath status={project.status} />);
+    const { container } = render(
+      <ProjectStatusPath
+        status={project.status}
+        prIsOpen={project.pr_is_open}
+      />,
+    );
 
     expect(container).toMatchSnapshot();
   });
