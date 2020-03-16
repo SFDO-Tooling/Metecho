@@ -38,7 +38,10 @@ class TestRefreshAccessToken:
             OrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
             refresh_access_token(
-                config=MagicMock(), org_name=MagicMock(), scratch_org=MagicMock()
+                config=MagicMock(),
+                org_name=MagicMock(),
+                scratch_org=MagicMock(),
+                originating_user_id=None,
             )
 
             assert OrgConfig.called
@@ -58,7 +61,10 @@ class TestRefreshAccessToken:
             scratch_org = MagicMock()
             with pytest.raises(HTTPError, match=".*job ID.*"):
                 refresh_access_token(
-                    config=MagicMock(), org_name=MagicMock(), scratch_org=scratch_org
+                    config=MagicMock(),
+                    org_name=MagicMock(),
+                    scratch_org=scratch_org,
+                    originating_user_id=None,
                 )
 
             assert scratch_org.remove_scratch_org.called
@@ -74,7 +80,10 @@ class TestRefreshAccessToken:
             scratch_org = MagicMock()
             with pytest.raises(HTTPError, match=".*org still exists*"):
                 refresh_access_token(
-                    config=MagicMock(), org_name=MagicMock(), scratch_org=scratch_org
+                    config=MagicMock(),
+                    org_name=MagicMock(),
+                    scratch_org=scratch_org,
+                    originating_user_id=None,
                 )
 
             assert scratch_org.remove_scratch_org.called
@@ -160,6 +169,7 @@ class TestDeployOrgSettings:
                 org_name=MagicMock(),
                 scratch_org_config=MagicMock(),
                 scratch_org=MagicMock(),
+                originating_user_id=None,
             )
             assert DeployOrgSettings.called
 

@@ -76,11 +76,14 @@ def get_valid_target_directories(user, scratch_org, repo_root):
 
 
 def run_retrieve_task(
-    user, scratch_org, project_path, desired_changes, target_directory
+    user, scratch_org, project_path, desired_changes, target_directory,
 ):
     repo_id = scratch_org.task.project.repository.get_repo_id(user)
     org_config = refresh_access_token(
-        config=scratch_org.config, org_name="dev", scratch_org=scratch_org
+        config=scratch_org.config,
+        org_name="dev",
+        scratch_org=scratch_org,
+        originating_user_id=user.id,
     )
     repository = get_repo_info(user, repo_id=repo_id)
     branch = repository.default_branch
@@ -152,10 +155,13 @@ def commit_changes_to_github(
         )
 
 
-def get_salesforce_connection(*, config, scratch_org, base_url=""):
+def get_salesforce_connection(*, config, scratch_org, originating_user_id, base_url=""):
     org_name = "dev"
     org_config = refresh_access_token(
-        config=config, org_name=org_name, scratch_org=scratch_org
+        config=config,
+        org_name=org_name,
+        scratch_org=scratch_org,
+        originating_user_id=originating_user_id,
     )
 
     conn = simple_salesforce.Salesforce(
@@ -171,9 +177,12 @@ def get_salesforce_connection(*, config, scratch_org, base_url=""):
     return conn
 
 
-def get_latest_revision_numbers(scratch_org):
+def get_latest_revision_numbers(scratch_org, *, originating_user_id):
     conn = get_salesforce_connection(
-        config=scratch_org.config, scratch_org=scratch_org, base_url="tooling/"
+        config=scratch_org.config,
+        scratch_org=scratch_org,
+        base_url="tooling/",
+        originating_user_id=originating_user_id,
     )
 
     # Store the results here on the org, and if any of these are > number than earlier

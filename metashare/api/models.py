@@ -397,8 +397,8 @@ class Project(
 
     def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)
-        return task_statuses and not all(
-            status == TASK_STATUSES.Planned for status in task_statuses
+        return task_statuses and any(
+            status != TASK_STATUSES.Planned for status in task_statuses
         )
 
     def should_update_review(self):
@@ -500,10 +500,10 @@ class Task(
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, force_project_save=True, **kwargs):
         ret = super().save(*args, **kwargs)
         # To update the project's status:
-        if self.project.should_update_status():
+        if force_project_save or self.project.should_update_status():
             self.project.save()
             self.project.notify_changed(originating_user_id=None)
         return ret
@@ -554,7 +554,7 @@ class Task(
         self.pr_is_open = False
         self.project.has_unmerged_commits = True
         # This will save the project, too:
-        self.save()
+        self.save(force_project_save=True)
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_closed(self, *, originating_user_id):

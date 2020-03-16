@@ -114,6 +114,10 @@ class TestProject:
             assert not project.has_unmerged_commits
             assert async_to_sync.called
 
+    def test_should_update_status(self, project_factory):
+        project = project_factory()
+        assert not project.should_update_status()
+
     def test_queue_create_pr(self, project_factory, user_factory):
         with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
             project = project_factory()

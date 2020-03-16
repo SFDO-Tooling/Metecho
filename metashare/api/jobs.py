@@ -180,7 +180,9 @@ def _create_org_and_run_flow(
     # function is called in a context that will eventually call a
     # finalize_* method, which will save the model.
     scratch_org.last_modified_at = now()
-    scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
+    scratch_org.latest_revision_numbers = get_latest_revision_numbers(
+        scratch_org, originating_user_id=user.id
+    )
 
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT

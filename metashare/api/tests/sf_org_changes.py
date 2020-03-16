@@ -151,7 +151,9 @@ def test_get_latest_revision_numbers():
 
         scratch_org = MagicMock()
 
-        get_latest_revision_numbers(scratch_org=scratch_org)
+        get_latest_revision_numbers(
+            scratch_org=scratch_org, originating_user_id=None,
+        )
 
         assert conn.query_all.called
 
