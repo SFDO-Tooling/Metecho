@@ -139,6 +139,7 @@ def test_create_org_and_run_flow():
             repo_id=123,
             repo_branch=MagicMock(),
             project_path="",
+            originating_user_id=None,
         )
 
         assert create_org.called

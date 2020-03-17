@@ -2,7 +2,7 @@ import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
 import { ProjectAction } from '@/store/projects/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { GitHubUser } from '@/store/user/reducer';
-import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes, ProjectStatuses } from '@/utils/constants';
 
 export interface Project {
   id: string;
@@ -15,10 +15,13 @@ export interface Project {
   branch_diff_url: string | null;
   pr_url: string | null;
   pr_is_open: boolean;
+  pr_is_merged: boolean;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
   github_users: GitHubUser[];
+  status: ProjectStatuses;
 }
+
 export interface ProjectsByRepositoryState {
   projects: Project[];
   next: string | null;

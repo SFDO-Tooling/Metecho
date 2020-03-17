@@ -11,6 +11,8 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import EditModal from '@/components/projects/edit';
+import ProjectStatusPath from '@/components/projects/path';
+import ProjectProgress from '@/components/projects/progress';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
@@ -31,8 +33,13 @@ import { updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
-import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
-import { getBranchLink } from '@/utils/helpers';
+import {
+  OBJECT_TYPES,
+  ORG_TYPES,
+  OrgTypes,
+  PROJECT_STATUSES,
+} from '@/utils/constants';
+import { getBranchLink, getCompletedTasks } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -130,12 +137,14 @@ const ProjectDetail = (props: RouteComponentProps) => {
   };
   const currentlySubmitting = Boolean(project?.currently_creating_pr);
   const readyToSubmit = Boolean(
-    project?.has_unmerged_commits && !project?.pr_is_open,
+    project?.has_unmerged_commits &&
+      !project?.pr_is_open &&
+      project?.status !== PROJECT_STATUSES.MERGED,
   );
   // "edit modal related:
   const [editModalOpen, setEditModalOpen] = useState(false);
   const openEditModal = () => {
-    setEditModalOpen(!editModalOpen);
+    setEditModalOpen(true);
   };
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -170,6 +179,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  // Progress Bar:
+  const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
+  const tasksTotal = tasks?.length || 0;
+  const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
+
+  // "Submit Project for Review" button:
   let submitButton: React.ReactNode = null;
   if (readyToSubmit) {
     const submitButtonText = currentlySubmitting ? (
@@ -278,11 +293,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
           </>
         }
       >
+        <ProjectStatusPath
+          status={project.status}
+          prIsOpen={project.pr_is_open}
+        />
         {submitButton}
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {tasks.length ? (
+              {tasks.length || project.status === PROJECT_STATUSES.MERGED ? (
                 <>
                   {i18n.t('Tasks for')} {project.name}
                 </>
@@ -292,15 +311,22 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 </>
               )}
             </h2>
-            <TaskForm project={project} startOpen={!tasks.length} />
-            <TaskTable
-              repositorySlug={repository.slug}
-              projectSlug={project.slug}
-              tasks={tasks}
-              projectUsers={project.github_users}
-              openAssignProjectUsersModal={openAssignUsersModal}
-              assignUserAction={assignUser}
-            />
+            {project.status !== PROJECT_STATUSES.MERGED && (
+              <TaskForm project={project} startOpen={!tasks.length} />
+            )}
+            {tasks.length ? (
+              <>
+                <ProjectProgress range={projectProgress} />
+                <TaskTable
+                  repositorySlug={repository.slug}
+                  projectSlug={project.slug}
+                  tasks={tasks}
+                  projectUsers={project.github_users}
+                  openAssignProjectUsersModal={openAssignUsersModal}
+                  assignUserAction={assignUser}
+                />
+              </>
+            ) : null}
           </>
         ) : (
           // Fetching tasks from API
@@ -319,7 +345,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         <EditModal
           project={project}
           isOpen={editModalOpen}
-          toggleModal={openEditModal}
+          toggleModal={setEditModalOpen}
         />
       </DetailPageLayout>
     </DocumentTitle>
