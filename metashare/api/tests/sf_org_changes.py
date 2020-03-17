@@ -35,7 +35,7 @@ class TestRunRetrieveTask:
             )
 
             desired_changes = {"name": ["member"]}
-            run_retrieve_task(user, scratch_org, ".", desired_changes, "src")
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "src", None)
 
             assert retrieve_components.called
 
@@ -58,7 +58,7 @@ class TestRunRetrieveTask:
             )
 
             desired_changes = {"name": ["member"]}
-            run_retrieve_task(user, scratch_org, ".", desired_changes, "src")
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "src", None)
 
             assert retrieve_components.called
 
@@ -81,7 +81,7 @@ class TestRunRetrieveTask:
             )
 
             desired_changes = {"name": ["member"]}
-            run_retrieve_task(user, scratch_org, ".", desired_changes, "source")
+            run_retrieve_task(user, scratch_org, ".", desired_changes, "source", None)
 
             assert retrieve_components.called
 
@@ -110,6 +110,7 @@ def test_commit_changes_to_github(user_factory, scratch_org_factory):
             desired_changes=desired_changes,
             commit_message="test message",
             target_directory="src",
+            originating_user_id=None,
         )
 
         assert CommitDir.called

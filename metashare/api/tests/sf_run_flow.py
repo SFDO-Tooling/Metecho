@@ -195,6 +195,7 @@ def test_create_org_and_run_flow():
             user=MagicMock(),
             project_path=MagicMock(),
             scratch_org=MagicMock(),
+            originating_user_id=None,
         )
         run_flow(
             cci=MagicMock(),

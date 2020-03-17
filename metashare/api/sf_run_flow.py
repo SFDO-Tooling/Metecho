@@ -233,6 +233,7 @@ def create_org(
     user,
     project_path,
     scratch_org,
+    originating_user_id,
     sf_username=None,
 ):
     """Create a new scratch org"""
@@ -272,7 +273,7 @@ def create_org(
         org_name=org_name,
         scratch_org_config=scratch_org_config,
         scratch_org=scratch_org,
-        originating_user_id=user.id,
+        originating_user_id=originating_user_id,
     )
 
     return (scratch_org_config, cci, org_config)
