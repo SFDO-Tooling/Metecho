@@ -14,7 +14,12 @@ import {
 } from '@/components/user/githubUser';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
-import { ORG_TYPES, OrgTypes, TASK_STATUSES } from '@/utils/constants';
+import {
+  ORG_TYPES,
+  OrgTypes,
+  REVIEW_STATUSES,
+  TASK_STATUSES,
+} from '@/utils/constants';
 import routes from '@/utils/routes';
 
 type AssignUserAction = ({
@@ -66,8 +71,12 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   if (!item) {
     return null;
   }
+  const status =
+    item.review_valid && item.status !== TASK_STATUSES.COMPLETED
+      ? item.review_status
+      : item.status;
   let displayStatus, icon;
-  switch (item.status) {
+  switch (status) {
     case TASK_STATUSES.PLANNED:
       displayStatus = i18n.t('Planned');
       icon = <ProgressRing value={0} />;
@@ -80,16 +89,26 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
       displayStatus = i18n.t('Complete');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
       break;
+    case REVIEW_STATUSES.CHANGES_REQUESTED:
+      displayStatus = i18n.t('Changes Requested');
+      icon = (
+        <ProgressRing value={60} flowDirection="fill" theme="warning" hasIcon />
+      );
+      break;
+    case REVIEW_STATUSES.APPROVED:
+      displayStatus = i18n.t('Approved');
+      icon = <ProgressRing value={80} flowDirection="fill" />;
+      break;
   }
   return (
     <DataTableCell
       {...props}
-      title={displayStatus || item.status}
+      title={displayStatus || status}
       className={classNames(className, 'project-task-status')}
     >
       {icon}
       <span className="slds-m-left_x-small project-task-status-text">
-        {displayStatus || item.status}
+        {displayStatus || status}
       </span>
     </DataTableCell>
   );
@@ -121,7 +140,7 @@ const AssigneeTableCell = ({
   const handleEmptyMessageClick = useCallback(() => {
     closeAssignUserModal();
     openAssignProjectUsersModal();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [openAssignProjectUsersModal]);
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null) => {
       /* istanbul ignore if */
@@ -192,57 +211,56 @@ const TaskTable = ({
   projectUsers,
   openAssignProjectUsersModal,
   assignUserAction,
-}: Props) =>
-  tasks.length ? (
-    <DataTable items={tasks} id="project-tasks-table" noRowHover>
-      <DataTableColumn
-        key="name"
-        label={i18n.t('Task')}
-        property="name"
-        width="65%"
-        primaryColumn
-        truncate
-      >
-        <NameTableCell
-          repositorySlug={repositorySlug}
-          projectSlug={projectSlug}
-        />
-      </DataTableColumn>
-      <DataTableColumn
-        key="status"
-        label={i18n.t('Status')}
-        property="status"
-        width="20%"
-      >
-        <StatusTableCell />
-      </DataTableColumn>
-      <DataTableColumn
-        key="assigned_dev"
-        label={i18n.t('Developer')}
-        property="assigned_dev"
-        width="15%"
-      >
-        <AssigneeTableCell
-          type={ORG_TYPES.DEV}
-          projectUsers={projectUsers}
-          openAssignProjectUsersModal={openAssignProjectUsersModal}
-          assignUserAction={assignUserAction}
-        />
-      </DataTableColumn>
-      <DataTableColumn
-        key="assigned_qa"
-        label={i18n.t('Reviewer')}
-        property="assigned_qa"
-        width="15%"
-      >
-        <AssigneeTableCell
-          type={ORG_TYPES.QA}
-          projectUsers={projectUsers}
-          openAssignProjectUsersModal={openAssignProjectUsersModal}
-          assignUserAction={assignUserAction}
-        />
-      </DataTableColumn>
-    </DataTable>
-  ) : null;
+}: Props) => (
+  <DataTable items={tasks} id="project-tasks-table" noRowHover>
+    <DataTableColumn
+      key="name"
+      label={i18n.t('Task')}
+      property="name"
+      width="65%"
+      primaryColumn
+      truncate
+    >
+      <NameTableCell
+        repositorySlug={repositorySlug}
+        projectSlug={projectSlug}
+      />
+    </DataTableColumn>
+    <DataTableColumn
+      key="status"
+      label={i18n.t('Status')}
+      property="status"
+      width="20%"
+    >
+      <StatusTableCell />
+    </DataTableColumn>
+    <DataTableColumn
+      key="assigned_dev"
+      label={i18n.t('Developer')}
+      property="assigned_dev"
+      width="15%"
+    >
+      <AssigneeTableCell
+        type={ORG_TYPES.DEV}
+        projectUsers={projectUsers}
+        openAssignProjectUsersModal={openAssignProjectUsersModal}
+        assignUserAction={assignUserAction}
+      />
+    </DataTableColumn>
+    <DataTableColumn
+      key="assigned_qa"
+      label={i18n.t('Reviewer')}
+      property="assigned_qa"
+      width="15%"
+    >
+      <AssigneeTableCell
+        type={ORG_TYPES.QA}
+        projectUsers={projectUsers}
+        openAssignProjectUsersModal={openAssignProjectUsersModal}
+        assignUserAction={assignUserAction}
+      />
+    </DataTableColumn>
+  </DataTable>
+);
 
 export default TaskTable;

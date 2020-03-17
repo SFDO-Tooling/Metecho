@@ -86,18 +86,17 @@ const defaultState = {
         id: 'task1',
         name: 'Task 1',
         slug: 'task-1',
-        old_slugs: [],
         project: 'project1',
         description: 'Task Description',
+        review_valid: true,
+        review_status: 'Approved',
         status: 'Completed',
       },
       {
         id: 'task2',
         name: 'Task 2',
         slug: 'task-2',
-        old_slugs: [],
         project: 'project1',
-        description: 'Task Description',
         status: 'In progress',
         assigned_dev: {
           id: '123456',
@@ -109,18 +108,30 @@ const defaultState = {
         id: 'task3',
         name: 'Task 3',
         slug: 'task-3',
-        old_slugs: [],
         project: 'project1',
-        description: 'Task Description',
         status: 'Planned',
       },
       {
         id: 'task4',
         name: 'Task 4',
         slug: 'task-4',
-        old_slugs: [],
         project: 'project1',
-        description: 'Task Description',
+      },
+      {
+        id: 'task5',
+        name: 'Task 5',
+        slug: 'task-5',
+        project: 'project1',
+        review_valid: true,
+        review_status: 'Changes requested',
+      },
+      {
+        id: 'task6',
+        name: 'Task 6',
+        slug: 'task-6',
+        project: 'project1',
+        review_valid: true,
+        review_status: 'Approved',
       },
     ],
   },
@@ -153,6 +164,8 @@ describe('<ProjectDetail/>', () => {
     expect(getByText('Project Description')).toBeVisible();
     expect(getByText('Tasks for Project 1')).toBeVisible();
     expect(getByText('Task 1')).toBeVisible();
+    expect(getByText('Approved')).toBeVisible();
+    expect(getByText('Changes Requested')).toBeVisible();
   });
 
   test('renders with form expanded if no tasks', () => {

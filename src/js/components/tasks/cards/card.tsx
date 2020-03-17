@@ -11,22 +11,24 @@ import OrgIcon from '@/components/tasks/cards/orgIcon';
 import OrgInfo from '@/components/tasks/cards/orgInfo';
 import OrgSpinner from '@/components/tasks/cards/orgSpinner';
 import RefreshOrgModal from '@/components/tasks/cards/refresh';
+import SubmitReviewModal from '@/components/tasks/cards/submitReview';
 import UserActions from '@/components/tasks/cards/userActions';
 import { AssignUserModal, UserCard } from '@/components/user/githubUser';
 import { Org } from '@/store/orgs/reducer';
+import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
 import { ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { getTaskCommits } from '@/utils/helpers';
 import { logError } from '@/utils/logging';
 
 interface OrgCardProps {
   org: Org | null;
   type: OrgTypes;
   user: User;
-  assignedUser: GitHubUser | null;
+  task: Task;
   projectUsers: GitHubUser[];
   projectUrl: string;
   repoUrl: string;
-  taskCommits?: string[];
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
   handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
@@ -43,11 +45,10 @@ const OrgCard = ({
   org,
   type,
   user,
-  assignedUser,
+  task,
   projectUsers,
   projectUrl,
   repoUrl,
-  taskCommits,
   isCreatingOrg,
   isDeletingOrg,
   handleAssignUser,
@@ -57,14 +58,25 @@ const OrgCard = ({
   handleRefresh,
   history,
 }: OrgCardProps & RouteComponentProps) => {
+  const assignedUser =
+    type === ORG_TYPES.QA ? task.assigned_qa : task.assigned_dev;
   const assignedToCurrentUser = user.username === assignedUser?.login;
   const ownedByCurrentUser = Boolean(org?.url && user.id === org?.owner);
   const ownedByWrongUser =
     org?.url && org.owner_gh_username !== assignedUser?.login ? org : null;
+  const readyForReview = Boolean(
+    task.pr_is_open &&
+      assignedToCurrentUser &&
+      type === ORG_TYPES.QA &&
+      (org || task.review_valid),
+  );
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
   const isRefreshingOrg = Boolean(org?.currently_refreshing_org);
+  const isSubmittingReview = Boolean(
+    type === ORG_TYPES.QA && task.currently_submitting_review,
+  );
 
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
@@ -75,6 +87,7 @@ const OrgCard = ({
         assignedUser,
       },
     );
+    // eslint-disable-next-line no-param-reassign
     org = null;
   }
 
@@ -93,6 +106,14 @@ const OrgCard = ({
   };
   const closeRefreshOrgModal = () => {
     setRefreshOrgModalOpen(false);
+  };
+
+  const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
+  const openSubmitReviewModal = () => {
+    setSubmitReviewModalOpen(true);
+  };
+  const closeSubmitReviewModal = () => {
+    setSubmitReviewModalOpen(false);
   };
 
   const doAssignUser = useCallback(
@@ -129,8 +150,9 @@ const OrgCard = ({
     history.push(projectUrl);
   }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const orgCommitIdx =
-    org && taskCommits ? taskCommits.indexOf(org.latest_commit) : -1;
+  const taskCommits = getTaskCommits(task);
+  const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;
+  // We consider an org out-of-date if it is not based on the first commit.
   const reviewOrgOutOfDate = Boolean(
     type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
   );
@@ -179,11 +201,11 @@ const OrgCard = ({
             <UserCard user={assignedUser} className="nested-card" />
           </div>
         )}
-        {(assignedUser || ownedByWrongUser) && (
+        {(assignedUser || ownedByWrongUser || task.review_status) && (
           <>
             <hr className="slds-m-vertical_none" />
             <Card
-              className="nested-card"
+              className="nested-card wrap-inner-truncate"
               heading={orgHeading}
               icon={
                 org &&
@@ -201,13 +223,17 @@ const OrgCard = ({
               headerActions={
                 <OrgActions
                   org={org}
+                  task={task}
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
                   ownedByWrongUser={ownedByWrongUser}
                   reviewOrgOutOfDate={reviewOrgOutOfDate}
+                  readyForReview={readyForReview}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
                   isRefreshingOrg={isRefreshingOrg}
+                  isSubmittingReview={isSubmittingReview}
+                  openSubmitReviewModal={openSubmitReviewModal}
                   doCreateOrg={doCreateOrg}
                   doDeleteOrg={doDeleteOrg}
                   doRefreshOrg={doRefreshOrg}
@@ -217,6 +243,7 @@ const OrgCard = ({
               <OrgInfo
                 org={org}
                 type={type}
+                task={task}
                 taskCommits={taskCommits}
                 repoUrl={repoUrl}
                 ownedByCurrentUser={ownedByCurrentUser}
@@ -224,6 +251,7 @@ const OrgCard = ({
                 ownedByWrongUser={ownedByWrongUser}
                 isCreating={isCreating}
                 isRefreshingOrg={isRefreshingOrg}
+                isSubmittingReview={isSubmittingReview}
                 reviewOrgOutOfDate={reviewOrgOutOfDate}
                 missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
@@ -254,6 +282,15 @@ const OrgCard = ({
           isOpen={refreshOrgModalOpen && !isRefreshingOrg}
           closeRefreshOrgModal={closeRefreshOrgModal}
           doRefreshOrg={doRefreshOrg}
+        />
+      )}
+      {readyForReview && (
+        <SubmitReviewModal
+          orgId={org?.id}
+          url={window.api_urls.task_review(task.id)}
+          reviewStatus={task.review_valid ? task.review_status : null}
+          isOpen={submitReviewModalOpen && !isSubmittingReview}
+          handleClose={closeSubmitReviewModal}
         />
       )}
     </div>

@@ -1,6 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
+import { addMinutes, isPast, parseISO } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -9,8 +10,10 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
-import CaptureModal from '@/components/tasks/captureOrgChanges';
+import CaptureModal from '@/components/tasks/capture';
 import OrgCards from '@/components/tasks/cards';
+import TaskStatusPath from '@/components/tasks/path';
+import TaskStatusSteps from '@/components/tasks/steps';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -31,7 +34,7 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES } from '@/utils/constants';
+import { ORG_TYPES, TASK_STATUSES } from '@/utils/constants';
 import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
@@ -89,9 +92,12 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   }, [fetchingChanges, devOrg, submitModalOpen]);
 
-  const doRefetchOrg = useCallback((org: Org) => {
-    dispatch(refetchOrg(org));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const doRefetchOrg = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
 
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
@@ -198,8 +204,22 @@ const TaskDetail = (props: RouteComponentProps) => {
     const captureButtonAction = () => {
       /* istanbul ignore else */
       if (devOrg) {
-        setFetchingChanges(true);
-        doRefetchOrg(devOrg);
+        let shouldCheck = true;
+        const checkAfterMinutes = window.GLOBALS.ORG_RECHECK_MINUTES;
+        if (
+          devOrg.last_checked_unsaved_changes_at !== null &&
+          typeof checkAfterMinutes === 'number'
+        ) {
+          const lastChecked = parseISO(devOrg.last_checked_unsaved_changes_at);
+          const shouldCheckAfter = addMinutes(lastChecked, checkAfterMinutes);
+          shouldCheck = isPast(shouldCheckAfter);
+        }
+        if (devOrg.has_unsaved_changes && !shouldCheck) {
+          setCaptureModalOpen(true);
+        } else {
+          setFetchingChanges(true);
+          doRefetchOrg(devOrg);
+        }
       }
     };
     let captureButtonText: JSX.Element = i18n.t('Capture Task Changes');
@@ -259,6 +279,14 @@ const TaskDetail = (props: RouteComponentProps) => {
           { name: task.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
+        sidebar={
+          <>
+            <TaskStatusPath task={task} />
+            {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
+              <TaskStatusSteps task={task} orgs={orgs} />
+            ) : null}
+          </>
+        }
       >
         {primaryButton}
         {secondaryButton}
@@ -278,6 +306,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           <CaptureModal
             orgId={devOrg.id}
             changeset={devOrg.unsaved_changes}
+            directories={devOrg.valid_target_directories}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
           />

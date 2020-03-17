@@ -22,6 +22,7 @@ from .serializers import (
     MinimalUserSerializer,
     ProjectSerializer,
     RepositorySerializer,
+    ReviewSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
 )
@@ -50,7 +51,11 @@ class CreatePrMixin:
         instance = self.get_object()
         if instance.pr_is_open:
             raise ValidationError(self.error_pr_exists)
-        instance.queue_create_pr(request.user, **serializer.validated_data)
+        instance.queue_create_pr(
+            request.user,
+            **serializer.validated_data,
+            originating_user_id=str(request.user.id)
+        )
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
         )
@@ -93,10 +98,8 @@ class UserRefreshView(CurrentUserObjectMixin, APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        from .jobs import refresh_github_repositories_for_user_job
-
         user = self.get_object()
-        refresh_github_repositories_for_user_job.delay(user)
+        user.queue_refresh_repositories()
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -140,7 +143,7 @@ class RepositoryViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["POST"])
     def refresh_github_users(self, request, pk=None):
         instance = self.get_object()
-        instance.queue_populate_github_users()
+        instance.queue_populate_github_users(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -162,6 +165,28 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for review.")
 
+    @action(detail=True, methods=["POST"])
+    def review(self, request, pk=None):
+        serializer = ReviewSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+        task = self.get_object()
+        org = serializer.validated_data["org"]
+
+        if not task.pr_is_open:
+            raise ValidationError(_("The pull request for this task has been closed."))
+        if not (org or task.review_valid):
+            raise ValidationError(_("Cannot submit review without a Review Org."))
+
+        task.queue_submit_review(
+            user=request.user,
+            data=serializer.validated_data,
+            originating_user_id=str(request.user.id),
+        )
+        return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
+
 
 class ScratchOrgViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -182,7 +207,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
 
     def perform_destroy(self, instance):
-        instance.queue_delete()
+        instance.queue_delete(originating_user_id=str(self.request.user.id))
 
     def list(self, request, *args, **kwargs):
         # XXX: This method is copied verbatim from
@@ -190,6 +215,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # insert the get_unsaved_changes line in the middle.
         queryset = self.filter_queryset(self.get_queryset())
 
+        force_get = request.query_params.get("get_unsaved_changes", False)
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
@@ -199,10 +225,12 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             "currently_capturing_changes": False,
             "currently_refreshing_changes": False,
         }
-        if not request.query_params.get("get_unsaved_changes"):
+        if not force_get:
             filters["owner"] = request.user
         for instance in queryset.filter(**filters):
-            instance.queue_get_unsaved_changes()
+            instance.queue_get_unsaved_changes(
+                force_get=force_get, originating_user_id=str(request.user.id)
+            )
 
         # XXX: If we ever paginate this endpoint, we will need to add
         # pagination logic back in here.
@@ -216,6 +244,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
         # change: we needed to insert the get_unsaved_changes line in
         # the middle.
         instance = self.get_object()
+        force_get = request.query_params.get("get_unsaved_changes", False)
         conditions = [
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
             instance.url is not None,
@@ -223,10 +252,12 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             not instance.currently_capturing_changes,
             not instance.currently_refreshing_changes,
         ]
-        if not request.query_params.get("get_unsaved_changes"):
+        if not force_get:
             conditions.append(instance.owner == request.user)
         if all(conditions):
-            instance.queue_get_unsaved_changes()
+            instance.queue_get_unsaved_changes(
+                force_get=force_get, originating_user_id=str(request.user.id)
+            )
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -237,7 +268,6 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
-
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
@@ -246,7 +276,21 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
             )
         commit_message = serializer.validated_data["commit_message"]
         desired_changes = serializer.validated_data["changes"]
-        scratch_org.queue_commit_changes(request.user, desired_changes, commit_message)
+        target_directory = serializer.validated_data["target_directory"]
+        valid_target_directories = [
+            item
+            for section in scratch_org.valid_target_directories.values()
+            for item in section
+        ]
+        if target_directory not in valid_target_directories:
+            raise ValidationError("Invalid target directory")
+        scratch_org.queue_commit_changes(
+            user=request.user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
+            originating_user_id=str(request.user.id),
+        )
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )
@@ -259,6 +303,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
                 {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        scratch_org.mark_visited(originating_user_id=str(request.user.id))
         url = scratch_org.get_login_url()
         return HttpResponseRedirect(redirect_to=url)
 
@@ -270,7 +315,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
                 {"error": _("Requesting user did not create scratch org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        scratch_org.queue_refresh_org()
+        scratch_org.queue_refresh_org(originating_user_id=str(request.user.id))
         return Response(
             self.get_serializer(scratch_org).data, status=status.HTTP_202_ACCEPTED
         )

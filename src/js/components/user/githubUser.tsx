@@ -20,12 +20,18 @@ interface TableCellProps {
   handleUserClick: (user: GitHubUser) => void;
 }
 
-export const GitHubUserAvatar = ({ user }: { user: GitHubUser }) => (
+export const GitHubUserAvatar = ({
+  user,
+  size,
+}: {
+  user: GitHubUser;
+  size?: string;
+}) => (
   <Avatar
     imgAlt={user.login}
     imgSrc={user.avatar_url}
     title={user.login}
-    size="small"
+    size={size || 'small'}
   />
 );
 
@@ -120,12 +126,12 @@ export const AssignUsersModal = ({
   refreshUsers: () => void;
 }) => {
   const [selection, setSelection] = useState(selectedUsers);
-  const reset = () => setSelection(selectedUsers);
+  const reset = useCallback(() => setSelection(selectedUsers), [selectedUsers]);
 
   // When selected users change, update row selection
   useEffect(() => {
     reset();
-  }, [selectedUsers]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [reset]);
 
   const handleUserClick = useCallback(
     (user: GitHubUser) => {

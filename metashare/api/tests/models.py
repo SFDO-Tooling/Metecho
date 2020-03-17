@@ -1,11 +1,19 @@
 from contextlib import ExitStack
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
-from ..models import TASK_STATUSES, Project, Repository, Task, user_logged_in_handler
+from ..models import (
+    SCRATCH_ORG_TYPES,
+    TASK_STATUSES,
+    Project,
+    Repository,
+    Task,
+    user_logged_in_handler,
+)
 
 
 @pytest.mark.django_db
@@ -45,13 +53,13 @@ class TestRepository:
         with patch(
             "metashare.api.jobs.populate_github_users_job"
         ) as populate_github_users_job:
-            repo.queue_populate_github_users()
+            repo.queue_populate_github_users(originating_user_id=None)
             assert populate_github_users_job.delay.called
 
     def test_queue_refresh_commits(self, repository_factory, user_factory):
         repo = repository_factory()
         with patch("metashare.api.jobs.refresh_commits_job") as refresh_commits_job:
-            repo.queue_refresh_commits(ref="some branch")
+            repo.queue_refresh_commits(ref="some branch", originating_user_id=None)
             assert refresh_commits_job.delay.called
 
     def test_save(self, repository_factory, git_hub_repository_factory):
@@ -67,14 +75,14 @@ class TestRepository:
     def test_finalize_populate_github_users(self, repository_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             repo = repository_factory()
-            repo.finalize_populate_github_users()
+            repo.finalize_populate_github_users(originating_user_id=None)
 
             assert async_to_sync.called
 
     def test_finalize_populate_github_users__error(self, repository_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             repo = repository_factory()
-            repo.finalize_populate_github_users(error=True)
+            repo.finalize_populate_github_users(error=True, originating_user_id=None)
 
             assert async_to_sync.called
 
@@ -101,10 +109,14 @@ class TestProject:
     def test_finalize_status_completed(self, project_factory):
         project = project_factory(has_unmerged_commits=True)
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
-            project.finalize_status_completed()
+            project.finalize_status_completed(originating_user_id=None)
             project.refresh_from_db()
             assert not project.has_unmerged_commits
             assert async_to_sync.called
+
+    def test_should_update_status(self, project_factory):
+        project = project_factory()
+        assert not project.should_update_status()
 
     def test_queue_create_pr(self, project_factory, user_factory):
         with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
@@ -117,6 +129,7 @@ class TestProject:
                 additional_changes="",
                 issues="",
                 notes="",
+                originating_user_id=None,
             )
 
             assert create_pr_job.delay.called
@@ -135,14 +148,14 @@ class TestTask:
                 patch("metashare.api.model_mixins.async_to_sync")
             )
             task = task_factory()
-            task.notify_changed()
+            task.notify_changed(originating_user_id=None)
 
             assert async_to_sync.called
 
     def test_finalize_status_completed(self, task_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             task = task_factory()
-            task.finalize_status_completed()
+            task.finalize_status_completed(originating_user_id=None)
 
             task.refresh_from_db()
             assert async_to_sync.called
@@ -151,7 +164,7 @@ class TestTask:
     def test_finalize_task_update(self, task_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             task = task_factory()
-            task.finalize_task_update()
+            task.finalize_task_update(originating_user_id=None)
 
             assert async_to_sync.called
 
@@ -166,6 +179,7 @@ class TestTask:
                 additional_changes="",
                 issues="",
                 notes="",
+                originating_user_id=None,
             )
 
             assert create_pr_job.delay.called
@@ -173,9 +187,61 @@ class TestTask:
     def test_finalize_create_pr(self, task_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             task = task_factory()
-            task.finalize_create_pr()
+            task.finalize_create_pr(originating_user_id=None)
 
             assert async_to_sync.called
+
+    def test_queue_submit_review(self, user_factory, task_factory):
+        user = user_factory()
+        task = task_factory()
+        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
+            task.queue_submit_review(
+                user=user,
+                data={"notes": "Foo", "status": "APPROVE"},
+                originating_user_id=None,
+            )
+
+            assert submit_review_job.delay.called
+
+    def test_finalize_submit_review(self, task_factory):
+        now = datetime(2020, 12, 31, 12, 0)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory(commits=[{"id": "123"}])
+            task.finalize_submit_review(now, sha="123", originating_user_id=None)
+
+            assert async_to_sync.called
+            assert task.review_sha == "123"
+            assert task.review_valid
+
+    def test_finalize_submit_review__delete_org(
+        self, task_factory, scratch_org_factory
+    ):
+        now = datetime(2020, 12, 31, 12, 0)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory(commits=[{"id": "123"}])
+            scratch_org = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+            scratch_org.queue_delete = MagicMock()
+            task.finalize_submit_review(
+                now,
+                sha="123",
+                delete_org=True,
+                org=scratch_org,
+                originating_user_id=None,
+            )
+
+            assert async_to_sync.called
+            assert scratch_org.queue_delete.called
+            assert task.review_sha == "123"
+            assert task.review_valid
+
+    def test_finalize_submit_review__error(self, task_factory):
+        now = datetime(2020, 12, 31, 12, 0)
+        with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
+            task = task_factory()
+            task.finalize_submit_review(now, error=ValueError, originating_user_id=None)
+
+            assert async_to_sync.called
+            assert not task.review_valid
 
 
 @pytest.mark.django_db
@@ -480,7 +546,7 @@ class TestScratchOrg:
                 patch("metashare.api.model_mixins.async_to_sync")
             )
             scratch_org = scratch_org_factory()
-            scratch_org.notify_changed()
+            scratch_org.notify_changed(originating_user_id=None)
 
             assert async_to_sync.called
 
@@ -489,7 +555,7 @@ class TestScratchOrg:
             "metashare.api.jobs.delete_scratch_org_job"
         ) as delete_scratch_org_job:
             scratch_org = scratch_org_factory(last_modified_at=now())
-            scratch_org.queue_delete()
+            scratch_org.queue_delete(originating_user_id=None)
 
             assert delete_scratch_org_job.delay.called
 
@@ -504,15 +570,30 @@ class TestScratchOrg:
         with patch(
             "metashare.api.jobs.get_unsaved_changes_job"
         ) as get_unsaved_changes_job:
-            scratch_org = scratch_org_factory()
-            scratch_org.queue_get_unsaved_changes()
+            scratch_org = scratch_org_factory(
+                last_checked_unsaved_changes_at=now() - timedelta(minutes=1),
+            )
+            scratch_org.queue_get_unsaved_changes(
+                force_get=True, originating_user_id=None
+            )
 
             assert get_unsaved_changes_job.delay.called
+
+    def test_get_unsaved_changes__bail_early(self, scratch_org_factory):
+        with patch(
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
+            scratch_org = scratch_org_factory(
+                last_checked_unsaved_changes_at=now() - timedelta(minutes=1),
+            )
+            scratch_org.queue_get_unsaved_changes(originating_user_id=None)
+
+            assert not get_unsaved_changes_job.delay.called
 
     def test_finalize_provision(self, scratch_org_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             scratch_org = scratch_org_factory()
-            scratch_org.finalize_provision()
+            scratch_org.finalize_provision(originating_user_id=None)
 
             assert async_to_sync.called
 
@@ -523,7 +604,7 @@ class TestScratchOrg:
                 patch("metashare.api.jobs.delete_scratch_org_job")
             )
             scratch_org = scratch_org_factory(url="https://example.com")
-            scratch_org.finalize_provision(error=True)
+            scratch_org.finalize_provision(error=True, originating_user_id=None)
 
             assert delete_queued.delay.called
 
@@ -540,9 +621,16 @@ class TestScratchOrg:
     def test_remove_scratch_org(self, scratch_org_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:
             scratch_org = scratch_org_factory()
-            scratch_org.remove_scratch_org(error=Exception)
+            scratch_org.remove_scratch_org(error=Exception, originating_user_id=None)
 
             assert async_to_sync.called
+
+    def test_clean_config(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        scratch_org.config = {"access_token": "bad", "anything else": "good"}
+        scratch_org.save()
+        scratch_org.refresh_from_db()
+        assert scratch_org.config == {"anything else": "good"}
 
 
 @pytest.mark.django_db
@@ -555,7 +643,6 @@ class TestGitHubRepository:
 @pytest.mark.django_db
 def test_login_handler(user_factory):
     user = user_factory()
-    patch_path = "metashare.api.jobs.refresh_github_repositories_for_user_job"
-    with patch(patch_path) as refresh_job:
-        user_logged_in_handler(None, user=user)
-        refresh_job.delay.assert_called_with(user)
+    user.queue_refresh_repositories = MagicMock()
+    user_logged_in_handler(None, user=user)
+    user.queue_refresh_repositories.assert_called_once()

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
@@ -33,8 +35,12 @@ from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+PROJECT_STATUSES = Choices("Planned", "In progress", "Review", "Merged",)
 TASK_STATUSES = Choices(
     ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
+)
+TASK_REVIEW_STATUS = Choices(
+    ("Approved", "Approved"), ("Changes requested", "Changes requested"),
 )
 
 
@@ -52,18 +58,32 @@ class User(HashIdMixin, AbstractUser):
     currently_fetching_repos = models.BooleanField(default=False)
     devhub_username = StringField(null=True, blank=True)
 
+    def queue_refresh_repositories(self):
+        """Queue a job to refresh repositories unless we're already doing so"""
+        from .jobs import refresh_github_repositories_for_user_job
+
+        if not self.currently_fetching_repos:
+            self.currently_fetching_repos = True
+            self.save()
+            refresh_github_repositories_for_user_job.delay(self)
+
     def refresh_repositories(self):
-        repos = gh.get_all_org_repos(self)
-        GitHubRepository.objects.filter(user=self).delete()
-        GitHubRepository.objects.bulk_create(
-            [
-                GitHubRepository(user=self, repo_id=repo.id, repo_url=repo.html_url)
-                for repo in repos
-            ]
-        )
-        self.currently_fetching_repos = False
-        self.save()
-        self.notify_repositories_updated()
+        try:
+            repos = gh.get_all_org_repos(self)
+            with transaction.atomic():
+                GitHubRepository.objects.filter(user=self).delete()
+                GitHubRepository.objects.bulk_create(
+                    [
+                        GitHubRepository(
+                            user=self, repo_id=repo.id, repo_url=repo.html_url
+                        )
+                        for repo in repos
+                    ]
+                )
+        finally:
+            self.currently_fetching_repos = False
+            self.save()
+            self.notify_repositories_updated()
 
     def notify_repositories_updated(self):
         message = {"type": "USER_REPOS_REFRESH"}
@@ -247,7 +267,7 @@ class Repository(
                 self.branch_name = repo.default_branch
 
         if not self.github_users:
-            self.queue_populate_github_users()
+            self.queue_populate_github_users(originating_user_id=None)
 
         super().save(*args, **kwargs)
 
@@ -261,22 +281,24 @@ class Repository(
 
         return None
 
-    def queue_populate_github_users(self):
+    def queue_populate_github_users(self, *, originating_user_id):
         from .jobs import populate_github_users_job
 
-        populate_github_users_job.delay(self)
+        populate_github_users_job.delay(self, originating_user_id=originating_user_id)
 
-    def finalize_populate_github_users(self, error=None):
+    def finalize_populate_github_users(self, *, error=None, originating_user_id):
         self.save()
         if error is None:
-            self.notify_changed()
+            self.notify_changed(originating_user_id=originating_user_id)
         else:
-            self.notify_error(error)
+            self.notify_error(error, originating_user_id=originating_user_id)
 
-    def queue_refresh_commits(self, *, ref):
+    def queue_refresh_commits(self, *, ref, originating_user_id):
         from .jobs import refresh_commits_job
 
-        refresh_commits_job.delay(repository=self, branch_name=ref)
+        refresh_commits_job.delay(
+            repository=self, branch_name=ref, originating_user_id=originating_user_id
+        )
 
     @transaction.atomic
     def add_commits(self, *, commits, ref, sender):
@@ -319,6 +341,10 @@ class Project(
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+    pr_is_merged = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned,
+    )
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -336,6 +362,10 @@ class Project(
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.update_status()
+        return super().save(*args, **kwargs)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -365,25 +395,56 @@ class Project(
 
     # end CreatePrMixin configuration
 
-    def finalize_pr_closed(self):
+    def should_update_in_progress(self):
+        task_statuses = self.tasks.values_list("status", flat=True)
+        return task_statuses and any(
+            status != TASK_STATUSES.Planned for status in task_statuses
+        )
+
+    def should_update_review(self):
+        task_statuses = self.tasks.values_list("status", flat=True)
+        return task_statuses and all(
+            status == TASK_STATUSES.Completed for status in task_statuses
+        )
+
+    def should_update_merged(self):
+        return self.pr_is_merged
+
+    def should_update_status(self):
+        return (
+            self.should_update_in_progress()
+            or self.should_update_review()
+            or self.should_update_merged()
+        )
+
+    def update_status(self):
+        if self.should_update_merged():
+            self.status = PROJECT_STATUSES.Merged
+        elif self.should_update_review():
+            self.status = PROJECT_STATUSES.Review
+        elif self.should_update_in_progress():
+            self.status = PROJECT_STATUSES["In progress"]
+
+    def finalize_pr_closed(self, *, originating_user_id):
         self.pr_is_open = False
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_reopened(self):
+    def finalize_pr_reopened(self, *, originating_user_id):
         self.pr_is_open = True
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_project_update(self):
+    def finalize_project_update(self, *, originating_user_id):
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_status_completed(self):
+    def finalize_status_completed(self, *, originating_user_id):
+        self.pr_is_merged = True
         self.has_unmerged_commits = False
         self.pr_is_open = False
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -403,13 +464,24 @@ class Task(
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
     )
+
     commits = JSONField(default=list, blank=True)
     origin_sha = StringField(null=True, blank=True)
     ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
+
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+
+    currently_submitting_review = models.BooleanField(default=False)
+    review_submitted_at = models.DateTimeField(null=True, blank=True)
+    review_valid = models.BooleanField(default=False)
+    review_status = models.CharField(
+        choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
+    )
+    review_sha = StringField(null=True, blank=True)
+
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
@@ -427,6 +499,14 @@ class Task(
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, force_project_save=True, **kwargs):
+        ret = super().save(*args, **kwargs)
+        # To update the project's status:
+        if force_project_save or self.project.should_update_status():
+            self.project.save()
+            self.project.notify_changed(originating_user_id=None)
+        return ret
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -456,51 +536,104 @@ class Task(
 
     # end CreatePrMixin configuration
 
-    def finalize_task_update(self):
-        self.save()
-        self.notify_changed()
+    def update_review_valid(self):
+        review_valid = bool(
+            self.review_sha
+            and self.commits
+            and self.review_sha == self.commits[0].get("id")
+        )
+        self.review_valid = review_valid
 
-    def finalize_status_completed(self):
+    def finalize_task_update(self, *, originating_user_id):
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
+    def finalize_status_completed(self, *, originating_user_id):
         self.status = TASK_STATUSES.Completed
         self.has_unmerged_commits = False
         self.pr_is_open = False
-        self.save()
-        self.notify_changed()
         self.project.has_unmerged_commits = True
-        self.project.save()
-        self.project.notify_changed()
+        # This will save the project, too:
+        self.save(force_project_save=True)
+        self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_closed(self):
+    def finalize_pr_closed(self, *, originating_user_id):
         self.pr_is_open = False
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_reopened(self):
+    def finalize_pr_reopened(self, *, originating_user_id):
         self.pr_is_open = True
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_provision(self):
+    def finalize_provision(self, *, originating_user_id):
         if self.status == TASK_STATUSES.Planned:
             self.status = TASK_STATUSES["In progress"]
             self.save()
-            self.notify_changed()
+            self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_commit_changes(self):
+    def finalize_commit_changes(self, *, originating_user_id):
         if self.status != TASK_STATUSES["In progress"]:
             self.status = TASK_STATUSES["In progress"]
             self.save()
-            self.notify_changed()
+            self.notify_changed(originating_user_id=originating_user_id)
 
     def add_commits(self, commits, sender):
         self.commits = [
             gh.normalize_commit(c, sender=sender) for c in commits
         ] + self.commits
+        self.update_review_valid()
         self.save()
-        self.notify_changed()
+        # This comes from the GitHub hook, and so has no originating user:
+        self.notify_changed(originating_user_id=None)
 
     def add_ms_git_sha(self, sha):
         self.ms_commits.append(sha)
+
+    def queue_submit_review(self, *, user, data, originating_user_id):
+        from .jobs import submit_review_job
+
+        self.currently_submitting_review = True
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+        submit_review_job.delay(
+            user=user, task=self, data=data, originating_user_id=originating_user_id
+        )
+
+    def finalize_submit_review(
+        self,
+        timestamp,
+        *,
+        error=None,
+        sha=None,
+        status=None,
+        delete_org=False,
+        org=None,
+        originating_user_id
+    ):
+        self.currently_submitting_review = False
+        if error:
+            self.save()
+            self.notify_error(
+                error,
+                type_="TASK_SUBMIT_REVIEW_FAILED",
+                originating_user_id=originating_user_id,
+            )
+        else:
+            self.review_submitted_at = timestamp
+            self.review_status = status
+            self.review_sha = sha
+            self.update_review_valid()
+            self.save()
+            self.notify_changed(
+                type_="TASK_SUBMIT_REVIEW", originating_user_id=originating_user_id
+            )
+            deletable_org = (
+                org and org.task == self and org.org_type == SCRATCH_ORG_TYPES.QA
+            )
+            if delete_org and deletable_org:
+                org.queue_delete(originating_user_id=originating_user_id)
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -517,6 +650,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     latest_commit_url = models.URLField(blank=True)
     latest_commit_at = models.DateTimeField(null=True, blank=True)
     url = models.URLField(null=True, blank=True)
+    last_checked_unsaved_changes_at = models.DateTimeField(null=True, blank=True)
     unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     latest_revision_numbers = JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
@@ -529,18 +663,32 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     expiry_job_id = StringField(null=True, blank=True)
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
+    has_been_visited = models.BooleanField(default=False)
+    valid_target_directories = JSONField(
+        default=dict, encoder=DjangoJSONEncoder, blank=True
+    )
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
     def save(self, *args, **kwargs):
         is_new = self.id is None
+        self.clean_config()
         ret = super().save(*args, **kwargs)
 
         if is_new:
-            self.queue_provision()
+            self.queue_provision(originating_user_id=str(self.owner.id))
 
         return ret
+
+    def clean_config(self):
+        banned_keys = {"access_token"}
+        self.config = {k: v for (k, v) in self.config.items() if k not in banned_keys}
+
+    def mark_visited(self, *, originating_user_id):
+        self.has_been_visited = True
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
 
     def get_refreshed_org_config(self):
         org_config = OrgConfig(self.config, "dev")
@@ -570,7 +718,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
 
     # end PushMixin configuration
 
-    def queue_delete(self):
+    def queue_delete(self, *, originating_user_id):
         from .jobs import delete_scratch_org_job
 
         # If the scratch org has no `last_modified_at`, it did not
@@ -581,108 +729,167 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if self.last_modified_at:
             self.delete_queued_at = timezone.now()
             self.save()
-            self.notify_changed()
+            self.notify_changed(originating_user_id=originating_user_id)
 
-        delete_scratch_org_job.delay(self)
+        delete_scratch_org_job.delay(self, originating_user_id=originating_user_id)
 
-    def finalize_delete(self):
-        self.notify_changed("SCRATCH_ORG_DELETE")
+    def finalize_delete(self, *, originating_user_id):
+        self.notify_changed(
+            type_="SCRATCH_ORG_DELETE", originating_user_id=originating_user_id
+        )
 
-    def delete(self, *args, should_finalize=True, **kwargs):
+    def delete(self, *args, should_finalize=True, originating_user_id=None, **kwargs):
         # If the scratch org has no `last_modified_at`, it did not
         # successfully complete the initial flow run on Salesforce, and
         # therefore we don't need to notify of its destruction; this
         # should only happen when it is destroyed during provisioning or
         # the initial flow run.
         if self.last_modified_at and should_finalize:
-            self.finalize_delete()
+            self.finalize_delete(originating_user_id=originating_user_id)
         super().delete(*args, **kwargs)
 
-    def queue_provision(self):
+    def queue_provision(self, *, originating_user_id):
         from .jobs import create_branches_on_github_then_create_scratch_org_job
 
-        create_branches_on_github_then_create_scratch_org_job.delay(scratch_org=self)
+        create_branches_on_github_then_create_scratch_org_job.delay(
+            scratch_org=self, originating_user_id=originating_user_id
+        )
 
-    def finalize_provision(self, error=None):
+    def finalize_provision(self, *, error=None, originating_user_id):
         if error is None:
             self.save()
-            self.notify_changed("SCRATCH_ORG_PROVISION")
-            self.task.finalize_provision()
+            self.notify_changed(
+                type_="SCRATCH_ORG_PROVISION", originating_user_id=originating_user_id
+            )
+            self.task.finalize_provision(originating_user_id=originating_user_id)
         else:
-            self.notify_scratch_org_error(error, "SCRATCH_ORG_PROVISION_FAILED")
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_PROVISION_FAILED",
+                originating_user_id=originating_user_id,
+            )
             # If the scratch org has already been created on Salesforce,
             # we need to delete it there as well.
             if self.url:
-                self.queue_delete()
+                self.queue_delete(originating_user_id=originating_user_id)
             else:
-                self.delete()
+                self.delete(originating_user_id=originating_user_id)
 
-    def queue_get_unsaved_changes(self):
+    def queue_get_unsaved_changes(self, *, force_get=False, originating_user_id):
         from .jobs import get_unsaved_changes_job
+
+        minutes_since_last_check = (
+            self.last_checked_unsaved_changes_at is not None
+            and timezone.now() - self.last_checked_unsaved_changes_at
+        )
+        should_bail = (
+            not force_get
+            and minutes_since_last_check
+            and minutes_since_last_check
+            < timedelta(minutes=settings.ORG_RECHECK_MINUTES)
+        )
+        if should_bail:
+            return
 
         self.currently_refreshing_changes = True
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
-        get_unsaved_changes_job.delay(self)
+        get_unsaved_changes_job.delay(self, originating_user_id=originating_user_id)
 
-    def finalize_get_unsaved_changes(self, error=None):
+    def finalize_get_unsaved_changes(self, *, error=None, originating_user_id):
         self.currently_refreshing_changes = False
         if error is None:
+            self.last_checked_unsaved_changes_at = timezone.now()
             self.save()
-            self.notify_changed()
+            self.notify_changed(originating_user_id=originating_user_id)
         else:
             self.unsaved_changes = {}
             self.save()
-            self.notify_scratch_org_error(error, "SCRATCH_ORG_FETCH_CHANGES_FAILED")
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_FETCH_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
 
-    def queue_commit_changes(self, user, desired_changes, commit_message):
+    def queue_commit_changes(
+        self,
+        *,
+        user,
+        desired_changes,
+        commit_message,
+        target_directory,
+        originating_user_id
+    ):
         from .jobs import commit_changes_from_org_job
 
         self.currently_capturing_changes = True
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
-        commit_changes_from_org_job.delay(self, user, desired_changes, commit_message)
+        commit_changes_from_org_job.delay(
+            scratch_org=self,
+            user=user,
+            desired_changes=desired_changes,
+            commit_message=commit_message,
+            target_directory=target_directory,
+            originating_user_id=originating_user_id,
+        )
 
-    def finalize_commit_changes(self, error=None):
+    def finalize_commit_changes(self, *, error=None, originating_user_id):
         self.currently_capturing_changes = False
         self.save()
         if error is None:
-            self.notify_changed("SCRATCH_ORG_COMMIT_CHANGES")
-            self.task.finalize_commit_changes()
+            self.notify_changed(
+                type_="SCRATCH_ORG_COMMIT_CHANGES",
+                originating_user_id=originating_user_id,
+            )
+            self.task.finalize_commit_changes(originating_user_id=originating_user_id)
         else:
-            self.notify_scratch_org_error(error, "SCRATCH_ORG_COMMIT_CHANGES_FAILED")
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_COMMIT_CHANGES_FAILED",
+                originating_user_id=originating_user_id,
+            )
 
-    def remove_scratch_org(self, error):
-        self.notify_error(error, "SCRATCH_ORG_REMOVE")
+    def remove_scratch_org(self, error, *, originating_user_id):
+        self.notify_scratch_org_error(
+            error=error,
+            type_="SCRATCH_ORG_REMOVE",
+            originating_user_id=originating_user_id,
+        )
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
-        self.delete(should_finalize=False)
+        self.delete(should_finalize=False, originating_user_id=originating_user_id)
 
-    def queue_refresh_org(self):
+    def queue_refresh_org(self, *, originating_user_id):
         from .jobs import refresh_scratch_org_job
 
+        self.has_been_visited = False
         self.currently_refreshing_org = True
         self.save()
-        self.notify_changed()
-        refresh_scratch_org_job.delay(self)
+        self.notify_changed(originating_user_id=originating_user_id)
+        refresh_scratch_org_job.delay(self, originating_user_id=originating_user_id)
 
-    def finalize_refresh_org(self, error=None):
+    def finalize_refresh_org(self, *, error=None, originating_user_id):
         self.currently_refreshing_org = False
         self.save()
         if error is None:
-            self.notify_changed("SCRATCH_ORG_REFRESH")
+            self.notify_changed(
+                type_="SCRATCH_ORG_REFRESH", originating_user_id=originating_user_id
+            )
         else:
-            self.notify_scratch_org_error(error, "SCRATCH_ORG_REFRESH_FAILED")
-            self.queue_delete()
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_REFRESH_FAILED",
+                originating_user_id=originating_user_id,
+            )
+            self.queue_delete(originating_user_id=originating_user_id)
 
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):
-    from .jobs import refresh_github_repositories_for_user_job
-
-    refresh_github_repositories_for_user_job.delay(user)
+    user.queue_refresh_repositories()
 
 
 def ensure_slug_handler(sender, *, created, instance, **kwargs):

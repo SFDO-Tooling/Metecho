@@ -22,6 +22,8 @@ SF_CLIENT_KEY = settings.SF_CLIENT_KEY
 SF_CLIENT_ID = settings.SF_CLIENT_ID
 SF_CLIENT_SECRET = settings.SF_CLIENT_SECRET
 
+DURATION_DAYS = 30
+
 # Deploy org settings metadata -- this should get moved into CumulusCI
 SETTINGS_XML_t = """<?xml version="1.0" encoding="UTF-8"?>
 <{settingsName} xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -50,7 +52,7 @@ def capitalize(s):
     return s[0].upper() + s[1:]
 
 
-def refresh_access_token(*, config, org_name, scratch_org):
+def refresh_access_token(*, config, org_name, scratch_org, originating_user_id):
     """
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
     which we don't want now -- this is a total hack which I'll try to
@@ -85,7 +87,7 @@ def refresh_access_token(*, config, org_name, scratch_org):
             error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
 
         err = err.__class__(error_msg, *err.args[1:],)
-        scratch_org.remove_scratch_org(err)
+        scratch_org.remove_scratch_org(err, originating_user_id=originating_user_id)
         raise err
 
 
@@ -142,7 +144,8 @@ def get_org_result(
         "ConnectedAppConsumerKey": SF_CLIENT_ID,
         "ConnectedAppCallbackUrl": SF_CALLBACK_URL,
         "Description": f"{repo_owner}/{repo_name} {repo_branch}",
-        "DurationDays": 30,  # Override whatever is in scratch_org_config.days
+        # Override whatever is in scratch_org_config.days:
+        "DurationDays": DURATION_DAYS,
         "Edition": scratch_org_definition["edition"],
         "Features": ";".join(scratch_org_definition.get("features", [])),
         "HasSampleData": scratch_org_definition.get("hasSampleData", False),
@@ -175,6 +178,7 @@ def mutate_scratch_org(*, scratch_org_config, org_result, email):
     scratch_org_config.config.update(scratch_org_config._scratch_info)
     scratch_org_config.config.update(
         {
+            "days": DURATION_DAYS,
             "date_created": datetime.now(),
             "created": True,
             "email": email,
@@ -201,12 +205,17 @@ def get_access_token(*, org_result, scratch_org_config):
     ] = auth_result["access_token"]
 
 
-def deploy_org_settings(*, cci, org_name, scratch_org_config, scratch_org):
+def deploy_org_settings(
+    *, cci, org_name, scratch_org_config, scratch_org, originating_user_id
+):
     """Do a Metadata API deployment to configure org settings
     as specified in the scratch org definition file.
     """
     org_config = refresh_access_token(
-        config=scratch_org_config.config, org_name=org_name, scratch_org=scratch_org,
+        config=scratch_org_config.config,
+        org_name=org_name,
+        scratch_org=scratch_org,
+        originating_user_id=originating_user_id,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
     task_config = TaskConfig({"options": {"definition_file": path}})
@@ -224,6 +233,7 @@ def create_org(
     user,
     project_path,
     scratch_org,
+    originating_user_id,
     sf_username=None,
 ):
     """Create a new scratch org"""
@@ -263,6 +273,7 @@ def create_org(
         org_name=org_name,
         scratch_org_config=scratch_org_config,
         scratch_org=scratch_org,
+        originating_user_id=originating_user_id,
     )
 
     return (scratch_org_config, cci, org_config)

@@ -6,6 +6,39 @@ import { addUrlParams } from '@/utils/api';
 import { storeWithThunk } from './../../utils';
 
 describe('provisionOrg', () => {
+  const org = {
+    id: 'org-id',
+    owner: 'user-id',
+    url: '/test/url/',
+    org_type: 'Dev',
+    task: 'task-id',
+  };
+  const orgAction = {
+    type: 'SCRATCH_ORG_PROVISION',
+    payload: org,
+  };
+
+  test('triggers action', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {
+        'project-id': [
+          { id: 'task-id', name: 'My Task', project: 'project-id' },
+        ],
+      },
+    });
+    store.dispatch(
+      actions.provisionOrg({
+        model: org,
+        orginating_user_id: 'another-user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('SCRATCH_ORG_PROVISION');
+    expect(allActions[0]).toEqual(orgAction);
+  });
+
   describe('owned by current user', () => {
     test('adds success message', () => {
       const store = storeWithThunk({
@@ -16,15 +49,12 @@ describe('provisionOrg', () => {
           ],
         },
       });
-      const org = {
-        id: 'org-id',
-        owner: 'user-id',
-        url: '/test/url/',
-        org_type: 'Dev',
-        task: 'task-id',
-      };
-      const orgAction = { type: 'SCRATCH_ORG_PROVISION', payload: org };
-      store.dispatch(actions.provisionOrg(org));
+      store.dispatch(
+        actions.provisionOrg({
+          model: org,
+          originating_user_id: 'user-id',
+        }),
+      );
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -37,27 +67,27 @@ describe('provisionOrg', () => {
       );
       expect(allActions[1]).toEqual(orgAction);
     });
+  });
 
-    test('does not fail if missing url', () => {
-      const store = storeWithThunk({ user: { id: 'user-id' }, tasks: {} });
-      const org = {
-        id: 'org-id',
-        owner: 'user-id',
-        org_type: 'Dev',
-        task: 'task-id',
-      };
-      const orgAction = { type: 'SCRATCH_ORG_PROVISION', payload: org };
-      store.dispatch(actions.provisionOrg(org));
-      const allActions = store.getActions();
+  test('does not fail if missing url', () => {
+    const store = storeWithThunk({ user: { id: 'user-id' }, tasks: {} });
+    const thisOrg = { ...org, url: null };
+    const thisOrgAction = { ...orgAction, payload: thisOrg };
+    store.dispatch(
+      actions.provisionOrg({
+        model: thisOrg,
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
 
-      expect(allActions[0].type).toEqual('TOAST_ADDED');
-      expect(allActions[0].payload.heading).toEqual(
-        'Successfully created Dev org.',
-      );
-      expect(allActions[0].payload.linkText).toBe(undefined);
-      expect(allActions[0].payload.linkUrl).toBe(undefined);
-      expect(allActions[1]).toEqual(orgAction);
-    });
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Successfully created Dev org.',
+    );
+    expect(allActions[0].payload.linkText).toBeUndefined();
+    expect(allActions[0].payload.linkUrl).toBeUndefined();
+    expect(allActions[1]).toEqual(thisOrgAction);
   });
 });
 
@@ -95,7 +125,11 @@ describe('provisionFailed', () => {
         payload: org,
       };
       store.dispatch(
-        actions.provisionFailed({ model: org, message: 'error msg' }),
+        actions.provisionFailed({
+          model: org,
+          message: 'error msg',
+          originating_user_id: 'user-id',
+        }),
       );
       const allActions = store.getActions();
 
@@ -121,7 +155,11 @@ describe('provisionFailed', () => {
         payload: org,
       };
       store.dispatch(
-        actions.provisionFailed({ model: org, message: 'error msg' }),
+        actions.provisionFailed({
+          model: org,
+          message: 'error msg',
+          originating_user_id: 'user-id',
+        }),
       );
       const allActions = store.getActions();
 
@@ -129,8 +167,8 @@ describe('provisionFailed', () => {
       expect(allActions[0].payload.heading).toEqual(
         'Uh oh. There was an error creating your new Dev org.',
       );
-      expect(allActions[0].payload.linkText).toBe(undefined);
-      expect(allActions[0].payload.linkUrl).toBe(undefined);
+      expect(allActions[0].payload.linkText).toBeUndefined();
+      expect(allActions[0].payload.linkUrl).toBeUndefined();
       expect(allActions[1]).toEqual(orgAction);
     });
   });
@@ -238,7 +276,13 @@ describe('updateFailed', () => {
       type: 'SCRATCH_ORG_UPDATE',
       payload: org,
     };
-    store.dispatch(actions.updateFailed({ model: org, message: 'error msg' }));
+    store.dispatch(
+      actions.updateFailed({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -261,14 +305,19 @@ describe('updateFailed', () => {
       type: 'SCRATCH_ORG_UPDATE',
       payload: org,
     };
-    store.dispatch(actions.updateFailed({ model: org }));
+    store.dispatch(
+      actions.updateFailed({
+        model: org,
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
       'Uh oh. There was an error checking for changes on your scratch org.',
     );
-    expect(allActions[0].payload.details).toBe(undefined);
+    expect(allActions[0].payload.details).toBeUndefined();
     expect(allActions[0].payload.variant).toEqual('error');
     expect(allActions[1]).toEqual(action);
   });
@@ -287,8 +336,9 @@ describe('deleteOrg', () => {
     const store = storeWithThunk({});
     const org = { id: 'org-id' };
     const action = { type: 'SCRATCH_ORG_DELETE', payload: org };
-    store.dispatch(actions.deleteOrg({ org }));
-
+    store.dispatch(
+      actions.deleteOrg({ model: org, originating_user_id: 'user-id' }),
+    );
     expect(store.getActions()).toEqual([action]);
     expect(window.socket.unsubscribe).toHaveBeenCalledWith({
       model: 'scratch_org',
@@ -314,7 +364,12 @@ describe('deleteOrg', () => {
         task: 'task-id',
       };
       const orgAction = { type: 'SCRATCH_ORG_DELETE', payload: org };
-      store.dispatch(actions.deleteOrg({ org }));
+      store.dispatch(
+        actions.deleteOrg({
+          model: org,
+          originating_user_id: 'user-id',
+        }),
+      );
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -341,7 +396,13 @@ describe('deleteOrg', () => {
         task: 'task-id',
       };
       const orgAction = { type: 'SCRATCH_ORG_DELETE', payload: org };
-      store.dispatch(actions.deleteOrg({ org, message: 'Broke the widget.' }));
+      store.dispatch(
+        actions.deleteOrg({
+          model: org,
+          message: 'Broke the widget.',
+          originating_user_id: 'user-id',
+        }),
+      );
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -375,7 +436,11 @@ describe('deleteFailed', () => {
         payload: org,
       };
       store.dispatch(
-        actions.deleteFailed({ model: org, message: 'error msg' }),
+        actions.deleteFailed({
+          model: org,
+          message: 'error msg',
+          originating_user_id: 'user-id',
+        }),
       );
       const allActions = store.getActions();
 
@@ -409,7 +474,9 @@ describe('commitSucceeded', () => {
       type: 'SCRATCH_ORG_COMMIT_CHANGES',
       payload: org,
     };
-    store.dispatch(actions.commitSucceeded(org));
+    store.dispatch(
+      actions.commitSucceeded({ model: org, originating_user_id: 'user-id' }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -433,7 +500,9 @@ describe('commitSucceeded', () => {
       type: 'SCRATCH_ORG_COMMIT_CHANGES',
       payload: org,
     };
-    store.dispatch(actions.commitSucceeded(org));
+    store.dispatch(
+      actions.commitSucceeded({ model: org, originating_user_id: 'user-id' }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -463,7 +532,13 @@ describe('commitFailed', () => {
       type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
       payload: org,
     };
-    store.dispatch(actions.commitFailed({ model: org, message: 'error msg' }));
+    store.dispatch(
+      actions.commitFailed({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -489,7 +564,13 @@ describe('commitFailed', () => {
       type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
       payload: org,
     };
-    store.dispatch(actions.commitFailed({ model: org, message: 'error msg' }));
+    store.dispatch(
+      actions.commitFailed({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -582,7 +663,9 @@ describe('orgRefreshed', () => {
       type: 'SCRATCH_ORG_UPDATE',
       payload: org,
     };
-    store.dispatch(actions.orgRefreshed(org));
+    store.dispatch(
+      actions.orgRefreshed({ model: org, originating_user_id: 'user-id' }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -606,7 +689,9 @@ describe('orgRefreshed', () => {
       type: 'SCRATCH_ORG_UPDATE',
       payload: org,
     };
-    store.dispatch(actions.orgRefreshed(org));
+    store.dispatch(
+      actions.orgRefreshed({ model: org, originating_user_id: 'user-id' }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -636,7 +721,13 @@ describe('refreshError', () => {
       type: 'SCRATCH_ORG_UPDATE',
       payload: org,
     };
-    store.dispatch(actions.refreshError({ model: org, message: 'error msg' }));
+    store.dispatch(
+      actions.refreshError({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -662,7 +753,13 @@ describe('refreshError', () => {
       type: 'SCRATCH_ORG_UPDATE',
       payload: org,
     };
-    store.dispatch(actions.refreshError({ model: org, message: 'error msg' }));
+    store.dispatch(
+      actions.refreshError({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');

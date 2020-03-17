@@ -1,74 +1,31 @@
 import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
-import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
-import Input from '@salesforce/design-system-react/components/input';
-import Modal from '@salesforce/design-system-react/components/modal';
+import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import cloneDeep from 'lodash.clonedeep';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 
-import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
+import {
+  BooleanObject,
+  CommitData,
+  ModalCard,
+} from '@/components/tasks/capture';
+import { UseFormProps } from '@/components/utils/useForm';
 import { Changeset } from '@/store/orgs/reducer';
-import { OBJECT_TYPES } from '@/utils/constants';
-import { getOrgChildChanges, getOrgTotalChanges } from '@/utils/helpers';
 
 interface Props {
-  orgId: string;
   changeset: Changeset;
-  isOpen: boolean;
-  toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+  inputs: CommitData;
+  errors: UseFormProps['errors'];
+  setInputs: UseFormProps['setInputs'];
 }
 
-interface Inputs {
-  changes: Changeset;
-  commit_message: string;
-}
-
-interface BooleanObject {
-  [key: string]: boolean;
-}
-
-const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
+const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
-  const [capturingChanges, setCapturingChanges] = useState(false);
-  const isMounted = useIsMounted();
-  const submitButton = useRef<HTMLButtonElement | null>(null);
-
-  const handleSuccess = () => {
-    /* istanbul ignore else */
-    if (isMounted.current) {
-      setCapturingChanges(false);
-      toggleModal(false);
-    }
-  };
-
-  /* istanbul ignore next */
-  const handleError = () => {
-    if (isMounted.current) {
-      setCapturingChanges(false);
-    }
-  };
-
-  const {
-    inputs,
-    errors,
-    handleInputChange,
-    setInputs,
-    handleSubmit,
-    resetForm,
-  } = useForm({
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    fields: { changes: {}, commit_message: '' },
-    objectType: OBJECT_TYPES.COMMIT,
-    url: window.api_urls.scratch_org_commit(orgId),
-    onSuccess: handleSuccess,
-    onError: handleError,
-    shouldSubscribeToObject: false,
-  });
 
   const setChanges = (changes: Changeset) => {
-    setInputs({ ...(inputs as Inputs), changes });
+    setInputs({ ...inputs, changes });
   };
 
   const handlePanelToggle = (groupName: string) => {
@@ -79,7 +36,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
   };
 
   const handleSelectGroup = (groupName: string, checked: boolean) => {
-    const newCheckedItems = cloneDeep((inputs as Inputs).changes);
+    const newCheckedItems = cloneDeep(inputs.changes);
     if (checked) {
       newCheckedItems[groupName] = [...changeset[groupName]];
     } else {
@@ -97,7 +54,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     change: string;
     checked: boolean;
   }) => {
-    const newCheckedItems = cloneDeep((inputs as Inputs).changes);
+    const newCheckedItems = cloneDeep(inputs.changes);
     const changes = newCheckedItems[groupName];
     if (checked) {
       if (changes) {
@@ -130,83 +87,43 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
     }
   };
 
-  const handleSubmitClicked = () => {
-    // Click hidden button inside form to activate native browser validation
-    /* istanbul ignore else */
-    if (submitButton.current) {
-      submitButton.current.click();
-    }
-  };
-
-  const handleClose = () => {
-    toggleModal(false);
-    resetForm();
-  };
-
-  const submitChanges = (e: React.FormEvent<HTMLFormElement>) => {
-    setCapturingChanges(true);
-    handleSubmit(e);
-  };
-
   const totalChanges = Object.values(changeset).flat().length;
-  const changesChecked = Object.values((inputs as Inputs).changes).flat()
-    .length;
+  const changesChecked = Object.values(inputs.changes).flat().length;
   const allChangesChecked = changesChecked === totalChanges;
   const noChangesChecked = !changesChecked;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      size="medium"
-      disableClose={capturingChanges}
-      heading={i18n.t('Select the changes to capture')}
-      footer={[
-        <Button
-          key="cancel"
-          label={i18n.t('Cancel')}
-          disabled={capturingChanges}
-          onClick={handleClose}
-        />,
-        <Button
-          key="submit"
-          type="submit"
-          label={
-            capturingChanges ? (
-              <LabelWithSpinner
-                label={i18n.t('Capturing Selected Changes…')}
-                variant="inverse"
-              />
-            ) : (
-              i18n.t('Capture Selected Changes')
-            )
-          }
-          variant="brand"
-          onClick={handleSubmitClicked}
-          disabled={!changesChecked || capturingChanges}
-        />,
-      ]}
-      onRequestClose={handleClose}
+    <form
+      className="slds-form slds-p-around_large has-checkboxes"
+      data-form="task-capture"
     >
-      <form
-        className="slds-form"
-        data-form="task-capture"
-        onSubmit={submitChanges}
-      >
-        <div className="slds-scrollable_y slds-p-around_large">
-          <div className="form-grid slds-p-around_x-small">
+      <ModalCard>
+        <Icon category="utility" name="open_folder" size="small" />
+        <code className="slds-p-left_x-small v-align-center">
+          {inputs.target_directory}
+        </code>
+      </ModalCard>
+      <ModalCard noBodyPadding>
+        <>
+          <div
+            className="form-grid
+              slds-m-left_xx-small
+              slds-p-left_x-large
+              slds-p-vertical_x-small
+              slds-p-right_medium"
+          >
             <Checkbox
               id="select-all"
               labels={{
-                label: `${i18n.t('Select All')}`,
+                label: `${i18n.t('Select All Changes')}`,
               }}
-              className="slds-p-left_none select-header-action-col"
               checked={allChangesChecked}
               indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
               errorText={errors.changes}
               onChange={handleSelectAllChange}
             />
-            <span className="select-header-changes-col">
-              ({getOrgTotalChanges(changeset)})
+            <span className="slds-text-body_regular slds-p-top_xxx-small">
+              ({totalChanges})
             </span>
           </div>
           {Object.keys(changeset)
@@ -220,7 +137,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
               ) => handleSelectGroup(groupName, checked);
               let checkedChildren = 0;
               for (const child of children) {
-                if ((inputs as Inputs).changes[groupName]?.includes(child)) {
+                if (inputs.changes[groupName]?.includes(child)) {
                   checkedChildren = checkedChildren + 1;
                 }
               }
@@ -244,14 +161,17 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                           )}
                           onChange={handleSelectThisGroup}
                         />
-                        <span className="slds-text-body_regular">
-                          ({getOrgChildChanges(children.length)})
+                        <span
+                          className="slds-text-body_regular
+                            slds-p-top_xxx-small"
+                        >
+                          ({children.length})
                         </span>
                       </div>
                     }
                     summary=""
                   >
-                    {changeset[groupName].sort().map((change) => (
+                    {children.sort().map((change) => (
                       <Checkbox
                         key={`${groupName}-${change}`}
                         labels={{
@@ -260,9 +180,7 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                         className="slds-p-left_xx-large"
                         name="changes"
                         checked={Boolean(
-                          (inputs as Inputs).changes[groupName]?.includes(
-                            change,
-                          ),
+                          inputs.changes[groupName]?.includes(change),
                         )}
                         onChange={(
                           event: React.ChangeEvent<HTMLInputElement>,
@@ -274,29 +192,10 @@ const CaptureModal = ({ orgId, changeset, isOpen, toggleModal }: Props) => {
                 </Accordion>
               );
             })}
-        </div>
-        <Input
-          id="commit-message"
-          label={i18n.t('Commit Message')}
-          className="slds-p-vertical_medium slds-p-horizontal_large"
-          name="commit_message"
-          value={(inputs as Inputs).commit_message}
-          required
-          aria-required
-          maxLength="50"
-          errorText={errors.commit_message}
-          onChange={handleInputChange}
-        />
-        {/* Clicking hidden button allows for native browser form validation */}
-        <button
-          ref={submitButton}
-          type="submit"
-          style={{ display: 'none' }}
-          disabled={!changesChecked || capturingChanges}
-        />
-      </form>
-    </Modal>
+        </>
+      </ModalCard>
+    </form>
   );
 };
 
-export default CaptureModal;
+export default ChangesForm;

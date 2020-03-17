@@ -55,24 +55,34 @@ class PushMixin:
             self, {"type": type_, "payload": message}
         )
 
-    def notify_changed(self, type_=None):
+    def notify_changed(self, *, type_=None, originating_user_id):
         self._push_message(
-            type_ or self.push_update_type, self.get_serialized_representation()
+            type_ or self.push_update_type,
+            {
+                "originating_user_id": originating_user_id,
+                "model": self.get_serialized_representation(),
+            },
         )
 
-    def notify_error(self, error, type_=None):
+    def notify_error(self, error, *, type_=None, originating_user_id):
         self._push_message(
             type_ or self.push_error_type,
-            {"message": str(error), "model": self.get_serialized_representation()},
+            {
+                "originating_user_id": originating_user_id,
+                "message": str(error),
+                "model": self.get_serialized_representation(),
+            },
         )
 
-    def notify_scratch_org_error(self, error, type_):
+    def notify_scratch_org_error(self, *, error, type_, originating_user_id):
         """
         This is only used in the ScratchOrg model currently, but it
-        follows the pattern enough that I waned to move it into this
+        follows the pattern enough that I wanted to move it into this
         mixin.
         """
-        async_to_sync(push.report_scratch_org_error)(self, error, type_)
+        async_to_sync(push.report_scratch_org_error)(
+            self, error=error, type_=type_, originating_user_id=originating_user_id
+        )
 
 
 class CreatePrMixin:
@@ -87,13 +97,21 @@ class CreatePrMixin:
     create_pr_event = ""  # Implement this
 
     def queue_create_pr(
-        self, user, *, title, critical_changes, additional_changes, issues, notes
+        self,
+        user,
+        *,
+        title,
+        critical_changes,
+        additional_changes,
+        issues,
+        notes,
+        originating_user_id,
     ):
         from .jobs import create_pr_job
 
         self.currently_creating_pr = True
         self.save()
-        self.notify_changed()
+        self.notify_changed(originating_user_id=originating_user_id)
 
         repo_id = self.get_repo_id(user)
         base = self.get_base()
@@ -110,12 +128,15 @@ class CreatePrMixin:
             additional_changes=additional_changes,
             issues=issues,
             notes=notes,
+            originating_user_id=originating_user_id,
         )
 
-    def finalize_create_pr(self, error=None):
+    def finalize_create_pr(self, *, error=None, originating_user_id):
         self.currently_creating_pr = False
         self.save()
         if error is None:
-            self.notify_changed(self.create_pr_event)
+            self.notify_changed(
+                type_=self.create_pr_event, originating_user_id=originating_user_id
+            )
         else:
-            self.notify_error(error)
+            self.notify_error(error=error, originating_user_id=originating_user_id)

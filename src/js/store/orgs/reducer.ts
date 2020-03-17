@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
@@ -29,6 +27,16 @@ export interface Org {
   currently_capturing_changes: boolean;
   currently_refreshing_org: boolean;
   delete_queued_at: string | null;
+  has_been_visited: boolean;
+  valid_target_directories: TargetDirectories;
+  last_checked_unsaved_changes_at: string | null;
+}
+
+export interface TargetDirectories {
+  source?: string[];
+  pre?: string[];
+  post?: string[];
+  config?: string[];
 }
 
 export interface Changeset {
@@ -176,7 +184,7 @@ const reducer = (
       const {
         objectType,
         object,
-      }: { objectType: ObjectTypes; object: Org } = action.payload;
+      }: { objectType?: ObjectTypes; object: Org } = action.payload;
       if (objectType === OBJECT_TYPES.ORG && object) {
         const taskOrgs = orgs[object.task] || {
           [ORG_TYPES.DEV]: null,

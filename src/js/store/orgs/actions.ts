@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
+import { isCurrentUser } from '@/store/helpers';
 import { Org } from '@/store/orgs/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
@@ -53,15 +54,17 @@ export type OrgsAction =
   | CommitEvent
   | OrgRefresh;
 
-export const provisionOrg = (payload: Org): ThunkResult => (
-  dispatch,
-  getState,
-) => {
+export const provisionOrg = ({
+  model,
+  originating_user_id,
+}: {
+  model: Org;
+  originating_user_id: string | null;
+}): ThunkResult<OrgProvisioned> => (dispatch, getState) => {
   const state = getState();
-  const user = state.user;
   /* istanbul ignore else */
-  if (user && user.id === payload.owner) {
-    const task = selectTaskById(state, payload.task);
+  if (isCurrentUser(originating_user_id, state)) {
+    const task = selectTaskById(state, model.task);
     let msg = {
       [ORG_TYPES.DEV]: i18n.t('Successfully created Dev org.'),
       [ORG_TYPES.QA]: i18n.t('Successfully created Review org.'),
@@ -78,31 +81,32 @@ export const provisionOrg = (payload: Org): ThunkResult => (
     }
     dispatch(
       addToast({
-        heading: msg[payload.org_type],
-        linkText: payload.url ? i18n.t('View your new org.') : undefined,
-        linkUrl: payload.url
-          ? window.api_urls.scratch_org_redirect(payload.id)
+        heading: msg[model.org_type],
+        linkText: model.url ? i18n.t('View your new org.') : undefined,
+        linkUrl: model.url
+          ? window.api_urls.scratch_org_redirect(model.id)
           : undefined,
         openLinkInNewWindow: true,
       }),
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_PROVISION',
-    payload,
+    type: 'SCRATCH_ORG_PROVISION' as 'SCRATCH_ORG_PROVISION',
+    payload: model,
   });
 };
 
 export const provisionFailed = ({
   model,
   message,
+  originating_user_id,
 }: {
   model: Org;
   message?: string;
-}): ThunkResult => (dispatch, getState) => {
+  originating_user_id: string | null;
+}): ThunkResult<OrgProvisionFailed> => (dispatch, getState) => {
   const state = getState();
-  const user = state.user;
-  if (user && user.id === model.owner) {
+  if (isCurrentUser(originating_user_id, state)) {
     const task = selectTaskById(state, model.task);
     let msg = {
       [ORG_TYPES.DEV]: i18n.t(
@@ -131,12 +135,14 @@ export const provisionFailed = ({
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_PROVISION_FAILED',
+    type: 'SCRATCH_ORG_PROVISION_FAILED' as 'SCRATCH_ORG_PROVISION_FAILED',
     payload: model,
   });
 };
 
-export const refetchOrg = (org: Org): ThunkResult => async (dispatch) => {
+export const refetchOrg = (
+  org: Org,
+): ThunkResult<Promise<RefetchOrg>> => async (dispatch) => {
   const url = window.api_urls.scratch_org_detail(org.id);
   dispatch({
     type: 'REFETCH_ORG_STARTED',
@@ -148,18 +154,17 @@ export const refetchOrg = (org: Org): ThunkResult => async (dispatch) => {
       throw new Error(`No URL found for org: ${org.id}`);
     }
     const response = await apiFetch({
-      // eslint-disable-next-line @typescript-eslint/camelcase
       url: addUrlParams(url, { get_unsaved_changes: true }),
       dispatch,
     });
     if (!response) {
       return dispatch({
-        type: 'REFETCH_ORG_FAILED',
+        type: 'REFETCH_ORG_FAILED' as 'REFETCH_ORG_FAILED',
         payload: { org, url, response },
       });
     }
     return dispatch({
-      type: 'REFETCH_ORG_SUCCEEDED',
+      type: 'REFETCH_ORG_SUCCEEDED' as 'REFETCH_ORG_SUCCEEDED',
       payload: { org: response, url },
     });
   } catch (err) {
@@ -179,14 +184,15 @@ export const updateOrg = (payload: Org): OrgUpdated => ({
 export const updateFailed = ({
   model,
   message,
+  originating_user_id,
 }: {
   model: Org;
   message?: string;
-}): ThunkResult => (dispatch, getState) => {
+  originating_user_id: string | null;
+}): ThunkResult<OrgUpdated> => (dispatch, getState) => {
   const state = getState();
-  const user = state.user;
   /* istanbul ignore else */
-  if (user && user.id === model.owner) {
+  if (isCurrentUser(originating_user_id, state)) {
     const task = selectTaskById(state, model.task);
     dispatch(
       addToast({
@@ -202,19 +208,18 @@ export const updateFailed = ({
       }),
     );
   }
-  return dispatch({
-    type: 'SCRATCH_ORG_UPDATE',
-    payload: model,
-  });
+  return dispatch(updateOrg(model));
 };
 
 export const deleteOrg = ({
-  org,
+  model,
   message,
+  originating_user_id,
 }: {
-  org: Org;
+  model: Org;
   message?: string;
-}): ThunkResult => (dispatch, getState) => {
+  originating_user_id: string | null;
+}): ThunkResult<OrgDeleted> => (dispatch, getState) => {
   /* istanbul ignore else */
   if (window.socket) {
     // This unsubscription is important. In the case of an expired or deleted
@@ -228,12 +233,11 @@ export const deleteOrg = ({
     // See https://github.com/oddbird/MetaShare/pull/79#discussion_r347644315
     window.socket.unsubscribe({
       model: OBJECT_TYPES.ORG,
-      id: org.id,
+      id: model.id,
     });
   }
   const state = getState();
-  const user = state.user;
-  if (user && user.id === org.owner) {
+  if (isCurrentUser(originating_user_id, state)) {
     if (message) {
       dispatch(
         addToast({
@@ -245,7 +249,7 @@ export const deleteOrg = ({
         }),
       );
     } else {
-      const task = selectTaskById(state, org.task);
+      const task = selectTaskById(state, model.task);
       let msg = {
         [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev org.'),
         [ORG_TYPES.QA]: i18n.t('Successfully deleted Review org.'),
@@ -261,26 +265,27 @@ export const deleteOrg = ({
           )} “${task.name}”.`,
         };
       }
-      dispatch(addToast({ heading: msg[org.org_type] }));
+      dispatch(addToast({ heading: msg[model.org_type] }));
     }
   }
   return dispatch({
-    type: 'SCRATCH_ORG_DELETE',
-    payload: org,
+    type: 'SCRATCH_ORG_DELETE' as 'SCRATCH_ORG_DELETE',
+    payload: model,
   });
 };
 
 export const deleteFailed = ({
   model,
   message,
+  originating_user_id,
 }: {
   model: Org;
   message?: string;
-}): ThunkResult => (dispatch, getState) => {
+  originating_user_id: string | null;
+}): ThunkResult<OrgDeleteFailed> => (dispatch, getState) => {
   const state = getState();
-  const user = state.user;
   /* istanbul ignore else */
-  if (user && user.id === model.owner) {
+  if (isCurrentUser(originating_user_id, state)) {
     const task = selectTaskById(state, model.task);
     let msg = {
       [ORG_TYPES.DEV]: i18n.t(
@@ -310,20 +315,22 @@ export const deleteFailed = ({
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_DELETE_FAILED',
+    type: 'SCRATCH_ORG_DELETE_FAILED' as 'SCRATCH_ORG_DELETE_FAILED',
     payload: model,
   });
 };
 
-export const commitSucceeded = (payload: Org): ThunkResult => (
-  dispatch,
-  getState,
-) => {
+export const commitSucceeded = ({
+  model,
+  originating_user_id,
+}: {
+  model: Org;
+  originating_user_id: string | null;
+}): ThunkResult<CommitEvent> => (dispatch, getState) => {
   const state = getState();
-  const user = state.user;
   /* istanbul ignore else */
-  if (user && user.id === payload.owner) {
-    const task = selectTaskById(state, payload.task);
+  if (isCurrentUser(originating_user_id, state)) {
+    const task = selectTaskById(state, model.task);
     dispatch(
       addToast({
         heading: task
@@ -335,22 +342,23 @@ export const commitSucceeded = (payload: Org): ThunkResult => (
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_COMMIT_CHANGES',
-    payload,
+    type: 'SCRATCH_ORG_COMMIT_CHANGES' as 'SCRATCH_ORG_COMMIT_CHANGES',
+    payload: model,
   });
 };
 
 export const commitFailed = ({
   model,
   message,
+  originating_user_id,
 }: {
   model: Org;
   message?: string;
-}): ThunkResult => (dispatch, getState) => {
+  originating_user_id: string | null;
+}): ThunkResult<CommitEvent> => (dispatch, getState) => {
   const state = getState();
-  const user = state.user;
   /* istanbul ignore else */
-  if (user && user.id === model.owner) {
+  if (isCurrentUser(originating_user_id, state)) {
     const task = selectTaskById(state, model.task);
     dispatch(
       addToast({
@@ -367,12 +375,14 @@ export const commitFailed = ({
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
+    type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED' as 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
     payload: model,
   });
 };
 
-export const refreshOrg = (org: Org): ThunkResult => async (dispatch) => {
+export const refreshOrg = (
+  org: Org,
+): ThunkResult<Promise<OrgRefresh>> => async (dispatch) => {
   dispatch({ type: 'SCRATCH_ORG_REFRESH_REQUESTED', payload: org });
   try {
     await apiFetch({
@@ -383,7 +393,7 @@ export const refreshOrg = (org: Org): ThunkResult => async (dispatch) => {
       },
     });
     return dispatch({
-      type: 'SCRATCH_ORG_REFRESH_ACCEPTED',
+      type: 'SCRATCH_ORG_REFRESH_ACCEPTED' as 'SCRATCH_ORG_REFRESH_ACCEPTED',
       payload: org,
     });
   } catch (err) {
@@ -395,15 +405,17 @@ export const refreshOrg = (org: Org): ThunkResult => async (dispatch) => {
   }
 };
 
-export const orgRefreshed = (payload: Org): ThunkResult => (
-  dispatch,
-  getState,
-) => {
+export const orgRefreshed = ({
+  model,
+  originating_user_id,
+}: {
+  model: Org;
+  originating_user_id: string | null;
+}): ThunkResult<OrgUpdated> => (dispatch, getState) => {
   const state = getState();
-  const user = state.user;
   /* istanbul ignore else */
-  if (user && user.id === payload.owner) {
-    const task = selectTaskById(state, payload.task);
+  if (isCurrentUser(originating_user_id, state)) {
+    const task = selectTaskById(state, model.task);
     dispatch(
       addToast({
         heading: task
@@ -414,20 +426,21 @@ export const orgRefreshed = (payload: Org): ThunkResult => (
       }),
     );
   }
-  return dispatch(updateOrg(payload));
+  return dispatch(updateOrg(model));
 };
 
 export const refreshError = ({
   model,
   message,
+  originating_user_id,
 }: {
   model: Org;
   message?: string;
-}): ThunkResult => (dispatch, getState) => {
+  originating_user_id: string | null;
+}): ThunkResult<OrgUpdated> => (dispatch, getState) => {
   const state = getState();
-  const user = state.user;
   /* istanbul ignore else */
-  if (user && user.id === model.owner) {
+  if (isCurrentUser(originating_user_id, state)) {
     const task = selectTaskById(state, model.task);
     dispatch(
       addToast({

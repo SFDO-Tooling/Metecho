@@ -296,17 +296,42 @@ class TestHookView:
 @pytest.mark.django_db
 class TestScratchOrgView:
     def test_commit_happy_path(self, client, scratch_org_factory):
+        scratch_org = scratch_org_factory(
+            org_type="Dev",
+            owner=client.user,
+            valid_target_directories={"source": ["src"]},
+        )
+        with patch(
+            "metashare.api.jobs.commit_changes_from_org_job"
+        ) as commit_changes_from_org_job:
+            response = client.post(
+                reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
+                {
+                    "commit_message": "Test message",
+                    "changes": {},
+                    "target_directory": "src",
+                },
+                format="json",
+            )
+            assert response.status_code == 202
+            assert commit_changes_from_org_job.delay.called
+
+    def test_commit_invalid_target_directory(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"
         ) as commit_changes_from_org_job:
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
-                {"commit_message": "Test message", "changes": {}},
+                {
+                    "commit_message": "Test message",
+                    "changes": {},
+                    "target_directory": "src",
+                },
                 format="json",
             )
-            assert response.status_code == 202
-            assert commit_changes_from_org_job.delay.called
+            assert response.status_code == 400
+            assert not commit_changes_from_org_job.delay.called
 
     def test_commit_sad_path__422(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(org_type="Dev")
@@ -328,7 +353,11 @@ class TestScratchOrgView:
         ) as commit_changes_from_org_job:
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
-                {"commit_message": "Test message", "changes": {}},
+                {
+                    "commit_message": "Test message",
+                    "changes": {},
+                    "target_directory": "src",
+                },
                 format="json",
             )
             assert response.status_code == 403
@@ -515,3 +544,53 @@ class TestTaskView:
             )
 
             assert response.status_code == 400
+
+    def test_review__good(self, client, task_factory):
+        task = task_factory(pr_is_open=True, review_valid=True)
+        with patch("metashare.api.jobs.submit_review_job") as submit_review_job:
+            data = {
+                "notes": "",
+                "status": "Approved",
+                "delete_org": False,
+                "org": "",
+            }
+            response = client.post(
+                reverse("task-review", kwargs={"pk": str(task.id)}), data
+            )
+
+            assert response.status_code == 202, response.json()
+            assert submit_review_job.delay.called
+
+    def test_review__bad(self, client, task_factory):
+        task = task_factory(pr_is_open=True, review_valid=True)
+        response = client.post(reverse("task-review", kwargs={"pk": str(task.id)}), {})
+
+        assert response.status_code == 422
+
+    def test_review__bad_pr_closed(self, client, task_factory):
+        task = task_factory(pr_is_open=False, review_valid=True)
+        data = {
+            "notes": "",
+            "status": "Approved",
+            "delete_org": False,
+            "org": "",
+        }
+        response = client.post(
+            reverse("task-review", kwargs={"pk": str(task.id)}), data
+        )
+
+        assert response.status_code == 400
+
+    def test_review__bad_invalid_review(self, client, task_factory):
+        task = task_factory(pr_is_open=True, review_valid=False)
+        data = {
+            "notes": "",
+            "status": "Approved",
+            "delete_org": False,
+            "org": "",
+        }
+        response = client.post(
+            reverse("task-review", kwargs={"pk": str(task.id)}), data
+        )
+
+        assert response.status_code == 400

@@ -25,7 +25,7 @@ describe('<CommitList/>', () => {
 
     expect(getByText('abc123d')).toBeVisible();
     expect(getByText('This is a commit')).toBeVisible();
-    expect(getAllByTitle('author123 (Author)').length).toEqual(2);
+    expect(getAllByTitle('author123 (Author)')).toHaveLength(2);
   });
 
   test('combines author username/name if identical', () => {

@@ -12,7 +12,7 @@ describe('updateProject', () => {
 
 describe('createProjectPR', () => {
   test('adds success message', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const project = {
       id: 'project-id',
       name: 'My Project',
@@ -22,7 +22,12 @@ describe('createProjectPR', () => {
       type: 'PROJECT_UPDATE',
       payload: project,
     };
-    store.dispatch(actions.createProjectPR(project));
+    store.dispatch(
+      actions.createProjectPR({
+        model: project,
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
@@ -35,7 +40,7 @@ describe('createProjectPR', () => {
   });
 
   test('adds success message [no pr url]', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const project = {
       id: 'project-id',
       name: 'My Project',
@@ -44,22 +49,27 @@ describe('createProjectPR', () => {
       type: 'PROJECT_UPDATE',
       payload: project,
     };
-    store.dispatch(actions.createProjectPR(project));
+    store.dispatch(
+      actions.createProjectPR({
+        model: project,
+        originating_user_id: 'user-id',
+      }),
+    );
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
       'Successfully submitted project for review: “My Project”.',
     );
-    expect(allActions[0].payload.linkText).toBe(undefined);
-    expect(allActions[0].payload.linkUrl).toBe(undefined);
+    expect(allActions[0].payload.linkText).toBeUndefined();
+    expect(allActions[0].payload.linkUrl).toBeUndefined();
     expect(allActions[1]).toEqual(action);
   });
 });
 
 describe('createProjectPRFailed', () => {
   test('adds error message', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ user: { id: 'user-id' } });
     const project = {
       id: 'project-id',
       name: 'My Project',
@@ -69,7 +79,11 @@ describe('createProjectPRFailed', () => {
       payload: project,
     };
     store.dispatch(
-      actions.createProjectPRFailed({ model: project, message: 'error msg' }),
+      actions.createProjectPRFailed({
+        model: project,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
     );
     const allActions = store.getActions();
 

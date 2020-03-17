@@ -18,6 +18,8 @@ Websocket notifications you can subscribe to:
         TASK_UPDATE
         TASK_CREATE_PR
         TASK_CREATE_PR_FAILED
+        TASK_SUBMIT_REVIEW
+        TASK_SUBMIT_REVIEW_FAILED
 
     scratchorg.:id
         SCRATCH_ORG_PROVISION
@@ -60,7 +62,7 @@ async def report_error(user):
     await push_message_about_instance(user, message)
 
 
-async def report_scratch_org_error(instance, err, type_):
+async def report_scratch_org_error(instance, *, error, type_, originating_user_id):
     from .serializers import ScratchOrgSerializer
 
     # @jgerigmeyer asked for the error to be unwrapped in the case that
@@ -68,17 +70,21 @@ async def report_scratch_org_error(instance, err, type_):
     # discussion:
     # https://github.com/SFDO-Tooling/MetaShare/pull/149#discussion_r327308563
     try:
-        message = err.content
+        message = error.content
         if isinstance(message, list) and len(message) == 1:
             message = message[0]
         if isinstance(message, dict):
             message = message.get("message", message)
         message = str(message)
     except AttributeError:
-        message = str(err)
+        message = str(error)
 
     message = {
         "type": type_,
-        "payload": {"message": message, "model": ScratchOrgSerializer(instance).data},
+        "payload": {
+            "message": message,
+            "originating_user_id": originating_user_id,
+            "model": ScratchOrgSerializer(instance).data,
+        },
     }
     await push_message_about_instance(instance, message)

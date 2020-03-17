@@ -135,7 +135,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
-    "parler",
     "anymail",
     "metashare",
     "metashare.multisalesforce",
@@ -195,8 +194,6 @@ ASGI_APPLICATION = "metashare.routing.application"
 
 SITE_ID = 1
 
-PARLER_LANGUAGES = {1: ({"code": "en-us"},), "default": {"fallback": "en-us"}}
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -210,6 +207,7 @@ AUTH_USER_MODEL = "api.User"
 ROOT_URLCONF = "metashare.urls"
 
 ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin")
+UNRESTRICTED_PREFIXES = ["api/hook"]
 
 ADMIN_API_ALLOWED_SUBNETS = env(
     "ADMIN_API_ALLOWED_SUBNETS",
@@ -250,6 +248,9 @@ SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=True, type_=boolish)
 SESSION_COOKIE_SECURE = env(
     "SESSION_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
 )
+# "Lax" is required for GitHub login redirects to work properly
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = env(
     "CSRF_COOKIE_SECURE", default=SECURE_SSL_REDIRECT, type_=boolish
 )
@@ -291,6 +292,7 @@ else:
 DAYS_BEFORE_ORG_EXPIRY_TO_ALERT = env(
     "DAYS_BEFORE_ORG_EXPIRY_TO_ALERT", default=3, type_=int
 )
+ORG_RECHECK_MINUTES = env("ORG_RECHECK_MINUTES", default=5, type_=int)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/

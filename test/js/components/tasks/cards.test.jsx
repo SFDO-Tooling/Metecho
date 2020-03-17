@@ -66,6 +66,7 @@ const defaultTask = {
   assigned_qa: { id: 'user-id', login: 'user-name' },
   commits: [{ id: '617a512-longlong' }, { id: 'other' }],
   origin_sha: 'parent',
+  review_submitted_at: '2019-10-16T12:58:53.721Z',
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
@@ -364,15 +365,13 @@ describe('<OrgCards/>', () => {
       },
     };
 
-    describe('up to date', () => {
-      test('renders "Up to Date"', () => {
-        const { getByText } = setup({
-          task: { ...defaultTask, commits: [] },
-          orgs: { ...orgs, QA: { ...orgs.QA, latest_commit: 'parent' } },
-        });
-
-        expect(getByText('Up to Date')).toBeVisible();
+    test('renders "Up to Date"', () => {
+      const { getByText } = setup({
+        task: { ...defaultTask, commits: [] },
+        orgs: { ...orgs, QA: { ...orgs.QA, latest_commit: 'parent' } },
       });
+
+      expect(getByText('Up to Date')).toBeVisible();
     });
 
     describe('out of date', () => {
@@ -440,6 +439,226 @@ describe('<OrgCards/>', () => {
           });
 
           expect(getByText('Refreshing Org…')).toBeVisible();
+        });
+      });
+    });
+
+    describe('submitting a review', () => {
+      test('opens submit review modal', () => {
+        const { getByText, queryByText } = setup({
+          task: { ...defaultTask, commits: [], pr_is_open: true },
+          orgs: {
+            ...orgs,
+            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+          },
+        });
+        fireEvent.click(getByText('Submit Review'));
+
+        expect(getByText('Submit Task Review')).toBeVisible();
+
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Submit Task Review')).toBeNull();
+      });
+
+      test('updates default fields when props change', () => {
+        let task = { ...defaultTask, commits: [], pr_is_open: true };
+        const theseOrgs = {
+          ...orgs,
+          QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+        };
+        const {
+          getByText,
+          getByLabelText,
+          queryByLabelText,
+          store,
+          rerender,
+        } = setup({
+          task,
+          orgs: theseOrgs,
+        });
+        fireEvent.click(getByText('Submit Review'));
+
+        expect(getByLabelText('Approve')).toBeChecked();
+        expect(getByLabelText('Request changes')).not.toBeChecked();
+
+        task = {
+          ...task,
+          review_valid: true,
+          review_status: 'Changes requested',
+        };
+        setup({ task, orgs, store, rerender });
+
+        expect(getByLabelText('Approve')).not.toBeChecked();
+        expect(getByLabelText('Request changes')).toBeChecked();
+        expect(getByLabelText('Delete Review Org')).toBeChecked();
+
+        setup({ task, orgs: { Dev: null, QA: null }, store, rerender });
+
+        expect(queryByLabelText('Delete Review Org')).toBeNull();
+      });
+
+      describe('form submit', () => {
+        test('submits task for review', () => {
+          const { getByText, baseElement } = setup({
+            task: { ...defaultTask, commits: [], pr_is_open: true },
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+              },
+            },
+          });
+          fireEvent.click(getByText('Submit Review'));
+          const submit = baseElement.querySelector(
+            '.slds-button[type="submit"]',
+          );
+          fireEvent.click(submit);
+
+          expect(getByText('Submitting Review…')).toBeVisible();
+          expect(createObject).toHaveBeenCalledTimes(1);
+          expect(createObject).toHaveBeenCalledWith({
+            url: window.api_urls.task_review('task-id'),
+            data: {
+              notes: '',
+              status: 'Approved',
+              delete_org: true,
+              org: 'org-id',
+            },
+            hasForm: true,
+            shouldSubscribeToObject: false,
+          });
+        });
+      });
+
+      test('currently submitting', () => {
+        const { getByText } = setup({
+          task: {
+            ...defaultTask,
+            commits: [],
+            pr_is_open: true,
+            currently_submitting_review: true,
+          },
+          orgs: {
+            ...orgs,
+            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
+          },
+        });
+
+        expect(getByText('Submitting Review…')).toBeVisible();
+      });
+
+      describe('submit review btn', () => {
+        test('updating review', () => {
+          const { getByText } = setup({
+            task: {
+              ...defaultTask,
+              commits: [],
+              pr_is_open: true,
+              review_valid: true,
+            },
+            orgs: {
+              Dev: null,
+              QA: null,
+            },
+          });
+
+          expect(getByText('Update Review')).toBeVisible();
+        });
+
+        test('disabled', () => {
+          const { getByText } = setup({
+            task: {
+              ...defaultTask,
+              commits: [],
+              pr_is_open: true,
+              review_valid: false,
+            },
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: false,
+              },
+            },
+          });
+
+          expect(getByText('Submit Review')).toHaveClass('btn-disabled');
+        });
+      });
+
+      describe('orgStatus', () => {
+        test('renders "Approved" status', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+                url: 'url',
+              },
+            },
+            task: {
+              ...defaultTask,
+              commits: [],
+              review_status: 'Approved',
+              review_valid: true,
+            },
+          });
+
+          expect(getByText('Approved')).toBeVisible();
+        });
+
+        test('renders "Changes requested" status', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+                url: 'url',
+              },
+            },
+            task: {
+              ...defaultTask,
+              commits: [],
+              review_status: 'Changes requested',
+              review_valid: true,
+            },
+          });
+
+          expect(
+            getByText('Changes requested', { exact: false }),
+          ).toBeVisible();
+        });
+
+        test('renders "Review out of date" status', () => {
+          const { getByText } = setup({
+            orgs: {
+              ...orgs,
+              QA: {
+                ...orgs.QA,
+                latest_commit: 'parent',
+                has_been_visited: true,
+                url: 'url',
+              },
+            },
+            task: {
+              ...defaultTask,
+              commits: [],
+              review_status: 'Approved',
+              review_valid: false,
+            },
+          });
+
+          expect(
+            getByText('Review out of date', { exact: false }),
+          ).toBeVisible();
         });
       });
     });

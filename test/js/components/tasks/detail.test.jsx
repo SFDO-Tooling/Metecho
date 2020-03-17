@@ -104,9 +104,14 @@ const defaultState = {
         latest_commit: '617a51',
         latest_commit_url: '/test/commit/url/',
         latest_commit_at: '2019-08-16T12:58:53.721Z',
+        last_checked_unsaved_changes_at: new Date().toISOString(),
         url: '/test/org/url/',
         unsaved_changes: { Foo: ['Bar'] },
         has_unsaved_changes: true,
+        valid_target_directories: {
+          source: ['src'],
+          post: ['foo/bar', 'buz/baz'],
+        },
       },
       QA: null,
     },
@@ -274,7 +279,30 @@ describe('<TaskDetail/>', () => {
 
       expect(refetchArgs.id).toEqual('org-id');
 
-      expect(getByText('Select the changes to capture')).toBeVisible();
+      expect(getByText('Select the location to capture changes')).toBeVisible();
+    });
+
+    describe('org has been checked within past 5 minutes', () => {
+      let ORG_RECHECK_MINUTES;
+
+      beforeAll(() => {
+        ORG_RECHECK_MINUTES = window.GLOBALS.ORG_RECHECK_MINUTES;
+        window.GLOBALS.ORG_RECHECK_MINUTES = 5;
+      });
+
+      afterAll(() => {
+        window.GLOBALS.ORG_RECHECK_MINUTES = ORG_RECHECK_MINUTES;
+      });
+
+      test('just opens modal', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Capture Task Changes'));
+
+        expect(refetchOrg).not.toHaveBeenCalled();
+        expect(
+          getByText('Select the location to capture changes'),
+        ).toBeVisible();
+      });
     });
   });
 
@@ -296,7 +324,7 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(getAllByText('Capturing Selected Changes…').length).toEqual(2);
+      expect(getAllByText('Capturing Selected Changes…')).toHaveLength(2);
     });
   });
 
