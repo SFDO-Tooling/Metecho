@@ -35,6 +35,7 @@ from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+PROJECT_STATUSES = Choices("Planned", "In progress", "Review", "Merged",)
 TASK_STATUSES = Choices(
     ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
 )
@@ -340,6 +341,10 @@ class Project(
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
+    pr_is_merged = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned,
+    )
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -357,6 +362,10 @@ class Project(
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.update_status()
+        return super().save(*args, **kwargs)
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -386,6 +395,36 @@ class Project(
 
     # end CreatePrMixin configuration
 
+    def should_update_in_progress(self):
+        task_statuses = self.tasks.values_list("status", flat=True)
+        return task_statuses and any(
+            status != TASK_STATUSES.Planned for status in task_statuses
+        )
+
+    def should_update_review(self):
+        task_statuses = self.tasks.values_list("status", flat=True)
+        return task_statuses and all(
+            status == TASK_STATUSES.Completed for status in task_statuses
+        )
+
+    def should_update_merged(self):
+        return self.pr_is_merged
+
+    def should_update_status(self):
+        return (
+            self.should_update_in_progress()
+            or self.should_update_review()
+            or self.should_update_merged()
+        )
+
+    def update_status(self):
+        if self.should_update_merged():
+            self.status = PROJECT_STATUSES.Merged
+        elif self.should_update_review():
+            self.status = PROJECT_STATUSES.Review
+        elif self.should_update_in_progress():
+            self.status = PROJECT_STATUSES["In progress"]
+
     def finalize_pr_closed(self, *, originating_user_id):
         self.pr_is_open = False
         self.save()
@@ -401,6 +440,7 @@ class Project(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_status_completed(self, *, originating_user_id):
+        self.pr_is_merged = True
         self.has_unmerged_commits = False
         self.pr_is_open = False
         self.save()
@@ -460,6 +500,14 @@ class Task(
     def __str__(self):
         return self.name
 
+    def save(self, *args, force_project_save=True, **kwargs):
+        ret = super().save(*args, **kwargs)
+        # To update the project's status:
+        if force_project_save or self.project.should_update_status():
+            self.project.save()
+            self.project.notify_changed(originating_user_id=None)
+        return ret
+
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
@@ -504,11 +552,10 @@ class Task(
         self.status = TASK_STATUSES.Completed
         self.has_unmerged_commits = False
         self.pr_is_open = False
-        self.save()
-        self.notify_changed(originating_user_id=originating_user_id)
         self.project.has_unmerged_commits = True
-        self.project.save()
-        self.project.notify_changed(originating_user_id=originating_user_id)
+        # This will save the project, too:
+        self.save(force_project_save=True)
+        self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_closed(self, *, originating_user_id):
         self.pr_is_open = False
@@ -538,8 +585,7 @@ class Task(
         ] + self.commits
         self.update_review_valid()
         self.save()
-        # This comes from the GitHub hook, and so should pertain to
-        # everyone:
+        # This comes from the GitHub hook, and so has no originating user:
         self.notify_changed(originating_user_id=None)
 
     def add_ms_git_sha(self, sha):
@@ -631,7 +677,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         ret = super().save(*args, **kwargs)
 
         if is_new:
-            self.queue_provision(originating_user_id=None)
+            self.queue_provision(originating_user_id=str(self.owner.id))
 
         return ret
 

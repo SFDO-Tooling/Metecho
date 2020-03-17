@@ -142,7 +142,7 @@ one-person-at-a-time thing, which is a problem for which we don't yet have
 a solution.
 
 As an OddBird, you can access the app at
-`<https://github.com/organizations/oddbird/settings/apps/metashare-dev>`_.
+`<https://github.com/organizations/oddbird/settings/apps/metashare-local-dev>`_.
 
 Setting up the database
 -----------------------

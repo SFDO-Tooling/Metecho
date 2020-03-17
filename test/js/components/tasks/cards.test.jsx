@@ -586,7 +586,7 @@ describe('<OrgCards/>', () => {
             },
           });
 
-          expect(getByText('Submit Review')).toBeDisabled();
+          expect(getByText('Submit Review')).toHaveClass('btn-disabled');
         });
       });
 

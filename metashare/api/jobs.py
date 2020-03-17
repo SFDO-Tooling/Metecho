@@ -135,7 +135,14 @@ def alert_user_about_expiring_org(*, org, days):
 
 
 def _create_org_and_run_flow(
-    scratch_org, *, user, repo_id, repo_branch, project_path, sf_username=None
+    scratch_org,
+    *,
+    user,
+    repo_id,
+    repo_branch,
+    project_path,
+    originating_user_id,
+    sf_username=None,
 ):
     from .models import SCRATCH_ORG_TYPES
 
@@ -152,6 +159,7 @@ def _create_org_and_run_flow(
         user=user,
         project_path=project_path,
         scratch_org=scratch_org,
+        originating_user_id=originating_user_id,
         sf_username=sf_username,
     )
     scratch_org.refresh_from_db()
@@ -180,7 +188,9 @@ def _create_org_and_run_flow(
     # function is called in a context that will eventually call a
     # finalize_* method, which will save the model.
     scratch_org.last_modified_at = now()
-    scratch_org.latest_revision_numbers = get_latest_revision_numbers(scratch_org)
+    scratch_org.latest_revision_numbers = get_latest_revision_numbers(
+        scratch_org, originating_user_id=originating_user_id,
+    )
 
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
@@ -214,6 +224,7 @@ def create_branches_on_github_then_create_scratch_org(
                 repo_id=repo_id,
                 repo_branch=commit_ish,
                 project_path=repo_root,
+                originating_user_id=originating_user_id,
             )
     except Exception as e:
         scratch_org.finalize_provision(error=e, originating_user_id=originating_user_id)
@@ -246,6 +257,7 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
                 repo_id=repo_id,
                 repo_branch=commit_ish,
                 project_path=repo_root,
+                originating_user_id=originating_user_id,
                 sf_username=sf_username,
             )
     except Exception as e:
@@ -267,7 +279,9 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
     try:
         scratch_org.refresh_from_db()
         old_revision_numbers = scratch_org.latest_revision_numbers
-        new_revision_numbers = get_latest_revision_numbers(scratch_org)
+        new_revision_numbers = get_latest_revision_numbers(
+            scratch_org, originating_user_id=originating_user_id
+        )
         unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
         user = scratch_org.owner
         repo_id = scratch_org.task.project.repository.get_repo_id(user)
@@ -316,6 +330,7 @@ def commit_changes_from_org(
             desired_changes=desired_changes,
             commit_message=commit_message,
             target_directory=target_directory,
+            originating_user_id=originating_user_id,
         )
 
         # Update
@@ -335,7 +350,9 @@ def commit_changes_from_org(
 
         # Update scratch_org.latest_revision_numbers with appropriate
         # numbers for the values in desired_changes.
-        latest_revision_numbers = get_latest_revision_numbers(scratch_org)
+        latest_revision_numbers = get_latest_revision_numbers(
+            scratch_org, originating_user_id=originating_user_id
+        )
         for member_type in desired_changes.keys():
             for member_name in desired_changes[member_type]:
                 try:
@@ -400,6 +417,7 @@ def create_pr(
         instance.refresh_from_db()
         instance.pr_number = pr.number
         instance.pr_is_open = True
+        instance.pr_is_merged = False
     except Exception as e:
         instance.refresh_from_db()
         instance.finalize_create_pr(error=e, originating_user_id=originating_user_id)
@@ -428,7 +446,7 @@ def delete_scratch_org(scratch_org, *, originating_user_id):
             scratch_org.last_modified_at = now()
         if not scratch_org.latest_revision_numbers:
             scratch_org.latest_revision_numbers = get_latest_revision_numbers(
-                scratch_org
+                scratch_org, originating_user_id=originating_user_id,
             )
         scratch_org.save()
         async_to_sync(report_scratch_org_error)(
