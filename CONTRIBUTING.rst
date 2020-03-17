@@ -247,3 +247,28 @@ exposed to the front end, to properly generate translation files. See error
 message handling in ``metashare/api/sf_run_flow.py`` for an example.
 
 .. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector
+
+Setting up the GitHub App
+-------------------------
+
+To deploy this app, you will need to set up a GitHub app and give it
+proper permissions. You can do that at
+``https://github.com/organizations/<your org>/settings/apps``
+
+The app will need the following permissions:
+
+ - Repository permissions
+    - Contents: read & write (maybe could be just read?)
+    - Metadata: read-only
+    - Pull requests: read & write (maybe could be just read?)
+    - Commit statuses: read & write
+ - Organization permissions:
+    - None
+ - User permissions:
+    - None
+ - Subscribe to events:
+    - Pull request
+    - Push
+
+You'll need to then configure MetaShare to use that app per "Logging in
+with GitHub".
