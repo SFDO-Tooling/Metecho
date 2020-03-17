@@ -112,11 +112,11 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
     {
       label: `${i18n.t('Submit a review')}`,
       visible: true,
-      // Complete if Task PR is still open, a up-to-date Review Org exists,
+      // Active if Task PR is still open, a up-to-date Review Org exists,
       // and there isn't already a valid review.
       active:
         task.pr_is_open &&
-        hasReviewOrg &&
+        Boolean(hasReviewOrg && reviewOrg?.has_been_visited) &&
         !reviewOrgOutOfDate &&
         !task.review_valid,
       complete: task.review_valid,

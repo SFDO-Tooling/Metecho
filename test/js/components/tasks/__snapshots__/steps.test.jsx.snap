@@ -1531,7 +1531,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         </div>
       </li>
       <li
-        class="slds-progress__item slds-is-active"
+        class="slds-progress__item"
       >
         <div>
           <span
@@ -1556,13 +1556,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         </div>
         <div
           class="slds-progress__marker slds-m-left_small"
-        >
-          <span
-            class="slds-assistive-text"
-          >
-            Active
-          </span>
-        </div>
+        />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >

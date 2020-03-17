@@ -64,12 +64,6 @@ const OrgCard = ({
   const ownedByCurrentUser = Boolean(org?.url && user.id === org?.owner);
   const ownedByWrongUser =
     org?.url && org.owner_gh_username !== assignedUser?.login ? org : null;
-  const readyForReview = Boolean(
-    task.pr_is_open &&
-      assignedToCurrentUser &&
-      type === ORG_TYPES.QA &&
-      (org || task.review_valid),
-  );
   const isCreating = Boolean(isCreatingOrg || (org && !org.url));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
@@ -156,6 +150,15 @@ const OrgCard = ({
   const reviewOrgOutOfDate = Boolean(
     type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
   );
+
+  const readyForReview = Boolean(
+    task.pr_is_open &&
+      assignedToCurrentUser &&
+      type === ORG_TYPES.QA &&
+      !reviewOrgOutOfDate &&
+      (ownedByCurrentUser || (!org && task.review_valid)),
+  );
+
   const heading =
     type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
   const orgHeading =
@@ -192,6 +195,7 @@ const OrgCard = ({
             isRefreshingChanges={isRefreshingChanges}
             isRefreshingOrg={isRefreshingOrg}
             reviewOrgOutOfDate={reviewOrgOutOfDate}
+            readyForReview={readyForReview}
             openRefreshOrgModal={openRefreshOrgModal}
           />
         }
