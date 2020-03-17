@@ -258,9 +258,9 @@ proper permissions. You can do that at
 The app will need the following permissions:
 
  - Repository permissions
-    - Contents: read & write (maybe could be just read?)
+    - Contents: read & write
     - Metadata: read-only
-    - Pull requests: read & write (maybe could be just read?)
+    - Pull requests: read & write
     - Commit statuses: read & write
  - Organization permissions:
     - None
