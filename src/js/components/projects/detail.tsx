@@ -1,4 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Icon from '@salesforce/design-system-react/components/icon';
+import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -8,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import EditModal from '@/components/projects/edit';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
@@ -129,7 +132,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const readyToSubmit = Boolean(
     project?.has_unmerged_commits && !project?.pr_is_open,
   );
-
+  // "edit modal related:
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const openEditModal = () => {
+    setEditModalOpen(!editModalOpen);
+  };
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -187,13 +194,30 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Button
+      <Dropdown
+        align="right"
         iconCategory="utility"
-        iconName="delete"
-        iconPosition="left"
-        label={i18n.t('Delete Project')}
-        variant="text-destructive"
-        disabled
+        iconName="down"
+        iconPosition="right"
+        width="xx-small"
+        className="dropdown-btn"
+        triggerClassName="slds-m-right_xx-small"
+        onSelect={openEditModal}
+        label={
+          <Icon
+            category="utility"
+            name="settings"
+            size="x-small"
+            className="icon-link slds-m-bottom_xxx-small"
+          />
+        }
+        options={[
+          { label: 'Project Options', type: 'header' },
+          { label: 'Edit Name', value: 'edit' },
+          { label: 'Edit Description', value: 'edit' },
+          { type: 'divider' },
+          { label: 'Archive Project', value: 'archive' },
+        ]}
       />
       {branchLink ? (
         <ExternalLink
@@ -292,6 +316,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
           />
         )}
+        <EditModal
+          project={project}
+          isOpen={editModalOpen}
+          toggleModal={openEditModal}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );
