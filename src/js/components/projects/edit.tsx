@@ -10,14 +10,14 @@ import { Project } from '@/store/projects/reducer';
 interface EditModalProps {
   project: Project;
   isOpen: boolean;
-  toggleModal: boolean;
+  toggleModal: (open: boolean) => void;
 }
 const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
   const editNameRef = useRef(null);
   const editDescriptionRef = useRef(null);
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(editNameRef.current, editDescriptionRef.current);
   };
