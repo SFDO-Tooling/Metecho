@@ -207,6 +207,7 @@ AUTH_USER_MODEL = "api.User"
 ROOT_URLCONF = "metashare.urls"
 
 ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin")
+UNRESTRICTED_PREFIXES = ["api/hook"]
 
 ADMIN_API_ALLOWED_SUBNETS = env(
     "ADMIN_API_ALLOWED_SUBNETS",
