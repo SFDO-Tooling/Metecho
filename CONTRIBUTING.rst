@@ -68,16 +68,49 @@ Docker-based development
 .. _Docker Desktop (Community Edition): https://www.docker.com/products/docker-desktop
 .. _this issue: https://github.com/moby/moby/issues/12997
 
+Setting up the GitHub App
+-------------------------
+
+To deploy this app, you will need to set up a GitHub App and give it
+proper permissions. You can do that at
+``https://github.com/organizations/<your org>/settings/apps``
+
+The App will need the following permissions:
+
+- Repository permissions
+    - Contents: Read & write
+    - Metadata: Read-only
+    - Pull requests: Read & write
+    - Commit statuses: Read & write
+- Organization permissions:
+    - None
+- User permissions:
+    - Email addresses: Read-only
+- Subscribe to events:
+    - Pull request
+    - Push
+
+To enable logging in with GitHub, set the "User authorization callback URL" to
+``https://<your-deployed-url>/accounts/github/login/callback/``, and be sure the
+"Request user authorization (OAuth) during installation" box is checked.
+
+To enable GitHub webhooks, set the "Webhook URL" to
+``https://<your-deployed-url>/api/hook/``, and be sure the "Active" box is
+checked and "SSL verification" is enabled.
+
+Use the "Webhook secret" value as your ``GITHUB_HOOK_SECRET`` environment
+variable in MetaShare.
+
 Logging in with GitHub
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
 To setup OAuth integration, run the ``populate_social_apps`` management command.
 The values to use for ``--gh-id``, ``--gh-secret``, ``--sf-id`` and
-``--sf-secret`` can be found in the GitHub App and Salesforce App, respectively,
-or if you're an OddBird you can find these values in the shared Keybase team
-folder (``metashare/prod.db``). If you've successfully set your ``SF_CLIENT_ID``
-and ``SF_CLIENT_SECRET`` environment variables above in step 2, you only need to
-add GitHub keys here::
+``--sf-secret`` can be found in the GitHub App ("Client ID" and "Client secret")
+and Salesforce App, respectively, or if you're an OddBird you can find these
+values in the shared Keybase team folder (``metashare/prod.db``). If you've
+successfully set your ``SF_CLIENT_ID`` and ``SF_CLIENT_SECRET`` environment
+variables above in step 2, you only need to add GitHub keys here::
 
     $ docker-compose run --rm web python manage.py populate_social_apps --gh-id XXX --gh-secret YYY
 
@@ -91,6 +124,25 @@ You will also need, when you log in, to make sure that the GitHub app
 that provides MetaShare with webhook updates and GitHub API access **is
 enabled for any Organizations you are testing against**. By default it
 will only install for the user you are logging in as.
+
+GitHub Webhooks in Development
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To test GitHub webhooks in development, you will need to use the tool
+``ngrok``, which sets up a tunnel from the internet-at-large to your
+computer. Run it like so::
+
+   $ ngrok http --host-header=localhost:8080 8080
+
+You will get output that indicates the name of the ngrok tunnel, which will look
+like ``https://<some hash>.ngrok.io``. You will need to adjust the GitHub App to
+point to the ``/api/hook/`` path of your ngrok tunnel (e.g.
+``https://<some hash>.ngrok.io/api/hook/``). This means that it's a
+one-person-at-a-time thing, which is a problem for which we don't yet have
+a solution.
+
+As an OddBird, you can access the app at
+`<https://github.com/organizations/oddbird/settings/apps/metashare-local-dev>`_.
 
 Setting up the database
 -----------------------
@@ -200,25 +252,6 @@ For more detailed instructions and options, see the `VS Code documentation`_.
 .. _Remote Development: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
 .. _integrated terminal: https://code.visualstudio.com/docs/editor/integrated-terminal
 .. _VS Code documentation: https://code.visualstudio.com/docs/remote/containers
-
-GitHub webhooks
----------------
-
-To test GitHub webhooks in development, you will need to use the tool
-``ngrok``, which sets up a tunnel from the internet-at-large to your
-computer. Run it like so::
-
-   $ ngrok http --host-header=localhost:8080 8080
-
-You will get output that indicates the name of the ngrok tunnel, which will look
-like ``https://<some hash>.ngrok.io``. You will need to adjust the GitHub app to
-point to the ``/api/hook/`` path of your ngrok tunnel (e.g.
-``https://<some hash>.ngrok.io/api/hook/``). This means that it's a
-one-person-at-a-time thing, which is a problem for which we don't yet have
-a solution.
-
-As an OddBird, you can access the app at
-`<https://github.com/organizations/oddbird/settings/apps/metashare-local-dev>`_.
 
 Internationalization
 --------------------
