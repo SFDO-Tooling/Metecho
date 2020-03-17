@@ -207,6 +207,9 @@ AUTH_USER_MODEL = "api.User"
 ROOT_URLCONF = "metashare.urls"
 
 ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin")
+RESTRICTED_PREFIXES = env(
+    "RESTRICTED_PREFIXES", default=(), type_=lambda x: x.split(",") if x else ()
+)
 UNRESTRICTED_PREFIXES = ["api/hook"]
 
 ADMIN_API_ALLOWED_SUBNETS = env(
