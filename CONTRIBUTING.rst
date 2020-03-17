@@ -265,7 +265,7 @@ The app will need the following permissions:
  - Organization permissions:
     - None
  - User permissions:
-    - None
+    - Email: read-only
  - Subscribe to events:
     - Pull request
     - Push
