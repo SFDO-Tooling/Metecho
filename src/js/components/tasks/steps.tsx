@@ -87,7 +87,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
       assignee: null,
     },
     {
-      label: `${i18n.t('Create a Review Org')}`,
+      label: `${i18n.t('Create a Scratch Org for review')}`,
       visible: !reviewOrgOutOfDate,
       active: readyForReview && hasReviewer && !hasReviewOrg,
       complete: (hasReviewer && hasReviewOrg) || task.review_valid,
