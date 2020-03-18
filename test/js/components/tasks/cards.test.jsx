@@ -58,6 +58,7 @@ const defaultState = {
     username: 'user-name',
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
+    allow_devhub_override: false,
   },
 };
 const defaultTask = {
@@ -680,11 +681,53 @@ describe('<OrgCards/>', () => {
       expect(getByText('Creating Org…')).toBeVisible();
     });
 
+    describe('connected to global devhub', () => {
+      let DEVHUB_USERNAME_SET;
+
+      beforeAll(() => {
+        DEVHUB_USERNAME_SET = window.GLOBALS.DEVHUB_USERNAME_SET;
+        window.GLOBALS.DEVHUB_USERNAME_SET = true;
+      });
+
+      afterAll(() => {
+        window.GLOBALS.DEVHUB_USERNAME_SET = DEVHUB_USERNAME_SET;
+      });
+
+      test('creates a new org', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Create Org'));
+
+        expect(createObject).toHaveBeenCalledWith({
+          objectType: 'scratch_org',
+          data: {
+            org_type: 'QA',
+            task: 'task-id',
+          },
+        });
+        expect(getByText('Creating Org…')).toBeVisible();
+      });
+    });
+
     describe('not connected to sf org', () => {
+      let DEVHUB_USERNAME_SET;
+
+      beforeAll(() => {
+        DEVHUB_USERNAME_SET = window.GLOBALS.DEVHUB_USERNAME_SET;
+        window.GLOBALS.DEVHUB_USERNAME_SET = true;
+      });
+
+      afterAll(() => {
+        window.GLOBALS.DEVHUB_USERNAME_SET = DEVHUB_USERNAME_SET;
+      });
+
       test('opens connect modal', () => {
         const { getByText } = setup({
           initialState: {
-            user: { ...defaultState.user, valid_token_for: null },
+            user: {
+              ...defaultState.user,
+              valid_token_for: null,
+              allow_devhub_override: true,
+            },
           },
         });
         fireEvent.click(getByText('Create Org'));

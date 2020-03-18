@@ -4,6 +4,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
@@ -101,6 +102,15 @@ const UserInfo = ({
     });
   }, [dispatch, isMounted]);
 
+  const usingUserDevhub = Boolean(user.devhub_username);
+  const usingGlobalDevhub =
+    window.GLOBALS.DEVHUB_USERNAME_SET && !user.allow_devhub_override;
+
+  /* istanbul ignore if */
+  if (usingGlobalDevhub) {
+    return null;
+  }
+
   return (
     <>
       {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
@@ -128,18 +138,18 @@ const UserInfo = ({
             <strong>{i18n.t('User')}:</strong> {user.sf_username}
           </li>
         )}
-        {user.org_name && (
+        {Boolean(user.org_name && !usingUserDevhub) && (
           <li>
             <strong>{i18n.t('Org')}:</strong> {user.org_name}
           </li>
         )}
-        {user.org_type && (
+        {Boolean(user.org_type && !usingUserDevhub) && (
           <li>
             <strong>{i18n.t('Type')}:</strong> {user.org_type}
           </li>
         )}
       </ul>
-      {!user.devhub_username && (
+      {!usingUserDevhub && (
         <Button
           label={i18n.t('Disconnect from Salesforce')}
           variant="link"
@@ -198,7 +208,11 @@ export const ConnectionInfoModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
-  const isConnected = Boolean(user.valid_token_for || user.devhub_username);
+  const usingGlobalDevhub =
+    window.GLOBALS.DEVHUB_USERNAME_SET && !user.allow_devhub_override;
+  const isConnected = Boolean(
+    user.valid_token_for || user.devhub_username || usingGlobalDevhub,
+  );
 
   return (
     <Modal
@@ -239,16 +253,25 @@ const UserDropdown = () => {
   const user = useSelector(selectUserState);
   const [modalOpen, setModalOpen] = useState(false);
 
-  return user ? (
+  if (!user) {
+    return null;
+  }
+
+  const usingGlobalDevhub =
+    window.GLOBALS.DEVHUB_USERNAME_SET && !user.allow_devhub_override;
+
+  return (
     <>
       <Popover
         align="bottom right"
         body={
           <>
             <header
-              className="slds-border_bottom
-                slds-p-bottom_x-small
-                slds-m-bottom_x-small"
+              className={classNames({
+                'slds-border_bottom': !usingGlobalDevhub,
+                'slds-p-bottom_x-small': !usingGlobalDevhub,
+                'slds-m-bottom_x-small': !usingGlobalDevhub,
+              })}
             >
               <div className="slds-p-vertical_small slds-p-horizontal_large">
                 {user.avatar_url ? (
@@ -279,13 +302,15 @@ const UserDropdown = () => {
                 </div>
               </div>
             </header>
-            <div className="slds-p-vertical_small slds-p-horizontal_large">
-              {user.valid_token_for || user.devhub_username ? (
-                <ConnectionInfo user={user} />
-              ) : (
-                <ConnectToSalesforce toggleModal={setModalOpen} />
-              )}
-            </div>
+            {!usingGlobalDevhub && (
+              <div className="slds-p-vertical_small slds-p-horizontal_large">
+                {user.valid_token_for || user.devhub_username ? (
+                  <ConnectionInfo user={user} />
+                ) : (
+                  <ConnectToSalesforce toggleModal={setModalOpen} />
+                )}
+              </div>
+            )}
           </>
         }
         classNameBody="slds-p-horizontal_none"
@@ -303,9 +328,15 @@ const UserDropdown = () => {
           }
         />
       </Popover>
-      <ConnectModal user={user} isOpen={modalOpen} toggleModal={setModalOpen} />
+      {!usingGlobalDevhub && (
+        <ConnectModal
+          user={user}
+          isOpen={modalOpen}
+          toggleModal={setModalOpen}
+        />
+      )}
     </>
-  ) : null;
+  );
 };
 
 export default UserDropdown;

@@ -104,9 +104,15 @@ const ConnectModal = ({
     );
   };
 
+  const usingGlobalDevhub =
+    window.GLOBALS.DEVHUB_USERNAME_SET && !user.allow_devhub_override;
+  const isConnected = Boolean(
+    user.valid_token_for || user.devhub_username || usingGlobalDevhub,
+  );
+
   return (
     <Modal
-      isOpen={isOpen && !(user.valid_token_for || user.devhub_username)}
+      isOpen={isOpen && !isConnected}
       heading={i18n.t('Connect to Salesforce')}
       tagline={
         <Trans i18nKey="devHubInfo">

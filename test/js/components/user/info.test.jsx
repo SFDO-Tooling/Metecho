@@ -152,6 +152,60 @@ describe('<UserDropdown />', () => {
     });
   });
 
+  describe('connected to global devhub', () => {
+    let DEVHUB_USERNAME_SET;
+
+    beforeAll(() => {
+      DEVHUB_USERNAME_SET = window.GLOBALS.DEVHUB_USERNAME_SET;
+      window.GLOBALS.DEVHUB_USERNAME_SET = true;
+    });
+
+    afterAll(() => {
+      window.GLOBALS.DEVHUB_USERNAME_SET = DEVHUB_USERNAME_SET;
+    });
+
+    test('does not render connection info', () => {
+      const { getByText, queryByText } = setup({
+        user: {
+          username: 'Test User',
+          avatar_url: 'http://avatar.com',
+          valid_token_for: null,
+          sf_username: 'user@domain.com',
+          is_devhub_enabled: true,
+          allow_devhub_override: false,
+        },
+      });
+
+      expect(getByText('Test User')).toBeVisible();
+      expect(queryByText('Connected to Salesforce')).toBeNull();
+      expect(queryByText('user@domain.com')).toBeNull();
+    });
+
+    describe('user has allow_devhub_override: true', () => {
+      test('renders connection info', () => {
+        const { getByText } = setup({
+          user: {
+            username: 'Test User',
+            avatar_url: 'http://avatar.com',
+            valid_token_for: 'token',
+            sf_username: 'user@domain.com',
+            org_name: 'Test Org',
+            org_type: 'Test Org Type',
+            is_devhub_enabled: true,
+            allow_devhub_override: true,
+          },
+        });
+
+        expect(getByText('Test User')).toBeVisible();
+        expect(getByText('Connected to Salesforce')).toBeVisible();
+        expect(getByText('Enabled')).toBeVisible();
+        expect(getByText('user@domain.com')).toBeVisible();
+        expect(getByText('Test Org')).toBeVisible();
+        expect(getByText('Test Org Type')).toBeVisible();
+      });
+    });
+  });
+
   describe('logged out', () => {
     test('renders nothing', () => {
       const { container } = setup({ user: null });
