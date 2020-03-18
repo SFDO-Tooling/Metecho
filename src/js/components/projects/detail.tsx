@@ -146,6 +146,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const openEditModal = () => {
     setEditModalOpen(true);
   };
+  const handleEdit = (newProject: any) => console.log(newProject);
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -344,8 +345,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
         )}
         <EditModal
           project={project}
-          isOpen={editModalOpen}
+          isOpen={true}
           toggleModal={setEditModalOpen}
+          handleSubmit={handleEdit}
         />
       </DetailPageLayout>
     </DocumentTitle>

@@ -11,20 +11,27 @@ interface EditModalProps {
   project: Project;
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
+  handleSubmit: (newProj: any) => void;
 }
-const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
-  const form = useRef(null);
+const EditModal = ({
+  project,
+  isOpen,
+  toggleModal,
+  handleSubmit,
+}: EditModalProps) => {
+  const form = useRef<HTMLFormElement | null>(null);
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
-  const handleSubmit = useCallback((e) => {
+  const onSubmit = useCallback((e) => {
     e.preventDefault();
-    //   const { name, description } = e.target;
-    const { name, description } = form.current;
-    //   value here same as defaultvalue
-    console.log(name, description);
+    if (form) {
+      const { name, description } = form.current;
+      handleSubmit({ name: name.value, description: description.value });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmitClicked = () => {
+  const onSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
     /* istanbul ignore else */
     if (submitButton.current) {
@@ -53,14 +60,14 @@ const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
           type="submit"
           label="Save"
           variant="brand"
-          onClick={handleSubmitClicked}
+          onClick={onSubmitClicked}
           // disabled={submittingReview}
         />,
       ]}
     >
       <form
         className="slds-form slds-p-around_large"
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
         ref={form}
       >
         <div className="slds-grid slds-wrap slds-gutters">
