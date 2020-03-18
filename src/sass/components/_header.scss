@@ -2,7 +2,7 @@
 // ======
 
 .global-header {
-  @include z-index('global-header');
+  z-index: $z-index-sticky;
   border-radius: 0;
   background: $color-background-alt;
 }

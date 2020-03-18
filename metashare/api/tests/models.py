@@ -1,5 +1,5 @@
 from contextlib import ExitStack
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -113,6 +113,10 @@ class TestProject:
             project.refresh_from_db()
             assert not project.has_unmerged_commits
             assert async_to_sync.called
+
+    def test_should_update_status(self, project_factory):
+        project = project_factory()
+        assert not project.should_update_status()
 
     def test_queue_create_pr(self, project_factory, user_factory):
         with patch("metashare.api.jobs.create_pr_job") as create_pr_job:
@@ -576,10 +580,25 @@ class TestScratchOrg:
         with patch(
             "metashare.api.jobs.get_unsaved_changes_job"
         ) as get_unsaved_changes_job:
-            scratch_org = scratch_org_factory()
-            scratch_org.queue_get_unsaved_changes(originating_user_id=None)
+            scratch_org = scratch_org_factory(
+                last_checked_unsaved_changes_at=now() - timedelta(minutes=1),
+            )
+            scratch_org.queue_get_unsaved_changes(
+                force_get=True, originating_user_id=None
+            )
 
             assert get_unsaved_changes_job.delay.called
+
+    def test_get_unsaved_changes__bail_early(self, scratch_org_factory):
+        with patch(
+            "metashare.api.jobs.get_unsaved_changes_job"
+        ) as get_unsaved_changes_job:
+            scratch_org = scratch_org_factory(
+                last_checked_unsaved_changes_at=now() - timedelta(minutes=1),
+            )
+            scratch_org.queue_get_unsaved_changes(originating_user_id=None)
+
+            assert not get_unsaved_changes_job.delay.called
 
     def test_finalize_provision(self, scratch_org_factory):
         with patch("metashare.api.model_mixins.async_to_sync") as async_to_sync:

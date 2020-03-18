@@ -3,6 +3,7 @@ import i18n from 'i18next';
 import { Org } from '@/store/orgs/reducer';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
+import { TASK_STATUSES } from '@/utils/constants';
 
 export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
@@ -55,3 +56,26 @@ export const getBranchLink = (object: Task | Project) => {
   }
   return { branchLink, branchLinkText };
 };
+
+export const getTaskCommits = (task: Task) => {
+  // Get list of commit sha/ids, newest to oldest, ending with origin commit.
+  // We consider an org out-of-date if it is not based on the first commit.
+  const taskCommits = task.commits.map((c) => c.id);
+  if (task.origin_sha) {
+    taskCommits.push(task.origin_sha);
+  }
+  return taskCommits;
+};
+
+export const getPercentage = (complete: number, total: number) =>
+  Math.floor((complete / total) * 100) || 0;
+
+export const getCompletedTasks = (tasks: Task[]) =>
+  tasks.filter((task) => task.status === TASK_STATUSES.COMPLETED);
+
+export const getSteps = () => [
+  i18n.t('Planned'),
+  i18n.t('In progress'),
+  i18n.t('Review'),
+  i18n.t('Merged'),
+];

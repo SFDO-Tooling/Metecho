@@ -1,4 +1,4 @@
-import { fireEvent, wait, waitForElement } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -40,14 +40,14 @@ describe('<ProjectForm/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { repository, startOpen } = opts;
     const context = {};
-    const { getByText, getByLabelText, queryByText } = renderWithRedux(
+    const result = renderWithRedux(
       <StaticRouter context={context}>
         <ProjectForm repository={repository} startOpen={startOpen} />
       </StaticRouter>,
       {},
       storeWithThunk,
     );
-    return { getByText, getByLabelText, queryByText, context };
+    return { ...result, context };
   };
 
   describe('submit/close buttons', () => {
@@ -137,14 +137,14 @@ describe('<ProjectForm/>', () => {
             },
           }),
         );
-        const { getByText, getByLabelText, queryByText } = setup();
+        const { getByText, getByLabelText, queryByText, findByText } = setup();
         const submit = getByText('Create Project');
         const nameInput = getByLabelText('*Project Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
         fireEvent.click(submit);
 
         expect.assertions(3);
-        await waitForElement(() => getByText('Do not do that'));
+        await findByText('Do not do that');
 
         expect(getByText('Do not do that')).toBeVisible();
         expect(getByText('Or that')).toBeVisible();
@@ -169,7 +169,7 @@ describe('<ProjectForm/>', () => {
         fireEvent.click(submit);
 
         expect.assertions(1);
-        await wait(() => {
+        await waitFor(() => {
           if (!addError.mock.calls.length) {
             throw new Error('waiting...');
           }

@@ -207,6 +207,10 @@ AUTH_USER_MODEL = "api.User"
 ROOT_URLCONF = "metashare.urls"
 
 ADMIN_AREA_PREFIX = env("DJANGO_ADMIN_URL", default="admin")
+RESTRICTED_PREFIXES = env(
+    "RESTRICTED_PREFIXES", default=(), type_=lambda x: x.split(",") if x else ()
+)
+UNRESTRICTED_PREFIXES = ["api/hook"]
 
 ADMIN_API_ALLOWED_SUBNETS = env(
     "ADMIN_API_ALLOWED_SUBNETS",
@@ -296,6 +300,7 @@ else:
 DAYS_BEFORE_ORG_EXPIRY_TO_ALERT = env(
     "DAYS_BEFORE_ORG_EXPIRY_TO_ALERT", default=3, type_=int
 )
+ORG_RECHECK_MINUTES = env("ORG_RECHECK_MINUTES", default=5, type_=int)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/

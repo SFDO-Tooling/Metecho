@@ -29,6 +29,7 @@ export interface Org {
   delete_queued_at: string | null;
   has_been_visited: boolean;
   valid_target_directories: TargetDirectories;
+  last_checked_unsaved_changes_at: string | null;
 }
 
 export interface TargetDirectories {

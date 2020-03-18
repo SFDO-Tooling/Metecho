@@ -487,7 +487,7 @@ describe('<OrgCards/>', () => {
           review_valid: true,
           review_status: 'Changes requested',
         };
-        setup({ task, orgs, store, rerender });
+        setup({ task, orgs: theseOrgs, store, rerender });
 
         expect(getByLabelText('Approve')).not.toBeChecked();
         expect(getByLabelText('Request changes')).toBeChecked();
@@ -568,8 +568,8 @@ describe('<OrgCards/>', () => {
           expect(getByText('Update Review')).toBeVisible();
         });
 
-        test('disabled', () => {
-          const { getByText } = setup({
+        test('org not yet visited', () => {
+          const { queryByText, getByText } = setup({
             task: {
               ...defaultTask,
               commits: [],
@@ -586,7 +586,8 @@ describe('<OrgCards/>', () => {
             },
           });
 
-          expect(getByText('Submit Review')).toBeDisabled();
+          expect(getByText('Review Changes in Org')).toBeVisible();
+          expect(queryByText('Submit Review')).toBeNull();
         });
       });
 

@@ -397,8 +397,8 @@ export const createSocket = ({
     },
   });
 
-  const subscribe = (payload: Subscription) => {
-    payload = { ...payload, action: WEBSOCKET_ACTIONS.SUBSCRIBE };
+  const subscribe = (data: Subscription) => {
+    const payload = { ...data, action: WEBSOCKET_ACTIONS.SUBSCRIBE };
     if (open) {
       log('[WebSocket] subscribing to:', payload);
       socket.json(payload);
@@ -407,8 +407,8 @@ export const createSocket = ({
     }
   };
 
-  const unsubscribe = (payload: Subscription) => {
-    payload = { ...payload, action: WEBSOCKET_ACTIONS.UNSUBSCRIBE };
+  const unsubscribe = (data: Subscription) => {
+    const payload = { ...data, action: WEBSOCKET_ACTIONS.UNSUBSCRIBE };
     if (open) {
       log('[WebSocket] unsubscribing from:', payload);
       socket.json(payload);

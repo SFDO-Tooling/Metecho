@@ -1,0 +1,9 @@
+// vertical path bar overrides
+.slds-progress_vertical {
+  .slds-progress__item {
+    &:before,
+    &:after {
+      content: none;
+    }
+  }
+}

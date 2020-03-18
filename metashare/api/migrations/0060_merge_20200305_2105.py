@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("api", "0058_merge_20200220_1748"),
-        ("api", "0059_auto_20200304_0535"),
+        ("api", "0059_rename_user_use_global_devhub"),
     ]
 
     operations = []
