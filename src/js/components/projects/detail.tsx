@@ -227,11 +227,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
           />
         }
         options={[
-          { label: 'Project Options', type: 'header' },
-          { label: 'Edit Name', value: 'edit' },
-          { label: 'Edit Description', value: 'edit' },
+          { label: 'Edit Project' },
           { type: 'divider' },
-          { label: 'Archive Project', value: 'archive' },
+          { label: 'Delete Project', disabled: true },
         ]}
       />
       {branchLink ? (
