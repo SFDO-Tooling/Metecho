@@ -107,8 +107,6 @@ const UserInfo = ({
     return null;
   }
 
-  const usingUserDevhub = Boolean(user.devhub_username);
-
   return (
     <>
       {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
@@ -136,18 +134,18 @@ const UserInfo = ({
             <strong>{i18n.t('User')}:</strong> {user.sf_username}
           </li>
         )}
-        {Boolean(user.org_name && !usingUserDevhub) && (
+        {user.org_name && (
           <li>
             <strong>{i18n.t('Org')}:</strong> {user.org_name}
           </li>
         )}
-        {Boolean(user.org_type && !usingUserDevhub) && (
+        {user.org_type && (
           <li>
             <strong>{i18n.t('Type')}:</strong> {user.org_type}
           </li>
         )}
       </ul>
-      {!usingUserDevhub && (
+      {!user.devhub_username && (
         <Button
           label={i18n.t('Disconnect from Salesforce')}
           variant="link"
