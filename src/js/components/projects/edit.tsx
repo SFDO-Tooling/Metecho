@@ -3,7 +3,7 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import { Project } from '@/store/projects/reducer';
 
@@ -13,14 +13,17 @@ interface EditModalProps {
   toggleModal: (open: boolean) => void;
 }
 const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
-  const editNameRef = useRef(null);
-  const editDescriptionRef = useRef(null);
+  const form = useRef(null);
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    console.log(editNameRef.current, editDescriptionRef.current);
-  };
+    //   const { name, description } = e.target;
+    const { name, description } = form.current;
+    //   value here same as defaultvalue
+    console.log(name, description);
+  }, []);
+
   const handleSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
     /* istanbul ignore else */
@@ -28,9 +31,11 @@ const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
       submitButton.current.click();
     }
   };
+
   const handleClose = () => {
     toggleModal(false);
   };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -53,7 +58,11 @@ const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
         />,
       ]}
     >
-      <form className="slds-form slds-p-around_large" onSubmit={handleSubmit}>
+      <form
+        className="slds-form slds-p-around_large"
+        onSubmit={handleSubmit}
+        ref={form}
+      >
         <div className="slds-grid slds-wrap slds-gutters">
           <div
             className="slds-col
@@ -68,7 +77,6 @@ const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
               className="slds-p-bottom_small"
               name="name"
               defaultValue={project.name}
-              ref={editNameRef}
               required
               aria-required
               //   errorText={errors.title}
@@ -82,7 +90,6 @@ const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
               className="ms-textarea slds-p-bottom_small"
               name="description"
               defaultValue={project.description}
-              ref={editDescriptionRef}
               //   errorText={errors.critical_changes}
               //   onChange={handleInputChange}
             />
