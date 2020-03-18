@@ -54,6 +54,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "currently_fetching_repos",
             "devhub_username",
             "allow_devhub_override",
+            "uses_global_devhub",
         )
 
 

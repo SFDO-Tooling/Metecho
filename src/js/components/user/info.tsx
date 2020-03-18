@@ -102,14 +102,12 @@ const UserInfo = ({
     });
   }, [dispatch, isMounted]);
 
-  const usingUserDevhub = Boolean(user.devhub_username);
-  const usingGlobalDevhub =
-    window.GLOBALS.DEVHUB_USERNAME_SET && !user.allow_devhub_override;
-
   /* istanbul ignore if */
-  if (usingGlobalDevhub) {
+  if (user.uses_global_devhub) {
     return null;
   }
+
+  const usingUserDevhub = Boolean(user.devhub_username);
 
   return (
     <>
@@ -208,10 +206,8 @@ export const ConnectionInfoModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
-  const usingGlobalDevhub =
-    window.GLOBALS.DEVHUB_USERNAME_SET && !user.allow_devhub_override;
   const isConnected = Boolean(
-    user.valid_token_for || user.devhub_username || usingGlobalDevhub,
+    user.valid_token_for || user.devhub_username || user.uses_global_devhub,
   );
 
   return (
@@ -257,9 +253,6 @@ const UserDropdown = () => {
     return null;
   }
 
-  const usingGlobalDevhub =
-    window.GLOBALS.DEVHUB_USERNAME_SET && !user.allow_devhub_override;
-
   return (
     <>
       <Popover
@@ -268,9 +261,9 @@ const UserDropdown = () => {
           <>
             <header
               className={classNames({
-                'slds-border_bottom': !usingGlobalDevhub,
-                'slds-p-bottom_x-small': !usingGlobalDevhub,
-                'slds-m-bottom_x-small': !usingGlobalDevhub,
+                'slds-border_bottom': !user.uses_global_devhub,
+                'slds-p-bottom_x-small': !user.uses_global_devhub,
+                'slds-m-bottom_x-small': !user.uses_global_devhub,
               })}
             >
               <div className="slds-p-vertical_small slds-p-horizontal_large">
@@ -302,7 +295,7 @@ const UserDropdown = () => {
                 </div>
               </div>
             </header>
-            {!usingGlobalDevhub && (
+            {!user.uses_global_devhub && (
               <div className="slds-p-vertical_small slds-p-horizontal_large">
                 {user.valid_token_for || user.devhub_username ? (
                   <ConnectionInfo user={user} />
@@ -328,7 +321,7 @@ const UserDropdown = () => {
           }
         />
       </Popover>
-      {!usingGlobalDevhub && (
+      {!user.uses_global_devhub && (
         <ConnectModal
           user={user}
           isOpen={modalOpen}

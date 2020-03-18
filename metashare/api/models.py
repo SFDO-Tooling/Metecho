@@ -118,10 +118,14 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def org_name(self):
+        if self.devhub_username or self.uses_global_devhub:
+            return None
         return self._get_org_property("Name")
 
     @property
     def org_type(self):
+        if self.devhub_username or self.uses_global_devhub:
+            return None
         return self._get_org_property("OrganizationType")
 
     @property
@@ -148,11 +152,19 @@ class User(HashIdMixin, AbstractUser):
             return None
 
     @property
+    def uses_global_devhub(self):
+        return bool(
+            settings.DEVHUB_USERNAME
+            and not self.devhub_username
+            and not self.allow_devhub_override
+        )
+
+    @property
     def sf_username(self):
         if self.devhub_username:
             return self.devhub_username
 
-        if settings.DEVHUB_USERNAME and not self.allow_devhub_override:
+        if self.uses_global_devhub:
             return settings.DEVHUB_USERNAME
 
         try:
@@ -181,6 +193,8 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def valid_token_for(self):
+        if self.devhub_username or self.uses_global_devhub:
+            return None
         if all(self.sf_token) and self.org_id:
             return self.org_id
         return None
@@ -188,14 +202,7 @@ class User(HashIdMixin, AbstractUser):
     @cached_property
     def is_devhub_enabled(self):
         # We can shortcut and avoid making an HTTP request in some cases:
-        if self.devhub_username:
-            return True
-        uses_global_devhub = (
-            settings.DEVHUB_USERNAME
-            and not self.devhub_username
-            and not self.allow_devhub_override
-        )
-        if uses_global_devhub:
+        if self.devhub_username or self.uses_global_devhub:
             return True
         if not self.salesforce_account:
             return False

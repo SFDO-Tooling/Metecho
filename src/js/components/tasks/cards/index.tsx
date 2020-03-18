@@ -161,10 +161,8 @@ const OrgCards = ({
   };
 
   let handleCreate: (...args: any[]) => void = openConnectModal;
-  const usingGlobalDevhub =
-    window.GLOBALS.DEVHUB_USERNAME_SET && !user.allow_devhub_override;
   const userIsConnected =
-    user.valid_token_for || user.devhub_username || usingGlobalDevhub;
+    user.valid_token_for || user.devhub_username || user.uses_global_devhub;
   if (userIsConnected) {
     handleCreate = user.is_devhub_enabled ? createOrg : openInfoModal;
   }

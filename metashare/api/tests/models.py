@@ -274,12 +274,28 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.org_name is None
 
+    def test_org_name__global_devhub(
+        self, settings, user_factory, social_account_factory
+    ):
+        settings.DEVHUB_USERNAME = "test global devhub"
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
+        assert user.org_name is None
+
     def test_org_type(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
         assert user.org_type == "Developer Edition"
 
         user.socialaccount_set.all().delete()
+        assert user.org_type is None
+
+    def test_org_type__global_devhub(
+        self, settings, user_factory, social_account_factory
+    ):
+        settings.DEVHUB_USERNAME = "test global devhub"
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.org_type is None
 
     def test_github_account(self, user_factory):
@@ -373,6 +389,14 @@ class TestUser:
         user.socialaccount_set.filter(
             provider="salesforce-production"
         ).first().socialtoken_set.all().delete()
+        assert user.valid_token_for is None
+
+    def test_valid_token_for__use_global_devhub(
+        self, settings, user_factory, social_account_factory
+    ):
+        settings.DEVHUB_USERNAME = "test global devhub"
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.valid_token_for is None
 
     def test_full_org_type(self, user_factory, social_account_factory):
