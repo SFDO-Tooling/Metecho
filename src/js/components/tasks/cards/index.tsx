@@ -161,7 +161,9 @@ const OrgCards = ({
   };
 
   let handleCreate: (...args: any[]) => void = openConnectModal;
-  if (user.valid_token_for || user.devhub_username) {
+  const userIsConnected =
+    user.valid_token_for || user.devhub_username || user.uses_global_devhub;
+  if (userIsConnected) {
     handleCreate = user.is_devhub_enabled ? createOrg : openInfoModal;
   }
 
