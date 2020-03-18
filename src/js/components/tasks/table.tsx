@@ -71,7 +71,10 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   if (!item) {
     return null;
   }
-  const status = item.review_valid ? item.review_status : item.status;
+  const status =
+    item.review_valid && item.status !== TASK_STATUSES.COMPLETED
+      ? item.review_status
+      : item.status;
   let displayStatus, icon;
   switch (status) {
     case TASK_STATUSES.PLANNED:
@@ -208,57 +211,56 @@ const TaskTable = ({
   projectUsers,
   openAssignProjectUsersModal,
   assignUserAction,
-}: Props) =>
-  tasks.length ? (
-    <DataTable items={tasks} id="project-tasks-table" noRowHover>
-      <DataTableColumn
-        key="name"
-        label={i18n.t('Task')}
-        property="name"
-        width="65%"
-        primaryColumn
-        truncate
-      >
-        <NameTableCell
-          repositorySlug={repositorySlug}
-          projectSlug={projectSlug}
-        />
-      </DataTableColumn>
-      <DataTableColumn
-        key="status"
-        label={i18n.t('Status')}
-        property="status"
-        width="20%"
-      >
-        <StatusTableCell />
-      </DataTableColumn>
-      <DataTableColumn
-        key="assigned_dev"
-        label={i18n.t('Developer')}
-        property="assigned_dev"
-        width="15%"
-      >
-        <AssigneeTableCell
-          type={ORG_TYPES.DEV}
-          projectUsers={projectUsers}
-          openAssignProjectUsersModal={openAssignProjectUsersModal}
-          assignUserAction={assignUserAction}
-        />
-      </DataTableColumn>
-      <DataTableColumn
-        key="assigned_qa"
-        label={i18n.t('Reviewer')}
-        property="assigned_qa"
-        width="15%"
-      >
-        <AssigneeTableCell
-          type={ORG_TYPES.QA}
-          projectUsers={projectUsers}
-          openAssignProjectUsersModal={openAssignProjectUsersModal}
-          assignUserAction={assignUserAction}
-        />
-      </DataTableColumn>
-    </DataTable>
-  ) : null;
+}: Props) => (
+  <DataTable items={tasks} id="project-tasks-table" noRowHover>
+    <DataTableColumn
+      key="name"
+      label={i18n.t('Task')}
+      property="name"
+      width="65%"
+      primaryColumn
+      truncate
+    >
+      <NameTableCell
+        repositorySlug={repositorySlug}
+        projectSlug={projectSlug}
+      />
+    </DataTableColumn>
+    <DataTableColumn
+      key="status"
+      label={i18n.t('Status')}
+      property="status"
+      width="20%"
+    >
+      <StatusTableCell />
+    </DataTableColumn>
+    <DataTableColumn
+      key="assigned_dev"
+      label={i18n.t('Developer')}
+      property="assigned_dev"
+      width="15%"
+    >
+      <AssigneeTableCell
+        type={ORG_TYPES.DEV}
+        projectUsers={projectUsers}
+        openAssignProjectUsersModal={openAssignProjectUsersModal}
+        assignUserAction={assignUserAction}
+      />
+    </DataTableColumn>
+    <DataTableColumn
+      key="assigned_qa"
+      label={i18n.t('Reviewer')}
+      property="assigned_qa"
+      width="15%"
+    >
+      <AssigneeTableCell
+        type={ORG_TYPES.QA}
+        projectUsers={projectUsers}
+        openAssignProjectUsersModal={openAssignProjectUsersModal}
+        assignUserAction={assignUserAction}
+      />
+    </DataTableColumn>
+  </DataTable>
+);
 
 export default TaskTable;

@@ -49,3 +49,12 @@ export const REVIEW_STATUSES = {
   APPROVED: 'Approved' as 'Approved',
   CHANGES_REQUESTED: 'Changes requested' as 'Changes requested',
 };
+
+export type ProjectStatuses = 'Planned' | 'In progress' | 'Review' | 'Merged';
+
+export const PROJECT_STATUSES = {
+  PLANNED: 'Planned' as 'Planned',
+  IN_PROGRESS: 'In progress' as 'In progress',
+  REVIEW: 'Review' as 'Review',
+  MERGED: 'Merged' as 'Merged',
+};

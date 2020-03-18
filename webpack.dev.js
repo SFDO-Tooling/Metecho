@@ -61,10 +61,10 @@ module.exports = merge(common, {
         resource: {
           savePath: '../locales_dev/{{lng}}/{{ns}}.json',
         },
-        defaultValue(lng, ns, key) {
+        defaultValue(lng, ns, key, opts) {
           if (lng === 'en') {
             // Return key as the default value for English language
-            return key;
+            return opts.defaultValue || key;
           }
           // Return the string '__NOT_TRANSLATED__' for other languages
           return '__NOT_TRANSLATED__';

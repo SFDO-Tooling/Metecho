@@ -20,12 +20,18 @@ interface TableCellProps {
   handleUserClick: (user: GitHubUser) => void;
 }
 
-export const GitHubUserAvatar = ({ user }: { user: GitHubUser }) => (
+export const GitHubUserAvatar = ({
+  user,
+  size,
+}: {
+  user: GitHubUser;
+  size?: string;
+}) => (
   <Avatar
     imgAlt={user.login}
     imgSrc={user.avatar_url}
     title={user.login}
-    size="small"
+    size={size || 'small'}
   />
 );
 

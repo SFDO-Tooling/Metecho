@@ -53,6 +53,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "sf_username",
             "currently_fetching_repos",
             "devhub_username",
+            "uses_global_devhub",
         )
 
 
@@ -111,6 +112,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             "currently_creating_pr",
             "pr_url",
             "pr_is_open",
+            "pr_is_merged",
+            "status",
             "github_users",
         )
         validators = (

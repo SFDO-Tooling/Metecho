@@ -1,4 +1,4 @@
-import { fireEvent, waitForElement } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -138,7 +138,7 @@ describe('<CaptureModal/>', () => {
             },
           }),
         );
-        const { getByText, getByLabelText } = setup();
+        const { getByText, getByLabelText, findByText } = setup();
         // Click forward to the select-changes modal:
         fireEvent.click(getByText('Save & Next'));
         const selectAll = getByLabelText('Select All Changes');
@@ -151,7 +151,7 @@ describe('<CaptureModal/>', () => {
         fireEvent.click(submit);
 
         expect.assertions(showsErr ? 2 : 1);
-        await waitForElement(() => getByText(text));
+        await findByText(text);
 
         expect(getByText(text)).toBeVisible();
         if (showsErr) {

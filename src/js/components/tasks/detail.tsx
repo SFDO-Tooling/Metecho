@@ -12,6 +12,8 @@ import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
 import CaptureModal from '@/components/tasks/capture';
 import OrgCards from '@/components/tasks/cards';
+import TaskStatusPath from '@/components/tasks/path';
+import TaskStatusSteps from '@/components/tasks/steps';
 import {
   DetailPageLayout,
   ExternalLink,
@@ -32,7 +34,7 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES } from '@/utils/constants';
+import { ORG_TYPES, TASK_STATUSES } from '@/utils/constants';
 import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
@@ -277,6 +279,14 @@ const TaskDetail = (props: RouteComponentProps) => {
           { name: task.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
+        sidebar={
+          <>
+            <TaskStatusPath task={task} />
+            {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
+              <TaskStatusSteps task={task} orgs={orgs} />
+            ) : null}
+          </>
+        }
       >
         {primaryButton}
         {secondaryButton}

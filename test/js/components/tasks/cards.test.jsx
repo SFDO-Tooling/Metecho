@@ -487,7 +487,7 @@ describe('<OrgCards/>', () => {
           review_valid: true,
           review_status: 'Changes requested',
         };
-        setup({ task, orgs, store, rerender });
+        setup({ task, orgs: theseOrgs, store, rerender });
 
         expect(getByLabelText('Approve')).not.toBeChecked();
         expect(getByLabelText('Request changes')).toBeChecked();
@@ -568,8 +568,8 @@ describe('<OrgCards/>', () => {
           expect(getByText('Update Review')).toBeVisible();
         });
 
-        test('disabled', () => {
-          const { getByText } = setup({
+        test('org not yet visited', () => {
+          const { queryByText, getByText } = setup({
             task: {
               ...defaultTask,
               commits: [],
@@ -586,7 +586,8 @@ describe('<OrgCards/>', () => {
             },
           });
 
-          expect(getByText('Submit Review')).toBeDisabled();
+          expect(getByText('Review Changes in Org')).toBeVisible();
+          expect(queryByText('Submit Review')).toBeNull();
         });
       });
 
@@ -677,6 +678,30 @@ describe('<OrgCards/>', () => {
         },
       });
       expect(getByText('Creating Org…')).toBeVisible();
+    });
+
+    describe('connected to global devhub', () => {
+      test('creates a new org', () => {
+        const { getByText } = setup({
+          initialState: {
+            user: {
+              ...defaultState.user,
+              valid_token_for: null,
+              uses_global_devhub: true,
+            },
+          },
+        });
+        fireEvent.click(getByText('Create Org'));
+
+        expect(createObject).toHaveBeenCalledWith({
+          objectType: 'scratch_org',
+          data: {
+            org_type: 'QA',
+            task: 'task-id',
+          },
+        });
+        expect(getByText('Creating Org…')).toBeVisible();
+      });
     });
 
     describe('not connected to sf org', () => {

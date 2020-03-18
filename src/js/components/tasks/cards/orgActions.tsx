@@ -1,6 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
-import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React from 'react';
 
@@ -74,12 +73,7 @@ const OrgActions = ({
 
   let submitReviewBtn = null;
 
-  if (
-    readyForReview &&
-    !reviewOrgOutOfDate &&
-    assignedToCurrentUser &&
-    (!org || ownedByCurrentUser)
-  ) {
+  if (readyForReview) {
     if (task.review_valid) {
       submitReviewBtn = (
         <Button
@@ -98,24 +92,6 @@ const OrgActions = ({
           onClick={openSubmitReviewModal}
         />
       );
-    } else {
-      /* istanbul ignore else */
-      // eslint-disable-next-line no-lonely-if
-      if (org && ownedByCurrentUser) {
-        submitReviewBtn = (
-          <Tooltip
-            content={i18n.t('View your org before submitting a review.')}
-            position="overflowBoundaryElement"
-          >
-            <Button
-              label={i18n.t('Submit Review')}
-              variant="outline-brand"
-              className="slds-m-right_x-small"
-              disabled
-            />
-          </Tooltip>
-        );
-      }
     }
   }
 
