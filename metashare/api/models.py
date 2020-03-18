@@ -151,11 +151,13 @@ class User(HashIdMixin, AbstractUser):
     def sf_username(self):
         if self.devhub_username:
             return self.devhub_username
+
+        if settings.DEVHUB_USERNAME and not self.allow_devhub_override:
+            return settings.DEVHUB_USERNAME
+
         try:
             return self.salesforce_account.extra_data["preferred_username"]
         except (AttributeError, KeyError):
-            if settings.DEVHUB_USERNAME:
-                return settings.DEVHUB_USERNAME
             return None
 
     @property
