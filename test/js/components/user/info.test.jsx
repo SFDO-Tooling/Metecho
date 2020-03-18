@@ -161,7 +161,6 @@ describe('<UserDropdown />', () => {
           valid_token_for: null,
           sf_username: 'user@domain.com',
           is_devhub_enabled: true,
-          allow_devhub_override: false,
           uses_global_devhub: true,
         },
       });

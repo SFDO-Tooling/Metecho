@@ -27,7 +27,6 @@ Retrieve
      "devhub_username": null,
      "sf_username": "user@domain.com",
      "currently_fetching_repos": false,
-     "allow_devhub_override": false,
      "uses_global_devhub": false
    }
 

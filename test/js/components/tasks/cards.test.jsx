@@ -58,7 +58,6 @@ const defaultState = {
     username: 'user-name',
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
-    allow_devhub_override: false,
   },
 };
 const defaultTask = {
