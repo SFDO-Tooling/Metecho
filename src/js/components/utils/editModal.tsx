@@ -3,30 +3,33 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
+import { useForm } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 
 interface EditModalProps {
   project: Project;
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
-  handleSubmit: (newProj: any) => void;
 }
-const EditModal = ({
-  project,
-  isOpen,
-  toggleModal,
-  handleSubmit,
-}: EditModalProps) => {
+const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
   const form = useRef<HTMLFormElement | null>(null);
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
+  const { handleSubmitFromRef } = useForm({
+    fields: { name: '', description: '' },
+  });
   const onSubmit = useCallback((e) => {
     e.preventDefault();
     if (form) {
       const { name, description } = form.current;
-      handleSubmit({ name: name.value, description: description.value });
+      const data = {
+        ...project,
+        name: name.value,
+        description: description.value,
+      };
+      handleSubmitFromRef(data);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -42,6 +45,10 @@ const EditModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
+
+  useEffect(() => {
+    console.log(form);
+  }, [form]);
 
   return (
     <Modal

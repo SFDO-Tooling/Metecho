@@ -10,7 +10,6 @@ import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
-import EditModal from '@/components/projects/edit';
 import ProjectStatusPath from '@/components/projects/path';
 import ProjectProgress from '@/components/projects/progress';
 import TaskForm from '@/components/tasks/createForm';
@@ -27,6 +26,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import EditModal from '@/components/utils/editModal';
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
@@ -146,7 +146,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const openEditModal = () => {
     setEditModalOpen(true);
   };
-  const handleEdit = (newProject: any) => console.log(newProject);
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -345,9 +344,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
         )}
         <EditModal
           project={project}
-          isOpen={true}
+          isOpen={editModalOpen}
           toggleModal={setEditModalOpen}
-          handleSubmit={handleEdit}
         />
       </DetailPageLayout>
     </DocumentTitle>

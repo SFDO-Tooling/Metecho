@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ThunkDispatch } from '@/store';
-import { createObject } from '@/store/actions';
+import { createObject, updateObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
 import { ApiError } from '@/utils/api';
-import { ObjectTypes } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 import useIsMounted from './useIsMounted';
 
@@ -49,6 +49,14 @@ export default ({
       value = e.target.checked;
     }
     setInputs({ ...inputs, [e.target.name]: value });
+  };
+  const handleSubmitFromRef = (data: any) => {
+    dispatch(
+      updateObject({
+        objectType: OBJECT_TYPES.PROJECT,
+        data,
+      }),
+    );
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -100,5 +108,6 @@ export default ({
     setInputs,
     handleSubmit,
     resetForm,
+    handleSubmitFromRef,
   };
 };
