@@ -447,6 +447,13 @@ class TestUser:
         user = user_factory(devhub_username="sample username")
         assert user.is_devhub_enabled
 
+    def test_is_devhub_enabled__shortcut_true__use_global_devhub(
+        self, settings, user_factory
+    ):
+        settings.DEVHUB_USERNAME = "test global devhub"
+        user = user_factory()
+        assert user.is_devhub_enabled
+
     def test_is_devhub_enabled__shortcut_false(
         self, user_factory, social_account_factory
     ):

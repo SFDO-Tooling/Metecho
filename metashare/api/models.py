@@ -190,6 +190,13 @@ class User(HashIdMixin, AbstractUser):
         # We can shortcut and avoid making an HTTP request in some cases:
         if self.devhub_username:
             return True
+        uses_global_devhub = (
+            settings.DEVHUB_USERNAME
+            and not self.devhub_username
+            and not self.allow_devhub_override
+        )
+        if uses_global_devhub:
+            return True
         if not self.salesforce_account:
             return False
         if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
