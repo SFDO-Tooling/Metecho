@@ -37,6 +37,7 @@ class HashidPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
 
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    sf_username = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -55,6 +56,11 @@ class FullUserSerializer(serializers.ModelSerializer):
             "devhub_username",
             "uses_global_devhub",
         )
+
+    def get_sf_username(self, obj) -> dict:
+        if obj.uses_global_devhub:
+            return None
+        return obj.sf_username
 
 
 class MinimalUserSerializer(serializers.ModelSerializer):
@@ -299,7 +305,6 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_capturing_changes",
             "currently_refreshing_org",
             "delete_queued_at",
-            "owner_sf_username",
             "owner_gh_username",
             "has_been_visited",
             "valid_target_directories",
