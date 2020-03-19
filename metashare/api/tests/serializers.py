@@ -55,7 +55,10 @@ class TestProjectSerializer:
     def test_markdown_fields_output(self, project_factory):
         project = project_factory(name="Test project", description="Test `project`")
         serializer = ProjectSerializer(project)
-        assert serializer.data["description"] == "<p>Test <code>project</code></p>"
+        assert (
+            serializer.data["description_rendered"]
+            == "<p>Test <code>project</code></p>"
+        )
 
     def test_branch_url__present(self, project_factory):
         project = project_factory(
