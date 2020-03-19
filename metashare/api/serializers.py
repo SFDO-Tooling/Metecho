@@ -281,17 +281,14 @@ class TaskSerializer(serializers.ModelSerializer):
         return None
 
     def update(self, instance, validated_data):
-        originating_user_id = getattr(
-            getattr(self.context.get("request"), "user", None), "id", None
-        )
         if instance.assigned_dev != validated_data["assigned_dev"]:
             orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
             for org in orgs:
-                org.queue_delete(originating_user_id=originating_user_id)
+                org.queue_delete(originating_user_id=None)
         if instance.assigned_qa != validated_data["assigned_qa"]:
             orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.QA)
             for org in orgs:
-                org.queue_delete(originating_user_id=originating_user_id)
+                org.queue_delete(originating_user_id=None)
         return super().update(instance, validated_data)
 
 
@@ -380,7 +377,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         return {}
 
     def get_total_unsaved_changes(self, obj) -> int:
-        return len(obj.unsaved_changes)
+        return sum(len(change) for change in obj.unsaved_changes.values())
 
     def get_valid_target_directories(self, obj) -> dict:
         user = getattr(self.context.get("request"), "user", None)
