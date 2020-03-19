@@ -293,14 +293,6 @@ class ReviewSerializer(serializers.Serializer):
     )
 
 
-# class UserSensitiveJSONField(serializers.JSONField):
-#     def to_representation(self, value):
-#         user = getattr(self.context.get("request"), "user", None)
-#         if user == self.parent.instance.owner:
-#             return super().to_representation(value)
-#         return super().to_representation({})
-
-
 class ScratchOrgSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     task = serializers.PrimaryKeyRelatedField(
@@ -313,6 +305,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
     )
     has_unsaved_changes = serializers.SerializerMethodField()
     unsaved_changes = serializers.SerializerMethodField()
+    total_unsaved_changes = serializers.SerializerMethodField()
     valid_target_directories = serializers.SerializerMethodField()
 
     class Meta:
@@ -330,6 +323,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "last_checked_unsaved_changes_at",
             "url",
             "unsaved_changes",
+            "total_unsaved_changes",
             "has_unsaved_changes",
             "currently_refreshing_changes",
             "currently_capturing_changes",
@@ -363,6 +357,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         if obj.owner == user:
             return obj.unsaved_changes
         return {}
+
+    def get_total_unsaved_changes(self, obj) -> int:
+        return len(obj.unsaved_changes)
 
     def get_valid_target_directories(self, obj) -> dict:
         user = getattr(self.context.get("request"), "user", None)
