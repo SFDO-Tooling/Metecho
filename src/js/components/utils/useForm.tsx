@@ -80,33 +80,34 @@ export default ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
-    try {
-      if (update) {
-        dispatch(
-          updateObject({
-            objectType: OBJECT_TYPES.PROJECT,
-            data: {
-              ...inputs,
-              ...additionalData,
-            },
-          }),
-        ).then((...args: any[]) => handleSuccess(...args));
-      } else {
-        dispatch(
-          createObject({
-            objectType,
-            url,
-            data: {
-              ...inputs,
-              ...additionalData,
-            },
-            hasForm: true,
-            shouldSubscribeToObject,
-          }),
-        ).then((...args: any[]) => handleSuccess(...args));
-      }
-    } catch (err) {
-      catchError(err);
+    if (update) {
+      dispatch(
+        updateObject({
+          objectType: OBJECT_TYPES.PROJECT,
+          data: {
+            ...additionalData,
+            ...inputs,
+          },
+          hasForm: true,
+        }),
+      )
+        .then((...args: any[]) => handleSuccess(...args))
+        .catch((err) => catchError(err));
+    } else {
+      dispatch(
+        createObject({
+          objectType,
+          url,
+          data: {
+            ...inputs,
+            ...additionalData,
+          },
+          hasForm: true,
+          shouldSubscribeToObject,
+        }),
+      )
+        .then((...args: any[]) => handleSuccess(...args))
+        .catch((err) => catchError(err));
     }
   };
 

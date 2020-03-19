@@ -3,6 +3,7 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
+import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useForm, useIsMounted } from '@/components/utils';
@@ -20,20 +21,11 @@ const EditModal = ({
   toggleModal,
   handleClose,
 }: EditModalProps) => {
-  const [saveBlocked, setSaveBlocked] = useState(true);
-  const isMounted = useIsMounted();
   const form = useRef<HTMLFormElement | null>(null);
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
   const handleSuccess = () => {
-    setSaveBlocked(true);
     handleClose();
-  };
-
-  const handleError = () => {
-    if (isMounted.current) {
-      setSaveBlocked(true);
-    }
   };
 
   const defaultName = project.name;
@@ -51,9 +43,8 @@ const EditModal = ({
       name: defaultName,
       description: defaultDescription,
     },
-    additionalData: project,
+    additionalData: _.omit(project, ['name', 'description']),
     onSuccess: handleSuccess,
-    onError: handleError,
     shouldSubscribeToObject: false,
     objectType: 'project',
     update: true,
@@ -72,8 +63,6 @@ const EditModal = ({
   useEffect(() => {
     const prevDefaultDescription = defaultDescriptionRef.current;
     if (defaultDescription !== prevDefaultDescription) {
-      // enabled the save button when user starts typing
-      setSaveBlocked(false);
       setInputs({ ...inputs, description: defaultDescription });
       defaultDescriptionRef.current = defaultDescription;
     }
@@ -110,7 +99,6 @@ const EditModal = ({
           label="Save"
           variant="brand"
           onClick={onSubmitClicked}
-          disabled={saveBlocked}
         />,
       ]}
     >
@@ -149,12 +137,7 @@ const EditModal = ({
             />
           </div>
         </div>
-        <button
-          ref={submitButton}
-          type="submit"
-          style={{ display: 'none' }}
-          disabled={saveBlocked}
-        />
+        <button ref={submitButton} type="submit" style={{ display: 'none' }} />
       </form>
     </Modal>
   );
