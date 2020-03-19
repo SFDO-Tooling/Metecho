@@ -26,6 +26,7 @@ export default ({
   onSuccess = () => {},
   onError = () => {},
   shouldSubscribeToObject = true,
+  update = false,
 }: {
   fields: { [key: string]: any };
   objectType?: ObjectTypes;
@@ -34,6 +35,7 @@ export default ({
   onSuccess?: (...args: any[]) => any;
   onError?: (...args: any[]) => any;
   shouldSubscribeToObject?: boolean | ((...args: any[]) => boolean);
+  update?: any;
 }) => {
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
@@ -50,55 +52,62 @@ export default ({
     }
     setInputs({ ...inputs, [e.target.name]: value });
   };
-  const handleSubmitFromRef = (data: any) => {
-    dispatch(
-      updateObject({
-        objectType: OBJECT_TYPES.PROJECT,
-        data,
-      }),
-    );
+  const handleSuccess = (...args: any[]) => {
+    if (isMounted.current) {
+      resetForm();
+    }
+    onSuccess(...args);
+  };
+  const catchError = (err: ApiError) => {
+    const allErrors = typeof err?.body === 'object' ? err.body : {};
+    const fieldErrors: typeof errors = {};
+    for (const field of Object.keys(allErrors)) {
+      if (Object.keys(fields).includes(field) && allErrors[field]?.length) {
+        fieldErrors[field] = allErrors[field].join(', ');
+      }
+    }
+    onError(err, fieldErrors);
+    /* istanbul ignore else */
+    if (isMounted.current && Object.keys(fieldErrors).length) {
+      setErrors(fieldErrors);
+    } else if (err.response?.status === 422) {
+      // If no inline errors to show, fallback to default global error toast
+      dispatch(addError(err.message));
+    } else {
+      throw err;
+    }
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
-    dispatch(
-      createObject({
-        objectType,
-        url,
-        data: {
-          ...inputs,
-          ...additionalData,
-        },
-        hasForm: true,
-        shouldSubscribeToObject,
-      }),
-    )
-      .then((...args: any[]) => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          resetForm();
-        }
-        onSuccess(...args);
-      })
-      .catch((err: ApiError) => {
-        const allErrors = typeof err?.body === 'object' ? err.body : {};
-        const fieldErrors: typeof errors = {};
-        for (const field of Object.keys(allErrors)) {
-          if (Object.keys(fields).includes(field) && allErrors[field]?.length) {
-            fieldErrors[field] = allErrors[field].join(', ');
-          }
-        }
-        onError(err, fieldErrors);
-        /* istanbul ignore else */
-        if (isMounted.current && Object.keys(fieldErrors).length) {
-          setErrors(fieldErrors);
-        } else if (err.response?.status === 422) {
-          // If no inline errors to show, fallback to default global error toast
-          dispatch(addError(err.message));
-        } else {
-          throw err;
-        }
-      });
+    try {
+      if (update) {
+        dispatch(
+          updateObject({
+            objectType: OBJECT_TYPES.PROJECT,
+            data: {
+              ...inputs,
+              ...additionalData,
+            },
+          }),
+        ).then((...args: any[]) => handleSuccess(...args));
+      } else {
+        dispatch(
+          createObject({
+            objectType,
+            url,
+            data: {
+              ...inputs,
+              ...additionalData,
+            },
+            hasForm: true,
+            shouldSubscribeToObject,
+          }),
+        ).then((...args: any[]) => handleSuccess(...args));
+      }
+    } catch (err) {
+      catchError(err);
+    }
   };
 
   return {
@@ -108,6 +117,6 @@ export default ({
     setInputs,
     handleSubmit,
     resetForm,
-    handleSubmitFromRef,
+    update,
   };
 };

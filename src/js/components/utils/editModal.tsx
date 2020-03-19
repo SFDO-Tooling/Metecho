@@ -3,36 +3,90 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { useForm } from '@/components/utils';
+import { useForm, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 
 interface EditModalProps {
   project: Project;
   isOpen: boolean;
   toggleModal: (open: boolean) => void;
+  handleClose: () => void;
 }
-const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
+const EditModal = ({
+  project,
+  isOpen,
+  toggleModal,
+  handleClose,
+}: EditModalProps) => {
+  const [saveBlocked, setSaveBlocked] = useState(true);
+  const isMounted = useIsMounted();
   const form = useRef<HTMLFormElement | null>(null);
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
-  const { handleSubmitFromRef } = useForm({
-    fields: { name: '', description: '' },
-  });
-  const onSubmit = useCallback((e) => {
-    e.preventDefault();
-    if (form) {
-      const { name, description } = form.current;
-      const data = {
-        ...project,
-        name: name.value,
-        description: description.value,
-      };
-      handleSubmitFromRef(data);
+  const handleSuccess = () => {
+    setSaveBlocked(true);
+    handleClose();
+  };
+
+  const handleError = () => {
+    if (isMounted.current) {
+      setSaveBlocked(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
+
+  const defaultName = project.name;
+  const defaultDescription = project.description;
+
+  const {
+    inputs,
+    errors,
+    handleInputChange,
+    setInputs,
+    handleSubmit,
+    resetForm,
+  } = useForm({
+    fields: {
+      name: defaultName,
+      description: defaultDescription,
+    },
+    additionalData: project,
+    onSuccess: handleSuccess,
+    onError: handleError,
+    shouldSubscribeToObject: false,
+    objectType: 'project',
+    update: true,
+  });
+
+  const defaultNameRef = useRef(defaultName);
+  useEffect(() => {
+    const prevDefaultName = defaultNameRef.current;
+    if (defaultName !== prevDefaultName) {
+      setInputs({ ...inputs, name: defaultName });
+      defaultNameRef.current = defaultName;
+    }
+  }, [defaultName, inputs, setInputs]);
+
+  const defaultDescriptionRef = useRef(defaultDescription);
+  useEffect(() => {
+    const prevDefaultDescription = defaultDescriptionRef.current;
+    if (defaultDescription !== prevDefaultDescription) {
+      // enabled the save button when user starts typing
+      setSaveBlocked(false);
+      setInputs({ ...inputs, description: defaultDescription });
+      defaultDescriptionRef.current = defaultDescription;
+    }
+  }, [defaultDescription, inputs, setInputs]);
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    handleSubmit(e);
+  };
+
+  const doClose = () => {
+    handleClose();
+    resetForm();
+  };
 
   const onSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
@@ -42,33 +96,21 @@ const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
     }
   };
 
-  const handleClose = () => {
-    toggleModal(false);
-  };
-
-  useEffect(() => {
-    console.log(form);
-  }, [form]);
-
   return (
     <Modal
       isOpen={isOpen}
       size="medium"
       heading="Edit Project Name and Description"
+      onRequestClose={doClose}
       footer={[
-        <Button
-          key="cancel"
-          label={i18n.t('Cancel')}
-          onClick={handleClose}
-          // disabled={submittingReview}
-        />,
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={doClose} />,
         <Button
           key="submit"
           type="submit"
           label="Save"
           variant="brand"
           onClick={onSubmitClicked}
-          // disabled={submittingReview}
+          disabled={saveBlocked}
         />,
       ]}
     >
@@ -87,25 +129,23 @@ const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
           >
             <Input
               id="edit-project-name"
-              label={i18n.t('Title')}
+              label={i18n.t('Project Name')}
               className="slds-p-bottom_small"
               name="name"
-              defaultValue={project.name}
+              value={inputs.name}
               required
               aria-required
-              //   errorText={errors.title}
-              //   onChange={handleInputChange}
+              errorText={errors.name}
+              onChange={handleInputChange}
             />
             <Textarea
               id="edit-project-description"
-              label={i18n.t(
-                'Describe any critical changes which might impact existing functionality',
-              )}
+              label={i18n.t('Description')}
               className="ms-textarea slds-p-bottom_small"
               name="description"
-              defaultValue={project.description}
-              //   errorText={errors.critical_changes}
-              //   onChange={handleInputChange}
+              value={inputs.description}
+              errorText={errors.critical_changes}
+              onChange={handleInputChange}
             />
           </div>
         </div>
@@ -113,7 +153,7 @@ const EditModal = ({ project, isOpen, toggleModal }: EditModalProps) => {
           ref={submitButton}
           type="submit"
           style={{ display: 'none' }}
-          disabled={false}
+          disabled={saveBlocked}
         />
       </form>
     </Modal>
