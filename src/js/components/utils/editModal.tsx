@@ -29,7 +29,7 @@ const EditModal = ({
   };
 
   const defaultName = project.name;
-  const defaultDescription = project.description;
+  const defaultDescription = project.description.replace(/<(.|\n)*?>/g, '');
 
   const {
     inputs,
