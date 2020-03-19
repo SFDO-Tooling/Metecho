@@ -33,7 +33,7 @@
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
     },
     "SF_CALLBACK_URL": {
-      "description": "Callback URL for Salesforce Connected App (e.g. \"https://<...>/accounts/salesforce-production/login/callback/\")"
+      "description": "Callback URL for Salesforce Connected App (e.g. \"https://<...>/accounts/salesforce/login/callback/\")"
     },
     "SF_CLIENT_ID": {
       "description": "Consumer Key for Salesforce Connected App"

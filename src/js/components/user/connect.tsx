@@ -79,7 +79,7 @@ const ConnectModal = ({
 
   const handleConnect = () => {
     window.location.assign(
-      addUrlParams(window.api_urls.salesforce_production_login(), {
+      addUrlParams(window.api_urls.salesforce_login(), {
         process: 'connect',
         next: window.location.pathname,
       }),
@@ -94,7 +94,7 @@ const ConnectModal = ({
     if (!val) {
       return;
     }
-    const baseUrl = window.api_urls.salesforce_custom_login();
+    const baseUrl = window.api_urls.salesforce_login();
     window.location.assign(
       addUrlParams(baseUrl, {
         custom_domain: val,

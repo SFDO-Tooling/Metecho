@@ -131,13 +131,13 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    "allauth.socialaccount.providers.github",
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
     "anymail",
     "metashare",
-    "metashare.multisalesforce",
+    "metashare.oauth2.github",
+    "metashare.oauth2.salesforce",
     "metashare.api",
     "metashare.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
@@ -327,6 +327,9 @@ STATIC_ROOT = str(PROJECT_ROOT / "staticfiles")
 # > you won't benefit from cache versioning
 # WHITENOISE_ROOT = PROJECT_ROOT.joinpath(static_dir_root)
 
+GITHUB_CLIENT_ID = env("GITHUB_CLIENT_ID")
+GITHUB_CLIENT_SECRET = env("GITHUB_CLIENT_SECRET")
+
 # If GITHUB_OAUTH_PRIVATE_REPO env var is True, oauth scope should include
 # private repositories. Otherwise, the scope will only be for public repos.
 GITHUB_OAUTH_PRIVATE_REPO = env(
@@ -335,15 +338,28 @@ GITHUB_OAUTH_PRIVATE_REPO = env(
 GITHUB_OAUTH_SCOPES = ["read:user", "user:email"]
 GITHUB_OAUTH_SCOPES.append("repo" if GITHUB_OAUTH_PRIVATE_REPO else "public_repo")
 
+# SF client settings:
+SF_CALLBACK_URL = env("SF_CALLBACK_URL", default=None)
+# Ugly hack to fix https://github.com/moby/moby/issues/12997
+SF_CLIENT_KEY = env("SF_CLIENT_KEY", default="").replace("\\n", "\n")
+SF_CLIENT_ID = env("SF_CLIENT_ID", default=None)
+SF_CLIENT_SECRET = env("SF_CLIENT_SECRET", default=None)
+SF_SIGNUP_INSTANCE = env("SF_SIGNUP_INSTANCE", default=None)
+
 SOCIALACCOUNT_PROVIDERS = {
-    "github": {"SCOPE": GITHUB_OAUTH_SCOPES},
-    "salesforce-production": {"SCOPE": ["web", "full", "refresh_token"]},
-    "salesforce-custom": {"SCOPE": ["web", "full", "refresh_token"]},
+    "github": {
+        "SCOPE": GITHUB_OAUTH_SCOPES,
+        "APP": {"client_id": GITHUB_CLIENT_ID, "secret": GITHUB_CLIENT_SECRET},
+    },
+    "salesforce": {
+        "SCOPE": ["web", "full", "refresh_token"],
+        "APP": {"client_id": SF_CLIENT_ID, "secret": SF_CLIENT_SECRET},
+    },
 }
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
-SOCIALACCOUNT_ADAPTER = "metashare.multisalesforce.adapter.CustomSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "metashare.oauth2.adapter.CustomSocialAccountAdapter"
 
 JS_REVERSE_JS_VAR_NAME = "api_urls"
 JS_REVERSE_EXCLUDE_NAMESPACES = ["admin", "admin_rest"]
@@ -388,14 +404,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-
-# SF client settings:
-SF_CALLBACK_URL = env("SF_CALLBACK_URL", default=None)
-# Ugly hack to fix https://github.com/moby/moby/issues/12997
-SF_CLIENT_KEY = env("SF_CLIENT_KEY", default="").replace("\\n", "\n")
-SF_CLIENT_ID = env("SF_CLIENT_ID", default=None)
-SF_CLIENT_SECRET = env("SF_CLIENT_SECRET", default=None)
-SF_SIGNUP_INSTANCE = env("SF_SIGNUP_INSTANCE", default=None)
 
 # Logging
 
@@ -458,7 +466,7 @@ LOGGING = {
             "propagate": False,
         },
         "rq.worker": {"handlers": ["rq_console"], "level": "DEBUG"},
-        "metashare.multisalesforce": {"handlers": ["console"], "level": "DEBUG"},
+        "metashare.oauth2": {"handlers": ["console"], "level": "DEBUG"},
         "metashare.logging_middleware": {
             "handlers": ["console"],
             "level": "DEBUG",

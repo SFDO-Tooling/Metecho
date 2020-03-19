@@ -37,7 +37,7 @@ describe('<ConnectModal />', () => {
     test('updates `window.location.href` on login click', () => {
       const { getAllByText } = setup();
       fireEvent.click(getAllByText('Connect to Salesforce')[1]);
-      const base = window.api_urls.salesforce_production_login();
+      const base = window.api_urls.salesforce_login();
       const expected = addUrlParams(base, {
         process: 'connect',
         next: window.location.pathname,
@@ -96,7 +96,7 @@ describe('<ConnectModal />', () => {
 
       fireEvent.change(input, { target: { value: 'foobar' } });
       fireEvent.click(getByText('Continue'));
-      const baseUrl = window.api_urls.salesforce_custom_login();
+      const baseUrl = window.api_urls.salesforce_login();
       const expected = addUrlParams(baseUrl, {
         custom_domain: 'foobar',
         process: 'connect',

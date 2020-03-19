@@ -1,7 +1,9 @@
 from allauth.socialaccount.providers.salesforce.provider import SalesforceProvider
 
 
-class ProviderMixin:
+class CustomSalesforceProvider(SalesforceProvider):
+    package = "metashare.oauth2.salesforce"
+
     def get_auth_params(self, request, action):
         ret = super().get_auth_params(request, action)
         # This will ensure that even if you're logged in to Salesforce,
@@ -17,16 +19,4 @@ class ProviderMixin:
         return "{}/{}".format(data["organization_id"], data["user_id"])
 
 
-class SalesforceProductionProvider(ProviderMixin, SalesforceProvider):
-    id = "salesforce-production"
-    name = "Salesforce Production"
-    package = "metashare.multisalesforce"
-
-
-class SalesforceCustomProvider(ProviderMixin, SalesforceProvider):
-    id = "salesforce-custom"
-    name = "Salesforce Custom"
-    package = "metashare.multisalesforce"
-
-
-provider_classes = [SalesforceProductionProvider, SalesforceCustomProvider]
+provider_classes = [CustomSalesforceProvider]
