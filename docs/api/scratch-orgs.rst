@@ -30,6 +30,7 @@ Retrieve
         "url": "https://sample-org-url.my.salesforce.com/",
         "unsaved_changes": {},
         "has_unsaved_changes": false,
+        "total_unsaved_changes": 0,
         "currently_refreshing_changes": false,
         "currently_capturing_changes": false,
         "currently_refreshing_org": false,

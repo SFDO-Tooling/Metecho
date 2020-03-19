@@ -22,6 +22,7 @@ export interface Org {
   url: string | null;
   unsaved_changes: Changeset;
   has_unsaved_changes: boolean;
+  total_unsaved_changes: number;
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
   currently_refreshing_org: boolean;
