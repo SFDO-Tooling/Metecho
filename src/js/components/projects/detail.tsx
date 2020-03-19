@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
