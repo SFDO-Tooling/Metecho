@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from ..models import SCRATCH_ORG_TYPES
 from ..serializers import (
     FullUserSerializer,
     HashidPrimaryKeyRelatedField,
@@ -165,6 +166,23 @@ class TestProjectSerializer:
 
 @pytest.mark.django_db
 class TestTaskSerializer:
+    def test_update(self, task_factory, scratch_org_factory):
+        task = task_factory()
+        scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
+        scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        data = {
+            "name": task.name,
+            "description": task.description,
+            "project": str(task.project.id),
+            "assigned_dev": {"test": "id"},
+            "assigned_qa": {"test": "id"},
+        }
+        serializer = TaskSerializer(task, data=data)
+        assert serializer.is_valid(), serializer.errors
+        with patch("metashare.api.jobs.delete_scratch_org_job") as job:
+            serializer.update(task, serializer.validated_data)
+            assert job.delay.called
+
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
         serializer = TaskSerializer(task)

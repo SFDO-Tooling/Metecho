@@ -5,7 +5,14 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .fields import MarkdownField
-from .models import TASK_REVIEW_STATUS, Project, Repository, ScratchOrg, Task
+from .models import (
+    SCRATCH_ORG_TYPES,
+    TASK_REVIEW_STATUS,
+    Project,
+    Repository,
+    ScratchOrg,
+    Task,
+)
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
@@ -272,6 +279,20 @@ class TaskSerializer(serializers.ModelSerializer):
         if repo_owner and repo_name and pr_number:
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
+
+    def update(self, instance, validated_data):
+        originating_user_id = getattr(
+            getattr(self.context.get("request"), "user", None), "id", None
+        )
+        if instance.assigned_dev != validated_data["assigned_dev"]:
+            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
+            for org in orgs:
+                org.queue_delete(originating_user_id=originating_user_id)
+        if instance.assigned_qa != validated_data["assigned_qa"]:
+            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.QA)
+            for org in orgs:
+                org.queue_delete(originating_user_id=originating_user_id)
+        return super().update(instance, validated_data)
 
 
 class CreatePrSerializer(serializers.Serializer):

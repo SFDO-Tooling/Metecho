@@ -115,9 +115,7 @@ class UserDisconnectSFView(CurrentUserObjectMixin, APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class UserViewSet(
-    mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
-):
+class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = MinimalUserSerializer
     pagination_class = CustomPaginator
