@@ -122,6 +122,18 @@ class ProjectSerializer(serializers.ModelSerializer):
             "status",
             "github_users",
         )
+        extra_kwargs = {
+            "slug": {"read_only": True},
+            "old_slugs": {"read_only": True},
+            "branch_url": {"read_only": True},
+            "branch_diff_url": {"read_only": True},
+            "has_unmerged_commits": {"read_only": True},
+            "currently_creating_pr": {"read_only": True},
+            "pr_url": {"read_only": True},
+            "pr_is_open": {"read_only": True},
+            "pr_is_merged": {"read_only": True},
+            "status": {"read_only": True},
+        }
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Project.objects.all(),
@@ -201,6 +213,24 @@ class TaskSerializer(serializers.ModelSerializer):
             "assigned_qa",
             "currently_submitting_review",
         )
+        extra_kwargs = {
+            "slug": {"read_only": True},
+            "old_slugs": {"read_only": True},
+            "has_unmerged_commits": {"read_only": True},
+            "currently_creating_pr": {"read_only": True},
+            "branch_url": {"read_only": True},
+            "commits": {"read_only": True},
+            "origin_sha": {"read_only": True},
+            "branch_diff_url": {"read_only": True},
+            "pr_url": {"read_only": True},
+            "review_submitted_at": {"read_only": True},
+            "review_valid": {"read_only": True},
+            "review_status": {"read_only": True},
+            "review_sha": {"read_only": True},
+            "status": {"read_only": True},
+            "pr_is_open": {"read_only": True},
+            "currently_submitting_review": {"read_only": True},
+        }
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Task.objects.all(),
@@ -320,6 +350,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
+            "delete_queued_at": {"read_only": True},
+            "owner_gh_username": {"read_only": True},
+            "has_been_visited": {"read_only": True},
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:

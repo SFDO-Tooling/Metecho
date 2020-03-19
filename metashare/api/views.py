@@ -122,7 +122,9 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
 
 
-class RepositoryViewSet(viewsets.ModelViewSet):
+class RepositoryViewSet(
+    mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
+):
     permission_classes = (IsAuthenticated,)
     serializer_class = RepositorySerializer
     filter_backends = (DjangoFilterBackend,)
@@ -192,7 +194,8 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
 class ScratchOrgViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    # Omit UpdateModelMixin
+    # Just say no to updating ScratchOrgs:
+    # mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
     GenericViewSet,

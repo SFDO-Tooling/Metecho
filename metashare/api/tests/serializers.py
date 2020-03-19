@@ -3,11 +3,21 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from ..serializers import (
+    FullUserSerializer,
     HashidPrimaryKeyRelatedField,
     ProjectSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
 )
+
+
+@pytest.mark.django_db
+class TestFullUserSerializer:
+    def test_get_sf_username(self, user_factory, settings):
+        settings.DEVHUB_USERNAME = "test username"
+        user = user_factory()
+        serializer = FullUserSerializer(user)
+        assert serializer.data["sf_username"] is None
 
 
 class TestHashidPrimaryKeyRelatedField:

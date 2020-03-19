@@ -457,6 +457,19 @@ class TestScratchOrgView:
 
             assert response.status_code == 204
 
+    def test_queue_delete__bad(
+        self, client, scratch_org_factory, social_account_factory
+    ):
+        social_account_factory(
+            user=client.user, provider="salesforce-production",
+        )
+        scratch_org = scratch_org_factory()
+        with patch("metashare.api.models.ScratchOrg.queue_delete"):
+            url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+            response = client.delete(url)
+
+            assert response.status_code == 403
+
     def test_redirect__good(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(owner=client.user)
         with patch("metashare.api.models.ScratchOrg.get_login_url") as get_login_url:
