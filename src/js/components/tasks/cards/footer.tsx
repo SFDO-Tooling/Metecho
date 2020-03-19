@@ -13,6 +13,7 @@ const Footer = ({
   isRefreshingChanges,
   isRefreshingOrg,
   reviewOrgOutOfDate,
+  readyForReview,
   openRefreshOrgModal,
 }: {
   org: Org | null;
@@ -22,6 +23,7 @@ const Footer = ({
   isRefreshingChanges: boolean;
   isRefreshingOrg: boolean;
   reviewOrgOutOfDate: boolean;
+  readyForReview: boolean;
   openRefreshOrgModal: () => void;
 }) => {
   const loadingMsg = i18n.t(
@@ -58,7 +60,10 @@ const Footer = ({
           />
         );
       }
-      return <ExternalLink url={orgUrl}>{i18n.t('View Org')}</ExternalLink>;
+      const label = readyForReview
+        ? i18n.t('Review Changes in Org')
+        : i18n.t('View Org');
+      return <ExternalLink url={orgUrl}>{label}</ExternalLink>;
     }
   }
 

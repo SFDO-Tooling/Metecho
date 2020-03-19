@@ -4,6 +4,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
@@ -100,6 +101,11 @@ const UserInfo = ({
       }
     });
   }, [dispatch, isMounted]);
+
+  /* istanbul ignore if */
+  if (user.uses_global_devhub) {
+    return null;
+  }
 
   return (
     <>
@@ -198,7 +204,9 @@ export const ConnectionInfoModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
-  const isConnected = Boolean(user.valid_token_for || user.devhub_username);
+  const isConnected = Boolean(
+    user.valid_token_for || user.devhub_username || user.uses_global_devhub,
+  );
 
   return (
     <Modal
@@ -239,16 +247,22 @@ const UserDropdown = () => {
   const user = useSelector(selectUserState);
   const [modalOpen, setModalOpen] = useState(false);
 
-  return user ? (
+  if (!user) {
+    return null;
+  }
+
+  return (
     <>
       <Popover
         align="bottom right"
         body={
           <>
             <header
-              className="slds-border_bottom
-                slds-p-bottom_x-small
-                slds-m-bottom_x-small"
+              className={classNames({
+                'slds-border_bottom': !user.uses_global_devhub,
+                'slds-p-bottom_x-small': !user.uses_global_devhub,
+                'slds-m-bottom_x-small': !user.uses_global_devhub,
+              })}
             >
               <div className="slds-p-vertical_small slds-p-horizontal_large">
                 {user.avatar_url ? (
@@ -279,13 +293,15 @@ const UserDropdown = () => {
                 </div>
               </div>
             </header>
-            <div className="slds-p-vertical_small slds-p-horizontal_large">
-              {user.valid_token_for || user.devhub_username ? (
-                <ConnectionInfo user={user} />
-              ) : (
-                <ConnectToSalesforce toggleModal={setModalOpen} />
-              )}
-            </div>
+            {!user.uses_global_devhub && (
+              <div className="slds-p-vertical_small slds-p-horizontal_large">
+                {user.valid_token_for || user.devhub_username ? (
+                  <ConnectionInfo user={user} />
+                ) : (
+                  <ConnectToSalesforce toggleModal={setModalOpen} />
+                )}
+              </div>
+            )}
           </>
         }
         classNameBody="slds-p-horizontal_none"
@@ -303,9 +319,15 @@ const UserDropdown = () => {
           }
         />
       </Popover>
-      <ConnectModal user={user} isOpen={modalOpen} toggleModal={setModalOpen} />
+      {!user.uses_global_devhub && (
+        <ConnectModal
+          user={user}
+          isOpen={modalOpen}
+          toggleModal={setModalOpen}
+        />
+      )}
     </>
-  ) : null;
+  );
 };
 
 export default UserDropdown;

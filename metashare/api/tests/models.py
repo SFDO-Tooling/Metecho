@@ -274,12 +274,28 @@ class TestUser:
         user.socialaccount_set.all().delete()
         assert user.org_name is None
 
+    def test_org_name__global_devhub(
+        self, settings, user_factory, social_account_factory
+    ):
+        settings.DEVHUB_USERNAME = "test global devhub"
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
+        assert user.org_name is None
+
     def test_org_type(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
         assert user.org_type == "Developer Edition"
 
         user.socialaccount_set.all().delete()
+        assert user.org_type is None
+
+    def test_org_type__global_devhub(
+        self, settings, user_factory, social_account_factory
+    ):
+        settings.DEVHUB_USERNAME = "test global devhub"
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.org_type is None
 
     def test_github_account(self, user_factory):
@@ -326,6 +342,16 @@ class TestUser:
         )
         assert user.sf_username == "sample username"
 
+    def test_sf_username__global_devhub(
+        self, settings, user_factory, social_account_factory
+    ):
+        settings.DEVHUB_USERNAME = "devhub username"
+        user = user_factory(devhub_username=None, allow_devhub_override=False)
+        social_account_factory(
+            user=user, provider="salesforce-production", extra_data={},
+        )
+        assert user.sf_username == "devhub username"
+
     def test_instance_url(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce-production")
@@ -363,6 +389,14 @@ class TestUser:
         user.socialaccount_set.filter(
             provider="salesforce-production"
         ).first().socialtoken_set.all().delete()
+        assert user.valid_token_for is None
+
+    def test_valid_token_for__use_global_devhub(
+        self, settings, user_factory, social_account_factory
+    ):
+        settings.DEVHUB_USERNAME = "test global devhub"
+        user = user_factory()
+        social_account_factory(user=user, provider="salesforce-production")
         assert user.valid_token_for is None
 
     def test_full_org_type(self, user_factory, social_account_factory):
@@ -435,6 +469,13 @@ class TestUser:
 
     def test_is_devhub_enabled__shortcut_true(self, user_factory):
         user = user_factory(devhub_username="sample username")
+        assert user.is_devhub_enabled
+
+    def test_is_devhub_enabled__shortcut_true__use_global_devhub(
+        self, settings, user_factory
+    ):
+        settings.DEVHUB_USERNAME = "test global devhub"
+        user = user_factory()
         assert user.is_devhub_enabled
 
     def test_is_devhub_enabled__shortcut_false(
