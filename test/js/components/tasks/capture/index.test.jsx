@@ -134,7 +134,7 @@ describe('<CaptureModal/>', () => {
               [field]: ['Do not do that'],
             },
             response: {
-              status: 422,
+              status: 400,
             },
           }),
         );

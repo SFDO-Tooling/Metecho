@@ -141,56 +141,52 @@ const SubmitReviewModal = ({
       ]}
     >
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
-        <div className="slds-grid slds-wrap slds-gutters">
-          <div className="slds-col slds-size_1-of-1">
-            <RadioGroup
-              assistiveText={{
-                label: i18n.t('Task review status'),
-                required: i18n.t('Required'),
-              }}
-              labels={{ error: errors.status }}
-              className="slds-p-bottom_x-small"
-              name="status"
-              required
-              onChange={handleInputChange}
-            >
-              <Radio
-                id="approve"
-                labels={{ label: i18n.t('Approve') }}
-                checked={inputs.status === REVIEW_STATUSES.APPROVED}
-                value={REVIEW_STATUSES.APPROVED}
-                name="status"
-              />
-              <Radio
-                id="request-changes"
-                labels={{ label: i18n.t('Request changes') }}
-                checked={inputs.status === REVIEW_STATUSES.CHANGES_REQUESTED}
-                value={REVIEW_STATUSES.CHANGES_REQUESTED}
-                name="status"
-              />
-            </RadioGroup>
-            <Textarea
-              id="notes"
-              label={i18n.t('Review Description')}
-              className="ms-textarea"
-              name="notes"
-              value={inputs.notes}
-              errorText={errors.notes}
-              onChange={handleInputChange}
-            />
-            {orgId ? (
-              <Checkbox
-                id="delete-org"
-                labels={{ label: 'Delete Review Org' }}
-                className="slds-p-top_small"
-                name="delete_org"
-                checked={inputs.delete_org}
-                errorText={errors.delete_org}
-                onChange={handleInputChange}
-              />
-            ) : null}
-          </div>
-        </div>
+        <RadioGroup
+          assistiveText={{
+            label: i18n.t('Task review status'),
+            required: i18n.t('Required'),
+          }}
+          labels={{ error: errors.status }}
+          className="slds-p-bottom_x-small"
+          name="status"
+          required
+          onChange={handleInputChange}
+        >
+          <Radio
+            id="approve"
+            labels={{ label: i18n.t('Approve') }}
+            checked={inputs.status === REVIEW_STATUSES.APPROVED}
+            value={REVIEW_STATUSES.APPROVED}
+            name="status"
+          />
+          <Radio
+            id="request-changes"
+            labels={{ label: i18n.t('Request changes') }}
+            checked={inputs.status === REVIEW_STATUSES.CHANGES_REQUESTED}
+            value={REVIEW_STATUSES.CHANGES_REQUESTED}
+            name="status"
+          />
+        </RadioGroup>
+        <Textarea
+          id="notes"
+          label={i18n.t('Review Description')}
+          className="ms-textarea"
+          name="notes"
+          value={inputs.notes}
+          errorText={errors.notes}
+          onChange={handleInputChange}
+        />
+        {orgId ? (
+          <Checkbox
+            id="delete-org"
+            labels={{ label: 'Delete Review Org' }}
+            className="slds-p-top_small"
+            name="delete_org"
+            checked={inputs.delete_org}
+            errorText={errors.delete_org}
+            onChange={handleInputChange}
+          />
+        ) : null}
         {/* Clicking hidden button allows for native browser form validation */}
         <button
           ref={submitButton}

@@ -45,9 +45,7 @@ class CreatePrMixin:
     def create_pr(self, request, pk=None):
         serializer = CreatePrSerializer(data=self.request.data)
         if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         instance = self.get_object()
         if instance.pr_is_open:
             raise ValidationError(self.error_pr_exists)
@@ -75,9 +73,7 @@ class HookView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = serializer_class(data=request.data)
         if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.process_hook()
         return Response(status=status.HTTP_202_ACCEPTED)
@@ -169,9 +165,7 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     def review(self, request, pk=None):
         serializer = ReviewSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         task = self.get_object()
         org = serializer.validated_data["org"]
 
@@ -265,9 +259,7 @@ class ScratchOrgViewSet(viewsets.ModelViewSet):
     def commit(self, request, pk=None):
         serializer = CommitSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(

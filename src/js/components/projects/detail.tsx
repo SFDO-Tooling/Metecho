@@ -140,7 +140,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
       !project?.pr_is_open &&
       project?.status !== PROJECT_STATUSES.MERGED,
   );
-  // "edit modal related:
+
+  // "edit" modal related:
   const [editModalOpen, setEditModalOpen] = useState(false);
   const openEditModal = () => {
     setEditModalOpen(true);
@@ -148,6 +149,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeEditModal = () => {
     setEditModalOpen(false);
   };
+
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -208,6 +210,21 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const handleSelect = (option: {
+    id: string;
+    label: string;
+    disabled?: boolean;
+  }) => {
+    if (!option.disabled) {
+      switch (option.id) {
+        case 'edit':
+          openEditModal();
+          break;
+        case 'delete':
+          break;
+      }
+    }
+  };
   const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
@@ -219,11 +236,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
         iconVariant="more"
         width="xx-small"
         triggerClassName="slds-m-right_xx-small"
-        onSelect={openEditModal}
+        assistiveText={{ icon: i18n.t('Project Options') }}
+        onSelect={handleSelect}
         options={[
-          { label: 'Edit Project' },
+          { id: 'edit', label: i18n.t('Edit Project') },
           { type: 'divider' },
-          { label: 'Delete Project', disabled: true },
+          { id: 'delete', label: i18n.t('Delete Project'), disabled: true },
         ]}
       />
       {branchLink ? (
@@ -337,7 +355,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
         <EditModal
           project={project}
           isOpen={editModalOpen}
-          toggleModal={setEditModalOpen}
           handleClose={closeEditModal}
         />
       </DetailPageLayout>

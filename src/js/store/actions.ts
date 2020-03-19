@@ -326,17 +326,21 @@ export const deleteObject = ({
 
 export const updateObject = ({
   objectType,
+  url,
   data,
   hasForm = false,
 }: {
-  objectType: ObjectTypes;
+  objectType?: ObjectTypes;
+  url?: string;
   data: { id?: string; [key: string]: any };
   hasForm?: boolean;
 }): ThunkResult<Promise<CreateUpdateObjectSucceeded>> => async (dispatch) => {
-  const urlFn = window.api_urls[`${objectType}_detail`];
-  let baseUrl;
-  if (urlFn && data.id) {
-    baseUrl = urlFn(data.id);
+  let baseUrl = url;
+  if (!url) {
+    const urlFn = window.api_urls[`${objectType}_detail`];
+    if (urlFn && data.id) {
+      baseUrl = urlFn(data.id);
+    }
   }
   dispatch({
     type: 'UPDATE_OBJECT_STARTED',

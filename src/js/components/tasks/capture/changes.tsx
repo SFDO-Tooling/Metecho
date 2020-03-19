@@ -3,7 +3,7 @@ import AccordionPanel from '@salesforce/design-system-react/components/accordion
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
-import cloneDeep from 'lodash.clonedeep';
+import { cloneDeep } from 'lodash';
 import React, { useState } from 'react';
 
 import {

@@ -5,7 +5,7 @@ import { ThunkDispatch } from '@/store';
 import { createObject, updateObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
 import { ApiError } from '@/utils/api';
-import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import { ObjectTypes } from '@/utils/constants';
 
 import useIsMounted from './useIsMounted';
 
@@ -35,7 +35,7 @@ export default ({
   onSuccess?: (...args: any[]) => any;
   onError?: (...args: any[]) => any;
   shouldSubscribeToObject?: boolean | ((...args: any[]) => boolean);
-  update?: any;
+  update?: boolean;
 }) => {
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
@@ -53,6 +53,7 @@ export default ({
     setInputs({ ...inputs, [e.target.name]: value });
   };
   const handleSuccess = (...args: any[]) => {
+    /* istanbul ignore else */
     if (isMounted.current) {
       resetForm();
     }
@@ -70,7 +71,7 @@ export default ({
     /* istanbul ignore else */
     if (isMounted.current && Object.keys(fieldErrors).length) {
       setErrors(fieldErrors);
-    } else if (err.response?.status === 422) {
+    } else if (err.response?.status === 400) {
       // If no inline errors to show, fallback to default global error toast
       dispatch(addError(err.message));
     } else {
@@ -83,7 +84,8 @@ export default ({
     if (update) {
       dispatch(
         updateObject({
-          objectType: OBJECT_TYPES.PROJECT,
+          objectType,
+          url,
           data: {
             ...additionalData,
             ...inputs,
@@ -91,23 +93,23 @@ export default ({
           hasForm: true,
         }),
       )
-        .then((...args: any[]) => handleSuccess(...args))
-        .catch((err) => catchError(err));
+        .then(handleSuccess)
+        .catch(catchError);
     } else {
       dispatch(
         createObject({
           objectType,
           url,
           data: {
-            ...inputs,
             ...additionalData,
+            ...inputs,
           },
           hasForm: true,
           shouldSubscribeToObject,
         }),
       )
-        .then((...args: any[]) => handleSuccess(...args))
-        .catch((err) => catchError(err));
+        .then(handleSuccess)
+        .catch(catchError);
     }
   };
 
@@ -118,6 +120,5 @@ export default ({
     setInputs,
     handleSubmit,
     resetForm,
-    update,
   };
 };
