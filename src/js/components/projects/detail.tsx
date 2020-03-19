@@ -215,20 +215,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
       <Dropdown
         align="right"
         iconCategory="utility"
-        iconName="down"
-        iconPosition="right"
+        iconName="settings"
+        iconSize="large"
+        iconVariant="more"
         width="xx-small"
-        className="dropdown-btn"
         triggerClassName="slds-m-right_xx-small"
         onSelect={openEditModal}
-        label={
-          <Icon
-            category="utility"
-            name="settings"
-            size="x-small"
-            className="icon-link slds-m-bottom_xxx-small"
-          />
-        }
         options={[
           { label: 'Edit Project' },
           { type: 'divider' },
