@@ -48,6 +48,7 @@ const defaultOrgs = {
     latest_commit_at: '2019-08-16T12:58:53.721Z',
     url: '/test/org/url/',
     unsaved_changes: { Foo: ['Bar'] },
+    total_unsaved_changes: 1,
     has_unsaved_changes: true,
   },
   QA: null,
@@ -143,6 +144,7 @@ describe('<OrgCards/>', () => {
           owner: 'other-user-id',
           owner_gh_username: 'other-user',
           unsaved_changes: {},
+          total_unsaved_changes: 0,
           has_unsaved_changes: false,
         },
       };
@@ -772,6 +774,7 @@ describe('<OrgCards/>', () => {
             owner_gh_username: 'other-user',
             org_type: 'QA',
             unsaved_changes: {},
+            total_unsaved_changes: 0,
             has_unsaved_changes: false,
           },
         };
@@ -800,6 +803,7 @@ describe('<OrgCards/>', () => {
             Dev: {
               ...defaultOrgs.Dev,
               unsaved_changes: {},
+              total_unsaved_changes: 0,
               has_unsaved_changes: false,
             },
           },
