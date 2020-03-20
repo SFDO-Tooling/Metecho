@@ -95,10 +95,10 @@ const OrgActions = ({
     }
   }
 
-  if (ownedByWrongUser || (org && ownedByCurrentUser)) {
+  if (ownedByCurrentUser && (org || ownedByWrongUser)) {
     return (
       <>
-        {reviewOrgOutOfDate && ownedByCurrentUser && (
+        {reviewOrgOutOfDate && (
           <Button
             label={i18n.t('Refresh Org')}
             variant="brand"
@@ -124,7 +124,7 @@ const OrgActions = ({
     );
   }
 
-  if (!org && assignedToCurrentUser) {
+  if (!(org || ownedByWrongUser) && assignedToCurrentUser) {
     return (
       <>
         {submitReviewBtn}
