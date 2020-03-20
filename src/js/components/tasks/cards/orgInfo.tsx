@@ -3,6 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React from 'react';
+import { Trans } from 'react-i18next';
 
 import { ExternalLink } from '@/components/utils';
 import { Org } from '@/store/orgs/reducer';
@@ -45,7 +46,9 @@ const OrgInfo = ({
     return (
       <ul>
         <li>
-          <strong>{i18n.t('Status')}:</strong> {i18n.t('owned by user')}{' '}
+          <Trans i18nKey="orgOwnedByWrongUser">
+            <strong>Status:</strong> owned by user
+          </Trans>{' '}
           <strong>{ownedByWrongUser.owner_gh_username}</strong>
         </li>
       </ul>
@@ -56,7 +59,9 @@ const OrgInfo = ({
     return (
       <ul>
         <li>
-          <strong>{i18n.t('Status')}:</strong> {i18n.t('not yet created')}
+          <Trans i18nKey="orgNotYetCreated">
+            <strong>Status:</strong> not yet created
+          </Trans>
         </li>
       </ul>
     );
@@ -79,7 +84,7 @@ const OrgInfo = ({
         // last commit status for dev org
         commitStatus = (
           <li>
-            <strong>{i18n.t('Deployed Commit')}:</strong>{' '}
+            <strong>{i18n.t('Deployed Commit:')}</strong>{' '}
             {org.latest_commit_url ? (
               <ExternalLink url={org.latest_commit_url}>
                 {org.latest_commit.substring(0, 7)}
@@ -108,8 +113,9 @@ const OrgInfo = ({
               containerClassName="slds-m-right_xx-small"
             />
             <strong>
-              {i18n.t('Behind Latest')}
-              {missingCommits > 0 ? ':' : ''}
+              {missingCommits > 0
+                ? i18n.t('Behind Latest:')
+                : i18n.t('Behind Latest')}
             </strong>{' '}
             {getOrgBehindLatestMsg(missingCommits)}
             {compareChangesUrl ? (
@@ -208,7 +214,7 @@ const OrgInfo = ({
       {/* expiration date for each org */}
       {expiresAt && (
         <li>
-          <strong>{i18n.t('Expires')}:</strong>{' '}
+          <strong>{i18n.t('Expires:')}</strong>{' '}
           <span title={format(expiresAt, 'PPpp')}>
             {formatDistanceToNow(expiresAt, { addSuffix: true })}
           </span>
@@ -216,7 +222,7 @@ const OrgInfo = ({
       )}
       {orgStatus ? (
         <li>
-          <strong>{i18n.t('Status')}:</strong> {orgStatus}
+          <strong>{i18n.t('Status:')}</strong> {orgStatus}
         </li>
       ) : null}
     </ul>
