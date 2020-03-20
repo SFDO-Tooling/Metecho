@@ -19,7 +19,8 @@ Retrieve
       {
         "id": "M13MnQO",
         "name": "Test Task",
-        "description": "<p>This is safely rendered Markdown.</p>",
+        "description": "This is *safely* rendered Markdown.",
+        "description_rendered": "<p>This is <em>safely</em> rendered Markdown.</p>",
         "project": "3Lw7OwK",
         "assigned_dev": {
           "id": "12345",

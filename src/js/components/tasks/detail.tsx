@@ -265,7 +265,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     >
       <DetailPageLayout
         title={task.name}
-        description={task.description}
+        description={task.description_rendered}
         repoUrl={repository.repo_url}
         breadcrumb={[
           {

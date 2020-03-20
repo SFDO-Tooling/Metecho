@@ -27,7 +27,7 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
   };
 
   const defaultName = project.name;
-  const defaultDescription = project.description.replace(/<(.|\n)*?>/g, '');
+  const defaultDescription = project.description;
 
   const {
     inputs,

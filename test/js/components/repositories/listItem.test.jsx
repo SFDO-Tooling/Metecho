@@ -26,7 +26,7 @@ describe('<RepositoryListItem />', () => {
             id: 'r1',
             name: 'Repository 1',
             slug: 'repository-1',
-            description: 'This is a test repository.',
+            description_rendered: 'This is a test repository.',
             repo_url: 'https://github.com/test/test-repo',
           },
           {

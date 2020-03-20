@@ -262,7 +262,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     >
       <DetailPageLayout
         title={project.name}
-        description={project.description}
+        description={project.description_rendered}
         repoUrl={repository.repo_url}
         breadcrumb={[
           {

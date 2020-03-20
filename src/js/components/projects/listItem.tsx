@@ -11,7 +11,7 @@ interface Props {
 }
 
 const ProjectListItem = ({ repository, project }: Props) => {
-  const { name, description, slug } = project;
+  const { name, description_rendered: description, slug } = project;
   return (
     <li className="slds-item slds-p-horizontal_none slds-p-vertical_medium">
       <h3 className="slds-text-heading_small">
