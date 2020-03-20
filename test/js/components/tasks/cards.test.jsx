@@ -346,7 +346,7 @@ describe('<OrgCards/>', () => {
         });
 
         describe('"confirm" click', () => {
-          test('removes use', () => {
+          test('removes user', () => {
             const { getByText, queryByText } = result;
             fireEvent.click(getByText('Confirm'));
 

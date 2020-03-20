@@ -258,9 +258,7 @@ describe('<ProjectDetail/>', () => {
       const { getByText, baseElement } = setup();
       fireEvent.click(getByText('Add or Remove Collaborators'));
       fireEvent.click(
-        baseElement.querySelector(
-          '.collaborator-button[title="TestGitHubUser"]',
-        ),
+        baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
       );
       fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="ThirdUser"]'),
@@ -270,7 +268,21 @@ describe('<ProjectDetail/>', () => {
       expect(updateObject).toHaveBeenCalled();
       expect(
         updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
-      ).toEqual(['OtherUser', 'ThirdUser']);
+      ).toEqual(['TestGitHubUser', 'ThirdUser']);
+    });
+
+    test('opens confirm modal if removing assigned user', () => {
+      const { getByText, baseElement } = setup();
+      fireEvent.click(getByText('Add or Remove Collaborators'));
+      fireEvent.click(
+        baseElement.querySelector(
+          '.collaborator-button[title="TestGitHubUser"]',
+        ),
+      );
+      fireEvent.click(getByText('Save'));
+
+      expect(updateObject).not.toHaveBeenCalled();
+      expect(getByText('Confirm Removing Collaborator')).toBeVisible();
     });
 
     describe('"re-sync collaborators" click', () => {
@@ -297,8 +309,8 @@ describe('<ProjectDetail/>', () => {
                   ...defaultState.projects.r1.projects[0],
                   github_users: [
                     {
-                      id: '123456',
-                      login: 'TestGitHubUser',
+                      id: '234567',
+                      login: 'OtherUser',
                       avatar_url: 'https://example.com/avatar.png',
                     },
                   ],
@@ -312,6 +324,88 @@ describe('<ProjectDetail/>', () => {
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+    });
+
+    test('opens confirm modal if removing assigned user', () => {
+      const { getByTitle, getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  github_users: [
+                    {
+                      id: '123456',
+                      login: 'TestGitHubUser',
+                      avatar_url: 'https://example.com/avatar.png',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getByTitle('Remove'));
+
+      expect(updateObject).not.toHaveBeenCalled();
+      expect(getByText('Confirm Removing Collaborator')).toBeVisible();
+    });
+  });
+
+  describe('<ConfirmRemoveUserModal />', () => {
+    let result;
+
+    beforeEach(() => {
+      const task = {
+        ...defaultState.tasks.project1[0],
+        assigned_qa: {
+          id: '234567',
+          login: 'OtherUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
+      };
+      result = setup({
+        initialState: {
+          ...defaultState,
+          tasks: { project1: [task, defaultState.tasks.project1[1]] },
+        },
+      });
+      fireEvent.click(result.getByText('Add or Remove Collaborators'));
+      fireEvent.click(
+        result.baseElement.querySelector(
+          '.collaborator-button[title="TestGitHubUser"]',
+        ),
+      );
+      fireEvent.click(
+        result.baseElement.querySelector(
+          '.collaborator-button[title="OtherUser"]',
+        ),
+      );
+      fireEvent.click(result.getByText('Save'));
+    });
+
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText } = result;
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Confirm Removing Collaborators')).toBeNull();
+      });
+    });
+
+    describe('"confirm" click', () => {
+      test('removes user', () => {
+        const { getByText, queryByText } = result;
+        fireEvent.click(getByText('Confirm'));
+
+        expect(queryByText('Confirm Removing Collaborators')).toBeNull();
+        expect(updateObject).toHaveBeenCalled();
+        expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+      });
     });
   });
 
