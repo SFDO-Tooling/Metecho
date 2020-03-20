@@ -240,24 +240,19 @@ describe('<OrgCards/>', () => {
       };
 
       describe('org has changes', () => {
-        test('refetches, opens confirm modal, deletes, updates assignment', () => {
-          const { getByText, rerender, store } = setup({ task });
+        test('refetches, opens confirm modal, updates assignment', () => {
+          const { getByText } = setup({ task });
           fireEvent.click(getByText('User Actions'));
           fireEvent.click(getByText('Change Developer'));
           fireEvent.click(getByText('other-user'));
 
           expect(refetchOrg).toHaveBeenCalledTimes(1);
-          expect(deleteObject).not.toHaveBeenCalled();
+          expect(updateObject).not.toHaveBeenCalled();
           expect(
             getByText('Confirm Changing Developer and Deleting Dev Org'),
           ).toBeVisible();
 
           fireEvent.click(getByText('Confirm'));
-
-          expect(deleteObject).toHaveBeenCalledTimes(1);
-          expect(getByText('Deleting Org…')).toBeVisible();
-
-          setup({ task, orgs: { Dev: null, QA: null }, store, rerender });
 
           expect(updateObject).toHaveBeenCalledTimes(1);
           expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
@@ -290,52 +285,77 @@ describe('<OrgCards/>', () => {
         assigned_qa: null,
       };
 
-      test('deletes org then updates assignment', () => {
-        const { getByText, store, rerender } = setup({
+      test('refetches, then updates assignment', () => {
+        const { getByText } = setup({
           orgs: {
             ...defaultOrgs,
-            Dev: null,
-            QA: {
+            Dev: {
               ...defaultOrgs.Dev,
-              org_type: 'QA',
+              unsaved_changes: {},
+              total_unsaved_changes: 0,
+              has_unsaved_changes: false,
             },
           },
-          task: { ...defaultTask, assigned_dev: null },
+          task: { ...defaultTask, assigned_qa: null },
         });
         fireEvent.click(getByText('User Actions'));
-        fireEvent.click(getByText('Remove Reviewer'));
+        fireEvent.click(getByText('Remove Developer'));
 
-        expect(refetchOrg).not.toHaveBeenCalled();
-        expect(deleteObject).toHaveBeenCalledTimes(1);
-        expect(getByText('Deleting Org…')).toBeVisible();
-
-        setup({ task, orgs: { Dev: null, QA: null }, store, rerender });
-
+        expect(refetchOrg).toHaveBeenCalledTimes(1);
         expect(updateObject).toHaveBeenCalledTimes(1);
-        expect(updateObject.mock.calls[0][0].data.assigned_qa).toBeNull();
+        expect(updateObject.mock.calls[0][0].data.assigned_dev).toBeNull();
       });
 
       describe('org has changes', () => {
-        test('refetches, opens confirm modal, deletes, updates assignment', () => {
-          const { getByText, rerender, store } = setup({ task });
+        test('refetches, opens confirm modal, updates assignment', () => {
+          const { getByText } = setup({ task });
           fireEvent.click(getByText('User Actions'));
           fireEvent.click(getByText('Remove Developer'));
 
           expect(refetchOrg).toHaveBeenCalledTimes(1);
-          expect(deleteObject).not.toHaveBeenCalled();
+          expect(updateObject).not.toHaveBeenCalled();
           expect(
             getByText('Confirm Removing Developer and Deleting Dev Org'),
           ).toBeVisible();
 
           fireEvent.click(getByText('Confirm'));
 
-          expect(deleteObject).toHaveBeenCalledTimes(1);
-          expect(getByText('Deleting Org…')).toBeVisible();
-
-          setup({ task, orgs: { Dev: null, QA: null }, store, rerender });
-
           expect(updateObject).toHaveBeenCalledTimes(1);
           expect(updateObject.mock.calls[0][0].data.assigned_dev).toBeNull();
+        });
+      });
+
+      describe('<ConfirmRemoveUserModal />', () => {
+        let result;
+
+        beforeEach(() => {
+          result = setup({ task });
+          fireEvent.click(result.getByText('User Actions'));
+          fireEvent.click(result.getByText('Remove Developer'));
+        });
+
+        describe('"cancel" click', () => {
+          test('closes modal', () => {
+            const { getByText, queryByText } = result;
+            fireEvent.click(getByText('Cancel'));
+
+            expect(
+              queryByText('Confirm Removing Developer and Deleting Dev Org'),
+            ).toBeNull();
+          });
+        });
+
+        describe('"confirm" click', () => {
+          test('removes use', () => {
+            const { getByText, queryByText } = result;
+            fireEvent.click(getByText('Confirm'));
+
+            expect(
+              queryByText('Confirm Removing Developer and Deleting Dev Org'),
+            ).toBeNull();
+            expect(updateObject).toHaveBeenCalledTimes(1);
+            expect(updateObject.mock.calls[0][0].data.assigned_dev).toBeNull();
+          });
         });
       });
     });
@@ -763,25 +783,24 @@ describe('<OrgCards/>', () => {
 
   describe('delete org click', () => {
     describe('QA org', () => {
-      let orgs;
-
-      beforeEach(() => {
-        orgs = {
+      test('deletes org', () => {
+        const task = {
+          ...defaultTask,
+          assigned_qa: {
+            login: 'other-user',
+          },
+        };
+        const orgs = {
           Dev: null,
           QA: {
             ...defaultOrgs.Dev,
-            owner: 'other-user-id',
-            owner_gh_username: 'other-user',
             org_type: 'QA',
             unsaved_changes: {},
             total_unsaved_changes: 0,
             has_unsaved_changes: false,
           },
         };
-      });
-
-      test('deletes org', () => {
-        const { getByText } = setup({ orgs });
+        const { getByText } = setup({ orgs, task });
         fireEvent.click(getByText('Org Actions'));
         fireEvent.click(getByText('Delete Org'));
 
@@ -860,7 +879,7 @@ describe('<OrgCards/>', () => {
           describe('"delete" click', () => {
             test('deletes org', () => {
               const { getByText, queryByText } = result;
-              fireEvent.click(getByText('Confirm'));
+              fireEvent.click(getByText('Delete'));
 
               expect(
                 queryByText('Confirm Deleting Org With Uncaptured Changes'),

@@ -38,7 +38,7 @@ const ConfirmDeleteModal = ({
         <Button key="cancel" label={i18n.t('Cancel')} onClick={handleCancel} />,
         <Button
           key="submit"
-          label={i18n.t('Confirm')}
+          label={i18n.t('Delete')}
           variant="brand"
           onClick={handleSubmit}
         />,
