@@ -3,7 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProjectForm from '@/components/projects/createForm';
@@ -21,6 +21,8 @@ import {
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { fetchObjects } from '@/store/actions';
+import { User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
@@ -30,6 +32,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { projects } = useFetchProjectsIfMissing(repository, props);
+  const user = useSelector(selectUserState) as User;
 
   const loadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -113,6 +116,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             <ProjectForm
+              user={user}
               repository={repository}
               startOpen={!projects.projects.length}
             />
