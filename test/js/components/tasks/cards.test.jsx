@@ -207,7 +207,7 @@ describe('<OrgCards/>', () => {
       const projectUsers = [];
       const { getByText, context } = setup({ task, projectUsers });
       fireEvent.click(getByText('Assign'));
-      fireEvent.click(getByText('Add collaborators to the project'));
+      fireEvent.click(getByText('View Project to Add Collaborators'));
 
       expect(context.action).toEqual('PUSH');
       expect(context.url).toEqual('project-url');

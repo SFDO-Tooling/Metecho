@@ -347,7 +347,7 @@ describe('<ProjectDetail/>', () => {
         },
       });
       fireEvent.click(getAllByText('Assign Reviewer')[0]);
-      fireEvent.click(getByText('Add collaborators to the project'));
+      fireEvent.click(getByText('Add Project Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
     });

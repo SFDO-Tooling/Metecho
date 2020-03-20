@@ -272,6 +272,7 @@ const OrgCard = ({
         selectedUser={assignedUser}
         heading={userModalHeading}
         isOpen={assignUserModalOpen}
+        emptyMessageText={i18n.t('View Project to Add Collaborators')}
         emptyMessageAction={handleEmptyMessageClick}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
