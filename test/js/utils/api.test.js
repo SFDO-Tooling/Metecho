@@ -108,7 +108,7 @@ describe('apiFetch', () => {
         }),
       ).rejects.toThrow(
         expect.objectContaining({
-          message: `Unprocessable Entity: ${JSON.stringify(response)}`,
+          message: `Bad Request: ${JSON.stringify(response)}`,
         }),
       );
       expect(addError).not.toHaveBeenCalled();

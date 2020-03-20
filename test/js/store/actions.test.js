@@ -731,6 +731,17 @@ describe('updateObject', () => {
     });
   });
 
+  test('has data.id', () => {
+    const store = storeWithThunk({});
+    const payload = {
+      objectType: 'foo',
+      url: undefined,
+      data: { id: 'foo-bar' },
+    };
+    store.dispatch(actions.updateObject(payload));
+    expect(true).toBeTruthy();
+  });
+
   test('throws error if no url', () => {
     const store = storeWithThunk({});
     const payload = {

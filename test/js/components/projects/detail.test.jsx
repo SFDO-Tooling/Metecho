@@ -444,4 +444,18 @@ describe('<ProjectDetail/>', () => {
       expect(getByText('View Branch')).toBeVisible();
     });
   });
+
+  describe('editing project click', () => {
+    test('opens opens and closes modal', () => {
+      const { baseElement, getByText, queryByText } = setup();
+      fireEvent.click(baseElement.querySelector('#projectOptions'));
+      fireEvent.click(getByText('Edit Project'));
+
+      expect(getByText('Edit Project')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('Edit Project')).toBeNull();
+    });
+  });
 });
