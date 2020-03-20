@@ -240,7 +240,7 @@ const SubmitModal = ({
                 <b>{i18n.t('Example')}</b>
               </p>
               <pre>## {i18n.t('Stops widget from refreshing')}</pre>
-              <pre>{i18n.t('This includes')}:</pre>
+              <pre>{i18n.t('This includes:')}</pre>
               <div className="markdown-block">
                 <pre>- {i18n.t('Renders incomplete bobble')}</pre>
                 <pre>- {i18n.t('Prevents fire from building')}</pre>

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import OrgCard from '@/components/tasks/cards/card';
 import ConfirmDeleteModal from '@/components/tasks/confirmDeleteModal';
+import ConfirmRemoveUserModal from '@/components/tasks/confirmRemoveUserModal';
 import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
 import { useIsMounted } from '@/components/utils';
@@ -49,6 +50,9 @@ const OrgCards = ({
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
+  const [confirmRemoveUserModalOpen, setConfirmRemoveUserModalOpen] = useState(
+    false,
+  );
   const [isWaitingToDeleteDevOrg, setIsWaitingToDeleteDevOrg] = useState(false);
   const [
     isWaitingToRemoveUser,
@@ -114,6 +118,7 @@ const OrgCards = ({
 
   const assignUser = useCallback(
     ({ type, assignee }: AssignedUserTracker) => {
+      setIsWaitingToRemoveUser(null);
       const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
       dispatch(
         updateObject({
@@ -133,8 +138,14 @@ const OrgCards = ({
   };
   const cancelConfirmDeleteModal = useCallback(() => {
     setIsWaitingToDeleteDevOrg(false);
-    setIsWaitingToRemoveUser(null);
     closeConfirmDeleteModal();
+  }, []);
+  const closeConfirmRemoveUserModal = () => {
+    setConfirmRemoveUserModalOpen(false);
+  };
+  const cancelConfirmRemoveUserModal = useCallback(() => {
+    closeConfirmRemoveUserModal();
+    setIsWaitingToRemoveUser(null);
   }, []);
   const openConnectModal = useCallback(() => {
     setInfoModalOpen(false);
@@ -147,16 +158,22 @@ const OrgCards = ({
     setInfoModalOpen(true);
   }, [cancelConfirmDeleteModal]);
 
-  const handleDelete = (
-    org: Org,
-    shouldRemoveUser?: AssignedUserTracker | null,
-  ) => {
-    setIsWaitingToRemoveUser(shouldRemoveUser || null);
+  const handleDelete = (org: Org) => {
     if (org.org_type === ORG_TYPES.DEV) {
       setIsWaitingToDeleteDevOrg(true);
       checkForOrgChanges(org);
     } else {
       deleteOrg(org);
+    }
+  };
+
+  const handleAssignUser = ({ type, assignee }: AssignedUserTracker) => {
+    const org = orgs[type];
+    if (org && type === ORG_TYPES.DEV) {
+      setIsWaitingToRemoveUser({ type, assignee });
+      checkForOrgChanges(org);
+    } else {
+      assignUser({ type, assignee });
     }
   };
 
@@ -166,17 +183,6 @@ const OrgCards = ({
   if (userIsConnected) {
     handleCreate = user.is_devhub_enabled ? createOrg : openInfoModal;
   }
-
-  const handleAssignUser = ({ type, assignee }: AssignedUserTracker) => {
-    const org = orgs[type];
-    const orgOwner = org?.owner_gh_username;
-    const newAssigned = assignee?.login;
-    if (org && (!orgOwner || orgOwner !== newAssigned)) {
-      handleDelete(org, { type, assignee });
-    } else {
-      assignUser({ type, assignee });
-    }
-  };
 
   const devOrg = orgs[ORG_TYPES.DEV];
 
@@ -195,17 +201,20 @@ const OrgCards = ({
     }
   }, [deleteOrg, isWaitingToDeleteDevOrg, devOrg]);
 
-  // After org is deleted, check if we also need to update the assigned user...
+  // When dev org reassign has been triggered, wait until it has been refreshed
   useEffect(() => {
-    if (isWaitingToRemoveUser) {
-      const { type, assignee } = isWaitingToRemoveUser;
-      const readyToUpdateUser = !orgs[type];
-      if (readyToUpdateUser) {
-        setIsWaitingToRemoveUser(null);
-        assignUser({ type, assignee });
+    if (
+      isWaitingToRemoveUser &&
+      devOrg &&
+      !devOrg.currently_refreshing_changes
+    ) {
+      if (devOrg.has_unsaved_changes) {
+        setConfirmRemoveUserModalOpen(true);
+      } else {
+        assignUser(isWaitingToRemoveUser);
       }
     }
-  }, [assignUser, isWaitingToRemoveUser, orgs]);
+  }, [assignUser, isWaitingToRemoveUser, devOrg]);
 
   return (
     <>
@@ -257,10 +266,16 @@ const OrgCards = ({
       <ConfirmDeleteModal
         orgs={orgs}
         isOpen={confirmDeleteModalOpen}
-        waitingToRemoveUser={isWaitingToRemoveUser}
         handleClose={closeConfirmDeleteModal}
         handleCancel={cancelConfirmDeleteModal}
         handleDelete={deleteOrg}
+      />
+      <ConfirmRemoveUserModal
+        isOpen={confirmRemoveUserModalOpen}
+        waitingToRemoveUser={isWaitingToRemoveUser}
+        handleClose={closeConfirmRemoveUserModal}
+        handleCancel={cancelConfirmRemoveUserModal}
+        handleAssignUser={assignUser}
       />
     </>
   );

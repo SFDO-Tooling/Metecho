@@ -33,10 +33,7 @@ interface OrgCardProps {
   isDeletingOrg: boolean;
   handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
   handleCreate: (type: OrgTypes) => void;
-  handleDelete: (
-    org: Org,
-    shouldRemoveUser?: AssignedUserTracker | null,
-  ) => void;
+  handleDelete: (org: Org) => void;
   handleCheckForOrgChanges: (org: Org) => void;
   handleRefresh?: (org: Org) => void;
 }

@@ -112,7 +112,7 @@ const UserInfo = ({
       {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
       <ul>
         <li>
-          <strong>{i18n.t('Dev Hub')}:</strong>{' '}
+          <strong>{i18n.t('Dev Hub:')}</strong>{' '}
           {user.is_devhub_enabled ? (
             <span className="slds-text-color_success">{i18n.t('Enabled')}</span>
           ) : (
@@ -131,17 +131,17 @@ const UserInfo = ({
         </li>
         {user.sf_username && (
           <li>
-            <strong>{i18n.t('User')}:</strong> {user.sf_username}
+            <strong>{i18n.t('User:')}</strong> {user.sf_username}
           </li>
         )}
         {user.org_name && (
           <li>
-            <strong>{i18n.t('Org')}:</strong> {user.org_name}
+            <strong>{i18n.t('Org:')}</strong> {user.org_name}
           </li>
         )}
         {user.org_type && (
           <li>
-            <strong>{i18n.t('Type')}:</strong> {user.org_type}
+            <strong>{i18n.t('Type:')}</strong> {user.org_type}
           </li>
         )}
       </ul>

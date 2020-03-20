@@ -26,11 +26,39 @@ async def test_report_error(user_factory):
 
 
 @pytest.mark.asyncio
-async def test_report_scratch_org_error():
+async def test_report_scratch_org_error__attribute_error():
     with patch(
         f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
     ) as push_message_about_instance:
         await report_scratch_org_error(
             MagicMock(), error="fake error", type_="fake type", originating_user_id=None
+        )
+        assert push_message_about_instance.called
+
+
+@pytest.mark.asyncio
+async def test_report_scratch_org_error__list():
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
+        await report_scratch_org_error(
+            MagicMock(),
+            error=MagicMock(content=["fake error"]),
+            type_="fake type",
+            originating_user_id=None,
+        )
+        assert push_message_about_instance.called
+
+
+@pytest.mark.asyncio
+async def test_report_scratch_org_error__dict():
+    with patch(
+        f"{PATCH_ROOT}.push_message_about_instance", new=AsyncMock()
+    ) as push_message_about_instance:
+        await report_scratch_org_error(
+            MagicMock(),
+            error=MagicMock(content={"message": "fake error"}),
+            type_="fake type",
+            originating_user_id=None,
         )
         assert push_message_about_instance.called
