@@ -56,9 +56,9 @@ export type RepositoriesAction =
   | RefreshGitHubUsersAccepted
   | RefreshGitHubUsersRejected;
 
-export const refreshRepos = (): ThunkResult<Promise<
-  RefreshReposAccepted
->> => async (dispatch) => {
+export const refreshRepos = (): ThunkResult<
+  Promise<RefreshReposAccepted>
+> => async (dispatch) => {
   dispatch({ type: 'REFRESH_REPOS_REQUESTED' });
   try {
     await apiFetch({
@@ -81,9 +81,9 @@ export const reposRefreshing = (): ReposRefreshing => ({
   type: 'REFRESHING_REPOS',
 });
 
-export const reposRefreshed = (): ThunkResult<Promise<
-  FetchObjectsSucceeded
->> => (dispatch) => {
+export const reposRefreshed = (): ThunkResult<
+  Promise<FetchObjectsSucceeded>
+> => (dispatch) => {
   dispatch({ type: 'REPOS_REFRESHED' });
   return dispatch(
     fetchObjects({
