@@ -47,6 +47,7 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
     update: true,
   });
 
+  // When name or description changes, update default selection
   const defaultNameRef = useRef(defaultName);
   const defaultDescriptionRef = useRef(defaultDescription);
   useEffect(() => {
