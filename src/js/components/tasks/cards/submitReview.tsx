@@ -69,25 +69,27 @@ const SubmitReviewModal = ({
     shouldSubscribeToObject: false,
   });
 
-  // When reviewStatus changes, update default selection
+  // When reviewStatus or orgId changes, update default selection
   const defaultStatusRef = useRef(defaultStatus);
-  useEffect(() => {
-    const prevDefaultStatus = defaultStatusRef.current;
-    if (defaultStatus !== prevDefaultStatus) {
-      setInputs({ ...inputs, status: defaultStatus });
-      defaultStatusRef.current = defaultStatus;
-    }
-  }, [defaultStatus, inputs, setInputs]);
-
-  // When orgId changes, update default selection
   const defaultDeleteOrgRef = useRef(defaultDeleteOrg);
   useEffect(() => {
+    const prevDefaultStatus = defaultStatusRef.current;
     const prevDefaultDeleteOrg = defaultDeleteOrgRef.current;
-    if (defaultDeleteOrg !== prevDefaultDeleteOrg) {
-      setInputs({ ...inputs, delete_org: defaultDeleteOrg });
-      defaultDeleteOrgRef.current = defaultDeleteOrg;
+    const statusChanged = defaultStatus !== prevDefaultStatus;
+    const deleteOrgChanged = defaultDeleteOrg !== prevDefaultDeleteOrg;
+    if (statusChanged || deleteOrgChanged) {
+      const newInputs = { ...inputs };
+      if (statusChanged) {
+        newInputs.status = defaultStatus;
+        defaultStatusRef.current = defaultStatus;
+      }
+      if (deleteOrgChanged) {
+        newInputs.delete_org = defaultDeleteOrg;
+        defaultDeleteOrgRef.current = defaultDeleteOrg;
+      }
+      setInputs(newInputs);
     }
-  }, [defaultDeleteOrg, inputs, setInputs]);
+  }, [defaultStatus, defaultDeleteOrg, inputs, setInputs]);
 
   const handleSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation

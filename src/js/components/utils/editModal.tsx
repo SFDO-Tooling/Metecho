@@ -48,22 +48,25 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
   });
 
   const defaultNameRef = useRef(defaultName);
-  useEffect(() => {
-    const prevDefaultName = defaultNameRef.current;
-    if (defaultName !== prevDefaultName) {
-      setInputs({ ...inputs, name: defaultName });
-      defaultNameRef.current = defaultName;
-    }
-  }, [defaultName, inputs, setInputs]);
-
   const defaultDescriptionRef = useRef(defaultDescription);
   useEffect(() => {
+    const prevDefaultName = defaultNameRef.current;
     const prevDefaultDescription = defaultDescriptionRef.current;
-    if (defaultDescription !== prevDefaultDescription) {
-      setInputs({ ...inputs, description: defaultDescription });
-      defaultDescriptionRef.current = defaultDescription;
+    const nameChanged = defaultName !== prevDefaultName;
+    const descriptionChanged = defaultDescription !== prevDefaultDescription;
+    if (nameChanged || descriptionChanged) {
+      const newInputs = { ...inputs };
+      if (nameChanged) {
+        newInputs.name = defaultName;
+        defaultNameRef.current = defaultName;
+      }
+      if (descriptionChanged) {
+        newInputs.description = defaultDescription;
+        defaultDescriptionRef.current = defaultDescription;
+      }
+      setInputs(newInputs);
     }
-  }, [defaultDescription, inputs, setInputs]);
+  }, [defaultName, defaultDescription, inputs, setInputs]);
 
   const doClose = () => {
     handleClose();

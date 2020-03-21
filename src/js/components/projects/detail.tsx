@@ -215,16 +215,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
     label: string;
     disabled?: boolean;
   }) => {
-    /* istanbul ignore else */
-    if (!option.disabled) {
-      switch (option.id) {
-        case 'edit':
-          openEditModal();
-          break;
-        /* istanbul ignore next */
-        case 'delete':
-          break;
-      }
+    switch (option.id) {
+      case 'edit':
+        openEditModal();
+        break;
+      /* istanbul ignore next */
+      case 'delete':
+        break;
     }
   };
   const { branchLink, branchLinkText } = getBranchLink(project);
@@ -240,7 +237,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
         triggerClassName="slds-m-right_xx-small"
         assistiveText={{ icon: i18n.t('Project Options') }}
         onSelect={handleSelect}
-        id="projectOptions"
         options={[
           { id: 'edit', label: i18n.t('Edit Project') },
           { type: 'divider' },

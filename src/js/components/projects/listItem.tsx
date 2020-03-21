@@ -11,16 +11,16 @@ interface Props {
 }
 
 const ProjectListItem = ({ repository, project }: Props) => {
-  const { name, description_rendered: description, slug } = project;
+  const { name, description_rendered, slug } = project;
   return (
     <li className="slds-item slds-p-horizontal_none slds-p-vertical_medium">
       <h3 className="slds-text-heading_small">
         <Link to={routes.project_detail(repository.slug, slug)}>{name}</Link>
       </h3>
-      {description && (
+      {description_rendered && (
         <p
           className="markdown"
-          dangerouslySetInnerHTML={{ __html: description }}
+          dangerouslySetInnerHTML={{ __html: description_rendered }}
         />
       )}
     </li>

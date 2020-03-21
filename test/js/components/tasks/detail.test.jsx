@@ -38,7 +38,8 @@ const defaultState = {
         name: 'Repository 1',
         slug: 'repository-1',
         old_slugs: [],
-        description_rendered: 'This is a test repository.',
+        description: 'This is a test repository.',
+        description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
         github_users: [
           {
@@ -59,7 +60,8 @@ const defaultState = {
           slug: 'project-1',
           name: 'Project 1',
           repository: 'r1',
-          description_rendered: 'Project Description',
+          description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
           old_slugs: [],
           github_users: [
             {
@@ -82,7 +84,8 @@ const defaultState = {
         slug: 'task-1',
         old_slugs: ['old-slug'],
         project: 'project1',
-        description_rendered: 'Task Description',
+        description: 'Task Description',
+        description_rendered: '<p>Task Description</p>',
         has_unmerged_commits: false,
         commits: [],
         assigned_dev: {

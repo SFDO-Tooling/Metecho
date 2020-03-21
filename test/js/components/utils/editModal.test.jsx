@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import EditModal from '@/components/utils/editModal';
@@ -16,66 +16,67 @@ afterEach(() => {
   updateObject.mockClear();
 });
 
+const defaultProject = {
+  id: 'project-id',
+  name: 'Project Name',
+  description: 'Description of the project',
+};
+
 describe('<EditModal />', () => {
-  const project = {
-    id: 'project-id',
-    name: 'Project Name',
-    description: 'Description of the project',
-  };
-  const setup = (options) => {
+  const setup = (options = {}) => {
     const defaults = {
-      project,
-      rerender: false,
+      project: defaultProject,
     };
     const opts = Object.assign({}, defaults, options);
     const closeEditModal = jest.fn();
-    const result = renderWithRedux(
-      <EditModal {...opts} isOpen handleClose={closeEditModal} />,
+    return renderWithRedux(
+      <EditModal project={opts.project} isOpen handleClose={closeEditModal} />,
       {},
       storeWithThunk,
       opts.rerender,
       opts.store,
     );
-    return { ...result, closeEditModal };
   };
 
   test('updates default fields on input', () => {
     const { store, rerender, getByLabelText } = setup();
-
+    setup({
+      project: {
+        ...defaultProject,
+        name: 'New Project Name',
+        description: 'New description',
+      },
+      rerender,
+      store,
+    });
     const nameInput = getByLabelText('*Project Name');
     const descriptionInput = getByLabelText('Description');
+
+    expect(nameInput.value).toEqual('New Project Name');
+    expect(descriptionInput.value).toEqual('New description');
+  });
+
+  test('submit clicked', () => {
+    const { getByText, getByLabelText } = setup();
+    const nameInput = getByLabelText('*Project Name');
+    const descriptionInput = getByLabelText('Description');
+    const submit = getByText('Save');
 
     fireEvent.change(nameInput, { target: { value: 'New Project Name' } });
     fireEvent.change(descriptionInput, {
       target: { value: 'New description' },
     });
-
-    setup({
-      project: { name: 'New Project Name', description: 'New description' },
-      rerender,
-      store,
-    });
-
-    expect(nameInput.value).toBe('New Project Name');
-    expect(descriptionInput.value).toBe('New description');
-  });
-
-  test('submit clicked', () => {
-    const { getByText } = setup();
-    const submit = getByText('Save');
-
     fireEvent.click(submit);
 
     expect(updateObject).toHaveBeenCalledTimes(1);
-    // expect(updateObject).toHaveBeenCalledWith({
-    //   objectType: 'project',
-    //   url: undefined,
-    //   data: {
-    //     name: 'Project Name',
-    //     description: 'Description of the project',
-    //     project: { id: 'project-id' },
-    //   },
-    //   hasForm: true,
-    // });
+    expect(updateObject).toHaveBeenCalledWith({
+      objectType: 'project',
+      data: {
+        name: 'New Project Name',
+        description: 'New description',
+        id: 'project-id',
+      },
+      hasForm: true,
+    });
   });
 });

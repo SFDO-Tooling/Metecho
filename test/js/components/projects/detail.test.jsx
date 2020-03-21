@@ -32,7 +32,8 @@ const defaultState = {
         name: 'Repository 1',
         slug: 'repository-1',
         old_slugs: [],
-        description_rendered: 'This is a test repository.',
+        description: 'This is a test repository.',
+        description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
         github_users: [
           {
@@ -61,7 +62,8 @@ const defaultState = {
           slug: 'project-1',
           name: 'Project 1',
           repository: 'r1',
-          description_rendered: 'Project Description',
+          description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
           old_slugs: ['old-slug'],
           github_users: [
             {
@@ -87,7 +89,8 @@ const defaultState = {
         name: 'Task 1',
         slug: 'task-1',
         project: 'project1',
-        description_rendered: 'Task Description',
+        description: 'Task Description',
+        description_rendered: '<p>Task Description</p>',
         review_valid: true,
         review_status: 'Approved',
         status: 'Completed',
@@ -446,9 +449,9 @@ describe('<ProjectDetail/>', () => {
   });
 
   describe('editing project click', () => {
-    test('opens opens and closes modal', () => {
-      const { baseElement, getByText, queryByText } = setup();
-      fireEvent.click(baseElement.querySelector('#projectOptions'));
+    test('opens and closes modal', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Project Options'));
       fireEvent.click(getByText('Edit Project'));
 
       expect(getByText('Edit Project')).toBeVisible();
