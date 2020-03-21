@@ -54,7 +54,7 @@ const ConfirmRemoveUserModal = ({
         />,
       ]}
     >
-      <div className="slds-p-vertical_medium">
+      <div className="slds-p-top_small">
         <Trans i18nKey="confirmRemoveCollaborators">
           The following users are being removed from this project, but are
           already assigned to at least one task in this project. Are you sure
