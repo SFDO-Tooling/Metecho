@@ -57,10 +57,12 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
     const descriptionChanged = defaultDescription !== prevDefaultDescription;
     if (nameChanged || descriptionChanged) {
       const newInputs = { ...inputs };
+      /* istanbul ignore else */
       if (nameChanged) {
         newInputs.name = defaultName;
         defaultNameRef.current = defaultName;
       }
+      /* istanbul ignore else */
       if (descriptionChanged) {
         newInputs.description = defaultDescription;
         defaultDescriptionRef.current = defaultDescription;
