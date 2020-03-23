@@ -21,9 +21,7 @@ def test_user_view(client):
 def test_user_disconnect_view(client):
     response = client.post(reverse("user-disconnect-sf"))
 
-    assert not client.user.socialaccount_set.filter(
-        provider__startswith="salesforce-"
-    ).exists()
+    assert not client.user.socialaccount_set.filter(provider="salesforce").exists()
     assert response.status_code == 200
     assert response.json()["username"].endswith("@example.com")
 
@@ -405,7 +403,7 @@ class TestScratchOrgView:
         task = task_factory()
         social_account_factory(
             user=client.user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={"preferred_username": "test-username"},
         )
         url = reverse("scratch-org-list")
@@ -429,7 +427,7 @@ class TestScratchOrgView:
         task = task_factory()
         social_account_factory(
             user=client.user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={"preferred_username": "test-username"},
         )
         url = reverse("scratch-org-list")
@@ -450,7 +448,7 @@ class TestScratchOrgView:
 
     def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
         social_account_factory(
-            user=client.user, provider="salesforce-production",
+            user=client.user, provider="salesforce",
         )
         scratch_org = scratch_org_factory(owner=client.user)
         with patch("metashare.api.models.ScratchOrg.queue_delete"):
