@@ -5,9 +5,14 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
-import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
+import {
+  LabelWithSpinner,
+  useForm,
+  useFormDefaults,
+  useIsMounted,
+} from '@/components/utils';
 import { REVIEW_STATUSES, ReviewStatuses } from '@/utils/constants';
 
 interface Props {
@@ -70,26 +75,18 @@ const SubmitReviewModal = ({
   });
 
   // When reviewStatus or orgId changes, update default selection
-  const defaultStatusRef = useRef(defaultStatus);
-  const defaultDeleteOrgRef = useRef(defaultDeleteOrg);
-  useEffect(() => {
-    const prevDefaultStatus = defaultStatusRef.current;
-    const prevDefaultDeleteOrg = defaultDeleteOrgRef.current;
-    const statusChanged = defaultStatus !== prevDefaultStatus;
-    const deleteOrgChanged = defaultDeleteOrg !== prevDefaultDeleteOrg;
-    if (statusChanged || deleteOrgChanged) {
-      const newInputs = { ...inputs };
-      if (statusChanged) {
-        newInputs.status = defaultStatus;
-        defaultStatusRef.current = defaultStatus;
-      }
-      if (deleteOrgChanged) {
-        newInputs.delete_org = defaultDeleteOrg;
-        defaultDeleteOrgRef.current = defaultDeleteOrg;
-      }
-      setInputs(newInputs);
-    }
-  }, [defaultStatus, defaultDeleteOrg, inputs, setInputs]);
+  useFormDefaults({
+    field: 'status',
+    value: defaultStatus,
+    inputs,
+    setInputs,
+  });
+  useFormDefaults({
+    field: 'delete_org',
+    value: defaultDeleteOrg,
+    inputs,
+    setInputs,
+  });
 
   const handleSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation

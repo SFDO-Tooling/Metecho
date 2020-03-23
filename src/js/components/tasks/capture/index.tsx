@@ -3,12 +3,17 @@ import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 
 import ChangesForm from '@/components/tasks/capture/changes';
 import TargetDirectoriesForm from '@/components/tasks/capture/directories';
 import CommitMessageForm from '@/components/tasks/capture/message';
-import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
+import {
+  LabelWithSpinner,
+  useForm,
+  useFormDefaults,
+  useIsMounted,
+} from '@/components/utils';
 import { Changeset, TargetDirectories } from '@/store/orgs/reducer';
 import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -129,17 +134,12 @@ const CaptureModal = ({
   });
 
   // When directories change, update default selection
-  const defaultDirectoryRef = useRef(defaultDir);
-  useEffect(() => {
-    const prevDefaultDir = defaultDirectoryRef.current;
-    if (defaultDir !== prevDefaultDir) {
-      setInputs({
-        ...inputs,
-        target_directory: defaultDir,
-      });
-      defaultDirectoryRef.current = defaultDir;
-    }
-  }, [defaultDir, inputs, setInputs]);
+  useFormDefaults({
+    field: 'target_directory',
+    value: defaultDir,
+    inputs,
+    setInputs,
+  });
 
   const dirSelected = Boolean(inputs.target_directory);
   const changesChecked = Object.values(inputs.changes).flat().length;

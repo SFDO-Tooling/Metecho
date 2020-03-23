@@ -40,6 +40,19 @@ describe('<EditModal />', () => {
 
   test('updates default fields on input', () => {
     const { store, rerender, getByLabelText } = setup();
+    const nameInput = getByLabelText('*Project Name');
+    const descriptionInput = getByLabelText('Description');
+    setup({
+      project: {
+        ...defaultProject,
+        name: 'New Project Name',
+      },
+      rerender,
+      store,
+    });
+
+    expect(nameInput.value).toEqual('New Project Name');
+
     setup({
       project: {
         ...defaultProject,
@@ -49,10 +62,7 @@ describe('<EditModal />', () => {
       rerender,
       store,
     });
-    const nameInput = getByLabelText('*Project Name');
-    const descriptionInput = getByLabelText('Description');
 
-    expect(nameInput.value).toEqual('New Project Name');
     expect(descriptionInput.value).toEqual('New description');
   });
 

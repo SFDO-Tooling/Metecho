@@ -4,9 +4,9 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import { omit } from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
-import { useForm, useIsMounted } from '@/components/utils';
+import { useForm, useFormDefaults, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 
@@ -48,28 +48,18 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
   });
 
   // When name or description changes, update default selection
-  const defaultNameRef = useRef(defaultName);
-  const defaultDescriptionRef = useRef(defaultDescription);
-  useEffect(() => {
-    const prevDefaultName = defaultNameRef.current;
-    const prevDefaultDescription = defaultDescriptionRef.current;
-    const nameChanged = defaultName !== prevDefaultName;
-    const descriptionChanged = defaultDescription !== prevDefaultDescription;
-    if (nameChanged || descriptionChanged) {
-      const newInputs = { ...inputs };
-      /* istanbul ignore else */
-      if (nameChanged) {
-        newInputs.name = defaultName;
-        defaultNameRef.current = defaultName;
-      }
-      /* istanbul ignore else */
-      if (descriptionChanged) {
-        newInputs.description = defaultDescription;
-        defaultDescriptionRef.current = defaultDescription;
-      }
-      setInputs(newInputs);
-    }
-  }, [defaultName, defaultDescription, inputs, setInputs]);
+  useFormDefaults({
+    field: 'name',
+    value: defaultName,
+    inputs,
+    setInputs,
+  });
+  useFormDefaults({
+    field: 'description',
+    value: defaultDescription,
+    inputs,
+    setInputs,
+  });
 
   const doClose = () => {
     handleClose();

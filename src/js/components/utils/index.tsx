@@ -14,4 +14,5 @@ export { default as useFetchProjectsIfMissing } from './useFetchProjectsIfMissin
 export { default as useFetchRepositoryIfMissing } from './useFetchRepositoryIfMissing';
 export { default as useFetchTasksIfMissing } from './useFetchTasksIfMissing';
 export { default as useForm } from './useForm';
+export { default as useFormDefaults } from './useFormDefaults';
 export { default as useIsMounted } from './useIsMounted';
