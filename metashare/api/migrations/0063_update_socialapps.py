@@ -27,9 +27,13 @@ def forwards(apps, schema_editor):
         )
         SocialToken.objects.filter().update()
 
-        custom_app = SocialApp.objects.get(provider="salesforce-custom")
-        SocialToken.objects.filter(app=custom_app).update(app=app)
-        custom_app.delete()
+        try:
+            custom_app = SocialApp.objects.get(provider="salesforce-custom")
+        except SocialApp.DoesNotExist:
+            pass
+        else:
+            SocialToken.objects.filter(app=custom_app).update(app=app)
+            custom_app.delete()
 
     # update github
     try:

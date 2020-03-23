@@ -39,6 +39,7 @@ describe('<ConnectModal />', () => {
       fireEvent.click(getAllByText('Connect to Salesforce')[1]);
       const base = window.api_urls.salesforce_login();
       const expected = addUrlParams(base, {
+        custom_domain: 'login',
         process: 'connect',
         next: window.location.pathname,
       });
