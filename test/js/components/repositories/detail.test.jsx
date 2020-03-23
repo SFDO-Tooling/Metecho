@@ -29,6 +29,7 @@ const defaultState = {
         description: 'This is a test repository.',
         description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
+        github_users: [],
       },
     ],
     notFound: ['yet-another-repository'],
@@ -50,6 +51,9 @@ const defaultState = {
       notFound: [],
       fetched: true,
     },
+  },
+  user: {
+    username: 'my-user',
   },
 };
 

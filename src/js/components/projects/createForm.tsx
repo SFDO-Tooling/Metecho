@@ -9,15 +9,22 @@ import { AnyAction } from 'redux';
 
 import { useForm } from '@/components/utils';
 import { Repository } from '@/store/repositories/reducer';
+import { User } from '@/store/user/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 interface Props extends RouteComponentProps {
+  user: User;
   repository: Repository;
   startOpen?: boolean;
 }
 
-const ProjectForm = ({ repository, startOpen = false, history }: Props) => {
+const ProjectForm = ({
+  user,
+  repository,
+  startOpen = false,
+  history,
+}: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -42,6 +49,10 @@ const ProjectForm = ({ repository, startOpen = false, history }: Props) => {
     }
   };
 
+  const githubUser = repository.github_users.find(
+    (ghUser) => ghUser.login === user.username,
+  );
+
   const {
     inputs,
     errors,
@@ -51,7 +62,10 @@ const ProjectForm = ({ repository, startOpen = false, history }: Props) => {
   } = useForm({
     fields: { name: '', description: '' },
     objectType: OBJECT_TYPES.PROJECT,
-    additionalData: { repository: repository.id },
+    additionalData: {
+      repository: repository.id,
+      github_users: githubUser ? [githubUser] : [],
+    },
     onSuccess,
   });
 

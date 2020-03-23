@@ -20,6 +20,7 @@ export const OBJECT_TYPES = {
 };
 
 export const GITHUB_REPO_PREFIX = 'https://github.com';
+export const SHOW_PROJECT_COLLABORATORS = 'show_collaborators';
 
 export type OrgTypes = 'Dev' | 'QA';
 

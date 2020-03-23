@@ -5,23 +5,29 @@ import { StaticRouter } from 'react-router-dom';
 import ProjectDetail from '@/components/projects/detail';
 import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';
+import { getUrlParam, removeUrlParam } from '@/utils/api';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
 jest.mock('@/store/repositories/actions');
+jest.mock('@/utils/api');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+getUrlParam.mockReturnValue(null);
+removeUrlParam.mockReturnValue('');
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
   updateObject.mockClear();
   refreshGitHubUsers.mockClear();
+  getUrlParam.mockClear();
+  removeUrlParam.mockClear();
 });
 
 const defaultState = {
@@ -150,14 +156,18 @@ describe('<ProjectDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug, projectSlug } = opts;
     const context = {};
+    const history = { replace: jest.fn() };
     const response = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectDetail match={{ params: { repositorySlug, projectSlug } }} />
+        <ProjectDetail
+          match={{ params: { repositorySlug, projectSlug } }}
+          history={history}
+        />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { ...response, context };
+    return { ...response, context, history };
   };
 
   test('renders project detail and tasks list', () => {
@@ -181,6 +191,23 @@ describe('<ProjectDetail/>', () => {
 
     expect(getByText('Add a Task for Project 1')).toBeVisible();
     expect(queryByText('Tasks for Project 1')).toBeNull();
+  });
+
+  describe('`SHOW_PROJECT_COLLABORATORS` param is truthy', () => {
+    beforeAll(() => {
+      getUrlParam.mockReturnValue('true');
+    });
+
+    afterAll(() => {
+      getUrlParam.mockReturnValue(null);
+    });
+
+    test('opens assign-users modal', () => {
+      const { history, getByText } = setup();
+
+      expect(history.replace).toHaveBeenCalledWith({ search: '' });
+      expect(getByText('GitHub Users')).toBeVisible();
+    });
   });
 
   describe('project not found', () => {
@@ -261,9 +288,7 @@ describe('<ProjectDetail/>', () => {
       const { getByText, baseElement } = setup();
       fireEvent.click(getByText('Add or Remove Collaborators'));
       fireEvent.click(
-        baseElement.querySelector(
-          '.collaborator-button[title="TestGitHubUser"]',
-        ),
+        baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
       );
       fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="ThirdUser"]'),
@@ -273,7 +298,21 @@ describe('<ProjectDetail/>', () => {
       expect(updateObject).toHaveBeenCalled();
       expect(
         updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
-      ).toEqual(['OtherUser', 'ThirdUser']);
+      ).toEqual(['TestGitHubUser', 'ThirdUser']);
+    });
+
+    test('opens confirm modal if removing assigned user', () => {
+      const { getByText, baseElement } = setup();
+      fireEvent.click(getByText('Add or Remove Collaborators'));
+      fireEvent.click(
+        baseElement.querySelector(
+          '.collaborator-button[title="TestGitHubUser"]',
+        ),
+      );
+      fireEvent.click(getByText('Save'));
+
+      expect(updateObject).not.toHaveBeenCalled();
+      expect(getByText('Confirm Removing Collaborator')).toBeVisible();
     });
 
     describe('"re-sync collaborators" click', () => {
@@ -300,8 +339,8 @@ describe('<ProjectDetail/>', () => {
                   ...defaultState.projects.r1.projects[0],
                   github_users: [
                     {
-                      id: '123456',
-                      login: 'TestGitHubUser',
+                      id: '234567',
+                      login: 'OtherUser',
                       avatar_url: 'https://example.com/avatar.png',
                     },
                   ],
@@ -315,6 +354,88 @@ describe('<ProjectDetail/>', () => {
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+    });
+
+    test('opens confirm modal if removing assigned user', () => {
+      const { getByTitle, getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  github_users: [
+                    {
+                      id: '123456',
+                      login: 'TestGitHubUser',
+                      avatar_url: 'https://example.com/avatar.png',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getByTitle('Remove'));
+
+      expect(updateObject).not.toHaveBeenCalled();
+      expect(getByText('Confirm Removing Collaborator')).toBeVisible();
+    });
+  });
+
+  describe('<ConfirmRemoveUserModal />', () => {
+    let result;
+
+    beforeEach(() => {
+      const task = {
+        ...defaultState.tasks.project1[0],
+        assigned_qa: {
+          id: '234567',
+          login: 'OtherUser',
+          avatar_url: 'https://example.com/avatar.png',
+        },
+      };
+      result = setup({
+        initialState: {
+          ...defaultState,
+          tasks: { project1: [task, defaultState.tasks.project1[1]] },
+        },
+      });
+      fireEvent.click(result.getByText('Add or Remove Collaborators'));
+      fireEvent.click(
+        result.baseElement.querySelector(
+          '.collaborator-button[title="TestGitHubUser"]',
+        ),
+      );
+      fireEvent.click(
+        result.baseElement.querySelector(
+          '.collaborator-button[title="OtherUser"]',
+        ),
+      );
+      fireEvent.click(result.getByText('Save'));
+    });
+
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText } = result;
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Confirm Removing Collaborators')).toBeNull();
+      });
+    });
+
+    describe('"confirm" click', () => {
+      test('removes user', () => {
+        const { getByText, queryByText } = result;
+        fireEvent.click(getByText('Confirm'));
+
+        expect(queryByText('Confirm Removing Collaborators')).toBeNull();
+        expect(updateObject).toHaveBeenCalled();
+        expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+      });
     });
   });
 
@@ -350,7 +471,7 @@ describe('<ProjectDetail/>', () => {
         },
       });
       fireEvent.click(getAllByText('Assign Reviewer')[0]);
-      fireEvent.click(getByText('Add collaborators to the project'));
+      fireEvent.click(getByText('Add Project Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
     });

@@ -300,6 +300,7 @@ export const AssignUserModal = ({
   selectedUser,
   heading,
   isOpen,
+  emptyMessageText,
   emptyMessageAction,
   onRequestClose,
   setUser,
@@ -308,6 +309,7 @@ export const AssignUserModal = ({
   selectedUser: GitHubUser | null;
   heading: string;
   isOpen: boolean;
+  emptyMessageText: string;
   emptyMessageAction: () => void;
   onRequestClose: () => void;
   setUser: (user: GitHubUser | null) => void;
@@ -315,7 +317,32 @@ export const AssignUserModal = ({
   const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
 
   return (
-    <Modal isOpen={isOpen} heading={heading} onRequestClose={onRequestClose}>
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      heading={heading}
+      tagline={
+        filteredUsers.length ? (
+          <>
+            {i18n.t('Only project collaborators appear in the list below.')}{' '}
+            <Button
+              label={i18n.t('View the project to add collaborators.')}
+              variant="link"
+              onClick={emptyMessageAction}
+            />
+          </>
+        ) : null
+      }
+      footer={
+        filteredUsers.length ? null : (
+          <Button
+            label={emptyMessageText}
+            variant="brand"
+            onClick={emptyMessageAction}
+          />
+        )
+      }
+    >
       {selectedUser && (
         <>
           <div className="slds-p-around_small">
@@ -342,13 +369,9 @@ export const AssignUserModal = ({
         </div>
       ) : (
         <div className="slds-p-around_medium">
-          {i18n.t('There are no collaborators on this project')}.{' '}
-          <Button
-            label={i18n.t('Add collaborators to the project')}
-            variant="link"
-            onClick={emptyMessageAction}
-          />{' '}
-          {i18n.t('before assigning them to this task')}.
+          {i18n.t(
+            'There are no collaborators on this project. Add collaborators to the project before assigning them to this task.',
+          )}
         </div>
       )}
     </Modal>
