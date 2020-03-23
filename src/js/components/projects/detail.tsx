@@ -2,7 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
@@ -31,11 +31,13 @@ import { updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
+import { getUrlParam, removeUrlParam } from '@/utils/api';
 import {
   OBJECT_TYPES,
   ORG_TYPES,
   OrgTypes,
   PROJECT_STATUSES,
+  SHOW_PROJECT_COLLABORATORS,
 } from '@/utils/constants';
 import { getBranchLink, getCompletedTasks } from '@/utils/helpers';
 import routes from '@/utils/routes';
@@ -66,6 +68,18 @@ const ProjectDetail = (props: RouteComponentProps) => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);
   }, []);
+
+  // Auto-open the assign-users modal if `SHOW_PROJECT_COLLABORATORS` param
+  const { history } = props;
+  useEffect(() => {
+    const showCollaborators = getUrlParam(SHOW_PROJECT_COLLABORATORS);
+    if (showCollaborators === 'true') {
+      // Remove query-string from URL
+      history.replace({ search: removeUrlParam(SHOW_PROJECT_COLLABORATORS) });
+      // Show collaborators modal
+      openAssignUsersModal();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const usersAssignedToTasks = new Set<string>();
   (tasks || []).forEach((task) => {

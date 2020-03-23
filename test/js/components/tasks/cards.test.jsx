@@ -5,6 +5,8 @@ import { StaticRouter } from 'react-router-dom';
 import OrgCards from '@/components/tasks/cards';
 import { createObject, deleteObject, updateObject } from '@/store/actions';
 import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
+import { addUrlParams } from '@/utils/api';
+import { SHOW_PROJECT_COLLABORATORS } from '@/utils/constants';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
@@ -210,7 +212,9 @@ describe('<OrgCards/>', () => {
       fireEvent.click(getByText('View Project to Add Collaborators'));
 
       expect(context.action).toEqual('PUSH');
-      expect(context.url).toEqual('project-url');
+      expect(context.url).toEqual(
+        addUrlParams('project-url', { [SHOW_PROJECT_COLLABORATORS]: true }),
+      );
     });
   });
 

@@ -5,23 +5,29 @@ import { StaticRouter } from 'react-router-dom';
 import ProjectDetail from '@/components/projects/detail';
 import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';
+import { getUrlParam, removeUrlParam } from '@/utils/api';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
 jest.mock('@/store/repositories/actions');
+jest.mock('@/utils/api');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+getUrlParam.mockReturnValue(null);
+removeUrlParam.mockReturnValue('');
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
   updateObject.mockClear();
   refreshGitHubUsers.mockClear();
+  getUrlParam.mockClear();
+  removeUrlParam.mockClear();
 });
 
 const defaultState = {
@@ -147,14 +153,18 @@ describe('<ProjectDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug, projectSlug } = opts;
     const context = {};
+    const history = { replace: jest.fn() };
     const response = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectDetail match={{ params: { repositorySlug, projectSlug } }} />
+        <ProjectDetail
+          match={{ params: { repositorySlug, projectSlug } }}
+          history={history}
+        />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { ...response, context };
+    return { ...response, context, history };
   };
 
   test('renders project detail and tasks list', () => {
@@ -178,6 +188,23 @@ describe('<ProjectDetail/>', () => {
 
     expect(getByText('Add a Task for Project 1')).toBeVisible();
     expect(queryByText('Tasks for Project 1')).toBeNull();
+  });
+
+  describe('`SHOW_PROJECT_COLLABORATORS` param is truthy', () => {
+    beforeAll(() => {
+      getUrlParam.mockReturnValue('true');
+    });
+
+    afterAll(() => {
+      getUrlParam.mockReturnValue(null);
+    });
+
+    test('opens assign-users modal', () => {
+      const { history, getByText } = setup();
+
+      expect(history.replace).toHaveBeenCalledWith({ search: '' });
+      expect(getByText('GitHub Users')).toBeVisible();
+    });
   });
 
   describe('project not found', () => {
