@@ -15,11 +15,11 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
       slds-large-size_1-of-3"
   >
     <Card heading={repository.name} bodyClassName="slds-card__body_inner">
-      {repository.description ? (
+      {repository.description_rendered ? (
         <div
           className="truncate-children slds-p-top_x-small"
           // This description is pre-cleaned by the API
-          dangerouslySetInnerHTML={{ __html: repository.description }}
+          dangerouslySetInnerHTML={{ __html: repository.description_rendered }}
         />
       ) : null}
     </Card>

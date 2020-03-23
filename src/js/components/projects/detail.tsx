@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -25,6 +26,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import EditModal from '@/components/utils/editModal';
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
@@ -201,6 +203,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
       project?.status !== PROJECT_STATUSES.MERGED,
   );
 
+  // "edit" modal related:
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const openEditModal = () => {
+    setEditModalOpen(true);
+  };
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+  };
+
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -261,16 +272,37 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const handleSelect = (option: {
+    id: string;
+    label: string;
+    disabled?: boolean;
+  }) => {
+    switch (option.id) {
+      case 'edit':
+        openEditModal();
+        break;
+      // case 'delete':
+      //   break;
+    }
+  };
   const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Button
+      <Dropdown
+        align="right"
         iconCategory="utility"
-        iconName="delete"
-        iconPosition="left"
-        label={i18n.t('Delete Project')}
-        variant="text-destructive"
-        disabled
+        iconName="settings"
+        iconSize="large"
+        iconVariant="more"
+        width="xx-small"
+        triggerClassName="slds-m-right_xx-small"
+        assistiveText={{ icon: i18n.t('Project Options') }}
+        onSelect={handleSelect}
+        options={[
+          { id: 'edit', label: i18n.t('Edit Project') },
+          // { type: 'divider' },
+          // { id: 'delete', label: i18n.t('Delete Project') },
+        ]}
       />
       {branchLink ? (
         <ExternalLink
@@ -290,7 +322,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     >
       <DetailPageLayout
         title={project.name}
-        description={project.description}
+        description={project.description_rendered}
         repoUrl={repository.repo_url}
         breadcrumb={[
           {
@@ -386,6 +418,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
           />
         )}
+        <EditModal
+          project={project}
+          isOpen={editModalOpen}
+          handleClose={closeEditModal}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );

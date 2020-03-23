@@ -757,6 +757,7 @@ describe('updateObject', () => {
 
   describe('error', () => {
     test('dispatches UPDATE_OBJECT_FAILED action', () => {
+      const payload = { ...objectPayload, url: undefined };
       const store = storeWithThunk({});
       fetchMock.putOnce(url, 500);
       const started = {
@@ -769,7 +770,7 @@ describe('updateObject', () => {
       };
 
       expect.assertions(5);
-      return store.dispatch(actions.updateObject(objectPayload)).catch(() => {
+      return store.dispatch(actions.updateObject(payload)).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);

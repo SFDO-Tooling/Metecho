@@ -80,6 +80,7 @@ class TestRepositoryView:
                     "id": str(repo.id),
                     "name": str(repo.name),
                     "description": "",
+                    "description_rendered": "",
                     "is_managed": False,
                     "slug": str(repo.slug),
                     "old_slugs": [],
@@ -114,6 +115,7 @@ class TestRepositoryView:
                     "id": str(repo.id),
                     "name": str(repo.name),
                     "description": "",
+                    "description_rendered": "",
                     "is_managed": False,
                     "slug": str(repo.slug),
                     "old_slugs": [],
@@ -222,7 +224,7 @@ class TestHookView:
             assert response.status_code == 202, response.content
             assert refresh_commits_job.delay.called
 
-    def test_422__push_error(
+    def test_400__push_error(
         self, settings, client, repository_factory, git_hub_repository_factory
     ):
         settings.GITHUB_HOOK_SECRET = b""
@@ -244,7 +246,7 @@ class TestHookView:
             HTTP_X_HUB_SIGNATURE="sha1=6fc6f8c254a19276680948251ccb9644995c3692",
             HTTP_X_GITHUB_EVENT="push",
         )
-        assert response.status_code == 422, response.json()
+        assert response.status_code == 400, response.json()
 
     def test_404__push_no_matching_repo(self, settings, client, repository_factory):
         settings.GITHUB_HOOK_SECRET = b""
@@ -331,7 +333,7 @@ class TestScratchOrgView:
             assert response.status_code == 400
             assert not commit_changes_from_org_job.delay.called
 
-    def test_commit_sad_path__422(self, client, scratch_org_factory):
+    def test_commit_sad_path__400(self, client, scratch_org_factory):
         scratch_org = scratch_org_factory(org_type="Dev")
         with patch(
             "metashare.api.jobs.commit_changes_from_org_job"
@@ -341,7 +343,7 @@ class TestScratchOrgView:
                 {"changes": {}},
                 format="json",
             )
-            assert response.status_code == 422
+            assert response.status_code == 400
             assert not commit_changes_from_org_job.delay.called
 
     def test_commit_sad_path__403(self, client, scratch_org_factory):
@@ -536,7 +538,7 @@ class TestTaskView:
             url = reverse("task-create-pr", kwargs={"pk": str(task.id)})
             response = client.post(url, {}, format="json")
 
-            assert response.status_code == 422
+            assert response.status_code == 400
 
     def test_create_pr__bad(self, client, task_factory):
         task = task_factory(pr_is_open=True)
@@ -576,7 +578,7 @@ class TestTaskView:
         task = task_factory(pr_is_open=True, review_valid=True)
         response = client.post(reverse("task-review", kwargs={"pk": str(task.id)}), {})
 
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_review__bad_pr_closed(self, client, task_factory):
         task = task_factory(pr_is_open=False, review_valid=True)

@@ -54,7 +54,7 @@ class TestRefreshAccessToken:
             get_current_job.return_value = MagicMock(id=123)
             jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
             jwt_session.side_effect = HTTPError(
-                "Error message.", response=MagicMock(status_code=422)
+                "Error message.", response=MagicMock(status_code=400)
             )
             stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
@@ -73,7 +73,7 @@ class TestRefreshAccessToken:
         with ExitStack() as stack:
             jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
             jwt_session.side_effect = HTTPError(
-                "Error message.", response=MagicMock(status_code=422)
+                "Error message.", response=MagicMock(status_code=400)
             )
             stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 

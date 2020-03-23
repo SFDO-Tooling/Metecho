@@ -39,6 +39,7 @@ const defaultState = {
         slug: 'repository-1',
         old_slugs: [],
         description: 'This is a test repository.',
+        description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
         github_users: [
           {
@@ -68,6 +69,7 @@ const defaultState = {
           name: 'Project 1',
           repository: 'r1',
           description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
           old_slugs: ['old-slug'],
           github_users: [
             {
@@ -94,6 +96,7 @@ const defaultState = {
         slug: 'task-1',
         project: 'project1',
         description: 'Task Description',
+        description_rendered: '<p>Task Description</p>',
         review_valid: true,
         review_status: 'Approved',
         status: 'Completed',
@@ -563,6 +566,20 @@ describe('<ProjectDetail/>', () => {
       });
 
       expect(getByText('View Branch')).toBeVisible();
+    });
+  });
+
+  describe('editing project click', () => {
+    test('opens and closes modal', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Project Options'));
+      fireEvent.click(getByText('Edit Project'));
+
+      expect(getByText('Edit Project')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('Edit Project')).toBeNull();
     });
   });
 });

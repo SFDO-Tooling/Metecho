@@ -148,7 +148,7 @@ class TestLocalGitHubCheckout:
 class TestTryCreateBranch:
     def test_try_to_make_branch__duplicate_name(self, user_factory, task_factory):
         repository = MagicMock()
-        resp = MagicMock(status_code=422)
+        resp = MagicMock(status_code=400)
         resp.json.return_value = {"message": "Reference already exists"}
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
         branch = MagicMock()
@@ -162,7 +162,7 @@ class TestTryCreateBranch:
 
     def test_try_to_make_branch__long_duplicate_name(self, user_factory, task_factory):
         repository = MagicMock()
-        resp = MagicMock(status_code=422)
+        resp = MagicMock(status_code=400)
         resp.json.return_value = {"message": "Reference already exists"}
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
         branch = MagicMock()
@@ -176,7 +176,7 @@ class TestTryCreateBranch:
 
     def test_try_to_make_branch__unknown_error(self, user_factory, task_factory):
         repository = MagicMock()
-        resp = MagicMock(status_code=422, msg="Test message")
+        resp = MagicMock(status_code=400, msg="Test message")
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
         branch = MagicMock()
         branch.latest_sha.return_value = "1234abc"
