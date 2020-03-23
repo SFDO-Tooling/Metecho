@@ -103,7 +103,8 @@ checked and "SSL verification" is enabled.
 Use the "Webhook secret" value as your ``GITHUB_HOOK_SECRET`` environment
 variable in MetaShare.
 
-Use the app's "client id" as ``GITHUB_CLIENT_ID`` and the "client secret" as ``GITHUB_CLIENT_SECRET``.
+Use the app's "Client ID" as ``GITHUB_CLIENT_ID`` and the "Client secret" as
+``GITHUB_CLIENT_SECRET``.
 
 Logging in as a superuser
 ~~~~~~~~~~~~~~~~~~~~~~~~~
