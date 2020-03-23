@@ -75,9 +75,9 @@ export const logout = (): ThunkResult<Promise<LogoutAction>> => (dispatch) =>
     return dispatch({ type: 'USER_LOGGED_OUT' as 'USER_LOGGED_OUT' });
   });
 
-export const refetchAllData = (): ThunkResult<Promise<
-  RefetchDataAction | LogoutAction
->> => async (dispatch) => {
+export const refetchAllData = (): ThunkResult<
+  Promise<RefetchDataAction | LogoutAction>
+> => async (dispatch) => {
   dispatch({ type: 'REFETCH_DATA_STARTED' });
   try {
     const payload = await apiFetch({
@@ -100,9 +100,9 @@ export const refetchAllData = (): ThunkResult<Promise<
   }
 };
 
-export const disconnect = (): ThunkResult<Promise<
-  DisconnectSucceeded
->> => async (dispatch) => {
+export const disconnect = (): ThunkResult<
+  Promise<DisconnectSucceeded>
+> => async (dispatch) => {
   dispatch({ type: 'USER_DISCONNECT_REQUESTED' });
   try {
     const payload = await apiFetch({
@@ -122,9 +122,9 @@ export const disconnect = (): ThunkResult<Promise<
   }
 };
 
-export const refreshDevHubStatus = (): ThunkResult<Promise<
-  RefreshDevHubSucceeded
->> => async (dispatch) => {
+export const refreshDevHubStatus = (): ThunkResult<
+  Promise<RefreshDevHubSucceeded>
+> => async (dispatch) => {
   dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
   try {
     const payload = await apiFetch({ url: window.api_urls.user(), dispatch });

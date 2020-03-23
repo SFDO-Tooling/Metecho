@@ -25,6 +25,7 @@ rules:
       ignoreDestructuring: true
       allow:
         - originating_user_id
+        - description_rendered
   '@typescript-eslint/explicit-function-return-type': 0
   '@typescript-eslint/no-empty-function': 0
   '@typescript-eslint/no-explicit-any': 0

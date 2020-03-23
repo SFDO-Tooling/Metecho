@@ -27,6 +27,7 @@ const defaultState = {
         slug: 'repository-1',
         old_slugs: ['old-slug'],
         description: 'This is a test repository.',
+        description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
         github_users: [],
       },
@@ -43,6 +44,7 @@ const defaultState = {
           name: 'Project 1',
           repository: 'r1',
           description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
         },
       ],
       next: 'next-url',
@@ -179,6 +181,7 @@ describe('<RepoDetail />', () => {
                 {
                   branch_url: 'branch-url',
                   description: 'repository description',
+                  description_rendered: '<p>repository description</p>',
                   id: 'project1',
                   name: 'Project 1',
                   old_slugs: [],
@@ -218,6 +221,7 @@ describe('<RepoDetail />', () => {
                 {
                   branch_url: 'branch-url',
                   description: 'repository description',
+                  description_rendered: '<p>repository description</p>',
                   id: 'project1',
                   name: 'Project 1',
                   old_slugs: [],

@@ -91,10 +91,10 @@ describe('apiFetch', () => {
       expect(addError).toHaveBeenCalledWith('not cool');
     });
 
-    test('does not add error message on POST with 422 response', async () => {
+    test('does not add error message on POST with 400 response', async () => {
       const response = { name: ['this is a form error'] };
       fetchMock.postOnce('/test/url/', {
-        status: 422,
+        status: 400,
         body: response,
       });
 
@@ -108,7 +108,7 @@ describe('apiFetch', () => {
         }),
       ).rejects.toThrow(
         expect.objectContaining({
-          message: `Unprocessable Entity: ${JSON.stringify(response)}`,
+          message: `Bad Request: ${JSON.stringify(response)}`,
         }),
       );
       expect(addError).not.toHaveBeenCalled();

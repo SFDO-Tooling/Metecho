@@ -5,9 +5,14 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
-import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
+import {
+  LabelWithSpinner,
+  useForm,
+  useFormDefaults,
+  useIsMounted,
+} from '@/components/utils';
 import { REVIEW_STATUSES, ReviewStatuses } from '@/utils/constants';
 
 interface Props {
@@ -69,25 +74,19 @@ const SubmitReviewModal = ({
     shouldSubscribeToObject: false,
   });
 
-  // When reviewStatus changes, update default selection
-  const defaultStatusRef = useRef(defaultStatus);
-  useEffect(() => {
-    const prevDefaultStatus = defaultStatusRef.current;
-    if (defaultStatus !== prevDefaultStatus) {
-      setInputs({ ...inputs, status: defaultStatus });
-      defaultStatusRef.current = defaultStatus;
-    }
-  }, [defaultStatus, inputs, setInputs]);
-
-  // When orgId changes, update default selection
-  const defaultDeleteOrgRef = useRef(defaultDeleteOrg);
-  useEffect(() => {
-    const prevDefaultDeleteOrg = defaultDeleteOrgRef.current;
-    if (defaultDeleteOrg !== prevDefaultDeleteOrg) {
-      setInputs({ ...inputs, delete_org: defaultDeleteOrg });
-      defaultDeleteOrgRef.current = defaultDeleteOrg;
-    }
-  }, [defaultDeleteOrg, inputs, setInputs]);
+  // When reviewStatus or orgId changes, update default selection
+  useFormDefaults({
+    field: 'status',
+    value: defaultStatus,
+    inputs,
+    setInputs,
+  });
+  useFormDefaults({
+    field: 'delete_org',
+    value: defaultDeleteOrg,
+    inputs,
+    setInputs,
+  });
 
   const handleSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
@@ -141,56 +140,52 @@ const SubmitReviewModal = ({
       ]}
     >
       <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
-        <div className="slds-grid slds-wrap slds-gutters">
-          <div className="slds-col slds-size_1-of-1">
-            <RadioGroup
-              assistiveText={{
-                label: i18n.t('Task review status'),
-                required: i18n.t('Required'),
-              }}
-              labels={{ error: errors.status }}
-              className="slds-p-bottom_x-small"
-              name="status"
-              required
-              onChange={handleInputChange}
-            >
-              <Radio
-                id="approve"
-                labels={{ label: i18n.t('Approve') }}
-                checked={inputs.status === REVIEW_STATUSES.APPROVED}
-                value={REVIEW_STATUSES.APPROVED}
-                name="status"
-              />
-              <Radio
-                id="request-changes"
-                labels={{ label: i18n.t('Request changes') }}
-                checked={inputs.status === REVIEW_STATUSES.CHANGES_REQUESTED}
-                value={REVIEW_STATUSES.CHANGES_REQUESTED}
-                name="status"
-              />
-            </RadioGroup>
-            <Textarea
-              id="notes"
-              label={i18n.t('Review Description')}
-              className="ms-textarea"
-              name="notes"
-              value={inputs.notes}
-              errorText={errors.notes}
-              onChange={handleInputChange}
-            />
-            {orgId ? (
-              <Checkbox
-                id="delete-org"
-                labels={{ label: 'Delete Review Org' }}
-                className="slds-p-top_small"
-                name="delete_org"
-                checked={inputs.delete_org}
-                errorText={errors.delete_org}
-                onChange={handleInputChange}
-              />
-            ) : null}
-          </div>
-        </div>
+        <RadioGroup
+          assistiveText={{
+            label: i18n.t('Task review status'),
+            required: i18n.t('Required'),
+          }}
+          labels={{ error: errors.status }}
+          className="slds-p-bottom_x-small"
+          name="status"
+          required
+          onChange={handleInputChange}
+        >
+          <Radio
+            id="approve"
+            labels={{ label: i18n.t('Approve') }}
+            checked={inputs.status === REVIEW_STATUSES.APPROVED}
+            value={REVIEW_STATUSES.APPROVED}
+            name="status"
+          />
+          <Radio
+            id="request-changes"
+            labels={{ label: i18n.t('Request changes') }}
+            checked={inputs.status === REVIEW_STATUSES.CHANGES_REQUESTED}
+            value={REVIEW_STATUSES.CHANGES_REQUESTED}
+            name="status"
+          />
+        </RadioGroup>
+        <Textarea
+          id="notes"
+          label={i18n.t('Review Description')}
+          className="ms-textarea"
+          name="notes"
+          value={inputs.notes}
+          errorText={errors.notes}
+          onChange={handleInputChange}
+        />
+        {orgId ? (
+          <Checkbox
+            id="delete-org"
+            labels={{ label: 'Delete Review Org' }}
+            className="slds-p-top_small"
+            name="delete_org"
+            checked={inputs.delete_org}
+            errorText={errors.delete_org}
+            onChange={handleInputChange}
+          />
+        ) : null}
         {/* Clicking hidden button allows for native browser form validation */}
         <button
           ref={submitButton}

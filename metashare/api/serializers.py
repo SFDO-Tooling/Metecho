@@ -80,7 +80,7 @@ class MinimalUserSerializer(serializers.ModelSerializer):
 
 class RepositorySerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    description = MarkdownField(allow_blank=True)
+    description_rendered = MarkdownField(source="description", read_only=True)
     repo_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -90,6 +90,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             "name",
             "repo_url",
             "description",
+            "description_rendered",
             "is_managed",
             "slug",
             "old_slugs",
@@ -102,7 +103,7 @@ class RepositorySerializer(serializers.ModelSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    description = MarkdownField(allow_blank=True)
+    description_rendered = MarkdownField(source="description", read_only=True)
     repository = serializers.PrimaryKeyRelatedField(
         queryset=Repository.objects.all(), pk_field=serializers.CharField()
     )
@@ -116,6 +117,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "description_rendered",
             "slug",
             "old_slugs",
             "repository",
@@ -186,7 +188,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    description = MarkdownField(allow_blank=True)
+    description_rendered = MarkdownField(source="description", read_only=True)
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
@@ -200,6 +202,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "description_rendered",
             "project",
             "slug",
             "old_slugs",

@@ -94,7 +94,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
     <DocumentTitle title={`${repository.name} | ${i18n.t('MetaShare')}`}>
       <DetailPageLayout
         title={repository.name}
-        description={repository.description}
+        description={repository.description_rendered}
         repoUrl={repository.repo_url}
         breadcrumb={[{ name: repository.name }]}
         sidebar={sidebarContent}
