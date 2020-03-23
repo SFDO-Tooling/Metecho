@@ -33,15 +33,15 @@ const ConfirmRemoveUserModal = ({
   };
 
   const count = (confirmRemoveUsers as GitHubUser[]).length;
-  const heading =
-    count === 1
-      ? i18n.t('Confirm Removing Collaborator')
-      : i18n.t('Confirm Removing Collaborators');
 
   return (
     <Modal
       isOpen={isOpen}
-      heading={heading}
+      heading={i18n.t(
+        'confirmRemoveCollaboratorsHeading',
+        'Confirm Removing Collaborator',
+        { count },
+      )}
       prompt="warning"
       onRequestClose={handleClose}
       footer={[
@@ -55,16 +55,16 @@ const ConfirmRemoveUserModal = ({
       ]}
     >
       <div className="slds-p-top_small">
-        <Trans i18nKey="confirmRemoveCollaborators">
-          The following users are being removed from this project, but are
-          already assigned to at least one task in this project. Are you sure
-          you want to remove them from the project? This will not remove them
-          from any assigned tasks.
+        <Trans i18nKey="confirmRemoveCollaboratorsMessage" count={count}>
+          The following user is being removed from this project, but is already
+          assigned to at least one task. Removing this user will not remove them
+          from any assigned tasks. Are you sure you want to remove this user
+          from the project?
         </Trans>
         <ul>
           {(confirmRemoveUsers as GitHubUser[]).map((user) => (
             <li key={user.id}>
-              <UserCard user={user} />
+              <UserCard user={user} className="has-nested-card" />
             </li>
           ))}
         </ul>
