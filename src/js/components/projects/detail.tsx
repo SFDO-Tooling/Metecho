@@ -219,9 +219,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
       case 'edit':
         openEditModal();
         break;
-      /* istanbul ignore next */
-      case 'delete':
-        break;
+      // case 'delete':
+      //   break;
     }
   };
   const { branchLink, branchLinkText } = getBranchLink(project);
@@ -239,8 +238,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
         onSelect={handleSelect}
         options={[
           { id: 'edit', label: i18n.t('Edit Project') },
-          { type: 'divider' },
-          { id: 'delete', label: i18n.t('Delete Project'), disabled: true },
+          // { type: 'divider' },
+          // { id: 'delete', label: i18n.t('Delete Project') },
         ]}
       />
       {branchLink ? (
