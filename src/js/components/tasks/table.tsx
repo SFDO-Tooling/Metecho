@@ -189,6 +189,7 @@ const AssigneeTableCell = ({
           selectedUser={assignedUser}
           heading={title}
           isOpen={assignUserModalOpen}
+          emptyMessageText={i18n.t('Add Project Collaborators')}
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}

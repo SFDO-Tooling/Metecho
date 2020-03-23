@@ -29,20 +29,28 @@ const defaultRepository = {
   old_slugs: [],
   description: 'This is a test repository.',
   repo_url: 'https://github.com/test/test-repo',
+  github_users: [],
 };
+
+const defaultUser = { username: 'test-user' };
 
 describe('<ProjectForm/>', () => {
   const setup = (options) => {
     const defaults = {
       repository: defaultRepository,
+      user: defaultUser,
       startOpen: true,
     };
     const opts = Object.assign({}, defaults, options);
-    const { repository, startOpen } = opts;
+    const { user, repository, startOpen } = opts;
     const context = {};
     const result = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectForm repository={repository} startOpen={startOpen} />
+        <ProjectForm
+          user={user}
+          repository={repository}
+          startOpen={startOpen}
+        />
       </StaticRouter>,
       {},
       storeWithThunk,
@@ -87,6 +95,32 @@ describe('<ProjectForm/>', () => {
           name: 'Name of Project',
           description: 'This is the description',
           repository: 'r1',
+          github_users: [],
+        },
+        hasForm: true,
+        shouldSubscribeToObject: true,
+      });
+    });
+
+    test('adds current user to github_users', () => {
+      const ghUser = { id: '1', login: 'test-user' };
+      const repository = {
+        ...defaultRepository,
+        github_users: [ghUser, { id: '2', login: 'other-username' }],
+      };
+      const { getByText, getByLabelText } = setup({ repository });
+      const submit = getByText('Create Project');
+      const nameInput = getByLabelText('*Project Name');
+      fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
+      fireEvent.click(submit);
+
+      expect(createObject).toHaveBeenCalledWith({
+        objectType: 'project',
+        data: {
+          name: 'Name of Project',
+          description: '',
+          repository: 'r1',
+          github_users: [ghUser],
         },
         hasForm: true,
         shouldSubscribeToObject: true,

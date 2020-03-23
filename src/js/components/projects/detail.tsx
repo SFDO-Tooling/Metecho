@@ -2,12 +2,13 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import ConfirmRemoveUserModal from '@/components/projects/confirmRemoveUserModal';
 import ProjectStatusPath from '@/components/projects/path';
 import ProjectProgress from '@/components/projects/progress';
 import TaskForm from '@/components/tasks/createForm';
@@ -30,11 +31,13 @@ import { updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
+import { getUrlParam, removeUrlParam } from '@/utils/api';
 import {
   OBJECT_TYPES,
   ORG_TYPES,
   OrgTypes,
   PROJECT_STATUSES,
+  SHOW_PROJECT_COLLABORATORS,
 } from '@/utils/constants';
 import { getBranchLink, getCompletedTasks } from '@/utils/helpers';
 import routes from '@/utils/routes';
@@ -53,7 +56,56 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
   }, []);
-  const setProjectUsers = useCallback(
+
+  // "Confirm remove user from project" modal related:
+  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
+    GitHubUser[] | null
+  >(null);
+  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
+    GitHubUser[] | null
+  >(null);
+  const closeConfirmRemoveUsersModal = useCallback(() => {
+    setWaitingToUpdateUsers(null);
+    setConfirmRemoveUsers(null);
+  }, []);
+
+  // Auto-open the assign-users modal if `SHOW_PROJECT_COLLABORATORS` param
+  const { history } = props;
+  useEffect(() => {
+    const showCollaborators = getUrlParam(SHOW_PROJECT_COLLABORATORS);
+    if (showCollaborators === 'true') {
+      // Remove query-string from URL
+      history.replace({ search: removeUrlParam(SHOW_PROJECT_COLLABORATORS) });
+      // Show collaborators modal
+      openAssignUsersModal();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const usersAssignedToTasks = new Set<string>();
+  (tasks || []).forEach((task) => {
+    if (task.assigned_dev) {
+      usersAssignedToTasks.add(task.assigned_dev.login);
+    }
+    if (task.assigned_qa) {
+      usersAssignedToTasks.add(task.assigned_qa.login);
+    }
+  });
+
+  const getRemovedUsers = useCallback(
+    (users: GitHubUser[]) => {
+      /* istanbul ignore if */
+      if (!project) {
+        return [];
+      }
+      return project.github_users.filter(
+        (oldUser) =>
+          usersAssignedToTasks.has(oldUser.login) &&
+          !users.find((user) => user.id === oldUser.id),
+      );
+    },
+    [project, usersAssignedToTasks],
+  );
+  const updateProjectUsers = useCallback(
     (users: GitHubUser[]) => {
       /* istanbul ignore if */
       if (!project) {
@@ -68,9 +120,21 @@ const ProjectDetail = (props: RouteComponentProps) => {
           },
         }),
       );
-      setAssignUsersModalOpen(false);
     },
     [project, dispatch],
+  );
+  const setProjectUsers = useCallback(
+    (users: GitHubUser[]) => {
+      const removedUsers = getRemovedUsers(users);
+      if (removedUsers.length) {
+        setWaitingToUpdateUsers(users);
+        setConfirmRemoveUsers(removedUsers);
+      } else {
+        updateProjectUsers(users);
+      }
+      setAssignUsersModalOpen(false);
+    },
+    [updateProjectUsers, getRemovedUsers],
   );
   const removeProjectUser = useCallback(
     (user: GitHubUser) => {
@@ -81,17 +145,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
       const users = project.github_users.filter(
         (possibleUser) => user.id !== possibleUser.id,
       );
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.PROJECT,
-          data: {
-            ...project,
-            github_users: users,
-          },
-        }),
-      );
+      const removedUsers = getRemovedUsers(users);
+      if (removedUsers.length) {
+        setWaitingToUpdateUsers(users);
+        setConfirmRemoveUsers(removedUsers);
+      } else {
+        updateProjectUsers(users);
+      }
     },
-    [project, dispatch],
+    [project, updateProjectUsers, getRemovedUsers],
   );
   const doRefreshGitHubUsers = useCallback(() => {
     /* istanbul ignore if */
@@ -261,6 +323,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
               setUsers={setProjectUsers}
               isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
               refreshUsers={doRefreshGitHubUsers}
+            />
+            <ConfirmRemoveUserModal
+              confirmRemoveUsers={confirmRemoveUsers}
+              waitingToUpdateUsers={waitingToUpdateUsers}
+              handleClose={closeConfirmRemoveUsersModal}
+              handleUpdateUsers={updateProjectUsers}
             />
             <UserCards
               users={project.github_users}

@@ -28,6 +28,7 @@ const defaultState = {
         old_slugs: ['old-slug'],
         description: 'This is a test repository.',
         repo_url: 'https://github.com/test/test-repo',
+        github_users: [],
       },
     ],
     notFound: ['yet-another-repository'],
@@ -48,6 +49,9 @@ const defaultState = {
       notFound: [],
       fetched: true,
     },
+  },
+  user: {
+    username: 'my-user',
   },
 };
 
