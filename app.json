@@ -32,6 +32,12 @@
     "DB_ENCRYPTION_KEY": {
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
     },
+    "GITHUB_CLIENT_ID": {
+      "description": "Client ID for a GitHub App."
+    },
+    "GITHUB_CLIENT_SECRET": {
+      "description": "Client secret for a GitHub App."
+    },
     "SF_CALLBACK_URL": {
       "description": "Callback URL for Salesforce Connected App (e.g. \"https://<...>/accounts/salesforce/login/callback/\")"
     },

@@ -80,6 +80,7 @@ const ConnectModal = ({
   const handleConnect = () => {
     window.location.assign(
       addUrlParams(window.api_urls.salesforce_login(), {
+        custom_domain: 'login',
         process: 'connect',
         next: window.location.pathname,
       }),

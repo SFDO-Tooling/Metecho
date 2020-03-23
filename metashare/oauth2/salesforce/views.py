@@ -34,10 +34,10 @@ class SalesforceOAuth2Adapter(SalesforceOAuth2BaseAdapter):
         if custom_domain and not CUSTOM_DOMAIN_RE.match(custom_domain):
             raise SuspiciousOperation("Invalid custom domain")
         self.request.session["custom_domain"] = custom_domain
-        if custom_domain:
-            base_url = "https://{}.my.salesforce.com".format(custom_domain)
-        else:
+        if custom_domain == "login" or not custom_domain:
             base_url = "https://login.salesforce.com"
+        else:
+            base_url = "https://{}.my.salesforce.com".format(custom_domain)
         return base_url
 
     def get_org_details(self, extra_data, token):
