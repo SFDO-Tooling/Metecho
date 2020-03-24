@@ -12,9 +12,10 @@ from ..api.serializers import (
 )
 from ..consumers import PushNotificationConsumer
 
+pytestmark = pytest.mark.asyncio
+
 
 @pytest.mark.django_db
-@pytest.mark.asyncio
 async def test_push_notification_consumer__repository(user_factory, repository_factory):
     user = await database_sync_to_async(user_factory)()
     repository = await database_sync_to_async(repository_factory)()
@@ -48,7 +49,6 @@ async def test_push_notification_consumer__repository(user_factory, repository_f
 
 
 @pytest.mark.django_db
-@pytest.mark.asyncio
 async def test_push_notification_consumer__project(user_factory, project_factory):
     user = await database_sync_to_async(user_factory)()
     project = await database_sync_to_async(project_factory)()
@@ -82,7 +82,6 @@ async def test_push_notification_consumer__project(user_factory, project_factory
 
 
 @pytest.mark.django_db
-@pytest.mark.asyncio
 async def test_push_notification_consumer__task(user_factory, task_factory):
     user = await database_sync_to_async(user_factory)()
     task = await database_sync_to_async(task_factory)()
@@ -114,7 +113,6 @@ async def test_push_notification_consumer__task(user_factory, task_factory):
 
 
 @pytest.mark.django_db
-@pytest.mark.asyncio
 async def test_push_notification_consumer__scratch_org(
     user_factory, scratch_org_factory
 ):
@@ -150,7 +148,6 @@ async def test_push_notification_consumer__scratch_org(
 
 
 @pytest.mark.django_db
-@pytest.mark.asyncio
 async def test_push_notification_consumer__report_error(user_factory):
     user = await database_sync_to_async(user_factory)()
 
@@ -176,7 +173,6 @@ async def test_push_notification_consumer__report_error(user_factory):
 
 
 @pytest.mark.django_db
-@pytest.mark.asyncio
 async def test_push_notification_consumer__unsubscribe(user_factory):
     user = await database_sync_to_async(user_factory)()
 
@@ -201,7 +197,6 @@ async def test_push_notification_consumer__unsubscribe(user_factory):
 
 
 @pytest.mark.django_db
-@pytest.mark.asyncio
 async def test_push_notification_consumer__invalid_subscription(user_factory):
     user = await database_sync_to_async(user_factory)()
 

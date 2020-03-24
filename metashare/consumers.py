@@ -47,19 +47,15 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         # Take lock out of redis for this message:
         await clear_message_semaphore(self.channel_layer, event)
         if "content" in event:
-            message = self.hydrate_message(event["content"])
+            message = await self.hydrate_message(event["content"])
             await self.send_json(message)
             return
 
-    @database_sync_to_async
-    def hydrate_message(self, content):
+    async def hydrate_message(self, content):
         content = deepcopy(content)
         model_name = content.pop("model_name")
         id = content.pop("id")
-        # XXX: We currently hard-code API as it's our only
-        # model-containing app:
-        Model = apps.get_app_config("api").get_model(model_name)
-        instance = Model.objects.get(id=id)
+        instance = await self.get_instance(model=model_name, id=id)
         # We specifically don't want to include every user, as that
         # would cause every error to include the user who's getting the
         # error to be included. It'd just be noise on the wire.
@@ -71,6 +67,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def get_instance(self, *, model, id, **kwargs):
+        # XXX: We currently hard-code API as it's our only
+        # model-containing app:
         Model = apps.get_model("api", model)
         return Model.objects.get(pk=id)
 
