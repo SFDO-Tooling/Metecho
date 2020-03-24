@@ -17,6 +17,16 @@ const PageOptions = ({
     handleOptionSelect(option.id);
   };
 
+  let assistiveText, editLabel;
+  switch (model) {
+    case 'Task':
+      assistiveText = i18n.t('Task Options');
+      editLabel = i18n.t(`Edit Task`);
+      break;
+    case 'Project':
+      assistiveText = i18n.t('Project Options');
+      editLabel = i18n.t('Edit Project');
+  }
   return (
     <Dropdown
       align="right"
@@ -26,12 +36,12 @@ const PageOptions = ({
       iconVariant="more"
       width="xx-small"
       triggerClassName="slds-m-right_xx-small"
-      assistiveText={{ icon: i18n.t(`${model} Options`) }}
+      assistiveText={{ icon: assistiveText }}
       onSelect={handleSelect}
       options={[
-        { id: 'edit', label: i18n.t(`Edit ${model}`) },
+        { id: 'edit', label: editLabel },
         // { type: 'divider' },
-        // { id: 'delete', label: i18n.t('Delete Project') },
+        // { id: 'delete', label: deleteLabel },
       ]}
     />
   );

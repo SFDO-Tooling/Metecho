@@ -50,7 +50,7 @@ const EditModal = ({
     },
     additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
-    objectType: OBJECT_TYPES.PROJECT,
+    objectType: instanceType,
     update: true,
   });
 
@@ -87,7 +87,7 @@ const EditModal = ({
       size="medium"
       heading={i18n.t(`Edit ${instanceType}`)}
       onRequestClose={doClose}
-      headerClassName="edit-modal-header"
+      headerClassName="capitalize"
       footer={[
         <Button key="cancel" label={i18n.t('Cancel')} onClick={doClose} />,
         <Button
@@ -102,7 +102,9 @@ const EditModal = ({
       <form className="slds-form slds-p-around_large" onSubmit={handleSubmit}>
         <Input
           id="edit-name"
-          label={i18n.t('Project Name')}
+          label={
+            <span className="capitalize">{i18n.t(`${instanceType} Name`)}</span>
+          }
           className="slds-p-bottom_small"
           name="name"
           value={inputs.name}
