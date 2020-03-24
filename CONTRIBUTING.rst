@@ -113,7 +113,7 @@ First log in using your GitHub account.
 
 Then turn this user into a superuser using the ``promote_superuser`` command::
 
-    $ docker-compose run --rm web python manage.py promote_superuser <your email>
+    $ docker-compose run --rm web python manage.py promote_superuser <username>
 
 You will also need, when you log in, to make sure that the GitHub app
 that provides MetaShare with webhook updates and GitHub API access **is
@@ -233,7 +233,7 @@ commands (this terminal runs inside the Docker container)::
 For any commands, when using the VS Code integrated terminal inside the
 Docker container, omit any ``docker-compose run --rm web...`` prefix, e.g.::
 
-    $ python manage.py promote_superuser <your email>
+    $ python manage.py promote_superuser <username>
     $ yarn test:js
     $ python manage.py truncate_data
     $ python manage.py populate_data
