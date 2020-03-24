@@ -60,9 +60,9 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         # would cause every error to include the user who's getting the
         # error to be included. It'd just be noise on the wire.
         if model_name.lower() != "user":
-            content["payload"]["model"] = instance.get_serialized_representation(
-                self.scope["user"]
-            )
+            content["payload"]["model"] = await database_sync_to_async(
+                instance.get_serialized_representation
+            )(self.scope["user"])
         return content
 
     @database_sync_to_async
