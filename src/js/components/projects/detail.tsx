@@ -402,6 +402,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         <EditModal
           model={project}
           isOpen={editModalOpen}
+          instanceType="project"
           handleClose={closeEditModal}
         />
       </DetailPageLayout>

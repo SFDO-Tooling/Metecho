@@ -334,6 +334,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         <EditModal
           model={task}
           isOpen={editModalOpen}
+          instanceType="task"
           handleClose={closeEditModal}
         />
         <CommitList commits={task.commits} />

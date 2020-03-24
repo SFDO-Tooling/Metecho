@@ -14,9 +14,15 @@ import { OBJECT_TYPES } from '@/utils/constants';
 interface EditModalProps {
   model: Project | Task;
   isOpen: boolean;
+  instanceType: 'project' | 'task';
   handleClose: () => void;
 }
-const EditModal = ({ model, isOpen, handleClose }: EditModalProps) => {
+const EditModal = ({
+  model,
+  isOpen,
+  instanceType,
+  handleClose,
+}: EditModalProps) => {
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
@@ -79,8 +85,9 @@ const EditModal = ({ model, isOpen, handleClose }: EditModalProps) => {
     <Modal
       isOpen={isOpen}
       size="medium"
-      heading={i18n.t('Edit Project')}
+      heading={i18n.t(`Edit ${instanceType}`)}
       onRequestClose={doClose}
+      headerClassName="edit-modal-header"
       footer={[
         <Button key="cancel" label={i18n.t('Cancel')} onClick={doClose} />,
         <Button
@@ -94,7 +101,7 @@ const EditModal = ({ model, isOpen, handleClose }: EditModalProps) => {
     >
       <form className="slds-form slds-p-around_large" onSubmit={handleSubmit}>
         <Input
-          id="edit-project-name"
+          id="edit-name"
           label={i18n.t('Project Name')}
           className="slds-p-bottom_small"
           name="name"
@@ -105,7 +112,7 @@ const EditModal = ({ model, isOpen, handleClose }: EditModalProps) => {
           onChange={handleInputChange}
         />
         <Textarea
-          id="edit-project-description"
+          id="edit-description"
           label={i18n.t('Description')}
           className="ms-textarea"
           name="description"
