@@ -25,12 +25,13 @@ const defaultProject = {
 describe('<EditModal />', () => {
   const setup = (options = {}) => {
     const defaults = {
-      project: defaultProject,
+      model: defaultProject,
+      instanceType: 'project',
     };
     const opts = Object.assign({}, defaults, options);
     const closeEditModal = jest.fn();
     return renderWithRedux(
-      <EditModal project={opts.project} isOpen handleClose={closeEditModal} />,
+      <EditModal {...opts} isOpen handleClose={closeEditModal} />,
       {},
       storeWithThunk,
       opts.rerender,
@@ -38,55 +39,22 @@ describe('<EditModal />', () => {
     );
   };
 
-  test('updates default fields on input', () => {
-    const { store, rerender, getByLabelText } = setup();
-    const nameInput = getByLabelText('*Project Name');
-    const descriptionInput = getByLabelText('Description');
-    setup({
-      project: {
-        ...defaultProject,
-        name: 'New Project Name',
-      },
-      rerender,
-      store,
-    });
-
-    expect(nameInput.value).toEqual('New Project Name');
-
-    setup({
-      project: {
-        ...defaultProject,
-        name: 'New Project Name',
-        description: 'New description',
-      },
-      rerender,
-      store,
-    });
-
-    expect(descriptionInput.value).toEqual('New description');
-  });
-
   test('submit clicked', () => {
-    const { getByText, getByLabelText } = setup();
-    const nameInput = getByLabelText('*Project Name');
-    const descriptionInput = getByLabelText('Description');
+    const { getByText } = setup();
     const submit = getByText('Save');
 
-    fireEvent.change(nameInput, { target: { value: 'New Project Name' } });
-    fireEvent.change(descriptionInput, {
-      target: { value: 'New description' },
-    });
     fireEvent.click(submit);
 
     expect(updateObject).toHaveBeenCalledTimes(1);
     expect(updateObject).toHaveBeenCalledWith({
       objectType: 'project',
       data: {
-        name: 'New Project Name',
-        description: 'New description',
+        name: 'Project Name',
+        description: 'Description of the project',
         id: 'project-id',
       },
       hasForm: true,
+      url: undefined,
     });
   });
 });
