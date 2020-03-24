@@ -9,7 +9,6 @@ import React, { useRef } from 'react';
 import { useForm, useFormDefaults, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
-import { OBJECT_TYPES } from '@/utils/constants';
 
 interface EditModalProps {
   model: Project | Task;
