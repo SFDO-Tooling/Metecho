@@ -51,6 +51,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(message)
             return
 
+    @database_sync_to_async
     def hydrate_message(self, content):
         content = deepcopy(content)
         model_name = content.pop("model_name")
