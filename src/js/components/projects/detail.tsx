@@ -272,8 +272,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
-  const handleSelect = (option: string) => {
-    switch (option) {
+  const handleSelect = (selection: string) => {
+    switch (selection) {
       case 'edit':
         openEditModal();
         break;
@@ -400,7 +400,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           />
         )}
         <EditModal
-          project={project}
+          model={project}
           isOpen={editModalOpen}
           handleClose={closeEditModal}
         />

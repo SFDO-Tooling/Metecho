@@ -8,14 +8,15 @@ import React, { useRef } from 'react';
 
 import { useForm, useFormDefaults, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
+import { Task } from '@/store/tasks/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 interface EditModalProps {
-  project: Project;
+  model: Project | Task;
   isOpen: boolean;
   handleClose: () => void;
 }
-const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
+const EditModal = ({ model, isOpen, handleClose }: EditModalProps) => {
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
@@ -26,8 +27,8 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
     }
   };
 
-  const defaultName = project.name;
-  const defaultDescription = project.description;
+  const defaultName = model.name;
+  const defaultDescription = model.description;
 
   const {
     inputs,
@@ -41,7 +42,7 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
       name: defaultName,
       description: defaultDescription,
     },
-    additionalData: omit(project, ['name', 'description']),
+    additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
     objectType: OBJECT_TYPES.PROJECT,
     update: true,

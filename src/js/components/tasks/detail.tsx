@@ -27,6 +27,8 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import EditModal from '@/components/utils/editModal';
+import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
@@ -42,6 +44,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -102,6 +105,13 @@ const TaskDetail = (props: RouteComponentProps) => {
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
   };
+  // edit modal related...
+  const openEditModal = () => {
+    setEditModalOpen(true);
+  };
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+  };
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -151,17 +161,17 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const handleSelect = (selection: string) => {
+    switch (selection) {
+      case 'edit':
+        openEditModal();
+        break;
+    }
+  };
   const { branchLink, branchLinkText } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Button
-        iconCategory="utility"
-        iconName="delete"
-        iconPosition="left"
-        label={i18n.t('Delete Task')}
-        variant="text-destructive"
-        disabled
-      />
+      <PageOptions model="Task" handleOptionSelect={handleSelect} />
       {branchLink ? (
         <ExternalLink
           url={branchLink}
@@ -321,6 +331,11 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
           />
         )}
+        <EditModal
+          model={task}
+          isOpen={editModalOpen}
+          handleClose={closeEditModal}
+        />
         <CommitList commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>
