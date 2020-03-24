@@ -35,6 +35,8 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_REFRESH
         SCRATCH_ORG_REFRESH_FAILED
 """
+from copy import deepcopy
+
 from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
@@ -47,7 +49,11 @@ async def push_message_about_instance(instance, message):
     id = str(instance.id)
     group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
     channel_layer = get_channel_layer()
-    sent_message = {"type": "notify", "content": message}
+
+    new_message = deepcopy(message)
+    new_message["model_name"] = model_name
+    new_message["id"] = id
+    sent_message = {"type": "notify", "content": new_message}
     if await get_set_message_semaphore(channel_layer, sent_message):
         await channel_layer.group_send(group_name, sent_message)
 

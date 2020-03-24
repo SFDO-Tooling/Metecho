@@ -263,10 +263,12 @@ class Repository(
     push_update_type = "REPOSITORY_UPDATE"
     push_error_type = "REPOSITORY_UPDATE_ERROR"
 
-    def get_serialized_representation(self):
+    def get_serialized_representation(self, user):
         from .serializers import RepositorySerializer
 
-        return RepositorySerializer(self).data
+        return RepositorySerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
 
     # end PushMixin configuration
 
@@ -393,10 +395,12 @@ class Project(
     push_update_type = "PROJECT_UPDATE"
     push_error_type = "PROJECT_CREATE_PR_FAILED"
 
-    def get_serialized_representation(self):
+    def get_serialized_representation(self, user):
         from .serializers import ProjectSerializer
 
-        return ProjectSerializer(self).data
+        return ProjectSerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
 
     # end PushMixin configuration
 
@@ -534,10 +538,10 @@ class Task(
     push_update_type = "TASK_UPDATE"
     push_error_type = "TASK_CREATE_PR_FAILED"
 
-    def get_serialized_representation(self):
+    def get_serialized_representation(self, user):
         from .serializers import TaskSerializer
 
-        return TaskSerializer(self).data
+        return TaskSerializer(self, context=self._create_context_with_user(user)).data
 
     # end PushMixin configuration
 
@@ -730,10 +734,12 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     push_update_type = "SCRATCH_ORG_UPDATE"
     push_error_type = "SCRATCH_ORG_ERROR"
 
-    def get_serialized_representation(self):
+    def get_serialized_representation(self, user):
         from .serializers import ScratchOrgSerializer
 
-        return ScratchOrgSerializer(self).data
+        return ScratchOrgSerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
 
     # end PushMixin configuration
 

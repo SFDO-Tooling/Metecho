@@ -1,3 +1,4 @@
+from copy import deepcopy
 from enum import Enum
 
 from channels.db import database_sync_to_async
@@ -32,14 +33,40 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
 
             channel_layer.group_send(group_name, {
                 'type': 'notify',  # This routes it to this handler.
-                'content': json_message,
+                'content': {
+                    'type': str (frontend Redux event),
+                    'payload': {
+                        'originating_user_id': str,
+                        'message': str (error message, optional),
+                    },
+                    'model_name': str,
+                    'id': str,
+                },
             })
         """
         # Take lock out of redis for this message:
         await clear_message_semaphore(self.channel_layer, event)
         if "content" in event:
-            await self.send_json(event["content"])
+            message = self.hydrate_message(event["content"])
+            await self.send_json(message)
             return
+
+    def hydrate_message(self, content):
+        content = deepcopy(content)
+        model_name = content.pop("model_name")
+        id = content.pop("id")
+        # XXX: We currently hard-code API as it's our only
+        # model-containing app:
+        Model = apps.get_app_config("api").get_model(model_name)
+        instance = Model.objects.get(id=id)
+        # We specifically don't want to include every user, as that
+        # would cause every error to include the user who's getting the
+        # error to be included. It'd just be noise on the wire.
+        if model_name.lower() != "user":
+            content["payload"]["model"] = instance.get_serialized_representation(
+                self.scope["user"]
+            )
+        return content
 
     @database_sync_to_async
     def get_instance(self, *, model, id, **kwargs):
