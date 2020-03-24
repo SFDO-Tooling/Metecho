@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -27,6 +26,7 @@ import {
   useFetchTasksIfMissing,
 } from '@/components/utils';
 import EditModal from '@/components/utils/editModal';
+import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
@@ -84,7 +84,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const usersAssignedToTasks = new Set<string>();
-  (tasks || []).forEach((task) => {
+  (tasks || []).forEach(task => {
     if (task.assigned_dev) {
       usersAssignedToTasks.add(task.assigned_dev.login);
     }
@@ -100,9 +100,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
         return [];
       }
       return project.github_users.filter(
-        (oldUser) =>
+        oldUser =>
           usersAssignedToTasks.has(oldUser.login) &&
-          !users.find((user) => user.id === oldUser.id),
+          !users.find(user => user.id === oldUser.id),
       );
     },
     [project, usersAssignedToTasks],
@@ -145,7 +145,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         return;
       }
       const users = project.github_users.filter(
-        (possibleUser) => user.id !== possibleUser.id,
+        possibleUser => user.id !== possibleUser.id,
       );
       const removedUsers = getRemovedUsers(users);
       if (removedUsers.length) {
@@ -272,12 +272,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
-  const handleSelect = (option: {
-    id: string;
-    label: string;
-    disabled?: boolean;
-  }) => {
-    switch (option.id) {
+  const handleSelect = (option: string) => {
+    switch (option) {
       case 'edit':
         openEditModal();
         break;
@@ -288,22 +284,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Dropdown
-        align="right"
-        iconCategory="utility"
-        iconName="settings"
-        iconSize="large"
-        iconVariant="more"
-        width="xx-small"
-        triggerClassName="slds-m-right_xx-small"
-        assistiveText={{ icon: i18n.t('Project Options') }}
-        onSelect={handleSelect}
-        options={[
-          { id: 'edit', label: i18n.t('Edit Project') },
-          // { type: 'divider' },
-          // { id: 'delete', label: i18n.t('Delete Project') },
-        ]}
-      />
+      <PageOptions model="Project" handleOptionSelect={handleSelect} />
       {branchLink ? (
         <ExternalLink
           url={branchLink}
