@@ -11,6 +11,7 @@ export interface Repository {
   old_slugs: string[];
   repo_url: string;
   description: string;
+  description_rendered: string;
   is_managed: boolean;
   github_users: GitHubUser[];
   currently_refreshing_gh_users?: boolean;

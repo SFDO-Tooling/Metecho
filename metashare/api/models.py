@@ -91,7 +91,7 @@ class User(HashIdMixin, AbstractUser):
         async_to_sync(push.push_message_about_instance)(self, message)
 
     def invalidate_salesforce_credentials(self):
-        self.socialaccount_set.filter(provider__startswith="salesforce-").delete()
+        self.socialaccount_set.filter(provider="salesforce").delete()
 
     def subscribable_by(self, user):
         return self == user
@@ -189,7 +189,7 @@ class User(HashIdMixin, AbstractUser):
 
     @property
     def salesforce_account(self):
-        return self.socialaccount_set.filter(provider__startswith="salesforce-").first()
+        return self.socialaccount_set.filter(provider="salesforce").first()
 
     @property
     def valid_token_for(self):

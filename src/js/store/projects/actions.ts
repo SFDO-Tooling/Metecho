@@ -32,7 +32,7 @@ export const createProjectPR = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t('Successfully submitted project for review')}: “${
+        heading: `${i18n.t('Successfully submitted project for review:')} “${
           model.name
         }”.`,
         linkText: model.pr_url ? i18n.t('View pull request.') : undefined,

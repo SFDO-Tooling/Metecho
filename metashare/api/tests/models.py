@@ -260,7 +260,7 @@ class TestUser:
 
     def test_org_id(self, user_factory, social_account_factory):
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.org_id is not None
 
         user.socialaccount_set.all().delete()
@@ -268,7 +268,7 @@ class TestUser:
 
     def test_org_name(self, user_factory, social_account_factory):
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.org_name == "Sample Org"
 
         user.socialaccount_set.all().delete()
@@ -279,12 +279,12 @@ class TestUser:
     ):
         settings.DEVHUB_USERNAME = "test global devhub"
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.org_name is None
 
     def test_org_type(self, user_factory, social_account_factory):
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.org_type == "Developer Edition"
 
         user.socialaccount_set.all().delete()
@@ -295,7 +295,7 @@ class TestUser:
     ):
         settings.DEVHUB_USERNAME = "test global devhub"
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.org_type is None
 
     def test_github_account(self, user_factory):
@@ -311,11 +311,11 @@ class TestUser:
 
     def test_salesforce_account(self, user_factory, social_account_factory):
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.salesforce_account is not None
         assert (
             user.salesforce_account
-            == user.socialaccount_set.filter(provider="salesforce-production").first()
+            == user.socialaccount_set.filter(provider="salesforce").first()
         )
 
         user.socialaccount_set.all().delete()
@@ -337,7 +337,7 @@ class TestUser:
         user = user_factory(devhub_username="sample username")
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={"preferred_username": "not me!"},
         )
         assert user.sf_username == "sample username"
@@ -348,13 +348,13 @@ class TestUser:
         settings.DEVHUB_USERNAME = "devhub username"
         user = user_factory(devhub_username=None, allow_devhub_override=False)
         social_account_factory(
-            user=user, provider="salesforce-production", extra_data={},
+            user=user, provider="salesforce", extra_data={},
         )
         assert user.sf_username == "devhub username"
 
     def test_instance_url(self, user_factory, social_account_factory):
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.instance_url == "https://example.com"
 
         user.socialaccount_set.all().delete()
@@ -362,7 +362,7 @@ class TestUser:
 
     def test_sf_token(self, user_factory, social_account_factory):
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.sf_token == ("0123456789abcdef", "secret.0123456789abcdef")
 
         user.socialaccount_set.all().delete()
@@ -373,7 +373,7 @@ class TestUser:
     ):
         user = user_factory()
         social_account = social_account_factory(
-            socialtoken_set=[], user=user, provider="salesforce-production"
+            socialtoken_set=[], user=user, provider="salesforce"
         )
         social_token_factory(token="an invalid token", account=social_account)
         assert user.sf_token == (None, None)
@@ -383,11 +383,11 @@ class TestUser:
 
     def test_valid_token_for(self, user_factory, social_account_factory):
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.valid_token_for == "00Dxxxxxxxxxxxxxxx"
 
         user.socialaccount_set.filter(
-            provider="salesforce-production"
+            provider="salesforce"
         ).first().socialtoken_set.all().delete()
         assert user.valid_token_for is None
 
@@ -396,14 +396,14 @@ class TestUser:
     ):
         settings.DEVHUB_USERNAME = "test global devhub"
         user = user_factory()
-        social_account_factory(user=user, provider="salesforce-production")
+        social_account_factory(user=user, provider="salesforce")
         assert user.valid_token_for is None
 
     def test_full_org_type(self, user_factory, social_account_factory):
         user = user_factory(socialaccount_set=[])
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -419,7 +419,7 @@ class TestUser:
         user = user_factory(socialaccount_set=[])
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -435,7 +435,7 @@ class TestUser:
         user = user_factory(socialaccount_set=[])
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -451,7 +451,7 @@ class TestUser:
         user = user_factory(socialaccount_set=[])
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -484,7 +484,7 @@ class TestUser:
         user = user_factory()
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -501,7 +501,7 @@ class TestUser:
         user = user_factory()
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -523,7 +523,7 @@ class TestUser:
         user = user_factory()
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {
@@ -545,7 +545,7 @@ class TestUser:
         user = user_factory()
         social_account_factory(
             user=user,
-            provider="salesforce-production",
+            provider="salesforce",
             extra_data={
                 "instance_url": "https://example.com",
                 "organization_details": {

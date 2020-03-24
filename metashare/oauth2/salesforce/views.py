@@ -2,19 +2,19 @@ import logging
 import re
 
 import requests
-from allauth.socialaccount.providers.oauth2.views import (
-    OAuth2CallbackView,
-    OAuth2LoginView,
-)
 from allauth.socialaccount.providers.salesforce.views import (
     SalesforceOAuth2Adapter as SalesforceOAuth2BaseAdapter,
 )
-from allauth.utils import get_request_param
 from django.core.exceptions import SuspiciousOperation
 from sfdo_template_helpers.crypto import fernet_decrypt, fernet_encrypt
 
-from ..api.constants import ORGANIZATION_DETAILS
-from .provider import SalesforceCustomProvider, SalesforceProductionProvider
+from metashare.api.constants import ORGANIZATION_DETAILS
+
+from ..views import (
+    LoggingOAuth2CallbackView,
+    LoggingOAuth2LoginView,
+    ensure_socialapp_in_db,
+)
 
 logger = logging.getLogger(__name__)
 ORGID_RE = re.compile(r"^00D[a-zA-Z0-9]{15}$")
@@ -25,7 +25,21 @@ class SalesforcePermissionsError(Exception):
     pass
 
 
-class SalesforceOAuth2Mixin:
+class SalesforceOAuth2Adapter(SalesforceOAuth2BaseAdapter):
+    @property
+    def base_url(self):
+        custom_domain = self.request.GET.get(
+            "custom_domain", self.request.session.get("custom_domain")
+        )
+        if custom_domain and not CUSTOM_DOMAIN_RE.match(custom_domain):
+            raise SuspiciousOperation("Invalid custom domain")
+        self.request.session["custom_domain"] = custom_domain
+        if custom_domain == "login" or not custom_domain:
+            base_url = "https://login.salesforce.com"
+        else:
+            base_url = "https://{}.my.salesforce.com".format(custom_domain)
+        return base_url
+
     def get_org_details(self, extra_data, token):
         headers = {"Authorization": f"Bearer {token}"}
 
@@ -52,6 +66,9 @@ class SalesforceOAuth2Mixin:
         return resp.json()
 
     def complete_login(self, request, app, token, **kwargs):
+        # make sure token is attached to a SocialApp in the db
+        ensure_socialapp_in_db(token)
+
         token = fernet_decrypt(token.token)
         headers = {"Authorization": f"Bearer {token}"}
         verifier = request.session["socialaccount_state"][1]
@@ -90,56 +107,5 @@ class SalesforceOAuth2Mixin:
             raise SuspiciousOperation("Invalid org Id")
 
 
-class SalesforceOAuth2ProductionAdapter(
-    SalesforceOAuth2Mixin, SalesforceOAuth2BaseAdapter
-):
-    provider_id = SalesforceProductionProvider.id
-
-
-class SalesforceOAuth2CustomAdapter(SalesforceOAuth2Mixin, SalesforceOAuth2BaseAdapter):
-    provider_id = SalesforceCustomProvider.id
-
-    @property
-    def base_url(self):
-        custom_domain = self.request.GET.get(
-            "custom_domain", self.request.session.get("custom_domain")
-        )
-        if not CUSTOM_DOMAIN_RE.match(custom_domain):
-            raise SuspiciousOperation("Invalid custom domain")
-        self.request.session["custom_domain"] = custom_domain
-        return "https://{}.my.salesforce.com".format(custom_domain)
-
-
-class LoggingOAuth2LoginView(OAuth2LoginView):
-    def dispatch(self, request, *args, **kwargs):
-        ret = super().dispatch(request, *args, **kwargs)
-
-        verifier = request.session["socialaccount_state"][1]
-        logger.info(
-            "Dispatching OAuth login",
-            extra={"tag": "oauth", "context": {"verifier": verifier}},
-        )
-
-        return ret
-
-
-class LoggingOAuth2CallbackView(OAuth2CallbackView):
-    def dispatch(self, request, *args, **kwargs):
-        verifier = get_request_param(request, "state")
-        logger.info(
-            "Dispatching OAuth callback",
-            extra={"tag": "oauth", "context": {"verifier": verifier}},
-        )
-        return super().dispatch(request, *args, **kwargs)
-
-
-prod_oauth2_login = LoggingOAuth2LoginView.adapter_view(
-    SalesforceOAuth2ProductionAdapter
-)
-prod_oauth2_callback = LoggingOAuth2CallbackView.adapter_view(
-    SalesforceOAuth2ProductionAdapter
-)
-custom_oauth2_login = LoggingOAuth2LoginView.adapter_view(SalesforceOAuth2CustomAdapter)
-custom_oauth2_callback = LoggingOAuth2CallbackView.adapter_view(
-    SalesforceOAuth2CustomAdapter
-)
+oauth2_login = LoggingOAuth2LoginView.adapter_view(SalesforceOAuth2Adapter)
+oauth2_callback = LoggingOAuth2CallbackView.adapter_view(SalesforceOAuth2Adapter)

@@ -5,7 +5,14 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .fields import MarkdownField
-from .models import TASK_REVIEW_STATUS, Project, Repository, ScratchOrg, Task
+from .models import (
+    SCRATCH_ORG_TYPES,
+    TASK_REVIEW_STATUS,
+    Project,
+    Repository,
+    ScratchOrg,
+    Task,
+)
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
@@ -37,6 +44,7 @@ class HashidPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
 
 class FullUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    sf_username = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -56,6 +64,11 @@ class FullUserSerializer(serializers.ModelSerializer):
             "uses_global_devhub",
         )
 
+    def get_sf_username(self, obj) -> dict:
+        if obj.uses_global_devhub:
+            return None
+        return obj.sf_username
+
 
 class MinimalUserSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
@@ -67,7 +80,7 @@ class MinimalUserSerializer(serializers.ModelSerializer):
 
 class RepositorySerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    description = MarkdownField(allow_blank=True)
+    description_rendered = MarkdownField(source="description", read_only=True)
     repo_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -77,6 +90,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             "name",
             "repo_url",
             "description",
+            "description_rendered",
             "is_managed",
             "slug",
             "old_slugs",
@@ -89,7 +103,7 @@ class RepositorySerializer(serializers.ModelSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    description = MarkdownField(allow_blank=True)
+    description_rendered = MarkdownField(source="description", read_only=True)
     repository = serializers.PrimaryKeyRelatedField(
         queryset=Repository.objects.all(), pk_field=serializers.CharField()
     )
@@ -103,6 +117,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "description_rendered",
             "slug",
             "old_slugs",
             "repository",
@@ -116,6 +131,18 @@ class ProjectSerializer(serializers.ModelSerializer):
             "status",
             "github_users",
         )
+        extra_kwargs = {
+            "slug": {"read_only": True},
+            "old_slugs": {"read_only": True},
+            "branch_url": {"read_only": True},
+            "branch_diff_url": {"read_only": True},
+            "has_unmerged_commits": {"read_only": True},
+            "currently_creating_pr": {"read_only": True},
+            "pr_url": {"read_only": True},
+            "pr_is_open": {"read_only": True},
+            "pr_is_merged": {"read_only": True},
+            "status": {"read_only": True},
+        }
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Project.objects.all(),
@@ -161,7 +188,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
-    description = MarkdownField(allow_blank=True)
+    description_rendered = MarkdownField(source="description", read_only=True)
     project = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
@@ -175,6 +202,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "description_rendered",
             "project",
             "slug",
             "old_slugs",
@@ -195,6 +223,24 @@ class TaskSerializer(serializers.ModelSerializer):
             "assigned_qa",
             "currently_submitting_review",
         )
+        extra_kwargs = {
+            "slug": {"read_only": True},
+            "old_slugs": {"read_only": True},
+            "has_unmerged_commits": {"read_only": True},
+            "currently_creating_pr": {"read_only": True},
+            "branch_url": {"read_only": True},
+            "commits": {"read_only": True},
+            "origin_sha": {"read_only": True},
+            "branch_diff_url": {"read_only": True},
+            "pr_url": {"read_only": True},
+            "review_submitted_at": {"read_only": True},
+            "review_valid": {"read_only": True},
+            "review_status": {"read_only": True},
+            "review_sha": {"read_only": True},
+            "status": {"read_only": True},
+            "pr_is_open": {"read_only": True},
+            "currently_submitting_review": {"read_only": True},
+        }
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Task.objects.all(),
@@ -237,6 +283,22 @@ class TaskSerializer(serializers.ModelSerializer):
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
 
+    def update(self, instance, validated_data):
+        user = getattr(self.context.get("request"), "user", None)
+        if user:
+            originating_user_id = str(user.id)
+        else:
+            originating_user_id = None
+        if instance.assigned_dev != validated_data["assigned_dev"]:
+            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
+            for org in orgs:
+                org.queue_delete(originating_user_id=originating_user_id)
+        if instance.assigned_qa != validated_data["assigned_qa"]:
+            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.QA)
+            for org in orgs:
+                org.queue_delete(originating_user_id=originating_user_id)
+        return super().update(instance, validated_data)
+
 
 class CreatePrSerializer(serializers.Serializer):
     title = serializers.CharField()
@@ -268,6 +330,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     has_unsaved_changes = serializers.SerializerMethodField()
+    unsaved_changes = serializers.SerializerMethodField()
+    total_unsaved_changes = serializers.SerializerMethodField()
+    valid_target_directories = serializers.SerializerMethodField()
 
     class Meta:
         model = ScratchOrg
@@ -284,12 +349,12 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "last_checked_unsaved_changes_at",
             "url",
             "unsaved_changes",
+            "total_unsaved_changes",
             "has_unsaved_changes",
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "currently_refreshing_org",
             "delete_queued_at",
-            "owner_sf_username",
             "owner_gh_username",
             "has_been_visited",
             "valid_target_directories",
@@ -302,15 +367,31 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "latest_commit_at": {"read_only": True},
             "last_checked_unsaved_changes_at": {"read_only": True},
             "url": {"read_only": True},
-            "unsaved_changes": {"read_only": True},
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
-            "valid_target_directories": {"read_only": True},
+            "delete_queued_at": {"read_only": True},
+            "owner_gh_username": {"read_only": True},
+            "has_been_visited": {"read_only": True},
         }
 
     def get_has_unsaved_changes(self, obj) -> bool:
         return bool(getattr(obj, "unsaved_changes", {}))
+
+    def get_unsaved_changes(self, obj) -> dict:
+        user = getattr(self.context.get("request"), "user", None)
+        if obj.owner == user:
+            return obj.unsaved_changes
+        return {}
+
+    def get_total_unsaved_changes(self, obj) -> int:
+        return sum(len(change) for change in obj.unsaved_changes.values())
+
+    def get_valid_target_directories(self, obj) -> dict:
+        user = getattr(self.context.get("request"), "user", None)
+        if obj.owner == user:
+            return obj.valid_target_directories
+        return {}
 
     def validate(self, data):
         if ScratchOrg.objects.filter(

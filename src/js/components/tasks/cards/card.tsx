@@ -17,7 +17,12 @@ import { AssignUserModal, UserCard } from '@/components/user/githubUser';
 import { Org } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
-import { ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { addUrlParams } from '@/utils/api';
+import {
+  ORG_TYPES,
+  OrgTypes,
+  SHOW_PROJECT_COLLABORATORS,
+} from '@/utils/constants';
 import { getTaskCommits } from '@/utils/helpers';
 import { logError } from '@/utils/logging';
 
@@ -33,10 +38,7 @@ interface OrgCardProps {
   isDeletingOrg: boolean;
   handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
   handleCreate: (type: OrgTypes) => void;
-  handleDelete: (
-    org: Org,
-    shouldRemoveUser?: AssignedUserTracker | null,
-  ) => void;
+  handleDelete: (org: Org) => void;
   handleCheckForOrgChanges: (org: Org) => void;
   handleRefresh?: (org: Org) => void;
 }
@@ -141,7 +143,9 @@ const OrgCard = ({
   }, [handleCheckForOrgChanges, org]);
 
   const handleEmptyMessageClick = useCallback(() => {
-    history.push(projectUrl);
+    history.push(
+      addUrlParams(projectUrl, { [SHOW_PROJECT_COLLABORATORS]: true }),
+    );
   }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const taskCommits = getTaskCommits(task);
@@ -275,6 +279,7 @@ const OrgCard = ({
         selectedUser={assignedUser}
         heading={userModalHeading}
         isOpen={assignUserModalOpen}
+        emptyMessageText={i18n.t('View Project to Add Collaborators')}
         emptyMessageAction={handleEmptyMessageClick}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}

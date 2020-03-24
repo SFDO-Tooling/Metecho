@@ -13,7 +13,6 @@ export interface Org {
   task: string;
   org_type: OrgTypes;
   owner: string;
-  owner_sf_username: string;
   owner_gh_username: string;
   last_modified_at: string | null;
   expires_at: string | null;
@@ -23,6 +22,7 @@ export interface Org {
   url: string | null;
   unsaved_changes: Changeset;
   has_unsaved_changes: boolean;
+  total_unsaved_changes: number;
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
   currently_refreshing_org: boolean;

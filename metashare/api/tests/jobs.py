@@ -245,6 +245,7 @@ def test_delete_scratch_org(scratch_org_factory):
 def test_delete_scratch_org__exception(scratch_org_factory):
     scratch_org = scratch_org_factory()
     with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.async_to_sync"))
         get_latest_revision_numbers = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_latest_revision_numbers")
         )

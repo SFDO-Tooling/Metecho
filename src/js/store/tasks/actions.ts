@@ -31,7 +31,7 @@ export const createTaskPR = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t('Successfully submitted task for review')}: “${
+        heading: `${i18n.t('Successfully submitted task for review:')} “${
           model.name
         }”.`,
         linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
@@ -81,7 +81,7 @@ export const submitReview = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t('Successfully submitted review for task')}: “${
+        heading: `${i18n.t('Successfully submitted review for task:')} “${
           model.name
         }”.`,
         linkText: model.pr_url ? i18n.t('View pull request.') : undefined,

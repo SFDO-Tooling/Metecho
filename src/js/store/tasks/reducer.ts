@@ -29,6 +29,7 @@ export interface Task {
   old_slugs: string[];
   project: string;
   description: string;
+  description_rendered: string;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
   branch_url: string | null;
