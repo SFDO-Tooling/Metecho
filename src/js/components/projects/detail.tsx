@@ -25,6 +25,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import DeleteModal from '@/components/utils/deleteModal';
 import EditModal from '@/components/utils/editModal';
 import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
@@ -211,6 +212,14 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeEditModal = () => {
     setEditModalOpen(false);
   };
+  // "delete" modal related:
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true);
+  };
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+  };
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -278,7 +287,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         openEditModal();
         break;
       case 'delete':
-        console.log('open delete modal');
+        openDeleteModal();
         break;
     }
   };
@@ -405,6 +414,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
           isOpen={editModalOpen}
           instanceType="project"
           handleClose={closeEditModal}
+        />
+        <DeleteModal
+          model={project}
+          isOpen={deleteModalOpen}
+          instanceType="project"
+          handleCancel={closeDeleteModal}
         />
       </DetailPageLayout>
     </DocumentTitle>
