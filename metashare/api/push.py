@@ -85,9 +85,6 @@ async def report_scratch_org_error(instance, *, error, type_, originating_user_i
 
     message = {
         "type": type_,
-        "payload": {
-            "message": message,
-            "originating_user_id": originating_user_id,
-        },
+        "payload": {"message": message, "originating_user_id": originating_user_id},
     }
     await push_message_about_instance(instance, message)

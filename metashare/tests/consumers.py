@@ -140,6 +140,18 @@ async def test_push_notification_consumer__scratch_org(
 
 
 @pytest.mark.django_db
+async def test_push_notification_consumer__missing_instance():
+    content = {
+        "model_name": "scratchorg",
+        "id": "bet this is an invalid ID",
+        "payload": {},
+    }
+    consumer = PushNotificationConsumer({})
+    new_content = await consumer.hydrate_message(content)
+    assert new_content == {"payload": {}}
+
+
+@pytest.mark.django_db
 async def test_push_notification_consumer__report_error(user_factory):
     user = await database_sync_to_async(user_factory)()
 
