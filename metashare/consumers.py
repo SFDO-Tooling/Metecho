@@ -55,10 +55,9 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         content = deepcopy(content)
         model_name = content.pop("model_name")
         id = content.pop("id")
-        # We specifically don't want to include every user, as that
+        # We specifically don't want to include the user model, as that
         # would cause every generic-message to include the user who's
-        # getting the message to be included. It'd just be noise on the
-        # wire.
+        # getting the message. It'd just be noise on the wire.
         if model_name.lower() != "user":
             try:
                 instance = await self.get_instance(model=model_name, id=id)
