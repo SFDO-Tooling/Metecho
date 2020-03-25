@@ -2,20 +2,16 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
 import React from 'react';
 
-import { OBJECT_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 const PageOptions = ({
   modelType,
   handleOptionSelect,
 }: {
-  modelType: 'project' | 'task';
-  handleOptionSelect: (id: string) => void;
+  modelType: ObjectTypes;
+  handleOptionSelect: (id: 'edit' | 'delete') => void;
 }) => {
-  const handleSelect = (option: {
-    id: string;
-    label: string;
-    disabled?: boolean;
-  }) => {
+  const handleSelect = (option: { id: 'edit' | 'delete'; label: string }) => {
     handleOptionSelect(option.id);
   };
 
@@ -28,6 +24,7 @@ const PageOptions = ({
     case OBJECT_TYPES.PROJECT:
       assistiveText = i18n.t('Project Options');
       editLabel = i18n.t('Edit Project');
+      break;
   }
   return (
     <Dropdown

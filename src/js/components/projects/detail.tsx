@@ -50,10 +50,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
 
-  // "Assign users to project" modal related:
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
@@ -131,6 +136,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
       if (removedUsers.length) {
         setWaitingToUpdateUsers(users);
         setConfirmRemoveUsers(removedUsers);
+        setAssignUsersModalOpen(false);
+        setSubmitModalOpen(false);
+        setEditModalOpen(false);
       } else {
         updateProjectUsers(users);
       }
@@ -151,6 +159,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
       if (removedUsers.length) {
         setWaitingToUpdateUsers(users);
         setConfirmRemoveUsers(removedUsers);
+        setAssignUsersModalOpen(false);
+        setSubmitModalOpen(false);
+        setEditModalOpen(false);
       } else {
         updateProjectUsers(users);
       }
@@ -192,9 +203,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
   );
 
   // "Submit" modal related:
-  const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
+    setEditModalOpen(false);
+    setAssignUsersModalOpen(false);
   };
   const currentlySubmitting = Boolean(project?.currently_creating_pr);
   const readyToSubmit = Boolean(
@@ -204,9 +216,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
   );
 
   // "edit" modal related:
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const openEditModal = () => {
     setEditModalOpen(true);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -272,7 +285,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
-  const handleSelect = (selection: string) => {
+  const handlePageOptionSelect = (selection: 'edit' | 'delete') => {
     switch (selection) {
       case 'edit':
         openEditModal();
@@ -284,7 +297,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <PageOptions modelType="project" handleOptionSelect={handleSelect} />
+      <PageOptions
+        modelType={OBJECT_TYPES.PROJECT}
+        handleOptionSelect={handlePageOptionSelect}
+      />
       {branchLink ? (
         <ExternalLink
           url={branchLink}
@@ -401,8 +417,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
         )}
         <EditModal
           model={project}
+          modelType={OBJECT_TYPES.PROJECT}
           isOpen={editModalOpen}
-          instanceType="project"
           handleClose={closeEditModal}
         />
       </DetailPageLayout>
