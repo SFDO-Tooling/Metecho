@@ -73,26 +73,37 @@ class PushMixin:
             self, {"type": type_, "payload": message}
         )
 
-    def notify_changed(self, *, type_=None, originating_user_id):
+    def notify_changed(self, *, type_=None, originating_user_id, message=None):
+        prepared_message = {"originating_user_id": originating_user_id}
+        prepared_message.update(message or {})
         self._push_message(
-            type_ or self.push_update_type,
-            {"originating_user_id": originating_user_id},
+            type_ or self.push_update_type, prepared_message,
         )
 
-    def notify_error(self, error, *, type_=None, originating_user_id):
+    def notify_error(self, error, *, type_=None, originating_user_id, message=None):
+        prepared_message = {
+            "originating_user_id": originating_user_id,
+            "message": str(error),
+        }
+        prepared_message.update(message or {})
         self._push_message(
-            type_ or self.push_error_type,
-            {"originating_user_id": originating_user_id, "message": str(error)},
+            type_ or self.push_error_type, prepared_message,
         )
 
-    def notify_scratch_org_error(self, *, error, type_, originating_user_id):
+    def notify_scratch_org_error(
+        self, *, error, type_, originating_user_id, message=None
+    ):
         """
         This is only used in the ScratchOrg model currently, but it
         follows the pattern enough that I wanted to move it into this
         mixin.
         """
         async_to_sync(push.report_scratch_org_error)(
-            self, error=error, type_=type_, originating_user_id=originating_user_id
+            self,
+            error=error,
+            type_=type_,
+            originating_user_id=originating_user_id,
+            message=message or {},
         )
 
 
