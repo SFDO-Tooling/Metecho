@@ -15,6 +15,12 @@ from ..consumers import PushNotificationConsumer
 pytestmark = pytest.mark.asyncio
 
 
+@database_sync_to_async
+def serialize_model(serializer_model, instance, user):
+    serializer = serializer_model(instance, context={"request": Request(user)})
+    return serializer.data
+
+
 @pytest.mark.django_db
 async def test_push_notification_consumer__repository(user_factory, repository_factory):
     user = await database_sync_to_async(user_factory)()
@@ -35,11 +41,7 @@ async def test_push_notification_consumer__repository(user_factory, repository_f
         repository, {"type": "TEST_MESSAGE", "payload": {"originating_user_id": "abc"}}
     )
     response = await communicator.receive_json_from()
-    model = (
-        await database_sync_to_async(RepositorySerializer)(
-            repository, context={"request": Request(user)}
-        )
-    ).data
+    model = await serialize_model(RepositorySerializer, repository, user)
     assert response == {
         "type": "TEST_MESSAGE",
         "payload": {"originating_user_id": "abc", "model": model},
@@ -68,11 +70,7 @@ async def test_push_notification_consumer__project(user_factory, project_factory
         project, {"type": "TEST_MESSAGE", "payload": {"originating_user_id": "abc"}}
     )
     response = await communicator.receive_json_from()
-    model = (
-        await database_sync_to_async(ProjectSerializer)(
-            project, context={"request": Request(user)}
-        )
-    ).data
+    model = await serialize_model(ProjectSerializer, project, user)
     assert response == {
         "type": "TEST_MESSAGE",
         "payload": {"originating_user_id": "abc", "model": model},
@@ -101,11 +99,7 @@ async def test_push_notification_consumer__task(user_factory, task_factory):
         task, {"type": "TEST_MESSAGE", "payload": {"originating_user_id": "abc"}}
     )
     response = await communicator.receive_json_from()
-    model = (
-        await database_sync_to_async(TaskSerializer)(
-            task, context={"request": Request(user)}
-        )
-    ).data
+    model = await serialize_model(TaskSerializer, task, user)
     assert response == {
         "type": "TEST_MESSAGE",
         "payload": {"originating_user_id": "abc", "model": model},
@@ -136,11 +130,7 @@ async def test_push_notification_consumer__scratch_org(
         scratch_org, {"type": "TEST_MESSAGE", "payload": {"originating_user_id": "abc"}}
     )
     response = await communicator.receive_json_from()
-    model = (
-        await database_sync_to_async(ScratchOrgSerializer)(
-            scratch_org, context={"request": Request(user)}
-        )
-    ).data
+    model = await serialize_model(ScratchOrgSerializer, scratch_org, user)
     assert response == {
         "type": "TEST_MESSAGE",
         "payload": {"originating_user_id": "abc", "model": model},
