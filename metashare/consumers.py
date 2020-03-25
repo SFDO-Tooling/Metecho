@@ -34,7 +34,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             channel_layer.group_send(group_name, {
                 'type': 'notify',  # This routes it to this handler.
                 'content': {
-                    'type': str (frontend Redux event),
+                    'type': str (will map to frontend Redux event),
                     'payload': {
                         'originating_user_id': str,
                         'message': str (error message, optional),
@@ -57,8 +57,9 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         id = content.pop("id")
         instance = await self.get_instance(model=model_name, id=id)
         # We specifically don't want to include every user, as that
-        # would cause every error to include the user who's getting the
-        # error to be included. It'd just be noise on the wire.
+        # would cause every generic-message to include the user who's
+        # getting the message to be included. It'd just be noise on the
+        # wire.
         if model_name.lower() != "user":
             content["payload"]["model"] = await database_sync_to_async(
                 instance.get_serialized_representation

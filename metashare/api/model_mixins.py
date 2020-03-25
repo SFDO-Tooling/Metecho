@@ -66,7 +66,7 @@ class PushMixin:
         message:
             {
                 "originating_user_id": str,
-                Optional["message"]: str  // error message
+                Optional["message"]: str  // error or other message
             }
         """
         async_to_sync(push.push_message_about_instance)(

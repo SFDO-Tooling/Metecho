@@ -69,8 +69,6 @@ async def report_error(user):
 
 
 async def report_scratch_org_error(instance, *, error, type_, originating_user_id):
-    from .serializers import ScratchOrgSerializer
-
     # @jgerigmeyer asked for the error to be unwrapped in the case that
     # there's only one, which is the most common case, per this
     # discussion:
@@ -90,7 +88,6 @@ async def report_scratch_org_error(instance, *, error, type_, originating_user_i
         "payload": {
             "message": message,
             "originating_user_id": originating_user_id,
-            "model": ScratchOrgSerializer(instance).data,
         },
     }
     await push_message_about_instance(instance, message)
