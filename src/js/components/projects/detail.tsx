@@ -84,7 +84,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const usersAssignedToTasks = new Set<string>();
-  (tasks || []).forEach(task => {
+  (tasks || []).forEach((task) => {
     if (task.assigned_dev) {
       usersAssignedToTasks.add(task.assigned_dev.login);
     }
@@ -100,9 +100,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
         return [];
       }
       return project.github_users.filter(
-        oldUser =>
+        (oldUser) =>
           usersAssignedToTasks.has(oldUser.login) &&
-          !users.find(user => user.id === oldUser.id),
+          !users.find((user) => user.id === oldUser.id),
       );
     },
     [project, usersAssignedToTasks],
@@ -145,7 +145,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         return;
       }
       const users = project.github_users.filter(
-        possibleUser => user.id !== possibleUser.id,
+        (possibleUser) => user.id !== possibleUser.id,
       );
       const removedUsers = getRemovedUsers(users);
       if (removedUsers.length) {

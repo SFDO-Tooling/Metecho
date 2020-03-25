@@ -122,7 +122,7 @@ const defaultState = {
 };
 
 describe('<TaskDetail/>', () => {
-  const setup = options => {
+  const setup = (options) => {
     const defaults = {
       initialState: defaultState,
       repositorySlug: 'repository-1',
