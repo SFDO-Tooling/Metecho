@@ -80,9 +80,7 @@ async def report_scratch_org_error(
         if isinstance(prepared_message, list) and len(prepared_message) == 1:
             prepared_message = prepared_message[0]
         if isinstance(prepared_message, dict):
-            prepared_message = prepared_message.get(
-                "prepared_message", prepared_message
-            )
+            prepared_message = prepared_message.get("message", prepared_message)
         prepared_message = str(prepared_message)
     except AttributeError:
         prepared_message = str(error)
@@ -94,5 +92,5 @@ async def report_scratch_org_error(
             "originating_user_id": originating_user_id,
         },
     }
-    prepared_message.update(message or {})
+    prepared_message["payload"].update(message or {})
     await push_message_about_instance(instance, prepared_message)

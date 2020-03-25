@@ -8,10 +8,13 @@ import {
   OrgTypes,
 } from '@/utils/constants';
 
-export interface Org {
+export interface MinimalOrg {
   id: string;
   task: string;
   org_type: OrgTypes;
+}
+
+export interface Org extends MinimalOrg {
   owner: string;
   owner_gh_username: string;
   last_modified_at: string | null;
@@ -225,11 +228,13 @@ const reducer = (
         [ORG_TYPES.DEV]: null,
         [ORG_TYPES.QA]: null,
       };
+      const existingOrg = taskOrgs[org.org_type];
       return {
         ...orgs,
         [org.task]: {
           ...taskOrgs,
           [org.org_type]: {
+            ...existingOrg,
             ...org,
             currently_refreshing_org:
               action.type === 'SCRATCH_ORG_REFRESH_REQUESTED',

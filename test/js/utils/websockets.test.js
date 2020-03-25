@@ -220,12 +220,13 @@ describe('createSocket', () => {
       });
 
       test('dispatches action', () => {
+        const payload = { model: {} };
         socketInstance.onmessage({
-          data: { type: 'SCRATCH_ORG_PROVISION', payload: {} },
+          data: { type: 'SCRATCH_ORG_PROVISION', payload },
         });
 
         expect(dispatch).toHaveBeenCalledTimes(1);
-        expect(actions.provisionOrg).toHaveBeenCalledWith({});
+        expect(actions.provisionOrg).toHaveBeenCalledWith(payload);
       });
     });
 

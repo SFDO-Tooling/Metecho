@@ -795,9 +795,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed(
-                type_="SCRATCH_ORG_PROVISION",
-                originating_user_id=originating_user_id,
-                message=self._build_message_extras(),
+                type_="SCRATCH_ORG_PROVISION", originating_user_id=originating_user_id,
             )
             self.task.finalize_provision(originating_user_id=originating_user_id)
         else:
@@ -805,6 +803,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
                 error=error,
                 type_="SCRATCH_ORG_PROVISION_FAILED",
                 originating_user_id=originating_user_id,
+                message=self._build_message_extras(),
             )
             # If the scratch org has already been created on Salesforce,
             # we need to delete it there as well.
@@ -915,15 +914,14 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.save()
         if error is None:
             self.notify_changed(
-                type_="SCRATCH_ORG_REFRESH",
-                originating_user_id=originating_user_id,
-                message=self._build_message_extras(),
+                type_="SCRATCH_ORG_REFRESH", originating_user_id=originating_user_id,
             )
         else:
             self.notify_scratch_org_error(
                 error=error,
                 type_="SCRATCH_ORG_REFRESH_FAILED",
                 originating_user_id=originating_user_id,
+                message=self._build_message_extras(),
             )
             self.queue_delete(originating_user_id=originating_user_id)
 
