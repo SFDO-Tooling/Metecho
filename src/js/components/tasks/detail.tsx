@@ -27,6 +27,8 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import EditModal from '@/components/utils/editModal';
+import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
@@ -34,7 +36,7 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES, TASK_STATUSES } from '@/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES, TASK_STATUSES } from '@/utils/constants';
 import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
@@ -42,6 +44,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -88,6 +91,8 @@ const TaskDetail = (props: RouteComponentProps) => {
       /* istanbul ignore else */
       if (devOrg.has_unsaved_changes && !submitModalOpen) {
         setCaptureModalOpen(true);
+        setSubmitModalOpen(false);
+        setEditModalOpen(false);
       }
     }
   }, [fetchingChanges, devOrg, submitModalOpen]);
@@ -101,6 +106,17 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
+    setCaptureModalOpen(false);
+    setEditModalOpen(false);
+  };
+  // edit modal related...
+  const openEditModal = () => {
+    setEditModalOpen(true);
+    setSubmitModalOpen(false);
+    setCaptureModalOpen(false);
+  };
+  const closeEditModal = () => {
+    setEditModalOpen(false);
   };
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -151,16 +167,22 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const handlePageOptionSelect = (selection: 'edit' | 'delete') => {
+    switch (selection) {
+      case 'edit':
+        openEditModal();
+        break;
+      // case 'delete':
+      //   break;
+    }
+  };
+
   const { branchLink, branchLinkText } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Button
-        iconCategory="utility"
-        iconName="delete"
-        iconPosition="left"
-        label={i18n.t('Delete Task')}
-        variant="text-destructive"
-        disabled
+      <PageOptions
+        modelType={OBJECT_TYPES.TASK}
+        handleOptionSelect={handlePageOptionSelect}
       />
       {branchLink ? (
         <ExternalLink
@@ -321,6 +343,12 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
           />
         )}
+        <EditModal
+          model={task}
+          modelType={OBJECT_TYPES.TASK}
+          isOpen={editModalOpen}
+          handleClose={closeEditModal}
+        />
         <CommitList commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>

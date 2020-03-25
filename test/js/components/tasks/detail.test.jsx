@@ -450,4 +450,18 @@ describe('<TaskDetail/>', () => {
 
     expect(getByText('Submitting Task for Review…')).toBeVisible();
   });
+
+  describe('edit task click', () => {
+    test('opens and closes modal', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Task Options'));
+      fireEvent.click(getByText('Edit Task'));
+
+      expect(getByText('Edit Task')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('Edit Task')).toBeNull();
+    });
+  });
 });

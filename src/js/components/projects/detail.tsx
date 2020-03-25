@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -27,6 +26,7 @@ import {
   useFetchTasksIfMissing,
 } from '@/components/utils';
 import EditModal from '@/components/utils/editModal';
+import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
@@ -50,10 +50,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
 
-  // "Assign users to project" modal related:
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
@@ -131,6 +136,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
       if (removedUsers.length) {
         setWaitingToUpdateUsers(users);
         setConfirmRemoveUsers(removedUsers);
+        setAssignUsersModalOpen(false);
+        setSubmitModalOpen(false);
+        setEditModalOpen(false);
       } else {
         updateProjectUsers(users);
       }
@@ -151,6 +159,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
       if (removedUsers.length) {
         setWaitingToUpdateUsers(users);
         setConfirmRemoveUsers(removedUsers);
+        setAssignUsersModalOpen(false);
+        setSubmitModalOpen(false);
+        setEditModalOpen(false);
       } else {
         updateProjectUsers(users);
       }
@@ -192,9 +203,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
   );
 
   // "Submit" modal related:
-  const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
+    setEditModalOpen(false);
+    setAssignUsersModalOpen(false);
   };
   const currentlySubmitting = Boolean(project?.currently_creating_pr);
   const readyToSubmit = Boolean(
@@ -204,9 +216,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
   );
 
   // "edit" modal related:
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const openEditModal = () => {
     setEditModalOpen(true);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -272,12 +285,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
-  const handleSelect = (option: {
-    id: string;
-    label: string;
-    disabled?: boolean;
-  }) => {
-    switch (option.id) {
+  const handlePageOptionSelect = (selection: 'edit' | 'delete') => {
+    switch (selection) {
       case 'edit':
         openEditModal();
         break;
@@ -288,21 +297,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Dropdown
-        align="right"
-        iconCategory="utility"
-        iconName="settings"
-        iconSize="large"
-        iconVariant="more"
-        width="xx-small"
-        triggerClassName="slds-m-right_xx-small"
-        assistiveText={{ icon: i18n.t('Project Options') }}
-        onSelect={handleSelect}
-        options={[
-          { id: 'edit', label: i18n.t('Edit Project') },
-          // { type: 'divider' },
-          // { id: 'delete', label: i18n.t('Delete Project') },
-        ]}
+      <PageOptions
+        modelType={OBJECT_TYPES.PROJECT}
+        handleOptionSelect={handlePageOptionSelect}
       />
       {branchLink ? (
         <ExternalLink
@@ -419,7 +416,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
           />
         )}
         <EditModal
-          project={project}
+          model={project}
+          modelType={OBJECT_TYPES.PROJECT}
           isOpen={editModalOpen}
           handleClose={closeEditModal}
         />
