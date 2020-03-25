@@ -20,9 +20,9 @@ const DeleteModal = ({
   handleCancel: () => void;
 }) => {
   // const [isDeleteing, setIsDeleteing] = useState(false);
-  const handleDelete = () => {
-    // setIsDeleteing(true);
-  };
+  // const handleDelete = () => {
+  // setIsDeleteing(true);
+  // };
 
   const heading = {
     [OBJECT_TYPES.PROJECT]: i18n.t('Delete Project'),
@@ -41,7 +41,7 @@ const DeleteModal = ({
           key="submit"
           label={i18n.t('Delete')}
           variant="brand"
-          onClick={handleDelete}
+          // onClick={handleDelete}
         />,
       ]}
     >
