@@ -284,7 +284,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <PageOptions model="Project" handleOptionSelect={handleSelect} />
+      <PageOptions modelType="project" handleOptionSelect={handleSelect} />
       {branchLink ? (
         <ExternalLink
           url={branchLink}
