@@ -17,15 +17,17 @@ const PageOptions = ({
     handleOptionSelect(option.id);
   };
 
-  let assistiveText, editLabel;
+  let assistiveText, editLabel, deleteLabel;
   switch (model) {
     case 'Task':
       assistiveText = i18n.t('Task Options');
       editLabel = i18n.t(`Edit Task`);
+      deleteLabel = i18n.t(`Delete Task`);
       break;
     case 'Project':
       assistiveText = i18n.t('Project Options');
       editLabel = i18n.t('Edit Project');
+      deleteLabel = i18n.t(`Delete Task`);
   }
   return (
     <Dropdown
@@ -40,8 +42,7 @@ const PageOptions = ({
       onSelect={handleSelect}
       options={[
         { id: 'edit', label: editLabel },
-        // { type: 'divider' },
-        // { id: 'delete', label: deleteLabel },
+        { id: 'delete', label: deleteLabel, disabled: model === 'Task' },
       ]}
     />
   );

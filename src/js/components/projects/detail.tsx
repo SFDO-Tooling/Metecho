@@ -277,8 +277,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
       case 'edit':
         openEditModal();
         break;
-      // case 'delete':
-      //   break;
+      case 'delete':
+        console.log('open delete modal');
+        break;
     }
   };
   const { branchLink, branchLinkText } = getBranchLink(project);
