@@ -171,7 +171,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <PageOptions model="Task" handleOptionSelect={handleSelect} />
+      <PageOptions modelType="task" handleOptionSelect={handleSelect} />
       {branchLink ? (
         <ExternalLink
           url={branchLink}

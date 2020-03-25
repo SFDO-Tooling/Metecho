@@ -9,6 +9,7 @@ import React, { useRef } from 'react';
 import { useForm, useFormDefaults, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
+import { OBJECT_TYPES } from '@/utils/constants';
 
 interface EditModalProps {
   model: Project | Task;
@@ -81,12 +82,12 @@ const EditModal = ({
   };
 
   const heading = {
-    project: i18n.t('Edit Project'),
-    task: i18n.t('Edit Task'),
+    [OBJECT_TYPES.PROJECT]: i18n.t('Edit Project'),
+    [OBJECT_TYPES.TASK]: i18n.t('Edit Task'),
   };
   const nameLabel = {
-    project: i18n.t('Project Name'),
-    task: i18n.t('Task Name'),
+    [OBJECT_TYPES.PROJECT]: i18n.t('Project Name'),
+    [OBJECT_TYPES.TASK]: i18n.t('Task Name'),
   };
 
   return (
