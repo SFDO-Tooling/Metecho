@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React from 'react';
 import { Trans } from 'react-i18next';
 
 import { Project } from '@/store/projects/reducer';

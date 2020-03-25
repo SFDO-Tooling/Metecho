@@ -4,32 +4,46 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import { omit } from 'lodash';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
-import { useForm, useFormDefaults, useIsMounted } from '@/components/utils';
+import {
+  LabelWithSpinner,
+  useForm,
+  useFormDefaults,
+  useIsMounted,
+} from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 interface EditModalProps {
   model: Project | Task;
+  modelType: ObjectTypes;
   isOpen: boolean;
-  instanceType: 'project' | 'task';
   handleClose: () => void;
 }
 const EditModal = ({
   model,
+  modelType,
   isOpen,
-  instanceType,
   handleClose,
 }: EditModalProps) => {
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSuccess = () => {
     /* istanbul ignore else */
     if (isMounted.current) {
+      setIsSaving(false);
       handleClose();
+    }
+  };
+
+  /* istanbul ignore next */
+  const handleError = () => {
+    if (isMounted.current) {
+      setIsSaving(false);
     }
   };
 
@@ -50,7 +64,8 @@ const EditModal = ({
     },
     additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
-    objectType: instanceType,
+    onError: handleError,
+    objectType: modelType,
     update: true,
   });
 
@@ -73,6 +88,11 @@ const EditModal = ({
     resetForm();
   };
 
+  const submitInstance = (e: React.FormEvent<HTMLFormElement>) => {
+    setIsSaving(true);
+    handleSubmit(e);
+  };
+
   const onSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
     /* istanbul ignore else */
@@ -81,36 +101,52 @@ const EditModal = ({
     }
   };
 
-  const heading = {
-    [OBJECT_TYPES.PROJECT]: i18n.t('Edit Project'),
-    [OBJECT_TYPES.TASK]: i18n.t('Edit Task'),
-  };
-  const nameLabel = {
-    [OBJECT_TYPES.PROJECT]: i18n.t('Project Name'),
-    [OBJECT_TYPES.TASK]: i18n.t('Task Name'),
-  };
+  let heading, nameLabel;
+  switch (modelType) {
+    case OBJECT_TYPES.TASK:
+      nameLabel = i18n.t('Task Name');
+      heading = i18n.t('Edit Task');
+      break;
+    case OBJECT_TYPES.PROJECT:
+      nameLabel = i18n.t('Project Name');
+      heading = i18n.t('Edit Project');
+      break;
+  }
 
   return (
     <Modal
       isOpen={isOpen}
       size="medium"
-      heading={heading[instanceType]}
+      disableClose={isSaving}
+      heading={heading}
       onRequestClose={doClose}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={doClose} />,
+        <Button
+          key="cancel"
+          label={i18n.t('Cancel')}
+          onClick={doClose}
+          disabled={isSaving}
+        />,
         <Button
           key="submit"
           type="submit"
-          label={i18n.t('Save')}
+          label={
+            isSaving ? (
+              <LabelWithSpinner label={i18n.t('Saving')} variant="inverse" />
+            ) : (
+              i18n.t('Save')
+            )
+          }
           variant="brand"
           onClick={onSubmitClicked}
+          disabled={isSaving}
         />,
       ]}
     >
-      <form className="slds-form slds-p-around_large" onSubmit={handleSubmit}>
+      <form className="slds-form slds-p-around_large" onSubmit={submitInstance}>
         <Input
           id="edit-name"
-          label={nameLabel[instanceType]}
+          label={nameLabel}
           className="slds-p-bottom_small"
           name="name"
           value={inputs.name}
@@ -129,7 +165,12 @@ const EditModal = ({
           onChange={handleInputChange}
         />
         {/* Clicking hidden button allows for native browser form validation */}
-        <button ref={submitButton} type="submit" style={{ display: 'none' }} />
+        <button
+          ref={submitButton}
+          type="submit"
+          style={{ display: 'none' }}
+          disabled={isSaving}
+        />
       </form>
     </Modal>
   );
