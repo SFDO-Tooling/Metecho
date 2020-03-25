@@ -263,10 +263,12 @@ class Repository(
     push_update_type = "REPOSITORY_UPDATE"
     push_error_type = "REPOSITORY_UPDATE_ERROR"
 
-    def get_serialized_representation(self):
+    def get_serialized_representation(self, user):
         from .serializers import RepositorySerializer
 
-        return RepositorySerializer(self).data
+        return RepositorySerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
 
     # end PushMixin configuration
 
@@ -393,10 +395,12 @@ class Project(
     push_update_type = "PROJECT_UPDATE"
     push_error_type = "PROJECT_CREATE_PR_FAILED"
 
-    def get_serialized_representation(self):
+    def get_serialized_representation(self, user):
         from .serializers import ProjectSerializer
 
-        return ProjectSerializer(self).data
+        return ProjectSerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
 
     # end PushMixin configuration
 
@@ -534,10 +538,10 @@ class Task(
     push_update_type = "TASK_UPDATE"
     push_error_type = "TASK_CREATE_PR_FAILED"
 
-    def get_serialized_representation(self):
+    def get_serialized_representation(self, user):
         from .serializers import TaskSerializer
 
-        return TaskSerializer(self).data
+        return TaskSerializer(self, context=self._create_context_with_user(user)).data
 
     # end PushMixin configuration
 
@@ -687,6 +691,15 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
 
+    def _build_message_extras(self):
+        return {
+            "model": {
+                "task": str(self.task.id),
+                "org_type": self.org_type,
+                "id": str(self.id),
+            }
+        }
+
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
@@ -730,10 +743,12 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     push_update_type = "SCRATCH_ORG_UPDATE"
     push_error_type = "SCRATCH_ORG_ERROR"
 
-    def get_serialized_representation(self):
+    def get_serialized_representation(self, user):
         from .serializers import ScratchOrgSerializer
 
-        return ScratchOrgSerializer(self).data
+        return ScratchOrgSerializer(
+            self, context=self._create_context_with_user(user)
+        ).data
 
     # end PushMixin configuration
 
@@ -754,7 +769,9 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
 
     def finalize_delete(self, *, originating_user_id):
         self.notify_changed(
-            type_="SCRATCH_ORG_DELETE", originating_user_id=originating_user_id
+            type_="SCRATCH_ORG_DELETE",
+            originating_user_id=originating_user_id,
+            message=self._build_message_extras(),
         )
 
     def delete(self, *args, should_finalize=True, originating_user_id=None, **kwargs):
@@ -778,7 +795,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed(
-                type_="SCRATCH_ORG_PROVISION", originating_user_id=originating_user_id
+                type_="SCRATCH_ORG_PROVISION", originating_user_id=originating_user_id,
             )
             self.task.finalize_provision(originating_user_id=originating_user_id)
         else:
@@ -786,6 +803,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
                 error=error,
                 type_="SCRATCH_ORG_PROVISION_FAILED",
                 originating_user_id=originating_user_id,
+                message=self._build_message_extras(),
             )
             # If the scratch org has already been created on Salesforce,
             # we need to delete it there as well.
@@ -876,6 +894,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
             error=error,
             type_="SCRATCH_ORG_REMOVE",
             originating_user_id=originating_user_id,
+            message=self._build_message_extras(),
         )
         # set should_finalize=False to avoid accidentally sending a
         # SCRATCH_ORG_DELETE event:
@@ -895,13 +914,14 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.save()
         if error is None:
             self.notify_changed(
-                type_="SCRATCH_ORG_REFRESH", originating_user_id=originating_user_id
+                type_="SCRATCH_ORG_REFRESH", originating_user_id=originating_user_id,
             )
         else:
             self.notify_scratch_org_error(
                 error=error,
                 type_="SCRATCH_ORG_REFRESH_FAILED",
                 originating_user_id=originating_user_id,
+                message=self._build_message_extras(),
             )
             self.queue_delete(originating_user_id=originating_user_id)
 

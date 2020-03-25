@@ -2,7 +2,7 @@ import i18n from 'i18next';
 
 import { ThunkResult } from '@/store';
 import { isCurrentUser } from '@/store/helpers';
-import { Org } from '@/store/orgs/reducer';
+import { MinimalOrg, Org } from '@/store/orgs/reducer';
 import { selectTaskById } from '@/store/tasks/selectors';
 import { addToast } from '@/store/toasts/actions';
 import apiFetch, { addUrlParams } from '@/utils/api';
@@ -14,7 +14,7 @@ interface OrgProvisioned {
 }
 interface OrgProvisionFailed {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
-  payload: Org;
+  payload: Org | MinimalOrg;
 }
 interface RefetchOrg {
   type: 'REFETCH_ORG_STARTED' | 'REFETCH_ORG_SUCCEEDED' | 'REFETCH_ORG_FAILED';
@@ -26,7 +26,7 @@ interface OrgUpdated {
 }
 interface OrgDeleted {
   type: 'SCRATCH_ORG_DELETE';
-  payload: Org;
+  payload: Org | MinimalOrg;
 }
 interface OrgDeleteFailed {
   type: 'SCRATCH_ORG_DELETE_FAILED';
@@ -37,11 +37,12 @@ interface CommitEvent {
   payload: Org;
 }
 interface OrgRefresh {
-  type:
-    | 'SCRATCH_ORG_REFRESH_REQUESTED'
-    | 'SCRATCH_ORG_REFRESH_ACCEPTED'
-    | 'SCRATCH_ORG_REFRESH_REJECTED';
+  type: 'SCRATCH_ORG_REFRESH_REQUESTED' | 'SCRATCH_ORG_REFRESH_ACCEPTED';
   payload: Org;
+}
+interface OrgRefreshRejected {
+  type: 'SCRATCH_ORG_REFRESH_REJECTED';
+  payload: Org | MinimalOrg;
 }
 
 export type OrgsAction =
@@ -52,7 +53,8 @@ export type OrgsAction =
   | OrgDeleted
   | OrgDeleteFailed
   | CommitEvent
-  | OrgRefresh;
+  | OrgRefresh
+  | OrgRefreshRejected;
 
 export const provisionOrg = ({
   model,
@@ -101,7 +103,7 @@ export const provisionFailed = ({
   message,
   originating_user_id,
 }: {
-  model: Org;
+  model: Org | MinimalOrg;
   message?: string;
   originating_user_id: string | null;
 }): ThunkResult<OrgProvisionFailed> => (dispatch, getState) => {
@@ -216,7 +218,7 @@ export const deleteOrg = ({
   message,
   originating_user_id,
 }: {
-  model: Org;
+  model: Org | MinimalOrg;
   message?: string;
   originating_user_id: string | null;
 }): ThunkResult<OrgDeleted> => (dispatch, getState) => {
@@ -434,10 +436,10 @@ export const refreshError = ({
   message,
   originating_user_id,
 }: {
-  model: Org;
+  model: Org | MinimalOrg;
   message?: string;
   originating_user_id: string | null;
-}): ThunkResult<OrgUpdated> => (dispatch, getState) => {
+}): ThunkResult<OrgUpdated | OrgRefreshRejected> => (dispatch, getState) => {
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
@@ -454,5 +456,11 @@ export const refreshError = ({
       }),
     );
   }
-  return dispatch(updateOrg(model));
+  if ((model as Org).owner) {
+    return dispatch(updateOrg(model as Org));
+  }
+  return dispatch({
+    type: 'SCRATCH_ORG_REFRESH_REJECTED',
+    payload: model,
+  });
 };

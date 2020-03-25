@@ -1,9 +1,13 @@
+from collections import namedtuple
+
 from asgiref.sync import async_to_sync
 from django.db import models
 from hashid_field import HashidAutoField
 
 from . import push
 from .gh import get_repo_info
+
+Request = namedtuple("Request", "user")
 
 
 class HashIdMixin(models.Model):
@@ -47,41 +51,59 @@ class PushMixin:
     Expects the following attributes:
         push_update_type: str
         push_error_type: str
-        get_serialized_representation: Callable[self]
+        get_serialized_representation: Callable[self, Optional[User]]
     """
 
+    def _create_context_with_user(self, user):
+        return {
+            "request": Request(user),
+        }
+
     def _push_message(self, type_, message):
+        """
+        type_:
+            str indicating frontend Redux action.
+        message:
+            {
+                "originating_user_id": str,
+                Optional["message"]: str  // error or other message
+            }
+        """
         async_to_sync(push.push_message_about_instance)(
             self, {"type": type_, "payload": message}
         )
 
-    def notify_changed(self, *, type_=None, originating_user_id):
+    def notify_changed(self, *, type_=None, originating_user_id, message=None):
+        prepared_message = {"originating_user_id": originating_user_id}
+        prepared_message.update(message or {})
         self._push_message(
-            type_ or self.push_update_type,
-            {
-                "originating_user_id": originating_user_id,
-                "model": self.get_serialized_representation(),
-            },
+            type_ or self.push_update_type, prepared_message,
         )
 
-    def notify_error(self, error, *, type_=None, originating_user_id):
+    def notify_error(self, error, *, type_=None, originating_user_id, message=None):
+        prepared_message = {
+            "originating_user_id": originating_user_id,
+            "message": str(error),
+        }
+        prepared_message.update(message or {})
         self._push_message(
-            type_ or self.push_error_type,
-            {
-                "originating_user_id": originating_user_id,
-                "message": str(error),
-                "model": self.get_serialized_representation(),
-            },
+            type_ or self.push_error_type, prepared_message,
         )
 
-    def notify_scratch_org_error(self, *, error, type_, originating_user_id):
+    def notify_scratch_org_error(
+        self, *, error, type_, originating_user_id, message=None
+    ):
         """
         This is only used in the ScratchOrg model currently, but it
         follows the pattern enough that I wanted to move it into this
         mixin.
         """
         async_to_sync(push.report_scratch_org_error)(
-            self, error=error, type_=type_, originating_user_id=originating_user_id
+            self,
+            error=error,
+            type_=type_,
+            originating_user_id=originating_user_id,
+            message=message or {},
         )
 
 
