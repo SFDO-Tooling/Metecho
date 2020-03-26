@@ -174,9 +174,18 @@ class TestDeployOrgSettings:
             assert DeployOrgSettings.called
 
 
-def test_create_org_and_run_flow():
+@pytest.mark.django_db
+def test_create_org_and_run_flow(user_factory, project_factory):
+    user = user_factory()
+    project = project_factory()
+    org_config = MagicMock(
+        org_id="org_id",
+        instance_url="instance_url",
+        access_token="access_token",
+    )
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.subprocess"))
         stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_devhub_api"))
         get_org_details = stack.enter_context(patch(f"{PATCH_ROOT}.get_org_details"))
@@ -198,9 +207,10 @@ def test_create_org_and_run_flow():
         )
         run_flow(
             cci=MagicMock(),
-            org_config=MagicMock(),
+            org_config=org_config,
             flow_name=MagicMock(),
-            project_path=MagicMock(),
+            project_path=project,
+            user=user,
         )
 
 
