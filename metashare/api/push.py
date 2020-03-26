@@ -74,7 +74,7 @@ async def report_scratch_org_error(
     # @jgerigmeyer asked for the error to be unwrapped in the case that
     # there's only one, which is the most common case, per this
     # discussion:
-    # https://github.com/SFDO-Tooling/MetaShare/pull/149#discussion_r327308563
+    # https://github.com/SFDO-Tooling/Metecho/pull/149#discussion_r327308563
     try:
         prepared_message = error.content
         if isinstance(prepared_message, list) and len(prepared_message) == 1:

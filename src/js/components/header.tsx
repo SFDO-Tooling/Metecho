@@ -36,8 +36,7 @@ const Header = () => {
             to={routes.home()}
             className="slds-text-heading_large slds-text-link_reset"
           >
-            <span data-logo-bit="start">meta</span>
-            <span data-logo-bit="end">share</span>
+            metecho
           </Link>
         }
         onRenderControls={controls}

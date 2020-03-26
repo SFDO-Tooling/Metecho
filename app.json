@@ -1,7 +1,7 @@
 {
-  "name": "MetaShare",
+  "name": "Metecho",
   "description": "Web-based tool for collaborating on Salesforce projects",
-  "repository": "https://github.com/SFDO-Tooling/MetaShare",
+  "repository": "https://github.com/SFDO-Tooling/Metecho",
   "keywords": ["ci", "python", "django", "salesforce", "github"],
   "env": {
     "DJANGO_ALLOWED_HOSTS": {

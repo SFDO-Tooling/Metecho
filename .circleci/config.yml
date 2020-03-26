@@ -2,17 +2,17 @@ version: 2.1
 
 jobs:
   build:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
       - image: oddbirds/pyjs
     steps:
       - checkout
       - restore_cache:
           keys:
-            - metashare-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
+            - metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
       - restore_cache:
           keys:
-            - metashare-npm-{{ checksum "yarn.lock" }}
+            - metecho-npm-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
           command: |
@@ -32,16 +32,16 @@ jobs:
             - ./venv
             - ./node_modules
       - save_cache:
-          key: metashare-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
+          key: metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
           paths:
             - ./venv
       - save_cache:
-          key: metashare-npm-{{ checksum "yarn.lock" }}
+          key: metecho-npm-{{ checksum "yarn.lock" }}
           paths:
             - ./node_modules
 
   lint:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
       - image: oddbirds/pyjs
     steps:
@@ -55,7 +55,7 @@ jobs:
             yarn lint:nofix
 
   test-client:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
       - image: oddbirds/pyjs
     steps:
@@ -76,7 +76,7 @@ jobs:
             - coverage
 
   test-python:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
       - image: oddbirds/pyjs
         environment:
@@ -118,7 +118,7 @@ jobs:
             - .coverage
 
   report-test-coverage:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
       - image: oddbirds/pyjs
     environment:
@@ -144,7 +144,7 @@ jobs:
             yarn test:py:check-coverage
 
   report-webpack-stats:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
       - image: oddbirds/pyjs
     steps:
@@ -165,7 +165,7 @@ jobs:
           command: yarn packtracker
 
   build-docs:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
       - image: oddbirds/pyjs
     steps:

@@ -16,7 +16,7 @@ const AuthError = () => {
 
   return (
     <DocumentTitle
-      title={`${i18n.t('Authentication Error')} | ${i18n.t('MetaShare')}`}
+      title={`${i18n.t('Authentication Error')} | ${i18n.t('Metecho')}`}
     >
       <>
         <EmptyIllustration

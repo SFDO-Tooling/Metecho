@@ -6,8 +6,8 @@ Cloning the project
 
 ::
 
-    $ git clone git@github.com:SFDO-Tooling/MetaShare
-    $ cd MetaShare
+    $ git clone git@github.com:SFDO-Tooling/Metecho
+    $ cd Metecho
 
 Docker-based development
 ------------------------
@@ -41,7 +41,7 @@ Docker-based development
 
    Finally, set the following environment variables (if you're an OddBird, you
    can find these values in the shared Keybase team folder --
-   ``metashare/env``)::
+   ``metecho/env``)::
 
     SF_CLIENT_KEY=...
     SF_CLIENT_ID=...
@@ -61,7 +61,7 @@ Docker-based development
 
 5. Visit `<http://localhost:8080/>`_ in your browser.
 
-6. When you're done working on MetaShare, ``Ctrl-C`` in the terminal where the
+6. When you're done working on Metecho, ``Ctrl-C`` in the terminal where the
    containers are running to exit. You can also ``./derrick down`` to stop
    all running containers, or ``./derrick prune`` to clean up unused
    images/containers. (``docker-compose ps`` will tell you what containers are
@@ -101,7 +101,7 @@ To enable GitHub webhooks, set the "Webhook URL" to
 checked and "SSL verification" is enabled.
 
 Use the "Webhook secret" value as your ``GITHUB_HOOK_SECRET`` environment
-variable in MetaShare.
+variable in Metecho.
 
 Use the app's "Client ID" as ``GITHUB_CLIENT_ID`` and the "Client secret" as
 ``GITHUB_CLIENT_SECRET``.
@@ -116,7 +116,7 @@ Then turn this user into a superuser using the ``promote_superuser`` command::
     $ docker-compose run --rm web python manage.py promote_superuser <username>
 
 You will also need, when you log in, to make sure that the GitHub app
-that provides MetaShare with webhook updates and GitHub API access **is
+that provides Metecho with webhook updates and GitHub API access **is
 enabled for any Organizations you are testing against**. By default it
 will only install for the user you are logging in as.
 
@@ -137,7 +137,7 @@ one-person-at-a-time thing, which is a problem for which we don't yet have
 a solution.
 
 As an OddBird, you can access the app at
-`<https://github.com/organizations/oddbird/settings/apps/metashare-local-dev>`_.
+`<https://github.com/organizations/oddbird/settings/apps/metecho-local-dev>`_.
 
 Setting up the database
 -----------------------
@@ -207,7 +207,7 @@ for code formatting/linting on save) need access to the running Docker
 container. `VS Code`_ supports this using the `Remote Development`_ extension
 pack.
 
-Once you have the extension pack installed, when you open the MetaShare folder
+Once you have the extension pack installed, when you open the Metecho folder
 in VS Code, you will be prompted to "Reopen in Container". Doing so will
 effectively run ``docker-compose up`` and reload your window, now running inside
 the Docker container. If you do not see the prompt, run the "Remote-Containers:

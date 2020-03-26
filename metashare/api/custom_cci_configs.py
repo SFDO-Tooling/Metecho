@@ -25,7 +25,7 @@ class ProjectConfig(BaseProjectConfig):
 
     @property
     def config_project_local_path(self):
-        """ MetaShare never uses the local path """
+        """ Metecho never uses the local path """
         return
 
     @property
@@ -58,7 +58,7 @@ class GlobalConfig(BaseGlobalConfig):
 
     @property
     def config_global_local_path(self):
-        """ MetaShare never uses the local path """
+        """ Metecho never uses the local path """
         return
 
     def get_project_config(

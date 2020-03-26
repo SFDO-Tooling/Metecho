@@ -101,7 +101,7 @@ def get_devhub_api(*, devhub_username):
     return SimpleSalesforce(
         instance_url=jwt["instance_url"],
         session_id=jwt["access_token"],
-        client_id="MetaShare",
+        client_id="Metecho",
         version="47.0",
     )
 
@@ -154,7 +154,7 @@ def get_org_result(
             if scratch_org_config.namespaced
             else None
         ),
-        "OrgName": scratch_org_definition.get("orgName", "MetaShare Task Org"),
+        "OrgName": scratch_org_definition.get("orgName", "Metecho Task Org"),
         # should really flesh this out to pass the other
         # optional fields from the scratch org definition file,
         # but this will work for a start

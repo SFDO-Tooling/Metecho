@@ -61,18 +61,18 @@ class Command(BaseCommand):
         return Task.objects.create(name=name, description=description, **kwargs)
 
     def handle(self, *args, **options):
-        metashare = self.create_repository(
-            name="MetaShare-Test",
+        metecho = self.create_repository(
+            name="Metecho-Test",
             repo_owner="oddbird",
-            repo_name="MetaShare-Test",
+            repo_name="Metecho-Test",
             description=(
-                f"# Welcome to Meta(Meta)Share!\n\n"
+                f"# Welcome to Metecho!\n\n"
                 "This is a description of the repository. "
                 "It might contain [links](https://install.salesforce.org)."
             ),
         )
         self.create_repository(
-            name="MetaShare", repo_owner="SFDO-Tooling", repo_name="MetaShare"
+            name="Metecho", repo_owner="SFDO-Tooling", repo_name="Metecho"
         )
         self.create_repository(
             name="MetaDeploy", repo_owner="SFDO-Tooling", repo_name="MetaDeploy"
@@ -108,12 +108,12 @@ class Command(BaseCommand):
         )
 
         for i in range(55):
-            self.create_project(name=f"Sample Project {i+1}", repository=metashare)
+            self.create_project(name=f"Sample Project {i+1}", repository=metecho)
 
         project = self.create_project(
             name="Project With Tasks",
             description="This project has tasks.",
-            repository=metashare,
+            repository=metecho,
         )
 
         for i in range(5):

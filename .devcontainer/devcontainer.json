@@ -1,6 +1,6 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
-  "name": "MetaShare",
+  "name": "Metecho",
   "dockerComposeFile": ["../docker-compose.yml", "./docker-compose.dev.yml"],
   "service": "web",
   "workspaceFolder": "/app",

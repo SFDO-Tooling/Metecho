@@ -109,13 +109,13 @@ def alert_user_about_expiring_org(*, org, days):
         task = org.task
         project = task.project
         repo = project.repository
-        metashare_link = get_user_facing_url(
+        metecho_link = get_user_facing_url(
             path=["repositories", repo.slug, project.slug, task.slug]
         )
 
         # email user
         send_mail(
-            _("MetaShare Scratch Org Expiring with Uncommitted Changes"),
+            _("Metecho Scratch Org Expiring with Uncommitted Changes"),
             render_to_string(
                 "scratch_org_expiry_email.txt",
                 {
@@ -125,7 +125,7 @@ def alert_user_about_expiring_org(*, org, days):
                     "days": days,
                     "expiry_date": org.expires_at,
                     "user_name": user.username,
-                    "metashare_link": metashare_link,
+                    "metecho_link": metecho_link,
                 },
             ),
             settings.DEFAULT_FROM_EMAIL,
@@ -589,7 +589,7 @@ def submit_review(*, user, task, data, originating_user_id):
             state_for_status,
             target_url=target_url,
             description=filtered_notes[:25],
-            context="MetaShare Review",
+            context="Metecho Review",
         )
         if notes:
             # We always COMMENT so as not to change the PR's status:
