@@ -179,13 +179,14 @@ def test_create_org_and_run_flow(user_factory, project_factory):
     user = user_factory()
     project = project_factory()
     org_config = MagicMock(
-        org_id="org_id",
-        instance_url="instance_url",
-        access_token="access_token",
+        org_id="org_id", instance_url="instance_url", access_token="access_token",
     )
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.subprocess"))
+        subprocess = stack.enter_context(patch(f"{PATCH_ROOT}.subprocess"))
+        Popen = MagicMock()
+        Popen.communicate.return_value = (MagicMock(), MagicMock())
+        subprocess.Popen.return_value = Popen
         stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_devhub_api"))
         get_org_details = stack.enter_context(patch(f"{PATCH_ROOT}.get_org_details"))
@@ -205,13 +206,14 @@ def test_create_org_and_run_flow(user_factory, project_factory):
             scratch_org=MagicMock(),
             originating_user_id=None,
         )
-        run_flow(
-            cci=MagicMock(),
-            org_config=org_config,
-            flow_name=MagicMock(),
-            project_path=project,
-            user=user,
-        )
+        with pytest.raises(Exception):
+            run_flow(
+                cci=MagicMock(),
+                org_config=org_config,
+                flow_name=MagicMock(),
+                project_path=project,
+                user=user,
+            )
 
 
 @pytest.mark.django_db
