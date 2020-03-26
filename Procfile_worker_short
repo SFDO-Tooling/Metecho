@@ -1,2 +1,1 @@
-worker_short: python manage.py rqworker short
-scheduler: python manage.py rqscheduler --queue short
+scheduler: python manage.py rqscheduler
