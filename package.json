@@ -9,7 +9,8 @@
     "url": "https://github.com/SFDO-Tooling/Metecho.git"
   },
   "engines": {
-    "node": "12.14.1"
+    "node": "12.14.1",
+    "yarn": "1.21.1"
   },
   "scripts": {
     "webpack:serve": "webpack-dev-server --config webpack.dev.js",

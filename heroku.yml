@@ -1,3 +1,7 @@
+# This is not currently being used, because Heroku private spaces do not honor
+# the `run` section:
+# https://help.heroku.com/RNIC7H18/why-my-private-spaces-app-on-container-registry-runtime-ignores-heroku-yml
+
 build:
   config:
     BUILD_ENV: production
