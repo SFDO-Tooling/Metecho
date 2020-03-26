@@ -16,7 +16,7 @@ const DeleteModal = ({
   handleDelete,
 }: {
   model: Project | Task;
-  instanceType: 'project';
+  instanceType: 'project' | 'task';
   isOpen: boolean;
   handleClose: () => void;
   handleDelete: () => void;

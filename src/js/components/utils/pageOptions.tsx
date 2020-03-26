@@ -45,7 +45,6 @@ const PageOptions = ({
         {
           id: 'delete',
           label: deleteLabel,
-          disabled: modelType === OBJECT_TYPES.TASK,
         },
       ]}
     />

@@ -27,10 +27,12 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import DeleteModal from '@/components/utils/deleteModal';
 import EditModal from '@/components/utils/editModal';
 import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
+import { deleteObject } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
@@ -45,6 +47,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -118,6 +121,25 @@ const TaskDetail = (props: RouteComponentProps) => {
   const closeEditModal = () => {
     setEditModalOpen(false);
   };
+  // delete modal related
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true);
+  };
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+  };
+  const handleProjectDelete = useCallback(() => {
+    if (task) {
+      dispatch(
+        deleteObject({
+          objectType: OBJECT_TYPES.TASK,
+          object: task,
+        }),
+      ).finally(() => {
+        closeDeleteModal();
+      });
+    }
+  }, [dispatch, task]);
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -166,14 +188,21 @@ const TaskDetail = (props: RouteComponentProps) => {
       />
     );
   }
+  // redirect to projct detail if task deleted
+  if (!task && project) {
+    return (
+      <Redirect to={routes.project_detail(repository.slug, project.slug)} />
+    );
+  }
 
   const handlePageOptionSelect = (selection: 'edit' | 'delete') => {
     switch (selection) {
       case 'edit':
         openEditModal();
         break;
-      // case 'delete':
-      //   break;
+      case 'delete':
+        openDeleteModal();
+        break;
     }
   };
 
@@ -348,6 +377,13 @@ const TaskDetail = (props: RouteComponentProps) => {
           modelType={OBJECT_TYPES.TASK}
           isOpen={editModalOpen}
           handleClose={closeEditModal}
+        />
+        <DeleteModal
+          model={task}
+          isOpen={deleteModalOpen}
+          instanceType={OBJECT_TYPES.TASK}
+          handleClose={closeDeleteModal}
+          handleDelete={handleProjectDelete}
         />
         <CommitList commits={task.commits} />
       </DetailPageLayout>
