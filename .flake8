@@ -8,4 +8,4 @@ exclude =
     coverage,
     node,
     node_modules
-max-line-length=88
+max-line-length=100

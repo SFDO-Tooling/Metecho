@@ -1,5 +1,8 @@
 import json
+import logging
 import os
+import shutil
+import subprocess
 from datetime import datetime
 from unittest.mock import Mock
 
@@ -7,13 +10,14 @@ from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
-from cumulusci.utils import cd
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler
 from requests.exceptions import HTTPError
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
+
+logger = logging.getLogger(__name__)
 
 # Salesforce connected app
 # Assign these locally, for brevity:
@@ -279,12 +283,43 @@ def create_org(
     return (scratch_org_config, cci, org_config)
 
 
-def run_flow(*, cci, org_config, flow_name, project_path):
+def run_flow(*, cci, org_config, flow_name, project_path, user):
     """Run a flow on a scratch org"""
-    # Run flow (takes care of getting a new access token)
-    flow = cci.get_flow(flow_name)
-    with cd(project_path):
-        flow.run(org_config)
+    # Run flow in a subprocess so we can control the environment
+    gh_token = user.socialaccount_set.get(provider="github").socialtoken_set.get().token
+    command = shutil.which("cci")
+    args = [command, "flow", "run", flow_name, "--org", "dev"]
+    env = {
+        "CUMULUSCI_KEYCHAIN_CLASS": "cumulusci.core.keychain.EnvironmentProjectKeychain",
+        "CUMULUSCI_DISABLE_REFRESH": "1",
+        "CUMULUSCI_ORG_dev": json.dumps(
+            {
+                "org_id": org_config.org_id,
+                "instance_url": org_config.instance_url,
+                "access_token": org_config.access_token,
+            }
+        ),
+        "GITHUB_TOKEN": gh_token,
+        # needed by sfdx
+        "HOME": project_path,
+    }
+    p = subprocess.Popen(
+        args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        stdin=subprocess.PIPE,
+        close_fds=True,
+        env=env,
+        cwd=project_path,
+    )
+    out, err = p.communicate()
+    if p.returncode:
+        p = subprocess.run([command, "error", "info"], capture_output=True)
+        traceback = p.stdout.decode("utf-8")
+        logger.warning(traceback)
+        raise Exception(
+            f"Error while running {flow_name} flow: {traceback.splitlines()[-5:]}"
+        )
 
 
 def delete_org(scratch_org):

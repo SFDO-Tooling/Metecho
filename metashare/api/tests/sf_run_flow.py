@@ -185,7 +185,6 @@ def test_create_org_and_run_flow():
         stack.enter_context(patch(f"{PATCH_ROOT}.mutate_scratch_org"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_access_token"))
         stack.enter_context(patch(f"{PATCH_ROOT}.deploy_org_settings"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.cd"))
 
         create_org(
             repo_owner=MagicMock(),

@@ -182,6 +182,7 @@ def _create_org_and_run_flow(
         org_config=org_config,
         flow_name=cases[scratch_org.org_type],
         project_path=project_path,
+        user=user,
     )
     scratch_org.refresh_from_db()
     # We don't need to explicitly save the following, because this
