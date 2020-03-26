@@ -12,36 +12,40 @@ const DeleteModal = ({
   model,
   instanceType,
   isOpen,
-  handleCancel,
+  handleClose,
+  handleDelete,
 }: {
   model: Project | Task;
   instanceType: 'project';
   isOpen: boolean;
-  handleCancel: () => void;
+  handleClose: () => void;
+  handleDelete: () => void;
 }) => {
-  // const [isDeleteing, setIsDeleteing] = useState(false);
-  // const handleDelete = () => {
-  // setIsDeleteing(true);
-  // };
-
-  const heading = {
-    [OBJECT_TYPES.PROJECT]: i18n.t('Delete Project'),
+  const handleConfirmDelete = () => {
+    handleClose();
+    handleDelete();
   };
+
+  let heading;
+  switch (instanceType) {
+    case OBJECT_TYPES.PROJECT:
+      i18n.t('Delete Project');
+      break;
+  }
+
   return (
-    // handlesubmit
-    // on success, redirect to project list?
     <Modal
       isOpen={isOpen}
-      heading={heading[instanceType]}
+      heading={heading}
       prompt="warning"
-      onRequestClose={handleCancel}
+      onRequestClose={handleClose}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleCancel} />,
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
         <Button
           key="submit"
           label={i18n.t('Delete')}
           variant="brand"
-          // onClick={handleDelete}
+          onClick={handleConfirmDelete}
         />,
       ]}
     >

@@ -211,6 +211,16 @@ const reducer = (
       }
       return projects;
     }
+    case 'DELETE_OBJECT_SUCCEEDED': {
+      const {
+        objectType,
+        object,
+      }: { objectType?: ObjectTypes; object: Project } = action.payload;
+      if (objectType === OBJECT_TYPES.PROJECT && object) {
+        return console.log('return new state here without deleted projects');
+      }
+      return projects;
+    }
   }
   return projects;
 };

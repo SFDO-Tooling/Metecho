@@ -30,7 +30,7 @@ import EditModal from '@/components/utils/editModal';
 import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
-import { updateObject } from '@/store/actions';
+import { deleteObject, updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
@@ -233,6 +233,18 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
+  const handleProjectDelete = useCallback(() => {
+    if (project) {
+      dispatch(
+        deleteObject({
+          objectType: OBJECT_TYPES.PROJECT,
+          object: project,
+        }),
+      ).finally(() => {
+        close();
+      });
+    }
+  }, [dispatch, project]);
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -267,6 +279,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  // Redirect once project is deleted
+  if (!project && repositorySlug) {
+    return <Redirect to={routes.repository_detail(repositorySlug)} />;
+  }
   // Progress Bar:
   const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
   const tasksTotal = tasks?.length || 0;
@@ -435,7 +451,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
           model={project}
           isOpen={deleteModalOpen}
           instanceType="project"
-          handleCancel={closeDeleteModal}
+          handleClose={closeDeleteModal}
+          handleDelete={handleProjectDelete}
         />
       </DetailPageLayout>
     </DocumentTitle>
