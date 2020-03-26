@@ -272,6 +272,6 @@ translations to ``locales/<language>/translation.json``.
 This applies to the server code too, except no error will be raised. Therefore,
 you should use string literals everywhere in server-side code that might be
 exposed to the front end, to properly generate translation files. See error
-message handling in ``metashare/api/sf_run_flow.py`` for an example.
+message handling in ``metecho/api/sf_run_flow.py`` for an example.
 
 .. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector
