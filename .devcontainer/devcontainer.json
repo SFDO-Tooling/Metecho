@@ -54,6 +54,9 @@
     "[markdown]": {
       "editor.rulers": [80]
     },
+    "[html]": {
+      "editor.formatOnSave": false
+    },
     "[javascriptreact]": {
       "editor.rulers": [80]
     },
