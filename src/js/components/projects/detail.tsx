@@ -242,7 +242,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           object: project,
         }),
       ).finally(() => {
-        close();
+        closeDeleteModal();
       });
     }
   }, [dispatch, project]);
