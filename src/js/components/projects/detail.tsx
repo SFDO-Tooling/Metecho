@@ -54,6 +54,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -136,6 +137,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
       const removedUsers = getRemovedUsers(users);
       if (removedUsers.length) {
         setWaitingToUpdateUsers(users);
+
         setConfirmRemoveUsers(removedUsers);
         setAssignUsersModalOpen(false);
         setSubmitModalOpen(false);
@@ -226,7 +228,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
   };
   // "delete" modal related:
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const openDeleteModal = () => {
     setDeleteModalOpen(true);
   };
@@ -436,7 +437,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
             instanceId={project.id}
             instanceName={project.name}
             instanceDiffUrl={project.branch_diff_url}
-            instanceType="project"
+            instanceType={OBJECT_TYPES.PROJECT}
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />
@@ -450,7 +451,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         <DeleteModal
           model={project}
           isOpen={deleteModalOpen}
-          instanceType="project"
+          instanceType={OBJECT_TYPES.PROJECT}
           handleClose={closeDeleteModal}
           handleDelete={handleProjectDelete}
         />
