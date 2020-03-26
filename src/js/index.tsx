@@ -64,7 +64,7 @@ const App = withRouter(
     );
 
     return (
-      <DocumentTitle title={i18n.t('MetaShare')}>
+      <DocumentTitle title={i18n.t('Metecho')}>
         <div className="slds-grid slds-grid_frame slds-grid_vertical">
           <ErrorBoundary>
             <Header />

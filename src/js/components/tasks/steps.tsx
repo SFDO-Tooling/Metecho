@@ -53,7 +53,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
       assignee: task.assigned_dev,
     },
     {
-      label: `${i18n.t('Make changes in Dev Org and capture in MetaShare')}`,
+      label: `${i18n.t('Make changes in Dev Org and capture in Metecho')}`,
       visible: true,
       // Active if we have an assigned Dev, a Dev Org, and any of the following:
       //   - The task has no commits yet
