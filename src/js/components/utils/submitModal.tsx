@@ -10,6 +10,7 @@ import {
   ExternalLink,
   LabelWithSpinner,
   useForm,
+  useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -76,6 +77,7 @@ const SubmitModal = ({
     inputs,
     errors,
     handleInputChange,
+    setInputs,
     handleSubmit,
     resetForm,
   } = useForm({
@@ -90,6 +92,14 @@ const SubmitModal = ({
     onError: handleError,
     shouldSubscribeToObject: false,
     ...objectType,
+  });
+
+  // When name changes, update default selection
+  useFormDefaults({
+    field: 'title',
+    value: instanceName,
+    inputs,
+    setInputs,
   });
 
   const handleSubmitClicked = () => {

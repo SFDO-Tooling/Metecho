@@ -8,13 +8,13 @@ class Command(BaseCommand):
     help = "Promotes a user to superuser status."
 
     def add_arguments(self, parser):
-        parser.add_argument("emails", nargs="+")
+        parser.add_argument("usernames", nargs="+")
 
     def handle(self, *args, **options):
-        num = User.objects.filter(email__in=options["emails"]).update(
+        num = User.objects.filter(username__in=options["usernames"]).update(
             is_superuser=True, is_staff=True
         )
         if num:
             self.stdout.write(self.style.SUCCESS("Promoted!"))
         else:
-            self.stdout.write(self.style.ERROR("No such email(s)."))
+            self.stdout.write(self.style.ERROR("No such username(s)."))

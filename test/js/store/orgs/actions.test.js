@@ -770,4 +770,28 @@ describe('refreshError', () => {
     expect(allActions[0].payload.variant).toEqual('error');
     expect(allActions[1]).toEqual(action);
   });
+
+  test('does not update if no full model', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {},
+    });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+    };
+    store.dispatch(
+      actions.refreshError({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions.map((action) => action.type)).toEqual([
+      'TOAST_ADDED',
+      'SCRATCH_ORG_REFRESH_REJECTED',
+    ]);
+  });
 });

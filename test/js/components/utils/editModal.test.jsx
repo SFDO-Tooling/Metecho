@@ -25,12 +25,13 @@ const defaultProject = {
 describe('<EditModal />', () => {
   const setup = (options = {}) => {
     const defaults = {
-      project: defaultProject,
+      model: defaultProject,
+      modelType: 'project',
     };
     const opts = Object.assign({}, defaults, options);
     const closeEditModal = jest.fn();
     return renderWithRedux(
-      <EditModal project={opts.project} isOpen handleClose={closeEditModal} />,
+      <EditModal {...opts} isOpen handleClose={closeEditModal} />,
       {},
       storeWithThunk,
       opts.rerender,
@@ -43,7 +44,7 @@ describe('<EditModal />', () => {
     const nameInput = getByLabelText('*Project Name');
     const descriptionInput = getByLabelText('Description');
     setup({
-      project: {
+      model: {
         ...defaultProject,
         name: 'New Project Name',
       },
@@ -54,7 +55,7 @@ describe('<EditModal />', () => {
     expect(nameInput.value).toEqual('New Project Name');
 
     setup({
-      project: {
+      model: {
         ...defaultProject,
         name: 'New Project Name',
         description: 'New description',

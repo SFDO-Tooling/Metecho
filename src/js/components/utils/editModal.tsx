@@ -4,30 +4,51 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import { omit } from 'lodash';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
-import { useForm, useFormDefaults, useIsMounted } from '@/components/utils';
+import {
+  LabelWithSpinner,
+  useForm,
+  useFormDefaults,
+  useIsMounted,
+} from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { Task } from '@/store/tasks/reducer';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 interface EditModalProps {
-  project: Project;
+  model: Project | Task;
+  modelType: ObjectTypes;
   isOpen: boolean;
   handleClose: () => void;
 }
-const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
+const EditModal = ({
+  model,
+  modelType,
+  isOpen,
+  handleClose,
+}: EditModalProps) => {
   const isMounted = useIsMounted();
   const submitButton = useRef<HTMLButtonElement | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSuccess = () => {
     /* istanbul ignore else */
     if (isMounted.current) {
+      setIsSaving(false);
       handleClose();
     }
   };
 
-  const defaultName = project.name;
-  const defaultDescription = project.description;
+  /* istanbul ignore next */
+  const handleError = () => {
+    if (isMounted.current) {
+      setIsSaving(false);
+    }
+  };
+
+  const defaultName = model.name;
+  const defaultDescription = model.description;
 
   const {
     inputs,
@@ -41,9 +62,10 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
       name: defaultName,
       description: defaultDescription,
     },
-    additionalData: omit(project, ['name', 'description']),
+    additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
-    objectType: OBJECT_TYPES.PROJECT,
+    onError: handleError,
+    objectType: modelType,
     update: true,
   });
 
@@ -66,6 +88,11 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
     resetForm();
   };
 
+  const submitInstance = (e: React.FormEvent<HTMLFormElement>) => {
+    setIsSaving(true);
+    handleSubmit(e);
+  };
+
   const onSubmitClicked = () => {
     // Click hidden button inside form to activate native browser validation
     /* istanbul ignore else */
@@ -74,27 +101,52 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
     }
   };
 
+  let heading, nameLabel;
+  switch (modelType) {
+    case OBJECT_TYPES.TASK:
+      nameLabel = i18n.t('Task Name');
+      heading = i18n.t('Edit Task');
+      break;
+    case OBJECT_TYPES.PROJECT:
+      nameLabel = i18n.t('Project Name');
+      heading = i18n.t('Edit Project');
+      break;
+  }
+
   return (
     <Modal
       isOpen={isOpen}
       size="medium"
-      heading={i18n.t('Edit Project')}
+      disableClose={isSaving}
+      heading={heading}
       onRequestClose={doClose}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={doClose} />,
+        <Button
+          key="cancel"
+          label={i18n.t('Cancel')}
+          onClick={doClose}
+          disabled={isSaving}
+        />,
         <Button
           key="submit"
           type="submit"
-          label={i18n.t('Save')}
+          label={
+            isSaving ? (
+              <LabelWithSpinner label={i18n.t('Saving')} variant="inverse" />
+            ) : (
+              i18n.t('Save')
+            )
+          }
           variant="brand"
           onClick={onSubmitClicked}
+          disabled={isSaving}
         />,
       ]}
     >
-      <form className="slds-form slds-p-around_large" onSubmit={handleSubmit}>
+      <form className="slds-form slds-p-around_large" onSubmit={submitInstance}>
         <Input
-          id="edit-project-name"
-          label={i18n.t('Project Name')}
+          id="edit-name"
+          label={nameLabel}
           className="slds-p-bottom_small"
           name="name"
           value={inputs.name}
@@ -104,7 +156,7 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
           onChange={handleInputChange}
         />
         <Textarea
-          id="edit-project-description"
+          id="edit-description"
           label={i18n.t('Description')}
           className="ms-textarea"
           name="description"
@@ -113,7 +165,12 @@ const EditModal = ({ project, isOpen, handleClose }: EditModalProps) => {
           onChange={handleInputChange}
         />
         {/* Clicking hidden button allows for native browser form validation */}
-        <button ref={submitButton} type="submit" style={{ display: 'none' }} />
+        <button
+          ref={submitButton}
+          type="submit"
+          style={{ display: 'none' }}
+          disabled={isSaving}
+        />
       </form>
     </Modal>
   );

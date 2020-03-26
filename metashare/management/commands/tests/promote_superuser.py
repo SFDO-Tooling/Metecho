@@ -9,12 +9,12 @@ def test_promote_superuser__no_such_user():
     out = StringIO()
     call_command("promote_superuser", "test@example.com", stdout=out)
 
-    assert "No such email(s)." in out.getvalue()
+    assert "No such username(s)." in out.getvalue()
 
 
 @pytest.mark.django_db
 def test_promote_superuser__success(user_factory):
-    user = user_factory(email="test@example.com")
+    user = user_factory(username="test@example.com")
     out = StringIO()
     call_command("promote_superuser", "test@example.com", stdout=out)
     user.refresh_from_db()
