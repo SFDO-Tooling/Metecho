@@ -61,7 +61,7 @@
     "worker": {
       "quantity": 1
     },
-    "scheduler": {
+    "worker-short": {
       "quantity": 1
     }
   },

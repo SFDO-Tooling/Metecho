@@ -13,9 +13,9 @@ run:
     command:
       - python manage.py rqworker default
     image: web
-  scheduler:
+  worker-short:
     command:
-      - python manage.py rqscheduler
+      - honcho start -f Procfile_worker_short
     image: web
 release:
   command:
