@@ -311,7 +311,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   return (
     <DocumentTitle
       title={` ${task.name} | ${project.name} | ${repository.name} | ${i18n.t(
-        'MetaShare',
+        'Metecho',
       )}`}
     >
       <DetailPageLayout

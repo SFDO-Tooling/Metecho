@@ -21,7 +21,7 @@ export const EmptyIllustration = ({ message }: { message: ReactNode }) => (
 );
 
 const FourOhFour = ({ message }: { message?: ReactNode }) => (
-  <DocumentTitle title={`${i18n.t('404')} | ${i18n.t('MetaShare')}`}>
+  <DocumentTitle title={`${i18n.t('404')} | ${i18n.t('Metecho')}`}>
     <EmptyIllustration
       message={
         message === undefined ? (
