@@ -37,13 +37,13 @@ const Footer = ({
     return <>{i18n.t('Deleting Org…')}</>;
   }
   if (isRefreshingChanges) {
-    return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
+    return <>{i18n.t('Checking for Unretrieved Changes…')}</>;
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_capturing_changes) {
       return (
         <>
-          {i18n.t('Capturing Selected Changes…')}
+          {i18n.t('Retrieving Selected Changes…')}
           <div className="slds-p-top_small">{loadingMsg}</div>
         </>
       );

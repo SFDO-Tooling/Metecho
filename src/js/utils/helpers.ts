@@ -13,7 +13,7 @@ export const getOrgStatusMsg = (org: Org) => {
     const totalChanges = org.total_unsaved_changes;
     /* istanbul ignore else */
     if (totalChanges) {
-      const statusMsgDefault = `has ${totalChanges} uncaptured ${pluralize(
+      const statusMsgDefault = `has ${totalChanges} unretrieved ${pluralize(
         totalChanges,
         'change',
       )}`;

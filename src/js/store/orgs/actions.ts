@@ -337,9 +337,9 @@ export const commitSucceeded = ({
       addToast({
         heading: task
           ? `${i18n.t(
-              'Successfully captured changes from your scratch org on task',
+              'Successfully retrieved changes from your scratch org on task',
             )} “${task.name}”.`
-          : i18n.t('Successfully captured changes from your scratch org.'),
+          : i18n.t('Successfully retrieved changes from your scratch org.'),
       }),
     );
   }
@@ -366,10 +366,10 @@ export const commitFailed = ({
       addToast({
         heading: task
           ? `${i18n.t(
-              'Uh oh. There was an error capturing changes from your scratch org on task',
+              'Uh oh. There was an error retrieving changes from your scratch org on task',
             )} “${task.name}”.`
           : i18n.t(
-              'Uh oh. There was an error capturing changes from your scratch org.',
+              'Uh oh. There was an error retrieving changes from your scratch org.',
             ),
         details: message,
         variant: 'error',

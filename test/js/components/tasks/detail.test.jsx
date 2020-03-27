@@ -271,10 +271,10 @@ describe('<TaskDetail/>', () => {
     });
   });
 
-  describe('"Capture Task Changes" click', () => {
+  describe('"Retrieve Changes from Dev Org" click', () => {
     test('refreshes and then opens modal', () => {
       const { getByText } = setup();
-      fireEvent.click(getByText('Capture Task Changes'));
+      fireEvent.click(getByText('Retrieve Changes from Dev Org'));
 
       expect(refetchOrg).toHaveBeenCalledTimes(1);
 
@@ -282,7 +282,9 @@ describe('<TaskDetail/>', () => {
 
       expect(refetchArgs.id).toEqual('org-id');
 
-      expect(getByText('Select the location to capture changes')).toBeVisible();
+      expect(
+        getByText('Select the location to retrieve changes'),
+      ).toBeVisible();
     });
 
     describe('org has been checked within past 5 minutes', () => {
@@ -299,11 +301,11 @@ describe('<TaskDetail/>', () => {
 
       test('just opens modal', () => {
         const { getByText } = setup();
-        fireEvent.click(getByText('Capture Task Changes'));
+        fireEvent.click(getByText('Retrieve Changes from Dev Org'));
 
         expect(refetchOrg).not.toHaveBeenCalled();
         expect(
-          getByText('Select the location to capture changes'),
+          getByText('Select the location to retrieve changes'),
         ).toBeVisible();
       });
     });
@@ -327,7 +329,7 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(getAllByText('Capturing Selected Changes…')).toHaveLength(2);
+      expect(getAllByText('Retrieving Selected Changes…')).toHaveLength(2);
     });
   });
 

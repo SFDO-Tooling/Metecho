@@ -244,18 +244,20 @@ const TaskDetail = (props: RouteComponentProps) => {
         }
       }
     };
-    let captureButtonText: JSX.Element = i18n.t('Capture Task Changes');
+    let captureButtonText: JSX.Element = i18n.t(
+      'Retrieve Changes from Dev Org',
+    );
     if (currentlyCommitting) {
       captureButtonText = (
         <LabelWithSpinner
-          label={i18n.t('Capturing Selected Changes…')}
+          label={i18n.t('Retrieving Selected Changes…')}
           variant="inverse"
         />
       );
     } else if (fetchingChanges || currentlyFetching) {
       captureButtonText = (
         <LabelWithSpinner
-          label={i18n.t('Checking for Uncaptured Changes…')}
+          label={i18n.t('Checking for Unretrieved Changes…')}
           variant="inverse"
         />
       );

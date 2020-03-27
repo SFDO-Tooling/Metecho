@@ -117,7 +117,7 @@ describe('<OrgCards/>', () => {
 
       expect(getByText('View Org')).toBeVisible();
       expect(
-        getByText('has 1 uncaptured change', { exact: false }),
+        getByText('has 1 unretrieved change', { exact: false }),
       ).toBeVisible();
       expect(getByText('Assign')).toBeVisible();
       expect(getByText('check again')).toBeVisible();
@@ -781,7 +781,7 @@ describe('<OrgCards/>', () => {
           },
         });
 
-        expect(getByText('Checking for Uncaptured Changes…')).toBeVisible();
+        expect(getByText('Checking for Unretrieved Changes…')).toBeVisible();
       });
     });
   });
@@ -857,7 +857,7 @@ describe('<OrgCards/>', () => {
 
           expect(deleteObject).not.toHaveBeenCalled();
           expect(
-            getByText('Confirm Deleting Org With Uncaptured Changes'),
+            getByText('Confirm Deleting Org With Unretrieved Changes'),
           ).toBeVisible();
         });
 
@@ -876,7 +876,7 @@ describe('<OrgCards/>', () => {
               fireEvent.click(getByText('Cancel'));
 
               expect(
-                queryByText('Confirm Deleting Org With Uncaptured Changes'),
+                queryByText('Confirm Deleting Org With Unretrieved Changes'),
               ).toBeNull();
             });
           });
@@ -887,7 +887,7 @@ describe('<OrgCards/>', () => {
               fireEvent.click(getByText('Delete'));
 
               expect(
-                queryByText('Confirm Deleting Org With Uncaptured Changes'),
+                queryByText('Confirm Deleting Org With Unretrieved Changes'),
               ).toBeNull();
               expect(deleteObject).toHaveBeenCalledTimes(1);
 
