@@ -31,7 +31,7 @@ export const createTaskPR = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t('Successfully submitted task for review:')} “${
+        heading: `${i18n.t('Successfully submitted task for testing:')} “${
           model.name
         }”.`,
         linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
@@ -57,7 +57,7 @@ export const createTaskPRFailed = ({
     dispatch(
       addToast({
         heading: `${i18n.t(
-          'Uh oh. There was an error submitting task for review',
+          'Uh oh. There was an error submitting task for testing',
         )}: “${model.name}”.`,
         details: message,
         variant: 'error',

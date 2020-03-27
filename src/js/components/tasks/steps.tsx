@@ -17,7 +17,7 @@ interface TaskStatusPathProps {
 
 const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
   const hasDev = Boolean(task.assigned_dev);
-  const hasReviewer = Boolean(task.assigned_qa);
+  const hasTester = Boolean(task.assigned_qa);
   const hasReviewApproved =
     task.review_valid && task.review_status === REVIEW_STATUSES.APPROVED;
   const hasReviewRejected =
@@ -25,17 +25,17 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
     task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
   const readyForReview = task.has_unmerged_commits && task.pr_is_open;
   const devOrg = orgs[ORG_TYPES.DEV];
-  const reviewOrg = orgs[ORG_TYPES.QA];
+  const testOrg = orgs[ORG_TYPES.QA];
   const hasDevOrg = Boolean(devOrg && devOrg?.url);
-  const hasReviewOrg = Boolean(reviewOrg && reviewOrg?.url);
+  const hasTestOrg = Boolean(testOrg && testOrg?.url);
   const hasValidCommits = task.has_unmerged_commits && !hasReviewRejected;
   const taskCommits = getTaskCommits(task);
-  const reviewOrgOutOfDate =
-    hasReviewOrg && taskCommits.indexOf(reviewOrg?.latest_commit || '') !== 0;
+  const testOrgOutOfDate =
+    hasTestOrg && taskCommits.indexOf(testOrg?.latest_commit || '') !== 0;
 
   const steps = [
     {
-      label: `${i18n.t('Assign a developer')}`,
+      label: `${i18n.t('Assign a Developer')}`,
       visible: true,
       active: !hasDev,
       // Even if no dev is currently assigned,
@@ -73,51 +73,50 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
       assignee: task.assigned_dev,
     },
     {
-      label: `${i18n.t('Submit changes for review')}`,
+      label: `${i18n.t('Submit changes for testing')}`,
       visible: true,
       active: task.has_unmerged_commits && !task.pr_is_open,
       complete: task.pr_is_open,
       assignee: null,
     },
     {
-      label: `${i18n.t('Assign a reviewer')}`,
+      label: `${i18n.t('Assign a Tester')}`,
       visible: true,
-      active: readyForReview && !hasReviewer,
-      complete: hasReviewer || task.review_valid,
+      active: readyForReview && !hasTester,
+      complete: hasTester || task.review_valid,
       assignee: null,
     },
     {
-      label: `${i18n.t('Create a Scratch Org for review')}`,
-      visible: !reviewOrgOutOfDate,
-      active: readyForReview && hasReviewer && !hasReviewOrg,
-      complete: (hasReviewer && hasReviewOrg) || task.review_valid,
+      label: `${i18n.t('Create a Scratch Org for testing')}`,
+      visible: !testOrgOutOfDate,
+      active: readyForReview && hasTester && !hasTestOrg,
+      complete: (hasTester && hasTestOrg) || task.review_valid,
       assignee: task.assigned_qa,
     },
     {
-      label: `${i18n.t('Refresh Review Org')}`,
-      visible: reviewOrgOutOfDate,
-      active: reviewOrgOutOfDate,
+      label: `${i18n.t('Refresh Test Org')}`,
+      visible: testOrgOutOfDate,
+      active: testOrgOutOfDate,
       complete: false,
       assignee: task.assigned_qa,
     },
     {
-      label: `${i18n.t('Review changes in Review Org')}`,
+      label: `${i18n.t('Test changes in Test Org')}`,
       visible: true,
-      active: readyForReview && hasReviewOrg && !reviewOrg?.has_been_visited,
+      active: readyForReview && hasTestOrg && !testOrg?.has_been_visited,
       complete:
-        Boolean(hasReviewOrg && reviewOrg?.has_been_visited) ||
-        task.review_valid,
+        Boolean(hasTestOrg && testOrg?.has_been_visited) || task.review_valid,
       assignee: task.assigned_qa,
     },
     {
       label: `${i18n.t('Submit a review')}`,
       visible: true,
-      // Active if Task PR is still open, a up-to-date Review Org exists,
+      // Active if Task PR is still open, a up-to-date Test Org exists,
       // and there isn't already a valid review.
       active:
         readyForReview &&
-        Boolean(hasReviewOrg && reviewOrg?.has_been_visited) &&
-        !reviewOrgOutOfDate &&
+        Boolean(hasTestOrg && testOrg?.has_been_visited) &&
+        !testOrgOutOfDate &&
         !task.review_valid,
       complete: task.review_valid,
       assignee: task.assigned_qa,

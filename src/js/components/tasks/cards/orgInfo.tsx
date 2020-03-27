@@ -22,7 +22,7 @@ const OrgInfo = ({
   isCreating,
   isRefreshingOrg,
   isSubmittingReview,
-  reviewOrgOutOfDate,
+  testOrgOutOfDate,
   missingCommits,
   doCheckForOrgChanges,
 }: {
@@ -36,7 +36,7 @@ const OrgInfo = ({
   isCreating: boolean;
   isRefreshingOrg: boolean;
   isSubmittingReview: boolean;
-  reviewOrgOutOfDate: boolean;
+  testOrgOutOfDate: boolean;
   missingCommits: number;
   doCheckForOrgChanges: () => void;
 }) => {
@@ -96,11 +96,11 @@ const OrgInfo = ({
       }
       case ORG_TYPES.QA: {
         // synced status for QA org
-        if (reviewOrgOutOfDate && taskCommits?.length) {
+        if (testOrgOutOfDate && taskCommits?.length) {
           // eslint-disable-next-line max-len
           compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${taskCommits[0]}`;
         }
-        commitStatus = reviewOrgOutOfDate ? (
+        commitStatus = testOrgOutOfDate ? (
           <li>
             <Icon
               category="utility"

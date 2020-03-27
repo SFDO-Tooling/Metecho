@@ -25,7 +25,7 @@ const defaultDevOrg = {
   url: '/foo/',
   has_unsaved_changes: false,
 };
-const defaultReviewOrg = {
+const defaultTestOrg = {
   id: 'review-org',
   task: 'task',
   org_type: 'QA',
@@ -34,7 +34,7 @@ const defaultReviewOrg = {
   url: '/bar/',
   has_been_visited: false,
 };
-const reviewOrgVisited = {
+const testOrgVisited = {
   has_been_visited: true,
   latest_commit: 'foo',
 };
@@ -59,22 +59,22 @@ const taskWithPR = {
   ...taskWithChanges,
   pr_is_open: true,
 };
-const taskWithReviewer = {
+const taskWithTester = {
   ...taskWithPR,
   assigned_qa: stacy,
 };
 const taskWithReviewRejected = {
-  ...taskWithReviewer,
+  ...taskWithTester,
   review_valid: true,
   review_status: REVIEW_STATUSES.CHANGES_REQUESTED,
 };
 const taskWithReviewApproved = {
-  ...taskWithReviewer,
+  ...taskWithTester,
   review_valid: true,
   review_status: REVIEW_STATUSES.APPROVED,
 };
 const taskWithReviewInvalid = {
-  ...taskWithReviewer,
+  ...taskWithTester,
   review_valid: false,
   review_status: REVIEW_STATUSES.APPROVED,
 };
@@ -91,30 +91,30 @@ describe('<TaskStatusSteps />', () => {
       null,
     ],
     ['changes captured', taskWithChanges, {}, null],
-    ['submitted for review', taskWithPR, {}, null],
-    ['reviewer assigned, no org', taskWithReviewer, {}, null],
-    ['review org', taskWithReviewer, {}, { latest_commit: 'foo' }],
-    ['review org out-of-date', taskWithReviewer, {}, {}],
-    ['review org visited', taskWithReviewer, {}, reviewOrgVisited],
-    ['review rejected', taskWithReviewRejected, {}, reviewOrgVisited],
-    ['review approved', taskWithReviewApproved, {}, reviewOrgVisited],
-    ['review invalid', taskWithReviewInvalid, {}, reviewOrgVisited],
-  ])('renders steps: %s', (name, taskOpts, devOrgOpts, reviewOrgOpts) => {
+    ['submitted for testing', taskWithPR, {}, null],
+    ['tester assigned, no org', taskWithTester, {}, null],
+    ['test org', taskWithTester, {}, { latest_commit: 'foo' }],
+    ['test org out-of-date', taskWithTester, {}, {}],
+    ['test org visited', taskWithTester, {}, testOrgVisited],
+    ['review rejected', taskWithReviewRejected, {}, testOrgVisited],
+    ['review approved', taskWithReviewApproved, {}, testOrgVisited],
+    ['review invalid', taskWithReviewInvalid, {}, testOrgVisited],
+  ])('renders steps: %s', (name, taskOpts, devOrgOpts, testOrgOpts) => {
     const task = { ...defaultTask, ...taskOpts };
-    let devOrg, reviewOrg;
+    let devOrg, testOrg;
     if (devOrgOpts === null) {
       devOrg = null;
     } else {
       devOrg = { ...defaultDevOrg, ...devOrgOpts };
     }
-    if (reviewOrgOpts === null) {
-      reviewOrg = null;
+    if (testOrgOpts === null) {
+      testOrg = null;
     } else {
-      reviewOrg = { ...defaultReviewOrg, ...reviewOrgOpts };
+      testOrg = { ...defaultTestOrg, ...testOrgOpts };
     }
     const orgs = {
       Dev: devOrg,
-      QA: reviewOrg,
+      QA: testOrg,
     };
     const { container } = render(<TaskStatusSteps task={task} orgs={orgs} />);
 

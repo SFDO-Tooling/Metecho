@@ -15,7 +15,7 @@ const OrgActions = ({
   ownedByCurrentUser,
   assignedToCurrentUser,
   ownedByWrongUser,
-  reviewOrgOutOfDate,
+  testOrgOutOfDate,
   readyForReview,
   isCreating,
   isDeleting,
@@ -32,7 +32,7 @@ const OrgActions = ({
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
-  reviewOrgOutOfDate: boolean;
+  testOrgOutOfDate: boolean;
   readyForReview: boolean;
   isCreating: boolean;
   isDeleting: boolean;
@@ -101,7 +101,7 @@ const OrgActions = ({
   if (ownedByCurrentUser && (org || ownedByWrongUser)) {
     return (
       <>
-        {reviewOrgOutOfDate && (
+        {testOrgOutOfDate && (
           <Button
             label={i18n.t('Refresh Org')}
             variant="brand"
@@ -128,7 +128,7 @@ const OrgActions = ({
   }
 
   if (assignedToCurrentUser && !(org || ownedByWrongUser)) {
-    const preventReviewOrg =
+    const preventNewTestOrg =
       type === ORG_TYPES.QA && !task.has_unmerged_commits;
     const hasReviewRejected =
       task.review_valid &&
@@ -147,7 +147,7 @@ const OrgActions = ({
     return (
       <>
         {submitReviewBtn}
-        {!preventReviewOrg && (
+        {!preventNewTestOrg && (
           <Button
             label={i18n.t('Create Org')}
             variant={isActive ? 'brand' : 'neutral'}

@@ -151,7 +151,7 @@ const OrgCard = ({
   const taskCommits = getTaskCommits(task);
   const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;
   // We consider an org out-of-date if it is not based on the first commit.
-  const reviewOrgOutOfDate = Boolean(
+  const testOrgOutOfDate = Boolean(
     type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
   );
 
@@ -159,17 +159,17 @@ const OrgCard = ({
     task.pr_is_open &&
       assignedToCurrentUser &&
       type === ORG_TYPES.QA &&
-      !reviewOrgOutOfDate &&
+      !testOrgOutOfDate &&
       (ownedByCurrentUser || (!org && task.review_valid)),
   );
 
   const heading =
-    type === ORG_TYPES.QA ? i18n.t('Reviewer') : i18n.t('Developer');
+    type === ORG_TYPES.QA ? i18n.t('Tester') : i18n.t('Developer');
   const orgHeading =
-    type === ORG_TYPES.QA ? i18n.t('Review Org') : i18n.t('Dev Org');
+    type === ORG_TYPES.QA ? i18n.t('Test Org') : i18n.t('Dev Org');
   const userModalHeading =
     type === ORG_TYPES.QA
-      ? i18n.t('Assign Reviewer')
+      ? i18n.t('Assign Tester')
       : i18n.t('Assign Developer');
 
   return (
@@ -198,7 +198,7 @@ const OrgCard = ({
             isDeleting={isDeleting}
             isRefreshingChanges={isRefreshingChanges}
             isRefreshingOrg={isRefreshingOrg}
-            reviewOrgOutOfDate={reviewOrgOutOfDate}
+            testOrgOutOfDate={testOrgOutOfDate}
             readyForReview={readyForReview}
             openRefreshOrgModal={openRefreshOrgModal}
           />
@@ -223,7 +223,7 @@ const OrgCard = ({
                     ownedByCurrentUser={ownedByCurrentUser}
                     isDeleting={isDeleting}
                     isRefreshingOrg={isRefreshingOrg}
-                    reviewOrgOutOfDate={reviewOrgOutOfDate}
+                    testOrgOutOfDate={testOrgOutOfDate}
                     openRefreshOrgModal={openRefreshOrgModal}
                   />
                 )
@@ -236,7 +236,7 @@ const OrgCard = ({
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
                   ownedByWrongUser={ownedByWrongUser}
-                  reviewOrgOutOfDate={reviewOrgOutOfDate}
+                  testOrgOutOfDate={testOrgOutOfDate}
                   readyForReview={readyForReview}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
@@ -260,7 +260,7 @@ const OrgCard = ({
                 isCreating={isCreating}
                 isRefreshingOrg={isRefreshingOrg}
                 isSubmittingReview={isSubmittingReview}
-                reviewOrgOutOfDate={reviewOrgOutOfDate}
+                testOrgOutOfDate={testOrgOutOfDate}
                 missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
               />
@@ -284,7 +284,7 @@ const OrgCard = ({
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
       />
-      {reviewOrgOutOfDate && (
+      {testOrgOutOfDate && (
         <RefreshOrgModal
           orgUrl={window.api_urls.scratch_org_redirect(org?.id)}
           missingCommits={orgCommitIdx}

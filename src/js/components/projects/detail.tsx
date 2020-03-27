@@ -263,16 +263,16 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const tasksTotal = tasks?.length || 0;
   const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
 
-  // "Submit Project for Review" button:
+  // "Submit Project for Review on GitHub" button:
   let submitButton: React.ReactNode = null;
   if (readyToSubmit) {
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
-        label={i18n.t('Submitting Project for Review…')}
+        label={i18n.t('Submitting Project for Review on GitHub…')}
         variant="inverse"
       />
     ) : (
-      i18n.t('Submit Project for Review')
+      i18n.t('Submit Project for Review on GitHub')
     );
     submitButton = (
       <Button

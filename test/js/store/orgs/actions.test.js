@@ -59,7 +59,7 @@ describe('provisionOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Successfully created Dev org for task “My Task”.',
+        'Successfully created Dev Org for task “My Task”.',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
       expect(allActions[0].payload.linkUrl).toEqual(
@@ -83,7 +83,7 @@ describe('provisionOrg', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully created Dev org.',
+      'Successfully created Dev Org.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
     expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -135,7 +135,7 @@ describe('provisionFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error creating your new Dev org for task “My Task”.',
+        'Uh oh. There was an error creating your new Dev Org for task “My Task”.',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');
@@ -165,7 +165,7 @@ describe('provisionFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error creating your new Dev org.',
+        'Uh oh. There was an error creating your new Dev Org.',
       );
       expect(allActions[0].payload.linkText).toBeUndefined();
       expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -374,7 +374,7 @@ describe('deleteOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Successfully deleted Dev org for task “My Task”.',
+        'Successfully deleted Dev Org for task “My Task”.',
       );
       expect(allActions[1]).toEqual(orgAction);
     });
@@ -446,7 +446,7 @@ describe('deleteFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error deleting your Dev org for task “My Task”.',
+        'Uh oh. There was an error deleting your Dev Org for task “My Task”.',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');

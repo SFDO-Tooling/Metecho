@@ -201,11 +201,11 @@ const TaskDetail = (props: RouteComponentProps) => {
     const isPrimary = !(userIsOwner && orgHasChanges);
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
-        label={i18n.t('Submitting Task for Review…')}
+        label={i18n.t('Submitting Task for Testing…')}
         variant={isPrimary ? 'inverse' : 'base'}
       />
     ) : (
-      i18n.t('Submit Task for Review')
+      i18n.t('Submit Task for Testing')
     );
     submitButton = (
       <Button

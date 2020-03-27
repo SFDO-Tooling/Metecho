@@ -332,7 +332,7 @@ describe('<TaskDetail/>', () => {
   });
 
   describe('pr is closed', () => {
-    test('renders "Submit Task for Review" button', () => {
+    test('renders "Submit Task for Testing" button', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
@@ -350,12 +350,12 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(getByText('Submit Task for Review')).toBeVisible();
+      expect(getByText('Submit Task for Testing')).toBeVisible();
     });
   });
 
   describe('pr is open', () => {
-    test('does not render "Submit Task for Review" button', () => {
+    test('does not render "Submit Task for Testing" button', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
@@ -373,11 +373,11 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(queryByText('Submit Task for Review')).toBeNull();
+      expect(queryByText('Submit Task for Testing')).toBeNull();
     });
   });
 
-  describe('"Submit Task for Review" click', () => {
+  describe('"Submit Task for Testing" click', () => {
     test('opens modal', () => {
       const { getByText } = setup({
         initialState: {
@@ -393,13 +393,13 @@ describe('<TaskDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getByText('Submit Task for Review'));
+      fireEvent.click(getByText('Submit Task for Testing'));
 
-      expect(getByText('Submit this task for review')).toBeVisible();
+      expect(getByText('Submit this task for testing')).toBeVisible();
     });
   });
 
-  describe('submitting task for review', () => {
+  describe('submitting task for testing', () => {
     test('renders loading button', () => {
       const { getByText } = setup({
         initialState: {
@@ -417,7 +417,7 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(getByText('Submitting Task for Review…')).toBeVisible();
+      expect(getByText('Submitting Task for Testing…')).toBeVisible();
     });
   });
 
@@ -448,7 +448,7 @@ describe('<TaskDetail/>', () => {
       },
     });
 
-    expect(getByText('Submitting Task for Review…')).toBeVisible();
+    expect(getByText('Submitting Task for Testing…')).toBeVisible();
   });
 
   describe('edit task click', () => {

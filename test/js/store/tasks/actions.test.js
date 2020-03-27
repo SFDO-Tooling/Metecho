@@ -29,7 +29,7 @@ describe('createTaskPR', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully submitted task for review: “My Task”.',
+      'Successfully submitted task for testing: “My Task”.',
     );
     expect(allActions[0].payload.linkText).toEqual('View pull request.');
     expect(allActions[0].payload.linkUrl).toEqual('my-pr-url');
@@ -75,7 +75,7 @@ describe('createTaskPR', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully submitted task for review: “My Task”.',
+      'Successfully submitted task for testing: “My Task”.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
     expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -105,7 +105,7 @@ describe('createTaskPRFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error submitting task for review: “My Task”.',
+      'Uh oh. There was an error submitting task for testing: “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

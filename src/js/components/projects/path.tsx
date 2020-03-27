@@ -1,8 +1,8 @@
+import i18n from 'i18next';
 import React from 'react';
 
 import Path from '@/components/path';
 import { PROJECT_STATUSES, ProjectStatuses } from '@/utils/constants';
-import { getSteps } from '@/utils/helpers';
 
 interface Props {
   status: ProjectStatuses;
@@ -12,7 +12,12 @@ interface Props {
 const ProjectStatusPath = ({ status, prIsOpen }: Props) => {
   let activeIdx = 0;
   let isCompleted = false;
-  const steps = getSteps();
+  const steps = [
+    i18n.t('Planned'),
+    i18n.t('In progress'),
+    i18n.t('Review'),
+    i18n.t('Merged'),
+  ];
   switch (status) {
     case PROJECT_STATUSES.IN_PROGRESS:
       activeIdx = 1;

@@ -37,7 +37,7 @@ const ConnectToSalesforce = ({
       />
       <Tooltip
         content={i18n.t(
-          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Review scratch org.',
+          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Test scratch org.',
         )}
         position="overflowBoundaryElement"
         align="top right"
