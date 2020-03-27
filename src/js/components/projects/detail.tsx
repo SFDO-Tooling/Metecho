@@ -342,7 +342,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
 
   return (
     <DocumentTitle
-      title={`${project.name} | ${repository.name} | ${i18n.t('MetaShare')}`}
+      title={`${project.name} | ${repository.name} | ${i18n.t('Metecho')}`}
     >
       <DetailPageLayout
         title={project.name}

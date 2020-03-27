@@ -70,7 +70,7 @@ const Login = () => {
         >
           <div className="slds-welcome-mat__info-content">
             <h1 className="slds-welcome-mat__info-title">
-              {i18n.t('Welcome to MetaShare!')}
+              {i18n.t('Welcome to Metecho!')}
             </h1>
             <div
               className="slds-welcome-mat__info-description
@@ -100,15 +100,15 @@ const Login = () => {
             slds-grid_align-center"
         >
           <h2 className="slds-text-heading_large slds-p-bottom_medium">
-            {i18n.t('What is MetaShare?')}
+            {i18n.t('What is Metecho?')}
           </h2>
           <p className="slds-p-bottom_xx-large">
             {i18n.t(
-              'MetaShare is a tool to help collaborate on sharable Salesforce projects.',
+              'Metecho is a tool to help collaborate on sharable Salesforce projects.',
             )}
           </p>
           <h3 className="slds-text-heading_small slds-p-bottom_small">
-            {i18n.t('What can I do with MetaShare?')}
+            {i18n.t('What can I do with Metecho?')}
           </h3>
           <ul className="slds-m-bottom_x-large">
             <li className="slds-p-bottom_small slds-grid">
@@ -141,10 +141,7 @@ const Login = () => {
               )}
             </li>
           </ul>
-          <img
-            src={welcomeMatFG}
-            alt="screenshots of MetaShare app interface"
-          />
+          <img src={welcomeMatFG} alt="screenshots of Metecho app interface" />
         </div>
       </div>
     </div>

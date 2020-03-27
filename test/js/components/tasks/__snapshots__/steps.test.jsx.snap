@@ -85,7 +85,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -278,7 +278,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -457,7 +457,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -636,7 +636,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -768,7 +768,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -933,7 +933,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -1169,7 +1169,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -1413,7 +1413,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -1665,7 +1665,7 @@ exports[`<TaskStatusSteps /> renders steps: review org out-of-date 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -1931,7 +1931,7 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -2189,7 +2189,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -2419,7 +2419,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
@@ -2679,7 +2679,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org and capture in Metecho
         </div>
       </li>
       <li
