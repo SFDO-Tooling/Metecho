@@ -53,23 +53,23 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
       assignee: task.assigned_dev,
     },
     {
-      label: `${i18n.t('Make changes in Dev Org and capture in Metecho')}`,
+      label: `${i18n.t('Make changes in Dev Org')}`,
       visible: true,
-      // Active if we have an assigned Dev, a Dev Org, and any of the following:
-      //   - The task has no commits yet
-      //   - The Dev Org has unsaved changes
-      //   - Changes have been requested via review
-      active:
-        hasDev &&
-        hasDevOrg &&
-        (!task.has_unmerged_commits ||
-          devOrg?.has_unsaved_changes ||
-          hasReviewRejected),
-      // Complete if we have commits (without rejected review) and either:
-      //   - The Dev Org has no unsaved changes
-      //   - Review has been approved
-      complete:
-        hasValidCommits && (!devOrg?.has_unsaved_changes || hasReviewApproved),
+      // Active if we have an assigned Dev, a Dev Org, and the Dev Org has no
+      // unsaved changes
+      active: hasDev && hasDevOrg && !devOrg?.has_unsaved_changes,
+      // Complete if the Dev Org has unsaved changes or we have commits
+      // (without rejected review)
+      complete: Boolean(devOrg?.has_unsaved_changes || hasValidCommits),
+      assignee: task.assigned_dev,
+    },
+    {
+      label: `${i18n.t('Retrieve changes from Dev Org')}`,
+      visible: true,
+      // Active if we have an assigned Dev and a Dev Org with unsaved changes
+      active: hasDev && hasDevOrg && Boolean(devOrg?.has_unsaved_changes),
+      // Complete if we have commits (without rejected review)
+      complete: hasValidCommits,
       assignee: task.assigned_dev,
     },
     {
@@ -103,7 +103,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
     {
       label: `${i18n.t('Review changes in Review Org')}`,
       visible: true,
-      active: hasReviewOrg && !reviewOrg?.has_been_visited,
+      active: readyForReview && hasReviewOrg && !reviewOrg?.has_been_visited,
       complete:
         Boolean(hasReviewOrg && reviewOrg?.has_been_visited) ||
         task.review_valid,
@@ -115,7 +115,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
       // Active if Task PR is still open, a up-to-date Review Org exists,
       // and there isn't already a valid review.
       active:
-        task.pr_is_open &&
+        readyForReview &&
         Boolean(hasReviewOrg && reviewOrg?.has_been_visited) &&
         !reviewOrgOutOfDate &&
         !task.review_valid,
@@ -125,7 +125,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
     {
       label: `${i18n.t('Merge pull request on GitHub')}`,
       visible: true,
-      active: task.pr_is_open && hasReviewApproved,
+      active: readyForReview && hasReviewApproved,
       complete: false,
       assignee: null,
     },

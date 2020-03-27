@@ -85,7 +85,32 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -278,7 +303,40 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -457,7 +515,40 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -601,6 +692,31 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         </div>
       </li>
       <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
         class="slds-progress__item slds-is-active"
       >
         <div>
@@ -636,7 +752,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -768,7 +884,19 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div
+          class="slds-progress__marker slds-m-left_x-large"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -933,7 +1061,32 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -1169,7 +1322,32 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -1413,7 +1591,32 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -1665,7 +1868,32 @@ exports[`<TaskStatusSteps /> renders steps: review org out-of-date 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -1931,7 +2159,32 @@ exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -2189,7 +2442,40 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -2419,7 +2705,32 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -2679,7 +2990,32 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in Metecho
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
