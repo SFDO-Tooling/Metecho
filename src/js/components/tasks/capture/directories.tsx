@@ -1,5 +1,6 @@
 import Radio from '@salesforce/design-system-react/components/radio';
-import RadioGroup from '@salesforce/design-system-react/components/radio-group';
+import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
@@ -21,12 +22,6 @@ const TargetDirectoriesForm = ({
   errors,
   handleInputChange,
 }: Props) => {
-  const headings = {
-    source: i18n.t('Package Directories'),
-    pre: i18n.t('Pre-Install Directories'),
-    post: i18n.t('Post-Install Directories'),
-    config: i18n.t('Optional Configuration Directories'),
-  };
   const keys = [
     'source' as 'source',
     'pre' as 'pre',
@@ -42,62 +37,64 @@ const TargetDirectoriesForm = ({
       orderedDirectories.set(key, directories[key] as string[]);
     }
   });
+  const headings = {
+    source: i18n.t('Package Directories'),
+    pre: i18n.t('Pre-Install Directories'),
+    post: i18n.t('Post-Install Directories'),
+    config: i18n.t('Optional Configuration Directories'),
+  };
+  const help = {
+    source: (
+      <Trans i18nKey="targetDirectorySourceInfo">
+        Package Directories hold the main metadata components of the package you
+        are building. These components will be deployed as an unmanaged package
+        during development, but installed as a managed or unlocked package in
+        production.
+      </Trans>
+    ),
+    pre: (
+      <Trans i18nKey="targetDirectoryPreInfo">
+        Pre-Install Directories are for unmanaged metadata components that
+        should always be deployed prior to deploying or installing the package.
+      </Trans>
+    ),
+    post: (
+      <Trans i18nKey="targetDirectoryPostInfo">
+        Post-Install Directories are for unmanaged metadata components that
+        should always be deployed after deploying or installing the package.
+      </Trans>
+    ),
+    config: (
+      <Trans i18nKey="targetDirectoryConfigInfo">
+        Optional Configuration Directories are for additional sets of metadata
+        components that will only be deployed on demand.
+      </Trans>
+    ),
+  };
 
   return (
     <form className="slds-form slds-p-around_large">
-      <div className="slds-form-element__help slds-p-bottom_small slds-text-longform">
-        {orderedDirectories.has('source') && (
-          <p>
-            <Trans i18nKey="targetDirectorySourceInfo">
-              Package Directories hold the main metadata components of the
-              package you are building. These components will be deployed as an
-              unmanaged package during development, but installed as a managed
-              or unlocked package in production.
-            </Trans>
-          </p>
-        )}
-        {orderedDirectories.has('pre') && (
-          <p>
-            <Trans i18nKey="targetDirectoryPreInfo">
-              Pre-Install Directories are for unmanaged metadata components that
-              should always be deployed prior to deploying or installing the
-              package.
-            </Trans>
-          </p>
-        )}
-        {orderedDirectories.has('post') && (
-          <p>
-            <Trans i18nKey="targetDirectoryPostInfo">
-              Post-Install Directories are for unmanaged metadata components
-              that should always be deployed after deploying or installing the
-              package.
-            </Trans>
-          </p>
-        )}
-        {orderedDirectories.has('config') && (
-          <p>
-            <Trans i18nKey="targetDirectoryConfigInfo">
-              Optional Configuration Directories are for additional sets of
-              metadata components that will only be deployed on demand.
-            </Trans>
-          </p>
-        )}
-      </div>
       <ModalCard>
         {Array.from(orderedDirectories, ([key, dirs], idx) => {
           const hasErrors = Boolean(errors.target_directory);
           const isLast = idx === orderedDirectories.size - 1;
-          const err = hasErrors ? ' ' : undefined;
           return (
-            <div key={`${key}-${idx}`} className="slds-p-bottom_x-small">
-              <RadioGroup
-                labels={{
-                  label: headings[key],
-                  error: isLast ? errors.target_directory : err,
-                }}
-                name="target_directory"
-                onChange={handleInputChange}
-              >
+            <fieldset
+              key={`${key}-${idx}`}
+              className={classNames('slds-form-element slds-p-bottom_x-small', {
+                'slds-has-error': hasErrors,
+              })}
+            >
+              <legend className="slds-form-element__legend slds-form-element__label">
+                <span className="slds-p-right_xx-small">{headings[key]}</span>
+                <Tooltip
+                  content={help[key]}
+                  position="overflowBoundaryElement"
+                  align="top left"
+                  dialogClassName="modal-tooltip"
+                />
+              </legend>
+              <div className="slds-form-element__control">
                 {dirs.map((dir, dirIdx) => (
                   <Radio
                     key={`${key}-${dirIdx}`}
@@ -106,10 +103,22 @@ const TargetDirectoriesForm = ({
                     checked={inputs.target_directory === dir}
                     value={dir}
                     name="target_directory"
+                    aria-describedby={
+                      hasErrors ? 'target_directory-error' : undefined
+                    }
+                    onChange={handleInputChange}
                   />
                 ))}
-              </RadioGroup>
-            </div>
+              </div>
+              {hasErrors && isLast && (
+                <div
+                  id="target_directory-error"
+                  className="slds-form-element__help"
+                >
+                  {errors.target_directory}
+                </div>
+              )}
+            </fieldset>
           );
         })}
       </ModalCard>

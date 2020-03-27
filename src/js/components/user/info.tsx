@@ -31,7 +31,7 @@ const ConnectToSalesforce = ({
     <>
       <Button
         label={i18n.t('Connect to Salesforce')}
-        className="slds-text-body_regular"
+        className="slds-text-body_regular slds-p-right_xx-small"
         variant="link"
         onClick={openConnectModal}
       />
@@ -39,23 +39,9 @@ const ConnectToSalesforce = ({
         content={i18n.t(
           'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Review scratch org.',
         )}
-        variant="learnMore"
         position="overflowBoundaryElement"
         align="top right"
-        triggerClassName="slds-p-left_x-small"
-      >
-        <a>
-          <Icon
-            category="utility"
-            name="info"
-            assistiveText={{
-              label: i18n.t('Learn More'),
-            }}
-            size="xx-small"
-            className="slds-m-bottom_xx-small"
-          />
-        </a>
-      </Tooltip>
+      />
     </>
   );
 };
