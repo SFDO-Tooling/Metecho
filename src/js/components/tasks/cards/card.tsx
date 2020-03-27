@@ -256,7 +256,6 @@ const OrgCard = ({
                 taskCommits={taskCommits}
                 repoUrl={repoUrl}
                 ownedByCurrentUser={ownedByCurrentUser}
-                assignedToCurrentUser={assignedToCurrentUser}
                 ownedByWrongUser={ownedByWrongUser}
                 isCreating={isCreating}
                 isRefreshingOrg={isRefreshingOrg}

@@ -18,7 +18,6 @@ const OrgInfo = ({
   repoUrl,
   taskCommits,
   ownedByCurrentUser,
-  assignedToCurrentUser,
   ownedByWrongUser,
   isCreating,
   isRefreshingOrg,
@@ -33,7 +32,6 @@ const OrgInfo = ({
   repoUrl: string;
   taskCommits?: string[];
   ownedByCurrentUser: boolean;
-  assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
   isCreating: boolean;
   isRefreshingOrg: boolean;
