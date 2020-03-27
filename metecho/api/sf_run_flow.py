@@ -286,7 +286,7 @@ def create_org(
 def run_flow(*, cci, org_config, flow_name, project_path, user):
     """Run a flow on a scratch org"""
     # Run flow in a subprocess so we can control the environment
-    gh_token = user.socialaccount_set.get(provider="github").socialtoken_set.get().token
+    gh_token = user.gh_token
     command = shutil.which("cci")
     args = [command, "flow", "run", flow_name, "--org", "dev"]
     env = {
