@@ -314,11 +314,13 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
     )
     out, err = p.communicate()
     if p.returncode:
-        p = subprocess.run([command, "error", "info"], capture_output=True)
+        p = subprocess.run(
+            [command, "error", "info"], capture_output=True, env={"HOME": project_path}
+        )
         traceback = p.stdout.decode("utf-8")
         logger.warning(traceback)
         raise Exception(
-            f"Error while running {flow_name} flow: {traceback.splitlines()[-5:]}"
+            f"Error while running {flow_name} flow: {traceback.splitlines()[-2]}"
         )
 
 
