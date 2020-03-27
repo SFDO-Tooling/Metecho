@@ -85,7 +85,7 @@ def refresh_access_token(*, config, org_name, scratch_org, originating_user_id):
             #
             # This is also why we repeat the first sentence.
             error_msg = _(
-                f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: E501
+                f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
             )
         else:
             error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
@@ -142,7 +142,7 @@ def get_org_result(
     """Create a new scratch org using the ScratchOrgInfo object in the Dev Hub org,
     and get the result."""
     # Schema for ScratchOrgInfo object:
-    # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm
+    # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm  # noqa: B950
     create_args = {
         "AdminEmail": email,
         "ConnectedAppConsumerKey": SF_CLIENT_ID,
