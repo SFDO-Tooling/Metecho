@@ -1,12 +1,12 @@
-MetaShare
-=========
+Metecho
+=======
 
-.. image:: https://circleci.com/gh/SFDO-Tooling/MetaShare.svg?style=shield
-     :target: https://circleci.com/gh/SFDO-Tooling/MetaShare
+.. image:: https://circleci.com/gh/SFDO-Tooling/Metecho.svg?style=shield
+     :target: https://circleci.com/gh/SFDO-Tooling/Metecho
      :alt: Build Status
 
-.. image:: https://coveralls.io/repos/github/SFDO-Tooling/MetaShare/badge.svg?branch=master
-     :target: https://coveralls.io/github/SFDO-Tooling/MetaShare?branch=master
+.. image:: https://coveralls.io/repos/github/SFDO-Tooling/Metecho/badge.svg?branch=master
+     :target: https://coveralls.io/github/SFDO-Tooling/Metecho?branch=master
      :alt: Test Coverage
 
 Development
@@ -22,4 +22,4 @@ Got feedback?
 -------------
 
 Please open a new `GitHub Issue
-<https://github.com/SFDO-Tooling/MetaShare/issues>`_.
+<https://github.com/SFDO-Tooling/Metecho/issues>`_.

@@ -1,20 +1,21 @@
 {
-  "name": "metashare",
+  "name": "metecho",
   "description": "Web-based tool for collaborating on Salesforce projects",
   "version": "0.1.0",
   "private": true,
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SFDO-Tooling/MetaShare.git"
+    "url": "https://github.com/SFDO-Tooling/Metecho.git"
   },
   "engines": {
-    "node": "12.14.1"
+    "node": "12.14.1",
+    "yarn": "1.21.1"
   },
   "scripts": {
     "webpack:serve": "webpack-dev-server --config webpack.dev.js",
     "django:serve": "python manage.py runserver 0.0.0.0:${PORT:-8000}",
-    "django:serve:prod": "daphne --bind 0.0.0.0 --port ${PORT:-8000} metashare.asgi:application",
+    "django:serve:prod": "daphne --bind 0.0.0.0 --port ${PORT:-8000} metecho.asgi:application",
     "redis:clear": "redis-cli -h redis FLUSHALL",
     "worker:serve": "python manage.py rqworker default",
     "scheduler:serve": "python manage.py rqscheduler",
@@ -25,9 +26,9 @@
     "eslint": "yarn eslint:nofix --fix",
     "eslint:nofix": "eslint '*.js' src/js test/js --ext .js,.ts,.jsx,.tsx",
     "tsc": "tsc",
-    "flake8": "flake8 manage.py metashare/ config/",
-    "isort": "isort -rc manage.py metashare/ config/",
-    "black": "black manage.py metashare/ config/",
+    "flake8": "flake8 manage.py metecho/ config/",
+    "isort": "isort -rc manage.py metecho/ config/",
+    "black": "black manage.py metecho/ config/",
     "lint": "run-p lint:py lint:js lint:sass prettier:other",
     "lint:nofix": "run-p flake8 eslint:nofix lint:sass:nofix tsc",
     "lint:js": "run-s prettier:js eslint tsc",
@@ -46,7 +47,8 @@
     "packtracker": "packtracker-upload --stats=webpack-stats.json --output-path=dist/prod",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
-    "prod:stats": "webpack --config webpack.prod.js --json > webpack-stats.json"
+    "prod:stats": "webpack --config webpack.prod.js --json > webpack-stats.json",
+    "heroku-postbuild": "yarn prod"
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.11.6",

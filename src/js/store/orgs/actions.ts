@@ -232,7 +232,7 @@ export const deleteOrg = ({
     // prevent that, but another solution could be for the reducer to ignore
     // orgs that have already been removed.
     //
-    // See https://github.com/oddbird/MetaShare/pull/79#discussion_r347644315
+    // See https://github.com/oddbird/Metecho/pull/79#discussion_r347644315
     window.socket.unsubscribe({
       model: OBJECT_TYPES.ORG,
       id: model.id,
