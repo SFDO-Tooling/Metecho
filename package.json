@@ -28,7 +28,7 @@
     "tsc": "tsc",
     "flake8": "flake8 manage.py metecho/ config/",
     "isort": "isort -rc manage.py metecho/ config/",
-    "black": "black manage.py metecho/ config/",
+    "black": "black --line-length 100 manage.py metecho/ config/",
     "lint": "run-p lint:py lint:js lint:sass prettier:other",
     "lint:nofix": "run-p flake8 eslint:nofix lint:sass:nofix tsc",
     "lint:js": "run-s prettier:js eslint tsc",
