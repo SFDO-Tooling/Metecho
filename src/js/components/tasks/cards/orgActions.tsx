@@ -6,9 +6,11 @@ import React from 'react';
 import { LabelWithSpinner } from '@/components/utils';
 import { Org } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
+import { ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 const OrgActions = ({
   org,
+  type,
   task,
   ownedByCurrentUser,
   assignedToCurrentUser,
@@ -25,6 +27,7 @@ const OrgActions = ({
   doRefreshOrg,
 }: {
   org: Org | null;
+  type: OrgTypes;
   task: Task;
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
@@ -124,11 +127,15 @@ const OrgActions = ({
     );
   }
 
-  if (!(org || ownedByWrongUser) && assignedToCurrentUser) {
+  if (assignedToCurrentUser && !(org || ownedByWrongUser)) {
+    const preventReviewOrg =
+      type === ORG_TYPES.QA && !task.has_unmerged_commits;
     return (
       <>
         {submitReviewBtn}
-        <Button label={i18n.t('Create Org')} onClick={doCreateOrg} />
+        {!preventReviewOrg && (
+          <Button label={i18n.t('Create Org')} onClick={doCreateOrg} />
+        )}
       </>
     );
   }

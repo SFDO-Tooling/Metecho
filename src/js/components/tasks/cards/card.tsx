@@ -231,6 +231,7 @@ const OrgCard = ({
               headerActions={
                 <OrgActions
                   org={org}
+                  type={type}
                   task={task}
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}

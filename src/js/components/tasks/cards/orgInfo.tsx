@@ -55,7 +55,11 @@ const OrgInfo = ({
     );
   }
 
-  if (!org && !assignedToCurrentUser) {
+  if (isCreating || isRefreshingOrg) {
+    return null;
+  }
+
+  if (!(org || task.review_status)) {
     return (
       <ul>
         <li>
@@ -65,10 +69,6 @@ const OrgInfo = ({
         </li>
       </ul>
     );
-  }
-
-  if (!(org || task.review_status) || isCreating || isRefreshingOrg) {
-    return null;
   }
 
   const expiresAt = org?.expires_at && new Date(org.expires_at);

@@ -70,6 +70,7 @@ const defaultTask = {
   commits: [{ id: '617a512-longlong' }, { id: 'other' }],
   origin_sha: 'parent',
   review_submitted_at: '2019-10-16T12:58:53.721Z',
+  has_unmerged_commits: true,
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
