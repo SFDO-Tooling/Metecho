@@ -6,7 +6,7 @@ import React from 'react';
 import { LabelWithSpinner } from '@/components/utils';
 import { Org } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
-import { ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '@/utils/constants';
 
 const OrgActions = ({
   org,
@@ -130,11 +130,29 @@ const OrgActions = ({
   if (assignedToCurrentUser && !(org || ownedByWrongUser)) {
     const preventReviewOrg =
       type === ORG_TYPES.QA && !task.has_unmerged_commits;
+    const hasReviewRejected =
+      task.review_valid &&
+      task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
+    const needsReview =
+      task.has_unmerged_commits && task.pr_is_open && !task.review_valid;
+    let isActive = false;
+    switch (type) {
+      case ORG_TYPES.DEV:
+        isActive = hasReviewRejected || !task.has_unmerged_commits;
+        break;
+      case ORG_TYPES.QA:
+        isActive = needsReview;
+        break;
+    }
     return (
       <>
         {submitReviewBtn}
         {!preventReviewOrg && (
-          <Button label={i18n.t('Create Org')} onClick={doCreateOrg} />
+          <Button
+            label={i18n.t('Create Org')}
+            variant={isActive ? 'brand' : 'neutral'}
+            onClick={doCreateOrg}
+          />
         )}
       </>
     );
