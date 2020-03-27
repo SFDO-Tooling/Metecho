@@ -2,6 +2,7 @@ from collections import namedtuple
 
 from asgiref.sync import async_to_sync
 from django.db import models
+from django.utils import timezone
 from hashid_field import HashidAutoField
 
 from . import push
@@ -162,3 +163,26 @@ class CreatePrMixin:
             )
         else:
             self.notify_error(error=error, originating_user_id=originating_user_id)
+
+
+class SoftDeleteQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(deleted_at__isnull=True)
+
+    def delete(self):
+        return self.update(deleted_at=timezone.now())
+
+    delete.queryset_only = True
+
+
+class SoftDeleteMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    deleted_at = models.DateTimeField(null=True)
+
+    objects = SoftDeleteQuerySet.as_manager()
+
+    def delete(self, *args, **kwargs):
+        self.deleted_at = timezone.now()
+        self.save()
