@@ -369,6 +369,7 @@ describe('<TaskDetail/>', () => {
                 has_unmerged_commits: true,
                 pr_url: 'my-pr-url',
                 pr_is_open: true,
+                review_valid: true,
               },
             ],
           },

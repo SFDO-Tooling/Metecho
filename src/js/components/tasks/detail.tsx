@@ -36,7 +36,12 @@ import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { OBJECT_TYPES, ORG_TYPES, TASK_STATUSES } from '@/utils/constants';
+import {
+  OBJECT_TYPES,
+  ORG_TYPES,
+  REVIEW_STATUSES,
+  TASK_STATUSES,
+} from '@/utils/constants';
 import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
@@ -67,6 +72,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
   const userIsAssignedDev = Boolean(
     user.username === task?.assigned_dev?.login,
+  );
+  const hasReviewRejected = Boolean(
+    task?.review_valid &&
+      task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED,
   );
   let currentlyFetching = false;
   let currentlyCommitting = false;
@@ -269,7 +278,12 @@ const TaskDetail = (props: RouteComponentProps) => {
           'slds-m-bottom_medium': readyToSubmit,
           'slds-m-bottom_x-large': !readyToSubmit,
         })}
-        variant={orgHasChanges || !readyToSubmit ? 'brand' : 'outline-brand'}
+        variant={
+          (orgHasChanges || !readyToSubmit) &&
+          (!task.pr_is_open || hasReviewRejected)
+            ? 'brand'
+            : 'outline-brand'
+        }
         onClick={captureButtonAction}
         disabled={fetchingChanges || currentlyFetching || currentlyCommitting}
       />
