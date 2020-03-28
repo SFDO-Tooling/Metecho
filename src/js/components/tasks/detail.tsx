@@ -254,18 +254,23 @@ const TaskDetail = (props: RouteComponentProps) => {
     let captureButtonText: JSX.Element = i18n.t(
       'Check for Unretrieved Changes',
     );
+    const isPrimary =
+      (orgHasChanges || !readyToSubmit) &&
+      (!task.pr_is_open || hasReviewRejected);
     if (currentlyCommitting) {
+      /* istanbul ignore next */
       captureButtonText = (
         <LabelWithSpinner
           label={i18n.t('Retrieving Selected Changes…')}
-          variant="inverse"
+          variant={isPrimary ? 'inverse' : 'base'}
         />
       );
     } else if (fetchingChanges || currentlyFetching) {
+      /* istanbul ignore next */
       captureButtonText = (
         <LabelWithSpinner
           label={i18n.t('Checking for Unretrieved Changes…')}
-          variant="inverse"
+          variant={isPrimary ? 'inverse' : 'base'}
         />
       );
     } else if (orgHasChanges) {
@@ -278,12 +283,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           'slds-m-bottom_medium': readyToSubmit,
           'slds-m-bottom_x-large': !readyToSubmit,
         })}
-        variant={
-          (orgHasChanges || !readyToSubmit) &&
-          (!task.pr_is_open || hasReviewRejected)
-            ? 'brand'
-            : 'outline-brand'
-        }
+        variant={isPrimary ? 'brand' : 'outline-brand'}
         onClick={captureButtonAction}
         disabled={fetchingChanges || currentlyFetching || currentlyCommitting}
       />

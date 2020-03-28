@@ -311,7 +311,7 @@ describe('<TaskDetail/>', () => {
     });
   });
 
-  describe('commiting changes', () => {
+  describe('retrieving changes', () => {
     test('renders loading button', () => {
       const { getAllByText } = setup({
         initialState: {
