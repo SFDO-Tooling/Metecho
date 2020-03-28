@@ -210,9 +210,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     submitButton = (
       <Button
         label={submitButtonText}
-        className={classNames('slds-size_full slds-m-bottom_x-large', {
-          'slds-m-left_none': !isPrimary,
-        })}
+        className="slds-size_full slds-m-bottom_x-large slds-m-left_none"
         variant={isPrimary ? 'brand' : 'outline-brand'}
         onClick={openSubmitModal}
         disabled={currentlySubmitting}
