@@ -220,15 +220,15 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
-  let primaryButton: React.ReactNode = null;
-  let secondaryButton: React.ReactNode = null;
-  if (userIsOwner && orgHasChanges) {
+  let captureButton: React.ReactNode = null;
+  if (userIsOwner) {
     const captureButtonAction = () => {
       /* istanbul ignore else */
       if (devOrg) {
         let shouldCheck = true;
         const checkAfterMinutes = window.GLOBALS.ORG_RECHECK_MINUTES;
         if (
+          orgHasChanges &&
           devOrg.last_checked_unsaved_changes_at !== null &&
           typeof checkAfterMinutes === 'number'
         ) {
@@ -236,16 +236,16 @@ const TaskDetail = (props: RouteComponentProps) => {
           const shouldCheckAfter = addMinutes(lastChecked, checkAfterMinutes);
           shouldCheck = isPast(shouldCheckAfter);
         }
-        if (devOrg.has_unsaved_changes && !shouldCheck) {
-          setCaptureModalOpen(true);
-        } else {
+        if (shouldCheck) {
           setFetchingChanges(true);
           doRefetchOrg(devOrg);
+        } else {
+          setCaptureModalOpen(true);
         }
       }
     };
     let captureButtonText: JSX.Element = i18n.t(
-      'Retrieve Changes from Dev Org',
+      'Check for Unretrieved Changes',
     );
     if (currentlyCommitting) {
       captureButtonText = (
@@ -261,24 +261,21 @@ const TaskDetail = (props: RouteComponentProps) => {
           variant="inverse"
         />
       );
+    } else if (orgHasChanges) {
+      captureButtonText = i18n.t('Retrieve Changes from Dev Org');
     }
-    primaryButton = (
+    captureButton = (
       <Button
         label={captureButtonText}
         className={classNames('slds-size_full', {
           'slds-m-bottom_medium': readyToSubmit,
           'slds-m-bottom_x-large': !readyToSubmit,
         })}
-        variant="brand"
+        variant={orgHasChanges || !readyToSubmit ? 'brand' : 'outline-brand'}
         onClick={captureButtonAction}
         disabled={fetchingChanges || currentlyFetching || currentlyCommitting}
       />
     );
-    if (readyToSubmit) {
-      secondaryButton = submitButton;
-    }
-  } else if (readyToSubmit) {
-    primaryButton = submitButton;
   }
 
   return (
@@ -312,8 +309,8 @@ const TaskDetail = (props: RouteComponentProps) => {
           </>
         }
       >
-        {primaryButton}
-        {secondaryButton}
+        {captureButton}
+        {submitButton}
 
         {orgs ? (
           <OrgCards
