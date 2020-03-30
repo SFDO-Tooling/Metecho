@@ -273,7 +273,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
   }
 
   // Progress Bar:
-  const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
+  const activeTasks = tasks?.filter((t) => !t.deleted_at) || [];
+  const tasksCompleted = tasks ? getCompletedTasks(activeTasks).length : 0;
   const tasksTotal = tasks?.length || 0;
   const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
 
@@ -327,7 +328,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
       ) : null}
     </PageHeaderControl>
   );
-
+  // const activeTasks = tasks?.filter((t) => !t.deleted_at);
   return (
     <DocumentTitle
       title={`${project.name} | ${repository.name} | ${i18n.t('Metecho')}`}
@@ -386,10 +387,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
           prIsOpen={project.pr_is_open}
         />
         {submitButton}
-        {tasks ? (
+        {activeTasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {tasks.length || project.status === PROJECT_STATUSES.MERGED ? (
+              {activeTasks.length ||
+              project.status === PROJECT_STATUSES.MERGED ? (
                 <>
                   {i18n.t('Tasks for')} {project.name}
                 </>
@@ -400,15 +402,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             {project.status !== PROJECT_STATUSES.MERGED && (
-              <TaskForm project={project} startOpen={!tasks.length} />
+              <TaskForm project={project} startOpen={!activeTasks.length} />
             )}
-            {tasks.length ? (
+            {activeTasks.length ? (
               <>
                 <ProjectProgress range={projectProgress} />
                 <TaskTable
                   repositorySlug={repository.slug}
                   projectSlug={project.slug}
-                  tasks={tasks}
+                  tasks={activeTasks}
                   projectUsers={project.github_users}
                   openAssignProjectUsersModal={openAssignUsersModal}
                   assignUserAction={assignUser}
