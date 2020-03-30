@@ -18,7 +18,7 @@ const DeleteModal = ({
   handleClose,
 }: {
   model: Project | Task;
-  modelType: 'project';
+  modelType: 'project' | 'task';
   isOpen: boolean;
   handleClose: () => void;
 }) => {
@@ -29,19 +29,22 @@ const DeleteModal = ({
     if (model) {
       dispatch(
         deleteObject({
-          objectType: OBJECT_TYPES.PROJECT,
+          objectType: modelType,
           object: model,
         }),
       ).finally(() => {
         handleClose();
       });
     }
-  }, [dispatch, model, handleClose]);
+  }, [dispatch, model, modelType, handleClose]);
 
   let heading;
   switch (modelType) {
     case OBJECT_TYPES.PROJECT:
       heading = i18n.t('Delete Project');
+      break;
+    case OBJECT_TYPES.TASK:
+      heading = i18n.t('Delete Task');
       break;
   }
 

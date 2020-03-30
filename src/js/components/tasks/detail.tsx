@@ -128,18 +128,6 @@ const TaskDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
-  const handleProjectDelete = useCallback(() => {
-    if (task) {
-      dispatch(
-        deleteObject({
-          objectType: OBJECT_TYPES.TASK,
-          object: task,
-        }),
-      ).finally(() => {
-        closeDeleteModal();
-      });
-    }
-  }, [dispatch, task]);
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -189,7 +177,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
   // redirect to projct detail if task deleted
-  if (!task && project) {
+  if (task?.deleted_at && project) {
     return (
       <Redirect to={routes.project_detail(repository.slug, project.slug)} />
     );
@@ -381,9 +369,8 @@ const TaskDetail = (props: RouteComponentProps) => {
         <DeleteModal
           model={task}
           isOpen={deleteModalOpen}
-          instanceType={OBJECT_TYPES.TASK}
+          modelType={OBJECT_TYPES.TASK}
           handleClose={closeDeleteModal}
-          handleDelete={handleProjectDelete}
         />
         <CommitList commits={task.commits} />
       </DetailPageLayout>
