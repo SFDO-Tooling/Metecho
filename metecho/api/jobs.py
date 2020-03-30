@@ -515,14 +515,19 @@ def populate_github_users(repository, *, originating_user_id):
         repo_id = repository.get_repo_id(user)
         repo = get_repo_info(user, repo_id=repo_id)
         repository.refresh_from_db()
-        repository.github_users = [
-            {
-                "id": str(collaborator.id),
-                "login": collaborator.login,
-                "avatar_url": collaborator.avatar_url,
-            }
-            for collaborator in repo.collaborators()
-        ]
+        repository.github_users = list(
+            sorted(
+                [
+                    {
+                        "id": str(collaborator.id),
+                        "login": collaborator.login,
+                        "avatar_url": collaborator.avatar_url,
+                    }
+                    for collaborator in repo.collaborators()
+                ],
+                key=lambda x: x["login"].lower(),
+            )
+        )
     except Exception as e:
         repository.refresh_from_db()
         repository.finalize_populate_github_users(

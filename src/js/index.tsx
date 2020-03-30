@@ -31,6 +31,7 @@ import ProjectDetail from '@/components/projects/detail';
 import RepositoryDetail from '@/components/repositories/detail';
 import RepositoryList from '@/components/repositories/list';
 import TaskDetail from '@/components/tasks/detail';
+import Terms from '@/components/terms';
 import AuthError from '@/components/user/authError';
 import Login from '@/components/user/login';
 import { PrivateRoute } from '@/components/utils';
@@ -72,6 +73,7 @@ const App = withRouter(
               <ErrorBoundary>
                 <Switch>
                   <Route exact path={routePatterns.login()} component={Login} />
+                  <Route exact path={routePatterns.terms()} component={Terms} />
                   <Route
                     exact
                     path={routePatterns.home()}

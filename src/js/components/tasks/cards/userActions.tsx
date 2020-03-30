@@ -31,7 +31,7 @@ const UserActions = ({
 
     const actionLabels =
       type === ORG_TYPES.QA
-        ? [i18n.t('Change Reviewer'), i18n.t('Remove Reviewer')]
+        ? [i18n.t('Change Tester'), i18n.t('Remove Tester')]
         : [i18n.t('Change Developer'), i18n.t('Remove Developer')];
 
     return (

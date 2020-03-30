@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ResponseError
@@ -90,6 +91,18 @@ class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
 
 
+class AgreeToTosView(CurrentUserObjectMixin, generics.UpdateAPIView):
+    model = User
+    serializer_class = FullUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def update(self, request, pk=None):
+        request.user.agreed_to_tos_at = timezone.now()
+        request.user.save()
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
+
 class UserRefreshView(CurrentUserObjectMixin, APIView):
     model = User
     permission_classes = (IsAuthenticated,)
@@ -153,7 +166,7 @@ class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
     queryset = Project.objects.active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
-    error_pr_exists = _("Project has already been submitted for review.")
+    error_pr_exists = _("Project has already been submitted for testing.")
 
 
 class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
@@ -162,7 +175,7 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     queryset = Task.objects.active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
-    error_pr_exists = _("Task has already been submitted for review.")
+    error_pr_exists = _("Task has already been submitted for testing.")
 
     @action(detail=True, methods=["POST"])
     def review(self, request, pk=None):
@@ -175,7 +188,7 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
         if not task.pr_is_open:
             raise ValidationError(_("The pull request for this task has been closed."))
         if not (org or task.review_valid):
-            raise ValidationError(_("Cannot submit review without a Review Org."))
+            raise ValidationError(_("Cannot submit review without a Test Org."))
 
         task.queue_submit_review(
             user=request.user,

@@ -36,7 +36,7 @@ const PathItem = ({ steps, idx, activeIdx, isCompleted }: PathItemProps) => {
     >
       <a
         aria-selected={isActive}
-        className="slds-path__link"
+        className="slds-path__link progress-bar-item"
         id={`path-${idx}`}
         role="option"
         tabIndex={isActive ? 0 : -1}

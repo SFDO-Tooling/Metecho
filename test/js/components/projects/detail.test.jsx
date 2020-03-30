@@ -442,7 +442,7 @@ describe('<ProjectDetail/>', () => {
   describe('task assignUser', () => {
     test('updates task assigned user', () => {
       const { getAllByText, baseElement } = setup();
-      fireEvent.click(getAllByText('Assign Reviewer')[0]);
+      fireEvent.click(getAllByText('Assign Tester')[0]);
       fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
       );
@@ -470,14 +470,14 @@ describe('<ProjectDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getAllByText('Assign Reviewer')[0]);
+      fireEvent.click(getAllByText('Assign Tester')[0]);
       fireEvent.click(getByText('Add Project Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
     });
   });
 
-  describe('"Submit Project for Review" click', () => {
+  describe('"Submit Project for Review on GitHub" click', () => {
     test('opens modal', () => {
       const { getByText, getAllByText } = setup({
         initialState: {
@@ -495,9 +495,9 @@ describe('<ProjectDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getByText('Submit Project for Review'));
+      fireEvent.click(getByText('Submit Project for Review on GitHub'));
 
-      getAllByText('Submit Project for Review').forEach((element) => {
+      getAllByText('Submit Project for Review on GitHub').forEach((element) => {
         expect(element).toBeVisible();
       });
     });
@@ -523,7 +523,9 @@ describe('<ProjectDetail/>', () => {
         },
       });
 
-      expect(getByText('Submitting Project for Review…')).toBeVisible();
+      expect(
+        getByText('Submitting Project for Review on GitHub…'),
+      ).toBeVisible();
     });
 
     test('renders view pr button if pr_url exists', () => {

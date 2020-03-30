@@ -13,7 +13,7 @@ export const getOrgStatusMsg = (org: Org) => {
     const totalChanges = org.total_unsaved_changes;
     /* istanbul ignore else */
     if (totalChanges) {
-      const statusMsgDefault = `has ${totalChanges} uncaptured ${pluralize(
+      const statusMsgDefault = `has ${totalChanges} unretrieved ${pluralize(
         totalChanges,
         'change',
       )}`;
@@ -72,10 +72,3 @@ export const getPercentage = (complete: number, total: number) =>
 
 export const getCompletedTasks = (tasks: Task[]) =>
   tasks.filter((task) => task.status === TASK_STATUSES.COMPLETED);
-
-export const getSteps = () => [
-  i18n.t('Planned'),
-  i18n.t('In progress'),
-  i18n.t('Review'),
-  i18n.t('Merged'),
-];
