@@ -197,7 +197,8 @@ const Terms = ({ from = {}, location }: Props) => {
             username, GitHub account information information, GitHub profile
             picture and any repositories associated with your GitHub account.
             Other Metecho users participating in the Open Source Community
-            Sprint will b
+            Sprint will be able to see your publicly available GitHub profile
+            picture and username.
           </p>
           <h3 className="slds-text-heading_small">
             Purposes of Access to Your GitHub Account
