@@ -1,7 +1,7 @@
 {
-  "name": "MetaShare",
+  "name": "Metecho",
   "description": "Web-based tool for collaborating on Salesforce projects",
-  "repository": "https://github.com/SFDO-Tooling/MetaShare",
+  "repository": "https://github.com/SFDO-Tooling/Metecho",
   "keywords": ["ci", "python", "django", "salesforce", "github"],
   "env": {
     "DJANGO_ALLOWED_HOSTS": {
@@ -38,6 +38,9 @@
     "GITHUB_CLIENT_SECRET": {
       "description": "Client secret for a GitHub App."
     },
+    "GITHUB_HOOK_SECRET": {
+      "description": "Webhook secret for a GitHub App."
+    },
     "SF_CALLBACK_URL": {
       "description": "Callback URL for Salesforce Connected App (e.g. \"https://<...>/accounts/salesforce/login/callback/\")"
     },
@@ -58,10 +61,20 @@
     "worker": {
       "quantity": 1
     },
-    "scheduler": {
+    "worker-short": {
       "quantity": 1
     }
   },
+  "stack": "heroku-18",
+  "buildpacks": [
+    { "url": "heroku/nodejs" },
+    {
+      "url": "https://github.com/SalesforceFoundation/simple-salesforce-dx-buildpack.git"
+    },
+    { "url": "heroku/python" }
+  ],
   "addons": ["heroku-postgresql", "heroku-redis", "sentry"],
-  "stack": "container"
+  "scripts": {
+    "postdeploy": "python manage.py migrate --noinput"
+  }
 }

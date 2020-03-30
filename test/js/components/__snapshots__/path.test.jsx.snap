@@ -22,7 +22,7 @@ exports[`<Path /> renders completed list of steps 1`] = `
           >
             <a
               aria-selected="false"
-              class="slds-path__link"
+              class="slds-path__link progress-bar-item"
               id="path-0"
               role="option"
               tabindex="-1"
@@ -58,7 +58,7 @@ exports[`<Path /> renders completed list of steps 1`] = `
           >
             <a
               aria-selected="false"
-              class="slds-path__link"
+              class="slds-path__link progress-bar-item"
               id="path-1"
               role="option"
               tabindex="-1"
@@ -94,7 +94,7 @@ exports[`<Path /> renders completed list of steps 1`] = `
           >
             <a
               aria-selected="false"
-              class="slds-path__link"
+              class="slds-path__link progress-bar-item"
               id="path-2"
               role="option"
               tabindex="-1"
@@ -130,7 +130,7 @@ exports[`<Path /> renders completed list of steps 1`] = `
           >
             <a
               aria-selected="true"
-              class="slds-path__link"
+              class="slds-path__link progress-bar-item"
               id="path-3"
               role="option"
               tabindex="0"
@@ -189,7 +189,7 @@ exports[`<Path /> renders list of steps 1`] = `
           >
             <a
               aria-selected="false"
-              class="slds-path__link"
+              class="slds-path__link progress-bar-item"
               id="path-0"
               role="option"
               tabindex="-1"
@@ -220,7 +220,7 @@ exports[`<Path /> renders list of steps 1`] = `
           >
             <a
               aria-selected="false"
-              class="slds-path__link"
+              class="slds-path__link progress-bar-item"
               id="path-1"
               role="option"
               tabindex="-1"
@@ -251,7 +251,7 @@ exports[`<Path /> renders list of steps 1`] = `
           >
             <a
               aria-selected="false"
-              class="slds-path__link"
+              class="slds-path__link progress-bar-item"
               id="path-2"
               role="option"
               tabindex="-1"
@@ -282,7 +282,7 @@ exports[`<Path /> renders list of steps 1`] = `
           >
             <a
               aria-selected="false"
-              class="slds-path__link"
+              class="slds-path__link progress-bar-item"
               id="path-3"
               role="option"
               tabindex="-1"

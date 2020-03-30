@@ -12,7 +12,7 @@ const Footer = ({
   isDeleting,
   isRefreshingChanges,
   isRefreshingOrg,
-  reviewOrgOutOfDate,
+  testOrgOutOfDate,
   readyForReview,
   openRefreshOrgModal,
 }: {
@@ -22,7 +22,7 @@ const Footer = ({
   isDeleting: boolean;
   isRefreshingChanges: boolean;
   isRefreshingOrg: boolean;
-  reviewOrgOutOfDate: boolean;
+  testOrgOutOfDate: boolean;
   readyForReview: boolean;
   openRefreshOrgModal: () => void;
 }) => {
@@ -37,13 +37,13 @@ const Footer = ({
     return <>{i18n.t('Deleting Org…')}</>;
   }
   if (isRefreshingChanges) {
-    return <>{i18n.t('Checking for Uncaptured Changes…')}</>;
+    return <>{i18n.t('Checking for Unretrieved Changes…')}</>;
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_capturing_changes) {
       return (
         <>
-          {i18n.t('Capturing Selected Changes…')}
+          {i18n.t('Retrieving Selected Changes…')}
           <div className="slds-p-top_small">{loadingMsg}</div>
         </>
       );
@@ -51,7 +51,7 @@ const Footer = ({
     const orgUrl = window.api_urls.scratch_org_redirect(org.id);
     /* istanbul ignore else */
     if (orgUrl) {
-      if (reviewOrgOutOfDate) {
+      if (testOrgOutOfDate) {
         return (
           <Button
             label={i18n.t('View Org')}
@@ -61,7 +61,7 @@ const Footer = ({
         );
       }
       const label = readyForReview
-        ? i18n.t('Review Changes in Org')
+        ? i18n.t('Test Changes in Org')
         : i18n.t('View Org');
       return <ExternalLink url={orgUrl}>{label}</ExternalLink>;
     }

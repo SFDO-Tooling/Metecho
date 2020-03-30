@@ -281,3 +281,46 @@ describe('refreshDevHubStatus', () => {
     });
   });
 });
+
+describe('agreeToTerms', () => {
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.agree_to_tos();
+  });
+
+  describe('success', () => {
+    test('returns updated user', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'me' };
+      fetchMock.putOnce(url, user);
+      const started = { type: 'AGREE_TO_TERMS_REQUESTED' };
+      const succeeded = { type: 'AGREE_TO_TERMS_SUCCEEDED', payload: user };
+
+      expect.assertions(1);
+      return store.dispatch(actions.agreeToTerms()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches AGREE_TO_TERMS_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.putOnce(url, 500);
+      const started = { type: 'AGREE_TO_TERMS_REQUESTED' };
+      const failed = { type: 'AGREE_TO_TERMS_FAILED' };
+
+      expect.assertions(5);
+      return store.dispatch(actions.agreeToTerms()).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+        expect(window.console.error).toHaveBeenCalled();
+      });
+    });
+  });
+});

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
+exports[`<TaskStatusSteps /> renders steps: changes retrieved 1`] = `
 <div>
   <h3
     class="slds-text-heading_medium slds-m-vertical_small"
@@ -35,7 +35,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -85,7 +85,32 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -103,7 +128,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Submit changes for testing
         </div>
       </li>
       <li
@@ -115,7 +140,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Assign a Tester
         </div>
       </li>
       <li
@@ -127,7 +152,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Create a Scratch Org for testing
         </div>
       </li>
       <li
@@ -139,7 +164,7 @@ exports[`<TaskStatusSteps /> renders steps: changes captured 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -206,7 +231,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -278,7 +303,40 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -290,7 +348,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Submit changes for testing
         </div>
       </li>
       <li
@@ -302,7 +360,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Assign a Tester
         </div>
       </li>
       <li
@@ -314,7 +372,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Create a Scratch Org for testing
         </div>
       </li>
       <li
@@ -326,7 +384,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -393,7 +451,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -457,7 +515,40 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -469,7 +560,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Submit changes for testing
         </div>
       </li>
       <li
@@ -481,7 +572,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Assign a Tester
         </div>
       </li>
       <li
@@ -493,7 +584,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Create a Scratch Org for testing
         </div>
       </li>
       <li
@@ -505,7 +596,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -537,7 +628,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
 </div>
 `;
 
-exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] = `
+exports[`<TaskStatusSteps /> renders steps: dev org with unretrieved changes 1`] = `
 <div>
   <h3
     class="slds-text-heading_medium slds-m-vertical_small"
@@ -572,7 +663,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -598,6 +689,31 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
           Create a Scratch Org for development
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Make changes in Dev Org
         </div>
       </li>
       <li
@@ -636,7 +752,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -648,7 +764,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Submit changes for testing
         </div>
       </li>
       <li
@@ -660,7 +776,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Assign a Tester
         </div>
       </li>
       <li
@@ -672,7 +788,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Create a Scratch Org for testing
         </div>
       </li>
       <li
@@ -684,7 +800,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with uncaptured changes 1`] 
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -744,7 +860,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -768,7 +884,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
         </div>
       </li>
       <li
@@ -780,7 +896,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -792,7 +908,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Submit changes for testing
         </div>
       </li>
       <li
@@ -804,7 +920,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Assign a Tester
         </div>
       </li>
       <li
@@ -816,7 +932,19 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
+          Create a Scratch Org for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div
+          class="slds-progress__marker slds-m-left_x-large"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -883,7 +1011,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -933,7 +1061,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
         </div>
       </li>
       <li
@@ -958,7 +1086,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -983,7 +1111,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Submit changes for testing
         </div>
       </li>
       <li
@@ -1008,7 +1136,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Assign a Tester
         </div>
       </li>
       <li
@@ -1033,7 +1161,32 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
+          Create a Scratch Org for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -1119,7 +1272,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -1169,7 +1322,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
         </div>
       </li>
       <li
@@ -1194,7 +1347,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -1219,7 +1372,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Submit changes for testing
         </div>
       </li>
       <li
@@ -1244,7 +1397,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Assign a Tester
         </div>
       </li>
       <li
@@ -1269,101 +1422,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-active"
-      >
-        <div>
-          <span
-            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
-          >
-            <span
-              class="slds-icon_container slds-icon-standard-user"
-            >
-              <svg
-                aria-hidden="true"
-                class="slds-icon"
-              >
-                <use />
-              </svg>
-              <span
-                class="slds-assistive-text"
-              >
-                User or Account Icon
-              </span>
-            </span>
-          </span>
-        </div>
-        <div
-          class="slds-progress__marker slds-m-left_small"
-        >
-          <span
-            class="slds-assistive-text"
-          >
-            Active
-          </span>
-        </div>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Submit a review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item"
-      >
-        <div
-          class="slds-progress__marker slds-m-left_x-large"
-        />
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Merge pull request on GitHub
-        </div>
-      </li>
-    </ol>
-  </div>
-</div>
-`;
-
-exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
-<div>
-  <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
-  >
-    Next Steps
-  </h3>
-  <div
-    class="slds-progress slds-progress_vertical"
-  >
-    <ol
-      class="slds-progress__list"
-    >
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Assign a developer
+          Create a Scratch Org for testing
         </div>
       </li>
       <li
@@ -1388,650 +1447,7 @@ exports[`<TaskStatusSteps /> renders steps: review org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Make changes in Dev Org and capture in MetaShare
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Submit changes for review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Assign a reviewer
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Create a Scratch Org for review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-active"
-      >
-        <div>
-          <span
-            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
-          >
-            <span
-              class="slds-icon_container slds-icon-standard-user"
-            >
-              <svg
-                aria-hidden="true"
-                class="slds-icon"
-              >
-                <use />
-              </svg>
-              <span
-                class="slds-assistive-text"
-              >
-                User or Account Icon
-              </span>
-            </span>
-          </span>
-        </div>
-        <div
-          class="slds-progress__marker slds-m-left_small"
-        >
-          <span
-            class="slds-assistive-text"
-          >
-            Active
-          </span>
-        </div>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Review changes in Review Org
-        </div>
-      </li>
-      <li
-        class="slds-progress__item"
-      >
-        <div>
-          <span
-            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
-          >
-            <span
-              class="slds-icon_container slds-icon-standard-user"
-            >
-              <svg
-                aria-hidden="true"
-                class="slds-icon"
-              >
-                <use />
-              </svg>
-              <span
-                class="slds-assistive-text"
-              >
-                User or Account Icon
-              </span>
-            </span>
-          </span>
-        </div>
-        <div
-          class="slds-progress__marker slds-m-left_small"
-        />
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Submit a review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item"
-      >
-        <div
-          class="slds-progress__marker slds-m-left_x-large"
-        />
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Merge pull request on GitHub
-        </div>
-      </li>
-    </ol>
-  </div>
-</div>
-`;
-
-exports[`<TaskStatusSteps /> renders steps: review org out-of-date 1`] = `
-<div>
-  <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
-  >
-    Next Steps
-  </h3>
-  <div
-    class="slds-progress slds-progress_vertical"
-  >
-    <ol
-      class="slds-progress__list"
-    >
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Assign a developer
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Create a Scratch Org for development
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Make changes in Dev Org and capture in MetaShare
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Submit changes for review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Assign a reviewer
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-active"
-      >
-        <div>
-          <span
-            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
-          >
-            <span
-              class="slds-icon_container slds-icon-standard-user"
-            >
-              <svg
-                aria-hidden="true"
-                class="slds-icon"
-              >
-                <use />
-              </svg>
-              <span
-                class="slds-assistive-text"
-              >
-                User or Account Icon
-              </span>
-            </span>
-          </span>
-        </div>
-        <div
-          class="slds-progress__marker slds-m-left_small"
-        >
-          <span
-            class="slds-assistive-text"
-          >
-            Active
-          </span>
-        </div>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Refresh Review Org
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-active"
-      >
-        <div>
-          <span
-            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
-          >
-            <span
-              class="slds-icon_container slds-icon-standard-user"
-            >
-              <svg
-                aria-hidden="true"
-                class="slds-icon"
-              >
-                <use />
-              </svg>
-              <span
-                class="slds-assistive-text"
-              >
-                User or Account Icon
-              </span>
-            </span>
-          </span>
-        </div>
-        <div
-          class="slds-progress__marker slds-m-left_small"
-        >
-          <span
-            class="slds-assistive-text"
-          >
-            Active
-          </span>
-        </div>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Review changes in Review Org
-        </div>
-      </li>
-      <li
-        class="slds-progress__item"
-      >
-        <div>
-          <span
-            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
-          >
-            <span
-              class="slds-icon_container slds-icon-standard-user"
-            >
-              <svg
-                aria-hidden="true"
-                class="slds-icon"
-              >
-                <use />
-              </svg>
-              <span
-                class="slds-assistive-text"
-              >
-                User or Account Icon
-              </span>
-            </span>
-          </span>
-        </div>
-        <div
-          class="slds-progress__marker slds-m-left_small"
-        />
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Submit a review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item"
-      >
-        <div
-          class="slds-progress__marker slds-m-left_x-large"
-        />
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Merge pull request on GitHub
-        </div>
-      </li>
-    </ol>
-  </div>
-</div>
-`;
-
-exports[`<TaskStatusSteps /> renders steps: review org visited 1`] = `
-<div>
-  <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
-  >
-    Next Steps
-  </h3>
-  <div
-    class="slds-progress slds-progress_vertical"
-  >
-    <ol
-      class="slds-progress__list"
-    >
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Assign a developer
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Create a Scratch Org for development
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Make changes in Dev Org and capture in MetaShare
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Submit changes for review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Assign a reviewer
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Create a Scratch Org for review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item slds-is-completed"
-      >
-        <span
-          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
-          title="Complete"
-        >
-          <svg
-            aria-hidden="true"
-            class="slds-icon slds-icon_x-small slds-icon-text-default"
-          >
-            <use />
-          </svg>
-          <span
-            class="slds-assistive-text"
-          >
-            Complete
-          </span>
-        </span>
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Review changes in Review Org
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -2125,7 +1541,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -2189,7 +1605,40 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -2214,7 +1663,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Submit changes for testing
         </div>
       </li>
       <li
@@ -2239,7 +1688,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Assign a Tester
         </div>
       </li>
       <li
@@ -2264,7 +1713,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Create a Scratch Org for testing
         </div>
       </li>
       <li
@@ -2289,7 +1738,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -2334,7 +1783,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
 </div>
 `;
 
-exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
+exports[`<TaskStatusSteps /> renders steps: submitted for testing 1`] = `
 <div>
   <h3
     class="slds-text-heading_medium slds-m-vertical_small"
@@ -2369,7 +1818,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -2419,7 +1868,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
         </div>
       </li>
       <li
@@ -2444,7 +1893,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Retrieve changes from Dev Org
         </div>
       </li>
       <li
@@ -2469,7 +1918,266 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Submit changes for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-active"
+      >
+        <div
+          class="slds-progress__marker slds-m-left_x-large"
+        >
+          <span
+            class="slds-assistive-text"
+          >
+            Active
+          </span>
+        </div>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Assign a Tester
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div
+          class="slds-progress__marker slds-m-left_x-large"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Create a Scratch Org for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div
+          class="slds-progress__marker slds-m-left_x-large"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Test changes in Test Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div
+          class="slds-progress__marker slds-m-left_x-large"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Submit a review
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div
+          class="slds-progress__marker slds-m-left_x-large"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Merge pull request on GitHub
+        </div>
+      </li>
+    </ol>
+  </div>
+</div>
+`;
+
+exports[`<TaskStatusSteps /> renders steps: test org 1`] = `
+<div>
+  <h3
+    class="slds-text-heading_medium slds-m-vertical_small"
+  >
+    Next Steps
+  </h3>
+  <div
+    class="slds-progress slds-progress_vertical"
+  >
+    <ol
+      class="slds-progress__list"
+    >
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Assign a Developer
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Create a Scratch Org for development
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Submit changes for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Assign a Tester
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Create a Scratch Org for testing
         </div>
       </li>
       <li
@@ -2508,40 +2216,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
-        </div>
-      </li>
-      <li
-        class="slds-progress__item"
-      >
-        <div>
-          <span
-            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
-          >
-            <span
-              class="slds-icon_container slds-icon-standard-user"
-            >
-              <svg
-                aria-hidden="true"
-                class="slds-icon"
-              >
-                <use />
-              </svg>
-              <span
-                class="slds-assistive-text"
-              >
-                User or Account Icon
-              </span>
-            </span>
-          </span>
-        </div>
-        <div
-          class="slds-progress__marker slds-m-left_small"
-        />
-        <div
-          class="slds-progress__item_content slds-grid slds-grid_align-spread"
-        >
-          Review changes in Review Org
+          Test changes in Test Org
         </div>
       </li>
       <li
@@ -2594,7 +2269,7 @@ exports[`<TaskStatusSteps /> renders steps: reviewer assigned, no org 1`] = `
 </div>
 `;
 
-exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
+exports[`<TaskStatusSteps /> renders steps: test org out-of-date 1`] = `
 <div>
   <h3
     class="slds-text-heading_medium slds-m-vertical_small"
@@ -2629,7 +2304,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a developer
+          Assign a Developer
         </div>
       </li>
       <li
@@ -2679,7 +2354,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Make changes in Dev Org and capture in MetaShare
+          Make changes in Dev Org
         </div>
       </li>
       <li
@@ -2704,14 +2379,85 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Submit changes for review
+          Retrieve changes from Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Submit changes for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Assign a Tester
         </div>
       </li>
       <li
         class="slds-progress__item slds-is-active"
       >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
         <div
-          class="slds-progress__marker slds-m-left_x-large"
+          class="slds-progress__marker slds-m-left_small"
         >
           <span
             class="slds-assistive-text"
@@ -2722,7 +2468,79 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Assign a reviewer
+          Refresh Test Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-active"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        >
+          <span
+            class="slds-assistive-text"
+          >
+            Active
+          </span>
+        </div>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Test changes in Test Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Submit a review
         </div>
       </li>
       <li
@@ -2734,7 +2552,264 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for review
+          Merge pull request on GitHub
+        </div>
+      </li>
+    </ol>
+  </div>
+</div>
+`;
+
+exports[`<TaskStatusSteps /> renders steps: test org visited 1`] = `
+<div>
+  <h3
+    class="slds-text-heading_medium slds-m-vertical_small"
+  >
+    Next Steps
+  </h3>
+  <div
+    class="slds-progress slds-progress_vertical"
+  >
+    <ol
+      class="slds-progress__list"
+    >
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Assign a Developer
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Create a Scratch Org for development
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Submit changes for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Assign a Tester
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Create a Scratch Org for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Test changes in Test Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-active"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        >
+          <span
+            class="slds-assistive-text"
+          >
+            Active
+          </span>
+        </div>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Submit a review
         </div>
       </li>
       <li
@@ -2746,14 +2821,275 @@ exports[`<TaskStatusSteps /> renders steps: submitted for review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Review changes in Review Org
+          Merge pull request on GitHub
+        </div>
+      </li>
+    </ol>
+  </div>
+</div>
+`;
+
+exports[`<TaskStatusSteps /> renders steps: tester assigned, no org 1`] = `
+<div>
+  <h3
+    class="slds-text-heading_medium slds-m-vertical_small"
+  >
+    Next Steps
+  </h3>
+  <div
+    class="slds-progress slds-progress_vertical"
+  >
+    <ol
+      class="slds-progress__list"
+    >
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Assign a Developer
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Create a Scratch Org for development
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Make changes in Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Retrieve changes from Dev Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Submit changes for testing
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-completed"
+      >
+        <span
+          class="slds-icon_container slds-icon-utility-success slds-progress__marker slds-progress__marker_icon slds-m-left_x-large"
+          title="Complete"
+        >
+          <svg
+            aria-hidden="true"
+            class="slds-icon slds-icon_x-small slds-icon-text-default"
+          >
+            <use />
+          </svg>
+          <span
+            class="slds-assistive-text"
+          >
+            Complete
+          </span>
+        </span>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Assign a Tester
+        </div>
+      </li>
+      <li
+        class="slds-progress__item slds-is-active"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
+        >
+          <span
+            class="slds-assistive-text"
+          >
+            Active
+          </span>
+        </div>
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Create a Scratch Org for testing
         </div>
       </li>
       <li
         class="slds-progress__item"
       >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
         <div
-          class="slds-progress__marker slds-m-left_x-large"
+          class="slds-progress__marker slds-m-left_small"
+        />
+        <div
+          class="slds-progress__item_content slds-grid slds-grid_align-spread"
+        >
+          Test changes in Test Org
+        </div>
+      </li>
+      <li
+        class="slds-progress__item"
+      >
+        <div>
+          <span
+            class="slds-avatar slds-avatar_circle slds-avatar_x-small"
+          >
+            <span
+              class="slds-icon_container slds-icon-standard-user"
+            >
+              <svg
+                aria-hidden="true"
+                class="slds-icon"
+              >
+                <use />
+              </svg>
+              <span
+                class="slds-assistive-text"
+              >
+                User or Account Icon
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"

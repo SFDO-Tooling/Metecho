@@ -31,6 +31,13 @@ interface RefreshDevHubSucceeded {
 interface RefreshDevHubAction {
   type: 'DEV_HUB_STATUS_REQUESTED' | 'DEV_HUB_STATUS_FAILED';
 }
+interface AgreeToTermsAction {
+  type: 'AGREE_TO_TERMS_REQUESTED' | 'AGREE_TO_TERMS_FAILED';
+}
+interface AgreeToTermsSucceeded {
+  type: 'AGREE_TO_TERMS_SUCCEEDED';
+  payload: User;
+}
 export type UserAction =
   | LoginAction
   | LogoutAction
@@ -38,7 +45,9 @@ export type UserAction =
   | DisconnectAction
   | DisconnectSucceeded
   | RefreshDevHubAction
-  | RefreshDevHubSucceeded;
+  | RefreshDevHubSucceeded
+  | AgreeToTermsAction
+  | AgreeToTermsSucceeded;
 
 export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
@@ -134,6 +143,28 @@ export const refreshDevHubStatus = (): ThunkResult<
     });
   } catch (err) {
     dispatch({ type: 'DEV_HUB_STATUS_FAILED' });
+    throw err;
+  }
+};
+
+export const agreeToTerms = (): ThunkResult<
+  Promise<AgreeToTermsSucceeded>
+> => async (dispatch) => {
+  dispatch({ type: 'AGREE_TO_TERMS_REQUESTED' });
+  try {
+    const payload = await apiFetch({
+      url: window.api_urls.agree_to_tos(),
+      dispatch,
+      opts: {
+        method: 'PUT',
+      },
+    });
+    return dispatch({
+      type: 'AGREE_TO_TERMS_SUCCEEDED' as 'AGREE_TO_TERMS_SUCCEEDED',
+      payload,
+    });
+  } catch (err) {
+    dispatch({ type: 'AGREE_TO_TERMS_FAILED' });
     throw err;
   }
 };

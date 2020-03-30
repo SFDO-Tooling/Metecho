@@ -105,7 +105,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
   }
 
   return (
-    <DocumentTitle title={`${i18n.t('Repositories')} | ${i18n.t('MetaShare')}`}>
+    <DocumentTitle title={`${i18n.t('Repositories')} | ${i18n.t('Metecho')}`}>
       <>
         <PageHeader
           className="page-header slds-p-around_x-large"

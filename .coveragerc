@@ -1,6 +1,6 @@
 [run]
 omit =
-    metashare/*/migrations/*
+    metecho/*/migrations/*
 
 [report]
 show_missing = True

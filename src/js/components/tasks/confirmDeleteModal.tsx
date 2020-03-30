@@ -31,7 +31,7 @@ const ConfirmDeleteModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      heading={i18n.t('Confirm Deleting Org With Uncaptured Changes')}
+      heading={i18n.t('Confirm Deleting Org With Unretrieved Changes')}
       prompt="warning"
       onRequestClose={handleCancel}
       footer={[
@@ -46,7 +46,7 @@ const ConfirmDeleteModal = ({
     >
       <div className="slds-p-vertical_medium">
         {i18n.t(
-          'This scratch org has uncaptured changes which will be lost. Are you sure you want to delete this org?',
+          'This scratch org has unretrieved changes which will be lost. Are you sure you want to delete this org?',
         )}
       </div>
     </Modal>

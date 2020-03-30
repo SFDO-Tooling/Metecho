@@ -70,6 +70,7 @@ const defaultTask = {
   commits: [{ id: '617a512-longlong' }, { id: 'other' }],
   origin_sha: 'parent',
   review_submitted_at: '2019-10-16T12:58:53.721Z',
+  has_unmerged_commits: true,
 };
 const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
@@ -116,7 +117,7 @@ describe('<OrgCards/>', () => {
 
       expect(getByText('View Org')).toBeVisible();
       expect(
-        getByText('has 1 uncaptured change', { exact: false }),
+        getByText('has 1 unretrieved change', { exact: false }),
       ).toBeVisible();
       expect(getByText('Assign')).toBeVisible();
       expect(getByText('check again')).toBeVisible();
@@ -218,7 +219,7 @@ describe('<OrgCards/>', () => {
     });
   });
 
-  describe('Change Reviewer click', () => {
+  describe('Change Tester click', () => {
     test('updates assigned user', () => {
       const task = {
         ...defaultTask,
@@ -226,7 +227,7 @@ describe('<OrgCards/>', () => {
       };
       const { getByText } = setup({ task, orgs: {} });
       fireEvent.click(getByText('User Actions'));
-      fireEvent.click(getByText('Change Reviewer'));
+      fireEvent.click(getByText('Change Tester'));
       fireEvent.click(getByText('other-user'));
 
       expect(updateObject).toHaveBeenCalled();
@@ -267,7 +268,7 @@ describe('<OrgCards/>', () => {
     });
   });
 
-  describe('Remove Reviewer click', () => {
+  describe('Remove Tester click', () => {
     test('removes assigned user', () => {
       const task = {
         ...defaultTask,
@@ -275,7 +276,7 @@ describe('<OrgCards/>', () => {
       };
       const { getByText } = setup({ task, orgs: {} });
       fireEvent.click(getByText('User Actions'));
-      fireEvent.click(getByText('Remove Reviewer'));
+      fireEvent.click(getByText('Remove Tester'));
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_qa).toBeNull();
@@ -425,11 +426,11 @@ describe('<OrgCards/>', () => {
           const { getByText, getByTitle, queryByText } = setup({ orgs });
           fireEvent.click(getByText('View Org'));
 
-          expect(getByText('Review Org Behind Latest: 1 Commit')).toBeVisible();
+          expect(getByText('Test Org Behind Latest: 1 Commit')).toBeVisible();
 
           fireEvent.click(getByTitle('Close'));
 
-          expect(queryByText('Review Org Behind Latest: 1 Commit')).toBeNull();
+          expect(queryByText('Test Org Behind Latest: 1 Commit')).toBeNull();
         });
 
         test('displays modal even if unsure how many commits behind', () => {
@@ -441,7 +442,7 @@ describe('<OrgCards/>', () => {
           });
           fireEvent.click(getByText('View Org'));
 
-          expect(getByText('Review Org Behind Latest')).toBeVisible();
+          expect(getByText('Test Org Behind Latest')).toBeVisible();
         });
       });
 
@@ -449,7 +450,7 @@ describe('<OrgCards/>', () => {
         test('calls refreshOrg action', () => {
           const { getByText } = setup({ orgs });
           fireEvent.click(getByText('View Org'));
-          fireEvent.click(getByText('Refresh Review Org'));
+          fireEvent.click(getByText('Refresh Test Org'));
 
           expect(refreshOrg).toHaveBeenCalledWith(orgs.QA);
         });
@@ -517,15 +518,15 @@ describe('<OrgCards/>', () => {
 
         expect(getByLabelText('Approve')).not.toBeChecked();
         expect(getByLabelText('Request changes')).toBeChecked();
-        expect(getByLabelText('Delete Review Org')).toBeChecked();
+        expect(getByLabelText('Delete Test Org')).toBeChecked();
 
         setup({ task, orgs: { Dev: null, QA: null }, store, rerender });
 
-        expect(queryByLabelText('Delete Review Org')).toBeNull();
+        expect(queryByLabelText('Delete Test Org')).toBeNull();
       });
 
       describe('form submit', () => {
-        test('submits task for review', () => {
+        test('submits task review', () => {
           const { getByText, baseElement } = setup({
             task: { ...defaultTask, commits: [], pr_is_open: true },
             orgs: {
@@ -612,7 +613,7 @@ describe('<OrgCards/>', () => {
             },
           });
 
-          expect(getByText('Review Changes in Org')).toBeVisible();
+          expect(getByText('Test Changes in Org')).toBeVisible();
           expect(queryByText('Submit Review')).toBeNull();
         });
       });
@@ -780,7 +781,7 @@ describe('<OrgCards/>', () => {
           },
         });
 
-        expect(getByText('Checking for Uncaptured Changes…')).toBeVisible();
+        expect(getByText('Checking for Unretrieved Changes…')).toBeVisible();
       });
     });
   });
@@ -856,7 +857,7 @@ describe('<OrgCards/>', () => {
 
           expect(deleteObject).not.toHaveBeenCalled();
           expect(
-            getByText('Confirm Deleting Org With Uncaptured Changes'),
+            getByText('Confirm Deleting Org With Unretrieved Changes'),
           ).toBeVisible();
         });
 
@@ -875,7 +876,7 @@ describe('<OrgCards/>', () => {
               fireEvent.click(getByText('Cancel'));
 
               expect(
-                queryByText('Confirm Deleting Org With Uncaptured Changes'),
+                queryByText('Confirm Deleting Org With Unretrieved Changes'),
               ).toBeNull();
             });
           });
@@ -886,7 +887,7 @@ describe('<OrgCards/>', () => {
               fireEvent.click(getByText('Delete'));
 
               expect(
-                queryByText('Confirm Deleting Org With Uncaptured Changes'),
+                queryByText('Confirm Deleting Org With Unretrieved Changes'),
               ).toBeNull();
               expect(deleteObject).toHaveBeenCalledTimes(1);
 

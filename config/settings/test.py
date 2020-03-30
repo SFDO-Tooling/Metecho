@@ -1,7 +1,7 @@
 from .base import *  # NOQA
 
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "metashare.tests.layer_utils.MockedRedisInMemoryChannelLayer"
-    }
+    "default": {"BACKEND": "metecho.tests.layer_utils.MockedRedisInMemoryChannelLayer"}
 }
+
+DEVHUB_USERNAME = None

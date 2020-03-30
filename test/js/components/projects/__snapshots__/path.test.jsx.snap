@@ -25,7 +25,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: all tasks comp
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-0"
                 role="option"
                 tabindex="-1"
@@ -61,7 +61,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: all tasks comp
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-1"
                 role="option"
                 tabindex="-1"
@@ -97,7 +97,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: all tasks comp
             >
               <a
                 aria-selected="true"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-2"
                 role="option"
                 tabindex="0"
@@ -133,7 +133,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: all tasks comp
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-3"
                 role="option"
                 tabindex="-1"
@@ -191,7 +191,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: in progress 1`
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-0"
                 role="option"
                 tabindex="-1"
@@ -227,7 +227,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: in progress 1`
             >
               <a
                 aria-selected="true"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-1"
                 role="option"
                 tabindex="0"
@@ -263,7 +263,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: in progress 1`
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-2"
                 role="option"
                 tabindex="-1"
@@ -294,7 +294,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: in progress 1`
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-3"
                 role="option"
                 tabindex="-1"
@@ -352,7 +352,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: merged 1`] = `
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-0"
                 role="option"
                 tabindex="-1"
@@ -388,7 +388,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: merged 1`] = `
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-1"
                 role="option"
                 tabindex="-1"
@@ -424,7 +424,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: merged 1`] = `
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-2"
                 role="option"
                 tabindex="-1"
@@ -460,7 +460,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: merged 1`] = `
             >
               <a
                 aria-selected="true"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-3"
                 role="option"
                 tabindex="0"
@@ -523,7 +523,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: planned 1`] = 
             >
               <a
                 aria-selected="true"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-0"
                 role="option"
                 tabindex="0"
@@ -559,7 +559,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: planned 1`] = 
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-1"
                 role="option"
                 tabindex="-1"
@@ -590,7 +590,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: planned 1`] = 
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-2"
                 role="option"
                 tabindex="-1"
@@ -621,7 +621,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: planned 1`] = 
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-3"
                 role="option"
                 tabindex="-1"
@@ -679,7 +679,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: pr opened 1`] 
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-0"
                 role="option"
                 tabindex="-1"
@@ -715,7 +715,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: pr opened 1`] 
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-1"
                 role="option"
                 tabindex="-1"
@@ -751,7 +751,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: pr opened 1`] 
             >
               <a
                 aria-selected="false"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-2"
                 role="option"
                 tabindex="-1"
@@ -787,7 +787,7 @@ exports[`<ProjectStatusPath /> renders steps from project status: pr opened 1`] 
             >
               <a
                 aria-selected="true"
-                class="slds-path__link"
+                class="slds-path__link progress-bar-item"
                 id="path-3"
                 role="option"
                 tabindex="0"

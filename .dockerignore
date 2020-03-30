@@ -48,6 +48,8 @@
 .tox/
 .venv
 .vscode/
+.yarn/
+.yarnrc
 ENV/
 __pycache__/
 build/

@@ -20,13 +20,25 @@ describe('<PrivateRoute />', () => {
     return { getByText, queryByText, context };
   };
 
-  test('renders component if logged in', () => {
-    const { getByText } = setup({ user: {} });
+  test('renders component if logged in and agreed to TOS', () => {
+    const { getByText } = setup({
+      user: { agreed_to_tos_at: '2019-02-01T19:47:49Z' },
+    });
 
     expect(getByText('Hi!')).toBeVisible();
   });
 
-  test('redirects if not logged in', () => {
+  test('redirects to terms if not agreed to', () => {
+    const { context, queryByText } = setup({
+      user: { agreed_to_tos_at: null },
+    });
+
+    expect(context.action).toEqual('REPLACE');
+    expect(context.url).toEqual(routes.terms());
+    expect(queryByText('Hi!')).toBeNull();
+  });
+
+  test('redirects to login if not logged in', () => {
     const { context, queryByText } = setup();
 
     expect(context.action).toEqual('REPLACE');

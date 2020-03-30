@@ -10,14 +10,14 @@ const OrgIcon = ({
   ownedByCurrentUser,
   isDeleting,
   isRefreshingOrg,
-  reviewOrgOutOfDate,
+  testOrgOutOfDate,
   openRefreshOrgModal,
 }: {
   orgId: string;
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
   isRefreshingOrg: boolean;
-  reviewOrgOutOfDate: boolean;
+  testOrgOutOfDate: boolean;
   openRefreshOrgModal: () => void;
 }) => {
   const orgUrl = window.api_urls.scratch_org_redirect(orgId);
@@ -31,7 +31,7 @@ const OrgIcon = ({
         className="icon-link slds-m-bottom_xxx-small"
       />
     );
-    return reviewOrgOutOfDate ? (
+    return testOrgOutOfDate ? (
       <Button
         label={iconLink}
         variant="link"

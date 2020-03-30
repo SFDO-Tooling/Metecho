@@ -168,7 +168,7 @@ const AssigneeTableCell = ({
         assignedUser = item.assigned_dev;
         break;
       case ORG_TYPES.QA:
-        title = i18n.t('Assign Reviewer');
+        title = i18n.t('Assign Tester');
         assignedUser = item.assigned_qa;
         break;
     }
@@ -250,7 +250,7 @@ const TaskTable = ({
     </DataTableColumn>
     <DataTableColumn
       key="assigned_qa"
-      label={i18n.t('Reviewer')}
+      label={i18n.t('Tester')}
       property="assigned_qa"
       width="15%"
     >
