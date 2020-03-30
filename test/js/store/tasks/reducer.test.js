@@ -452,31 +452,5 @@ describe('reducer', () => {
 
       expect(actual).toEqual(expected);
     });
-
-    // test('different id?', () => {
-    //   const task = {
-    //     id: 't1',
-    //     project: 'project-1',
-    //   };
-    //   const task2 = {
-    //     id: 't2',
-    //     project: 'project-1',
-    //   };
-    //   const expected = {
-    //     'project-1': [task],
-    //   };
-    //   const actual = reducer(
-    //     {
-    //       'project-1': [task, task2],
-    //     },
-    //     {
-    //       type: 'DELETE_OBJECT_SUCCEEDED',
-    //       payload: { object: task2, objectType: 'task' },
-    //     },
-    //   );
-
-    //   console.log(actual['project-1']);
-    //   // expect(actual[1].deleted_at).not.toBeUndefined();
-    // });
   });
 });
