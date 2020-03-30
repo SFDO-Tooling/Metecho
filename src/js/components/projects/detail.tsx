@@ -123,7 +123,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
           objectType: OBJECT_TYPES.PROJECT,
           data: {
             ...project,
-            github_users: users,
+            github_users: users.sort((a, b) =>
+              /* istanbul ignore next */
+              a.login.toLowerCase() > b.login.toLowerCase() ? 1 : -1,
+            ),
           },
         }),
       );
