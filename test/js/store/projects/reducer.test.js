@@ -575,4 +575,87 @@ describe('reducer', () => {
       expect(actual).toEqual({});
     });
   });
+
+  describe('DELETE_OBJECT_SUCCEDDED', () => {
+    test('object type is project', () => {
+      const project = {
+        id: 'r1',
+        slug: 'project-1',
+        name: 'Project 1',
+        description: 'This is a test project.',
+        repository: 'repository-1',
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'DELETE_OBJECT_SUCCEEDED',
+          payload: {
+            object: project,
+            objectType: 'project',
+          },
+        },
+      );
+
+      expect(actual).toEqual({});
+    });
+
+    test('ignores if objectType is not project', () => {
+      const project = {
+        id: 'r1',
+        slug: 'project-1',
+        name: 'Project 1',
+        repository: 'repository-1',
+      };
+      const expected = {};
+      const actual = reducer(expected, {
+        type: 'DELETE_OBJECT_SUCCEEDED',
+        payload: {
+          object: project,
+          objectType: 'other-object',
+        },
+      });
+      expect(actual).toEqual({});
+    });
+
+    test('adds deleted_at to project', () => {
+      const project = {
+        id: 'p1',
+        repository: 'repository-1',
+        name: 'Project 1',
+      };
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const deletedProject = {
+        ...project,
+        deleted_at: '2020-10-15T00:05:32.000Z',
+      };
+      const expected = {
+        'repository-1': {
+          projects: [deletedProject, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(
+        {
+          'repository-1': {
+            projects: [project, project2],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+        {
+          type: 'DELETED_OBJECT_SUCCEEDED',
+          payload: { objectType: 'project', object: project },
+        },
+      );
+
+      expect(expected).toEqual(actual);
+    });
+  });
 });

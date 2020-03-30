@@ -593,5 +593,27 @@ describe('<ProjectDetail/>', () => {
 
       expect(queryByText('Edit Project')).toBeNull();
     });
+
+    test('redirects when project deleted', () => {
+      const { context } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  deleted_at: '2020-10-15T00:05:32.000Z',
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(context.action).toEqual('REPLACE');
+      expect(context.url).toEqual(routes.repository_detail('repository-1'));
+    });
   });
 });

@@ -28,6 +28,7 @@ from .model_mixins import (
     HashIdMixin,
     PopulateRepoIdMixin,
     PushMixin,
+    SoftDeleteMixin,
     TimestampsMixin,
 )
 from .sf_run_flow import get_devhub_api
@@ -351,7 +352,13 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(
-    CreatePrMixin, PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    CreatePrMixin,
+    PushMixin,
+    HashIdMixin,
+    TimestampsMixin,
+    SlugMixin,
+    SoftDeleteMixin,
+    models.Model,
 ):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
@@ -479,7 +486,13 @@ class TaskSlug(AbstractSlug):
 
 
 class Task(
-    CreatePrMixin, PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    CreatePrMixin,
+    PushMixin,
+    HashIdMixin,
+    TimestampsMixin,
+    SlugMixin,
+    SoftDeleteMixin,
+    models.Model,
 ):
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")

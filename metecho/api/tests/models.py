@@ -134,6 +134,24 @@ class TestProject:
 
             assert create_pr_job.delay.called
 
+    def test_soft_delete(self, project_factory):
+        project = project_factory()
+        project.delete()
+        project.refresh_from_db()
+        assert project.deleted_at is not None
+
+    def test_queryset_soft_delete(self, project_factory):
+        project_factory()
+        project_factory()
+        project_factory()
+
+        assert Project.objects.count() == 3
+        assert Project.objects.active().count() == 3
+        Project.objects.all().delete()
+
+        assert Project.objects.count() == 3
+        assert Project.objects.active().count() == 0
+
 
 @pytest.mark.django_db
 class TestTask:

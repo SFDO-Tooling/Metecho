@@ -246,7 +246,7 @@
   "You are in offline mode. We are trying to reconnect, but you may need to": "You are in offline mode. We are trying to reconnect, but you may need to",
   "anErrorOccurred": "An error occurred. Try the <1>home page</1>?",
   "check again": "check again",
-  "confirmDelete": "Are you sure you want to delete <2><0>{{status}}</0></2> <4>{{instanceType}}</4> \"<6>{{name}}</6>\"?",
+  "confirmDelete": "Are you sure you want to delete <2><0>{{status}}</0></2> <4>{{modelType}}</4> \"<6>{{name}}</6>\"?",
   "confirmRemoveCollaboratorsHeading": "Confirm Removing Collaborator",
   "confirmRemoveCollaboratorsHeading_plural": "Confirm Removing Collaborator",
   "confirmRemoveCollaboratorsMessage": "The following user is being removed from this project, but is already assigned to at least one task. Removing this user will not remove them from any assigned tasks. Are you sure you want to remove this user from the project?",
