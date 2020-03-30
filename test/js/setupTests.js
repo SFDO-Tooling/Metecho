@@ -18,6 +18,7 @@ beforeAll(() => {
     user: () => '/api/user/',
     user_refresh: () => '/api/user/refresh/',
     user_disconnect_sf: () => '/api/user/disconnect/',
+    agree_to_tos: () => '/api/agree_to_tos/',
     repository_list: () => '/api/repositories/',
     repository_detail: (slug) => `/api/repositories/${slug}/`,
     repository_refresh_github_users: (id) =>
