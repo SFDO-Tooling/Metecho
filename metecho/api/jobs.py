@@ -525,7 +525,7 @@ def populate_github_users(repository, *, originating_user_id):
                     }
                     for collaborator in repo.collaborators()
                 ],
-                key=lambda x: x["login"],
+                key=lambda x: x["login"].lower(),
             )
         )
     except Exception as e:
