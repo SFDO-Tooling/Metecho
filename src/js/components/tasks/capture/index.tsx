@@ -158,7 +158,7 @@ const CaptureModal = ({
 
   const pages = [
     {
-      heading: i18n.t('Select the location to capture changes'),
+      heading: i18n.t('Select the location to retrieve changes'),
       contents: (
         <TargetDirectoriesForm
           key="page-1-contents"
@@ -179,7 +179,7 @@ const CaptureModal = ({
       ),
     },
     {
-      heading: i18n.t('Select the changes to capture'),
+      heading: i18n.t('Select the changes to retrieve'),
       contents: (
         <ChangesForm
           key="page-2-contents"
@@ -211,7 +211,7 @@ const CaptureModal = ({
       ],
     },
     {
-      heading: i18n.t('Describe the changes you are capturing'),
+      heading: i18n.t('Describe the changes you are retrieving'),
       contents: (
         <CommitMessageForm
           key="page-3-contents"
@@ -234,11 +234,11 @@ const CaptureModal = ({
           label={
             capturingChanges ? (
               <LabelWithSpinner
-                label={i18n.t('Capturing Selected Changes…')}
+                label={i18n.t('Retrieving Selected Changes…')}
                 variant="inverse"
               />
             ) : (
-              i18n.t('Capture Selected Changes')
+              i18n.t('Retrieve Selected Changes')
             )
           }
           variant="brand"

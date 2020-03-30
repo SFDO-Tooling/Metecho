@@ -80,3 +80,11 @@ $color-background-path-complete-hover: $color-gray-6;
     }
   }
 }
+
+.progress-bar-item {
+  cursor: default;
+
+  &:focus {
+    text-decoration: none;
+  }
+}

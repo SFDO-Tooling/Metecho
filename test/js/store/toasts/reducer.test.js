@@ -12,6 +12,7 @@ describe('reducer', () => {
     const msg = {
       id: 'toast-1',
       heading: 'message',
+      variant: 'error',
     };
     const actual = reducer([], {
       type: 'TOAST_ADDED',
@@ -19,6 +20,35 @@ describe('reducer', () => {
     });
 
     expect(actual).toEqual([msg]);
+  });
+
+  test('removes existing "success" toasts if new one is added', () => {
+    const toast1 = {
+      id: 'toast-1',
+      heading: 'message',
+    };
+    const toast2 = {
+      id: 'toast-2',
+      heading: 'message',
+      variant: 'success',
+    };
+    const toast3 = {
+      id: 'toast-3',
+      heading: 'message',
+      variant: 'error',
+    };
+    const newToast = {
+      id: 'new-toast',
+      heading: 'message',
+      variant: 'success',
+    };
+    const actual = reducer([toast1, toast2, toast3], {
+      type: 'TOAST_ADDED',
+      payload: newToast,
+    });
+    const expected = [toast3, newToast];
+
+    expect(actual).toEqual(expected);
   });
 
   test('handles TOAST_REMOVED action', () => {

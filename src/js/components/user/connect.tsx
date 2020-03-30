@@ -116,7 +116,7 @@ const ConnectModal = ({
       tagline={
         <Trans i18nKey="devHubInfo">
           Connection to a Salesforce org with Dev Hub enabled is required to
-          create a Dev or Review scratch org. Learn how to{' '}
+          create a Dev or Test scratch org. Learn how to{' '}
           <ExternalLink url="https://developer.salesforce.com/signup">
             create a Developer Edition org
           </ExternalLink>{' '}

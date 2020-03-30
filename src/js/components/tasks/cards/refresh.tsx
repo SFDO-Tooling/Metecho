@@ -25,7 +25,7 @@ const RefreshOrgModal = ({
     closeRefreshOrgModal();
   };
 
-  let heading = i18n.t('Review Org Behind Latest');
+  let heading = i18n.t('Test Org Behind Latest');
   if (missingCommits > 0) {
     heading = `${heading}: ${getOrgBehindLatestMsg(missingCommits, true)}`;
   }
@@ -37,13 +37,13 @@ const RefreshOrgModal = ({
       onRequestClose={closeRefreshOrgModal}
     >
       <div className="slds-p-around_large">
-        <Trans i18nKey="refreshReviewOrgMsg">
-          <strong>[Recommended]</strong> This option will re-create your Review
-          Org with the latest changes, allowing you to review the most recent
+        <Trans i18nKey="refreshTestOrgMsg">
+          <strong>[Recommended]</strong> This option will re-create your Test
+          Org with the latest changes, allowing you to test the most recent
           version.
         </Trans>
         <Button
-          label={i18n.t('Refresh Review Org')}
+          label={i18n.t('Refresh Test Org')}
           variant="brand"
           className="slds-size_full slds-m-top_medium"
           onClick={handleSubmit}
@@ -51,7 +51,7 @@ const RefreshOrgModal = ({
         <hr className="slds-m-vertical_large" />
         <Trans i18nKey="viewOutdatedOrg">
           You may proceed with the outdated org, but be aware that you will not
-          be reviewing the latest changes.
+          be testing the latest changes.
         </Trans>
         <ExternalLink
           url={orgUrl}

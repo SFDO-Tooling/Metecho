@@ -178,7 +178,7 @@ const SubmitReviewModal = ({
         {orgId ? (
           <Checkbox
             id="delete-org"
-            labels={{ label: 'Delete Review Org' }}
+            labels={{ label: 'Delete Test Org' }}
             className="slds-p-top_small"
             name="delete_org"
             checked={inputs.delete_org}

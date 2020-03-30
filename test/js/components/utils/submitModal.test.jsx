@@ -41,7 +41,7 @@ describe('<SubmitModal/>', () => {
     test('closes modal', () => {
       const { getByText, toggleModal } = setup();
 
-      expect(getByText('Submit this task for review')).toBeVisible();
+      expect(getByText('Submit this task for testing')).toBeVisible();
       expect(getByText('Cancel')).toBeVisible();
 
       fireEvent.click(getByText('Cancel'));
@@ -53,10 +53,10 @@ describe('<SubmitModal/>', () => {
   describe('form submit', () => {
     test('creates a new task pr', () => {
       const { getByText } = setup();
-      const submit = getByText('Submit Task for Review');
+      const submit = getByText('Submit Task for Testing');
       fireEvent.click(submit);
 
-      expect(getByText('Submitting Task for Review…')).toBeVisible();
+      expect(getByText('Submitting Task for Testing…')).toBeVisible();
       expect(createObject).toHaveBeenCalledTimes(1);
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'task_pr',

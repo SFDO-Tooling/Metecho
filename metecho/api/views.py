@@ -153,7 +153,7 @@ class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
     queryset = Project.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
-    error_pr_exists = _("Project has already been submitted for review.")
+    error_pr_exists = _("Project has already been submitted for testing.")
 
 
 class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
@@ -162,7 +162,7 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     queryset = Task.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
-    error_pr_exists = _("Task has already been submitted for review.")
+    error_pr_exists = _("Task has already been submitted for testing.")
 
     @action(detail=True, methods=["POST"])
     def review(self, request, pk=None):
@@ -175,7 +175,7 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
         if not task.pr_is_open:
             raise ValidationError(_("The pull request for this task has been closed."))
         if not (org or task.review_valid):
-            raise ValidationError(_("Cannot submit review without a Review Org."))
+            raise ValidationError(_("Cannot submit review without a Test Org."))
 
         task.queue_submit_review(
             user=request.user,
