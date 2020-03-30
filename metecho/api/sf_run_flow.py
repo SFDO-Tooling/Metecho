@@ -286,8 +286,9 @@ def create_org(
 def run_flow(*, cci, org_config, flow_name, project_path, user):
     """Run a flow on a scratch org"""
     # Run flow in a subprocess so we can control the environment
+    os.system(f"chmod -R 774 {project_path}")
     gh_token = user.socialaccount_set.get(provider="github").socialtoken_set.get().token
-    command = shutil.which("cci")
+    command = os.environ.get("METECHO_CCI_PATH", shutil.which("cci"))
     args = [command, "flow", "run", flow_name, "--org", "dev"]
     env = {
         "CUMULUSCI_KEYCHAIN_CLASS": "cumulusci.core.keychain.EnvironmentProjectKeychain",
@@ -314,6 +315,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
     )
     out, err = p.communicate()
     if p.returncode:
+        raise Exception(out)
         p = subprocess.run(
             [command, "error", "info"], capture_output=True, env={"HOME": project_path}
         )

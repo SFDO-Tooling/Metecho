@@ -8,10 +8,11 @@ import itertools
 import logging
 import os
 import shutil
+import tempfile
 import zipfile
 from glob import glob
 
-from cumulusci.utils import temporary_dir
+from cumulusci.utils import cd
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from github3 import login
 from github3.exceptions import UnprocessableEntity
@@ -97,7 +98,9 @@ def extract_zip_file(zip_file, owner, repo_name):
 
 @contextlib.contextmanager
 def local_github_checkout(user, repo_id, commit_ish=None):
-    with temporary_dir() as repo_root:
+    # with tempfile.TemporaryDirectory(dir="/home/cci") as repo_root:
+    repo_root = tempfile.mkdtemp(dir="/home/cci")
+    with cd(repo_root):
         # pretend it's a git clone to satisfy cci
         os.mkdir(".git")
 

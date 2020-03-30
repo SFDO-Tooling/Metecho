@@ -1,0 +1,10 @@
+#!/bin/bash -x
+
+# Create cci user and homedir
+adduser --disabled-password --gecos "" --ingroup dyno cci
+chmod g+s /home/cci
+
+# Compile wrapper to setuid as cci
+gcc -Wall bin/run-cci.c -o bin/run-cci
+chown cci bin/run-cci
+chmod u+s bin/run-cci
