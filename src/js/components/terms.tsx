@@ -129,7 +129,7 @@ const Terms = ({ from = {}, location }: Props) => {
             <li>
               Retrieving your development work from the scratch org and
               committing it to the public open source, SFDO-Community-Sprints
-              Github repository.
+              GitHub repository.
             </li>
           </ul>
           <p>
@@ -137,13 +137,13 @@ const Terms = ({ from = {}, location }: Props) => {
             org, and it does not access any Customer Data as that term is
             defined in the Salesforce Master Subscription Agreement. You do not
             have to use the Metecho tool in order to access the
-            SFDO-Community-Sprints Github repository.
+            SFDO-Community-Sprints GitHub repository.
           </p>
           <h3 className="slds-text-heading_small">
             Your Use of the Metecho Tool
           </h3>
           <p>
-            Please do not use the Metecho Tool in a way that violates any laws,
+            Please do not use the Metecho tool in a way that violates any laws,
             infringes anyone’s rights, is offensive, or interferes with the
             Sites or any features on the Sites (including any technological
             measures we employ to enforce this Agreement).
@@ -172,38 +172,38 @@ const Terms = ({ from = {}, location }: Props) => {
             for evaluation purposes only, is provided as-is, is not supported,
             and may be subject to additional terms.
           </p>
-          <h3 className="slds-text-heading_small">Your Github Account</h3>
+          <h3 className="slds-text-heading_small">Your GitHub Account</h3>
           <p>
-            In order to contribute to the Salesforce.org’s open source products,
-            you will be required to have a Github account. By signing up for
-            Github, you agree to Github’s Terms of Service and Privacy Statement
-            and to provide Github with the information necessary to create
-            and/or maintain your account.
+            In order to contribute to Salesforce.org’s open source products, you
+            will be required to have a GitHub account. By signing up for GitHub,
+            you agree to GitHub’s Terms of Service and Privacy Statement and to
+            provide GitHub with the information necessary to create and/or
+            maintain your account.
           </p>
           <h3 className="slds-text-heading_small">
-            Access to Your Github Account
+            Access to Your GitHub Account
           </h3>
           <p>
             In order to facilitate contribution, the Metecho tool requires
-            access to your Github accountincluding, but not limited to, the
+            access to your GitHub account including, but not limited to, the
             personal data and code repositories associated with your account, in
-            order to carry out actions on your behalf via the Github API.
+            order to carry out actions on your behalf via the GitHub API.
           </p>
           <h3 className="slds-text-heading_small">
-            Personal Data Associated with Your Github Account
+            Personal Data Associated with Your GitHub Account
           </h3>
           <p>
-            The Metecho tool may access your name, email address, Github
-            username, Github account information information, Github profile
-            picture and any repositories associated with your Github account.
+            The Metecho tool may access your name, email address, GitHub
+            username, GitHub account information information, GitHub profile
+            picture and any repositories associated with your GitHub account.
             Other Metecho users participating in the Open Source Community
             Sprint will b
           </p>
           <h3 className="slds-text-heading_small">
-            Purposes of Access to Your Github Account
+            Purposes of Access to Your GitHub Account
           </h3>
           <p>
-            Specifically, the Metecho tool will access your Github account,
+            Specifically, the Metecho tool will access your GitHub account,
             including your associated personal data, for the following purposes:
           </p>
           <ul>
@@ -235,7 +235,7 @@ const Terms = ({ from = {}, location }: Props) => {
             By using the Metecho tool and participating in the Open Source
             Community Sprint, you agree that any work or code you write while
             using the Metecho tool (a) will be made available in the
-            SFDO-Community-Sprints Github repository and (b) is subject to
+            SFDO-Community-Sprints GitHub repository and (b) is subject to
             Salesforce’s Contributor License Agreement.
           </p>
           <p>
