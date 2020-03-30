@@ -2,7 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
-from github3.exceptions import UnprocessableEntity
+from github3.exceptions import NotFoundError, UnprocessableEntity
 
 from ..gh import (
     NoGitHubTokenError,
@@ -16,6 +16,7 @@ from ..gh import (
     local_github_checkout,
     log_unsafe_zipfile_error,
     try_to_make_branch,
+    validate_cumulusci_yml_unchanged,
     zip_file_is_safe,
 )
 
@@ -115,8 +116,9 @@ class TestLocalGitHubCheckout:
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             repository = MagicMock(default_branch="master")
+            repository.file_contents.side_effect = NotFoundError(MagicMock())
             gh = MagicMock()
-            gh.repository.return_value = repository
+            gh.repository_with_id.return_value = repository
             gh_given_user.return_value = gh
             glob.return_value = ["owner-repo_name-"]
 
@@ -191,3 +193,11 @@ def test_get_source_format():
     with patch(f"{PATCH_ROOT}.get_project_config") as get_project_config:
         get_project_config.return_value = MagicMock(project__source_format="sentinel")
         assert get_source_format() == "sentinel"
+
+
+def test_validate_cumulusci_yml_unchanged():
+    repo = MagicMock()
+    repo.file_contents.return_value.decoded.decode.return_value = "1"
+
+    with pytest.raises(Exception):
+        validate_cumulusci_yml_unchanged(repo)
