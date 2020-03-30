@@ -576,7 +576,7 @@ describe('reducer', () => {
     });
   });
 
-  describe('DELETE_OBJECT_SUCCEDDED', () => {
+  describe('DELETE_OBJECT_SUCCEEDED', () => {
     test('object type is project', () => {
       const project = {
         id: 'r1',
@@ -585,18 +585,28 @@ describe('reducer', () => {
         description: 'This is a test project.',
         repository: 'repository-1',
       };
-      const actual = reducer(
-        {},
-        {
-          type: 'DELETE_OBJECT_SUCCEEDED',
-          payload: {
-            object: project,
-            objectType: 'project',
-          },
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const expected = {
+        'repository-1': {
+          projects: [project, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
         },
-      );
+      };
+      const actual = reducer(expected, {
+        type: 'DELETE_OBJECT_SUCCEEDED',
+        payload: {
+          object: project,
+          objectType: 'project',
+        },
+      });
 
-      expect(actual).toEqual({});
+      expect(actual['repository-1'].projects[0].deleted_at).not.toBeUndefined();
     });
 
     test('ignores if objectType is not project', () => {
@@ -628,13 +638,9 @@ describe('reducer', () => {
         repository: 'repository-1',
         name: 'Project 2',
       };
-      const deletedProject = {
-        ...project,
-        deleted_at: '2020-10-15T00:05:32.000Z',
-      };
       const expected = {
         'repository-1': {
-          projects: [deletedProject, project2],
+          projects: [project, project2],
           next: null,
           notFound: [],
           fetched: true,
@@ -655,7 +661,7 @@ describe('reducer', () => {
         },
       );
 
-      expect(expected).toEqual(actual);
+      expect(actual).toEqual(expected);
     });
   });
 });
