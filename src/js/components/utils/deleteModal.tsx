@@ -13,18 +13,19 @@ import { OBJECT_TYPES } from '@/utils/constants';
 
 const DeleteModal = ({
   model,
-  instanceType,
+  modelType,
   isOpen,
   handleClose,
 }: {
   model: Project | Task;
-  instanceType: 'project';
+  modelType: 'project';
   isOpen: boolean;
   handleClose: () => void;
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
 
   const doDelete = useCallback(() => {
+    /* istanbul ignore else */
     if (model) {
       dispatch(
         deleteObject({
@@ -38,7 +39,7 @@ const DeleteModal = ({
   }, [dispatch, model, handleClose]);
 
   let heading;
-  switch (instanceType) {
+  switch (modelType) {
     case OBJECT_TYPES.PROJECT:
       heading = i18n.t('Delete Project');
       break;
@@ -64,7 +65,7 @@ const DeleteModal = ({
         <Trans i18nKey="confirmDelete" name={name}>
           Are you sure you want to delete{' '}
           <span className="lowercase">{{ status: model.status }}</span>{' '}
-          {{ instanceType }} &quot;{{ name: model.name }}&quot;?
+          {{ modelType }} &quot;{{ name: model.name }}&quot;?
         </Trans>
       </div>
     </Modal>

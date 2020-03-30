@@ -439,7 +439,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         <DeleteModal
           model={project}
           isOpen={deleteModalOpen}
-          instanceType={OBJECT_TYPES.PROJECT}
+          modelType={OBJECT_TYPES.PROJECT}
           handleClose={closeDeleteModal}
         />
       </DetailPageLayout>

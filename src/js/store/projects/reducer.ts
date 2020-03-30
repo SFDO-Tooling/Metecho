@@ -218,7 +218,6 @@ const reducer = (
         object,
       }: { objectType?: ObjectTypes; object: Project } = action.payload;
       if (objectType === OBJECT_TYPES.PROJECT && object) {
-        // filter deleted object from repositoryProjects
         const repositoryProjects = projects[object.repository] || {
           ...defaultState,
         };
