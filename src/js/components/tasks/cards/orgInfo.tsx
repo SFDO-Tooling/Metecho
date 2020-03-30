@@ -18,12 +18,11 @@ const OrgInfo = ({
   repoUrl,
   taskCommits,
   ownedByCurrentUser,
-  assignedToCurrentUser,
   ownedByWrongUser,
   isCreating,
   isRefreshingOrg,
   isSubmittingReview,
-  reviewOrgOutOfDate,
+  testOrgOutOfDate,
   missingCommits,
   doCheckForOrgChanges,
 }: {
@@ -33,12 +32,11 @@ const OrgInfo = ({
   repoUrl: string;
   taskCommits?: string[];
   ownedByCurrentUser: boolean;
-  assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
   isCreating: boolean;
   isRefreshingOrg: boolean;
   isSubmittingReview: boolean;
-  reviewOrgOutOfDate: boolean;
+  testOrgOutOfDate: boolean;
   missingCommits: number;
   doCheckForOrgChanges: () => void;
 }) => {
@@ -55,7 +53,11 @@ const OrgInfo = ({
     );
   }
 
-  if (!org && !assignedToCurrentUser) {
+  if (isCreating || isRefreshingOrg) {
+    return null;
+  }
+
+  if (!(org || task.review_status)) {
     return (
       <ul>
         <li>
@@ -65,10 +67,6 @@ const OrgInfo = ({
         </li>
       </ul>
     );
-  }
-
-  if (!(org || task.review_status) || isCreating || isRefreshingOrg) {
-    return null;
   }
 
   const expiresAt = org?.expires_at && new Date(org.expires_at);
@@ -98,11 +96,11 @@ const OrgInfo = ({
       }
       case ORG_TYPES.QA: {
         // synced status for QA org
-        if (reviewOrgOutOfDate && taskCommits?.length) {
+        if (testOrgOutOfDate && taskCommits?.length) {
           // eslint-disable-next-line max-len
           compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${taskCommits[0]}`;
         }
-        commitStatus = reviewOrgOutOfDate ? (
+        commitStatus = testOrgOutOfDate ? (
           <li>
             <Icon
               category="utility"

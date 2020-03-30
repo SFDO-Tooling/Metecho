@@ -32,9 +32,9 @@ export const createProjectPR = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t('Successfully submitted project for review:')} “${
-          model.name
-        }”.`,
+        heading: `${i18n.t(
+          'Successfully submitted project for review on GitHub:',
+        )} “${model.name}”.`,
         linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
         linkUrl: model.pr_url ? model.pr_url : undefined,
         openLinkInNewWindow: true,
@@ -62,7 +62,7 @@ export const createProjectPRFailed = ({
     dispatch(
       addToast({
         heading: `${i18n.t(
-          'Uh oh. There was an error submitting project for review',
+          'Uh oh. There was an error submitting project for review on GitHub',
         )}: “${model.name}”.`,
         details: message,
         variant: 'error',

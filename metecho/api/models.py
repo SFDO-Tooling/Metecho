@@ -36,12 +36,12 @@ from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
-PROJECT_STATUSES = Choices("Planned", "In progress", "Review", "Merged",)
+PROJECT_STATUSES = Choices("Planned", "In progress", "Review", "Merged")
 TASK_STATUSES = Choices(
-    ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed"),
+    ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed")
 )
 TASK_REVIEW_STATUS = Choices(
-    ("Approved", "Approved"), ("Changes requested", "Changes requested"),
+    ("Approved", "Approved"), ("Changes requested", "Changes requested")
 )
 
 
@@ -51,7 +51,7 @@ class UserQuerySet(models.QuerySet):
 
 class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
     def get_or_create_github_user(self):
-        return self.get_or_create(username=settings.GITHUB_USER_NAME,)[0]
+        return self.get_or_create(username=settings.GITHUB_USER_NAME)[0]
 
 
 class User(HashIdMixin, AbstractUser):
@@ -59,6 +59,7 @@ class User(HashIdMixin, AbstractUser):
     currently_fetching_repos = models.BooleanField(default=False)
     devhub_username = StringField(null=True, blank=True)
     allow_devhub_override = models.BooleanField(default=False)
+    agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
 
     def queue_refresh_repositories(self):
         """Queue a job to refresh repositories unless we're already doing so"""
@@ -183,6 +184,10 @@ class User(HashIdMixin, AbstractUser):
             )
         except (InvalidToken, AttributeError):
             return (None, None)
+
+    @property
+    def gh_token(self):
+        return self.socialaccount_set.get(provider="github").socialtoken_set.get().token
 
     @property
     def github_account(self):
@@ -371,7 +376,7 @@ class Project(
     pr_is_open = models.BooleanField(default=False)
     pr_is_merged = models.BooleanField(default=False)
     status = models.CharField(
-        max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned,
+        max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned
     )
 
     repository = models.ForeignKey(
@@ -498,7 +503,7 @@ class Task(
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, null=True, blank=True, validators=[validate_unicode_branch],
+        max_length=100, null=True, blank=True, validators=[validate_unicode_branch]
     )
 
     commits = JSONField(default=list, blank=True)
@@ -808,7 +813,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         if error is None:
             self.save()
             self.notify_changed(
-                type_="SCRATCH_ORG_PROVISION", originating_user_id=originating_user_id,
+                type_="SCRATCH_ORG_PROVISION", originating_user_id=originating_user_id
             )
             self.task.finalize_provision(originating_user_id=originating_user_id)
         else:
@@ -927,7 +932,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
         self.save()
         if error is None:
             self.notify_changed(
-                type_="SCRATCH_ORG_REFRESH", originating_user_id=originating_user_id,
+                type_="SCRATCH_ORG_REFRESH", originating_user_id=originating_user_id
             )
         else:
             self.notify_scratch_org_error(

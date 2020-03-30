@@ -6,14 +6,16 @@ import React from 'react';
 import { LabelWithSpinner } from '@/components/utils';
 import { Org } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
+import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '@/utils/constants';
 
 const OrgActions = ({
   org,
+  type,
   task,
   ownedByCurrentUser,
   assignedToCurrentUser,
   ownedByWrongUser,
-  reviewOrgOutOfDate,
+  testOrgOutOfDate,
   readyForReview,
   isCreating,
   isDeleting,
@@ -25,11 +27,12 @@ const OrgActions = ({
   doRefreshOrg,
 }: {
   org: Org | null;
+  type: OrgTypes;
   task: Task;
   ownedByCurrentUser: boolean;
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
-  reviewOrgOutOfDate: boolean;
+  testOrgOutOfDate: boolean;
   readyForReview: boolean;
   isCreating: boolean;
   isDeleting: boolean;
@@ -98,7 +101,7 @@ const OrgActions = ({
   if (ownedByCurrentUser && (org || ownedByWrongUser)) {
     return (
       <>
-        {reviewOrgOutOfDate && (
+        {testOrgOutOfDate && (
           <Button
             label={i18n.t('Refresh Org')}
             variant="brand"
@@ -124,11 +127,33 @@ const OrgActions = ({
     );
   }
 
-  if (!(org || ownedByWrongUser) && assignedToCurrentUser) {
+  if (assignedToCurrentUser && !(org || ownedByWrongUser)) {
+    const preventNewTestOrg =
+      type === ORG_TYPES.QA && !task.has_unmerged_commits;
+    const hasReviewRejected =
+      task.review_valid &&
+      task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
+    const needsReview =
+      task.has_unmerged_commits && task.pr_is_open && !task.review_valid;
+    let isActive = false;
+    switch (type) {
+      case ORG_TYPES.DEV:
+        isActive = hasReviewRejected || !task.has_unmerged_commits;
+        break;
+      case ORG_TYPES.QA:
+        isActive = needsReview;
+        break;
+    }
     return (
       <>
         {submitReviewBtn}
-        <Button label={i18n.t('Create Org')} onClick={doCreateOrg} />
+        {!preventNewTestOrg && (
+          <Button
+            label={i18n.t('Create Org')}
+            variant={isActive ? 'brand' : 'neutral'}
+            onClick={doCreateOrg}
+          />
+        )}
       </>
     );
   }

@@ -15,8 +15,18 @@ const reducer = (
   action: ToastAction,
 ): ToastType[] => {
   switch (action.type) {
-    case 'TOAST_ADDED':
-      return [...toasts, action.payload];
+    case 'TOAST_ADDED': {
+      const toast = action.payload;
+      let newToasts;
+      if (!toast.variant || toast.variant === 'success') {
+        // If new toast is a success toast, remove other success toasts...
+        newToasts = toasts.filter((t) => t.variant && t.variant !== 'success');
+      } else {
+        newToasts = [...toasts];
+      }
+      newToasts.push(toast);
+      return newToasts;
+    }
     case 'TOAST_REMOVED':
       return toasts.filter((toast) => toast.id !== action.payload);
     case 'TOASTS_CLEARED':

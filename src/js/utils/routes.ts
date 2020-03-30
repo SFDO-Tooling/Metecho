@@ -1,6 +1,7 @@
 const routes = {
   home: () => '/',
   login: () => '/login',
+  terms: () => '/terms',
   repository_list: () => '/repositories',
   repository_detail: (repositorySlug: string) =>
     `/repositories/${repositorySlug}`,
@@ -13,9 +14,11 @@ const routes = {
   ) => `/repositories/${repositorySlug}/${projectSlug}/${taskSlug}`,
 };
 
+/* istanbul ignore next */
 export const routePatterns = {
   home: () => '/',
   login: () => '/login',
+  terms: () => '/terms',
   auth_error: () => '/accounts/*',
   repository_list: () => '/repositories',
   repository_detail: () => '/repositories/:repositorySlug',
