@@ -85,7 +85,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges = Boolean(devOrg?.has_unsaved_changes);
-    userIsOwner = Boolean(userIsAssignedDev && devOrg?.owner === user.id);
+    userIsOwner = Boolean(
+      userIsAssignedDev && devOrg?.url && devOrg?.owner === user.id,
+    );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
   }
