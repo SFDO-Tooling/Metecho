@@ -10,11 +10,19 @@ from ..models import SCRATCH_ORG_TYPES
 
 
 @pytest.mark.django_db
-def test_user_view(client):
-    response = client.get(reverse("user"))
+class TestUserView:
+    def test_get(self, client):
+        response = client.get(reverse("user"))
 
-    assert response.status_code == 200
-    assert response.json()["username"].endswith("@example.com")
+        assert response.status_code == 200
+        assert response.json()["username"].endswith("@example.com")
+
+    def test_agree_to_tos(self, client):
+        response = client.put(reverse("agree-to-tos"))
+
+        assert response.status_code == 200
+        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["agreed_to_tos_at"] is not None
 
 
 @pytest.mark.django_db

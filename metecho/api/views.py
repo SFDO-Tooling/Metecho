@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ResponseError
@@ -88,6 +89,18 @@ class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
     model = User
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
+
+
+class AgreeToTosView(CurrentUserObjectMixin, generics.UpdateAPIView):
+    model = User
+    serializer_class = FullUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def update(self, request, pk=None):
+        request.user.agreed_to_tos_at = timezone.now()
+        request.user.save()
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
 
 class UserRefreshView(CurrentUserObjectMixin, APIView):

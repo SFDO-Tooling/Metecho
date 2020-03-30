@@ -58,6 +58,7 @@ class User(HashIdMixin, AbstractUser):
     currently_fetching_repos = models.BooleanField(default=False)
     devhub_username = StringField(null=True, blank=True)
     allow_devhub_override = models.BooleanField(default=False)
+    agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
 
     def queue_refresh_repositories(self):
         """Queue a job to refresh repositories unless we're already doing so"""

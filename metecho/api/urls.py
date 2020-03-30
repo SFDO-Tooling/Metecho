@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework import routers
 
 from .views import (
+    AgreeToTosView,
     HookView,
     ProjectViewSet,
     RepositoryViewSet,
@@ -22,6 +23,7 @@ router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
 urlpatterns = router.urls + [
     path("hook/", HookView.as_view(), name="hook"),
     path("user/", UserView.as_view(), name="user"),
+    path("agree_to_tos/", AgreeToTosView.as_view(), name="agree-to-tos"),
     path("user/disconnect/", UserDisconnectSFView.as_view(), name="user-disconnect-sf"),
     path("user/refresh/", UserRefreshView.as_view(), name="user-refresh"),
 ]

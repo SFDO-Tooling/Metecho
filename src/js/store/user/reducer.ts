@@ -21,6 +21,7 @@ export interface User {
   currently_fetching_repos: boolean;
   devhub_username: string | null;
   uses_global_devhub: boolean;
+  agreed_to_tos_at: string | null;
 }
 
 const reducer = (
@@ -31,6 +32,7 @@ const reducer = (
     case 'USER_LOGGED_IN':
     case 'USER_DISCONNECT_SUCCEEDED':
     case 'DEV_HUB_STATUS_SUCCEEDED':
+    case 'AGREE_TO_TERMS_SUCCEEDED':
       return action.payload;
     case 'USER_LOGGED_OUT':
       return null;
