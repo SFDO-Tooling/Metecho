@@ -3,6 +3,8 @@
 .mypy_cache/
 .nyc_output/
 .vscode/
+.yarn/
+.yarnrc
 ENV/
 __pycache__/
 coverage/

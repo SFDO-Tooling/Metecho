@@ -32,7 +32,7 @@ describe('createProjectPR', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully submitted project for review: “My Project”.',
+      'Successfully submitted project for review on GitHub: “My Project”.',
     );
     expect(allActions[0].payload.linkText).toEqual('View pull request.');
     expect(allActions[0].payload.linkUrl).toEqual('my-pr-url');
@@ -59,7 +59,7 @@ describe('createProjectPR', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully submitted project for review: “My Project”.',
+      'Successfully submitted project for review on GitHub: “My Project”.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
     expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -89,7 +89,7 @@ describe('createProjectPRFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error submitting project for review: “My Project”.',
+      'Uh oh. There was an error submitting project for review on GitHub: “My Project”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

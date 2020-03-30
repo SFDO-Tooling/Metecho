@@ -52,15 +52,15 @@ describe('<CaptureModal/>', () => {
   test('can navigate forward/back, close modal', () => {
     const { getByText, toggleModal } = setup();
 
-    expect(getByText('Select the location to capture changes')).toBeVisible();
+    expect(getByText('Select the location to retrieve changes')).toBeVisible();
 
     fireEvent.click(getByText('Save & Next'));
 
-    expect(getByText('Select the changes to capture')).toBeVisible();
+    expect(getByText('Select the changes to retrieve')).toBeVisible();
 
     fireEvent.click(getByText('Go Back'));
 
-    expect(getByText('Select the location to capture changes')).toBeVisible();
+    expect(getByText('Select the location to retrieve changes')).toBeVisible();
 
     fireEvent.click(getByText('Close'));
 
@@ -98,11 +98,11 @@ describe('<CaptureModal/>', () => {
       fireEvent.click(getByText('Save & Next'));
 
       const commitInput = getByLabelText('*Commit Message', { exact: false });
-      const submit = getByText('Capture Selected Changes');
+      const submit = getByText('Retrieve Selected Changes');
       fireEvent.change(commitInput, { target: { value: 'My Commit' } });
       fireEvent.click(submit);
 
-      expect(getByText('Capturing Selected Changes…')).toBeVisible();
+      expect(getByText('Retrieving Selected Changes…')).toBeVisible();
       expect(createObject).toHaveBeenCalledTimes(1);
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'scratch_org_commit',
@@ -120,10 +120,10 @@ describe('<CaptureModal/>', () => {
 
   describe('form error', () => {
     test.each([
-      ['target_directory', 'Select the location to capture changes', true],
-      ['changes', 'Select the changes to capture', true],
-      ['commit_message', 'Describe the changes you are capturing', true],
-      ['foobar', 'Describe the changes you are capturing', false],
+      ['target_directory', 'Select the location to retrieve changes', true],
+      ['changes', 'Select the changes to retrieve', true],
+      ['commit_message', 'Describe the changes you are retrieving', true],
+      ['foobar', 'Describe the changes you are retrieving', false],
     ])(
       'navigates to correct page to show error: %s',
       async (field, text, showsErr) => {
@@ -146,7 +146,7 @@ describe('<CaptureModal/>', () => {
         // Click forward to the commit-message modal:
         fireEvent.click(getByText('Save & Next'));
         const commitInput = getByLabelText('*Commit Message', { exact: false });
-        const submit = getByText('Capture Selected Changes');
+        const submit = getByText('Retrieve Selected Changes');
         fireEvent.change(commitInput, { target: { value: 'My Commit' } });
         fireEvent.click(submit);
 

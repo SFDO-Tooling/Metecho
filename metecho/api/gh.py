@@ -7,6 +7,7 @@ import hmac
 import itertools
 import logging
 import os
+import pathlib
 import shutil
 import zipfile
 from glob import glob
@@ -14,7 +15,7 @@ from glob import glob
 from cumulusci.utils import temporary_dir
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from github3 import login
-from github3.exceptions import UnprocessableEntity
+from github3.exceptions import NotFoundError, UnprocessableEntity
 
 from .custom_cci_configs import GlobalConfig
 
@@ -114,6 +115,10 @@ def local_github_checkout(user, repo_id, commit_ish=None):
             # present in the filesystem at cwd, things that are in the
             # repo (we hope):
             extract_zip_file(zip_file, repo.owner.login, repo.name)
+
+            # validate that cumulusci.yml is the same as master
+            validate_cumulusci_yml_unchanged(repo)
+
             yield repo_root
 
 
@@ -207,3 +212,19 @@ def normalize_commit(commit, **kwargs):
             "message": commit.message,
             "url": commit.html_url,
         }
+
+
+def validate_cumulusci_yml_unchanged(repo):
+    """Confirm cumulusci.yml is unchanged between master and the cwd."""
+    try:
+        cci_config_master = repo.file_contents(
+            "cumulusci.yml", ref=repo.default_branch
+        ).decoded.decode("utf-8")
+    except NotFoundError:
+        cci_config_master = ""
+    try:
+        cci_config_branch = pathlib.Path("cumulusci.yml").read_text()
+    except IOError:
+        cci_config_branch = ""
+    if cci_config_master != cci_config_branch:
+        raise Exception(f"cumulusci.yml contains unreviewed changes.")

@@ -137,7 +137,7 @@ const Login = () => {
                 className="slds-m-right_x-small"
               />
               {i18n.t(
-                'Make changes and capture them into a repository on GitHub.',
+                'Make changes and retrieve them into a repository on GitHub.',
               )}
             </li>
           </ul>
