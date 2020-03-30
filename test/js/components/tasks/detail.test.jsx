@@ -464,4 +464,38 @@ describe('<TaskDetail/>', () => {
       expect(queryByText('Edit Task')).toBeNull();
     });
   });
+
+  test('opens/closed deleted modal', () => {
+    const { getByText, queryByText } = setup();
+    fireEvent.click(getByText('Task Options'));
+    fireEvent.click(getByText('Delete Task'));
+
+    expect(getByText('Delete Task')).toBeVisible();
+
+    fireEvent.click(getByText('Cancel'));
+
+    expect(queryByText('Delete Task')).toBeNull();
+  });
+
+  test('redirects when task deleted', () => {
+    const { context } = setup({
+      initialState: {
+        ...defaultState,
+        tasks: {
+          ...defaultState.tasks,
+          project1: [
+            {
+              ...defaultState.tasks.project1[0],
+              deleted_at: 'deleted-date',
+            },
+          ],
+        },
+      },
+    });
+
+    expect(context.action).toEqual('REPLACE');
+    expect(context.url).toEqual(
+      routes.project_detail('repository-1', 'project-1'),
+    );
+  });
 });

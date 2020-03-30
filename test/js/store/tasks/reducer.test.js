@@ -387,4 +387,96 @@ describe('reducer', () => {
       expect(actual).toEqual({});
     });
   });
+
+  describe('DELETE_OBJECT_SUCCEEDED', () => {
+    test('adds deleted_at to existing task', () => {
+      const task = {
+        id: 't1',
+        project: 'project-1',
+        name: 'Task Name',
+      };
+      const task2 = {
+        id: 't2',
+        project: 'project-1',
+      };
+      const actual = reducer(
+        { 'project-1': [task, task2] },
+        {
+          type: 'DELETE_OBJECT_SUCCEEDED',
+          payload: { object: task, objectType: 'task' },
+        },
+      );
+
+      expect(actual['project-1'][0].deleted_at).not.toBeUndefined();
+    });
+
+    test('ignores if no existing task', () => {
+      const task = {
+        id: 't1',
+        slug: 'task-1',
+        name: 'Task 1',
+        project: 'project-1',
+      };
+      const actual = reducer(
+        {},
+        {
+          type: 'DELETE_OBJECT_SUCCEEDED',
+          payload: { object: task, objectType: 'task' },
+        },
+      );
+
+      expect(actual).toEqual({});
+    });
+
+    test('ignores if different objecttype', () => {
+      const task = {
+        id: 't1',
+        project: 'project-1',
+      };
+      const task2 = {
+        id: 't2',
+        project: 'project-1',
+      };
+      const expected = {
+        'project-1': [task, task2],
+      };
+      const actual = reducer(
+        {
+          'project-1': [task, task2],
+        },
+        {
+          type: 'DELETE_OBJECT_SUCCEEDED',
+          payload: { object: task2, objectType: 'foobar' },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    // test('different id?', () => {
+    //   const task = {
+    //     id: 't1',
+    //     project: 'project-1',
+    //   };
+    //   const task2 = {
+    //     id: 't2',
+    //     project: 'project-1',
+    //   };
+    //   const expected = {
+    //     'project-1': [task],
+    //   };
+    //   const actual = reducer(
+    //     {
+    //       'project-1': [task, task2],
+    //     },
+    //     {
+    //       type: 'DELETE_OBJECT_SUCCEEDED',
+    //       payload: { object: task2, objectType: 'task' },
+    //     },
+    //   );
+
+    //   console.log(actual['project-1']);
+    //   // expect(actual[1].deleted_at).not.toBeUndefined();
+    // });
+  });
 });
