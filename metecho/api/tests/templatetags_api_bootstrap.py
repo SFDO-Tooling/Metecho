@@ -28,6 +28,7 @@ def test_serialize(user_factory):
                 "currently_fetching_repos": True,
                 "devhub_username": None,
                 "uses_global_devhub": False,
+                "agreed_to_tos_at": None,
             }
         )
     )
