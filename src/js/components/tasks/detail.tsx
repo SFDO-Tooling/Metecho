@@ -230,7 +230,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   let captureButton: React.ReactNode = null;
-  if (userIsOwner) {
+  if (userIsOwner && (orgHasChanges || devOrg?.has_been_visited)) {
     const captureButtonAction = () => {
       /* istanbul ignore else */
       if (devOrg) {

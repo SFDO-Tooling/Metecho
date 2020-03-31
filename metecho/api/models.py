@@ -325,8 +325,8 @@ class Repository(
         populate_github_users_job.delay(self, originating_user_id=originating_user_id)
 
     def finalize_populate_github_users(self, *, error=None, originating_user_id):
-        self.save()
         if error is None:
+            self.save()
             self.notify_changed(originating_user_id=originating_user_id)
         else:
             self.notify_error(error, originating_user_id=originating_user_id)

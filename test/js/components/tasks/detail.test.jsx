@@ -115,6 +115,7 @@ const defaultState = {
           source: ['src'],
           post: ['foo/bar', 'buz/baz'],
         },
+        has_been_visited: true,
       },
       QA: null,
     },
