@@ -529,7 +529,6 @@ def populate_github_users(repository, *, originating_user_id):
             )
         )
     except Exception as e:
-        repository.refresh_from_db()
         repository.finalize_populate_github_users(
             error=e, originating_user_id=originating_user_id
         )
