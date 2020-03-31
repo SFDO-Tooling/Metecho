@@ -3,6 +3,15 @@
 from django.db import migrations, models
 
 
+def forwards(apps, schema_editor):
+    ScratchOrg = apps.get_model("api", "ScratchOrg")
+    ScratchOrg.objects.update(is_created=True)
+
+
+def backwards(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -15,4 +24,5 @@ class Migration(migrations.Migration):
             name="is_created",
             field=models.BooleanField(default=False),
         ),
+        migrations.RunPython(forwards, backwards),
     ]
