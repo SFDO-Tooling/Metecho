@@ -97,8 +97,8 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
     <>
       <h2
         className="slds-text-heading_medium
-        slds-m-top_large
-        slds-m-bottom_x-small"
+          slds-m-top_large
+          slds-m-bottom_x-small"
       >
         Commit History
       </h2>
