@@ -229,7 +229,6 @@ const TaskTable = ({
       property="name"
       width="65%"
       primaryColumn
-      truncate
     >
       <NameTableCell
         repositorySlug={repositorySlug}
