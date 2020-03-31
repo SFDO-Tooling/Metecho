@@ -11,6 +11,7 @@ from .models import (
     Project,
     Repository,
     ScratchOrg,
+    SiteProfile,
     Task,
 )
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
@@ -415,3 +416,16 @@ class CommitSerializer(serializers.Serializer):
         child=serializers.ListField(child=serializers.CharField())
     )
     target_directory = serializers.CharField()
+
+
+class SiteSerializer(serializers.ModelSerializer):
+    clickthrough_agreement = serializers.CharField(
+        source="clickthrough_agreement_markdown"
+    )
+
+    class Meta:
+        model = SiteProfile
+        fields = (
+            "name",
+            "clickthrough_agreement",
+        )
