@@ -3,17 +3,12 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import { Location } from 'history';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { StaticContext, withRouter } from 'react-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import Logout from '@/components/user/logout';
-import {
-  ExternalLink,
-  LabelWithSpinner,
-  useIsMounted,
-} from '@/components/utils';
+import { LabelWithSpinner, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { agreeToTerms } from '@/store/user/actions';
 import { selectUserState } from '@/store/user/selectors';
