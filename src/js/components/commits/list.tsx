@@ -67,7 +67,7 @@ const MessageTableCell = ({
 }: TableCellProps) => (
   <DataTableCell
     {...props}
-    className={classNames(className, 'commits-message')}
+    className={classNames(className, 'commits-message', 'truncated-cell')}
   >
     {children}
   </DataTableCell>
