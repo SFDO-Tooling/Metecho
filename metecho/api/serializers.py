@@ -419,9 +419,7 @@ class CommitSerializer(serializers.Serializer):
 
 
 class SiteSerializer(serializers.ModelSerializer):
-    clickthrough_agreement = serializers.CharField(
-        source="clickthrough_agreement_markdown"
-    )
+    clickthrough_agreement = MarkdownField(read_only=True)
 
     class Meta:
         model = SiteProfile

@@ -20,6 +20,19 @@ describe('<PrivateRoute />', () => {
     return { getByText, queryByText, context };
   };
 
+  let SITE;
+
+  beforeAll(() => {
+    SITE = window.GLOBALS.SITE;
+    window.GLOBALS.SITE = {
+      clickthrough_agreement: 'Resistance is futile.',
+    };
+  });
+
+  afterAll(() => {
+    window.GLOBALS.SITE = SITE;
+  });
+
   test('renders component if logged in and agreed to TOS', () => {
     const { getByText } = setup({
       user: { agreed_to_tos_at: '2019-02-01T19:47:49Z' },
