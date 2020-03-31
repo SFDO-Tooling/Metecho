@@ -278,7 +278,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   // Progress Bar:
   const activeTasks = tasks?.filter((t) => !t.deleted_at) || [];
   const tasksCompleted = tasks ? getCompletedTasks(activeTasks).length : 0;
-  const tasksTotal = tasks?.length || 0;
+  const tasksTotal = activeTasks?.length || 0;
   const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
 
   // "Submit Project for Review on GitHub" button:
