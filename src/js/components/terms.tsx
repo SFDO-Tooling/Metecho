@@ -81,9 +81,12 @@ const Terms = ({ from = {}, location }: Props) => {
             Sprint. In order to facilitate your contributions to the Open Source
             Commons’ applications and sprint projects, you will need to access
             and use Salesforce.org’s proprietary Metecho tool. These Metecho
-            Terms of Service (“Agreement”) govern the use of our tool. Please
-            read this Agreement carefully because it is a binding agreement
-            between You and Salesforce.com, Inc. (“Salesforce” or “We”).
+            Terms of Service (“Agreement”) govern the use of our tool.
+          </p>
+          <p>
+            Salesforce.org is an Affiliate of Salesforce.com, Inc. (“Salesforce”
+            or “We”). Please read this Agreement carefully because it is a
+            binding agreement between You and Salesforce.
           </p>
           <p>
             BY ACCEPTING THIS AGREEMENT, BY (1) CLICKING A BOX INDICATING
@@ -100,11 +103,12 @@ const Terms = ({ from = {}, location }: Props) => {
             AND MAY NOT USE THE METECHO TOOL.
           </p>
           <p>
-            Please note that we offer many services. Your use of Salesforce
-            products or services are provided by Salesforce pursuant to a
-            separate manually or digitally-executed agreement. The Metecho tool
-            is not considered a Service under the Salesforce Master Subscription
-            Agreement, which does not apply to the use of the Metecho tool.
+            Please note that we offer many services. Your use of Salesforce’s,
+            or its Affiliates’, products or services are provided by Salesforce,
+            or its Affiliates, pursuant to a separate manually or
+            digitally-executed agreement. The Metecho tool is not considered a
+            Service under the Salesforce Master Subscription Agreement, which
+            does not apply to the use of the Metecho tool.
           </p>
           <p>
             This Agreement was last updated on March 30, 2020. It is effective
@@ -194,11 +198,10 @@ const Terms = ({ from = {}, location }: Props) => {
           </h3>
           <p>
             The Metecho tool may access your name, email address, GitHub
-            username, GitHub account information information, GitHub profile
-            picture and any repositories associated with your GitHub account.
-            Other Metecho users participating in the Open Source Community
-            Sprint will be able to see your publicly available GitHub profile
-            picture and username.
+            username, account information, and profile picture, and any
+            repositories associated with your GitHub account. Other Metecho
+            users participating in the Open Source Community Sprint will see
+            your publicly available GitHub profile picture and username.
           </p>
           <h3 className="slds-text-heading_small">
             Purposes of Access to Your GitHub Account
@@ -220,16 +223,16 @@ const Terms = ({ from = {}, location }: Props) => {
           <h3 className="slds-text-heading_small">Proprietary Rights</h3>
           <p>
             Subject to the limited rights expressly granted under this
-            Agreement, Salesforce and its licensors reserve all rights, title
-            and interest in and to the Metecho tool (including reports, data,
-            assessments, analyses or compilations of data, collected by, derived
-            from, created by or returned by the Metecho tool, including any
-            derivative works thereof), including all related intellectual
-            property rights. No rights are granted to you hereunder other than
-            as expressly set forth herein. Subject to the limited licenses
-            granted herein, Salesforce acquires no right, title or interest from
-            you or your licensors under this Agreement, including to program
-            code.
+            Agreement, Salesforce, its Affiliates, and its licensors reserve all
+            rights, title and interest in and to the Metecho tool (including
+            reports, data, assessments, analyses or compilations of data,
+            collected by, derived from, created by or returned by the Metecho
+            tool, including any derivative works thereof), including all related
+            intellectual property rights. No rights are granted to you hereunder
+            other than as expressly set forth herein. Subject to the limited
+            licenses granted herein, neither Salesforce nor its Affiliates
+            acquires any right, title or interest from you or your licensors
+            under this Agreement, including to program code.
           </p>
           <h3 className="slds-text-heading_small">License Information</h3>
           <p>
@@ -241,8 +244,9 @@ const Terms = ({ from = {}, location }: Props) => {
           </p>
           <p>
             You also agree that both the Metecho tool and any work you do while
-            participating in the Open Source Community Sprint are licensed by
-            Salesforce.org under the BSD-3 Clause License, found at{' '}
+            participating in the Open Source Community Sprint must be released
+            in a publicly accessible open source repository under the BSD-3
+            Clause License, found at{' '}
             <ExternalLink url="https://opensource.org/licenses/BSD-3-Clause">
               https://opensource.org/licenses/BSD-3-Clause
             </ExternalLink>
@@ -251,42 +255,44 @@ const Terms = ({ from = {}, location }: Props) => {
           <h3 className="slds-text-heading_small">Feedback</h3>
           <p>
             If you provide feedback to Salesforce regarding the Metecho tool,
-            you agree that Salesforce shall have a royalty-free, worldwide,
-            irrevocable, perpetual license to use and incorporate into the
-            Metecho tool, and successor tools, any suggestion, enhancement
-            request, recommendation, correction or other feedback provided by
-            you, relating to the operation of the Metecho tool, and any
-            successor tools, for use by Salesforce and users of its offerings.
+            you agree that Salesforce and its Affiliates shall have a
+            royalty-free, worldwide, irrevocable, perpetual license to use and
+            incorporate into the Metecho tool, and successor tools, any
+            suggestion, enhancement request, recommendation, correction or other
+            feedback provided by you, relating to the operation of the Metecho
+            tool, and any successor tools, for use by Salesforce, its
+            Affiliates, and users of its offerings.
           </p>
           <h3 className="slds-text-heading_small">No Warranty</h3>
           <p>
             THE METECHO TOOL IS PROVIDED “AS-IS,” EXCLUSIVE OF ANY WARRANTY
             WHATSOEVER WHETHER EXPRESS, IMPLIED, STATUTORY OR OTHERWISE.
-            SALESFORCE DISCLAIMS ALL IMPLIED WARRANTIES, INCLUDING WITHOUT
-            LIMITATION ANY IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-            A PARTICULAR PURPOSE OR NON-INFRINGEMENT, TO THE MAXIMUM EXTENT
-            PERMITTED BY APPLICABLE LAW. SALESFORCE DISCLAIMS ALL LIABILITY FOR
-            ANY HARM OR DAMAGES CAUSED BY ANY THIRD PARTY HOSTING PROVIDERS.
+            SALESFORCE AND ITS AFFILIATES DISCLAIM ALL IMPLIED WARRANTIES,
+            INCLUDING WITHOUT LIMITATION ANY IMPLIED WARRANTIES OF
+            MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE OR
+            NON-INFRINGEMENT, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.
+            SALESFORCE AND ITS AFFILIATES DISCLAIM ALL LIABILITY FOR ANY HARM OR
+            DAMAGES CAUSED BY ANY THIRD PARTY HOSTING PROVIDERS.
           </p>
           <p>
             The Metecho tool may contain bugs or errors. Any participation in or
             use of the Metecho tool is at your sole risk. You acknowledge that
-            Salesforce may discontinue the Metecho tool at any time in its sole
-            discretion, and may never make an applicable successor tool
-            available.
+            Salesforce and its Affiliates may discontinue the Metecho tool at
+            any time in its sole discretion, and may never make an applicable
+            successor tool available.
           </p>
           <h3 className="slds-text-heading_small">No Damages</h3>
           <p>
-            IN NO EVENT SHALL SALESFORCE HAVE ANY LIABILITY HEREUNDER TO YOU FOR
-            ANY DAMAGES WHATSOEVER, INCLUDING BUT NOT LIMITED TO DIRECT,
-            INDIRECT, SPECIAL, INCIDENTAL, PUNITIVE, OR CONSEQUENTIAL DAMAGES,
-            OR DAMAGES BASED ON LOST PROFITS, DATA OR USE, INCLUDING ANY DAMAGES
-            CAUSED BY THE METECHO TOOL ACCESSING YOUR GITHUB ACCOUNT, AND ANY
-            REPOSITORIES OR PERSONAL DATA ASSOCIATED WITH YOUR GITHUB ACCOUNT,
-            HOWEVER CAUSED AND, WHETHER IN CONTRACT, TORT OR UNDER ANY OTHER
-            THEORY OF LIABILITY, WHETHER OR NOT YOU HAVE BEEN ADVISED OF THE
-            POSSIBILITY OF SUCH DAMAGES UNLESS SUCH DISCLAIMER OF LIABILITY IS
-            NOT ENFORCEABLE UNDER APPLICABLE LAW.
+            IN NO EVENT SHALL SALESFORCE OR ITS AFFILIATES HAVE ANY LIABILITY
+            HEREUNDER TO YOU FOR ANY DAMAGES WHATSOEVER, INCLUDING BUT NOT
+            LIMITED TO DIRECT, INDIRECT, SPECIAL, INCIDENTAL, PUNITIVE, OR
+            CONSEQUENTIAL DAMAGES, OR DAMAGES BASED ON LOST PROFITS, DATA OR
+            USE, INCLUDING ANY DAMAGES CAUSED BY THE METECHO TOOL ACCESSING YOUR
+            GITHUB ACCOUNT, AND ANY REPOSITORIES OR PERSONAL DATA ASSOCIATED
+            WITH YOUR GITHUB ACCOUNT, HOWEVER CAUSED AND, WHETHER IN CONTRACT,
+            TORT OR UNDER ANY OTHER THEORY OF LIABILITY, WHETHER OR NOT YOU HAVE
+            BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES UNLESS SUCH
+            DISCLAIMER OF LIABILITY IS NOT ENFORCEABLE UNDER APPLICABLE LAW.
           </p>
           <h3 className="slds-text-heading_small">Assignment</h3>
           <p>
