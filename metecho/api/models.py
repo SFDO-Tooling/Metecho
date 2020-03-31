@@ -84,6 +84,7 @@ class User(HashIdMixin, AbstractUser):
                     ]
                 )
         finally:
+            self.refresh_from_db()
             self.currently_fetching_repos = False
             self.save()
             self.notify_repositories_updated()
