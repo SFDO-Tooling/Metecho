@@ -302,6 +302,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         "GITHUB_TOKEN": gh_token,
         # needed by sfdx
         "HOME": project_path,
+        "PATH": os.environ["PATH"],
     }
     p = subprocess.Popen(
         args,
