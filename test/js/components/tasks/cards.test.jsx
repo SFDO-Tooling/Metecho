@@ -52,6 +52,7 @@ const defaultOrgs = {
     unsaved_changes: { Foo: ['Bar'] },
     total_unsaved_changes: 1,
     has_unsaved_changes: true,
+    is_created: true,
   },
   QA: null,
 };

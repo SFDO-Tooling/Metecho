@@ -375,6 +375,7 @@ class TestScratchOrgView:
         scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Dev,
             url="https://example.com",
+            is_created=True,
             delete_queued_at=None,
             currently_capturing_changes=False,
             currently_refreshing_changes=False,
@@ -393,6 +394,7 @@ class TestScratchOrgView:
         scratch_org = scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Dev,
             url="https://example.com",
+            is_created=True,
             delete_queued_at=None,
             currently_capturing_changes=False,
             currently_refreshing_changes=False,

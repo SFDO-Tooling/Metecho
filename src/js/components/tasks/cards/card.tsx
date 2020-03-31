@@ -63,10 +63,12 @@ const OrgCard = ({
   const assignedUser =
     type === ORG_TYPES.QA ? task.assigned_qa : task.assigned_dev;
   const assignedToCurrentUser = user.username === assignedUser?.login;
-  const ownedByCurrentUser = Boolean(org?.url && user.id === org?.owner);
+  const ownedByCurrentUser = Boolean(org?.is_created && user.id === org?.owner);
   const ownedByWrongUser =
-    org?.url && org.owner_gh_username !== assignedUser?.login ? org : null;
-  const isCreating = Boolean(isCreatingOrg || (org && !org.url));
+    org?.is_created && org.owner_gh_username !== assignedUser?.login
+      ? org
+      : null;
+  const isCreating = Boolean(isCreatingOrg || (org && !org.is_created));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
   const isRefreshingOrg = Boolean(org?.currently_refreshing_org);
