@@ -577,7 +577,7 @@ describe('reducer', () => {
   });
 
   describe('DELETE_OBJECT_SUCCEEDED', () => {
-    test('object type is project', () => {
+    test('adds deleted_at to project', () => {
       const project = {
         id: 'r1',
         slug: 'project-1',
@@ -625,43 +625,6 @@ describe('reducer', () => {
         },
       });
       expect(actual).toEqual({});
-    });
-
-    test('adds deleted_at to project', () => {
-      const project = {
-        id: 'p1',
-        repository: 'repository-1',
-        name: 'Project 1',
-      };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const expected = {
-        'repository-1': {
-          projects: [project, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const actual = reducer(
-        {
-          'repository-1': {
-            projects: [project, project2],
-            next: null,
-            notFound: [],
-            fetched: true,
-          },
-        },
-        {
-          type: 'DELETED_OBJECT_SUCCEEDED',
-          payload: { objectType: 'project', object: project },
-        },
-      );
-
-      expect(actual).toEqual(expected);
     });
   });
 });
