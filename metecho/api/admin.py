@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
 from django.forms.widgets import Textarea
+from parler.admin import TranslatableAdmin
 
 from .models import (
     GitHubRepository,
@@ -12,6 +13,7 @@ from .models import (
     Repository,
     RepositorySlug,
     ScratchOrg,
+    SiteProfile,
     Task,
     TaskSlug,
     User,
@@ -89,3 +91,8 @@ class SiteAdminForm(forms.ModelForm):
 
 
 SiteAdmin.form = SiteAdminForm
+
+
+@admin.register(SiteProfile)
+class SiteProfileAdmin(TranslatableAdmin):
+    list_display = ("name", "site")

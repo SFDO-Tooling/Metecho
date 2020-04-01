@@ -38,6 +38,19 @@ describe('<Terms/>', () => {
     };
   };
 
+  let SITE;
+
+  beforeAll(() => {
+    SITE = window.GLOBALS.SITE;
+    window.GLOBALS.SITE = {
+      clickthrough_agreement: 'Resistance is futile.',
+    };
+  });
+
+  afterAll(() => {
+    window.GLOBALS.SITE = SITE;
+  });
+
   test('redirects if already agreed to TOS', () => {
     const { context, queryByText } = setup(
       {
@@ -69,6 +82,7 @@ describe('<Terms/>', () => {
       const { getByText } = setup();
 
       expect(getByText('Metecho Terms of Service')).toBeVisible();
+      expect(getByText('Resistance is futile.')).toBeVisible();
       expect(getByText('I Agree')).toBeVisible();
 
       fireEvent.click(getByText('I Agree'));

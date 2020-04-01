@@ -19,7 +19,8 @@ const PrivateRoute = ({
       {...rest}
       render={(props) => {
         if (user) {
-          return user.agreed_to_tos_at ? (
+          return user.agreed_to_tos_at ||
+            !window.GLOBALS?.SITE?.clickthrough_agreement ? (
             <Component {...props} />
           ) : (
             <Redirect
