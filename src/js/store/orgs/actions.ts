@@ -84,8 +84,8 @@ export const provisionOrg = ({
     dispatch(
       addToast({
         heading: msg[model.org_type],
-        linkText: model.url ? i18n.t('View your new org.') : undefined,
-        linkUrl: model.url
+        linkText: model.is_created ? i18n.t('View your new org.') : undefined,
+        linkUrl: model.is_created
           ? window.api_urls.scratch_org_redirect(model.id)
           : undefined,
         openLinkInNewWindow: true,

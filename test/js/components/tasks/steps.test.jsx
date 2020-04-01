@@ -23,6 +23,7 @@ const defaultDevOrg = {
   owner: 'jonny',
   owner_gh_username: 'jonny',
   url: '/foo/',
+  is_created: true,
   has_unsaved_changes: false,
 };
 const defaultTestOrg = {
@@ -32,6 +33,7 @@ const defaultTestOrg = {
   owner: 'stacy',
   owner_gh_username: 'stacy',
   url: '/bar/',
+  is_created: true,
   has_been_visited: false,
 };
 const testOrgVisited = {

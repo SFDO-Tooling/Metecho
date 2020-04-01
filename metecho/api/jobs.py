@@ -192,6 +192,7 @@ def _create_org_and_run_flow(
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(
         scratch_org, originating_user_id=originating_user_id,
     )
+    scratch_org.is_created = True
 
     scheduler = get_scheduler("default")
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
