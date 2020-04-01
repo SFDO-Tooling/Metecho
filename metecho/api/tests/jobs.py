@@ -95,7 +95,7 @@ class TestCreateBranchesOnGitHub:
 
 @pytest.mark.django_db
 class TestAlertUserAboutExpiringOrg:
-    def test_missing_model(self, scratch_org_factory):
+    def test_soft_deleted_model(self, scratch_org_factory):
         scratch_org = scratch_org_factory()
         scratch_org.delete()
         with patch(f"{PATCH_ROOT}.send_mail") as send_mail:

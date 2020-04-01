@@ -100,11 +100,16 @@ def alert_user_about_expiring_org(*, org, days):
         org.refresh_from_db()
         user = org.owner
         user.refresh_from_db()
-    except (ScratchOrg.DoesNotExist, User.DoesNotExist):
+    except (ScratchOrg.DoesNotExist, User.DoesNotExist):  # pragma: nocover
+        # This should never be reachable under normal circumstances, but
+        # if it should exceptionally occur, the correct thing to do is
+        # bail:
+        return
+    if org.deleted_at is not None:
         return
 
     # and has unsaved changes
-    get_unsaved_changes(org)
+    get_unsaved_changes(org, originating_user_id=None)
     if org.unsaved_changes:
         task = org.task
         project = task.project
@@ -177,7 +182,7 @@ def _create_org_and_run_flow(
     scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
-    run_flow(
+    out = run_flow(
         cci=cci,
         org_config=org_config,
         flow_name=cases[scratch_org.org_type],
@@ -188,6 +193,7 @@ def _create_org_and_run_flow(
     # We don't need to explicitly save the following, because this
     # function is called in a context that will eventually call a
     # finalize_* method, which will save the model.
+    scratch_org.cci_log += out
     scratch_org.last_modified_at = now()
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(
         scratch_org, originating_user_id=originating_user_id,
