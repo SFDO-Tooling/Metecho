@@ -133,6 +133,14 @@ def test_create_org_and_run_flow():
             False,
         )
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
+        open = stack.enter_context(patch(f"{PATCH_ROOT}.open"))
+        open.return_value = MagicMock(
+            **{
+                "__enter__.return_value": MagicMock(
+                    **{"read.return_value": "test logs"}
+                )
+            }
+        )
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),

@@ -182,18 +182,24 @@ def _create_org_and_run_flow(
     scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
-    out = run_flow(
-        cci=cci,
-        org_config=org_config,
-        flow_name=cases[scratch_org.org_type],
-        project_path=project_path,
-        user=user,
-    )
+    try:
+        run_flow(
+            cci=cci,
+            org_config=org_config,
+            flow_name=cases[scratch_org.org_type],
+            project_path=project_path,
+            user=user,
+        )
+    finally:
+        with open(".cumulusci/logs/cci.log") as f:
+            logs = f.read()
+            scratch_org.refresh_from_db()
+            scratch_org.cci_logs = logs
+            scratch_org.save()
     scratch_org.refresh_from_db()
     # We don't need to explicitly save the following, because this
     # function is called in a context that will eventually call a
     # finalize_* method, which will save the model.
-    scratch_org.cci_log += out
     scratch_org.last_modified_at = now()
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(
         scratch_org, originating_user_id=originating_user_id,

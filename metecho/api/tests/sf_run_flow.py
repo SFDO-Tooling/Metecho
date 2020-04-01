@@ -218,49 +218,6 @@ class TestRunFlow:
                     user=user,
                 )
 
-    def test_create_org_and_run_flow__success(self, user_factory, project_factory):
-        user = user_factory()
-        project = project_factory()
-        org_config = MagicMock(
-            org_id="org_id", instance_url="instance_url", access_token="access_token",
-        )
-        with ExitStack() as stack:
-            stack.enter_context(patch(f"{PATCH_ROOT}.os"))
-            subprocess = stack.enter_context(patch(f"{PATCH_ROOT}.subprocess"))
-            Popen = MagicMock()
-            Popen.communicate.return_value = ("sample out", MagicMock())
-            Popen.returncode = None
-            subprocess.Popen.return_value = Popen
-            stack.enter_context(patch(f"{PATCH_ROOT}.BaseCumulusCI"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.get_devhub_api"))
-            get_org_details = stack.enter_context(
-                patch(f"{PATCH_ROOT}.get_org_details")
-            )
-            get_org_details.return_value = (MagicMock(), MagicMock())
-            stack.enter_context(patch(f"{PATCH_ROOT}.get_org_result"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.mutate_scratch_org"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.get_access_token"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.deploy_org_settings"))
-
-            create_org(
-                repo_owner=MagicMock(),
-                repo_name=MagicMock(),
-                repo_url=MagicMock(),
-                repo_branch=MagicMock(),
-                user=MagicMock(),
-                project_path=MagicMock(),
-                scratch_org=MagicMock(),
-                originating_user_id=None,
-            )
-            out = run_flow(
-                cci=MagicMock(),
-                org_config=org_config,
-                flow_name=MagicMock(),
-                project_path=project,
-                user=user,
-            )
-            assert out == "sample out"
-
 
 @pytest.mark.django_db
 def test_delete_org(scratch_org_factory):
