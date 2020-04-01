@@ -29,6 +29,7 @@ export interface Org extends MinimalOrg {
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
   currently_refreshing_org: boolean;
+  is_created: boolean;
   delete_queued_at: string | null;
   has_been_visited: boolean;
   valid_target_directories: TargetDirectories;

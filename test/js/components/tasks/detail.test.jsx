@@ -109,6 +109,7 @@ const defaultState = {
         latest_commit_at: '2019-08-16T12:58:53.721Z',
         last_checked_unsaved_changes_at: new Date().toISOString(),
         url: '/test/org/url/',
+        is_created: true,
         unsaved_changes: { Foo: ['Bar'] },
         has_unsaved_changes: true,
         valid_target_directories: {
