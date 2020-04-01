@@ -141,6 +141,7 @@ INSTALLED_APPS = [
     "metecho.api",
     "metecho.adminapi.apps.AdminapiConfig",
     "django_js_reverse",
+    "parler",
 ]
 
 MIDDLEWARE = [

@@ -89,7 +89,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges = Boolean(devOrg?.has_unsaved_changes);
     userIsOwner = Boolean(
-      userIsAssignedDev && devOrg?.url && devOrg?.owner === user.id,
+      userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
@@ -247,7 +247,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   let captureButton: React.ReactNode = null;
-  if (userIsOwner) {
+  if (userIsOwner && (orgHasChanges || devOrg?.has_been_visited)) {
     const captureButtonAction = () => {
       /* istanbul ignore else */
       if (devOrg) {

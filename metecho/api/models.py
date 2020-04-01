@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
+from django.contrib.sites.models import Site
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
 from django.db.models.signals import post_save
@@ -16,6 +17,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 from model_utils import Choices
+from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
@@ -43,6 +45,15 @@ TASK_STATUSES = Choices(
 TASK_REVIEW_STATUS = Choices(
     ("Approved", "Approved"), ("Changes requested", "Changes requested")
 )
+
+
+class SiteProfile(TranslatableModel):
+    site = models.OneToOneField(Site, on_delete=models.CASCADE)
+
+    translations = TranslatedFields(
+        name=models.CharField(max_length=64),
+        clickthrough_agreement=MarkdownField(property_suffix="_markdown", blank=True),
+    )
 
 
 class UserQuerySet(models.QuerySet):
@@ -315,8 +326,8 @@ class Repository(
         populate_github_users_job.delay(self, originating_user_id=originating_user_id)
 
     def finalize_populate_github_users(self, *, error=None, originating_user_id):
-        self.save()
         if error is None:
+            self.save()
             self.notify_changed(originating_user_id=originating_user_id)
         else:
             self.notify_error(error, originating_user_id=originating_user_id)
@@ -700,6 +711,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_capturing_changes = models.BooleanField(default=False)
     currently_refreshing_org = models.BooleanField(default=False)
+    is_created = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     expiry_job_id = StringField(null=True, blank=True)

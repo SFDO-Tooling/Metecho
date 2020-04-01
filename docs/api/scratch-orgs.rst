@@ -34,6 +34,7 @@ Retrieve
         "currently_refreshing_changes": false,
         "currently_capturing_changes": false,
         "currently_refreshing_org": false,
+        "is_created": true,
         "delete_queued_at": null,
         "owner_gh_username": "user123",
         "has_been_visited": true,

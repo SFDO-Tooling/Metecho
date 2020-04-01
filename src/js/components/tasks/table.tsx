@@ -50,13 +50,17 @@ const NameTableCell = ({
   repositorySlug,
   projectSlug,
   item,
+  className,
   children,
   ...props
 }: TableCellProps & {
   repositorySlug: string;
   projectSlug: string;
 }) => (
-  <DataTableCell {...props}>
+  <DataTableCell
+    {...props}
+    className={classNames(className, 'project-task-name', 'truncated-cell')}
+  >
     {repositorySlug && projectSlug && item && (
       <Link to={routes.task_detail(repositorySlug, projectSlug, item.slug)}>
         {children}
@@ -121,6 +125,7 @@ const AssigneeTableCell = ({
   openAssignProjectUsersModal,
   assignUserAction,
   item,
+  className,
   children,
   ...props
 }: TableCellProps & {
@@ -198,7 +203,11 @@ const AssigneeTableCell = ({
     );
   }
   return (
-    <DataTableCell {...props} title={title}>
+    <DataTableCell
+      {...props}
+      title={title}
+      className={classNames(className, 'project-task-assignee')}
+    >
       {contents}
     </DataTableCell>
   );
@@ -220,7 +229,6 @@ const TaskTable = ({
       property="name"
       width="65%"
       primaryColumn
-      truncate
     >
       <NameTableCell
         repositorySlug={repositorySlug}

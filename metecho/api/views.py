@@ -274,7 +274,7 @@ class ScratchOrgViewSet(
         force_get = request.query_params.get("get_unsaved_changes", False)
         conditions = [
             instance.org_type == SCRATCH_ORG_TYPES.Dev,
-            instance.url is not None,
+            instance.is_created,
             instance.delete_queued_at is None,
             not instance.currently_capturing_changes,
             not instance.currently_refreshing_changes,

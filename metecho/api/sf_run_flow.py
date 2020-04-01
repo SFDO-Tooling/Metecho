@@ -291,12 +291,16 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
     args = [command, "flow", "run", flow_name, "--org", "dev"]
     env = {
         "CUMULUSCI_KEYCHAIN_CLASS": "cumulusci.core.keychain.EnvironmentProjectKeychain",
+        # We need to set the "scratch" flag to true because some flows check for it,
+        # but we need the org config to NOT be a ScratchOrgConfig which tries to use sfdx
+        "CUMULUSCI_SCRATCH_ORG_CLASS": "cumulusci.core.config.OrgConfig",
         "CUMULUSCI_DISABLE_REFRESH": "1",
         "CUMULUSCI_ORG_dev": json.dumps(
             {
                 "org_id": org_config.org_id,
                 "instance_url": org_config.instance_url,
                 "access_token": org_config.access_token,
+                "scratch": True,
             }
         ),
         "GITHUB_TOKEN": gh_token,
@@ -320,9 +324,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         )
         traceback = p.stdout.decode("utf-8")
         logger.warning(traceback)
-        raise Exception(
-            f"Error while running {flow_name} flow: {traceback.splitlines()[-2]}"
-        )
+        raise Exception(_last_line(traceback) or _last_line(err))
 
 
 def delete_org(scratch_org):
@@ -346,3 +348,8 @@ def delete_org(scratch_org):
     if scratch_org.expiry_job_id:
         scheduler = get_scheduler("default")
         scheduler.cancel(scratch_org.expiry_job_id)
+
+
+def _last_line(s):
+    lines = [line for line in s.splitlines() if line.strip()]
+    return lines[-1] if lines else ""

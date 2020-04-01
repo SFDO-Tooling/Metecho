@@ -10,6 +10,7 @@ describe('provisionOrg', () => {
     id: 'org-id',
     owner: 'user-id',
     url: '/test/url/',
+    is_created: true,
     org_type: 'Dev',
     task: 'task-id',
   };
@@ -69,9 +70,9 @@ describe('provisionOrg', () => {
     });
   });
 
-  test('does not fail if missing url', () => {
+  test('does not fail if not yet created', () => {
     const store = storeWithThunk({ user: { id: 'user-id' }, tasks: {} });
-    const thisOrg = { ...org, url: null };
+    const thisOrg = { ...org, is_created: false };
     const thisOrgAction = { ...orgAction, payload: thisOrg };
     store.dispatch(
       actions.provisionOrg({
@@ -117,6 +118,7 @@ describe('provisionFailed', () => {
         id: 'org-id',
         owner: 'user-id',
         url: '/test/url/',
+        is_created: true,
         org_type: 'Dev',
         task: 'task-id',
       };
@@ -360,6 +362,7 @@ describe('deleteOrg', () => {
         id: 'org-id',
         owner: 'user-id',
         url: '/test/url/',
+        is_created: true,
         org_type: 'Dev',
         task: 'task-id',
       };
@@ -392,6 +395,7 @@ describe('deleteOrg', () => {
         id: 'org-id',
         owner: 'user-id',
         url: '/test/url/',
+        is_created: true,
         org_type: 'Dev',
         task: 'task-id',
       };

@@ -26,8 +26,8 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
   const readyForReview = task.has_unmerged_commits && task.pr_is_open;
   const devOrg = orgs[ORG_TYPES.DEV];
   const testOrg = orgs[ORG_TYPES.QA];
-  const hasDevOrg = Boolean(devOrg && devOrg?.url);
-  const hasTestOrg = Boolean(testOrg && testOrg?.url);
+  const hasDevOrg = Boolean(devOrg?.is_created);
+  const hasTestOrg = Boolean(testOrg?.is_created);
   const hasValidCommits = task.has_unmerged_commits && !hasReviewRejected;
   const taskCommits = getTaskCommits(task);
   const testOrgOutOfDate =
