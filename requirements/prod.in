@@ -9,6 +9,7 @@ django-hashid-field==3.1.1
 django-js-reverse==0.9.1
 django-log-request-id==1.4.1
 django-model-utils==4.0.0
+django-parler==2.0.1
 django-redis==4.11.0
 django-rq==2.3.0
 djangorestframework==3.11.0
@@ -21,7 +22,7 @@ markdown==3.2.1
 psycopg2-binary==2.8.4
 sentry-sdk==0.14.3
 service_identity==18.1.0
-https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.11.0.tar.gz
+https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.12.0.tar.gz
 simple-salesforce==1.0.0
 whitenoise==5.0.1
 django-anymail[mailgun]==7.0.0

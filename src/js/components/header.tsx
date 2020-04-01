@@ -37,7 +37,7 @@ const Header = () => {
             className="slds-text-heading_large slds-text-link_reset"
           >
             <span data-logo-bit="start">met</span>
-            <span data-logo-bit="end">echo</span>
+            <span data-logo-bit="end">échō</span>
           </Link>
         }
         onRenderControls={controls}

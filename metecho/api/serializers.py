@@ -11,6 +11,7 @@ from .models import (
     Project,
     Repository,
     ScratchOrg,
+    SiteProfile,
     Task,
 )
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
@@ -355,6 +356,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "currently_refreshing_org",
+            "is_created",
             "delete_queued_at",
             "owner_gh_username",
             "has_been_visited",
@@ -371,6 +373,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
+            "is_created": {"read_only": True},
             "delete_queued_at": {"read_only": True},
             "owner_gh_username": {"read_only": True},
             "has_been_visited": {"read_only": True},
@@ -415,3 +418,14 @@ class CommitSerializer(serializers.Serializer):
         child=serializers.ListField(child=serializers.CharField())
     )
     target_directory = serializers.CharField()
+
+
+class SiteSerializer(serializers.ModelSerializer):
+    clickthrough_agreement = MarkdownField(read_only=True)
+
+    class Meta:
+        model = SiteProfile
+        fields = (
+            "name",
+            "clickthrough_agreement",
+        )
