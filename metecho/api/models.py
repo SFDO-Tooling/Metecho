@@ -16,7 +16,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
-from model_utils import Choices
+from django.utils.text import slugify
+from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
@@ -272,6 +273,7 @@ class Repository(
     github_users = JSONField(default=list, blank=True)
 
     slug_class = RepositorySlug
+    tracker = FieldTracker(fields=["name"])
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -397,6 +399,7 @@ class Project(
     github_users = JSONField(default=list, blank=True)
 
     slug_class = ProjectSlug
+    tracker = FieldTracker(fields=["name"])
 
     def __str__(self):
         return self.name
@@ -536,6 +539,7 @@ class Task(
     assigned_qa = JSONField(null=True, blank=True)
 
     slug_class = TaskSlug
+    tracker = FieldTracker(fields=["name"])
 
     def __str__(self):
         return self.name
@@ -950,8 +954,20 @@ def user_logged_in_handler(sender, *, user, **kwargs):
 
 
 def ensure_slug_handler(sender, *, created, instance, **kwargs):
+    slug_field_name = getattr(instance, "slug_field_name", "name")
     if created:
         instance.ensure_slug()
+    elif instance.tracker.has_changed(slug_field_name):
+        # Create new slug off new name:
+        sluggable_name = getattr(instance, slug_field_name)
+        slug = slugify(sluggable_name)
+        slug = instance._find_unique_slug(slug)
+        instance.slug_class.objects.filter(parent=instance.slug_parent).update(
+            is_active=False
+        )
+        instance.slug_class.objects.create(
+            parent=instance.slug_parent, slug=slug, is_active=True
+        )
 
 
 post_save.connect(ensure_slug_handler, sender=Repository)

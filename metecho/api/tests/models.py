@@ -23,6 +23,14 @@ class TestRepository:
         repository.save()
         assert repository.slug == "test-repository"
 
+    def test_signal__recreate(self):
+        repository = Repository(name="Test Repository")
+        repository.save()
+        assert repository.slug == "test-repository"
+        repository.name = "Test Repository with a Twist"
+        repository.save()
+        assert repository.slug == "test-repository-with-a-twist"
+
     def test_str(self):
         repository = Repository(name="Test Repository")
         assert str(repository) == "Test Repository"
