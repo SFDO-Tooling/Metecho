@@ -239,7 +239,7 @@ class User(HashIdMixin, AbstractUser):
 
 class RepositorySlug(AbstractSlug):
     parent = models.ForeignKey(
-        "Repository", on_delete=models.PROTECT, related_name="slugs"
+        "Repository", on_delete=models.CASCADE, related_name="slugs"
     )
 
 
@@ -365,7 +365,7 @@ class GitHubRepository(HashIdMixin, models.Model):
 
 class ProjectSlug(AbstractSlug):
     parent = models.ForeignKey(
-        "Project", on_delete=models.PROTECT, related_name="slugs"
+        "Project", on_delete=models.CASCADE, related_name="slugs"
     )
 
 
@@ -495,7 +495,7 @@ class Project(
 
 
 class TaskSlug(AbstractSlug):
-    parent = models.ForeignKey("Task", on_delete=models.PROTECT, related_name="slugs")
+    parent = models.ForeignKey("Task", on_delete=models.CASCADE, related_name="slugs")
 
 
 class Task(
