@@ -106,6 +106,14 @@ variable in Metecho.
 Use the app's "Client ID" as ``GITHUB_CLIENT_ID`` and the "Client secret" as
 ``GITHUB_CLIENT_SECRET``.
 
+Set the correct values for the connected GitHub app from
+``https://github.com/organizations/<your org>/settings/apps/<your app>``::
+
+   GITHUB_APP_ID=...
+   GITHUB_PEM=...
+
+The ``PEM`` should be the entire key, not a path to one.
+
 Logging in as a superuser
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

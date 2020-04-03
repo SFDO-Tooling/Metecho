@@ -12,6 +12,7 @@ from ..gh import (
     get_repo_info,
     get_source_format,
     get_zip_file,
+    gh_as_app,
     is_safe_path,
     local_github_checkout,
     log_unsafe_zipfile_error,
@@ -39,6 +40,11 @@ class TestGetAllOrgRepos:
         user = user_factory(socialaccount_set=[])
         with pytest.raises(NoGitHubTokenError):
             get_all_org_repos(user)
+
+
+def test_gh_as_app():
+    with patch("metecho.api.gh.GitHub"):
+        assert gh_as_app() is not None
 
 
 def test_is_safe_path():

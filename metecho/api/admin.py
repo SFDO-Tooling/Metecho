@@ -33,11 +33,17 @@ class RepositoryForm(forms.ModelForm):
         repo_owner = cleaned_data.get("repo_owner")
 
         try:
-            # self.user is jammed on in RepositoryAdmin.get_form. Stupid hack!
-            gh.get_repo_info(self.user, repo_owner=repo_owner, repo_name=repo_name)
+            gh.get_repo_info(None, repo_owner=repo_owner, repo_name=repo_name)
         except NotFoundError:
             raise forms.ValidationError(
                 "No repository with this name and owner exists."
+            )
+        try:
+            app = gh.gh_as_app()
+            app.app_installation_for_repository(repo_owner, repo_name)
+        except NotFoundError:
+            raise forms.ValidationError(
+                "The associated GitHub app is not installed for that repository."
             )
 
 
@@ -57,11 +63,6 @@ class UserAdmin(admin.ModelAdmin):
 class RepositoryAdmin(admin.ModelAdmin):
     form = RepositoryForm
     list_display = ("name", "repo_owner", "repo_name")
-
-    def get_form(self, request, *args, **kwargs):
-        ret = super().get_form(request, *args, **kwargs)
-        ret.user = request.user
-        return ret
 
 
 @admin.register(RepositorySlug)

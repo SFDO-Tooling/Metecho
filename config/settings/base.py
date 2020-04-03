@@ -225,6 +225,8 @@ GITHUB_HOOK_SECRET = env(
 )
 # The username of the user that GitHub webhook actions should authenticate as:
 GITHUB_USER_NAME = env("GITHUB_USER_NAME", default="GitHub user")
+GITHUB_APP_ID = env("GITHUB_APP_ID", default=0, type_=int)
+GITHUB_PEM = env("GITHUB_PEM", default="")
 
 
 # Salesforce Devhub settings:
