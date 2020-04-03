@@ -4,8 +4,10 @@ from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
 from django.forms.widgets import Textarea
+from github3.exceptions import NotFoundError
 from parler.admin import TranslatableAdmin
 
+from . import gh
 from .models import (
     GitHubRepository,
     Project,
@@ -18,6 +20,25 @@ from .models import (
     TaskSlug,
     User,
 )
+
+
+class RepositoryForm(forms.ModelForm):
+    class Meta:
+        model = Repository
+        exclude = ()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        repo_name = cleaned_data.get("repo_name")
+        repo_owner = cleaned_data.get("repo_owner")
+
+        try:
+            # self.user is jammed on in RepositoryAdmin.get_form. Stupid hack!
+            gh.get_repo_info(self.user, repo_owner=repo_owner, repo_name=repo_name)
+        except NotFoundError:
+            raise forms.ValidationError(
+                "No repository with this name and owner exists."
+            )
 
 
 class JSONWidget(Textarea):
@@ -34,7 +55,13 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Repository)
 class RepositoryAdmin(admin.ModelAdmin):
+    form = RepositoryForm
     list_display = ("name", "repo_owner", "repo_name")
+
+    def get_form(self, request, *args, **kwargs):
+        ret = super().get_form(request, *args, **kwargs)
+        ret.user = request.user
+        return ret
 
 
 @admin.register(RepositorySlug)
