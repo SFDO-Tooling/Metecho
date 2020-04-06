@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v-0.1.0
     steps:
       - checkout
       - restore_cache:
@@ -43,7 +43,7 @@ jobs:
   lint:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v-0.1.0
     steps:
       - checkout
       - attach_workspace:
@@ -57,7 +57,7 @@ jobs:
   test-client:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v-0.1.0
     steps:
       - checkout
       - attach_workspace:
@@ -78,7 +78,7 @@ jobs:
   test-python:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v-0.1.0
         environment:
           DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
@@ -87,8 +87,8 @@ jobs:
           DJANGO_SECRET_KEY: test_secret_key
           DJANGO_SETTINGS_MODULE: config.settings.test
           SECURE_SSL_REDIRECT: False
-      - image: circleci/redis:latest
-      - image: circleci/postgres:latest
+      - image: circleci/redis:5.0
+      - image: circleci/postgres:10.6
         environment:
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
@@ -120,7 +120,7 @@ jobs:
   report-test-coverage:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v-0.1.0
     environment:
       COVERALLS_PARALLEL: true
     steps:
@@ -146,7 +146,7 @@ jobs:
   report-webpack-stats:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v-0.1.0
     steps:
       - run:
           name: Check if packtracker.io is configured
@@ -167,7 +167,7 @@ jobs:
   build-docs:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v-0.1.0
     steps:
       - checkout
       - attach_workspace:
