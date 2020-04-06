@@ -52,10 +52,10 @@ Docker-based development
     GITHUB_APP_ID=...
     GITHUB_APP_KEY=...
 
-   Note that none of the values should be quoted, and while ``SF_CLIENT_KEY`` is
-   an RSA private key, it must have newlines replaced with ``\n`` in order to
-   work properly with the Docker ``env_file`` configuration option (see `this
-   issue`_).
+   Note that none of the values should be quoted, and while ``SF_CLIENT_KEY``
+   and ``GITHUB_APP_KEY`` are RSA private keys, they must have newlines replaced
+   with ``\n`` in order to work properly with the Docker ``env_file``
+   configuration option (see `this issue`_).
 
 3. Run ``./derrick build`` to build/re-build all the container images.
 
@@ -105,16 +105,11 @@ checked and "SSL verification" is enabled.
 Use the "Webhook secret" value as your ``GITHUB_HOOK_SECRET`` environment
 variable in Metecho.
 
-Use the app's "Client ID" as ``GITHUB_CLIENT_ID`` and the "Client secret" as
-``GITHUB_CLIENT_SECRET``.
+Use the app's "App ID" as ``GITHUB_APP_ID``, "Client ID" as
+``GITHUB_CLIENT_ID``, and "Client secret" as ``GITHUB_CLIENT_SECRET``.
 
-Set the correct values for the connected GitHub app from
-``https://github.com/organizations/<your org>/settings/apps/<your app>``::
-
-   GITHUB_APP_ID=...
-   GITHUB_APP_KEY=...
-
-The ``KEY`` should be the entire key, not a path to one.
+Finally, generate a new private key for the app, and set it as the
+``GITHUB_APP_KEY`` environment variable (the entire key, not a path to one).
 
 Logging in as a superuser
 ~~~~~~~~~~~~~~~~~~~~~~~~~
