@@ -46,7 +46,7 @@ def gh_given_user(user):
 
 def gh_as_app():
     app_id = settings.GITHUB_APP_ID
-    pem = settings.GITHUB_PEM
+    pem = settings.GITHUB_APP_KEY
     gh = GitHub()
     gh.login_as_app(pem, app_id)
     return gh

@@ -110,9 +110,9 @@ Set the correct values for the connected GitHub app from
 ``https://github.com/organizations/<your org>/settings/apps/<your app>``::
 
    GITHUB_APP_ID=...
-   GITHUB_PEM=...
+   GITHUB_APP_KEY=...
 
-The ``PEM`` should be the entire key, not a path to one.
+The ``KEY`` should be the entire key, not a path to one.
 
 Logging in as a superuser
 ~~~~~~~~~~~~~~~~~~~~~~~~~
