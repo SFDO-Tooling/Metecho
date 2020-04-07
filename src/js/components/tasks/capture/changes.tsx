@@ -3,7 +3,7 @@ import AccordionPanel from '@salesforce/design-system-react/components/accordion
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import React, { useState } from 'react';
 
 import {
@@ -17,18 +17,27 @@ import { Changeset } from '@/store/orgs/reducer';
 interface Props {
   changeset: Changeset;
   inputs: CommitData;
+  ignoredChangeset: Changeset;
   errors: UseFormProps['errors'];
   setInputs: UseFormProps['setInputs'];
 }
 
-const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
+const ChangesForm = ({
+  changeset,
+  inputs,
+  errors,
+  setInputs,
+  ignoredChangeset,
+}: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
-
   const setChanges = (changes: Changeset) => {
     setInputs({ ...inputs, changes });
   };
-
+  const setIgnored = (ignored: Changeset) => {
+    setInputs({ ...inputs, ignored });
+  };
   const handlePanelToggle = (groupName: string) => {
+    console.log(groupName);
     setExpandedPanels({
       ...expandedPanels,
       [groupName]: !expandedPanels[groupName],
@@ -45,16 +54,21 @@ const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
     setChanges(newCheckedItems);
   };
 
-  const handleChange = ({
-    groupName,
-    change,
-    checked,
-  }: {
-    groupName: string;
-    change: string;
-    checked: boolean;
-  }) => {
-    const newCheckedItems = cloneDeep(inputs.changes);
+  const handleSelectIgnoredGroup = () => {};
+
+  const handleChange = (
+    set: Changeset,
+    {
+      groupName,
+      change,
+      checked,
+    }: {
+      groupName: string;
+      change: string;
+      checked: boolean;
+    },
+  ) => {
+    const newCheckedItems = cloneDeep(set);
     const changes = newCheckedItems[groupName];
     if (checked) {
       if (changes) {
@@ -72,7 +86,11 @@ const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
         changes.splice(changes.indexOf(change), 1);
       }
     }
-    setChanges(newCheckedItems);
+    if (set === inputs.changes) {
+      setChanges(newCheckedItems);
+    } else {
+      setIgnored(newCheckedItems);
+    }
   };
 
   const handleSelectAllChange = (
@@ -86,11 +104,26 @@ const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
       setChanges({});
     }
   };
-
+  const handleSelectAllIgnored = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    { checked }: { checked: boolean },
+  ) => {
+    if (checked) {
+      const allChanges = cloneDeep(ignoredChangeset);
+      setIgnored(allChanges);
+    } else {
+      setIgnored({});
+    }
+  };
   const totalChanges = Object.values(changeset).flat().length;
   const changesChecked = Object.values(inputs.changes).flat().length;
   const allChangesChecked = changesChecked === totalChanges;
   const noChangesChecked = !changesChecked;
+
+  const totalIgnored = Object.values(ignoredChangeset).flat().length;
+  const ignoredChecked = Object.values(inputs.ignored).flat().length;
+  const allIgnoredChecked = ignoredChecked === totalIgnored;
+  const noIgnoredChecked = !ignoredChecked;
 
   return (
     <form
@@ -185,13 +218,97 @@ const ChangesForm = ({ changeset, inputs, errors, setInputs }: Props) => {
                         onChange={(
                           event: React.ChangeEvent<HTMLInputElement>,
                           { checked }: { checked: boolean },
-                        ) => handleChange({ groupName, change, checked })}
+                        ) =>
+                          handleChange(inputs.changes, {
+                            groupName,
+                            change,
+                            checked,
+                          })
+                        }
                       />
                     ))}
                   </AccordionPanel>
                 </Accordion>
               );
             })}
+          {/* ignored changes panel, changesets are placed here after they are ignored */}
+          <Accordion key="allIgnored" className="light-bordered-row">
+            <AccordionPanel
+              expanded={Boolean(expandedPanels.allIgnored)}
+              key={`allIgnored-panel`}
+              id={`group-ignored`}
+              onTogglePanel={() => handlePanelToggle(`allIgnored`)}
+              title={`allIgnored`}
+              panelContentActions={
+                <div className="form-grid">
+                  <Checkbox
+                    labels={{ label: 'All ignored' }}
+                    checked={!isEmpty(ignoredChangeset) && allIgnoredChecked}
+                    indeterminate={Boolean(
+                      !allIgnoredChecked && !noIgnoredChecked,
+                    )}
+                    onChange={handleSelectAllIgnored}
+                  />
+                  <span
+                    className="slds-text-body_regular
+                            slds-p-top_xxx-small"
+                  >
+                    ({totalIgnored})
+                  </span>
+                </div>
+              }
+              summary="Changes placed here will remain ignored until you un-ignore them."
+            >
+              {/* inner accordian for each changeset */}
+              {Object.keys(ignoredChangeset)
+                .sort()
+                .map((groupName, index) => {
+                  const ignoredChildren = ignoredChangeset[groupName];
+                  const identifier = `ignored-children-${index}`;
+                  return (
+                    <Accordion key={`ignoredChildren`}>
+                      <AccordionPanel
+                        expanded={Boolean(expandedPanels[identifier])}
+                        key={identifier}
+                        id={identifier}
+                        onTogglePanel={() => handlePanelToggle(identifier)}
+                        title={`ignoredChildren`}
+                        panelContentActions={
+                          <Checkbox
+                            labels={{ label: groupName }}
+                            name="ignored"
+                            checked={allIgnoredChecked}
+                          />
+                        }
+                      >
+                        {/* children of ignored changesets */}
+                        {ignoredChildren.sort().map((change, idx) => (
+                          <Checkbox
+                            key={`ignored-children-${idx}`}
+                            labels={{ label: change }}
+                            className="slds-p-left_xx-large"
+                            name="ignored"
+                            checked={Boolean(
+                              inputs.ignored[groupName]?.includes(change),
+                            )}
+                            onChange={(
+                              event: React.ChangeEvent<HTMLInputElement>,
+                              { checked }: { checked: boolean },
+                            ) =>
+                              handleChange(inputs.ignored, {
+                                groupName,
+                                change,
+                                checked,
+                              })
+                            }
+                          />
+                        ))}
+                      </AccordionPanel>
+                    </Accordion>
+                  );
+                })}
+            </AccordionPanel>
+          </Accordion>
         </>
       </ModalCard>
     </form>

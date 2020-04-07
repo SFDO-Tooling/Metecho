@@ -74,6 +74,7 @@ const CaptureModal = ({
 }: Props) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
+  const [ignoredChangeset, setIgnoredChangeset] = useState({});
   const isMounted = useIsMounted();
 
   const nextPage = () => {
@@ -123,6 +124,7 @@ const CaptureModal = ({
   } = useForm({
     fields: {
       changes: {},
+      ignored: {},
       commit_message: '',
       target_directory: defaultDir,
     } as CommitData,
@@ -144,6 +146,11 @@ const CaptureModal = ({
   const dirSelected = Boolean(inputs.target_directory);
   const changesChecked = Object.values(inputs.changes).flat().length;
   const hasCommitMessage = Boolean(inputs.commit_message);
+
+  const ignoreSelected = () => {
+    setIgnoredChangeset({ ...ignoredChangeset, ...inputs.changes });
+    resetForm();
+  };
 
   const handleClose = () => {
     toggleModal(false);
@@ -179,11 +186,12 @@ const CaptureModal = ({
       ),
     },
     {
-      heading: i18n.t('Select the changes to retrieve'),
+      heading: i18n.t('Select the changes to retrieve or ignore'),
       contents: (
         <ChangesForm
           key="page-2-contents"
           changeset={changeset}
+          ignoredChangeset={ignoredChangeset}
           inputs={inputs as CommitData}
           errors={errors}
           setInputs={setInputs}
@@ -196,11 +204,13 @@ const CaptureModal = ({
           variant="outline-brand"
           onClick={prevPage}
         />,
-        // <Button
-        //   key="page-2-button-2"
-        //   label={i18n.t('Ignore Selected Changes')}
-        //   variant="outline-brand"
-        // />,
+        <Button
+          key="page-2-button-2"
+          label={i18n.t('Ignore Selected Changes')}
+          variant="outline-brand"
+          onClick={ignoreSelected}
+          disabled={!changesChecked}
+        />,
         <Button
           key="page-2-button-3"
           label={i18n.t('Save & Next')}
