@@ -1,3 +1,4 @@
+import re
 from collections import namedtuple
 
 from asgiref.sync import async_to_sync
@@ -170,6 +171,12 @@ class SoftDeleteQuerySet(models.QuerySet):
         return self.filter(deleted_at__isnull=True)
 
     def delete(self):
+        soft_delete_child_class = getattr(self.model, "soft_delete_child_class", None)
+        if soft_delete_child_class:
+            parent = camel_to_snake(self.model.__name__)
+            soft_delete_child_class(None).objects.filter(
+                **{f"{parent}__in": self}
+            ).delete()
         return self.update(deleted_at=timezone.now())
 
     delete.queryset_only = True
@@ -184,5 +191,13 @@ class SoftDeleteMixin(models.Model):
     objects = SoftDeleteQuerySet.as_manager()
 
     def delete(self, *args, **kwargs):
+        soft_delete_child_class = getattr(self, "soft_delete_child_class", None)
+        if soft_delete_child_class:
+            parent = camel_to_snake(self.__class__.__name__)
+            soft_delete_child_class().objects.filter(**{parent: self}).delete()
         self.deleted_at = timezone.now()
         self.save()
+
+
+def camel_to_snake(name):
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()

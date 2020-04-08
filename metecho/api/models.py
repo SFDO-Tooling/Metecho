@@ -418,6 +418,12 @@ class Project(
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
+    # begin SoftDeleteMixin configuration:
+    def soft_delete_child_class(self):
+        return Task
+
+    # end SoftDeleteMixin configuration
+
     # begin PushMixin configuration:
     push_update_type = "PROJECT_UPDATE"
     push_error_type = "PROJECT_CREATE_PR_FAILED"
@@ -569,6 +575,12 @@ class Task(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    # begin SoftDeleteMixin configuration:
+    def soft_delete_child_class(self):
+        return ScratchOrg
+
+    # end SoftDeleteMixin configuration
 
     # begin PushMixin configuration:
     push_update_type = "TASK_UPDATE"

@@ -152,23 +152,32 @@ class TestProject:
 
             assert create_pr_job.delay.called
 
-    def test_soft_delete(self, project_factory):
+    def test_soft_delete(self, project_factory, task_factory):
         project = project_factory()
+        task_factory(project=project)
+        task_factory(project=project)
+
         project.delete()
         project.refresh_from_db()
         assert project.deleted_at is not None
+        assert project.tasks.active().count() == 0
 
-    def test_queryset_soft_delete(self, project_factory):
+    def test_queryset_soft_delete(self, project_factory, task_factory):
+        project1 = project_factory()
+        project2 = project_factory()
         project_factory()
-        project_factory()
-        project_factory()
+
+        task_factory(project=project1)
+        task_factory(project=project2)
 
         assert Project.objects.count() == 3
         assert Project.objects.active().count() == 3
+        assert Task.objects.active().count() == 2
         Project.objects.all().delete()
 
         assert Project.objects.count() == 3
         assert Project.objects.active().count() == 0
+        assert Task.objects.active().count() == 0
 
 
 @pytest.mark.django_db
@@ -278,6 +287,26 @@ class TestTask:
 
             assert async_to_sync.called
             assert not task.review_valid
+
+    def test_soft_delete_cascade(self, task_factory, scratch_org_factory):
+        task = task_factory()
+        scratch_org_factory(task=task)
+        scratch_org_factory(task=task)
+
+        assert task.scratchorg_set.active().count() == 2
+
+        task.delete()
+        assert task.scratchorg_set.active().count() == 0
+
+    def test_soft_delete_cascade__manager(self, task_factory, scratch_org_factory):
+        task = task_factory()
+        scratch_org_factory(task=task)
+        scratch_org_factory(task=task)
+
+        assert task.scratchorg_set.active().count() == 2
+
+        Task.objects.all().delete()
+        assert task.scratchorg_set.active().count() == 0
 
 
 @pytest.mark.django_db
