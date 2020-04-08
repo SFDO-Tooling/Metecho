@@ -33,13 +33,19 @@
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
     },
     "GITHUB_CLIENT_ID": {
-      "description": "Client ID for a GitHub App."
+      "description": "Client ID for a GitHub App"
     },
     "GITHUB_CLIENT_SECRET": {
-      "description": "Client secret for a GitHub App."
+      "description": "Client secret for a GitHub App"
     },
     "GITHUB_HOOK_SECRET": {
-      "description": "Webhook secret for a GitHub App."
+      "description": "Webhook secret for a GitHub App"
+    },
+    "GITHUB_APP_ID": {
+      "description": "App ID for a GitHub App"
+    },
+    "GITHUB_APP_KEY": {
+      "description": "RSA private key for GitHub App"
     },
     "SF_CALLBACK_URL": {
       "description": "Callback URL for Salesforce Connected App (e.g. \"https://<...>/accounts/salesforce/login/callback/\")"
@@ -73,7 +79,7 @@
     },
     { "url": "heroku/python" }
   ],
-  "addons": ["heroku-postgresql", "heroku-redis", "sentry"],
+  "addons": ["heroku-postgresql", "heroku-redis"],
   "scripts": {
     "postdeploy": "python manage.py migrate --noinput"
   }
