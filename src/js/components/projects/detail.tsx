@@ -91,6 +91,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // If the project slug changes, make sure EditProject modal is closed
+  useEffect(() => {
+    if (projectSlug && project && projectSlug !== project.slug) {
+      setEditModalOpen(false);
+    }
+  }, [project, projectSlug]);
+
   const usersAssignedToTasks = new Set<string>();
   (tasks || []).forEach((task) => {
     if (task.assigned_dev) {

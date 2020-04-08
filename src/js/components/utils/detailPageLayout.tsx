@@ -44,7 +44,8 @@ const DetailPageLayout = ({
       <div
         className="slds-p-horizontal_x-large
           slds-p-top_x-small
-          ms-breadcrumb"
+          ms-breadcrumb
+          slds-truncate"
       >
         <BreadCrumb
           trail={[
