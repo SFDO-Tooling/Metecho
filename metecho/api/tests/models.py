@@ -7,6 +7,7 @@ from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
 from ..models import (
+    PROJECT_STATUSES,
     SCRATCH_ORG_TYPES,
     TASK_STATUSES,
     Project,
@@ -124,6 +125,15 @@ class TestProject:
 
     def test_should_update_status(self, project_factory):
         project = project_factory()
+        assert not project.should_update_status()
+
+    def test_should_update_status__already_merged(self, project_factory):
+        project = project_factory(status=PROJECT_STATUSES.Merged, pr_is_merged=True)
+        assert not project.should_update_status()
+
+    def test_should_update_status__already_review(self, project_factory, task_factory):
+        project = project_factory(status=PROJECT_STATUSES.Review)
+        task_factory(project=project, status=TASK_STATUSES.Completed)
         assert not project.should_update_status()
 
     def test_queue_create_pr(self, project_factory, user_factory):

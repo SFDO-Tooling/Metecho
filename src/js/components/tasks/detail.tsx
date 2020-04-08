@@ -108,6 +108,13 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   }, [fetchingChanges, devOrg, submitModalOpen]);
 
+  // If the task slug changes, make sure EditTask modal is closed
+  useEffect(() => {
+    if (taskSlug && task && taskSlug !== task.slug) {
+      setEditModalOpen(false);
+    }
+  }, [task, taskSlug]);
+
   const doRefetchOrg = useCallback(
     (org: Org) => {
       dispatch(refetchOrg(org));

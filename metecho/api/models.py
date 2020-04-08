@@ -454,11 +454,13 @@ class Project(
         return self.pr_is_merged
 
     def should_update_status(self):
-        return (
-            self.should_update_in_progress()
-            or self.should_update_review()
-            or self.should_update_merged()
-        )
+        if self.should_update_merged():
+            return self.status != PROJECT_STATUSES.Merged
+        elif self.should_update_review():
+            return self.status != PROJECT_STATUSES.Review
+        elif self.should_update_in_progress():
+            return self.status != PROJECT_STATUSES["In progress"]
+        return False
 
     def update_status(self):
         if self.should_update_merged():
@@ -544,7 +546,7 @@ class Task(
     def __str__(self):
         return self.name
 
-    def save(self, *args, force_project_save=True, **kwargs):
+    def save(self, *args, force_project_save=False, **kwargs):
         ret = super().save(*args, **kwargs)
         # To update the project's status:
         if force_project_save or self.project.should_update_status():
