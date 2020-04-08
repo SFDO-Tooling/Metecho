@@ -693,7 +693,9 @@ class Task(
         unique_together = (("name", "project"),)
 
 
-class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
+class ScratchOrg(
+    SoftDeleteMixin, PushMixin, HashIdMixin, TimestampsMixin, models.Model
+):
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -721,6 +723,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     valid_target_directories = JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
+    cci_log = models.TextField(blank=True)
 
     def _build_message_extras(self):
         return {

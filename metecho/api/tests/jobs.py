@@ -95,7 +95,7 @@ class TestCreateBranchesOnGitHub:
 
 @pytest.mark.django_db
 class TestAlertUserAboutExpiringOrg:
-    def test_missing_model(self, scratch_org_factory):
+    def test_soft_deleted_model(self, scratch_org_factory):
         scratch_org = scratch_org_factory()
         scratch_org.delete()
         with patch(f"{PATCH_ROOT}.send_mail") as send_mail:
@@ -133,6 +133,8 @@ def test_create_org_and_run_flow():
             False,
         )
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
+        Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
+        Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
             user=MagicMock(),
