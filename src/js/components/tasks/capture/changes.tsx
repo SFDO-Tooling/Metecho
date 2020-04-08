@@ -43,14 +43,26 @@ const ChangesForm = ({
     });
   };
 
-  const handleSelectGroup = (groupName: string, checked: boolean) => {
-    const newCheckedItems = cloneDeep(inputs.changes);
+  const handleSelectGroup = (
+    set: Changeset,
+    groupName: string,
+    checked: boolean,
+  ) => {
+    const newCheckedItems = cloneDeep(set);
+    let thing, action;
+    if (set === inputs.changes) {
+      thing = changeset;
+      action = setChanges(newCheckedItems);
+    } else {
+      thing = ignoredChangeset;
+      action = setIgnored(newCheckedItems);
+    }
     if (checked) {
-      newCheckedItems[groupName] = [...changeset[groupName]];
+      newCheckedItems[groupName] = [...thing[groupName]];
     } else {
       Reflect.deleteProperty(newCheckedItems, groupName);
     }
-    setChanges(newCheckedItems);
+    return action;
   };
 
   const handleSelectIgnoredGroup = () => {};
@@ -166,7 +178,7 @@ const ChangesForm = ({
               const handleSelectThisGroup = (
                 event: React.ChangeEvent<HTMLInputElement>,
                 { checked }: { checked: boolean },
-              ) => handleSelectGroup(groupName, checked);
+              ) => handleSelectGroup(inputs.changes, groupName, checked);
               let checkedChildren = 0;
               for (const child of children) {
                 if (inputs.changes[groupName]?.includes(child)) {
@@ -264,6 +276,12 @@ const ChangesForm = ({
                 .map((groupName, index) => {
                   const ignoredChildren = ignoredChangeset[groupName];
                   const identifier = `ignored-children-${index}`;
+                  let checkedChildren = 0;
+                  for (const child of ignoredChildren) {
+                    if (inputs.ignored[groupName]?.includes(child)) {
+                      checkedChildren = checkedChildren + 1;
+                    }
+                  }
                   return (
                     <Accordion key={`ignoredChildren`}>
                       <AccordionPanel
@@ -276,7 +294,20 @@ const ChangesForm = ({
                           <Checkbox
                             labels={{ label: groupName }}
                             name="ignored"
-                            checked={allIgnoredChecked}
+                            checked={
+                              allIgnoredChecked ||
+                              checkedChildren === ignoredChildren.length
+                            }
+                            onChange={(
+                              event: React.ChangeEvent<HTMLInputElement>,
+                              { checked }: { checked: boolean },
+                            ) =>
+                              handleSelectGroup(
+                                inputs.ignored,
+                                groupName,
+                                checked,
+                              )
+                            }
                           />
                         }
                       >
