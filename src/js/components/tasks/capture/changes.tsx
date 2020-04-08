@@ -2,9 +2,10 @@ import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import { cloneDeep, isEmpty } from 'lodash';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   BooleanObject,
@@ -30,6 +31,8 @@ const ChangesForm = ({
   ignoredChangeset,
 }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
+  const [success, setSuccess] = useState(false);
+
   const setChanges = (changes: Changeset) => {
     setInputs({ ...inputs, changes });
   };
@@ -64,8 +67,6 @@ const ChangesForm = ({
     }
     return action;
   };
-
-  const handleSelectIgnoredGroup = () => {};
 
   const handleChange = (
     set: Changeset,
@@ -115,6 +116,7 @@ const ChangesForm = ({
       setChanges({});
     }
   };
+
   const handleSelectAllIgnored = (
     event: React.ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
@@ -126,6 +128,28 @@ const ChangesForm = ({
       setIgnored({});
     }
   };
+  const successTimeout = useRef<NodeJS.Timeout | null>(null);
+  const clearSuccessTimeout = () => {
+    if (typeof successTimeout.current === 'number') {
+      clearTimeout(successTimeout.current);
+      successTimeout.current = null;
+    }
+  };
+
+  /* check for when new changes are ignored */
+  const ignoredChanges = useRef(ignoredChangeset);
+  useEffect(() => {
+    const prevValue = ignoredChanges.current;
+    const value = ignoredChangeset;
+    if (value !== prevValue) {
+      setSuccess(true);
+    }
+    successTimeout.current = setTimeout(() => {
+      setSuccess(false);
+    }, 2000);
+    return () => clearSuccessTimeout();
+  }, [ignoredChangeset]);
+
   const totalChanges = Object.values(changeset).flat().length;
   const changesChecked = Object.values(inputs.changes).flat().length;
   const allChangesChecked = changesChecked === totalChanges;
@@ -243,7 +267,12 @@ const ChangesForm = ({
               );
             })}
           {/* ignored changes panel, changesets are placed here after they are ignored */}
-          <Accordion key="allIgnored" className="light-bordered-row">
+          <Accordion
+            key="allIgnored"
+            className={classNames('light-bordered-row', {
+              'success-highlight': success,
+            })}
+          >
             <AccordionPanel
               expanded={Boolean(expandedPanels.allIgnored)}
               key={`allIgnored-panel`}

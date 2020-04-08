@@ -149,7 +149,7 @@ const CaptureModal = ({
   const hasCommitMessage = Boolean(inputs.commit_message);
 
   const ignoreSelected = () => {
-    setIgnoredChangeset({ ...ignoredChangeset, ...inputs.changes });
+    setIgnoredChangeset({ ...inputs.changes, ...ignoredChangeset });
     resetForm();
   };
 

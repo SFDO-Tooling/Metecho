@@ -14,6 +14,10 @@
   display: grid;
   height: 100%;
 
+  .success-highlight {
+    background-color: $color-background-highlight;
+  }
+
   .slds-accordion__section {
     padding: $spacing-x-small $spacing-medium;
   }
