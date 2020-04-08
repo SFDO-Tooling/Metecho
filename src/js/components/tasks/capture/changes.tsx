@@ -276,14 +276,18 @@ const ChangesForm = ({
           >
             <AccordionPanel
               expanded={Boolean(expandedPanels.allIgnored)}
-              key={`allIgnored-panel`}
-              id={`group-ignored`}
-              onTogglePanel={() => handlePanelToggle(`allIgnored`)}
-              title={`allIgnored`}
+              key="allIgnored-panel"
+              id="group-ignored"
+              onTogglePanel={() => handlePanelToggle('allIgnored')}
+              title="allIgnored"
               panelContentActions={
                 <div className="form-grid">
                   <Checkbox
-                    labels={{ label: i18n.t('All ignored') }}
+                    labels={{
+                      label: i18n.t(
+                        'All ignored - Changes placed here will remain ignored until you un-ignore them.',
+                      ),
+                    }}
                     checked={!isEmpty(ignoredChangeset) && allIgnoredChecked}
                     indeterminate={Boolean(
                       !allIgnoredChecked && !noIgnoredChecked,
@@ -298,7 +302,7 @@ const ChangesForm = ({
                   </span>
                 </div>
               }
-              summary="Changes placed here will remain ignored until you un-ignore them."
+              summary=""
             >
               {/* inner accordian for each changeset */}
               {Object.keys(ignoredChangeset)
@@ -313,13 +317,13 @@ const ChangesForm = ({
                     }
                   }
                   return (
-                    <Accordion key={`ignoredChildren`}>
+                    <Accordion key="ignoredChildren">
                       <AccordionPanel
                         expanded={Boolean(expandedPanels[identifier])}
                         key={identifier}
                         id={identifier}
                         onTogglePanel={() => handlePanelToggle(identifier)}
-                        title={`ignoredChildren`}
+                        title="ignoredChildren"
                         panelContentActions={
                           <Checkbox
                             labels={{ label: groupName }}
@@ -340,6 +344,7 @@ const ChangesForm = ({
                             }
                           />
                         }
+                        summary=""
                       >
                         {/* children of ignored changesets */}
                         {ignoredChildren.sort().map((change, idx) => (
