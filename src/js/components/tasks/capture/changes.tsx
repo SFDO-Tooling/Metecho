@@ -37,7 +37,6 @@ const ChangesForm = ({
     setInputs({ ...inputs, ignored });
   };
   const handlePanelToggle = (groupName: string) => {
-    console.log(groupName);
     setExpandedPanels({
       ...expandedPanels,
       [groupName]: !expandedPanels[groupName],
@@ -242,7 +241,7 @@ const ChangesForm = ({
               panelContentActions={
                 <div className="form-grid">
                   <Checkbox
-                    labels={{ label: 'All ignored' }}
+                    labels={{ label: i18n.t('All ignored') }}
                     checked={!isEmpty(ignoredChangeset) && allIgnoredChecked}
                     indeterminate={Boolean(
                       !allIgnoredChecked && !noIgnoredChecked,

@@ -145,6 +145,7 @@ const CaptureModal = ({
 
   const dirSelected = Boolean(inputs.target_directory);
   const changesChecked = Object.values(inputs.changes).flat().length;
+  const ignoredChecked = Object.values(inputs.ignored).flat().length;
   const hasCommitMessage = Boolean(inputs.commit_message);
 
   const ignoreSelected = () => {
@@ -206,15 +207,19 @@ const CaptureModal = ({
         />,
         <Button
           key="page-2-button-2"
-          label={i18n.t('Ignore Selected Changes')}
-          variant="outline-brand"
+          label={
+            ignoredChecked
+              ? i18n.t('Un-ignore')
+              : i18n.t('Ignore Selected Changes')
+          }
+          variant={ignoredChecked ? 'brand' : 'outline-brand'}
           onClick={ignoreSelected}
-          disabled={!changesChecked}
+          disabled={!changesChecked && !ignoredChecked}
         />,
         <Button
           key="page-2-button-3"
           label={i18n.t('Save & Next')}
-          variant="brand"
+          variant={ignoredChecked && changesChecked ? 'outline-brand' : 'brand'}
           onClick={nextPage}
           disabled={!changesChecked}
         />,
