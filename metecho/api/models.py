@@ -962,9 +962,6 @@ def ensure_slug_handler(sender, *, created, instance, **kwargs):
         sluggable_name = getattr(instance, slug_field_name)
         slug = slugify(sluggable_name)
         slug = instance._find_unique_slug(slug)
-        instance.slug_class.objects.filter(parent=instance.slug_parent).update(
-            is_active=False
-        )
         instance.slug_class.objects.create(
             parent=instance.slug_parent, slug=slug, is_active=True
         )
