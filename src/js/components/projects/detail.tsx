@@ -141,7 +141,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
       const removedUsers = getRemovedUsers(users);
       if (removedUsers.length) {
         setWaitingToUpdateUsers(users);
-
         setConfirmRemoveUsers(removedUsers);
         setAssignUsersModalOpen(false);
         setSubmitModalOpen(false);

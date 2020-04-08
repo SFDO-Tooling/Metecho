@@ -106,7 +106,7 @@ urllib3==1.25.8           # via cumulusci, requests, selenium, sentry-sdk
 webencodings==0.5.1       # via bleach
 whitenoise==5.0.1         # via -r requirements/prod.in
 xmltodict==0.12.0         # via cumulusci
-zope.interface==4.6.0     # via twisted
+zope.interface==5.1.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
