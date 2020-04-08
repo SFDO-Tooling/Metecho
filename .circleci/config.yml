@@ -23,11 +23,10 @@ jobs:
             pip install -r requirements/dev.txt
       - run:
           name: Compile Front-End Assets
-          command: yarn prod:stats
+          command: yarn prod
       - persist_to_workspace:
           root: .
           paths:
-            - ./webpack-stats.json
             - ./dist
             - ./venv
             - ./node_modules
@@ -143,27 +142,6 @@ jobs:
             yarn test:js:check-coverage
             yarn test:py:check-coverage
 
-  report-webpack-stats:
-    working_directory: ~/metecho
-    docker:
-      - image: oddbirds/pyjs:v0.2.0
-    steps:
-      - run:
-          name: Check if packtracker.io is configured
-          command: |
-            if [ -z "${PT_PROJECT_TOKEN}" ]; then
-                circleci-agent step halt
-            fi
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: Install packtracker.io Plugin
-          command: yarn global add @packtracker/webpack-plugin
-      - run:
-          name: Upload Webpack Stats to packtracker.io
-          command: yarn packtracker
-
   build-docs:
     working_directory: ~/metecho
     docker:
@@ -200,6 +178,3 @@ workflows:
           requires:
             - test-client
             - test-python
-      - report-webpack-stats:
-          requires:
-            - build
