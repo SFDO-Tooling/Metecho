@@ -123,15 +123,13 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             {Boolean(projects.projects.length) && (
               <>
                 <ul className="slds-has-dividers_bottom">
-                  {projects.projects
-                    .filter((p) => !p.deleted_at)
-                    .map((project) => (
-                      <ProjectListItem
-                        key={project.id}
-                        project={project}
-                        repository={repository}
-                      />
-                    ))}
+                  {projects.projects.map((project) => (
+                    <ProjectListItem
+                      key={project.id}
+                      project={project}
+                      repository={repository}
+                    />
+                  ))}
                 </ul>
                 {projects.next ? (
                   <div className="slds-m-top_large">

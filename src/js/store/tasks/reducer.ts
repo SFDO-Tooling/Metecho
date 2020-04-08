@@ -46,7 +46,6 @@ export interface Task {
   review_valid: boolean;
   review_status: ReviewStatuses | null;
   review_sha: string | null;
-  deleted_at: string;
 }
 
 export interface TaskState {
@@ -184,23 +183,14 @@ const reducer = (
       }: { objectType?: ObjectTypes; object: Task } = action.payload;
       if (objectType === OBJECT_TYPES.TASK) {
         const task = object;
+        /* istanbul ignore next */
         const projectTasks = tasks[task.project] || [];
-        const existingTask = projectTasks.find((t) => t.id === task.id);
-        if (existingTask) {
-          return {
-            ...tasks,
-            [task.project]: projectTasks.map((t) => {
-              if (t.id === task.id) {
-                return {
-                  ...task,
-                  deleted_at: new Date().toISOString(),
-                };
-              }
-              return t;
-            }),
-          };
-        }
+        return {
+          ...tasks,
+          [task.project]: projectTasks.filter((t) => t.id !== task.id),
+        };
       }
+      return tasks;
     }
   }
   return tasks;

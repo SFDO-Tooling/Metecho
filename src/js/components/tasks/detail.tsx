@@ -32,7 +32,6 @@ import EditModal from '@/components/utils/editModal';
 import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
-import { deleteObject } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
@@ -107,6 +106,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         setCaptureModalOpen(true);
         setSubmitModalOpen(false);
         setEditModalOpen(false);
+        setDeleteModalOpen(false);
       }
     }
   }, [fetchingChanges, devOrg, submitModalOpen]);
@@ -122,12 +122,14 @@ const TaskDetail = (props: RouteComponentProps) => {
     setSubmitModalOpen(true);
     setCaptureModalOpen(false);
     setEditModalOpen(false);
+    setDeleteModalOpen(false);
   };
   // edit modal related...
   const openEditModal = () => {
     setEditModalOpen(true);
     setSubmitModalOpen(false);
     setCaptureModalOpen(false);
+    setDeleteModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -135,6 +137,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   // delete modal related
   const openDeleteModal = () => {
     setDeleteModalOpen(true);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setCaptureModalOpen(false);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -185,12 +190,6 @@ const TaskDetail = (props: RouteComponentProps) => {
       <Redirect
         to={routes.task_detail(repository.slug, project.slug, task.slug)}
       />
-    );
-  }
-  // redirect to projct detail if task deleted
-  if (task?.deleted_at && project) {
-    return (
-      <Redirect to={routes.project_detail(repository.slug, project.slug)} />
     );
   }
 
@@ -309,6 +308,8 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const projectUrl = routes.project_detail(repository.slug, project.slug);
+
   return (
     <DocumentTitle
       title={` ${task.name} | ${project.name} | ${repository.name} | ${i18n.t(
@@ -326,7 +327,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           },
           {
             name: project.name,
-            url: routes.project_detail(repository.slug, project.slug),
+            url: projectUrl,
           },
           { name: task.name },
         ]}
@@ -348,7 +349,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             orgs={orgs}
             task={task}
             projectUsers={project.github_users}
-            projectUrl={routes.project_detail(repository.slug, project.slug)}
+            projectUrl={projectUrl}
             repoUrl={repository.repo_url}
           />
         ) : (
@@ -381,8 +382,9 @@ const TaskDetail = (props: RouteComponentProps) => {
         />
         <DeleteModal
           model={task}
-          isOpen={deleteModalOpen}
           modelType={OBJECT_TYPES.TASK}
+          isOpen={deleteModalOpen}
+          redirect={projectUrl}
           handleClose={closeDeleteModal}
         />
         <CommitList commits={task.commits} />

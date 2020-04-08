@@ -41,10 +41,21 @@ const PageOptions = ({
       assistiveText={{ icon: assistiveText }}
       onSelect={handleSelect}
       options={[
-        { id: 'edit', label: editLabel },
+        {
+          id: 'edit',
+          label: editLabel,
+          leftIcon: {
+            name: 'edit',
+            category: 'utility',
+          },
+        },
         {
           id: 'delete',
           label: deleteLabel,
+          leftIcon: {
+            name: 'delete',
+            category: 'utility',
+          },
         },
       ]}
     />

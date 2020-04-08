@@ -21,7 +21,6 @@ export interface Project {
   currently_creating_pr: boolean;
   github_users: GitHubUser[];
   status: ProjectStatuses;
-  deleted_at: boolean;
 }
 
 export interface ProjectsByRepositoryState {
@@ -217,27 +216,20 @@ const reducer = (
         objectType,
         object,
       }: { objectType?: ObjectTypes; object: Project } = action.payload;
-      if (objectType === OBJECT_TYPES.PROJECT && object) {
+      if (objectType === OBJECT_TYPES.PROJECT) {
+        /* istanbul ignore next */
         const repositoryProjects = projects[object.repository] || {
           ...defaultState,
         };
-        const existingProject = repositoryProjects.projects.find(
-          (p) => p.id === object.id,
-        );
-        if (existingProject) {
-          return {
-            ...projects,
-            [object.repository]: {
-              ...repositoryProjects,
-              projects: repositoryProjects.projects.map((p) => {
-                if (p.id === object.id) {
-                  return { ...object, deleted_at: new Date().toISOString() };
-                }
-                return p;
-              }),
-            },
-          };
-        }
+        return {
+          ...projects,
+          [object.repository]: {
+            ...repositoryProjects,
+            projects: repositoryProjects.projects.filter(
+              (p) => p.id !== object.id,
+            ),
+          },
+        };
       }
       return projects;
     }

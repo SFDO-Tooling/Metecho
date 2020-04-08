@@ -179,7 +179,7 @@ class SoftDeleteMixin(models.Model):
     class Meta:
         abstract = True
 
-    deleted_at = models.DateTimeField(null=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     objects = SoftDeleteQuerySet.as_manager()
 

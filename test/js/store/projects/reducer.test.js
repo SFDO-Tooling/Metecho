@@ -577,7 +577,7 @@ describe('reducer', () => {
   });
 
   describe('DELETE_OBJECT_SUCCEEDED', () => {
-    test('adds deleted_at to project', () => {
+    test('removes project', () => {
       const project = {
         id: 'r1',
         slug: 'project-1',
@@ -590,7 +590,7 @@ describe('reducer', () => {
         repository: 'repository-1',
         name: 'Project 2',
       };
-      const expected = {
+      const initial = {
         'repository-1': {
           projects: [project, project2],
           next: null,
@@ -598,7 +598,8 @@ describe('reducer', () => {
           fetched: true,
         },
       };
-      const actual = reducer(expected, {
+      const expected = [project2];
+      const actual = reducer(initial, {
         type: 'DELETE_OBJECT_SUCCEEDED',
         payload: {
           object: project,
@@ -606,25 +607,39 @@ describe('reducer', () => {
         },
       });
 
-      expect(actual['repository-1'].projects[0].deleted_at).not.toBeUndefined();
+      expect(actual['repository-1'].projects).toEqual(expected);
     });
 
-    test('ignores if objectType is not project', () => {
+    test('ignores if unknown objectType', () => {
       const project = {
         id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
+        description: 'This is a test project.',
         repository: 'repository-1',
       };
-      const expected = {};
-      const actual = reducer(expected, {
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const initial = {
+        'repository-1': {
+          projects: [project, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(initial, {
         type: 'DELETE_OBJECT_SUCCEEDED',
         payload: {
           object: project,
-          objectType: 'other-object',
+          objectType: 'foobar',
         },
       });
-      expect(actual).toEqual({});
+
+      expect(actual).toEqual(initial);
     });
   });
 });

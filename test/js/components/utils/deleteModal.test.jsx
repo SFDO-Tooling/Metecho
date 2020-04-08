@@ -1,5 +1,6 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
+import { StaticRouter } from 'react-router-dom';
 
 import DeleteModal from '@/components/utils/deleteModal';
 import { deleteObject } from '@/store/actions';
@@ -27,19 +28,25 @@ describe('<DeleteModal />', () => {
     const defaults = {
       model: defaultProject,
       modelType: 'project',
+      redirect: '/foo',
     };
     const opts = Object.assign({}, defaults, options);
     const closeDeleteModal = jest.fn();
-    return renderWithRedux(
-      <DeleteModal {...opts} isOpen handleClose={closeDeleteModal} />,
-      {},
-      storeWithThunk,
-      opts.rerender,
-      opts.store,
-    );
+    const context = {};
+    return {
+      ...renderWithRedux(
+        <StaticRouter context={context}>
+          <DeleteModal {...opts} isOpen handleClose={closeDeleteModal} />
+        </StaticRouter>,
+        {},
+        storeWithThunk,
+      ),
+      context,
+    };
   };
-  test('deletes project', () => {
-    const { getByText } = setup();
+
+  test('deletes project and redirects', async () => {
+    const { getByText, context } = setup();
 
     fireEvent.click(getByText('Delete'));
 
@@ -48,5 +55,11 @@ describe('<DeleteModal />', () => {
       objectType: 'project',
       object: defaultProject,
     });
+
+    expect.assertions(4);
+    await deleteObject;
+
+    expect(context.action).toEqual('PUSH');
+    expect(context.url).toEqual('/foo');
   });
 });

@@ -61,6 +61,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     setAssignUsersModalOpen(true);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
+    setDeleteModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
@@ -145,6 +146,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         setAssignUsersModalOpen(false);
         setSubmitModalOpen(false);
         setEditModalOpen(false);
+        setDeleteModalOpen(false);
       } else {
         updateProjectUsers(users);
       }
@@ -168,6 +170,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         setAssignUsersModalOpen(false);
         setSubmitModalOpen(false);
         setEditModalOpen(false);
+        setDeleteModalOpen(false);
       } else {
         updateProjectUsers(users);
       }
@@ -212,6 +215,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
     setEditModalOpen(false);
+    setDeleteModalOpen(false);
     setAssignUsersModalOpen(false);
   };
   const currentlySubmitting = Boolean(project?.currently_creating_pr);
@@ -224,6 +228,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   // "edit" modal related:
   const openEditModal = () => {
     setEditModalOpen(true);
+    setDeleteModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
   };
@@ -233,6 +238,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
   // "delete" modal related:
   const openDeleteModal = () => {
     setDeleteModalOpen(true);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -255,10 +263,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
     return projectLoadingOrNotFound;
   }
 
-  // Redirect once project is deleted
-  if (project?.deleted_at && repository) {
-    return <Redirect to={routes.repository_detail(repository.slug)} />;
-  }
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
   if (!repository || !project) {
@@ -276,9 +280,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
   }
 
   // Progress Bar:
-  const activeTasks = tasks?.filter((t) => !t.deleted_at) || [];
-  const tasksCompleted = tasks ? getCompletedTasks(activeTasks).length : 0;
-  const tasksTotal = activeTasks?.length || 0;
+  const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
+  const tasksTotal = tasks?.length || 0;
   const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
 
   // "Submit Project for Review on GitHub" button:
@@ -331,7 +334,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
       ) : null}
     </PageHeaderControl>
   );
-  // const activeTasks = tasks?.filter((t) => !t.deleted_at);
+
+  const repoUrl = routes.repository_detail(repository.slug);
+
   return (
     <DocumentTitle
       title={`${project.name} | ${repository.name} | ${i18n.t('Metecho')}`}
@@ -343,7 +348,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         breadcrumb={[
           {
             name: repository.name,
-            url: routes.repository_detail(repository.slug),
+            url: repoUrl,
           },
           { name: project.name },
         ]}
@@ -390,11 +395,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
           prIsOpen={project.pr_is_open}
         />
         {submitButton}
-        {activeTasks ? (
+        {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {activeTasks.length ||
-              project.status === PROJECT_STATUSES.MERGED ? (
+              {tasks.length || project.status === PROJECT_STATUSES.MERGED ? (
                 <>
                   {i18n.t('Tasks for')} {project.name}
                 </>
@@ -405,15 +409,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             {project.status !== PROJECT_STATUSES.MERGED && (
-              <TaskForm project={project} startOpen={!activeTasks.length} />
+              <TaskForm project={project} startOpen={!tasks.length} />
             )}
-            {activeTasks.length ? (
+            {tasks.length ? (
               <>
                 <ProjectProgress range={projectProgress} />
                 <TaskTable
                   repositorySlug={repository.slug}
                   projectSlug={project.slug}
-                  tasks={activeTasks}
+                  tasks={tasks}
                   projectUsers={project.github_users}
                   openAssignProjectUsersModal={openAssignUsersModal}
                   assignUserAction={assignUser}
@@ -443,8 +447,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
         />
         <DeleteModal
           model={project}
-          isOpen={deleteModalOpen}
           modelType={OBJECT_TYPES.PROJECT}
+          isOpen={deleteModalOpen}
+          redirect={repoUrl}
           handleClose={closeDeleteModal}
         />
       </DetailPageLayout>
