@@ -56,7 +56,7 @@ describe('<CaptureModal/>', () => {
 
     fireEvent.click(getByText('Save & Next'));
 
-    expect(getByText('Select the changes to retrieve')).toBeVisible();
+    expect(getByText('Select the changes to retrieve or ignore')).toBeVisible();
 
     fireEvent.click(getByText('Go Back'));
 
@@ -109,6 +109,7 @@ describe('<CaptureModal/>', () => {
         url: window.api_urls.scratch_org_commit('org-id'),
         data: {
           commit_message: 'My Commit',
+          ignored: {},
           changes: defaultChangeset,
           target_directory: 'src',
         },
@@ -121,7 +122,7 @@ describe('<CaptureModal/>', () => {
   describe('form error', () => {
     test.each([
       ['target_directory', 'Select the location to retrieve changes', true],
-      ['changes', 'Select the changes to retrieve', true],
+      ['changes', 'Select the changes to retrieve or ignore', true],
       ['commit_message', 'Describe the changes you are retrieving', true],
       ['foobar', 'Describe the changes you are retrieving', false],
     ])(

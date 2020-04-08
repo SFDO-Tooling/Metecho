@@ -266,7 +266,8 @@ const ChangesForm = ({
                 </Accordion>
               );
             })}
-          {/* ignored changes panel, changesets are placed here after they are ignored */}
+          {/* ignored changes panel, changesets are 
+          placed here after they are ignored */}
           <Accordion
             key="allIgnored"
             className={classNames('light-bordered-row', {
