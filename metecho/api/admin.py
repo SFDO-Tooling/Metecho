@@ -4,8 +4,10 @@ from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
 from django.forms.widgets import Textarea
+from github3.exceptions import NotFoundError
 from parler.admin import TranslatableAdmin
 
+from . import gh
 from .models import (
     GitHubRepository,
     Project,
@@ -18,6 +20,31 @@ from .models import (
     TaskSlug,
     User,
 )
+
+
+class RepositoryForm(forms.ModelForm):
+    class Meta:
+        model = Repository
+        exclude = ()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        repo_name = cleaned_data.get("repo_name")
+        repo_owner = cleaned_data.get("repo_owner")
+
+        try:
+            gh.get_repo_info(None, repo_owner=repo_owner, repo_name=repo_name)
+        except NotFoundError:
+            raise forms.ValidationError(
+                "No repository with this name and owner exists."
+            )
+        try:
+            app = gh.gh_as_app()
+            app.app_installation_for_repository(repo_owner, repo_name)
+        except NotFoundError:
+            raise forms.ValidationError(
+                "The associated GitHub app is not installed for that repository."
+            )
 
 
 class JSONWidget(Textarea):
@@ -34,6 +61,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Repository)
 class RepositoryAdmin(admin.ModelAdmin):
+    form = RepositoryForm
     list_display = ("name", "repo_owner", "repo_name")
 
 

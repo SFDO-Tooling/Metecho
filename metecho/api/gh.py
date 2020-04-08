@@ -13,8 +13,9 @@ import zipfile
 from glob import glob
 
 from cumulusci.utils import temporary_dir
+from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from github3 import login
+from github3 import GitHub, login
 from github3.exceptions import NotFoundError, UnprocessableEntity
 
 from .custom_cci_configs import GlobalConfig
@@ -43,6 +44,14 @@ def gh_given_user(user):
     return login(token=token)
 
 
+def gh_as_app():
+    app_id = settings.GITHUB_APP_ID
+    pem = settings.GITHUB_APP_KEY
+    gh = GitHub()
+    gh.login_as_app(pem, app_id)
+    return gh
+
+
 def get_all_org_repos(user):
     gh = gh_given_user(user)
     repos = set(
@@ -60,7 +69,7 @@ def zip_file_is_safe(zip_file):
 
 
 def get_repo_info(user, repo_id=None, repo_owner=None, repo_name=None):
-    gh = gh_given_user(user)
+    gh = gh_given_user(user) if user else gh_as_app()
     if repo_id is None:
         return gh.repository(repo_owner, repo_name)
     return gh.repository_with_id(repo_id)
