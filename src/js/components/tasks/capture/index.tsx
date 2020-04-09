@@ -3,6 +3,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
 import i18n from 'i18next';
+import { omit } from 'lodash';
 import React, { ReactNode, useState } from 'react';
 
 import ChangesForm from '@/components/tasks/capture/changes';
@@ -149,7 +150,12 @@ const CaptureModal = ({
   const hasCommitMessage = Boolean(inputs.commit_message);
 
   const ignoreSelected = () => {
-    setIgnoredChangeset({ ...inputs.changes, ...ignoredChangeset });
+    if (ignoredChecked) {
+      const unIgnored = omit(ignoredChangeset, Object.keys(inputs.ignored));
+      setIgnoredChangeset(unIgnored);
+    } else {
+      setIgnoredChangeset({ ...inputs.changes, ...inputs.ignored });
+    }
     resetForm();
   };
 
