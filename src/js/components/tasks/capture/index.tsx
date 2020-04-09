@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import { omit } from 'lodash';
 import React, { ReactNode, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import ChangesForm from '@/components/tasks/capture/changes';
 import TargetDirectoriesForm from '@/components/tasks/capture/directories';
@@ -15,12 +16,16 @@ import {
   useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
-import { Changeset, TargetDirectories } from '@/store/orgs/reducer';
+import { ThunkDispatch } from '@/store';
+import { refetchOrg } from '@/store/orgs/actions';
+import { Changeset, Org, TargetDirectories } from '@/store/orgs/reducer';
 import { ApiError } from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
 
+import CommitSuccessMessage from './success';
+
 interface Props {
-  orgId: string;
+  org: Org;
   changeset: Changeset;
   directories: TargetDirectories;
   isOpen: boolean;
@@ -67,16 +72,17 @@ export const ModalCard = ({
 );
 
 const CaptureModal = ({
-  orgId,
+  org,
   changeset,
   directories,
   isOpen,
   toggleModal,
 }: Props) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState(3);
   const [ignoredChangeset, setIgnoredChangeset] = useState({});
   const isMounted = useIsMounted();
+  const dispatch = useDispatch<ThunkDispatch>();
 
   const nextPage = () => {
     setPageIndex(pageIndex + 1);
@@ -90,7 +96,8 @@ const CaptureModal = ({
     /* istanbul ignore else */
     if (isMounted.current) {
       setCapturingChanges(false);
-      toggleModal(false);
+      // toggleModal(false);
+      // set page index to the new modal..
       setPageIndex(0);
     }
   };
@@ -130,7 +137,7 @@ const CaptureModal = ({
       target_directory: defaultDir,
     } as CommitData,
     objectType: OBJECT_TYPES.COMMIT,
-    url: window.api_urls.scratch_org_commit(orgId),
+    url: window.api_urls.scratch_org_commit(org.id),
     onSuccess: handleSuccess,
     onError: handleError,
     shouldSubscribeToObject: false,
@@ -148,6 +155,7 @@ const CaptureModal = ({
   const changesChecked = Object.values(inputs.changes).flat().length;
   const ignoredChecked = Object.values(inputs.ignored).flat().length;
   const hasCommitMessage = Boolean(inputs.commit_message);
+  const isRetrievingChanges = org.currently_refreshing_changes;
 
   const ignoreSelected = () => {
     if (ignoredChecked) {
@@ -168,6 +176,13 @@ const CaptureModal = ({
   const submitChanges = (e: React.FormEvent<HTMLFormElement>) => {
     setCapturingChanges(true);
     handleSubmit(e);
+  };
+
+  const handleContinueRetrievingChanges = () => {
+    // call refreshorg, then set to pageindex to 0
+    dispatch(refetchOrg(org)).finally(() => {
+      handleSuccess();
+    });
   };
 
   const pages = [
@@ -265,6 +280,30 @@ const CaptureModal = ({
           variant="brand"
           onClick={submitChanges}
           disabled={capturingChanges || !hasCommitMessage}
+        />,
+      ],
+    },
+    {
+      heading: i18n.t('Success!'),
+      contents: <CommitSuccessMessage summary={[]} />,
+      footer: [
+        <Button
+          key="page-4-button-1"
+          label={i18n.t('Close')}
+          variant="outline-brand"
+          onClick={handleClose}
+        />,
+        <Button
+          key="page-4-button-2"
+          type="submit"
+          label={
+            isRetrievingChanges
+              ? i18n.t('Retrieving Changes…')
+              : i18n.t('Continue Retrieving Changes')
+          }
+          variant="brand"
+          onClick={handleContinueRetrievingChanges}
+          disabled={isRetrievingChanges}
         />,
       ],
     },
