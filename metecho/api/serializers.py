@@ -398,7 +398,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         return {}
 
     def validate(self, data):
-        if ScratchOrg.objects.filter(
+        if ScratchOrg.objects.active().filter(
             task=data["task"], org_type=data["org_type"]
         ).exists():
             raise serializers.ValidationError(

@@ -209,7 +209,7 @@ class ScratchOrgViewSet(
 ):
     permission_classes = (IsAuthenticated,)
     serializer_class = ScratchOrgSerializer
-    queryset = ScratchOrg.objects.all()
+    queryset = ScratchOrg.objects.active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ScratchOrgFilter
 

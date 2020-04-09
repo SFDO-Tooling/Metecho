@@ -177,7 +177,7 @@ class SoftDeleteQuerySet(models.QuerySet):
             soft_delete_child_class(None).objects.filter(
                 **{f"{parent}__in": self}
             ).delete()
-        return self.update(deleted_at=timezone.now())
+        return self.active().update(deleted_at=timezone.now())
 
     delete.queryset_only = True
 
@@ -195,8 +195,9 @@ class SoftDeleteMixin(models.Model):
         if soft_delete_child_class:
             parent = camel_to_snake(self.__class__.__name__)
             soft_delete_child_class().objects.filter(**{parent: self}).delete()
-        self.deleted_at = timezone.now()
-        self.save()
+        if self.deleted_at is None:
+            self.deleted_at = timezone.now()
+            self.save()
 
 
 def camel_to_snake(name):
