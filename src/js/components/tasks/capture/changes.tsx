@@ -136,18 +136,26 @@ const ChangesForm = ({
     }
   };
 
-  /* check for when new changes are ignored */
+  /* check for when changes are make to the ignored changes*/
   const ignoredChanges = useRef(ignoredChangeset);
   useEffect(() => {
     const prevValue = ignoredChanges.current;
     const value = ignoredChangeset;
     if (value !== prevValue) {
-      setSuccess(true);
+      if (
+        Object.keys(value).flat().length > Object.keys(prevValue).flat().length
+      ) {
+        setSuccess(true);
+      }
+      if (isEmpty(value)) {
+        handlePanelToggle('allIgnored');
+      }
     }
     successTimeout.current = setTimeout(() => {
       setSuccess(false);
     }, 2000);
     return () => clearSuccessTimeout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ignoredChangeset]);
 
   const totalChanges = Object.values(changeset).flat().length;
