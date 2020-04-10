@@ -96,8 +96,9 @@ const CaptureModal = ({
     /* istanbul ignore else */
     if (isMounted.current) {
       setCapturingChanges(false);
-      // toggleModal(false);
-      // set page index to the new modal..
+      // if there are uncaptured changes,
+      //  go to next page to refresh org or
+      //  continue
       setPageIndex(3);
     }
   };
@@ -287,7 +288,14 @@ const CaptureModal = ({
     },
     {
       heading: i18n.t('Success!'),
-      contents: <CommitSuccessMessage summary={[]} />,
+      contents: (
+        <CommitSuccessMessage
+          summary={[
+            Object.keys(inputs.changes).flat().length,
+            Object.keys(inputs.ignored).flat().length,
+          ]}
+        />
+      ),
       footer: [
         <Button
           key="page-4-button-1"
