@@ -4,7 +4,7 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import { cloneDeep, isEmpty } from 'lodash';
+import { cloneDeep, isEmpty, omit } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 
 import {
@@ -146,6 +146,12 @@ const ChangesForm = ({
   const allIgnoredChecked = ignoredChecked === totalIgnored;
   const noIgnoredChecked = !ignoredChecked;
 
+  // remove changes from list that are ignored
+  const filteredChangest: Changeset = omit(
+    changeset,
+    Object.keys(ignoredChangeset),
+  );
+
   /* check for when new changes are ignored*/
   const ignoredChanges = useRef(ignoredChangeset);
   useEffect(() => {
@@ -202,10 +208,10 @@ const ChangesForm = ({
               ({totalChanges})
             </span>
           </div>
-          {Object.keys(changeset)
+          {Object.keys(filteredChangest)
             .sort()
             .map((groupName, index) => {
-              const children = changeset[groupName];
+              const children = filteredChangest[groupName];
               const handleThisPanelToggle = () => handlePanelToggle(groupName);
               const handleSelectThisGroup = (
                 event: React.ChangeEvent<HTMLInputElement>,
