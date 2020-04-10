@@ -136,17 +136,27 @@ const ChangesForm = ({
     }
   };
 
-  /* check for when changes are make to the ignored changes*/
+  const totalChanges = Object.values(changeset).flat().length;
+  const changesChecked = Object.values(inputs.changes).flat().length;
+  const allChangesChecked = changesChecked === totalChanges;
+  const noChangesChecked = !changesChecked;
+
+  const totalIgnored = Object.values(ignoredChangeset).flat().length;
+  const ignoredChecked = Object.values(inputs.ignored).flat().length;
+  const allIgnoredChecked = ignoredChecked === totalIgnored;
+  const noIgnoredChecked = !ignoredChecked;
+
+  /* check for when new changes are ignored*/
   const ignoredChanges = useRef(ignoredChangeset);
   useEffect(() => {
     const prevValue = ignoredChanges.current;
     const value = ignoredChangeset;
     if (value !== prevValue) {
-      if (
-        Object.keys(value).flat().length > Object.keys(prevValue).flat().length
-      ) {
+      // show highlight when new changes are ignored
+      if (totalIgnored > Object.values(prevValue).flat().length) {
         setSuccess(true);
       }
+      // close the accodion if ignored list is emptied
       if (isEmpty(value)) {
         handlePanelToggle('allIgnored');
       }
@@ -157,16 +167,6 @@ const ChangesForm = ({
     return () => clearSuccessTimeout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ignoredChangeset]);
-
-  const totalChanges = Object.values(changeset).flat().length;
-  const changesChecked = Object.values(inputs.changes).flat().length;
-  const allChangesChecked = changesChecked === totalChanges;
-  const noChangesChecked = !changesChecked;
-
-  const totalIgnored = Object.values(ignoredChangeset).flat().length;
-  const ignoredChecked = Object.values(inputs.ignored).flat().length;
-  const allIgnoredChecked = ignoredChecked === totalIgnored;
-  const noIgnoredChecked = !ignoredChecked;
 
   return (
     <form

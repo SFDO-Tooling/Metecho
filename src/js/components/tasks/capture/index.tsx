@@ -145,12 +145,13 @@ const CaptureModal = ({
   });
 
   const dirSelected = Boolean(inputs.target_directory);
+  const hasCommitMessage = Boolean(inputs.commit_message);
   const changesChecked = Object.values(inputs.changes).flat().length;
   const ignoredChecked = Object.values(inputs.ignored).flat().length;
-  const hasCommitMessage = Boolean(inputs.commit_message);
+  const bothChecked = changesChecked && ignoredChecked;
 
   const ignoreSelected = () => {
-    if (ignoredChecked) {
+    if (ignoredChecked && !bothChecked) {
       const unIgnored = omit(ignoredChangeset, Object.keys(inputs.ignored));
       setIgnoredChangeset(unIgnored);
     } else {
@@ -214,8 +215,11 @@ const CaptureModal = ({
         <Button
           key="page-2-button-2"
           label={
+            // eslint-disable-next-line no-nested-ternary
             ignoredChecked
-              ? i18n.t('Un-ignore')
+              ? changesChecked
+                ? i18n.t('Ignore')
+                : i18n.t('Un-ignore')
               : i18n.t('Ignore Selected Changes')
           }
           variant={ignoredChecked ? 'brand' : 'outline-brand'}
@@ -225,7 +229,7 @@ const CaptureModal = ({
         <Button
           key="page-2-button-3"
           label={i18n.t('Save & Next')}
-          variant={ignoredChecked && changesChecked ? 'outline-brand' : 'brand'}
+          variant={bothChecked ? 'outline-brand' : 'brand'}
           onClick={nextPage}
           disabled={!changesChecked}
         />,
