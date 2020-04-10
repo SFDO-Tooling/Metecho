@@ -346,7 +346,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         )}
         {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
-            org={devOrg}
+            orgId={devOrg.id}
             changeset={devOrg.unsaved_changes}
             directories={devOrg.valid_target_directories}
             isOpen={captureModalOpen}
