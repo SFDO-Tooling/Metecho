@@ -79,7 +79,7 @@ const CaptureModal = ({
   toggleModal,
 }: Props) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
-  const [pageIndex, setPageIndex] = useState(3);
+  const [pageIndex, setPageIndex] = useState(0);
   const [ignoredChangeset, setIgnoredChangeset] = useState({});
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
@@ -98,7 +98,7 @@ const CaptureModal = ({
       setCapturingChanges(false);
       // toggleModal(false);
       // set page index to the new modal..
-      setPageIndex(0);
+      setPageIndex(3);
     }
   };
 
@@ -179,9 +179,11 @@ const CaptureModal = ({
   };
 
   const handleContinueRetrievingChanges = () => {
-    // call refreshorg, then set to pageindex to 0
+    // refreshorg, then set to pageindex to 0
     dispatch(refetchOrg(org)).finally(() => {
-      handleSuccess();
+      if (isMounted.current) {
+        setPageIndex(0);
+      }
     });
   };
 
