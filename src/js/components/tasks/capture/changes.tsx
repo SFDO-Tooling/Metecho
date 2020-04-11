@@ -33,6 +33,21 @@ const ChangesForm = ({
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
   const [success, setSuccess] = useState(false);
 
+  // remove changes from list that are ignored
+  const filteredChangest: Changeset = omit(
+    changeset,
+    Object.keys(ignoredChangeset),
+  );
+  const totalChanges = Object.values(filteredChangest).flat().length;
+  const changesChecked = Object.values(inputs.changes).flat().length;
+  const allChangesChecked = changesChecked === totalChanges;
+  const noChangesChecked = !changesChecked;
+
+  const totalIgnored = Object.values(ignoredChangeset).flat().length;
+  const ignoredChecked = Object.values(inputs.ignored).flat().length;
+  const allIgnoredChecked = ignoredChecked === totalIgnored;
+  const noIgnoredChecked = !ignoredChecked;
+
   const setChanges = (changes: Changeset) => {
     setInputs({ ...inputs, changes });
   };
@@ -109,7 +124,7 @@ const ChangesForm = ({
     event: React.ChangeEvent<HTMLInputElement>,
     { checked }: { checked: boolean },
   ) => {
-    if (checked) {
+    if (checked && totalChanges) {
       const allChanges = cloneDeep(changeset);
       setChanges(allChanges);
     } else {
@@ -135,23 +150,6 @@ const ChangesForm = ({
       successTimeout.current = null;
     }
   };
-
-  const totalChanges = Object.values(changeset).flat().length;
-  const changesChecked = Object.values(inputs.changes).flat().length;
-  const allChangesChecked = changesChecked === totalChanges;
-  const noChangesChecked = !changesChecked;
-
-  const totalIgnored = Object.values(ignoredChangeset).flat().length;
-  const ignoredChecked = Object.values(inputs.ignored).flat().length;
-  const allIgnoredChecked = ignoredChecked === totalIgnored;
-  const noIgnoredChecked = !ignoredChecked;
-
-  // remove changes from list that are ignored
-  const filteredChangest: Changeset = omit(
-    changeset,
-    Object.keys(ignoredChangeset),
-  );
-
   /* check for when new changes are ignored*/
   const ignoredChanges = useRef(ignoredChangeset);
   useEffect(() => {
@@ -199,7 +197,7 @@ const ChangesForm = ({
               labels={{
                 label: `${i18n.t('Select All Changes')}`,
               }}
-              checked={allChangesChecked}
+              checked={totalChanges && allChangesChecked}
               indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
               errorText={errors.changes}
               onChange={handleSelectAllChange}
