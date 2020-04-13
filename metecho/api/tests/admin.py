@@ -3,9 +3,72 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django import forms
+from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 from github3.exceptions import NotFoundError
 
-from ..admin import JSONWidget, RepositoryForm, SiteAdminForm
+from ..admin import JSONWidget, RepositoryForm, SiteAdminForm, SoftDeletedListFilter
+from ..models import Project
+
+
+@pytest.mark.django_db
+class TestSoftDeletedListFilter:
+    def test_lookups(self):
+        args = (
+            None,
+            {},
+            None,
+            None,
+        )
+        lookups = SoftDeletedListFilter(*args).lookups(None, None)
+        assert lookups == (("true", _("Deleted")),)
+
+    def test_queryset__not_deleted(self, project_factory):
+        project = project_factory()
+        project_factory(deleted_at=now())
+
+        args = (
+            None,
+            {},
+            None,
+            None,
+        )
+        actual = SoftDeletedListFilter(*args).queryset(None, Project.objects.all())
+        assert list(actual) == [project]
+
+    def test_queryset__deleted(self, project_factory):
+        project_factory()
+        project = project_factory(deleted_at=now())
+
+        args = (
+            None,
+            {"deleted_at": "true"},
+            None,
+            None,
+        )
+        actual = SoftDeletedListFilter(*args).queryset(None, Project.objects.all())
+        assert list(actual) == [project]
+
+    def test_choices(self):
+        args = (
+            None,
+            {},
+            None,
+            None,
+        )
+        changelist = MagicMock()
+        actual = SoftDeletedListFilter(*args).choices(changelist)
+
+        assert set(next(actual).keys()) == {
+            "selected",
+            "query_string",
+            "display",
+        }
+        assert set(next(actual).keys()) == {
+            "selected",
+            "query_string",
+            "display",
+        }
 
 
 @pytest.mark.django_db

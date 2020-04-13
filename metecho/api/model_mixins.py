@@ -170,6 +170,18 @@ class SoftDeleteQuerySet(models.QuerySet):
     def active(self):
         return self.filter(deleted_at__isnull=True)
 
+    def special_case_scratch_org_delete(self):
+        if self.model.__name__ == "ScratchOrg":
+            from .sf_run_flow import delete_org
+
+            for scratch_org in self:
+                try:
+                    delete_org(scratch_org)
+                except Exception:
+                    # If there's a problem deleting it, it's probably
+                    # already been deleted.
+                    pass
+
     def delete(self):
         soft_delete_child_class = getattr(self.model, "soft_delete_child_class", None)
         if soft_delete_child_class:
@@ -177,6 +189,7 @@ class SoftDeleteQuerySet(models.QuerySet):
             soft_delete_child_class(None).objects.filter(
                 **{f"{parent}__in": self}
             ).delete()
+        self.special_case_scratch_org_delete()
         return self.active().update(deleted_at=timezone.now())
 
     delete.queryset_only = True
@@ -190,12 +203,24 @@ class SoftDeleteMixin(models.Model):
 
     objects = SoftDeleteQuerySet.as_manager()
 
+    def special_case_scratch_org_delete(self):
+        if self.__class__.__name__ == "ScratchOrg":
+            from .sf_run_flow import delete_org
+
+            try:
+                delete_org(self)
+            except Exception:
+                # If there's a problem deleting it, it's probably
+                # already been deleted.
+                pass
+
     def delete(self, *args, **kwargs):
         soft_delete_child_class = getattr(self, "soft_delete_child_class", None)
         if soft_delete_child_class:
             parent = camel_to_snake(self.__class__.__name__)
             soft_delete_child_class().objects.filter(**{parent: self}).delete()
         if self.deleted_at is None:
+            self.special_case_scratch_org_delete()
             self.deleted_at = timezone.now()
             self.save()
 
