@@ -31,6 +31,7 @@ export interface CommitData {
   changes: Changeset;
   commit_message: string;
   target_directory: string;
+  ignored_changes: Changeset;
 }
 
 export interface BooleanObject {
@@ -125,7 +126,7 @@ const CaptureModal = ({
   } = useForm({
     fields: {
       changes: {},
-      ignored: {},
+      ignored_changes: {},
       commit_message: '',
       target_directory: defaultDir,
     } as CommitData,
@@ -147,15 +148,18 @@ const CaptureModal = ({
   const dirSelected = Boolean(inputs.target_directory);
   const hasCommitMessage = Boolean(inputs.commit_message);
   const changesChecked = Object.values(inputs.changes).flat().length;
-  const ignoredChecked = Object.values(inputs.ignored).flat().length;
+  const ignoredChecked = Object.values(inputs.ignored_changes).flat().length;
   const bothChecked = changesChecked && ignoredChecked;
 
   const ignoreSelected = () => {
     if (ignoredChecked && !bothChecked) {
-      const unIgnored = omit(ignoredChangeset, Object.keys(inputs.ignored));
+      const unIgnored = omit(
+        ignoredChangeset,
+        Object.keys(inputs.ignored_changes),
+      );
       setIgnoredChangeset(unIgnored);
     } else {
-      setIgnoredChangeset({ ...inputs.changes, ...inputs.ignored });
+      setIgnoredChangeset({ ...inputs.changes, ...inputs.ignored_changes });
     }
     resetForm();
   };

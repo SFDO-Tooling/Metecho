@@ -44,15 +44,18 @@ const ChangesForm = ({
   const noChangesChecked = !changesChecked;
 
   const totalIgnored = Object.values(ignoredChangeset).flat().length;
-  const ignoredChecked = Object.values(inputs.ignored).flat().length;
+  const ignoredChecked = Object.values(inputs.ignored_changes).flat().length;
   const allIgnoredChecked = ignoredChecked === totalIgnored;
   const noIgnoredChecked = !ignoredChecked;
 
   const setChanges = (changes: Changeset) => {
     setInputs({ ...inputs, changes });
   };
-  const setIgnored = (ignored: Changeset) => {
-    setInputs({ ...inputs, ignored });
+  const setIgnored = (ignored_changes: Changeset) => {
+    setInputs({
+      ...inputs,
+      ignored_changes,
+    });
   };
   const handlePanelToggle = (groupName: string) => {
     setExpandedPanels({
@@ -67,16 +70,16 @@ const ChangesForm = ({
     checked: boolean,
   ) => {
     const newCheckedItems = cloneDeep(set);
-    let thing, action;
+    let changeGroup, action;
     if (set === inputs.changes) {
-      thing = changeset;
+      changeGroup = changeset;
       action = setChanges(newCheckedItems);
     } else {
-      thing = ignoredChangeset;
+      changeGroup = ignoredChangeset;
       action = setIgnored(newCheckedItems);
     }
     if (checked) {
-      newCheckedItems[groupName] = [...thing[groupName]];
+      newCheckedItems[groupName] = [...changeGroup[groupName]];
     } else {
       Reflect.deleteProperty(newCheckedItems, groupName);
     }
@@ -321,15 +324,15 @@ const ChangesForm = ({
                 .sort()
                 .map((groupName, index) => {
                   const ignoredChildren = ignoredChangeset[groupName];
-                  const identifier = `ignored-children-${index}`;
+                  const identifier = `ignored-child-${index}`;
                   let checkedChildren = 0;
                   for (const child of ignoredChildren) {
-                    if (inputs.ignored[groupName]?.includes(child)) {
+                    if (inputs.ignored_changes[groupName]?.includes(child)) {
                       checkedChildren = checkedChildren + 1;
                     }
                   }
                   return (
-                    <Accordion key="ignoredChildren">
+                    <Accordion key={identifier}>
                       <AccordionPanel
                         expanded={Boolean(expandedPanels[identifier])}
                         key={identifier}
@@ -339,17 +342,20 @@ const ChangesForm = ({
                         panelContentActions={
                           <Checkbox
                             labels={{ label: groupName }}
-                            name="ignored"
+                            name="ignored_changes"
                             checked={
                               allIgnoredChecked ||
                               checkedChildren === ignoredChildren.length
+                            }
+                            indeterminate={
+                              Boolean(checkedChildren) && !allIgnoredChecked
                             }
                             onChange={(
                               event: React.ChangeEvent<HTMLInputElement>,
                               { checked }: { checked: boolean },
                             ) =>
                               handleSelectGroup(
-                                inputs.ignored,
+                                inputs.ignored_changes,
                                 groupName,
                                 checked,
                               )
@@ -361,18 +367,20 @@ const ChangesForm = ({
                         {/* children of ignored changesets */}
                         {ignoredChildren.sort().map((change, idx) => (
                           <Checkbox
-                            key={`ignored-children-${idx}`}
+                            key={`ignored-grandchild-${idx}`}
                             labels={{ label: change }}
                             className="slds-p-left_xx-large"
-                            name="ignored"
+                            name="ignored_changes"
                             checked={Boolean(
-                              inputs.ignored[groupName]?.includes(change),
+                              inputs.ignored_changes[groupName]?.includes(
+                                change,
+                              ),
                             )}
                             onChange={(
                               event: React.ChangeEvent<HTMLInputElement>,
                               { checked }: { checked: boolean },
                             ) =>
-                              handleChange(inputs.ignored, {
+                              handleChange(inputs.ignored_changes, {
                                 groupName,
                                 change,
                                 checked,

@@ -34,6 +34,7 @@ export interface Org extends MinimalOrg {
   has_been_visited: boolean;
   valid_target_directories: TargetDirectories;
   last_checked_unsaved_changes_at: string | null;
+  ignored_changes: Changeset;
 }
 
 export interface TargetDirectories {
