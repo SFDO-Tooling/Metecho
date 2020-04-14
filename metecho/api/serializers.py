@@ -331,8 +331,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
         read_only=True,
     )
-    has_unsaved_changes = serializers.SerializerMethodField()
     unsaved_changes = serializers.SerializerMethodField()
+    has_unsaved_changes = serializers.SerializerMethodField()
     total_unsaved_changes = serializers.SerializerMethodField()
     valid_target_directories = serializers.SerializerMethodField()
 
@@ -353,6 +353,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "unsaved_changes",
             "total_unsaved_changes",
             "has_unsaved_changes",
+            "ignored_changes",
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "currently_refreshing_org",
