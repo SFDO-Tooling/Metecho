@@ -1,4 +1,3 @@
-from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -21,30 +20,9 @@ class TestRepositoryForm:
             get_repo_info.side_effect = NotFoundError(MagicMock())
             assert not form.is_valid()
             assert form.errors == {
-                "__all__": ["No repository with this name and owner exists."],
-            }
-
-    def test_clean__app_not_installed(self, user_factory):
-        form = RepositoryForm(
-            {"name": "Test", "repo_owner": "test", "repo_name": "test"}
-        )
-        # This is how the user gets there in real circumstances, just
-        # jammed on:
-        form.user = user_factory()
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.admin.gh.get_repo_info"))
-            gh_as_app = stack.enter_context(patch("metecho.api.admin.gh.gh_as_app"))
-            gh_as_app.return_value = MagicMock(
-                **{
-                    "app_installation_for_repository.side_effect": NotFoundError(
-                        MagicMock()
-                    ),
-                }
-            )
-            assert not form.is_valid()
-            assert form.errors == {
                 "__all__": [
-                    "The associated GitHub app is not installed for that repository."
+                    "Could not access test/test using GitHub app. "
+                    "Does the Metecho app need to be installed for this repository?"
                 ],
             }
 

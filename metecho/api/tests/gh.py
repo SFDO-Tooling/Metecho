@@ -44,7 +44,7 @@ class TestGetAllOrgRepos:
 
 def test_gh_as_app():
     with patch("metecho.api.gh.GitHub"):
-        assert gh_as_app() is not None
+        assert gh_as_app("TestOrg", "TestRepo") is not None
 
 
 def test_is_safe_path():
