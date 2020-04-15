@@ -5,7 +5,6 @@ from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
 from django.forms.widgets import Textarea
 from django.utils.translation import gettext_lazy as _
-from github3.exceptions import NotFoundError
 from parler.admin import TranslatableAdmin
 
 from . import gh
@@ -33,18 +32,15 @@ class RepositoryForm(forms.ModelForm):
         repo_name = cleaned_data.get("repo_name")
         repo_owner = cleaned_data.get("repo_owner")
 
+        # Make sure we can access the repository
         try:
             gh.get_repo_info(None, repo_owner=repo_owner, repo_name=repo_name)
-        except NotFoundError:
+        except Exception:
             raise forms.ValidationError(
-                _("No repository with this name and owner exists.")
-            )
-        try:
-            app = gh.gh_as_app()
-            app.app_installation_for_repository(repo_owner, repo_name)
-        except NotFoundError:
-            raise forms.ValidationError(
-                _("The associated GitHub app is not installed for that repository.")
+                _(
+                    f"Could not access {repo_owner}/{repo_name} using GitHub app. "
+                    "Does the Metecho app need to be installed for this repository?"
+                )
             )
 
 

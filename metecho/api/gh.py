@@ -44,11 +44,13 @@ def gh_given_user(user):
     return login(token=token)
 
 
-def gh_as_app():
+def gh_as_app(repo_owner, repo_name):
     app_id = settings.GITHUB_APP_ID
-    pem = settings.GITHUB_APP_KEY
+    app_key = settings.GITHUB_APP_KEY
     gh = GitHub()
-    gh.login_as_app(pem, app_id)
+    gh.login_as_app(app_key, app_id, expire_in=120)
+    installation = gh.app_installation_for_repository(repo_owner, repo_name)
+    gh.login_as_app_installation(app_key, app_id, installation.id)
     return gh
 
 
@@ -69,7 +71,7 @@ def zip_file_is_safe(zip_file):
 
 
 def get_repo_info(user, repo_id=None, repo_owner=None, repo_name=None):
-    gh = gh_given_user(user) if user else gh_as_app()
+    gh = gh_given_user(user) if user else gh_as_app(repo_owner, repo_name)
     if repo_id is None:
         return gh.repository(repo_owner, repo_name)
     return gh.repository_with_id(repo_id)

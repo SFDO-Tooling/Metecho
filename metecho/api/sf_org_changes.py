@@ -161,8 +161,9 @@ def commit_changes_to_github(
         )
         repo = get_repo_info(user, repo_id=repo_id)
         author = {"name": user.username, "email": user.email}
+        local_dir = os.path.join(project_path, target_directory)
         CommitDir(repo, author=author)(
-            project_path, branch, repo_dir="", commit_message=commit_message
+            local_dir, branch, repo_dir=target_directory, commit_message=commit_message
         )
 
 

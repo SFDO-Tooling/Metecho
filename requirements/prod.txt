@@ -36,7 +36,7 @@ django-log-request-id==1.4.1  # via -r requirements/prod.in
 django-model-utils==4.0.0  # via -r requirements/prod.in
 django-parler==2.0.1      # via -r requirements/prod.in
 django-redis==4.11.0      # via -r requirements/prod.in
-django-rq==2.3.0          # via -r requirements/prod.in
+django-rq==2.3.1          # via -r requirements/prod.in
 django==3.0.5             # via -r requirements/prod.in, channels, django-allauth, django-anymail, django-filter, django-hashid-field, django-js-reverse, django-log-request-id, django-model-utils, django-redis, django-rq, djangorestframework, sfdo-template-helpers
 djangorestframework==3.11.0  # via -r requirements/prod.in, sfdo-template-helpers
 docutils==0.16            # via cumulusci
