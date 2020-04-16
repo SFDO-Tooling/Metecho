@@ -204,7 +204,7 @@ class ScratchOrgViewSet(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet
+    GenericViewSet,
 ):
     permission_classes = (IsAuthenticated,)
     serializer_class = ScratchOrgSerializer

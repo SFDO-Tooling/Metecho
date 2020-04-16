@@ -281,13 +281,15 @@ class TestScratchOrgSerializer:
         )
         assert not serializer.is_valid()
 
-    def test_circumspect_ignored_changes(self, rf, user_factory, task_factory, scratch_org_factory):
+    def test_circumspect_ignored_changes(
+        self, rf, user_factory, task_factory, scratch_org_factory
+    ):
         user = user_factory()
         task = task_factory()
-        instance = scratch_org_factory(task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"})
+        instance = scratch_org_factory(
+            task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
+        )
 
         r = rf.get("/")
-        serializer = ScratchOrgSerializer(
-            instance, context={"request": r}
-        )
+        serializer = ScratchOrgSerializer(instance, context={"request": r})
         assert serializer.data["ignored_changes"] == {}
