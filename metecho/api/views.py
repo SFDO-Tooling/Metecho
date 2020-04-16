@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from . import gh
 from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
 from .hook_serializers import PrHookSerializer, PushHookSerializer
@@ -157,6 +158,13 @@ class RepositoryViewSet(
         instance = self.get_object()
         instance.queue_populate_github_users(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=["GET"])
+    def feature_branches(self, request, pk=None):
+        instance = self.get_object()
+        repo = gh.get_repo_info(request.user, repo_id=instance.repo_id)
+        data = [branch.name for branch in repo.branches() if "__" not in branch.name]
+        return Response(data)
 
 
 class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
