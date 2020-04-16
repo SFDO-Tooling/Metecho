@@ -1,4 +1,4 @@
-FROM oddbirds/pyjs:v-0.1.0
+FROM oddbirds/pyjs:v0.2.0
 
 ARG BUILD_ENV=development
 
