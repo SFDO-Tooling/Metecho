@@ -1,4 +1,5 @@
 import json
+from collections import namedtuple
 from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
@@ -7,6 +8,8 @@ from django.urls import reverse
 from github3.exceptions import ResponseError
 
 from ..models import SCRATCH_ORG_TYPES
+
+Branch = namedtuple("Branch", ["name"])
 
 
 @pytest.mark.django_db
@@ -66,6 +69,29 @@ class TestRepositoryView:
 
             assert response.status_code == 202
             assert populate_github_users_job.delay.called
+
+    def test_feature_branches(
+        self, client, repository_factory, git_hub_repository_factory
+    ):
+        git_hub_repository_factory(user=client.user, repo_id=123)
+        repository = repository_factory(repo_id=123)
+        with patch("metecho.api.views.gh.get_repo_info") as get_repo_info:
+            repo = MagicMock(
+                **{
+                    "branches.return_value": [
+                        Branch(name="include_me"),
+                        Branch(name="omit__me"),
+                    ]
+                }
+            )
+            get_repo_info.return_value = repo
+
+            response = client.get(
+                reverse(
+                    "repository-feature-branches", kwargs={"pk": str(repository.id)}
+                )
+            )
+            assert response.json() == ["include_me"]
 
     def test_get_queryset(self, client, repository_factory, git_hub_repository_factory):
         git_hub_repository_factory(
