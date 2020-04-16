@@ -3,6 +3,7 @@ from typing import Optional
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+from rest_framework.fields import JSONField
 
 from .fields import MarkdownField
 from .models import (
@@ -321,6 +322,15 @@ class ReviewSerializer(serializers.Serializer):
     )
 
 
+class CircumspectJSONField(JSONField):
+    def to_representation(self, value):
+        user = getattr(self.context, "request", {}).get("user", None)
+        owner = getattr(self.parent.instance, "owner", None)
+        if owner and user != owner:
+            value = {}
+        return super().to_representation(value)
+
+
 class ScratchOrgSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     task = serializers.PrimaryKeyRelatedField(
@@ -334,6 +344,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
     unsaved_changes = serializers.SerializerMethodField()
     has_unsaved_changes = serializers.SerializerMethodField()
     total_unsaved_changes = serializers.SerializerMethodField()
+    ignored_changes = CircumspectJSONField(required=False)
+    has_ignored_changes = serializers.SerializerMethodField()
+    total_ignored_changes = serializers.SerializerMethodField()
     valid_target_directories = serializers.SerializerMethodField()
 
     class Meta:
@@ -354,6 +367,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "total_unsaved_changes",
             "has_unsaved_changes",
             "ignored_changes",
+            "total_ignored_changes",
+            "has_ignored_changes",
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "currently_refreshing_org",
@@ -380,17 +395,29 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "has_been_visited": {"read_only": True},
         }
 
-    def get_has_unsaved_changes(self, obj) -> bool:
-        return bool(getattr(obj, "unsaved_changes", {}))
-
     def get_unsaved_changes(self, obj) -> dict:
         user = getattr(self.context.get("request"), "user", None)
         if obj.owner == user:
             return obj.unsaved_changes
         return {}
 
+    def _has_X_changes(self, obj, kind) -> bool:
+        return bool(getattr(obj, f"{kind}_changes", {}))
+
+    def _total_X_changes(self, obj, kind) -> int:
+        return sum(len(change) for change in getattr(obj, f"{kind}_changes").values())
+
+    def get_has_unsaved_changes(self, obj) -> bool:
+        return self._has_X_changes(obj, "unsaved")
+
     def get_total_unsaved_changes(self, obj) -> int:
-        return sum(len(change) for change in obj.unsaved_changes.values())
+        return self._total_X_changes(obj, "unsaved")
+
+    def get_has_ignored_changes(self, obj) -> bool:
+        return self._has_X_changes(obj, "ignored")
+
+    def get_total_ignored_changes(self, obj) -> int:
+        return self._total_X_changes(obj, "ignored")
 
     def get_valid_target_directories(self, obj) -> dict:
         user = getattr(self.context.get("request"), "user", None)
