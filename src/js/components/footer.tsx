@@ -1,14 +1,23 @@
+import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import Terms from '@/components/terms';
 import { selectUserState } from '@/store/user/selectors';
 
 const Footer = ({ logoSrc }: { logoSrc: string }) => {
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
   const user = useSelector(selectUserState);
   if (!user) {
     return null;
   }
+  const openTermsModal = () => {
+    setTermsModalOpen(true);
+  };
+  const closeTermsModal = () => {
+    setTermsModalOpen(false);
+  };
   return (
     <footer
       className="slds-grid
@@ -29,6 +38,14 @@ const Footer = ({ logoSrc }: { logoSrc: string }) => {
         <p>
           {i18n.t('Copyright 2019–2020 Salesforce.org. All rights reserved.')}
         </p>
+        <Button
+          label={i18n.t('Terms of Service')}
+          variant="link"
+          onClick={openTermsModal}
+        />
+        {termsModalOpen && (
+          <Terms reviewTerms={termsModalOpen} handleClose={closeTermsModal} />
+        )}
       </div>
     </footer>
   );
