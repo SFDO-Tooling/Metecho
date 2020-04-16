@@ -78,7 +78,6 @@ const CaptureModal = ({
 }: Props) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
-  const [ignoredChangeset, setIgnoredChangeset] = useState({});
   const isMounted = useIsMounted();
 
   const prevPage = () => {
@@ -92,6 +91,9 @@ const CaptureModal = ({
       toggleModal(false);
       setPageIndex(0);
     }
+  };
+  const handleIgnoredSuccess = () => {
+    console.log('gonna handle success here!');
   };
 
   // eslint-disable-next-line handle-callback-err
@@ -120,12 +122,11 @@ const CaptureModal = ({
     errors,
     handleInputChange,
     setInputs,
-    handleSubmit,
+    handleSubmit: submitCommit,
     resetForm,
   } = useForm({
     fields: {
       changes: {},
-      ignored_changes: defaultIgnoredChanges,
       commit_message: '',
       target_directory: defaultDir,
     } as CommitData,
@@ -134,6 +135,18 @@ const CaptureModal = ({
     onSuccess: handleSuccess,
     onError: handleError,
     shouldSubscribeToObject: false,
+  });
+
+  const { inputs: ignoredInputs, handleSubmit: submitIgnored } = useForm({
+    fields: {
+      ignored_changes: defaultIgnoredChanges,
+    },
+    objectType: OBJECT_TYPES.ORG,
+    url: window.api_urls.scratch_org_detail(orgId),
+    onSuccess: handleIgnoredSuccess,
+    onError: handleError,
+    shouldSubscribeToObject: false,
+    update: true,
   });
 
   // When directories change, update default selection
@@ -154,34 +167,16 @@ const CaptureModal = ({
   const dirSelected = Boolean(inputs.target_directory);
   const hasCommitMessage = Boolean(inputs.commit_message);
   const changesChecked = Object.values(inputs.changes).flat().length;
-  const ignoredChecked = Object.values(inputs.ignored_changes).flat().length;
+  const ignoredChecked = Object.values(ignoredInputs.ignored_changes).flat()
+    .length;
   const bothChecked = changesChecked && ignoredChecked;
 
   const nextPage = () => {
     setPageIndex(pageIndex + 1);
   };
 
-  const saveIgnored = () => {
-    // set ignored_changes inputs to ignoredChangesset
-    //  on next page
-    setInputs({
-      ...inputs,
-      ignored_changes: ignoredChangeset,
-    });
-    nextPage();
-  };
-
-  const ignoreSelected = () => {
-    if (ignoredChecked && !bothChecked) {
-      const unIgnored = omit(
-        ignoredChangeset,
-        Object.keys(inputs.ignored_changes),
-      );
-      setIgnoredChangeset(unIgnored);
-    } else {
-      setIgnoredChangeset({ ...inputs.changes, ...inputs.ignored_changes });
-    }
-    resetForm();
+  const saveIgnored = (e: React.FormEvent<HTMLFormElement>) => {
+    submitIgnored(e);
   };
 
   const handleClose = () => {
@@ -192,7 +187,7 @@ const CaptureModal = ({
 
   const submitChanges = (e: React.FormEvent<HTMLFormElement>) => {
     setCapturingChanges(true);
-    handleSubmit(e);
+    submitCommit(e);
   };
 
   const pages = [
@@ -223,8 +218,9 @@ const CaptureModal = ({
         <ChangesForm
           key="page-2-contents"
           changeset={changeset}
-          ignoredChanges={ignoredChangeset}
+          ignoredChanges={ignoredChanges}
           inputs={inputs as CommitData}
+          ignoredInputs={ignoredInputs}
           errors={errors}
           setInputs={setInputs}
         />
@@ -247,7 +243,7 @@ const CaptureModal = ({
               : i18n.t('Ignore Selected Changes')
           }
           variant={ignoredChecked ? 'brand' : 'outline-brand'}
-          onClick={ignoreSelected}
+          onClick={saveIgnored}
           disabled={!changesChecked && !ignoredChecked}
         />,
         <Button

@@ -18,6 +18,7 @@ import { Changeset } from '@/store/orgs/reducer';
 interface Props {
   changeset: Changeset;
   inputs: CommitData;
+  ignoredInputs: any; // @todo add right type...
   ignoredChanges: Changeset;
   errors: UseFormProps['errors'];
   setInputs: UseFormProps['setInputs'];
@@ -26,6 +27,7 @@ interface Props {
 const ChangesForm = ({
   changeset,
   inputs,
+  ignoredInputs,
   errors,
   setInputs,
   ignoredChanges,
@@ -38,14 +40,14 @@ const ChangesForm = ({
     changeset,
     Object.keys(ignoredChanges),
   );
-  console.log(Object.values(ignoredChanges));
   const totalChanges = Object.values(filteredChanges).flat().length;
   const changesChecked = Object.values(inputs.changes).flat().length;
   const allChangesChecked = changesChecked === totalChanges;
   const noChangesChecked = !changesChecked;
 
   const totalIgnored = Object.values(ignoredChanges).flat().length;
-  const ignoredChecked = Object.values(inputs.ignored_changes).flat().length;
+  const ignoredChecked = Object.values(ignoredInputs.ignored_changes).flat()
+    .length;
   const allIgnoredChecked =
     Boolean(ignoredChecked) && ignoredChecked === totalIgnored;
   const noIgnoredChecked = !ignoredChecked;
@@ -333,7 +335,9 @@ const ChangesForm = ({
                   const identifier = `ignored-child-${index}`;
                   let checkedChildren = 0;
                   for (const child of ignoredChildren) {
-                    if (inputs.ignored_changes[groupName]?.includes(child)) {
+                    if (
+                      ignoredInputs.ignored_changes[groupName]?.includes(child)
+                    ) {
                       checkedChildren = checkedChildren + 1;
                     }
                   }
@@ -361,7 +365,7 @@ const ChangesForm = ({
                               { checked }: { checked: boolean },
                             ) =>
                               handleSelectGroup(
-                                inputs.ignored_changes,
+                                ignoredInputs.ignored_changes,
                                 groupName,
                                 checked,
                               )
@@ -378,15 +382,15 @@ const ChangesForm = ({
                             className="slds-p-left_xx-large"
                             name="ignored_changes"
                             checked={Boolean(
-                              inputs.ignored_changes[groupName]?.includes(
-                                change,
-                              ),
+                              ignoredInputs.ignored_changes[
+                                groupName
+                              ]?.includes(change),
                             )}
                             onChange={(
                               event: React.ChangeEvent<HTMLInputElement>,
                               { checked }: { checked: boolean },
                             ) =>
-                              handleChange(inputs.ignored_changes, {
+                              handleChange(ignoredInputs.ignored_changes, {
                                 groupName,
                                 change,
                                 checked,
