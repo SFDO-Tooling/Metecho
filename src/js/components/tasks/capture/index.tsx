@@ -22,6 +22,7 @@ import { OBJECT_TYPES } from '@/utils/constants';
 interface Props {
   orgId: string;
   changeset: Changeset;
+  ignoredChanges: Changeset;
   directories: TargetDirectories;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -71,6 +72,7 @@ const CaptureModal = ({
   orgId,
   changeset,
   directories,
+  ignoredChanges,
   isOpen,
   toggleModal,
 }: Props) => {
@@ -78,10 +80,6 @@ const CaptureModal = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [ignoredChangeset, setIgnoredChangeset] = useState({});
   const isMounted = useIsMounted();
-
-  const nextPage = () => {
-    setPageIndex(pageIndex + 1);
-  };
 
   const prevPage = () => {
     setPageIndex(pageIndex - 1 || 0);
@@ -115,6 +113,7 @@ const CaptureModal = ({
   };
 
   const defaultDir = directories.source?.[0] || 'src';
+  const defaultIgnoredChanges = ignoredChanges;
 
   const {
     inputs,
@@ -126,7 +125,7 @@ const CaptureModal = ({
   } = useForm({
     fields: {
       changes: {},
-      ignored_changes: {},
+      ignored_changes: defaultIgnoredChanges,
       commit_message: '',
       target_directory: defaultDir,
     } as CommitData,
@@ -145,11 +144,32 @@ const CaptureModal = ({
     setInputs,
   });
 
+  useFormDefaults({
+    field: 'ignored_changes',
+    value: defaultIgnoredChanges,
+    inputs,
+    setInputs,
+  });
+
   const dirSelected = Boolean(inputs.target_directory);
   const hasCommitMessage = Boolean(inputs.commit_message);
   const changesChecked = Object.values(inputs.changes).flat().length;
   const ignoredChecked = Object.values(inputs.ignored_changes).flat().length;
   const bothChecked = changesChecked && ignoredChecked;
+
+  const nextPage = () => {
+    setPageIndex(pageIndex + 1);
+  };
+
+  const saveIgnored = () => {
+    // set ignored_changes inputs to ignoredChangesset
+    //  on next page
+    setInputs({
+      ...inputs,
+      ignored_changes: ignoredChangeset,
+    });
+    nextPage();
+  };
 
   const ignoreSelected = () => {
     if (ignoredChecked && !bothChecked) {
@@ -203,7 +223,7 @@ const CaptureModal = ({
         <ChangesForm
           key="page-2-contents"
           changeset={changeset}
-          ignoredChangeset={ignoredChangeset}
+          ignoredChanges={ignoredChangeset}
           inputs={inputs as CommitData}
           errors={errors}
           setInputs={setInputs}
@@ -234,7 +254,7 @@ const CaptureModal = ({
           key="page-2-button-3"
           label={i18n.t('Save & Next')}
           variant={bothChecked ? 'outline-brand' : 'brand'}
-          onClick={nextPage}
+          onClick={saveIgnored}
           disabled={!changesChecked}
         />,
       ],

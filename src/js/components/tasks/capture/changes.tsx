@@ -18,7 +18,7 @@ import { Changeset } from '@/store/orgs/reducer';
 interface Props {
   changeset: Changeset;
   inputs: CommitData;
-  ignoredChangeset: Changeset;
+  ignoredChanges: Changeset;
   errors: UseFormProps['errors'];
   setInputs: UseFormProps['setInputs'];
 }
@@ -28,24 +28,26 @@ const ChangesForm = ({
   inputs,
   errors,
   setInputs,
-  ignoredChangeset,
+  ignoredChanges,
 }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
   const [success, setSuccess] = useState(false);
 
   // remove changes from list that are ignored
-  const filteredChangest: Changeset = omit(
+  const filteredChanges: Changeset = omit(
     changeset,
-    Object.keys(ignoredChangeset),
+    Object.keys(ignoredChanges),
   );
-  const totalChanges = Object.values(filteredChangest).flat().length;
+  console.log(Object.values(ignoredChanges));
+  const totalChanges = Object.values(filteredChanges).flat().length;
   const changesChecked = Object.values(inputs.changes).flat().length;
   const allChangesChecked = changesChecked === totalChanges;
   const noChangesChecked = !changesChecked;
 
-  const totalIgnored = Object.values(ignoredChangeset).flat().length;
+  const totalIgnored = Object.values(ignoredChanges).flat().length;
   const ignoredChecked = Object.values(inputs.ignored_changes).flat().length;
-  const allIgnoredChecked = ignoredChecked === totalIgnored;
+  const allIgnoredChecked =
+    Boolean(ignoredChecked) && ignoredChecked === totalIgnored;
   const noIgnoredChecked = !ignoredChecked;
 
   const setChanges = (changes: Changeset) => {
@@ -58,6 +60,10 @@ const ChangesForm = ({
     });
   };
   const handlePanelToggle = (groupName: string) => {
+    // dont toggle all ignored panel when empty
+    if (groupName === 'allIgnored' && isEmpty(ignoredChanges)) {
+      return;
+    }
     setExpandedPanels({
       ...expandedPanels,
       [groupName]: !expandedPanels[groupName],
@@ -75,7 +81,7 @@ const ChangesForm = ({
       changeGroup = changeset;
       action = setChanges(newCheckedItems);
     } else {
-      changeGroup = ignoredChangeset;
+      changeGroup = ignoredChanges;
       action = setIgnored(newCheckedItems);
     }
     if (checked) {
@@ -140,7 +146,7 @@ const ChangesForm = ({
     { checked }: { checked: boolean },
   ) => {
     if (checked) {
-      const allChanges = cloneDeep(ignoredChangeset);
+      const allChanges = cloneDeep(ignoredChanges);
       setIgnored(allChanges);
     } else {
       setIgnored({});
@@ -154,10 +160,10 @@ const ChangesForm = ({
     }
   };
   /* check for when new changes are ignored*/
-  const ignoredChanges = useRef(ignoredChangeset);
+  const ignoredChangesRef = useRef(ignoredChanges);
   useEffect(() => {
-    const prevValue = ignoredChanges.current;
-    const value = ignoredChangeset;
+    const prevValue = ignoredChangesRef.current;
+    const value = ignoredChanges;
     if (value !== prevValue) {
       // show highlight when new changes are ignored
       if (totalIgnored > Object.values(prevValue).flat().length) {
@@ -173,7 +179,7 @@ const ChangesForm = ({
     }, 2000);
     return () => clearSuccessTimeout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ignoredChangeset]);
+  }, [ignoredChanges]);
 
   return (
     <form
@@ -209,10 +215,10 @@ const ChangesForm = ({
               ({totalChanges})
             </span>
           </div>
-          {Object.keys(filteredChangest)
+          {Object.keys(filteredChanges)
             .sort()
             .map((groupName, index) => {
-              const children = filteredChangest[groupName];
+              const children = filteredChanges[groupName];
               const handleThisPanelToggle = () => handlePanelToggle(groupName);
               const handleSelectThisGroup = (
                 event: React.ChangeEvent<HTMLInputElement>,
@@ -303,7 +309,7 @@ const ChangesForm = ({
                         'All ignored - Changes placed here will remain ignored until you un-ignore them.',
                       ),
                     }}
-                    checked={!isEmpty(ignoredChangeset) && allIgnoredChecked}
+                    checked={allIgnoredChecked}
                     indeterminate={Boolean(
                       !allIgnoredChecked && !noIgnoredChecked,
                     )}
@@ -320,10 +326,10 @@ const ChangesForm = ({
               summary=""
             >
               {/* inner accordian for each changeset */}
-              {Object.keys(ignoredChangeset)
+              {Object.keys(ignoredChanges)
                 .sort()
                 .map((groupName, index) => {
-                  const ignoredChildren = ignoredChangeset[groupName];
+                  const ignoredChildren = ignoredChanges[groupName];
                   const identifier = `ignored-child-${index}`;
                   let checkedChildren = 0;
                   for (const child of ignoredChildren) {

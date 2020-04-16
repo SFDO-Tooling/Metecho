@@ -348,6 +348,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           <CaptureModal
             orgId={devOrg.id}
             changeset={devOrg.unsaved_changes}
+            ignoredChanges={devOrg.ignored_changes}
             directories={devOrg.valid_target_directories}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
