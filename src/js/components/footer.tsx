@@ -63,6 +63,7 @@ const Footer = ({ logoSrc }: { logoSrc: string }) => {
         <Button
           label={i18n.t('Terms of Service')}
           variant="link"
+          className="slds-p-left_xxx-small"
           onClick={openTermsModal}
         />
         {termsModalOpen && (
