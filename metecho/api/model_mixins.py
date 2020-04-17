@@ -174,7 +174,7 @@ class SoftDeleteQuerySet(models.QuerySet):
         if self.model.__name__ == "ScratchOrg":
             for scratch_org in self:
                 try:
-                    scratch_org.queue_delete()
+                    scratch_org.queue_delete(originating_user_id=None)
                 except Exception:
                     # If there's a problem deleting it, it's probably
                     # already been deleted.
