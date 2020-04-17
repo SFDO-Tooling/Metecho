@@ -175,7 +175,7 @@ class SoftDeleteQuerySet(models.QuerySet):
             for scratch_org in self:
                 try:
                     scratch_org.queue_delete(originating_user_id=None)
-                except Exception:
+                except Exception:  # pragma: nocover
                     # If there's a problem deleting it, it's probably
                     # already been deleted.
                     pass
@@ -188,12 +188,20 @@ class SoftDeleteQuerySet(models.QuerySet):
                 **{f"{parent}__in": self}
             ).delete()
         self.active().special_case_scratch_org_delete()
-        return self.active().update(deleted_at=timezone.now())
+        instances = [instance for instance in self.active()]
+        ret = self.active().update(deleted_at=timezone.now())
+        for instance in instances:
+            instance.notify_changed(originating_user_id=None)
+        return ret
 
     delete.queryset_only = True
 
 
 class SoftDeleteMixin(models.Model):
+    """
+    Assumes you're also mixing in PushMixin.
+    """
+
     class Meta:
         abstract = True
 
@@ -203,11 +211,9 @@ class SoftDeleteMixin(models.Model):
 
     def special_case_scratch_org_delete(self):
         if self.__class__.__name__ == "ScratchOrg":
-            from .sf_run_flow import delete_org
-
             try:
-                delete_org(self)
-            except Exception:
+                self.queue_delete(originating_user_id=None)
+            except Exception:  # pragma: nocover
                 # If there's a problem deleting it, it's probably
                 # already been deleted.
                 pass
@@ -221,6 +227,7 @@ class SoftDeleteMixin(models.Model):
             self.special_case_scratch_org_delete()
             self.deleted_at = timezone.now()
             self.save()
+            self.notify_changed(originating_user_id=None)
 
 
 def camel_to_snake(name):
