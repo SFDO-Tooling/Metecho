@@ -172,11 +172,9 @@ class SoftDeleteQuerySet(models.QuerySet):
 
     def special_case_scratch_org_delete(self):
         if self.model.__name__ == "ScratchOrg":
-            from .sf_run_flow import delete_org
-
             for scratch_org in self:
                 try:
-                    delete_org(scratch_org)
+                    scratch_org.queue_delete()
                 except Exception:
                     # If there's a problem deleting it, it's probably
                     # already been deleted.
@@ -189,7 +187,7 @@ class SoftDeleteQuerySet(models.QuerySet):
             soft_delete_child_class(None).objects.filter(
                 **{f"{parent}__in": self}
             ).delete()
-        self.special_case_scratch_org_delete()
+        self.active().special_case_scratch_org_delete()
         return self.active().update(deleted_at=timezone.now())
 
     delete.queryset_only = True

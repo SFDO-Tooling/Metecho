@@ -55,7 +55,7 @@ async def push_message_about_instance(instance, message):
     new_message["id"] = id
     sent_message = {"type": "notify", "content": new_message}
     not_deleted = getattr(instance, "deleted_at", None) is None
-    message_about_delete = "DELETE" in message["type"]
+    message_about_delete = "DELETE" in message["type"] or "REMOVE" in message["type"]
     semaphore_clear = await get_set_message_semaphore(channel_layer, sent_message)
     if (message_about_delete or not_deleted) and semaphore_clear:
         await channel_layer.group_send(group_name, sent_message)
