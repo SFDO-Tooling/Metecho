@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import Footer from '@/components/footer';
@@ -16,6 +17,22 @@ describe('<Footer />', () => {
       expect(getByTestId('footer-logo')).toHaveStyle(
         'background-image: url(my/logo.png)',
       );
+    });
+
+    test('open/close terms of service', () => {
+      const { getByText, queryByText } = renderWithRedux(
+        <Footer logoSrc="my/logo.png" />,
+        {
+          user: {},
+        },
+      );
+      fireEvent.click(getByText('Terms of Service'));
+
+      expect(queryByText('Metecho Terms of Service')).toBeVisible();
+
+      fireEvent.click(getByText('Close'));
+
+      expect(queryByText('Metecho Terms of Service')).toBeNull();
     });
   });
 

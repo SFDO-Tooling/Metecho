@@ -1,11 +1,33 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import Terms from '@/components/terms';
 import { selectUserState } from '@/store/user/selectors';
 
+const ReviewTermsModal = ({
+  isOpen,
+  handleClose,
+}: {
+  isOpen: boolean;
+  handleClose: () => void;
+}) => (
+  <Modal
+    isOpen={isOpen}
+    heading={i18n.t('Metecho Terms of Service')}
+    size="medium"
+    onRequestClose={handleClose}
+  >
+    {/* This text is pre-cleaned by the API */}
+    <div
+      className="slds-p-around_large slds-text-longform markdown"
+      dangerouslySetInnerHTML={{
+        __html: window.GLOBALS.SITE.clickthrough_agreement as string,
+      }}
+    />
+  </Modal>
+);
 const Footer = ({ logoSrc }: { logoSrc: string }) => {
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const user = useSelector(selectUserState);
@@ -44,7 +66,10 @@ const Footer = ({ logoSrc }: { logoSrc: string }) => {
           onClick={openTermsModal}
         />
         {termsModalOpen && (
-          <Terms reviewTerms={termsModalOpen} handleClose={closeTermsModal} />
+          <ReviewTermsModal
+            isOpen={termsModalOpen}
+            handleClose={closeTermsModal}
+          />
         )}
       </div>
     </footer>

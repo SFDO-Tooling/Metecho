@@ -2,6 +2,8 @@ import '@testing-library/jest-dom/extend-expect';
 
 import fetchMock from 'fetch-mock';
 
+let SITE;
+
 beforeAll(() => {
   document.createRange = () => ({
     setStart: jest.fn(),
@@ -39,6 +41,14 @@ beforeAll(() => {
   window.console.error = jest.fn();
   window.console.warn = jest.fn();
   window.console.info = jest.fn();
+  SITE = window.GLOBALS.SITE;
+  window.GLOBALS.SITE = {
+    clickthrough_agreement: 'Resistance is futile.',
+  };
+});
+
+afterAll(() => {
+  window.GLOBALS.SITE = SITE;
 });
 
 afterEach(fetchMock.reset);

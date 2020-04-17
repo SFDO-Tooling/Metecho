@@ -17,11 +17,9 @@ import routes from '@/utils/routes';
 interface Props
   extends RouteComponentProps<{}, StaticContext, { from?: Location }> {
   from?: { pathname?: string };
-  reviewTerms?: boolean;
-  handleClose: () => void;
 }
 
-const Terms = ({ from = {}, location, reviewTerms, handleClose }: Props) => {
+const Terms = ({ from = {}, location }: Props) => {
   const user = useSelector(selectUserState);
   let { pathname } = location.state?.from || from;
   if (!pathname) {
@@ -41,55 +39,36 @@ const Terms = ({ from = {}, location, reviewTerms, handleClose }: Props) => {
     });
   }, [dispatch, isMounted]);
 
-  if (!reviewTerms) {
-    if (
-      !user ||
-      user.agreed_to_tos_at ||
-      !window.GLOBALS?.SITE?.clickthrough_agreement
-    ) {
-      return <Redirect to={pathname} />;
-    }
-  }
-  return (
+  return !user ||
+    user.agreed_to_tos_at ||
+    !window.GLOBALS?.SITE?.clickthrough_agreement ? (
+    <Redirect to={pathname} />
+  ) : (
     <Modal
-      isOpen={reviewTerms ? reviewTerms : true}
+      isOpen
       disableClose
       heading={i18n.t('Metecho Terms of Service')}
       size="medium"
-      footer={
-        reviewTerms
-          ? [
-              <Button
-                key="close"
-                label={i18n.t('Close')}
-                variant="link"
-                onClick={handleClose}
-              />,
-            ]
-          : [
-              <Logout
-                key="cancel"
-                label={i18n.t('Cancel and Log Out')}
-                variant="neutral"
-              />,
-              <Button
-                key="submit"
-                label={
-                  submitting ? (
-                    <LabelWithSpinner
-                      label={i18n.t('Saving…')}
-                      variant="inverse"
-                    />
-                  ) : (
-                    i18n.t('I Agree')
-                  )
-                }
-                variant="brand"
-                onClick={doAgree}
-                disabled={submitting}
-              />,
-            ]
-      }
+      footer={[
+        <Logout
+          key="cancel"
+          label={i18n.t('Cancel and Log Out')}
+          variant="neutral"
+        />,
+        <Button
+          key="submit"
+          label={
+            submitting ? (
+              <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
+            ) : (
+              i18n.t('I Agree')
+            )
+          }
+          variant="brand"
+          onClick={doAgree}
+          disabled={submitting}
+        />,
+      ]}
     >
       {/* This text is pre-cleaned by the API */}
       <div
