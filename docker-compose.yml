@@ -39,12 +39,3 @@ services:
   # Runs the queue process:
   redis:
     image: redis:5.0
-
-  # Sets up git hooks for local development:
-  githooks:
-    build:
-      context: .
-      dockerfile: ./compose/githooks/Dockerfile
-    volumes:
-      - ./.git:/tmp/.git
-      - ./hooks:/tmp/hooks

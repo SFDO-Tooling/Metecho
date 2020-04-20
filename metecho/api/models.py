@@ -16,7 +16,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
-from model_utils import Choices
+from django.utils.text import slugify
+from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
@@ -238,7 +239,7 @@ class User(HashIdMixin, AbstractUser):
 
 class RepositorySlug(AbstractSlug):
     parent = models.ForeignKey(
-        "Repository", on_delete=models.PROTECT, related_name="slugs"
+        "Repository", on_delete=models.CASCADE, related_name="slugs"
     )
 
 
@@ -272,6 +273,7 @@ class Repository(
     github_users = JSONField(default=list, blank=True)
 
     slug_class = RepositorySlug
+    tracker = FieldTracker(fields=["name"])
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
@@ -363,7 +365,7 @@ class GitHubRepository(HashIdMixin, models.Model):
 
 class ProjectSlug(AbstractSlug):
     parent = models.ForeignKey(
-        "Project", on_delete=models.PROTECT, related_name="slugs"
+        "Project", on_delete=models.CASCADE, related_name="slugs"
     )
 
 
@@ -397,6 +399,7 @@ class Project(
     github_users = JSONField(default=list, blank=True)
 
     slug_class = ProjectSlug
+    tracker = FieldTracker(fields=["name"])
 
     def __str__(self):
         return self.name
@@ -451,11 +454,13 @@ class Project(
         return self.pr_is_merged
 
     def should_update_status(self):
-        return (
-            self.should_update_in_progress()
-            or self.should_update_review()
-            or self.should_update_merged()
-        )
+        if self.should_update_merged():
+            return self.status != PROJECT_STATUSES.Merged
+        elif self.should_update_review():
+            return self.status != PROJECT_STATUSES.Review
+        elif self.should_update_in_progress():
+            return self.status != PROJECT_STATUSES["In progress"]
+        return False
 
     def update_status(self):
         if self.should_update_merged():
@@ -492,7 +497,7 @@ class Project(
 
 
 class TaskSlug(AbstractSlug):
-    parent = models.ForeignKey("Task", on_delete=models.PROTECT, related_name="slugs")
+    parent = models.ForeignKey("Task", on_delete=models.CASCADE, related_name="slugs")
 
 
 class Task(
@@ -536,11 +541,12 @@ class Task(
     assigned_qa = JSONField(null=True, blank=True)
 
     slug_class = TaskSlug
+    tracker = FieldTracker(fields=["name"])
 
     def __str__(self):
         return self.name
 
-    def save(self, *args, force_project_save=True, **kwargs):
+    def save(self, *args, force_project_save=False, **kwargs):
         ret = super().save(*args, **kwargs)
         # To update the project's status:
         if force_project_save or self.project.should_update_status():
@@ -950,8 +956,17 @@ def user_logged_in_handler(sender, *, user, **kwargs):
 
 
 def ensure_slug_handler(sender, *, created, instance, **kwargs):
+    slug_field_name = getattr(instance, "slug_field_name", "name")
     if created:
         instance.ensure_slug()
+    elif instance.tracker.has_changed(slug_field_name):
+        # Create new slug off new name:
+        sluggable_name = getattr(instance, slug_field_name)
+        slug = slugify(sluggable_name)
+        slug = instance._find_unique_slug(slug)
+        instance.slug_class.objects.create(
+            parent=instance.slug_parent, slug=slug, is_active=True
+        )
 
 
 post_save.connect(ensure_slug_handler, sender=Repository)

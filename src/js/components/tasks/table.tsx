@@ -5,6 +5,7 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import classNames from 'classnames';
 import i18n from 'i18next';
+import { sortBy } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -221,55 +222,66 @@ const TaskTable = ({
   projectUsers,
   openAssignProjectUsersModal,
   assignUserAction,
-}: Props) => (
-  <DataTable items={tasks} id="project-tasks-table" noRowHover>
-    <DataTableColumn
-      key="name"
-      label={i18n.t('Task')}
-      property="name"
-      width="65%"
-      primaryColumn
-    >
-      <NameTableCell
-        repositorySlug={repositorySlug}
-        projectSlug={projectSlug}
-      />
-    </DataTableColumn>
-    <DataTableColumn
-      key="status"
-      label={i18n.t('Status')}
-      property="status"
-      width="20%"
-    >
-      <StatusTableCell />
-    </DataTableColumn>
-    <DataTableColumn
-      key="assigned_dev"
-      label={i18n.t('Developer')}
-      property="assigned_dev"
-      width="15%"
-    >
-      <AssigneeTableCell
-        type={ORG_TYPES.DEV}
-        projectUsers={projectUsers}
-        openAssignProjectUsersModal={openAssignProjectUsersModal}
-        assignUserAction={assignUserAction}
-      />
-    </DataTableColumn>
-    <DataTableColumn
-      key="assigned_qa"
-      label={i18n.t('Tester')}
-      property="assigned_qa"
-      width="15%"
-    >
-      <AssigneeTableCell
-        type={ORG_TYPES.QA}
-        projectUsers={projectUsers}
-        openAssignProjectUsersModal={openAssignProjectUsersModal}
-        assignUserAction={assignUserAction}
-      />
-    </DataTableColumn>
-  </DataTable>
-);
+}: Props) => {
+  const statusOrder = {
+    [TASK_STATUSES.IN_PROGRESS]: 1,
+    [TASK_STATUSES.PLANNED]: 2,
+    [TASK_STATUSES.COMPLETED]: 3,
+  };
+  const taskDefaultSort = sortBy(tasks, [
+    (item) => statusOrder[item.status],
+    'name',
+  ]);
+  return (
+    <DataTable items={taskDefaultSort} id="project-tasks-table" noRowHover>
+      <DataTableColumn
+        key="name"
+        label={i18n.t('Task')}
+        property="name"
+        width="65%"
+        primaryColumn
+      >
+        <NameTableCell
+          repositorySlug={repositorySlug}
+          projectSlug={projectSlug}
+        />
+      </DataTableColumn>
+      <DataTableColumn
+        key="status"
+        label={i18n.t('Status')}
+        property="status"
+        width="20%"
+      >
+        <StatusTableCell />
+      </DataTableColumn>
+      <DataTableColumn
+        key="assigned_dev"
+        label={i18n.t('Developer')}
+        property="assigned_dev"
+        width="15%"
+      >
+        <AssigneeTableCell
+          type={ORG_TYPES.DEV}
+          projectUsers={projectUsers}
+          openAssignProjectUsersModal={openAssignProjectUsersModal}
+          assignUserAction={assignUserAction}
+        />
+      </DataTableColumn>
+      <DataTableColumn
+        key="assigned_qa"
+        label={i18n.t('Tester')}
+        property="assigned_qa"
+        width="15%"
+      >
+        <AssigneeTableCell
+          type={ORG_TYPES.QA}
+          projectUsers={projectUsers}
+          openAssignProjectUsersModal={openAssignProjectUsersModal}
+          assignUserAction={assignUserAction}
+        />
+      </DataTableColumn>
+    </DataTable>
+  );
+};
 
 export default TaskTable;

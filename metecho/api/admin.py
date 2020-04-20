@@ -6,6 +6,7 @@ from django.contrib.sites.models import Site
 from django.forms.widgets import Textarea
 from parler.admin import TranslatableAdmin
 
+from . import gh
 from .models import (
     GitHubRepository,
     Project,
@@ -18,6 +19,26 @@ from .models import (
     TaskSlug,
     User,
 )
+
+
+class RepositoryForm(forms.ModelForm):
+    class Meta:
+        model = Repository
+        exclude = ()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        repo_name = cleaned_data.get("repo_name")
+        repo_owner = cleaned_data.get("repo_owner")
+
+        # Make sure we can access the repository
+        try:
+            gh.get_repo_info(None, repo_owner=repo_owner, repo_name=repo_name)
+        except Exception:
+            raise forms.ValidationError(
+                f"Could not access {repo_owner}/{repo_name} using GitHub app. "
+                "Does the Metecho app need to be installed for this repository?"
+            )
 
 
 class JSONWidget(Textarea):
@@ -34,6 +55,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Repository)
 class RepositoryAdmin(admin.ModelAdmin):
+    form = RepositoryForm
     list_display = ("name", "repo_owner", "repo_name")
 
 
