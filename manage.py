@@ -2,8 +2,18 @@
 import os
 import sys
 
+ALLOWED_PRODUCTION_COMMANDS = [
+    "collectstatic",
+    "promote_superuser",
+    "migrate",
+    "rqscheduler",
+    "rqworker",
+    "showmigrations",
+]
+
+
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+    settings_module = os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:
@@ -19,4 +29,10 @@ if __name__ == "__main__":
                 "forget to activate a virtual environment?"
             )
         raise
+
+    if len(sys.argv) > 1 and settings_module == "config.settings.production":
+        command = sys.argv[1]
+        if command not in ALLOWED_PRODUCTION_COMMANDS:
+            raise RuntimeError(f"Access to the {command} command has been disabled in production.")
+
     execute_from_command_line(sys.argv)
