@@ -2,12 +2,12 @@ Django==3.0.5
 bleach==3.1.4
 channels-redis==2.4.2
 channels==2.4.0
-cumulusci==3.10.0
+cumulusci==3.11.0
 dj-database-url==0.5.0
 django-allauth==0.41.0
 django-hashid-field==3.1.1
 django-js-reverse==0.9.1
-django-log-request-id==1.4.1
+django-log-request-id==1.5.0
 django-model-utils==4.0.0
 django-parler==2.0.1
 django-redis==4.11.0
@@ -25,4 +25,4 @@ service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.12.0.tar.gz
 simple-salesforce==1.0.0
 whitenoise==5.0.1
-django-anymail[mailgun]==7.0.0
+django-anymail[mailgun]==7.1.0
