@@ -171,7 +171,7 @@ class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProjectSerializer
     pagination_class = CustomPaginator
-    queryset = Project.objects.all()
+    queryset = Project.objects.active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
     error_pr_exists = _("Project has already been submitted for testing.")
@@ -180,7 +180,7 @@ class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
 class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
-    queryset = Task.objects.all()
+    queryset = Task.objects.active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for testing.")
@@ -217,7 +217,7 @@ class ScratchOrgViewSet(
 ):
     permission_classes = (IsAuthenticated,)
     serializer_class = ScratchOrgSerializer
-    queryset = ScratchOrg.objects.all()
+    queryset = ScratchOrg.objects.active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ScratchOrgFilter
 

@@ -25,6 +25,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import DeleteModal from '@/components/utils/deleteModal';
 import EditModal from '@/components/utils/editModal';
 import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
@@ -53,12 +54,14 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
+    setDeleteModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
@@ -149,6 +152,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         setAssignUsersModalOpen(false);
         setSubmitModalOpen(false);
         setEditModalOpen(false);
+        setDeleteModalOpen(false);
       } else {
         updateProjectUsers(users);
       }
@@ -172,6 +176,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         setAssignUsersModalOpen(false);
         setSubmitModalOpen(false);
         setEditModalOpen(false);
+        setDeleteModalOpen(false);
       } else {
         updateProjectUsers(users);
       }
@@ -216,6 +221,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
     setEditModalOpen(false);
+    setDeleteModalOpen(false);
     setAssignUsersModalOpen(false);
   };
   const currentlySubmitting = Boolean(project?.currently_creating_pr);
@@ -228,11 +234,22 @@ const ProjectDetail = (props: RouteComponentProps) => {
   // "edit" modal related:
   const openEditModal = () => {
     setEditModalOpen(true);
+    setDeleteModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
+  };
+  // "delete" modal related:
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
+  };
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
   };
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -300,8 +317,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
       case 'edit':
         openEditModal();
         break;
-      // case 'delete':
-      //   break;
+      case 'delete':
+        openDeleteModal();
+        break;
     }
   };
   const { branchLink, branchLinkText } = getBranchLink(project);
@@ -323,6 +341,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
+  const repoUrl = routes.repository_detail(repository.slug);
+
   return (
     <DocumentTitle
       title={`${project.name} | ${repository.name} | ${i18n.t('Metecho')}`}
@@ -334,7 +354,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         breadcrumb={[
           {
             name: repository.name,
-            url: routes.repository_detail(repository.slug),
+            url: repoUrl,
           },
           { name: project.name },
         ]}
@@ -420,7 +440,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
             instanceId={project.id}
             instanceName={project.name}
             instanceDiffUrl={project.branch_diff_url}
-            instanceType="project"
+            instanceType={OBJECT_TYPES.PROJECT}
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />
@@ -430,6 +450,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
           modelType={OBJECT_TYPES.PROJECT}
           isOpen={editModalOpen}
           handleClose={closeEditModal}
+        />
+        <DeleteModal
+          model={project}
+          modelType={OBJECT_TYPES.PROJECT}
+          isOpen={deleteModalOpen}
+          redirect={repoUrl}
+          handleClose={closeDeleteModal}
         />
       </DetailPageLayout>
     </DocumentTitle>
