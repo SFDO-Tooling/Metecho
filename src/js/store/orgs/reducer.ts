@@ -244,6 +244,28 @@ const reducer = (
         },
       };
     }
+    case 'UPDATE_OBJECT_SUCCEEDED': {
+      const {
+        objectType,
+        object,
+      }: { objectType?: ObjectTypes; object: Org } = action.payload;
+      if (objectType === OBJECT_TYPES.ORG && object) {
+        const taskOrgs = orgs[object.task] || {
+          [ORG_TYPES.DEV]: null,
+          [ORG_TYPES.QA]: null,
+        };
+        return {
+          ...orgs,
+          [object.task]: {
+            ...taskOrgs,
+            [object.org_type]: {
+              ...object,
+            },
+          },
+        };
+      }
+      return orgs;
+    }
   }
   return orgs;
 };

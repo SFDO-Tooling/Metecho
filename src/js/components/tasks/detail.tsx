@@ -346,6 +346,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         )}
         {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
+            taskId={task.id}
             orgId={devOrg.id}
             changeset={devOrg.unsaved_changes}
             ignoredChanges={devOrg.ignored_changes}

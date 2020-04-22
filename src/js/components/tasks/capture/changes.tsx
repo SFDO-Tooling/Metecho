@@ -5,7 +5,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import { cloneDeep, isEmpty, omit } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   BooleanObject,
@@ -22,6 +22,8 @@ interface Props {
   ignoredChanges: Changeset;
   errors: UseFormProps['errors'];
   setInputs: UseFormProps['setInputs'];
+  setIgnoredInputs: UseFormProps['setInputs'];
+  success: boolean;
 }
 
 const ChangesForm = ({
@@ -30,10 +32,11 @@ const ChangesForm = ({
   ignoredInputs,
   errors,
   setInputs,
+  setIgnoredInputs,
   ignoredChanges,
+  success,
 }: Props) => {
   const [expandedPanels, setExpandedPanels] = useState<BooleanObject>({});
-  const [success, setSuccess] = useState(false);
 
   // remove changes from list that are ignored
   const filteredChanges: Changeset = omit(
@@ -48,16 +51,15 @@ const ChangesForm = ({
   const totalIgnored = Object.values(ignoredChanges).flat().length;
   const ignoredChecked = Object.values(ignoredInputs.ignored_changes).flat()
     .length;
-  const allIgnoredChecked =
-    Boolean(ignoredChecked) && ignoredChecked === totalIgnored;
+  const allIgnoredChecked = ignoredChecked === totalIgnored;
   const noIgnoredChecked = !ignoredChecked;
 
   const setChanges = (changes: Changeset) => {
     setInputs({ ...inputs, changes });
   };
   const setIgnored = (ignored_changes: Changeset) => {
-    setInputs({
-      ...inputs,
+    setIgnoredInputs({
+      ...ignoredInputs,
       ignored_changes,
     });
   };
@@ -154,34 +156,6 @@ const ChangesForm = ({
       setIgnored({});
     }
   };
-  const successTimeout = useRef<NodeJS.Timeout | null>(null);
-  const clearSuccessTimeout = () => {
-    if (typeof successTimeout.current === 'number') {
-      clearTimeout(successTimeout.current);
-      successTimeout.current = null;
-    }
-  };
-  /* check for when new changes are ignored*/
-  const ignoredChangesRef = useRef(ignoredChanges);
-  useEffect(() => {
-    const prevValue = ignoredChangesRef.current;
-    const value = ignoredChanges;
-    if (value !== prevValue) {
-      // show highlight when new changes are ignored
-      if (totalIgnored > Object.values(prevValue).flat().length) {
-        setSuccess(true);
-      }
-      // close the accodion if ignored list is emptied
-      if (isEmpty(value)) {
-        handlePanelToggle('allIgnored');
-      }
-    }
-    successTimeout.current = setTimeout(() => {
-      setSuccess(false);
-    }, 2000);
-    return () => clearSuccessTimeout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ignoredChanges]);
 
   return (
     <form
