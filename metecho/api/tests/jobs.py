@@ -539,12 +539,12 @@ class TestPopulateGithubUsers:
             collab1 = MagicMock(
                 id=123,
                 login="test-user-1",
-                avatar_url="http://example.com/avatar1.png",
+                avatar_url="https://example.com/avatar1.png",
             )
             collab2 = MagicMock(
                 id=456,
                 login="test-user-2",
-                avatar_url="http://example.com/avatar2.png",
+                avatar_url="https://example.com/avatar2.png",
             )
             repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
             get_repo_info.return_value = repo
