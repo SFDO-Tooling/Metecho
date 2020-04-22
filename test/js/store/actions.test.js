@@ -782,3 +782,12 @@ describe('updateObject', () => {
     });
   });
 });
+
+describe('removeObject', () => {
+  test('returns OBJECT_REMOVED action', () => {
+    const project = { id: 'project-id' };
+    const expected = { type: 'OBJECT_REMOVED', payload: project };
+
+    expect(actions.removeObject(project)).toEqual(expected);
+  });
+});

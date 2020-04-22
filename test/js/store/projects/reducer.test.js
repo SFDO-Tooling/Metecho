@@ -642,4 +642,65 @@ describe('reducer', () => {
       expect(actual).toEqual(initial);
     });
   });
+
+  describe('OBJECT_REMOVED', () => {
+    test('removes project', () => {
+      const project = {
+        id: 'r1',
+        slug: 'project-1',
+        name: 'Project 1',
+        description: 'This is a test project.',
+        repository: 'repository-1',
+      };
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const initial = {
+        'repository-1': {
+          projects: [project, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const expected = [project2];
+      const actual = reducer(initial, {
+        type: 'OBJECT_REMOVED',
+        payload: project,
+      });
+
+      expect(actual['repository-1'].projects).toEqual(expected);
+    });
+
+    test('ignores if payload is not a project', () => {
+      const project = {
+        id: 'r1',
+        slug: 'project-1',
+        name: 'Project 1',
+        description: 'This is a test project.',
+        repository: 'repository-1',
+      };
+      const project2 = {
+        id: 'p2',
+        repository: 'repository-1',
+        name: 'Project 2',
+      };
+      const initial = {
+        'repository-1': {
+          projects: [project, project2],
+          next: null,
+          notFound: [],
+          fetched: true,
+        },
+      };
+      const actual = reducer(initial, {
+        type: 'OBJECT_REMOVED',
+        payload: {},
+      });
+
+      expect(actual).toEqual(initial);
+    });
+  });
 });
