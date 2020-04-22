@@ -1,6 +1,7 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
+import { removeObject } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
@@ -222,6 +223,13 @@ interface CommitFailedEvent {
     originating_user_id: string | null;
   };
 }
+interface SoftDeletedEvent {
+  type: 'SOFT_DELETE';
+  payload: {
+    model: Project | Task;
+    originating_user_id: null;
+  };
+}
 type ModelEvent =
   | RepoUpdatedEvent
   | RepoUpdateErrorEvent
@@ -243,7 +251,8 @@ type ModelEvent =
   | OrgRefreshedEvent
   | OrgRefreshFailedEvent
   | CommitSucceededEvent
-  | CommitFailedEvent;
+  | CommitFailedEvent
+  | SoftDeletedEvent;
 type EventType =
   | SubscriptionEvent
   | ModelEvent
@@ -304,6 +313,8 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && commitSucceeded(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
       return hasModel(event) && commitFailed(event.payload);
+    case 'SOFT_DELETE':
+      return hasModel(event) && removeObject(event.payload.model);
   }
   return null;
 };

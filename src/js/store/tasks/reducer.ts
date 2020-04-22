@@ -54,6 +54,9 @@ export interface TaskState {
 
 const defaultState = {};
 
+const modelIsTask = (model: any): model is Task =>
+  Boolean((model as Task).project);
+
 const reducer = (
   tasks: TaskState = defaultState,
   action: TaskAction | ObjectsAction | LogoutAction | RefetchDataAction,
@@ -175,6 +178,32 @@ const reducer = (
         };
       }
       return tasks;
+    }
+    case 'OBJECT_REMOVED':
+    case 'DELETE_OBJECT_SUCCEEDED': {
+      let maybeTask;
+      if (action.type === 'OBJECT_REMOVED') {
+        maybeTask = modelIsTask(action.payload) ? action.payload : null;
+      } else {
+        const {
+          object,
+          objectType,
+        }: { object: Task; objectType?: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.TASK && object) {
+          maybeTask = object;
+        }
+      }
+      /* istanbul ignore if */
+      if (!maybeTask) {
+        return tasks;
+      }
+      const task = maybeTask;
+      /* istanbul ignore next */
+      const projectTasks = tasks[task.project] || [];
+      return {
+        ...tasks,
+        [task.project]: projectTasks.filter((t) => t.id !== task.id),
+      };
     }
   }
   return tasks;

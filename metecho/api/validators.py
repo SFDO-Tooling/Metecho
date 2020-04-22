@@ -31,6 +31,8 @@ class CaseInsensitiveUniqueTogetherValidator(UniqueTogetherValidator):
                 if source not in attrs:
                     attrs[source] = getattr(serializer.instance, source)
 
+        if hasattr(queryset, "active"):
+            queryset = queryset.active()
         # Determine the filter keyword arguments and filter the queryset.
         filter_kwargs = {
             self.process_field_name(source): attrs[source] for source in sources

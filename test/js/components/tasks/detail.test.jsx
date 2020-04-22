@@ -469,4 +469,16 @@ describe('<TaskDetail/>', () => {
       expect(queryByText('Edit Task')).toBeNull();
     });
   });
+
+  test('opens/closed deleted modal', () => {
+    const { getByText, queryByText } = setup();
+    fireEvent.click(getByText('Task Options'));
+    fireEvent.click(getByText('Delete Task'));
+
+    expect(getByText('Confirm Deleting Task')).toBeVisible();
+
+    fireEvent.click(getByText('Cancel'));
+
+    expect(queryByText('Confirm Deleting Task')).toBeNull();
+  });
 });

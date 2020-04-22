@@ -160,7 +160,7 @@ describe('<ProjectForm/>', () => {
     });
 
     describe('error', () => {
-      test('displays inline field errors', async () => {
+      test('displays inline field errors on 400', async () => {
         createObject.mockReturnValueOnce(() =>
           // eslint-disable-next-line prefer-promise-reject-errors
           Promise.reject({
@@ -168,6 +168,9 @@ describe('<ProjectForm/>', () => {
               name: ['Do not do that'],
               description: ['Or that'],
               other: ['What is happening'],
+            },
+            response: {
+              status: 400,
             },
           }),
         );
