@@ -19,20 +19,32 @@ describe('<Footer />', () => {
       );
     });
 
-    test('open/close terms of service', () => {
-      const { getByText, queryByText } = renderWithRedux(
-        <Footer logoSrc="my/logo.png" />,
-        {
+    describe('with terms of service', () => {
+      let SITE;
+
+      beforeAll(() => {
+        SITE = window.GLOBALS.SITE;
+        window.GLOBALS.SITE = {
+          clickthrough_agreement: 'Resistance is futile.',
+        };
+      });
+
+      afterAll(() => {
+        window.GLOBALS.SITE = SITE;
+      });
+
+      test('can open/close terms of service', () => {
+        const { getByText, queryByText } = renderWithRedux(<Footer />, {
           user: {},
-        },
-      );
-      fireEvent.click(getByText('Terms of Service'));
+        });
+        fireEvent.click(getByText('Terms of Service'));
 
-      expect(queryByText('Metecho Terms of Service')).toBeVisible();
+        expect(queryByText('Metecho Terms of Service')).toBeVisible();
 
-      fireEvent.click(getByText('Close'));
+        fireEvent.click(getByText('Close'));
 
-      expect(queryByText('Metecho Terms of Service')).toBeNull();
+        expect(queryByText('Metecho Terms of Service')).toBeNull();
+      });
     });
   });
 
