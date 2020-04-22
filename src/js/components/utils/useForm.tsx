@@ -60,6 +60,12 @@ export default ({
     onSuccess(...args);
   };
   const catchError = (err: ApiError) => {
+    // We only consider `400` responses as valid form errors...
+    // Non-400 errors are displayed in a global error message.
+    /* istanbul ignore if */
+    if (err.response?.status !== 400) {
+      throw err;
+    }
     const allErrors = typeof err?.body === 'object' ? err.body : {};
     const fieldErrors: typeof errors = {};
     for (const field of Object.keys(allErrors)) {
@@ -69,13 +75,12 @@ export default ({
     }
     onError(err, fieldErrors);
     /* istanbul ignore else */
-    if (isMounted.current && Object.keys(fieldErrors).length) {
+    const hasFormErrors = Boolean(Object.keys(fieldErrors).length);
+    if (isMounted.current && hasFormErrors) {
       setErrors(fieldErrors);
-    } else if (err.response?.status === 400) {
+    } else {
       // If no inline errors to show, fallback to default global error toast
       dispatch(addError(err.message));
-    } else {
-      throw err;
     }
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

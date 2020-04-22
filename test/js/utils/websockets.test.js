@@ -1,5 +1,6 @@
 import Sockette from 'sockette';
 
+import { removeObject } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
@@ -32,6 +33,7 @@ import {
 } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
+jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
 jest.mock('@/store/projects/actions');
 jest.mock('@/store/repositories/actions');
@@ -59,6 +61,7 @@ const actions = {
   updateTask,
   submitReview,
   submitReviewFailed,
+  removeObject,
 };
 for (const action of Object.values(actions)) {
   action.mockReturnValue({ type: 'TEST', payload: {} });
@@ -112,6 +115,7 @@ describe('getAction', () => {
     ['SCRATCH_ORG_REFRESH_FAILED', 'refreshError', false],
     ['SCRATCH_ORG_COMMIT_CHANGES', 'commitSucceeded', false],
     ['SCRATCH_ORG_COMMIT_CHANGES_FAILED', 'commitFailed', false],
+    ['SOFT_DELETE', 'removeObject', true],
   ])('handles %s event', (type, action, modelOnly) => {
     const payload = { model: 'bar' };
     const msg = { type, payload };

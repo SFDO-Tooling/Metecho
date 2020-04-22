@@ -1,4 +1,6 @@
 import { ThunkResult } from '@/store';
+import { Project } from '@/store/projects/reducer';
+import { Task } from '@/store/tasks/reducer';
 import apiFetch, { addUrlParams } from '@/utils/api';
 import { ObjectTypes } from '@/utils/constants';
 
@@ -70,6 +72,10 @@ interface DeleteObjectAction {
     | 'DELETE_OBJECT_FAILED';
   payload: { object: any } & CreateObjectPayload;
 }
+interface ObjectRemoved {
+  type: 'OBJECT_REMOVED';
+  payload: Project | Task;
+}
 
 export type ObjectsAction =
   | FetchObjectsStarted
@@ -81,7 +87,8 @@ export type ObjectsAction =
   | CreateUpdateObjectStarted
   | CreateUpdateObjectSucceeded
   | CreateUpdateObjectFailed
-  | DeleteObjectAction;
+  | DeleteObjectAction
+  | ObjectRemoved;
 
 export type ObjectsActionType = ({
   objectType,
@@ -374,3 +381,8 @@ export const updateObject = ({
     throw err;
   }
 };
+
+export const removeObject = (payload: Project | Task): ObjectRemoved => ({
+  type: 'OBJECT_REMOVED',
+  payload,
+});

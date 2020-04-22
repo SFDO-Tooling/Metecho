@@ -1,7 +1,9 @@
+import re
 from collections import namedtuple
 
 from asgiref.sync import async_to_sync
 from django.db import models
+from django.utils import timezone
 from hashid_field import HashidAutoField
 
 from . import push
@@ -162,3 +164,71 @@ class CreatePrMixin:
             )
         else:
             self.notify_error(error=error, originating_user_id=originating_user_id)
+
+
+class SoftDeleteQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(deleted_at__isnull=True)
+
+    def notify_soft_deleted(self):
+        if self.model.__name__ == "ScratchOrg":
+            for scratch_org in self:
+                try:
+                    scratch_org.queue_delete(originating_user_id=None)
+                except Exception:  # pragma: nocover
+                    # If there's a problem deleting it, it's probably
+                    # already been deleted.
+                    pass
+        else:
+            for instance in self:
+                instance.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
+
+    def delete(self):
+        soft_delete_child_class = getattr(self.model, "soft_delete_child_class", None)
+        if soft_delete_child_class:
+            parent = camel_to_snake(self.model.__name__)
+            soft_delete_child_class(None).objects.filter(
+                **{f"{parent}__in": self}
+            ).delete()
+        self.active().notify_soft_deleted()
+        return self.active().update(deleted_at=timezone.now())
+
+    delete.queryset_only = True
+
+
+class SoftDeleteMixin(models.Model):
+    """
+    Assumes you're also mixing in PushMixin.
+    """
+
+    class Meta:
+        abstract = True
+
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = SoftDeleteQuerySet.as_manager()
+
+    def notify_soft_deleted(self):
+        if self.__class__.__name__ == "ScratchOrg":
+            try:
+                self.queue_delete(originating_user_id=None)
+            except Exception:  # pragma: nocover
+                # If there's a problem deleting it, it's probably
+                # already been deleted.
+                pass
+        else:
+            self.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
+
+    def delete(self, *args, **kwargs):
+        soft_delete_child_class = getattr(self, "soft_delete_child_class", None)
+        if soft_delete_child_class:
+            parent = camel_to_snake(self.__class__.__name__)
+            soft_delete_child_class().objects.filter(**{parent: self}).delete()
+        if self.deleted_at is None:
+            self.deleted_at = timezone.now()
+            self.save()
+            self.notify_soft_deleted()
+
+
+def camel_to_snake(name):
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
