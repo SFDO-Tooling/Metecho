@@ -33,6 +33,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and settings_module == "config.settings.production":
         command = sys.argv[1]
         if command not in ALLOWED_PRODUCTION_COMMANDS:
-            raise RuntimeError(f"Access to the {command} command has been disabled in production.")
+            raise RuntimeError(
+                f"Access to the {command} command has been disabled in production."
+            )
 
     execute_from_command_line(sys.argv)
