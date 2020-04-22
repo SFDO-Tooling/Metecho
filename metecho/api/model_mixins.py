@@ -170,7 +170,7 @@ class SoftDeleteQuerySet(models.QuerySet):
     def active(self):
         return self.filter(deleted_at__isnull=True)
 
-    def special_case_scratch_org_delete(self):
+    def notify_soft_deleted(self):
         if self.model.__name__ == "ScratchOrg":
             for scratch_org in self:
                 try:
@@ -179,6 +179,9 @@ class SoftDeleteQuerySet(models.QuerySet):
                     # If there's a problem deleting it, it's probably
                     # already been deleted.
                     pass
+        else:
+            for instance in self:
+                instance.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
 
     def delete(self):
         soft_delete_child_class = getattr(self.model, "soft_delete_child_class", None)
@@ -187,12 +190,8 @@ class SoftDeleteQuerySet(models.QuerySet):
             soft_delete_child_class(None).objects.filter(
                 **{f"{parent}__in": self}
             ).delete()
-        self.active().special_case_scratch_org_delete()
-        instances = [instance for instance in self.active()]
-        ret = self.active().update(deleted_at=timezone.now())
-        for instance in instances:
-            instance.notify_changed(originating_user_id=None)
-        return ret
+        self.active().notify_soft_deleted()
+        return self.active().update(deleted_at=timezone.now())
 
     delete.queryset_only = True
 
@@ -209,7 +208,7 @@ class SoftDeleteMixin(models.Model):
 
     objects = SoftDeleteQuerySet.as_manager()
 
-    def special_case_scratch_org_delete(self):
+    def notify_soft_deleted(self):
         if self.__class__.__name__ == "ScratchOrg":
             try:
                 self.queue_delete(originating_user_id=None)
@@ -217,6 +216,8 @@ class SoftDeleteMixin(models.Model):
                 # If there's a problem deleting it, it's probably
                 # already been deleted.
                 pass
+        else:
+            self.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
 
     def delete(self, *args, **kwargs):
         soft_delete_child_class = getattr(self, "soft_delete_child_class", None)
@@ -224,10 +225,9 @@ class SoftDeleteMixin(models.Model):
             parent = camel_to_snake(self.__class__.__name__)
             soft_delete_child_class().objects.filter(**{parent: self}).delete()
         if self.deleted_at is None:
-            self.special_case_scratch_org_delete()
             self.deleted_at = timezone.now()
             self.save()
-            self.notify_changed(originating_user_id=None)
+            self.notify_soft_deleted()
 
 
 def camel_to_snake(name):

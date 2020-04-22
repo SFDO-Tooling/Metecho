@@ -447,6 +447,7 @@ create_pr_job = job(create_pr)
 def delete_scratch_org(scratch_org, *, originating_user_id):
     try:
         delete_org(scratch_org)
+        scratch_org.refresh_from_db()
         scratch_org.delete(originating_user_id=originating_user_id)
     except Exception as e:
         scratch_org.refresh_from_db()

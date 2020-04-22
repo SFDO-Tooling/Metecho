@@ -41,6 +41,9 @@ const defaultState = {
   fetched: false,
 };
 
+const modelIsProject = (model: any): model is Project =>
+  Boolean((model as Project).repository);
+
 const reducer = (
   projects: ProjectsState = {},
   action: ProjectAction | ObjectsAction | LogoutAction | RefetchDataAction,
@@ -211,27 +214,38 @@ const reducer = (
       }
       return projects;
     }
+    case 'OBJECT_REMOVED':
     case 'DELETE_OBJECT_SUCCEEDED': {
-      const {
-        objectType,
-        object,
-      }: { objectType?: ObjectTypes; object: Project } = action.payload;
-      if (objectType === OBJECT_TYPES.PROJECT) {
-        /* istanbul ignore next */
-        const repositoryProjects = projects[object.repository] || {
-          ...defaultState,
-        };
-        return {
-          ...projects,
-          [object.repository]: {
-            ...repositoryProjects,
-            projects: repositoryProjects.projects.filter(
-              (p) => p.id !== object.id,
-            ),
-          },
-        };
+      let maybeProject;
+      if (action.type === 'OBJECT_REMOVED') {
+        maybeProject = modelIsProject(action.payload) ? action.payload : null;
+      } else {
+        const {
+          object,
+          objectType,
+        }: { object: Project; objectType?: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.PROJECT && object) {
+          maybeProject = object;
+        }
       }
-      return projects;
+      /* istanbul ignore if */
+      if (!maybeProject) {
+        return projects;
+      }
+      const project = maybeProject;
+      /* istanbul ignore next */
+      const repositoryProjects = projects[project.repository] || {
+        ...defaultState,
+      };
+      return {
+        ...projects,
+        [project.repository]: {
+          ...repositoryProjects,
+          projects: repositoryProjects.projects.filter(
+            (p) => p.id !== project.id,
+          ),
+        },
+      };
     }
   }
   return projects;

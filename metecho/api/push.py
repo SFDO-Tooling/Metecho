@@ -13,7 +13,7 @@ Websocket notifications you can subscribe to:
         PROJECT_UPDATE
         PROJECT_CREATE_PR
         PROJECT_CREATE_PR_FAILED
-        PROJECT_DELETE
+        SOFT_DELETE
 
     task.:id
         TASK_UPDATE
@@ -21,7 +21,7 @@ Websocket notifications you can subscribe to:
         TASK_CREATE_PR_FAILED
         TASK_SUBMIT_REVIEW
         TASK_SUBMIT_REVIEW_FAILED
-        TASK_DELETE
+        SOFT_DELETE
 
     scratchorg.:id
         SCRATCH_ORG_PROVISION
