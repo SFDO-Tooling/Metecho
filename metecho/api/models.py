@@ -31,6 +31,7 @@ from .model_mixins import (
     HashIdMixin,
     PopulateRepoIdMixin,
     PushMixin,
+    SoftDeleteMixin,
     TimestampsMixin,
 )
 from .sf_run_flow import get_devhub_api
@@ -370,7 +371,13 @@ class ProjectSlug(AbstractSlug):
 
 
 class Project(
-    CreatePrMixin, PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    CreatePrMixin,
+    PushMixin,
+    HashIdMixin,
+    TimestampsMixin,
+    SlugMixin,
+    SoftDeleteMixin,
+    models.Model,
 ):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
@@ -410,6 +417,12 @@ class Project(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    # begin SoftDeleteMixin configuration:
+    def soft_delete_child_class(self):
+        return Task
+
+    # end SoftDeleteMixin configuration
 
     # begin PushMixin configuration:
     push_update_type = "PROJECT_UPDATE"
@@ -501,7 +514,13 @@ class TaskSlug(AbstractSlug):
 
 
 class Task(
-    CreatePrMixin, PushMixin, HashIdMixin, TimestampsMixin, SlugMixin, models.Model
+    CreatePrMixin,
+    PushMixin,
+    HashIdMixin,
+    TimestampsMixin,
+    SlugMixin,
+    SoftDeleteMixin,
+    models.Model,
 ):
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
@@ -556,6 +575,12 @@ class Task(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    # begin SoftDeleteMixin configuration:
+    def soft_delete_child_class(self):
+        return ScratchOrg
+
+    # end SoftDeleteMixin configuration
 
     # begin PushMixin configuration:
     push_update_type = "TASK_UPDATE"
@@ -686,7 +711,9 @@ class Task(
         unique_together = (("name", "project"),)
 
 
-class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
+class ScratchOrg(
+    SoftDeleteMixin, PushMixin, HashIdMixin, TimestampsMixin, models.Model
+):
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -715,6 +742,7 @@ class ScratchOrg(PushMixin, HashIdMixin, TimestampsMixin, models.Model):
     valid_target_directories = JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
+    cci_log = models.TextField(blank=True)
 
     def _build_message_extras(self):
         return {

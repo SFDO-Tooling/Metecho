@@ -428,9 +428,9 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if (
             not self.instance
-            and ScratchOrg.objects.filter(
-                task=data["task"], org_type=data["org_type"]
-            ).exists()
+            and ScratchOrg.objects.active()
+            .filter(task=data["task"], org_type=data["org_type"])
+            .exists()
         ):
             raise serializers.ValidationError(
                 _("A ScratchOrg of this type already exists for this task.")

@@ -27,6 +27,7 @@ import {
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
+import DeleteModal from '@/components/utils/deleteModal';
 import EditModal from '@/components/utils/editModal';
 import PageOptions from '@/components/utils/pageOptions';
 import SubmitModal from '@/components/utils/submitModal';
@@ -50,6 +51,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -104,6 +106,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         setCaptureModalOpen(true);
         setSubmitModalOpen(false);
         setEditModalOpen(false);
+        setDeleteModalOpen(false);
       }
     }
   }, [fetchingChanges, devOrg, submitModalOpen]);
@@ -126,15 +129,27 @@ const TaskDetail = (props: RouteComponentProps) => {
     setSubmitModalOpen(true);
     setCaptureModalOpen(false);
     setEditModalOpen(false);
+    setDeleteModalOpen(false);
   };
   // edit modal related...
   const openEditModal = () => {
     setEditModalOpen(true);
     setSubmitModalOpen(false);
     setCaptureModalOpen(false);
+    setDeleteModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
+  };
+  // delete modal related
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setCaptureModalOpen(false);
+  };
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
   };
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -190,8 +205,9 @@ const TaskDetail = (props: RouteComponentProps) => {
       case 'edit':
         openEditModal();
         break;
-      // case 'delete':
-      //   break;
+      case 'delete':
+        openDeleteModal();
+        break;
     }
   };
 
@@ -299,6 +315,8 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const projectUrl = routes.project_detail(repository.slug, project.slug);
+
   return (
     <DocumentTitle
       title={` ${task.name} | ${project.name} | ${repository.name} | ${i18n.t(
@@ -316,7 +334,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           },
           {
             name: project.name,
-            url: routes.project_detail(repository.slug, project.slug),
+            url: projectUrl,
           },
           { name: task.name },
         ]}
@@ -338,7 +356,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             orgs={orgs}
             task={task}
             projectUsers={project.github_users}
-            projectUrl={routes.project_detail(repository.slug, project.slug)}
+            projectUrl={projectUrl}
             repoUrl={repository.repo_url}
           />
         ) : (
@@ -370,6 +388,13 @@ const TaskDetail = (props: RouteComponentProps) => {
           modelType={OBJECT_TYPES.TASK}
           isOpen={editModalOpen}
           handleClose={closeEditModal}
+        />
+        <DeleteModal
+          model={task}
+          modelType={OBJECT_TYPES.TASK}
+          isOpen={deleteModalOpen}
+          redirect={projectUrl}
+          handleClose={closeDeleteModal}
         />
         <CommitList commits={task.commits} />
       </DetailPageLayout>

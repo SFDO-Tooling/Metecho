@@ -317,7 +317,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         env=env,
         cwd=project_path,
     )
-    out, err = p.communicate()
+    _, err = p.communicate()
     if p.returncode:
         p = subprocess.run(
             [command, "error", "info"], capture_output=True, env={"HOME": project_path}

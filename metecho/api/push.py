@@ -13,6 +13,7 @@ Websocket notifications you can subscribe to:
         PROJECT_UPDATE
         PROJECT_CREATE_PR
         PROJECT_CREATE_PR_FAILED
+        SOFT_DELETE
 
     task.:id
         TASK_UPDATE
@@ -20,6 +21,7 @@ Websocket notifications you can subscribe to:
         TASK_CREATE_PR_FAILED
         TASK_SUBMIT_REVIEW
         TASK_SUBMIT_REVIEW_FAILED
+        SOFT_DELETE
 
     scratchorg.:id
         SCRATCH_ORG_PROVISION
@@ -54,7 +56,10 @@ async def push_message_about_instance(instance, message):
     new_message["model_name"] = model_name
     new_message["id"] = id
     sent_message = {"type": "notify", "content": new_message}
-    if await get_set_message_semaphore(channel_layer, sent_message):
+    not_deleted = getattr(instance, "deleted_at", None) is None
+    message_about_delete = "DELETE" in message["type"] or "REMOVE" in message["type"]
+    semaphore_clear = await get_set_message_semaphore(channel_layer, sent_message)
+    if (message_about_delete or not_deleted) and semaphore_clear:
         await channel_layer.group_send(group_name, sent_message)
 
 

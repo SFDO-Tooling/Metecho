@@ -14,12 +14,69 @@ import { agreeToTerms } from '@/store/user/actions';
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
-interface Props
+interface TermsProps
   extends RouteComponentProps<{}, StaticContext, { from?: Location }> {
   from?: { pathname?: string };
 }
 
-const Terms = ({ from = {}, location }: Props) => {
+export const TermsModal = ({
+  isOpen,
+  isRequired = false,
+  isSubmitting = false,
+  handleClose,
+  handleSubmit,
+}: {
+  isOpen?: boolean;
+  isRequired?: boolean;
+  isSubmitting?: boolean;
+  handleClose?: () => void;
+  handleSubmit?: () => void;
+}) => (
+  <Modal
+    isOpen={isRequired || isOpen}
+    disableClose={isRequired}
+    heading={i18n.t('Metecho Terms of Service')}
+    size="medium"
+    footer={
+      isRequired
+        ? [
+            <Logout
+              key="cancel"
+              label={i18n.t('Cancel and Log Out')}
+              variant="neutral"
+            />,
+            <Button
+              key="submit"
+              label={
+                isSubmitting ? (
+                  <LabelWithSpinner
+                    label={i18n.t('Saving…')}
+                    variant="inverse"
+                  />
+                ) : (
+                  i18n.t('I Agree')
+                )
+              }
+              variant="brand"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            />,
+          ]
+        : null
+    }
+    onRequestClose={handleClose}
+  >
+    {/* This text is pre-cleaned by the API */}
+    <div
+      className="slds-p-around_large slds-text-longform markdown"
+      dangerouslySetInnerHTML={{
+        __html: window.GLOBALS.SITE.clickthrough_agreement as string,
+      }}
+    />
+  </Modal>
+);
+
+const Terms = ({ from = {}, location }: TermsProps) => {
   const user = useSelector(selectUserState);
   let { pathname } = location.state?.from || from;
   if (!pathname) {
@@ -44,40 +101,7 @@ const Terms = ({ from = {}, location }: Props) => {
     !window.GLOBALS?.SITE?.clickthrough_agreement ? (
     <Redirect to={pathname} />
   ) : (
-    <Modal
-      isOpen
-      disableClose
-      heading={i18n.t('Metecho Terms of Service')}
-      size="medium"
-      footer={[
-        <Logout
-          key="cancel"
-          label={i18n.t('Cancel and Log Out')}
-          variant="neutral"
-        />,
-        <Button
-          key="submit"
-          label={
-            submitting ? (
-              <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
-            ) : (
-              i18n.t('I Agree')
-            )
-          }
-          variant="brand"
-          onClick={doAgree}
-          disabled={submitting}
-        />,
-      ]}
-    >
-      {/* This text is pre-cleaned by the API */}
-      <div
-        className="slds-p-around_large slds-text-longform markdown"
-        dangerouslySetInnerHTML={{
-          __html: window.GLOBALS.SITE.clickthrough_agreement as string,
-        }}
-      />
-    </Modal>
+    <TermsModal isRequired isSubmitting={submitting} handleSubmit={doAgree} />
   );
 };
 
