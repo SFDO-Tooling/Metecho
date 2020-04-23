@@ -284,7 +284,7 @@ class TestHookView:
 
     def test_404__push_no_matching_repo(self, settings, client, repository_factory):
         settings.GITHUB_HOOK_SECRET = b""
-        repository_factory()
+        repository_factory(repo_id=456)
         response = client.post(
             reverse("hook"),
             json.dumps(
