@@ -14,7 +14,7 @@ pytest-cov==2.8.1
 pytest-django==3.9.0
 pytest-factoryboy==2.0.3
 pytest-mock==3.1.0
-pytest-sugar==0.9.2
+pytest-sugar==0.9.3
 pytest==5.3.5
 remote-pdb==2.0.0
 sphinxcontrib-httpdomain==1.7.0
