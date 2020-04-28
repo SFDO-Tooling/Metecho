@@ -8,6 +8,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
+import RepositoryDescription from '@/components/repositories/description';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
@@ -89,6 +90,16 @@ const RepositoryDetail = (props: RouteComponentProps) => {
       />
     </ExternalLink>
   );
+  const descriptionHasTitle =
+    repository.description_rendered?.startsWith('<h1>') ||
+    repository.description_rendered?.startsWith('<h2>');
+  const name = descriptionHasTitle ? null : repository.name;
+  const infoPanelContent = (
+    <RepositoryDescription
+      title={name}
+      description={repository.description_rendered}
+    />
+  );
 
   return (
     <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
@@ -98,6 +109,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         repoUrl={repository.repo_url}
         breadcrumb={[{ name: repository.name }]}
         sidebar={sidebarContent}
+        infoPanel={infoPanelContent}
       >
         {!projects || !projects.fetched ? (
           // Fetching projects from API

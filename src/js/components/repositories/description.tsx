@@ -1,15 +1,16 @@
-import Icon from '@salesforce/design-system-react/components/icon';
 import VisualPicker from '@salesforce/design-system-react/components/visual-picker';
 import VisualPickerLink from '@salesforce/design-system-react/components/visual-picker/link';
 import React from 'react';
 
-import { Repository } from '@/store/repositories/reducer';
-import routes from '@/utils/routes';
-
-const RepositoryListItem = ({ repository }: { repository: Repository }) => (
+const RepositoryDescription = ({
+  title,
+  description,
+}: {
+  title: string | null;
+  description: string | null;
+}) => (
   <VisualPicker
     size="large"
-    id={repository.slug}
     className="slds-text-link_reset
       slds-p-around_small
       slds-size_1-of-1
@@ -17,23 +18,21 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
       slds-large-size_1-of-3"
   >
     <VisualPickerLink
-      href={routes.repository_detail(repository.slug)}
       icon={
         <img
           src="https://via.placeholder.com/75"
           alt="Placeholder image till we get it from the API"
         />
       }
-      title={repository.name}
-      className="bar"
-      links
+      title={title}
+      className="page-description"
       description={
-        repository.description_rendered ? (
+        description ? (
           <div
-            className="truncate-children slds-p-top_x-small"
+            className="markdown"
             // This description is pre-cleaned by the API
             dangerouslySetInnerHTML={{
-              __html: repository.description_rendered,
+              __html: description,
             }}
           />
         ) : null
@@ -42,4 +41,4 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
   </VisualPicker>
 );
 
-export default RepositoryListItem;
+export default RepositoryDescription;

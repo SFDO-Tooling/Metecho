@@ -4,9 +4,8 @@ import i18n from 'i18next';
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
+import ExternalLink from '@/components/utils/externalLink';
 import routes from '@/utils/routes';
-
-import ExternalLink from './externalLink';
 
 interface Crumb {
   name: string;
@@ -21,6 +20,7 @@ const DetailPageLayout = ({
   onRenderHeaderActions,
   sidebar,
   children,
+  infoPanel,
 }: {
   title: string;
   description?: string;
@@ -29,6 +29,7 @@ const DetailPageLayout = ({
   onRenderHeaderActions?: () => JSX.Element;
   sidebar?: ReactNode;
   children?: ReactNode;
+  infoPanel?: ReactNode;
 }) => {
   const descriptionHasTitle =
     description?.startsWith('<h1>') || description?.startsWith('<h2>');
@@ -89,18 +90,22 @@ const DetailPageLayout = ({
             slds-size_1-of-1
             slds-medium-size_5-of-12"
         >
-          <div className="slds-text-longform">
-            {!descriptionHasTitle && (
-              <h2 className="slds-text-heading_medium">{title}</h2>
-            )}
-            {/* This description is pre-cleaned by the API */}
-            {description && (
-              <p
-                className="markdown"
-                dangerouslySetInnerHTML={{ __html: description }}
-              />
-            )}
-          </div>
+          {infoPanel ? (
+            infoPanel
+          ) : (
+            <div className="slds-text-longform">
+              {!descriptionHasTitle && (
+                <h2 className="slds-text-heading_medium">{title}</h2>
+              )}
+              {/* This description is pre-cleaned by the API */}
+              {description && (
+                <p
+                  className="markdown"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                />
+              )}
+            </div>
+          )}
           {sidebar}
         </div>
       </div>
