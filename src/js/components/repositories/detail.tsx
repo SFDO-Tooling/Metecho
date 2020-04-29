@@ -8,7 +8,6 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProjectForm from '@/components/projects/createForm';
 import ProjectListItem from '@/components/projects/listItem';
-import RepositoryDescription from '@/components/repositories/description';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
