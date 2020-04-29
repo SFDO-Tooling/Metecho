@@ -66,20 +66,31 @@ describe('<RepoDetail />', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug } = opts;
     const context = {};
-    const { getByText, getByTitle, queryByText } = renderWithRedux(
+    const {
+      getByText,
+      getByTitle,
+      getAllByTitle,
+      queryByText,
+    } = renderWithRedux(
       <StaticRouter context={context}>
         <RepoDetail match={{ params: { repositorySlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { getByText, getByTitle, queryByText, context };
+    return {
+      getByText,
+      getByTitle,
+      getAllByTitle,
+      queryByText,
+      context,
+    };
   };
 
   test('renders repository detail and projects list', () => {
-    const { getByText, getByTitle } = setup();
+    const { getByText, getAllByTitle } = setup();
 
-    expect(getByTitle('Repository 1')).toBeVisible();
+    expect(getAllByTitle('Repository 1')[0]).toBeVisible();
     expect(getByText('This is a test repository.')).toBeVisible();
     expect(getByText('Project 1')).toBeVisible();
     expect(getByText('Projects for Repository 1')).toBeVisible();

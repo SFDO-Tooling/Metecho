@@ -31,74 +31,80 @@ const DetailPageLayout = ({
   sidebar?: ReactNode;
   children?: ReactNode;
   image?: string;
-}) => (
-  <>
-    <PageHeader
-      className="page-header slds-p-around_x-large"
-      title={title}
-      info={<ExternalLink url={repoUrl} shortenGithub />}
-      onRenderControls={onRenderHeaderActions}
-      icon={image && !description ? <img src={image} /> : null}
-    />
-    <div
-      className="slds-p-horizontal_x-large
+}) => {
+  const showImage = image && !description;
+
+  return (
+    <>
+      <PageHeader
+        className="page-header slds-p-around_x-large"
+        title={title}
+        info={<ExternalLink url={repoUrl} shortenGithub />}
+        onRenderControls={onRenderHeaderActions}
+        icon={
+          showImage && <img src={image} alt={`social image for ${title}`} />
+        }
+      />
+      <div
+        className="slds-p-horizontal_x-large
           slds-p-top_x-small
           ms-breadcrumb
           slds-truncate"
-    >
-      <BreadCrumb
-        trail={[
-          <Link to={routes.home()} key="home">
-            {i18n.t('Home')}
-          </Link>,
-        ].concat(
-          breadcrumb.map((crumb, idx) => {
-            if (crumb.url) {
+      >
+        <BreadCrumb
+          trail={[
+            <Link to={routes.home()} key="home">
+              {i18n.t('Home')}
+            </Link>,
+          ].concat(
+            breadcrumb.map((crumb, idx) => {
+              if (crumb.url) {
+                return (
+                  <Link to={crumb.url} key={idx}>
+                    {crumb.name}
+                  </Link>
+                );
+              }
               return (
-                <Link to={crumb.url} key={idx}>
+                <div className="slds-p-horizontal_x-small" key={idx}>
                   {crumb.name}
-                </Link>
+                </div>
               );
-            }
-            return (
-              <div className="slds-p-horizontal_x-small" key={idx}>
-                {crumb.name}
-              </div>
-            );
-          }),
-        )}
-      />
-    </div>
-    <div
-      className="slds-p-around_x-large
+            }),
+          )}
+        />
+      </div>
+      <div
+        className="slds-p-around_x-large
           slds-grid
           slds-gutters
           slds-wrap"
-    >
-      <div
-        className="slds-col
+      >
+        <div
+          className="slds-col
             slds-size_1-of-1
             slds-medium-size_7-of-12
             slds-p-bottom_x-large"
-      >
-        {children}
-      </div>
-      <div
-        className="slds-col
+        >
+          {children}
+        </div>
+        <div
+          className="slds-col
             slds-size_1-of-1
             slds-medium-size_5-of-12"
-      >
-        {description && (
-          <PageDescription
-            title={title}
-            description={description}
-            image={image}
-          />
-        )}
-        {sidebar}
+        >
+          {description && (
+            <PageDescription
+              title={title}
+              description={description}
+              image={image}
+            />
+          )}
+          {sidebar}
+        </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
+};
 
 export default DetailPageLayout;

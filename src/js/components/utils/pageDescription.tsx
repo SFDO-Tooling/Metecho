@@ -29,7 +29,7 @@ const PageDescription = ({
             title={title}
             className="page-description"
             description={
-              description ? (
+              description && (
                 <div
                   className="markdown"
                   // This description is pre-cleaned by the API
@@ -37,7 +37,7 @@ const PageDescription = ({
                     __html: description,
                   }}
                 />
-              ) : null
+              )
             }
           ></VisualPickerLink>
         </VisualPicker>

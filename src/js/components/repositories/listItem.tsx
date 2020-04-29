@@ -1,4 +1,3 @@
-import Icon from '@salesforce/design-system-react/components/icon';
 import VisualPicker from '@salesforce/design-system-react/components/visual-picker';
 import VisualPickerLink from '@salesforce/design-system-react/components/visual-picker/link';
 import React from 'react';
