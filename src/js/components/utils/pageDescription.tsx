@@ -26,7 +26,7 @@ const PageDescription = ({
         >
           <VisualPickerLink
             icon={<img src={image} alt={`image for ${title}`} />}
-            title={title}
+            title={descriptionHasTitle ? null : title}
             className="page-description"
             description={
               description && (
