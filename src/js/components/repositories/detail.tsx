@@ -90,17 +90,6 @@ const RepositoryDetail = (props: RouteComponentProps) => {
       />
     </ExternalLink>
   );
-  const descriptionHasTitle =
-    repository.description_rendered?.startsWith('<h1>') ||
-    repository.description_rendered?.startsWith('<h2>');
-  const name = descriptionHasTitle ? null : repository.name;
-  const infoPanelContent = (
-    <RepositoryDescription
-      title={name}
-      description={repository.description_rendered}
-    />
-  );
-
   return (
     <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
@@ -109,7 +98,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         repoUrl={repository.repo_url}
         breadcrumb={[{ name: repository.name }]}
         sidebar={sidebarContent}
-        infoPanel={infoPanelContent}
+        image={'https://via.placeholder.com/75'} // placeholder until returned from api
       >
         {!projects || !projects.fetched ? (
           // Fetching projects from API
