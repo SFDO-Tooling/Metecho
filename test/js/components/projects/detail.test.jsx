@@ -571,8 +571,8 @@ describe('<ProjectDetail/>', () => {
     });
   });
 
-  describe('editing project click', () => {
-    test('opens and closes modal', () => {
+  describe('project options click', () => {
+    test('opens and closes edit modal', () => {
       const { getByText, queryByText } = setup();
       fireEvent.click(getByText('Project Options'));
       fireEvent.click(getByText('Edit Project'));
@@ -582,6 +582,18 @@ describe('<ProjectDetail/>', () => {
       fireEvent.click(getByText('Cancel'));
 
       expect(queryByText('Edit Project')).toBeNull();
+    });
+
+    test('opens and closes delete modal', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Project Options'));
+      fireEvent.click(getByText('Delete Project'));
+
+      expect(getByText('Confirm Deleting Project')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('Confirm Deleting Project')).toBeNull();
     });
   });
 });

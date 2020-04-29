@@ -13,13 +13,13 @@ import {
   useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 interface Props {
   instanceId: string;
   instanceName: string;
   instanceDiffUrl: string | null;
-  instanceType: 'task' | 'project';
+  instanceType: ObjectTypes;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -53,7 +53,7 @@ const SubmitModal = ({
 
   let objectType, heading, submittingLabel, toSubmitLabel;
   switch (instanceType) {
-    case 'task':
+    case OBJECT_TYPES.TASK:
       objectType = {
         objectType: OBJECT_TYPES.TASK_PR,
         url: window.api_urls.task_create_pr(instanceId),
@@ -62,7 +62,7 @@ const SubmitModal = ({
       submittingLabel = i18n.t('Submitting Task for Testing…');
       toSubmitLabel = i18n.t('Submit Task for Testing');
       break;
-    case 'project':
+    case OBJECT_TYPES.PROJECT:
       objectType = {
         objectType: OBJECT_TYPES.PROJECT_PR,
         url: window.api_urls.project_create_pr(instanceId),

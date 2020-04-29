@@ -132,7 +132,7 @@ const EditModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Saving')} variant="inverse" />
+              <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
             ) : (
               i18n.t('Save')
             )
