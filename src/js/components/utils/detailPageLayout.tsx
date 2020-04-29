@@ -38,6 +38,7 @@ const DetailPageLayout = ({
       title={title}
       info={<ExternalLink url={repoUrl} shortenGithub />}
       onRenderControls={onRenderHeaderActions}
+      icon={image && !description ? <img src={image} /> : null}
     />
     <div
       className="slds-p-horizontal_x-large
