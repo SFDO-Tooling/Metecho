@@ -1,13 +1,18 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Checkbox from '@salesforce/design-system-react/components/checkbox';
+import Combobox from '@salesforce/design-system-react/components/combobox';
 import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
 import { useForm } from '@/components/utils';
+import { ThunkDispatch } from '@/store';
+import { fetchRepoBranches } from '@/store/repositories/actions';
 import { Repository } from '@/store/repositories/reducer';
 import { User } from '@/store/user/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -26,6 +31,10 @@ const ProjectForm = ({
   history,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
+  const [fromBranchChecked, setFromBranchChecked] = useState(false);
+  const [baseBranch, setBaseBranch] = useState('');
+  const [fetchingBranches, setFetchingBranches] = useState(false);
+  const dispatch = useDispatch<ThunkDispatch>();
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
@@ -74,10 +83,70 @@ const ProjectForm = ({
     resetForm();
   };
 
+  const handleChange = (checked: boolean) => {
+    if (checked) {
+      setFromBranchChecked(true);
+    } else {
+      setFromBranchChecked(!fromBranchChecked);
+    }
+  };
+  const fakeData = [
+    {
+      id: '1',
+      label: 'Acme',
+      subTitle: 'Account • San Francisco',
+      type: 'account',
+    },
+    {
+      id: '2',
+      label: 'Salesforce.com, Inc.',
+      subTitle: 'Account • San Francisco',
+      type: 'account',
+    },
+  ];
+  const doGetBranches = () => {
+    setFetchingBranches(true);
+    dispatch(fetchRepoBranches(repository.id)).finally(() => {
+      /* istanbul ignore else */
+      setFetchingBranches(false);
+    });
+  };
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
         <>
+          <Checkbox
+            id="project-base-branch"
+            assistiveText={{
+              label: `${i18n.t('Use existing Github branch')}`,
+            }}
+            labels={{
+              label: `${i18n.t('Use existing Github branch')}`,
+            }}
+            checked={fromBranchChecked}
+            className="slds-form-element_stacked slds-p-left_none"
+            onChange={(
+              event: React.ChangeEvent<HTMLInputElement>,
+              { checked }: { checked: boolean },
+            ) => handleChange(checked)}
+          />
+          {fromBranchChecked && (
+            <Combobox
+              id="combobox-inline-single"
+              events={{
+                // onChange: (event, { value }) => console.log(value),
+                onFocus: doGetBranches,
+              }}
+              labels={{
+                label: `${i18n.t('Select a branch to use for this project')}`,
+              }}
+              options={fakeData}
+              hasInputSpinner={fetchingBranches}
+              // selection={}
+              // value={}
+              variant="inline-listbox"
+            />
+          )}
           <Input
             id="project-name"
             label={i18n.t('Project Name')}
