@@ -6,6 +6,7 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
+import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
@@ -32,8 +33,10 @@ const ProjectForm = ({
 }: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
-  const [baseBranch, setBaseBranch] = useState('');
   const [fetchingBranches, setFetchingBranches] = useState(false);
+  const [baseBranch, setBaseBranch] = useState('');
+  const [repoBranches, setData] = useState([]); // @todo replace with branches from store
+  const [branchMenuOpen, setBranchMenuOpen] = useState(false);
   const dispatch = useDispatch<ThunkDispatch>();
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -90,27 +93,69 @@ const ProjectForm = ({
       setFromBranchChecked(!fromBranchChecked);
     }
   };
-  const fakeData = [
-    {
-      id: '1',
-      label: 'Acme',
-      subTitle: 'Account • San Francisco',
-      type: 'account',
-    },
-    {
-      id: '2',
-      label: 'Salesforce.com, Inc.',
-      subTitle: 'Account • San Francisco',
-      type: 'account',
-    },
-  ];
+  // const fakeData = [
+  //   {
+  //     id: '1',
+  //     label: 'Acme',
+  //     subTitle: 'Account • San Francisco',
+  //     type: 'account',
+  //   },
+  //   {
+  //     id: '2',
+  //     label: 'Salesforce.com, Inc.',
+  //     subTitle: 'Account • San Francisco',
+  //     type: 'account',
+  //   },
+  // ];
+
   const doGetBranches = () => {
-    setFetchingBranches(true);
-    dispatch(fetchRepoBranches(repository.id)).finally(() => {
-      /* istanbul ignore else */
-      setFetchingBranches(false);
-    });
+    if (repoBranches.length) {
+      setBranchMenuOpen(true);
+    } else {
+      if (branchMenuOpen) {
+        setBranchMenuOpen(false);
+      }
+      setFetchingBranches(true);
+      dispatch(fetchRepoBranches(repository.id)).finally(() => {
+        /* istanbul ignore else */
+        setData([]);
+        setFetchingBranches(false);
+        setBranchMenuOpen(true);
+      });
+    }
   };
+
+  const handleBranchSelection = (selection: any) => {
+    setBaseBranch(selection[0].label);
+    setBranchMenuOpen(false);
+  };
+
+  const resetBranch = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setBranchMenuOpen(false);
+    setFromBranchChecked(false);
+  };
+
+  const noOptionsFoundText = (
+    <p data-form="project-create">
+      <Trans i18nKey="createProjectHelpText">
+        There aren&apos;t any available branches at this time.{' '}
+        <Button
+          label={i18n.t('Check Again')}
+          variant="base"
+          onClick={doGetBranches}
+        />
+        {''} to refresh this list or{' '}
+        <Button
+          label={i18n.t('start from a new branch')}
+          variant="link"
+          onClick={resetBranch}
+        />
+        .
+      </Trans>
+    </p>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
@@ -133,18 +178,21 @@ const ProjectForm = ({
           {fromBranchChecked && (
             <Combobox
               id="combobox-inline-single"
+              isOpen={branchMenuOpen}
               events={{
-                // onChange: (event, { value }) => console.log(value),
-                onFocus: doGetBranches,
+                onRequestOpen: doGetBranches,
+                onSelect: (event: React.MouseEvent, data: any) =>
+                  handleBranchSelection(data.selection),
               }}
               labels={{
                 label: `${i18n.t('Select a branch to use for this project')}`,
+                noOptionsFound: noOptionsFoundText,
               }}
-              options={fakeData}
+              options={repoBranches}
               hasInputSpinner={fetchingBranches}
-              // selection={}
-              // value={}
+              value={baseBranch}
               variant="inline-listbox"
+              classNameContainer="repo-branch"
             />
           )}
           <Input

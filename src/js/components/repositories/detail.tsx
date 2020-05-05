@@ -3,6 +3,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -115,6 +116,15 @@ const RepositoryDetail = (props: RouteComponentProps) => {
                 </>
               )}
             </h2>
+            <Trans i18nKey="createProjectHelpText">
+              <p className="slds-p-bottom_medium slds-text-color_weak">
+                Projects in Metecho are the high-level features that can be
+                broken down into smaller parts when creating Tasks. You can
+                create a branch new project or create a project based on an
+                existing GitHub branch. Ever project requires a unique project
+                name, which becomes the branch name in Github.
+              </p>
+            </Trans>{' '}
             <ProjectForm
               user={user}
               repository={repository}
