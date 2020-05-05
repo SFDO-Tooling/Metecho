@@ -143,22 +143,3 @@ export const repoError = ({
 
   return dispatch(updateRepo(model));
 };
-
-export const fetchRepoBranches = (repoId: string): ThunkResult => async (
-  dispatch,
-) => {
-  dispatch({ type: 'FETCH_REPO_BRANCHES_REQUESTED', payload: repoId });
-  try {
-    const response = await apiFetch({
-      url: `${window.api_urls.repository_detail(repoId)}/feature_branches`,
-      dispatch,
-    });
-    return dispatch({
-      type: 'FETCH_REPO_BRANCHES_REQUESTED',
-      payload: { response },
-    });
-  } catch (err) {
-    dispatch({ type: 'REFRESH_GH_USERS_FAILED', payload: repoId });
-    throw err;
-  }
-};

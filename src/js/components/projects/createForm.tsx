@@ -13,9 +13,9 @@ import { AnyAction } from 'redux';
 
 import { useForm } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { fetchRepoBranches } from '@/store/repositories/actions';
 import { Repository } from '@/store/repositories/reducer';
 import { User } from '@/store/user/reducer';
+import apiFetch from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
@@ -32,10 +32,11 @@ const ProjectForm = ({
   history,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(startOpen);
+  // state related to setting base branch on project creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
   const [baseBranch, setBaseBranch] = useState('');
-  const [repoBranches, setData] = useState([]); // @todo replace with branches from store
+  const [repoBranches, setRepoBranches] = useState([]);
   const [branchMenuOpen, setBranchMenuOpen] = useState(false);
   const dispatch = useDispatch<ThunkDispatch>();
 
@@ -93,22 +94,8 @@ const ProjectForm = ({
       setFromBranchChecked(!fromBranchChecked);
     }
   };
-  // const fakeData = [
-  //   {
-  //     id: '1',
-  //     label: 'Acme',
-  //     subTitle: 'Account • San Francisco',
-  //     type: 'account',
-  //   },
-  //   {
-  //     id: '2',
-  //     label: 'Salesforce.com, Inc.',
-  //     subTitle: 'Account • San Francisco',
-  //     type: 'account',
-  //   },
-  // ];
 
-  const doGetBranches = () => {
+  const doGetBranches = async () => {
     if (repoBranches.length) {
       setBranchMenuOpen(true);
     } else {
@@ -116,12 +103,17 @@ const ProjectForm = ({
         setBranchMenuOpen(false);
       }
       setFetchingBranches(true);
-      dispatch(fetchRepoBranches(repository.id)).finally(() => {
-        /* istanbul ignore else */
-        setData([]);
-        setFetchingBranches(false);
-        setBranchMenuOpen(true);
+      // fetching feature branches here when option selected,
+      // in lieu of storing in store...
+      const baseBranches = await apiFetch({
+        url: `${window.api_urls.repository_detail(
+          repository.id,
+        )}/feature_branches`,
+        dispatch,
       });
+      setRepoBranches(baseBranches);
+      setFetchingBranches(false);
+      setBranchMenuOpen(true);
     }
   };
 
@@ -138,24 +130,26 @@ const ProjectForm = ({
 
   const noOptionsFoundText = (
     <p data-form="project-create">
-      <Trans i18nKey="createProjectHelpText">
-        There aren&apos;t any available branches at this time.{' '}
-        <Button
-          label={i18n.t('Check Again')}
-          variant="base"
-          onClick={doGetBranches}
-        />
-        {''} to refresh this list or{' '}
-        <Button
-          label={i18n.t('start from a new branch')}
-          variant="link"
-          onClick={resetBranch}
-        />
-        .
-      </Trans>
+      {i18n.t("There aren't any available branches at this time.")}{' '}
+      <Button
+        label={i18n.t('Check Again')}
+        variant="base"
+        onClick={doGetBranches}
+      />
+      {i18n.t('to refresh this list or')}{' '}
+      <Button
+        label={i18n.t('start from a new branch')}
+        variant="link"
+        onClick={resetBranch}
+      />
+      .
     </p>
   );
 
+  const branchOptions = repoBranches.map((item, index) => ({
+    id: `${index + 1}`,
+    label: item,
+  }));
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
@@ -188,7 +182,7 @@ const ProjectForm = ({
                 label: `${i18n.t('Select a branch to use for this project')}`,
                 noOptionsFound: noOptionsFoundText,
               }}
-              options={repoBranches}
+              options={branchOptions}
               hasInputSpinner={fetchingBranches}
               value={baseBranch}
               variant="inline-listbox"
