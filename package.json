@@ -119,7 +119,7 @@
     "eslint-plugin-simple-import-sort": "^5.0.3",
     "fetch-mock": "^9.5.0",
     "file-loader": "^6.0.0",
-    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-plugin": "^4.3.0",
     "i18next-scanner-webpack": "^0.4.5",
     "jest": "^26.0.1",
     "jest-junit": "^10.0.0",
@@ -148,7 +148,6 @@
     "webpack-merge": "^4.2.2"
   },
   "resolutions": {
-    "@types/vfile-message": "1.0.1",
     "minimist": "^1.2.5",
     "webpack-dev-server/yargs": "~13.2"
   }
