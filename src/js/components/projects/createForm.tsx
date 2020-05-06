@@ -1,6 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Combobox from '@salesforce/design-system-react/components/combobox';
+import comboboxFilter from '@salesforce/design-system-react/components/combobox/filter';
 import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
@@ -37,6 +38,7 @@ const ProjectForm = ({
   const [baseBranch, setBaseBranch] = useState('');
   const [repoBranches, setRepoBranches] = useState([]);
   const [branchMenuOpen, setBranchMenuOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
   const dispatch = useDispatch<ThunkDispatch>();
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -117,16 +119,24 @@ const ProjectForm = ({
   };
 
   const handleBranchSelection = (selection: any) => {
+    setInputValue('');
     setBaseBranch(selection[0].label);
     setBranchMenuOpen(false);
   };
 
   const resetBranch = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    setInputValue('');
     setBranchMenuOpen(false);
     setFromBranchChecked(false);
   };
 
+  const handleBranchChange = (value: string) => {
+    if (baseBranch) {
+      setBaseBranch(inputValue);
+    }
+    setInputValue(value);
+  };
   const noOptionsFoundText = (
     <p data-form="project-create">
       {i18n.t("There aren't any available branches at this time.")}{' '}
@@ -149,6 +159,7 @@ const ProjectForm = ({
     id: `${index + 1}`,
     label: item,
   }));
+
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
@@ -176,15 +187,27 @@ const ProjectForm = ({
                 onRequestOpen: doGetBranches,
                 onSelect: (event: React.MouseEvent, data: any) =>
                   handleBranchSelection(data.selection),
+                onChange: (
+                  event: React.FormEvent<HTMLInputElement>,
+                  {
+                    value,
+                  }: {
+                    value: string;
+                  },
+                ) => handleBranchChange(value),
               }}
               labels={{
                 label: `${i18n.t('Select a branch to use for this project')}`,
                 noOptionsFound: noOptionsFoundText,
               }}
               menuItemVisibleLength={5}
-              options={branchOptions}
+              options={comboboxFilter({
+                inputValue,
+                options: branchOptions,
+                selection: [baseBranch],
+              })}
               hasInputSpinner={fetchingBranches}
-              value={baseBranch}
+              value={baseBranch ? baseBranch : inputValue}
               variant="inline-listbox"
               classNameContainer="repo-branch slds-form-element_stacked  slds-p-left_none"
             />
