@@ -86,7 +86,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   let devOrg: Org | null | undefined;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
-    orgHasChanges = Boolean(devOrg?.has_unsaved_changes);
+    orgHasChanges =
+      (devOrg?.total_unsaved_changes || 0) -
+        (devOrg?.total_ignored_changes || 0) >
+      0;
     userIsOwner = Boolean(
       userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
     );
@@ -102,14 +105,14 @@ const TaskDetail = (props: RouteComponentProps) => {
     if (changesFetched && devOrg) {
       setFetchingChanges(false);
       /* istanbul ignore else */
-      if (devOrg.has_unsaved_changes && !submitModalOpen) {
+      if (orgHasChanges && !submitModalOpen) {
         setCaptureModalOpen(true);
         setSubmitModalOpen(false);
         setEditModalOpen(false);
         setDeleteModalOpen(false);
       }
     }
-  }, [fetchingChanges, devOrg, submitModalOpen]);
+  }, [fetchingChanges, devOrg, orgHasChanges, submitModalOpen]);
 
   // If the task slug changes, make sure EditTask modal is closed
   useEffect(() => {
@@ -364,11 +367,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         )}
         {devOrg && userIsOwner && orgHasChanges && (
           <CaptureModal
-            taskId={task.id}
-            orgId={devOrg.id}
-            changeset={devOrg.unsaved_changes}
-            ignoredChanges={devOrg.ignored_changes}
-            directories={devOrg.valid_target_directories}
+            org={devOrg}
             isOpen={captureModalOpen}
             toggleModal={setCaptureModalOpen}
           />

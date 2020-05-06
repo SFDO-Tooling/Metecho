@@ -9,8 +9,8 @@ export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
 
 export const getOrgStatusMsg = (org: Org) => {
-  if (org.has_unsaved_changes) {
-    const totalChanges = org.total_unsaved_changes;
+  const totalChanges = org.total_unsaved_changes - org.total_ignored_changes;
+  if (totalChanges > 0) {
     /* istanbul ignore else */
     if (totalChanges) {
       const statusMsgDefault = `has ${totalChanges} unretrieved ${pluralize(

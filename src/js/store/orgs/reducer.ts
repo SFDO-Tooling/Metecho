@@ -26,6 +26,9 @@ export interface Org extends MinimalOrg {
   unsaved_changes: Changeset;
   has_unsaved_changes: boolean;
   total_unsaved_changes: number;
+  ignored_changes: Changeset;
+  has_ignored_changes: boolean;
+  total_ignored_changes: number;
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
   currently_refreshing_org: boolean;
@@ -34,7 +37,6 @@ export interface Org extends MinimalOrg {
   has_been_visited: boolean;
   valid_target_directories: TargetDirectories;
   last_checked_unsaved_changes_at: string | null;
-  ignored_changes: Changeset;
 }
 
 export interface TargetDirectories {
