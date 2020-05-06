@@ -181,6 +181,7 @@ const ProjectForm = ({
                 label: `${i18n.t('Select a branch to use for this project')}`,
                 noOptionsFound: noOptionsFoundText,
               }}
+              menuItemVisibleLength={5}
               options={branchOptions}
               hasInputSpinner={fetchingBranches}
               value={baseBranch}
