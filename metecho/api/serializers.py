@@ -125,6 +125,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "repository",
             "branch_url",
             "branch_diff_url",
+            "branch_name",
             "has_unmerged_commits",
             "currently_creating_pr",
             "pr_url",
@@ -155,6 +156,25 @@ class ProjectSerializer(serializers.ModelSerializer):
             ),
             GitHubUserValidator(parent="repository"),
         )
+
+    def validate_branch_name(self, value):
+        if getattr(self.instance, "branch_name", None) != value:
+            if "__" in value:
+                raise serializers.ValidationError(
+                    _("Non-feature branch names not allowed.")
+                )
+
+            already_used_branch_name = (
+                Project.objects.exclude(pk=getattr(self.instance, "pk", None))
+                .filter(branch_name=value)
+                .exists()
+            )
+            if already_used_branch_name:
+                raise serializers.ValidationError(
+                    _("This branch name is already in use.")
+                )
+
+            return value
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
         repo = obj.repository

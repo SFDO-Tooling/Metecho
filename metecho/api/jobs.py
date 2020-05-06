@@ -47,14 +47,7 @@ def get_user_facing_url(*, path):
     return furl(f"{scheme}://{domain}").set(path=path).url
 
 
-def _create_branches_on_github(*, user, repo_id, project, task, originating_user_id):
-    """
-    Expects to be called in the context of a local github checkout.
-    """
-    repository = get_repo_info(user, repo_id=repo_id)
-
-    # Make project branch, with latest from project:
-    project.refresh_from_db()
+def project_create_branch(*, project, repository, user, repo_id, originating_user_id):
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
@@ -75,7 +68,24 @@ def _create_branches_on_github(*, user, repo_id, project, task, originating_user
         )
         project.branch_name = project_branch_name
         project.finalize_project_update(originating_user_id=originating_user_id)
+    return project_branch_name
 
+
+def _create_branches_on_github(*, user, repo_id, project, task, originating_user_id):
+    """
+    Expects to be called in the context of a local github checkout.
+    """
+    repository = get_repo_info(user, repo_id=repo_id)
+
+    # Make project branch, with latest from project:
+    project.refresh_from_db()
+    project_branch_name = project_create_branch(
+        project=project,
+        repository=repository,
+        user=user,
+        repo_id=repo_id,
+        originating_user_id=originating_user_id,
+    )
     # Make task branch, with latest from task:
     task.refresh_from_db()
     if task.branch_name:

@@ -176,7 +176,8 @@ class TestHookView:
         settings.GITHUB_HOOK_SECRET = b""
         repo = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
-        project = project_factory(repository=repo, branch_name="test-project")
+        with patch("metecho.api.models.gh"):
+            project = project_factory(repository=repo, branch_name="test-project")
         task = task_factory(project=project, branch_name="test-task")
         with patch("metecho.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
