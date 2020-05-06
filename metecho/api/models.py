@@ -413,6 +413,7 @@ class Project(
 
     def save(self, *args, **kwargs):
         self.update_status()
+        self.create_gh_branch()
         return super().save(*args, **kwargs)
 
     def subscribable_by(self, user):  # pragma: nocover
@@ -450,6 +451,15 @@ class Project(
         return self.branch_name
 
     # end CreatePrMixin configuration
+
+    def create_gh_branch(self):
+        if not self.id and self.branch_name:  # i.e. "newly created"
+            repository = gh.get_repo_info(None, repo_id=self.repository.repo_id)
+            gh.try_to_make_branch(
+                repository,
+                new_branch=self.branch_name,
+                base_branch=repository.default_branch,
+            )
 
     def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)

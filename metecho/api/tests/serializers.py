@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -53,7 +54,9 @@ class TestProjectSerializer:
         )
         assert serializer.is_valid()
 
-        with patch("metecho.api.gh.gh_given_user") as gh_given_user:
+        with ExitStack() as stack:
+            gh_given_user = stack.enter_context(patch("metecho.api.gh.gh_given_user"))
+            stack.enter_context(patch("metecho.api.models.gh"))
             repo = MagicMock()
             repo.url = "test"
             gh = MagicMock()
@@ -71,12 +74,38 @@ class TestProjectSerializer:
             == "<p>Test <code>project</code></p>"
         )
 
-    def test_branch_url__present(self, project_factory):
-        project = project_factory(
-            name="Test project",
-            description="Test `project`",
-            branch_name="test-project",
+    def test_validate_branch_name__non_feature(self, repository_factory):
+        repo = repository_factory()
+        serializer = ProjectSerializer(
+            data={
+                "branch_name": "test__non-feature",
+                "name": "Test",
+                "repository": str(repo.id),
+            }
         )
+        assert not serializer.is_valid()
+        assert "branch_name" in serializer.errors
+
+    def test_validate_branch_name__already_used(
+        self, repository_factory, project_factory
+    ):
+        repo = repository_factory()
+        with patch("metecho.api.models.gh"):
+            project_factory(branch_name="test")
+
+        serializer = ProjectSerializer(
+            data={"branch_name": "test", "name": "Test", "repository": str(repo.id)}
+        )
+        assert not serializer.is_valid()
+        assert "branch_name" in serializer.errors
+
+    def test_branch_url__present(self, project_factory):
+        with patch("metecho.api.models.gh"):
+            project = project_factory(
+                name="Test project",
+                description="Test `project`",
+                branch_name="test-project",
+            )
         serializer = ProjectSerializer(project)
         owner = project.repository.repo_owner
         name = project.repository.repo_name
@@ -220,7 +249,8 @@ class TestTaskSerializer:
         assert serializer.data["branch_url"] is None
 
     def test_branch_diff_url__present(self, project_factory, task_factory):
-        project = project_factory(branch_name="test-project")
+        with patch("metecho.api.models.gh"):
+            project = project_factory(branch_name="test-project")
         task = task_factory(project=project, branch_name="test-task")
         serializer = TaskSerializer(task)
         owner = task.project.repository.repo_owner

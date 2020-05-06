@@ -69,7 +69,9 @@ class TestCreateBranchesOnGitHub:
         self, user_factory, project_factory, task_factory
     ):
         user = user_factory()
-        project = project_factory(branch_name="pepin")
+        with patch("metecho.api.models.gh") as gh:
+            project = project_factory(branch_name="pepin")
+            assert gh.try_to_make_branch.called
         task = task_factory(branch_name="charlemagne", project=project)
         with ExitStack() as stack:
             global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
