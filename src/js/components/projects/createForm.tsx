@@ -185,7 +185,7 @@ const ProjectForm = ({
               hasInputSpinner={fetchingBranches}
               value={baseBranch}
               variant="inline-listbox"
-              classNameContainer="repo-branch"
+              classNameContainer="repo-branch slds-form-element_stacked  slds-p-left_none"
             />
           )}
           <Input

@@ -120,9 +120,9 @@ const RepositoryDetail = (props: RouteComponentProps) => {
               <p className="slds-p-bottom_medium slds-text-color_weak">
                 Projects in Metecho are the high-level features that can be
                 broken down into smaller parts when creating Tasks. You can
-                create a branch new project or create a project based on an
-                existing GitHub branch. Ever project requires a unique project
-                name, which becomes the branch name in Github.
+                create a new project or create a project based on an existing
+                GitHub branch. Every project requires a unique project name,
+                which becomes the branch name in Github.
               </p>
             </Trans>{' '}
             <ProjectForm
