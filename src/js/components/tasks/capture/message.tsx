@@ -63,41 +63,37 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
         <div data-form="task-capture">
           {Object.keys(inputs.changes)
             .sort()
-            .map((groupName, index) => {
-              const children = inputs.changes[groupName];
-              const handleThisPanelToggle = () => handlePanelToggle(groupName);
-              return (
-                <Accordion
-                  key={groupName}
-                  className={classNames('grow-inner-item', {
-                    'light-bordered-row': index > 0,
-                  })}
+            .map((groupName, index) => (
+              <Accordion
+                key={groupName}
+                className={classNames('grow-inner-item', {
+                  'light-bordered-row': index > 0,
+                })}
+              >
+                <AccordionPanel
+                  expanded={Boolean(expandedPanels[groupName])}
+                  key={`${groupName}-panel`}
+                  id={`group-${index}`}
+                  onTogglePanel={() => handlePanelToggle(groupName)}
+                  title={groupName}
+                  summary={
+                    <span className="form-grid slds-text-body_regular">
+                      <span>{groupName}</span>
+                      <span>({inputs.changes[groupName].length})</span>
+                    </span>
+                  }
                 >
-                  <AccordionPanel
-                    expanded={Boolean(expandedPanels[groupName])}
-                    key={`${groupName}-panel`}
-                    id={`group-${index}`}
-                    onTogglePanel={handleThisPanelToggle}
-                    title={groupName}
-                    summary={
-                      <span className="form-grid slds-text-body_regular">
-                        <span>{groupName}</span>
-                        <span>({children.length})</span>
-                      </span>
-                    }
-                  >
-                    {children.sort().map((change) => (
-                      <div
-                        key={`${groupName}-${change}`}
-                        className="slds-p-left_xx-large"
-                      >
-                        {change}
-                      </div>
-                    ))}
-                  </AccordionPanel>
-                </Accordion>
-              );
-            })}
+                  {inputs.changes[groupName].sort().map((change) => (
+                    <div
+                      key={`${groupName}-${change}`}
+                      className="slds-p-left_xx-large"
+                    >
+                      {change}
+                    </div>
+                  ))}
+                </AccordionPanel>
+              </Accordion>
+            ))}
         </div>
       </ModalCard>
     </form>
