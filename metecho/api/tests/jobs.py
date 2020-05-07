@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
+from github3.exceptions import NotFoundError
 from simple_salesforce.exceptions import SalesforceGeneralError
 
 from ..jobs import (
@@ -65,13 +66,21 @@ class TestCreateBranchesOnGitHub:
 
             assert repository.create_branch_ref.called
 
+    def test_create_branches_on_github__missing(self, project_factory):
+        with patch("metecho.api.models.gh") as gh:
+            gh.get_repo_info.return_value = MagicMock(
+                **{"branch.side_effect": NotFoundError(MagicMock())}
+            )
+            project_factory(branch_name="placeholder")
+            assert gh.try_to_make_branch.called
+
     def test_create_branches_on_github__already_there(
         self, user_factory, project_factory, task_factory
     ):
         user = user_factory()
         with patch("metecho.api.models.gh") as gh:
             project = project_factory(branch_name="pepin")
-            assert gh.try_to_make_branch.called
+            assert not gh.try_to_make_branch.called
         task = task_factory(branch_name="charlemagne", project=project)
         with ExitStack() as stack:
             global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
