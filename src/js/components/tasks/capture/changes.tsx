@@ -222,114 +222,119 @@ const ChangesForm = ({
       </ModalCard>
       {totalIgnored > 0 && (
         <ModalCard noBodyPadding>
-          <div className={classNames({ 'success-highlight': ignoredSuccess })}>
-            <div
-              className={classNames(
-                'form-grid',
-                'slds-m-left_xx-small',
-                'slds-p-left_x-large',
-                'slds-p-vertical_x-small',
-                'slds-p-right_medium',
-              )}
+          <Accordion
+            className={classNames('accordion-no-padding', {
+              'success-highlight': ignoredSuccess,
+            })}
+          >
+            <AccordionPanel
+              expanded={Boolean(expandedPanels['all-ignored'])}
+              id="all-ignored"
+              onTogglePanel={() => handlePanelToggle('all-ignored')}
+              panelContentActions={
+                <div className="form-grid">
+                  <div>
+                    <Checkbox
+                      id="select-all-ignored"
+                      labels={{
+                        label: i18n.t('Select All Ignored Changes'),
+                      }}
+                      className="slds-float_left"
+                      checked={allIgnoredChecked}
+                      indeterminate={Boolean(
+                        !allIgnoredChecked && !noIgnoredChecked,
+                      )}
+                      onChange={handleSelectAllIgnored}
+                    />
+                    <Tooltip
+                      content={i18n.t(
+                        'Changes placed here will remain ignored until you un-ignore them.',
+                      )}
+                      position="overflowBoundaryElement"
+                      align="top left"
+                      dialogClassName="modal-tooltip"
+                    />
+                  </div>
+                  <span className="slds-text-body_regular slds-p-top_xxx-small">
+                    ({totalIgnored})
+                  </span>
+                </div>
+              }
+              summary=""
             >
-              <div>
-                <Checkbox
-                  id="select-all-ignored"
-                  labels={{
-                    label: i18n.t('Select All Ignored Changes'),
-                  }}
-                  className="slds-float_left"
-                  checked={allIgnoredChecked}
-                  indeterminate={Boolean(
-                    !allIgnoredChecked && !noIgnoredChecked,
-                  )}
-                  onChange={handleSelectAllIgnored}
-                />
-                <Tooltip
-                  content={i18n.t(
-                    'Changes placed here will remain ignored until you un-ignore them.',
-                  )}
-                  position="overflowBoundaryElement"
-                  align="top left"
-                  dialogClassName="modal-tooltip"
-                />
-              </div>
-              <span className="slds-text-body_regular slds-p-top_xxx-small">
-                ({totalIgnored})
-              </span>
-            </div>
-            {Object.keys(ignoredChanges)
-              .sort()
-              .map((groupName, index) => {
-                const uniqueGroupName = `ignored-${groupName}`;
-                const children = ignoredChanges[groupName];
-                const handleThisPanelToggle = () =>
-                  handlePanelToggle(uniqueGroupName);
-                const handleSelectThisGroup = (
-                  event: React.ChangeEvent<HTMLInputElement>,
-                  { checked }: { checked: boolean },
-                ) => handleSelectGroup('ignored', groupName, checked);
-                let checkedChildren = 0;
-                for (const child of children) {
-                  if (ignoredChecked[groupName]?.includes(child)) {
-                    checkedChildren = checkedChildren + 1;
+              {Object.keys(ignoredChanges)
+                .sort()
+                .map((groupName, index) => {
+                  const uniqueGroupName = `ignored-${groupName}`;
+                  const children = ignoredChanges[groupName];
+                  const handleThisPanelToggle = () =>
+                    handlePanelToggle(uniqueGroupName);
+                  const handleSelectThisGroup = (
+                    event: React.ChangeEvent<HTMLInputElement>,
+                    { checked }: { checked: boolean },
+                  ) => handleSelectGroup('ignored', groupName, checked);
+                  let checkedChildren = 0;
+                  for (const child of children) {
+                    if (ignoredChecked[groupName]?.includes(child)) {
+                      checkedChildren = checkedChildren + 1;
+                    }
                   }
-                }
 
-                return (
-                  <Accordion
-                    key={uniqueGroupName}
-                    className="light-bordered-row"
-                  >
-                    <AccordionPanel
-                      expanded={Boolean(expandedPanels[uniqueGroupName])}
-                      key={`${uniqueGroupName}-panel`}
-                      id={`ignored-group-${index}`}
-                      onTogglePanel={handleThisPanelToggle}
-                      title={groupName}
-                      panelContentActions={
-                        <div className="form-grid">
-                          <Checkbox
-                            labels={{ label: groupName }}
-                            checked={checkedChildren === children.length}
-                            indeterminate={Boolean(
-                              checkedChildren &&
-                                checkedChildren !== children.length,
-                            )}
-                            onChange={handleSelectThisGroup}
-                          />
-                          <span
-                            className="slds-text-body_regular
-                            slds-p-top_xxx-small"
-                          >
-                            ({children.length})
-                          </span>
-                        </div>
-                      }
-                      summary=""
+                  return (
+                    <Accordion
+                      key={uniqueGroupName}
+                      className="light-bordered-row"
                     >
-                      {children.sort().map((change) => (
-                        <Checkbox
-                          key={`${uniqueGroupName}-${change}`}
-                          labels={{
-                            label: change,
-                          }}
-                          className="slds-p-left_xx-large"
-                          name="ignored_changes"
-                          checked={Boolean(
-                            ignoredChecked[groupName]?.includes(change),
-                          )}
-                          onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>,
-                            { checked }: { checked: boolean },
-                          ) => handleChange({ groupName, change, checked })}
-                        />
-                      ))}
-                    </AccordionPanel>
-                  </Accordion>
-                );
-              })}
-          </div>
+                      <AccordionPanel
+                        expanded={Boolean(expandedPanels[uniqueGroupName])}
+                        key={`${uniqueGroupName}-panel`}
+                        id={`ignored-group-${index}`}
+                        onTogglePanel={handleThisPanelToggle}
+                        title={groupName}
+                        panelContentActions={
+                          <div className="form-grid">
+                            <Checkbox
+                              labels={{ label: groupName }}
+                              checked={checkedChildren === children.length}
+                              indeterminate={Boolean(
+                                checkedChildren &&
+                                  checkedChildren !== children.length,
+                              )}
+                              onChange={handleSelectThisGroup}
+                            />
+                            <span
+                              className="slds-text-body_regular
+                            slds-p-top_xxx-small"
+                            >
+                              ({children.length})
+                            </span>
+                          </div>
+                        }
+                        summary=""
+                      >
+                        {children.sort().map((change) => (
+                          <Checkbox
+                            key={`${uniqueGroupName}-${change}`}
+                            labels={{
+                              label: change,
+                            }}
+                            className="slds-p-left_xx-large"
+                            name="ignored_changes"
+                            checked={Boolean(
+                              ignoredChecked[groupName]?.includes(change),
+                            )}
+                            onChange={(
+                              event: React.ChangeEvent<HTMLInputElement>,
+                              { checked }: { checked: boolean },
+                            ) => handleChange({ groupName, change, checked })}
+                          />
+                        ))}
+                      </AccordionPanel>
+                    </Accordion>
+                  );
+                })}
+            </AccordionPanel>
+          </Accordion>
         </ModalCard>
       )}
     </form>

@@ -37,4 +37,14 @@
       flex-grow: 1;
     }
   }
+
+  .accordion-no-padding > .slds-accordion__list-item > .slds-is-open {
+    padding: 0;
+
+    & > .slds-accordion__summary {
+      padding-top: $spacing-x-small;
+      padding-left: $spacing-medium;
+      padding-right: $spacing-medium;
+    }
+  }
 }
