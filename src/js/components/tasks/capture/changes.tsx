@@ -264,6 +264,7 @@ const ChangesForm = ({
             <AccordionPanel
               expanded={Boolean(expandedPanels['all-ignored'])}
               id="all-ignored"
+              title={i18n.t('All Ignored Changes')}
               onTogglePanel={() => handlePanelToggle('all-ignored')}
               panelContentActions={
                 <div className="form-grid">

@@ -374,7 +374,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         )}
         {devOrg &&
           userIsOwner &&
-          (orgHasChanges || devOrg.total_ignored_changes > 0) && (
+          (orgHasChanges || devOrg.has_ignored_changes) && (
             <CaptureModal
               org={devOrg}
               isOpen={captureModalOpen}

@@ -300,6 +300,66 @@ describe('reducer', () => {
     });
   });
 
+  describe('UPDATE_OBJECT_SUCCEEDED', () => {
+    test('updates org', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+        has_unsaved_changes: false,
+      };
+      const changedOrg = { ...org, has_unsaved_changes: true };
+      const expected = {
+        'task-1': {
+          Dev: changedOrg,
+          QA: null,
+        },
+      };
+      const actual = reducer(
+        {
+          'task-1': {
+            Dev: org,
+            QA: null,
+          },
+        },
+        {
+          type: 'UPDATE_OBJECT_SUCCEEDED',
+          payload: {
+            objectType: 'scratch_org',
+            object: changedOrg,
+          },
+        },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if unknown objectType', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+        has_unsaved_changes: false,
+      };
+      const changedOrg = { ...org, has_unsaved_changes: true };
+      const expected = {
+        'task-1': {
+          Dev: org,
+          QA: null,
+        },
+      };
+      const actual = reducer(expected, {
+        type: 'UPDATE_OBJECT_SUCCEEDED',
+        payload: {
+          objectType: 'foobar',
+          object: changedOrg,
+        },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('REFETCH_ORG_STARTED', () => {
     test('sets currently_refreshing_changes: true', () => {
       const org = {

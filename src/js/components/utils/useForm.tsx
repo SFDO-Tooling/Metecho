@@ -91,11 +91,12 @@ export default ({
     e.preventDefault();
     setErrors({});
     if (action) {
-      action()
+      return action()
         .then(success || handleSuccess)
         .catch(catchError);
-    } else if (update) {
-      dispatch(
+    }
+    if (update) {
+      return dispatch(
         updateObject({
           objectType,
           url,
@@ -108,22 +109,21 @@ export default ({
       )
         .then(handleSuccess)
         .catch(catchError);
-    } else {
-      dispatch(
-        createObject({
-          objectType,
-          url,
-          data: {
-            ...additionalData,
-            ...inputs,
-          },
-          hasForm: true,
-          shouldSubscribeToObject,
-        }),
-      )
-        .then(handleSuccess)
-        .catch(catchError);
     }
+    return dispatch(
+      createObject({
+        objectType,
+        url,
+        data: {
+          ...additionalData,
+          ...inputs,
+        },
+        hasForm: true,
+        shouldSubscribeToObject,
+      }),
+    )
+      .then(handleSuccess)
+      .catch(catchError);
   };
 
   return {

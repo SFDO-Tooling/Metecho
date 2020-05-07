@@ -144,7 +144,7 @@ const OrgInfo = ({
       /* istanbul ignore else */
       if (org) {
         let ignoredChangesMsg = null;
-        if (ownedByCurrentUser && org.total_ignored_changes > 0) {
+        if (ownedByCurrentUser && org.has_ignored_changes) {
           ignoredChangesMsg = (
             <>
               {' ('}

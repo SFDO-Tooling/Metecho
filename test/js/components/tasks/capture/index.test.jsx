@@ -3,7 +3,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import CaptureModal from '@/components/tasks/capture';
-import { createObject } from '@/store/actions';
+import { createObject, updateObject } from '@/store/actions';
 
 import { renderWithRedux, storeWithThunk } from '../../../utils';
 
@@ -12,9 +12,13 @@ jest.mock('@/store/actions');
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
+updateObject.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 
 afterEach(() => {
   createObject.mockClear();
+  updateObject.mockClear();
 });
 
 const defaultChangeset = {
@@ -22,35 +26,41 @@ const defaultChangeset = {
   Buz: ['Baz', 'Bing'],
 };
 
+const defaultIgnored = {
+  Bang: ['Bazinga'],
+};
+
+const defaultDirs = { config: ['foo/bar'], pre: ['buz/baz'] };
+
+const defaultOrg = {
+  id: 'org-id',
+  unsaved_changes: defaultChangeset,
+  ignored_changes: defaultIgnored,
+  valid_target_directories: defaultDirs,
+};
+
 describe('<CaptureModal/>', () => {
   const setup = (options = {}) => {
     const defaults = {
-      changeset: defaultChangeset,
-      directories: { config: ['foo/bar'], pre: ['buz/baz'] },
+      org: defaultOrg,
       rerender: false,
     };
     const opts = Object.assign({}, defaults, options);
-    const toggleModal = jest.fn();
+    const closeModal = jest.fn();
     const result = renderWithRedux(
       <MemoryRouter>
-        <CaptureModal
-          orgId="org-id"
-          changeset={opts.changeset}
-          directories={opts.directories}
-          isOpen
-          toggleModal={toggleModal}
-        />
+        <CaptureModal org={opts.org} isOpen closeModal={closeModal} />
       </MemoryRouter>,
       {},
       storeWithThunk,
       opts.rerender,
       opts.store,
     );
-    return { ...result, toggleModal };
+    return { ...result, closeModal };
   };
 
   test('can navigate forward/back, close modal', () => {
-    const { getByText, toggleModal } = setup();
+    const { getByText, closeModal } = setup();
 
     expect(getByText('Select the location to retrieve changes')).toBeVisible();
 
@@ -64,19 +74,22 @@ describe('<CaptureModal/>', () => {
 
     fireEvent.click(getByText('Close'));
 
-    expect(toggleModal).toHaveBeenCalledTimes(1);
+    expect(closeModal).toHaveBeenCalledTimes(1);
   });
 
   test('updates default fields when props change', () => {
     const { getByLabelText, queryByLabelText, store, rerender } = setup({
-      directories: { source: ['src'] },
+      org: { ...defaultOrg, valid_target_directories: { source: ['src'] } },
     });
 
     expect(getByLabelText('src')).toBeChecked();
     expect(queryByLabelText('force-app')).toBeNull();
 
     setup({
-      directories: { source: ['force-app'] },
+      org: {
+        ...defaultOrg,
+        valid_target_directories: { source: ['force-app'] },
+      },
       store,
       rerender,
     });
@@ -92,7 +105,7 @@ describe('<CaptureModal/>', () => {
       // Click forward to the select-changes modal:
       fireEvent.click(getByText('Save & Next'));
 
-      const selectAll = getByLabelText('Select All Changes');
+      const selectAll = getByLabelText('All Changes');
       fireEvent.click(selectAll);
       // Click forward to the commit-message modal:
       fireEvent.click(getByText('Save & Next'));
@@ -109,12 +122,80 @@ describe('<CaptureModal/>', () => {
         url: window.api_urls.scratch_org_commit('org-id'),
         data: {
           commit_message: 'My Commit',
-          ignored: {},
           changes: defaultChangeset,
           target_directory: 'src',
         },
         hasForm: true,
         shouldSubscribeToObject: false,
+      });
+    });
+  });
+
+  describe('form secondary submit', () => {
+    test('updates ignored changes', () => {
+      const { getByText, getByLabelText } = setup();
+
+      // Click forward to the select-changes modal:
+      fireEvent.click(getByText('Save & Next'));
+
+      const selectAll = getByLabelText('All Changes');
+      fireEvent.click(selectAll);
+      fireEvent.click(getByText('Ignore Selected Changes'));
+
+      expect(getByText('Saving Ignored Changes…')).toBeVisible();
+      expect(createObject).not.toHaveBeenCalled();
+      expect(updateObject).toHaveBeenCalledTimes(1);
+      expect(updateObject).toHaveBeenCalledWith({
+        objectType: 'scratch_org',
+        url: window.api_urls.scratch_org_detail('org-id'),
+        data: {
+          ignored_changes_write: { ...defaultChangeset, ...defaultIgnored },
+        },
+        hasForm: true,
+        patch: true,
+      });
+    });
+
+    describe('success', () => {
+      test('displays success class for 3 seconds', async () => {
+        jest.useFakeTimers();
+        updateObject.mockReturnValueOnce(() => Promise.resolve({}));
+        const { getByText, getByLabelText, baseElement } = setup();
+
+        // Click forward to the select-changes modal:
+        fireEvent.click(getByText('Save & Next'));
+
+        const selectAll = getByLabelText('All Ignored Changes');
+        fireEvent.click(selectAll);
+        fireEvent.click(getByText('Un-ignore Selected Changes'));
+
+        expect.assertions(4);
+        expect(getByText('Saving Ignored Changes…')).toBeVisible();
+        expect(updateObject).toHaveBeenCalledWith({
+          objectType: 'scratch_org',
+          url: window.api_urls.scratch_org_detail('org-id'),
+          data: {
+            ignored_changes_write: {},
+          },
+          hasForm: true,
+          patch: true,
+        });
+
+        await updateObject;
+
+        expect(
+          baseElement
+            .querySelector('.accordion-no-padding')
+            .classList.contains('success-highlight'),
+        ).toBe(true);
+
+        jest.runAllTimers();
+
+        expect(
+          baseElement
+            .querySelector('.accordion-no-padding')
+            .classList.contains('success-highlight'),
+        ).toBe(false);
       });
     });
   });
@@ -142,7 +223,7 @@ describe('<CaptureModal/>', () => {
         const { getByText, getByLabelText, findByText } = setup();
         // Click forward to the select-changes modal:
         fireEvent.click(getByText('Save & Next'));
-        const selectAll = getByLabelText('Select All Changes');
+        const selectAll = getByLabelText('All Changes');
         fireEvent.click(selectAll);
         // Click forward to the commit-message modal:
         fireEvent.click(getByText('Save & Next'));
@@ -163,18 +244,21 @@ describe('<CaptureModal/>', () => {
   });
 
   describe('select changes', () => {
-    let getters, selectAll, group1, inputs;
+    let getters, selectAll, selectAllIgnored, group1, group2, inputs;
 
     beforeEach(() => {
       getters = setup();
       const { getByLabelText, getByText } = getters;
       fireEvent.click(getByText('Save & Next'));
-      selectAll = getByLabelText('Select All Changes');
+      selectAll = getByLabelText('All Changes');
+      selectAllIgnored = getByLabelText('All Ignored Changes');
       group1 = getByLabelText('Buz');
+      group2 = getByLabelText('Bang');
       inputs = [
         getByLabelText('Bar'),
         getByLabelText('Baz'),
         getByLabelText('Bing'),
+        getByLabelText('Bazinga'),
       ];
     });
 
@@ -185,12 +269,28 @@ describe('<CaptureModal/>', () => {
         expect(inputs[0].checked).toBe(true);
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
+        expect(inputs[3].checked).toBe(false);
+
+        fireEvent.click(selectAllIgnored);
+
+        expect(inputs[0].checked).toBe(true);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(true);
+        expect(inputs[3].checked).toBe(true);
 
         fireEvent.click(selectAll);
 
         expect(inputs[0].checked).toBe(false);
         expect(inputs[1].checked).toBe(false);
         expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(true);
+
+        fireEvent.click(selectAllIgnored);
+
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(false);
+        expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(false);
       });
     });
 
@@ -201,12 +301,28 @@ describe('<CaptureModal/>', () => {
         expect(inputs[0].checked).toBe(false);
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
+        expect(inputs[3].checked).toBe(false);
+
+        fireEvent.click(group2);
+
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(true);
+        expect(inputs[3].checked).toBe(true);
 
         fireEvent.click(group1);
 
         expect(inputs[0].checked).toBe(false);
         expect(inputs[1].checked).toBe(false);
         expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(true);
+
+        fireEvent.click(group2);
+
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(false);
+        expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(false);
       });
     });
 
@@ -217,31 +333,68 @@ describe('<CaptureModal/>', () => {
         expect(inputs[0].checked).toBe(false);
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(false);
 
         fireEvent.click(inputs[2]);
 
         expect(inputs[0].checked).toBe(false);
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(true);
+        expect(inputs[3].checked).toBe(false);
+
+        fireEvent.click(inputs[3]);
+
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(true);
+        expect(inputs[3].checked).toBe(true);
 
         fireEvent.click(inputs[2]);
 
         expect(inputs[0].checked).toBe(false);
         expect(inputs[1].checked).toBe(true);
         expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(true);
+
+        fireEvent.click(inputs[3]);
+
+        expect(inputs[0].checked).toBe(false);
+        expect(inputs[1].checked).toBe(true);
+        expect(inputs[2].checked).toBe(false);
+        expect(inputs[3].checked).toBe(false);
       });
     });
 
     describe('accordion panel click', () => {
       test('expands/collapses', () => {
         const { baseElement, getByTitle } = getters;
-        const content = baseElement.querySelector('.slds-accordion__content');
+        const panels = baseElement.querySelectorAll('.slds-accordion__content');
 
-        expect(content).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[3]).toHaveAttribute('aria-hidden', 'true');
 
         fireEvent.click(getByTitle('Buz'));
 
-        expect(content).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[3]).toHaveAttribute('aria-hidden', 'true');
+
+        fireEvent.click(getByTitle('Bang'));
+
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[2]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
+
+        fireEvent.click(getByTitle('All Ignored Changes'));
+
+        expect(panels[0]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[1]).toHaveAttribute('aria-hidden', 'true');
+        expect(panels[2]).toHaveAttribute('aria-hidden', 'false');
+        expect(panels[3]).toHaveAttribute('aria-hidden', 'false');
       });
     });
   });
@@ -253,7 +406,7 @@ describe('<CaptureModal/>', () => {
       getters = setup();
       const { getByLabelText, getByText } = getters;
       fireEvent.click(getByText('Save & Next'));
-      fireEvent.click(getByLabelText('Select All Changes'));
+      fireEvent.click(getByLabelText('All Changes'));
       fireEvent.click(getByText('Save & Next'));
     });
 
