@@ -71,10 +71,11 @@ const ProjectForm = ({
     inputs,
     errors,
     handleInputChange,
+    setInputs,
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: { name: '', description: '' },
+    fields: { name: '', description: '', branch_name: '' },
     objectType: OBJECT_TYPES.PROJECT,
     additionalData: {
       repository: repository.id,
@@ -119,7 +120,7 @@ const ProjectForm = ({
   };
 
   const handleBranchSelection = (selection: any) => {
-    setInputValue('');
+    setInputs({ ...inputs, ...inputs.branch_name, branch_name: '' });
     setBaseBranch(selection[0].label);
     setBranchMenuOpen(false);
   };
@@ -131,11 +132,12 @@ const ProjectForm = ({
     setFromBranchChecked(false);
   };
 
+  // eslint-disable-next-line @typescript-eslint/camelcase
   const handleBranchChange = (value: string) => {
     if (baseBranch) {
-      setBaseBranch(inputValue);
+      setBaseBranch(inputs.branch_name);
     }
-    setInputValue(value);
+    setInputs({ ...inputs, ...inputs.branch_name, branch_name: value });
   };
   const noOptionsFoundText = (
     <p data-form="project-create">
@@ -183,18 +185,21 @@ const ProjectForm = ({
             <Combobox
               id="combobox-inline-single"
               isOpen={branchMenuOpen}
+              input={
+                <Input
+                  id="project-branch_name"
+                  label={i18n.t('Select a branch to use for this project')}
+                  className="slds-form-element_stacked slds-p-left_none"
+                  name="branch_name"
+                  errorText={errors.branch_name}
+                  onChange={handleBranchChange}
+                  onFocus={doGetBranches}
+                />
+              }
               events={{
                 onRequestOpen: doGetBranches,
                 onSelect: (event: React.MouseEvent, data: any) =>
                   handleBranchSelection(data.selection),
-                onChange: (
-                  event: React.FormEvent<HTMLInputElement>,
-                  {
-                    value,
-                  }: {
-                    value: string;
-                  },
-                ) => handleBranchChange(value),
               }}
               labels={{
                 label: `${i18n.t('Select a branch to use for this project')}`,
@@ -207,7 +212,7 @@ const ProjectForm = ({
                 selection: [baseBranch],
               })}
               hasInputSpinner={fetchingBranches}
-              value={baseBranch ? baseBranch : inputValue}
+              value={baseBranch ? baseBranch : inputs.branch_name}
               variant="inline-listbox"
               classNameContainer="repo-branch slds-form-element_stacked  slds-p-left_none"
             />
