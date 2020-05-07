@@ -169,6 +169,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   const hasCommitMessage = Boolean(inputs.commit_message);
   const dirSelected = Boolean(inputs.target_directory);
 
+  // Secondary action for updating list of ignored changes
   const submitIgnored = () => {
     let data;
     if (onlyIgnoredChecked) {
@@ -196,7 +197,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   const handleIgnoredSuccess = () => {
     /* istanbul ignore else */
     if (isMounted.current) {
-      resetForm();
+      setInputs({ ...inputs, changes: {} });
       setIgnoringChanges(false);
       setIgnoredSuccess(true);
       successTimeout.current = setTimeout(() => {
