@@ -11,7 +11,6 @@ const I18nextWebpackPlugin = require('i18next-scanner-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const babel = require('@babel/core');
 const merge = require('webpack-merge');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const common = require('./webpack.common.js');
 
@@ -37,7 +36,6 @@ module.exports = merge(common, {
     writeToDisk: true,
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
