@@ -1,6 +1,7 @@
 import i18n from 'i18next';
+import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
 
-import { Org } from '@/store/orgs/reducer';
+import { Changeset, Org } from '@/store/orgs/reducer';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { TASK_STATUSES } from '@/utils/constants';
@@ -72,3 +73,28 @@ export const getPercentage = (complete: number, total: number) =>
 
 export const getCompletedTasks = (tasks: Task[]) =>
   tasks.filter((task) => task.status === TASK_STATUSES.COMPLETED);
+
+export const splitChangeset = (changes: Changeset, comparison: Changeset) => {
+  const remaining: Changeset = {};
+  const removed: Changeset = {};
+  for (const groupName of Object.keys(changes)) {
+    if (comparison[groupName]?.length) {
+      const toRemove = intersection(changes[groupName], comparison[groupName]);
+      const filtered = without(changes[groupName], ...toRemove);
+      if (filtered.length) {
+        remaining[groupName] = filtered;
+      }
+      if (toRemove.length) {
+        removed[groupName] = toRemove;
+      }
+    } else {
+      remaining[groupName] = [...changes[groupName]];
+    }
+  }
+  return { remaining, removed };
+};
+
+export const mergeChangesets = (original: Changeset, adding: Changeset) =>
+  mergeWith(cloneDeep(original), adding, (objVal, srcVal) =>
+    union(objVal, srcVal),
+  );

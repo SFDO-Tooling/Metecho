@@ -4,9 +4,8 @@ import i18n from 'i18next';
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
+import { ExternalLink } from '@/components/utils';
 import routes from '@/utils/routes';
-
-import ExternalLink from './externalLink';
 
 interface Crumb {
   name: string;
