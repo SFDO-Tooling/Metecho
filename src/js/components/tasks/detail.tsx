@@ -97,37 +97,15 @@ const TaskDetail = (props: RouteComponentProps) => {
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
   }
 
-  // When capture changes has been triggered, wait until org has been refreshed
-  useEffect(() => {
-    const changesFetched =
-      fetchingChanges && devOrg && !devOrg.currently_refreshing_changes;
-
-    if (changesFetched && devOrg) {
-      setFetchingChanges(false);
-      /* istanbul ignore else */
-      if (orgHasChanges && !submitModalOpen) {
-        setCaptureModalOpen(true);
-        setSubmitModalOpen(false);
-        setEditModalOpen(false);
-        setDeleteModalOpen(false);
-      }
-    }
-  }, [fetchingChanges, devOrg, orgHasChanges, submitModalOpen]);
-
-  // If the task slug changes, make sure EditTask modal is closed
-  useEffect(() => {
-    if (taskSlug && task && taskSlug !== task.slug) {
-      setEditModalOpen(false);
-    }
-  }, [task, taskSlug]);
-
-  const doRefetchOrg = useCallback(
-    (org: Org) => {
-      dispatch(refetchOrg(org));
-    },
-    [dispatch],
-  );
-
+  const openCaptureModal = () => {
+    setCaptureModalOpen(true);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+  };
+  const closeCaptureModal = () => {
+    setCaptureModalOpen(false);
+  };
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
     setCaptureModalOpen(false);
@@ -154,6 +132,34 @@ const TaskDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
+
+  // When capture changes has been triggered, wait until org has been refreshed
+  useEffect(() => {
+    const changesFetched =
+      fetchingChanges && devOrg && !devOrg.currently_refreshing_changes;
+
+    if (changesFetched && devOrg) {
+      setFetchingChanges(false);
+      /* istanbul ignore else */
+      if (orgHasChanges && !submitModalOpen) {
+        openCaptureModal();
+      }
+    }
+  }, [fetchingChanges, devOrg, orgHasChanges, submitModalOpen]);
+
+  // If the task slug changes, make sure EditTask modal is closed
+  useEffect(() => {
+    if (taskSlug && task && taskSlug !== task.slug) {
+      setEditModalOpen(false);
+    }
+  }, [task, taskSlug]);
+
+  const doRefetchOrg = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -275,7 +281,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           setFetchingChanges(true);
           doRefetchOrg(devOrg);
         } else {
-          setCaptureModalOpen(true);
+          openCaptureModal();
         }
       }
     };
@@ -361,17 +367,20 @@ const TaskDetail = (props: RouteComponentProps) => {
             projectUsers={project.github_users}
             projectUrl={projectUrl}
             repoUrl={repository.repo_url}
+            openCaptureModal={openCaptureModal}
           />
         ) : (
           <SpinnerWrapper />
         )}
-        {devOrg && userIsOwner && orgHasChanges && (
-          <CaptureModal
-            org={devOrg}
-            isOpen={captureModalOpen}
-            toggleModal={setCaptureModalOpen}
-          />
-        )}
+        {devOrg &&
+          userIsOwner &&
+          (orgHasChanges || devOrg.total_ignored_changes > 0) && (
+            <CaptureModal
+              org={devOrg}
+              isOpen={captureModalOpen}
+              closeModal={closeCaptureModal}
+            />
+          )}
         {readyToSubmit && (
           <SubmitModal
             instanceId={task.id}

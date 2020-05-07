@@ -38,12 +38,14 @@ const OrgCards = ({
   projectUsers,
   projectUrl,
   repoUrl,
+  openCaptureModal,
 }: {
   orgs: OrgsByTask;
   task: Task;
   projectUsers: GitHubUser[];
   projectUrl: string;
   repoUrl: string;
+  openCaptureModal: () => void;
 }) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
@@ -234,6 +236,7 @@ const OrgCards = ({
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
+          openCaptureModal={openCaptureModal}
         />
         <OrgCard
           org={orgs[ORG_TYPES.QA]}

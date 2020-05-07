@@ -127,99 +127,104 @@ const ChangesForm = ({
           {inputs.target_directory}
         </code>
       </ModalCard>
-      <ModalCard noBodyPadding>
-        <>
-          <div
-            className="form-grid
+      {totalChanges > 0 && (
+        <ModalCard noBodyPadding>
+          <>
+            <div
+              className="form-grid
               slds-m-left_xx-small
               slds-p-left_x-large
               slds-p-vertical_x-small
               slds-p-right_medium"
-          >
-            <Checkbox
-              id="select-all-changes"
-              labels={{
-                label: `${i18n.t('All Changes')}`,
-              }}
-              checked={allChangesChecked}
-              indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
-              errorText={errors.changes}
-              onChange={handleSelectAllChange}
-            />
-            <span className="slds-text-body_regular slds-p-top_xxx-small">
-              ({totalChanges})
-            </span>
-          </div>
-          {Object.keys(filteredChanges)
-            .sort()
-            .map((groupName, index) => {
-              const uniqueGroupName = `change-${groupName}`;
-              const children = filteredChanges[groupName];
-              const handleThisPanelToggle = () =>
-                handlePanelToggle(uniqueGroupName);
-              const handleSelectThisGroup = (
-                event: React.ChangeEvent<HTMLInputElement>,
-                { checked }: { checked: boolean },
-              ) => handleSelectGroup('changes', groupName, checked);
-              let checkedChildren = 0;
-              for (const child of children) {
-                if (changesChecked[groupName]?.includes(child)) {
-                  checkedChildren = checkedChildren + 1;
+            >
+              <Checkbox
+                id="select-all-changes"
+                labels={{
+                  label: `${i18n.t('All Changes')}`,
+                }}
+                checked={allChangesChecked}
+                indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
+                errorText={errors.changes}
+                onChange={handleSelectAllChange}
+              />
+              <span className="slds-text-body_regular slds-p-top_xxx-small">
+                ({totalChanges})
+              </span>
+            </div>
+            {Object.keys(filteredChanges)
+              .sort()
+              .map((groupName, index) => {
+                const uniqueGroupName = `change-${groupName}`;
+                const children = filteredChanges[groupName];
+                const handleThisPanelToggle = () =>
+                  handlePanelToggle(uniqueGroupName);
+                const handleSelectThisGroup = (
+                  event: React.ChangeEvent<HTMLInputElement>,
+                  { checked }: { checked: boolean },
+                ) => handleSelectGroup('changes', groupName, checked);
+                let checkedChildren = 0;
+                for (const child of children) {
+                  if (changesChecked[groupName]?.includes(child)) {
+                    checkedChildren = checkedChildren + 1;
+                  }
                 }
-              }
 
-              return (
-                <Accordion key={uniqueGroupName} className="light-bordered-row">
-                  <AccordionPanel
-                    expanded={Boolean(expandedPanels[uniqueGroupName])}
-                    key={`${uniqueGroupName}-panel`}
-                    id={`change-group-${index}`}
-                    onTogglePanel={handleThisPanelToggle}
-                    title={groupName}
-                    panelContentActions={
-                      <div className="form-grid">
-                        <Checkbox
-                          labels={{ label: groupName }}
-                          checked={checkedChildren === children.length}
-                          indeterminate={Boolean(
-                            checkedChildren &&
-                              checkedChildren !== children.length,
-                          )}
-                          onChange={handleSelectThisGroup}
-                        />
-                        <span
-                          className="slds-text-body_regular
-                            slds-p-top_xxx-small"
-                        >
-                          ({children.length})
-                        </span>
-                      </div>
-                    }
-                    summary=""
+                return (
+                  <Accordion
+                    key={uniqueGroupName}
+                    className="light-bordered-row"
                   >
-                    {children.sort().map((change) => (
-                      <Checkbox
-                        key={`${uniqueGroupName}-${change}`}
-                        labels={{
-                          label: change,
-                        }}
-                        className="slds-p-left_xx-large"
-                        name="changes"
-                        checked={Boolean(
-                          changesChecked[groupName]?.includes(change),
-                        )}
-                        onChange={(
-                          event: React.ChangeEvent<HTMLInputElement>,
-                          { checked }: { checked: boolean },
-                        ) => handleChange({ groupName, change, checked })}
-                      />
-                    ))}
-                  </AccordionPanel>
-                </Accordion>
-              );
-            })}
-        </>
-      </ModalCard>
+                    <AccordionPanel
+                      expanded={Boolean(expandedPanels[uniqueGroupName])}
+                      key={`${uniqueGroupName}-panel`}
+                      id={`change-group-${index}`}
+                      onTogglePanel={handleThisPanelToggle}
+                      title={groupName}
+                      panelContentActions={
+                        <div className="form-grid">
+                          <Checkbox
+                            labels={{ label: groupName }}
+                            checked={checkedChildren === children.length}
+                            indeterminate={Boolean(
+                              checkedChildren &&
+                                checkedChildren !== children.length,
+                            )}
+                            onChange={handleSelectThisGroup}
+                          />
+                          <span
+                            className="slds-text-body_regular
+                            slds-p-top_xxx-small"
+                          >
+                            ({children.length})
+                          </span>
+                        </div>
+                      }
+                      summary=""
+                    >
+                      {children.sort().map((change) => (
+                        <Checkbox
+                          key={`${uniqueGroupName}-${change}`}
+                          labels={{
+                            label: change,
+                          }}
+                          className="slds-p-left_xx-large"
+                          name="changes"
+                          checked={Boolean(
+                            changesChecked[groupName]?.includes(change),
+                          )}
+                          onChange={(
+                            event: React.ChangeEvent<HTMLInputElement>,
+                            { checked }: { checked: boolean },
+                          ) => handleChange({ groupName, change, checked })}
+                        />
+                      ))}
+                    </AccordionPanel>
+                  </Accordion>
+                );
+              })}
+          </>
+        </ModalCard>
+      )}
       {totalIgnored > 0 && (
         <ModalCard noBodyPadding>
           <Accordion

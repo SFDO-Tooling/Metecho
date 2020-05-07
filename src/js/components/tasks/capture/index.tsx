@@ -25,7 +25,7 @@ import { mergeChangesets, splitChangeset } from '@/utils/helpers';
 interface Props {
   org: Org;
   isOpen: boolean;
-  toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+  closeModal: () => void;
 }
 
 export interface CommitData {
@@ -67,7 +67,7 @@ export const ModalCard = ({
   </Card>
 );
 
-const CaptureModal = ({ org, isOpen, toggleModal }: Props) => {
+const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [ignoringChanges, setIgnoringChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
@@ -102,7 +102,7 @@ const CaptureModal = ({ org, isOpen, toggleModal }: Props) => {
     /* istanbul ignore else */
     if (isMounted.current) {
       setCapturingChanges(false);
-      toggleModal(false);
+      closeModal();
       setPageIndex(0);
     }
   };
@@ -218,7 +218,7 @@ const CaptureModal = ({ org, isOpen, toggleModal }: Props) => {
   }
 
   const handleClose = () => {
-    toggleModal(false);
+    closeModal();
     setPageIndex(0);
     resetForm();
   };

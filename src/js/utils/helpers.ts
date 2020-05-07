@@ -12,16 +12,13 @@ export const pluralize = (count: number, str: string) =>
 export const getOrgStatusMsg = (org: Org) => {
   const totalChanges = org.total_unsaved_changes - org.total_ignored_changes;
   if (totalChanges > 0) {
-    /* istanbul ignore else */
-    if (totalChanges) {
-      const statusMsgDefault = `has ${totalChanges} unretrieved ${pluralize(
-        totalChanges,
-        'change',
-      )}`;
-      return i18n.t('orgStatusMsg', statusMsgDefault, {
-        count: totalChanges,
-      });
-    }
+    const statusMsgDefault = `${totalChanges} unretrieved ${pluralize(
+      totalChanges,
+      'change',
+    )}`;
+    return i18n.t('orgStatusMsg', statusMsgDefault, {
+      count: totalChanges,
+    });
   }
   return i18n.t('up to date');
 };
