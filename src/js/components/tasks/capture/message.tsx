@@ -2,6 +2,7 @@ import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Icon from '@salesforce/design-system-react/components/icon';
 import Textarea from '@salesforce/design-system-react/components/textarea';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
@@ -68,7 +69,9 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
               return (
                 <Accordion
                   key={groupName}
-                  className="light-bordered-row grow-inner-item"
+                  className={classNames('grow-inner-item', {
+                    'light-bordered-row': index > 0,
+                  })}
                 >
                   <AccordionPanel
                     expanded={Boolean(expandedPanels[groupName])}

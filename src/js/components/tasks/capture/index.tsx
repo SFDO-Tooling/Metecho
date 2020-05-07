@@ -340,7 +340,7 @@ const CaptureModal = ({ org, isOpen, toggleModal }: Props) => {
   return (
     <Modal
       isOpen={isOpen}
-      size="medium"
+      size="small"
       disableClose={capturingChanges}
       heading={pages[pageIndex].heading}
       footer={pages[pageIndex].footer}

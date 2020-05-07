@@ -139,7 +139,7 @@ const ChangesForm = ({
             <Checkbox
               id="select-all-changes"
               labels={{
-                label: `${i18n.t('Select All Changes')}`,
+                label: `${i18n.t('All Changes')}`,
               }}
               checked={allChangesChecked}
               indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}
@@ -237,7 +237,7 @@ const ChangesForm = ({
                     <Checkbox
                       id="select-all-ignored"
                       labels={{
-                        label: i18n.t('Select All Ignored Changes'),
+                        label: i18n.t('All Ignored Changes'),
                       }}
                       className="slds-float_left"
                       checked={allIgnoredChecked}
@@ -304,7 +304,7 @@ const ChangesForm = ({
                             />
                             <span
                               className="slds-text-body_regular
-                            slds-p-top_xxx-small"
+                                slds-p-top_xxx-small"
                             >
                               ({children.length})
                             </span>
