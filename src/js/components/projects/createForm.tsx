@@ -120,24 +120,25 @@ const ProjectForm = ({
   };
 
   const handleBranchSelection = (selection: any) => {
-    setInputs({ ...inputs, ...inputs.branch_name, branch_name: '' });
     setBaseBranch(selection[0].label);
+    setInputs({ ...inputs, branch_name: baseBranch });
     setBranchMenuOpen(false);
   };
 
   const resetBranch = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setInputValue('');
+    resetForm();
     setBranchMenuOpen(false);
     setFromBranchChecked(false);
   };
 
   // eslint-disable-next-line @typescript-eslint/camelcase
-  const handleBranchChange = (value: string) => {
+  const handleBranchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (baseBranch) {
       setBaseBranch(inputs.branch_name);
     }
-    setInputs({ ...inputs, ...inputs.branch_name, branch_name: value });
+    setBranchMenuOpen(true);
+    handleInputChange(e);
   };
   const noOptionsFoundText = (
     <p data-form="project-create">
@@ -191,6 +192,7 @@ const ProjectForm = ({
                   label={i18n.t('Select a branch to use for this project')}
                   className="slds-form-element_stacked slds-p-left_none"
                   name="branch_name"
+                  value={baseBranch ? baseBranch : inputs.branch_name}
                   errorText={errors.branch_name}
                   onChange={handleBranchChange}
                   onFocus={doGetBranches}
@@ -207,12 +209,12 @@ const ProjectForm = ({
               }}
               menuItemVisibleLength={5}
               options={comboboxFilter({
-                inputValue,
+                inputValue: inputs.branch_name,
                 options: branchOptions,
                 selection: [baseBranch],
               })}
-              hasInputSpinner={fetchingBranches}
               value={baseBranch ? baseBranch : inputs.branch_name}
+              hasInputSpinner={fetchingBranches}
               variant="inline-listbox"
               classNameContainer="repo-branch slds-form-element_stacked  slds-p-left_none"
             />
