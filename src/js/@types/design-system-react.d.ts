@@ -37,7 +37,7 @@ declare module '@salesforce/design-system-react/components/combobox/filter' {
 
   const filter: (opts: {
     inputValue: string;
-    limit: number;
+    limit?: number;
     options: Option[];
     selection: Selection[];
   }) => Option[];

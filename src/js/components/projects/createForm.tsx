@@ -6,10 +6,12 @@ import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
+import { Selection } from 'src/js/@types/design-system-react.d.ts';
 
 import { useForm } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
@@ -35,10 +37,9 @@ const ProjectForm = ({
   // state related to setting base branch on project creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
-  const [baseBranch, setBaseBranch] = useState('');
-  const [repoBranches, setRepoBranches] = useState([]);
+  const [baseBranch, setBaseBranch] = useState<Selection>('');
+  const [repoBranches, setRepoBranches] = useState<string[]>([]);
   const [branchMenuOpen, setBranchMenuOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const dispatch = useDispatch<ThunkDispatch>();
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -75,7 +76,7 @@ const ProjectForm = ({
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: { name: '', description: '', branch_name: '' },
+    fields: { name: '', description: '', branch_name: null },
     objectType: OBJECT_TYPES.PROJECT,
     additionalData: {
       repository: repository.id,
@@ -93,6 +94,7 @@ const ProjectForm = ({
     if (checked) {
       setFromBranchChecked(true);
     } else {
+      setBaseBranch('');
       setFromBranchChecked(!fromBranchChecked);
     }
   };
@@ -121,13 +123,21 @@ const ProjectForm = ({
 
   const handleBranchSelection = (selection: any) => {
     setBaseBranch(selection[0].label);
-    setInputs({ ...inputs, branch_name: baseBranch });
+    console.log('hi');
+    // setInputs({ ...inputs, branch_name: baseBranch });
     setBranchMenuOpen(false);
   };
+  useEffect(() => {
+    if (baseBranch) {
+      setInputs({ ...inputs, branch_name: baseBranch });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseBranch]);
 
   const resetBranch = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     resetForm();
+    setBaseBranch('');
     setBranchMenuOpen(false);
     setFromBranchChecked(false);
   };
@@ -140,21 +150,32 @@ const ProjectForm = ({
     setBranchMenuOpen(true);
     handleInputChange(e);
   };
+
+  const inputVal = inputs.branch_name;
   const noOptionsFoundText = (
     <p data-form="project-create">
-      {i18n.t("There aren't any available branches at this time.")}{' '}
+      {inputVal ? (
+        <>
+          <Trans i18nKey="noBranchFoundText">
+            No matches found for <em>{{ inputVal }}</em>. Try{' '}
+          </Trans>
+        </>
+      ) : (
+        <>
+          {i18n.t("There aren't any available branches at this time.")}{' '}
+          <Button
+            label={i18n.t('Check Again')}
+            variant="base"
+            onClick={doGetBranches}
+          />
+          {i18n.t('to refresh this list or try')}{' '}
+        </>
+      )}
       <Button
-        label={i18n.t('Check Again')}
-        variant="base"
-        onClick={doGetBranches}
-      />
-      {i18n.t('to refresh this list or')}{' '}
-      <Button
-        label={i18n.t('start from a new branch')}
+        label={i18n.t('starting from a new branch.')}
         variant="link"
         onClick={resetBranch}
       />
-      .
     </p>
   );
 
@@ -162,7 +183,8 @@ const ProjectForm = ({
     id: `${index + 1}`,
     label: item,
   }));
-
+  const disableCreateBtn =
+    fromBranchChecked && !repoBranches.includes(inputVal);
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
@@ -251,6 +273,7 @@ const ProjectForm = ({
           variant="brand"
           type="submit"
           onClick={submitClicked}
+          disabled={disableCreateBtn}
         />
         <span className="vertical-separator slds-m-left--large"></span>
         {isOpen && (
