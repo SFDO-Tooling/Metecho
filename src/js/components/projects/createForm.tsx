@@ -190,7 +190,7 @@ const ProjectForm = ({
                 <Input
                   id="project-branch_name"
                   label={i18n.t('Select a branch to use for this project')}
-                  className="slds-form-element_stacked slds-p-left_none"
+                  className="slds-combobox__input"
                   name="branch_name"
                   value={baseBranch ? baseBranch : inputs.branch_name}
                   errorText={errors.branch_name}

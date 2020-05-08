@@ -17,6 +17,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
+from github3.exceptions import NotFoundError
 from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -455,11 +456,19 @@ class Project(
     def create_gh_branch(self):
         if not self.id and self.branch_name:  # i.e. "newly created"
             repository = gh.get_repo_info(None, repo_id=self.repository.repo_id)
-            gh.try_to_make_branch(
-                repository,
-                new_branch=self.branch_name,
-                base_branch=repository.default_branch,
-            )
+            try:
+                head = repository.branch(self.branch_name).commit.sha
+            except NotFoundError:
+                gh.try_to_make_branch(
+                    repository,
+                    new_branch=self.branch_name,
+                    base_branch=repository.default_branch,
+                )
+            else:
+                base = repository.branch(repository.default_branch).commit.sha
+                self.has_unmerged_commits = (
+                    "ahead" in repository.compare_commits(base, head).status
+                )
 
     def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)
