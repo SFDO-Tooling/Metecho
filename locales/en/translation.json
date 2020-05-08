@@ -208,7 +208,6 @@
   "The existing Dev Org for this task has unretrieved changes. Removing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?": "The existing Dev Org for this task has unretrieved changes. Removing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?",
   "There are no collaborators on this project. Add collaborators to the project before assigning them to this task.": "There are no collaborators on this project. Add collaborators to the project before assigning them to this task.",
   "There aren't any available branches at this time.": "There aren't any available branches at this time.",
-
   "This becomes bold text": "This becomes bold text",
   "This becomes italic text": "This becomes italic text",
   "This includes:": "This includes:",
@@ -266,7 +265,6 @@
   "confirmRemoveCollaboratorsMessage": "The following user is being removed from this project, but is already assigned to at least one task. Removing this user will not remove them from any assigned tasks. Are you sure you want to remove this user from the project?",
   "confirmRemoveCollaboratorsMessage_plural": "The following users are being removed from this project, but are already assigned to at least one task. Removing them will not remove them from any assigned tasks. Are you sure you want to remove them from the project?",
   "createProjectHelpText": "<0>Projects in Metecho are the high-level features that can be broken down into smaller parts when creating Tasks. You can create a new project or create a project based on an existing GitHub branch. Every project requires a unique project name, which becomes the branch name in Github.</0>",
-
   "devHubInfo": "Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Test scratch org. Learn how to <2>create a Developer Edition org</2> and <6>enable Dev Hub</6>.",
   "devHubNotEnabled": "This Salesforce org does not have Dev Hub enabled or your user does not have permission to create scratch orgs. Learn how to <2>enable Dev Hub</2>.",
   "errorWithAccount": "An error occurred with your account. Try the <2>home page</2>?",

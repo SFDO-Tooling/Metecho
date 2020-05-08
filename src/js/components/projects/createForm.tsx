@@ -36,7 +36,7 @@ const ProjectForm = ({
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
   const [baseBranch, setBaseBranch] = useState('');
-  const [repoBranches, setRepoBranches] = useState([]);
+  const [repoBranches, setRepoBranches] = useState<string[]>([]);
   const [branchMenuOpen, setBranchMenuOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const dispatch = useDispatch<ThunkDispatch>();
@@ -209,7 +209,9 @@ const ProjectForm = ({
               options={comboboxFilter({
                 inputValue,
                 options: branchOptions,
-                selection: [baseBranch],
+                selection: branchOptions.filter(
+                  (branch) => branch.label === baseBranch,
+                ),
               })}
               hasInputSpinner={fetchingBranches}
               value={baseBranch ? baseBranch : inputs.branch_name}
