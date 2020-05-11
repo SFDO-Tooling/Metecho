@@ -58,7 +58,7 @@ jwcrypto==0.7             # via cumulusci, github3-py, github3.py
 keyring==21.2.0           # via cumulusci
 logfmt==0.4               # via -r requirements/prod.in, sfdo-template-helpers
 lxml==4.5.0               # via cumulusci
-markdown==3.2.1           # via -r requirements/prod.in, sfdo-template-helpers
+markdown==3.2.2           # via -r requirements/prod.in, sfdo-template-helpers
 markupsafe==1.1.1         # via cumulusci, jinja2
 msgpack==0.6.2            # via channels-redis
 oauthlib==3.1.0           # via requests-oauthlib
