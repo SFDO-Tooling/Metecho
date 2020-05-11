@@ -2,7 +2,7 @@ Django==3.0.6
 bleach==3.1.5
 channels-redis==2.4.2
 channels==2.4.0
-cumulusci==3.12.1
+cumulusci==3.12.2
 dj-database-url==0.5.0
 django-allauth==0.41.0
 django-anymail[mailgun]==7.1.0
