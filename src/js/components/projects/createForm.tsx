@@ -6,12 +6,11 @@ import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
-import { Selection } from 'src/js/@types/design-system-react.d.ts';
 
 import { useForm } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
@@ -37,7 +36,7 @@ const ProjectForm = ({
   // state related to setting base branch on project creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
-  const [baseBranch, setBaseBranch] = useState<Selection>('');
+  const [baseBranch, setBaseBranch] = useState('');
   const [repoBranches, setRepoBranches] = useState<string[]>([]);
   const [branchMenuOpen, setBranchMenuOpen] = useState(false);
   const dispatch = useDispatch<ThunkDispatch>();
@@ -123,8 +122,6 @@ const ProjectForm = ({
 
   const handleBranchSelection = (selection: any) => {
     setBaseBranch(selection[0].label);
-    console.log('hi');
-    // setInputs({ ...inputs, branch_name: baseBranch });
     setBranchMenuOpen(false);
   };
   useEffect(() => {
@@ -233,7 +230,9 @@ const ProjectForm = ({
               options={comboboxFilter({
                 inputValue: inputs.branch_name,
                 options: branchOptions,
-                selection: [baseBranch],
+                selection: branchOptions.filter(
+                  (branch) => branch.label === baseBranch,
+                ),
               })}
               value={baseBranch ? baseBranch : inputs.branch_name}
               hasInputSpinner={fetchingBranches}
