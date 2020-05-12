@@ -89,10 +89,14 @@ const ProjectForm = ({
     onSuccess,
   });
 
+  const resetFilterVal = () => {
+    setFilterVal('');
+  };
+
   const closeForm = () => {
     setIsOpen(false);
     setFromBranchChecked(false);
-    setFilterVal('');
+    resetFilterVal();
     resetForm();
   };
 
@@ -116,7 +120,7 @@ const ProjectForm = ({
 
   const resetBranchForm = () => {
     setBranch('');
-    setFilterVal('');
+    resetFilterVal();
   };
 
   const closeBranchForm = () => {
@@ -211,7 +215,7 @@ const ProjectForm = ({
                 onSelect: handleBranchSelection,
                 onChange: handleBranchChange,
                 onRequestRemoveSelectedOption: handleBranchRemoveSelection,
-                onBlur: () => setFilterVal(''),
+                onBlur: resetFilterVal,
               }}
               labels={{
                 label: `${i18n.t('Select a branch to use for this project')}`,
