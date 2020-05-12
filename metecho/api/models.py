@@ -455,8 +455,14 @@ class Project(
 
     def create_gh_branch(self):
         if not self.id:  # i.e. "newly created"
-            user = self.repository.get_a_matching_user()
-            repository = gh.get_repo_info(None, repo_id=self.get_repo_id(user))
+            # We cannot get an app user with a repo_id, sadly; the API
+            # doesn't support it. So we have to use the repo_owner and
+            # repo_name.
+            repository = gh.get_repo_info(
+                None,
+                repo_owner=self.repository.repo_owner,
+                repo_name=self.repository.repo_name,
+            )
 
             if self.branch_name:
                 try:
@@ -491,11 +497,12 @@ class Project(
             else:
                 from .jobs import project_create_branch
 
-                repo_id = self.repository.repo_id
+                repo_id = self.get_repo_id(None)
                 project_create_branch(
                     project=self,
                     repository=repository,
-                    user=user,
+                    # This is used only to check out the repo to get config info:
+                    user=None,
                     repo_id=repo_id,
                     originating_user_id=None,
                 )
