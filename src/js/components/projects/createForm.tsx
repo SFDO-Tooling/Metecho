@@ -6,19 +6,24 @@ import Input from '@salesforce/design-system-react/components/input';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
-import { useForm } from '@/components/utils';
+import { useForm, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { Repository } from '@/store/repositories/reducer';
 import { User } from '@/store/user/reducer';
 import apiFetch from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
+
+interface ComboboxOption {
+  id: string;
+  label: string;
+}
 
 interface Props extends RouteComponentProps {
   user: User;
@@ -32,13 +37,13 @@ const ProjectForm = ({
   startOpen = false,
   history,
 }: Props) => {
+  const isMounted = useIsMounted();
   const [isOpen, setIsOpen] = useState(startOpen);
   // state related to setting base branch on project creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
-  const [baseBranch, setBaseBranch] = useState('');
   const [repoBranches, setRepoBranches] = useState<string[]>([]);
-  const [branchMenuOpen, setBranchMenuOpen] = useState(false);
+  const [filterVal, setFilterVal] = useState('');
   const dispatch = useDispatch<ThunkDispatch>();
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -86,13 +91,12 @@ const ProjectForm = ({
 
   const closeForm = () => {
     setIsOpen(false);
+    setFromBranchChecked(false);
+    setFilterVal('');
     resetForm();
   };
 
   const doGetBranches = async () => {
-    if (repoBranches.length) {
-      return;
-    }
     setFetchingBranches(true);
     // fetching feature branches here when option selected,
     // in lieu of storing in store...
@@ -100,128 +104,114 @@ const ProjectForm = ({
       url: `${window.api_urls.repository_feature_branches(repository.id)}`,
       dispatch,
     });
-    setRepoBranches(baseBranches);
-    setFetchingBranches(false);
-    setBranchMenuOpen(true);
+    if (isMounted.current) {
+      setRepoBranches(baseBranches);
+      setFetchingBranches(false);
+    }
   };
 
-  const resetBranch = () => {
-    setBaseBranch('');
-    resetForm();
+  const setBranch = (branch: string) => {
+    setInputs({ ...inputs, branch_name: branch });
+  };
+
+  const resetBranchForm = () => {
+    setBranch('');
+    setFilterVal('');
+  };
+
+  const closeBranchForm = () => {
+    resetBranchForm();
     setFromBranchChecked(false);
   };
 
-  const handleChange = (checked: boolean) => {
-    if (checked) {
-      setFromBranchChecked(true);
-      doGetBranches();
-    } else {
-      resetBranch();
-    }
-  };
-
-  const handleBranchSelection = (selection: any) => {
-    setBaseBranch(selection[0].label);
-    setBranchMenuOpen(false);
-  };
-  useEffect(() => {
-    if (baseBranch) {
-      setInputs({ ...inputs, branch_name: baseBranch });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [baseBranch]);
-
-  const handleBranchChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    value: string,
+  const handleBranchCheckboxChange = (
+    event: any,
+    { checked }: { checked: boolean },
   ) => {
-    if (baseBranch) {
-      setBaseBranch(value);
+    if (checked) {
+      doGetBranches();
+      setFromBranchChecked(true);
+    } else {
+      closeBranchForm();
     }
-    setInputs({ ...inputs, branch_name: value });
   };
-  const isBranchMenuOpen = (bool: boolean) => {
-    setBranchMenuOpen(bool);
-  };
-  const inputVal = inputs.branch_name;
-  const invalidInput = !repoBranches.includes(inputVal);
-  const disableCreateBtn = fromBranchChecked && invalidInput;
-  const noFeatureBranches = !fetchingBranches && !repoBranches.length;
-  const noOptionsFoundText = (
-    <p data-form="project-create">
-      {invalidInput && (
-        <Trans i18nKey="noBranchFoundText">
-          No matches found for <em>{{ inputVal }}</em>. Try{' '}
-        </Trans>
-      )}
-      {noFeatureBranches && (
-        <>
-          {i18n.t("There aren't any available branches at this time.")}{' '}
-          <Button
-            label={i18n.t('Check Again')}
-            variant="base"
-            onClick={doGetBranches}
-          />
-          {i18n.t('to refresh this list or try')}{' '}
-        </>
-      )}
-      {invalidInput && (
-        <Button
-          label={i18n.t('starting from a new branch.')}
-          variant="link"
-          onClick={resetBranch}
-        />
-      )}
-    </p>
-  );
 
-  const branchOptions = repoBranches.map((item, index) => ({
+  const handleBranchSelection = (
+    event: any,
+    { selection }: { selection: ComboboxOption[] },
+  ) => {
+    setBranch(selection[0].label);
+  };
+
+  const handleBranchChange = (event: any, { value }: { value: string }) => {
+    setFilterVal(value);
+  };
+
+  const handleBranchRemoveSelection = () => {
+    resetBranchForm();
+  };
+
+  const noFeatureBranches = !repoBranches.length;
+  const inputVal = inputs.branch_name;
+  const branchOptions: ComboboxOption[] = repoBranches.map((item, index) => ({
     id: `${index + 1}`,
     label: item,
   }));
+  const selection = branchOptions.find((branch) => branch.label === inputVal);
+  let noOptionsFoundText = null;
+  if (fetchingBranches) {
+    noOptionsFoundText = i18n.t('Loading existing branches…');
+  } else {
+    noOptionsFoundText = (
+      <>
+        {noFeatureBranches
+          ? i18n.t("There aren't any available branches at this time.")
+          : i18n.t('No matching branches found.')}{' '}
+        <Button
+          label={i18n.t('Check again')}
+          variant="link"
+          onClick={doGetBranches}
+        />{' '}
+        {i18n.t('to refresh this list or')}{' '}
+        <Button
+          label={i18n.t('start from a new branch.')}
+          variant="link"
+          onClick={closeBranchForm}
+        />
+      </>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
         <>
-          <Trans i18nKey="createProjectHelpText">
-            <p className="slds-p-bottom_medium slds-text-color_weak">
+          <p className="slds-form-element__help slds-m-bottom_small">
+            <Trans i18nKey="createProjectHelpText">
               Projects in Metecho are the high-level features that can be broken
               down into smaller parts when creating Tasks. You can create a new
               project or create a project based on an existing GitHub branch.
               Every project requires a unique project name, which becomes the
-              branch name in Github.
-            </p>
-          </Trans>{' '}
+              branch name in GitHub unless you choose to use an existing branch.
+            </Trans>
+          </p>
           <Checkbox
             id="project-base-branch"
             labels={{
-              label: `${i18n.t('Use existing Github branch')}`,
+              label: `${i18n.t('Use existing GitHub branch')}`,
             }}
             checked={fromBranchChecked}
             className="slds-form-element_stacked slds-p-left_none"
-            onChange={(
-              event: React.ChangeEvent<HTMLInputElement>,
-              { checked }: { checked: boolean },
-            ) => handleChange(checked)}
+            onChange={handleBranchCheckboxChange}
           />
           {fromBranchChecked && (
             <Combobox
               id="combobox-inline-single"
-              isOpen={branchMenuOpen}
               events={{
-                onSelect: (event: React.MouseEvent, data: any) =>
-                  handleBranchSelection(data.selection),
-                onFocus: () => isBranchMenuOpen(true),
-                onRequestClose: () => isBranchMenuOpen(false),
-                onChange: (
-                  event: React.ChangeEvent<HTMLInputElement>,
-                  {
-                    value,
-                  }: {
-                    value: string;
-                  },
-                ) => handleBranchChange(event, value),
+                onSelect: handleBranchSelection,
+                onChange: handleBranchChange,
+                onRequestRemoveSelectedOption: handleBranchRemoveSelection,
+                onBlur: () => setFilterVal(''),
               }}
               labels={{
                 label: `${i18n.t('Select a branch to use for this project')}`,
@@ -229,17 +219,17 @@ const ProjectForm = ({
               }}
               menuItemVisibleLength={5}
               options={comboboxFilter({
-                inputValue: inputs.branch_name,
+                inputValue: filterVal,
                 options: branchOptions,
-                selection: branchOptions.filter(
-                  (branch) => branch.label === baseBranch,
-                ),
+                selection: selection ? [selection] : [],
               })}
-              value={baseBranch ? baseBranch : inputs.branch_name}
+              selection={selection ? [selection] : []}
+              value={filterVal}
+              errorText={errors.branch_name}
               hasInputSpinner={fetchingBranches}
-              hasMenuSpinner={noFeatureBranches}
+              hasMenuSpinner={fetchingBranches}
               variant="inline-listbox"
-              classNameContainer="repo-branch slds-form-element_stacked  slds-p-left_none"
+              classNameContainer="slds-form-element_stacked slds-p-left_none"
             />
           )}
           <Input
@@ -274,7 +264,6 @@ const ProjectForm = ({
           variant="brand"
           type="submit"
           onClick={submitClicked}
-          disabled={disableCreateBtn}
         />
         <span className="vertical-separator slds-m-left--large"></span>
         {isOpen && (

@@ -30,8 +30,12 @@ const ProjectListItem = ({ repository, project }: Props) => {
           />
         )}
         {branch_url && (
-          <p className="slds-text-body_small slds-p-top_x-small slds-text-color_weak">
-            {i18n.t('Branch')}:{' '}
+          <p
+            className="slds-text-body_small
+              slds-p-top_x-small
+              slds-text-color_weak"
+          >
+            {i18n.t('Branch:')}{' '}
             <ExternalLink url={branch_url}>
               {branch_name}
               <Icon
@@ -39,7 +43,7 @@ const ProjectListItem = ({ repository, project }: Props) => {
                 name="new_window"
                 size="xx-small"
                 className="slds-m-bottom_xx-small"
-                containerClassName="slds-m-left_xx-small slds-current-color"
+                containerClassName="slds-m-left_xx-small"
               />
             </ExternalLink>
           </p>

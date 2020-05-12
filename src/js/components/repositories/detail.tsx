@@ -3,7 +3,6 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -86,7 +85,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         name="new_window"
         size="xx-small"
         className="slds-m-bottom_xx-small"
-        containerClassName="slds-m-left_xx-small slds-current-color"
+        containerClassName="slds-m-left_xx-small"
       />
     </ExternalLink>
   );
