@@ -105,12 +105,18 @@ const ProjectForm = ({
     setBranchMenuOpen(true);
   };
 
+  const resetBranch = () => {
+    setBaseBranch('');
+    resetForm();
+    setFromBranchChecked(false);
+  };
+
   const handleChange = (checked: boolean) => {
     if (checked) {
       setFromBranchChecked(true);
       doGetBranches();
     } else {
-      setFromBranchChecked(!fromBranchChecked);
+      resetBranch();
     }
   };
 
@@ -125,14 +131,6 @@ const ProjectForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseBranch]);
 
-  const resetBranch = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    resetForm();
-    setBaseBranch('');
-    setFromBranchChecked(false);
-  };
-
-  // eslint-disable-next-line @typescript-eslint/camelcase
   const handleBranchChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     value: string,
