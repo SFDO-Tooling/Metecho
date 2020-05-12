@@ -99,9 +99,13 @@ class TestRepository:
 @pytest.mark.django_db
 class TestProject:
     def test_signal(self, repository_factory):
-        repository = repository_factory()
-        project = Project(name="Test Project", repository=repository)
-        project.save()
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            repository = repository_factory()
+            project = Project(name="Test Project", repository=repository)
+            project.save()
+
         assert project.slug == "test-project"
 
     def test_str(self, repository_factory):
@@ -111,33 +115,56 @@ class TestProject:
 
     def test_get_repo_id(self, repository_factory, project_factory):
         user = MagicMock()
-        repo = repository_factory(repo_id=123)
-        project = project_factory(repository=repo)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            repo = repository_factory(repo_id=123)
+            project = project_factory(repository=repo)
+
         assert project.get_repo_id(user) == 123
 
     def test_finalize_status_completed(self, project_factory):
-        project = project_factory(has_unmerged_commits=True)
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            project = project_factory(has_unmerged_commits=True)
+
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
             project.finalize_status_completed(originating_user_id=None)
             project.refresh_from_db()
             assert not project.has_unmerged_commits
             assert async_to_sync.called
 
     def test_should_update_status(self, project_factory):
-        project = project_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            project = project_factory()
         assert not project.should_update_status()
 
     def test_should_update_status__already_merged(self, project_factory):
-        project = project_factory(status=PROJECT_STATUSES.Merged, pr_is_merged=True)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            project = project_factory(status=PROJECT_STATUSES.Merged, pr_is_merged=True)
         assert not project.should_update_status()
 
     def test_should_update_status__already_review(self, project_factory, task_factory):
-        project = project_factory(status=PROJECT_STATUSES.Review)
-        task_factory(project=project, status=TASK_STATUSES.Completed)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            project = project_factory(status=PROJECT_STATUSES.Review)
+            task_factory(project=project, status=TASK_STATUSES.Completed)
         assert not project.should_update_status()
 
     def test_queue_create_pr(self, project_factory, user_factory):
-        with patch("metecho.api.jobs.create_pr_job") as create_pr_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            create_pr_job = stack.enter_context(patch("metecho.api.jobs.create_pr_job"))
+
             project = project_factory()
             user = user_factory()
             project.queue_create_pr(
@@ -153,9 +180,12 @@ class TestProject:
             assert create_pr_job.delay.called
 
     def test_soft_delete(self, project_factory, task_factory):
-        project = project_factory()
-        task_factory(project=project)
-        task_factory(project=project)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            project = project_factory()
+            task_factory(project=project)
+            task_factory(project=project)
 
         project.delete()
         project.refresh_from_db()
@@ -163,12 +193,15 @@ class TestProject:
         assert project.tasks.active().count() == 0
 
     def test_queryset_soft_delete(self, project_factory, task_factory):
-        project1 = project_factory()
-        project2 = project_factory()
-        project_factory()
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            project1 = project_factory()
+            project2 = project_factory()
+            project_factory()
 
-        task_factory(project=project1)
-        task_factory(project=project2)
+            task_factory(project=project1)
+            task_factory(project=project2)
 
         assert Project.objects.count() == 3
         assert Project.objects.active().count() == 3
@@ -179,6 +212,21 @@ class TestProject:
         assert Project.objects.active().count() == 0
         assert Task.objects.active().count() == 0
 
+    def test_create_gh_branch__no_pr(self, project_factory):
+        with ExitStack() as stack:
+            gh = stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            gh.get_repo_info.return_value = MagicMock(
+                **{
+                    "pull_requests.return_value": (
+                        _ for _ in range(0)  # empty generator
+                    ),
+                }
+            )
+
+            project = project_factory(branch_name="pepin")
+            assert project.pr_number is None
+
 
 @pytest.mark.django_db
 class TestTask:
@@ -188,6 +236,8 @@ class TestTask:
 
     def test_notify_changed(self, task_factory):
         with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             stack.enter_context(patch("metecho.api.jobs.create_pr_job"))
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
@@ -198,7 +248,13 @@ class TestTask:
             assert async_to_sync.called
 
     def test_finalize_status_completed(self, task_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             task = task_factory()
             task.finalize_status_completed(originating_user_id=None)
 
@@ -207,14 +263,24 @@ class TestTask:
             assert task.status == TASK_STATUSES.Completed
 
     def test_finalize_task_update(self, task_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             task = task_factory()
             task.finalize_task_update(originating_user_id=None)
 
             assert async_to_sync.called
 
     def test_queue_create_pr(self, task_factory, user_factory):
-        with patch("metecho.api.jobs.create_pr_job") as create_pr_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            create_pr_job = stack.enter_context(patch("metecho.api.jobs.create_pr_job"))
+
             task = task_factory()
             user = user_factory()
             task.queue_create_pr(
@@ -230,7 +296,13 @@ class TestTask:
             assert create_pr_job.delay.called
 
     def test_finalize_create_pr(self, task_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             task = task_factory()
             task.finalize_create_pr(originating_user_id=None)
 
@@ -238,8 +310,14 @@ class TestTask:
 
     def test_queue_submit_review(self, user_factory, task_factory):
         user = user_factory()
-        task = task_factory()
-        with patch("metecho.api.jobs.submit_review_job") as submit_review_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+
+            submit_review_job = stack.enter_context(
+                patch("metecho.api.jobs.submit_review_job")
+            )
             task.queue_submit_review(
                 user=user,
                 data={"notes": "Foo", "status": "APPROVE"},
@@ -250,7 +328,13 @@ class TestTask:
 
     def test_finalize_submit_review(self, task_factory):
         now = datetime(2020, 12, 31, 12, 0)
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             task = task_factory(commits=[{"id": "123"}])
             task.finalize_submit_review(now, sha="123", originating_user_id=None)
 
@@ -262,7 +346,13 @@ class TestTask:
         self, task_factory, scratch_org_factory
     ):
         now = datetime(2020, 12, 31, 12, 0)
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             task = task_factory(commits=[{"id": "123"}])
             scratch_org = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
             scratch_org.queue_delete = MagicMock()
@@ -281,7 +371,13 @@ class TestTask:
 
     def test_finalize_submit_review__error(self, task_factory):
         now = datetime(2020, 12, 31, 12, 0)
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             task = task_factory()
             task.finalize_submit_review(now, error=ValueError, originating_user_id=None)
 
@@ -289,9 +385,12 @@ class TestTask:
             assert not task.review_valid
 
     def test_soft_delete_cascade(self, task_factory, scratch_org_factory):
-        task = task_factory()
-        scratch_org_factory(task=task)
-        scratch_org_factory(task=task)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+            scratch_org_factory(task=task)
+            scratch_org_factory(task=task)
 
         assert task.scratchorg_set.active().count() == 2
 
@@ -299,9 +398,12 @@ class TestTask:
         assert task.scratchorg_set.active().count() == 0
 
     def test_soft_delete_cascade__manager(self, task_factory, scratch_org_factory):
-        task = task_factory()
-        scratch_org_factory(task=task)
-        scratch_org_factory(task=task)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+            scratch_org_factory(task=task)
+            scratch_org_factory(task=task)
 
         assert task.scratchorg_set.active().count() == 2
 
@@ -642,6 +744,8 @@ class TestUser:
 class TestScratchOrg:
     def test_notify_changed(self, scratch_org_factory):
         with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             stack.enter_context(
                 patch(
                     "metecho.api.jobs."
@@ -657,23 +761,39 @@ class TestScratchOrg:
             assert async_to_sync.called
 
     def test_queue_delete(self, scratch_org_factory):
-        with patch("metecho.api.jobs.delete_scratch_org_job") as delete_scratch_org_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            delete_scratch_org_job = stack.enter_context(
+                patch("metecho.api.jobs.delete_scratch_org_job")
+            )
+
             scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.queue_delete(originating_user_id=None)
 
             assert delete_scratch_org_job.delay.called
 
     def test_notify_delete(self, scratch_org_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.delete()
 
             assert async_to_sync.called
 
     def test_get_unsaved_changes(self, scratch_org_factory):
-        with patch(
-            "metecho.api.jobs.get_unsaved_changes_job"
-        ) as get_unsaved_changes_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            get_unsaved_changes_job = stack.enter_context(
+                patch("metecho.api.jobs.get_unsaved_changes_job")
+            )
+
             scratch_org = scratch_org_factory(
                 last_checked_unsaved_changes_at=now() - timedelta(minutes=1),
             )
@@ -684,9 +804,13 @@ class TestScratchOrg:
             assert get_unsaved_changes_job.delay.called
 
     def test_get_unsaved_changes__bail_early(self, scratch_org_factory):
-        with patch(
-            "metecho.api.jobs.get_unsaved_changes_job"
-        ) as get_unsaved_changes_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            get_unsaved_changes_job = stack.enter_context(
+                patch("metecho.api.jobs.get_unsaved_changes_job")
+            )
+
             scratch_org = scratch_org_factory(
                 last_checked_unsaved_changes_at=now() - timedelta(minutes=1),
             )
@@ -695,7 +819,13 @@ class TestScratchOrg:
             assert not get_unsaved_changes_job.delay.called
 
     def test_finalize_provision(self, scratch_org_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             scratch_org = scratch_org_factory()
             scratch_org.finalize_provision(originating_user_id=None)
 
@@ -703,6 +833,8 @@ class TestScratchOrg:
 
     def test_finalize_provision__flow_error(self, scratch_org_factory):
         with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             stack.enter_context(patch("metecho.api.model_mixins.async_to_sync"))
             delete_queued = stack.enter_context(
                 patch("metecho.api.jobs.delete_scratch_org_job")
@@ -714,6 +846,8 @@ class TestScratchOrg:
 
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             jwt_session = stack.enter_context(patch("metecho.api.models.jwt_session"))
             OrgConfig = stack.enter_context(patch("metecho.api.models.OrgConfig"))
             OrgConfig.return_value = MagicMock(start_url="https://example.com")
@@ -723,16 +857,26 @@ class TestScratchOrg:
             assert jwt_session.called
 
     def test_remove_scratch_org(self, scratch_org_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+
             scratch_org = scratch_org_factory()
             scratch_org.remove_scratch_org(error=Exception, originating_user_id=None)
 
             assert async_to_sync.called
 
     def test_clean_config(self, scratch_org_factory):
-        scratch_org = scratch_org_factory()
-        scratch_org.config = {"access_token": "bad", "anything else": "good"}
-        scratch_org.save()
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory()
+            scratch_org.config = {"access_token": "bad", "anything else": "good"}
+            scratch_org.save()
+
         scratch_org.refresh_from_db()
         assert scratch_org.config == {"anything else": "good"}
 

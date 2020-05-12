@@ -162,7 +162,9 @@ class RepositoryViewSet(
     @action(detail=True, methods=["GET"])
     def feature_branches(self, request, pk=None):
         instance = self.get_object()
-        repo = gh.get_repo_info(request.user, repo_id=instance.repo_id)
+        repo = gh.get_repo_info(
+            request.user, repo_id=instance.get_repo_id(request.user)
+        )
         data = [branch.name for branch in repo.branches() if "__" not in branch.name]
         return Response(data)
 

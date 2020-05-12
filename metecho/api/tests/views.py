@@ -174,11 +174,22 @@ class TestHookView:
         task_factory,
     ):
         settings.GITHUB_HOOK_SECRET = b""
-        repo = repository_factory(repo_id=123)
-        git_hub_repository_factory(repo_id=123)
-        with patch("metecho.api.models.gh"):
+        with ExitStack() as stack:
+            gh = stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            gh.get_repo_info.return_value = MagicMock(
+                **{
+                    "pull_requests.return_value": (
+                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        for _ in range(1)
+                    ),
+                }
+            )
+
+            repo = repository_factory(repo_id=123)
+            git_hub_repository_factory(repo_id=123)
             project = project_factory(repository=repo, branch_name="test-project")
-        task = task_factory(project=project, branch_name="test-task")
+            task = task_factory(project=project, branch_name="test-task")
         with patch("metecho.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
                 reverse("hook"),
@@ -331,14 +342,18 @@ class TestHookView:
 @pytest.mark.django_db
 class TestScratchOrgView:
     def test_commit_happy_path(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(
-            org_type="Dev",
-            owner=client.user,
-            valid_target_directories={"source": ["src"]},
-        )
-        with patch(
-            "metecho.api.jobs.commit_changes_from_org_job"
-        ) as commit_changes_from_org_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            commit_changes_from_org_job = stack.enter_context(
+                patch("metecho.api.jobs.commit_changes_from_org_job")
+            )
+
+            scratch_org = scratch_org_factory(
+                org_type="Dev",
+                owner=client.user,
+                valid_target_directories={"source": ["src"]},
+            )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
                 {
@@ -352,10 +367,14 @@ class TestScratchOrgView:
             assert commit_changes_from_org_job.delay.called
 
     def test_commit_invalid_target_directory(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
-        with patch(
-            "metecho.api.jobs.commit_changes_from_org_job"
-        ) as commit_changes_from_org_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
+
+            commit_changes_from_org_job = stack.enter_context(
+                patch("metecho.api.jobs.commit_changes_from_org_job")
+            )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
                 {
@@ -369,10 +388,14 @@ class TestScratchOrgView:
             assert not commit_changes_from_org_job.delay.called
 
     def test_commit_sad_path__400(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(org_type="Dev")
-        with patch(
-            "metecho.api.jobs.commit_changes_from_org_job"
-        ) as commit_changes_from_org_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory(org_type="Dev")
+
+            commit_changes_from_org_job = stack.enter_context(
+                patch("metecho.api.jobs.commit_changes_from_org_job")
+            )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
                 {"changes": {}},
@@ -382,10 +405,14 @@ class TestScratchOrgView:
             assert not commit_changes_from_org_job.delay.called
 
     def test_commit_sad_path__403(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(org_type="Dev")
-        with patch(
-            "metecho.api.jobs.commit_changes_from_org_job"
-        ) as commit_changes_from_org_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory(org_type="Dev")
+
+            commit_changes_from_org_job = stack.enter_context(
+                patch("metecho.api.jobs.commit_changes_from_org_job")
+            )
             response = client.post(
                 reverse("scratch-org-commit", kwargs={"pk": str(scratch_org.id)}),
                 {
@@ -399,18 +426,22 @@ class TestScratchOrgView:
             assert not commit_changes_from_org_job.delay.called
 
     def test_list_fetch_changes(self, client, scratch_org_factory):
-        scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Dev,
-            url="https://example.com",
-            is_created=True,
-            delete_queued_at=None,
-            currently_capturing_changes=False,
-            currently_refreshing_changes=False,
-            owner=client.user,
-        )
-        with patch(
-            "metecho.api.jobs.get_unsaved_changes_job"
-        ) as get_unsaved_changes_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org_factory(
+                org_type=SCRATCH_ORG_TYPES.Dev,
+                url="https://example.com",
+                is_created=True,
+                delete_queued_at=None,
+                currently_capturing_changes=False,
+                currently_refreshing_changes=False,
+                owner=client.user,
+            )
+
+            get_unsaved_changes_job = stack.enter_context(
+                patch("metecho.api.jobs.get_unsaved_changes_job")
+            )
             url = reverse("scratch-org-list")
             response = client.get(url)
 
@@ -418,18 +449,22 @@ class TestScratchOrgView:
             assert get_unsaved_changes_job.delay.called
 
     def test_retrieve_fetch_changes(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(
-            org_type=SCRATCH_ORG_TYPES.Dev,
-            url="https://example.com",
-            is_created=True,
-            delete_queued_at=None,
-            currently_capturing_changes=False,
-            currently_refreshing_changes=False,
-            owner=client.user,
-        )
-        with patch(
-            "metecho.api.jobs.get_unsaved_changes_job"
-        ) as get_unsaved_changes_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory(
+                org_type=SCRATCH_ORG_TYPES.Dev,
+                url="https://example.com",
+                is_created=True,
+                delete_queued_at=None,
+                currently_capturing_changes=False,
+                currently_refreshing_changes=False,
+                owner=client.user,
+            )
+
+            get_unsaved_changes_job = stack.enter_context(
+                patch("metecho.api.jobs.get_unsaved_changes_job")
+            )
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.get(url)
 
@@ -437,14 +472,17 @@ class TestScratchOrgView:
             assert get_unsaved_changes_job.delay.called
 
     def test_create(self, client, task_factory, social_account_factory):
-        task = task_factory()
-        social_account_factory(
-            user=client.user,
-            provider="salesforce",
-            extra_data={"preferred_username": "test-username"},
-        )
-        url = reverse("scratch-org-list")
         with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+            social_account_factory(
+                user=client.user,
+                provider="salesforce",
+                extra_data={"preferred_username": "test-username"},
+            )
+            url = reverse("scratch-org-list")
+
             stack.enter_context(
                 patch("metecho.api.views.viewsets.ModelViewSet.perform_create")
             )
@@ -461,14 +499,17 @@ class TestScratchOrgView:
         assert response.status_code == 201, response.content
 
     def test_create__bad(self, client, task_factory, social_account_factory):
-        task = task_factory()
-        social_account_factory(
-            user=client.user,
-            provider="salesforce",
-            extra_data={"preferred_username": "test-username"},
-        )
-        url = reverse("scratch-org-list")
         with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+            social_account_factory(
+                user=client.user,
+                provider="salesforce",
+                extra_data={"preferred_username": "test-username"},
+            )
+            url = reverse("scratch-org-list")
+
             stack.enter_context(
                 patch("metecho.api.views.viewsets.ModelViewSet.perform_create")
             )
@@ -484,11 +525,15 @@ class TestScratchOrgView:
         assert response.status_code == 403, response.content
 
     def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
-        social_account_factory(
-            user=client.user, provider="salesforce",
-        )
-        scratch_org = scratch_org_factory(owner=client.user)
-        with patch("metecho.api.models.ScratchOrg.queue_delete"):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            social_account_factory(
+                user=client.user, provider="salesforce",
+            )
+            scratch_org = scratch_org_factory(owner=client.user)
+
+            stack.enter_context(patch("metecho.api.models.ScratchOrg.queue_delete"))
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.delete(url)
 
@@ -497,19 +542,29 @@ class TestScratchOrgView:
     def test_queue_delete__bad(
         self, client, scratch_org_factory, social_account_factory
     ):
-        social_account_factory(
-            user=client.user, provider="salesforce-production",
-        )
-        scratch_org = scratch_org_factory()
-        with patch("metecho.api.models.ScratchOrg.queue_delete"):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            social_account_factory(
+                user=client.user, provider="salesforce-production",
+            )
+            scratch_org = scratch_org_factory()
+
+            stack.enter_context(patch("metecho.api.models.ScratchOrg.queue_delete"))
             url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
             response = client.delete(url)
 
             assert response.status_code == 403
 
     def test_redirect__good(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(owner=client.user)
-        with patch("metecho.api.models.ScratchOrg.get_login_url") as get_login_url:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory(owner=client.user)
+
+            get_login_url = stack.enter_context(
+                patch("metecho.api.models.ScratchOrg.get_login_url")
+            )
             get_login_url.return_value = "https://example.com"
             url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
             response = client.get(url)
@@ -517,8 +572,14 @@ class TestScratchOrgView:
             assert response.status_code == 302
 
     def test_redirect__bad(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory()
-        with patch("metecho.api.models.ScratchOrg.get_login_url") as get_login_url:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory()
+
+            get_login_url = stack.enter_context(
+                patch("metecho.api.models.ScratchOrg.get_login_url")
+            )
             get_login_url.return_value = "https://example.com"
             url = reverse("scratch-org-redirect", kwargs={"pk": str(scratch_org.id)})
             response = client.get(url)
@@ -526,8 +587,11 @@ class TestScratchOrgView:
             assert response.status_code == 403
 
     def test_refresh__good(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory(owner=client.user)
         with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory(owner=client.user)
+
             refresh_scratch_org_job = stack.enter_context(
                 patch("metecho.api.jobs.refresh_scratch_org_job")
             )
@@ -538,10 +602,14 @@ class TestScratchOrgView:
             assert refresh_scratch_org_job.delay.called
 
     def test_refresh__bad(self, client, scratch_org_factory):
-        scratch_org = scratch_org_factory()
-        with patch(
-            "metecho.api.jobs.refresh_scratch_org_job"
-        ) as refresh_scratch_org_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            scratch_org = scratch_org_factory()
+
+            refresh_scratch_org_job = stack.enter_context(
+                patch("metecho.api.jobs.refresh_scratch_org_job")
+            )
             url = reverse("scratch-org-refresh", kwargs={"pk": str(scratch_org.id)})
             response = client.post(url)
 
@@ -552,8 +620,12 @@ class TestScratchOrgView:
 @pytest.mark.django_db
 class TestTaskView:
     def test_create_pr(self, client, task_factory):
-        task = task_factory()
-        with patch("metecho.api.models.Task.queue_create_pr"):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+
+            stack.enter_context(patch("metecho.api.models.Task.queue_create_pr"))
             url = reverse("task-create-pr", kwargs={"pk": str(task.id)})
             response = client.post(
                 url,
@@ -570,16 +642,24 @@ class TestTaskView:
             assert response.status_code == 202, response.json()
 
     def test_create_pr__error(self, client, task_factory):
-        task = task_factory()
-        with patch("metecho.api.models.Task.queue_create_pr"):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+
+            stack.enter_context(patch("metecho.api.models.Task.queue_create_pr"))
             url = reverse("task-create-pr", kwargs={"pk": str(task.id)})
             response = client.post(url, {}, format="json")
 
             assert response.status_code == 400
 
     def test_create_pr__bad(self, client, task_factory):
-        task = task_factory(pr_is_open=True)
-        with patch("metecho.api.models.Task.queue_create_pr"):
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory(pr_is_open=True)
+
+            stack.enter_context(patch("metecho.api.models.Task.queue_create_pr"))
             url = reverse("task-create-pr", kwargs={"pk": str(task.id)})
             response = client.post(
                 url,
@@ -596,8 +676,14 @@ class TestTaskView:
             assert response.status_code == 400
 
     def test_review__good(self, client, task_factory):
-        task = task_factory(pr_is_open=True, review_valid=True)
-        with patch("metecho.api.jobs.submit_review_job") as submit_review_job:
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory(pr_is_open=True, review_valid=True)
+
+            submit_review_job = stack.enter_context(
+                patch("metecho.api.jobs.submit_review_job")
+            )
             data = {
                 "notes": "",
                 "status": "Approved",
@@ -612,13 +698,21 @@ class TestTaskView:
             assert submit_review_job.delay.called
 
     def test_review__bad(self, client, task_factory):
-        task = task_factory(pr_is_open=True, review_valid=True)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory(pr_is_open=True, review_valid=True)
+
         response = client.post(reverse("task-review", kwargs={"pk": str(task.id)}), {})
 
         assert response.status_code == 400
 
     def test_review__bad_pr_closed(self, client, task_factory):
-        task = task_factory(pr_is_open=False, review_valid=True)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory(pr_is_open=False, review_valid=True)
+
         data = {
             "notes": "",
             "status": "Approved",
@@ -632,7 +726,11 @@ class TestTaskView:
         assert response.status_code == 400
 
     def test_review__bad_invalid_review(self, client, task_factory):
-        task = task_factory(pr_is_open=True, review_valid=False)
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory(pr_is_open=True, review_valid=False)
+
         data = {
             "notes": "",
             "status": "Approved",

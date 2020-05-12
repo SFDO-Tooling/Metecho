@@ -454,20 +454,50 @@ class Project(
     # end CreatePrMixin configuration
 
     def create_gh_branch(self):
-        if not self.id and self.branch_name:  # i.e. "newly created"
-            repository = gh.get_repo_info(None, repo_id=self.repository.repo_id)
-            try:
-                head = repository.branch(self.branch_name).commit.sha
-            except NotFoundError:
-                gh.try_to_make_branch(
-                    repository,
-                    new_branch=self.branch_name,
-                    base_branch=repository.default_branch,
-                )
+        if not self.id:  # i.e. "newly created"
+            user = self.repository.get_a_matching_user()
+            repository = gh.get_repo_info(None, repo_id=self.get_repo_id(user))
+
+            if self.branch_name:
+                try:
+                    head = repository.branch(self.branch_name).commit.sha
+                except NotFoundError:
+                    gh.try_to_make_branch(
+                        repository,
+                        new_branch=self.branch_name,
+                        base_branch=repository.default_branch,
+                    )
+                else:
+                    base = repository.branch(repository.default_branch).commit.sha
+                    self.has_unmerged_commits = (
+                        "ahead" in repository.compare_commits(base, head).status
+                    )
+                    # Check if has PR
+                    try:
+                        head_str = f"{repository.owner}:{self.branch_name}"
+                        base_str = f"{repository.owner}:{repository.default_branch}"
+                        # Defaults to descending order, so we'll find
+                        # the most recent one, if there is one to be
+                        # found:
+                        pr = next(
+                            repository.pull_requests(head=head_str, base=base_str)
+                        )
+                        # Check PR status
+                        self.pr_number = pr.number
+                        self.pr_is_open = pr.closed_at is None
+                        self.pr_is_merged = pr.is_merged
+                    except StopIteration:
+                        pass
             else:
-                base = repository.branch(repository.default_branch).commit.sha
-                self.has_unmerged_commits = (
-                    "ahead" in repository.compare_commits(base, head).status
+                from .jobs import project_create_branch
+
+                repo_id = self.repository.repo_id
+                project_create_branch(
+                    project=self,
+                    repository=repository,
+                    user=user,
+                    repo_id=repo_id,
+                    originating_user_id=None,
                 )
 
     def should_update_in_progress(self):
@@ -700,7 +730,7 @@ class Task(
         status=None,
         delete_org=False,
         org=None,
-        originating_user_id
+        originating_user_id,
     ):
         self.currently_submitting_review = False
         if error:
@@ -927,7 +957,7 @@ class ScratchOrg(
         desired_changes,
         commit_message,
         target_directory,
-        originating_user_id
+        originating_user_id,
     ):
         from .jobs import commit_changes_from_org_job
 

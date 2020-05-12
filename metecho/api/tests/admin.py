@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -23,8 +24,11 @@ class TestSoftDeletedListFilter:
         assert lookups == (("true", _("Deleted")),)
 
     def test_queryset__not_deleted(self, project_factory):
-        project = project_factory()
-        project_factory(deleted_at=now())
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            stack.enter_context(patch("metecho.api.models.gh"))
+            project = project_factory()
+            project_factory(deleted_at=now())
 
         args = (
             None,
@@ -36,8 +40,11 @@ class TestSoftDeletedListFilter:
         assert list(actual) == [project]
 
     def test_queryset__deleted(self, project_factory):
-        project_factory()
-        project = project_factory(deleted_at=now())
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            stack.enter_context(patch("metecho.api.models.gh"))
+            project_factory()
+            project = project_factory(deleted_at=now())
 
         args = (
             None,
