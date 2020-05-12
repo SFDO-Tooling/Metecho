@@ -102,7 +102,7 @@ const ChangesList = ({
                 <Checkbox
                   key={`${uniqueGroupName}-${change}`}
                   labels={{ label: change }}
-                  className="slds-p-left_xx-large"
+                  className="ms-nested-checkboxes"
                   name="changes"
                   checked={Boolean(checkedChanges[groupName]?.includes(change))}
                   onChange={(
