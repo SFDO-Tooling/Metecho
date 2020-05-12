@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import Icon from '@salesforce/design-system-react/components/icon';
+import i18n from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -14,11 +15,7 @@ interface Props {
 }
 
 const ProjectListItem = ({ repository, project }: Props) => {
-  const { name, description_rendered, slug, branch_url } = project;
-  const branchLinkText = branch_url?.slice(
-    branch_url.indexOf('feature/'),
-    branch_url.length,
-  );
+  const { name, description_rendered, slug, branch_url, branch_name } = project;
 
   return (
     <>
@@ -34,9 +31,9 @@ const ProjectListItem = ({ repository, project }: Props) => {
         )}
         {branch_url && (
           <p className="slds-text-body_small slds-p-top_x-small slds-text-color_weak">
-            Branch:{' '}
+            {i18n.t('Branch')}:{' '}
             <ExternalLink url={branch_url}>
-              {branchLinkText}
+              {branch_name}
               <Icon
                 category="utility"
                 name="new_window"
