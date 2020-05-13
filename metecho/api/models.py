@@ -17,7 +17,6 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
-from github3.exceptions import NotFoundError
 from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -453,49 +452,9 @@ class Project(
     # end CreatePrMixin configuration
 
     def create_gh_branch(self, user):
-        repo_id = self.get_repo_id(user)
-        repository = gh.get_repo_info(user, repo_id=repo_id,)
+        from .jobs import create_gh_branch_for_new_project_job
 
-        if self.branch_name:
-            try:
-                head = repository.branch(self.branch_name).commit.sha
-            except NotFoundError:
-                gh.try_to_make_branch(
-                    repository,
-                    new_branch=self.branch_name,
-                    base_branch=repository.default_branch,
-                )
-            else:
-                base = repository.branch(repository.default_branch).commit.sha
-                self.has_unmerged_commits = (
-                    "ahead" in repository.compare_commits(base, head).status
-                )
-                # Check if has PR
-                try:
-                    head_str = f"{repository.owner}:{self.branch_name}"
-                    base_str = f"{repository.owner}:{repository.default_branch}"
-                    # Defaults to descending order, so we'll find
-                    # the most recent one, if there is one to be
-                    # found:
-                    pr = next(repository.pull_requests(head=head_str, base=base_str))
-                    # Check PR status
-                    self.pr_number = pr.number
-                    self.pr_is_open = pr.closed_at is None
-                    self.pr_is_merged = pr.is_merged
-                except StopIteration:
-                    pass
-        else:
-            from .jobs import project_create_branch
-
-            repo_id = self.get_repo_id(user)
-            project_create_branch(
-                project=self,
-                repository=repository,
-                repo_id=repo_id,
-                user=user,
-                originating_user_id=str(user.id),
-                should_finalize=False,
-            )
+        create_gh_branch_for_new_project_job.delay(self, user=user)
 
     def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)

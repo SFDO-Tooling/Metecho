@@ -165,7 +165,11 @@ class RepositoryViewSet(
         repo = gh.get_repo_info(
             request.user, repo_id=instance.get_repo_id(request.user)
         )
-        data = [branch.name for branch in repo.branches() if "__" not in branch.name]
+        data = [
+            branch.name
+            for branch in repo.branches()
+            if "__" not in branch.name and branch.name != repo.default_branch
+        ]
         return Response(data)
 
 

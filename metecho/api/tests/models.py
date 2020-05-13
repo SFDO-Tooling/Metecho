@@ -187,35 +187,6 @@ class TestProject:
         assert Project.objects.active().count() == 0
         assert Task.objects.active().count() == 0
 
-    def test_create_gh_branch__no_pr(self, user_factory, project_factory):
-        user = user_factory()
-        with ExitStack() as stack:
-            gh = stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            gh.get_repo_info.return_value = MagicMock(
-                **{
-                    "pull_requests.return_value": (
-                        _ for _ in range(0)  # empty generator
-                    ),
-                }
-            )
-
-            project = project_factory(branch_name="pepin")
-            project.create_gh_branch(user)
-            assert project.pr_number is None
-
-    def test_create_gh_branch__no_branch_name(self, user_factory, project_factory):
-        user = user_factory()
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            project_create_branch = stack.enter_context(
-                patch("metecho.api.jobs.project_create_branch")
-            )
-
-            project = project_factory()
-            project.create_gh_branch(user)
-            assert project_create_branch.called
-
 
 @pytest.mark.django_db
 class TestTask:
