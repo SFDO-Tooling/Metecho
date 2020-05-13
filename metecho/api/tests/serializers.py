@@ -423,6 +423,7 @@ class TestScratchOrgSerializer:
         with ExitStack() as stack:
             stack.enter_context(patch("metecho.api.models.gh"))
             stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            stack.enter_context(patch("metecho.api.gh.gh_as_app"))
             task = task_factory()
             instance = scratch_org_factory(
                 task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
@@ -439,6 +440,7 @@ class TestScratchOrgSerializer:
         with ExitStack() as stack:
             stack.enter_context(patch("metecho.api.models.gh"))
             stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            stack.enter_context(patch("metecho.api.gh.gh_as_app"))
             task = task_factory()
             instances = [
                 scratch_org_factory(

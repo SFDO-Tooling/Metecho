@@ -14,6 +14,10 @@ def test_populate_data():
     with ExitStack() as stack:
         stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
         stack.enter_context(patch("metecho.api.models.gh"))
+        get_repo_id = stack.enter_context(
+            patch("metecho.api.models.Repository.get_repo_id")
+        )
+        get_repo_id.return_value = 8080
         call_command("populate_data")
 
     assert Repository.objects.count() == 14
