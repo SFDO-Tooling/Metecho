@@ -455,9 +455,9 @@ class Project(
 
     def create_gh_branch(self):
         if not self.id:  # i.e. "newly created"
-            # We cannot get an app user with a repo_id, sadly; the API
-            # doesn't support it. So we have to use the repo_owner and
-            # repo_name.
+            # We cannot authenticate against GitHub as an App with a
+            # repo_id, sadly; the github3 library doesn't support it. So
+            # we have to use the repo_owner and repo_name.
             repository = gh.get_repo_info(
                 None,
                 repo_owner=self.repository.repo_owner,
@@ -501,10 +501,9 @@ class Project(
                 project_create_branch(
                     project=self,
                     repository=repository,
-                    # This is used only to check out the repo to get config info:
-                    user=None,
                     repo_id=repo_id,
                     originating_user_id=None,
+                    should_finalize=False,
                 )
 
     def should_update_in_progress(self):

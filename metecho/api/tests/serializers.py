@@ -420,10 +420,13 @@ class TestScratchOrgSerializer:
         self, rf, user_factory, task_factory, scratch_org_factory
     ):
         user = user_factory()
-        task = task_factory()
-        instance = scratch_org_factory(
-            task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
-        )
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+            instance = scratch_org_factory(
+                task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
+            )
 
         r = rf.get("/")
         serializer = ScratchOrgSerializer(instance, context={"request": r})
@@ -433,15 +436,24 @@ class TestScratchOrgSerializer:
         self, rf, user_factory, task_factory, scratch_org_factory
     ):
         user = user_factory()
-        task = task_factory()
-        instances = [
-            scratch_org_factory(
-                task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
-            ),
-            scratch_org_factory(
-                task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
-            ),
-        ]
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.models.gh"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            task = task_factory()
+            instances = [
+                scratch_org_factory(
+                    task=task,
+                    org_type="Dev",
+                    owner=user,
+                    ignored_changes={"test": "value"},
+                ),
+                scratch_org_factory(
+                    task=task,
+                    org_type="Dev",
+                    owner=user,
+                    ignored_changes={"test": "value"},
+                ),
+            ]
 
         r = rf.get("/")
         serializer = ScratchOrgSerializer(instances, many=True, context={"request": r})

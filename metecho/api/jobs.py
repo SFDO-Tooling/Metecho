@@ -47,7 +47,15 @@ def get_user_facing_url(*, path):
     return furl(f"{scheme}://{domain}").set(path=path).url
 
 
-def project_create_branch(*, project, repository, user, repo_id, originating_user_id):
+def project_create_branch(
+    *,
+    project,
+    repository,
+    repo_id,
+    originating_user_id,
+    user=None,
+    should_finalize=True,
+):
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
@@ -67,7 +75,8 @@ def project_create_branch(*, project, repository, user, repo_id, originating_use
             base_branch=repository.default_branch,
         )
         project.branch_name = project_branch_name
-        project.finalize_project_update(originating_user_id=originating_user_id)
+        if should_finalize:
+            project.finalize_project_update(originating_user_id=originating_user_id)
     return project_branch_name
 
 
