@@ -415,3 +415,34 @@ class TestScratchOrgSerializer:
             data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
         )
         assert not serializer.is_valid()
+
+    def test_circumspect_ignored_changes(
+        self, rf, user_factory, task_factory, scratch_org_factory
+    ):
+        user = user_factory()
+        task = task_factory()
+        instance = scratch_org_factory(
+            task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
+        )
+
+        r = rf.get("/")
+        serializer = ScratchOrgSerializer(instance, context={"request": r})
+        assert serializer.data["ignored_changes"] == {}
+
+    def test_circumspect_ignored_changes__many(
+        self, rf, user_factory, task_factory, scratch_org_factory
+    ):
+        user = user_factory()
+        task = task_factory()
+        instances = [
+            scratch_org_factory(
+                task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
+            ),
+            scratch_org_factory(
+                task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
+            ),
+        ]
+
+        r = rf.get("/")
+        serializer = ScratchOrgSerializer(instances, many=True, context={"request": r})
+        assert all(instance["ignored_changes"] == {} for instance in serializer.data)

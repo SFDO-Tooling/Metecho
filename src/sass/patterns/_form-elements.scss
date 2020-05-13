@@ -14,6 +14,10 @@
   display: grid;
   height: 100%;
 
+  .success-highlight {
+    background-color: $color-background-highlight;
+  }
+
   .slds-accordion__section {
     padding: $spacing-x-small $spacing-medium;
   }
@@ -24,8 +28,10 @@
     }
   }
 
-  .slds-is-open > .slds-accordion__summary {
-    margin-bottom: $spacing-x-small;
+  .slds-is-open {
+    > .slds-accordion__summary {
+      margin-bottom: $spacing-x-small;
+    }
   }
 
   .grow-inner-item {
@@ -33,4 +39,23 @@
       flex-grow: 1;
     }
   }
+
+  .accordion-no-padding {
+    > .slds-accordion__list-item {
+      > .slds-is-open {
+        padding: 0;
+
+        > .slds-accordion__summary {
+          padding-top: $spacing-x-small;
+          padding-left: $spacing-medium;
+          padding-right: $spacing-medium;
+        }
+      }
+    }
+  }
+}
+
+.ms-nested-checkboxes {
+  // line up with above label; add grid + (faux checkbox + label margin)
+  padding-left: $square-icon-x-small-boundary + $spacing-large;
 }

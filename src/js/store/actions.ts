@@ -336,11 +336,13 @@ export const updateObject = ({
   url,
   data,
   hasForm = false,
+  patch = false,
 }: {
   objectType?: ObjectTypes;
   url?: string;
   data: { id?: string; [key: string]: any };
   hasForm?: boolean;
+  patch?: boolean;
 }): ThunkResult<Promise<CreateUpdateObjectSucceeded>> => async (dispatch) => {
   let baseUrl = url;
   if (!url) {
@@ -361,7 +363,7 @@ export const updateObject = ({
       url: baseUrl,
       dispatch,
       opts: {
-        method: 'PUT',
+        method: patch ? 'PATCH' : 'PUT',
         body: JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json',

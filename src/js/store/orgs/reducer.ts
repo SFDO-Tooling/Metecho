@@ -26,6 +26,9 @@ export interface Org extends MinimalOrg {
   unsaved_changes: Changeset;
   has_unsaved_changes: boolean;
   total_unsaved_changes: number;
+  ignored_changes: Changeset;
+  has_ignored_changes: boolean;
+  total_ignored_changes: number;
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
   currently_refreshing_org: boolean;
@@ -133,8 +136,27 @@ const reducer = (
     }
     case 'SCRATCH_ORG_PROVISION':
     case 'SCRATCH_ORG_UPDATE':
-    case 'SCRATCH_ORG_DELETE_FAILED': {
-      const org = action.payload as Org;
+    case 'SCRATCH_ORG_DELETE_FAILED':
+    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
+    case 'SCRATCH_ORG_COMMIT_CHANGES':
+    case 'UPDATE_OBJECT_SUCCEEDED': {
+      let maybeOrg;
+      if (action.type === 'UPDATE_OBJECT_SUCCEEDED') {
+        const {
+          object,
+          objectType,
+        }: { object: Org; objectType?: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.ORG && object) {
+          maybeOrg = object;
+        }
+      } else {
+        maybeOrg = action.payload as Org;
+      }
+      /* istanbul ignore if */
+      if (!maybeOrg) {
+        return orgs;
+      }
+      const org = maybeOrg;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
         [ORG_TYPES.QA]: null,
@@ -206,21 +228,6 @@ const reducer = (
         };
       }
       return orgs;
-    }
-    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
-    case 'SCRATCH_ORG_COMMIT_CHANGES': {
-      const org = action.payload;
-      const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: null,
-        [ORG_TYPES.QA]: null,
-      };
-      return {
-        ...orgs,
-        [org.task]: {
-          ...taskOrgs,
-          [org.org_type]: org,
-        },
-      };
     }
     case 'SCRATCH_ORG_REFRESH_REQUESTED':
     case 'SCRATCH_ORG_REFRESH_REJECTED': {

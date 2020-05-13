@@ -52,6 +52,9 @@ const defaultOrgs = {
     unsaved_changes: { Foo: ['Bar'] },
     total_unsaved_changes: 1,
     has_unsaved_changes: true,
+    ignored_changes: {},
+    total_ignored_changes: 0,
+    has_ignored_changes: false,
     is_created: true,
   },
   QA: null,
@@ -117,9 +120,7 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup({ task });
 
       expect(getByText('View Org')).toBeVisible();
-      expect(
-        getByText('has 1 unretrieved change', { exact: false }),
-      ).toBeVisible();
+      expect(getByText('1 unretrieved change', { exact: false })).toBeVisible();
       expect(getByText('Assign')).toBeVisible();
       expect(getByText('check again')).toBeVisible();
       expect(getByText('617a512')).toBeVisible();
@@ -136,6 +137,23 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup({ orgs });
 
       expect(getByText('617a512')).toBeVisible();
+    });
+  });
+
+  describe('org has ignored changes', () => {
+    test('renders card status', () => {
+      const orgs = {
+        ...defaultOrgs,
+        Dev: {
+          ...defaultOrgs.Dev,
+          has_ignored_changes: true,
+          total_ignored_changes: 1,
+          ignored_changes: { Foo: ['Bar'] },
+        },
+      };
+      const { getByText } = setup({ orgs });
+
+      expect(getByText('1 ignored')).toBeVisible();
     });
   });
 

@@ -4,13 +4,13 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ResponseError
-from rest_framework import generics, mixins, status, viewsets
+from rest_framework import generics, mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from . import gh
 from .authentication import GitHubHookAuthentication
@@ -169,7 +169,7 @@ class RepositoryViewSet(
         return Response(data)
 
 
-class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
+class ProjectViewSet(CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProjectSerializer
     pagination_class = CustomPaginator
@@ -179,7 +179,7 @@ class ProjectViewSet(CreatePrMixin, viewsets.ModelViewSet):
     error_pr_exists = _("Project has already been submitted for testing.")
 
 
-class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
+class TaskViewSet(CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
     queryset = Task.objects.active()
@@ -211,8 +211,7 @@ class TaskViewSet(CreatePrMixin, viewsets.ModelViewSet):
 class ScratchOrgViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    # Just say no to updating ScratchOrgs:
-    # mixins.UpdateModelMixin,
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
     GenericViewSet,

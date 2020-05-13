@@ -25,6 +25,7 @@ const OrgInfo = ({
   testOrgOutOfDate,
   missingCommits,
   doCheckForOrgChanges,
+  openCaptureModal,
 }: {
   org: Org | null;
   type: OrgTypes;
@@ -39,6 +40,7 @@ const OrgInfo = ({
   testOrgOutOfDate: boolean;
   missingCommits: number;
   doCheckForOrgChanges: () => void;
+  openCaptureModal?: () => void;
 }) => {
   if (ownedByWrongUser) {
     return (
@@ -141,11 +143,26 @@ const OrgInfo = ({
     case ORG_TYPES.DEV: {
       /* istanbul ignore else */
       if (org) {
+        let ignoredChangesMsg = null;
+        if (ownedByCurrentUser && org.has_ignored_changes) {
+          ignoredChangesMsg = (
+            <>
+              {' ('}
+              <Button
+                label={`${org.total_ignored_changes} ${i18n.t('ignored')}`}
+                variant="link"
+                onClick={openCaptureModal}
+              />
+              {')'}
+            </>
+          );
+        }
         orgStatus = (
           <>
             {getOrgStatusMsg(org)}
             {ownedByCurrentUser && (
               <>
+                {ignoredChangesMsg}
                 {' | '}
                 <Button
                   label={i18n.t('check again')}

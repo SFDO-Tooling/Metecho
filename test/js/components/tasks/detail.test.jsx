@@ -112,6 +112,10 @@ const defaultState = {
         is_created: true,
         unsaved_changes: { Foo: ['Bar'] },
         has_unsaved_changes: true,
+        total_unsaved_changes: 1,
+        ignored_changes: {},
+        has_ignored_changes: false,
+        total_ignored_changes: 0,
         valid_target_directories: {
           source: ['src'],
           post: ['foo/bar', 'buz/baz'],
@@ -302,13 +306,19 @@ describe('<TaskDetail/>', () => {
       });
 
       test('just opens modal', () => {
-        const { getByText } = setup();
+        const { getByText, queryByText } = setup();
         fireEvent.click(getByText('Retrieve Changes from Dev Org'));
 
         expect(refetchOrg).not.toHaveBeenCalled();
         expect(
           getByText('Select the location to retrieve changes'),
         ).toBeVisible();
+
+        fireEvent.click(getByText('Close'));
+
+        expect(
+          queryByText('Select the location to retrieve changes'),
+        ).toBeNull();
       });
     });
   });
@@ -446,7 +456,7 @@ describe('<TaskDetail/>', () => {
             ...defaultState.orgs.task1,
             Dev: {
               ...defaultState.orgs.task1.Dev,
-              has_unsaved_changes: false,
+              total_unsaved_changes: 0,
             },
           },
         },
