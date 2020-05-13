@@ -12,8 +12,6 @@ def test_populate_data():
     assert Repository.objects.count() == 0
 
     with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        stack.enter_context(patch("metecho.api.models.gh"))
         get_repo_id = stack.enter_context(
             patch("metecho.api.models.Repository.get_repo_id")
         )

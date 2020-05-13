@@ -181,11 +181,8 @@ class TestRunFlow:
         org_config = MagicMock(
             org_id="org_id", instance_url="instance_url", access_token="access_token",
         )
+        project = project_factory()
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            project = project_factory()
-
             stack.enter_context(patch(f"{PATCH_ROOT}.os"))
             subprocess = stack.enter_context(patch(f"{PATCH_ROOT}.subprocess"))
             Popen = MagicMock()
@@ -224,12 +221,10 @@ class TestRunFlow:
 
 @pytest.mark.django_db
 def test_delete_org(scratch_org_factory):
+    scratch_org = scratch_org_factory(
+        config={"org_id": "some-id"}, expiry_job_id="abcd1234"
+    )
     with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.models.gh"))
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        scratch_org = scratch_org_factory(
-            config={"org_id": "some-id"}, expiry_job_id="abcd1234"
-        )
         stack.enter_context(patch(f"{PATCH_ROOT}.os"))
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         devhub_api = MagicMock()

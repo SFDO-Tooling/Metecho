@@ -10,8 +10,6 @@ def test_resync_all_gh_commit_data(task_factory):
     module_name = "metecho.api.management.commands.resync_all_gh_commit_data"
 
     with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        stack.enter_context(patch("metecho.api.models.gh"))
         refresh_commits = stack.enter_context(patch(f"{module_name}.refresh_commits"))
         task_factory(
             branch_name="test",

@@ -39,11 +39,8 @@ PATCH_ROOT = "metecho.api.jobs"
 class TestCreateBranchesOnGitHub:
     def test_create_branches_on_github(self, user_factory, task_factory):
         user = user_factory()
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            stack.enter_context(patch("metecho.api.models.gh"))
-            task = task_factory()
-            project = task.project
+        task = task_factory()
+        project = task.project
 
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
@@ -70,12 +67,14 @@ class TestCreateBranchesOnGitHub:
 
             assert repository.create_branch_ref.called
 
-    def test_create_branches_on_github__missing(self, project_factory):
+    def test_create_branches_on_github__missing(self, user_factory, project_factory):
+        user = user_factory()
         with patch("metecho.api.models.gh") as gh:
             gh.get_repo_info.return_value = MagicMock(
                 **{"branch.side_effect": NotFoundError(MagicMock())}
             )
-            project_factory(branch_name="placeholder")
+            project = project_factory(branch_name="placeholder")
+            project.create_gh_branch(user)
             assert gh.try_to_make_branch.called
 
     def test_create_branches_on_github__already_there(
@@ -124,22 +123,14 @@ class TestCreateBranchesOnGitHub:
 @pytest.mark.django_db
 class TestAlertUserAboutExpiringOrg:
     def test_soft_deleted_model(self, scratch_org_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            scratch_org = scratch_org_factory()
-
+        scratch_org = scratch_org_factory()
         scratch_org.delete()
         with patch(f"{PATCH_ROOT}.send_mail") as send_mail:
             assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
             assert not send_mail.called
 
     def test_good(self, scratch_org_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
-
+        scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
         with ExitStack() as stack:
             send_mail = stack.enter_context(patch(f"{PATCH_ROOT}.send_mail"))
             get_unsaved_changes = stack.enter_context(
@@ -186,13 +177,9 @@ def test_create_org_and_run_flow():
 
 @pytest.mark.django_db
 def test_get_unsaved_changes(scratch_org_factory):
-    with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.models.gh"))
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        scratch_org = scratch_org_factory(
-            latest_revision_numbers={"TypeOne": {"NameOne": 10}}
-        )
-
+    scratch_org = scratch_org_factory(
+        latest_revision_numbers={"TypeOne": {"NameOne": 10}}
+    )
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
         stack.enter_context(patch(f"metecho.api.sf_org_changes.get_repo_info"))
@@ -244,10 +231,7 @@ def test_create_branches_on_github_then_create_scratch_org():
 @pytest.mark.django_db
 class TestRefreshScratchOrg:
     def test_refresh_scratch_org(self, scratch_org_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             delete_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
@@ -260,10 +244,7 @@ class TestRefreshScratchOrg:
             assert _create_org_and_run_flow.called
 
     def test_refresh_scratch_org__error(self, scratch_org_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             delete_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
             delete_org.side_effect = Exception
@@ -281,10 +262,7 @@ class TestRefreshScratchOrg:
 
 @pytest.mark.django_db
 def test_delete_scratch_org(scratch_org_factory):
-    with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.models.gh"))
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        scratch_org = scratch_org_factory()
+    scratch_org = scratch_org_factory()
     with patch(f"{PATCH_ROOT}.delete_org") as sf_delete_scratch_org:
         delete_scratch_org(scratch_org, originating_user_id=None)
 
@@ -293,10 +271,7 @@ def test_delete_scratch_org(scratch_org_factory):
 
 @pytest.mark.django_db
 def test_delete_scratch_org__exception(scratch_org_factory):
-    with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.models.gh"))
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        scratch_org = scratch_org_factory()
+    scratch_org = scratch_org_factory()
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.async_to_sync"))
         get_latest_revision_numbers = stack.enter_context(
@@ -326,10 +301,7 @@ def test_refresh_github_repositories_for_user(user_factory):
 
 @pytest.mark.django_db
 def test_commit_changes_from_org(scratch_org_factory, user_factory):
-    with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.models.gh"))
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        scratch_org = scratch_org_factory()
+    scratch_org = scratch_org_factory()
     user = user_factory()
     with ExitStack() as stack:
         commit_changes_to_github = stack.enter_context(
@@ -375,10 +347,7 @@ class TestErrorHandling:
     def test_create_branches_on_github_then_create_scratch_org(
         self, scratch_org_factory
     ):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
@@ -399,10 +368,7 @@ class TestErrorHandling:
             assert async_to_sync.called
 
     def test_get_unsaved_changes(self, scratch_org_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
@@ -419,10 +385,7 @@ class TestErrorHandling:
 
     def test_commit_changes_from_org(self, scratch_org_factory, user_factory):
         user = user_factory()
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory()
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
@@ -448,14 +411,9 @@ class TestErrorHandling:
 @pytest.mark.django_db
 class TestRefreshCommits:
     def test_task__no_user(self, repository_factory, project_factory, task_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            repository = repository_factory()
-            project = project_factory(repository=repository)
-            task = task_factory(
-                project=project, branch_name="task", origin_sha="1234abcd"
-            )
+        repository = repository_factory()
+        project = project_factory(repository=repository)
+        task = task_factory(project=project, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:
             commit1 = Commit(
                 **{
@@ -501,13 +459,8 @@ class TestRefreshCommits:
         user = user_factory()
         repository = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            project = project_factory(repository=repository)
-            task = task_factory(
-                project=project, branch_name="task", origin_sha="1234abcd"
-            )
+        project = project_factory(repository=repository)
+        task = task_factory(project=project, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:
             commit1 = Commit(
                 **{
@@ -546,10 +499,7 @@ class TestRefreshCommits:
 @pytest.mark.django_db
 def test_create_pr(user_factory, task_factory):
     user = user_factory()
-    with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.models.gh"))
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        task = task_factory()
+    task = task_factory()
     with ExitStack() as stack:
         pr = MagicMock(number=123)
         repository = MagicMock(**{"create_pull.return_value": pr})
@@ -577,10 +527,7 @@ def test_create_pr(user_factory, task_factory):
 @pytest.mark.django_db
 def test_create_pr__error(user_factory, task_factory):
     user = user_factory()
-    with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.models.gh"))
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        task = task_factory()
+    task = task_factory()
     with ExitStack() as stack:
         repository = MagicMock()
         get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
@@ -614,10 +561,7 @@ class TestPopulateGithubUsers:
         self, user_factory, repository_factory, git_hub_repository_factory,
     ):
         user = user_factory()
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            repository = repository_factory(repo_id=123)
+        repository = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
         with patch("metecho.api.jobs.get_repo_info") as get_repo_info:
             collab1 = MagicMock(
@@ -638,20 +582,14 @@ class TestPopulateGithubUsers:
             assert len(repository.github_users) == 2
 
     def test_user_missing(self, repository_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            repository = repository_factory(repo_id=123)
+        repository = repository_factory(repo_id=123)
         with patch("metecho.api.jobs.logger") as logger:
             populate_github_users(repository, originating_user_id=None)
             assert logger.warning.called
 
     def test__error(self, user_factory, repository_factory, git_hub_repository_factory):
         user = user_factory()
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            repository = repository_factory(repo_id=123)
+        repository = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
@@ -672,8 +610,6 @@ class TestPopulateGithubUsers:
 class TestSubmitReview:
     def test_good(self, task_factory, user_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
 
             user = user_factory()
@@ -713,8 +649,6 @@ class TestSubmitReview:
             get_repo_info = stack.enter_context(
                 patch("metecho.api.model_mixins.get_repo_info")
             )
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
 
             user = user_factory()
             task = task_factory(pr_is_open=True, review_valid=True, review_sha="none")
@@ -752,8 +686,6 @@ class TestSubmitReview:
             get_repo_info = stack.enter_context(
                 patch("metecho.api.model_mixins.get_repo_info")
             )
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
 
             user = user_factory()
             task = task_factory(
@@ -784,8 +716,6 @@ class TestSubmitReview:
     def test_bad(self):
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
 
             task = MagicMock()
             pr = MagicMock()

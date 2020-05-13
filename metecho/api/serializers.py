@@ -158,6 +158,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             GitHubUserValidator(parent="repository"),
         )
 
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        instance.create_gh_branch(self.context["request"].user)
+        return instance
+
     def validate_branch_name(self, value):
         if getattr(self.instance, "branch_name", None) != value:
             if "__" in value:

@@ -71,6 +71,8 @@ def zip_file_is_safe(zip_file):
 
 
 def get_repo_info(user, repo_id=None, repo_owner=None, repo_name=None):
+    if user is None and (repo_owner is None or repo_name is None):
+        raise TypeError("If user=None, you must call with repo_owner and repo_name")
     gh = gh_given_user(user) if user else gh_as_app(repo_owner, repo_name)
     if repo_id is None:
         return gh.repository(repo_owner, repo_name)

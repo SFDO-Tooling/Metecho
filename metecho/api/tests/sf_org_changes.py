@@ -19,8 +19,6 @@ class TestRunRetrieveTask:
     def test_run_retrieve_task(self, user_factory, scratch_org_factory):
         user = user_factory()
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory()
 
             stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
@@ -45,8 +43,6 @@ class TestRunRetrieveTask:
     def test_run_retrieve_task__sfdx(self, user_factory, scratch_org_factory):
         user = user_factory()
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory()
 
             stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
@@ -71,8 +67,6 @@ class TestRunRetrieveTask:
     def test_run_retrieve_task__sfdx__non_main(self, user_factory, scratch_org_factory):
         user = user_factory()
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory()
 
             stack.enter_context(patch(f"{PATCH_ROOT}.refresh_access_token"))
@@ -99,8 +93,6 @@ class TestRunRetrieveTask:
 def test_commit_changes_to_github(user_factory, scratch_org_factory):
     user = user_factory()
     with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.models.gh"))
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
         scratch_org = scratch_org_factory()
 
         local_github_checkout = stack.enter_context(
@@ -204,8 +196,6 @@ class TestGetValidTargetDirectories:
             open_context_manager.__enter__.return_value = file_mock
             open_mock.return_value = open_context_manager
 
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory(config={"source_format": "sfdx"})
 
             user = user_factory()
@@ -239,8 +229,6 @@ class TestGetValidTargetDirectories:
             open_context_manager.__enter__.return_value = file_mock
             open_mock.return_value = open_context_manager
 
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory(config={"source_format": "sfdx"})
 
             user = user_factory()

@@ -10,8 +10,6 @@ def test_resync_all_gh_user_data(repository_factory):
     module_name = "metecho.api.management.commands.resync_all_gh_user_data"
 
     with ExitStack() as stack:
-        stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-        stack.enter_context(patch("metecho.api.models.gh"))
         repository_factory(repo_id=1234)
 
         populate_github_users = stack.enter_context(

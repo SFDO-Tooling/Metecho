@@ -1,4 +1,3 @@
-from contextlib import ExitStack
 from unittest.mock import patch
 
 import pytest
@@ -70,15 +69,12 @@ class TestPrHookSerializer:
     def test_process_hook__mark_matching_tasks_as_completed(
         self, repository_factory, task_factory
     ):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            stack.enter_context(patch("metecho.api.models.gh"))
-            repository = repository_factory(repo_id=123)
-            task = task_factory(
-                pr_number=456,
-                project__repository=repository,
-                status=TASK_STATUSES["In progress"],
-            )
+        repository = repository_factory(repo_id=123)
+        task = task_factory(
+            pr_number=456,
+            project__repository=repository,
+            status=TASK_STATUSES["In progress"],
+        )
         data = {
             "action": "closed",
             "number": 456,
@@ -93,15 +89,12 @@ class TestPrHookSerializer:
         assert task.status == TASK_STATUSES.Completed
 
     def test_process_hook__closed_not_merged(self, repository_factory, task_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            stack.enter_context(patch("metecho.api.models.gh"))
-            repository = repository_factory(repo_id=123)
-            task = task_factory(
-                pr_number=456,
-                project__repository=repository,
-                status=TASK_STATUSES["In progress"],
-            )
+        repository = repository_factory(repo_id=123)
+        task = task_factory(
+            pr_number=456,
+            project__repository=repository,
+            status=TASK_STATUSES["In progress"],
+        )
         data = {
             "action": "closed",
             "number": 456,
@@ -117,15 +110,12 @@ class TestPrHookSerializer:
         assert not task.pr_is_open
 
     def test_process_hook__reopened(self, repository_factory, task_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            stack.enter_context(patch("metecho.api.models.gh"))
-            repository = repository_factory(repo_id=123)
-            task = task_factory(
-                pr_number=456,
-                project__repository=repository,
-                status=TASK_STATUSES["In progress"],
-            )
+        repository = repository_factory(repo_id=123)
+        task = task_factory(
+            pr_number=456,
+            project__repository=repository,
+            status=TASK_STATUSES["In progress"],
+        )
         data = {
             "action": "reopened",
             "number": 456,
@@ -143,13 +133,8 @@ class TestPrHookSerializer:
     def test_process_hook__close_matching_projects(
         self, repository_factory, project_factory
     ):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            stack.enter_context(patch("metecho.api.models.gh"))
-            repository = repository_factory(repo_id=123)
-            project = project_factory(
-                pr_number=456, repository=repository, pr_is_open=True
-            )
+        repository = repository_factory(repo_id=123)
+        project = project_factory(pr_number=456, repository=repository, pr_is_open=True)
         data = {
             "action": "closed",
             "number": 456,
@@ -166,13 +151,10 @@ class TestPrHookSerializer:
     def test_process_hook__project_closed_not_merged(
         self, repository_factory, project_factory
     ):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            stack.enter_context(patch("metecho.api.models.gh"))
-            repository = repository_factory(repo_id=123)
-            project = project_factory(
-                pr_number=456, repository=repository, pr_is_open=True,
-            )
+        repository = repository_factory(repo_id=123)
+        project = project_factory(
+            pr_number=456, repository=repository, pr_is_open=True,
+        )
         data = {
             "action": "closed",
             "number": 456,
@@ -187,13 +169,10 @@ class TestPrHookSerializer:
         assert not project.pr_is_open
 
     def test_process_hook__project_reopened(self, repository_factory, project_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            stack.enter_context(patch("metecho.api.models.gh"))
-            repository = repository_factory(repo_id=123)
-            project = project_factory(
-                pr_number=456, repository=repository, pr_is_open=True,
-            )
+        repository = repository_factory(repo_id=123)
+        project = project_factory(
+            pr_number=456, repository=repository, pr_is_open=True,
+        )
         data = {
             "action": "reopened",
             "number": 456,

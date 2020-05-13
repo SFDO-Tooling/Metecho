@@ -176,7 +176,6 @@ class TestHookView:
         settings.GITHUB_HOOK_SECRET = b""
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             gh.get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
@@ -343,8 +342,6 @@ class TestHookView:
 class TestScratchOrgView:
     def test_commit_happy_path(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             commit_changes_from_org_job = stack.enter_context(
                 patch("metecho.api.jobs.commit_changes_from_org_job")
             )
@@ -368,8 +365,6 @@ class TestScratchOrgView:
 
     def test_commit_invalid_target_directory(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory(org_type="Dev", owner=client.user)
 
             commit_changes_from_org_job = stack.enter_context(
@@ -389,8 +384,6 @@ class TestScratchOrgView:
 
     def test_commit_sad_path__400(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory(org_type="Dev")
 
             commit_changes_from_org_job = stack.enter_context(
@@ -406,8 +399,6 @@ class TestScratchOrgView:
 
     def test_commit_sad_path__403(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory(org_type="Dev")
 
             commit_changes_from_org_job = stack.enter_context(
@@ -427,8 +418,6 @@ class TestScratchOrgView:
 
     def test_list_fetch_changes(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org_factory(
                 org_type=SCRATCH_ORG_TYPES.Dev,
                 url="https://example.com",
@@ -450,8 +439,6 @@ class TestScratchOrgView:
 
     def test_retrieve_fetch_changes(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory(
                 org_type=SCRATCH_ORG_TYPES.Dev,
                 url="https://example.com",
@@ -473,8 +460,6 @@ class TestScratchOrgView:
 
     def test_create(self, client, task_factory, social_account_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             task = task_factory()
             social_account_factory(
                 user=client.user,
@@ -498,8 +483,6 @@ class TestScratchOrgView:
 
     def test_create__bad(self, client, task_factory, social_account_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             task = task_factory()
             social_account_factory(
                 user=client.user,
@@ -522,8 +505,6 @@ class TestScratchOrgView:
 
     def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             social_account_factory(
                 user=client.user, provider="salesforce",
             )
@@ -539,8 +520,6 @@ class TestScratchOrgView:
         self, client, scratch_org_factory, social_account_factory
     ):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             social_account_factory(
                 user=client.user, provider="salesforce-production",
             )
@@ -554,8 +533,6 @@ class TestScratchOrgView:
 
     def test_redirect__good(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory(owner=client.user)
 
             get_login_url = stack.enter_context(
@@ -569,8 +546,6 @@ class TestScratchOrgView:
 
     def test_redirect__bad(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory()
 
             get_login_url = stack.enter_context(
@@ -584,8 +559,6 @@ class TestScratchOrgView:
 
     def test_refresh__good(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory(owner=client.user)
 
             refresh_scratch_org_job = stack.enter_context(
@@ -599,8 +572,6 @@ class TestScratchOrgView:
 
     def test_refresh__bad(self, client, scratch_org_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             scratch_org = scratch_org_factory()
 
             refresh_scratch_org_job = stack.enter_context(
@@ -617,8 +588,6 @@ class TestScratchOrgView:
 class TestTaskView:
     def test_create_pr(self, client, task_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             task = task_factory()
 
             stack.enter_context(patch("metecho.api.models.Task.queue_create_pr"))
@@ -639,8 +608,6 @@ class TestTaskView:
 
     def test_create_pr__error(self, client, task_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             task = task_factory()
 
             stack.enter_context(patch("metecho.api.models.Task.queue_create_pr"))
@@ -651,8 +618,6 @@ class TestTaskView:
 
     def test_create_pr__bad(self, client, task_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             task = task_factory(pr_is_open=True)
 
             stack.enter_context(patch("metecho.api.models.Task.queue_create_pr"))
@@ -673,8 +638,6 @@ class TestTaskView:
 
     def test_review__good(self, client, task_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
             task = task_factory(pr_is_open=True, review_valid=True)
 
             submit_review_job = stack.enter_context(
@@ -694,20 +657,14 @@ class TestTaskView:
             assert submit_review_job.delay.called
 
     def test_review__bad(self, client, task_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            task = task_factory(pr_is_open=True, review_valid=True)
+        task = task_factory(pr_is_open=True, review_valid=True)
 
         response = client.post(reverse("task-review", kwargs={"pk": str(task.id)}), {})
 
         assert response.status_code == 400
 
     def test_review__bad_pr_closed(self, client, task_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            task = task_factory(pr_is_open=False, review_valid=True)
+        task = task_factory(pr_is_open=False, review_valid=True)
 
         data = {
             "notes": "",
@@ -722,10 +679,7 @@ class TestTaskView:
         assert response.status_code == 400
 
     def test_review__bad_invalid_review(self, client, task_factory):
-        with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.models.gh"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
-            task = task_factory(pr_is_open=True, review_valid=False)
+        task = task_factory(pr_is_open=True, review_valid=False)
 
         data = {
             "notes": "",
