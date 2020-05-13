@@ -143,6 +143,7 @@ def get_org_result(
     and get the result."""
     # Schema for ScratchOrgInfo object:
     # https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_scratchorginfo.htm  # noqa: B950
+    features = scratch_org_definition.get("features", [])
     create_args = {
         "AdminEmail": email,
         "ConnectedAppConsumerKey": SF_CLIENT_ID,
@@ -151,7 +152,7 @@ def get_org_result(
         # Override whatever is in scratch_org_config.days:
         "DurationDays": DURATION_DAYS,
         "Edition": scratch_org_definition["edition"],
-        "Features": ";".join(scratch_org_definition.get("features", [])),
+        "Features": ";".join(features) if isinstance(features, list) else features,
         "HasSampleData": scratch_org_definition.get("hasSampleData", False),
         "Namespace": (
             cci.project_config.project__package__namespace
