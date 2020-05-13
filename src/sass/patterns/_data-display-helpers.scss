@@ -2,9 +2,7 @@
 // ====================
 
 .light-bordered-row {
-  &:not(:first-child) {
-    border-top: 1px solid $color-border-separator-alt;
-  }
+  border-top: 1px solid $color-border-separator-alt;
 }
 
 .vertical-separator {

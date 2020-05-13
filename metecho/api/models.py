@@ -725,6 +725,7 @@ class ScratchOrg(
     url = models.URLField(null=True, blank=True)
     last_checked_unsaved_changes_at = models.DateTimeField(null=True, blank=True)
     unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
+    ignored_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     latest_revision_numbers = JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )

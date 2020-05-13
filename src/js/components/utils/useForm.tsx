@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { AnyAction } from 'redux';
 
+import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { createObject, updateObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
 import { ApiError } from '@/utils/api';
 import { ObjectTypes } from '@/utils/constants';
-
-import useIsMounted from './useIsMounted';
 
 export interface UseFormProps {
   inputs: { [key: string]: any };
@@ -83,11 +83,20 @@ export default ({
       dispatch(addError(err.message));
     }
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (
+    e: React.FormEvent<HTMLFormElement>,
+    action?: (...args: any[]) => Promise<AnyAction>,
+    success?: () => void,
+  ) => {
     e.preventDefault();
     setErrors({});
+    if (action) {
+      return action()
+        .then(success || handleSuccess)
+        .catch(catchError);
+    }
     if (update) {
-      dispatch(
+      return dispatch(
         updateObject({
           objectType,
           url,
@@ -100,22 +109,21 @@ export default ({
       )
         .then(handleSuccess)
         .catch(catchError);
-    } else {
-      dispatch(
-        createObject({
-          objectType,
-          url,
-          data: {
-            ...additionalData,
-            ...inputs,
-          },
-          hasForm: true,
-          shouldSubscribeToObject,
-        }),
-      )
-        .then(handleSuccess)
-        .catch(catchError);
     }
+    return dispatch(
+      createObject({
+        objectType,
+        url,
+        data: {
+          ...additionalData,
+          ...inputs,
+        },
+        hasForm: true,
+        shouldSubscribeToObject,
+      }),
+    )
+      .then(handleSuccess)
+      .catch(catchError);
   };
 
   return {
