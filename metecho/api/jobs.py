@@ -671,24 +671,26 @@ def create_gh_branch_for_new_project(project, *, user):
         else:
             base = repository.branch(repository.default_branch).commit.sha
             project.has_unmerged_commits = (
-                "ahead" in repository.compare_commits(base, head).status
+                repository.compare_commits(base, head).ahead_by > 0
             )
             # Check if has PR
             try:
                 head_str = f"{repository.owner}:{project.branch_name}"
-                base_str = f"{repository.owner}:{repository.default_branch}"
                 # Defaults to descending order, so we'll find
                 # the most recent one, if there is one to be
                 # found:
-                pr = next(repository.pull_requests(head=head_str, base=base_str))
+                pr = next(
+                    repository.pull_requests(
+                        state="all", head=head_str, base=repository.default_branch
+                    )
+                )
                 # Check PR status
                 project.pr_number = pr.number
-                project.pr_is_open = pr.closed_at is None
-                project.pr_is_merged = pr.is_merged
+                project.pr_is_merged = pr.merged_at is not None
+                project.pr_is_open = pr.closed_at is None and pr.merged_at is not None
             except StopIteration:
                 pass
     else:
-        repo_id = project.get_repo_id(user)
         project_create_branch(
             project=project,
             repository=repository,

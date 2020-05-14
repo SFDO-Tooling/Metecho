@@ -167,11 +167,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         if getattr(self.instance, "branch_name", None) != value:
             if "__" in value:
                 raise serializers.ValidationError(
-                    _("Non-feature branch names not allowed.")
+                    _('Only feature branch names (without "__") are allowed.')
                 )
 
             already_used_branch_name = (
-                Project.objects.exclude(pk=getattr(self.instance, "pk", None))
+                Project.objects.active()
+                .exclude(pk=getattr(self.instance, "pk", None))
                 .filter(branch_name=value)
                 .exists()
             )
