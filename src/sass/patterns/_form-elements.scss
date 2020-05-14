@@ -59,3 +59,14 @@
   // line up with above label; add grid + (faux checkbox + label margin)
   padding-left: $square-icon-x-small-boundary + $spacing-large;
 }
+
+[data-form='create-project-branch'] {
+  .slds-listbox__status {
+    padding: $spacing-xx-small $spacing-x-small;
+
+    > span {
+      padding: 0;
+      margin: 0;
+    }
+  }
+}

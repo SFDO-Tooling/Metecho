@@ -194,7 +194,11 @@ const ProjectForm = ({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
+    <form
+      onSubmit={handleSubmit}
+      className="slds-form slds-m-bottom--large"
+      data-form="create-project-branch"
+    >
       {isOpen && (
         <>
           <p className="slds-form-element__help slds-m-bottom_small">
@@ -245,6 +249,7 @@ const ProjectForm = ({
                 noOptionsFound: noOptionsFoundText,
               }}
               menuItemVisibleLength={5}
+              predefinedOptionsOnly
               options={comboboxFilter({
                 inputValue: filterVal,
                 options: branchOptions,
@@ -254,7 +259,7 @@ const ProjectForm = ({
               value={selection ? selection.label : filterVal}
               errorText={errors.branch_name}
               hasInputSpinner={fetchingBranches}
-              hasMenuSpinner={fetchingBranches}
+              required
               variant="inline-listbox"
               classNameContainer="slds-form-element_stacked slds-p-left_none"
             />
