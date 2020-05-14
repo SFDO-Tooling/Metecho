@@ -1,8 +1,9 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Combobox from '@salesforce/design-system-react/components/combobox';
 import comboboxFilter from '@salesforce/design-system-react/components/combobox/filter';
 import Input from '@salesforce/design-system-react/components/input';
+import Radio from '@salesforce/design-system-react/components/radio';
+import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -129,10 +130,9 @@ const ProjectForm = ({
   };
 
   const handleBranchCheckboxChange = (
-    event: any,
-    { checked }: { checked: boolean },
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    if (checked) {
+    if (event.target.value === 'existing') {
       doGetBranches();
       setFromBranchChecked(true);
     } else {
@@ -153,6 +153,13 @@ const ProjectForm = ({
 
   const handleBranchRemoveSelection = () => {
     resetBranchForm();
+  };
+
+  const handleBranchBlur = () => {
+    if (repoBranches.includes(filterVal)) {
+      setBranch(filterVal);
+    }
+    resetFilterVal();
   };
 
   const noFeatureBranches = !repoBranches.length;
@@ -199,15 +206,31 @@ const ProjectForm = ({
               branch name in GitHub unless you choose to use an existing branch.
             </Trans>
           </p>
-          <Checkbox
-            id="project-base-branch"
-            labels={{
-              label: `${i18n.t('Use existing GitHub branch')}`,
+          <RadioGroup
+            assistiveText={{
+              label: i18n.t('Project Branch'),
+              required: i18n.t('Required'),
             }}
-            checked={fromBranchChecked}
             className="slds-form-element_stacked slds-p-left_none"
+            name="project-branch"
+            required
             onChange={handleBranchCheckboxChange}
-          />
+          >
+            <Radio
+              id="project-branch-new"
+              labels={{ label: i18n.t('Create new branch on GitHub') }}
+              checked={!fromBranchChecked}
+              name="project-branch"
+              value="new"
+            />
+            <Radio
+              id="project-branch-existing"
+              labels={{ label: i18n.t('Use existing GitHub branch') }}
+              checked={fromBranchChecked}
+              name="project-branch"
+              value="existing"
+            />
+          </RadioGroup>
           {fromBranchChecked && (
             <Combobox
               id="combobox-inline-single"
@@ -215,7 +238,7 @@ const ProjectForm = ({
                 onSelect: handleBranchSelection,
                 onChange: handleBranchChange,
                 onRequestRemoveSelectedOption: handleBranchRemoveSelection,
-                onBlur: resetFilterVal,
+                onBlur: handleBranchBlur,
               }}
               labels={{
                 label: `${i18n.t('Select a branch to use for this project')}`,
@@ -228,7 +251,7 @@ const ProjectForm = ({
                 selection: selection ? [selection] : [],
               })}
               selection={selection ? [selection] : []}
-              value={filterVal}
+              value={selection ? selection.label : filterVal}
               errorText={errors.branch_name}
               hasInputSpinner={fetchingBranches}
               hasMenuSpinner={fetchingBranches}
