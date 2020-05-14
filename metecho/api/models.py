@@ -511,7 +511,10 @@ class Project(
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "repository"),)
+        # We enforce this in business logic, not in the database, as we
+        # need to limit this constraint only to active Projects, and
+        # make the name column case-insensitive:
+        # unique_together = (("name", "repository"),)
 
 
 class TaskSlug(AbstractSlug):

@@ -98,7 +98,7 @@ class TestCreateBranchesOnGitHub:
                         MagicMock(number=123, closed_at=None, merged_at=None,)
                         for _ in range(1)
                     ),
-                    "compare_commits.return_value": (MagicMock(ahead_by=0,)),
+                    "compare_commits.return_value": MagicMock(ahead_by=0),
                 }
             )
 
@@ -762,7 +762,7 @@ class TestCreateGhBranchForNewProject:
                     "pull_requests.return_value": (
                         _ for _ in range(0)  # empty generator
                     ),
-                    "compare_commits.return_value": (MagicMock(ahead_by=0,)),
+                    "compare_commits.return_value": MagicMock(ahead_by=0),
                 }
             )
 
@@ -782,3 +782,18 @@ class TestCreateGhBranchForNewProject:
             project = project_factory()
             create_gh_branch_for_new_project(project, user=user)
             assert project_create_branch.called
+
+    def test_exception(self, user_factory, project_factory):
+        user = user_factory()
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            project_create_branch = stack.enter_context(
+                patch("metecho.api.jobs.project_create_branch")
+            )
+            get_repo_info.side_effect = ValueError()
+
+            project = project_factory()
+            with pytest.raises(ValueError):
+                create_gh_branch_for_new_project(project, user=user)
+
+            assert not project_create_branch.called
