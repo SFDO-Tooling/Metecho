@@ -1,9 +1,8 @@
 import React, { ReactElement } from 'react';
 
 import RepositoryNotFound from '@/components/repositories/repository404';
+import { SpinnerWrapper } from '@/components/utils';
 import { Repository } from '@/store/repositories/reducer';
-
-import SpinnerWrapper from './spinnerWrapper';
 
 export default ({
   repository,

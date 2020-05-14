@@ -711,24 +711,42 @@ describe('updateObject', () => {
     };
   });
 
-  describe('success', () => {
-    test('sends PUT to api', () => {
-      const store = storeWithThunk({});
-      fetchMock.putOnce(url, objectPayload.data);
-      const started = {
-        type: 'UPDATE_OBJECT_STARTED',
-        payload: objectPayload,
-      };
-      const succeeded = {
-        type: 'UPDATE_OBJECT_SUCCEEDED',
-        payload: { ...objectPayload, object: objectPayload.data },
-      };
+  test('sends PUT to api', () => {
+    const store = storeWithThunk({});
+    fetchMock.putOnce(url, objectPayload.data);
+    const started = {
+      type: 'UPDATE_OBJECT_STARTED',
+      payload: objectPayload,
+    };
+    const succeeded = {
+      type: 'UPDATE_OBJECT_SUCCEEDED',
+      payload: { ...objectPayload, object: objectPayload.data },
+    };
 
-      expect.assertions(1);
-      return store.dispatch(actions.updateObject(objectPayload)).then(() => {
+    expect.assertions(1);
+    return store.dispatch(actions.updateObject(objectPayload)).then(() => {
+      expect(store.getActions()).toEqual([started, succeeded]);
+    });
+  });
+
+  test('sends PATCH to api', () => {
+    const store = storeWithThunk({});
+    fetchMock.patchOnce(url, objectPayload.data);
+    const started = {
+      type: 'UPDATE_OBJECT_STARTED',
+      payload: objectPayload,
+    };
+    const succeeded = {
+      type: 'UPDATE_OBJECT_SUCCEEDED',
+      payload: { ...objectPayload, object: objectPayload.data },
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.updateObject({ ...objectPayload, patch: true }))
+      .then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
-    });
   });
 
   test('throws error if no url', () => {
