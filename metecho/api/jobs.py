@@ -689,9 +689,7 @@ def create_gh_branch_for_new_project(project, *, user):
                     # Check PR status
                     project.pr_number = pr.number
                     project.pr_is_merged = pr.merged_at is not None
-                    project.pr_is_open = (
-                        pr.closed_at is None and pr.merged_at is not None
-                    )
+                    project.pr_is_open = pr.closed_at is None and pr.merged_at is None
                 except StopIteration:
                     pass
         else:

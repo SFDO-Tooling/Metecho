@@ -193,7 +193,7 @@ const ProjectForm = ({
           <p className="slds-form-element__help slds-m-bottom_small">
             <Trans i18nKey="createProjectHelpText">
               Projects in Metecho are the high-level features that can be broken
-              down into smaller parts when creating Tasks. You can create a new
+              down into smaller parts by creating Tasks. You can create a new
               project or create a project based on an existing GitHub branch.
               Every project requires a unique project name, which becomes the
               branch name in GitHub unless you choose to use an existing branch.

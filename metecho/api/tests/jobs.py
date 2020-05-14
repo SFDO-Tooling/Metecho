@@ -95,9 +95,10 @@ class TestCreateBranchesOnGitHub:
             get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
-                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        MagicMock(number=123, closed_at=None, merged_at=None,)
                         for _ in range(1)
                     ),
+                    "compare_commits.return_value": (MagicMock(ahead_by=0,)),
                 }
             )
 
@@ -761,6 +762,7 @@ class TestCreateGhBranchForNewProject:
                     "pull_requests.return_value": (
                         _ for _ in range(0)  # empty generator
                     ),
+                    "compare_commits.return_value": (MagicMock(ahead_by=0,)),
                 }
             )
 
