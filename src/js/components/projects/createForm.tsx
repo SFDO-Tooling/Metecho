@@ -109,6 +109,7 @@ const ProjectForm = ({
       url: `${window.api_urls.repository_feature_branches(repository.id)}`,
       dispatch,
     });
+    /* istanbul ignore else */
     if (isMounted.current) {
       setRepoBranches(baseBranches);
       setFetchingBranches(false);

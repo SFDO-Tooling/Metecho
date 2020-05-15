@@ -1,4 +1,5 @@
 import { fireEvent, waitFor } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -95,10 +96,12 @@ describe('<ProjectForm/>', () => {
           name: 'Name of Project',
           description: 'This is the description',
           repository: 'r1',
+          branch_name: '',
           github_users: [],
         },
         hasForm: true,
         shouldSubscribeToObject: true,
+        url: undefined,
       });
     });
 
@@ -120,10 +123,12 @@ describe('<ProjectForm/>', () => {
           name: 'Name of Project',
           description: '',
           repository: 'r1',
+          branch_name: '',
           github_users: [ghUser],
         },
         hasForm: true,
         shouldSubscribeToObject: true,
+        url: undefined,
       });
     });
 
@@ -214,6 +219,65 @@ describe('<ProjectForm/>', () => {
 
         expect(addError).toHaveBeenCalledWith('This is an error.');
       });
+    });
+  });
+
+  describe('creating from existing branch', () => {
+    let url, result, fakeBranches, input;
+
+    beforeEach(async () => {
+      result = setup();
+      url = `${window.api_urls.repository_feature_branches('r1')}`;
+      fakeBranches = ['feature/foo', 'feature/bar'];
+      fetchMock.getOnce(url, fakeBranches);
+      fireEvent.click(result.getByText('Use existing GitHub branch'));
+      input = await result.queryByLabelText(
+        '*Select a branch to use for this project',
+      );
+      await waitFor(() => fireEvent.click(input));
+    });
+
+    test('selecting existing branch options', () => {
+      const { getByText } = result;
+
+      fireEvent.click(getByText('feature/foo'));
+
+      expect(getByText('Remove selected option')).toBeVisible();
+    });
+
+    test('removing selected branch', () => {
+      const { getByText } = result;
+
+      fireEvent.click(getByText('feature/foo'));
+      fireEvent.click(getByText('Remove selected option'));
+
+      expect(input.value).toEqual('');
+    });
+
+    test('search/filter branches from list', () => {
+      fireEvent.change(input, { target: { value: 'foo' } });
+
+      expect(input.value).toEqual('foo');
+    });
+
+    test('select new branch instead', () => {
+      const { getByLabelText } = result;
+      fireEvent.click(getByLabelText('Create new branch on GitHub'));
+
+      expect(input.value).toEqual('');
+    });
+
+    test('sets selected branch on blur', () => {
+      fireEvent.change(input, { target: { value: 'feature/foo' } });
+      fireEvent.blur(input);
+      expect(input.value).toEqual('feature/foo');
+    });
+
+    test('resets input value on blur', () => {
+      fireEvent.change(input, { target: { value: '' } });
+      fireEvent.blur(input);
+
+      expect(input.value).toEqual('');
     });
   });
 });
