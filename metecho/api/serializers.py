@@ -163,25 +163,45 @@ class ProjectSerializer(serializers.ModelSerializer):
         instance.create_gh_branch(self.context["request"].user)
         return instance
 
-    def validate_branch_name(self, value):
-        if getattr(self.instance, "branch_name", None) != value:
-            if "__" in value:
+    def validate(self, data):
+        branch_name = data.get("branch_name", None)
+        repo = data.get("repository", None)
+        branch_name_differs = branch_name != getattr(self.instance, "branch_name", None)
+        branch_name_changed = branch_name and branch_name_differs
+        if branch_name_changed:
+            if "__" in branch_name:
                 raise serializers.ValidationError(
-                    _('Only feature branch names (without "__") are allowed.')
+                    {
+                        "branch_name": _(
+                            'Only feature branch names (without "__") are allowed.'
+                        )
+                    }
+                )
+
+            branch_name_is_repo_default_branch = (
+                repo and branch_name == repo.branch_name
+            )
+            if branch_name_is_repo_default_branch:
+                raise serializers.ValidationError(
+                    {
+                        "branch_name": _(
+                            "Cannot create a project from the repository default branch."
+                        )
+                    }
                 )
 
             already_used_branch_name = (
                 Project.objects.active()
                 .exclude(pk=getattr(self.instance, "pk", None))
-                .filter(branch_name=value)
+                .filter(branch_name=branch_name)
                 .exists()
             )
             if already_used_branch_name:
                 raise serializers.ValidationError(
-                    _("This branch name is already in use.")
+                    {"branch_name": _("This branch name is already in use.")}
                 )
 
-            return value
+        return data
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
         repo = obj.repository

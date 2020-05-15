@@ -49,13 +49,7 @@ def get_user_facing_url(*, path):
 
 
 def project_create_branch(
-    *,
-    user,
-    project,
-    repository,
-    repo_id,
-    originating_user_id,
-    should_finalize=True,
+    *, user, project, repository, repo_id, originating_user_id, should_finalize=True,
 ):
     if project.branch_name:
         project_branch_name = project.branch_name
