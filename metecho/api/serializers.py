@@ -166,9 +166,9 @@ class ProjectSerializer(serializers.ModelSerializer):
     def validate(self, data):
         branch_name = data.get("branch_name", None)
         repo = data.get("repository", None)
-        print(branch_name)
-        print(repo)
-        if branch_name and getattr(self.instance, "branch_name", None) != branch_name:
+        branch_name_differs = branch_name != getattr(self.instance, "branch_name", None)
+        branch_name_changed = branch_name and branch_name_differs
+        if branch_name_changed:
             if "__" in branch_name:
                 raise serializers.ValidationError(
                     {
@@ -178,7 +178,10 @@ class ProjectSerializer(serializers.ModelSerializer):
                     }
                 )
 
-            if repo and branch_name == getattr(repo, "branch_name", None):
+            branch_name_is_repo_default_branch = (
+                repo and branch_name == repo.branch_name
+            )
+            if branch_name_is_repo_default_branch:
                 raise serializers.ValidationError(
                     {
                         "branch_name": _(
