@@ -118,6 +118,18 @@ class TestProjectSerializer:
         assert not serializer.is_valid()
         assert "branch_name" in serializer.errors
 
+    def test_validate_branch_name__repo_default_branch(self, repository_factory):
+        repo = repository_factory()
+        serializer = ProjectSerializer(
+            data={
+                "branch_name": repo.branch_name,
+                "name": "Test",
+                "repository": str(repo.id),
+            }
+        )
+        assert not serializer.is_valid()
+        assert "branch_name" in serializer.errors
+
     def test_branch_url__present(self, project_factory):
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
