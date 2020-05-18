@@ -11,9 +11,9 @@ def forwards(apps, schema_editor):
     if client_id and secret:
         SocialApp = apps.get_model("socialaccount", "SocialApp")
         SocialApp.objects.get_or_create(
-            provider=f"salesforce-production",
+            provider="salesforce-production",
             defaults=dict(
-                name=f"Salesforce Production",
+                name="Salesforce Production",
                 key="https://login.salesforce.com/",
                 client_id=client_id,
                 secret=secret,
