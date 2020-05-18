@@ -152,7 +152,12 @@ def _create_org_and_run_flow(
 ):
     from .models import SCRATCH_ORG_TYPES
 
-    cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
+    cases = {
+        SCRATCH_ORG_TYPES.Dev: "dev_org",
+        SCRATCH_ORG_TYPES.QA: "qa_org",
+        SCRATCH_ORG_TYPES.Beta: "install_beta",
+        SCRATCH_ORG_TYPES.Release: "install_prod",
+    }
 
     repository = get_repo_info(user, repo_id=repo_id)
     commit = repository.branch(repo_branch).commit
