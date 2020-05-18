@@ -2,17 +2,52 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
-// import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
+import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import i18n from 'i18next';
 import React from 'react';
 
 import ProjectListItem from '@/components/projects/listItem';
 import { Project } from '@/store/projects/reducer';
+import { PROJECT_STATUSES } from '@/utils/constants';
 
 interface TableCellProps {
   [key: string]: any;
   item?: Project;
 }
+
+const StatusTableCell = ({ item, ...props }: TableCellProps) => {
+  if (!item) {
+    return null;
+  }
+  const status = item.status;
+  let display, icon;
+  switch (status) {
+    case PROJECT_STATUSES.PLANNED:
+      display = 'Planned';
+      icon = <ProgressRing value={0} />;
+      break;
+    case PROJECT_STATUSES.IN_PROGRESS:
+      display = 'In Progress';
+      icon = <ProgressRing value={40} flowDirection="fill" theme="active" />;
+      break;
+    case PROJECT_STATUSES.REVIEW:
+      display = 'Review';
+      icon = <ProgressRing value={100} />;
+      break;
+    case PROJECT_STATUSES.MERGED:
+      display = 'Merged';
+      icon = <ProgressRing value={100} theme="complete" hasIcon />;
+  }
+  return (
+    <DataTableCell {...props} title={display || status}>
+      {icon}
+      <span className="slds-m-left_x-small project-task-status-text">
+        {display || status}
+      </span>
+    </DataTableCell>
+  );
+};
+StatusTableCell.displayName = DataTableCell.displayName;
 
 const CollaboratorTableCell = ({ item, children }: TableCellProps) => (
   <DataTableCell>{item && children}</DataTableCell>
@@ -62,7 +97,7 @@ const ProjectTable = ({
         width="25%"
         primaryColumn
       >
-        {/* <div>project status here...</div> */}
+        <StatusTableCell />
       </DataTableColumn>
       <DataTableColumn
         key="numCollaborators"
