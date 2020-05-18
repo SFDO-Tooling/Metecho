@@ -12,8 +12,8 @@ interface Props {
 const ProjectListItem = ({ repositorySlug, project }: Props) => {
   const { name, description_rendered, slug } = project;
   return (
-    <li className="slds-item slds-p-horizontal_none slds-p-vertical_medium">
-      <h3 className="slds-text-heading_small">
+    <li className="slds-item slds-p-horizontal_none slds-p-vertical_xx-small">
+      <h3 className="slds-text-heading_small slds-p-bottom_xx-small">
         <Link to={routes.project_detail(repositorySlug, slug)}>{name}</Link>
       </h3>
       {description_rendered && (

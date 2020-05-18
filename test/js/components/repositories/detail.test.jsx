@@ -45,6 +45,7 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           description_rendered: '<p>Project Description</p>',
+          github_users: [],
         },
       ],
       next: 'next-url',
