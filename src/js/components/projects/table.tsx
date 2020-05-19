@@ -16,6 +16,7 @@ interface TableCellProps {
 }
 
 const StatusTableCell = ({ item, ...props }: TableCellProps) => {
+  /* istanbul ignore if */
   if (!item) {
     return null;
   }
