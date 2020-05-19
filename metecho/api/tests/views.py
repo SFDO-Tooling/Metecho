@@ -265,7 +265,7 @@ class TestHookView:
                 {
                     "ref": "refs/heads/master",
                     "forced": False,
-                    "repository": {"id": 123},
+                    "repository": {"id": 8489},
                     "commits": [],
                     "sender": {},
                 }
@@ -273,7 +273,7 @@ class TestHookView:
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=4129db8949c2aa1b82f850a68cc384019c0d73d0",
+            HTTP_X_HUB_SIGNATURE="sha1=b27899e561020cabc0f4f4584e16217c544143fd",
             HTTP_X_GITHUB_EVENT="push",
         )
         assert response.status_code == 404

@@ -1,7 +1,11 @@
+import logging
+import traceback
 from datetime import timedelta
 
+import requests
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
+from bs4 import BeautifulSoup
 from cryptography.fernet import InvalidToken
 from cumulusci.core.config import OrgConfig
 from cumulusci.oauth.salesforce import jwt_session
@@ -36,6 +40,8 @@ from .model_mixins import (
 )
 from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
+
+logger = logging.getLogger(__name__)
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
@@ -95,6 +101,8 @@ class User(HashIdMixin, AbstractUser):
                         for repo in repos
                     ]
                 )
+                for repo in GitHubRepository.objects.all():
+                    repo.get_social_image(self)
         finally:
             self.refresh_from_db()
             self.currently_fetching_repos = False
@@ -355,6 +363,25 @@ class GitHubRepository(HashIdMixin, models.Model):
     )
     repo_id = models.IntegerField()
     repo_url = models.URLField()
+    repo_image_url = models.URLField(blank=True)
+
+    def get_social_image(self, user):
+        """
+        Because this makes external HTTP calls, this should only be
+        called from within a background job. Currently, it is called
+        inside User.refresh_repositories, which is called inside a
+        background job.
+        """
+        try:
+            repo = gh.get_repo_info(user, repo_id=self.repo_id)
+            soup = BeautifulSoup(requests.get(repo.html_url).content, "html.parser")
+            og_image = soup.find("meta", property="og:image").attrs.get("content", "")
+        except Exception:  # pragma: nocover
+            tb = traceback.format_exc()
+            logger.error(tb)
+        else:
+            self.repo_image_url = og_image
+            self.save()
 
     class Meta:
         verbose_name_plural = "GitHub repositories"
