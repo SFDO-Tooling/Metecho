@@ -238,4 +238,4 @@ def validate_cumulusci_yml_unchanged(repo):
     except IOError:
         cci_config_branch = ""
     if cci_config_master != cci_config_branch:
-        raise Exception(f"cumulusci.yml contains unreviewed changes.")
+        raise Exception("cumulusci.yml contains unreviewed changes.")
