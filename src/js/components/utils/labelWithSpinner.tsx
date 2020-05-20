@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import React from 'react';
 
-import SpinnerWrapper from './spinnerWrapper';
+import { SpinnerWrapper } from '@/components/utils';
 
 // For use as a "loading" button label
 const LabelWithSpinner = ({

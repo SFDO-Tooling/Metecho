@@ -41,6 +41,7 @@ interface OrgCardProps {
   handleDelete: (org: Org) => void;
   handleCheckForOrgChanges: (org: Org) => void;
   handleRefresh?: (org: Org) => void;
+  openCaptureModal?: () => void;
 }
 
 const OrgCard = ({
@@ -58,6 +59,7 @@ const OrgCard = ({
   handleDelete,
   handleCheckForOrgChanges,
   handleRefresh,
+  openCaptureModal,
   history,
 }: OrgCardProps & RouteComponentProps) => {
   const assignedUser =
@@ -265,6 +267,7 @@ const OrgCard = ({
                 testOrgOutOfDate={testOrgOutOfDate}
                 missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
+                openCaptureModal={openCaptureModal}
               />
               <OrgSpinner
                 org={org}

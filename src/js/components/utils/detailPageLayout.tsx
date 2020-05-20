@@ -4,7 +4,7 @@ import i18n from 'i18next';
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import ExternalLink from '@/components/utils/externalLink';
+import { ExternalLink } from '@/components/utils';
 import PageDescription from '@/components/utils/pageDescription';
 import routes from '@/utils/routes';
 

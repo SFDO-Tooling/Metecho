@@ -66,7 +66,7 @@ class Command(BaseCommand):
             repo_owner="oddbird",
             repo_name="Metecho-Test",
             description=(
-                f"# Welcome to Metecho!\n\n"
+                "# Welcome to Metecho!\n\n"
                 "This is a description of the repository. "
                 "It might contain [links](https://install.salesforce.org)."
             ),

@@ -420,9 +420,7 @@ class TestScratchOrgView:
         )
         url = reverse("scratch-org-list")
         with ExitStack() as stack:
-            stack.enter_context(
-                patch("metecho.api.views.viewsets.ModelViewSet.perform_create")
-            )
+            stack.enter_context(patch("metecho.api.views.ModelViewSet.perform_create"))
             get_devhub_api = stack.enter_context(
                 patch("metecho.api.models.get_devhub_api")
             )
@@ -444,9 +442,7 @@ class TestScratchOrgView:
         )
         url = reverse("scratch-org-list")
         with ExitStack() as stack:
-            stack.enter_context(
-                patch("metecho.api.views.viewsets.ModelViewSet.perform_create")
-            )
+            stack.enter_context(patch("metecho.api.views.ModelViewSet.perform_create"))
             get_devhub_api = stack.enter_context(
                 patch("metecho.api.models.get_devhub_api")
             )
