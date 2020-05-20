@@ -1,5 +1,6 @@
 import VisualPicker from '@salesforce/design-system-react/components/visual-picker';
 import VisualPickerLink from '@salesforce/design-system-react/components/visual-picker/link';
+import i18n from 'i18next';
 import React from 'react';
 
 import { Repository } from '@/store/repositories/reducer';
@@ -19,8 +20,12 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
       href={routes.repository_detail(repository.slug)}
       icon={
         <img
-          src="https://via.placeholder.com/75"
-          alt="Placeholder image till we get it from the API"
+          src={
+            repository.repo_image_url
+              ? repository.repo_image_url
+              : 'https://via.placeholder.com/75'
+          }
+          alt={`${i18n.t('image for')} ${repository.name}}`}
         />
       }
       title={repository.name}

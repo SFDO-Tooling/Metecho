@@ -30,6 +30,7 @@ const defaultState = {
         description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
         github_users: [],
+        repo_image_url: 'https://github.com/repo-image',
       },
     ],
     notFound: ['yet-another-repository'],

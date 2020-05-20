@@ -264,6 +264,7 @@
   "devHubInfo": "Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Test scratch org. Learn how to <2>create a Developer Edition org</2> and <6>enable Dev Hub</6>.",
   "devHubNotEnabled": "This Salesforce org does not have Dev Hub enabled or your user does not have permission to create scratch orgs. Learn how to <2>enable Dev Hub</2>.",
   "errorWithAccount": "An error occurred with your account. Try the <2>home page</2>?",
+  "image for": "image for",
   "markdownGuide": "For more options, view this <2>Markdown Guide</2>.",
   "noGitHubUsers": "We couldn’t find any GitHub users who have access to this repository. Try re-syncing the list of available collaborators, or contact an admin for this repository on GitHub.",
   "noRepositoriesHelper": "We couldn’t find any repositories you have access to on GitHub. Confirm that you are logged into the correct account or contact an admin on GitHub.",

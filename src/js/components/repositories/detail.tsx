@@ -97,7 +97,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         repoUrl={repository.repo_url}
         breadcrumb={[{ name: repository.name }]}
         sidebar={sidebarContent}
-        image={'https://via.placeholder.com/75'} // placeholder until returned from api
+        image={repository.repo_image_url}
       >
         {!projects || !projects.fetched ? (
           // Fetching projects from API
