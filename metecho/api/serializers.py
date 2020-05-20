@@ -97,6 +97,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "github_users",
+            "repo_image_url",
         )
 
     def get_repo_url(self, obj) -> Optional[str]:

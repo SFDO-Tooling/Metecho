@@ -96,6 +96,7 @@ class TestRepositoryView:
                         f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
                     ),
                     "github_users": [],
+                    "repo_image_url": "",
                 }
             ],
         }
@@ -131,6 +132,7 @@ class TestRepositoryView:
                         f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
                     ),
                     "github_users": [],
+                    "repo_image_url": "",
                 }
             ],
         }

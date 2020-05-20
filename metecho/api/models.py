@@ -320,6 +320,17 @@ class Repository(
 
         super().save(*args, **kwargs)
 
+    @cached_property
+    def repo_image_url(self):
+        github_repository = GitHubRepository.objects.filter(
+            repo_id=self.repo_id
+        ).first()
+
+        if github_repository:
+            return github_repository.repo_image_url
+
+        return None
+
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
             repo_id=self.repo_id
