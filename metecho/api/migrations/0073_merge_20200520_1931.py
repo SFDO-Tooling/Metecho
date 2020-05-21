@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0072_githubrepository_repo_image_url'),
-        ('api', '0072_merge_20200423_1445'),
+        ("api", "0072_githubrepository_repo_image_url"),
+        ("api", "0072_merge_20200423_1445"),
     ]
 
-    operations = [
-    ]
+    operations = []
