@@ -192,7 +192,7 @@ def test_get_unsaved_changes(scratch_org_factory):
     )
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-        stack.enter_context(patch(f"metecho.api.sf_org_changes.get_repo_info"))
+        stack.enter_context(patch("metecho.api.sf_org_changes.get_repo_info"))
         get_valid_target_directories = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_valid_target_directories")
         )
