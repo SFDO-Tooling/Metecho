@@ -19,7 +19,6 @@ export const OBJECT_TYPES = {
   PROJECT_PR: 'project_pr' as 'project_pr',
 };
 
-export const GITHUB_REPO_PREFIX = 'https://github.com';
 export const SHOW_PROJECT_COLLABORATORS = 'show_collaborators';
 
 export type OrgTypes = 'Dev' | 'QA';

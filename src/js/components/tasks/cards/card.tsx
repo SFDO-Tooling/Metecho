@@ -128,7 +128,7 @@ const OrgCard = ({
     if (org?.org_type === ORG_TYPES.QA && handleRefresh) {
       handleRefresh(org);
     }
-  }, [handleRefresh, org]);
+  }, [handleRefresh, org, org?.org_type]);
   const doCreateOrg = useCallback(() => {
     handleCreate(type);
   }, [handleCreate, type]);
