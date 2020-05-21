@@ -489,6 +489,11 @@ class Project(
 
     # end CreatePrMixin configuration
 
+    def create_gh_branch(self, user):
+        from .jobs import create_gh_branch_for_new_project_job
+
+        create_gh_branch_for_new_project_job.delay(self, user=user)
+
     def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)
         return task_statuses and any(
@@ -544,7 +549,10 @@ class Project(
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "repository"),)
+        # We enforce this in business logic, not in the database, as we
+        # need to limit this constraint only to active Projects, and
+        # make the name column case-insensitive:
+        # unique_together = (("name", "repository"),)
 
 
 class TaskSlug(AbstractSlug):
@@ -719,7 +727,7 @@ class Task(
         status=None,
         delete_org=False,
         org=None,
-        originating_user_id
+        originating_user_id,
     ):
         self.currently_submitting_review = False
         if error:
@@ -746,7 +754,10 @@ class Task(
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "project"),)
+        # We enforce this in business logic, not in the database, as we
+        # need to limit this constraint only to active Tasks, and
+        # make the name column case-insensitive:
+        # unique_together = (("name", "project"),)
 
 
 class ScratchOrg(
@@ -947,7 +958,7 @@ class ScratchOrg(
         desired_changes,
         commit_message,
         target_directory,
-        originating_user_id
+        originating_user_id,
     ):
         from .jobs import commit_changes_from_org_job
 

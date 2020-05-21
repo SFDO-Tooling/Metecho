@@ -178,10 +178,10 @@ class TestDeployOrgSettings:
 class TestRunFlow:
     def test_create_org_and_run_flow__exception(self, user_factory, project_factory):
         user = user_factory()
-        project = project_factory()
         org_config = MagicMock(
             org_id="org_id", instance_url="instance_url", access_token="access_token",
         )
+        project = project_factory()
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.os"))
             subprocess = stack.enter_context(patch(f"{PATCH_ROOT}.subprocess"))

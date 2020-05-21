@@ -12,6 +12,7 @@ export interface Project {
   old_slugs: string[];
   description: string;
   description_rendered: string;
+  branch_name: string | null;
   branch_url: string | null;
   branch_diff_url: string | null;
   pr_url: string | null;

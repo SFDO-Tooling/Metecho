@@ -92,6 +92,8 @@ class RepositorySerializer(serializers.ModelSerializer):
             "id",
             "name",
             "repo_url",
+            "repo_owner",
+            "repo_name",
             "description",
             "description_rendered",
             "is_managed",
@@ -127,6 +129,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "repository",
             "branch_url",
             "branch_diff_url",
+            "branch_name",
             "has_unmerged_commits",
             "currently_creating_pr",
             "pr_url",
@@ -157,6 +160,51 @@ class ProjectSerializer(serializers.ModelSerializer):
             ),
             GitHubUserValidator(parent="repository"),
         )
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        instance.create_gh_branch(self.context["request"].user)
+        return instance
+
+    def validate(self, data):
+        branch_name = data.get("branch_name", None)
+        repo = data.get("repository", None)
+        branch_name_differs = branch_name != getattr(self.instance, "branch_name", None)
+        branch_name_changed = branch_name and branch_name_differs
+        if branch_name_changed:
+            if "__" in branch_name:
+                raise serializers.ValidationError(
+                    {
+                        "branch_name": _(
+                            'Only feature branch names (without "__") are allowed.'
+                        )
+                    }
+                )
+
+            branch_name_is_repo_default_branch = (
+                repo and branch_name == repo.branch_name
+            )
+            if branch_name_is_repo_default_branch:
+                raise serializers.ValidationError(
+                    {
+                        "branch_name": _(
+                            "Cannot create a project from the repository default branch."
+                        )
+                    }
+                )
+
+            already_used_branch_name = (
+                Project.objects.active()
+                .exclude(pk=getattr(self.instance, "pk", None))
+                .filter(branch_name=branch_name)
+                .exists()
+            )
+            if already_used_branch_name:
+                raise serializers.ValidationError(
+                    {"branch_name": _("This branch name is already in use.")}
+                )
+
+        return data
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
         repo = obj.repository
@@ -212,6 +260,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "old_slugs",
             "has_unmerged_commits",
             "currently_creating_pr",
+            "branch_name",
             "branch_url",
             "commits",
             "origin_sha",

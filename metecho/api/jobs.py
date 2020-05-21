@@ -15,6 +15,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
 from furl import furl
+from github3.exceptions import NotFoundError
 
 from .gh import (
     get_cumulus_prefix,
@@ -47,14 +48,9 @@ def get_user_facing_url(*, path):
     return furl(f"{scheme}://{domain}").set(path=path).url
 
 
-def _create_branches_on_github(*, user, repo_id, project, task, originating_user_id):
-    """
-    Expects to be called in the context of a local github checkout.
-    """
-    repository = get_repo_info(user, repo_id=repo_id)
-
-    # Make project branch, with latest from project:
-    project.refresh_from_db()
+def project_create_branch(
+    *, user, project, repository, repo_id, originating_user_id, should_finalize=True,
+):
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
@@ -74,8 +70,26 @@ def _create_branches_on_github(*, user, repo_id, project, task, originating_user
             base_branch=repository.default_branch,
         )
         project.branch_name = project_branch_name
-        project.finalize_project_update(originating_user_id=originating_user_id)
+        if should_finalize:
+            project.finalize_project_update(originating_user_id=originating_user_id)
+    return project_branch_name
 
+
+def _create_branches_on_github(*, user, repo_id, project, task, originating_user_id):
+    """
+    Expects to be called in the context of a local github checkout.
+    """
+    repository = get_repo_info(user, repo_id=repo_id)
+
+    # Make project branch, with latest from project:
+    project.refresh_from_db()
+    project_branch_name = project_create_branch(
+        project=project,
+        repository=repository,
+        user=user,
+        repo_id=repo_id,
+        originating_user_id=originating_user_id,
+    )
     # Make task branch, with latest from task:
     task.refresh_from_db()
     if task.branch_name:
@@ -633,3 +647,67 @@ def submit_review(*, user, task, data, originating_user_id):
 
 
 submit_review_job = job(submit_review)
+
+
+def create_gh_branch_for_new_project(project, *, user):
+    try:
+        project.refresh_from_db()
+        repo_id = project.get_repo_id(user)
+        repository = get_repo_info(user, repo_id=repo_id)
+
+        if project.branch_name:
+            try:
+                head = repository.branch(project.branch_name).commit.sha
+            except NotFoundError:
+                try_to_make_branch(
+                    repository,
+                    new_branch=project.branch_name,
+                    base_branch=repository.default_branch,
+                )
+            else:
+                base = repository.branch(repository.default_branch).commit.sha
+                project.has_unmerged_commits = (
+                    repository.compare_commits(base, head).ahead_by > 0
+                )
+                # Check if has PR
+                try:
+                    head_str = f"{repository.owner}:{project.branch_name}"
+                    # Defaults to descending order, so we'll find
+                    # the most recent one, if there is one to be
+                    # found:
+                    pr = next(
+                        repository.pull_requests(
+                            state="all", head=head_str, base=repository.default_branch
+                        )
+                    )
+                    # Check PR status
+                    project.pr_number = pr.number
+                    project.pr_is_merged = pr.merged_at is not None
+                    project.pr_is_open = pr.closed_at is None and pr.merged_at is None
+                except StopIteration:
+                    pass
+        else:
+            project_create_branch(
+                project=project,
+                repository=repository,
+                repo_id=repo_id,
+                user=user,
+                originating_user_id=str(user.id),
+                should_finalize=False,
+            )
+    except Exception:
+        project.refresh_from_db()
+        project.branch_name = None
+        project.pr_number = None
+        project.pr_is_merged = False
+        project.pr_is_open = False
+        project.has_unmerged_commits = False
+        project.finalize_project_update(originating_user_id=str(user.id))
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        project.finalize_project_update(originating_user_id=str(user.id))
+
+
+create_gh_branch_for_new_project_job = job(create_gh_branch_for_new_project)
