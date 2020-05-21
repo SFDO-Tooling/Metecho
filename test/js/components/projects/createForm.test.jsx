@@ -101,7 +101,6 @@ describe('<ProjectForm/>', () => {
         },
         hasForm: true,
         shouldSubscribeToObject: true,
-        url: undefined,
       });
     });
 
@@ -128,7 +127,6 @@ describe('<ProjectForm/>', () => {
         },
         hasForm: true,
         shouldSubscribeToObject: true,
-        url: undefined,
       });
     });
 
@@ -227,19 +225,19 @@ describe('<ProjectForm/>', () => {
 
     beforeEach(async () => {
       result = setup();
-      url = `${window.api_urls.repository_feature_branches('r1')}`;
+      url = window.api_urls.repository_feature_branches(defaultRepository.id);
       fakeBranches = ['feature/foo', 'feature/bar'];
       fetchMock.getOnce(url, fakeBranches);
       fireEvent.click(result.getByText('Use existing GitHub branch'));
-      input = await result.queryByLabelText(
+      input = result.queryByLabelText(
         '*Select a branch to use for this project',
       );
-      await waitFor(() => fireEvent.click(input));
+      fireEvent.click(input);
+      await result.findByText('feature/foo');
     });
 
     test('selecting existing branch options', () => {
       const { getByText } = result;
-
       fireEvent.click(getByText('feature/foo'));
 
       expect(getByText('Remove selected option')).toBeVisible();
@@ -247,8 +245,10 @@ describe('<ProjectForm/>', () => {
 
     test('removing selected branch', () => {
       const { getByText } = result;
-
       fireEvent.click(getByText('feature/foo'));
+
+      expect(input.value).toEqual('feature/foo');
+
       fireEvent.click(getByText('Remove selected option'));
 
       expect(input.value).toEqual('');
@@ -261,20 +261,25 @@ describe('<ProjectForm/>', () => {
     });
 
     test('select new branch instead', () => {
-      const { getByLabelText } = result;
+      const { getByText, getByLabelText } = result;
+      fireEvent.click(getByText('feature/foo'));
+
+      expect(input.value).toEqual('feature/foo');
+
       fireEvent.click(getByLabelText('Create new branch on GitHub'));
 
-      expect(input.value).toEqual('');
+      expect(input).not.toBeInTheDocument();
     });
 
-    test('sets selected branch on blur', () => {
+    test('sets selected branch on blur if match found', () => {
       fireEvent.change(input, { target: { value: 'feature/foo' } });
       fireEvent.blur(input);
+
       expect(input.value).toEqual('feature/foo');
     });
 
-    test('resets input value on blur', () => {
-      fireEvent.change(input, { target: { value: '' } });
+    test('resets input value on blur if no match found', () => {
+      fireEvent.change(input, { target: { value: 'nope' } });
       fireEvent.blur(input);
 
       expect(input.value).toEqual('');
