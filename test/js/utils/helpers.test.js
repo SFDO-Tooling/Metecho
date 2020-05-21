@@ -10,6 +10,29 @@ describe('pluralize', () => {
   });
 });
 
+describe('getBranchLink', () => {
+  test.each([
+    [
+      { pr_url: 'pr' },
+      { branchLink: 'pr', branchLinkText: 'View Pull Request' },
+    ],
+    [
+      { has_unmerged_commits: true, branch_diff_url: 'diff' },
+      { branchLink: 'diff', branchLinkText: 'View Changes' },
+    ],
+    [
+      { branch_url: 'branch' },
+      { branchLink: 'branch', branchLinkText: 'View Branch' },
+    ],
+    [{}, { branchLink: undefined, branchLinkText: undefined }],
+  ])(
+    'returns branchLink and branchLinkText for input: %o',
+    (input, expected) => {
+      expect(helpers.getBranchLink(input)).toEqual(expected);
+    },
+  );
+});
+
 describe('splitChangeset', () => {
   test('removes members of one changeset from another', () => {
     const changeset1 = {

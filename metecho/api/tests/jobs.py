@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils.timezone import now
+from github3.exceptions import NotFoundError
 from simple_salesforce.exceptions import SalesforceGeneralError
 
 from ..jobs import (
@@ -14,6 +15,7 @@ from ..jobs import (
     alert_user_about_expiring_org,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
+    create_gh_branch_for_new_project,
     create_pr,
     delete_scratch_org,
     get_unsaved_changes,
@@ -40,6 +42,7 @@ class TestCreateBranchesOnGitHub:
         user = user_factory()
         task = task_factory()
         project = task.project
+
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
             global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
@@ -65,12 +68,46 @@ class TestCreateBranchesOnGitHub:
 
             assert repository.create_branch_ref.called
 
+    def test_create_branches_on_github__missing(self, user_factory, project_factory):
+        user = user_factory()
+        with ExitStack() as stack:
+            try_to_make_branch = stack.enter_context(
+                patch("metecho.api.jobs.try_to_make_branch")
+            )
+            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            get_repo_info.return_value = MagicMock(
+                **{"branch.side_effect": NotFoundError(MagicMock())}
+            )
+            project = project_factory(branch_name="placeholder")
+            create_gh_branch_for_new_project(project, user=user)
+            assert try_to_make_branch.called
+
     def test_create_branches_on_github__already_there(
         self, user_factory, project_factory, task_factory
     ):
         user = user_factory()
-        project = project_factory(branch_name="pepin")
-        task = task_factory(branch_name="charlemagne", project=project)
+        with ExitStack() as stack:
+            try_to_make_branch = stack.enter_context(
+                patch("metecho.api.jobs.try_to_make_branch")
+            )
+            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            get_repo_info.return_value = MagicMock(
+                **{
+                    "pull_requests.return_value": (
+                        MagicMock(number=123, closed_at=None, merged_at=None,)
+                        for _ in range(1)
+                    ),
+                    "compare_commits.return_value": MagicMock(ahead_by=0),
+                }
+            )
+
+            project = project_factory(branch_name="pepin")
+            create_gh_branch_for_new_project(project, user=user)
+            assert not try_to_make_branch.called
+
+            task = task_factory(branch_name="charlemagne", project=project)
+
         with ExitStack() as stack:
             global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
             global_config_instance = MagicMock()
@@ -153,10 +190,9 @@ def test_get_unsaved_changes(scratch_org_factory):
     scratch_org = scratch_org_factory(
         latest_revision_numbers={"TypeOne": {"NameOne": 10}}
     )
-
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-        stack.enter_context(patch(f"metecho.api.sf_org_changes.get_repo_info"))
+        stack.enter_context(patch("metecho.api.sf_org_changes.get_repo_info"))
         get_valid_target_directories = stack.enter_context(
             patch(f"{PATCH_ROOT}.get_valid_target_directories")
         )
@@ -583,7 +619,9 @@ class TestPopulateGithubUsers:
 @pytest.mark.django_db
 class TestSubmitReview:
     def test_good(self, task_factory, user_factory):
-        with patch("metecho.api.jobs.get_repo_info") as get_repo_info:
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+
             user = user_factory()
             task = task_factory(
                 pr_is_open=True, review_valid=True, review_sha="test_sha"
@@ -617,10 +655,11 @@ class TestSubmitReview:
 
     def test_good__has_org(self, task_factory, scratch_org_factory, user_factory):
         with ExitStack() as stack:
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
             get_repo_info = stack.enter_context(
                 patch("metecho.api.model_mixins.get_repo_info")
             )
+
             user = user_factory()
             task = task_factory(pr_is_open=True, review_valid=True, review_sha="none")
             scratch_org = scratch_org_factory(task=task, latest_commit="test_sha")
@@ -653,10 +692,11 @@ class TestSubmitReview:
 
     def test_good__review_invalid(self, task_factory, user_factory):
         with ExitStack() as stack:
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
             get_repo_info = stack.enter_context(
                 patch("metecho.api.model_mixins.get_repo_info")
             )
+
             user = user_factory()
             task = task_factory(
                 pr_is_open=True, review_valid=False, review_sha="test_sha"
@@ -684,7 +724,9 @@ class TestSubmitReview:
             assert "error" in task.finalize_submit_review.call_args.kwargs
 
     def test_bad(self):
-        with patch("metecho.api.jobs.get_repo_info") as get_repo_info:
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+
             task = MagicMock()
             pr = MagicMock()
             pr.create_review.side_effect = ValueError()
@@ -706,3 +748,52 @@ class TestSubmitReview:
             assert task.finalize_submit_review.called
             assert task.finalize_submit_review.call_args.args
             assert "error" in task.finalize_submit_review.call_args.kwargs
+
+
+@pytest.mark.django_db
+class TestCreateGhBranchForNewProject:
+    def test_no_pr(self, user_factory, project_factory):
+        user = user_factory()
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            get_repo_info.return_value = MagicMock(
+                **{
+                    "pull_requests.return_value": (
+                        _ for _ in range(0)  # empty generator
+                    ),
+                    "compare_commits.return_value": MagicMock(ahead_by=0),
+                }
+            )
+
+            project = project_factory(branch_name="pepin")
+            create_gh_branch_for_new_project(project, user=user)
+            assert project.pr_number is None
+
+    def test_no_branch_name(self, user_factory, project_factory):
+        user = user_factory()
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            project_create_branch = stack.enter_context(
+                patch("metecho.api.jobs.project_create_branch")
+            )
+            get_repo_info.return_value = MagicMock()
+
+            project = project_factory()
+            create_gh_branch_for_new_project(project, user=user)
+            assert project_create_branch.called
+
+    def test_exception(self, user_factory, project_factory):
+        user = user_factory()
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            project_create_branch = stack.enter_context(
+                patch("metecho.api.jobs.project_create_branch")
+            )
+            get_repo_info.side_effect = ValueError()
+
+            project = project_factory()
+            with pytest.raises(ValueError):
+                create_gh_branch_for_new_project(project, user=user)
+
+            assert not project_create_branch.called

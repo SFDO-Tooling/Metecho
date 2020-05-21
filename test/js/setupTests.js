@@ -34,6 +34,8 @@ beforeAll(() => {
     task_review: (id) => `/api/tasks/${id}/review/`,
     project_detail: (id) => `/api/projects/${id}/`,
     project_create_pr: (id) => `/api/projects/${id}/create_pr/`,
+    repository_feature_branches: (id) =>
+      `/api/repositories/${id}/feature_branches/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();

@@ -69,6 +69,10 @@ def test_log_unsafe_zipfile_error():
 
 @pytest.mark.django_db
 class TestGetRepoInfo:
+    def test_invalid_arguments(self):
+        with pytest.raises(TypeError):
+            get_repo_info(None, repo_id=123)
+
     def test_with_repo_id(self, user_factory):
         with patch(f"{PATCH_ROOT}.gh_given_user") as gh_given_user:
             user = user_factory()

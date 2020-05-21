@@ -329,7 +329,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         modelType={OBJECT_TYPES.PROJECT}
         handleOptionSelect={handlePageOptionSelect}
       />
-      {branchLink ? (
+      {branchLink && (
         <ExternalLink
           url={branchLink}
           showButtonIcon
@@ -337,11 +337,20 @@ const ProjectDetail = (props: RouteComponentProps) => {
         >
           {branchLinkText}
         </ExternalLink>
-      ) : null}
+      )}
     </PageHeaderControl>
   );
 
   const repoUrl = routes.repository_detail(repository.slug);
+  let headerUrl, headerUrlText;
+  /* istanbul ignore else */
+  if (project.branch_url && project.branch_name) {
+    headerUrl = project.branch_url;
+    headerUrlText = project.branch_name;
+  } else {
+    headerUrl = repository.repo_url;
+    headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
+  }
 
   return (
     <DocumentTitle
@@ -350,7 +359,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
       <DetailPageLayout
         title={project.name}
         description={project.description_rendered}
-        repoUrl={repository.repo_url}
+        headerUrl={headerUrl}
+        headerUrlText={headerUrlText}
         breadcrumb={[
           {
             name: repository.name,
