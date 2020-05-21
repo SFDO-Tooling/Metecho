@@ -53,7 +53,7 @@ async def test_push_notification_consumer__repository(user_factory, repository_f
 @pytest.mark.django_db
 async def test_push_notification_consumer__project(user_factory, project_factory):
     user = await database_sync_to_async(user_factory)()
-    project = await database_sync_to_async(project_factory)()
+    project = await database_sync_to_async(project_factory)(repository__repo_id=1234)
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -82,7 +82,7 @@ async def test_push_notification_consumer__project(user_factory, project_factory
 @pytest.mark.django_db
 async def test_push_notification_consumer__task(user_factory, task_factory):
     user = await database_sync_to_async(user_factory)()
-    task = await database_sync_to_async(task_factory)()
+    task = await database_sync_to_async(task_factory)(project__repository__repo_id=4321)
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -113,7 +113,9 @@ async def test_push_notification_consumer__scratch_org(
     user_factory, scratch_org_factory
 ):
     user = await database_sync_to_async(user_factory)()
-    scratch_org = await database_sync_to_async(scratch_org_factory)()
+    scratch_org = await database_sync_to_async(scratch_org_factory)(
+        task__project__repository__repo_id=2468
+    )
 
     communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
     communicator.scope["user"] = user

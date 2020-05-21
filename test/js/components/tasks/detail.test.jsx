@@ -41,6 +41,8 @@ const defaultState = {
         description: 'This is a test repository.',
         description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
+        repo_owner: 'test',
+        repo_name: 'test-repo',
         github_users: [
           {
             id: 'user-1',
@@ -62,6 +64,8 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           description_rendered: '<p>Project Description</p>',
+          branch_url: 'https://github.com/test/test-repo/tree/branch-name',
+          branch_name: 'branch-name',
           old_slugs: [],
           github_users: [
             {
@@ -84,6 +88,8 @@ const defaultState = {
         slug: 'task-1',
         old_slugs: ['old-slug'],
         project: 'project1',
+        branch_url: 'https://github.com/test/test-repo/tree/project__task',
+        branch_name: 'project__task',
         description: 'Task Description',
         description_rendered: '<p>Task Description</p>',
         has_unmerged_commits: false,
@@ -155,7 +161,7 @@ describe('<TaskDetail/>', () => {
 
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByText('Task Description')).toBeVisible();
-    expect(queryByText('View Branch')).toBeNull();
+    expect(queryByText('View Branch')).toBeVisible();
     expect(getByTitle('View Org')).toBeVisible();
     expect(getByText('Task Team & Orgs')).toBeVisible();
   });

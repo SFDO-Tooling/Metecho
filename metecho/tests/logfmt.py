@@ -52,12 +52,12 @@ def test_formatter_format():
     result = LogfmtFormatter().format(record)
     expected = " ".join(
         [
-            f"id=unknown",
-            f"at=INFO",
+            "id=unknown",
+            "at=INFO",
             f'time="{time}"',
-            f"tag=external",
-            f"module=module",
-            f'msg="Some message"',
+            "tag=external",
+            "module=module",
+            'msg="Some message"',
         ]
     )
 
@@ -96,13 +96,13 @@ def test_parsed_msg():
     result = LogfmtFormatter().format(record)
     expected = " ".join(
         [
-            f"id=unknown",
-            f"at=INFO",
+            "id=unknown",
+            "at=INFO",
             f'time="{time}"',
-            f"tag=external",
-            f"module=logging_middleware",
-            f"foo=bar",
-            f"baz=qux",
+            "tag=external",
+            "module=logging_middleware",
+            "foo=bar",
+            "baz=qux",
         ]
     )
 

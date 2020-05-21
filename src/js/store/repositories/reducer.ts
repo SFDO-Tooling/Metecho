@@ -10,6 +10,8 @@ export interface Repository {
   slug: string;
   old_slugs: string[];
   repo_url: string;
+  repo_owner: string;
+  repo_name: string;
   description: string;
   description_rendered: string;
   is_managed: boolean;
