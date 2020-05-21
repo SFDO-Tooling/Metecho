@@ -121,6 +121,8 @@ class TestRepositoryView:
                     "repo_url": (
                         f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
                     ),
+                    "repo_owner": str(repo.repo_owner),
+                    "repo_name": str(repo.repo_name),
                     "github_users": [],
                 }
             ],
@@ -156,6 +158,8 @@ class TestRepositoryView:
                     "repo_url": (
                         f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
                     ),
+                    "repo_owner": str(repo.repo_owner),
+                    "repo_name": str(repo.repo_name),
                     "github_users": [],
                 }
             ],
