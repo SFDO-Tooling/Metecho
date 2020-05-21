@@ -95,7 +95,8 @@ const RepositoryDetail = (props: RouteComponentProps) => {
       <DetailPageLayout
         title={repository.name}
         description={repository.description_rendered}
-        repoUrl={repository.repo_url}
+        headerUrl={repository.repo_url}
+        headerUrlText={`${repository.repo_owner}/${repository.repo_name}`}
         breadcrumb={[{ name: repository.name }]}
         sidebar={sidebarContent}
       >
@@ -118,7 +119,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             <ProjectForm
               user={user}
               repository={repository}
-              startOpen={!projects.projects.length}
+              hasProjects={projects.projects.length > 0}
             />
             {Boolean(projects.projects.length) && (
               <>

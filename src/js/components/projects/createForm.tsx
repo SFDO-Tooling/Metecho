@@ -29,17 +29,12 @@ interface ComboboxOption {
 interface Props extends RouteComponentProps {
   user: User;
   repository: Repository;
-  startOpen?: boolean;
+  hasProjects: boolean;
 }
 
-const ProjectForm = ({
-  user,
-  repository,
-  startOpen = false,
-  history,
-}: Props) => {
+const ProjectForm = ({ user, repository, hasProjects, history }: Props) => {
   const isMounted = useIsMounted();
-  const [isOpen, setIsOpen] = useState(startOpen);
+  const [isOpen, setIsOpen] = useState(!hasProjects);
   // state related to setting base branch on project creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
@@ -202,15 +197,18 @@ const ProjectForm = ({
     >
       {isOpen && (
         <>
-          <p className="slds-form-element__help slds-m-bottom_small">
-            <Trans i18nKey="createProjectHelpText">
-              Projects in Metecho are the high-level features that can be broken
-              down into smaller parts by creating Tasks. You can create a new
-              project or create a project based on an existing GitHub branch.
-              Every project requires a unique project name, which becomes the
-              branch name in GitHub unless you choose to use an existing branch.
-            </Trans>
-          </p>
+          {!hasProjects && (
+            <p className="slds-form-element__help slds-m-bottom_small">
+              <Trans i18nKey="createProjectHelpText">
+                Projects in Metecho are the high-level features that can be
+                broken down into smaller parts by creating Tasks. You can create
+                a new project or create a project based on an existing GitHub
+                branch. Every project requires a unique project name, which
+                becomes the branch name in GitHub unless you choose to use an
+                existing branch.
+              </Trans>
+            </p>
+          )}
           <RadioGroup
             assistiveText={{
               label: i18n.t('Project Branch'),

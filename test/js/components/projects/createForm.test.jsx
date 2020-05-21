@@ -40,17 +40,17 @@ describe('<ProjectForm/>', () => {
     const defaults = {
       repository: defaultRepository,
       user: defaultUser,
-      startOpen: true,
+      hasProjects: false,
     };
     const opts = Object.assign({}, defaults, options);
-    const { user, repository, startOpen } = opts;
+    const { user, repository, hasProjects } = opts;
     const context = {};
     const result = renderWithRedux(
       <StaticRouter context={context}>
         <ProjectForm
           user={user}
           repository={repository}
-          startOpen={startOpen}
+          hasProjects={hasProjects}
         />
       </StaticRouter>,
       {},
@@ -61,7 +61,7 @@ describe('<ProjectForm/>', () => {
 
   describe('submit/close buttons', () => {
     test('toggle form open/closed', () => {
-      const { getByText, queryByText } = setup({ startOpen: undefined });
+      const { getByText, queryByText } = setup({ hasProjects: true });
 
       expect(queryByText('Close Form')).toBeNull();
 

@@ -41,6 +41,8 @@ const defaultState = {
         description: 'This is a test repository.',
         description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
+        repo_owner: 'test',
+        repo_name: 'test-repo',
         github_users: [
           {
             id: '123456',
@@ -70,6 +72,8 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           description_rendered: '<p>Project Description</p>',
+          branch_url: 'https://github.com/test/test-repo/tree/branch-name',
+          branch_name: 'branch-name',
           old_slugs: ['old-slug'],
           github_users: [
             {
@@ -97,6 +101,8 @@ const defaultState = {
         project: 'project1',
         description: 'Task Description',
         description_rendered: '<p>Task Description</p>',
+        branch_url: 'https://github.com/test/test-repo/tree/project__task',
+        branch_name: 'project__task',
         review_valid: true,
         review_status: 'Approved',
         status: 'Completed',
