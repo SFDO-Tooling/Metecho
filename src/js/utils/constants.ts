@@ -26,6 +26,8 @@ export type OrgTypes = 'Dev' | 'QA';
 export const ORG_TYPES = {
   DEV: 'Dev' as 'Dev',
   QA: 'QA' as 'QA',
+  BETA: 'Beta' as 'Beta',
+  RELEASE: 'Release' as 'Release',
 };
 
 export type WebsocketActions = 'SUBSCRIBE' | 'UNSUBSCRIBE';

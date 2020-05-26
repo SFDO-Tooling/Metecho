@@ -122,6 +122,7 @@
   "Only project collaborators appear in the list below.": "Only project collaborators appear in the list below.",
   "Optional Configuration Directories": "Optional Configuration Directories",
   "Org Actions": "Org Actions",
+  "Org Type": "Org Type",
   "Org:": "Org:",
   "Package Directories": "Package Directories",
   "Pending review": "Pending review",
@@ -289,11 +290,13 @@
   "pageCannotBeFound": "That page cannot be found. Try the <2>home page</2>?",
   "projectCollaborators": "Only users who have access to the GitHub repository for this project will appear in the list below. Visit GitHub to invite additional collaborators to this repository.",
   "projectNotFound": "We can’t find the project you’re looking for. Try <2>another project</2> from that repository?",
+  "ready for production": "ready for production",
   "refreshTestOrgMsg": "<0>[Recommended]</0> This option will re-create your Test Org with the latest changes, allowing you to test the most recent version.",
   "releaseNotesInfo": "Details entered will be used when publishing release notes. Please use Markdown to format your notes.",
   "reload the page.": "reload the page.",
   "repositoryListHelper": "Contributor access on GitHub is required to view repositories. If you do not see the repository you’re looking for below, confirm that you are logged into the correct account or contact an admin on GitHub.",
   "repositoryNotFound": "We can’t find the repository you’re looking for. Try the <2>list of all repositories</2>?",
+  "set up for package development": "set up for package development",
   "start from a new branch.": "start from a new branch.",
   "targetDirectoryConfigInfo": "Optional Configuration Directories are for additional sets of metadata components that will only be deployed on demand.",
   "targetDirectoryPostInfo": "Post-Install Directories are for unmanaged metadata components that should always be deployed after deploying or installing the package.",
@@ -303,7 +306,9 @@
   "tasksComplete": "<0>{{complete}}</0> of <2>{{total}}</2> Complete",
   "to refresh this list or": "to refresh this list or",
   "up to date": "up to date",
+  "use as a testing environment": "use as a testing environment",
   "view changes": "view changes",
   "viewOutdatedOrg": "You may proceed with the outdated org, but be aware that you will not be testing the latest changes.",
-  "welcomeMessage": "<0>To get started</0> log in with your GitHub account."
+  "welcomeMessage": "<0>To get started</0> log in with your GitHub account.",
+  "what the cool kids want": "what the cool kids want"
 }
