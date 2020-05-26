@@ -27,27 +27,26 @@ const ProjectListItem = ({ repositorySlug, project }: Props) => {
           dangerouslySetInnerHTML={{ __html: description_rendered }}
         />
       )}
-        {branch_url && (
-          <p
-            className="slds-text-body_small
+      {branch_url && (
+        <p
+          className="slds-text-body_small
               slds-p-top_x-small
               slds-text-color_weak"
-          >
-            {i18n.t('Branch:')}{' '}
-            <ExternalLink url={branch_url}>
-              {branch_name}
-              <Icon
-                category="utility"
-                name="new_window"
-                size="xx-small"
-                className="slds-m-bottom_xx-small"
-                containerClassName="slds-m-left_xx-small"
-              />
-            </ExternalLink>
-          </p>
-        )}
-      </li>
-    </>
+        >
+          {i18n.t('Branch:')}{' '}
+          <ExternalLink url={branch_url}>
+            {branch_name}
+            <Icon
+              category="utility"
+              name="new_window"
+              size="xx-small"
+              className="slds-m-bottom_xx-small"
+              containerClassName="slds-m-left_xx-small"
+            />
+          </ExternalLink>
+        </p>
+      )}
+    </li>
   );
 };
 
