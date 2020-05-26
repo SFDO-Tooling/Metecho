@@ -227,7 +227,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         modelType={OBJECT_TYPES.TASK}
         handleOptionSelect={handlePageOptionSelect}
       />
-      {branchLink ? (
+      {branchLink && (
         <ExternalLink
           url={branchLink}
           showButtonIcon
@@ -235,7 +235,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         >
           {branchLinkText}
         </ExternalLink>
-      ) : null}
+      )}
     </PageHeaderControl>
   );
 
@@ -325,6 +325,18 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   const projectUrl = routes.project_detail(repository.slug, project.slug);
+  let headerUrl, headerUrlText; // eslint-disable-line one-var
+  /* istanbul ignore else */
+  if (task.branch_url && task.branch_name) {
+    headerUrl = task.branch_url;
+    headerUrlText = task.branch_name;
+  } else if (project.branch_url && project.branch_name) {
+    headerUrl = project.branch_url;
+    headerUrlText = project.branch_name;
+  } else {
+    headerUrl = repository.repo_url;
+    headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
+  }
 
   return (
     <DocumentTitle
@@ -335,7 +347,8 @@ const TaskDetail = (props: RouteComponentProps) => {
       <DetailPageLayout
         title={task.name}
         description={task.description_rendered}
-        repoUrl={repository.repo_url}
+        headerUrl={headerUrl}
+        headerUrlText={headerUrlText}
         breadcrumb={[
           {
             name: repository.name,

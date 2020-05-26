@@ -1,4 +1,5 @@
 import { fireEvent, waitFor } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -39,17 +40,17 @@ describe('<ProjectForm/>', () => {
     const defaults = {
       repository: defaultRepository,
       user: defaultUser,
-      startOpen: true,
+      hasProjects: false,
     };
     const opts = Object.assign({}, defaults, options);
-    const { user, repository, startOpen } = opts;
+    const { user, repository, hasProjects } = opts;
     const context = {};
     const result = renderWithRedux(
       <StaticRouter context={context}>
         <ProjectForm
           user={user}
           repository={repository}
-          startOpen={startOpen}
+          hasProjects={hasProjects}
         />
       </StaticRouter>,
       {},
@@ -60,7 +61,7 @@ describe('<ProjectForm/>', () => {
 
   describe('submit/close buttons', () => {
     test('toggle form open/closed', () => {
-      const { getByText, queryByText } = setup({ startOpen: undefined });
+      const { getByText, queryByText } = setup({ hasProjects: true });
 
       expect(queryByText('Close Form')).toBeNull();
 
@@ -95,6 +96,7 @@ describe('<ProjectForm/>', () => {
           name: 'Name of Project',
           description: 'This is the description',
           repository: 'r1',
+          branch_name: '',
           github_users: [],
         },
         hasForm: true,
@@ -120,6 +122,7 @@ describe('<ProjectForm/>', () => {
           name: 'Name of Project',
           description: '',
           repository: 'r1',
+          branch_name: '',
           github_users: [ghUser],
         },
         hasForm: true,
@@ -214,6 +217,72 @@ describe('<ProjectForm/>', () => {
 
         expect(addError).toHaveBeenCalledWith('This is an error.');
       });
+    });
+  });
+
+  describe('creating from existing branch', () => {
+    let url, result, fakeBranches, input;
+
+    beforeEach(async () => {
+      result = setup();
+      url = window.api_urls.repository_feature_branches(defaultRepository.id);
+      fakeBranches = ['feature/foo', 'feature/bar'];
+      fetchMock.getOnce(url, fakeBranches);
+      fireEvent.click(result.getByText('Use existing GitHub branch'));
+      input = result.queryByLabelText(
+        '*Select a branch to use for this project',
+      );
+      fireEvent.click(input);
+      await result.findByText('feature/foo');
+    });
+
+    test('selecting existing branch options', () => {
+      const { getByText } = result;
+      fireEvent.click(getByText('feature/foo'));
+
+      expect(getByText('Remove selected option')).toBeVisible();
+    });
+
+    test('removing selected branch', () => {
+      const { getByText } = result;
+      fireEvent.click(getByText('feature/foo'));
+
+      expect(input.value).toEqual('feature/foo');
+
+      fireEvent.click(getByText('Remove selected option'));
+
+      expect(input.value).toEqual('');
+    });
+
+    test('search/filter branches from list', () => {
+      fireEvent.change(input, { target: { value: 'foo' } });
+
+      expect(input.value).toEqual('foo');
+    });
+
+    test('select new branch instead', () => {
+      const { getByText, getByLabelText } = result;
+      fireEvent.click(getByText('feature/foo'));
+
+      expect(input.value).toEqual('feature/foo');
+
+      fireEvent.click(getByLabelText('Create new branch on GitHub'));
+
+      expect(input).not.toBeInTheDocument();
+    });
+
+    test('sets selected branch on blur if match found', () => {
+      fireEvent.change(input, { target: { value: 'feature/foo' } });
+      fireEvent.blur(input);
+
+      expect(input.value).toEqual('feature/foo');
+    });
+
+    test('resets input value on blur if no match found', () => {
+      fireEvent.change(input, { target: { value: 'nope' } });
+      fireEvent.blur(input);
+
+      expect(input.value).toEqual('');
     });
   });
 });

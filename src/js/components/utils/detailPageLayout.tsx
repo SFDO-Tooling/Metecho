@@ -15,7 +15,8 @@ interface Crumb {
 const DetailPageLayout = ({
   title,
   description,
-  repoUrl,
+  headerUrl,
+  headerUrlText,
   breadcrumb,
   onRenderHeaderActions,
   sidebar,
@@ -23,7 +24,8 @@ const DetailPageLayout = ({
 }: {
   title: string;
   description?: string;
-  repoUrl: string;
+  headerUrl: string;
+  headerUrlText?: string;
   breadcrumb: Crumb[];
   onRenderHeaderActions?: () => JSX.Element;
   sidebar?: ReactNode;
@@ -37,7 +39,11 @@ const DetailPageLayout = ({
       <PageHeader
         className="page-header slds-p-around_x-large"
         title={title}
-        info={<ExternalLink url={repoUrl} shortenGithub />}
+        info={
+          <ExternalLink url={headerUrl} showGitHubIcon>
+            /{headerUrlText}
+          </ExternalLink>
+        }
         onRenderControls={onRenderHeaderActions}
       />
       <div

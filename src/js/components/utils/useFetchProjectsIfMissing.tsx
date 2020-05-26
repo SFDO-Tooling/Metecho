@@ -29,7 +29,7 @@ export default (
         }),
       );
     }
-  }, [dispatch, repository, projects]);
+  }, [dispatch, repository, projects?.fetched]);
 
   return { projects };
 };
