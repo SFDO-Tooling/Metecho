@@ -61,6 +61,7 @@ def project_create_branch(
                 repo_url=repository.html_url,
                 repo_owner=repository.owner.login,
                 repo_branch=repository.default_branch,
+                branch_prefix=repository.branch_prefix,
                 repo_commit=repository.branch(repository.default_branch).latest_sha(),
             )
         project_branch_name = f"{prefix}{slugify(project.name)}"

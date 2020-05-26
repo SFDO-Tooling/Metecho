@@ -147,6 +147,11 @@ def get_cumulus_prefix(**kwargs):
     """
     Expects to be in a local_github_checkout.
     """
+    branch_prefix = kwargs.pop("branch_prefix", None)
+    if branch_prefix:
+        return branch_prefix
+    if settings.BRANCH_PREFIX:
+        return settings.BRANCH_PREFIX
     project_config = get_project_config(**kwargs)
     return project_config.project__git__prefix_feature
 
