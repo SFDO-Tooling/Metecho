@@ -101,7 +101,7 @@ class User(HashIdMixin, AbstractUser):
                         for repo in repos
                     ]
                 )
-                for repo in GitHubRepository.objects.all():
+                for repo in Repository.objects.all():
                     repo.get_social_image(self)
         finally:
             self.refresh_from_db()
@@ -266,6 +266,7 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    repo_image_url = models.URLField(blank=True)
     branch_name = models.CharField(
         max_length=100,
         blank=True,
@@ -320,17 +321,6 @@ class Repository(
 
         super().save(*args, **kwargs)
 
-    @cached_property
-    def repo_image_url(self):
-        github_repository = GitHubRepository.objects.filter(
-            repo_id=self.repo_id
-        ).first()
-
-        if github_repository:
-            return github_repository.repo_image_url
-
-        return None
-
     def get_a_matching_user(self):
         github_repository = GitHubRepository.objects.filter(
             repo_id=self.repo_id
@@ -367,21 +357,10 @@ class Repository(
         for task in matching_tasks:
             task.add_commits(commits, sender)
 
-
-class GitHubRepository(HashIdMixin, models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="repositories"
-    )
-    repo_id = models.IntegerField()
-    repo_url = models.URLField()
-    repo_image_url = models.URLField(blank=True)
-
     def get_social_image(self, user):
         """
         Because this makes external HTTP calls, this should only be
-        called from within a background job. Currently, it is called
-        inside User.refresh_repositories, which is called inside a
-        background job.
+        called from within a background job.
         """
         try:
             repo = gh.get_repo_info(user, repo_id=self.repo_id)
@@ -393,6 +372,14 @@ class GitHubRepository(HashIdMixin, models.Model):
         else:
             self.repo_image_url = og_image
             self.save()
+
+
+class GitHubRepository(HashIdMixin, models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="repositories"
+    )
+    repo_id = models.IntegerField()
+    repo_url = models.URLField()
 
     class Meta:
         verbose_name_plural = "GitHub repositories"

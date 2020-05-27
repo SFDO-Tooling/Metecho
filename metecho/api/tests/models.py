@@ -10,7 +10,6 @@ from ..models import (
     PROJECT_STATUSES,
     SCRATCH_ORG_TYPES,
     TASK_STATUSES,
-    GitHubRepository,
     Project,
     Repository,
     Task,
@@ -375,9 +374,6 @@ class TestUser:
             user.refresh_repositories()
 
             assert async_to_sync.called
-            assert GitHubRepository.objects.filter(
-                repo_image_url="https://example.com/"
-            ).exists()
 
     def test_refresh_repositories__error(self, user_factory):
         user = user_factory()
