@@ -4,8 +4,7 @@ import i18n from 'i18next';
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ExternalLink } from '@/components/utils';
-import PageDescription from '@/components/utils/pageDescription';
+import { ExternalLink, PageDescription } from '@/components/utils';
 import routes from '@/utils/routes';
 
 interface Crumb {
@@ -34,13 +33,19 @@ const DetailPageLayout = ({
   children?: ReactNode;
   image?: string;
 }) => {
-  const showImage = image && !description;
+  const showHeaderImage = Boolean(image && !description);
 
   return (
     <>
       <PageHeader
         className="page-header slds-p-around_x-large"
-        title={title}
+        title={
+          showHeaderImage ? (
+            <div className="slds-m-top_small">{title}</div>
+          ) : (
+            title
+          )
+        }
         info={
           <ExternalLink url={headerUrl} showGitHubIcon>
             /{headerUrlText}
@@ -48,7 +53,11 @@ const DetailPageLayout = ({
         }
         onRenderControls={onRenderHeaderActions}
         icon={
-          showImage && <img src={image} alt={`social image for ${title}`} />
+          showHeaderImage && (
+            <div className="ms-repo-image-wrapper slds-align_absolute-center">
+              <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
+            </div>
+          )
         }
       />
       <div

@@ -141,7 +141,10 @@ const Login = () => {
               )}
             </li>
           </ul>
-          <img src={welcomeMatFG} alt="screenshots of Metecho app interface" />
+          <img
+            src={welcomeMatFG}
+            alt={i18n.t('screenshots of Metecho app interface')}
+          />
         </div>
       </div>
     </div>

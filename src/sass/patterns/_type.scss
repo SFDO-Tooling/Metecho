@@ -33,4 +33,8 @@
     line-height: $line-height-heading;
     margin-bottom: $spacing-small;
   }
+
+  > p:last-child {
+    margin-bottom: 0;
+  }
 }

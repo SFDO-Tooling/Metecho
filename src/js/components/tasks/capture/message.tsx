@@ -11,7 +11,7 @@ import {
   CommitData,
   ModalCard,
 } from '@/components/tasks/capture';
-import { UseFormProps } from '@/components/utils/useForm';
+import { UseFormProps } from '@/components/utils';
 
 interface Props {
   inputs: CommitData;

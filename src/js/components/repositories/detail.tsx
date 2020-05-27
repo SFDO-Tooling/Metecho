@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -11,7 +10,6 @@ import ProjectListItem from '@/components/projects/listItem';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
-  ExternalLink,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
   SpinnerWrapper,
@@ -77,18 +75,6 @@ const RepositoryDetail = (props: RouteComponentProps) => {
     }
   };
 
-  const sidebarContent = (
-    <ExternalLink url={repository.repo_url}>
-      {i18n.t('GitHub Repo')}
-      <Icon
-        category="utility"
-        name="new_window"
-        size="xx-small"
-        className="slds-m-bottom_xx-small"
-        containerClassName="slds-m-left_xx-small"
-      />
-    </ExternalLink>
-  );
   return (
     <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
@@ -97,7 +83,6 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         headerUrl={repository.repo_url}
         headerUrlText={`${repository.repo_owner}/${repository.repo_name}`}
         breadcrumb={[{ name: repository.name }]}
-        sidebar={sidebarContent}
         image={repository.repo_image_url}
       >
         {!projects || !projects.fetched ? (

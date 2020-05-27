@@ -4,7 +4,7 @@ import i18n from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { ExternalLink } from '@/components/utils/';
+import { ExternalLink } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { Repository } from '@/store/repositories/reducer';
 import routes from '@/utils/routes';
@@ -24,8 +24,8 @@ const ProjectListItem = ({ repository, project }: Props) => {
           <Link to={routes.project_detail(repository.slug, slug)}>{name}</Link>
         </h3>
         {description_rendered && (
-          <p
-            className="markdown"
+          <div
+            className="truncate-children slds-m-top_xx-small"
             dangerouslySetInnerHTML={{ __html: description_rendered }}
           />
         )}

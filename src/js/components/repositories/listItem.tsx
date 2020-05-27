@@ -1,49 +1,69 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
-import VisualPicker from '@salesforce/design-system-react/components/visual-picker';
-import VisualPickerLink from '@salesforce/design-system-react/components/visual-picker/link';
 import i18n from 'i18next';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import { Repository } from '@/store/repositories/reducer';
 import routes from '@/utils/routes';
 
 const RepositoryListItem = ({ repository }: { repository: Repository }) => (
-  <div data-form="repo-select">
-    <VisualPicker
-      size="large"
-      id={repository.slug}
-      className="slds-text-link_reset
+  <div
+    className="ms-repo-item
       slds-p-around_small
       slds-size_1-of-1
       slds-medium-size_1-of-2
       slds-large-size_1-of-3"
+  >
+    <Link
+      to={routes.repository_detail(repository.slug)}
+      className="slds-box
+        slds-box_link
+        slds-box_x-small
+        slds-theme_default
+        slds-media"
     >
-      <VisualPickerLink
-        href={routes.repository_detail(repository.slug)}
-        icon={
+      <div
+        className="slds-media__figure
+          slds-media__figure_fixed-width
+          slds-align_absolute-center
+          slds-m-left_xx-small"
+      >
+        {repository.repo_image_url ? (
+          <div className="slds-align_absolute-center">
+            <img
+              src={repository.repo_image_url}
+              alt={`${i18n.t('social image for')} ${repository.name}`}
+            />
+          </div>
+        ) : (
           <Avatar
             variant="entity"
-            label={repository.name}
             size="large"
-            imgSrc={repository.repo_image_url}
-            imgAlt={`${i18n.t('Image for')} ${repository.name}`}
+            label={repository.name}
+            title={repository.name}
           />
-        }
-        title={repository.name}
-        links
-        description={
-          repository.description_rendered ? (
-            <span
-              className="truncate-children slds-p-top_x-small"
+        )}
+      </div>
+      <div className="slds-media__body slds-border_left slds-p-around_small">
+        <h2
+          className="slds-truncate slds-text-heading_small"
+          title={repository.name}
+        >
+          {repository.name}
+        </h2>
+        <div className="ms-repo-description slds-m-top_small">
+          {repository.description_rendered ? (
+            <div
+              className="truncate-children"
               // This description is pre-cleaned by the API
               dangerouslySetInnerHTML={{
                 __html: repository.description_rendered,
               }}
             />
-          ) : null
-        }
-      ></VisualPickerLink>
-    </VisualPicker>
+          ) : null}
+        </div>
+      </div>
+    </Link>
   </div>
 );
 

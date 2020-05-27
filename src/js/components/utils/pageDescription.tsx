@@ -1,5 +1,4 @@
-import VisualPicker from '@salesforce/design-system-react/components/visual-picker';
-import VisualPickerLink from '@salesforce/design-system-react/components/visual-picker/link';
+import i18n from 'i18next';
 import React from 'react';
 
 const PageDescription = ({
@@ -7,53 +6,58 @@ const PageDescription = ({
   description,
   image,
 }: {
-  title: string | null;
-  description: string | null;
+  title: string;
+  description: string;
   image?: string;
 }) => {
   const descriptionHasTitle =
     description?.startsWith('<h1>') || description?.startsWith('<h2>');
+
+  const renderedTitle = `${i18n.t('About')} ${title}`;
+
+  const renderedDescription = (
+    <>
+      {!descriptionHasTitle && (
+        <h2
+          className="slds-truncate slds-text-heading_small slds-m-bottom_small"
+          title={renderedTitle}
+        >
+          {renderedTitle}
+        </h2>
+      )}
+      <div
+        className="markdown slds-text-longform"
+        // This description is pre-cleaned by the API
+        dangerouslySetInnerHTML={{
+          __html: description,
+        }}
+      />
+    </>
+  );
+
   return (
     <>
       {image ? (
-        <VisualPicker
-          size="large"
-          className="slds-text-link_reset
-      slds-p-around_small
-      slds-size_1-of-1
-      slds-medium-size_1-of-2
-      slds-large-size_1-of-3"
-        >
-          <VisualPickerLink
-            icon={<img src={image} alt={`image for ${title}`} />}
-            title={descriptionHasTitle ? null : title}
-            className="page-description"
-            description={
-              description && (
-                <div
-                  className="markdown"
-                  // This description is pre-cleaned by the API
-                  dangerouslySetInnerHTML={{
-                    __html: description,
-                  }}
-                />
-              )
-            }
-          ></VisualPickerLink>
-        </VisualPicker>
-      ) : (
-        <div className="slds-text-longform">
-          {!descriptionHasTitle && (
-            <h2 className="slds-text-heading_medium">{title}</h2>
-          )}
-          {/* This description is pre-cleaned by the API */}
-          {description && (
-            <p
-              className="markdown"
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
-          )}
+        <div className="slds-media">
+          <div
+            className="slds-media__figure
+              slds-media__figure_fixed-width
+              slds-align_absolute-center
+              slds-m-left_xx-small
+              ms-repo-image-wrapper"
+          >
+            <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
+          </div>
+          <div
+            className="slds-media__body
+              slds-border_left
+              slds-p-around_small"
+          >
+            {renderedDescription}
+          </div>
         </div>
+      ) : (
+        renderedDescription
       )}
     </>
   );

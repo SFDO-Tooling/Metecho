@@ -67,13 +67,7 @@ describe('<RepoDetail />', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug } = opts;
     const context = {};
-    const {
-      getByText,
-      getByTitle,
-      getAllByTitle,
-      queryByText,
-      debug,
-    } = renderWithRedux(
+    const result = renderWithRedux(
       <StaticRouter context={context}>
         <RepoDetail match={{ params: { repositorySlug } }} />
       </StaticRouter>,
@@ -81,12 +75,8 @@ describe('<RepoDetail />', () => {
       storeWithThunk,
     );
     return {
-      getByText,
-      getByTitle,
-      getAllByTitle,
-      queryByText,
+      ...result,
       context,
-      debug,
     };
   };
 
@@ -97,27 +87,6 @@ describe('<RepoDetail />', () => {
     expect(getByText('This is a test repository.')).toBeVisible();
     expect(getByText('Project 1')).toBeVisible();
     expect(getByText('Projects for Repository 1')).toBeVisible();
-  });
-
-  test('renders title and description from markdown', () => {
-    const { getByText } = setup({
-      initialState: {
-        ...defaultState,
-        repositories: {
-          repositories: [
-            {
-              ...defaultState.repositories.repositories[0],
-              description: '#Welcome! This is a test repository.',
-              description_rendered:
-                '<h1>Welcome!</h1><p>This is a test repository.</p>',
-            },
-          ],
-          notFound: [],
-          next: null,
-        },
-      },
-    });
-    expect(getByText('Welcome!')).toBeVisible();
   });
 
   test('renders with form expanded if no projects', () => {

@@ -70,24 +70,3 @@
     }
   }
 }
-
-[data-form='repo-select'] {
-  // increase default height/weight of icon in repo visualpicker
-  .slds-media__figure {
-    > div {
-      height: 4rem;
-      width: 4rem;
-
-      .slds-avatar_large {
-        height: 100%;
-        width: 100%;
-        font-size: $font-size-10;
-        font-weight: $font-weight-bold;
-      }
-
-      abbr {
-        text-shadow: none;
-      }
-    }
-  }
-}
