@@ -1,11 +1,8 @@
 import logging
-import traceback
 from datetime import timedelta
 
-import requests
 from allauth.account.signals import user_logged_in
 from asgiref.sync import async_to_sync
-from bs4 import BeautifulSoup
 from cryptography.fernet import InvalidToken
 from cumulusci.core.config import OrgConfig
 from cumulusci.oauth.salesforce import jwt_session
@@ -101,8 +98,6 @@ class User(HashIdMixin, AbstractUser):
                         for repo in repos
                     ]
                 )
-                for repo in Repository.objects.all():
-                    repo.get_social_image(self)
         finally:
             self.refresh_from_db()
             self.currently_fetching_repos = False
@@ -319,6 +314,11 @@ class Repository(
         if not self.github_users:
             self.queue_populate_github_users(originating_user_id=None)
 
+        if not self.repo_image_url:
+            from .jobs import get_social_image_job
+
+            get_social_image_job.delay(self)
+
         super().save(*args, **kwargs)
 
     def get_a_matching_user(self):
@@ -356,22 +356,6 @@ class Repository(
 
         for task in matching_tasks:
             task.add_commits(commits, sender)
-
-    def get_social_image(self, user):
-        """
-        Because this makes external HTTP calls, this should only be
-        called from within a background job.
-        """
-        try:
-            repo = gh.get_repo_info(user, repo_id=self.repo_id)
-            soup = BeautifulSoup(requests.get(repo.html_url).content, "html.parser")
-            og_image = soup.find("meta", property="og:image").attrs.get("content", "")
-        except Exception:  # pragma: nocover
-            tb = traceback.format_exc()
-            logger.error(tb)
-        else:
-            self.repo_image_url = og_image
-            self.save()
 
 
 class GitHubRepository(HashIdMixin, models.Model):

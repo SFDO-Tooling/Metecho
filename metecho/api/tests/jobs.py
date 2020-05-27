@@ -18,6 +18,7 @@ from ..jobs import (
     create_gh_branch_for_new_project,
     create_pr,
     delete_scratch_org,
+    get_social_image,
     get_unsaved_changes,
     populate_github_users,
     refresh_commits,
@@ -797,3 +798,25 @@ class TestCreateGhBranchForNewProject:
                 create_gh_branch_for_new_project(project, user=user)
 
             assert not project_create_branch.called
+
+
+@pytest.mark.django_db
+def test_get_social_image(repository_factory):
+    repository = repository_factory()
+    with ExitStack() as stack:
+        stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+        get = stack.enter_context(patch("metecho.api.jobs.requests.get"))
+        get.return_value = MagicMock(
+            content="""
+            <html>
+                <head>
+                <meta property="og:image" content="https://example.com/">
+                </head>
+                <body></body>
+            </html>
+            """
+        )
+        get_social_image(repository)
+
+        repository.refresh_from_db()
+        assert repository.repo_image_url == "https://example.com/"

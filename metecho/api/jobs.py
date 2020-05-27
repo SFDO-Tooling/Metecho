@@ -4,7 +4,9 @@ import traceback
 from datetime import timedelta
 from pathlib import Path
 
+import requests
 from asgiref.sync import async_to_sync
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
@@ -496,6 +498,24 @@ def refresh_github_repositories_for_user(user):
 
 
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
+
+
+def get_social_image(repository):
+    try:
+        user = repository.get_a_matching_user()
+        repo = get_repo_info(user, repo_id=repository.repo_id)
+        soup = BeautifulSoup(requests.get(repo.html_url).content, "html.parser")
+        og_image = soup.find("meta", property="og:image").attrs.get("content", "")
+    except Exception:  # pragma: nocover
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        repository.repo_image_url = og_image
+        repository.save()
+
+
+get_social_image_job = job(get_social_image)
 
 
 # This avoids partially-applied saving:

@@ -357,17 +357,6 @@ class TestUser:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.models.async_to_sync")
             )
-            get = stack.enter_context(patch("metecho.api.models.requests.get"))
-            get.return_value = MagicMock(
-                content="""
-                <html>
-                  <head>
-                    <meta property="og:image" content="https://example.com/">
-                  </head>
-                  <body></body>
-                </html>
-                """
-            )
             gh.get_all_org_repos.return_value = [
                 MagicMock(id=8558, html_url="https://example.com/")
             ]
@@ -381,17 +370,6 @@ class TestUser:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
             async_to_sync = stack.enter_context(
                 patch("metecho.api.models.async_to_sync")
-            )
-            get = stack.enter_context(patch("metecho.api.models.requests.get"))
-            get.return_value = MagicMock(
-                content="""
-                <html>
-                  <head>
-                    <meta property="og:image" content="https://example.com/">
-                  </head>
-                  <body></body>
-                </html>
-                """
             )
             gh.get_all_org_repos.return_value = [
                 MagicMock(id=1, html_url="https://example.com/")
