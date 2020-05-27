@@ -801,8 +801,9 @@ class TestCreateGhBranchForNewProject:
 
 
 @pytest.mark.django_db
-def test_get_social_image(repository_factory):
+def test_get_social_image(repository_factory, user_factory):
     repository = repository_factory()
+    user = user_factory()
     with ExitStack() as stack:
         stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
         get = stack.enter_context(patch("metecho.api.jobs.requests.get"))
@@ -816,7 +817,7 @@ def test_get_social_image(repository_factory):
             </html>
             """
         )
-        get_social_image(repository)
+        get_social_image(repository=repository, user=user)
 
         repository.refresh_from_db()
         assert repository.repo_image_url == "https://example.com/"

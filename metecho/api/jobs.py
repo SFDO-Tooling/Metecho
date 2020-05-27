@@ -500,10 +500,10 @@ def refresh_github_repositories_for_user(user):
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
 
 
-def get_social_image(repository):
+def get_social_image(*, repository, user):
     try:
-        user = repository.get_a_matching_user()
-        repo = get_repo_info(user, repo_id=repository.repo_id)
+        repo_id = repository.get_repo_id(user)
+        repo = get_repo_info(user, repo_id=repo_id)
         soup = BeautifulSoup(requests.get(repo.html_url).content, "html.parser")
         og_image = soup.find("meta", property="og:image").attrs.get("content", "")
     except Exception:  # pragma: nocover
@@ -511,8 +511,9 @@ def get_social_image(repository):
         logger.error(tb)
         raise
     else:
+        repository.refresh_from_db()
         repository.repo_image_url = og_image
-        repository.save()
+        repository.finalize_get_social_image()
 
 
 get_social_image_job = job(get_social_image)

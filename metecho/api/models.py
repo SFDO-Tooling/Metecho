@@ -315,9 +315,11 @@ class Repository(
             self.queue_populate_github_users(originating_user_id=None)
 
         if not self.repo_image_url:
-            from .jobs import get_social_image_job
+            user = self.get_a_matching_user()
+            if user:
+                from .jobs import get_social_image_job
 
-            get_social_image_job.delay(self)
+                get_social_image_job.delay(repository=self, user=user)
 
         super().save(*args, **kwargs)
 
@@ -330,6 +332,10 @@ class Repository(
             return github_repository.user
 
         return None
+
+    def finalize_get_social_image(self):
+        self.save()
+        self.notify_changed(originating_user_id=None)
 
     def queue_populate_github_users(self, *, originating_user_id):
         from .jobs import populate_github_users_job
