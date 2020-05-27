@@ -3,14 +3,22 @@ import Radio from '@salesforce/design-system-react/components/radio-group/radio'
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
-import { ORG_TYPES } from '@/utils/constants';
+import { ORG_TYPES, OrgTypes } from '@/utils/constants';
 
-const SelectOrgType = ({ isDisabled }: { isDisabled: boolean }) => {
+const SelectFlowType = ({
+  isDisabled,
+  handleSelect,
+}: {
+  isDisabled?: boolean;
+  handleSelect: (option: OrgTypes) => void;
+}) => {
   const [orgFlowSelected, setOrgFlowSelected] = useState<string>(ORG_TYPES.DEV);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = event.target.value;
+    const selected = event.target.value as OrgTypes;
     setOrgFlowSelected(selected);
+    handleSelect(selected);
   };
+
   const orgTypes = [
     {
       type: ORG_TYPES.DEV,
@@ -55,4 +63,4 @@ const SelectOrgType = ({ isDisabled }: { isDisabled: boolean }) => {
   );
 };
 
-export default SelectOrgType;
+export default SelectFlowType;

@@ -1,16 +1,15 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
-import RadioGroup from '@salesforce/design-system-react/components/radio-group';
-import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useEffect, useRef, useState } from 'react';
 import { AnyAction } from 'redux';
 
+import SelectFlowType from '@/components/tasks/selectFlowType';
 import { useForm, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
-import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 interface Props {
   project: Project;
@@ -78,32 +77,13 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     onSuccess,
   });
 
-  const handleFlowChange = (event) => {
-    setInputs({ ...inputs, flow_type: event.target.value });
+  const handleFlowChange = (val: OrgTypes) => {
+    setInputs({ ...inputs, flow_type: val });
   };
   const closeForm = () => {
     setIsOpen(false);
     resetForm();
   };
-
-  const flowTypes = [
-    {
-      type: ORG_TYPES.DEV,
-      description: i18n.t('set up for package development'),
-    },
-    {
-      type: ORG_TYPES.QA,
-      description: i18n.t('use as a testing environment'),
-    },
-    {
-      type: ORG_TYPES.BETA,
-      description: i18n.t('what the cool kids want'),
-    },
-    {
-      type: ORG_TYPES.RELEASE,
-      description: i18n.t('ready for production'),
-    },
-  ];
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
@@ -128,25 +108,7 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
             errorText={errors.description}
             onChange={handleInputChange}
           />
-          <RadioGroup
-            labels={{ label: i18n.t('Org Type') }}
-            onChange={handleFlowChange}
-            disabled={false}
-            required
-            name="flow-type"
-          >
-            {flowTypes.map(({ type, description }) => (
-              <Radio
-                key={type}
-                id={type}
-                labels={{ label: `${type} - ${description}` }}
-                value={type}
-                checked={Boolean(type === inputs.flow_type)}
-                variant="base"
-                name="flo"
-              />
-            ))}
-          </RadioGroup>
+          <SelectFlowType handleSelect={handleFlowChange} />
         </>
       )}
       <div className={classNames({ 'slds-m-top--medium': isOpen })}>
