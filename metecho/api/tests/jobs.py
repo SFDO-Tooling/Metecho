@@ -52,7 +52,7 @@ class TestCreateBranchesOnGitHub:
                 project__git__prefix_feature="feature/"
             )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            repository = MagicMock(branch_prefix="")
+            repository = MagicMock()
             repository.branch.return_value = MagicMock(
                 **{"latest_sha.return_value": "123abc"}
             )
@@ -116,7 +116,7 @@ class TestCreateBranchesOnGitHub:
                 project__git__prefix_feature="feature/"
             )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            repository = MagicMock(branch_prefix="")
+            repository = MagicMock()
             get_repo_info.return_value = repository
 
             _create_branches_on_github(

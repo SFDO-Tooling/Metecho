@@ -15,6 +15,7 @@ export interface Repository {
   description: string;
   description_rendered: string;
   is_managed: boolean;
+  branch_prefix: string;
   github_users: GitHubUser[];
   currently_refreshing_gh_users?: boolean;
 }
