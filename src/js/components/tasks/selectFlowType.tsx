@@ -42,22 +42,26 @@ const SelectFlowType = ({
     },
   ];
   const helpText = isDisabled ? (
-    <div>{i18n.t('This is disabled because there is a Scratch Org')}</div>
+    <div>
+      {i18n.t('Sorry, Scratch Org environment has been set for this task.')}
+    </div>
   ) : (
-    <div>{i18n.t('Here is an explanation of these different flow types')}</div>
+    <div>
+      {i18n.t(
+        'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?',
+      )}
+    </div>
   );
   return (
     <fieldset className="slds-m-top--medium">
       <legend className="slds-form-element__legend slds-form-element__label">
         <span className="slds-p-right_xx-small">{i18n.t('Org Type')}</span>
-        {orgConfig && (
-          <Tooltip
-            content={helpText}
-            position="overflowBoundaryElement"
-            align="top left"
-            dialogClassName="modal-tooltip"
-          />
-        )}
+        <Tooltip
+          content={helpText}
+          position="overflowBoundaryElement"
+          align="top left"
+          dialogClassName="modal-tooltip"
+        />
       </legend>
       <div className="slds-form-element__control">
         {flowTypes.map(({ type, description }) => (
