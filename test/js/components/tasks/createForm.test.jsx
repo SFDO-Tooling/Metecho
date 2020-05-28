@@ -72,21 +72,26 @@ describe('<TaskForm/>', () => {
       const submit = getByText('Create Task');
       const nameInput = getByLabelText('*Task Name');
       const descriptionInput = getByLabelText('Description');
+      const radioInput = getByLabelText('Release - ready for production');
       fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
       fireEvent.change(descriptionInput, {
         target: { value: 'This is the description' },
       });
+      fireEvent.click(radioInput);
       fireEvent.click(submit);
 
+      expect(radioInput).toBeChecked();
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'task',
         data: {
           name: 'Name of Task',
           description: 'This is the description',
           project: 'r1',
+          flow_type: 'Release',
         },
         hasForm: true,
         shouldSubscribeToObject: true,
+        url: undefined,
       });
     });
 

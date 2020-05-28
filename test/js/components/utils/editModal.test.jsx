@@ -86,8 +86,10 @@ describe('<EditModal />', () => {
         name: 'New Project Name',
         description: 'New description',
         id: 'project-id',
+        flow_type: 'Dev',
       },
       hasForm: true,
+      url: undefined,
     });
   });
 });
