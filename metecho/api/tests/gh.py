@@ -9,7 +9,6 @@ from ..gh import (
     UnsafeZipfileError,
     extract_zip_file,
     get_all_org_repos,
-    get_cumulus_prefix,
     get_repo_info,
     get_source_format,
     get_zip_file,
@@ -114,15 +113,6 @@ def test_extract_zip_file():
         assert shutil.move.called
         assert shutil.rmtree.called
         assert os.remove.called
-
-
-class TestGetCumulusPrefix:
-    def test_explicit_prefix(self):
-        assert get_cumulus_prefix(branch_prefix="whee!") == "whee!"
-
-    def test_setting_prefix(self, settings):
-        settings.BRANCH_PREFIX = "wahoo!"
-        assert get_cumulus_prefix() == "wahoo!"
 
 
 class TestLocalGitHubCheckout:
