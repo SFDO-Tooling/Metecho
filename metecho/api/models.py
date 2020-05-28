@@ -38,7 +38,7 @@ from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
-SCRATCH_ORG_TYPES = Choices("Dev", "QA", "Beta", "Release")
+SCRATCH_ORG_TYPES = Choices("Dev", "QA")
 PROJECT_STATUSES = Choices("Planned", "In progress", "Review", "Merged")
 TASK_STATUSES = Choices(
     ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed")
@@ -537,6 +537,7 @@ class Task(
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch]
     )
+    org_config_name = StringField(blank=True)
 
     commits = JSONField(default=list, blank=True)
     origin_sha = StringField(null=True, blank=True)

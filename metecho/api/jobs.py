@@ -172,15 +172,6 @@ def _create_org_and_run_flow(
     originating_user_id,
     sf_username=None,
 ):
-    from .models import SCRATCH_ORG_TYPES
-
-    cases = {
-        SCRATCH_ORG_TYPES.Dev: "dev_org",
-        SCRATCH_ORG_TYPES.QA: "qa_org",
-        SCRATCH_ORG_TYPES.Beta: "install_beta",
-        SCRATCH_ORG_TYPES.Release: "install_prod",
-    }
-
     repository = get_repo_info(user, repo_id=repo_id)
     commit = repository.branch(repo_branch).commit
 
@@ -210,11 +201,25 @@ def _create_org_and_run_flow(
     scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
+
+    org_config = cci.project_config.keychain.get_org(scratch_org.task.org_config_name)
+    if org_config.setup_flow:
+        flow_name = org_config.setup_flow
+    else:
+        cases = {
+            "dev": "dev_org",
+            "feature": "dev_org",
+            "qa": "qa_org",
+            "beta": "install_beta",
+            "release": "install_prod",
+        }
+        flow_name = cases[scratch_org.task.org_config_name]
+
     try:
         run_flow(
             cci=cci,
             org_config=org_config,
-            flow_name=cases[scratch_org.org_type],
+            flow_name=flow_name,
             project_path=project_path,
             user=user,
         )
