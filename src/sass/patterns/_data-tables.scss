@@ -47,4 +47,39 @@
   & > div {
     display: contents;
   }
+
+  // further targeting of complex table cells
+  .truncate-inner-items {
+    > * {
+      display: contents;
+    }
+  }
+}
+
+.complex-cell {
+  vertical-align: top;
+
+  #repo-projects-table & {
+    padding-bottom: $spacing-x_small;
+    padding-top: $spacing-x_small;
+  }
+}
+
+// Status Cells
+// ------------
+
+.status-cell {
+  > div {
+    align-items: center;
+    display: flex;
+  }
+}
+
+// add a tiny top margin to create visual appearance of centered text
+.status-cell-text {
+  margin-top: $spacing-xxx-small;
+}
+
+.numbers-cell {
+  text-align: right;
 }

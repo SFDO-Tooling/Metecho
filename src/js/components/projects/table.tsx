@@ -1,6 +1,7 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import classNames from 'classnames';
 import Icon from '@salesforce/design-system-react/components/icon';
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import i18n from 'i18next';
@@ -15,7 +16,7 @@ interface TableCellProps {
   item?: Project;
 }
 
-const StatusTableCell = ({ item, ...props }: TableCellProps) => {
+const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
   if (!item) {
     return null;
@@ -40,9 +41,13 @@ const StatusTableCell = ({ item, ...props }: TableCellProps) => {
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
   }
   return (
-    <DataTableCell {...props} title={display || status}>
+    <DataTableCell
+      {...props}
+      title={display || status}
+      className={classNames(className, 'status-cell', 'complex-cell')}
+    >
       {icon}
-      <span className="slds-m-left_x-small project-task-status-text">
+      <span className="slds-m-left_x-small status-cell-text">
         {display || status}
       </span>
     </DataTableCell>
@@ -50,20 +55,42 @@ const StatusTableCell = ({ item, ...props }: TableCellProps) => {
 };
 StatusTableCell.displayName = DataTableCell.displayName;
 
-const CollaboratorTableCell = ({ item, children }: TableCellProps) => (
-  <DataTableCell>{item && children}</DataTableCell>
+const CollaboratorTableCell = ({
+  item,
+  className,
+  children,
+}: TableCellProps) => (
+  <DataTableCell
+    className={classNames(
+      className,
+      'project-collaborators-cell',
+      'numbers-cell',
+      'complex-cell',
+    )}
+  >
+    {item && children}
+  </DataTableCell>
 );
 CollaboratorTableCell.displayName = DataTableCell.displayName;
 
 const DetailTableCell = ({
   repositorySlug,
   item,
+  className,
   //   children,
   ...props
 }: TableCellProps & {
   repositorySlug: string;
 }) => (
-  <DataTableCell {...props}>
+  <DataTableCell
+    {...props}
+    className={classNames(
+      className,
+      'truncated-cell',
+      'project-name-cell',
+      'complex-cell',
+    )}
+  >
     {item && <ProjectListItem repositorySlug={repositorySlug} project={item} />}
   </DataTableCell>
 );
@@ -81,12 +108,12 @@ const ProjectTable = ({
     numCollaborators: project.github_users?.length || 0,
   }));
   return (
-    <DataTable items={items} id="repo-projects-table" noRowHover fixedLayout>
+    <DataTable items={items} id="repo-projects-table" noRowHover>
       <DataTableColumn
         key="details"
         label={i18n.t('Project')}
         property="name"
-        width="65%"
+        width="100%"
         primaryColumn
       >
         <DetailTableCell repositorySlug={repositorySlug} />
@@ -95,8 +122,7 @@ const ProjectTable = ({
         key="status"
         label={i18n.t('Status')}
         property="status"
-        width="25%"
-        primaryColumn
+        width="0"
       >
         <StatusTableCell />
       </DataTableColumn>
@@ -108,12 +134,11 @@ const ProjectTable = ({
             name="user"
             size="xx-small"
             className="slds-m-bottom_xx-small"
-            containerClassName="slds-m-left_xx-small slds-current-color"
+            containerClassName="slds-current-color"
           />
         }
         property="numCollaborators"
-        width="6%"
-        primaryColumn
+        width="0"
       >
         <CollaboratorTableCell />
       </DataTableColumn>

@@ -17,13 +17,16 @@ const ProjectListItem = ({ repositorySlug, project }: Props) => {
   const { name, description_rendered, slug, branch_url, branch_name } = project;
 
   return (
-    <li className="slds-item slds-p-horizontal_none slds-p-vertical_xx-small">
-      <h3 className="slds-text-heading_small slds-p-bottom_xx-small">
-        <Link to={routes.project_detail(repositorySlug, slug)}>{name}</Link>
-      </h3>
+    <div className="cell-stacked slds-truncate">
+      <Link
+        to={routes.project_detail(repositorySlug, slug)}
+        className="slds-text-heading_small slds-p-bottom_xx-small project-name-link"
+      >
+        {name}
+      </Link>
       {description_rendered && (
-        <p
-          className="markdown"
+        <div
+          className="markdown slds-truncate truncate-inner-items"
           dangerouslySetInnerHTML={{ __html: description_rendered }}
         />
       )}
@@ -31,7 +34,8 @@ const ProjectListItem = ({ repositorySlug, project }: Props) => {
         <p
           className="slds-text-body_small
               slds-p-top_x-small
-              slds-text-color_weak"
+              slds-text-color_weak
+              slds-truncate"
         >
           {i18n.t('Branch:')}{' '}
           <ExternalLink url={branch_url}>
@@ -46,7 +50,7 @@ const ProjectListItem = ({ repositorySlug, project }: Props) => {
           </ExternalLink>
         </p>
       )}
-    </li>
+    </div>
   );
 };
 

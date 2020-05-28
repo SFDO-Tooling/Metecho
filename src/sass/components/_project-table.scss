@@ -1,0 +1,11 @@
+// Project Table
+// =============
+
+// override alignment for slds table th for number columns
+#repo-projects-table {
+  thead {
+    th:last-child {
+      text-align: right;
+    }
+  }
+}
