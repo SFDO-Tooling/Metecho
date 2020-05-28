@@ -47,13 +47,6 @@
   & > div {
     display: contents;
   }
-
-  // further targeting of complex table cells
-  .truncate-inner-items {
-    > * {
-      display: contents;
-    }
-  }
 }
 
 .complex-cell {

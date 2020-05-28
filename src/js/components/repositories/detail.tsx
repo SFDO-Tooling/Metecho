@@ -123,12 +123,10 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             />
             {Boolean(projects.projects.length) && (
               <>
-                <ul className="slds-has-dividers_bottom">
-                  <ProjectTable
-                    projects={projects.projects}
-                    repositorySlug={repository.slug}
-                  />
-                </ul>
+                <ProjectTable
+                  projects={projects.projects}
+                  repositorySlug={repository.slug}
+                />
                 {projects.next ? (
                   <div className="slds-m-top_large">
                     <Button
