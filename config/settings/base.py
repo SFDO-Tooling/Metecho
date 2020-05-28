@@ -481,6 +481,9 @@ LOGGING = {
 
 API_PAGE_SIZE = env("API_PAGE_SIZE", type_=int, default=50)
 
+# New feature branch prefix:
+BRANCH_PREFIX = env("BRANCH_PREFIX", default=None)
+
 # Sentry
 SENTRY_DSN = env("SENTRY_DSN", default="")
 

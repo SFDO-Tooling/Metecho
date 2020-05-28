@@ -82,6 +82,85 @@ class TestCreateBranchesOnGitHub:
             create_gh_branch_for_new_project(project, user=user)
             assert try_to_make_branch.called
 
+    def test_create_branches_on_github__settings(
+        self, settings, user_factory, task_factory
+    ):
+        settings.BRANCH_PREFIX = "test_prefix"
+        user = user_factory()
+        task = task_factory()
+        project = task.project
+
+        with ExitStack() as stack:
+            local_github_checkout = stack.enter_context(
+                patch(f"{PATCH_ROOT}.local_github_checkout")
+            )
+            try_to_make_branch = stack.enter_context(
+                patch(f"{PATCH_ROOT}.try_to_make_branch")
+            )
+            try_to_make_branch.return_value = "bleep"
+            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
+            global_config_instance = MagicMock()
+            global_config.return_value = global_config_instance
+            global_config_instance.get_project_config.return_value = MagicMock(
+                project__git__prefix_feature="feature/"
+            )
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            repository = MagicMock()
+            repository.branch.return_value = MagicMock(
+                **{"latest_sha.return_value": "123abc"}
+            )
+            get_repo_info.return_value = repository
+
+            _create_branches_on_github(
+                user=user,
+                repo_id=123,
+                project=project,
+                task=task,
+                originating_user_id="123abc",
+            )
+
+            assert try_to_make_branch.called
+            assert not local_github_checkout.called
+
+    def test_create_branches_on_github__repo_branch_prefix(
+        self, user_factory, task_factory
+    ):
+        user = user_factory()
+        task = task_factory(project__repository__branch_prefix="test_prefix")
+        project = task.project
+
+        with ExitStack() as stack:
+            local_github_checkout = stack.enter_context(
+                patch(f"{PATCH_ROOT}.local_github_checkout")
+            )
+            try_to_make_branch = stack.enter_context(
+                patch(f"{PATCH_ROOT}.try_to_make_branch")
+            )
+            try_to_make_branch.return_value = "bleep"
+            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
+            global_config_instance = MagicMock()
+            global_config.return_value = global_config_instance
+            global_config_instance.get_project_config.return_value = MagicMock(
+                project__git__prefix_feature="feature/"
+            )
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            repository = MagicMock()
+            repository.branch.return_value = MagicMock(
+                **{"latest_sha.return_value": "123abc"}
+            )
+            get_repo_info.return_value = repository
+
+            _create_branches_on_github(
+                user=user,
+                repo_id=123,
+                project=project,
+                task=task,
+                originating_user_id="123abc",
+            )
+
+            assert try_to_make_branch.called
+            assert not local_github_checkout.called
+
     def test_create_branches_on_github__already_there(
         self, user_factory, project_factory, task_factory
     ):
