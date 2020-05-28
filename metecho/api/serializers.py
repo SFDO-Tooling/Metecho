@@ -275,6 +275,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "assigned_dev",
             "assigned_qa",
             "currently_submitting_review",
+            "org_config_name",
         )
         extra_kwargs = {
             "slug": {"read_only": True},
