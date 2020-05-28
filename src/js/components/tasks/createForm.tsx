@@ -9,7 +9,7 @@ import { AnyAction } from 'redux';
 import SelectFlowType from '@/components/tasks/selectFlowType';
 import { useForm, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
-import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
 
 interface Props {
   project: Project;
@@ -63,7 +63,6 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
 
   const {
     inputs,
-    setInputs,
     errors,
     handleInputChange,
     handleSubmit,
@@ -77,8 +76,8 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     onSuccess,
   });
 
-  const handleFlowChange = (val: OrgTypes) => {
-    setInputs({ ...inputs, flow_type: val });
+  const handleFlowChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleInputChange(e);
   };
   const closeForm = () => {
     setIsOpen(false);

@@ -19,7 +19,6 @@ import {
   OBJECT_TYPES,
   ObjectTypes,
   ORG_TYPES,
-  OrgTypes,
   TASK_STATUSES,
 } from '@/utils/constants';
 
@@ -56,6 +55,7 @@ const EditModal = ({
 
   const defaultName = model.name;
   const defaultDescription = model.description;
+  const defaultFlowType = model.flow_type || ORG_TYPES.DEV;
 
   const {
     inputs,
@@ -68,7 +68,7 @@ const EditModal = ({
     fields: {
       name: defaultName,
       description: defaultDescription,
-      flow_type: '',
+      flow_type: defaultFlowType,
     },
     additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
@@ -90,6 +90,12 @@ const EditModal = ({
     inputs,
     setInputs,
   });
+  useFormDefaults({
+    field: 'flow_type',
+    value: defaultFlowType,
+    inputs,
+    setInputs,
+  });
 
   const doClose = () => {
     handleClose();
@@ -107,9 +113,6 @@ const EditModal = ({
     if (submitButton.current) {
       submitButton.current.click();
     }
-  };
-  const handleFlowChange = (val: OrgTypes) => {
-    setInputs({ ...inputs, flow_type: val });
   };
 
   let heading, nameLabel;
@@ -178,9 +181,9 @@ const EditModal = ({
         {/* display for tasks, disable if task has a scratch org  */}
         {modelType === OBJECT_TYPES.TASK && (
           <SelectFlowType
-            editing={true}
-            handleSelect={handleFlowChange}
+            handleSelect={handleInputChange}
             isDisabled={model.status !== TASK_STATUSES.PLANNED}
+            orgConfig={inputs.flow_type}
           />
         )}
         {/* Clicking hidden button allows for native browser form validation */}

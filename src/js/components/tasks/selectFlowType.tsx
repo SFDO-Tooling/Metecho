@@ -7,20 +7,20 @@ import { ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 const SelectFlowType = ({
   isDisabled,
-  editing,
+  orgConfig,
   handleSelect,
 }: {
   isDisabled?: boolean;
-  editing?: boolean;
-  handleSelect: (option: OrgTypes) => void;
+  orgConfig?: OrgTypes;
+  handleSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   // if editing task, check if there is a flow_type already selected, else use Dev as default
-  const defaultFlowType = editing ? '' : ORG_TYPES.DEV;
+  const defaultFlowType = orgConfig || ORG_TYPES.DEV;
   const [flowSelected, setFlowSelected] = useState<string>(defaultFlowType);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selected = event.target.value as OrgTypes;
     setFlowSelected(selected);
-    handleSelect(selected);
+    handleSelect(event);
   };
 
   const flowTypes = [
@@ -44,17 +44,13 @@ const SelectFlowType = ({
   const helpText = isDisabled ? (
     <div>{i18n.t('This is disabled because there is a Scratch Org')}</div>
   ) : (
-    flowTypes.map(({ type, description }) => (
-      <div key={type}>
-        <b>{type} -</b> {description}
-      </div>
-    ))
+    <div>{i18n.t('Here is an explanation of these different flow types')}</div>
   );
   return (
     <fieldset className="slds-m-top--medium">
       <legend className="slds-form-element__legend slds-form-element__label">
         <span className="slds-p-right_xx-small">{i18n.t('Org Type')}</span>
-        {editing && (
+        {orgConfig && (
           <Tooltip
             content={helpText}
             position="overflowBoundaryElement"
@@ -64,22 +60,19 @@ const SelectFlowType = ({
         )}
       </legend>
       <div className="slds-form-element__control">
-        {flowTypes.map(({ type, description }) => {
-          const label = editing ? type : `${type} - ${description}`;
-          return (
-            <Radio
-              key={type}
-              id={type}
-              labels={{ label }}
-              value={type}
-              checked={Boolean(type === flowSelected)}
-              variant="base"
-              name="type"
-              onChange={handleChange}
-              disabled={isDisabled}
-            />
-          );
-        })}
+        {flowTypes.map(({ type, description }) => (
+          <Radio
+            key={type}
+            id={type}
+            labels={{ label: `${type} - ${description}` }}
+            value={type}
+            checked={Boolean(type === flowSelected)}
+            variant="base"
+            name="flow_type"
+            onChange={handleChange}
+            disabled={isDisabled}
+          />
+        ))}
       </div>
     </fieldset>
   );
