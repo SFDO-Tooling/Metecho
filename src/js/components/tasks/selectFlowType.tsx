@@ -1,5 +1,5 @@
-import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
+import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
@@ -39,14 +39,19 @@ const SelectFlowType = ({
   ];
 
   return (
-    <div className="slds-m-top--medium">
-      <RadioGroup
-        labels={{ label: i18n.t('Org Type') }}
-        onChange={handleChange}
-        disabled={isDisabled}
-        required
-        name="org-type"
-      >
+    <fieldset className="slds-m-top--medium">
+      <legend className="slds-form-element__legend slds-form-element__label">
+        <span className="slds-p-right_xx-small">{i18n.t('Org Type')}</span>
+        {isDisabled && (
+          <Tooltip
+            content={'content goes here'}
+            position="overflowBoundaryElement"
+            align="top left"
+            dialogClassName="modal-tooltip"
+          />
+        )}
+      </legend>
+      <div className="slds-form-element__control">
         {orgTypes.map(({ type, description }) => (
           <Radio
             key={type}
@@ -56,10 +61,12 @@ const SelectFlowType = ({
             checked={Boolean(type === orgFlowSelected)}
             variant="base"
             name="type"
+            onChange={handleChange}
+            isDisabled={isDisabled}
           />
         ))}
-      </RadioGroup>
-    </div>
+      </div>
+    </fieldset>
   );
 };
 
