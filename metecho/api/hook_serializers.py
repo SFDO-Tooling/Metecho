@@ -25,8 +25,16 @@ class AuthorCommitSerializer(serializers.Serializer):
     avatar_url = serializers.CharField(required=False)
 
 
+class PrBranchSerializer(serializers.Serializer):
+    ref = serializers.CharField()
+    sha = serializers.CharField()
+    # All other fields are ignored by default.
+
+
 class PrSerializer(serializers.Serializer):
     merged = serializers.BooleanField()
+    head = PrBranchSerializer()
+    base = PrBranchSerializer()
     # All other fields are ignored by default.
 
 
@@ -37,22 +45,32 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
     repository = HookRepositorySerializer()
     # All other fields are ignored by default.
 
+    def _is_opened(self):
+        action = self.validated_data["action"]
+        return action == "opened" or action == "reopened"
+
     def _is_closed(self):
         return self.validated_data["action"] == "closed"
 
     def _is_merged(self):
         return self._is_closed() and self.validated_data["pull_request"]["merged"]
 
-    def _is_reopened(self):
-        return self.validated_data["action"] == "reopened"
-
     def _get_matching_instance(self, repository):
+        pr_number = self.validated_data["number"]
+        pr_head_ref = self.validated_data["pull_request"]["head"]["ref"]
+        pr_base_ref = self.validated_data["pull_request"]["base"]["ref"]
         return (
             Task.objects.filter(
-                project__repository=repository, pr_number=self.validated_data["number"]
+                project__repository=repository, pr_number=pr_number
             ).first()
             or Project.objects.filter(
-                repository=repository, pr_number=self.validated_data["number"]
+                repository=repository, pr_number=pr_number
+            ).first()
+            or Task.objects.filter(
+                project__repository=repository, branch_name=pr_head_ref, project__branch_name=pr_base_ref
+            ).first()
+            or Project.objects.filter(
+                repository=repository, branch_name=pr_head_ref, repository__branch_name=pr_base_ref
             ).first()
         )
 
@@ -61,19 +79,20 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
         if not repository:
             raise NotFound("No matching repository.")
 
-        if self._is_closed() or self._is_reopened():
+        if self._is_closed() or self._is_opened():
             instance = self._get_matching_instance(repository)
             if instance is None:
                 return
             # In all these, our originating user is None, because this
             # comes from the GitHub hook, and therefore all users on the
             # frontend should pay attention to it.
-            if self._is_reopened():
-                instance.finalize_pr_reopened(originating_user_id=None)
+            pr_number = self.validated_data["number"]
+            if self._is_opened():
+                instance.finalize_pr_opened(pr_number, originating_user_id=None)
             elif self._is_merged():
-                instance.finalize_status_completed(originating_user_id=None)
+                instance.finalize_status_completed(pr_number, originating_user_id=None)
             else:
-                instance.finalize_pr_closed(originating_user_id=None)
+                instance.finalize_pr_closed(pr_number, originating_user_id=None)
 
 
 class CommitSerializer(serializers.Serializer):
