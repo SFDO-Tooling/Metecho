@@ -265,6 +265,7 @@ class Repository(
         validators=[validate_unicode_branch],
         default="master",
     )
+    branch_prefix = StringField(blank=True)
     # User data is shaped like this:
     #   {
     #     "id": str,

@@ -123,6 +123,7 @@ class TestRepositoryView:
                     ),
                     "repo_owner": str(repo.repo_owner),
                     "repo_name": str(repo.repo_name),
+                    "branch_prefix": "",
                     "github_users": [],
                 }
             ],
@@ -160,6 +161,7 @@ class TestRepositoryView:
                     ),
                     "repo_owner": str(repo.repo_owner),
                     "repo_name": str(repo.repo_name),
+                    "branch_prefix": "",
                     "github_users": [],
                 }
             ],
