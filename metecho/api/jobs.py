@@ -56,15 +56,23 @@ def project_create_branch(
     if project.branch_name:
         project_branch_name = project.branch_name
     else:
-        with local_github_checkout(user, repo_id) as repo_root:
-            prefix = get_cumulus_prefix(
-                repo_root=repo_root,
-                repo_name=repository.name,
-                repo_url=repository.html_url,
-                repo_owner=repository.owner.login,
-                repo_branch=repository.default_branch,
-                repo_commit=repository.branch(repository.default_branch).latest_sha(),
-            )
+        branch_prefix = project.repository.branch_prefix
+        if branch_prefix:
+            prefix = branch_prefix
+        elif settings.BRANCH_PREFIX:
+            prefix = settings.BRANCH_PREFIX
+        else:
+            with local_github_checkout(user, repo_id) as repo_root:
+                prefix = get_cumulus_prefix(
+                    repo_root=repo_root,
+                    repo_name=repository.name,
+                    repo_url=repository.html_url,
+                    repo_owner=repository.owner.login,
+                    repo_branch=repository.default_branch,
+                    repo_commit=repository.branch(
+                        repository.default_branch
+                    ).latest_sha(),
+                )
         project_branch_name = f"{prefix}{slugify(project.name)}"
         project_branch_name = try_to_make_branch(
             repository,

@@ -31,6 +31,7 @@ Retrieve
           "is_managed": false,
           "slug": "test-repository",
           "old_slugs": [],
+          "branch_prefix": "",
           "github_users": [
             {
               "id": "12345",

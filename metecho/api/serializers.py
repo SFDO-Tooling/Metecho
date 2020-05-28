@@ -99,6 +99,7 @@ class RepositorySerializer(serializers.ModelSerializer):
             "is_managed",
             "slug",
             "old_slugs",
+            "branch_prefix",
             "github_users",
             "repo_image_url",
         )
