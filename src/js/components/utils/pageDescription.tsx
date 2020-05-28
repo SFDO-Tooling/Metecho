@@ -38,11 +38,10 @@ const PageDescription = ({
   return (
     <>
       {image ? (
-        <div className="slds-media">
+        <div className="slds-media container-fill-space">
           <div
             className="slds-media__figure
               slds-media__figure_fixed-width
-              slds-align_absolute-center
               slds-m-left_xx-small
               ms-repo-image-wrapper"
           >
@@ -51,7 +50,10 @@ const PageDescription = ({
           <div
             className="slds-media__body
               slds-border_left
-              slds-p-around_small"
+              slds-p-around_small
+              slds-grid
+              slds-grid_vertical
+              content-fill-height"
           >
             {renderedDescription}
           </div>
