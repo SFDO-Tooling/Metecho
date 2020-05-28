@@ -262,6 +262,7 @@ class Repository(
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
     repo_image_url = models.URLField(blank=True)
+    include_repo_image_url = models.BooleanField(default=True)
     branch_name = models.CharField(
         max_length=100,
         blank=True,
