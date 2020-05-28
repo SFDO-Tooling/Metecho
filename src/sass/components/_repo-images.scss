@@ -1,9 +1,14 @@
+// Repo Images
+
+// Variables specific to repo images
+$repo-img-size: calc(3.5rem + 3vw);
+
 .ms-repo-item {
   // increase default height/weight of icon in repo visualpicker
   .slds-media__figure {
     > div {
-      height: 4rem;
-      width: 4rem;
+      height: $repo-img-size;
+      width: $repo-img-size;
 
       .slds-avatar_large {
         height: 100%;
@@ -24,6 +29,6 @@
 }
 
 .ms-repo-image-wrapper {
-  height: 4rem;
-  width: 4rem;
+  height: $repo-img-size;
+  width: $repo-img-size;
 }

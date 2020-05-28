@@ -20,7 +20,8 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
         slds-box_link
         slds-box_x-small
         slds-theme_default
-        slds-media"
+        slds-media
+        container-fill-space"
     >
       <div
         className="slds-media__figure
@@ -44,7 +45,8 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
           />
         )}
       </div>
-      <div className="slds-media__body slds-border_left slds-p-around_small">
+      <div className="slds-media__body slds-border_left slds-p-around_small slds-grid slds-grid_vertical
+        content-fill-height">
         <h2
           className="slds-truncate slds-text-heading_small"
           title={repository.name}
