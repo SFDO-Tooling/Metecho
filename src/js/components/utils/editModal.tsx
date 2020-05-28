@@ -6,6 +6,7 @@ import i18n from 'i18next';
 import { omit } from 'lodash';
 import React, { useRef, useState } from 'react';
 
+import SelectFlowType from '@/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
   useForm,
@@ -14,7 +15,13 @@ import {
 } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
-import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import {
+  OBJECT_TYPES,
+  ObjectTypes,
+  ORG_TYPES,
+  OrgTypes,
+  TASK_STATUSES,
+} from '@/utils/constants';
 
 interface EditModalProps {
   model: Project | Task;
@@ -61,6 +68,7 @@ const EditModal = ({
     fields: {
       name: defaultName,
       description: defaultDescription,
+      flow_type: '',
     },
     additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
@@ -99,6 +107,9 @@ const EditModal = ({
     if (submitButton.current) {
       submitButton.current.click();
     }
+  };
+  const handleFlowChange = (val: OrgTypes) => {
+    setInputs({ ...inputs, flow_type: val });
   };
 
   let heading, nameLabel;
@@ -164,6 +175,14 @@ const EditModal = ({
           errorText={errors.description}
           onChange={handleInputChange}
         />
+        {/* display for tasks, disable if task has a scratch org  */}
+        {modelType === OBJECT_TYPES.TASK && (
+          <SelectFlowType
+            editing={true}
+            handleSelect={handleFlowChange}
+            isDisabled={model.status !== TASK_STATUSES.PLANNED}
+          />
+        )}
         {/* Clicking hidden button allows for native browser form validation */}
         <button
           ref={submitButton}
