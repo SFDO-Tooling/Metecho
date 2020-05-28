@@ -67,10 +67,14 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
                 repository=repository, pr_number=pr_number
             ).first()
             or Task.objects.filter(
-                project__repository=repository, branch_name=pr_head_ref, project__branch_name=pr_base_ref
+                project__repository=repository,
+                branch_name=pr_head_ref,
+                project__branch_name=pr_base_ref,
             ).first()
             or Project.objects.filter(
-                repository=repository, branch_name=pr_head_ref, repository__branch_name=pr_base_ref
+                repository=repository,
+                branch_name=pr_head_ref,
+                repository__branch_name=pr_base_ref,
             ).first()
         )
 
