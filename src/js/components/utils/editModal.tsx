@@ -28,6 +28,10 @@ interface EditModalProps {
   isOpen: boolean;
   handleClose: () => void;
 }
+
+const isTask = (model: Project | Task, modelType: ObjectTypes): model is Task =>
+  modelType === OBJECT_TYPES.TASK;
+
 const EditModal = ({
   model,
   modelType,
@@ -55,7 +59,16 @@ const EditModal = ({
 
   const defaultName = model.name;
   const defaultDescription = model.description;
-  const defaultConfigName = model.org_config_name || ORG_CONFIGS.DEV;
+  let defaultConfigName;
+  const fields: { [key: string]: any } = {
+    name: defaultName,
+    description: defaultDescription,
+  };
+
+  if (isTask(model, modelType)) {
+    defaultConfigName = model.org_config_name || ORG_CONFIGS.DEV;
+    fields.org_config_name = defaultConfigName;
+  }
 
   const {
     inputs,
@@ -65,11 +78,7 @@ const EditModal = ({
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: {
-      name: defaultName,
-      description: defaultDescription,
-      org_config_name: defaultConfigName,
-    },
+    fields,
     additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
     onError: handleError,
@@ -115,7 +124,7 @@ const EditModal = ({
     }
   };
 
-  let heading, nameLabel;
+  let heading, nameLabel; // eslint-disable-line one-var
   switch (modelType) {
     case OBJECT_TYPES.TASK:
       nameLabel = i18n.t('Task Name');
