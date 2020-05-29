@@ -190,14 +190,19 @@ class TestHookView:
                         MagicMock(number=123, closed_at=None, is_merged=False,)
                         for _ in range(1)
                     ),
+                    "compare_commits.return_value": MagicMock(ahead_by=0),
                 }
             )
+            gh.normalize_commit.return_value = "1234abcd"
 
             repo = repository_factory(repo_id=123)
             git_hub_repository_factory(repo_id=123)
             project = project_factory(repository=repo, branch_name="test-project")
             task = task_factory(project=project, branch_name="test-task")
-        with patch("metecho.api.jobs.refresh_commits_job") as refresh_commits_job:
+
+            refresh_commits_job = stack.enter_context(
+                patch("metecho.api.jobs.refresh_commits_job")
+            )
             response = client.post(
                 reverse("hook"),
                 json.dumps(

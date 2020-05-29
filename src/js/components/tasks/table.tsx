@@ -109,10 +109,10 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     <DataTableCell
       {...props}
       title={displayStatus || status}
-      className={classNames(className, 'project-task-status')}
+      className={classNames(className, 'project-task-status', 'status-cell')}
     >
       {icon}
-      <span className="slds-m-left_x-small project-task-status-text">
+      <span className="slds-m-left_x-small status-cell-text">
         {displayStatus || status}
       </span>
     </DataTableCell>
