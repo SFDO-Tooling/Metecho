@@ -91,7 +91,6 @@ describe('<TaskForm/>', () => {
         },
         hasForm: true,
         shouldSubscribeToObject: true,
-        url: undefined,
       });
     });
 
