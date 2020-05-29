@@ -39,9 +39,7 @@ const DetailPageLayout = ({
     <>
       <PageHeader
         className="page-header slds-p-around_x-large"
-        title={
-          showHeaderImage ? <div className="page-title">{title}</div> : title
-        }
+        title={title}
         info={
           <ExternalLink url={headerUrl} showGitHubIcon>
             /{headerUrlText}
