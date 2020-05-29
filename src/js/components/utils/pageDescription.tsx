@@ -41,7 +41,6 @@ const PageDescription = ({
         <div className="slds-media container-fill-space">
           <div
             className="slds-media__figure
-              slds-media__figure_fixed-width
               slds-m-left_xx-small
               ms-repo-image-wrapper"
           >
@@ -50,7 +49,8 @@ const PageDescription = ({
           <div
             className="slds-media__body
               slds-border_left
-              slds-p-around_small
+              slds-p-horizontal_small
+              slds-p-bottom_small
               slds-grid
               slds-grid_vertical
               content-fill-height"

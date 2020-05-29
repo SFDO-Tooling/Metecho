@@ -40,11 +40,7 @@ const DetailPageLayout = ({
       <PageHeader
         className="page-header slds-p-around_x-large"
         title={
-          showHeaderImage ? (
-            <div className="slds-m-top_small">{title}</div>
-          ) : (
-            title
-          )
+          showHeaderImage ? <div className="page-title">{title}</div> : title
         }
         info={
           <ExternalLink url={headerUrl} showGitHubIcon>
@@ -54,7 +50,7 @@ const DetailPageLayout = ({
         onRenderControls={onRenderHeaderActions}
         icon={
           showHeaderImage && (
-            <div className="ms-repo-image-wrapper">
+            <div className="ms-repo-image-header">
               <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
             </div>
           )
