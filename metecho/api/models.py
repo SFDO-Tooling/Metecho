@@ -489,13 +489,16 @@ class Project(
         elif self.should_update_in_progress():
             self.status = PROJECT_STATUSES["In progress"]
 
-    def finalize_pr_closed(self, *, originating_user_id):
+    def finalize_pr_closed(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_open = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_reopened(self, *, originating_user_id):
+    def finalize_pr_opened(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_open = True
+        self.pr_is_merged = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -503,7 +506,8 @@ class Project(
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_status_completed(self, *, originating_user_id):
+    def finalize_status_completed(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_merged = True
         self.has_unmerged_commits = False
         self.pr_is_open = False
@@ -624,26 +628,44 @@ class Task(
         )
         self.review_valid = review_valid
 
+    def update_has_unmerged_commits(self, user=None):
+        if user is None:
+            user = self.project.repository.get_a_matching_user()
+        base = self.get_base()
+        head = self.get_head()
+        if user and head and base:
+            repo_id = self.get_repo_id(user)
+            repo = gh.get_repo_info(user, repo_id=repo_id)
+            base_sha = repo.branch(base).commit.sha
+            head_sha = repo.branch(head).commit.sha
+            self.has_unmerged_commits = (
+                repo.compare_commits(base_sha, head_sha).ahead_by > 0
+            )
+
     def finalize_task_update(self, *, originating_user_id):
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_status_completed(self, *, originating_user_id):
+    def finalize_status_completed(self, pr_number, *, originating_user_id):
         self.status = TASK_STATUSES.Completed
         self.has_unmerged_commits = False
+        self.pr_number = pr_number
         self.pr_is_open = False
         self.project.has_unmerged_commits = True
         # This will save the project, too:
         self.save(force_project_save=True)
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_closed(self, *, originating_user_id):
+    def finalize_pr_closed(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_open = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_reopened(self, *, originating_user_id):
+    def finalize_pr_opened(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_open = True
+        self.pr_is_merged = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -663,6 +685,7 @@ class Task(
         self.commits = [
             gh.normalize_commit(c, sender=sender) for c in commits
         ] + self.commits
+        self.update_has_unmerged_commits()
         self.update_review_valid()
         self.save()
         # This comes from the GitHub hook, and so has no originating user:
