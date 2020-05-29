@@ -254,7 +254,7 @@ def create_branches_on_github_then_create_scratch_org(
     project = task.project
 
     try:
-        repo_id = project.repository.get_repo_id(user)
+        repo_id = task.get_repo_id(user)
         commit_ish = _create_branches_on_github(
             user=user,
             repo_id=repo_id,
@@ -289,7 +289,7 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
     try:
         scratch_org.refresh_from_db()
         user = scratch_org.owner
-        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id(user)
         commit_ish = scratch_org.task.branch_name
         sf_username = scratch_org.owner_sf_username
 
@@ -329,7 +329,7 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
         )
         unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
         user = scratch_org.owner
-        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id(user)
         commit_ish = scratch_org.task.branch_name
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             scratch_org.valid_target_directories, _ = get_valid_target_directories(
@@ -366,7 +366,7 @@ def commit_changes_from_org(
     branch = scratch_org.task.branch_name
 
     try:
-        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id(user)
         commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
@@ -544,6 +544,7 @@ def refresh_commits(*, repository, branch_name, originating_user_id):
         task.commits = [
             normalize_commit(commit) for commit in commits[:origin_sha_index]
         ]
+        task.update_has_unmerged_commits(user=user)
         task.update_review_valid()
         task.finalize_task_update(originating_user_id=originating_user_id)
 
@@ -606,7 +607,7 @@ def submit_review(*, user, task, data, originating_user_id):
         if not (task.pr_is_open and review_sha):
             raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
 
-        repo_id = task.project.repository.get_repo_id(user)
+        repo_id = task.get_repo_id(user)
         repository = get_repo_info(user, repo_id=repo_id)
         pr = repository.pull_request(task.pr_number)
 
