@@ -54,7 +54,7 @@ const DetailPageLayout = ({
         onRenderControls={onRenderHeaderActions}
         icon={
           showHeaderImage && (
-            <div className="ms-repo-image-wrapper slds-align_absolute-center">
+            <div className="ms-repo-image-wrapper">
               <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
             </div>
           )

@@ -26,11 +26,10 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
       <div
         className="slds-media__figure
           slds-media__figure_fixed-width
-          slds-align_absolute-center
           slds-m-left_xx-small"
       >
         {repository.repo_image_url ? (
-          <div className="slds-align_absolute-center">
+          <div>
             <img
               src={repository.repo_image_url}
               alt={`${i18n.t('social image for')} ${repository.name}`}
@@ -45,15 +44,21 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
           />
         )}
       </div>
-      <div className="slds-media__body slds-border_left slds-p-around_small slds-grid slds-grid_vertical
-        content-fill-height">
+      <div
+        className="slds-media__body
+          slds-border_left
+          slds-p-around_small
+          slds-grid
+          slds-grid_vertical
+          content-fill-height"
+      >
         <h2
           className="slds-truncate slds-text-heading_small"
           title={repository.name}
         >
           {repository.name}
         </h2>
-        <div className="ms-repo-description slds-m-top_small">
+        <div className="slds-m-top_small">
           {repository.description_rendered ? (
             <div
               className="truncate-children"
