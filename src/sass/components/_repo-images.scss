@@ -11,18 +11,13 @@ $repo-img-pos-adjust: -1.125rem;
     > div {
       height: $repo-img-size;
       width: $repo-img-size;
-
-      .slds-avatar_large {
-        height: 100%;
-        width: 100%;
-        font-size: $font-size-10;
-        font-weight: $font-weight-bold;
-      }
-
-      abbr {
-        text-shadow: none;
-      }
     }
+  }
+
+  .slds-avatar_large {
+    font-size: $font-size-10;
+    height: 100%;
+    width: 100%;
   }
 }
 
