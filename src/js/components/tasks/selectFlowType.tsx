@@ -3,7 +3,7 @@ import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 
-import { ORG_TYPES, OrgTypes } from '@/utils/constants';
+import { ORG_CONFIGS, OrgTypes } from '@/utils/constants';
 
 const SelectFlowType = ({
   isDisabled,
@@ -14,8 +14,8 @@ const SelectFlowType = ({
   orgConfig?: OrgTypes;
   handleSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
-  // if editing task, check if there is a flow_type already selected, else use Dev as default
-  const defaultFlowType = orgConfig || ORG_TYPES.DEV;
+  // if editing task, check if org_config_name already selected, else use Dev as default
+  const defaultFlowType = orgConfig || ORG_CONFIGS.DEV;
   const [flowSelected, setFlowSelected] = useState<string>(defaultFlowType);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selected = event.target.value as OrgTypes;
@@ -25,19 +25,19 @@ const SelectFlowType = ({
 
   const flowTypes = [
     {
-      type: ORG_TYPES.DEV,
+      type: ORG_CONFIGS.DEV,
       description: i18n.t('set up for package development'),
     },
     {
-      type: ORG_TYPES.QA,
+      type: ORG_CONFIGS.QA,
       description: i18n.t('use as a testing environment'),
     },
     {
-      type: ORG_TYPES.BETA,
+      type: ORG_CONFIGS.BETA,
       description: i18n.t('what the cool kids want'),
     },
     {
-      type: ORG_TYPES.RELEASE,
+      type: ORG_CONFIGS.RELEASE,
       description: i18n.t('ready for production'),
     },
   ];
@@ -72,7 +72,7 @@ const SelectFlowType = ({
             value={type}
             checked={Boolean(type === flowSelected)}
             variant="base"
-            name="flow_type"
+            name="org_config_name"
             onChange={handleChange}
             disabled={isDisabled}
           />

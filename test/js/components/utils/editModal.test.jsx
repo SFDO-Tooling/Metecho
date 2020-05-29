@@ -86,7 +86,7 @@ describe('<EditModal />', () => {
         name: 'New Project Name',
         description: 'New description',
         id: 'project-id',
-        flow_type: 'Dev',
+        org_config_name: 'Dev',
       },
       hasForm: true,
       url: undefined,

@@ -18,7 +18,7 @@ import { Task } from '@/store/tasks/reducer';
 import {
   OBJECT_TYPES,
   ObjectTypes,
-  ORG_TYPES,
+  ORG_CONFIGS,
   TASK_STATUSES,
 } from '@/utils/constants';
 
@@ -55,7 +55,7 @@ const EditModal = ({
 
   const defaultName = model.name;
   const defaultDescription = model.description;
-  const defaultFlowType = model.flow_type || ORG_TYPES.DEV;
+  const defaultConfigName = model.org_config_name || ORG_CONFIGS.DEV;
 
   const {
     inputs,
@@ -68,7 +68,7 @@ const EditModal = ({
     fields: {
       name: defaultName,
       description: defaultDescription,
-      flow_type: defaultFlowType,
+      org_config_name: defaultConfigName,
     },
     additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
@@ -91,8 +91,8 @@ const EditModal = ({
     setInputs,
   });
   useFormDefaults({
-    field: 'flow_type',
-    value: defaultFlowType,
+    field: 'org_config_name',
+    value: defaultConfigName,
     inputs,
     setInputs,
   });
@@ -183,7 +183,7 @@ const EditModal = ({
           <SelectFlowType
             handleSelect={handleInputChange}
             isDisabled={model.status !== TASK_STATUSES.PLANNED}
-            orgConfig={inputs.flow_type}
+            orgConfig={inputs.org_config_name}
           />
         )}
         {/* Clicking hidden button allows for native browser form validation */}

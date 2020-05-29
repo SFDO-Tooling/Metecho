@@ -68,7 +68,7 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: { name: '', description: '', flow_type: ORG_TYPES.DEV },
+    fields: { name: '', description: '', org_config_name: ORG_TYPES.DEV },
     objectType: OBJECT_TYPES.TASK,
     additionalData: {
       project: project.id,

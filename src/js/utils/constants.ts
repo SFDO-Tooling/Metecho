@@ -21,9 +21,16 @@ export const OBJECT_TYPES = {
 
 export const SHOW_PROJECT_COLLABORATORS = 'show_collaborators';
 
-export type OrgTypes = 'Dev' | 'QA' | 'BETA' | 'RELEASE';
+export type OrgTypes = 'Dev' | 'QA';
+
+export type OrgConfigs = 'Dev' | 'QA' | 'BETA' | 'RELEASE';
 
 export const ORG_TYPES = {
+  DEV: 'Dev' as 'Dev',
+  QA: 'QA' as 'QA',
+};
+
+export const ORG_CONFIGS = {
   DEV: 'Dev' as 'Dev',
   QA: 'QA' as 'QA',
   BETA: 'Beta' as 'Beta',

@@ -87,7 +87,7 @@ describe('<TaskForm/>', () => {
           name: 'Name of Task',
           description: 'This is the description',
           project: 'r1',
-          flow_type: 'Release',
+          org_config_name: 'Release',
         },
         hasForm: true,
         shouldSubscribeToObject: true,

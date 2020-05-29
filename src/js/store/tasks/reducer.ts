@@ -47,6 +47,7 @@ export interface Task {
   review_valid: boolean;
   review_status: ReviewStatuses | null;
   review_sha: string | null;
+  org_config_name: string;
 }
 
 export interface TaskState {
