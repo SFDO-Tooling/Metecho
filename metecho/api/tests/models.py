@@ -124,8 +124,9 @@ class TestProject:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
             )
-            project.finalize_status_completed(originating_user_id=None)
+            project.finalize_status_completed(123, originating_user_id=None)
             project.refresh_from_db()
+            assert project.pr_number == 123
             assert not project.has_unmerged_commits
             assert async_to_sync.called
 
@@ -212,10 +213,11 @@ class TestTask:
             )
 
             task = task_factory()
-            task.finalize_status_completed(originating_user_id=None)
+            task.finalize_status_completed(123, originating_user_id=None)
 
             task.refresh_from_db()
             assert async_to_sync.called
+            assert task.pr_number == 123
             assert task.status == TASK_STATUSES.Completed
 
     def test_finalize_task_update(self, task_factory):

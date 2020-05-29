@@ -23,10 +23,7 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
         slds-media
         container-fill-space"
     >
-      <div
-        className="slds-media__figure
-          slds-m-left_xx-small"
-      >
+      <div className="slds-media__figure slds-m-left_xx-small">
         {repository.repo_image_url ? (
           <div>
             <img
