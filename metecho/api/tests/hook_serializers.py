@@ -46,7 +46,11 @@ class TestPrHookSerializer:
         data = {
             "action": "closed",
             "number": 123,
-            "pull_request": {"merged": False},
+            "pull_request": {
+                "merged": False,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+            },
             "repository": {"id": 123},
         }
         serializer = PrHookSerializer(data=data)
@@ -59,7 +63,11 @@ class TestPrHookSerializer:
         data = {
             "action": "closed",
             "number": 456,
-            "pull_request": {"merged": True},
+            "pull_request": {
+                "merged": True,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+            },
             "repository": {"id": 123},
         }
         serializer = PrHookSerializer(data=data)
@@ -78,7 +86,11 @@ class TestPrHookSerializer:
         data = {
             "action": "closed",
             "number": 456,
-            "pull_request": {"merged": True},
+            "pull_request": {
+                "merged": True,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+            },
             "repository": {"id": 123},
         }
         serializer = PrHookSerializer(data=data)
@@ -98,7 +110,11 @@ class TestPrHookSerializer:
         data = {
             "action": "closed",
             "number": 456,
-            "pull_request": {"merged": False},
+            "pull_request": {
+                "merged": False,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+            },
             "repository": {"id": 123},
         }
         serializer = PrHookSerializer(data=data)
@@ -119,7 +135,11 @@ class TestPrHookSerializer:
         data = {
             "action": "reopened",
             "number": 456,
-            "pull_request": {"merged": False},
+            "pull_request": {
+                "merged": False,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+            },
             "repository": {"id": 123},
         }
         serializer = PrHookSerializer(data=data)
@@ -138,7 +158,11 @@ class TestPrHookSerializer:
         data = {
             "action": "closed",
             "number": 456,
-            "pull_request": {"merged": True},
+            "pull_request": {
+                "merged": True,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+            },
             "repository": {"id": 123},
         }
         serializer = PrHookSerializer(data=data)
@@ -158,7 +182,11 @@ class TestPrHookSerializer:
         data = {
             "action": "closed",
             "number": 456,
-            "pull_request": {"merged": False},
+            "pull_request": {
+                "merged": False,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+            },
             "repository": {"id": 123},
         }
         serializer = PrHookSerializer(data=data)
@@ -176,7 +204,11 @@ class TestPrHookSerializer:
         data = {
             "action": "reopened",
             "number": 456,
-            "pull_request": {"merged": False},
+            "pull_request": {
+                "merged": False,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+            },
             "repository": {"id": 123},
         }
         serializer = PrHookSerializer(data=data)
