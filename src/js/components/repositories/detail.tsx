@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProjectForm from '@/components/projects/createForm';
-import ProjectListItem from '@/components/projects/listItem';
+import ProjectTable from '@/components/projects/table';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
@@ -123,15 +123,10 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             />
             {Boolean(projects.projects.length) && (
               <>
-                <ul className="slds-has-dividers_bottom">
-                  {projects.projects.map((project) => (
-                    <ProjectListItem
-                      key={project.id}
-                      project={project}
-                      repository={repository}
-                    />
-                  ))}
-                </ul>
+                <ProjectTable
+                  projects={projects.projects}
+                  repositorySlug={repository.slug}
+                />
                 {projects.next ? (
                   <div className="slds-m-top_large">
                     <Button
