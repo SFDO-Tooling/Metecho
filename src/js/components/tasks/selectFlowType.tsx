@@ -1,9 +1,9 @@
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React from 'react';
 
-import { ORG_CONFIGS, OrgTypes } from '@/utils/constants';
+import { ORG_CONFIGS, OrgConfigs } from '@/utils/constants';
 
 const SelectFlowType = ({
   isDisabled,
@@ -11,15 +11,10 @@ const SelectFlowType = ({
   handleSelect,
 }: {
   isDisabled?: boolean;
-  orgConfig?: OrgTypes;
+  orgConfig: OrgConfigs;
   handleSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
-  // if editing task, check if org_config_name already selected, else use Dev as default
-  const defaultFlowType = orgConfig || ORG_CONFIGS.DEV;
-  const [flowSelected, setFlowSelected] = useState<string>(defaultFlowType);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = event.target.value as OrgTypes;
-    setFlowSelected(selected);
     handleSelect(event);
   };
 
@@ -70,7 +65,7 @@ const SelectFlowType = ({
             id={type}
             labels={{ label: `${type} - ${description}` }}
             value={type}
-            checked={Boolean(type === flowSelected)}
+            checked={Boolean(type === orgConfig)}
             variant="base"
             name="org_config_name"
             onChange={handleChange}

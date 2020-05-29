@@ -107,7 +107,10 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
             errorText={errors.description}
             onChange={handleInputChange}
           />
-          <SelectFlowType handleSelect={handleFlowChange} />
+          <SelectFlowType
+            handleSelect={handleFlowChange}
+            orgConfig={inputs.org_config_name}
+          />
         </>
       )}
       <div className={classNames({ 'slds-m-top--medium': isOpen })}>
