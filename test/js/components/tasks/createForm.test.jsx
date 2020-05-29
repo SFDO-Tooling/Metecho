@@ -80,7 +80,6 @@ describe('<TaskForm/>', () => {
       fireEvent.click(radioInput);
       fireEvent.click(submit);
 
-      expect(radioInput).toBeChecked();
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'task',
         data: {
