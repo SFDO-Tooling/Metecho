@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import React from 'react';
 
-import StepsItem, { Step } from '@/components/steps/item';
+import StepsItem, { Step } from '@/components/steps/stepsItem';
 
 const Steps = ({ steps }: { steps: Step[] }) => (
   <>
@@ -13,7 +13,7 @@ const Steps = ({ steps }: { steps: Step[] }) => (
         {steps
           .filter((step) => step.visible)
           .map((step, idx) => {
-            const isActive = step.active && step.complete;
+            const isActive = step.active && !step.complete;
             const hasAssignee = Boolean(step.assignee && !step.complete);
             return (
               <StepsItem

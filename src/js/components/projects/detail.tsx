@@ -11,6 +11,7 @@ import FourOhFour from '@/components/404';
 import ConfirmRemoveUserModal from '@/components/projects/confirmRemoveUserModal';
 import ProjectStatusPath from '@/components/projects/path';
 import ProjectProgress from '@/components/projects/progress';
+import ProjectStatusSteps from '@/components/projects/steps';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
@@ -403,6 +404,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               users={project.github_users}
               removeUser={removeProjectUser}
             />
+            <ProjectStatusSteps tasks={tasks || []} project={project} />
           </>
         }
       >

@@ -56,10 +56,9 @@ const StepsItem = ({
           'slds-m-left_small': hasAssignee,
         })}
       >
-        {/* why is this not in test coverage?  */}
-        {/* {isActive && (
+        {isActive && (
           <span className="slds-assistive-text">{i18n.t('Active')}</span>
-        )} */}
+        )}
       </div>
     )}
     <div
