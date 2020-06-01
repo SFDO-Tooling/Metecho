@@ -1,12 +1,9 @@
-import Icon from '@salesforce/design-system-react/components/icon';
-import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 
-import { GitHubUserAvatar } from '@/components/user/githubUser';
+import Steps from '@/components/steps';
 import { OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
-import { GitHubUser } from '@/store/user/reducer';
 import { ORG_TYPES, REVIEW_STATUSES } from '@/utils/constants';
 import { getTaskCommits } from '@/utils/helpers';
 
@@ -132,75 +129,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
 
   return (
     <>
-      <h3 className="slds-text-heading_medium slds-m-vertical_small">
-        {i18n.t('Next Steps')}
-      </h3>
-
-      <div className="slds-progress slds-progress_vertical">
-        <ol className="slds-progress__list">
-          {steps
-            .filter((step) => step.visible)
-            .map((step, idx) => {
-              const isActive = step.active && !step.complete;
-              const hasAssignee = Boolean(step.assignee && !step.complete);
-              return (
-                <li
-                  key={idx}
-                  className={classNames('slds-progress__item', {
-                    'slds-is-completed': step.complete,
-                    'slds-is-active': isActive,
-                  })}
-                >
-                  {hasAssignee && (
-                    <GitHubUserAvatar
-                      user={step.assignee as GitHubUser}
-                      size="x-small"
-                    />
-                  )}
-                  {step.complete ? (
-                    <Icon
-                      category="utility"
-                      name="success"
-                      size="x-small"
-                      containerClassName={classNames(
-                        'slds-icon_container',
-                        'slds-icon-utility-success',
-                        'slds-progress__marker',
-                        'slds-progress__marker_icon',
-                        {
-                          'slds-m-left_x-large': !hasAssignee,
-                          'slds-m-left_small': hasAssignee,
-                        },
-                      )}
-                      title={i18n.t('Complete')}
-                      assistiveText={{ label: i18n.t('Complete') }}
-                    />
-                  ) : (
-                    <div
-                      className={classNames('slds-progress__marker', {
-                        'slds-m-left_x-large': !hasAssignee,
-                        'slds-m-left_small': hasAssignee,
-                      })}
-                    >
-                      {isActive && (
-                        <span className="slds-assistive-text">
-                          {i18n.t('Active')}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <div
-                    className="slds-progress__item_content
-                      slds-grid
-                      slds-grid_align-spread"
-                  >
-                    {step.label}
-                  </div>
-                </li>
-              );
-            })}
-        </ol>
-      </div>
+      <Steps steps={steps} />
     </>
   );
 };
