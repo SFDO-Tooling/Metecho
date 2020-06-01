@@ -43,7 +43,14 @@ Retrieve
               "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
             }
           ],
-          "status": "In progress"
+          "status": "In progress",
+          "available_task_org_config_names": [
+            "dev",
+            "qa",
+            "feature",
+            "beta",
+            "release"
+          ]
         }
         ...
       ]

@@ -22,6 +22,7 @@ export interface Project {
   currently_creating_pr: boolean;
   github_users: GitHubUser[];
   status: ProjectStatuses;
+  available_task_org_config_names: string[];
 }
 
 export interface ProjectsByRepositoryState {
