@@ -532,7 +532,7 @@ class Project(
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def get_available_task_org_config_names(self, user):
+    def queue_available_task_org_config_names(self, user):
         from .jobs import available_task_org_config_names_job
 
         available_task_org_config_names_job.delay(self, user=user)
