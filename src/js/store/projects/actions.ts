@@ -43,7 +43,7 @@ export const createProjectPR = ({
   }
 
   return dispatch({
-    type: 'PROJECT_UPDATE' as 'PROJECT_UPDATE',
+    type: 'PROJECT_UPDATE' as const,
     payload: model,
   });
 };
@@ -70,7 +70,7 @@ export const createProjectPRFailed = ({
     );
   }
   return dispatch({
-    type: 'PROJECT_CREATE_PR_FAILED' as 'PROJECT_CREATE_PR_FAILED',
+    type: 'PROJECT_CREATE_PR_FAILED' as const,
     payload: model,
   });
 };

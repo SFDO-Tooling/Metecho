@@ -23,10 +23,10 @@ const TargetDirectoriesForm = ({
   handleInputChange,
 }: Props) => {
   const keys = [
-    'source' as 'source',
-    'pre' as 'pre',
-    'post' as 'post',
-    'config' as 'config',
+    'source' as const,
+    'pre' as const,
+    'post' as const,
+    'config' as const,
   ];
   const orderedDirectories = new Map<
     'source' | 'pre' | 'post' | 'config',
