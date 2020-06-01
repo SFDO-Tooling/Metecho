@@ -6,7 +6,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 
 import { CommitData, ModalCard } from '@/components/tasks/capture';
-import { UseFormProps } from '@/components/utils/useForm';
+import { UseFormProps } from '@/components/utils';
 import { TargetDirectories } from '@/store/orgs/reducer';
 
 interface Props {

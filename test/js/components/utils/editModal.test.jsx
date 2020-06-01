@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import EditModal from '@/components/utils/editModal';
+import { EditModal } from '@/components/utils';
 import { updateObject } from '@/store/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
