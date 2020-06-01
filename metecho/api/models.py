@@ -541,7 +541,7 @@ class Task(
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch]
     )
-    org_config_name = StringField(blank=True)
+    org_config_name = StringField()
 
     commits = JSONField(default=list, blank=True)
     origin_sha = StringField(null=True, blank=True)

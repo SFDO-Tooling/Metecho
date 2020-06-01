@@ -4,6 +4,15 @@ import sfdo_template_helpers.fields.string
 from django.db import migrations
 
 
+def forwards(apps, schema_editor):
+    Task = apps.get_model("api", "Task")
+    Task.objects.update(org_config_name="dev")
+
+
+def backwards(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -22,5 +31,13 @@ class Migration(migrations.Migration):
             field=sfdo_template_helpers.fields.string.StringField(
                 choices=[("Dev", "Dev"), ("QA", "QA")]
             ),
+        ),
+        # Set default values on org_config_name
+        migrations.RunPython(forwards, backwards),
+        # Remove blank=True on org_config_name
+        migrations.AlterField(
+            model_name="task",
+            name="org_config_name",
+            field=sfdo_template_helpers.fields.string.StringField(),
         ),
     ]
