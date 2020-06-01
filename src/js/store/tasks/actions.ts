@@ -66,7 +66,7 @@ export const createTaskPRFailed = ({
   }
 
   return dispatch({
-    type: 'TASK_CREATE_PR_FAILED' as 'TASK_CREATE_PR_FAILED',
+    type: 'TASK_CREATE_PR_FAILED' as const,
     payload: model,
   });
 };

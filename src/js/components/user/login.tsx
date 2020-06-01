@@ -15,7 +15,11 @@ import welcomeMatBG from '#/welcome-mat-bg.png';
 import welcomeMatFG from '#/welcome-mat-fg.png';
 
 interface Props
-  extends RouteComponentProps<{}, StaticContext, { from?: Location }> {
+  extends RouteComponentProps<
+    { [key: string]: any },
+    StaticContext,
+    { from?: Location }
+  > {
   id?: string;
   label?: string | ReactElement;
   from?: { pathname?: string };
