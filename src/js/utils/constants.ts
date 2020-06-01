@@ -31,10 +31,10 @@ export const ORG_TYPES = {
 };
 
 export const ORG_CONFIGS = {
-  DEV: 'Dev' as 'Dev',
-  QA: 'QA' as 'QA',
-  BETA: 'Beta' as 'Beta',
-  RELEASE: 'Release' as 'Release',
+  DEV: 'Dev' as const,
+  QA: 'QA' as const,
+  BETA: 'Beta' as const,
+  RELEASE: 'Release' as const,
 };
 
 export type WebsocketActions = 'SUBSCRIBE' | 'UNSUBSCRIBE';
