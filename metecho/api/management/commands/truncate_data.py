@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from ...models import (
+    GitHubRepository,
     Project,
     ProjectSlug,
     Repository,
@@ -21,9 +22,13 @@ class Command(BaseCommand):
             Task,
             ProjectSlug,
             Project,
+            GitHubRepository,
             RepositorySlug,
             Repository,
         ]
 
         for model_class in ordered_models:
-            model_class.objects.all().delete()
+            try:
+                model_class.objects.all().hard_delete()
+            except AttributeError:  # pragma: nocover
+                model_class.objects.all().delete()

@@ -16,20 +16,20 @@ import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
 import {
+  DeleteModal,
   DetailPageLayout,
+  EditModal,
   ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
+  PageOptions,
   SpinnerWrapper,
+  SubmitModal,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
-import DeleteModal from '@/components/utils/deleteModal';
-import EditModal from '@/components/utils/editModal';
-import PageOptions from '@/components/utils/pageOptions';
-import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';

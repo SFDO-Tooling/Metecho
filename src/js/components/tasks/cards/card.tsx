@@ -125,10 +125,10 @@ const OrgCard = ({
   );
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
-    if (org?.org_type === ORG_TYPES.QA && handleRefresh) {
+    if (org && org.org_type === ORG_TYPES.QA && handleRefresh) {
       handleRefresh(org);
     }
-  }, [handleRefresh, org, org?.org_type]);
+  }, [handleRefresh, org]);
   const doCreateOrg = useCallback(() => {
     handleCreate(type);
   }, [handleCreate, type]);

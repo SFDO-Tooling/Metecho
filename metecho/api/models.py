@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from allauth.account.signals import user_logged_in
@@ -36,6 +37,8 @@ from .model_mixins import (
 )
 from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
+
+logger = logging.getLogger(__name__)
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
@@ -258,6 +261,8 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    repo_image_url = models.URLField(blank=True)
+    include_repo_image_url = models.BooleanField(default=True)
     branch_name = models.CharField(
         max_length=100,
         blank=True,
@@ -311,6 +316,13 @@ class Repository(
         if not self.github_users:
             self.queue_populate_github_users(originating_user_id=None)
 
+        if not self.repo_image_url:
+            user = self.get_a_matching_user()
+            if user:
+                from .jobs import get_social_image_job
+
+                get_social_image_job.delay(repository=self, user=user)
+
         super().save(*args, **kwargs)
 
     def get_a_matching_user(self):
@@ -322,6 +334,10 @@ class Repository(
             return github_repository.user
 
         return None
+
+    def finalize_get_social_image(self):
+        self.save()
+        self.notify_changed(originating_user_id=None)
 
     def queue_populate_github_users(self, *, originating_user_id):
         from .jobs import populate_github_users_job

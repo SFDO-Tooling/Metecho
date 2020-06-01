@@ -151,7 +151,7 @@ export const fetchObjects = ({
       }
     }
     return dispatch({
-      type: 'FETCH_OBJECTS_SUCCEEDED' as 'FETCH_OBJECTS_SUCCEEDED',
+      type: 'FETCH_OBJECTS_SUCCEEDED' as const,
       payload: { response, objectType, url: baseUrl, reset, filters },
     });
   } catch (err) {
@@ -204,7 +204,7 @@ export const fetchObject = ({
       });
     }
     return dispatch({
-      type: 'FETCH_OBJECT_SUCCEEDED' as 'FETCH_OBJECT_SUCCEEDED',
+      type: 'FETCH_OBJECT_SUCCEEDED' as const,
       payload: { object, filters, objectType, url: baseUrl },
     });
   } catch (err) {
@@ -268,7 +268,7 @@ export const createObject = ({
       });
     }
     return dispatch({
-      type: 'CREATE_OBJECT_SUCCEEDED' as 'CREATE_OBJECT_SUCCEEDED',
+      type: 'CREATE_OBJECT_SUCCEEDED' as const,
       payload: { data, object, url, objectType },
     });
   } catch (err) {
@@ -319,7 +319,7 @@ export const deleteObject = ({
       });
     }
     return dispatch({
-      type: 'DELETE_OBJECT_SUCCEEDED' as 'DELETE_OBJECT_SUCCEEDED',
+      type: 'DELETE_OBJECT_SUCCEEDED' as const,
       payload: { objectType, url: baseUrl, object },
     });
   } catch (err) {
@@ -372,7 +372,7 @@ export const updateObject = ({
       hasForm,
     });
     return dispatch({
-      type: 'UPDATE_OBJECT_SUCCEEDED' as 'UPDATE_OBJECT_SUCCEEDED',
+      type: 'UPDATE_OBJECT_SUCCEEDED' as const,
       payload: { objectType, url: baseUrl, data, object },
     });
   } catch (err) {

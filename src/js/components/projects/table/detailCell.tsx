@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';

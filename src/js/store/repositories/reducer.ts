@@ -18,6 +18,7 @@ export interface Repository {
   branch_prefix: string;
   github_users: GitHubUser[];
   currently_refreshing_gh_users?: boolean;
+  repo_image_url: string;
 }
 export interface RepositoriesState {
   repositories: Repository[];

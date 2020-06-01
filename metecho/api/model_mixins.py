@@ -193,6 +193,9 @@ class SoftDeleteQuerySet(models.QuerySet):
         self.active().notify_soft_deleted()
         return self.active().update(deleted_at=timezone.now())
 
+    def hard_delete(self):  # pragma: nocover
+        return super().delete()
+
     delete.queryset_only = True
 
 
@@ -228,6 +231,9 @@ class SoftDeleteMixin(models.Model):
             self.deleted_at = timezone.now()
             self.save()
             self.notify_soft_deleted()
+
+    def hard_delete(self):  # pragma: nocover
+        return super().delete()
 
 
 def camel_to_snake(name):
