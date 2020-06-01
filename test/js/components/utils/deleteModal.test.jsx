@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import DeleteModal from '@/components/utils/deleteModal';
+import { DeleteModal } from '@/components/utils';
 import { deleteObject } from '@/store/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';

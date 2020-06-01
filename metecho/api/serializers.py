@@ -85,6 +85,7 @@ class RepositorySerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     repo_url = serializers.SerializerMethodField()
+    repo_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Repository
@@ -101,10 +102,14 @@ class RepositorySerializer(serializers.ModelSerializer):
             "old_slugs",
             "branch_prefix",
             "github_users",
+            "repo_image_url",
         )
 
     def get_repo_url(self, obj) -> Optional[str]:
         return f"https://github.com/{obj.repo_owner}/{obj.repo_name}"
+
+    def get_repo_image_url(self, obj) -> Optional[str]:
+        return obj.repo_image_url if obj.include_repo_image_url else ""
 
 
 class ProjectSerializer(serializers.ModelSerializer):

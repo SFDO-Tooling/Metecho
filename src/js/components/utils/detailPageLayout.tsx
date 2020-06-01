@@ -4,7 +4,7 @@ import i18n from 'i18next';
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ExternalLink } from '@/components/utils';
+import { ExternalLink, PageDescription } from '@/components/utils';
 import routes from '@/utils/routes';
 
 interface Crumb {
@@ -21,6 +21,7 @@ const DetailPageLayout = ({
   onRenderHeaderActions,
   sidebar,
   children,
+  image,
 }: {
   title: string;
   description?: string;
@@ -30,9 +31,9 @@ const DetailPageLayout = ({
   onRenderHeaderActions?: () => JSX.Element;
   sidebar?: ReactNode;
   children?: ReactNode;
+  image?: string;
 }) => {
-  const descriptionHasTitle =
-    description?.startsWith('<h1>') || description?.startsWith('<h2>');
+  const showHeaderImage = Boolean(image && !description);
 
   return (
     <>
@@ -45,6 +46,13 @@ const DetailPageLayout = ({
           </ExternalLink>
         }
         onRenderControls={onRenderHeaderActions}
+        icon={
+          showHeaderImage && (
+            <div className="ms-repo-image-header">
+              <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
+            </div>
+          )
+        }
       />
       <div
         className="slds-p-horizontal_x-large
@@ -94,18 +102,13 @@ const DetailPageLayout = ({
             slds-size_1-of-1
             slds-medium-size_5-of-12"
         >
-          <div className="slds-text-longform">
-            {!descriptionHasTitle && (
-              <h2 className="slds-text-heading_medium">{title}</h2>
-            )}
-            {/* This description is pre-cleaned by the API */}
-            {description && (
-              <p
-                className="markdown"
-                dangerouslySetInnerHTML={{ __html: description }}
-              />
-            )}
-          </div>
+          {description && (
+            <PageDescription
+              title={title}
+              description={description}
+              image={image}
+            />
+          )}
           {sidebar}
         </div>
       </div>

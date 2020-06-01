@@ -19,6 +19,7 @@ from ..jobs import (
     create_gh_branch_for_new_project,
     create_pr,
     delete_scratch_org,
+    get_social_image,
     get_unsaved_changes,
     populate_github_users,
     refresh_commits,
@@ -940,3 +941,26 @@ def test_available_task_org_config_names(project_factory, user_factory):
         available_task_org_config_names(project, user=user)
 
         assert project.finalize_available_task_org_config_names.called
+
+
+@pytest.mark.django_db
+def test_get_social_image(repository_factory, user_factory):
+    repository = repository_factory()
+    user = user_factory()
+    with ExitStack() as stack:
+        stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+        get = stack.enter_context(patch("metecho.api.jobs.requests.get"))
+        get.return_value = MagicMock(
+            content="""
+            <html>
+                <head>
+                <meta property="og:image" content="https://example.com/">
+                </head>
+                <body></body>
+            </html>
+            """
+        )
+        get_social_image(repository=repository, user=user)
+
+        repository.refresh_from_db()
+        assert repository.repo_image_url == "https://example.com/"

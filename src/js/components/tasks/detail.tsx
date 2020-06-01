@@ -15,22 +15,22 @@ import OrgCards from '@/components/tasks/cards';
 import TaskStatusPath from '@/components/tasks/path';
 import TaskStatusSteps from '@/components/tasks/steps';
 import {
+  DeleteModal,
   DetailPageLayout,
+  EditModal,
   ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
   LabelWithSpinner,
+  PageOptions,
   SpinnerWrapper,
+  SubmitModal,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
-import DeleteModal from '@/components/utils/deleteModal';
-import EditModal from '@/components/utils/editModal';
-import PageOptions from '@/components/utils/pageOptions';
-import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';

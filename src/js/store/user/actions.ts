@@ -81,7 +81,7 @@ export const logout = (): ThunkResult<Promise<LogoutAction>> => (dispatch) =>
     if (window.Sentry) {
       window.Sentry.configureScope((scope) => scope.clear());
     }
-    return dispatch({ type: 'USER_LOGGED_OUT' as 'USER_LOGGED_OUT' });
+    return dispatch({ type: 'USER_LOGGED_OUT' as const });
   });
 
 export const refetchAllData = (): ThunkResult<
@@ -95,13 +95,13 @@ export const refetchAllData = (): ThunkResult<
       suppressErrorsOn: [401, 403, 404],
     });
     if (!payload) {
-      return dispatch({ type: 'USER_LOGGED_OUT' as 'USER_LOGGED_OUT' });
+      return dispatch({ type: 'USER_LOGGED_OUT' as const });
     }
     dispatch(login(payload));
     dispatch(reposRefreshing());
     dispatch(reposRefreshed());
     return dispatch({
-      type: 'REFETCH_DATA_SUCCEEDED' as 'REFETCH_DATA_SUCCEEDED',
+      type: 'REFETCH_DATA_SUCCEEDED' as const,
     });
   } catch (err) {
     dispatch({ type: 'REFETCH_DATA_FAILED' });
@@ -122,7 +122,7 @@ export const disconnect = (): ThunkResult<
       },
     });
     return dispatch({
-      type: 'USER_DISCONNECT_SUCCEEDED' as 'USER_DISCONNECT_SUCCEEDED',
+      type: 'USER_DISCONNECT_SUCCEEDED' as const,
       payload,
     });
   } catch (err) {
@@ -138,7 +138,7 @@ export const refreshDevHubStatus = (): ThunkResult<
   try {
     const payload = await apiFetch({ url: window.api_urls.user(), dispatch });
     return dispatch({
-      type: 'DEV_HUB_STATUS_SUCCEEDED' as 'DEV_HUB_STATUS_SUCCEEDED',
+      type: 'DEV_HUB_STATUS_SUCCEEDED' as const,
       payload,
     });
   } catch (err) {
@@ -160,7 +160,7 @@ export const agreeToTerms = (): ThunkResult<
       },
     });
     return dispatch({
-      type: 'AGREE_TO_TERMS_SUCCEEDED' as 'AGREE_TO_TERMS_SUCCEEDED',
+      type: 'AGREE_TO_TERMS_SUCCEEDED' as const,
       payload,
     });
   } catch (err) {

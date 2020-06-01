@@ -15,7 +15,11 @@ import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
 
 interface TermsProps
-  extends RouteComponentProps<{}, StaticContext, { from?: Location }> {
+  extends RouteComponentProps<
+    { [key: string]: any },
+    StaticContext,
+    { from?: Location }
+  > {
   from?: { pathname?: string };
 }
 
