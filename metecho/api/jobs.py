@@ -30,6 +30,7 @@ from .sf_org_changes import (
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
+    get_org_config,
     get_valid_target_directories,
 )
 from .sf_run_flow import create_org, delete_org, run_flow
@@ -730,3 +731,16 @@ def create_gh_branch_for_new_project(project, *, user):
 
 
 create_gh_branch_for_new_project_job = job(create_gh_branch_for_new_project)
+
+
+def available_task_org_config_names(project, *, user):
+    repo_id = project.get_repo_id(user)
+    with local_github_checkout(user, repo_id) as repo_root:
+        config = get_org_config(user=user, repo_id=repo_id, project_path=repo_root)
+        project.available_task_org_config_names = list(config.orgs__scratch.keys())
+        project.finalize_available_task_org_config_names(
+            originating_user_id=str(user.id)
+        )
+
+
+available_task_org_config_names_job = job(available_task_org_config_names)

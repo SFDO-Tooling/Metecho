@@ -393,6 +393,8 @@ class Project(
     status = models.CharField(
         max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned
     )
+    # List of strings:
+    available_task_org_config_names = JSONField(default=list, blank=True)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -511,6 +513,15 @@ class Project(
         self.pr_is_merged = True
         self.has_unmerged_commits = False
         self.pr_is_open = False
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
+    def get_available_task_org_config_names(self, user):
+        from .jobs import available_task_org_config_names_job
+
+        available_task_org_config_names_job.delay(self, user=user)
+
+    def finalize_available_task_org_config_names(self, originating_user_id=None):
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 

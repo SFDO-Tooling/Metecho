@@ -188,6 +188,23 @@ class TestProject:
         assert Project.objects.active().count() == 0
         assert Task.objects.active().count() == 0
 
+    def test_get_available_task_org_config_names(self, user_factory, project_factory):
+        user = user_factory()
+        project = project_factory()
+        with ExitStack() as stack:
+            available_task_org_config_names_job = stack.enter_context(
+                patch("metecho.api.jobs.available_task_org_config_names_job")
+            )
+            project.get_available_task_org_config_names(user)
+
+            assert available_task_org_config_names_job.delay.called
+
+    def test_finalize_available_task_org_config_names(self, project_factory):
+        project = project_factory()
+        project.notify_changed = MagicMock()
+        project.finalize_available_task_org_config_names()
+        assert project.notify_changed.called
+
 
 @pytest.mark.django_db
 class TestTask:

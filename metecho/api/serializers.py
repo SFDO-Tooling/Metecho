@@ -137,6 +137,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "pr_is_merged",
             "status",
             "github_users",
+            "available_task_org_config_names",
         )
         extra_kwargs = {
             "slug": {"read_only": True},
