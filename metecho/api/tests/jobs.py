@@ -908,10 +908,18 @@ def test_available_task_org_config_names(project_factory, user_factory):
     project.finalize_available_task_org_config_names = MagicMock()
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-        get_repo_info = stack.enter_context(
-            patch("metecho.api.sf_org_changes.get_repo_info")
+        get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        get_repo_info.return_value = MagicMock(
+            **{
+                "name": "repo",
+                "html_url": "https://example.com",
+                "owner.login": "login",
+                "branch.return_value": MagicMock(
+                    **{"latest_sha.return_value": "123abc"}
+                ),
+            }
         )
-        get_repo_info.return_value = MagicMock(default_branch="master")
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_project_config"))
         BaseCumulusCI = stack.enter_context(
             patch("metecho.api.sf_org_changes.BaseCumulusCI")
         )
