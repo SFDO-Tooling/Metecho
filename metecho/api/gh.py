@@ -18,7 +18,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from github3 import GitHub, login
 from github3.exceptions import NotFoundError, UnprocessableEntity
 
-from .custom_cci_configs import ProjectConfig
+from .custom_cci_configs import GlobalConfig, ProjectConfig
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +139,8 @@ def get_project_config(**kwargs):
     """
     Expects to be in a local_github_checkout.
     """
-    return ProjectConfig({}, **kwargs)
+    global_config = GlobalConfig()
+    return ProjectConfig(global_config, **kwargs)
 
 
 def get_cumulus_prefix(**kwargs):
