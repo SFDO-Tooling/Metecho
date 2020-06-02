@@ -132,7 +132,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
 
   return (
     <>
-      <h3 className="slds-text-heading_medium slds-m-vertical_small">
+      <h3 className="slds-text-heading_medium slds-m-bottom_small">
         {i18n.t('Next Steps')}
       </h3>
 
