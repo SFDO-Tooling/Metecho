@@ -170,6 +170,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = super().create(validated_data)
         instance.create_gh_branch(self.context["request"].user)
+        instance.queue_available_task_org_config_names(self.context["request"].user)
         return instance
 
     def validate(self, data):
