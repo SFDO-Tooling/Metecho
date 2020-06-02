@@ -221,18 +221,3 @@ def compare_revisions(old_revision, new_revision):
             if new_revision[mt][mn] > old_revision.get(mt, {}).get(mn, -1):
                 ret[mt].append(mn)
     return ret
-
-
-def get_org_config(*, user, repo_id, project_path):
-    repository = get_repo_info(user, repo_id=repo_id)
-    branch = repository.default_branch
-    cci = BaseCumulusCI(
-        repo_info={
-            "root": project_path,
-            "url": repository.html_url,
-            "name": repository.name,
-            "owner": repository.owner.login,
-            "commit": branch,
-        }
-    )
-    return cci.project_config

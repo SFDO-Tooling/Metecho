@@ -21,6 +21,7 @@ from github3.exceptions import NotFoundError
 
 from .gh import (
     get_cumulus_prefix,
+    get_project_config,
     get_repo_info,
     local_github_checkout,
     normalize_commit,
@@ -32,7 +33,6 @@ from .sf_org_changes import (
     commit_changes_to_github,
     compare_revisions,
     get_latest_revision_numbers,
-    get_org_config,
     get_valid_target_directories,
 )
 from .sf_run_flow import create_org, delete_org, run_flow
@@ -756,8 +756,16 @@ create_gh_branch_for_new_project_job = job(create_gh_branch_for_new_project)
 
 def available_task_org_config_names(project, *, user):
     repo_id = project.get_repo_id(user)
+    repository = get_repo_info(user, repo_id=repo_id)
     with local_github_checkout(user, repo_id) as repo_root:
-        config = get_org_config(user=user, repo_id=repo_id, project_path=repo_root)
+        config = get_project_config(
+            repo_root=repo_root,
+            repo_name=repository.name,
+            repo_url=repository.html_url,
+            repo_owner=repository.owner.login,
+            repo_branch=project.branch_name,
+            repo_commit=repository.branch(project.branch_name).latest_sha(),
+        )
         project.available_task_org_config_names = [
             {"key": key, **value} for key, value in config.orgs__scratch.items()
         ]
