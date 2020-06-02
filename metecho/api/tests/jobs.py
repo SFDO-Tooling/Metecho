@@ -902,32 +902,50 @@ class TestCreateGhBranchForNewProject:
 
 
 @pytest.mark.django_db
-def test_available_task_org_config_names(project_factory, user_factory):
-    project = project_factory()
-    user = user_factory()
-    project.finalize_available_task_org_config_names = MagicMock()
-    with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-        get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-        get_repo_info.return_value = MagicMock(
-            **{
-                "name": "repo",
-                "html_url": "https://example.com",
-                "owner.login": "login",
-                "branch.return_value": MagicMock(
-                    **{"latest_sha.return_value": "123abc"}
-                ),
-            }
-        )
-        stack.enter_context(patch(f"{PATCH_ROOT}.get_project_config"))
-        BaseCumulusCI = stack.enter_context(
-            patch("metecho.api.sf_org_changes.BaseCumulusCI")
-        )
-        BaseCumulusCI.return_value = MagicMock(**{"project_config.orgs__scratch": {}})
+class TestAvailableTaskOrgConfigNames:
+    def test_available_task_org_config_names(self, project_factory, user_factory):
+        project = project_factory()
+        user = user_factory()
+        project.finalize_available_task_org_config_names = MagicMock()
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_repo_info.return_value = MagicMock(
+                **{
+                    "name": "repo",
+                    "html_url": "https://example.com",
+                    "owner.login": "login",
+                    "branch.return_value": MagicMock(
+                        **{"latest_sha.return_value": "123abc"}
+                    ),
+                }
+            )
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_project_config"))
+            BaseCumulusCI = stack.enter_context(
+                patch("metecho.api.sf_org_changes.BaseCumulusCI")
+            )
+            BaseCumulusCI.return_value = MagicMock(
+                **{"project_config.orgs__scratch": {}}
+            )
 
-        available_task_org_config_names(project, user=user)
+            available_task_org_config_names(project, user=user)
 
-        assert project.finalize_available_task_org_config_names.called
+            assert project.finalize_available_task_org_config_names.called
+
+    def test_available_task_org_config_names__error(
+        self, project_factory, user_factory
+    ):
+        project = project_factory()
+        user = user_factory()
+        project.finalize_available_task_org_config_names = MagicMock()
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_repo_info.side_effect = ValueError
+
+            with pytest.raises(ValueError):
+                available_task_org_config_names(project, user=user)
+
+            assert project.finalize_available_task_org_config_names.called
 
 
 @pytest.mark.django_db
