@@ -143,6 +143,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "status",
             "github_users",
             "available_task_org_config_names",
+            "currently_fetching_org_config_names",
         )
         extra_kwargs = {
             "slug": {"read_only": True},

@@ -415,6 +415,7 @@ class Project(
     #   "description": str,
     # }
     available_task_org_config_names = JSONField(default=list, blank=True)
+    currently_fetching_org_config_names = models.BooleanField(default=False)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -539,9 +540,13 @@ class Project(
     def queue_available_task_org_config_names(self, user):
         from .jobs import available_task_org_config_names_job
 
+        self.currently_fetching_org_config_names = True
+        self.save()
+        self.notify_changed(originating_user_id=str(user.id))
         available_task_org_config_names_job.delay(self, user=user)
 
     def finalize_available_task_org_config_names(self, originating_user_id=None):
+        self.currently_fetching_org_config_names = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
