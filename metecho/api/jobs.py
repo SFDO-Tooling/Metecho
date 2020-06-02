@@ -206,17 +206,14 @@ def _create_org_and_run_flow(
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
 
-    if scratch_org_config.setup_flow:
-        flow_name = scratch_org_config.setup_flow
-    else:
-        cases = {
-            "dev": "dev_org",
-            "feature": "dev_org",
-            "qa": "qa_org",
-            "beta": "install_beta",
-            "release": "install_prod",
-        }
-        flow_name = cases[scratch_org.task.org_config_name]
+    cases = {
+        "dev": "dev_org",
+        "feature": "dev_org",
+        "qa": "qa_org",
+        "beta": "install_beta",
+        "release": "install_prod",
+    }
+    flow_name = scratch_org_config.setup_flow or cases[scratch_org.task.org_config_name]
 
     try:
         run_flow(
