@@ -409,7 +409,11 @@ class Project(
     status = models.CharField(
         max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned
     )
-    # List of strings:
+    # List of {
+    #   "key": str,
+    #   "label": str,
+    #   "description": str,
+    # }
     available_task_org_config_names = JSONField(default=list, blank=True)
 
     repository = models.ForeignKey(

@@ -758,7 +758,9 @@ def available_task_org_config_names(project, *, user):
     repo_id = project.get_repo_id(user)
     with local_github_checkout(user, repo_id) as repo_root:
         config = get_org_config(user=user, repo_id=repo_id, project_path=repo_root)
-        project.available_task_org_config_names = list(config.orgs__scratch.keys())
+        project.available_task_org_config_names = [
+            {"key": key, **value} for key, value in config.orgs__scratch.items()
+        ]
         project.finalize_available_task_org_config_names(
             originating_user_id=str(user.id)
         )
