@@ -37,20 +37,5 @@ def test_global_config():
         project_init.return_value = None
         global_init.return_value = None
         global_config = GlobalConfig()
-        project_config = global_config.get_project_config(
-            repo_root="repo_root",
-            repo_name="repo_name",
-            repo_url="repo_url",
-            repo_owner="repo_owner",
-            repo_branch="repo_branch",
-            repo_commit="repo_commit",
-        )
 
         assert global_config.config_global_local_path is None
-
-        assert project_config.repo_root == "repo_root"
-        assert project_config.repo_name == "repo_name"
-        assert project_config.repo_url == "repo_url"
-        assert project_config.repo_owner == "repo_owner"
-        assert project_config.repo_branch == "repo_branch"
-        assert project_config.repo_commit == "repo_commit"
