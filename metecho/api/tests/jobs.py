@@ -47,12 +47,9 @@ class TestCreateBranchesOnGitHub:
 
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
-            global_config_instance = MagicMock()
-            global_config.return_value = global_config_instance
-            global_config_instance.get_project_config.return_value = MagicMock(
-                project__git__prefix_feature="feature/"
-            )
+            project_config = stack.enter_context(patch("metecho.api.gh.ProjectConfig"))
+            project_config_instance = MagicMock(project__git__prefix_feature="feature/")
+            project_config.return_value = project_config_instance
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
             repository.branch.return_value = MagicMock(
@@ -100,12 +97,6 @@ class TestCreateBranchesOnGitHub:
                 patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
             try_to_make_branch.return_value = "bleep"
-            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
-            global_config_instance = MagicMock()
-            global_config.return_value = global_config_instance
-            global_config_instance.get_project_config.return_value = MagicMock(
-                project__git__prefix_feature="feature/"
-            )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
             repository.branch.return_value = MagicMock(
@@ -139,12 +130,6 @@ class TestCreateBranchesOnGitHub:
                 patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
             try_to_make_branch.return_value = "bleep"
-            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
-            global_config_instance = MagicMock()
-            global_config.return_value = global_config_instance
-            global_config_instance.get_project_config.return_value = MagicMock(
-                project__git__prefix_feature="feature/"
-            )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
             repository.branch.return_value = MagicMock(
@@ -190,12 +175,6 @@ class TestCreateBranchesOnGitHub:
             task = task_factory(branch_name="charlemagne", project=project)
 
         with ExitStack() as stack:
-            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
-            global_config_instance = MagicMock()
-            global_config.return_value = global_config_instance
-            global_config_instance.get_project_config.return_value = MagicMock(
-                project__git__prefix_feature="feature/"
-            )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
             get_repo_info.return_value = repository

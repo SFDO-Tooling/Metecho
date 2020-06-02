@@ -1,4 +1,4 @@
-from cumulusci.core.config import BaseGlobalConfig, BaseProjectConfig
+from cumulusci.core.config import BaseProjectConfig
 
 
 class ProjectConfig(BaseProjectConfig):
@@ -51,26 +51,3 @@ class ProjectConfig(BaseProjectConfig):
     @property
     def repo_commit(self):
         return self._repo_commit
-
-
-class GlobalConfig(BaseGlobalConfig):
-    project_config_class = ProjectConfig
-
-    @property
-    def config_global_local_path(self):
-        """ Metecho never uses the local path """
-        return
-
-    def get_project_config(
-        self, *, repo_root, repo_name, repo_url, repo_owner, repo_branch, repo_commit
-    ):
-        kwargs = {
-            "repo_root": repo_root,
-            "repo_name": repo_name,
-            "repo_url": repo_url,
-            "repo_owner": repo_owner,
-            "repo_branch": repo_branch,
-            "repo_commit": repo_commit,
-        }
-
-        return self.project_config_class(self, **kwargs)
