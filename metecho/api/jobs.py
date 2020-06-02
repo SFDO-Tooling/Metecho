@@ -186,6 +186,7 @@ def _create_org_and_run_flow(
         user=user,
         project_path=project_path,
         scratch_org=scratch_org,
+        org_name=scratch_org.task.org_config_name,
         originating_user_id=originating_user_id,
         sf_username=sf_username,
     )
@@ -205,9 +206,8 @@ def _create_org_and_run_flow(
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
 
-    org_config = cci.project_config.keychain.get_org(scratch_org.task.org_config_name)
-    if org_config.setup_flow:
-        flow_name = org_config.setup_flow
+    if scratch_org_config.setup_flow:
+        flow_name = scratch_org_config.setup_flow
     else:
         cases = {
             "dev": "dev_org",
@@ -755,12 +755,22 @@ create_gh_branch_for_new_project_job = job(create_gh_branch_for_new_project)
 
 
 def available_task_org_config_names(project, *, user):
-    repo_id = project.get_repo_id(user)
-    with local_github_checkout(user, repo_id) as repo_root:
-        config = get_org_config(user=user, repo_id=repo_id, project_path=repo_root)
-        project.available_task_org_config_names = [
-            {"key": key, **value} for key, value in config.orgs__scratch.items()
-        ]
+    try:
+        project.refresh_from_db()
+        repo_id = project.get_repo_id(user)
+        with local_github_checkout(user, repo_id) as repo_root:
+            config = get_org_config(user=user, repo_id=repo_id, project_path=repo_root)
+            project.available_task_org_config_names = [
+                {"key": key, **value} for key, value in config.orgs__scratch.items()
+            ]
+    except Exception:
+        project.finalize_available_task_org_config_names(
+            originating_user_id=str(user.id)
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
         project.finalize_available_task_org_config_names(
             originating_user_id=str(user.id)
         )

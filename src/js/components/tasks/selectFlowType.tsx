@@ -1,54 +1,46 @@
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 
-import { ORG_CONFIGS, OrgConfigs } from '@/utils/constants';
+import { SpinnerWrapper, UseFormProps } from '@/components/utils';
+import { OrgConfig } from '@/store/projects/reducer';
+import { DEFAULT_ORG_CONFIG_NAME } from '@/utils/constants';
 
 const SelectFlowType = ({
+  orgConfigs,
+  value,
+  errors,
   isDisabled,
-  orgConfig,
+  isLoading,
   handleSelect,
 }: {
+  orgConfigs: OrgConfig[];
+  value: string;
+  errors?: string;
   isDisabled?: boolean;
-  orgConfig: OrgConfigs;
-  handleSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isLoading?: boolean;
+  handleSelect: UseFormProps['handleInputChange'];
 }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleSelect(event);
-  };
-
-  const flowTypes = [
-    {
-      type: ORG_CONFIGS.DEV,
-      description: i18n.t('set up for package development'),
-    },
-    {
-      type: ORG_CONFIGS.QA,
-      description: i18n.t('use as a testing environment'),
-    },
-    {
-      type: ORG_CONFIGS.BETA,
-      description: i18n.t('what the cool kids want'),
-    },
-    {
-      type: ORG_CONFIGS.RELEASE,
-      description: i18n.t('ready for production'),
-    },
-  ];
-  const helpText = isDisabled ? (
-    <div>
-      {i18n.t('Sorry, Scratch Org environment has been set for this task.')}
-    </div>
-  ) : (
-    <div>
-      {i18n.t(
+  const flowTypes = orgConfigs.length
+    ? orgConfigs
+    : [{ key: DEFAULT_ORG_CONFIG_NAME }];
+  const helpText = isDisabled
+    ? i18n.t(
+        'Org Type cannot be changed while a scratch org exists for this task.',
+      )
+    : i18n.t(
         'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?',
-      )}
-    </div>
-  );
+      );
+  const hasErrors = Boolean(errors);
   return (
-    <fieldset className="slds-m-top--medium">
+    <fieldset
+      className={classNames('slds-form-element', {
+        'slds-has-error': hasErrors,
+      })}
+    >
+      {isLoading && <SpinnerWrapper size="small" />}
       <legend className="slds-form-element__legend slds-form-element__label">
         <span className="slds-p-right_xx-small">{i18n.t('Org Type')}</span>
         <Tooltip
@@ -59,20 +51,29 @@ const SelectFlowType = ({
         />
       </legend>
       <div className="slds-form-element__control">
-        {flowTypes.map(({ type, description }) => (
+        {flowTypes.map(({ key, label, description }) => (
           <Radio
-            key={type}
-            id={type}
-            labels={{ label: `${type} - ${description}` }}
-            value={type}
-            checked={Boolean(type === orgConfig)}
-            variant="base"
+            key={key}
+            id={key}
+            labels={{
+              label: description
+                ? `${label || key} - ${description}`
+                : label || key,
+            }}
+            value={key}
+            checked={Boolean(key === value)}
             name="org_config_name"
-            onChange={handleChange}
-            disabled={isDisabled}
+            aria-describedby={hasErrors ? 'org_config_name-error' : undefined}
+            disabled={isDisabled || isLoading}
+            onChange={handleSelect}
           />
         ))}
       </div>
+      {hasErrors && (
+        <div id="org_config_name-error" className="slds-form-element__help">
+          {errors}
+        </div>
+      )}
     </fieldset>
   );
 };

@@ -9,7 +9,7 @@ import { AnyAction } from 'redux';
 import SelectFlowType from '@/components/tasks/selectFlowType';
 import { useForm, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
-import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
+import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
   project: Project;
@@ -68,7 +68,11 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: { name: '', description: '', org_config_name: ORG_TYPES.DEV },
+    fields: {
+      name: '',
+      description: '',
+      org_config_name: DEFAULT_ORG_CONFIG_NAME,
+    },
     objectType: OBJECT_TYPES.TASK,
     additionalData: {
       project: project.id,
@@ -76,13 +80,11 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     onSuccess,
   });
 
-  const handleFlowChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleInputChange(e);
-  };
   const closeForm = () => {
     setIsOpen(false);
     resetForm();
   };
+
   return (
     <form onSubmit={handleSubmit} className="slds-form slds-m-bottom--large">
       {isOpen && (
@@ -108,8 +110,11 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
             onChange={handleInputChange}
           />
           <SelectFlowType
-            handleSelect={handleFlowChange}
-            orgConfig={inputs.org_config_name}
+            orgConfigs={project.available_task_org_config_names}
+            value={inputs.org_config_name}
+            errors={errors.org_config_name}
+            isLoading={project.currently_fetching_org_config_names}
+            handleSelect={handleInputChange}
           />
         </>
       )}

@@ -21,20 +21,13 @@ export const OBJECT_TYPES = {
 
 export const SHOW_PROJECT_COLLABORATORS = 'show_collaborators';
 
-export type OrgTypes = 'Dev' | 'QA';
+export const DEFAULT_ORG_CONFIG_NAME = 'dev';
 
-export type OrgConfigs = 'Dev' | 'QA' | 'BETA' | 'RELEASE';
+export type OrgTypes = 'Dev' | 'QA';
 
 export const ORG_TYPES = {
   DEV: 'Dev' as const,
   QA: 'QA' as const,
-};
-
-export const ORG_CONFIGS = {
-  DEV: 'Dev' as const,
-  QA: 'QA' as const,
-  BETA: 'Beta' as const,
-  RELEASE: 'Release' as const,
 };
 
 export type WebsocketActions = 'SUBSCRIBE' | 'UNSUBSCRIBE';

@@ -13,18 +13,20 @@ import {
   useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
-import { Project } from '@/store/projects/reducer';
+import { OrgConfig, Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
 import {
+  DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
   ObjectTypes,
-  ORG_CONFIGS,
-  TASK_STATUSES,
 } from '@/utils/constants';
 
 interface EditModalProps {
   model: Project | Task;
   modelType: ObjectTypes;
+  hasOrgs?: boolean;
+  orgConfigsLoading?: boolean;
+  orgConfigs?: OrgConfig[];
   isOpen: boolean;
   handleClose: () => void;
 }
@@ -35,6 +37,9 @@ const isTask = (model: Project | Task, modelType: ObjectTypes): model is Task =>
 const EditModal = ({
   model,
   modelType,
+  hasOrgs,
+  orgConfigsLoading,
+  orgConfigs,
   isOpen,
   handleClose,
 }: EditModalProps) => {
@@ -66,7 +71,7 @@ const EditModal = ({
   };
 
   if (isTask(model, modelType)) {
-    defaultConfigName = model.org_config_name || ORG_CONFIGS.DEV;
+    defaultConfigName = model.org_config_name || DEFAULT_ORG_CONFIG_NAME;
     fields.org_config_name = defaultConfigName;
   }
 
@@ -86,7 +91,7 @@ const EditModal = ({
     update: true,
   });
 
-  // When name or description changes, update default selection
+  // When name, description or org_config_name changes, update default selection
   useFormDefaults({
     field: 'name',
     value: defaultName,
@@ -187,14 +192,17 @@ const EditModal = ({
           errorText={errors.description}
           onChange={handleInputChange}
         />
-        {/* display for tasks, disable if task has a scratch org  */}
-        {modelType === OBJECT_TYPES.TASK && (
+        {/* display for tasks, disable if task has a scratch org */}
+        {isTask(model, modelType) ? (
           <SelectFlowType
+            orgConfigs={orgConfigs || []}
+            value={inputs.org_config_name}
+            errors={errors.org_config_name}
+            isDisabled={hasOrgs}
+            isLoading={orgConfigsLoading}
             handleSelect={handleInputChange}
-            isDisabled={model.status !== TASK_STATUSES.PLANNED}
-            orgConfig={inputs.org_config_name}
           />
-        )}
+        ) : null}
         {/* Clicking hidden button allows for native browser form validation */}
         <button
           ref={submitButton}

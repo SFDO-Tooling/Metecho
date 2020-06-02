@@ -33,6 +33,7 @@ Retrieve
           "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/master...feature/test-project",
           "has_unmerged_commits": true,
           "currently_creating_pr": false,
+          "currently_fetching_org_config_names": false,
           "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
           "pr_is_open": true,
           "pr_is_merged": false,

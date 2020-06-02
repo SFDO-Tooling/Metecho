@@ -26,6 +26,7 @@ export interface Project {
   pr_is_merged: boolean;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
+  currently_fetching_org_config_names: boolean;
   github_users: GitHubUser[];
   status: ProjectStatuses;
   available_task_org_config_names: OrgConfig[];
