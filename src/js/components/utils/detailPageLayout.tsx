@@ -47,11 +47,11 @@ const DetailPageLayout = ({
         }
         onRenderControls={onRenderHeaderActions}
         icon={
-          showHeaderImage && (
+          showHeaderImage ? (
             <div className="ms-repo-image-header">
               <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
             </div>
-          )
+          ) : null
         }
       />
       <div
