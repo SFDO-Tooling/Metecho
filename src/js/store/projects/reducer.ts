@@ -4,6 +4,12 @@ import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ObjectTypes, ProjectStatuses } from '@/utils/constants';
 
+export interface OrgConfig {
+  key: string;
+  label?: string;
+  description?: string;
+}
+
 export interface Project {
   id: string;
   repository: string;
@@ -22,7 +28,7 @@ export interface Project {
   currently_creating_pr: boolean;
   github_users: GitHubUser[];
   status: ProjectStatuses;
-  available_task_org_config_names: string[];
+  available_task_org_config_names: OrgConfig[];
 }
 
 export interface ProjectsByRepositoryState {

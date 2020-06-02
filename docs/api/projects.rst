@@ -45,11 +45,14 @@ Retrieve
           ],
           "status": "In progress",
           "available_task_org_config_names": [
-            "dev",
-            "qa",
-            "feature",
-            "beta",
-            "release"
+            {
+              "key": "dev",
+              "label": "Dev Org",
+              "description": "Org set up for package development"
+            },
+            {
+              "key": "qa"
+            }
           ]
         }
         ...
