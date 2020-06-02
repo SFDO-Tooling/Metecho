@@ -100,6 +100,7 @@ class TaskFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence("Project {}".format)
     project = factory.SubFactory(ProjectFactory)
+    org_config_name = "dev"
 
 
 @register

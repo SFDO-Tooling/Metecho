@@ -207,6 +207,7 @@ class TestRunFlow:
                 user=MagicMock(),
                 project_path=MagicMock(),
                 scratch_org=MagicMock(),
+                org_name="dev",
                 originating_user_id=None,
             )
             with pytest.raises(Exception):

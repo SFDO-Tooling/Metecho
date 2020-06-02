@@ -58,7 +58,13 @@ class Command(BaseCommand):
                 "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
-        return Task.objects.create(name=name, description=description, **kwargs)
+        org_config_name = kwargs.pop("org_config_name", "dev")
+        return Task.objects.create(
+            name=name,
+            description=description,
+            org_config_name=org_config_name,
+            **kwargs,
+        )
 
     def handle(self, *args, **options):
         metecho = self.create_repository(
