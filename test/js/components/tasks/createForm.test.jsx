@@ -27,6 +27,11 @@ const defaultProject = {
   slug: 'project-1',
   old_slugs: [],
   description: 'This is a test project.',
+  available_task_org_config_names: [
+    { key: 'dev' },
+    { key: 'qa', label: 'QA', description: 'This is a QA flow' },
+    { key: 'release', description: 'This is a Release flow' },
+  ],
 };
 
 describe('<TaskForm/>', () => {
@@ -37,19 +42,24 @@ describe('<TaskForm/>', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const { project, startOpen } = opts;
-    const { getByText, getByLabelText, queryByText } = renderWithRedux(
+    return renderWithRedux(
       <MemoryRouter>
         <TaskForm project={project} startOpen={startOpen} />
       </MemoryRouter>,
       {},
       storeWithThunk,
     );
-    return { getByText, getByLabelText, queryByText };
   };
 
   describe('submit/close buttons', () => {
     test('toggle form open/closed', () => {
-      const { getByText, queryByText } = setup({ startOpen: undefined });
+      const { getByText, queryByText } = setup({
+        startOpen: undefined,
+        project: {
+          ...defaultProject,
+          currently_fetching_org_config_names: true,
+        },
+      });
 
       expect(queryByText('Close Form')).toBeNull();
 
@@ -72,7 +82,7 @@ describe('<TaskForm/>', () => {
       const submit = getByText('Create Task');
       const nameInput = getByLabelText('*Task Name');
       const descriptionInput = getByLabelText('Description');
-      const radioInput = getByLabelText('Release - ready for production');
+      const radioInput = getByLabelText('QA - This is a QA flow');
       fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
       fireEvent.change(descriptionInput, {
         target: { value: 'This is the description' },
@@ -86,7 +96,7 @@ describe('<TaskForm/>', () => {
           name: 'Name of Task',
           description: 'This is the description',
           project: 'r1',
-          org_config_name: 'Release',
+          org_config_name: 'qa',
         },
         hasForm: true,
         shouldSubscribeToObject: true,
@@ -126,6 +136,34 @@ describe('<TaskForm/>', () => {
         jest.runAllTimers();
 
         expect(queryByText('A task was successfully created.')).toBeNull();
+      });
+    });
+
+    describe('error', () => {
+      test('displays errors', async () => {
+        createObject.mockReturnValueOnce(() =>
+          // eslint-disable-next-line prefer-promise-reject-errors
+          Promise.reject({
+            body: {
+              org_config_name: ['Do not do that'],
+            },
+            response: {
+              status: 400,
+            },
+          }),
+        );
+        const { getByText, getByLabelText, findByText } = setup({
+          project: { ...defaultProject, available_task_org_config_names: [] },
+        });
+        const submit = getByText('Create Task');
+        const nameInput = getByLabelText('*Task Name');
+        fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
+        fireEvent.click(submit);
+
+        expect.assertions(1);
+        await findByText('Do not do that');
+
+        expect(getByText('Do not do that')).toBeVisible();
       });
     });
   });

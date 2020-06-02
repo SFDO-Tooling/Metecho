@@ -96,6 +96,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
+    /* istanbul ignore next */
     if (devOrg || orgs[ORG_TYPES.QA]) {
       hasOrgs = true;
     }
