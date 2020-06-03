@@ -217,8 +217,9 @@ def _create_org_and_run_flow(
         )
     finally:
         scratch_org.refresh_from_db()
-        scratch_org.cci_logs = Path(".cumulusci/logs/cci.log").read_text()
-        scratch_org.save()
+        if Path(".cumulusci/logs/cci.log").exists():
+            scratch_org.cci_logs = Path(".cumulusci/logs/cci.log").read_text()
+            scratch_org.save()
     scratch_org.refresh_from_db()
     # We don't need to explicitly save the following, because this
     # function is called in a context that will eventually call a
