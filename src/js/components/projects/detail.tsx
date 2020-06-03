@@ -134,6 +134,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           objectType: OBJECT_TYPES.PROJECT,
           data: {
             ...project,
+            // eslint-disable-next-line @typescript-eslint/camelcase
             github_users: users.sort((a, b) =>
               /* istanbul ignore next */
               a.login.toLowerCase() > b.login.toLowerCase() ? 1 : -1,

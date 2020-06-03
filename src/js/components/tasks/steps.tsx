@@ -129,7 +129,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusPathProps) => {
 
   return (
     <>
-      <Steps steps={steps} />
+      <Steps steps={steps} title={i18n.t('Next Steps for this Task')} />
     </>
   );
 };

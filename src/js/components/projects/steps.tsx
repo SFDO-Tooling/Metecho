@@ -12,21 +12,21 @@ interface ProjectStatusStepsProps {
 const ProjectStatusSteps = ({ tasks, project }: ProjectStatusStepsProps) => {
   const steps = [
     {
-      label: `${i18n.t('Create a Task')}`,
+      label: `${i18n.t('Create a task')}`,
       visible: true,
       active: !tasks?.length,
       complete: Boolean(tasks.length), // complete if there are 1+ tasks
       assignee: null, //
     },
     {
-      label: `${i18n.t('Add collaborators')}`,
+      label: `${i18n.t('Assign a developer to a task')}`,
       visible: true,
       active: Boolean(tasks.length),
       complete: Boolean(tasks.length && project.github_users.length), // complete if there are tasks collaborators
       assignee: null, // anyone can add collaborators
     },
     {
-      label: `${i18n.t('Merge changes from a task')}`,
+      label: `${i18n.t('Complete a task')}`,
       visible: true,
       active: false, // if there is a task with an unmerged commit
       complete: false, // not sure, if the no unmerged commits and
@@ -41,7 +41,7 @@ const ProjectStatusSteps = ({ tasks, project }: ProjectStatusStepsProps) => {
     },
     {
       label: `${i18n.t('Merge pull request on Github')}`,
-      visible: false,
+      visible: true,
       active: false,
       complete: false,
       assignee: null,
@@ -49,7 +49,7 @@ const ProjectStatusSteps = ({ tasks, project }: ProjectStatusStepsProps) => {
   ];
   return (
     <>
-      <Steps steps={steps} />
+      <Steps steps={steps} title={i18n.t('Next Steps for this Project')} />
     </>
   );
 };
