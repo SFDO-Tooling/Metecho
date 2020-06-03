@@ -216,8 +216,8 @@ def _create_org_and_run_flow(
             user=user,
         )
     finally:
-        scratch_org.refresh_from_db()
         if Path(".cumulusci/logs/cci.log").exists():
+            scratch_org.refresh_from_db()
             scratch_org.cci_logs = Path(".cumulusci/logs/cci.log").read_text()
             scratch_org.save()
     scratch_org.refresh_from_db()
