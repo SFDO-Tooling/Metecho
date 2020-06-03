@@ -65,9 +65,14 @@ const SelectFlowType = ({
           dialogClassName="modal-tooltip"
         />
         <Button
-          label={`[${i18n.t('refresh')}]`}
-          variant="link"
-          className="slds-p-left_xxx-small"
+          assistiveText={{
+            icon: i18n.t('refresh list of available org types'),
+          }}
+          title={i18n.t('refresh list of available org types')}
+          variant="icon"
+          iconCategory="utility"
+          iconName="refresh"
+          className="slds-m-left_xx-small"
           onClick={doRefreshOrgConfigs}
         />
       </legend>

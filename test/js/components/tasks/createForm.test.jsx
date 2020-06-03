@@ -80,10 +80,10 @@ describe('<TaskForm/>', () => {
     });
   });
 
-  describe('refresh org types click', () => {
+  describe('refresh org types button click', () => {
     test('triggers refreshOrgConfigs actions', () => {
       const { getByText } = setup();
-      const btn = getByText('[refresh]');
+      const btn = getByText('refresh list of available org types');
       fireEvent.click(btn);
 
       expect(refreshOrgConfigs).toHaveBeenCalledWith('p1');
