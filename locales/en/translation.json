@@ -298,6 +298,7 @@
   "pageCannotBeFound": "That page cannot be found. Try the <2>home page</2>?",
   "projectCollaborators": "Only users who have access to the GitHub repository for this project will appear in the list below. Visit GitHub to invite additional collaborators to this repository.",
   "projectNotFound": "We can’t find the project you’re looking for. Try <2>another project</2> from that repository?",
+  "refresh": "refresh",
   "refreshTestOrgMsg": "<0>[Recommended]</0> This option will re-create your Test Org with the latest changes, allowing you to test the most recent version.",
   "releaseNotesInfo": "Details entered will be used when publishing release notes. Please use Markdown to format your notes.",
   "reload the page.": "reload the page.",

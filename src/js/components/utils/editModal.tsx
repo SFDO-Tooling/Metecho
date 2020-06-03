@@ -25,6 +25,7 @@ interface EditModalProps {
   model: Project | Task;
   modelType: ObjectTypes;
   hasOrgs?: boolean;
+  projectId?: string;
   orgConfigsLoading?: boolean;
   orgConfigs?: OrgConfig[];
   isOpen: boolean;
@@ -38,6 +39,7 @@ const EditModal = ({
   model,
   modelType,
   hasOrgs,
+  projectId,
   orgConfigsLoading,
   orgConfigs,
   isOpen,
@@ -196,6 +198,7 @@ const EditModal = ({
         {isTask(model, modelType) ? (
           <SelectFlowType
             orgConfigs={orgConfigs || []}
+            projectId={projectId}
             value={inputs.org_config_name}
             errors={errors.org_config_name}
             isDisabled={hasOrgs}

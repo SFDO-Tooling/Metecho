@@ -111,6 +111,7 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
           />
           <SelectFlowType
             orgConfigs={project.available_task_org_config_names}
+            projectId={project.id}
             value={inputs.org_config_name}
             errors={errors.org_config_name}
             isLoading={project.currently_fetching_org_config_names}

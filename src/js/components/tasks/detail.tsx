@@ -413,6 +413,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           model={task}
           modelType={OBJECT_TYPES.TASK}
           hasOrgs={hasOrgs}
+          projectId={project.id}
           orgConfigsLoading={project.currently_fetching_org_config_names}
           orgConfigs={project.available_task_org_config_names}
           isOpen={editModalOpen}

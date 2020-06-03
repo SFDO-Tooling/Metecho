@@ -4,6 +4,7 @@ import { ThunkResult } from '@/store';
 import { isCurrentUser } from '@/store/helpers';
 import { Project } from '@/store/projects/reducer';
 import { addToast } from '@/store/toasts/actions';
+import apiFetch from '@/utils/api';
 
 interface ProjectUpdated {
   type: 'PROJECT_UPDATE';
@@ -13,8 +14,18 @@ interface ProjectCreatePRFailed {
   type: 'PROJECT_CREATE_PR_FAILED';
   payload: Project;
 }
+interface RefreshOrgConfigsAction {
+  type:
+    | 'REFRESH_ORG_CONFIGS_REQUESTED'
+    | 'REFRESH_ORG_CONFIGS_ACCEPTED'
+    | 'REFRESH_ORG_CONFIGS_REJECTED';
+  payload: string;
+}
 
-export type ProjectAction = ProjectUpdated | ProjectCreatePRFailed;
+export type ProjectAction =
+  | ProjectUpdated
+  | ProjectCreatePRFailed
+  | RefreshOrgConfigsAction;
 
 export const updateProject = (payload: Project): ProjectUpdated => ({
   type: 'PROJECT_UPDATE',
@@ -73,4 +84,26 @@ export const createProjectPRFailed = ({
     type: 'PROJECT_CREATE_PR_FAILED' as const,
     payload: model,
   });
+};
+
+export const refreshOrgConfigs = (
+  id: string,
+): ThunkResult<Promise<RefreshOrgConfigsAction>> => async (dispatch) => {
+  dispatch({ type: 'REFRESH_ORG_CONFIGS_REQUESTED', payload: id });
+  try {
+    await apiFetch({
+      url: window.api_urls.project_refresh_org_config_names(id),
+      dispatch,
+      opts: {
+        method: 'POST',
+      },
+    });
+    return dispatch({
+      type: 'REFRESH_ORG_CONFIGS_ACCEPTED' as const,
+      payload: id,
+    });
+  } catch (err) {
+    dispatch({ type: 'REFRESH_ORG_CONFIGS_REJECTED', payload: id });
+    throw err;
+  }
 };

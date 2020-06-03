@@ -5,24 +5,28 @@ import { MemoryRouter } from 'react-router-dom';
 import TaskForm from '@/components/tasks/createForm';
 import { createObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
+import { refreshOrgConfigs } from '@/store/projects/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
 jest.mock('@/store/errors/actions');
+jest.mock('@/store/projects/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
 addError.mockReturnValue({ type: 'TEST' });
+refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   createObject.mockClear();
   addError.mockClear();
+  refreshOrgConfigs.mockClear();
 });
 
 const defaultProject = {
-  id: 'r1',
+  id: 'p1',
   name: 'Project 1',
   slug: 'project-1',
   old_slugs: [],
@@ -76,6 +80,16 @@ describe('<TaskForm/>', () => {
     });
   });
 
+  describe('refresh org types click', () => {
+    test('triggers refreshOrgConfigs actions', () => {
+      const { getByText } = setup();
+      const btn = getByText('[refresh]');
+      fireEvent.click(btn);
+
+      expect(refreshOrgConfigs).toHaveBeenCalledWith('p1');
+    });
+  });
+
   describe('form submit', () => {
     test('creates a new task', () => {
       const { getByText, getByLabelText } = setup();
@@ -95,7 +109,7 @@ describe('<TaskForm/>', () => {
         data: {
           name: 'Name of Task',
           description: 'This is the description',
-          project: 'r1',
+          project: 'p1',
           org_config_name: 'qa',
         },
         hasForm: true,
@@ -117,7 +131,7 @@ describe('<TaskForm/>', () => {
                 slug: 'name-of-task',
                 name: 'Name of Task',
                 description: '',
-                project: 'r1',
+                project: 'p1',
               },
             },
           }),
