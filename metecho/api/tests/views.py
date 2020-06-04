@@ -705,3 +705,22 @@ class TestTaskView:
         )
 
         assert response.status_code == 400
+
+
+@pytest.mark.django_db
+class TestProjectView:
+    def test_refresh_org_config_names(self, client, project_factory):
+        with ExitStack() as stack:
+            project = project_factory()
+
+            available_task_org_config_names_job = stack.enter_context(
+                patch("metecho.api.jobs.available_task_org_config_names_job")
+            )
+            response = client.post(
+                reverse(
+                    "project-refresh-org-config-names", kwargs={"pk": str(project.id)}
+                )
+            )
+
+            assert response.status_code == 202, response.json()
+            assert available_task_org_config_names_job.delay.called

@@ -13,6 +13,7 @@ from ..jobs import (
     _create_branches_on_github,
     _create_org_and_run_flow,
     alert_user_about_expiring_org,
+    available_task_org_config_names,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_project,
@@ -46,12 +47,9 @@ class TestCreateBranchesOnGitHub:
 
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
-            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
-            global_config_instance = MagicMock()
-            global_config.return_value = global_config_instance
-            global_config_instance.get_project_config.return_value = MagicMock(
-                project__git__prefix_feature="feature/"
-            )
+            project_config = stack.enter_context(patch("metecho.api.gh.ProjectConfig"))
+            project_config_instance = MagicMock(project__git__prefix_feature="feature/")
+            project_config.return_value = project_config_instance
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
             repository.branch.return_value = MagicMock(
@@ -73,9 +71,9 @@ class TestCreateBranchesOnGitHub:
         user = user_factory()
         with ExitStack() as stack:
             try_to_make_branch = stack.enter_context(
-                patch("metecho.api.jobs.try_to_make_branch")
+                patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_repo_info.return_value = MagicMock(
                 **{"branch.side_effect": NotFoundError(MagicMock())}
             )
@@ -99,12 +97,6 @@ class TestCreateBranchesOnGitHub:
                 patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
             try_to_make_branch.return_value = "bleep"
-            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
-            global_config_instance = MagicMock()
-            global_config.return_value = global_config_instance
-            global_config_instance.get_project_config.return_value = MagicMock(
-                project__git__prefix_feature="feature/"
-            )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
             repository.branch.return_value = MagicMock(
@@ -138,12 +130,6 @@ class TestCreateBranchesOnGitHub:
                 patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
             try_to_make_branch.return_value = "bleep"
-            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
-            global_config_instance = MagicMock()
-            global_config.return_value = global_config_instance
-            global_config_instance.get_project_config.return_value = MagicMock(
-                project__git__prefix_feature="feature/"
-            )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
             repository.branch.return_value = MagicMock(
@@ -168,10 +154,10 @@ class TestCreateBranchesOnGitHub:
         user = user_factory()
         with ExitStack() as stack:
             try_to_make_branch = stack.enter_context(
-                patch("metecho.api.jobs.try_to_make_branch")
+                patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.project_create_branch"))
             get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
@@ -189,12 +175,6 @@ class TestCreateBranchesOnGitHub:
             task = task_factory(branch_name="charlemagne", project=project)
 
         with ExitStack() as stack:
-            global_config = stack.enter_context(patch("metecho.api.gh.GlobalConfig"))
-            global_config_instance = MagicMock()
-            global_config.return_value = global_config_instance
-            global_config_instance.get_project_config.return_value = MagicMock(
-                project__git__prefix_feature="feature/"
-            )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             repository = MagicMock()
             get_repo_info.return_value = repository
@@ -254,6 +234,48 @@ def test_create_org_and_run_flow():
         Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
         _create_org_and_run_flow(
             MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
+            user=MagicMock(),
+            repo_id=123,
+            repo_branch=MagicMock(),
+            project_path="",
+            originating_user_id=None,
+        )
+
+        assert create_org.called
+        assert run_flow.called
+
+
+def test_create_org_and_run_flow__fall_back_to_cases():
+    with ExitStack() as stack:
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_latest_revision_numbers"))
+        create_org = stack.enter_context(patch(f"{PATCH_ROOT}.create_org"))
+        create_org.return_value = (
+            MagicMock(expires=datetime(2020, 1, 1, 12, 0)),
+            MagicMock(
+                **{
+                    "project_config.keychain.get_org.return_value": MagicMock(
+                        setup_flow=None
+                    ),
+                }
+            ),
+            MagicMock(),
+        )
+        run_flow = stack.enter_context(patch(f"{PATCH_ROOT}.run_flow"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        get_valid_target_directories = stack.enter_context(
+            patch(f"{PATCH_ROOT}.get_valid_target_directories")
+        )
+        get_valid_target_directories.return_value = (
+            {"source": ["src"], "config": [], "post": [], "pre": []},
+            False,
+        )
+        stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
+        Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
+        Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
+        _create_org_and_run_flow(
+            MagicMock(
+                **{"org_type": SCRATCH_ORG_TYPES.Dev, "task.org_config_name": "dev"}
+            ),
             user=MagicMock(),
             repo_id=123,
             repo_branch=MagicMock(),
@@ -341,7 +363,7 @@ class TestRefreshScratchOrg:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
             )
-            logger = stack.enter_context(patch("metecho.api.jobs.logger"))
+            logger = stack.enter_context(patch(f"{PATCH_ROOT}.logger"))
 
             with pytest.raises(Exception):
                 refresh_scratch_org(scratch_org, originating_user_id=None)
@@ -529,7 +551,7 @@ class TestRefreshCommits:
                 }
             )
             repo = MagicMock(**{"commits.return_value": [commit1, commit2]})
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_repo_info.return_value = repo
 
             refresh_commits(
@@ -576,7 +598,7 @@ class TestRefreshCommits:
                 }
             )
             repo = MagicMock(**{"commits.return_value": [commit1, commit2]})
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_repo_info.return_value = repo
 
             refresh_commits(
@@ -653,7 +675,7 @@ class TestPopulateGithubUsers:
         user = user_factory()
         repository = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
-        with patch("metecho.api.jobs.get_repo_info") as get_repo_info:
+        with patch(f"{PATCH_ROOT}.get_repo_info") as get_repo_info:
             collab1 = MagicMock(
                 id=123,
                 login="test-user-1",
@@ -673,7 +695,7 @@ class TestPopulateGithubUsers:
 
     def test_user_missing(self, repository_factory):
         repository = repository_factory(repo_id=123)
-        with patch("metecho.api.jobs.logger") as logger:
+        with patch(f"{PATCH_ROOT}.logger") as logger:
             populate_github_users(repository, originating_user_id=None)
             assert logger.warning.called
 
@@ -687,7 +709,7 @@ class TestPopulateGithubUsers:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
             )
-            logger = stack.enter_context(patch("metecho.api.jobs.logger"))
+            logger = stack.enter_context(patch(f"{PATCH_ROOT}.logger"))
 
             with pytest.raises(Exception):
                 populate_github_users(repository, originating_user_id=None)
@@ -700,7 +722,7 @@ class TestPopulateGithubUsers:
 class TestSubmitReview:
     def test_good(self, task_factory, user_factory):
         with ExitStack() as stack:
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
 
             user = user_factory()
             task = task_factory(
@@ -735,7 +757,7 @@ class TestSubmitReview:
 
     def test_good__has_org(self, task_factory, scratch_org_factory, user_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_repo_info = stack.enter_context(
                 patch("metecho.api.model_mixins.get_repo_info")
             )
@@ -772,7 +794,7 @@ class TestSubmitReview:
 
     def test_good__review_invalid(self, task_factory, user_factory):
         with ExitStack() as stack:
-            stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_repo_info = stack.enter_context(
                 patch("metecho.api.model_mixins.get_repo_info")
             )
@@ -805,7 +827,7 @@ class TestSubmitReview:
 
     def test_bad(self):
         with ExitStack() as stack:
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
 
             task = MagicMock()
             pr = MagicMock()
@@ -835,8 +857,8 @@ class TestCreateGhBranchForNewProject:
     def test_no_pr(self, user_factory, project_factory):
         user = user_factory()
         with ExitStack() as stack:
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
-            stack.enter_context(patch("metecho.api.jobs.project_create_branch"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.project_create_branch"))
             get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
@@ -853,9 +875,9 @@ class TestCreateGhBranchForNewProject:
     def test_no_branch_name(self, user_factory, project_factory):
         user = user_factory()
         with ExitStack() as stack:
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             project_create_branch = stack.enter_context(
-                patch("metecho.api.jobs.project_create_branch")
+                patch(f"{PATCH_ROOT}.project_create_branch")
             )
             get_repo_info.return_value = MagicMock()
 
@@ -866,9 +888,9 @@ class TestCreateGhBranchForNewProject:
     def test_exception(self, user_factory, project_factory):
         user = user_factory()
         with ExitStack() as stack:
-            get_repo_info = stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             project_create_branch = stack.enter_context(
-                patch("metecho.api.jobs.project_create_branch")
+                patch(f"{PATCH_ROOT}.project_create_branch")
             )
             get_repo_info.side_effect = ValueError()
 
@@ -877,6 +899,53 @@ class TestCreateGhBranchForNewProject:
                 create_gh_branch_for_new_project(project, user=user)
 
             assert not project_create_branch.called
+
+
+@pytest.mark.django_db
+class TestAvailableTaskOrgConfigNames:
+    def test_available_task_org_config_names(self, project_factory, user_factory):
+        project = project_factory()
+        user = user_factory()
+        project.finalize_available_task_org_config_names = MagicMock()
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_repo_info.return_value = MagicMock(
+                **{
+                    "name": "repo",
+                    "html_url": "https://example.com",
+                    "owner.login": "login",
+                    "branch.return_value": MagicMock(
+                        **{"latest_sha.return_value": "123abc"}
+                    ),
+                }
+            )
+            stack.enter_context(patch(f"{PATCH_ROOT}.get_project_config"))
+            BaseCumulusCI = stack.enter_context(
+                patch("metecho.api.sf_org_changes.BaseCumulusCI")
+            )
+            BaseCumulusCI.return_value = MagicMock(
+                **{"project_config.orgs__scratch": {}}
+            )
+
+            available_task_org_config_names(project, user=user)
+
+            assert project.finalize_available_task_org_config_names.called
+
+    def test_available_task_org_config_names__error(
+        self, project_factory, user_factory
+    ):
+        project = project_factory()
+        user = user_factory()
+        project.finalize_available_task_org_config_names = MagicMock()
+        with ExitStack() as stack:
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            get_repo_info.side_effect = ValueError
+
+            with pytest.raises(ValueError):
+                available_task_org_config_names(project, user=user)
+
+            assert project.finalize_available_task_org_config_names.called
 
 
 @pytest.mark.django_db

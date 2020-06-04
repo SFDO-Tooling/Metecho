@@ -3,7 +3,7 @@
 exports[`<TaskStatusSteps /> renders steps: changes retrieved 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -199,7 +199,7 @@ exports[`<TaskStatusSteps /> renders steps: changes retrieved 1`] = `
 exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -419,7 +419,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
 exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -631,7 +631,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
 exports[`<TaskStatusSteps /> renders steps: dev org with unretrieved changes 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -835,7 +835,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with unretrieved changes 1`]
 exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -979,7 +979,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
 exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -1240,7 +1240,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
 exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -1509,7 +1509,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
 exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -1786,7 +1786,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
 exports[`<TaskStatusSteps /> renders steps: submitted for testing 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -1995,7 +1995,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for testing 1`] = `
 exports[`<TaskStatusSteps /> renders steps: test org 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -2272,7 +2272,7 @@ exports[`<TaskStatusSteps /> renders steps: test org 1`] = `
 exports[`<TaskStatusSteps /> renders steps: test org out-of-date 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -2563,7 +2563,7 @@ exports[`<TaskStatusSteps /> renders steps: test org out-of-date 1`] = `
 exports[`<TaskStatusSteps /> renders steps: test org visited 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>
@@ -2832,7 +2832,7 @@ exports[`<TaskStatusSteps /> renders steps: test org visited 1`] = `
 exports[`<TaskStatusSteps /> renders steps: tester assigned, no org 1`] = `
 <div>
   <h3
-    class="slds-text-heading_medium slds-m-vertical_small"
+    class="slds-text-heading_medium slds-m-bottom_small"
   >
     Next Steps for this Task
   </h3>

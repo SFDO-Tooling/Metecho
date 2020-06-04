@@ -84,6 +84,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   let orgHasChanges = false;
   let userIsOwner = false;
   let devOrg: Org | null | undefined;
+  let hasOrgs = false;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges =
@@ -95,6 +96,10 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
+    /* istanbul ignore next */
+    if (devOrg || orgs[ORG_TYPES.QA]) {
+      hasOrgs = true;
+    }
   }
 
   const openCaptureModal = () => {
@@ -407,6 +412,10 @@ const TaskDetail = (props: RouteComponentProps) => {
         <EditModal
           model={task}
           modelType={OBJECT_TYPES.TASK}
+          hasOrgs={hasOrgs}
+          projectId={project.id}
+          orgConfigsLoading={project.currently_fetching_org_config_names}
+          orgConfigs={project.available_task_org_config_names}
           isOpen={editModalOpen}
           handleClose={closeEditModal}
         />

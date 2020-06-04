@@ -42,7 +42,7 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
   }
 
   return (
-    <div className="slds-p-vertical_large">
+    <div className="slds-p-bottom_large">
       <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />
     </div>
   );

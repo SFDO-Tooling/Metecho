@@ -409,6 +409,13 @@ class Project(
     status = models.CharField(
         max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned
     )
+    # List of {
+    #   "key": str,
+    #   "label": str,
+    #   "description": str,
+    # }
+    available_task_org_config_names = JSONField(default=list, blank=True)
+    currently_fetching_org_config_names = models.BooleanField(default=False)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -530,6 +537,19 @@ class Project(
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
+    def queue_available_task_org_config_names(self, user):
+        from .jobs import available_task_org_config_names_job
+
+        self.currently_fetching_org_config_names = True
+        self.save()
+        self.notify_changed(originating_user_id=str(user.id))
+        available_task_org_config_names_job.delay(self, user=user)
+
+    def finalize_available_task_org_config_names(self, originating_user_id=None):
+        self.currently_fetching_org_config_names = False
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
     class Meta:
         ordering = ("-created_at", "name")
         # We enforce this in business logic, not in the database, as we
@@ -557,6 +577,7 @@ class Task(
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch]
     )
+    org_config_name = StringField()
 
     commits = JSONField(default=list, blank=True)
     origin_sha = StringField(null=True, blank=True)

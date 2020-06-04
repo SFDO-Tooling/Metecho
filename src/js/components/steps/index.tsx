@@ -6,9 +6,7 @@ const Steps = ({ steps, title }: { steps: Step[]; title: string }) => {
   const someAssignees = steps.some((i) => i.assignee);
   return (
     <>
-      <h3 className="slds-text-heading_medium slds-m-vertical_small">
-        {title}
-      </h3>
+      <h3 className="slds-text-heading_medium slds-m-bottom_small">{title}</h3>
       <div className="slds-progress slds-progress_vertical">
         <ol className="slds-progress__list">
           {steps

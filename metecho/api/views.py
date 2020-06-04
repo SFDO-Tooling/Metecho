@@ -191,6 +191,14 @@ class ProjectViewSet(CreatePrMixin, ModelViewSet):
     filterset_class = ProjectFilter
     error_pr_exists = _("Project has already been submitted for testing.")
 
+    @action(detail=True, methods=["POST"])
+    def refresh_org_config_names(self, request, pk=None):
+        project = self.get_object()
+        project.queue_available_task_org_config_names(request.user)
+        return Response(
+            self.get_serializer(project).data, status=status.HTTP_202_ACCEPTED
+        )
+
 
 class TaskViewSet(CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)

@@ -21,6 +21,7 @@ from github3.exceptions import NotFoundError
 
 from .gh import (
     get_cumulus_prefix,
+    get_project_config,
     get_repo_info,
     local_github_checkout,
     normalize_commit,
@@ -174,10 +175,6 @@ def _create_org_and_run_flow(
     originating_user_id,
     sf_username=None,
 ):
-    from .models import SCRATCH_ORG_TYPES
-
-    cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
-
     repository = get_repo_info(user, repo_id=repo_id)
     commit = repository.branch(repo_branch).commit
 
@@ -189,6 +186,7 @@ def _create_org_and_run_flow(
         user=user,
         project_path=project_path,
         scratch_org=scratch_org,
+        org_name=scratch_org.task.org_config_name,
         originating_user_id=originating_user_id,
         sf_username=sf_username,
     )
@@ -207,11 +205,21 @@ def _create_org_and_run_flow(
     scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
+
+    cases = {
+        "dev": "dev_org",
+        "feature": "dev_org",
+        "qa": "qa_org",
+        "beta": "install_beta",
+        "release": "install_prod",
+    }
+    flow_name = scratch_org_config.setup_flow or cases[scratch_org.task.org_config_name]
+
     try:
         run_flow(
             cci=cci,
             org_config=org_config,
-            flow_name=cases[scratch_org.org_type],
+            flow_name=flow_name,
             project_path=project_path,
             user=user,
         )
@@ -742,3 +750,36 @@ def create_gh_branch_for_new_project(project, *, user):
 
 
 create_gh_branch_for_new_project_job = job(create_gh_branch_for_new_project)
+
+
+def available_task_org_config_names(project, *, user):
+    try:
+        project.refresh_from_db()
+        repo_id = project.get_repo_id(user)
+        repository = get_repo_info(user, repo_id=repo_id)
+        with local_github_checkout(user, repo_id) as repo_root:
+            config = get_project_config(
+                repo_root=repo_root,
+                repo_name=repository.name,
+                repo_url=repository.html_url,
+                repo_owner=repository.owner.login,
+                repo_branch=project.branch_name,
+                repo_commit=repository.branch(project.branch_name).latest_sha(),
+            )
+            project.available_task_org_config_names = [
+                {"key": key, **value} for key, value in config.orgs__scratch.items()
+            ]
+    except Exception:
+        project.finalize_available_task_org_config_names(
+            originating_user_id=str(user.id)
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        project.finalize_available_task_org_config_names(
+            originating_user_id=str(user.id)
+        )
+
+
+available_task_org_config_names_job = job(available_task_org_config_names)
