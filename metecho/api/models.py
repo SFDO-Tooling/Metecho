@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 
 from allauth.account.signals import user_logged_in
+from allauth.socialaccount.models import SocialAccount
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from cumulusci.core.config import OrgConfig
@@ -11,13 +12,16 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
+from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -610,12 +614,13 @@ class Task(
     assigned_qa = JSONField(null=True, blank=True)
 
     slug_class = TaskSlug
-    tracker = FieldTracker(fields=["name"])
+    tracker = FieldTracker(fields=["name", "assigned_dev", "assigned_qa"])
 
     def __str__(self):
         return self.name
 
     def save(self, *args, force_project_save=False, **kwargs):
+        self.try_send_assignment_emails()
         ret = super().save(*args, **kwargs)
         # To update the project's status:
         if force_project_save or self.project.should_update_status():
@@ -774,6 +779,26 @@ class Task(
             )
             if delete_org and deletable_org:
                 org.queue_delete(originating_user_id=originating_user_id)
+
+    def try_send_assignment_emails(self):
+        for type_ in ("dev", "qa"):
+            if self.tracker.has_changed(f"assigned_{type_}"):
+                user = self.get_matching_assigned_user(type_)
+                if user:
+                    send_mail(
+                        # @@@ TODO: real subject, real set of context
+                        # variables for the email template.
+                        _("Assigned to task"),
+                        render_to_string("user_assigned_to_task.txt", {"task": self}),
+                        settings.DEFAULT_FROM_EMAIL,
+                        [user.email],
+                        fail_silently=False,
+                    )
+
+    def get_matching_assigned_user(self, type_):
+        id_ = getattr(self, f"assigned_{type_}", {}).get("id")
+        sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
+        return getattr(sa, "user", None)  # Optional[User]
 
     class Meta:
         ordering = ("-created_at", "name")

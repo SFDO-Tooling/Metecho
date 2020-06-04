@@ -347,10 +347,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         user = getattr(self.context.get("request"), "user", None)
-        if user:
-            originating_user_id = str(user.id)
-        else:
-            originating_user_id = None
+        originating_user_id = str(user.id) if user else None
         if instance.assigned_dev != validated_data["assigned_dev"]:
             orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
             for org in orgs:
