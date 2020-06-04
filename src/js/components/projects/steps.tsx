@@ -33,7 +33,7 @@ const ProjectStatusSteps = ({ project, tasks }: ProjectStatusStepsProps) => {
       complete: project.has_unmerged_commits,
     },
     {
-      label: `${i18n.t('Submit project for review')}`,
+      label: `${i18n.t('Submit this project for review on GitHub')}`,
       active: project.has_unmerged_commits,
       complete: project.pr_is_open || isMerged,
     },
