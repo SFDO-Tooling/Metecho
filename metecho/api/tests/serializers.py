@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..models import SCRATCH_ORG_TYPES
+from ..models import SCRATCH_ORG_TYPES, Task
 from ..serializers import (
     FullUserSerializer,
     HashidPrimaryKeyRelatedField,
@@ -239,6 +239,26 @@ class TestProjectSerializer:
 
 @pytest.mark.django_db
 class TestTaskSerializer:
+    def test_create(self, rf, user_factory, project_factory):
+        user = user_factory()
+        project = project_factory()
+        data = {
+            "name": "Test Task",
+            "description": "Description.",
+            "project": str(project.id),
+            "assigned_dev": {"test": "id"},
+            "assigned_qa": {"test": "id"},
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
+        }
+        r = rf.get("/")
+        r.user = user
+        serializer = TaskSerializer(data=data, context={"request": r})
+        assert serializer.is_valid(), serializer.errors
+        serializer.save()
+        assert Task.objects.count() == 1
+
     def test_update(self, rf, user_factory, task_factory, scratch_org_factory):
         user = user_factory()
         task = task_factory()
@@ -250,6 +270,8 @@ class TestTaskSerializer:
             "project": str(task.project.id),
             "assigned_dev": {"test": "id"},
             "assigned_qa": {"test": "id"},
+            "should_alert_dev": False,
+            "should_alert_qa": False,
             "org_config_name": "dev",
         }
         r = rf.get("/")
@@ -270,6 +292,8 @@ class TestTaskSerializer:
             "project": str(task.project.id),
             "assigned_dev": {"test": "id"},
             "assigned_qa": {"test": "id"},
+            "should_alert_dev": False,
+            "should_alert_qa": False,
             "org_config_name": "dev",
         }
         serializer = TaskSerializer(task, data=data)
@@ -337,7 +361,9 @@ class TestTaskSerializer:
             task,
             data={
                 "assigned_dev": {"id": user.github_account.uid},
-                "assigned_qa": None,
+                "assigned_qa": {"id": user.github_account.uid},
+                "should_alert_dev": True,
+                "should_alert_qa": True,
                 "name": task.name,
                 "project": str(task.project.id),
                 "org_config_name": task.org_config_name,
@@ -346,7 +372,7 @@ class TestTaskSerializer:
         assert serializer.is_valid(), serializer.errors
         serializer.save()
 
-        assert len(mailoutbox) == 1
+        assert len(mailoutbox) == 2
 
 
 @pytest.mark.django_db
