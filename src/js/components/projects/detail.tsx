@@ -404,7 +404,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               users={project.github_users}
               removeUser={removeProjectUser}
             />
-            <ProjectStatusSteps tasks={tasks || []} project={project} />
+            <ProjectStatusSteps project={project} tasks={tasks || []} />
           </>
         }
       >

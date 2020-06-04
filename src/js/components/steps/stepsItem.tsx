@@ -8,69 +8,71 @@ import { GitHubUser } from '@/store/user/reducer';
 
 export type Step = {
   label: string;
-  visible: boolean;
   active: boolean;
   complete: boolean;
+  hidden?: boolean;
   assignee?: GitHubUser | null;
 };
+
 const StepsItem = ({
   step,
-  isActive,
-  hasAssignee,
   someAssignees,
 }: {
   step: Step;
-  isActive: boolean;
-  hasAssignee: boolean;
   someAssignees: boolean;
-}) => (
-  <li
-    className={classNames('slds-progress__item', {
-      'slds-is-completed': step.complete,
-      'slds-is-active': isActive,
-    })}
-  >
-    {hasAssignee && (
-      <GitHubUserAvatar user={step.assignee as GitHubUser} size="x-small" />
-    )}
-    {step.complete ? (
-      <Icon
-        category="utility"
-        name="success"
-        size="x-small"
-        containerClassName={classNames(
-          'slds-icon_container',
-          'slds-icon-utility-success',
-          'slds-progress__marker',
-          'slds-progress__marker_icon',
-          {
+}) => {
+  const isActive = step.active && !step.complete;
+  const hasAssignee = Boolean(step.assignee && !step.complete);
+
+  return (
+    <li
+      className={classNames('slds-progress__item', {
+        'slds-is-completed': step.complete,
+        'slds-is-active': isActive,
+      })}
+    >
+      {hasAssignee && (
+        <GitHubUserAvatar user={step.assignee as GitHubUser} size="x-small" />
+      )}
+      {step.complete ? (
+        <Icon
+          category="utility"
+          name="success"
+          size="x-small"
+          containerClassName={classNames(
+            'slds-icon_container',
+            'slds-icon-utility-success',
+            'slds-progress__marker',
+            'slds-progress__marker_icon',
+            {
+              'slds-m-left_x-large': !hasAssignee && someAssignees,
+              'slds-m-left_small': hasAssignee || !someAssignees,
+            },
+          )}
+          title={i18n.t('Complete')}
+          assistiveText={{ label: i18n.t('Complete') }}
+        />
+      ) : (
+        <div
+          className={classNames('slds-progress__marker', {
             'slds-m-left_x-large': !hasAssignee && someAssignees,
             'slds-m-left_small': hasAssignee || !someAssignees,
-          },
-        )}
-        title={i18n.t('Complete')}
-        assistiveText={{ label: i18n.t('Complete') }}
-      />
-    ) : (
+          })}
+        >
+          {isActive && (
+            <span className="slds-assistive-text">{i18n.t('Active')}</span>
+          )}
+        </div>
+      )}
       <div
-        className={classNames('slds-progress__marker', {
-          'slds-m-left_x-large': !hasAssignee && someAssignees,
-          'slds-m-left_small': hasAssignee || !someAssignees,
-        })}
+        className="slds-progress__item_content
+          slds-grid
+          slds-grid_align-spread"
       >
-        {isActive && (
-          <span className="slds-assistive-text">{i18n.t('Active')}</span>
-        )}
+        {step.label}
       </div>
-    )}
-    <div
-      className="slds-progress__item_content
-                      slds-grid
-                      slds-grid_align-spread"
-    >
-      {step.label}
-    </div>
-  </li>
-);
+    </li>
+  );
+};
 
 export default StepsItem;
