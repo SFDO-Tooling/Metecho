@@ -19,36 +19,31 @@ const ProjectStatusSteps = ({ tasks, project }: ProjectStatusStepsProps) => {
       visible: true,
       active: !hasTasks,
       complete: hasTasks,
-      assignee: null,
     },
     {
       label: `${i18n.t('Assign a developer to a task')}`,
       visible: true,
       active: hasTasks && !hasDev,
       complete: project.has_unmerged_commits || (hasTasks && hasDev),
-      assignee: null,
     },
     {
       label: `${i18n.t('Complete a task')}`,
       visible: true,
-      active: hasTasks && hasDev, //  active if tasks exist && any task has a developer
-      complete: project.has_unmerged_commits, // project.has_unmerged_commits
-      assignee: null,
+      active: hasTasks && hasDev,
+      complete: project.has_unmerged_commits,
     },
     {
       label: `${i18n.t('Submit project for review')}`,
       visible: true,
       active: project.has_unmerged_commits,
       complete:
-        project.pr_is_open || project.status === PROJECT_STATUSES.MERGED, //  project.pr_is_open || project.status === MERGED
-      assignee: null,
+        project.pr_is_open || project.status === PROJECT_STATUSES.MERGED,
     },
     {
       label: `${i18n.t('Merge pull request on Github')}`,
       visible: true,
       active: project.pr_is_open,
       complete: project.status === PROJECT_STATUSES.MERGED,
-      assignee: null,
     },
   ];
   return (

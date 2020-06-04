@@ -11,16 +11,18 @@ export type Step = {
   visible: boolean;
   active: boolean;
   complete: boolean;
-  assignee: GitHubUser | null;
+  assignee?: GitHubUser | null;
 };
 const StepsItem = ({
   step,
   isActive,
   hasAssignee,
+  someAssignees,
 }: {
   step: Step;
   isActive: boolean;
   hasAssignee: boolean;
+  someAssignees: boolean;
 }) => (
   <li
     className={classNames('slds-progress__item', {
@@ -42,7 +44,7 @@ const StepsItem = ({
           'slds-progress__marker',
           'slds-progress__marker_icon',
           {
-            'slds-m-left_x-large': !hasAssignee,
+            'slds-m-left_x-large': !hasAssignee && someAssignees,
             'slds-m-left_small': hasAssignee,
           },
         )}
@@ -54,6 +56,7 @@ const StepsItem = ({
         className={classNames('slds-progress__marker', {
           'slds-m-left_x-large': !hasAssignee,
           'slds-m-left_small': hasAssignee,
+          'slds-m-left_none': !someAssignees,
         })}
       >
         {isActive && (
