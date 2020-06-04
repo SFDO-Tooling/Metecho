@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 
@@ -26,7 +27,9 @@ const PageDescription = ({
         </h2>
       )}
       <div
-        className="markdown slds-text-longform"
+        className={classNames('markdown', 'slds-text-longform', {
+          'slds-m-bottom_large': !image,
+        })}
         // This description is pre-cleaned by the API
         dangerouslySetInnerHTML={{
           __html: description,
@@ -38,7 +41,7 @@ const PageDescription = ({
   return (
     <>
       {image ? (
-        <div className="slds-media container-fill-space">
+        <div className="slds-media container-fill-space slds-m-bottom_large">
           <div
             className="slds-media__figure
               slds-m-left_xx-small

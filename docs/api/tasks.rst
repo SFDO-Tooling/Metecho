@@ -58,7 +58,8 @@ Retrieve
         "review_submitted_at": "2019-03-01T19:47:49Z",
         "review_valid": true,
         "review_status": "Approved",
-        "review_sha": "617a512"
+        "review_sha": "617a512",
+        "org_config_name": "dev"
       }
       ...
     ]

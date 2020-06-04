@@ -250,6 +250,7 @@ class TestTaskSerializer:
             "project": str(task.project.id),
             "assigned_dev": {"test": "id"},
             "assigned_qa": {"test": "id"},
+            "org_config_name": "dev",
         }
         r = rf.get("/")
         r.user = user
@@ -269,6 +270,7 @@ class TestTaskSerializer:
             "project": str(task.project.id),
             "assigned_dev": {"test": "id"},
             "assigned_qa": {"test": "id"},
+            "org_config_name": "dev",
         }
         serializer = TaskSerializer(task, data=data)
         assert serializer.is_valid(), serializer.errors

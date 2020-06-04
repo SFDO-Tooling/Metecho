@@ -3,7 +3,7 @@
 exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
 <div>
   <div
-    class="slds-p-vertical_large"
+    class="slds-p-bottom_large"
   >
     <div
       class="slds-region_small"
@@ -174,7 +174,7 @@ exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`] = `
 <div>
   <div
-    class="slds-p-vertical_large"
+    class="slds-p-bottom_large"
   >
     <div
       class="slds-region_small"
@@ -335,7 +335,7 @@ exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`
 exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
 <div>
   <div
-    class="slds-p-vertical_large"
+    class="slds-p-bottom_large"
   >
     <div
       class="slds-region_small"
@@ -496,7 +496,7 @@ exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
 <div>
   <div
-    class="slds-p-vertical_large"
+    class="slds-p-bottom_large"
   >
     <div
       class="slds-region_small"
@@ -667,7 +667,7 @@ exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
 <div>
   <div
-    class="slds-p-vertical_large"
+    class="slds-p-bottom_large"
   >
     <div
       class="slds-region_small"
@@ -823,7 +823,7 @@ exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: review 1`] = `
 <div>
   <div
-    class="slds-p-vertical_large"
+    class="slds-p-bottom_large"
   >
     <div
       class="slds-region_small"

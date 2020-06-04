@@ -85,6 +85,7 @@ const defaultState = {
               login: 'OtherUser',
             },
           ],
+          available_task_org_config_names: [],
         },
       ],
       next: null,

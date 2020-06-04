@@ -142,6 +142,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             "pr_is_merged",
             "status",
             "github_users",
+            "available_task_org_config_names",
+            "currently_fetching_org_config_names",
         )
         extra_kwargs = {
             "slug": {"read_only": True},
@@ -169,6 +171,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = super().create(validated_data)
         instance.create_gh_branch(self.context["request"].user)
+        instance.queue_available_task_org_config_names(self.context["request"].user)
         return instance
 
     def validate(self, data):
@@ -280,6 +283,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "assigned_dev",
             "assigned_qa",
             "currently_submitting_review",
+            "org_config_name",
         )
         extra_kwargs = {
             "slug": {"read_only": True},
