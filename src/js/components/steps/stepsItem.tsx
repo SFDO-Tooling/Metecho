@@ -45,7 +45,7 @@ const StepsItem = ({
           'slds-progress__marker_icon',
           {
             'slds-m-left_x-large': !hasAssignee && someAssignees,
-            'slds-m-left_small': hasAssignee,
+            'slds-m-left_small': hasAssignee || !someAssignees,
           },
         )}
         title={i18n.t('Complete')}
@@ -54,9 +54,8 @@ const StepsItem = ({
     ) : (
       <div
         className={classNames('slds-progress__marker', {
-          'slds-m-left_x-large': !hasAssignee,
-          'slds-m-left_small': hasAssignee,
-          'slds-m-left_none': !someAssignees,
+          'slds-m-left_x-large': !hasAssignee && someAssignees,
+          'slds-m-left_small': hasAssignee || !someAssignees,
         })}
       >
         {isActive && (
