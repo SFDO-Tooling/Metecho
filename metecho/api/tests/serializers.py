@@ -329,6 +329,25 @@ class TestTaskSerializer:
         serializer = TaskSerializer(task)
         assert serializer.data["pr_url"] is None
 
+    def test_try_send_assignment_emails(self, mailoutbox, user_factory, task_factory):
+        user = user_factory()
+        task = task_factory()
+
+        serializer = TaskSerializer(
+            task,
+            data={
+                "assigned_dev": {"id": user.github_account.uid},
+                "assigned_qa": None,
+                "name": task.name,
+                "project": str(task.project.id),
+                "org_config_name": task.org_config_name,
+            },
+        )
+        assert serializer.is_valid(), serializer.errors
+        serializer.save()
+
+        assert len(mailoutbox) == 1
+
 
 @pytest.mark.django_db
 class TestScratchOrgSerializer:

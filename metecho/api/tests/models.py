@@ -365,12 +365,6 @@ class TestTask:
         Task.objects.all().delete()
         assert task.scratchorg_set.active().count() == 0
 
-    def test_try_send_assignment_emails(self, mailoutbox, user_factory, task_factory):
-        user = user_factory()
-        task_factory(assigned_dev={"id": user.github_account.uid})
-
-        assert len(mailoutbox) == 1
-
 
 @pytest.mark.django_db
 class TestUser:

@@ -1,6 +1,10 @@
 from typing import Optional
 
+from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.fields import JSONField
@@ -349,14 +353,35 @@ class TaskSerializer(serializers.ModelSerializer):
         user = getattr(self.context.get("request"), "user", None)
         originating_user_id = str(user.id) if user else None
         if instance.assigned_dev != validated_data["assigned_dev"]:
+            self.try_send_assignment_emails(instance, "dev", validated_data)
             orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
+            self.try_send_assignment_emails(instance, "qa", validated_data)
             orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.QA)
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
         return super().update(instance, validated_data)
+
+    def try_send_assignment_emails(self, instance, type_, validated_data):
+        user = self.get_matching_assigned_user(type_, validated_data)
+        if user:
+            send_mail(
+                # @@@ TODO: real subject, real set of context
+                # variables for the email template.
+                _("Assigned to task"),
+                render_to_string("user_assigned_to_task.txt", {"task": instance}),
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+
+    def get_matching_assigned_user(self, type_, validated_data):
+        assigned = validated_data.get(f"assigned_{type_}", {})
+        id_ = assigned.get("id") if assigned else None
+        sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
+        return getattr(sa, "user", None)  # Optional[User]
 
 
 class CreatePrSerializer(serializers.Serializer):
