@@ -849,7 +849,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item slds-is-active"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         >
           <span
             class="slds-assistive-text"
@@ -867,7 +867,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
@@ -879,7 +879,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
@@ -891,7 +891,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
@@ -903,7 +903,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
@@ -915,7 +915,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
@@ -927,7 +927,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
@@ -939,7 +939,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
@@ -951,7 +951,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
@@ -963,7 +963,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         class="slds-progress__item"
       >
         <div
-          class="slds-progress__marker slds-m-left_x-large slds-m-left_none"
+          class="slds-progress__marker slds-m-left_small"
         />
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
