@@ -1,3 +1,4 @@
+import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -12,18 +13,24 @@ export type Step = {
   complete: boolean;
   hidden?: boolean;
   assignee?: GitHubUser | null;
+  action?: string;
 };
 
 const StepsItem = ({
   step,
   someAssignees,
+  stepActionClicked,
 }: {
   step: Step;
   someAssignees: boolean;
+  stepActionClicked: () => void;
 }) => {
   const isActive = step.active && !step.complete;
   const hasAssignee = Boolean(step.assignee && !step.complete);
 
+  const handleAction = () => {
+    stepActionClicked();
+  };
   return (
     <li
       className={classNames('slds-progress__item', {
@@ -64,13 +71,24 @@ const StepsItem = ({
           )}
         </div>
       )}
-      <div
-        className="slds-progress__item_content
+      {step.action && step.active ? (
+        <Button
+          label={step.label}
+          onClick={handleAction}
+          variant="base"
+          className="slds-progress__item_content
           slds-grid
           slds-grid_align-spread"
-      >
-        {step.label}
-      </div>
+        />
+      ) : (
+        <div
+          className="slds-progress__item_content
+          slds-grid
+          slds-grid_align-spread"
+        >
+          {step.label}
+        </div>
+      )}
     </li>
   );
 };

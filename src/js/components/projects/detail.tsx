@@ -56,6 +56,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [createFormOpen, setCreateFormOpen] = useState(Boolean(tasks?.length));
 
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -252,6 +253,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
+  const toggleCreateForm = (bool: boolean) => {
+    setCreateFormOpen(bool);
+  };
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -353,6 +357,19 @@ const ProjectDetail = (props: RouteComponentProps) => {
     headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
   }
 
+  const handleStepAction = (step: any) => {
+    // should be one active step at a time
+    const action = step[0].action;
+    switch (action) {
+      case 'create':
+        if (!createFormOpen) {
+          toggleCreateForm(true);
+        }
+        break;
+      default:
+        break;
+    }
+  };
   return (
     <DocumentTitle
       title={`${project.name} | ${repository.name} | ${i18n.t('Metecho')}`}
@@ -404,7 +421,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
               users={project.github_users}
               removeUser={removeProjectUser}
             />
-            <ProjectStatusSteps project={project} tasks={tasks || []} />
+            <ProjectStatusSteps
+              project={project}
+              tasks={tasks || []}
+              handleAction={handleStepAction}
+            />
           </>
         }
       >
@@ -427,7 +448,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             {project.status !== PROJECT_STATUSES.MERGED && (
-              <TaskForm project={project} startOpen={!tasks.length} />
+              <TaskForm
+                project={project}
+                isOpen={createFormOpen}
+                toggleForm={toggleCreateForm}
+              />
             )}
             {tasks.length ? (
               <>
