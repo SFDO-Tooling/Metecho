@@ -612,7 +612,7 @@ populate_github_users_job = job(populate_github_users)
 
 def submit_review(*, user, task, data, originating_user_id):
     try:
-        review_sha = None
+        review_sha = ""
         org = data["org"]
         notes = data["notes"]
         status = data["status"]
