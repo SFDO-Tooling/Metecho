@@ -75,7 +75,7 @@ class TestRepository:
         with patch("metecho.api.gh.get_repo_info") as get_repo_info:
             get_repo_info.return_value = MagicMock(default_branch="main-branch")
             git_hub_repository_factory(repo_id=123)
-            repo = repository_factory(branch_name=None, repo_id=123)
+            repo = repository_factory(branch_name="", repo_id=123)
             repo.save()
             assert get_repo_info.called
             repo.refresh_from_db()

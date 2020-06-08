@@ -167,7 +167,7 @@ class RepositoryViewSet(
         )
         existing_branches = set(
             Project.objects.active()
-            .filter(branch_name__isnull=False)
+            .exclude(branch_name="")
             .values_list("branch_name", flat=True)
         )
         data = [

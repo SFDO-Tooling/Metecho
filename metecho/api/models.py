@@ -264,11 +264,9 @@ class Repository(
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
     repo_image_url = models.URLField(blank=True)
     include_repo_image_url = models.BooleanField(default=True)
-    # Null means XXX, "" means XXX
     branch_name = models.CharField(
         max_length=100,
         blank=True,
-        null=True,
         validators=[validate_unicode_branch],
         default="master",
     )
@@ -400,9 +398,8 @@ class Project(
 ):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    # Null means XXX, "" means XXX
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
+        max_length=100, blank=True, default="", validators=[validate_unicode_branch]
     )
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
@@ -577,9 +574,8 @@ class Task(
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
-    # Null means XXX, "" means XXX
     branch_name = models.CharField(
-        max_length=100, null=True, blank=True, validators=[validate_unicode_branch]
+        max_length=100, blank=True, default="", validators=[validate_unicode_branch]
     )
     org_config_name = StringField()
 
