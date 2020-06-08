@@ -10,12 +10,14 @@ import { PROJECT_STATUSES } from '@/utils/constants';
 interface ProjectStatusStepsProps {
   project: Project;
   tasks: Task[];
+  readyToSubmit: boolean;
   handleAction: (action: Step[]) => void;
 }
 
 const ProjectStatusSteps = ({
   project,
   tasks,
+  readyToSubmit,
   handleAction,
 }: ProjectStatusStepsProps) => {
   const hasTasks = Boolean(tasks.length);
@@ -32,16 +34,16 @@ const ProjectStatusSteps = ({
     {
       label: `${i18n.t('Assign a Developer to a task')}`,
       active: hasTasks && !hasDev,
-      complete: project.has_unmerged_commits || (hasTasks && hasDev),
+      complete: readyToSubmit || (hasTasks && hasDev),
     },
     {
       label: `${i18n.t('Complete a task')}`,
       active: hasTasks && hasDev,
-      complete: project.has_unmerged_commits,
+      complete: readyToSubmit,
     },
     {
       label: `${i18n.t('Submit this project for review on GitHub')}`,
-      active: project.has_unmerged_commits,
+      active: readyToSubmit,
       complete: project.pr_is_open || isMerged,
       action: 'submit',
     },

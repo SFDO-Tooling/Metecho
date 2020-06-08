@@ -56,8 +56,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [createFormOpen, setCreateFormOpen] = useState(Boolean(tasks?.length));
-
+  const [createFormOpen, setCreateFormOpen] = useState(!tasks?.length);
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
@@ -366,6 +365,11 @@ const ProjectDetail = (props: RouteComponentProps) => {
           toggleCreateForm(true);
         }
         break;
+      case 'submit':
+        if (readyToSubmit) {
+          setSubmitModalOpen(true);
+        }
+        break;
       default:
         break;
     }
@@ -424,6 +428,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
             <ProjectStatusSteps
               project={project}
               tasks={tasks || []}
+              readyToSubmit={readyToSubmit}
               handleAction={handleStepAction}
             />
           </>
