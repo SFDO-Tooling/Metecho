@@ -5,6 +5,7 @@ import i18n from 'i18next';
 import React from 'react';
 
 import { GitHubUserAvatar } from '@/components/user/githubUser';
+import { ExternalLink } from '@/components/utils';
 import { GitHubUser } from '@/store/user/reducer';
 
 export type Step = {
@@ -14,6 +15,7 @@ export type Step = {
   hidden?: boolean;
   assignee?: GitHubUser | null;
   action?: string;
+  link?: string | null;
 };
 
 const StepsItem = ({
@@ -27,10 +29,20 @@ const StepsItem = ({
 }) => {
   const isActive = step.active && !step.complete;
   const hasAssignee = Boolean(step.assignee && !step.complete);
-
   const handleAction = () => {
     stepActionClicked();
   };
+  let label = <>{step.label}</>;
+  if (isActive) {
+    if (step.link) {
+      label = <ExternalLink url={step.link}>{step.label}</ExternalLink>;
+    }
+    if (step.action) {
+      label = (
+        <Button label={step.label} onClick={handleAction} variant="base" />
+      );
+    }
+  }
   return (
     <li
       className={classNames('slds-progress__item', {
@@ -71,24 +83,13 @@ const StepsItem = ({
           )}
         </div>
       )}
-      {step.action && step.active ? (
-        <Button
-          label={step.label}
-          onClick={handleAction}
-          variant="base"
-          className="slds-progress__item_content
+      <div
+        className="slds-progress__item_content
           slds-grid
           slds-grid_align-spread"
-        />
-      ) : (
-        <div
-          className="slds-progress__item_content
-          slds-grid
-          slds-grid_align-spread"
-        >
-          {step.label}
-        </div>
-      )}
+      >
+        {label}
+      </div>
     </li>
   );
 };

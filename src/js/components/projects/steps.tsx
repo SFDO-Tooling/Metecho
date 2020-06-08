@@ -51,7 +51,7 @@ const ProjectStatusSteps = ({
       label: `${i18n.t('Merge pull request on GitHub')}`,
       active: project.pr_is_open,
       complete: isMerged,
-      action: 'merge',
+      link: project.branch_url,
     },
   ];
   const activeStep = steps.filter((s) => s.active);

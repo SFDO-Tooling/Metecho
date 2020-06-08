@@ -9,7 +9,7 @@ const Steps = ({
 }: {
   steps: Step[];
   title: string;
-  handleCurrentAction: () => void;
+  handleCurrentAction?: () => void;
 }) => {
   const someAssignees = steps.some((i) => i.assignee);
   return (
@@ -25,7 +25,7 @@ const Steps = ({
                 step={step}
                 someAssignees={someAssignees}
                 stepActionClicked={() => {
-                  if (step.action) {
+                  if (handleCurrentAction && step.action) {
                     handleCurrentAction();
                   }
                 }}
