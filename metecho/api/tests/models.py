@@ -485,7 +485,7 @@ class TestUser:
         self, settings, user_factory, social_account_factory
     ):
         settings.DEVHUB_USERNAME = "devhub username"
-        user = user_factory(devhub_username=None, allow_devhub_override=False)
+        user = user_factory(devhub_username="", allow_devhub_override=False)
         social_account_factory(
             user=user, provider="salesforce", extra_data={},
         )

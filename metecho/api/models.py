@@ -72,7 +72,8 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
-    devhub_username = StringField(null=True, blank=True)
+    # Null means XXX, "" means XXX
+    devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
     agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
 
@@ -263,6 +264,7 @@ class Repository(
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
     repo_image_url = models.URLField(blank=True)
     include_repo_image_url = models.BooleanField(default=True)
+    # Null means XXX, "" means XXX
     branch_name = models.CharField(
         max_length=100,
         blank=True,
@@ -398,6 +400,7 @@ class Project(
 ):
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
+    # Null means XXX, "" means XXX
     branch_name = models.CharField(
         max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
     )
@@ -574,12 +577,14 @@ class Task(
     name = StringField()
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
+    # Null means XXX, "" means XXX
     branch_name = models.CharField(
         max_length=100, null=True, blank=True, validators=[validate_unicode_branch]
     )
     org_config_name = StringField()
 
     commits = JSONField(default=list, blank=True)
+    # Null means XXX, "" means XXX
     origin_sha = StringField(null=True, blank=True)
     ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
@@ -591,9 +596,11 @@ class Task(
     currently_submitting_review = models.BooleanField(default=False)
     review_submitted_at = models.DateTimeField(null=True, blank=True)
     review_valid = models.BooleanField(default=False)
+    # Null means XXX, "" means XXX
     review_status = models.CharField(
         choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
     )
+    # Null means XXX, "" means XXX
     review_sha = StringField(null=True, blank=True)
 
     status = models.CharField(
@@ -794,6 +801,7 @@ class ScratchOrg(
     latest_commit = StringField(blank=True)
     latest_commit_url = models.URLField(blank=True)
     latest_commit_at = models.DateTimeField(null=True, blank=True)
+    # Null means XXX, "" means XXX
     url = models.URLField(null=True, blank=True)
     last_checked_unsaved_changes_at = models.DateTimeField(null=True, blank=True)
     unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
@@ -807,6 +815,7 @@ class ScratchOrg(
     is_created = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
+    # Null means XXX, "" means XXX
     expiry_job_id = StringField(null=True, blank=True)
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
