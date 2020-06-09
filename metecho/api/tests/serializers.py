@@ -329,6 +329,32 @@ class TestTaskSerializer:
         serializer = TaskSerializer(task)
         assert serializer.data["pr_url"] is None
 
+    def test_reassigns(self, task_factory, scratch_org_factory, user_factory):
+        user = user_factory(devhub_username="test")
+        new_user = user_factory(devhub_username="test")
+        id_ = user.github_account.uid
+        new_id = new_user.github_account.uid
+        task = task_factory(assigned_dev={"id": id_}, assigned_qa={"id": id_})
+        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
+        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+
+        data = {
+            "name": task.name,
+            "description": task.description,
+            "project": str(task.project.id),
+            "assigned_dev": {"id": new_id},
+            "assigned_qa": {"id": new_id},
+            "org_config_name": "dev",
+        }
+        serializer = TaskSerializer(instance=task, data=data)
+        assert serializer.is_valid()
+        serializer.save()
+
+        so1.refresh_from_db()
+        so2.refresh_from_db()
+        assert so1.owner == new_user
+        assert so2.owner == new_user
+
 
 @pytest.mark.django_db
 class TestScratchOrgSerializer:

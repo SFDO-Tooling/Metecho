@@ -1050,6 +1050,12 @@ class ScratchOrg(
             )
             self.queue_delete(originating_user_id=originating_user_id)
 
+    def reassign(self, *, new_user, originating_user_id):
+        self.config["email"] = new_user.email
+        self.owner = new_user
+        self.save()
+        # TODO update `AdminEmail` in the org too?
+
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, *, user, **kwargs):

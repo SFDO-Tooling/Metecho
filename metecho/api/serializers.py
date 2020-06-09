@@ -1,5 +1,6 @@
 from typing import Optional
 
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -354,12 +355,43 @@ class TaskSerializer(serializers.ModelSerializer):
         if instance.assigned_dev != validated_data["assigned_dev"]:
             orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
             for org in orgs:
-                org.queue_delete(originating_user_id=originating_user_id)
+                if new_user := self._valid_reassign(
+                    "dev", instance.assigned_dev, validated_data["assigned_dev"]
+                ):
+                    org.reassign(
+                        new_user=new_user, originating_user_id=originating_user_id
+                    )
+                else:
+                    org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
             orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.QA)
             for org in orgs:
-                org.queue_delete(originating_user_id=originating_user_id)
+                if new_user := self._valid_reassign(
+                    "qa", instance.assigned_qa, validated_data["assigned_qa"]
+                ):
+                    org.reassign(
+                        new_user=new_user, originating_user_id=originating_user_id
+                    )
+                else:
+                    org.queue_delete(originating_user_id=originating_user_id)
         return super().update(instance, validated_data)
+
+    def _valid_reassign(self, type_, old_assignee, new_assignee):
+        old_user = self.get_matching_assigned_user(
+            type_, {f"assigned_{type_}": old_assignee}
+        )
+        new_user = self.get_matching_assigned_user(
+            type_, {f"assigned_{type_}": new_assignee}
+        )
+        if old_user and new_user and old_user.sf_username == new_user.sf_username:
+            return new_user
+        return None
+
+    def get_matching_assigned_user(self, type_, validated_data):
+        assigned = validated_data.get(f"assigned_{type_}", {})
+        id_ = assigned.get("id") if assigned else None
+        sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
+        return getattr(sa, "user", None)  # Optional[User]
 
 
 class CreatePrSerializer(serializers.Serializer):
