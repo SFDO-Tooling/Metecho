@@ -5,6 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    atomic = False
 
     dependencies = [
         ("api", "0082_remove_more_nullable_strings"),
@@ -27,7 +28,7 @@ class Migration(migrations.Migration):
             model_name="task",
             name="origin_sha",
             field=sfdo_template_helpers.fields.string.StringField(
-                blank=True, default=True
+                blank=True, default=""
             ),
         ),
         migrations.AlterField(

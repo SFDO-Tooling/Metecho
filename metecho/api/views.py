@@ -277,14 +277,13 @@ class ScratchOrgViewSet(
         # worker queues easily this way:
         filters = {
             "org_type": SCRATCH_ORG_TYPES.Dev,
-            "url__isnull": False,
             "delete_queued_at__isnull": True,
             "currently_capturing_changes": False,
             "currently_refreshing_changes": False,
         }
         if not force_get:
             filters["owner"] = request.user
-        for instance in queryset.filter(**filters):
+        for instance in queryset.filter(**filters).exclude(url=""):
             instance.queue_get_unsaved_changes(
                 force_get=force_get, originating_user_id=str(request.user.id)
             )

@@ -579,7 +579,7 @@ class Task(
     org_config_name = StringField()
 
     commits = JSONField(default=list, blank=True)
-    origin_sha = StringField(blank=True, default=True)
+    origin_sha = StringField(blank=True, default="")
     ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
 

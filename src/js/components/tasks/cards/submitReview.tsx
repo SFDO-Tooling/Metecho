@@ -18,7 +18,7 @@ import { REVIEW_STATUSES, ReviewStatuses } from '@/utils/constants';
 interface Props {
   orgId?: string;
   url: string;
-  reviewStatus: ReviewStatuses | null;
+  reviewStatus: ReviewStatuses | '' | null;
   isOpen: boolean;
   handleClose: () => void;
 }

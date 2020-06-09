@@ -5,6 +5,7 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
+    atomic = False
 
     dependencies = [
         ("api", "0080_project_currently_fetching_org_config_names"),

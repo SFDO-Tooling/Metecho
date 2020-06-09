@@ -7,6 +7,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    atomic = False
 
     dependencies = [
         ("api", "0081_no_nullable_devhub_username"),
