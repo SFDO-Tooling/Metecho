@@ -56,7 +56,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [createFormOpen, setCreateFormOpen] = useState(!tasks?.length);
+  // "create anew task form" related...
+  const [createFormOpen, setCreateFormOpen] = useState(true);
+  useEffect(() => {
+    if (tasks?.length) {
+      setCreateFormOpen(false);
+    }
+  }, [tasks]);
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
