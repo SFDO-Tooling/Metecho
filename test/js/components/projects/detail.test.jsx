@@ -602,5 +602,15 @@ describe('<ProjectDetail/>', () => {
 
       expect(queryByText('Confirm Deleting Project')).toBeNull();
     });
+
+    test('open/close createForm', () => {
+      const { getByText, queryByText } = setup();
+
+      expect(queryByText('Close Form')).toBeNull();
+
+      fireEvent.click(getByText('Add a Task'));
+
+      expect(getByText('Create Task')).toBeVisible();
+    });
   });
 });

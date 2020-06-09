@@ -37,8 +37,9 @@ const TaskForm = ({ project, isOpen, toggleForm }: Props) => {
   );
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
+    /* istanbul ignore if*/
     if (!isOpen) {
-      toggleForm(false);
+      toggleForm(true);
       e.preventDefault();
     }
   };
