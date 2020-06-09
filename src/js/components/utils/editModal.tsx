@@ -1,0 +1,220 @@
+import Button from '@salesforce/design-system-react/components/button';
+import Input from '@salesforce/design-system-react/components/input';
+import Modal from '@salesforce/design-system-react/components/modal';
+import Textarea from '@salesforce/design-system-react/components/textarea';
+import i18n from 'i18next';
+import { omit } from 'lodash';
+import React, { useRef, useState } from 'react';
+
+import SelectFlowType from '@/components/tasks/selectFlowType';
+import {
+  LabelWithSpinner,
+  useForm,
+  useFormDefaults,
+  useIsMounted,
+} from '@/components/utils';
+import { OrgConfig, Project } from '@/store/projects/reducer';
+import { Task } from '@/store/tasks/reducer';
+import {
+  DEFAULT_ORG_CONFIG_NAME,
+  OBJECT_TYPES,
+  ObjectTypes,
+} from '@/utils/constants';
+
+interface EditModalProps {
+  model: Project | Task;
+  modelType: ObjectTypes;
+  hasOrgs?: boolean;
+  projectId?: string;
+  orgConfigsLoading?: boolean;
+  orgConfigs?: OrgConfig[];
+  isOpen: boolean;
+  handleClose: () => void;
+}
+
+const isTask = (model: Project | Task, modelType: ObjectTypes): model is Task =>
+  modelType === OBJECT_TYPES.TASK;
+
+const EditModal = ({
+  model,
+  modelType,
+  hasOrgs,
+  projectId,
+  orgConfigsLoading,
+  orgConfigs,
+  isOpen,
+  handleClose,
+}: EditModalProps) => {
+  const isMounted = useIsMounted();
+  const submitButton = useRef<HTMLButtonElement | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSuccess = () => {
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      setIsSaving(false);
+      handleClose();
+    }
+  };
+
+  /* istanbul ignore next */
+  const handleError = () => {
+    if (isMounted.current) {
+      setIsSaving(false);
+    }
+  };
+
+  const defaultName = model.name;
+  const defaultDescription = model.description;
+  let defaultConfigName;
+  const fields: { [key: string]: any } = {
+    name: defaultName,
+    description: defaultDescription,
+  };
+
+  if (isTask(model, modelType)) {
+    defaultConfigName = model.org_config_name || DEFAULT_ORG_CONFIG_NAME;
+    fields.org_config_name = defaultConfigName;
+  }
+
+  const {
+    inputs,
+    errors,
+    handleInputChange,
+    setInputs,
+    handleSubmit,
+    resetForm,
+  } = useForm({
+    fields,
+    additionalData: omit(model, ['name', 'description']),
+    onSuccess: handleSuccess,
+    onError: handleError,
+    objectType: modelType,
+    update: true,
+  });
+
+  // When name, description or org_config_name changes, update default selection
+  useFormDefaults({
+    field: 'name',
+    value: defaultName,
+    inputs,
+    setInputs,
+  });
+  useFormDefaults({
+    field: 'description',
+    value: defaultDescription,
+    inputs,
+    setInputs,
+  });
+  useFormDefaults({
+    field: 'org_config_name',
+    value: defaultConfigName,
+    inputs,
+    setInputs,
+  });
+
+  const doClose = () => {
+    handleClose();
+    resetForm();
+  };
+
+  const submitInstance = (e: React.FormEvent<HTMLFormElement>) => {
+    setIsSaving(true);
+    handleSubmit(e);
+  };
+
+  const onSubmitClicked = () => {
+    // Click hidden button inside form to activate native browser validation
+    /* istanbul ignore else */
+    if (submitButton.current) {
+      submitButton.current.click();
+    }
+  };
+
+  let heading, nameLabel; // eslint-disable-line one-var
+  switch (modelType) {
+    case OBJECT_TYPES.TASK:
+      nameLabel = i18n.t('Task Name');
+      heading = i18n.t('Edit Task');
+      break;
+    case OBJECT_TYPES.PROJECT:
+      nameLabel = i18n.t('Project Name');
+      heading = i18n.t('Edit Project');
+      break;
+  }
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      size="medium"
+      disableClose={isSaving}
+      heading={heading}
+      onRequestClose={doClose}
+      footer={[
+        <Button
+          key="cancel"
+          label={i18n.t('Cancel')}
+          onClick={doClose}
+          disabled={isSaving}
+        />,
+        <Button
+          key="submit"
+          type="submit"
+          label={
+            isSaving ? (
+              <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
+            ) : (
+              i18n.t('Save')
+            )
+          }
+          variant="brand"
+          onClick={onSubmitClicked}
+          disabled={isSaving}
+        />,
+      ]}
+    >
+      <form className="slds-form slds-p-around_large" onSubmit={submitInstance}>
+        <Input
+          id="edit-name"
+          label={nameLabel}
+          className="slds-p-bottom_small"
+          name="name"
+          value={inputs.name}
+          required
+          aria-required
+          errorText={errors.name}
+          onChange={handleInputChange}
+        />
+        <Textarea
+          id="edit-description"
+          label={i18n.t('Description')}
+          className="ms-textarea"
+          name="description"
+          value={inputs.description}
+          errorText={errors.description}
+          onChange={handleInputChange}
+        />
+        {/* display for tasks, disable if task has a scratch org */}
+        {isTask(model, modelType) ? (
+          <SelectFlowType
+            orgConfigs={orgConfigs || []}
+            projectId={projectId}
+            value={inputs.org_config_name}
+            errors={errors.org_config_name}
+            isDisabled={hasOrgs}
+            isLoading={orgConfigsLoading}
+            handleSelect={handleInputChange}
+          />
+        ) : null}
+        {/* Clicking hidden button allows for native browser form validation */}
+        <button
+          ref={submitButton}
+          type="submit"
+          style={{ display: 'none' }}
+          disabled={isSaving}
+        />
+      </form>
+    </Modal>
+  );
+};
+export default EditModal;

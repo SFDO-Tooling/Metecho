@@ -1,4 +1,4 @@
-# MetaShare Settings
+# Metecho Settings
 
 The Django `settings` module/system has been in production for many applications
 for a long time. People like Daniel Roy Greenfield (of [Two Scoops of
@@ -67,7 +67,7 @@ modules in order to run commands lke database migrations with elevated
 credentials, and to run management commands with specific logging. Sometimes
 these are small enough to simply put behind an additional environment variable.
 
-# MetaShare Proctypes
+# Metecho Proctypes
 
 - `web`: the asgi server that handles HTTP and WebSockets
 - `worker`: the main worker type

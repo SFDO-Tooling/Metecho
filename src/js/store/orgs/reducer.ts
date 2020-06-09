@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { ObjectsAction } from '@/store/actions';
 import { OrgsAction } from '@/store/orgs/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
@@ -10,12 +8,14 @@ import {
   OrgTypes,
 } from '@/utils/constants';
 
-export interface Org {
+export interface MinimalOrg {
   id: string;
   task: string;
   org_type: OrgTypes;
+}
+
+export interface Org extends MinimalOrg {
   owner: string;
-  owner_sf_username: string;
   owner_gh_username: string;
   last_modified_at: string | null;
   expires_at: string | null;
@@ -25,9 +25,25 @@ export interface Org {
   url: string | null;
   unsaved_changes: Changeset;
   has_unsaved_changes: boolean;
+  total_unsaved_changes: number;
+  ignored_changes: Changeset;
+  has_ignored_changes: boolean;
+  total_ignored_changes: number;
   currently_refreshing_changes: boolean;
   currently_capturing_changes: boolean;
+  currently_refreshing_org: boolean;
+  is_created: boolean;
   delete_queued_at: string | null;
+  has_been_visited: boolean;
+  valid_target_directories: TargetDirectories;
+  last_checked_unsaved_changes_at: string | null;
+}
+
+export interface TargetDirectories {
+  source?: string[];
+  pre?: string[];
+  post?: string[];
+  config?: string[];
 }
 
 export interface Changeset {
@@ -120,8 +136,27 @@ const reducer = (
     }
     case 'SCRATCH_ORG_PROVISION':
     case 'SCRATCH_ORG_UPDATE':
-    case 'SCRATCH_ORG_DELETE_FAILED': {
-      const org = action.payload as Org;
+    case 'SCRATCH_ORG_DELETE_FAILED':
+    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
+    case 'SCRATCH_ORG_COMMIT_CHANGES':
+    case 'UPDATE_OBJECT_SUCCEEDED': {
+      let maybeOrg;
+      if (action.type === 'UPDATE_OBJECT_SUCCEEDED') {
+        const {
+          object,
+          objectType,
+        }: { object: Org; objectType?: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.ORG && object) {
+          maybeOrg = object;
+        }
+      } else {
+        maybeOrg = action.payload as Org;
+      }
+      /* istanbul ignore if */
+      if (!maybeOrg) {
+        return orgs;
+      }
+      const org = maybeOrg;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
         [ORG_TYPES.QA]: null,
@@ -175,7 +210,7 @@ const reducer = (
       const {
         objectType,
         object,
-      }: { objectType: ObjectTypes; object: Org } = action.payload;
+      }: { objectType?: ObjectTypes; object: Org } = action.payload;
       if (objectType === OBJECT_TYPES.ORG && object) {
         const taskOrgs = orgs[object.task] || {
           [ORG_TYPES.DEV]: null,
@@ -194,18 +229,24 @@ const reducer = (
       }
       return orgs;
     }
-    case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
-    case 'SCRATCH_ORG_COMMIT_CHANGES': {
+    case 'SCRATCH_ORG_REFRESH_REQUESTED':
+    case 'SCRATCH_ORG_REFRESH_REJECTED': {
       const org = action.payload;
       const taskOrgs = orgs[org.task] || {
         [ORG_TYPES.DEV]: null,
         [ORG_TYPES.QA]: null,
       };
+      const existingOrg = taskOrgs[org.org_type];
       return {
         ...orgs,
         [org.task]: {
           ...taskOrgs,
-          [org.org_type]: org,
+          [org.org_type]: {
+            ...existingOrg,
+            ...org,
+            currently_refreshing_org:
+              action.type === 'SCRATCH_ORG_REFRESH_REQUESTED',
+          },
         },
       };
     }

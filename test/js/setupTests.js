@@ -14,11 +14,11 @@ beforeAll(() => {
   window.api_urls = {
     account_logout: () => '/accounts/logout/',
     github_login: () => '/accounts/github/login/',
-    salesforce_custom_login: () => '/accounts/salesforce-custom/login/',
-    salesforce_production_login: () => '/accounts/salesforce-production/login/',
+    salesforce_login: () => '/accounts/salesforce/login/',
     user: () => '/api/user/',
     user_refresh: () => '/api/user/refresh/',
     user_disconnect_sf: () => '/api/user/disconnect/',
+    agree_to_tos: () => '/api/agree_to_tos/',
     repository_list: () => '/api/repositories/',
     repository_detail: (slug) => `/api/repositories/${slug}/`,
     repository_refresh_github_users: (id) =>
@@ -28,10 +28,16 @@ beforeAll(() => {
     scratch_org_detail: (id) => `/api/scratch_orgs/${id}/`,
     scratch_org_commit: (id) => `/api/scratch_orgs/${id}/commit/`,
     scratch_org_redirect: (id) => `/api/scratch_orgs/${id}/redirect/`,
+    scratch_org_refresh: (id) => `/api/scratch_orgs/${id}/refresh/`,
     task_detail: (id) => `/api/tasks/${id}/`,
     task_create_pr: (id) => `/api/tasks/${id}/create_pr/`,
+    task_review: (id) => `/api/tasks/${id}/review/`,
     project_detail: (id) => `/api/projects/${id}/`,
     project_create_pr: (id) => `/api/projects/${id}/create_pr/`,
+    project_refresh_org_config_names: (id) =>
+      `/api/projects/${id}/refresh_org_config_names/`,
+    repository_feature_branches: (id) =>
+      `/api/repositories/${id}/feature_branches/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();

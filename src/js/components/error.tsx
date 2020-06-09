@@ -16,7 +16,7 @@ class ErrorBoundary extends Component<Props, { hasError: boolean }> {
   }
 
   /* istanbul ignore next */
-  componentDidCatch(error: Error, info: {}) {
+  componentDidCatch(error: Error, info: { [key: string]: any }) {
     this.setState({ hasError: true });
     logError(error, info);
   }

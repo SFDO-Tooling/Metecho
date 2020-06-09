@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { AnyAction } from 'redux';
 
+import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { createObject } from '@/store/actions';
+import { createObject, updateObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
 import { ApiError } from '@/utils/api';
 import { ObjectTypes } from '@/utils/constants';
 
-import useIsMounted from './useIsMounted';
+export interface UseFormProps {
+  inputs: { [key: string]: any };
+  errors: { [key: string]: string };
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setInputs: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  resetForm: () => void;
+}
 
 export default ({
   fields,
@@ -17,67 +26,104 @@ export default ({
   onSuccess = () => {},
   onError = () => {},
   shouldSubscribeToObject = true,
+  update = false,
 }: {
   fields: { [key: string]: any };
-  objectType: ObjectTypes;
+  objectType?: ObjectTypes;
   url?: string;
   additionalData?: { [key: string]: any };
   onSuccess?: (...args: any[]) => any;
   onError?: (...args: any[]) => any;
   shouldSubscribeToObject?: boolean | ((...args: any[]) => boolean);
+  update?: boolean;
 }) => {
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
-  const [inputs, setInputs] = useState<{ [key: string]: any }>(fields);
+  const [inputs, setInputs] = useState<{ [key: string]: any }>({ ...fields });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const resetForm = () => {
-    setInputs(fields);
+    setInputs({ ...fields });
     setErrors({});
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputs({ ...inputs, [e.target.name]: e.target.value });
+    let value: boolean | string = e.target.value;
+    if (e.target.type === 'checkbox') {
+      value = e.target.checked;
+    }
+    setInputs({ ...inputs, [e.target.name]: value });
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSuccess = (...args: any[]) => {
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      resetForm();
+    }
+    onSuccess(...args);
+  };
+  const catchError = (err: ApiError) => {
+    // We only consider `400` responses as valid form errors...
+    // Non-400 errors are displayed in a global error message.
+    /* istanbul ignore if */
+    if (err.response?.status !== 400) {
+      throw err;
+    }
+    const allErrors = typeof err?.body === 'object' ? err.body : {};
+    const fieldErrors: typeof errors = {};
+    for (const field of Object.keys(allErrors)) {
+      if (Object.keys(fields).includes(field) && allErrors[field]?.length) {
+        fieldErrors[field] = allErrors[field].join(', ');
+      }
+    }
+    onError(err, fieldErrors);
+    /* istanbul ignore else */
+    const hasFormErrors = Boolean(Object.keys(fieldErrors).length);
+    if (isMounted.current && hasFormErrors) {
+      setErrors(fieldErrors);
+    } else {
+      // If no inline errors to show, fallback to default global error toast
+      dispatch(addError(err.message));
+    }
+  };
+  const handleSubmit = (
+    e: React.FormEvent<HTMLFormElement>,
+    action?: (...args: any[]) => Promise<AnyAction>,
+    success?: () => void,
+  ) => {
     e.preventDefault();
     setErrors({});
-    dispatch(
+    if (action) {
+      return action()
+        .then(success || handleSuccess)
+        .catch(catchError);
+    }
+    if (update) {
+      return dispatch(
+        updateObject({
+          objectType,
+          url,
+          data: {
+            ...additionalData,
+            ...inputs,
+          },
+          hasForm: true,
+        }),
+      )
+        .then(handleSuccess)
+        .catch(catchError);
+    }
+    return dispatch(
       createObject({
         objectType,
         url,
         data: {
-          ...inputs,
           ...additionalData,
+          ...inputs,
         },
         hasForm: true,
         shouldSubscribeToObject,
       }),
     )
-      .then((...args: any[]) => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          resetForm();
-        }
-        onSuccess(...args);
-      })
-      .catch((err: ApiError) => {
-        onError(err);
-        const allErrors = typeof err?.body === 'object' ? err.body : {};
-        const fieldErrors: typeof errors = {};
-        for (const field of Object.keys(allErrors)) {
-          if (Object.keys(fields).includes(field) && allErrors[field]?.length) {
-            fieldErrors[field] = allErrors[field].join(', ');
-          }
-        }
-        /* istanbul ignore else */
-        if (isMounted.current && Object.keys(fieldErrors).length) {
-          setErrors(fieldErrors);
-        } else if (err.response?.status === 422) {
-          // If no inline errors to show, fallback to default global error toast
-          dispatch(addError(err.message));
-        } else {
-          throw err;
-        }
-      });
+      .then(handleSuccess)
+      .catch(catchError);
   };
 
   return {

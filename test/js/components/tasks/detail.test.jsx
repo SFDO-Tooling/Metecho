@@ -39,7 +39,10 @@ const defaultState = {
         slug: 'repository-1',
         old_slugs: [],
         description: 'This is a test repository.',
+        description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
+        repo_owner: 'test',
+        repo_name: 'test-repo',
         github_users: [
           {
             id: 'user-1',
@@ -60,6 +63,9 @@ const defaultState = {
           name: 'Project 1',
           repository: 'r1',
           description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
+          branch_url: 'https://github.com/test/test-repo/tree/branch-name',
+          branch_name: 'branch-name',
           old_slugs: [],
           github_users: [
             {
@@ -82,7 +88,10 @@ const defaultState = {
         slug: 'task-1',
         old_slugs: ['old-slug'],
         project: 'project1',
+        branch_url: 'https://github.com/test/test-repo/tree/project__task',
+        branch_name: 'project__task',
         description: 'Task Description',
+        description_rendered: '<p>Task Description</p>',
         has_unmerged_commits: false,
         commits: [],
         assigned_dev: {
@@ -104,9 +113,20 @@ const defaultState = {
         latest_commit: '617a51',
         latest_commit_url: '/test/commit/url/',
         latest_commit_at: '2019-08-16T12:58:53.721Z',
+        last_checked_unsaved_changes_at: new Date().toISOString(),
         url: '/test/org/url/',
+        is_created: true,
         unsaved_changes: { Foo: ['Bar'] },
         has_unsaved_changes: true,
+        total_unsaved_changes: 1,
+        ignored_changes: {},
+        has_ignored_changes: false,
+        total_ignored_changes: 0,
+        valid_target_directories: {
+          source: ['src'],
+          post: ['foo/bar', 'buz/baz'],
+        },
+        has_been_visited: true,
       },
       QA: null,
     },
@@ -141,7 +161,7 @@ describe('<TaskDetail/>', () => {
 
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByText('Task Description')).toBeVisible();
-    expect(queryByText('View Branch')).toBeNull();
+    expect(queryByText('View Branch')).toBeVisible();
     expect(getByTitle('View Org')).toBeVisible();
     expect(getByText('Task Team & Orgs')).toBeVisible();
   });
@@ -263,10 +283,10 @@ describe('<TaskDetail/>', () => {
     });
   });
 
-  describe('"Capture Task Changes" click', () => {
+  describe('"Retrieve Changes from Dev Org" click', () => {
     test('refreshes and then opens modal', () => {
       const { getByText } = setup();
-      fireEvent.click(getByText('Capture Task Changes'));
+      fireEvent.click(getByText('Retrieve Changes from Dev Org'));
 
       expect(refetchOrg).toHaveBeenCalledTimes(1);
 
@@ -274,11 +294,42 @@ describe('<TaskDetail/>', () => {
 
       expect(refetchArgs.id).toEqual('org-id');
 
-      expect(getByText('Select the changes to capture')).toBeVisible();
+      expect(
+        getByText('Select the location to retrieve changes'),
+      ).toBeVisible();
+    });
+
+    describe('org has been checked within past 5 minutes', () => {
+      let ORG_RECHECK_MINUTES;
+
+      beforeAll(() => {
+        ORG_RECHECK_MINUTES = window.GLOBALS.ORG_RECHECK_MINUTES;
+        window.GLOBALS.ORG_RECHECK_MINUTES = 5;
+      });
+
+      afterAll(() => {
+        window.GLOBALS.ORG_RECHECK_MINUTES = ORG_RECHECK_MINUTES;
+      });
+
+      test('just opens modal', () => {
+        const { getByText, queryByText } = setup();
+        fireEvent.click(getByText('Retrieve Changes from Dev Org'));
+
+        expect(refetchOrg).not.toHaveBeenCalled();
+        expect(
+          getByText('Select the location to retrieve changes'),
+        ).toBeVisible();
+
+        fireEvent.click(getByText('Close'));
+
+        expect(
+          queryByText('Select the location to retrieve changes'),
+        ).toBeNull();
+      });
     });
   });
 
-  describe('commiting changes', () => {
+  describe('retrieving changes', () => {
     test('renders loading button', () => {
       const { getAllByText } = setup({
         initialState: {
@@ -296,12 +347,12 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(getAllByText('Capturing Selected Changes…').length).toEqual(2);
+      expect(getAllByText('Retrieving Selected Changes…')).toHaveLength(2);
     });
   });
 
   describe('pr is closed', () => {
-    test('renders "Submit Task for Review" button', () => {
+    test('renders "Submit Task for Testing" button', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
@@ -319,12 +370,12 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(getByText('Submit Task for Review')).toBeVisible();
+      expect(getByText('Submit Task for Testing')).toBeVisible();
     });
   });
 
   describe('pr is open', () => {
-    test('does not render "Submit Task for Review" button', () => {
+    test('does not render "Submit Task for Testing" button', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
@@ -336,17 +387,18 @@ describe('<TaskDetail/>', () => {
                 has_unmerged_commits: true,
                 pr_url: 'my-pr-url',
                 pr_is_open: true,
+                review_valid: true,
               },
             ],
           },
         },
       });
 
-      expect(queryByText('Submit Task for Review')).toBeNull();
+      expect(queryByText('Submit Task for Testing')).toBeNull();
     });
   });
 
-  describe('"Submit Task for Review" click', () => {
+  describe('"Submit Task for Testing" click', () => {
     test('opens modal', () => {
       const { getByText } = setup({
         initialState: {
@@ -362,13 +414,13 @@ describe('<TaskDetail/>', () => {
           },
         },
       });
-      fireEvent.click(getByText('Submit Task for Review'));
+      fireEvent.click(getByText('Submit Task for Testing'));
 
-      expect(getByText('Submit this task for review')).toBeVisible();
+      expect(getByText('Submit this task for testing')).toBeVisible();
     });
   });
 
-  describe('submitting task for review', () => {
+  describe('submitting task for testing', () => {
     test('renders loading button', () => {
       const { getByText } = setup({
         initialState: {
@@ -386,7 +438,7 @@ describe('<TaskDetail/>', () => {
         },
       });
 
-      expect(getByText('Submitting Task for Review…')).toBeVisible();
+      expect(getByText('Submitting Task for Testing…')).toBeVisible();
     });
   });
 
@@ -410,13 +462,39 @@ describe('<TaskDetail/>', () => {
             ...defaultState.orgs.task1,
             Dev: {
               ...defaultState.orgs.task1.Dev,
-              has_unsaved_changes: false,
+              total_unsaved_changes: 0,
             },
           },
         },
       },
     });
 
-    expect(getByText('Submitting Task for Review…')).toBeVisible();
+    expect(getByText('Submitting Task for Testing…')).toBeVisible();
+  });
+
+  describe('edit task click', () => {
+    test('opens and closes modal', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Task Options'));
+      fireEvent.click(getByText('Edit Task'));
+
+      expect(getByText('Edit Task')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('Edit Task')).toBeNull();
+    });
+  });
+
+  test('opens/closed deleted modal', () => {
+    const { getByText, queryByText } = setup();
+    fireEvent.click(getByText('Task Options'));
+    fireEvent.click(getByText('Delete Task'));
+
+    expect(getByText('Confirm Deleting Task')).toBeVisible();
+
+    fireEvent.click(getByText('Cancel'));
+
+    expect(queryByText('Confirm Deleting Task')).toBeNull();
   });
 });

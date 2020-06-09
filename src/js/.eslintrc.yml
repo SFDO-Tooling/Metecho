@@ -4,23 +4,20 @@ parser: '@typescript-eslint/parser'
 parserOptions:
   sourceType: module
   ecmaFeatures:
-    impliedStrict: true
     jsx: true
   project: ./tsconfig.json
 env:
   browser: true
-  commonjs: true
   node: false
 plugins:
   - simple-import-sort
   - '@typescript-eslint'
 extends:
-  - plugin:@typescript-eslint/eslint-recommended
   - plugin:@typescript-eslint/recommended
   - prettier/@typescript-eslint
 rules:
   # TypeScript
-  '@typescript-eslint/explicit-function-return-type': 0
+  '@typescript-eslint/explicit-module-boundary-types': 0
   '@typescript-eslint/no-empty-function': 0
   '@typescript-eslint/no-explicit-any': 0
 

@@ -32,19 +32,10 @@ services:
   postgres:
     image: postgres:10.6
     environment:
-      - POSTGRES_USER=metashare
+      - POSTGRES_USER=metecho
     volumes:
       - ./postgres:/var/lib/postgresql/data:delegated
 
   # Runs the queue process:
   redis:
     image: redis:5.0
-
-  # Sets up git hooks for local development:
-  githooks:
-    build:
-      context: .
-      dockerfile: ./compose/githooks/Dockerfile
-    volumes:
-      - ./.git:/tmp/.git
-      - ./hooks:/tmp/hooks

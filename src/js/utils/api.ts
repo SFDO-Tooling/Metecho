@@ -78,8 +78,13 @@ const apiFetch = async ({
         msg = `${msg}: ${JSON.stringify(body)}`;
       }
     }
-    // If a `POST` returns `422`, suppress default error to show errors inline
-    if (!hasForm || options.method !== 'POST' || response.status !== 422) {
+    // If a `POST` or `PUT` returns `400`, suppress default error message to
+    // show errors inline
+    const suppressGlobalError =
+      hasForm &&
+      ['POST', 'PUT'].includes(options.method) &&
+      response.status === 400;
+    if (!suppressGlobalError) {
       dispatch(addError(msg));
     }
     const error: ApiError = new Error(msg);

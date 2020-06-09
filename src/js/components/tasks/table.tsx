@@ -5,6 +5,7 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import classNames from 'classnames';
 import i18n from 'i18next';
+import { sortBy } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -14,7 +15,12 @@ import {
 } from '@/components/user/githubUser';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
-import { ORG_TYPES, OrgTypes, TASK_STATUSES } from '@/utils/constants';
+import {
+  ORG_TYPES,
+  OrgTypes,
+  REVIEW_STATUSES,
+  TASK_STATUSES,
+} from '@/utils/constants';
 import routes from '@/utils/routes';
 
 type AssignUserAction = ({
@@ -45,13 +51,17 @@ const NameTableCell = ({
   repositorySlug,
   projectSlug,
   item,
+  className,
   children,
   ...props
 }: TableCellProps & {
   repositorySlug: string;
   projectSlug: string;
 }) => (
-  <DataTableCell {...props}>
+  <DataTableCell
+    {...props}
+    className={classNames(className, 'project-task-name', 'truncated-cell')}
+  >
     {repositorySlug && projectSlug && item && (
       <Link to={routes.task_detail(repositorySlug, projectSlug, item.slug)}>
         {children}
@@ -66,8 +76,12 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   if (!item) {
     return null;
   }
+  const status =
+    item.review_valid && item.status !== TASK_STATUSES.COMPLETED
+      ? item.review_status
+      : item.status;
   let displayStatus, icon;
-  switch (item.status) {
+  switch (status) {
     case TASK_STATUSES.PLANNED:
       displayStatus = i18n.t('Planned');
       icon = <ProgressRing value={0} />;
@@ -80,16 +94,26 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
       displayStatus = i18n.t('Complete');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
       break;
+    case REVIEW_STATUSES.CHANGES_REQUESTED:
+      displayStatus = i18n.t('Changes Requested');
+      icon = (
+        <ProgressRing value={60} flowDirection="fill" theme="warning" hasIcon />
+      );
+      break;
+    case REVIEW_STATUSES.APPROVED:
+      displayStatus = i18n.t('Approved');
+      icon = <ProgressRing value={80} flowDirection="fill" />;
+      break;
   }
   return (
     <DataTableCell
       {...props}
-      title={displayStatus || item.status}
-      className={classNames(className, 'project-task-status')}
+      title={displayStatus || status}
+      className={classNames(className, 'project-task-status', 'status-cell')}
     >
       {icon}
-      <span className="slds-m-left_x-small project-task-status-text">
-        {displayStatus || item.status}
+      <span className="slds-m-left_x-small status-cell-text">
+        {displayStatus || status}
       </span>
     </DataTableCell>
   );
@@ -102,6 +126,7 @@ const AssigneeTableCell = ({
   openAssignProjectUsersModal,
   assignUserAction,
   item,
+  className,
   children,
   ...props
 }: TableCellProps & {
@@ -121,7 +146,7 @@ const AssigneeTableCell = ({
   const handleEmptyMessageClick = useCallback(() => {
     closeAssignUserModal();
     openAssignProjectUsersModal();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [openAssignProjectUsersModal]);
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null) => {
       /* istanbul ignore if */
@@ -149,7 +174,7 @@ const AssigneeTableCell = ({
         assignedUser = item.assigned_dev;
         break;
       case ORG_TYPES.QA:
-        title = i18n.t('Assign Reviewer');
+        title = i18n.t('Assign Tester');
         assignedUser = item.assigned_qa;
         break;
     }
@@ -170,6 +195,7 @@ const AssigneeTableCell = ({
           selectedUser={assignedUser}
           heading={title}
           isOpen={assignUserModalOpen}
+          emptyMessageText={i18n.t('Add Project Collaborators')}
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
@@ -178,7 +204,11 @@ const AssigneeTableCell = ({
     );
   }
   return (
-    <DataTableCell {...props} title={title}>
+    <DataTableCell
+      {...props}
+      title={title}
+      className={classNames(className, 'project-task-assignee')}
+    >
       {contents}
     </DataTableCell>
   );
@@ -192,16 +222,24 @@ const TaskTable = ({
   projectUsers,
   openAssignProjectUsersModal,
   assignUserAction,
-}: Props) =>
-  tasks.length ? (
-    <DataTable items={tasks} id="project-tasks-table" noRowHover>
+}: Props) => {
+  const statusOrder = {
+    [TASK_STATUSES.IN_PROGRESS]: 1,
+    [TASK_STATUSES.PLANNED]: 2,
+    [TASK_STATUSES.COMPLETED]: 3,
+  };
+  const taskDefaultSort = sortBy(tasks, [
+    (item) => statusOrder[item.status],
+    'name',
+  ]);
+  return (
+    <DataTable items={taskDefaultSort} id="project-tasks-table" noRowHover>
       <DataTableColumn
         key="name"
         label={i18n.t('Task')}
         property="name"
         width="65%"
         primaryColumn
-        truncate
       >
         <NameTableCell
           repositorySlug={repositorySlug}
@@ -231,7 +269,7 @@ const TaskTable = ({
       </DataTableColumn>
       <DataTableColumn
         key="assigned_qa"
-        label={i18n.t('Reviewer')}
+        label={i18n.t('Tester')}
         property="assigned_qa"
         width="15%"
       >
@@ -243,6 +281,7 @@ const TaskTable = ({
         />
       </DataTableColumn>
     </DataTable>
-  ) : null;
+  );
+};
 
 export default TaskTable;

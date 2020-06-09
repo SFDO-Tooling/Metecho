@@ -1,10 +1,10 @@
-FROM oddbirds/pyjs
+FROM oddbirds/pyjs:v0.2.0
 
 ARG BUILD_ENV=development
 
 # Env setup:
 ENV PYTHONPATH /app
-ENV DATABASE_URL postgres://metashare@postgres:5432/metashare
+ENV DATABASE_URL postgres://metecho@postgres:5432/metecho
 # A sample key, not to be used for realsies:
 ENV DB_ENCRYPTION_KEY 'IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE='
 ENV DJANGO_HASHID_SALT 'sample hashid salt'

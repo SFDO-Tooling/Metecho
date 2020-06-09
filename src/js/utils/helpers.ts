@@ -1,45 +1,43 @@
 import i18n from 'i18next';
+import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
 
 import { Changeset, Org } from '@/store/orgs/reducer';
 import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
+import { TASK_STATUSES } from '@/utils/constants';
 
 export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
 
 export const getOrgStatusMsg = (org: Org) => {
-  if (org.has_unsaved_changes) {
-    const totalChanges = Object.values(org.unsaved_changes).flat().length;
-    /* istanbul ignore else */
-    if (totalChanges) {
-      const statusMsgDefault = `has ${totalChanges} uncaptured ${pluralize(
-        totalChanges,
-        'change',
-      )}`;
-      return i18n.t('orgStatusMsg', statusMsgDefault, {
-        count: totalChanges,
-      });
-    }
+  const totalChanges = org.total_unsaved_changes - org.total_ignored_changes;
+  if (totalChanges > 0) {
+    const statusMsgDefault = `${totalChanges} unretrieved ${pluralize(
+      totalChanges,
+      'change',
+    )}`;
+    return i18n.t('orgStatusMsg', statusMsgDefault, {
+      count: totalChanges,
+    });
   }
-  return i18n.t('up-to-date');
+  return i18n.t('up to date');
 };
 
-export const getOrgTotalChanges = (changes: Changeset) => {
-  const totalChanges = Object.values(changes).flat().length;
-  const changesMsgDefault = `${totalChanges} total ${pluralize(
-    totalChanges,
-    'change',
-  )}`;
-  return i18n.t('orgTotalChangesMsg', changesMsgDefault, {
-    count: totalChanges,
-  });
-};
-
-export const getOrgChildChanges = (count: number) => {
-  const msgDefault = `${count} ${pluralize(count, 'change')}`;
-  return i18n.t('orgChildChangesMsg', msgDefault, {
-    count,
-  });
+export const getOrgBehindLatestMsg = (
+  missingCommits: number,
+  titleCase?: boolean,
+) => {
+  /* istanbul ignore else */
+  if (missingCommits > 0) {
+    const msgDefault = titleCase
+      ? `${missingCommits} ${pluralize(missingCommits, 'Commit')}`
+      : `${missingCommits} ${pluralize(missingCommits, 'commit')}`;
+    const name = titleCase ? 'orgBehindTitle' : 'orgBehindMsg';
+    return i18n.t(name, msgDefault, {
+      count: missingCommits,
+    });
+  }
+  return '';
 };
 
 export const getBranchLink = (object: Task | Project) => {
@@ -56,3 +54,44 @@ export const getBranchLink = (object: Task | Project) => {
   }
   return { branchLink, branchLinkText };
 };
+
+export const getTaskCommits = (task: Task) => {
+  // Get list of commit sha/ids, newest to oldest, ending with origin commit.
+  // We consider an org out-of-date if it is not based on the first commit.
+  const taskCommits = task.commits.map((c) => c.id);
+  if (task.origin_sha) {
+    taskCommits.push(task.origin_sha);
+  }
+  return taskCommits;
+};
+
+export const getPercentage = (complete: number, total: number) =>
+  Math.floor((complete / total) * 100) || 0;
+
+export const getCompletedTasks = (tasks: Task[]) =>
+  tasks.filter((task) => task.status === TASK_STATUSES.COMPLETED);
+
+export const splitChangeset = (changes: Changeset, comparison: Changeset) => {
+  const remaining: Changeset = {};
+  const removed: Changeset = {};
+  for (const groupName of Object.keys(changes)) {
+    if (comparison[groupName]?.length) {
+      const toRemove = intersection(changes[groupName], comparison[groupName]);
+      const filtered = without(changes[groupName], ...toRemove);
+      if (filtered.length) {
+        remaining[groupName] = filtered;
+      }
+      if (toRemove.length) {
+        removed[groupName] = toRemove;
+      }
+    } else {
+      remaining[groupName] = [...changes[groupName]];
+    }
+  }
+  return { remaining, removed };
+};
+
+export const mergeChangesets = (original: Changeset, adding: Changeset) =>
+  mergeWith(cloneDeep(original), adding, (objVal, srcVal) =>
+    union(objVal, srcVal),
+  );

@@ -4,6 +4,7 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Popover from '@salesforce/design-system-react/components/popover';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
@@ -30,31 +31,17 @@ const ConnectToSalesforce = ({
     <>
       <Button
         label={i18n.t('Connect to Salesforce')}
-        className="slds-text-body_regular"
+        className="slds-text-body_regular slds-p-right_xx-small"
         variant="link"
         onClick={openConnectModal}
       />
       <Tooltip
         content={i18n.t(
-          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Review scratch org.',
+          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Test scratch org.',
         )}
-        variant="learnMore"
         position="overflowBoundaryElement"
         align="top right"
-        triggerClassName="slds-p-left_x-small"
-      >
-        <a>
-          <Icon
-            category="utility"
-            name="info"
-            assistiveText={{
-              label: i18n.t('Learn More'),
-            }}
-            size="xx-small"
-            className="slds-m-bottom_xx-small"
-          />
-        </a>
-      </Tooltip>
+      />
     </>
   );
 };
@@ -90,7 +77,7 @@ const UserInfo = ({
         setIsDisconnecting(false);
       }
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, isMounted, onDisconnect]);
   const doRefreshDevHubStatus = useCallback(() => {
     setIsRefreshing(true);
     dispatch(refreshDevHubStatus()).finally(() => {
@@ -99,14 +86,19 @@ const UserInfo = ({
         setIsRefreshing(false);
       }
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, isMounted]);
+
+  /* istanbul ignore if */
+  if (user.uses_global_devhub) {
+    return null;
+  }
 
   return (
     <>
       {(isDisconnecting || isRefreshing) && <SpinnerWrapper />}
       <ul>
         <li>
-          <strong>{i18n.t('Dev Hub')}:</strong>{' '}
+          <strong>{i18n.t('Dev Hub:')}</strong>{' '}
           {user.is_devhub_enabled ? (
             <span className="slds-text-color_success">{i18n.t('Enabled')}</span>
           ) : (
@@ -125,17 +117,17 @@ const UserInfo = ({
         </li>
         {user.sf_username && (
           <li>
-            <strong>{i18n.t('User')}:</strong> {user.sf_username}
+            <strong>{i18n.t('User:')}</strong> {user.sf_username}
           </li>
         )}
         {user.org_name && (
           <li>
-            <strong>{i18n.t('Org')}:</strong> {user.org_name}
+            <strong>{i18n.t('Org:')}</strong> {user.org_name}
           </li>
         )}
         {user.org_type && (
           <li>
-            <strong>{i18n.t('Type')}:</strong> {user.org_type}
+            <strong>{i18n.t('Type:')}</strong> {user.org_type}
           </li>
         )}
       </ul>
@@ -198,7 +190,9 @@ export const ConnectionInfoModal = ({
   const handleClose = () => {
     toggleModal(false);
   };
-  const isConnected = Boolean(user.valid_token_for || user.devhub_username);
+  const isConnected = Boolean(
+    user.valid_token_for || user.devhub_username || user.uses_global_devhub,
+  );
 
   return (
     <Modal
@@ -239,23 +233,29 @@ const UserDropdown = () => {
   const user = useSelector(selectUserState);
   const [modalOpen, setModalOpen] = useState(false);
 
-  return user ? (
+  if (!user) {
+    return null;
+  }
+
+  return (
     <>
       <Popover
         align="bottom right"
         body={
           <>
             <header
-              className="slds-border_bottom
-                slds-p-bottom_x-small
-                slds-m-bottom_x-small"
+              className={classNames({
+                'slds-border_bottom': !user.uses_global_devhub,
+                'slds-p-bottom_x-small': !user.uses_global_devhub,
+                'slds-m-bottom_x-small': !user.uses_global_devhub,
+              })}
             >
               <div className="slds-p-vertical_small slds-p-horizontal_large">
                 {user.avatar_url ? (
                   <div className="slds-is-absolute">
                     <Avatar
                       imgSrc={user.avatar_url}
-                      imgAlt={user.username}
+                      imgAlt={`${i18n.t('avatar for user')} ${user.username}`}
                       title={user.username}
                       size="small"
                     />
@@ -279,13 +279,15 @@ const UserDropdown = () => {
                 </div>
               </div>
             </header>
-            <div className="slds-p-vertical_small slds-p-horizontal_large">
-              {user.valid_token_for || user.devhub_username ? (
-                <ConnectionInfo user={user} />
-              ) : (
-                <ConnectToSalesforce toggleModal={setModalOpen} />
-              )}
-            </div>
+            {!user.uses_global_devhub && (
+              <div className="slds-p-vertical_small slds-p-horizontal_large">
+                {user.valid_token_for || user.devhub_username ? (
+                  <ConnectionInfo user={user} />
+                ) : (
+                  <ConnectToSalesforce toggleModal={setModalOpen} />
+                )}
+              </div>
+            )}
           </>
         }
         classNameBody="slds-p-horizontal_none"
@@ -297,15 +299,21 @@ const UserDropdown = () => {
           label={
             <Avatar
               imgSrc={user.avatar_url}
-              imgAlt={user.username}
+              imgAlt={`${i18n.t('avatar for user')} ${user.username}`}
               title={user.username}
             />
           }
         />
       </Popover>
-      <ConnectModal user={user} isOpen={modalOpen} toggleModal={setModalOpen} />
+      {!user.uses_global_devhub && (
+        <ConnectModal
+          user={user}
+          isOpen={modalOpen}
+          toggleModal={setModalOpen}
+        />
+      )}
     </>
-  ) : null;
+  );
 };
 
 export default UserDropdown;

@@ -1,6 +1,6 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
-  "name": "MetaShare",
+  "name": "Metecho",
   "dockerComposeFile": ["../docker-compose.yml", "./docker-compose.dev.yml"],
   "service": "web",
   "workspaceFolder": "/app",
@@ -8,6 +8,7 @@
   "extensions": [
     "bibhasdn.django-html",
     "coenraads.bracket-pair-colorizer-2",
+    "csstools.postcss",
     "dbaeumer.vscode-eslint",
     "formulahendry.auto-rename-tag",
     "lextudio.restructuredtext",
@@ -52,6 +53,9 @@
     },
     "[markdown]": {
       "editor.rulers": [80]
+    },
+    "[html]": {
+      "editor.formatOnSave": false
     },
     "[javascriptreact]": {
       "editor.rulers": [80]

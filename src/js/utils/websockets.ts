@@ -1,17 +1,20 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
+import { removeObject } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgRefreshed,
   provisionFailed,
   provisionOrg,
+  refreshError,
   updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
-import { Org } from '@/store/orgs/reducer';
+import { MinimalOrg, Org } from '@/store/orgs/reducer';
 import {
   createProjectPR,
   createProjectPRFailed,
@@ -28,6 +31,8 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   createTaskPR,
   createTaskPRFailed,
+  submitReview,
+  submitReviewFailed,
   updateTask,
 } from '@/store/tasks/actions';
 import { Task } from '@/store/tasks/reducer';
@@ -63,99 +68,169 @@ interface ReposRefreshedEvent {
 }
 interface RepoUpdatedEvent {
   type: 'REPOSITORY_UPDATE';
-  payload: Repository;
+  payload: {
+    model: Repository;
+    originating_user_id: string | null;
+  };
 }
 interface RepoUpdateErrorEvent {
   type: 'REPOSITORY_UPDATE_ERROR';
   payload: {
     message?: string;
     model: Repository;
+    originating_user_id: string | null;
   };
 }
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
-  payload: Project;
+  payload: {
+    model: Project;
+    originating_user_id: string | null;
+  };
 }
 interface ProjectCreatePREvent {
   type: 'PROJECT_CREATE_PR';
-  payload: Project;
+  payload: {
+    model: Project;
+    originating_user_id: string | null;
+  };
 }
 interface ProjectCreatePRFailedEvent {
   type: 'PROJECT_CREATE_PR_FAILED';
   payload: {
     message?: string;
     model: Project;
+    originating_user_id: string | null;
   };
 }
 interface TaskUpdatedEvent {
   type: 'TASK_UPDATE';
-  payload: Task;
+  payload: {
+    model: Task;
+    originating_user_id: string | null;
+  };
 }
 interface TaskCreatePREvent {
   type: 'TASK_CREATE_PR';
-  payload: Task;
+  payload: {
+    model: Task;
+    originating_user_id: string | null;
+  };
 }
 interface TaskCreatePRFailedEvent {
   type: 'TASK_CREATE_PR_FAILED';
   payload: {
     message?: string;
     model: Task;
+    originating_user_id: string | null;
+  };
+}
+interface TaskSubmitReviewEvent {
+  type: 'TASK_SUBMIT_REVIEW';
+  payload: {
+    model: Task;
+    originating_user_id: string | null;
+  };
+}
+interface TaskSubmitReviewFailedEvent {
+  type: 'TASK_SUBMIT_REVIEW_FAILED';
+  payload: {
+    message?: string;
+    model: Task;
+    originating_user_id: string | null;
   };
 }
 interface OrgProvisionedEvent {
   type: 'SCRATCH_ORG_PROVISION';
-  payload: Org;
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
 }
 interface OrgProvisionFailedEvent {
   type: 'SCRATCH_ORG_PROVISION_FAILED';
   payload: {
     message?: string;
-    model: Org;
+    model: Org | MinimalOrg;
+    originating_user_id: string | null;
   };
 }
 interface OrgUpdatedEvent {
   type: 'SCRATCH_ORG_UPDATE';
-  payload: Org;
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
 }
 interface OrgUpdateFailedEvent {
   type: 'SCRATCH_ORG_FETCH_CHANGES_FAILED';
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
   };
 }
 interface OrgDeletedEvent {
   type: 'SCRATCH_ORG_DELETE';
-  payload: Org;
+  payload: {
+    model: Org | MinimalOrg;
+    originating_user_id: string | null;
+  };
 }
 interface OrgDeleteFailedEvent {
   type: 'SCRATCH_ORG_DELETE_FAILED';
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
   };
 }
 interface OrgRemovedEvent {
   type: 'SCRATCH_ORG_REMOVE';
   payload: {
     message?: string;
+    model: Org | MinimalOrg;
+    originating_user_id: string | null;
+  };
+}
+interface OrgRefreshedEvent {
+  type: 'SCRATCH_ORG_REFRESH';
+  payload: {
     model: Org;
+    originating_user_id: string | null;
+  };
+}
+interface OrgRefreshFailedEvent {
+  type: 'SCRATCH_ORG_REFRESH_FAILED';
+  payload: {
+    message?: string;
+    model: Org | MinimalOrg;
+    originating_user_id: string | null;
   };
 }
 interface CommitSucceededEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES';
-  payload: Org;
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
 }
 interface CommitFailedEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED';
   payload: {
     message?: string;
     model: Org;
+    originating_user_id: string | null;
+  };
+}
+interface SoftDeletedEvent {
+  type: 'SOFT_DELETE';
+  payload: {
+    model: Project | Task;
+    originating_user_id: null;
   };
 }
 type ModelEvent =
-  | ErrorEvent
-  | ReposRefreshedEvent
   | RepoUpdatedEvent
   | RepoUpdateErrorEvent
   | ProjectUpdatedEvent
@@ -164,6 +239,8 @@ type ModelEvent =
   | TaskUpdatedEvent
   | TaskCreatePREvent
   | TaskCreatePRFailedEvent
+  | TaskSubmitReviewEvent
+  | TaskSubmitReviewFailedEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
@@ -171,12 +248,21 @@ type ModelEvent =
   | OrgDeletedEvent
   | OrgDeleteFailedEvent
   | OrgRemovedEvent
+  | OrgRefreshedEvent
+  | OrgRefreshFailedEvent
   | CommitSucceededEvent
-  | CommitFailedEvent;
-type EventType = SubscriptionEvent | ModelEvent;
+  | CommitFailedEvent
+  | SoftDeletedEvent;
+type EventType =
+  | SubscriptionEvent
+  | ModelEvent
+  | ErrorEvent
+  | ReposRefreshedEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;
+
+const hasModel = (event: ModelEvent) => Boolean(event?.payload?.model);
 
 export const getAction = (event: EventType) => {
   if (!event || isSubscriptionEvent(event)) {
@@ -185,43 +271,50 @@ export const getAction = (event: EventType) => {
   switch (event.type) {
     case 'USER_REPOS_REFRESH':
       return reposRefreshed();
-    case 'PROJECT_UPDATE':
-      return updateProject(event.payload);
-    case 'PROJECT_CREATE_PR':
-      return createProjectPR(event.payload);
-    case 'PROJECT_CREATE_PR_FAILED':
-      return createProjectPRFailed(event.payload);
     case 'REPOSITORY_UPDATE':
-      return updateRepo(event.payload);
+      return hasModel(event) && updateRepo(event.payload.model);
     case 'REPOSITORY_UPDATE_ERROR':
-      return repoError(event.payload);
+      return hasModel(event) && repoError(event.payload);
+    case 'PROJECT_UPDATE':
+      return hasModel(event) && updateProject(event.payload.model);
+    case 'PROJECT_CREATE_PR':
+      return hasModel(event) && createProjectPR(event.payload);
+    case 'PROJECT_CREATE_PR_FAILED':
+      return hasModel(event) && createProjectPRFailed(event.payload);
     case 'TASK_UPDATE':
-      return updateTask(event.payload);
+      return hasModel(event) && updateTask(event.payload.model);
     case 'TASK_CREATE_PR':
-      return createTaskPR(event.payload);
+      return hasModel(event) && createTaskPR(event.payload);
     case 'TASK_CREATE_PR_FAILED':
-      return createTaskPRFailed(event.payload);
+      return hasModel(event) && createTaskPRFailed(event.payload);
+    case 'TASK_SUBMIT_REVIEW':
+      return hasModel(event) && submitReview(event.payload);
+    case 'TASK_SUBMIT_REVIEW_FAILED':
+      return hasModel(event) && submitReviewFailed(event.payload);
     case 'SCRATCH_ORG_PROVISION':
-      return provisionOrg(event.payload);
+      return hasModel(event) && provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':
-      return provisionFailed(event.payload);
+      return hasModel(event) && provisionFailed(event.payload);
     case 'SCRATCH_ORG_UPDATE':
-      return updateOrg(event.payload);
+      return hasModel(event) && updateOrg(event.payload.model);
     case 'SCRATCH_ORG_FETCH_CHANGES_FAILED':
-      return updateFailed(event.payload);
+      return hasModel(event) && updateFailed(event.payload);
     case 'SCRATCH_ORG_DELETE':
-      return deleteOrg({ org: event.payload });
+      return hasModel(event) && deleteOrg(event.payload);
     case 'SCRATCH_ORG_REMOVE':
-      return deleteOrg({
-        org: event.payload.model,
-        message: event.payload.message,
-      });
+      return hasModel(event) && deleteOrg(event.payload);
     case 'SCRATCH_ORG_DELETE_FAILED':
-      return deleteFailed(event.payload);
+      return hasModel(event) && deleteFailed(event.payload);
+    case 'SCRATCH_ORG_REFRESH':
+      return hasModel(event) && orgRefreshed(event.payload);
+    case 'SCRATCH_ORG_REFRESH_FAILED':
+      return hasModel(event) && refreshError(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES':
-      return commitSucceeded(event.payload);
+      return hasModel(event) && commitSucceeded(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
-      return commitFailed(event.payload);
+      return hasModel(event) && commitFailed(event.payload);
+    case 'SOFT_DELETE':
+      return hasModel(event) && removeObject(event.payload.model);
   }
   return null;
 };
@@ -319,8 +412,8 @@ export const createSocket = ({
     },
   });
 
-  const subscribe = (payload: Subscription) => {
-    payload = { ...payload, action: WEBSOCKET_ACTIONS.SUBSCRIBE };
+  const subscribe = (data: Subscription) => {
+    const payload = { ...data, action: WEBSOCKET_ACTIONS.SUBSCRIBE };
     if (open) {
       log('[WebSocket] subscribing to:', payload);
       socket.json(payload);
@@ -329,8 +422,8 @@ export const createSocket = ({
     }
   };
 
-  const unsubscribe = (payload: Subscription) => {
-    payload = { ...payload, action: WEBSOCKET_ACTIONS.UNSUBSCRIBE };
+  const unsubscribe = (data: Subscription) => {
+    const payload = { ...data, action: WEBSOCKET_ACTIONS.UNSUBSCRIBE };
     if (open) {
       log('[WebSocket] unsubscribing from:', payload);
       socket.json(payload);

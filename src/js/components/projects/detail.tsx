@@ -2,34 +2,47 @@ import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
+import ConfirmRemoveUserModal from '@/components/projects/confirmRemoveUserModal';
+import ProjectStatusPath from '@/components/projects/path';
+import ProjectProgress from '@/components/projects/progress';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
 import {
+  DeleteModal,
   DetailPageLayout,
+  EditModal,
   ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
+  PageOptions,
   SpinnerWrapper,
+  SubmitModal,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
-import SubmitModal from '@/components/utils/submitModal';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
 import { refreshGitHubUsers } from '@/store/repositories/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
-import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
-import { getBranchLink } from '@/utils/helpers';
+import { getUrlParam, removeUrlParam } from '@/utils/api';
+import {
+  OBJECT_TYPES,
+  ORG_TYPES,
+  OrgTypes,
+  PROJECT_STATUSES,
+  SHOW_PROJECT_COLLABORATORS,
+} from '@/utils/constants';
+import { getBranchLink, getCompletedTasks } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
@@ -38,15 +51,78 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
   const { tasks } = useFetchTasksIfMissing(project, props);
 
-  // "Assign users to project" modal related:
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
-  const openAssignUsersModal = () => {
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  // "Assign users to project" modal related:
+  const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
-  };
-  const closeAssignUsersModal = () => {
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+  }, []);
+  const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
-  };
-  const setProjectUsers = useCallback(
+  }, []);
+
+  // "Confirm remove user from project" modal related:
+  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
+    GitHubUser[] | null
+  >(null);
+  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
+    GitHubUser[] | null
+  >(null);
+  const closeConfirmRemoveUsersModal = useCallback(() => {
+    setWaitingToUpdateUsers(null);
+    setConfirmRemoveUsers(null);
+  }, []);
+
+  // Auto-open the assign-users modal if `SHOW_PROJECT_COLLABORATORS` param
+  const { history } = props;
+  useEffect(() => {
+    const showCollaborators = getUrlParam(SHOW_PROJECT_COLLABORATORS);
+    if (showCollaborators === 'true') {
+      // Remove query-string from URL
+      history.replace({ search: removeUrlParam(SHOW_PROJECT_COLLABORATORS) });
+      // Show collaborators modal
+      openAssignUsersModal();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // If the project slug changes, make sure EditProject modal is closed
+  useEffect(() => {
+    if (projectSlug && project && projectSlug !== project.slug) {
+      setEditModalOpen(false);
+    }
+  }, [project, projectSlug]);
+
+  const usersAssignedToTasks = new Set<string>();
+  (tasks || []).forEach((task) => {
+    if (task.assigned_dev) {
+      usersAssignedToTasks.add(task.assigned_dev.login);
+    }
+    if (task.assigned_qa) {
+      usersAssignedToTasks.add(task.assigned_qa.login);
+    }
+  });
+
+  const getRemovedUsers = useCallback(
+    (users: GitHubUser[]) => {
+      /* istanbul ignore if */
+      if (!project) {
+        return [];
+      }
+      return project.github_users.filter(
+        (oldUser) =>
+          usersAssignedToTasks.has(oldUser.login) &&
+          !users.find((user) => user.id === oldUser.id),
+      );
+    },
+    [project, usersAssignedToTasks],
+  );
+  const updateProjectUsers = useCallback(
     (users: GitHubUser[]) => {
       /* istanbul ignore if */
       if (!project) {
@@ -57,14 +133,32 @@ const ProjectDetail = (props: RouteComponentProps) => {
           objectType: OBJECT_TYPES.PROJECT,
           data: {
             ...project,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            github_users: users,
+            github_users: users.sort((a, b) =>
+              /* istanbul ignore next */
+              a.login.toLowerCase() > b.login.toLowerCase() ? 1 : -1,
+            ),
           },
         }),
       );
-      setAssignUsersModalOpen(false);
     },
     [project, dispatch],
+  );
+  const setProjectUsers = useCallback(
+    (users: GitHubUser[]) => {
+      const removedUsers = getRemovedUsers(users);
+      if (removedUsers.length) {
+        setWaitingToUpdateUsers(users);
+        setConfirmRemoveUsers(removedUsers);
+        setAssignUsersModalOpen(false);
+        setSubmitModalOpen(false);
+        setEditModalOpen(false);
+        setDeleteModalOpen(false);
+      } else {
+        updateProjectUsers(users);
+      }
+      setAssignUsersModalOpen(false);
+    },
+    [updateProjectUsers, getRemovedUsers],
   );
   const removeProjectUser = useCallback(
     (user: GitHubUser) => {
@@ -75,18 +169,19 @@ const ProjectDetail = (props: RouteComponentProps) => {
       const users = project.github_users.filter(
         (possibleUser) => user.id !== possibleUser.id,
       );
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.PROJECT,
-          data: {
-            ...project,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            github_users: users,
-          },
-        }),
-      );
+      const removedUsers = getRemovedUsers(users);
+      if (removedUsers.length) {
+        setWaitingToUpdateUsers(users);
+        setConfirmRemoveUsers(removedUsers);
+        setAssignUsersModalOpen(false);
+        setSubmitModalOpen(false);
+        setEditModalOpen(false);
+        setDeleteModalOpen(false);
+      } else {
+        updateProjectUsers(users);
+      }
     },
-    [project, dispatch],
+    [project, updateProjectUsers, getRemovedUsers],
   );
   const doRefreshGitHubUsers = useCallback(() => {
     /* istanbul ignore if */
@@ -94,7 +189,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
       return;
     }
     dispatch(refreshGitHubUsers(repository.id));
-  }, [repository, dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [repository, dispatch]);
 
   // "Assign user to task" modal related:
   const assignUser = useCallback(
@@ -119,18 +214,43 @@ const ProjectDetail = (props: RouteComponentProps) => {
         }),
       );
     },
-    [], // eslint-disable-line react-hooks/exhaustive-deps
+    [dispatch],
   );
 
   // "Submit" modal related:
-  const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setAssignUsersModalOpen(false);
   };
   const currentlySubmitting = Boolean(project?.currently_creating_pr);
   const readyToSubmit = Boolean(
-    project?.has_unmerged_commits && !project?.pr_is_open,
+    project?.has_unmerged_commits &&
+      !project?.pr_is_open &&
+      project?.status !== PROJECT_STATUSES.MERGED,
   );
+
+  // "edit" modal related:
+  const openEditModal = () => {
+    setEditModalOpen(true);
+    setDeleteModalOpen(false);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
+  };
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+  };
+  // "delete" modal related:
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
+  };
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+  };
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -165,15 +285,21 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  // Progress Bar:
+  const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
+  const tasksTotal = tasks?.length || 0;
+  const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
+
+  // "Submit Project for Review on GitHub" button:
   let submitButton: React.ReactNode = null;
   if (readyToSubmit) {
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
-        label={i18n.t('Submitting Project for Review…')}
+        label={i18n.t('Submitting Project for Review on GitHub…')}
         variant="inverse"
       />
     ) : (
-      i18n.t('Submit Project for Review')
+      i18n.t('Submit Project for Review on GitHub')
     );
     submitButton = (
       <Button
@@ -186,18 +312,24 @@ const ProjectDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const handlePageOptionSelect = (selection: 'edit' | 'delete') => {
+    switch (selection) {
+      case 'edit':
+        openEditModal();
+        break;
+      case 'delete':
+        openDeleteModal();
+        break;
+    }
+  };
   const { branchLink, branchLinkText } = getBranchLink(project);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Button
-        iconCategory="utility"
-        iconName="delete"
-        iconPosition="left"
-        label={i18n.t('Delete Project')}
-        variant="text-destructive"
-        disabled
+      <PageOptions
+        modelType={OBJECT_TYPES.PROJECT}
+        handleOptionSelect={handlePageOptionSelect}
       />
-      {branchLink ? (
+      {branchLink && (
         <ExternalLink
           url={branchLink}
           showButtonIcon
@@ -205,22 +337,34 @@ const ProjectDetail = (props: RouteComponentProps) => {
         >
           {branchLinkText}
         </ExternalLink>
-      ) : null}
+      )}
     </PageHeaderControl>
   );
 
+  const repoUrl = routes.repository_detail(repository.slug);
+  let headerUrl, headerUrlText;
+  /* istanbul ignore else */
+  if (project.branch_url && project.branch_name) {
+    headerUrl = project.branch_url;
+    headerUrlText = project.branch_name;
+  } else {
+    headerUrl = repository.repo_url;
+    headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
+  }
+
   return (
     <DocumentTitle
-      title={`${project.name} | ${repository.name} | ${i18n.t('MetaShare')}`}
+      title={`${project.name} | ${repository.name} | ${i18n.t('Metecho')}`}
     >
       <DetailPageLayout
         title={project.name}
-        description={project.description}
-        repoUrl={repository.repo_url}
+        description={project.description_rendered}
+        headerUrl={headerUrl}
+        headerUrlText={headerUrlText}
         breadcrumb={[
           {
             name: repository.name,
-            url: routes.repository_detail(repository.slug),
+            url: repoUrl,
           },
           { name: project.name },
         ]}
@@ -249,6 +393,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
               isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
               refreshUsers={doRefreshGitHubUsers}
             />
+            <ConfirmRemoveUserModal
+              confirmRemoveUsers={confirmRemoveUsers}
+              waitingToUpdateUsers={waitingToUpdateUsers}
+              handleClose={closeConfirmRemoveUsersModal}
+              handleUpdateUsers={updateProjectUsers}
+            />
             <UserCards
               users={project.github_users}
               removeUser={removeProjectUser}
@@ -256,11 +406,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
           </>
         }
       >
+        <ProjectStatusPath
+          status={project.status}
+          prIsOpen={project.pr_is_open}
+        />
         {submitButton}
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {tasks.length ? (
+              {tasks.length || project.status === PROJECT_STATUSES.MERGED ? (
                 <>
                   {i18n.t('Tasks for')} {project.name}
                 </>
@@ -270,15 +424,22 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 </>
               )}
             </h2>
-            <TaskForm project={project} startOpen={!tasks.length} />
-            <TaskTable
-              repositorySlug={repository.slug}
-              projectSlug={project.slug}
-              tasks={tasks}
-              projectUsers={project.github_users}
-              openAssignProjectUsersModal={openAssignUsersModal}
-              assignUserAction={assignUser}
-            />
+            {project.status !== PROJECT_STATUSES.MERGED && (
+              <TaskForm project={project} startOpen={!tasks.length} />
+            )}
+            {tasks.length ? (
+              <>
+                <ProjectProgress range={projectProgress} />
+                <TaskTable
+                  repositorySlug={repository.slug}
+                  projectSlug={project.slug}
+                  tasks={tasks}
+                  projectUsers={project.github_users}
+                  openAssignProjectUsersModal={openAssignUsersModal}
+                  assignUserAction={assignUser}
+                />
+              </>
+            ) : null}
           </>
         ) : (
           // Fetching tasks from API
@@ -289,11 +450,24 @@ const ProjectDetail = (props: RouteComponentProps) => {
             instanceId={project.id}
             instanceName={project.name}
             instanceDiffUrl={project.branch_diff_url}
-            instanceType="project"
+            instanceType={OBJECT_TYPES.PROJECT}
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
           />
         )}
+        <EditModal
+          model={project}
+          modelType={OBJECT_TYPES.PROJECT}
+          isOpen={editModalOpen}
+          handleClose={closeEditModal}
+        />
+        <DeleteModal
+          model={project}
+          modelType={OBJECT_TYPES.PROJECT}
+          isOpen={deleteModalOpen}
+          redirect={repoUrl}
+          handleClose={closeDeleteModal}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );

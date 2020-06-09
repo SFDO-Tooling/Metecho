@@ -1,17 +1,15 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProjectForm from '@/components/projects/createForm';
-import ProjectListItem from '@/components/projects/listItem';
+import ProjectTable from '@/components/projects/table';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
-  ExternalLink,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
   SpinnerWrapper,
@@ -21,6 +19,8 @@ import {
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { fetchObjects } from '@/store/actions';
+import { User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
@@ -30,6 +30,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { projects } = useFetchProjectsIfMissing(repository, props);
+  const user = useSelector(selectUserState) as User;
 
   const loadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -74,27 +75,15 @@ const RepositoryDetail = (props: RouteComponentProps) => {
     }
   };
 
-  const sidebarContent = (
-    <ExternalLink url={repository.repo_url}>
-      {i18n.t('GitHub Repo')}
-      <Icon
-        category="utility"
-        name="new_window"
-        size="xx-small"
-        className="slds-m-bottom_xx-small"
-        containerClassName="slds-m-left_xx-small slds-current-color"
-      />
-    </ExternalLink>
-  );
-
   return (
-    <DocumentTitle title={`${repository.name} | ${i18n.t('MetaShare')}`}>
+    <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
         title={repository.name}
-        description={repository.description}
-        repoUrl={repository.repo_url}
+        description={repository.description_rendered}
+        headerUrl={repository.repo_url}
+        headerUrlText={`${repository.repo_owner}/${repository.repo_name}`}
         breadcrumb={[{ name: repository.name }]}
-        sidebar={sidebarContent}
+        image={repository.repo_image_url}
       >
         {!projects || !projects.fetched ? (
           // Fetching projects from API
@@ -113,20 +102,16 @@ const RepositoryDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             <ProjectForm
+              user={user}
               repository={repository}
-              startOpen={!projects.projects.length}
+              hasProjects={projects.projects.length > 0}
             />
             {Boolean(projects.projects.length) && (
               <>
-                <ul className="slds-has-dividers_bottom">
-                  {projects.projects.map((project) => (
-                    <ProjectListItem
-                      key={project.id}
-                      project={project}
-                      repository={repository}
-                    />
-                  ))}
-                </ul>
+                <ProjectTable
+                  projects={projects.projects}
+                  repositorySlug={repository.slug}
+                />
                 {projects.next ? (
                   <div className="slds-m-top_large">
                     <Button

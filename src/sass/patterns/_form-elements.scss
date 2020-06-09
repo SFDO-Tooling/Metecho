@@ -1,39 +1,72 @@
 // Form Elements
 // =============
 
-.pr-submit-textarea {
+.ms-textarea {
   min-height: $size-xx-small;
 }
 
 .form-grid {
   display: grid;
-  // needs a non-percentage and non fr
-  //   for changes column to be consistent between row types
-  //   16vw is a magic number that works well in changes column
-  grid-template-columns: 1fr 16vw;
+  grid-template-columns: 1fr auto;
 }
 
 [data-form='task-capture'] {
   display: grid;
   height: 100%;
 
+  .success-highlight {
+    background-color: $color-background-highlight;
+  }
+
   .slds-accordion__section {
-    padding: $spacing-x-small;
+    padding: $spacing-x-small $spacing-medium;
   }
 
-  .slds-accordion__summary {
-    @include icon-checkbox-layout;
+  &.has-checkboxes {
+    .slds-accordion__summary {
+      @include icon-checkbox-layout;
+    }
   }
 
-  .slds-is-open > .slds-accordion__summary {
-    margin-bottom: $spacing-x-small;
+  .slds-is-open {
+    > .slds-accordion__summary {
+      margin-bottom: $spacing-x-small;
+    }
+  }
+
+  .grow-inner-item {
+    .slds-accordion__summary-action > .slds-truncate {
+      flex-grow: 1;
+    }
+  }
+
+  .accordion-no-padding {
+    > .slds-accordion__list-item {
+      > .slds-is-open {
+        padding: 0;
+
+        > .slds-accordion__summary {
+          padding-top: $spacing-x-small;
+          padding-left: $spacing-medium;
+          padding-right: $spacing-medium;
+        }
+      }
+    }
   }
 }
 
-.select-header-action-col {
-  @include icon-checkbox-layout;
+.ms-nested-checkboxes {
+  // line up with above label; add grid + (faux checkbox + label margin)
+  padding-left: $square-icon-x-small-boundary + $spacing-large;
+}
 
-  .slds-form-element__control {
-    grid-column: 2;
+[data-form='create-project-branch'] {
+  .slds-listbox__status {
+    padding: $spacing-xx-small $spacing-x-small;
+
+    > span {
+      margin: 0;
+      padding: 0;
+    }
   }
 }

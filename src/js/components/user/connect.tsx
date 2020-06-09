@@ -79,7 +79,8 @@ const ConnectModal = ({
 
   const handleConnect = () => {
     window.location.assign(
-      addUrlParams(window.api_urls.salesforce_production_login(), {
+      addUrlParams(window.api_urls.salesforce_login(), {
+        custom_domain: 'login',
         process: 'connect',
         next: window.location.pathname,
       }),
@@ -94,24 +95,28 @@ const ConnectModal = ({
     if (!val) {
       return;
     }
-    const baseUrl = window.api_urls.salesforce_custom_login();
+    const baseUrl = window.api_urls.salesforce_login();
     window.location.assign(
       addUrlParams(baseUrl, {
-        custom_domain: val, // eslint-disable-line @typescript-eslint/camelcase
+        custom_domain: val,
         process: 'connect',
         next: window.location.pathname,
       }),
     );
   };
 
+  const isConnected = Boolean(
+    user.valid_token_for || user.devhub_username || user.uses_global_devhub,
+  );
+
   return (
     <Modal
-      isOpen={isOpen && !(user.valid_token_for || user.devhub_username)}
+      isOpen={isOpen && !isConnected}
       heading={i18n.t('Connect to Salesforce')}
       tagline={
         <Trans i18nKey="devHubInfo">
           Connection to a Salesforce org with Dev Hub enabled is required to
-          create a Dev or Review scratch org. Learn how to{' '}
+          create a Dev or Test scratch org. Learn how to{' '}
           <ExternalLink url="https://developer.salesforce.com/signup">
             create a Developer Edition org
           </ExternalLink>{' '}

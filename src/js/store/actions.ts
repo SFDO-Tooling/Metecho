@@ -1,9 +1,11 @@
 import { ThunkResult } from '@/store';
+import { Project } from '@/store/projects/reducer';
+import { Task } from '@/store/tasks/reducer';
 import apiFetch, { addUrlParams } from '@/utils/api';
 import { ObjectTypes } from '@/utils/constants';
 
 interface CreateObjectPayload {
-  objectType: ObjectTypes;
+  objectType?: ObjectTypes;
   url: string;
 }
 interface ObjectPayload extends CreateObjectPayload {
@@ -26,7 +28,7 @@ interface FetchObjectsStarted {
   type: 'FETCH_OBJECTS_STARTED';
   payload: ObjectPayload;
 }
-interface FetchObjectsSucceeded {
+export interface FetchObjectsSucceeded {
   type: 'FETCH_OBJECTS_SUCCEEDED';
   payload: {
     response: PaginatedObjectResponse | ObjectResponse;
@@ -70,6 +72,10 @@ interface DeleteObjectAction {
     | 'DELETE_OBJECT_FAILED';
   payload: { object: any } & CreateObjectPayload;
 }
+interface ObjectRemoved {
+  type: 'OBJECT_REMOVED';
+  payload: Project | Task;
+}
 
 export type ObjectsAction =
   | FetchObjectsStarted
@@ -81,7 +87,8 @@ export type ObjectsAction =
   | CreateUpdateObjectStarted
   | CreateUpdateObjectSucceeded
   | CreateUpdateObjectFailed
-  | DeleteObjectAction;
+  | DeleteObjectAction
+  | ObjectRemoved;
 
 export type ObjectsActionType = ({
   objectType,
@@ -109,7 +116,7 @@ export const fetchObjects = ({
   filters?: ObjectFilters;
   reset?: boolean;
   shouldSubscribeToObject?: boolean | ((response: any) => boolean);
-}): ThunkResult => async (dispatch) => {
+}): ThunkResult<Promise<FetchObjectsSucceeded>> => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
   if (url || urlFn) {
@@ -144,7 +151,7 @@ export const fetchObjects = ({
       }
     }
     return dispatch({
-      type: 'FETCH_OBJECTS_SUCCEEDED',
+      type: 'FETCH_OBJECTS_SUCCEEDED' as const,
       payload: { response, objectType, url: baseUrl, reset, filters },
     });
   } catch (err) {
@@ -166,7 +173,7 @@ export const fetchObject = ({
   url?: string;
   filters?: ObjectFilters;
   shouldSubscribeToObject?: boolean | ((object: any) => boolean);
-}): ThunkResult => async (dispatch) => {
+}): ThunkResult<Promise<FetchObjectSucceeded>> => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_list`];
   let baseUrl;
   if (url || urlFn) {
@@ -197,7 +204,7 @@ export const fetchObject = ({
       });
     }
     return dispatch({
-      type: 'FETCH_OBJECT_SUCCEEDED',
+      type: 'FETCH_OBJECT_SUCCEEDED' as const,
       payload: { object, filters, objectType, url: baseUrl },
     });
   } catch (err) {
@@ -216,15 +223,16 @@ export const createObject = ({
   hasForm = false,
   shouldSubscribeToObject = true,
 }: {
-  objectType: ObjectTypes;
+  objectType?: ObjectTypes;
   url?: string;
   data?: ObjectData;
   hasForm?: boolean;
   shouldSubscribeToObject?: boolean | ((object: any) => boolean);
-}): ThunkResult => async (dispatch) => {
+}): ThunkResult<Promise<CreateUpdateObjectSucceeded>> => async (dispatch) => {
   if (!url) {
     const urlFn = window.api_urls[`${objectType}_list`];
     if (urlFn) {
+      // eslint-disable-next-line no-param-reassign
       url = urlFn();
     }
   }
@@ -253,14 +261,14 @@ export const createObject = ({
         shouldSubscribeToObject) ||
       (typeof shouldSubscribeToObject === 'function' &&
         shouldSubscribeToObject(object));
-    if (object?.id && window.socket && shouldSubscribe) {
+    if (object?.id && window.socket && shouldSubscribe && objectType) {
       window.socket.subscribe({
         model: objectType,
         id: object.id,
       });
     }
     return dispatch({
-      type: 'CREATE_OBJECT_SUCCEEDED',
+      type: 'CREATE_OBJECT_SUCCEEDED' as const,
       payload: { data, object, url, objectType },
     });
   } catch (err) {
@@ -280,7 +288,7 @@ export const deleteObject = ({
   objectType: ObjectTypes;
   object: { id: string; [key: string]: any };
   shouldSubscribeToObject?: boolean | ((object: any) => boolean);
-}): ThunkResult => async (dispatch) => {
+}): ThunkResult<Promise<DeleteObjectAction>> => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_detail`];
   let baseUrl;
   if (urlFn && object.id) {
@@ -311,7 +319,7 @@ export const deleteObject = ({
       });
     }
     return dispatch({
-      type: 'DELETE_OBJECT_SUCCEEDED',
+      type: 'DELETE_OBJECT_SUCCEEDED' as const,
       payload: { objectType, url: baseUrl, object },
     });
   } catch (err) {
@@ -325,15 +333,23 @@ export const deleteObject = ({
 
 export const updateObject = ({
   objectType,
+  url,
   data,
+  hasForm = false,
+  patch = false,
 }: {
-  objectType: ObjectTypes;
-  data: { id: string; [key: string]: any };
-}): ThunkResult => async (dispatch) => {
-  const urlFn = window.api_urls[`${objectType}_detail`];
-  let baseUrl;
-  if (urlFn && data.id) {
-    baseUrl = urlFn(data.id);
+  objectType?: ObjectTypes;
+  url?: string;
+  data: { id?: string; [key: string]: any };
+  hasForm?: boolean;
+  patch?: boolean;
+}): ThunkResult<Promise<CreateUpdateObjectSucceeded>> => async (dispatch) => {
+  let baseUrl = url;
+  if (!url) {
+    const urlFn = window.api_urls[`${objectType}_detail`];
+    if (urlFn && data.id) {
+      baseUrl = urlFn(data.id);
+    }
   }
   dispatch({
     type: 'UPDATE_OBJECT_STARTED',
@@ -347,15 +363,16 @@ export const updateObject = ({
       url: baseUrl,
       dispatch,
       opts: {
-        method: 'PUT',
+        method: patch ? 'PATCH' : 'PUT',
         body: JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json',
         },
       },
+      hasForm,
     });
     return dispatch({
-      type: 'UPDATE_OBJECT_SUCCEEDED',
+      type: 'UPDATE_OBJECT_SUCCEEDED' as const,
       payload: { objectType, url: baseUrl, data, object },
     });
   } catch (err) {
@@ -366,3 +383,8 @@ export const updateObject = ({
     throw err;
   }
 };
+
+export const removeObject = (payload: Project | Task): ObjectRemoved => ({
+  type: 'OBJECT_REMOVED',
+  payload,
+});

@@ -1,10 +1,13 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { ObjectsAction } from '@/store/actions';
 import { TaskAction } from '@/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { GitHubUser } from '@/store/user/reducer';
-import { OBJECT_TYPES, ObjectTypes, TaskStatuses } from '@/utils/constants';
+import {
+  OBJECT_TYPES,
+  ObjectTypes,
+  ReviewStatuses,
+  TaskStatuses,
+} from '@/utils/constants';
 
 export interface Commit {
   id: string;
@@ -26,16 +29,25 @@ export interface Task {
   old_slugs: string[];
   project: string;
   description: string;
+  description_rendered: string;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
+  branch_name: string | null;
   branch_url: string | null;
   branch_diff_url: string | null;
   pr_url: string | null;
   pr_is_open: boolean;
   commits: Commit[];
+  origin_sha: string | null;
   assigned_dev: GitHubUser | null;
   assigned_qa: GitHubUser | null;
   status: TaskStatuses;
+  currently_submitting_review: boolean;
+  review_submitted_at: string | null;
+  review_valid: boolean;
+  review_status: ReviewStatuses | null;
+  review_sha: string | null;
+  org_config_name: string;
 }
 
 export interface TaskState {
@@ -43,6 +55,9 @@ export interface TaskState {
 }
 
 const defaultState = {};
+
+const modelIsTask = (model: any): model is Task =>
+  Boolean((model as Task).project);
 
 const reducer = (
   tasks: TaskState = defaultState,
@@ -70,7 +85,7 @@ const reducer = (
       const {
         object,
         objectType,
-      }: { object: Task; objectType: ObjectTypes } = action.payload;
+      }: { object: Task; objectType?: ObjectTypes } = action.payload;
       switch (objectType) {
         case OBJECT_TYPES.TASK: {
           if (object) {
@@ -121,7 +136,7 @@ const reducer = (
         const {
           object,
           objectType,
-        }: { object: Task; objectType: ObjectTypes } = action.payload;
+        }: { object: Task; objectType?: ObjectTypes } = action.payload;
         if (objectType === OBJECT_TYPES.TASK && object) {
           maybeTask = object;
         }
@@ -165,6 +180,32 @@ const reducer = (
         };
       }
       return tasks;
+    }
+    case 'OBJECT_REMOVED':
+    case 'DELETE_OBJECT_SUCCEEDED': {
+      let maybeTask;
+      if (action.type === 'OBJECT_REMOVED') {
+        maybeTask = modelIsTask(action.payload) ? action.payload : null;
+      } else {
+        const {
+          object,
+          objectType,
+        }: { object: Task; objectType?: ObjectTypes } = action.payload;
+        if (objectType === OBJECT_TYPES.TASK && object) {
+          maybeTask = object;
+        }
+      }
+      /* istanbul ignore if */
+      if (!maybeTask) {
+        return tasks;
+      }
+      const task = maybeTask;
+      /* istanbul ignore next */
+      const projectTasks = tasks[task.project] || [];
+      return {
+        ...tasks,
+        [task.project]: projectTasks.filter((t) => t.id !== task.id),
+      };
     }
   }
   return tasks;

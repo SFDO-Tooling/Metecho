@@ -1,12 +1,15 @@
 import Sockette from 'sockette';
 
+import { removeObject } from '@/store/actions';
 import {
   commitFailed,
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgRefreshed,
   provisionFailed,
   provisionOrg,
+  refreshError,
   updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
@@ -24,10 +27,13 @@ import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   createTaskPR,
   createTaskPRFailed,
+  submitReview,
+  submitReviewFailed,
   updateTask,
 } from '@/store/tasks/actions';
 import * as sockets from '@/utils/websockets';
 
+jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
 jest.mock('@/store/projects/actions');
 jest.mock('@/store/repositories/actions');
@@ -42,8 +48,10 @@ const actions = {
   createTaskPRFailed,
   deleteFailed,
   deleteOrg,
+  orgRefreshed,
   provisionFailed,
   provisionOrg,
+  refreshError,
   repoError,
   reposRefreshed,
   updateFailed,
@@ -51,6 +59,9 @@ const actions = {
   updateProject,
   updateRepo,
   updateTask,
+  submitReview,
+  submitReviewFailed,
+  removeObject,
 };
 for (const action of Object.values(actions)) {
   action.mockReturnValue({ type: 'TEST', payload: {} });
@@ -83,28 +94,35 @@ afterEach(() => {
 
 describe('getAction', () => {
   test.each([
-    ['REPOSITORY_UPDATE', 'updateRepo'],
-    ['REPOSITORY_UPDATE_ERROR', 'repoError'],
-    ['PROJECT_UPDATE', 'updateProject'],
-    ['PROJECT_CREATE_PR', 'createProjectPR'],
-    ['PROJECT_CREATE_PR_FAILED', 'createProjectPRFailed'],
-    ['TASK_UPDATE', 'updateTask'],
-    ['TASK_CREATE_PR', 'createTaskPR'],
-    ['TASK_CREATE_PR_FAILED', 'createTaskPRFailed'],
-    ['SCRATCH_ORG_PROVISION', 'provisionOrg'],
-    ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed'],
-    ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed'],
-    ['SCRATCH_ORG_UPDATE', 'updateOrg'],
-    ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed'],
-    ['SCRATCH_ORG_COMMIT_CHANGES', 'commitSucceeded'],
-    ['SCRATCH_ORG_COMMIT_CHANGES_FAILED', 'commitFailed'],
-  ])('handles %s event', (type, action) => {
-    const payload = { foo: 'bar' };
+    ['REPOSITORY_UPDATE', 'updateRepo', true],
+    ['REPOSITORY_UPDATE_ERROR', 'repoError', false],
+    ['PROJECT_UPDATE', 'updateProject', true],
+    ['PROJECT_CREATE_PR', 'createProjectPR', false],
+    ['PROJECT_CREATE_PR_FAILED', 'createProjectPRFailed', false],
+    ['TASK_UPDATE', 'updateTask', true],
+    ['TASK_CREATE_PR', 'createTaskPR', false],
+    ['TASK_CREATE_PR_FAILED', 'createTaskPRFailed', false],
+    ['TASK_SUBMIT_REVIEW', 'submitReview', false],
+    ['TASK_SUBMIT_REVIEW_FAILED', 'submitReviewFailed', false],
+    ['SCRATCH_ORG_PROVISION', 'provisionOrg', false],
+    ['SCRATCH_ORG_PROVISION_FAILED', 'provisionFailed', false],
+    ['SCRATCH_ORG_UPDATE', 'updateOrg', true],
+    ['SCRATCH_ORG_FETCH_CHANGES_FAILED', 'updateFailed', false],
+    ['SCRATCH_ORG_DELETE', 'deleteOrg', false],
+    ['SCRATCH_ORG_REMOVE', 'deleteOrg', false],
+    ['SCRATCH_ORG_DELETE_FAILED', 'deleteFailed', false],
+    ['SCRATCH_ORG_REFRESH', 'orgRefreshed', false],
+    ['SCRATCH_ORG_REFRESH_FAILED', 'refreshError', false],
+    ['SCRATCH_ORG_COMMIT_CHANGES', 'commitSucceeded', false],
+    ['SCRATCH_ORG_COMMIT_CHANGES_FAILED', 'commitFailed', false],
+    ['SOFT_DELETE', 'removeObject', true],
+  ])('handles %s event', (type, action, modelOnly) => {
+    const payload = { model: 'bar' };
     const msg = { type, payload };
+    const expected = modelOnly ? 'bar' : payload;
     sockets.getAction(msg);
 
-    // eslint-disable-next-line import/namespace
-    expect(actions[action]).toHaveBeenCalledWith(payload);
+    expect(actions[action]).toHaveBeenCalledWith(expected);
   });
 
   describe('USER_REPOS_REFRESH', () => {
@@ -113,27 +131,6 @@ describe('getAction', () => {
       sockets.getAction(event);
 
       expect(reposRefreshed).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('SCRATCH_ORG_DELETE', () => {
-    test('calls deleteOrg', () => {
-      const payload = { foo: 'bar' };
-      const event = { type: 'SCRATCH_ORG_DELETE', payload };
-      sockets.getAction(event);
-
-      expect(deleteOrg).toHaveBeenCalledWith({ org: payload });
-    });
-  });
-
-  describe('SCRATCH_ORG_REMOVE', () => {
-    test('calls deleteOrg', () => {
-      const model = { foo: 'bar' };
-      const message = 'Error things.';
-      const event = { type: 'SCRATCH_ORG_REMOVE', payload: { model, message } };
-      sockets.getAction(event);
-
-      expect(deleteOrg).toHaveBeenCalledWith({ org: model, message });
     });
   });
 
@@ -227,12 +224,13 @@ describe('createSocket', () => {
       });
 
       test('dispatches action', () => {
+        const payload = { model: {} };
         socketInstance.onmessage({
-          data: { type: 'SCRATCH_ORG_PROVISION', payload: {} },
+          data: { type: 'SCRATCH_ORG_PROVISION', payload },
         });
 
         expect(dispatch).toHaveBeenCalledTimes(1);
-        expect(actions.provisionOrg).toHaveBeenCalledWith({});
+        expect(actions.provisionOrg).toHaveBeenCalledWith(payload);
       });
     });
 

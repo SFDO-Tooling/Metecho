@@ -1,6 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
+import { addMinutes, isPast, parseISO } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -9,29 +10,39 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
-import CaptureModal from '@/components/tasks/captureOrgChanges';
+import CaptureModal from '@/components/tasks/capture';
 import OrgCards from '@/components/tasks/cards';
+import TaskStatusPath from '@/components/tasks/path';
+import TaskStatusSteps from '@/components/tasks/steps';
 import {
+  DeleteModal,
   DetailPageLayout,
+  EditModal,
   ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
   LabelWithSpinner,
+  PageOptions,
   SpinnerWrapper,
+  SubmitModal,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
-import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
-import { ORG_TYPES } from '@/utils/constants';
+import {
+  OBJECT_TYPES,
+  ORG_TYPES,
+  REVIEW_STATUSES,
+  TASK_STATUSES,
+} from '@/utils/constants';
 import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
@@ -39,6 +50,8 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -62,18 +75,68 @@ const TaskDetail = (props: RouteComponentProps) => {
   const userIsAssignedDev = Boolean(
     user.username === task?.assigned_dev?.login,
   );
+  const hasReviewRejected = Boolean(
+    task?.review_valid &&
+      task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED,
+  );
   let currentlyFetching = false;
   let currentlyCommitting = false;
   let orgHasChanges = false;
   let userIsOwner = false;
   let devOrg: Org | null | undefined;
+  let hasOrgs = false;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
-    orgHasChanges = Boolean(devOrg?.has_unsaved_changes);
-    userIsOwner = Boolean(userIsAssignedDev && devOrg?.owner === user.id);
+    orgHasChanges =
+      (devOrg?.total_unsaved_changes || 0) -
+        (devOrg?.total_ignored_changes || 0) >
+      0;
+    userIsOwner = Boolean(
+      userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
+    );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
+    /* istanbul ignore next */
+    if (devOrg || orgs[ORG_TYPES.QA]) {
+      hasOrgs = true;
+    }
   }
+
+  const openCaptureModal = () => {
+    setCaptureModalOpen(true);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+  };
+  const closeCaptureModal = () => {
+    setCaptureModalOpen(false);
+  };
+  const openSubmitModal = () => {
+    setSubmitModalOpen(true);
+    setCaptureModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+  };
+  // edit modal related...
+  const openEditModal = () => {
+    setEditModalOpen(true);
+    setSubmitModalOpen(false);
+    setCaptureModalOpen(false);
+    setDeleteModalOpen(false);
+  };
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+  };
+  // delete modal related
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setCaptureModalOpen(false);
+  };
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+  };
 
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
@@ -83,19 +146,25 @@ const TaskDetail = (props: RouteComponentProps) => {
     if (changesFetched && devOrg) {
       setFetchingChanges(false);
       /* istanbul ignore else */
-      if (devOrg.has_unsaved_changes && !submitModalOpen) {
-        setCaptureModalOpen(true);
+      if (orgHasChanges && !submitModalOpen) {
+        openCaptureModal();
       }
     }
-  }, [fetchingChanges, devOrg, submitModalOpen]);
+  }, [fetchingChanges, devOrg, orgHasChanges, submitModalOpen]);
 
-  const doRefetchOrg = useCallback((org: Org) => {
-    dispatch(refetchOrg(org));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // If the task slug changes, make sure EditTask modal is closed
+  useEffect(() => {
+    if (taskSlug && task && taskSlug !== task.slug) {
+      setEditModalOpen(false);
+    }
+  }, [task, taskSlug]);
 
-  const openSubmitModal = () => {
-    setSubmitModalOpen(true);
-  };
+  const doRefetchOrg = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -145,18 +214,25 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
+  const handlePageOptionSelect = (selection: 'edit' | 'delete') => {
+    switch (selection) {
+      case 'edit':
+        openEditModal();
+        break;
+      case 'delete':
+        openDeleteModal();
+        break;
+    }
+  };
+
   const { branchLink, branchLinkText } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <Button
-        iconCategory="utility"
-        iconName="delete"
-        iconPosition="left"
-        label={i18n.t('Delete Task')}
-        variant="text-destructive"
-        disabled
+      <PageOptions
+        modelType={OBJECT_TYPES.TASK}
+        handleOptionSelect={handlePageOptionSelect}
       />
-      {branchLink ? (
+      {branchLink && (
         <ExternalLink
           url={branchLink}
           showButtonIcon
@@ -164,7 +240,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         >
           {branchLinkText}
         </ExternalLink>
-      ) : null}
+      )}
     </PageHeaderControl>
   );
 
@@ -173,18 +249,16 @@ const TaskDetail = (props: RouteComponentProps) => {
     const isPrimary = !(userIsOwner && orgHasChanges);
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
-        label={i18n.t('Submitting Task for Review…')}
+        label={i18n.t('Submitting Task for Testing…')}
         variant={isPrimary ? 'inverse' : 'base'}
       />
     ) : (
-      i18n.t('Submit Task for Review')
+      i18n.t('Submit Task for Testing')
     );
     submitButton = (
       <Button
         label={submitButtonText}
-        className={classNames('slds-size_full slds-m-bottom_x-large', {
-          'slds-m-left_none': !isPrimary,
-        })}
+        className="slds-size_full slds-m-bottom_x-large slds-m-left_none"
         variant={isPrimary ? 'brand' : 'outline-brand'}
         onClick={openSubmitModal}
         disabled={currentlySubmitting}
@@ -192,61 +266,94 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
-  let primaryButton: React.ReactNode = null;
-  let secondaryButton: React.ReactNode = null;
-  if (userIsOwner && orgHasChanges) {
+  let captureButton: React.ReactNode = null;
+  if (userIsOwner && (orgHasChanges || devOrg?.has_been_visited)) {
     const captureButtonAction = () => {
       /* istanbul ignore else */
       if (devOrg) {
-        setFetchingChanges(true);
-        doRefetchOrg(devOrg);
+        let shouldCheck = true;
+        const checkAfterMinutes = window.GLOBALS.ORG_RECHECK_MINUTES;
+        if (
+          orgHasChanges &&
+          devOrg.last_checked_unsaved_changes_at !== null &&
+          typeof checkAfterMinutes === 'number'
+        ) {
+          const lastChecked = parseISO(devOrg.last_checked_unsaved_changes_at);
+          const shouldCheckAfter = addMinutes(lastChecked, checkAfterMinutes);
+          shouldCheck = isPast(shouldCheckAfter);
+        }
+        if (shouldCheck) {
+          setFetchingChanges(true);
+          doRefetchOrg(devOrg);
+        } else {
+          openCaptureModal();
+        }
       }
     };
-    let captureButtonText: JSX.Element = i18n.t('Capture Task Changes');
+    let captureButtonText: JSX.Element = i18n.t(
+      'Check for Unretrieved Changes',
+    );
+    const isPrimary =
+      (orgHasChanges || !readyToSubmit) &&
+      (!task.pr_is_open || hasReviewRejected);
     if (currentlyCommitting) {
+      /* istanbul ignore next */
       captureButtonText = (
         <LabelWithSpinner
-          label={i18n.t('Capturing Selected Changes…')}
-          variant="inverse"
+          label={i18n.t('Retrieving Selected Changes…')}
+          variant={isPrimary ? 'inverse' : 'base'}
         />
       );
     } else if (fetchingChanges || currentlyFetching) {
+      /* istanbul ignore next */
       captureButtonText = (
         <LabelWithSpinner
-          label={i18n.t('Checking for Uncaptured Changes…')}
-          variant="inverse"
+          label={i18n.t('Checking for Unretrieved Changes…')}
+          variant={isPrimary ? 'inverse' : 'base'}
         />
       );
+    } else if (orgHasChanges) {
+      captureButtonText = i18n.t('Retrieve Changes from Dev Org');
     }
-    primaryButton = (
+    captureButton = (
       <Button
         label={captureButtonText}
         className={classNames('slds-size_full', {
           'slds-m-bottom_medium': readyToSubmit,
           'slds-m-bottom_x-large': !readyToSubmit,
         })}
-        variant="brand"
+        variant={isPrimary ? 'brand' : 'outline-brand'}
         onClick={captureButtonAction}
         disabled={fetchingChanges || currentlyFetching || currentlyCommitting}
       />
     );
-    if (readyToSubmit) {
-      secondaryButton = submitButton;
-    }
-  } else if (readyToSubmit) {
-    primaryButton = submitButton;
+  }
+
+  const projectUrl = routes.project_detail(repository.slug, project.slug);
+  let headerUrl, headerUrlText; // eslint-disable-line one-var
+  /* istanbul ignore else */
+  if (task.branch_url && task.branch_name) {
+    headerUrl = task.branch_url;
+    headerUrlText = task.branch_name;
+  } else if (project.branch_url && project.branch_name) {
+    headerUrl = project.branch_url;
+    headerUrlText = project.branch_name;
+  } else {
+    headerUrl = repository.repo_url;
+    headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
   }
 
   return (
     <DocumentTitle
       title={` ${task.name} | ${project.name} | ${repository.name} | ${i18n.t(
-        'MetaShare',
+        'Metecho',
       )}`}
     >
       <DetailPageLayout
         title={task.name}
-        description={task.description}
-        repoUrl={repository.repo_url}
+        description={task.description_rendered}
+        headerUrl={headerUrl}
+        headerUrlText={headerUrlText}
         breadcrumb={[
           {
             name: repository.name,
@@ -254,33 +361,44 @@ const TaskDetail = (props: RouteComponentProps) => {
           },
           {
             name: project.name,
-            url: routes.project_detail(repository.slug, project.slug),
+            url: projectUrl,
           },
           { name: task.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
+        sidebar={
+          <>
+            <TaskStatusPath task={task} />
+            {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
+              <TaskStatusSteps task={task} orgs={orgs} />
+            ) : null}
+          </>
+        }
       >
-        {primaryButton}
-        {secondaryButton}
+        {captureButton}
+        {submitButton}
 
         {orgs ? (
           <OrgCards
             orgs={orgs}
             task={task}
             projectUsers={project.github_users}
-            projectUrl={routes.project_detail(repository.slug, project.slug)}
+            projectUrl={projectUrl}
+            repoUrl={repository.repo_url}
+            openCaptureModal={openCaptureModal}
           />
         ) : (
           <SpinnerWrapper />
         )}
-        {devOrg && userIsOwner && orgHasChanges && (
-          <CaptureModal
-            orgId={devOrg.id}
-            changeset={devOrg.unsaved_changes}
-            isOpen={captureModalOpen}
-            toggleModal={setCaptureModalOpen}
-          />
-        )}
+        {devOrg &&
+          userIsOwner &&
+          (orgHasChanges || devOrg.has_ignored_changes) && (
+            <CaptureModal
+              org={devOrg}
+              isOpen={captureModalOpen}
+              closeModal={closeCaptureModal}
+            />
+          )}
         {readyToSubmit && (
           <SubmitModal
             instanceId={task.id}
@@ -291,6 +409,23 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
           />
         )}
+        <EditModal
+          model={task}
+          modelType={OBJECT_TYPES.TASK}
+          hasOrgs={hasOrgs}
+          projectId={project.id}
+          orgConfigsLoading={project.currently_fetching_org_config_names}
+          orgConfigs={project.available_task_org_config_names}
+          isOpen={editModalOpen}
+          handleClose={closeEditModal}
+        />
+        <DeleteModal
+          model={task}
+          modelType={OBJECT_TYPES.TASK}
+          isOpen={deleteModalOpen}
+          redirect={projectUrl}
+          handleClose={closeDeleteModal}
+        />
         <CommitList commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>

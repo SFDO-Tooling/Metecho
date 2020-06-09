@@ -2,17 +2,17 @@ version: 2.1
 
 jobs:
   build:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v0.2.0
     steps:
       - checkout
       - restore_cache:
           keys:
-            - metashare-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
+            - metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
       - restore_cache:
           keys:
-            - metashare-npm-{{ checksum "yarn.lock" }}
+            - metecho-npm-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
           command: |
@@ -23,27 +23,26 @@ jobs:
             pip install -r requirements/dev.txt
       - run:
           name: Compile Front-End Assets
-          command: yarn prod:stats
+          command: yarn prod
       - persist_to_workspace:
           root: .
           paths:
-            - ./webpack-stats.json
             - ./dist
             - ./venv
             - ./node_modules
       - save_cache:
-          key: metashare-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
+          key: metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
           paths:
             - ./venv
       - save_cache:
-          key: metashare-npm-{{ checksum "yarn.lock" }}
+          key: metecho-npm-{{ checksum "yarn.lock" }}
           paths:
             - ./node_modules
 
   lint:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v0.2.0
     steps:
       - checkout
       - attach_workspace:
@@ -55,9 +54,9 @@ jobs:
             yarn lint:nofix
 
   test-client:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v0.2.0
     steps:
       - checkout
       - attach_workspace:
@@ -76,9 +75,9 @@ jobs:
             - coverage
 
   test-python:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v0.2.0
         environment:
           DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
@@ -87,8 +86,8 @@ jobs:
           DJANGO_SECRET_KEY: test_secret_key
           DJANGO_SETTINGS_MODULE: config.settings.test
           SECURE_SSL_REDIRECT: False
-      - image: circleci/redis:latest
-      - image: circleci/postgres:latest
+      - image: circleci/redis:5.0
+      - image: circleci/postgres:10.6
         environment:
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
@@ -118,9 +117,9 @@ jobs:
             - .coverage
 
   report-test-coverage:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v0.2.0
     environment:
       COVERALLS_PARALLEL: true
     steps:
@@ -130,10 +129,12 @@ jobs:
       - run:
           name: Report Test Coverage
           command: |
-            . venv/bin/activate
-            yarn test:js:report-coverage
-            yarn test:py:report-coverage
-            curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+            if [ -n "${COVERALLS_REPO_TOKEN}" ]; then
+              . venv/bin/activate
+              yarn test:js:report-coverage
+              yarn test:py:report-coverage
+              curl -k "https://coveralls.io/webhook?repo_token=${COVERALLS_REPO_TOKEN}" -d "payload[build_num]=${CIRCLE_BUILD_NUM}&payload[status]=done"
+            fi
       - run:
           name: Check Test Coverage
           command: |
@@ -141,25 +142,10 @@ jobs:
             yarn test:js:check-coverage
             yarn test:py:check-coverage
 
-  report-webpack-stats:
-    working_directory: ~/metashare
-    docker:
-      - image: oddbirds/pyjs
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: Install packtracker.io Plugin
-          command: yarn global add @packtracker/webpack-plugin
-      - run:
-          name: Upload Webpack Stats to packtracker.io
-          command: yarn packtracker
-
   build-docs:
-    working_directory: ~/metashare
+    working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs
+      - image: oddbirds/pyjs:v0.2.0
     steps:
       - checkout
       - attach_workspace:
@@ -192,6 +178,3 @@ workflows:
           requires:
             - test-client
             - test-python
-      - report-webpack-stats:
-          requires:
-            - build

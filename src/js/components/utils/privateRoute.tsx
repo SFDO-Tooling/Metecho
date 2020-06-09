@@ -17,18 +17,29 @@ const PrivateRoute = ({
   return (
     <Route
       {...rest}
-      render={(props) =>
-        user ? (
-          <Component {...props} />
-        ) : (
+      render={(props) => {
+        if (user) {
+          return user.agreed_to_tos_at ||
+            !window.GLOBALS?.SITE?.clickthrough_agreement ? (
+            <Component {...props} />
+          ) : (
+            <Redirect
+              to={{
+                pathname: routes.terms(),
+                state: { from: props.location },
+              }}
+            />
+          );
+        }
+        return (
           <Redirect
             to={{
               pathname: routes.login(),
               state: { from: props.location },
             }}
           />
-        )
-      }
+        );
+      }}
     />
   );
 };

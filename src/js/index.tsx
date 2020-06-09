@@ -31,6 +31,7 @@ import ProjectDetail from '@/components/projects/detail';
 import RepositoryDetail from '@/components/repositories/detail';
 import RepositoryList from '@/components/repositories/list';
 import TaskDetail from '@/components/tasks/detail';
+import Terms from '@/components/terms';
 import AuthError from '@/components/user/authError';
 import Login from '@/components/user/login';
 import { PrivateRoute } from '@/components/utils';
@@ -39,9 +40,11 @@ import reducer from '@/store';
 import { fetchObjects } from '@/store/actions';
 import { clearErrors } from '@/store/errors/actions';
 import { reposRefreshing } from '@/store/repositories/actions';
+import { selectRepositories } from '@/store/repositories/selectors';
 import { clearToasts } from '@/store/toasts/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import { log, logError } from '@/utils/logging';
 import routes, { routePatterns } from '@/utils/routes';
@@ -62,7 +65,7 @@ const App = withRouter(
     );
 
     return (
-      <DocumentTitle title={i18n.t('MetaShare')}>
+      <DocumentTitle title={i18n.t('Metecho')}>
         <div className="slds-grid slds-grid_frame slds-grid_vertical">
           <ErrorBoundary>
             <Header />
@@ -70,6 +73,7 @@ const App = withRouter(
               <ErrorBoundary>
                 <Switch>
                   <Route exact path={routePatterns.login()} component={Login} />
+                  <Route exact path={routePatterns.terms()} component={Terms} />
                   <Route
                     exact
                     path={routePatterns.home()}
@@ -152,17 +156,17 @@ initializeI18n((i18nError?: string) => {
     window.GLOBALS = GLOBALS;
 
     // Get logged-in/out status
-    let user;
+    let userData;
     const userString = el.getAttribute('data-user');
     if (userString) {
       try {
-        user = JSON.parse(userString) as User;
+        userData = JSON.parse(userString) as User;
       } catch (err) {
         // swallow error
       }
-      if (user) {
+      if (userData) {
         // Login
-        appStore.dispatch(login(user));
+        appStore.dispatch(login(userData));
       }
     }
     el.removeAttribute('data-user');
@@ -189,14 +193,21 @@ initializeI18n((i18nError?: string) => {
       );
     };
 
-    // If logged in, fetch repositories before rendering App
-    if (user?.currently_fetching_repos) {
-      appStore.dispatch(reposRefreshing());
-      renderApp();
-    } else if (user) {
+    if (userData) {
+      // If logged in, fetch repositories before rendering App
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
         fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
-      ).finally(renderApp);
+      ).finally(() => {
+        const state = appStore.getState();
+        const repos = selectRepositories(state);
+        const user = selectUserState(state);
+        // If user has no repos and is currently fetching repos, update state
+        // to show spinner instead of empty repos-list.
+        if (user?.currently_fetching_repos && !repos.length) {
+          appStore.dispatch(reposRefreshing());
+        }
+        renderApp();
+      });
     } else {
       renderApp();
     }

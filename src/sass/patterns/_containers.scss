@@ -18,3 +18,15 @@
 .spinner-container.slds-spinner_container {
   z-index: 0;
 }
+
+.modal-tooltip {
+  z-index: $z-index-toast;
+}
+
+.container-fill-space {
+  align-items: stretch;
+}
+
+.content-fill-height {
+  min-height: 100%;
+}

@@ -152,6 +152,25 @@ describe('<UserDropdown />', () => {
     });
   });
 
+  describe('connected to global devhub', () => {
+    test('does not render connection info', () => {
+      const { getByText, queryByText } = setup({
+        user: {
+          username: 'Test User',
+          avatar_url: 'http://avatar.com',
+          valid_token_for: null,
+          sf_username: 'user@domain.com',
+          is_devhub_enabled: true,
+          uses_global_devhub: true,
+        },
+      });
+
+      expect(getByText('Test User')).toBeVisible();
+      expect(queryByText('Connected to Salesforce')).toBeNull();
+      expect(queryByText('user@domain.com')).toBeNull();
+    });
+  });
+
   describe('logged out', () => {
     test('renders nothing', () => {
       const { container } = setup({ user: null });

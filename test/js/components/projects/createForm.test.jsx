@@ -1,4 +1,5 @@
-import { fireEvent, wait, waitForElement } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -29,30 +30,38 @@ const defaultRepository = {
   old_slugs: [],
   description: 'This is a test repository.',
   repo_url: 'https://github.com/test/test-repo',
+  github_users: [],
 };
+
+const defaultUser = { username: 'test-user' };
 
 describe('<ProjectForm/>', () => {
   const setup = (options) => {
     const defaults = {
       repository: defaultRepository,
-      startOpen: true,
+      user: defaultUser,
+      hasProjects: false,
     };
     const opts = Object.assign({}, defaults, options);
-    const { repository, startOpen } = opts;
+    const { user, repository, hasProjects } = opts;
     const context = {};
-    const { getByText, getByLabelText, queryByText } = renderWithRedux(
+    const result = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectForm repository={repository} startOpen={startOpen} />
+        <ProjectForm
+          user={user}
+          repository={repository}
+          hasProjects={hasProjects}
+        />
       </StaticRouter>,
       {},
       storeWithThunk,
     );
-    return { getByText, getByLabelText, queryByText, context };
+    return { ...result, context };
   };
 
   describe('submit/close buttons', () => {
     test('toggle form open/closed', () => {
-      const { getByText, queryByText } = setup({ startOpen: undefined });
+      const { getByText, queryByText } = setup({ hasProjects: true });
 
       expect(queryByText('Close Form')).toBeNull();
 
@@ -87,6 +96,34 @@ describe('<ProjectForm/>', () => {
           name: 'Name of Project',
           description: 'This is the description',
           repository: 'r1',
+          branch_name: '',
+          github_users: [],
+        },
+        hasForm: true,
+        shouldSubscribeToObject: true,
+      });
+    });
+
+    test('adds current user to github_users', () => {
+      const ghUser = { id: '1', login: 'test-user' };
+      const repository = {
+        ...defaultRepository,
+        github_users: [ghUser, { id: '2', login: 'other-username' }],
+      };
+      const { getByText, getByLabelText } = setup({ repository });
+      const submit = getByText('Create Project');
+      const nameInput = getByLabelText('*Project Name');
+      fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
+      fireEvent.click(submit);
+
+      expect(createObject).toHaveBeenCalledWith({
+        objectType: 'project',
+        data: {
+          name: 'Name of Project',
+          description: '',
+          repository: 'r1',
+          branch_name: '',
+          github_users: [ghUser],
         },
         hasForm: true,
         shouldSubscribeToObject: true,
@@ -126,7 +163,7 @@ describe('<ProjectForm/>', () => {
     });
 
     describe('error', () => {
-      test('displays inline field errors', async () => {
+      test('displays inline field errors on 400', async () => {
         createObject.mockReturnValueOnce(() =>
           // eslint-disable-next-line prefer-promise-reject-errors
           Promise.reject({
@@ -135,29 +172,32 @@ describe('<ProjectForm/>', () => {
               description: ['Or that'],
               other: ['What is happening'],
             },
+            response: {
+              status: 400,
+            },
           }),
         );
-        const { getByText, getByLabelText, queryByText } = setup();
+        const { getByText, getByLabelText, queryByText, findByText } = setup();
         const submit = getByText('Create Project');
         const nameInput = getByLabelText('*Project Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
         fireEvent.click(submit);
 
         expect.assertions(3);
-        await waitForElement(() => getByText('Do not do that'));
+        await findByText('Do not do that');
 
         expect(getByText('Do not do that')).toBeVisible();
         expect(getByText('Or that')).toBeVisible();
         expect(queryByText('What is happening')).toBeNull();
       });
 
-      test('calls addError with non-form errors on 422', async () => {
+      test('calls addError with non-form errors on 400', async () => {
         createObject.mockReturnValueOnce(() =>
           // eslint-disable-next-line prefer-promise-reject-errors
           Promise.reject({
             body: 'Nope',
             response: {
-              status: 422,
+              status: 400,
             },
             message: 'This is an error.',
           }),
@@ -169,7 +209,7 @@ describe('<ProjectForm/>', () => {
         fireEvent.click(submit);
 
         expect.assertions(1);
-        await wait(() => {
+        await waitFor(() => {
           if (!addError.mock.calls.length) {
             throw new Error('waiting...');
           }
@@ -177,6 +217,72 @@ describe('<ProjectForm/>', () => {
 
         expect(addError).toHaveBeenCalledWith('This is an error.');
       });
+    });
+  });
+
+  describe('creating from existing branch', () => {
+    let url, result, fakeBranches, input;
+
+    beforeEach(async () => {
+      result = setup();
+      url = window.api_urls.repository_feature_branches(defaultRepository.id);
+      fakeBranches = ['feature/foo', 'feature/bar'];
+      fetchMock.getOnce(url, fakeBranches);
+      fireEvent.click(result.getByText('Use existing GitHub branch'));
+      input = result.queryByLabelText(
+        '*Select a branch to use for this project',
+      );
+      fireEvent.click(input);
+      await result.findByText('feature/foo');
+    });
+
+    test('selecting existing branch options', () => {
+      const { getByText } = result;
+      fireEvent.click(getByText('feature/foo'));
+
+      expect(getByText('Remove selected option')).toBeVisible();
+    });
+
+    test('removing selected branch', () => {
+      const { getByText } = result;
+      fireEvent.click(getByText('feature/foo'));
+
+      expect(input.value).toEqual('feature/foo');
+
+      fireEvent.click(getByText('Remove selected option'));
+
+      expect(input.value).toEqual('');
+    });
+
+    test('search/filter branches from list', () => {
+      fireEvent.change(input, { target: { value: 'foo' } });
+
+      expect(input.value).toEqual('foo');
+    });
+
+    test('select new branch instead', () => {
+      const { getByText, getByLabelText } = result;
+      fireEvent.click(getByText('feature/foo'));
+
+      expect(input.value).toEqual('feature/foo');
+
+      fireEvent.click(getByLabelText('Create new branch on GitHub'));
+
+      expect(input).not.toBeInTheDocument();
+    });
+
+    test('sets selected branch on blur if match found', () => {
+      fireEvent.change(input, { target: { value: 'feature/foo' } });
+      fireEvent.blur(input);
+
+      expect(input.value).toEqual('feature/foo');
+    });
+
+    test('resets input value on blur if no match found', () => {
+      fireEvent.change(input, { target: { value: 'nope' } });
+      fireEvent.blur(input);
+
+      expect(input.value).toEqual('');
     });
   });
 });

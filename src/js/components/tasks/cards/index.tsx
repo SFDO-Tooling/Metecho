@@ -4,12 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import OrgCard from '@/components/tasks/cards/card';
 import ConfirmDeleteModal from '@/components/tasks/confirmDeleteModal';
+import ConfirmRemoveUserModal from '@/components/tasks/confirmRemoveUserModal';
 import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
 import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { createObject, deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
@@ -36,17 +37,24 @@ const OrgCards = ({
   task,
   projectUsers,
   projectUrl,
+  repoUrl,
+  openCaptureModal,
 }: {
   orgs: OrgsByTask;
   task: Task;
   projectUsers: GitHubUser[];
   projectUrl: string;
+  repoUrl: string;
+  openCaptureModal: () => void;
 }) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
+  const [confirmRemoveUserModalOpen, setConfirmRemoveUserModalOpen] = useState(
+    false,
+  );
   const [isWaitingToDeleteDevOrg, setIsWaitingToDeleteDevOrg] = useState(false);
   const [
     isWaitingToRemoveUser,
@@ -60,43 +68,59 @@ const OrgCards = ({
   );
   const dispatch = useDispatch<ThunkDispatch>();
 
-  const checkForOrgChanges = useCallback((org: Org) => {
-    dispatch(refetchOrg(org));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const checkForOrgChanges = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
 
-  const deleteOrg = useCallback((org: Org) => {
-    setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
-    dispatch(
-      deleteObject({
-        objectType: OBJECT_TYPES.ORG,
-        object: org,
-      }),
-    ).finally(() => {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: false });
-      }
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const handleRefresh = useCallback(
+    (org: Org) => {
+      dispatch(refreshOrg(org));
+    },
+    [dispatch],
+  );
 
-  const createOrg = useCallback((type: OrgTypes) => {
-    setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
-    dispatch(
-      createObject({
-        objectType: OBJECT_TYPES.ORG,
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        data: { task: task.id, org_type: type },
-      }),
-    ).finally(() => {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
-      }
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const deleteOrg = useCallback(
+    (org: Org) => {
+      setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
+      dispatch(
+        deleteObject({
+          objectType: OBJECT_TYPES.ORG,
+          object: org,
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: false });
+        }
+      });
+    },
+    [dispatch, isDeletingOrg, isMounted],
+  );
+
+  const createOrg = useCallback(
+    (type: OrgTypes) => {
+      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
+      dispatch(
+        createObject({
+          objectType: OBJECT_TYPES.ORG,
+          data: { task: task.id, org_type: type },
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
+        }
+      });
+    },
+    [dispatch, isCreatingOrg, isMounted, task.id],
+  );
 
   const assignUser = useCallback(
     ({ type, assignee }: AssignedUserTracker) => {
+      setIsWaitingToRemoveUser(null);
       const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
       dispatch(
         updateObject({
@@ -108,33 +132,35 @@ const OrgCards = ({
         }),
       );
     },
-    [task], // eslint-disable-line react-hooks/exhaustive-deps
+    [dispatch, task],
   );
 
   const closeConfirmDeleteModal = () => {
     setConfirmDeleteModalOpen(false);
   };
-  const cancelConfirmDeleteModal = () => {
+  const cancelConfirmDeleteModal = useCallback(() => {
     setIsWaitingToDeleteDevOrg(false);
-    setIsWaitingToRemoveUser(null);
     closeConfirmDeleteModal();
+  }, []);
+  const closeConfirmRemoveUserModal = () => {
+    setConfirmRemoveUserModalOpen(false);
   };
-  const openConnectModal = () => {
+  const cancelConfirmRemoveUserModal = useCallback(() => {
+    closeConfirmRemoveUserModal();
+    setIsWaitingToRemoveUser(null);
+  }, []);
+  const openConnectModal = useCallback(() => {
     setInfoModalOpen(false);
     cancelConfirmDeleteModal();
     setConnectModalOpen(true);
-  };
-  const openInfoModal = () => {
+  }, [cancelConfirmDeleteModal]);
+  const openInfoModal = useCallback(() => {
     setConnectModalOpen(false);
     cancelConfirmDeleteModal();
     setInfoModalOpen(true);
-  };
+  }, [cancelConfirmDeleteModal]);
 
-  const handleDelete = (
-    org: Org,
-    shouldRemoveUser?: AssignedUserTracker | null,
-  ) => {
-    setIsWaitingToRemoveUser(shouldRemoveUser || null);
+  const handleDelete = (org: Org) => {
     if (org.org_type === ORG_TYPES.DEV) {
       setIsWaitingToDeleteDevOrg(true);
       checkForOrgChanges(org);
@@ -143,21 +169,22 @@ const OrgCards = ({
     }
   };
 
-  let handleCreate: (...args: any[]) => void = openConnectModal;
-  if (user.valid_token_for || user.devhub_username) {
-    handleCreate = user.is_devhub_enabled ? createOrg : openInfoModal;
-  }
-
   const handleAssignUser = ({ type, assignee }: AssignedUserTracker) => {
     const org = orgs[type];
-    const orgOwner = org?.owner_gh_username;
-    const newAssigned = assignee?.login;
-    if (org && (!orgOwner || orgOwner !== newAssigned)) {
-      handleDelete(org, { type, assignee });
+    if (org && type === ORG_TYPES.DEV) {
+      setIsWaitingToRemoveUser({ type, assignee });
+      checkForOrgChanges(org);
     } else {
       assignUser({ type, assignee });
     }
   };
+
+  let handleCreate: (...args: any[]) => void = openConnectModal;
+  const userIsConnected =
+    user.valid_token_for || user.devhub_username || user.uses_global_devhub;
+  if (userIsConnected) {
+    handleCreate = user.is_devhub_enabled ? createOrg : openInfoModal;
+  }
 
   const devOrg = orgs[ORG_TYPES.DEV];
 
@@ -176,17 +203,20 @@ const OrgCards = ({
     }
   }, [deleteOrg, isWaitingToDeleteDevOrg, devOrg]);
 
-  // After org is deleted, check if we also need to update the assigned user...
+  // When dev org reassign has been triggered, wait until it has been refreshed
   useEffect(() => {
-    if (isWaitingToRemoveUser) {
-      const { type, assignee } = isWaitingToRemoveUser;
-      const readyToUpdateUser = !orgs[type];
-      if (readyToUpdateUser) {
-        setIsWaitingToRemoveUser(null);
-        assignUser({ type, assignee });
+    if (
+      isWaitingToRemoveUser &&
+      devOrg &&
+      !devOrg.currently_refreshing_changes
+    ) {
+      if (devOrg.has_unsaved_changes) {
+        setConfirmRemoveUserModalOpen(true);
+      } else {
+        assignUser(isWaitingToRemoveUser);
       }
     }
-  }, [assignUser, isWaitingToRemoveUser, orgs]);
+  }, [assignUser, isWaitingToRemoveUser, devOrg]);
 
   return (
     <>
@@ -196,29 +226,33 @@ const OrgCards = ({
           org={orgs[ORG_TYPES.DEV]}
           type={ORG_TYPES.DEV}
           user={user}
-          assignedUser={task.assigned_dev}
+          task={task}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
+          repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
+          openCaptureModal={openCaptureModal}
         />
         <OrgCard
           org={orgs[ORG_TYPES.QA]}
           type={ORG_TYPES.QA}
           user={user}
-          assignedUser={task.assigned_qa}
+          task={task}
           projectUsers={projectUsers}
           projectUrl={projectUrl}
+          repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
+          handleRefresh={handleRefresh}
         />
       </div>
       <ConnectModal
@@ -235,10 +269,16 @@ const OrgCards = ({
       <ConfirmDeleteModal
         orgs={orgs}
         isOpen={confirmDeleteModalOpen}
-        waitingToRemoveUser={isWaitingToRemoveUser}
         handleClose={closeConfirmDeleteModal}
         handleCancel={cancelConfirmDeleteModal}
         handleDelete={deleteOrg}
+      />
+      <ConfirmRemoveUserModal
+        isOpen={confirmRemoveUserModalOpen}
+        waitingToRemoveUser={isWaitingToRemoveUser}
+        handleClose={closeConfirmRemoveUserModal}
+        handleCancel={cancelConfirmRemoveUserModal}
+        handleAssignUser={assignUser}
       />
     </>
   );

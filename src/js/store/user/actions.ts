@@ -31,6 +31,13 @@ interface RefreshDevHubSucceeded {
 interface RefreshDevHubAction {
   type: 'DEV_HUB_STATUS_REQUESTED' | 'DEV_HUB_STATUS_FAILED';
 }
+interface AgreeToTermsAction {
+  type: 'AGREE_TO_TERMS_REQUESTED' | 'AGREE_TO_TERMS_FAILED';
+}
+interface AgreeToTermsSucceeded {
+  type: 'AGREE_TO_TERMS_SUCCEEDED';
+  payload: User;
+}
 export type UserAction =
   | LoginAction
   | LogoutAction
@@ -38,7 +45,9 @@ export type UserAction =
   | DisconnectAction
   | DisconnectSucceeded
   | RefreshDevHubAction
-  | RefreshDevHubSucceeded;
+  | RefreshDevHubSucceeded
+  | AgreeToTermsAction
+  | AgreeToTermsSucceeded;
 
 export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
@@ -57,7 +66,7 @@ export const login = (payload: User): LoginAction => {
   };
 };
 
-export const logout = (): ThunkResult => (dispatch) =>
+export const logout = (): ThunkResult<Promise<LogoutAction>> => (dispatch) =>
   apiFetch({
     url: window.api_urls.account_logout(),
     dispatch,
@@ -72,10 +81,12 @@ export const logout = (): ThunkResult => (dispatch) =>
     if (window.Sentry) {
       window.Sentry.configureScope((scope) => scope.clear());
     }
-    return dispatch({ type: 'USER_LOGGED_OUT' });
+    return dispatch({ type: 'USER_LOGGED_OUT' as const });
   });
 
-export const refetchAllData = (): ThunkResult => async (dispatch) => {
+export const refetchAllData = (): ThunkResult<
+  Promise<RefetchDataAction | LogoutAction>
+> => async (dispatch) => {
   dispatch({ type: 'REFETCH_DATA_STARTED' });
   try {
     const payload = await apiFetch({
@@ -84,19 +95,23 @@ export const refetchAllData = (): ThunkResult => async (dispatch) => {
       suppressErrorsOn: [401, 403, 404],
     });
     if (!payload) {
-      return dispatch({ type: 'USER_LOGGED_OUT' });
+      return dispatch({ type: 'USER_LOGGED_OUT' as const });
     }
     dispatch(login(payload));
     dispatch(reposRefreshing());
     dispatch(reposRefreshed());
-    return dispatch({ type: 'REFETCH_DATA_SUCCEEDED' });
+    return dispatch({
+      type: 'REFETCH_DATA_SUCCEEDED' as const,
+    });
   } catch (err) {
     dispatch({ type: 'REFETCH_DATA_FAILED' });
     throw err;
   }
 };
 
-export const disconnect = (): ThunkResult => async (dispatch) => {
+export const disconnect = (): ThunkResult<
+  Promise<DisconnectSucceeded>
+> => async (dispatch) => {
   dispatch({ type: 'USER_DISCONNECT_REQUESTED' });
   try {
     const payload = await apiFetch({
@@ -106,20 +121,50 @@ export const disconnect = (): ThunkResult => async (dispatch) => {
         method: 'POST',
       },
     });
-    return dispatch({ type: 'USER_DISCONNECT_SUCCEEDED', payload });
+    return dispatch({
+      type: 'USER_DISCONNECT_SUCCEEDED' as const,
+      payload,
+    });
   } catch (err) {
     dispatch({ type: 'USER_DISCONNECT_FAILED' });
     throw err;
   }
 };
 
-export const refreshDevHubStatus = (): ThunkResult => async (dispatch) => {
+export const refreshDevHubStatus = (): ThunkResult<
+  Promise<RefreshDevHubSucceeded>
+> => async (dispatch) => {
   dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
   try {
     const payload = await apiFetch({ url: window.api_urls.user(), dispatch });
-    return dispatch({ type: 'DEV_HUB_STATUS_SUCCEEDED', payload });
+    return dispatch({
+      type: 'DEV_HUB_STATUS_SUCCEEDED' as const,
+      payload,
+    });
   } catch (err) {
     dispatch({ type: 'DEV_HUB_STATUS_FAILED' });
+    throw err;
+  }
+};
+
+export const agreeToTerms = (): ThunkResult<
+  Promise<AgreeToTermsSucceeded>
+> => async (dispatch) => {
+  dispatch({ type: 'AGREE_TO_TERMS_REQUESTED' });
+  try {
+    const payload = await apiFetch({
+      url: window.api_urls.agree_to_tos(),
+      dispatch,
+      opts: {
+        method: 'PUT',
+      },
+    });
+    return dispatch({
+      type: 'AGREE_TO_TERMS_SUCCEEDED' as const,
+      payload,
+    });
+  } catch (err) {
+    dispatch({ type: 'AGREE_TO_TERMS_FAILED' });
     throw err;
   }
 };

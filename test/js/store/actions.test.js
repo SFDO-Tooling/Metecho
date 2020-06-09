@@ -711,24 +711,42 @@ describe('updateObject', () => {
     };
   });
 
-  describe('success', () => {
-    test('sends PUT to api', () => {
-      const store = storeWithThunk({});
-      fetchMock.putOnce(url, objectPayload.data);
-      const started = {
-        type: 'UPDATE_OBJECT_STARTED',
-        payload: objectPayload,
-      };
-      const succeeded = {
-        type: 'UPDATE_OBJECT_SUCCEEDED',
-        payload: { ...objectPayload, object: objectPayload.data },
-      };
+  test('sends PUT to api', () => {
+    const store = storeWithThunk({});
+    fetchMock.putOnce(url, objectPayload.data);
+    const started = {
+      type: 'UPDATE_OBJECT_STARTED',
+      payload: objectPayload,
+    };
+    const succeeded = {
+      type: 'UPDATE_OBJECT_SUCCEEDED',
+      payload: { ...objectPayload, object: objectPayload.data },
+    };
 
-      expect.assertions(1);
-      return store.dispatch(actions.updateObject(objectPayload)).then(() => {
+    expect.assertions(1);
+    return store.dispatch(actions.updateObject(objectPayload)).then(() => {
+      expect(store.getActions()).toEqual([started, succeeded]);
+    });
+  });
+
+  test('sends PATCH to api', () => {
+    const store = storeWithThunk({});
+    fetchMock.patchOnce(url, objectPayload.data);
+    const started = {
+      type: 'UPDATE_OBJECT_STARTED',
+      payload: objectPayload,
+    };
+    const succeeded = {
+      type: 'UPDATE_OBJECT_SUCCEEDED',
+      payload: { ...objectPayload, object: objectPayload.data },
+    };
+
+    expect.assertions(1);
+    return store
+      .dispatch(actions.updateObject({ ...objectPayload, patch: true }))
+      .then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
-    });
   });
 
   test('throws error if no url', () => {
@@ -757,6 +775,7 @@ describe('updateObject', () => {
 
   describe('error', () => {
     test('dispatches UPDATE_OBJECT_FAILED action', () => {
+      const payload = { ...objectPayload, url: undefined };
       const store = storeWithThunk({});
       fetchMock.putOnce(url, 500);
       const started = {
@@ -769,7 +788,7 @@ describe('updateObject', () => {
       };
 
       expect.assertions(5);
-      return store.dispatch(actions.updateObject(objectPayload)).catch(() => {
+      return store.dispatch(actions.updateObject(payload)).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
@@ -779,5 +798,14 @@ describe('updateObject', () => {
         expect(window.console.error).toHaveBeenCalled();
       });
     });
+  });
+});
+
+describe('removeObject', () => {
+  test('returns OBJECT_REMOVED action', () => {
+    const project = { id: 'project-id' };
+    const expected = { type: 'OBJECT_REMOVED', payload: project };
+
+    expect(actions.removeObject(project)).toEqual(expected);
   });
 });

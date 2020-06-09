@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# MetaShare documentation build configuration file, created by
+# Metecho documentation build configuration file, created by
 # sphinx-quickstart on Sat May 20 12:05:20 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -45,7 +45,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"MetaShare"
+project = u"Metecho"
 copyright = u"2019–2020, Salesforce.org"
 author = u"Salesforce.org"
 
@@ -99,7 +99,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "MetaSharedoc"
+htmlhelp_basename = "Metechodoc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -123,13 +123,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (
-        master_doc,
-        "MetaShare.tex",
-        u"MetaShare Documentation",
-        u"Salesforce.org",
-        "manual",
-    )
+    (master_doc, "Metecho.tex", u"Metecho Documentation", u"Salesforce.org", "manual",)
 ]
 
 
@@ -137,7 +131,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "MetaShare", u"MetaShare Documentation", [author], 1)]
+man_pages = [(master_doc, "Metecho", u"Metecho Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -148,8 +142,8 @@ man_pages = [(master_doc, "MetaShare", u"MetaShare Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "MetaShare",
-        u"MetaShare Documentation",
+        "Metecho",
+        u"Metecho Documentation",
         author,
         "cookiecutterproject_name",
         """Web-based tool for collaborating on Salesforce projects""",

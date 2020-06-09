@@ -27,7 +27,10 @@ const defaultState = {
         slug: 'repository-1',
         old_slugs: ['old-slug'],
         description: 'This is a test repository.',
+        description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
+        github_users: [],
+        repo_image_url: 'https://github.com/repo-image',
       },
     ],
     notFound: ['yet-another-repository'],
@@ -42,12 +45,48 @@ const defaultState = {
           name: 'Project 1',
           repository: 'r1',
           description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
+          github_users: [],
+          status: 'In progress',
+        },
+        {
+          id: 'project2',
+          slug: 'project-2',
+          name: 'Project 2',
+          repository: 'r1',
+          description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
+          github_users: [],
+          status: 'Planned',
+        },
+        {
+          id: 'project3',
+          slug: 'project-3',
+          name: 'Project 3',
+          repository: 'r1',
+          description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
+          github_users: [],
+          status: 'Merged',
+        },
+        {
+          id: 'project4',
+          slug: 'project-4',
+          name: 'Project 4',
+          repository: 'r1',
+          description: 'Project Description',
+          description_rendered: '<p>Project Description</p>',
+          github_users: [],
+          status: 'Review',
         },
       ],
       next: 'next-url',
       notFound: [],
       fetched: true,
     },
+  },
+  user: {
+    username: 'my-user',
   },
 };
 
@@ -60,20 +99,23 @@ describe('<RepoDetail />', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug } = opts;
     const context = {};
-    const { getByText, getByTitle, queryByText } = renderWithRedux(
+    const result = renderWithRedux(
       <StaticRouter context={context}>
         <RepoDetail match={{ params: { repositorySlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { getByText, getByTitle, queryByText, context };
+    return {
+      ...result,
+      context,
+    };
   };
 
   test('renders repository detail and projects list', () => {
-    const { getByText, getByTitle } = setup();
+    const { getByText, getAllByTitle } = setup();
 
-    expect(getByTitle('Repository 1')).toBeVisible();
+    expect(getAllByTitle('Repository 1')[0]).toBeVisible();
     expect(getByText('This is a test repository.')).toBeVisible();
     expect(getByText('Project 1')).toBeVisible();
     expect(getByText('Projects for Repository 1')).toBeVisible();
@@ -175,6 +217,7 @@ describe('<RepoDetail />', () => {
                 {
                   branch_url: 'branch-url',
                   description: 'repository description',
+                  description_rendered: '<p>repository description</p>',
                   id: 'project1',
                   name: 'Project 1',
                   old_slugs: [],
@@ -214,6 +257,7 @@ describe('<RepoDetail />', () => {
                 {
                   branch_url: 'branch-url',
                   description: 'repository description',
+                  description_rendered: '<p>repository description</p>',
                   id: 'project1',
                   name: 'Project 1',
                   old_slugs: [],

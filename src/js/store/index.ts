@@ -23,8 +23,8 @@ export interface AppState {
   user: User | null;
 }
 
-export type ThunkResult = ThunkAction<
-  Promise<any> | AnyAction,
+export type ThunkResult<A = AnyAction | Promise<AnyAction>> = ThunkAction<
+  A,
   AppState,
   void,
   AnyAction

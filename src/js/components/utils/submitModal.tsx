@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
-
 import Button from '@salesforce/design-system-react/components/button';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
@@ -12,15 +10,16 @@ import {
   ExternalLink,
   LabelWithSpinner,
   useForm,
+  useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 interface Props {
   instanceId: string;
   instanceName: string;
   instanceDiffUrl: string | null;
-  instanceType: 'task' | 'project';
+  instanceType: ObjectTypes;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -54,23 +53,23 @@ const SubmitModal = ({
 
   let objectType, heading, submittingLabel, toSubmitLabel;
   switch (instanceType) {
-    case 'task':
+    case OBJECT_TYPES.TASK:
       objectType = {
         objectType: OBJECT_TYPES.TASK_PR,
         url: window.api_urls.task_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this task for review');
-      submittingLabel = i18n.t('Submitting Task for Review…');
-      toSubmitLabel = i18n.t('Submit Task for Review');
+      heading = i18n.t('Submit this task for testing');
+      submittingLabel = i18n.t('Submitting Task for Testing…');
+      toSubmitLabel = i18n.t('Submit Task for Testing');
       break;
-    case 'project':
+    case OBJECT_TYPES.PROJECT:
       objectType = {
         objectType: OBJECT_TYPES.PROJECT_PR,
         url: window.api_urls.project_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this project for review');
-      submittingLabel = i18n.t('Submitting Project for Review…');
-      toSubmitLabel = i18n.t('Submit Project for Review');
+      heading = i18n.t('Submit this project for review on GitHub');
+      submittingLabel = i18n.t('Submitting Project for Review on GitHub…');
+      toSubmitLabel = i18n.t('Submit Project for Review on GitHub');
       break;
   }
 
@@ -78,6 +77,7 @@ const SubmitModal = ({
     inputs,
     errors,
     handleInputChange,
+    setInputs,
     handleSubmit,
     resetForm,
   } = useForm({
@@ -92,6 +92,14 @@ const SubmitModal = ({
     onError: handleError,
     shouldSubscribeToObject: false,
     ...objectType,
+  });
+
+  // When name changes, update default selection
+  useFormDefaults({
+    field: 'title',
+    value: instanceName,
+    inputs,
+    setInputs,
   });
 
   const handleSubmitClicked = () => {
@@ -165,7 +173,6 @@ const SubmitModal = ({
               value={inputs.title}
               required
               aria-required
-              maxLength="50"
               errorText={errors.title}
               onChange={handleInputChange}
             />
@@ -174,7 +181,7 @@ const SubmitModal = ({
               label={i18n.t(
                 'Describe any critical changes which might impact existing functionality',
               )}
-              className="pr-submit-textarea slds-p-bottom_small"
+              className="ms-textarea slds-p-bottom_small"
               name="critical_changes"
               value={inputs.critical_changes}
               errorText={errors.critical_changes}
@@ -185,7 +192,7 @@ const SubmitModal = ({
               label={i18n.t(
                 'Describe additional changes including instructions for users for any post-upgrade tasks',
               )}
-              className="pr-submit-textarea slds-p-bottom_small"
+              className="ms-textarea slds-p-bottom_small"
               name="additional_changes"
               value={inputs.additional_changes}
               errorText={errors.additional_changes}
@@ -194,7 +201,7 @@ const SubmitModal = ({
             <Textarea
               id="pr-notes"
               label={i18n.t('Developer notes')}
-              className="pr-submit-textarea slds-p-bottom_small"
+              className="ms-textarea slds-p-bottom_small"
               name="notes"
               value={inputs.notes}
               errorText={errors.notes}
@@ -243,7 +250,7 @@ const SubmitModal = ({
                 <b>{i18n.t('Example')}</b>
               </p>
               <pre>## {i18n.t('Stops widget from refreshing')}</pre>
-              <pre>{i18n.t('This includes')}:</pre>
+              <pre>{i18n.t('This includes:')}</pre>
               <div className="markdown-block">
                 <pre>- {i18n.t('Renders incomplete bobble')}</pre>
                 <pre>- {i18n.t('Prevents fire from building')}</pre>
