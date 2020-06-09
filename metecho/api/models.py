@@ -72,7 +72,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
-    devhub_username = StringField(null=True, blank=True)
+    devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
     agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
 
@@ -266,7 +266,6 @@ class Repository(
     branch_name = models.CharField(
         max_length=100,
         blank=True,
-        null=True,
         validators=[validate_unicode_branch],
         default="master",
     )
@@ -399,7 +398,7 @@ class Project(
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
+        max_length=100, blank=True, default="", validators=[validate_unicode_branch]
     )
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
@@ -575,12 +574,12 @@ class Task(
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, null=True, blank=True, validators=[validate_unicode_branch]
+        max_length=100, blank=True, default="", validators=[validate_unicode_branch]
     )
     org_config_name = StringField()
 
     commits = JSONField(default=list, blank=True)
-    origin_sha = StringField(null=True, blank=True)
+    origin_sha = StringField(blank=True, default="")
     ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
 
@@ -592,9 +591,9 @@ class Task(
     review_submitted_at = models.DateTimeField(null=True, blank=True)
     review_valid = models.BooleanField(default=False)
     review_status = models.CharField(
-        choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
+        choices=TASK_REVIEW_STATUS, blank=True, default="", max_length=32
     )
-    review_sha = StringField(null=True, blank=True)
+    review_sha = StringField(blank=True, default="")
 
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
@@ -747,7 +746,7 @@ class Task(
         *,
         error=None,
         sha=None,
-        status=None,
+        status="",
         delete_org=False,
         org=None,
         originating_user_id,
@@ -794,7 +793,7 @@ class ScratchOrg(
     latest_commit = StringField(blank=True)
     latest_commit_url = models.URLField(blank=True)
     latest_commit_at = models.DateTimeField(null=True, blank=True)
-    url = models.URLField(null=True, blank=True)
+    url = models.URLField(blank=True, default="")
     last_checked_unsaved_changes_at = models.DateTimeField(null=True, blank=True)
     unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     ignored_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
@@ -807,7 +806,7 @@ class ScratchOrg(
     is_created = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
-    expiry_job_id = StringField(null=True, blank=True)
+    expiry_job_id = StringField(blank=True, default="")
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
     has_been_visited = models.BooleanField(default=False)
