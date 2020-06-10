@@ -12,6 +12,7 @@ import ConfirmRemoveUserModal from '@/components/projects/confirmRemoveUserModal
 import ProjectStatusPath from '@/components/projects/path';
 import ProjectProgress from '@/components/projects/progress';
 import ProjectStatusSteps from '@/components/projects/steps';
+import { Step } from '@/components/steps/stepsItem';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
@@ -56,13 +57,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  // "create anew task form" related...
-  const [createFormOpen, setCreateFormOpen] = useState(true);
-  useEffect(() => {
-    if (tasks?.length) {
-      setCreateFormOpen(false);
-    }
-  }, [tasks]);
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
@@ -258,9 +252,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
-  const toggleCreateForm = (bool: boolean) => {
-    setCreateFormOpen(bool);
-  };
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -362,15 +353,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
     headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
   }
 
-  const handleStepAction = (step: any) => {
+  const handleStepAction = (step: Step[]) => {
     // should be one active step at a time
     const action = step[0].action;
     switch (action) {
-      case 'create':
-        if (!createFormOpen) {
-          toggleCreateForm(true);
-        }
-        break;
       case 'submit':
         if (readyToSubmit) {
           setSubmitModalOpen(true);
@@ -459,11 +445,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               )}
             </h2>
             {project.status !== PROJECT_STATUSES.MERGED && (
-              <TaskForm
-                project={project}
-                isOpen={createFormOpen}
-                toggleForm={toggleCreateForm}
-              />
+              <TaskForm project={project} startOpen={!tasks.length} />
             )}
             {tasks.length ? (
               <>

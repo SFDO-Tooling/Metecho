@@ -29,7 +29,6 @@ const ProjectStatusSteps = ({
       label: `${i18n.t('Create a task')}`,
       active: !hasTasks,
       complete: hasTasks,
-      action: 'create',
     },
     {
       label: `${i18n.t('Assign a Developer to a task')}`,

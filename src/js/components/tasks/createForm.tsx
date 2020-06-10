@@ -13,12 +13,13 @@ import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
   project: Project;
-  isOpen: boolean;
-  toggleForm: (bool: boolean) => void;
+  startOpen?: boolean;
 }
 
-const TaskForm = ({ project, isOpen, toggleForm }: Props) => {
+const TaskForm = ({ project, startOpen = false }: Props) => {
   const isMounted = useIsMounted();
+  const [isOpen, setIsOpen] = useState(startOpen);
+
   const [success, setSuccess] = useState(false);
   const successTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -39,7 +40,7 @@ const TaskForm = ({ project, isOpen, toggleForm }: Props) => {
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     /* istanbul ignore if*/
     if (!isOpen) {
-      toggleForm(true);
+      setIsOpen(true);
       e.preventDefault();
     }
   };
@@ -82,12 +83,8 @@ const TaskForm = ({ project, isOpen, toggleForm }: Props) => {
   });
 
   const closeForm = () => {
-    toggleForm(false);
+    setIsOpen(false);
     resetForm();
-  };
-  const openForm = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    toggleForm(true);
   };
 
   return (
@@ -125,23 +122,16 @@ const TaskForm = ({ project, isOpen, toggleForm }: Props) => {
         </>
       )}
       <div className={classNames({ 'slds-m-top--medium': isOpen })}>
-        {isOpen ? (
-          <Button
-            label={i18n.t('Create Task')}
-            className="show-separator"
-            variant="brand"
-            type="submit"
-            onClick={submitClicked}
-          />
-        ) : (
-          <Button
-            label={i18n.t('Add a Task')}
-            className="hide-separator"
-            variant="brand"
-            // type="button"
-            onClick={openForm}
-          />
-        )}
+        <Button
+          label={isOpen ? i18n.t('Create Task') : i18n.t('Add a Task')}
+          className={classNames({
+            'hide-separator': !isOpen,
+            'show-separator': isOpen,
+          })}
+          variant="brand"
+          type="submit"
+          onClick={submitClicked}
+        />
         <span className="vertical-separator slds-m-left--large"></span>
         {isOpen && (
           <Button

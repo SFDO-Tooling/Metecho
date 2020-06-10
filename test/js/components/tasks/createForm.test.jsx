@@ -39,17 +39,16 @@ const defaultProject = {
 };
 
 describe('<TaskForm/>', () => {
-  const toggleForm = jest.fn();
   const setup = (options) => {
     const defaults = {
       project: defaultProject,
-      isOpen: true,
+      startOpen: true,
     };
     const opts = Object.assign({}, defaults, options);
-    const { project, isOpen } = opts;
+    const { project, startOpen } = opts;
     return renderWithRedux(
       <MemoryRouter>
-        <TaskForm project={project} isOpen={isOpen} toggleForm={toggleForm} />
+        <TaskForm project={project} startOpen={startOpen} />
       </MemoryRouter>,
       {},
       storeWithThunk,
@@ -57,16 +56,27 @@ describe('<TaskForm/>', () => {
   };
 
   describe('submit/close buttons', () => {
-    test('toggle form', () => {
-      const { getByText } = setup({
+    test('toggle form open/closed', () => {
+      const { getByText, queryByText } = setup({
+        startOpen: undefined,
         project: {
           ...defaultProject,
           currently_fetching_org_config_names: true,
         },
       });
+
+      expect(queryByText('Close Form')).toBeNull();
+
+      fireEvent.click(getByText('Add a Task'));
+
+      expect(getByText('Close Form')).toBeVisible();
+      expect(getByText('Create Task')).toBeVisible();
+      expect(queryByText('Add a Task')).toBeNull();
+
       fireEvent.click(getByText('Close Form'));
 
-      expect(toggleForm).toHaveBeenCalledWith(false);
+      expect(queryByText('Close Form')).toBeNull();
+      expect(getByText('Add a Task')).toBeVisible();
     });
   });
 
