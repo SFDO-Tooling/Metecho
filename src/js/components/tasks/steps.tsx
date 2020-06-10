@@ -32,7 +32,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
 
   const steps = [
     {
-      label: `${i18n.t('Assign a Developer')}`,
+      label: i18n.t('Assign a Developer'),
       active: !hasDev,
       // Even if no dev is currently assigned,
       // consider this complete if there are commits and no rejected review
@@ -40,7 +40,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
       assignee: null,
     },
     {
-      label: `${i18n.t('Create a Scratch Org for development')}`,
+      label: i18n.t('Create a Scratch Org for development'),
       active: hasDev && !hasDevOrg,
       // Even if no dev is currently assigned and there's no Dev Org,
       // consider this complete if there are commits and no rejected review
@@ -48,7 +48,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
       assignee: task.assigned_dev,
     },
     {
-      label: `${i18n.t('Make changes in Dev Org')}`,
+      label: i18n.t('Make changes in Dev Org'),
       // Active if we have an assigned Dev, a Dev Org, and the Dev Org has no
       // unsaved changes
       active: hasDev && hasDevOrg && !devOrg?.has_unsaved_changes,
@@ -58,7 +58,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
       assignee: task.assigned_dev,
     },
     {
-      label: `${i18n.t('Retrieve changes from Dev Org')}`,
+      label: i18n.t('Retrieve changes from Dev Org'),
       // Active if we have an assigned Dev and a Dev Org with unsaved changes
       active: hasDev && hasDevOrg && Boolean(devOrg?.has_unsaved_changes),
       // Complete if we have commits (without rejected review)
@@ -66,40 +66,40 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
       assignee: task.assigned_dev,
     },
     {
-      label: `${i18n.t('Submit changes for testing')}`,
+      label: i18n.t('Submit changes for testing'),
       active: task.has_unmerged_commits && !task.pr_is_open,
       complete: task.pr_is_open,
       assignee: null,
     },
     {
-      label: `${i18n.t('Assign a Tester')}`,
+      label: i18n.t('Assign a Tester'),
       active: readyForReview && !hasTester,
       complete: hasTester || task.review_valid,
       assignee: null,
     },
     {
-      label: `${i18n.t('Create a Scratch Org for testing')}`,
+      label: i18n.t('Create a Scratch Org for testing'),
       active: readyForReview && hasTester && !hasTestOrg,
       complete: (hasTester && hasTestOrg) || task.review_valid,
       hidden: testOrgOutOfDate,
       assignee: task.assigned_qa,
     },
     {
-      label: `${i18n.t('Refresh Test Org')}`,
+      label: i18n.t('Refresh Test Org'),
       active: testOrgOutOfDate,
       complete: false,
       hidden: !testOrgOutOfDate,
       assignee: task.assigned_qa,
     },
     {
-      label: `${i18n.t('Test changes in Test Org')}`,
+      label: i18n.t('Test changes in Test Org'),
       active: readyForReview && hasTestOrg && !testOrg?.has_been_visited,
       complete:
         Boolean(hasTestOrg && testOrg?.has_been_visited) || task.review_valid,
       assignee: task.assigned_qa,
     },
     {
-      label: `${i18n.t('Submit a review')}`,
+      label: i18n.t('Submit a review'),
       // Active if Task PR is still open, a up-to-date Test Org exists,
       // and there isn't already a valid review.
       active:
@@ -111,7 +111,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
       assignee: task.assigned_qa,
     },
     {
-      label: `${i18n.t('Merge pull request on GitHub')}`,
+      label: i18n.t('Merge pull request on GitHub'),
       active: readyForReview && hasReviewApproved,
       complete: false,
       assignee: null,
