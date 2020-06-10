@@ -19,7 +19,6 @@ interface Props {
 const TaskForm = ({ project, startOpen = false }: Props) => {
   const isMounted = useIsMounted();
   const [isOpen, setIsOpen] = useState(startOpen);
-
   const [success, setSuccess] = useState(false);
   const successTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -38,7 +37,6 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
   );
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-    /* istanbul ignore if*/
     if (!isOpen) {
       setIsOpen(true);
       e.preventDefault();

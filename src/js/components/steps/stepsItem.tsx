@@ -21,28 +21,39 @@ export type Step = {
 const StepsItem = ({
   step,
   someAssignees,
-  stepActionClicked,
+  handleAction,
 }: {
   step: Step;
   someAssignees: boolean;
-  stepActionClicked: () => void;
+  handleAction?: (step: Step) => void;
 }) => {
   const isActive = step.active && !step.complete;
   const hasAssignee = Boolean(step.assignee && !step.complete);
-  const handleAction = () => {
-    stepActionClicked();
-  };
-  let label = <>{step.label}</>;
+
+  let label: JSX.Element | string = step.label;
   if (isActive) {
     if (step.link) {
-      label = <ExternalLink url={step.link}>{step.label}</ExternalLink>;
-    }
-    if (step.action) {
       label = (
-        <Button label={step.label} onClick={handleAction} variant="base" />
+        <ExternalLink url={step.link}>
+          {step.label}
+          <Icon
+            category="utility"
+            name="new_window"
+            size="xx-small"
+            className="slds-m-bottom_xx-small"
+            containerClassName="slds-m-left_xx-small"
+          />
+        </ExternalLink>
+      );
+    }
+    if (step.action && handleAction) {
+      const stepClicked = () => handleAction(step);
+      label = (
+        <Button label={step.label} onClick={stepClicked} variant="link" />
       );
     }
   }
+
   return (
     <li
       className={classNames('slds-progress__item', {

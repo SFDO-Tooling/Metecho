@@ -57,6 +57,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
@@ -253,6 +254,22 @@ const ProjectDetail = (props: RouteComponentProps) => {
     setDeleteModalOpen(false);
   };
 
+  // "Next Steps" action handler
+  const handleStepAction = useCallback(
+    (step: Step) => {
+      const action = step.action;
+      switch (action) {
+        case 'submit':
+          /* istanbul ignore else */
+          if (readyToSubmit) {
+            openSubmitModal();
+          }
+          break;
+      }
+    },
+    [readyToSubmit],
+  );
+
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -353,19 +370,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
     headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
   }
 
-  const handleStepAction = (step: Step[]) => {
-    // should be one active step at a time
-    const action = step[0].action;
-    switch (action) {
-      case 'submit':
-        if (readyToSubmit) {
-          setSubmitModalOpen(true);
-        }
-        break;
-      default:
-        break;
-    }
-  };
   return (
     <DocumentTitle
       title={`${project.name} | ${repository.name} | ${i18n.t('Metecho')}`}

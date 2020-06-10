@@ -11,7 +11,7 @@ interface ProjectStatusStepsProps {
   project: Project;
   tasks: Task[];
   readyToSubmit: boolean;
-  handleAction: (action: Step[]) => void;
+  handleAction: (step: Step) => void;
 }
 
 const ProjectStatusSteps = ({
@@ -28,17 +28,18 @@ const ProjectStatusSteps = ({
     {
       label: `${i18n.t('Create a task')}`,
       active: !hasTasks,
-      complete: hasTasks,
+      complete: hasTasks || isMerged,
     },
     {
       label: `${i18n.t('Assign a Developer to a task')}`,
       active: hasTasks && !hasDev,
-      complete: readyToSubmit || (hasTasks && hasDev),
+      complete:
+        project.has_unmerged_commits || (hasTasks && hasDev) || isMerged,
     },
     {
       label: `${i18n.t('Complete a task')}`,
       active: hasTasks && hasDev,
-      complete: readyToSubmit,
+      complete: project.has_unmerged_commits || isMerged,
     },
     {
       label: `${i18n.t('Submit this project for review on GitHub')}`,
@@ -50,16 +51,15 @@ const ProjectStatusSteps = ({
       label: `${i18n.t('Merge pull request on GitHub')}`,
       active: project.pr_is_open,
       complete: isMerged,
-      link: project.branch_url,
+      link: project.pr_url,
     },
   ];
-  const activeStep = steps.filter((s) => s.active);
 
   return (
     <Steps
       steps={steps}
       title={i18n.t('Next Steps for this Project')}
-      handleCurrentAction={() => handleAction(activeStep)}
+      handleAction={handleAction}
     />
   );
 };

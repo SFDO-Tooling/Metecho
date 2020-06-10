@@ -5,11 +5,11 @@ import StepsItem, { Step } from '@/components/steps/stepsItem';
 const Steps = ({
   steps,
   title,
-  handleCurrentAction,
+  handleAction,
 }: {
   steps: Step[];
   title: string;
-  handleCurrentAction?: () => void;
+  handleAction?: (step: Step) => void;
 }) => {
   const someAssignees = steps.some((i) => i.assignee);
   return (
@@ -24,11 +24,7 @@ const Steps = ({
                 key={idx}
                 step={step}
                 someAssignees={someAssignees}
-                stepActionClicked={() => {
-                  if (handleCurrentAction && step.action) {
-                    handleCurrentAction();
-                  }
-                }}
+                handleAction={handleAction}
               />
             ))}
         </ol>
