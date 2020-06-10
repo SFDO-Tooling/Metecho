@@ -76,7 +76,7 @@ export const UserCards = ({
     className="slds-grid
       slds-wrap
       slds-grid_pull-padded-xx-small
-      slds-m-top_medium"
+      slds-m-top_large"
   >
     {users.map((user) => {
       const doRemoveUser = () => removeUser(user);
