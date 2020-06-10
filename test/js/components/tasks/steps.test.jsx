@@ -7,7 +7,7 @@ import { REVIEW_STATUSES, TASK_STATUSES } from '@/utils/constants';
 const defaultTask = {
   id: 'task',
   review_valid: false,
-  review_status: null,
+  review_status: '',
   pr_is_open: false,
   status: TASK_STATUSES.PLANNED,
   assigned_dev: null,
