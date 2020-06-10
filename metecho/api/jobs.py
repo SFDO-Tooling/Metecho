@@ -783,3 +783,24 @@ def available_task_org_config_names(project, *, user):
 
 
 available_task_org_config_names_job = job(available_task_org_config_names)
+
+
+def user_reassign(scratch_org, *, new_user, originating_user_id):
+    try:
+        scratch_org.refresh_from_db()
+        scratch_org.config["email"] = new_user.email
+        scratch_org.owner = new_user
+        org_config = scratch_org.get_refreshed_org_config()
+        username = org_config.username
+        org_config.salesforce_client.User.update(
+            f"Username/{username}", {"Email": new_user.email},
+        )
+    except Exception as err:
+        scratch_org.finalize_reassign(
+            error=err, originating_user_id=originating_user_id
+        )
+    else:
+        scratch_org.finalize_reassign(originating_user_id=originating_user_id)
+
+
+user_reassign_job = job(user_reassign)

@@ -358,7 +358,7 @@ class TaskSerializer(serializers.ModelSerializer):
                 if new_user := self._valid_reassign(
                     "dev", instance.assigned_dev, validated_data["assigned_dev"]
                 ):
-                    org.reassign(
+                    org.queue_reassign(
                         new_user=new_user, originating_user_id=originating_user_id
                     )
                 else:
@@ -369,7 +369,7 @@ class TaskSerializer(serializers.ModelSerializer):
                 if new_user := self._valid_reassign(
                     "qa", instance.assigned_qa, validated_data["assigned_qa"]
                 ):
-                    org.reassign(
+                    org.queue_reassign(
                         new_user=new_user, originating_user_id=originating_user_id
                     )
                 else:
@@ -458,6 +458,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "currently_refreshing_org",
+            "currently_reassigning_user",
             "is_created",
             "delete_queued_at",
             "owner_gh_username",
@@ -475,6 +476,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
+            "currently_reassigning_user": {"read_only": True},
             "is_created": {"read_only": True},
             "delete_queued_at": {"read_only": True},
             "owner_gh_username": {"read_only": True},

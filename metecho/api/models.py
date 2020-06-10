@@ -804,6 +804,7 @@ class ScratchOrg(
     currently_refreshing_changes = models.BooleanField(default=False)
     currently_capturing_changes = models.BooleanField(default=False)
     currently_refreshing_org = models.BooleanField(default=False)
+    currently_reassigning_user = models.BooleanField(default=False)
     is_created = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
@@ -1050,11 +1051,29 @@ class ScratchOrg(
             )
             self.queue_delete(originating_user_id=originating_user_id)
 
-    def reassign(self, *, new_user, originating_user_id):
-        self.config["email"] = new_user.email
-        self.owner = new_user
+    def queue_reassign(self, *, new_user, originating_user_id):
+        from .jobs import user_reassign_job
+
+        self.currently_refreshing_org = True
         self.save()
-        # TODO update `AdminEmail` in the org too?
+        self.notify_changed(originating_user_id=originating_user_id)
+        user_reassign_job.delay(
+            self, new_user=new_user, originating_user_id=originating_user_id
+        )
+
+    def finalize_reassign(self, *, error=None, originating_user_id):
+        self.currently_reassigning_user = False
+        self.save()
+        if error is None:
+            self.notify_changed(
+                type_="SCRATCH_ORG_REASSIGN", originating_user_id=originating_user_id
+            )
+        else:
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_REASSIGN_FAILED",
+                originating_user_id=originating_user_id,
+            )
 
 
 @receiver(user_logged_in)
