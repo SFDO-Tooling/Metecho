@@ -390,16 +390,14 @@ const ProjectDetail = (props: RouteComponentProps) => {
         sidebar={
           <>
             <div className="slds-m-bottom_x-large ms-secondary-block">
-              <div class="slds-m-bottom_medium">
-                <h2 className="slds-text-heading_medium slds-p-bottom_small">
-                  {i18n.t('Collaborators')}
-                </h2>
-                <Button
-                  label={i18n.t('Add or Remove Collaborators')}
-                  variant="outline-brand"
-                  onClick={openAssignUsersModal}
-                />
-              </div>
+              <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                {i18n.t('Collaborators')}
+              </h2>
+              <Button
+                label={i18n.t('Add or Remove Collaborators')}
+                variant="outline-brand"
+                onClick={openAssignUsersModal}
+              />
               <AssignUsersModal
                 allUsers={repository.github_users}
                 selectedUsers={project.github_users}
@@ -418,10 +416,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 handleClose={closeConfirmRemoveUsersModal}
                 handleUpdateUsers={updateProjectUsers}
               />
-              <UserCards
-                users={project.github_users}
-                removeUser={removeProjectUser}
-              />
+              {project.github_users.length ? (
+                <UserCards
+                  users={project.github_users}
+                  removeUser={removeProjectUser}
+                />
+              ) : null}
             </div>
             <div className="slds-m-bottom_x-large ms-secondary-block">
               <ProjectStatusSteps
