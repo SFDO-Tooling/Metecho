@@ -389,44 +389,48 @@ const ProjectDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_medium">
-              <h2 className="slds-text-heading_medium slds-p-bottom_small">
-                {i18n.t('Collaborators')}
-              </h2>
-              <Button
-                label={i18n.t('Add or Remove Collaborators')}
-                variant="outline-brand"
-                onClick={openAssignUsersModal}
+            <div className="slds-m-bottom_x-large ms-secondary-block">
+              <div class="slds-m-bottom_medium">
+                <h2 className="slds-text-heading_medium slds-p-bottom_small">
+                  {i18n.t('Collaborators')}
+                </h2>
+                <Button
+                  label={i18n.t('Add or Remove Collaborators')}
+                  variant="outline-brand"
+                  onClick={openAssignUsersModal}
+                />
+              </div>
+              <AssignUsersModal
+                allUsers={repository.github_users}
+                selectedUsers={project.github_users}
+                heading={`${i18n.t('Add or Remove Collaborators for')} ${
+                  project.name
+                }`}
+                isOpen={assignUsersModalOpen}
+                onRequestClose={closeAssignUsersModal}
+                setUsers={setProjectUsers}
+                isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
+                refreshUsers={doRefreshGitHubUsers}
+              />
+              <ConfirmRemoveUserModal
+                confirmRemoveUsers={confirmRemoveUsers}
+                waitingToUpdateUsers={waitingToUpdateUsers}
+                handleClose={closeConfirmRemoveUsersModal}
+                handleUpdateUsers={updateProjectUsers}
+              />
+              <UserCards
+                users={project.github_users}
+                removeUser={removeProjectUser}
               />
             </div>
-            <AssignUsersModal
-              allUsers={repository.github_users}
-              selectedUsers={project.github_users}
-              heading={`${i18n.t('Add or Remove Collaborators for')} ${
-                project.name
-              }`}
-              isOpen={assignUsersModalOpen}
-              onRequestClose={closeAssignUsersModal}
-              setUsers={setProjectUsers}
-              isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
-              refreshUsers={doRefreshGitHubUsers}
-            />
-            <ConfirmRemoveUserModal
-              confirmRemoveUsers={confirmRemoveUsers}
-              waitingToUpdateUsers={waitingToUpdateUsers}
-              handleClose={closeConfirmRemoveUsersModal}
-              handleUpdateUsers={updateProjectUsers}
-            />
-            <UserCards
-              users={project.github_users}
-              removeUser={removeProjectUser}
-            />
-            <ProjectStatusSteps
-              project={project}
-              tasks={tasks || []}
-              readyToSubmit={readyToSubmit}
-              handleAction={handleStepAction}
-            />
+            <div className="slds-m-bottom_x-large ms-secondary-block">
+              <ProjectStatusSteps
+                project={project}
+                tasks={tasks || []}
+                readyToSubmit={readyToSubmit}
+                handleAction={handleStepAction}
+              />
+            </div>
           </>
         }
       >

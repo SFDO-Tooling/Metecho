@@ -42,7 +42,7 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
   }
 
   return (
-    <div className="slds-p-bottom_large">
+    <div className="slds-m-bottom_x-large ms-secondary-block">
       <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />
     </div>
   );
