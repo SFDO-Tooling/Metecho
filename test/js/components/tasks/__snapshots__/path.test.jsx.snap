@@ -3,168 +3,164 @@
 exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
 <div>
   <div
-    class="slds-p-bottom_large"
+    class="slds-region_small"
   >
     <div
-      class="slds-region_small"
+      class="slds-path"
     >
       <div
-        class="slds-path"
+        class="slds-grid slds-path__track"
       >
-        <div
-          class="slds-grid slds-path__track"
+        <ul
+          aria-orientation="horizontal"
+          class="slds-path__nav"
+          role="listbox"
         >
-          <ul
-            aria-orientation="horizontal"
-            class="slds-path__nav"
-            role="listbox"
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
           >
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-0"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-0"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Planned
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Planned
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-1"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-1"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  In progress
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                In progress
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-2"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-2"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Test
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-current slds-is-active"
-              role="presentation"
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Test
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-current slds-is-active"
+            role="presentation"
+          >
+            <a
+              aria-selected="true"
+              class="slds-path__link progress-bar-item"
+              id="path-3"
+              role="option"
+              tabindex="0"
             >
-              <a
-                aria-selected="true"
-                class="slds-path__link progress-bar-item"
-                id="path-3"
-                role="option"
-                tabindex="0"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Current Stage:
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Merged
+                  Current Stage:
                 </span>
-              </a>
-            </li>
-          </ul>
-        </div>
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Merged
+              </span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -174,158 +170,154 @@ exports[`<TaskStatusPath /> renders steps from task status: approved 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`] = `
 <div>
   <div
-    class="slds-p-bottom_large"
+    class="slds-region_small"
   >
     <div
-      class="slds-region_small"
+      class="slds-path"
     >
       <div
-        class="slds-path"
+        class="slds-grid slds-path__track"
       >
-        <div
-          class="slds-grid slds-path__track"
+        <ul
+          aria-orientation="horizontal"
+          class="slds-path__nav"
+          role="listbox"
         >
-          <ul
-            aria-orientation="horizontal"
-            class="slds-path__nav"
-            role="listbox"
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
           >
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-0"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-0"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Planned
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-current slds-is-active"
-              role="presentation"
-            >
-              <a
-                aria-selected="true"
-                class="slds-path__link progress-bar-item"
-                id="path-1"
-                role="option"
-                tabindex="0"
+              </span>
+              <span
+                class="slds-path__title"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                Planned
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-current slds-is-active"
+            role="presentation"
+          >
+            <a
+              aria-selected="true"
+              class="slds-path__link progress-bar-item"
+              id="path-1"
+              role="option"
+              tabindex="0"
+            >
+              <span
+                class="slds-path__stage"
+              >
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Current Stage:
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  In progress
+                  Current Stage:
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-incomplete"
-              role="presentation"
-            >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-2"
-                role="option"
-                tabindex="-1"
+              </span>
+              <span
+                class="slds-path__title"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                </span>
-                <span
-                  class="slds-path__title"
-                >
-                  Test
-                </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-incomplete"
-              role="presentation"
+                In progress
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-incomplete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-2"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-3"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                  >
+                    <use />
+                  </svg>
+                  
                 </span>
-                <span
-                  class="slds-path__title"
-                >
-                  Merged
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Test
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-incomplete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-3"
+              role="option"
+              tabindex="-1"
+            >
+              <span
+                class="slds-path__stage"
+              >
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                  >
+                    <use />
+                  </svg>
+                  
                 </span>
-              </a>
-            </li>
-          </ul>
-        </div>
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Merged
+              </span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -335,158 +327,154 @@ exports[`<TaskStatusPath /> renders steps from task status: changes requested 1`
 exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
 <div>
   <div
-    class="slds-p-bottom_large"
+    class="slds-region_small"
   >
     <div
-      class="slds-region_small"
+      class="slds-path"
     >
       <div
-        class="slds-path"
+        class="slds-grid slds-path__track"
       >
-        <div
-          class="slds-grid slds-path__track"
+        <ul
+          aria-orientation="horizontal"
+          class="slds-path__nav"
+          role="listbox"
         >
-          <ul
-            aria-orientation="horizontal"
-            class="slds-path__nav"
-            role="listbox"
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
           >
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-0"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-0"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Planned
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-current slds-is-active"
-              role="presentation"
-            >
-              <a
-                aria-selected="true"
-                class="slds-path__link progress-bar-item"
-                id="path-1"
-                role="option"
-                tabindex="0"
+              </span>
+              <span
+                class="slds-path__title"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                Planned
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-current slds-is-active"
+            role="presentation"
+          >
+            <a
+              aria-selected="true"
+              class="slds-path__link progress-bar-item"
+              id="path-1"
+              role="option"
+              tabindex="0"
+            >
+              <span
+                class="slds-path__stage"
+              >
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Current Stage:
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  In progress
+                  Current Stage:
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-incomplete"
-              role="presentation"
-            >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-2"
-                role="option"
-                tabindex="-1"
+              </span>
+              <span
+                class="slds-path__title"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                </span>
-                <span
-                  class="slds-path__title"
-                >
-                  Test
-                </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-incomplete"
-              role="presentation"
+                In progress
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-incomplete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-2"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-3"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                  >
+                    <use />
+                  </svg>
+                  
                 </span>
-                <span
-                  class="slds-path__title"
-                >
-                  Merged
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Test
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-incomplete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-3"
+              role="option"
+              tabindex="-1"
+            >
+              <span
+                class="slds-path__stage"
+              >
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                  >
+                    <use />
+                  </svg>
+                  
                 </span>
-              </a>
-            </li>
-          </ul>
-        </div>
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Merged
+              </span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -496,168 +484,164 @@ exports[`<TaskStatusPath /> renders steps from task status: in progress 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
 <div>
   <div
-    class="slds-p-bottom_large"
+    class="slds-region_small"
   >
     <div
-      class="slds-region_small"
+      class="slds-path"
     >
       <div
-        class="slds-path"
+        class="slds-grid slds-path__track"
       >
-        <div
-          class="slds-grid slds-path__track"
+        <ul
+          aria-orientation="horizontal"
+          class="slds-path__nav"
+          role="listbox"
         >
-          <ul
-            aria-orientation="horizontal"
-            class="slds-path__nav"
-            role="listbox"
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
           >
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-0"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-0"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Planned
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Planned
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-1"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-1"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  In progress
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                In progress
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-2"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-2"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Test
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-current slds-is-active slds-is-won"
-              role="presentation"
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Test
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-current slds-is-active slds-is-won"
+            role="presentation"
+          >
+            <a
+              aria-selected="true"
+              class="slds-path__link progress-bar-item"
+              id="path-3"
+              role="option"
+              tabindex="0"
             >
-              <a
-                aria-selected="true"
-                class="slds-path__link progress-bar-item"
-                id="path-3"
-                role="option"
-                tabindex="0"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Current Stage:
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Merged
+                  Current Stage:
                 </span>
-              </a>
-            </li>
-          </ul>
-        </div>
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Merged
+              </span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -667,153 +651,149 @@ exports[`<TaskStatusPath /> renders steps from task status: merged 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
 <div>
   <div
-    class="slds-p-bottom_large"
+    class="slds-region_small"
   >
     <div
-      class="slds-region_small"
+      class="slds-path"
     >
       <div
-        class="slds-path"
+        class="slds-grid slds-path__track"
       >
-        <div
-          class="slds-grid slds-path__track"
+        <ul
+          aria-orientation="horizontal"
+          class="slds-path__nav"
+          role="listbox"
         >
-          <ul
-            aria-orientation="horizontal"
-            class="slds-path__nav"
-            role="listbox"
+          <li
+            class="slds-path__item slds-is-current slds-is-active"
+            role="presentation"
           >
-            <li
-              class="slds-path__item slds-is-current slds-is-active"
-              role="presentation"
+            <a
+              aria-selected="true"
+              class="slds-path__link progress-bar-item"
+              id="path-0"
+              role="option"
+              tabindex="0"
             >
-              <a
-                aria-selected="true"
-                class="slds-path__link progress-bar-item"
-                id="path-0"
-                role="option"
-                tabindex="0"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Current Stage:
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Planned
+                  Current Stage:
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-incomplete"
-              role="presentation"
-            >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-1"
-                role="option"
-                tabindex="-1"
+              </span>
+              <span
+                class="slds-path__title"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                </span>
-                <span
-                  class="slds-path__title"
-                >
-                  In progress
-                </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-incomplete"
-              role="presentation"
+                Planned
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-incomplete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-1"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-2"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                  >
+                    <use />
+                  </svg>
+                  
                 </span>
-                <span
-                  class="slds-path__title"
-                >
-                  Test
-                </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-incomplete"
-              role="presentation"
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                In progress
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-incomplete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-2"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-3"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                  >
+                    <use />
+                  </svg>
+                  
                 </span>
-                <span
-                  class="slds-path__title"
-                >
-                  Merged
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Test
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-incomplete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-3"
+              role="option"
+              tabindex="-1"
+            >
+              <span
+                class="slds-path__stage"
+              >
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                  >
+                    <use />
+                  </svg>
+                  
                 </span>
-              </a>
-            </li>
-          </ul>
-        </div>
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Merged
+              </span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -823,163 +803,159 @@ exports[`<TaskStatusPath /> renders steps from task status: planned 1`] = `
 exports[`<TaskStatusPath /> renders steps from task status: review 1`] = `
 <div>
   <div
-    class="slds-p-bottom_large"
+    class="slds-region_small"
   >
     <div
-      class="slds-region_small"
+      class="slds-path"
     >
       <div
-        class="slds-path"
+        class="slds-grid slds-path__track"
       >
-        <div
-          class="slds-grid slds-path__track"
+        <ul
+          aria-orientation="horizontal"
+          class="slds-path__nav"
+          role="listbox"
         >
-          <ul
-            aria-orientation="horizontal"
-            class="slds-path__nav"
-            role="listbox"
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
           >
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-0"
+              role="option"
+              tabindex="-1"
             >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-0"
-                role="option"
-                tabindex="-1"
+              <span
+                class="slds-path__stage"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Planned
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-complete"
-              role="presentation"
-            >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-1"
-                role="option"
-                tabindex="-1"
+              </span>
+              <span
+                class="slds-path__title"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                Planned
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-complete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-1"
+              role="option"
+              tabindex="-1"
+            >
+              <span
+                class="slds-path__stage"
+              >
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Stage Complete
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  In progress
+                  Stage Complete
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-current slds-is-active"
-              role="presentation"
-            >
-              <a
-                aria-selected="true"
-                class="slds-path__link progress-bar-item"
-                id="path-2"
-                role="option"
-                tabindex="0"
+              </span>
+              <span
+                class="slds-path__title"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
-                  <span
-                    class="slds-assistive-text"
+                In progress
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-current slds-is-active"
+            role="presentation"
+          >
+            <a
+              aria-selected="true"
+              class="slds-path__link progress-bar-item"
+              id="path-2"
+              role="option"
+              tabindex="0"
+            >
+              <span
+                class="slds-path__stage"
+              >
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
                   >
-                    Current Stage:
-                  </span>
+                    <use />
+                  </svg>
+                  
                 </span>
                 <span
-                  class="slds-path__title"
+                  class="slds-assistive-text"
                 >
-                  Test
+                  Current Stage:
                 </span>
-              </a>
-            </li>
-            <li
-              class="slds-path__item slds-is-incomplete"
-              role="presentation"
-            >
-              <a
-                aria-selected="false"
-                class="slds-path__link progress-bar-item"
-                id="path-3"
-                role="option"
-                tabindex="-1"
+              </span>
+              <span
+                class="slds-path__title"
               >
-                <span
-                  class="slds-path__stage"
-                >
-                  <span>
-                    <svg
-                      aria-hidden="true"
-                      class="slds-icon slds-icon_x-small slds-icon-text-default"
-                    >
-                      <use />
-                    </svg>
-                    
-                  </span>
+                Test
+              </span>
+            </a>
+          </li>
+          <li
+            class="slds-path__item slds-is-incomplete"
+            role="presentation"
+          >
+            <a
+              aria-selected="false"
+              class="slds-path__link progress-bar-item"
+              id="path-3"
+              role="option"
+              tabindex="-1"
+            >
+              <span
+                class="slds-path__stage"
+              >
+                <span>
+                  <svg
+                    aria-hidden="true"
+                    class="slds-icon slds-icon_x-small slds-icon-text-default"
+                  >
+                    <use />
+                  </svg>
+                  
                 </span>
-                <span
-                  class="slds-path__title"
-                >
-                  Merged
-                </span>
-              </a>
-            </li>
-          </ul>
-        </div>
+              </span>
+              <span
+                class="slds-path__title"
+              >
+                Merged
+              </span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

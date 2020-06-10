@@ -368,9 +368,13 @@ const TaskDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <TaskStatusPath task={task} />
+            <div className="slds-m-bottom_x-large ms-secondary-block">
+              <TaskStatusPath task={task} />
+            </div>
             {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
-              <TaskStatusSteps task={task} orgs={orgs} />
+              <div className="slds-m-bottom_x-large ms-secondary-block">
+                <TaskStatusSteps task={task} orgs={orgs} />
+              </div>
             ) : null}
           </>
         }

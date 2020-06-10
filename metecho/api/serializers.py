@@ -352,11 +352,15 @@ class TaskSerializer(serializers.ModelSerializer):
         else:
             originating_user_id = None
         if instance.assigned_dev != validated_data["assigned_dev"]:
-            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
+            orgs = instance.scratchorg_set.active().filter(
+                org_type=SCRATCH_ORG_TYPES.Dev
+            )
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
-            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.QA)
+            orgs = instance.scratchorg_set.active().filter(
+                org_type=SCRATCH_ORG_TYPES.QA
+            )
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
         return super().update(instance, validated_data)

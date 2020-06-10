@@ -231,7 +231,7 @@ const ChangesForm = ({
               <Checkbox
                 id="select-all-changes"
                 labels={{
-                  label: `${i18n.t('All Changes')}`,
+                  label: i18n.t('All Changes'),
                 }}
                 checked={allChangesChecked}
                 indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}

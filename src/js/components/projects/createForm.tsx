@@ -244,7 +244,7 @@ const ProjectForm = ({ user, repository, hasProjects, history }: Props) => {
                 onBlur: handleBranchBlur,
               }}
               labels={{
-                label: `${i18n.t('Select a branch to use for this project')}`,
+                label: i18n.t('Select a branch to use for this project'),
                 noOptionsFound: noOptionsFoundText,
               }}
               menuItemVisibleLength={5}

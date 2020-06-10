@@ -72,7 +72,12 @@ export const UserCards = ({
   users: GitHubUser[];
   removeUser: (user: GitHubUser) => void;
 }) => (
-  <div className="slds-grid slds-wrap slds-grid_pull-padded-xx-small">
+  <div
+    className="slds-grid
+      slds-wrap
+      slds-grid_pull-padded-xx-small
+      slds-m-top_large"
+  >
     {users.map((user) => {
       const doRemoveUser = () => removeUser(user);
       return (
