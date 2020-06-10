@@ -91,15 +91,9 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {projects.projects.length ? (
-                <>
-                  {i18n.t('Projects for')} {repository.name}
-                </>
-              ) : (
-                <>
-                  {i18n.t('Create a Project for')} {repository.name}
-                </>
-              )}
+              {projects.projects.length
+                ? `${i18n.t('Projects for')} ${repository.name}`
+                : `${i18n.t('Create a Project for')} ${repository.name}`}
             </h2>
             <ProjectForm
               user={user}

@@ -61,9 +61,9 @@ const PageDescription = ({
           </div>
         </div>
       ) : (
-        renderedDescription
-      )}
-    </div>
+      renderedDescription
+    )}
+  </div>
   );
 };
 

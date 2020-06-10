@@ -442,15 +442,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {tasks.length || project.status === PROJECT_STATUSES.MERGED ? (
-                <>
-                  {i18n.t('Tasks for')} {project.name}
-                </>
-              ) : (
-                <>
-                  {i18n.t('Add a Task for')} {project.name}
-                </>
-              )}
+              {tasks.length || project.status === PROJECT_STATUSES.MERGED
+                ? `${i18n.t('Tasks for')} ${project.name}`
+                : `${i18n.t('Add a Task for')} ${project.name}`}
             </h2>
             {project.status !== PROJECT_STATUSES.MERGED && (
               <TaskForm project={project} startOpen={!tasks.length} />
