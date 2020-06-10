@@ -75,7 +75,7 @@ class TestRepository:
         with patch("metecho.api.gh.get_repo_info") as get_repo_info:
             get_repo_info.return_value = MagicMock(default_branch="main-branch")
             git_hub_repository_factory(repo_id=123)
-            repo = repository_factory(branch_name=None, repo_id=123)
+            repo = repository_factory(branch_name="", repo_id=123)
             repo.save()
             assert get_repo_info.called
             repo.refresh_from_db()
@@ -485,7 +485,7 @@ class TestUser:
         self, settings, user_factory, social_account_factory
     ):
         settings.DEVHUB_USERNAME = "devhub username"
-        user = user_factory(devhub_username=None, allow_devhub_override=False)
+        user = user_factory(devhub_username="", allow_devhub_override=False)
         social_account_factory(
             user=user, provider="salesforce", extra_data={},
         )

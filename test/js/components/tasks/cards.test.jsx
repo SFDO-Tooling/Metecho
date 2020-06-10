@@ -431,7 +431,7 @@ describe('<OrgCards/>', () => {
       describe('unknown commits list', () => {
         test('does not render compare changes link', () => {
           const { getByText, queryByText } = setup({
-            task: { ...defaultTask, commits: [], origin_sha: null },
+            task: { ...defaultTask, commits: [], origin_sha: '' },
             orgs,
           });
 

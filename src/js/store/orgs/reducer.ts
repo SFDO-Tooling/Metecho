@@ -22,7 +22,7 @@ export interface Org extends MinimalOrg {
   latest_commit: string;
   latest_commit_url: string;
   latest_commit_at: string | null;
-  url: string | null;
+  url: string;
   unsaved_changes: Changeset;
   has_unsaved_changes: boolean;
   total_unsaved_changes: number;
