@@ -38,33 +38,29 @@ const PageDescription = ({
     </>
   );
 
-  return (
-    <>
-      {image ? (
-        <div className="slds-media container-fill-space slds-m-bottom_large">
-          <div
-            className="slds-media__figure
+  return image ? (
+    <div className="slds-media container-fill-space slds-m-bottom_large">
+      <div
+        className="slds-media__figure
               slds-m-left_xx-small
               ms-repo-image-wrapper"
-          >
-            <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
-          </div>
-          <div
-            className="slds-media__body
+      >
+        <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
+      </div>
+      <div
+        className="slds-media__body
               slds-border_left
               slds-p-horizontal_small
               slds-p-bottom_small
               slds-grid
               slds-grid_vertical
               content-fill-height"
-          >
-            {renderedDescription}
-          </div>
-        </div>
-      ) : (
-        renderedDescription
-      )}
-    </>
+      >
+        {renderedDescription}
+      </div>
+    </div>
+  ) : (
+    renderedDescription
   );
 };
 

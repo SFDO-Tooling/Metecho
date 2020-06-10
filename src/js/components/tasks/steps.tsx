@@ -118,11 +118,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
     },
   ];
 
-  return (
-    <>
-      <Steps steps={steps} title={i18n.t('Next Steps for this Task')} />
-    </>
-  );
+  return <Steps steps={steps} title={i18n.t('Next Steps for this Task')} />;
 };
 
 export default TaskStatusSteps;

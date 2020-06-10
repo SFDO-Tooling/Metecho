@@ -8,11 +8,9 @@ describe('<RepositoryListItem />', () => {
   const setup = (initialState) => {
     const { getByText } = render(
       <MemoryRouter>
-        <>
-          {initialState.repositories.repositories.map((repository) => (
-            <RepositoryListItem repository={repository} key={repository.id} />
-          ))}
-        </>
+        {initialState.repositories.repositories.map((repository) => (
+          <RepositoryListItem repository={repository} key={repository.id} />
+        ))}
       </MemoryRouter>,
     );
     return { getByText };
