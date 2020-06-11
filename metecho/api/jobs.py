@@ -199,7 +199,6 @@ def _create_org_and_run_flow(
     scratch_org.url = scratch_org_config.instance_url
     scratch_org.expires_at = scratch_org_config.expires
     scratch_org.latest_commit = commit.sha
-    scratch_org.originating_commit = commit.sha
     scratch_org.latest_commit_url = commit.html_url
     scratch_org.latest_commit_at = commit.commit.author.get("date", None)
     scratch_org.config = scratch_org_config.config
