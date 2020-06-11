@@ -19,7 +19,7 @@ export interface User {
   is_devhub_enabled: boolean;
   is_staff: boolean;
   currently_fetching_repos: boolean;
-  devhub_username: string | null;
+  devhub_username: string;
   uses_global_devhub: boolean;
   agreed_to_tos_at: string | null;
 }

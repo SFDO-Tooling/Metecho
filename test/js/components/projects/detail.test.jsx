@@ -510,6 +510,30 @@ describe('<ProjectDetail/>', () => {
     });
   });
 
+  describe('"Submit this project for review on GitHub" step click', () => {
+    test('opens modal', () => {
+      const { getByText, getByLabelText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  has_unmerged_commits: true,
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getByText('Submit this project for review on GitHub'));
+
+      expect(getByLabelText('Developer notes')).toBeVisible();
+    });
+  });
+
   describe('submitting project for review', () => {
     test('renders loading button', () => {
       const { getByText } = setup({

@@ -20,7 +20,14 @@ github3-py==1.3.0
 honcho==1.0.1
 logfmt==0.4
 markdown==3.2.2
+
+# psycopg2 is used as the database driver for Django to connect to PostgreSQL.
+# It is LGPL-licensed and we must follow these rules for compliance with Salesforce 3rd-party software policy:
+# 1. Salesforce code only links to unmodified (binary, if applicable) copies of the 3rd-party code
+# 2. Salesforce code only dynamically (not statically) links to the 3rd-party code
+# 3. Salesforce code does not derive from, is not based on, and remains separate (aside from linking) from the requested code
 psycopg2-binary==2.8.5
+
 rq-scheduler==0.10.0
 sentry-sdk==0.14.4
 service_identity==18.1.0

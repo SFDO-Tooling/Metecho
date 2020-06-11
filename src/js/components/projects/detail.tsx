@@ -11,6 +11,8 @@ import FourOhFour from '@/components/404';
 import ConfirmRemoveUserModal from '@/components/projects/confirmRemoveUserModal';
 import ProjectStatusPath from '@/components/projects/path';
 import ProjectProgress from '@/components/projects/progress';
+import ProjectStatusSteps from '@/components/projects/steps';
+import { Step } from '@/components/steps/stepsItem';
 import TaskForm from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
@@ -252,6 +254,22 @@ const ProjectDetail = (props: RouteComponentProps) => {
     setDeleteModalOpen(false);
   };
 
+  // "Next Steps" action handler
+  const handleStepAction = useCallback(
+    (step: Step) => {
+      const action = step.action;
+      switch (action) {
+        case 'submit':
+          /* istanbul ignore else */
+          if (readyToSubmit) {
+            openSubmitModal();
+          }
+          break;
+      }
+    },
+    [readyToSubmit],
+  );
+
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
     repositorySlug,
@@ -371,7 +389,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_medium">
+            <div className="slds-m-bottom_x-large ms-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
                 {i18n.t('Collaborators')}
               </h2>
@@ -380,29 +398,39 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 variant="outline-brand"
                 onClick={openAssignUsersModal}
               />
+              <AssignUsersModal
+                allUsers={repository.github_users}
+                selectedUsers={project.github_users}
+                heading={`${i18n.t('Add or Remove Collaborators for')} ${
+                  project.name
+                }`}
+                isOpen={assignUsersModalOpen}
+                onRequestClose={closeAssignUsersModal}
+                setUsers={setProjectUsers}
+                isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
+                refreshUsers={doRefreshGitHubUsers}
+              />
+              <ConfirmRemoveUserModal
+                confirmRemoveUsers={confirmRemoveUsers}
+                waitingToUpdateUsers={waitingToUpdateUsers}
+                handleClose={closeConfirmRemoveUsersModal}
+                handleUpdateUsers={updateProjectUsers}
+              />
+              {project.github_users.length ? (
+                <UserCards
+                  users={project.github_users}
+                  removeUser={removeProjectUser}
+                />
+              ) : null}
             </div>
-            <AssignUsersModal
-              allUsers={repository.github_users}
-              selectedUsers={project.github_users}
-              heading={`${i18n.t('Add or Remove Collaborators for')} ${
-                project.name
-              }`}
-              isOpen={assignUsersModalOpen}
-              onRequestClose={closeAssignUsersModal}
-              setUsers={setProjectUsers}
-              isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
-              refreshUsers={doRefreshGitHubUsers}
-            />
-            <ConfirmRemoveUserModal
-              confirmRemoveUsers={confirmRemoveUsers}
-              waitingToUpdateUsers={waitingToUpdateUsers}
-              handleClose={closeConfirmRemoveUsersModal}
-              handleUpdateUsers={updateProjectUsers}
-            />
-            <UserCards
-              users={project.github_users}
-              removeUser={removeProjectUser}
-            />
+            <div className="slds-m-bottom_x-large ms-secondary-block">
+              <ProjectStatusSteps
+                project={project}
+                tasks={tasks || []}
+                readyToSubmit={readyToSubmit}
+                handleAction={handleStepAction}
+              />
+            </div>
           </>
         }
       >
@@ -414,15 +442,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {tasks.length || project.status === PROJECT_STATUSES.MERGED ? (
-                <>
-                  {i18n.t('Tasks for')} {project.name}
-                </>
-              ) : (
-                <>
-                  {i18n.t('Add a Task for')} {project.name}
-                </>
-              )}
+              {tasks.length || project.status === PROJECT_STATUSES.MERGED
+                ? `${i18n.t('Tasks for')} ${project.name}`
+                : `${i18n.t('Add a Task for')} ${project.name}`}
             </h2>
             {project.status !== PROJECT_STATUSES.MERGED && (
               <TaskForm project={project} startOpen={!tasks.length} />
