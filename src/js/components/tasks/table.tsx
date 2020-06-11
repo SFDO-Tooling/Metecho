@@ -6,7 +6,8 @@ import ProgressRing from '@salesforce/design-system-react/components/progress-ri
 import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import {
@@ -14,7 +15,8 @@ import {
   GitHubUserAvatar,
 } from '@/components/user/githubUser';
 import { Task } from '@/store/tasks/reducer';
-import { GitHubUser } from '@/store/user/reducer';
+import { GitHubUser, User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
 import {
   ORG_TYPES,
   OrgTypes,
@@ -136,8 +138,19 @@ const AssigneeTableCell = ({
   assignUserAction: AssignUserAction;
   children?: GitHubUser | null;
 }) => {
+  const currentUser = useSelector(selectUserState) as User;
+
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
   const [alertAssignee, setAlertAssignee] = useState(true);
+  const [assigneeSelection, setAssigneeSelection] = useState<GitHubUser | null>(
+    null,
+  );
+  useEffect(() => {
+    if (assigneeSelection) {
+      // if these match uncheck checkbox if checked (LOL)
+      console.log(assigneeSelection, currentUser);
+    }
+  }, [assigneeSelection, currentUser]);
   const handleAlertAssignee = (checked: boolean) => {
     if (checked) {
       setAlertAssignee(checked);
@@ -210,6 +223,8 @@ const AssigneeTableCell = ({
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
+          selection={assigneeSelection}
+          setSelection={setAssigneeSelection}
         />
       </>
     );

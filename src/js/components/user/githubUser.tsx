@@ -308,6 +308,8 @@ export const AssignUserModal = ({
   isOpen,
   emptyMessageText,
   alertAssignee,
+  selection,
+  setSelection,
   handleAlertAssignee,
   emptyMessageAction,
   onRequestClose,
@@ -319,13 +321,15 @@ export const AssignUserModal = ({
   isOpen: boolean;
   emptyMessageText: string;
   alertAssignee: boolean;
+  selection: GitHubUser | null;
+  setSelection: React.Dispatch<React.SetStateAction<GitHubUser | null>>;
   handleAlertAssignee: (checked: boolean) => void;
   emptyMessageAction: () => void;
   onRequestClose: () => void;
   setUser: (user: GitHubUser | null) => void;
 }) => {
   const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
-  const [selection, setSelection] = useState<GitHubUser | null>(null);
+  const defaultChecked = Boolean(selection && alertAssignee);
   return (
     <Modal
       isOpen={isOpen}
@@ -351,7 +355,7 @@ export const AssignUserModal = ({
               key="alert"
               labels={{ label: i18n.t('Notify assigned Developer by Email') }}
               value={alertAssignee}
-              checked={alertAssignee}
+              checked={defaultChecked}
               onChange={(
                 event: React.FormEvent<HTMLFormElement>,
                 { checked }: { checked: boolean },
