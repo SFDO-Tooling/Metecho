@@ -48,6 +48,8 @@ export interface Task {
   review_status: ReviewStatuses | null;
   review_sha: string | null;
   org_config_name: string;
+  should_alert_dev: boolean;
+  should_alert_qa: boolean;
 }
 
 export interface TaskState {

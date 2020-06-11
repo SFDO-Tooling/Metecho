@@ -137,6 +137,14 @@ const AssigneeTableCell = ({
   children?: GitHubUser | null;
 }) => {
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
+  const [alertAssignee, setAlertAssignee] = useState(true);
+  const handleAlertAssignee = (checked: boolean) => {
+    if (checked) {
+      setAlertAssignee(checked);
+    } else {
+      setAlertAssignee(false);
+    }
+  };
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);
   };
@@ -147,6 +155,7 @@ const AssigneeTableCell = ({
     closeAssignUserModal();
     openAssignProjectUsersModal();
   }, [openAssignProjectUsersModal]);
+
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null) => {
       /* istanbul ignore if */
@@ -196,6 +205,8 @@ const AssigneeTableCell = ({
           heading={title}
           isOpen={assignUserModalOpen}
           emptyMessageText={i18n.t('Add Project Collaborators')}
+          alertAssignee={alertAssignee}
+          handleAlertAssignee={handleAlertAssignee}
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}

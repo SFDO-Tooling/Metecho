@@ -1,6 +1,7 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
+import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
@@ -301,6 +302,8 @@ export const AssignUserModal = ({
   heading,
   isOpen,
   emptyMessageText,
+  alertAssignee,
+  handleAlertAssignee,
   emptyMessageAction,
   onRequestClose,
   setUser,
@@ -310,17 +313,20 @@ export const AssignUserModal = ({
   heading: string;
   isOpen: boolean;
   emptyMessageText: string;
+  alertAssignee: boolean;
+  handleAlertAssignee: (checked: boolean) => void;
   emptyMessageAction: () => void;
   onRequestClose: () => void;
   setUser: (user: GitHubUser | null) => void;
 }) => {
   const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
-
+  const [selection, setSelection] = useState<GitHubUser | null>(null);
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       heading={heading}
+      directional={true}
       tagline={
         filteredUsers.length ? (
           <>
@@ -334,7 +340,32 @@ export const AssignUserModal = ({
         ) : null
       }
       footer={
-        filteredUsers.length ? null : (
+        filteredUsers.length ? (
+          [
+            <Checkbox
+              key="alert"
+              labels={{ label: i18n.t('Notify assigned Developer by Email') }}
+              value={alertAssignee}
+              checked={alertAssignee}
+              onChange={(
+                event: React.FormEvent<HTMLFormElement>,
+                { checked }: { checked: boolean },
+              ) => handleAlertAssignee(checked)}
+            />,
+            <Button
+              key="cancel"
+              label={i18n.t('Cancel')}
+              onClick={() => console.log('closemodal')}
+            />,
+            <Button
+              key="submit"
+              type="submit"
+              label={i18n.t('Save')}
+              variant="brand"
+              onClick={() => setUser(selection)}
+            />,
+          ]
+        ) : (
           <Button
             label={emptyMessageText}
             variant="brand"
@@ -362,7 +393,11 @@ export const AssignUserModal = ({
           <ul>
             {filteredUsers.map((user) => (
               <li key={user.id}>
-                <GitHubUserButton user={user} onClick={() => setUser(user)} />
+                <GitHubUserButton
+                  user={user}
+                  isSelected={selection === user}
+                  onClick={() => setSelection(user)}
+                />
               </li>
             ))}
           </ul>

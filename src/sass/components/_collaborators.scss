@@ -7,13 +7,13 @@
   margin-left: $spacing-x-small;
 
   .collaborator-button.is-selected & {
-    color: $color-text-default;
+    color: $color-border-selection;
   }
 }
 
 .collaborator-button {
   &.is-selected {
-    background-color: $color-background-row-active;
+    border-color: $color-border-selection;
   }
 
   &:not(.is-selected) {
