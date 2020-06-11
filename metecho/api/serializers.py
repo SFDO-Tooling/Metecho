@@ -179,9 +179,9 @@ class ProjectSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
-        branch_name = data.get("branch_name", None)
+        branch_name = data.get("branch_name", "")
         repo = data.get("repository", None)
-        branch_name_differs = branch_name != getattr(self.instance, "branch_name", None)
+        branch_name_differs = branch_name != getattr(self.instance, "branch_name", "")
         branch_name_changed = branch_name and branch_name_differs
         if branch_name_changed:
             if "__" in branch_name:
@@ -365,13 +365,17 @@ class TaskSerializer(serializers.ModelSerializer):
         if instance.assigned_dev != validated_data["assigned_dev"]:
             if validated_data["should_alert_dev"]:
                 self.try_send_assignment_emails(instance, "dev", validated_data)
-            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
+            orgs = instance.scratchorg_set.active().filter(
+                org_type=SCRATCH_ORG_TYPES.Dev
+            )
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
             if validated_data["should_alert_qa"]:
                 self.try_send_assignment_emails(instance, "qa", validated_data)
-            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.QA)
+            orgs = instance.scratchorg_set.active().filter(
+                org_type=SCRATCH_ORG_TYPES.QA
+            )
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
         validated_data.pop("should_alert_dev")
