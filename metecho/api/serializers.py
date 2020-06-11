@@ -353,26 +353,28 @@ class TaskSerializer(serializers.ModelSerializer):
         else:
             originating_user_id = None
         if instance.assigned_dev != validated_data["assigned_dev"]:
-            orgs = instance.scratchorg_set.active().filter(
-                org_type=SCRATCH_ORG_TYPES.Dev
-            )
+            # We want to consider soft-deleted orgs, too:
+            orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.Dev,)
             for org in orgs:
-                if new_user := self._valid_reassign(
-                    "dev", instance.assigned_dev, validated_data["assigned_dev"]
-                ):
+                if (
+                    new_user := self._valid_reassign(
+                        "dev", instance.assigned_dev, validated_data["assigned_dev"]
+                    )
+                ) and org.latest_commit == instance.commits[0]:
                     org.queue_reassign(
                         new_user=new_user, originating_user_id=originating_user_id
                     )
                 else:
                     org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
-            orgs = instance.scratchorg_set.active().filter(
-                org_type=SCRATCH_ORG_TYPES.QA
-            )
+            # We want to consider soft-deleted orgs, too:
+            orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.QA,)
             for org in orgs:
-                if new_user := self._valid_reassign(
-                    "qa", instance.assigned_qa, validated_data["assigned_qa"]
-                ):
+                if (
+                    new_user := self._valid_reassign(
+                        "qa", instance.assigned_qa, validated_data["assigned_qa"]
+                    )
+                ) and org.latest_commit == instance.commits[0]:
                     org.queue_reassign(
                         new_user=new_user, originating_user_id=originating_user_id
                     )

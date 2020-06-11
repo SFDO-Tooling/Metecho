@@ -878,19 +878,9 @@ class ScratchOrg(
     # end PushMixin configuration
 
     def queue_delete(self, *, originating_user_id):
-        from .jobs import delete_scratch_org_job
-
-        # If the scratch org has no `last_modified_at`, it did not
-        # successfully complete the initial flow run on Salesforce, and
-        # therefore we don't need to notify of its destruction; this
-        # should only happen when it is destroyed during the initial
-        # flow run.
-        if self.last_modified_at:
-            self.delete_queued_at = timezone.now()
-            self.save()
-            self.notify_changed(originating_user_id=originating_user_id)
-
-        delete_scratch_org_job.delay(self, originating_user_id=originating_user_id)
+        # Formerly a background job, currently synchronous:
+        self.delete()
+        self.finalize_delete(originating_user_id=originating_user_id)
 
     def finalize_delete(self, *, originating_user_id):
         self.notify_changed(
@@ -1054,6 +1044,7 @@ class ScratchOrg(
         from .jobs import user_reassign_job
 
         self.currently_refreshing_org = True
+        self.deleted_at = None
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
         user_reassign_job.delay(

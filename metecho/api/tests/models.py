@@ -731,15 +731,11 @@ class TestScratchOrg:
             assert async_to_sync.called
 
     def test_queue_delete(self, scratch_org_factory):
-        with ExitStack() as stack:
-            delete_scratch_org_job = stack.enter_context(
-                patch("metecho.api.jobs.delete_scratch_org_job")
-            )
+        scratch_org = scratch_org_factory(last_modified_at=now())
+        scratch_org.queue_delete(originating_user_id=None)
 
-            scratch_org = scratch_org_factory(last_modified_at=now())
-            scratch_org.queue_delete(originating_user_id=None)
-
-            assert delete_scratch_org_job.delay.called
+        scratch_org.refresh_from_db()
+        assert scratch_org.deleted_at is not None
 
     def test_notify_delete(self, scratch_org_factory):
         with ExitStack() as stack:
@@ -794,13 +790,11 @@ class TestScratchOrg:
     def test_finalize_provision__flow_error(self, scratch_org_factory):
         with ExitStack() as stack:
             stack.enter_context(patch("metecho.api.model_mixins.async_to_sync"))
-            delete_queued = stack.enter_context(
-                patch("metecho.api.jobs.delete_scratch_org_job")
-            )
             scratch_org = scratch_org_factory(url="https://example.com")
             scratch_org.finalize_provision(error=True, originating_user_id=None)
 
-            assert delete_queued.delay.called
+            scratch_org.refresh_from_db()
+            assert scratch_org.deleted_at is not None
 
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:

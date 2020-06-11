@@ -241,7 +241,7 @@ class TestProjectSerializer:
 class TestTaskSerializer:
     def test_update(self, rf, user_factory, task_factory, scratch_org_factory):
         user = user_factory()
-        task = task_factory()
+        task = task_factory(commits=["abc123"])
         scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
         scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
         data = {
@@ -256,12 +256,14 @@ class TestTaskSerializer:
         r.user = user
         serializer = TaskSerializer(task, data=data, context={"request": r})
         assert serializer.is_valid(), serializer.errors
-        with patch("metecho.api.jobs.delete_scratch_org_job") as job:
+        with patch("metecho.api.models.ScratchOrg.queue_delete") as queue_delete:
             serializer.update(task, serializer.validated_data)
-            assert job.delay.call_args.kwargs == {"originating_user_id": str(user.id)}
+            assert queue_delete.call_args.kwargs == {
+                "originating_user_id": str(user.id)
+            }
 
     def test_update__no_user(self, task_factory, scratch_org_factory):
-        task = task_factory()
+        task = task_factory(commits=["abc123"])
         scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
         scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
         data = {
@@ -274,9 +276,9 @@ class TestTaskSerializer:
         }
         serializer = TaskSerializer(task, data=data)
         assert serializer.is_valid(), serializer.errors
-        with patch("metecho.api.jobs.delete_scratch_org_job") as job:
+        with patch("metecho.api.models.ScratchOrg.queue_delete") as queue_delete:
             serializer.update(task, serializer.validated_data)
-            assert job.delay.call_args.kwargs == {"originating_user_id": None}
+            assert queue_delete.call_args.kwargs == {"originating_user_id": None}
 
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
@@ -334,9 +336,15 @@ class TestTaskSerializer:
         new_user = user_factory(devhub_username="test")
         id_ = user.github_account.uid
         new_id = new_user.github_account.uid
-        task = task_factory(assigned_dev={"id": id_}, assigned_qa={"id": id_})
-        scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        task = task_factory(
+            assigned_dev={"id": id_}, assigned_qa={"id": id_}, commits=["abc123"]
+        )
+        scratch_org_factory(
+            task=task, org_type=SCRATCH_ORG_TYPES.Dev, latest_commit="abc123"
+        )
+        scratch_org_factory(
+            task=task, org_type=SCRATCH_ORG_TYPES.QA, latest_commit="abc123"
+        )
 
         data = {
             "name": task.name,
