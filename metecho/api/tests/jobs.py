@@ -669,7 +669,7 @@ def test_create_pr__error(user_factory, task_factory):
 
 
 @pytest.mark.django_db
-class TestPopulateGithubUsers:
+class TestPopulateGitHubUsers:
     def test_user_present(
         self, user_factory, repository_factory, git_hub_repository_factory,
     ):

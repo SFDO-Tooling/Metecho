@@ -26,18 +26,18 @@ const Footer = ({
   readyForReview: boolean;
   openRefreshOrgModal: () => void;
 }) => {
-  const loadingMsg = i18n.t(
+  const loadingMsg: JSX.Element = i18n.t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',
   );
 
   if (isCreating || isRefreshingOrg) {
-    return <>{loadingMsg}</>;
+    return loadingMsg;
   }
   if (isDeleting) {
-    return <>{i18n.t('Deleting Org…')}</>;
+    return i18n.t('Deleting Org…') as JSX.Element;
   }
   if (isRefreshingChanges) {
-    return <>{i18n.t('Checking for Unretrieved Changes…')}</>;
+    return i18n.t('Checking for Unretrieved Changes…') as JSX.Element;
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_capturing_changes) {

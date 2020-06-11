@@ -176,9 +176,9 @@ class ProjectSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
-        branch_name = data.get("branch_name", None)
+        branch_name = data.get("branch_name", "")
         repo = data.get("repository", None)
-        branch_name_differs = branch_name != getattr(self.instance, "branch_name", None)
+        branch_name_differs = branch_name != getattr(self.instance, "branch_name", "")
         branch_name_changed = branch_name and branch_name_differs
         if branch_name_changed:
             if "__" in branch_name:
@@ -353,7 +353,9 @@ class TaskSerializer(serializers.ModelSerializer):
         else:
             originating_user_id = None
         if instance.assigned_dev != validated_data["assigned_dev"]:
-            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.Dev)
+            orgs = instance.scratchorg_set.active().filter(
+                org_type=SCRATCH_ORG_TYPES.Dev
+            )
             for org in orgs:
                 if new_user := self._valid_reassign(
                     "dev", instance.assigned_dev, validated_data["assigned_dev"]
@@ -364,7 +366,9 @@ class TaskSerializer(serializers.ModelSerializer):
                 else:
                     org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
-            orgs = instance.scratchorg_set.filter(org_type=SCRATCH_ORG_TYPES.QA)
+            orgs = instance.scratchorg_set.active().filter(
+                org_type=SCRATCH_ORG_TYPES.QA
+            )
             for org in orgs:
                 if new_user := self._valid_reassign(
                     "qa", instance.assigned_qa, validated_data["assigned_qa"]
