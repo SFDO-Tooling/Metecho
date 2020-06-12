@@ -1,9 +1,7 @@
 from typing import Optional
 
 from allauth.socialaccount.models import SocialAccount
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -385,15 +383,11 @@ class TaskSerializer(serializers.ModelSerializer):
     def try_send_assignment_emails(self, instance, type_, validated_data):
         user = self.get_matching_assigned_user(type_, validated_data)
         if user:
-            send_mail(
-                # @@@ TODO: real subject, real set of context
-                # variables for the email template.
-                _("Assigned to task"),
-                render_to_string("user_assigned_to_task.txt", {"task": instance}),
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
-            )
+            # @@@ TODO: real subject, real set of context variables for
+            # the email template.
+            subject = _("Assigned to task")
+            body = render_to_string("user_assigned_to_task.txt", {"task": instance})
+            user.notify(subject, body)
 
     def get_matching_assigned_user(self, type_, validated_data):
         assigned = validated_data.get(f"assigned_{type_}", {})

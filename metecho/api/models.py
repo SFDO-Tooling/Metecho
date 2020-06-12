@@ -11,6 +11,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
+from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
 from django.db.models.signals import post_save
@@ -75,6 +76,17 @@ class User(HashIdMixin, AbstractUser):
     devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
     agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
+
+    def notify(self, subject, body):
+        # Right now, the only way we notify is via email. In future, we
+        # may add in-app notifications.
+        send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [self.email],
+            fail_silently=False,
+        )
 
     def queue_refresh_repositories(self):
         """Queue a job to refresh repositories unless we're already doing so"""
