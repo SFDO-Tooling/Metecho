@@ -195,14 +195,14 @@ class TestAlertUserAboutExpiringOrg:
     def test_soft_deleted_model(self, scratch_org_factory):
         scratch_org = scratch_org_factory()
         scratch_org.delete()
-        with patch(f"{PATCH_ROOT}.send_mail") as send_mail:
+        with patch("metecho.api.models.send_mail") as send_mail:
             assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
             assert not send_mail.called
 
     def test_good(self, scratch_org_factory):
         scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
         with ExitStack() as stack:
-            send_mail = stack.enter_context(patch(f"{PATCH_ROOT}.send_mail"))
+            send_mail = stack.enter_context(patch("metecho.api.models.send_mail"))
             get_unsaved_changes = stack.enter_context(
                 patch(f"{PATCH_ROOT}.get_unsaved_changes")
             )
