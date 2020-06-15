@@ -29,10 +29,12 @@ type AssignUserAction = ({
   task,
   type,
   assignee,
+  shouldAlertAssignee,
 }: {
   task: Task;
   type: OrgTypes;
   assignee: GitHubUser | null;
+  shouldAlertAssignee: boolean;
 }) => void;
 
 interface TableCellProps {
@@ -146,9 +148,11 @@ const AssigneeTableCell = ({
     null,
   );
   useEffect(() => {
-    if (assigneeSelection) {
+    const currentUserSelected =
+      assigneeSelection?.login === currentUser.username;
+    if (currentUserSelected) {
       // if these match uncheck checkbox if checked (LOL)
-      console.log(assigneeSelection, currentUser);
+      setAlertAssignee(false);
     }
   }, [assigneeSelection, currentUser]);
   const handleAlertAssignee = (checked: boolean) => {
@@ -175,10 +179,10 @@ const AssigneeTableCell = ({
       if (!item || !type) {
         return;
       }
-      assignUserAction({ task: item, type, assignee });
+      assignUserAction({ task: item, type, assignee, alertAssignee });
       closeAssignUserModal();
     },
-    [assignUserAction, item, type],
+    [assignUserAction, item, type, alertAssignee],
   );
   /* istanbul ignore if */
   if (!item) {

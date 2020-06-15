@@ -364,7 +364,7 @@ export const AssignUserModal = ({
             <Button
               key="cancel"
               label={i18n.t('Cancel')}
-              onClick={() => console.log('closemodal')}
+              onClick={onRequestClose}
             />,
             <Button
               key="submit"
