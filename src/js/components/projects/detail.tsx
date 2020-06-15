@@ -199,12 +199,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
       task,
       type,
       assignee,
-      alertAssignee,
+      shouldAlertAssignee,
     }: {
       task: Task;
       type: OrgTypes;
       assignee: GitHubUser | null;
-      alertAssigne: boolean;
+      shouldAlertAssignee: boolean;
     }) => {
       /* istanbul ignore next */
       const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
@@ -214,8 +214,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
           data: {
             ...task,
             [userType]: assignee,
-            should_alert_dev: type === ORG_TYPES.DEV && alertAssignee,
-            should_alert_qa: type === ORG_TYPES.QA && alertAssignee,
+            should_alert_dev: type === ORG_TYPES.DEV && shouldAlertAssignee,
+            should_alert_qa: type === ORG_TYPES.QA && shouldAlertAssignee,
           },
         }),
       );

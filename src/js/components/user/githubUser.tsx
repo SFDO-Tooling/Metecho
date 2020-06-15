@@ -329,7 +329,6 @@ export const AssignUserModal = ({
   setUser: (user: GitHubUser | null) => void;
 }) => {
   const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
-  const defaultChecked = Boolean(selection && alertAssignee);
   return (
     <Modal
       isOpen={isOpen}
@@ -355,7 +354,7 @@ export const AssignUserModal = ({
               key="alert"
               labels={{ label: i18n.t('Notify assigned Developer by Email') }}
               value={alertAssignee}
-              checked={defaultChecked}
+              checked={alertAssignee}
               onChange={(
                 event: React.FormEvent<HTMLFormElement>,
                 { checked }: { checked: boolean },

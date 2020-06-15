@@ -6,7 +6,7 @@ import ProgressRing from '@salesforce/design-system-react/components/progress-ri
 import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -143,23 +143,15 @@ const AssigneeTableCell = ({
   const currentUser = useSelector(selectUserState) as User;
 
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
-  const [alertAssignee, setAlertAssignee] = useState(true);
+  const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
   const [assigneeSelection, setAssigneeSelection] = useState<GitHubUser | null>(
     null,
   );
-  useEffect(() => {
-    const currentUserSelected =
-      assigneeSelection?.login === currentUser.username;
-    if (currentUserSelected) {
-      // if these match uncheck checkbox if checked (LOL)
-      setAlertAssignee(false);
-    }
-  }, [assigneeSelection, currentUser]);
   const handleAlertAssignee = (checked: boolean) => {
     if (checked) {
-      setAlertAssignee(checked);
+      setShouldAlertAssignee(checked);
     } else {
-      setAlertAssignee(false);
+      setShouldAlertAssignee(false);
     }
   };
   const openAssignUserModal = () => {
@@ -179,10 +171,10 @@ const AssigneeTableCell = ({
       if (!item || !type) {
         return;
       }
-      assignUserAction({ task: item, type, assignee, alertAssignee });
+      assignUserAction({ task: item, type, assignee, shouldAlertAssignee });
       closeAssignUserModal();
     },
-    [assignUserAction, item, type, alertAssignee],
+    [assignUserAction, item, type, shouldAlertAssignee],
   );
   /* istanbul ignore if */
   if (!item) {
@@ -204,6 +196,8 @@ const AssigneeTableCell = ({
         assignedUser = item.assigned_qa;
         break;
     }
+    const currentUserSelected =
+      assigneeSelection?.login === currentUser.username;
     contents = (
       <>
         <Button
@@ -222,7 +216,7 @@ const AssigneeTableCell = ({
           heading={title}
           isOpen={assignUserModalOpen}
           emptyMessageText={i18n.t('Add Project Collaborators')}
-          alertAssignee={alertAssignee}
+          alertAssignee={shouldAlertAssignee && !currentUserSelected}
           handleAlertAssignee={handleAlertAssignee}
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}

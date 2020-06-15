@@ -36,7 +36,11 @@ interface OrgCardProps {
   repoUrl: string;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
-  handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
+  handleAssignUser: ({
+    type,
+    assignee,
+    shouldAlertAssignee,
+  }: AssignedUserTracker) => void;
   handleCreate: (type: OrgTypes) => void;
   handleDelete: (org: Org) => void;
   handleCheckForOrgChanges: (org: Org) => void;
@@ -90,7 +94,7 @@ const OrgCard = ({
     // eslint-disable-next-line no-param-reassign
     org = null;
   }
-
+  // assign user modal related
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);
@@ -98,7 +102,18 @@ const OrgCard = ({
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(false);
   };
+  const [assigneeSelection, setAssigneeSelection] = useState<GitHubUser | null>(
+    null,
+  );
+  const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
 
+  const handleAlertAssignee = (checked: boolean) => {
+    if (checked) {
+      setShouldAlertAssignee(checked);
+    } else {
+      setShouldAlertAssignee(false);
+    }
+  };
   // refresh org modal
   const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
   const openRefreshOrgModal = () => {
@@ -119,9 +134,9 @@ const OrgCard = ({
   const doAssignUser = useCallback(
     (assignee: GitHubUser | null) => {
       closeAssignUserModal();
-      handleAssignUser({ type, assignee });
+      handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
-    [handleAssignUser, type],
+    [handleAssignUser, type, shouldAlertAssignee],
   );
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
@@ -288,6 +303,10 @@ const OrgCard = ({
         emptyMessageAction={handleEmptyMessageClick}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
+        selection={assigneeSelection}
+        setSelection={setAssigneeSelection}
+        handleAlertAssignee={handleAlertAssignee}
+        alertAssignee={shouldAlertAssignee}
       />
       {testOrgOutOfDate && (
         <RefreshOrgModal

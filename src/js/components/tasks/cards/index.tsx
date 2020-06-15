@@ -20,6 +20,7 @@ import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 export interface AssignedUserTracker {
   type: OrgTypes;
   assignee: GitHubUser | null;
+  shouldAlertAssignee?: boolean;
 }
 
 interface OrgTypeTracker {
@@ -119,7 +120,7 @@ const OrgCards = ({
   );
 
   const assignUser = useCallback(
-    ({ type, assignee }: AssignedUserTracker) => {
+    ({ type, assignee, shouldAlertAssignee }: AssignedUserTracker) => {
       setIsWaitingToRemoveUser(null);
       const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
       dispatch(
@@ -128,6 +129,8 @@ const OrgCards = ({
           data: {
             ...task,
             [userType]: assignee,
+            should_alert_dev: type === ORG_TYPES.DEV && shouldAlertAssignee,
+            should_alert_qa: type === ORG_TYPES.QA && shouldAlertAssignee,
           },
         }),
       );
@@ -169,13 +172,17 @@ const OrgCards = ({
     }
   };
 
-  const handleAssignUser = ({ type, assignee }: AssignedUserTracker) => {
+  const handleAssignUser = ({
+    type,
+    assignee,
+    shouldAlertAssignee,
+  }: AssignedUserTracker) => {
     const org = orgs[type];
     if (org && type === ORG_TYPES.DEV) {
       setIsWaitingToRemoveUser({ type, assignee });
       checkForOrgChanges(org);
     } else {
-      assignUser({ type, assignee });
+      assignUser({ type, assignee, shouldAlertAssignee });
     }
   };
 
