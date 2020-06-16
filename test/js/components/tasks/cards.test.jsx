@@ -214,6 +214,7 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup({ task, orgs: {} });
       fireEvent.click(getByText('Assign'));
       fireEvent.click(getByText('other-user'));
+      fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
@@ -248,6 +249,7 @@ describe('<OrgCards/>', () => {
       fireEvent.click(getByText('User Actions'));
       fireEvent.click(getByText('Change Tester'));
       fireEvent.click(getByText('other-user'));
+      fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
@@ -269,6 +271,7 @@ describe('<OrgCards/>', () => {
           fireEvent.click(getByText('User Actions'));
           fireEvent.click(getByText('Change Developer'));
           fireEvent.click(getByText('other-user'));
+          fireEvent.click(getByText('Save'));
 
           expect(refetchOrg).toHaveBeenCalledTimes(1);
           expect(updateObject).not.toHaveBeenCalled();

@@ -53,6 +53,8 @@ describe('AssignUsersModal', () => {
 describe('AssignUserModal', () => {
   test('responds to user click', () => {
     const setUser = jest.fn();
+    const setSelection = jest.fn();
+
     const allUsers = [
       {
         id: '123456',
@@ -66,10 +68,60 @@ describe('AssignUserModal', () => {
         selectedUser={null}
         isOpen={true}
         setUser={setUser}
+        setSelection={setSelection}
       />,
     );
     fireEvent.click(getByText('test user'));
 
-    expect(setUser).toHaveBeenCalledWith(allUsers[0]);
+    expect(setSelection).toHaveBeenCalledWith(allUsers[0]);
+  });
+
+  test('selects email assignee checkbox', () => {
+    const handleAlertAssignee = jest.fn();
+
+    const allUsers = [
+      {
+        id: '123456',
+        login: 'test user',
+        avatar_url: 'https://example.com/avatar.png',
+      },
+    ];
+    const { getByText } = render(
+      <AssignUserModal
+        allUsers={allUsers}
+        selectedUser={null}
+        isOpen={true}
+        handleAlertAssignee={handleAlertAssignee}
+      />,
+    );
+    fireEvent.click(getByText('Notify assigned Developer by Email'));
+
+    expect(handleAlertAssignee).toHaveBeenCalledTimes(1);
+  });
+
+  test('assigns selected user', () => {
+    const setUser = jest.fn();
+    const setSelection = jest.fn();
+
+    const allUsers = [
+      {
+        id: '123456',
+        login: 'test user',
+        avatar_url: 'https://example.com/avatar.png',
+      },
+    ];
+    const { getByText } = render(
+      <AssignUserModal
+        allUsers={allUsers}
+        selectedUser={null}
+        isOpen={true}
+        setUser={setUser}
+        setSelection={setSelection}
+      />,
+    );
+    fireEvent.click(getByText('test user'));
+    fireEvent.click(getByText('Save'));
+
+    expect(setUser).toHaveBeenCalled();
   });
 });

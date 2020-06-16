@@ -151,6 +151,12 @@ const defaultState = {
       },
     ],
   },
+  user: {
+    id: 'user-id',
+    username: 'user-name',
+    valid_token_for: 'my-org',
+    is_devhub_enabled: true,
+  },
 };
 
 describe('<ProjectDetail/>', () => {
@@ -448,12 +454,12 @@ describe('<ProjectDetail/>', () => {
 
   describe('task assignUser', () => {
     test('updates task assigned user', () => {
-      const { getAllByText, baseElement } = setup();
+      const { getAllByText, baseElement, getByText } = setup();
       fireEvent.click(getAllByText('Assign Tester')[0]);
       fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
       );
-
+      fireEvent.click(getByText('Save'));
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
         'OtherUser',
