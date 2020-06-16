@@ -108,11 +108,7 @@ const OrgCard = ({
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
 
   const handleAlertAssignee = (checked: boolean) => {
-    if (checked) {
-      setShouldAlertAssignee(checked);
-    } else {
-      setShouldAlertAssignee(false);
-    }
+    setShouldAlertAssignee(checked);
   };
   // refresh org modal
   const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
@@ -193,8 +189,8 @@ const OrgCard = ({
 
   const userModalLabel =
     type === ORG_TYPES.QA
-      ? i18n.t('Notify Tester by Email')
-      : i18n.t('Notify Developer By Email');
+      ? i18n.t('Notify Assigned Tester by Email')
+      : i18n.t('Notify Assigned Developer By Email');
   return (
     <div
       className="slds-size_1-of-1

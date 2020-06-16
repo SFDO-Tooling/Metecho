@@ -148,11 +148,7 @@ const AssigneeTableCell = ({
     null,
   );
   const handleAlertAssignee = (checked: boolean) => {
-    if (checked) {
-      setShouldAlertAssignee(checked);
-    } else {
-      setShouldAlertAssignee(false);
-    }
+    setShouldAlertAssignee(checked);
   };
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);

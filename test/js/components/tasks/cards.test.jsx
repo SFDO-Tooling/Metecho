@@ -214,11 +214,16 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup({ task, orgs: {} });
       fireEvent.click(getByText('Assign'));
       fireEvent.click(getByText('other-user'));
+      fireEvent.click(getByText('Notify Assigned Developer By Email'));
+
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
         'other-user',
+      );
+      expect(updateObject.mock.calls[0][0].data.should_alert_dev).toEqual(
+        false,
       );
     });
 
@@ -924,10 +929,4 @@ describe('<OrgCards/>', () => {
       });
     });
   });
-
-  // describe('something', () => {
-  //   test('something else', () => {
-  //     const { debug } =
-  //   })
-  // })
 });
