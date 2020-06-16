@@ -309,6 +309,7 @@ export const AssignUserModal = ({
   emptyMessageText,
   alertAssignee,
   selection,
+  label,
   setSelection,
   handleAlertAssignee,
   emptyMessageAction,
@@ -322,6 +323,7 @@ export const AssignUserModal = ({
   emptyMessageText: string;
   alertAssignee: boolean;
   selection: GitHubUser | null;
+  label: string;
   setSelection: React.Dispatch<React.SetStateAction<GitHubUser | null>>;
   handleAlertAssignee: (checked: boolean) => void;
   emptyMessageAction: () => void;
@@ -352,7 +354,7 @@ export const AssignUserModal = ({
           [
             <Checkbox
               key="alert"
-              labels={{ label: i18n.t('Notify assigned Developer by Email') }}
+              labels={{ label }}
               value={alertAssignee}
               checked={alertAssignee}
               onChange={(

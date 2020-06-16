@@ -198,6 +198,10 @@ const AssigneeTableCell = ({
     }
     const currentUserSelected =
       assigneeSelection?.login === currentUser.username;
+    const label =
+      type === ORG_TYPES.QA
+        ? i18n.t('Notify Assigned Tester by Email')
+        : i18n.t('Notify Assigned Developer By Email');
     contents = (
       <>
         <Button
@@ -223,6 +227,7 @@ const AssigneeTableCell = ({
           setUser={doAssignUserAction}
           selection={assigneeSelection}
           setSelection={setAssigneeSelection}
+          label={label}
         />
       </>
     );

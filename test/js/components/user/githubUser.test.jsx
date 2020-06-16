@@ -78,7 +78,7 @@ describe('AssignUserModal', () => {
 
   test('selects email assignee checkbox', () => {
     const handleAlertAssignee = jest.fn();
-
+    const label = 'Notify Assigned Developer by Email';
     const allUsers = [
       {
         id: '123456',
@@ -92,9 +92,10 @@ describe('AssignUserModal', () => {
         selectedUser={null}
         isOpen={true}
         handleAlertAssignee={handleAlertAssignee}
+        label={label}
       />,
     );
-    fireEvent.click(getByText('Notify assigned Developer by Email'));
+    fireEvent.click(getByText('Notify Assigned Developer by Email'));
 
     expect(handleAlertAssignee).toHaveBeenCalledTimes(1);
   });

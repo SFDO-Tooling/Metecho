@@ -191,6 +191,10 @@ const OrgCard = ({
       ? i18n.t('Assign Tester')
       : i18n.t('Assign Developer');
 
+  const userModalLabel =
+    type === ORG_TYPES.QA
+      ? i18n.t('Notify Tester by Email')
+      : i18n.t('Notify Developer By Email');
   return (
     <div
       className="slds-size_1-of-1
@@ -307,6 +311,7 @@ const OrgCard = ({
         setSelection={setAssigneeSelection}
         handleAlertAssignee={handleAlertAssignee}
         alertAssignee={shouldAlertAssignee}
+        label={userModalLabel}
       />
       {testOrgOutOfDate && (
         <RefreshOrgModal
