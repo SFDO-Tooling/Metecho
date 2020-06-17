@@ -488,6 +488,35 @@ describe('<ProjectDetail/>', () => {
 
       expect(getByText('GitHub Users')).toBeVisible();
     });
+
+    describe('alerts assigned user', () => {
+      test('assigning tester', () => {
+        const { getAllByText, baseElement, getByText } = setup();
+        fireEvent.click(getAllByText('Assign Tester')[0]);
+        fireEvent.click(
+          baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+        );
+        fireEvent.click(
+          getByText('Notify Assigned Tester By Email', { exact: false }),
+        );
+        fireEvent.click(getByText('Save'));
+
+        expect(updateObject.mock.calls[0][0].data.should_alert_dev).toBeFalsy();
+      });
+      test('assigning developer', () => {
+        const { getAllByText, baseElement, getByText } = setup();
+        fireEvent.click(getAllByText('Assign Developer')[0]);
+        fireEvent.click(
+          getByText('Notify Assigned Developer By Email', { exact: false }),
+        );
+        fireEvent.click(
+          baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+        );
+        fireEvent.click(getByText('Save'));
+
+        expect(updateObject.mock.calls[0][0].data.should_alert_qa).toBeFalsy();
+      });
+    });
   });
 
   describe('"Submit Project for Review on GitHub" click', () => {
