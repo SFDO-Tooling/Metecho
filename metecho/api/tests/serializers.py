@@ -332,7 +332,7 @@ class TestTaskSerializer:
         assert serializer.data["pr_url"] is None
 
     def test_queues_reassign(self, task_factory, scratch_org_factory, user_factory):
-        user = user_factory(devhub_username="test")
+        user = user_factory()
         new_user = user_factory(devhub_username="test")
         id_ = user.github_account.uid
         new_id = new_user.github_account.uid
@@ -340,10 +340,16 @@ class TestTaskSerializer:
             assigned_dev={"id": id_}, assigned_qa={"id": id_}, commits=["abc123"]
         )
         scratch_org_factory(
-            task=task, org_type=SCRATCH_ORG_TYPES.Dev, latest_commit="abc123"
+            owner_sf_username="test",
+            task=task,
+            org_type=SCRATCH_ORG_TYPES.Dev,
+            latest_commit="abc123",
         )
         scratch_org_factory(
-            task=task, org_type=SCRATCH_ORG_TYPES.QA, latest_commit="abc123"
+            owner_sf_username="test",
+            task=task,
+            org_type=SCRATCH_ORG_TYPES.QA,
+            latest_commit="abc123",
         )
 
         data = {

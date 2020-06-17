@@ -354,11 +354,11 @@ class TaskSerializer(serializers.ModelSerializer):
             originating_user_id = None
         if instance.assigned_dev != validated_data["assigned_dev"]:
             # We want to consider soft-deleted orgs, too:
-            orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.Dev,)
+            orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.Dev)
             reassigned_org = False
             for org in orgs:
                 new_user = self._valid_reassign(
-                    "dev", instance.assigned_dev, validated_data["assigned_dev"]
+                    "dev", org, validated_data["assigned_dev"]
                 )
                 valid_commit = org.latest_commit == (
                     instance.commits[0] if instance.commits else instance.origin_sha
@@ -372,11 +372,11 @@ class TaskSerializer(serializers.ModelSerializer):
                     org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
             # We want to consider soft-deleted orgs, too:
-            orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.QA,)
+            orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.QA)
             reassigned_org = False
             for org in orgs:
                 new_user = self._valid_reassign(
-                    "qa", instance.assigned_qa, validated_data["assigned_qa"]
+                    "qa", org, validated_data["assigned_qa"]
                 )
                 valid_commit = org.latest_commit == (
                     instance.commits[0] if instance.commits else instance.origin_sha
@@ -390,14 +390,11 @@ class TaskSerializer(serializers.ModelSerializer):
                     org.queue_delete(originating_user_id=originating_user_id)
         return super().update(instance, validated_data)
 
-    def _valid_reassign(self, type_, old_assignee, new_assignee):
-        old_user = self.get_matching_assigned_user(
-            type_, {f"assigned_{type_}": old_assignee}
-        )
+    def _valid_reassign(self, type_, org, new_assignee):
         new_user = self.get_matching_assigned_user(
             type_, {f"assigned_{type_}": new_assignee}
         )
-        if old_user and new_user and old_user.sf_username == new_user.sf_username:
+        if new_user and org.owner_sf_username == new_user.sf_username:
             return new_user
         return None
 
