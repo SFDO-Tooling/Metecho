@@ -84,6 +84,7 @@ const defaultState = {
               id: '234567',
               login: 'OtherUser',
             },
+            { id: 'user-id', login: 'currentUser' },
           ],
           available_task_org_config_names: [],
         },
@@ -153,7 +154,7 @@ const defaultState = {
   },
   user: {
     id: 'user-id',
-    username: 'user-name',
+    username: 'currentUser',
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -311,7 +312,7 @@ describe('<ProjectDetail/>', () => {
       expect(updateObject).toHaveBeenCalled();
       expect(
         updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
-      ).toEqual(['TestGitHubUser', 'ThirdUser']);
+      ).toEqual(['currentUser', 'TestGitHubUser', 'ThirdUser']);
     });
 
     test('opens confirm modal if removing assigned user', () => {
@@ -447,7 +448,9 @@ describe('<ProjectDetail/>', () => {
 
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
         expect(updateObject).toHaveBeenCalled();
-        expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+        expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
+          { id: 'user-id', login: 'currentUser' },
+        ]);
       });
     });
   });
@@ -457,12 +460,12 @@ describe('<ProjectDetail/>', () => {
       const { getAllByText, baseElement, getByText } = setup();
       fireEvent.click(getAllByText('Assign Tester')[0]);
       fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+        baseElement.querySelector('.collaborator-button[title="currentUser"]'),
       );
       fireEvent.click(getByText('Save'));
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
-        'OtherUser',
+        'currentUser',
       );
     });
 

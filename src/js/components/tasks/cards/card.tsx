@@ -110,6 +110,13 @@ const OrgCard = ({
   const handleAlertAssignee = (checked: boolean) => {
     setShouldAlertAssignee(checked);
   };
+  const handleAssigneeSelection = (selection: GitHubUser) => {
+    const currentUserSelected = selection.login === user.username;
+    if (currentUserSelected) {
+      handleAlertAssignee(false);
+    }
+    setAssigneeSelection(selection);
+  };
   // refresh org modal
   const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
   const openRefreshOrgModal = () => {
@@ -304,7 +311,7 @@ const OrgCard = ({
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
         selection={assigneeSelection}
-        setSelection={setAssigneeSelection}
+        setSelection={handleAssigneeSelection}
         handleAlertAssignee={handleAlertAssignee}
         alertAssignee={shouldAlertAssignee}
         label={userModalLabel}

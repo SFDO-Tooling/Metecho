@@ -211,20 +211,20 @@ describe('<OrgCards/>', () => {
         ...defaultTask,
         assigned_dev: null,
       };
-      const { getByText } = setup({ task, orgs: {} });
+      const { getByText, baseElement } = setup({ task, orgs: {} });
       fireEvent.click(getByText('Assign'));
-      fireEvent.click(getByText('other-user'));
+      fireEvent.click(
+        baseElement.querySelector('.collaborator-button[title="user-name"]'),
+      );
       fireEvent.click(getByText('Notify Assigned Developer By Email'));
 
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
-        'other-user',
+        'user-name',
       );
-      expect(updateObject.mock.calls[0][0].data.should_alert_dev).toEqual(
-        false,
-      );
+      expect(updateObject.mock.calls[0][0].data.should_alert_dev).toEqual(true);
     });
 
     test('redirects to project-detail if no users to assign', () => {

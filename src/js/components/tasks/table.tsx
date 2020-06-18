@@ -150,10 +150,18 @@ const AssigneeTableCell = ({
   const handleAlertAssignee = (checked: boolean) => {
     setShouldAlertAssignee(checked);
   };
+  const handleAssigneeSelection = (selection: GitHubUser) => {
+    const currentUserSelected = selection.login === currentUser.username;
+    if (currentUserSelected) {
+      handleAlertAssignee(false);
+    }
+    setAssigneeSelection(selection);
+  };
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);
   };
   const closeAssignUserModal = () => {
+    setAssigneeSelection(null);
     setAssignUserModalOpen(false);
   };
   const handleEmptyMessageClick = useCallback(() => {
@@ -192,8 +200,7 @@ const AssigneeTableCell = ({
         assignedUser = item.assigned_qa;
         break;
     }
-    const currentUserSelected =
-      assigneeSelection?.login === currentUser.username;
+
     const label =
       type === ORG_TYPES.QA
         ? i18n.t('Notify Assigned Tester by Email')
@@ -216,13 +223,13 @@ const AssigneeTableCell = ({
           heading={title}
           isOpen={assignUserModalOpen}
           emptyMessageText={i18n.t('Add Project Collaborators')}
-          alertAssignee={shouldAlertAssignee && !currentUserSelected}
+          alertAssignee={shouldAlertAssignee}
           handleAlertAssignee={handleAlertAssignee}
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
           selection={assigneeSelection}
-          setSelection={setAssigneeSelection}
+          setSelection={handleAssigneeSelection}
           label={label}
         />
       </>
