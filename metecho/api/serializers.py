@@ -258,8 +258,8 @@ class TaskSerializer(serializers.ModelSerializer):
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
 
-    should_alert_dev = serializers.BooleanField(write_only=True)
-    should_alert_qa = serializers.BooleanField(write_only=True)
+    should_alert_dev = serializers.BooleanField(write_only=True, required=False)
+    should_alert_qa = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
         model = Task
@@ -353,15 +353,15 @@ class TaskSerializer(serializers.ModelSerializer):
         return None
 
     def create(self, validated_data):
-        validated_data.pop("should_alert_dev")
-        validated_data.pop("should_alert_qa")
+        validated_data.pop("should_alert_dev", None)
+        validated_data.pop("should_alert_qa", None)
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         user = getattr(self.context.get("request"), "user", None)
         originating_user_id = str(user.id) if user else None
         if instance.assigned_dev != validated_data["assigned_dev"]:
-            if validated_data["should_alert_dev"]:
+            if validated_data.get("should_alert_dev"):
                 self.try_send_assignment_emails(instance, "dev", validated_data)
             orgs = instance.scratchorg_set.active().filter(
                 org_type=SCRATCH_ORG_TYPES.Dev
@@ -369,15 +369,15 @@ class TaskSerializer(serializers.ModelSerializer):
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
-            if validated_data["should_alert_qa"]:
+            if validated_data.get("should_alert_qa"):
                 self.try_send_assignment_emails(instance, "qa", validated_data)
             orgs = instance.scratchorg_set.active().filter(
                 org_type=SCRATCH_ORG_TYPES.QA
             )
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
-        validated_data.pop("should_alert_dev")
-        validated_data.pop("should_alert_qa")
+        validated_data.pop("should_alert_dev", None)
+        validated_data.pop("should_alert_qa", None)
         return super().update(instance, validated_data)
 
     def try_send_assignment_emails(self, instance, type_, validated_data):
