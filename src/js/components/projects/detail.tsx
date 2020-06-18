@@ -208,14 +208,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
     }) => {
       /* istanbul ignore next */
       const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
+      const alertType =
+        type === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
           data: {
             ...task,
             [userType]: assignee,
-            should_alert_dev: type === ORG_TYPES.DEV && shouldAlertAssignee,
-            should_alert_qa: type === ORG_TYPES.QA && shouldAlertAssignee,
+            [alertType]: shouldAlertAssignee,
           },
         }),
       );

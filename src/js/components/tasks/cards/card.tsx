@@ -94,6 +94,7 @@ const OrgCard = ({
     // eslint-disable-next-line no-param-reassign
     org = null;
   }
+
   // assign user modal related
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
   const openAssignUserModal = () => {
@@ -197,7 +198,7 @@ const OrgCard = ({
   const userModalLabel =
     type === ORG_TYPES.QA
       ? i18n.t('Notify Assigned Tester by Email')
-      : i18n.t('Notify Assigned Developer By Email');
+      : i18n.t('Notify Assigned Developer by Email');
   return (
     <div
       className="slds-size_1-of-1
