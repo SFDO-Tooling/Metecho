@@ -324,7 +324,7 @@ export const AssignUserModal = ({
   alertAssignee: boolean;
   selection: GitHubUser | null;
   label: string;
-  setSelection: React.Dispatch<React.SetStateAction<GitHubUser | null>>;
+  setSelection: (selection: GitHubUser) => void;
   handleAlertAssignee: (checked: boolean) => void;
   emptyMessageAction: () => void;
   onRequestClose: () => void;
