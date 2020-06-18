@@ -499,9 +499,7 @@ describe('<ProjectDetail/>', () => {
         fireEvent.click(
           baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
         );
-        fireEvent.click(
-          getByText('Notify Assigned Tester By Email', { exact: false }),
-        );
+        fireEvent.click(getByText('Notify Assigned Tester by Email'));
         fireEvent.click(getByText('Save'));
 
         expect(updateObject.mock.calls[0][0].data.should_alert_dev).toBeFalsy();
@@ -509,9 +507,7 @@ describe('<ProjectDetail/>', () => {
       test('assigning developer', () => {
         const { getAllByText, baseElement, getByText } = setup();
         fireEvent.click(getAllByText('Assign Developer')[0]);
-        fireEvent.click(
-          getByText('Notify Assigned Developer By Email', { exact: false }),
-        );
+        fireEvent.click(getByText('Notify Assigned Developer by Email'));
         fireEvent.click(
           baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
         );

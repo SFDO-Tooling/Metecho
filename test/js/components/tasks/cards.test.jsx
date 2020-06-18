@@ -216,7 +216,7 @@ describe('<OrgCards/>', () => {
       fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="user-name"]'),
       );
-      fireEvent.click(getByText('Notify Assigned Developer By Email'));
+      fireEvent.click(getByText('Notify Assigned Developer by Email'));
 
       fireEvent.click(getByText('Save'));
 

@@ -204,7 +204,7 @@ const AssigneeTableCell = ({
     const label =
       type === ORG_TYPES.QA
         ? i18n.t('Notify Assigned Tester by Email')
-        : i18n.t('Notify Assigned Developer By Email');
+        : i18n.t('Notify Assigned Developer by Email');
     contents = (
       <>
         <Button
