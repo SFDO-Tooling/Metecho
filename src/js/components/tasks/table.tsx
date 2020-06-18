@@ -7,7 +7,6 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import React, { useCallback, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import {
@@ -15,8 +14,7 @@ import {
   GitHubUserAvatar,
 } from '@/components/user/githubUser';
 import { Task } from '@/store/tasks/reducer';
-import { GitHubUser, User } from '@/store/user/reducer';
-import { selectUserState } from '@/store/user/selectors';
+import { GitHubUser } from '@/store/user/reducer';
 import {
   ORG_TYPES,
   OrgTypes,
@@ -140,28 +138,13 @@ const AssigneeTableCell = ({
   assignUserAction: AssignUserAction;
   children?: GitHubUser | null;
 }) => {
-  const currentUser = useSelector(selectUserState) as User;
-
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
-  const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
-  const [assigneeSelection, setAssigneeSelection] = useState<GitHubUser | null>(
-    null,
-  );
-  const handleAlertAssignee = (checked: boolean) => {
-    setShouldAlertAssignee(checked);
-  };
-  const handleAssigneeSelection = (selection: GitHubUser) => {
-    const currentUserSelected = selection.login === currentUser.username;
-    if (currentUserSelected) {
-      handleAlertAssignee(false);
-    }
-    setAssigneeSelection(selection);
-  };
+
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);
   };
   const closeAssignUserModal = () => {
-    setAssigneeSelection(null);
+    // setAssigneeSelection(null);
     setAssignUserModalOpen(false);
   };
   const handleEmptyMessageClick = useCallback(() => {
@@ -170,7 +153,7 @@ const AssigneeTableCell = ({
   }, [openAssignProjectUsersModal]);
 
   const doAssignUserAction = useCallback(
-    (assignee: GitHubUser | null) => {
+    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
       /* istanbul ignore if */
       if (!item || !type) {
         return;
@@ -178,7 +161,7 @@ const AssigneeTableCell = ({
       assignUserAction({ task: item, type, assignee, shouldAlertAssignee });
       closeAssignUserModal();
     },
-    [assignUserAction, item, type, shouldAlertAssignee],
+    [assignUserAction, item, type],
   );
   /* istanbul ignore if */
   if (!item) {
@@ -223,13 +206,9 @@ const AssigneeTableCell = ({
           heading={title}
           isOpen={assignUserModalOpen}
           emptyMessageText={i18n.t('Add Project Collaborators')}
-          alertAssignee={shouldAlertAssignee}
-          handleAlertAssignee={handleAlertAssignee}
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
-          selection={assigneeSelection}
-          setSelection={handleAssigneeSelection}
           label={label}
         />
       </>

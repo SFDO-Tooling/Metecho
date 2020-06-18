@@ -103,21 +103,6 @@ const OrgCard = ({
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(false);
   };
-  const [assigneeSelection, setAssigneeSelection] = useState<GitHubUser | null>(
-    null,
-  );
-  const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
-
-  const handleAlertAssignee = (checked: boolean) => {
-    setShouldAlertAssignee(checked);
-  };
-  const handleAssigneeSelection = (selection: GitHubUser) => {
-    const currentUserSelected = selection.login === user.username;
-    if (currentUserSelected) {
-      handleAlertAssignee(false);
-    }
-    setAssigneeSelection(selection);
-  };
   // refresh org modal
   const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
   const openRefreshOrgModal = () => {
@@ -136,11 +121,11 @@ const OrgCard = ({
   };
 
   const doAssignUser = useCallback(
-    (assignee: GitHubUser | null) => {
+    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
       closeAssignUserModal();
       handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
-    [handleAssignUser, type, shouldAlertAssignee],
+    [handleAssignUser, type],
   );
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
@@ -311,10 +296,6 @@ const OrgCard = ({
         emptyMessageAction={handleEmptyMessageClick}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
-        selection={assigneeSelection}
-        setSelection={handleAssigneeSelection}
-        handleAlertAssignee={handleAlertAssignee}
-        alertAssignee={shouldAlertAssignee}
         label={userModalLabel}
       />
       {testOrgOutOfDate && (

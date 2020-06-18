@@ -10,10 +10,12 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '@/components/404';
 import { LabelWithSpinner, SpinnerWrapper } from '@/components/utils';
-import { GitHubUser } from '@/store/user/reducer';
+import { GitHubUser, User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
 
 interface TableCellProps {
   [key: string]: any;
@@ -307,11 +309,9 @@ export const AssignUserModal = ({
   heading,
   isOpen,
   emptyMessageText,
-  alertAssignee,
-  selection,
+  // selection,
   label,
-  setSelection,
-  handleAlertAssignee,
+  // setSelection,
   emptyMessageAction,
   onRequestClose,
   setUser,
@@ -321,15 +321,29 @@ export const AssignUserModal = ({
   heading: string;
   isOpen: boolean;
   emptyMessageText: string;
-  alertAssignee: boolean;
-  selection: GitHubUser | null;
+  // selection: GitHubUser | null;
   label: string;
-  setSelection: (selection: GitHubUser) => void;
-  handleAlertAssignee: (checked: boolean) => void;
+  // setSelection: (selection: GitHubUser) => void;
   emptyMessageAction: () => void;
   onRequestClose: () => void;
-  setUser: (user: GitHubUser | null) => void;
+  setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
 }) => {
+  const currentUser = useSelector(selectUserState) as User;
+
+  const [selection, setSelection] = useState<GitHubUser | null>(null);
+  const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
+  const handleAlertAssignee = (checked: boolean) => {
+    setShouldAlertAssignee(checked);
+  };
+  const handleAssigneeSelection = (user: GitHubUser) => {
+    const currentUserSelected = user.login === currentUser.username;
+    if (currentUserSelected) {
+      setShouldAlertAssignee(false);
+    } else if (!shouldAlertAssignee) {
+      setShouldAlertAssignee(true);
+    }
+    setSelection(user);
+  };
   const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
   return (
     <Modal
@@ -355,8 +369,8 @@ export const AssignUserModal = ({
             <Checkbox
               key="alert"
               labels={{ label }}
-              value={alertAssignee}
-              checked={alertAssignee}
+              value={shouldAlertAssignee}
+              checked={shouldAlertAssignee}
               onChange={(
                 event: React.FormEvent<HTMLFormElement>,
                 { checked }: { checked: boolean },
@@ -372,7 +386,7 @@ export const AssignUserModal = ({
               type="submit"
               label={i18n.t('Save')}
               variant="brand"
-              onClick={() => setUser(selection)}
+              onClick={() => setUser(selection, shouldAlertAssignee)} // change to accept user AND boolean
             />,
           ]
         ) : (
@@ -406,7 +420,7 @@ export const AssignUserModal = ({
                 <GitHubUserButton
                   user={user}
                   isSelected={selection === user}
-                  onClick={() => setSelection(user)}
+                  onClick={() => handleAssigneeSelection(user)}
                 />
               </li>
             ))}

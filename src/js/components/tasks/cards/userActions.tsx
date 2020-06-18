@@ -15,7 +15,7 @@ const UserActions = ({
   type: OrgTypes;
   assignedUser: GitHubUser | null;
   openAssignUserModal: () => void;
-  setUser: (user: GitHubUser | null) => void;
+  setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
 }) => {
   if (assignedUser) {
     const handleSelect = (option: { id: string; label: string }) => {
@@ -24,7 +24,7 @@ const UserActions = ({
           openAssignUserModal();
           break;
         case 'remove':
-          setUser(null);
+          setUser(null, false);
           break;
       }
     };
