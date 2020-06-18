@@ -6,6 +6,8 @@ import {
   AssignUsersModal,
 } from '@/components/user/githubUser';
 
+import { renderWithRedux, storeWithThunk } from '../../utils';
+
 describe('AssignUsersModal', () => {
   test('responds to checkbox clicks', () => {
     const setUsers = jest.fn();
@@ -51,78 +53,33 @@ describe('AssignUsersModal', () => {
 });
 
 describe('AssignUserModal', () => {
+  const defaultState = {
+    user: {
+      id: 'user-id',
+      username: 'user-name',
+      valid_token_for: 'sf-org',
+      is_devhub_enabled: true,
+    },
+  };
+  const allUsers = [
+    {
+      id: '123456',
+      login: 'test user',
+      avatar_url: 'https://example.com/avatar.png',
+    },
+  ];
+  const setup = () => ({
+    ...renderWithRedux(
+      <AssignUserModal allUsers={allUsers} selectedUser={null} isOpen={true} />,
+      defaultState,
+      storeWithThunk,
+    ),
+  });
   test('responds to user click', () => {
-    const setUser = jest.fn();
-    const setSelection = jest.fn();
+    const { getAllByTitle } = setup();
+    const userBtn = getAllByTitle('test user')[0];
+    fireEvent.click(userBtn);
 
-    const allUsers = [
-      {
-        id: '123456',
-        login: 'test user',
-        avatar_url: 'https://example.com/avatar.png',
-      },
-    ];
-    const { getByText } = render(
-      <AssignUserModal
-        allUsers={allUsers}
-        selectedUser={null}
-        isOpen={true}
-        setUser={setUser}
-        setSelection={setSelection}
-      />,
-    );
-    fireEvent.click(getByText('test user'));
-
-    expect(setSelection).toHaveBeenCalledWith(allUsers[0]);
-  });
-
-  test('selects email assignee checkbox', () => {
-    const handleAlertAssignee = jest.fn();
-    const label = 'Notify Assigned Developer by Email';
-    const allUsers = [
-      {
-        id: '123456',
-        login: 'test user',
-        avatar_url: 'https://example.com/avatar.png',
-      },
-    ];
-    const { getByText } = render(
-      <AssignUserModal
-        allUsers={allUsers}
-        selectedUser={null}
-        isOpen={true}
-        handleAlertAssignee={handleAlertAssignee}
-        label={label}
-      />,
-    );
-    fireEvent.click(getByText('Notify Assigned Developer by Email'));
-
-    expect(handleAlertAssignee).toHaveBeenCalledTimes(1);
-  });
-
-  test('assigns selected user', () => {
-    const setUser = jest.fn();
-    const setSelection = jest.fn();
-
-    const allUsers = [
-      {
-        id: '123456',
-        login: 'test user',
-        avatar_url: 'https://example.com/avatar.png',
-      },
-    ];
-    const { getByText } = render(
-      <AssignUserModal
-        allUsers={allUsers}
-        selectedUser={null}
-        isOpen={true}
-        setUser={setUser}
-        setSelection={setSelection}
-      />,
-    );
-    fireEvent.click(getByText('test user'));
-    fireEvent.click(getByText('Save'));
-
-    expect(setUser).toHaveBeenCalled();
+    expect(userBtn).toHaveClass('is-selected');
   });
 });
