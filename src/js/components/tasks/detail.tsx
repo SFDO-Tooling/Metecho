@@ -411,6 +411,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             instanceType="task"
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
+            assignee={task.assigned_qa}
           />
         )}
         <EditModal

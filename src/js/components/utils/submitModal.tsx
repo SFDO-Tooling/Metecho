@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
@@ -13,6 +14,7 @@ import {
   useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
+import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 interface Props {
@@ -22,6 +24,7 @@ interface Props {
   instanceType: ObjectTypes;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+  assignee: GitHubUser | null;
 }
 
 const SubmitModal = ({
@@ -31,6 +34,7 @@ const SubmitModal = ({
   instanceType,
   isOpen,
   toggleModal,
+  assignee,
 }: Props) => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const isMounted = useIsMounted();
@@ -87,6 +91,7 @@ const SubmitModal = ({
       additional_changes: '',
       issues: '',
       notes: '',
+      alert_assigned_dev: false,
     },
     onSuccess: handleSuccess,
     onError: handleError,
@@ -119,7 +124,9 @@ const SubmitModal = ({
     setSubmittingReview(true);
     handleSubmit(e);
   };
-
+  const alertLabel = assignee
+    ? `Alert ${assignee.login} by Email`
+    : 'Alert Assigned Tester by Email';
   return (
     <Modal
       isOpen={isOpen}
@@ -127,6 +134,12 @@ const SubmitModal = ({
       disableClose={submittingReview}
       heading={heading}
       footer={[
+        <Checkbox
+          key="alert-pr-create"
+          labels={{ label: alertLabel }}
+          name="alert_assigned_dev"
+          onChange={handleInputChange}
+        />,
         <Button
           key="cancel"
           label={i18n.t('Cancel')}
