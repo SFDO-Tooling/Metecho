@@ -346,6 +346,10 @@ export const AssignUserModal = ({
     setSelection(null);
     setShouldAlertAssignee(true);
   };
+  const handleSave = () => {
+    setUser(selection, shouldAlertAssignee);
+    handleClose();
+  };
 
   const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
   const heading =
@@ -397,7 +401,7 @@ export const AssignUserModal = ({
               key="submit"
               label={i18n.t('Save')}
               variant="brand"
-              onClick={() => setUser(selection, shouldAlertAssignee)}
+              onClick={handleSave}
             />,
           ]
         ) : (

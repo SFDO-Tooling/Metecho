@@ -8,6 +8,7 @@ from rest_framework import serializers
 from rest_framework.fields import JSONField
 
 from .fields import MarkdownField
+from .jobs import get_user_facing_url
 from .models import (
     SCRATCH_ORG_TYPES,
     TASK_REVIEW_STATUS,
@@ -383,10 +384,24 @@ class TaskSerializer(serializers.ModelSerializer):
     def try_send_assignment_emails(self, instance, type_, validated_data):
         user = self.get_matching_assigned_user(type_, validated_data)
         if user:
-            # @@@ TODO: real subject, real set of context variables for
-            # the email template.
-            subject = _("Assigned to task")
-            body = render_to_string("user_assigned_to_task.txt", {"task": instance})
+            task = instance
+            project = task.project
+            repo = project.repository
+            metecho_link = get_user_facing_url(
+                path=["repositories", repo.slug, project.slug, task.slug]
+            )
+            subject = _("Metecho Task Assigned to You")
+            body = render_to_string(
+                "user_assigned_to_task.txt",
+                {
+                    "role": "Tester" if type_ == "qa" else "Developer",
+                    "task_name": task.name,
+                    "project_name": project.name,
+                    "repo_name": repo.name,
+                    "user_name": user.username,
+                    "metecho_link": metecho_link,
+                },
+            )
             user.notify(subject, body)
 
     def get_matching_assigned_user(self, type_, validated_data):

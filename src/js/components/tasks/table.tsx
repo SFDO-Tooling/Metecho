@@ -159,7 +159,6 @@ const AssigneeTableCell = ({
         return;
       }
       assignUserAction({ task: item, type, assignee, shouldAlertAssignee });
-      closeAssignUserModal();
     },
     [assignUserAction, item, type],
   );

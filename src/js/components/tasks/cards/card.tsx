@@ -123,7 +123,6 @@ const OrgCard = ({
 
   const doAssignUser = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
-      closeAssignUserModal();
       handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
     [handleAssignUser, type],
