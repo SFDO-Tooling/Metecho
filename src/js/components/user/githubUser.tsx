@@ -16,6 +16,7 @@ import { EmptyIllustration } from '@/components/404';
 import { LabelWithSpinner, SpinnerWrapper } from '@/components/utils';
 import { GitHubUser, User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
+import { ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 interface TableCellProps {
   [key: string]: any;
@@ -274,10 +275,12 @@ export const AssignUsersModal = ({
 
 const GitHubUserButton = ({
   user,
+  isAssigned,
   isSelected,
   ...props
 }: {
   user: GitHubUser;
+  isAssigned?: boolean;
   isSelected?: boolean;
   [key: string]: any;
 }) => (
@@ -287,6 +290,7 @@ const GitHubUserButton = ({
       'slds-p-around_xx-small',
       'collaborator-button',
       {
+        'is-assigned': isAssigned,
         'is-selected': isSelected,
       },
     )}
@@ -298,7 +302,7 @@ const GitHubUserButton = ({
       </>
     }
     variant="base"
-    disabled={isSelected}
+    disabled={isSelected || isAssigned}
     {...props}
   />
 );
@@ -306,24 +310,18 @@ const GitHubUserButton = ({
 export const AssignUserModal = ({
   allUsers,
   selectedUser,
-  heading,
+  orgType,
   isOpen,
   emptyMessageText,
-  // selection,
-  label,
-  // setSelection,
   emptyMessageAction,
   onRequestClose,
   setUser,
 }: {
   allUsers: GitHubUser[];
   selectedUser: GitHubUser | null;
-  heading: string;
+  orgType: OrgTypes;
   isOpen: boolean;
   emptyMessageText: string;
-  // selection: GitHubUser | null;
-  label: string;
-  // setSelection: (selection: GitHubUser) => void;
   emptyMessageAction: () => void;
   onRequestClose: () => void;
   setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
@@ -332,25 +330,41 @@ export const AssignUserModal = ({
 
   const [selection, setSelection] = useState<GitHubUser | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
-  const handleAlertAssignee = (checked: boolean) => {
+  const handleAlertAssignee = (
+    event: React.FormEvent<HTMLFormElement>,
+    { checked }: { checked: boolean },
+  ) => {
     setShouldAlertAssignee(checked);
   };
   const handleAssigneeSelection = (user: GitHubUser) => {
     const currentUserSelected = user.login === currentUser.username;
-    if (currentUserSelected) {
-      setShouldAlertAssignee(false);
-    } else if (!shouldAlertAssignee) {
-      setShouldAlertAssignee(true);
-    }
+    setShouldAlertAssignee(!currentUserSelected);
     setSelection(user);
   };
+  const handleClose = () => {
+    onRequestClose();
+    setSelection(null);
+    setShouldAlertAssignee(true);
+  };
+
   const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
+  const heading =
+    orgType === ORG_TYPES.QA
+      ? i18n.t('Assign Tester')
+      : i18n.t('Assign Developer');
+  const checkboxLabel =
+    orgType === ORG_TYPES.QA
+      ? i18n.t('Notify Assigned Tester by Email')
+      : i18n.t('Notify Assigned Developer by Email');
+  const alertType =
+    orgType === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
+
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       heading={heading}
-      directional={true}
+      directional
       tagline={
         filteredUsers.length ? (
           <>
@@ -368,25 +382,22 @@ export const AssignUserModal = ({
           [
             <Checkbox
               key="alert"
-              labels={{ label }}
-              value={shouldAlertAssignee}
+              labels={{ label: checkboxLabel }}
+              className="slds-float_left slds-p-top_xx-small"
+              name={alertType}
               checked={shouldAlertAssignee}
-              onChange={(
-                event: React.FormEvent<HTMLFormElement>,
-                { checked }: { checked: boolean },
-              ) => handleAlertAssignee(checked)}
+              onChange={handleAlertAssignee}
             />,
             <Button
               key="cancel"
               label={i18n.t('Cancel')}
-              onClick={onRequestClose}
+              onClick={handleClose}
             />,
             <Button
               key="submit"
-              type="submit"
               label={i18n.t('Save')}
               variant="brand"
-              onClick={() => setUser(selection, shouldAlertAssignee)} // change to accept user AND boolean
+              onClick={() => setUser(selection, shouldAlertAssignee)}
             />,
           ]
         ) : (
@@ -404,7 +415,7 @@ export const AssignUserModal = ({
             <div className="slds-text-title slds-m-bottom_xx-small">
               {i18n.t('Currently Assigned')}
             </div>
-            <GitHubUserButton user={selectedUser} isSelected />
+            <GitHubUserButton user={selectedUser} isAssigned />
           </div>
           <hr className="slds-m-vertical_none slds-m-horizontal_small" />
         </>

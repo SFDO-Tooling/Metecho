@@ -184,10 +184,6 @@ const AssigneeTableCell = ({
         break;
     }
 
-    const label =
-      type === ORG_TYPES.QA
-        ? i18n.t('Notify Assigned Tester by Email')
-        : i18n.t('Notify Assigned Developer by Email');
     contents = (
       <>
         <Button
@@ -203,13 +199,12 @@ const AssigneeTableCell = ({
         <AssignUserModal
           allUsers={projectUsers}
           selectedUser={assignedUser}
-          heading={title}
+          orgType={type}
           isOpen={assignUserModalOpen}
           emptyMessageText={i18n.t('Add Project Collaborators')}
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
-          label={label}
         />
       </>
     );

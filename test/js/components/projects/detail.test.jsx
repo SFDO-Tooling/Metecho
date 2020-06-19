@@ -463,10 +463,13 @@ describe('<ProjectDetail/>', () => {
         baseElement.querySelector('.collaborator-button[title="currentUser"]'),
       );
       fireEvent.click(getByText('Save'));
+
       expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
-        'currentUser',
-      );
+
+      const data = updateObject.mock.calls[0][0].data;
+
+      expect(data.assigned_qa.login).toEqual('currentUser');
+      expect(data.should_alert_qa).toBe(false);
     });
 
     test('closes modal if no users to assign', () => {
@@ -502,8 +505,9 @@ describe('<ProjectDetail/>', () => {
         fireEvent.click(getByText('Notify Assigned Tester by Email'));
         fireEvent.click(getByText('Save'));
 
-        expect(updateObject.mock.calls[0][0].data.should_alert_dev).toBeFalsy();
+        expect(updateObject.mock.calls[0][0].data.should_alert_qa).toBe(false);
       });
+
       test('assigning developer', () => {
         const { getAllByText, baseElement, getByText } = setup();
         fireEvent.click(getAllByText('Assign Developer')[0]);
@@ -513,7 +517,7 @@ describe('<ProjectDetail/>', () => {
         );
         fireEvent.click(getByText('Save'));
 
-        expect(updateObject.mock.calls[0][0].data.should_alert_qa).toBeFalsy();
+        expect(updateObject.mock.calls[0][0].data.should_alert_dev).toBe(true);
       });
     });
   });

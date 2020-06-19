@@ -103,6 +103,7 @@ const OrgCard = ({
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(false);
   };
+
   // refresh org modal
   const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
   const openRefreshOrgModal = () => {
@@ -175,15 +176,7 @@ const OrgCard = ({
     type === ORG_TYPES.QA ? i18n.t('Tester') : i18n.t('Developer');
   const orgHeading =
     type === ORG_TYPES.QA ? i18n.t('Test Org') : i18n.t('Dev Org');
-  const userModalHeading =
-    type === ORG_TYPES.QA
-      ? i18n.t('Assign Tester')
-      : i18n.t('Assign Developer');
 
-  const userModalLabel =
-    type === ORG_TYPES.QA
-      ? i18n.t('Notify Assigned Tester by Email')
-      : i18n.t('Notify Assigned Developer by Email');
   return (
     <div
       className="slds-size_1-of-1
@@ -290,13 +283,12 @@ const OrgCard = ({
       <AssignUserModal
         allUsers={projectUsers}
         selectedUser={assignedUser}
-        heading={userModalHeading}
+        orgType={type}
         isOpen={assignUserModalOpen}
         emptyMessageText={i18n.t('View Project to Add Collaborators')}
         emptyMessageAction={handleEmptyMessageClick}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
-        label={userModalLabel}
       />
       {testOrgOutOfDate && (
         <RefreshOrgModal

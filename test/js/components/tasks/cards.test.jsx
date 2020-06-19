@@ -217,14 +217,14 @@ describe('<OrgCards/>', () => {
         baseElement.querySelector('.collaborator-button[title="user-name"]'),
       );
       fireEvent.click(getByText('Notify Assigned Developer by Email'));
-
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
-        'user-name',
-      );
-      expect(updateObject.mock.calls[0][0].data.should_alert_dev).toEqual(true);
+
+      const data = updateObject.mock.calls[0][0].data;
+
+      expect(data.assigned_dev.login).toEqual('user-name');
+      expect(data.should_alert_dev).toBe(true);
     });
 
     test('redirects to project-detail if no users to assign', () => {

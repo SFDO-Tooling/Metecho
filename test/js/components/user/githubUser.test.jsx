@@ -22,7 +22,7 @@ describe('AssignUsersModal', () => {
       <AssignUsersModal
         allUsers={allUsers}
         selectedUsers={[]}
-        isOpen={true}
+        isOpen
         setUsers={setUsers}
         isRefreshing={false}
         refreshUsers={() => {}}
@@ -40,9 +40,9 @@ describe('AssignUsersModal', () => {
         <AssignUsersModal
           allUsers={[]}
           selectedUsers={[]}
-          isOpen={true}
+          isOpen
           setUsers={() => {}}
-          isRefreshing={true}
+          isRefreshing
           refreshUsers={() => {}}
         />,
       );
@@ -68,18 +68,37 @@ describe('AssignUserModal', () => {
       avatar_url: 'https://example.com/avatar.png',
     },
   ];
+  const setUser = jest.fn();
+  const onRequestClose = jest.fn();
+
   const setup = () => ({
     ...renderWithRedux(
-      <AssignUserModal allUsers={allUsers} selectedUser={null} isOpen={true} />,
+      <AssignUserModal
+        allUsers={allUsers}
+        selectedUser={null}
+        orgType="Dev"
+        isOpen
+        setUser={setUser}
+        onRequestClose={onRequestClose}
+      />,
       defaultState,
       storeWithThunk,
     ),
   });
+
   test('responds to user click', () => {
-    const { getAllByTitle } = setup();
+    const { getByText, getAllByTitle } = setup();
     const userBtn = getAllByTitle('test user')[0];
     fireEvent.click(userBtn);
+    fireEvent.click(getByText('Save'));
 
-    expect(userBtn).toHaveClass('is-selected');
+    expect(setUser).toHaveBeenCalledWith(allUsers[0], true);
+  });
+
+  test('closes on Cancel click', () => {
+    const { getByText } = setup();
+    fireEvent.click(getByText('Cancel'));
+
+    expect(onRequestClose).toHaveBeenCalled();
   });
 });
