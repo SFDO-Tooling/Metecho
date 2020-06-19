@@ -369,7 +369,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     )
                     reassigned_org = True
                 else:
-                    org.queue_delete(originating_user_id=originating_user_id)
+                    org.delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
             # We want to consider soft-deleted orgs, too:
             orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.QA)
@@ -387,7 +387,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     )
                     reassigned_org = True
                 else:
-                    org.queue_delete(originating_user_id=originating_user_id)
+                    org.delete(originating_user_id=originating_user_id)
         return super().update(instance, validated_data)
 
     def _valid_reassign(self, type_, org, new_assignee):

@@ -242,8 +242,8 @@ class TestTaskSerializer:
     def test_update(self, rf, user_factory, task_factory, scratch_org_factory):
         user = user_factory()
         task = task_factory(commits=["abc123"])
-        scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
+        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
         data = {
             "name": task.name,
             "description": task.description,
@@ -256,11 +256,12 @@ class TestTaskSerializer:
         r.user = user
         serializer = TaskSerializer(task, data=data, context={"request": r})
         assert serializer.is_valid(), serializer.errors
-        with patch("metecho.api.models.ScratchOrg.queue_delete") as queue_delete:
-            serializer.update(task, serializer.validated_data)
-            assert queue_delete.call_args.kwargs == {
-                "originating_user_id": str(user.id)
-            }
+
+        serializer.update(task, serializer.validated_data)
+        so1.refresh_from_db()
+        so2.refresh_from_db()
+        assert so1.deleted_at is not None
+        assert so2.deleted_at is not None
 
     def test_update__no_user(self, task_factory, scratch_org_factory):
         task = task_factory(commits=["abc123"])
