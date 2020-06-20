@@ -363,7 +363,7 @@ class TaskSerializer(serializers.ModelSerializer):
         originating_user_id = str(user.id) if user else None
         if instance.assigned_dev != validated_data["assigned_dev"]:
             if validated_data.get("should_alert_dev"):
-                self.try_send_assignment_emails(instance, "dev", validated_data)
+                self.try_send_assignment_emails(instance, "dev", validated_data, user)
             orgs = instance.scratchorg_set.active().filter(
                 org_type=SCRATCH_ORG_TYPES.Dev
             )
@@ -371,7 +371,7 @@ class TaskSerializer(serializers.ModelSerializer):
                 org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
             if validated_data.get("should_alert_qa"):
-                self.try_send_assignment_emails(instance, "qa", validated_data)
+                self.try_send_assignment_emails(instance, "qa", validated_data, user)
             orgs = instance.scratchorg_set.active().filter(
                 org_type=SCRATCH_ORG_TYPES.QA
             )
@@ -381,9 +381,9 @@ class TaskSerializer(serializers.ModelSerializer):
         validated_data.pop("should_alert_qa", None)
         return super().update(instance, validated_data)
 
-    def try_send_assignment_emails(self, instance, type_, validated_data):
-        user = self.get_matching_assigned_user(type_, validated_data)
-        if user:
+    def try_send_assignment_emails(self, instance, type_, validated_data, user):
+        assigned_user = self.get_matching_assigned_user(type_, validated_data)
+        if assigned_user:
             task = instance
             project = task.project
             repo = project.repository
@@ -398,11 +398,12 @@ class TaskSerializer(serializers.ModelSerializer):
                     "task_name": task.name,
                     "project_name": project.name,
                     "repo_name": repo.name,
-                    "user_name": user.username,
+                    "assigned_user_name": assigned_user.username,
+                    "user_name": user.username if user else None,
                     "metecho_link": metecho_link,
                 },
             )
-            user.notify(subject, body)
+            assigned_user.notify(subject, body)
 
     def get_matching_assigned_user(self, type_, validated_data):
         assigned = validated_data.get(f"assigned_{type_}", {})
