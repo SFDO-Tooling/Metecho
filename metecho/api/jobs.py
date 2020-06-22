@@ -9,7 +9,6 @@ from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils.text import slugify
@@ -145,24 +144,20 @@ def alert_user_about_expiring_org(*, org, days):
         )
 
         # email user
-        send_mail(
-            _("Metecho Scratch Org Expiring with Uncommitted Changes"),
-            render_to_string(
-                "scratch_org_expiry_email.txt",
-                {
-                    "repo_name": repo.name,
-                    "project_name": project.name,
-                    "task_name": task.name,
-                    "days": days,
-                    "expiry_date": org.expires_at,
-                    "user_name": user.username,
-                    "metecho_link": metecho_link,
-                },
-            ),
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
+        subject = _("Metecho Scratch Org Expiring with Uncommitted Changes")
+        body = render_to_string(
+            "scratch_org_expiry_email.txt",
+            {
+                "repo_name": repo.name,
+                "project_name": project.name,
+                "task_name": task.name,
+                "days": days,
+                "expiry_date": org.expires_at,
+                "user_name": user.username,
+                "metecho_link": metecho_link,
+            },
         )
+        user.notify(subject, body)
 
 
 def _create_org_and_run_flow(

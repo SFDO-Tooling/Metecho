@@ -6,6 +6,8 @@ import {
   AssignUsersModal,
 } from '@/components/user/githubUser';
 
+import { renderWithRedux, storeWithThunk } from '../../utils';
+
 describe('AssignUsersModal', () => {
   test('responds to checkbox clicks', () => {
     const setUsers = jest.fn();
@@ -20,7 +22,7 @@ describe('AssignUsersModal', () => {
       <AssignUsersModal
         allUsers={allUsers}
         selectedUsers={[]}
-        isOpen={true}
+        isOpen
         setUsers={setUsers}
         isRefreshing={false}
         refreshUsers={() => {}}
@@ -38,9 +40,9 @@ describe('AssignUsersModal', () => {
         <AssignUsersModal
           allUsers={[]}
           selectedUsers={[]}
-          isOpen={true}
+          isOpen
           setUsers={() => {}}
-          isRefreshing={true}
+          isRefreshing
           refreshUsers={() => {}}
         />,
       );
@@ -51,25 +53,52 @@ describe('AssignUsersModal', () => {
 });
 
 describe('AssignUserModal', () => {
-  test('responds to user click', () => {
-    const setUser = jest.fn();
-    const allUsers = [
-      {
-        id: '123456',
-        login: 'test user',
-        avatar_url: 'https://example.com/avatar.png',
-      },
-    ];
-    const { getByText } = render(
+  const defaultState = {
+    user: {
+      id: 'user-id',
+      username: 'user-name',
+      valid_token_for: 'sf-org',
+      is_devhub_enabled: true,
+    },
+  };
+  const allUsers = [
+    {
+      id: '123456',
+      login: 'test user',
+      avatar_url: 'https://example.com/avatar.png',
+    },
+  ];
+  const setUser = jest.fn();
+  const onRequestClose = jest.fn();
+
+  const setup = () => ({
+    ...renderWithRedux(
       <AssignUserModal
         allUsers={allUsers}
         selectedUser={null}
-        isOpen={true}
+        orgType="Dev"
+        isOpen
         setUser={setUser}
+        onRequestClose={onRequestClose}
       />,
-    );
-    fireEvent.click(getByText('test user'));
+      defaultState,
+      storeWithThunk,
+    ),
+  });
 
-    expect(setUser).toHaveBeenCalledWith(allUsers[0]);
+  test('responds to user click', () => {
+    const { getByText, getAllByTitle } = setup();
+    const userBtn = getAllByTitle('test user')[0];
+    fireEvent.click(userBtn);
+    fireEvent.click(getByText('Save'));
+
+    expect(setUser).toHaveBeenCalledWith(allUsers[0], true);
+  });
+
+  test('closes on Cancel click', () => {
+    const { getByText } = setup();
+    fireEvent.click(getByText('Cancel'));
+
+    expect(onRequestClose).toHaveBeenCalled();
   });
 });

@@ -37,7 +37,7 @@ class SocialAccountFactory(factory.django.DjangoModelFactory):
         model = SocialAccount
 
     provider = "github"
-    uid = factory.Sequence("https://example.com/{}".format)
+    uid = factory.Sequence("{}".format)
     socialtoken_set = factory.RelatedFactory(SocialTokenFactory, "account")
     extra_data = {
         "instance_url": "https://example.com",

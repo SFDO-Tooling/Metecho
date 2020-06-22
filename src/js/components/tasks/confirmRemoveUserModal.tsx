@@ -16,7 +16,11 @@ const ConfirmRemoveUserModal = ({
   waitingToRemoveUser: AssignedUserTracker | null;
   handleClose: () => void;
   handleCancel: () => void;
-  handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
+  handleAssignUser: ({
+    type,
+    assignee,
+    shouldAlertAssignee,
+  }: AssignedUserTracker) => void;
 }) => {
   const handleSubmit = () => {
     handleClose();
