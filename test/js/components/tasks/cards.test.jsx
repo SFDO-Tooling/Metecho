@@ -211,14 +211,20 @@ describe('<OrgCards/>', () => {
         ...defaultTask,
         assigned_dev: null,
       };
-      const { getByText } = setup({ task, orgs: {} });
+      const { getByText, baseElement } = setup({ task, orgs: {} });
       fireEvent.click(getByText('Assign'));
-      fireEvent.click(getByText('other-user'));
+      fireEvent.click(
+        baseElement.querySelector('.collaborator-button[title="user-name"]'),
+      );
+      fireEvent.click(getByText('Notify Assigned Developer by Email'));
+      fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
-        'other-user',
-      );
+
+      const data = updateObject.mock.calls[0][0].data;
+
+      expect(data.assigned_dev.login).toEqual('user-name');
+      expect(data.should_alert_dev).toBe(true);
     });
 
     test('redirects to project-detail if no users to assign', () => {
@@ -248,6 +254,7 @@ describe('<OrgCards/>', () => {
       fireEvent.click(getByText('User Actions'));
       fireEvent.click(getByText('Change Tester'));
       fireEvent.click(getByText('other-user'));
+      fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
@@ -269,6 +276,7 @@ describe('<OrgCards/>', () => {
           fireEvent.click(getByText('User Actions'));
           fireEvent.click(getByText('Change Developer'));
           fireEvent.click(getByText('other-user'));
+          fireEvent.click(getByText('Save'));
 
           expect(refetchOrg).toHaveBeenCalledTimes(1);
           expect(updateObject).not.toHaveBeenCalled();
