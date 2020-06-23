@@ -91,7 +91,7 @@ salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
 secretstorage==3.1.2      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sentry-sdk==0.14.4        # via -r requirements/prod.in
+sentry-sdk==0.15.1        # via -r requirements/prod.in
 service_identity==18.1.0  # via -r requirements/prod.in
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.12.0.tar.gz  # via -r requirements/prod.in
 simple-salesforce==1.0.0  # via -r requirements/prod.in, cumulusci, salesforce-bulk
