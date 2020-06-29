@@ -116,6 +116,7 @@ class CreatePrMixin:
         get_repo_id: Fn(user: User) -> int
         get_base: Fn() -> str
         get_head: Fn() -> str
+        try_to_notify_assigned_user: Fn() -> None
     """
 
     create_pr_event = ""  # Implement this
@@ -158,6 +159,13 @@ class CreatePrMixin:
     def finalize_create_pr(self, *, error=None, originating_user_id):
         self.currently_creating_pr = False
         self.save()
+
+        # If appropriate:
+        # Get assigned_qa or assigned_dev
+        # Find user in DB if present
+        # Send email
+        self.try_to_notify_assigned_user()
+
         if error is None:
             self.notify_changed(
                 type_=self.create_pr_event, originating_user_id=originating_user_id
