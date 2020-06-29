@@ -156,6 +156,7 @@ class TestProject:
                 additional_changes="",
                 issues="",
                 notes="",
+                alert_assigned_dev=True,
                 originating_user_id=None,
             )
 
@@ -261,6 +262,7 @@ class TestTask:
                 additional_changes="",
                 issues="",
                 notes="",
+                alert_assigned_dev=True,
                 originating_user_id=None,
             )
 

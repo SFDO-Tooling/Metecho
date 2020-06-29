@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 
 from allauth.account.signals import user_logged_in
+from allauth.socialaccount.models import SocialAccount
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
 from cumulusci.core.config import OrgConfig
@@ -16,9 +17,11 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
 from sfdo_template_helpers.crypto import fernet_decrypt
@@ -484,6 +487,10 @@ class Project(
     def get_head(self):
         return self.branch_name
 
+    def try_to_notify_assigned_user(self):  # pragma: nocover
+        # Does nothing in this case.
+        pass
+
     # end CreatePrMixin configuration
 
     def create_gh_branch(self, user):
@@ -665,6 +672,23 @@ class Task(
 
     def get_head(self):
         return self.branch_name
+
+    def try_to_notify_assigned_user(self):
+        # This takes the tester (a.k.a. assigned_qa) and sends them an
+        # email when a PR has been made.
+        assigned = self.assigned_qa
+        id_ = assigned.get("id") if assigned else None
+        sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
+        user = getattr(sa, "user", None)
+        if user:
+            subject = _("PR created for Metecho task")
+            body = render_to_string(
+                "pr_created_for_task.txt",
+                {
+                    # TODO
+                },
+            )
+            user.notify(subject, body)
 
     # end CreatePrMixin configuration
 
