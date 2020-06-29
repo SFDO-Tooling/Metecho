@@ -613,6 +613,7 @@ class TestTaskView:
                     "additional_changes": "",
                     "issues": "",
                     "notes": "",
+                    "alert_assigned_dev": True,
                 },
                 format="json",
             )
@@ -643,6 +644,7 @@ class TestTaskView:
                     "additional_changes": "",
                     "issues": "",
                     "notes": "",
+                    "alert_assigned_dev": True,
                 },
                 format="json",
             )

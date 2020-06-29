@@ -440,6 +440,7 @@ def create_pr(
     additional_changes,
     issues,
     notes,
+    alert_assigned_dev,
     originating_user_id,
 ):
     try:
@@ -466,7 +467,10 @@ def create_pr(
         logger.error(tb)
         raise
     else:
-        instance.finalize_create_pr(originating_user_id=originating_user_id)
+        instance.finalize_create_pr(
+            alert_assigned_dev=alert_assigned_dev,
+            originating_user_id=originating_user_id,
+        )
 
 
 create_pr_job = job(create_pr)

@@ -418,6 +418,7 @@ class CreatePrSerializer(serializers.Serializer):
     additional_changes = serializers.CharField(allow_blank=True)
     issues = serializers.CharField(allow_blank=True)
     notes = serializers.CharField(allow_blank=True)
+    alert_assigned_dev = serializers.BooleanField()
 
 
 class ReviewSerializer(serializers.Serializer):
