@@ -133,13 +133,17 @@ const SubmitModal = ({
       size="medium"
       disableClose={submittingReview}
       heading={heading}
+      directional
       footer={[
         <Checkbox
-          key="alert-pr-create"
-          labels={{ label: alertLabel }}
+          key="alert"
+          className="slds-float_left slds-p-top_xx-small"
           name="alert_assigned_dev"
           onChange={handleInputChange}
         />,
+        <span key="alert-label" className="slds-float_left slds-p-top_xx-small">
+          {alertLabel}
+        </span>,
         <Button
           key="cancel"
           label={i18n.t('Cancel')}
