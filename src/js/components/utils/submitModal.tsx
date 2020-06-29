@@ -1,3 +1,4 @@
+import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
@@ -24,7 +25,7 @@ interface Props {
   instanceType: ObjectTypes;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
-  assignee: GitHubUser | null;
+  assignee?: GitHubUser | null;
 }
 
 const SubmitModal = ({
@@ -124,9 +125,37 @@ const SubmitModal = ({
     setSubmittingReview(true);
     handleSubmit(e);
   };
-  const alertLabel = assignee
-    ? `Alert ${assignee.login} by Email`
-    : 'Alert Assigned Tester by Email';
+  const alertLabel = (
+    <>
+      {' '}
+      {assignee ? (
+        <span data-form="task-pr-create">
+          {i18n.t('Notify')}{' '}
+          <Avatar
+            assistiveText={{ icon: 'Avatar image' }}
+            imgSrc={assignee.avatar_url}
+            imgAlt={assignee.login}
+          />{' '}
+          <span>{assignee.login}</span> {i18n.t('by Email')}
+        </span>
+      ) : (
+        <div>{i18n.t('Notify Assignee by Email')}</div>
+      )}
+    </>
+  );
+  const AlertAssignee = () => (
+    <>
+      <Checkbox
+        className="slds-float_left slds-p-top_xx-small"
+        name="alert_assigned_dev"
+        onChange={handleInputChange}
+        checked={inputs.alert_assigned_dev}
+      />
+      <span key="alert-label" className="slds-float_left slds-p-top_xx-small">
+        {alertLabel}
+      </span>
+    </>
+  );
   return (
     <Modal
       isOpen={isOpen}
@@ -135,15 +164,7 @@ const SubmitModal = ({
       heading={heading}
       directional
       footer={[
-        <Checkbox
-          key="alert"
-          className="slds-float_left slds-p-top_xx-small"
-          name="alert_assigned_dev"
-          onChange={handleInputChange}
-        />,
-        <span key="alert-label" className="slds-float_left slds-p-top_xx-small">
-          {alertLabel}
-        </span>,
+        <AlertAssignee key="alert" />,
         <Button
           key="cancel"
           label={i18n.t('Cancel')}

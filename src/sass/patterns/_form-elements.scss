@@ -70,3 +70,8 @@
     }
   }
 }
+[data-form='task-pr-create'] {
+  > div {
+    display: inherit;
+  }
+}
