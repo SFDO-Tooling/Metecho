@@ -114,7 +114,7 @@
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jest": "^23.17.1",
     "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-react": "^7.20.1",
+    "eslint-plugin-react": "7.20.0",
     "eslint-plugin-react-hooks": "^4.0.4",
     "eslint-plugin-simple-import-sort": "^5.0.3",
     "fetch-mock": "^9.10.3",
