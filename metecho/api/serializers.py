@@ -1,11 +1,14 @@
 from typing import Optional
 
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
+from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.fields import JSONField
 
 from .fields import MarkdownField
+from .jobs import get_user_facing_url
 from .models import (
     SCRATCH_ORG_TYPES,
     TASK_REVIEW_STATUS,
@@ -256,6 +259,9 @@ class TaskSerializer(serializers.ModelSerializer):
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
 
+    should_alert_dev = serializers.BooleanField(write_only=True, required=False)
+    should_alert_qa = serializers.BooleanField(write_only=True, required=False)
+
     class Meta:
         model = Task
         fields = (
@@ -282,6 +288,8 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_is_open",
             "assigned_dev",
             "assigned_qa",
+            "should_alert_dev",
+            "should_alert_qa",
             "currently_submitting_review",
             "org_config_name",
         )
@@ -345,25 +353,63 @@ class TaskSerializer(serializers.ModelSerializer):
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
 
+    def create(self, validated_data):
+        validated_data.pop("should_alert_dev", None)
+        validated_data.pop("should_alert_qa", None)
+        return super().create(validated_data)
+
     def update(self, instance, validated_data):
         user = getattr(self.context.get("request"), "user", None)
-        if user:
-            originating_user_id = str(user.id)
-        else:
-            originating_user_id = None
+        originating_user_id = str(user.id) if user else None
         if instance.assigned_dev != validated_data["assigned_dev"]:
+            if validated_data.get("should_alert_dev"):
+                self.try_send_assignment_emails(instance, "dev", validated_data, user)
             orgs = instance.scratchorg_set.active().filter(
                 org_type=SCRATCH_ORG_TYPES.Dev
             )
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
         if instance.assigned_qa != validated_data["assigned_qa"]:
+            if validated_data.get("should_alert_qa"):
+                self.try_send_assignment_emails(instance, "qa", validated_data, user)
             orgs = instance.scratchorg_set.active().filter(
                 org_type=SCRATCH_ORG_TYPES.QA
             )
             for org in orgs:
                 org.queue_delete(originating_user_id=originating_user_id)
+        validated_data.pop("should_alert_dev", None)
+        validated_data.pop("should_alert_qa", None)
         return super().update(instance, validated_data)
+
+    def try_send_assignment_emails(self, instance, type_, validated_data, user):
+        assigned_user = self.get_matching_assigned_user(type_, validated_data)
+        if assigned_user:
+            task = instance
+            project = task.project
+            repo = project.repository
+            metecho_link = get_user_facing_url(
+                path=["repositories", repo.slug, project.slug, task.slug]
+            )
+            subject = _("Metecho Task Assigned to You")
+            body = render_to_string(
+                "user_assigned_to_task.txt",
+                {
+                    "role": "Tester" if type_ == "qa" else "Developer",
+                    "task_name": task.name,
+                    "project_name": project.name,
+                    "repo_name": repo.name,
+                    "assigned_user_name": assigned_user.username,
+                    "user_name": user.username if user else None,
+                    "metecho_link": metecho_link,
+                },
+            )
+            assigned_user.notify(subject, body)
+
+    def get_matching_assigned_user(self, type_, validated_data):
+        assigned = validated_data.get(f"assigned_{type_}", {})
+        id_ = assigned.get("id") if assigned else None
+        sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
+        return getattr(sa, "user", None)  # Optional[User]
 
 
 class CreatePrSerializer(serializers.Serializer):

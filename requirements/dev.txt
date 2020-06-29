@@ -16,7 +16,7 @@ click==7.1.2              # via -c requirements/prod.txt, black
 coverage==4.5.4           # via coveralls, pytest-cov
 coveralls==2.0.0          # via -r requirements/dev.in
 decorator==4.4.0          # via ipython, traitlets
-django-extensions==2.2.9  # via -r requirements/dev.in
+django-extensions==3.0.0  # via -r requirements/dev.in
 doc8==0.8.1               # via -r requirements/dev.in
 docopt==0.6.2             # via coveralls
 docutils==0.16            # via -c requirements/prod.txt, doc8, restructuredtext-lint, sphinx
@@ -28,7 +28,7 @@ idna==2.8                 # via -c requirements/prod.txt, requests
 imagesize==1.1.0          # via sphinx
 inflection==0.3.1         # via pytest-factoryboy
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.15.0           # via -r requirements/dev.in
+ipython==7.16.1           # via -r requirements/dev.in
 isort==4.3.21             # via -r requirements/dev.in
 jedi==0.15.1              # via ipython
 jinja2==2.11.2            # via -c requirements/prod.txt, sphinx

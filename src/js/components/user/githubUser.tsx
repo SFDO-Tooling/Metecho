@@ -1,6 +1,7 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
+import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
@@ -9,10 +10,13 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '@/components/404';
 import { LabelWithSpinner, SpinnerWrapper } from '@/components/utils';
-import { GitHubUser } from '@/store/user/reducer';
+import { GitHubUser, User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
+import { ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 interface TableCellProps {
   [key: string]: any;
@@ -271,10 +275,12 @@ export const AssignUsersModal = ({
 
 const GitHubUserButton = ({
   user,
+  isAssigned,
   isSelected,
   ...props
 }: {
   user: GitHubUser;
+  isAssigned?: boolean;
   isSelected?: boolean;
   [key: string]: any;
 }) => (
@@ -284,6 +290,7 @@ const GitHubUserButton = ({
       'slds-p-around_xx-small',
       'collaborator-button',
       {
+        'is-assigned': isAssigned,
         'is-selected': isSelected,
       },
     )}
@@ -295,7 +302,7 @@ const GitHubUserButton = ({
       </>
     }
     variant="base"
-    disabled={isSelected}
+    disabled={isSelected || isAssigned}
     {...props}
   />
 );
@@ -303,7 +310,7 @@ const GitHubUserButton = ({
 export const AssignUserModal = ({
   allUsers,
   selectedUser,
-  heading,
+  orgType,
   isOpen,
   emptyMessageText,
   emptyMessageAction,
@@ -312,20 +319,56 @@ export const AssignUserModal = ({
 }: {
   allUsers: GitHubUser[];
   selectedUser: GitHubUser | null;
-  heading: string;
+  orgType: OrgTypes;
   isOpen: boolean;
   emptyMessageText: string;
   emptyMessageAction: () => void;
   onRequestClose: () => void;
-  setUser: (user: GitHubUser | null) => void;
+  setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
 }) => {
+  const currentUser = useSelector(selectUserState) as User;
+
+  const [selection, setSelection] = useState<GitHubUser | null>(null);
+  const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
+  const handleAlertAssignee = (
+    event: React.FormEvent<HTMLFormElement>,
+    { checked }: { checked: boolean },
+  ) => {
+    setShouldAlertAssignee(checked);
+  };
+  const handleAssigneeSelection = (user: GitHubUser) => {
+    const currentUserSelected = user.login === currentUser.username;
+    setShouldAlertAssignee(!currentUserSelected);
+    setSelection(user);
+  };
+  const handleClose = () => {
+    onRequestClose();
+    setSelection(null);
+    setShouldAlertAssignee(true);
+  };
+  const handleSave = () => {
+    setUser(selection, shouldAlertAssignee);
+    handleClose();
+  };
+
   const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
+  const heading =
+    orgType === ORG_TYPES.QA
+      ? i18n.t('Assign Tester')
+      : i18n.t('Assign Developer');
+  const checkboxLabel =
+    orgType === ORG_TYPES.QA
+      ? i18n.t('Notify Assigned Tester by Email')
+      : i18n.t('Notify Assigned Developer by Email');
+  const alertType =
+    orgType === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
 
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       heading={heading}
+      directional
       tagline={
         filteredUsers.length ? (
           <>
@@ -339,7 +382,29 @@ export const AssignUserModal = ({
         ) : null
       }
       footer={
-        filteredUsers.length ? null : (
+        filteredUsers.length ? (
+          [
+            <Checkbox
+              key="alert"
+              labels={{ label: checkboxLabel }}
+              className="slds-float_left slds-p-top_xx-small"
+              name={alertType}
+              checked={shouldAlertAssignee}
+              onChange={handleAlertAssignee}
+            />,
+            <Button
+              key="cancel"
+              label={i18n.t('Cancel')}
+              onClick={handleClose}
+            />,
+            <Button
+              key="submit"
+              label={i18n.t('Save')}
+              variant="brand"
+              onClick={handleSave}
+            />,
+          ]
+        ) : (
           <Button
             label={emptyMessageText}
             variant="brand"
@@ -354,7 +419,7 @@ export const AssignUserModal = ({
             <div className="slds-text-title slds-m-bottom_xx-small">
               {i18n.t('Currently Assigned')}
             </div>
-            <GitHubUserButton user={selectedUser} isSelected />
+            <GitHubUserButton user={selectedUser} isAssigned />
           </div>
           <hr className="slds-m-vertical_none slds-m-horizontal_small" />
         </>
@@ -367,7 +432,11 @@ export const AssignUserModal = ({
           <ul>
             {filteredUsers.map((user) => (
               <li key={user.id}>
-                <GitHubUserButton user={user} onClick={() => setUser(user)} />
+                <GitHubUserButton
+                  user={user}
+                  isSelected={selection === user}
+                  onClick={() => handleAssigneeSelection(user)}
+                />
               </li>
             ))}
           </ul>

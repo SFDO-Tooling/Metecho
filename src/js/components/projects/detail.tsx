@@ -199,19 +199,24 @@ const ProjectDetail = (props: RouteComponentProps) => {
       task,
       type,
       assignee,
+      shouldAlertAssignee,
     }: {
       task: Task;
       type: OrgTypes;
       assignee: GitHubUser | null;
+      shouldAlertAssignee: boolean;
     }) => {
       /* istanbul ignore next */
       const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
+      const alertType =
+        type === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
           data: {
             ...task,
             [userType]: assignee,
+            [alertType]: shouldAlertAssignee,
           },
         }),
       );
