@@ -24,6 +24,11 @@ describe('<SubmitModal/>', () => {
       instanceName: 'My Task',
       instanceDiffUrl: 'my-diff-url',
       instanceType: 'task',
+      assignee: {
+        id: 'user-id',
+        login: 'userlogin',
+        avatar_url: 'https://url.com',
+      },
     };
     const opts = Object.assign({}, defaults, options);
     const toggleModal = jest.fn();
@@ -67,6 +72,7 @@ describe('<SubmitModal/>', () => {
           additional_changes: '',
           issues: '',
           notes: '',
+          alert_assigned_dev: false,
         },
         hasForm: true,
         shouldSubscribeToObject: false,
