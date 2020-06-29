@@ -4,10 +4,11 @@ import traceback
 from datetime import timedelta
 from pathlib import Path
 
+import requests
 from asgiref.sync import async_to_sync
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils.text import slugify
@@ -15,9 +16,11 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
 from furl import furl
+from github3.exceptions import NotFoundError
 
 from .gh import (
     get_cumulus_prefix,
+    get_project_config,
     get_repo_info,
     local_github_checkout,
     normalize_commit,
@@ -47,6 +50,41 @@ def get_user_facing_url(*, path):
     return furl(f"{scheme}://{domain}").set(path=path).url
 
 
+def project_create_branch(
+    *, user, project, repository, repo_id, originating_user_id, should_finalize=True,
+):
+    if project.branch_name:
+        project_branch_name = project.branch_name
+    else:
+        branch_prefix = project.repository.branch_prefix
+        if branch_prefix:
+            prefix = branch_prefix
+        elif settings.BRANCH_PREFIX:
+            prefix = settings.BRANCH_PREFIX
+        else:
+            with local_github_checkout(user, repo_id) as repo_root:
+                prefix = get_cumulus_prefix(
+                    repo_root=repo_root,
+                    repo_name=repository.name,
+                    repo_url=repository.html_url,
+                    repo_owner=repository.owner.login,
+                    repo_branch=repository.default_branch,
+                    repo_commit=repository.branch(
+                        repository.default_branch
+                    ).latest_sha(),
+                )
+        project_branch_name = f"{prefix}{slugify(project.name)}"
+        project_branch_name = try_to_make_branch(
+            repository,
+            new_branch=project_branch_name,
+            base_branch=repository.default_branch,
+        )
+        project.branch_name = project_branch_name
+        if should_finalize:
+            project.finalize_project_update(originating_user_id=originating_user_id)
+    return project_branch_name
+
+
 def _create_branches_on_github(*, user, repo_id, project, task, originating_user_id):
     """
     Expects to be called in the context of a local github checkout.
@@ -55,27 +93,13 @@ def _create_branches_on_github(*, user, repo_id, project, task, originating_user
 
     # Make project branch, with latest from project:
     project.refresh_from_db()
-    if project.branch_name:
-        project_branch_name = project.branch_name
-    else:
-        with local_github_checkout(user, repo_id) as repo_root:
-            prefix = get_cumulus_prefix(
-                repo_root=repo_root,
-                repo_name=repository.name,
-                repo_url=repository.html_url,
-                repo_owner=repository.owner.login,
-                repo_branch=repository.default_branch,
-                repo_commit=repository.branch(repository.default_branch).latest_sha(),
-            )
-        project_branch_name = f"{prefix}{slugify(project.name)}"
-        project_branch_name = try_to_make_branch(
-            repository,
-            new_branch=project_branch_name,
-            base_branch=repository.default_branch,
-        )
-        project.branch_name = project_branch_name
-        project.finalize_project_update(originating_user_id=originating_user_id)
-
+    project_branch_name = project_create_branch(
+        project=project,
+        repository=repository,
+        user=user,
+        repo_id=repo_id,
+        originating_user_id=originating_user_id,
+    )
     # Make task branch, with latest from task:
     task.refresh_from_db()
     if task.branch_name:
@@ -120,24 +144,20 @@ def alert_user_about_expiring_org(*, org, days):
         )
 
         # email user
-        send_mail(
-            _("Metecho Scratch Org Expiring with Uncommitted Changes"),
-            render_to_string(
-                "scratch_org_expiry_email.txt",
-                {
-                    "repo_name": repo.name,
-                    "project_name": project.name,
-                    "task_name": task.name,
-                    "days": days,
-                    "expiry_date": org.expires_at,
-                    "user_name": user.username,
-                    "metecho_link": metecho_link,
-                },
-            ),
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
+        subject = _("Metecho Scratch Org Expiring with Uncommitted Changes")
+        body = render_to_string(
+            "scratch_org_expiry_email.txt",
+            {
+                "repo_name": repo.name,
+                "project_name": project.name,
+                "task_name": task.name,
+                "days": days,
+                "expiry_date": org.expires_at,
+                "user_name": user.username,
+                "metecho_link": metecho_link,
+            },
         )
+        user.notify(subject, body)
 
 
 def _create_org_and_run_flow(
@@ -150,10 +170,6 @@ def _create_org_and_run_flow(
     originating_user_id,
     sf_username=None,
 ):
-    from .models import SCRATCH_ORG_TYPES
-
-    cases = {SCRATCH_ORG_TYPES.Dev: "dev_org", SCRATCH_ORG_TYPES.QA: "qa_org"}
-
     repository = get_repo_info(user, repo_id=repo_id)
     commit = repository.branch(repo_branch).commit
 
@@ -165,6 +181,7 @@ def _create_org_and_run_flow(
         user=user,
         project_path=project_path,
         scratch_org=scratch_org,
+        org_name=scratch_org.task.org_config_name,
         originating_user_id=originating_user_id,
         sf_username=sf_username,
     )
@@ -183,18 +200,29 @@ def _create_org_and_run_flow(
     scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
     scratch_org.save()
+
+    cases = {
+        "dev": "dev_org",
+        "feature": "dev_org",
+        "qa": "qa_org",
+        "beta": "install_beta",
+        "release": "install_prod",
+    }
+    flow_name = scratch_org_config.setup_flow or cases[scratch_org.task.org_config_name]
+
     try:
         run_flow(
             cci=cci,
             org_config=org_config,
-            flow_name=cases[scratch_org.org_type],
+            flow_name=flow_name,
             project_path=project_path,
             user=user,
         )
     finally:
-        scratch_org.refresh_from_db()
-        scratch_org.cci_logs = Path(".cumulusci/logs/cci.log").read_text()
-        scratch_org.save()
+        if Path(".cumulusci/logs/cci.log").exists():
+            scratch_org.refresh_from_db()
+            scratch_org.cci_logs = Path(".cumulusci/logs/cci.log").read_text()
+            scratch_org.save()
     scratch_org.refresh_from_db()
     # We don't need to explicitly save the following, because this
     # function is called in a context that will eventually call a
@@ -222,7 +250,7 @@ def create_branches_on_github_then_create_scratch_org(
     project = task.project
 
     try:
-        repo_id = project.repository.get_repo_id(user)
+        repo_id = task.get_repo_id(user)
         commit_ish = _create_branches_on_github(
             user=user,
             repo_id=repo_id,
@@ -257,7 +285,7 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
     try:
         scratch_org.refresh_from_db()
         user = scratch_org.owner
-        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id(user)
         commit_ish = scratch_org.task.branch_name
         sf_username = scratch_org.owner_sf_username
 
@@ -297,7 +325,7 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
         )
         unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
         user = scratch_org.owner
-        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id(user)
         commit_ish = scratch_org.task.branch_name
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             scratch_org.valid_target_directories, _ = get_valid_target_directories(
@@ -334,7 +362,7 @@ def commit_changes_from_org(
     branch = scratch_org.task.branch_name
 
     try:
-        repo_id = scratch_org.task.project.repository.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id(user)
         commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
@@ -484,6 +512,25 @@ def refresh_github_repositories_for_user(user):
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
 
 
+def get_social_image(*, repository, user):
+    try:
+        repo_id = repository.get_repo_id(user)
+        repo = get_repo_info(user, repo_id=repo_id)
+        soup = BeautifulSoup(requests.get(repo.html_url).content, "html.parser")
+        og_image = soup.find("meta", property="og:image").attrs.get("content", "")
+    except Exception:  # pragma: nocover
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        repository.refresh_from_db()
+        repository.repo_image_url = og_image
+        repository.finalize_get_social_image()
+
+
+get_social_image_job = job(get_social_image)
+
+
 # This avoids partially-applied saving:
 @transaction.atomic
 def refresh_commits(*, repository, branch_name, originating_user_id):
@@ -512,6 +559,7 @@ def refresh_commits(*, repository, branch_name, originating_user_id):
         task.commits = [
             normalize_commit(commit) for commit in commits[:origin_sha_index]
         ]
+        task.update_has_unmerged_commits(user=user)
         task.update_review_valid()
         task.finalize_task_update(originating_user_id=originating_user_id)
 
@@ -559,7 +607,7 @@ populate_github_users_job = job(populate_github_users)
 
 def submit_review(*, user, task, data, originating_user_id):
     try:
-        review_sha = None
+        review_sha = ""
         org = data["org"]
         notes = data["notes"]
         status = data["status"]
@@ -574,7 +622,7 @@ def submit_review(*, user, task, data, originating_user_id):
         if not (task.pr_is_open and review_sha):
             raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
 
-        repo_id = task.project.repository.get_repo_id(user)
+        repo_id = task.get_repo_id(user)
         repository = get_repo_info(user, repo_id=repo_id)
         pr = repository.pull_request(task.pr_number)
 
@@ -633,3 +681,100 @@ def submit_review(*, user, task, data, originating_user_id):
 
 
 submit_review_job = job(submit_review)
+
+
+def create_gh_branch_for_new_project(project, *, user):
+    try:
+        project.refresh_from_db()
+        repo_id = project.get_repo_id(user)
+        repository = get_repo_info(user, repo_id=repo_id)
+
+        if project.branch_name:
+            try:
+                head = repository.branch(project.branch_name).commit.sha
+            except NotFoundError:
+                try_to_make_branch(
+                    repository,
+                    new_branch=project.branch_name,
+                    base_branch=repository.default_branch,
+                )
+            else:
+                base = repository.branch(repository.default_branch).commit.sha
+                project.has_unmerged_commits = (
+                    repository.compare_commits(base, head).ahead_by > 0
+                )
+                # Check if has PR
+                try:
+                    head_str = f"{repository.owner}:{project.branch_name}"
+                    # Defaults to descending order, so we'll find
+                    # the most recent one, if there is one to be
+                    # found:
+                    pr = next(
+                        repository.pull_requests(
+                            state="all", head=head_str, base=repository.default_branch
+                        )
+                    )
+                    # Check PR status
+                    project.pr_number = pr.number
+                    project.pr_is_merged = pr.merged_at is not None
+                    project.pr_is_open = pr.closed_at is None and pr.merged_at is None
+                except StopIteration:
+                    pass
+        else:
+            project_create_branch(
+                project=project,
+                repository=repository,
+                repo_id=repo_id,
+                user=user,
+                originating_user_id=str(user.id),
+                should_finalize=False,
+            )
+    except Exception:
+        project.refresh_from_db()
+        project.branch_name = ""
+        project.pr_number = None
+        project.pr_is_merged = False
+        project.pr_is_open = False
+        project.has_unmerged_commits = False
+        project.finalize_project_update(originating_user_id=str(user.id))
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        project.finalize_project_update(originating_user_id=str(user.id))
+
+
+create_gh_branch_for_new_project_job = job(create_gh_branch_for_new_project)
+
+
+def available_task_org_config_names(project, *, user):
+    try:
+        project.refresh_from_db()
+        repo_id = project.get_repo_id(user)
+        repository = get_repo_info(user, repo_id=repo_id)
+        with local_github_checkout(user, repo_id) as repo_root:
+            config = get_project_config(
+                repo_root=repo_root,
+                repo_name=repository.name,
+                repo_url=repository.html_url,
+                repo_owner=repository.owner.login,
+                repo_branch=project.branch_name,
+                repo_commit=repository.branch(project.branch_name).latest_sha(),
+            )
+            project.available_task_org_config_names = [
+                {"key": key, **value} for key, value in config.orgs__scratch.items()
+            ]
+    except Exception:
+        project.finalize_available_task_org_config_names(
+            originating_user_id=str(user.id)
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        project.finalize_available_task_org_config_names(
+            originating_user_id=str(user.id)
+        )
+
+
+available_task_org_config_names_job = job(available_task_org_config_names)

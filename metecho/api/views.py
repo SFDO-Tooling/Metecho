@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from . import gh
 from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
 from .hook_serializers import PrHookSerializer, PushHookSerializer
@@ -158,6 +159,28 @@ class RepositoryViewSet(
         instance.queue_populate_github_users(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @action(detail=True, methods=["GET"])
+    def feature_branches(self, request, pk=None):
+        instance = self.get_object()
+        repo = gh.get_repo_info(
+            request.user, repo_id=instance.get_repo_id(request.user)
+        )
+        existing_branches = set(
+            Project.objects.active()
+            .exclude(branch_name="")
+            .values_list("branch_name", flat=True)
+        )
+        data = [
+            branch.name
+            for branch in repo.branches()
+            if (
+                "__" not in branch.name
+                and branch.name != repo.default_branch
+                and branch.name not in existing_branches
+            )
+        ]
+        return Response(data)
+
 
 class ProjectViewSet(CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -167,6 +190,14 @@ class ProjectViewSet(CreatePrMixin, ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
     error_pr_exists = _("Project has already been submitted for testing.")
+
+    @action(detail=True, methods=["POST"])
+    def refresh_org_config_names(self, request, pk=None):
+        project = self.get_object()
+        project.queue_available_task_org_config_names(request.user)
+        return Response(
+            self.get_serializer(project).data, status=status.HTTP_202_ACCEPTED
+        )
 
 
 class TaskViewSet(CreatePrMixin, ModelViewSet):
@@ -246,14 +277,13 @@ class ScratchOrgViewSet(
         # worker queues easily this way:
         filters = {
             "org_type": SCRATCH_ORG_TYPES.Dev,
-            "url__isnull": False,
             "delete_queued_at__isnull": True,
             "currently_capturing_changes": False,
             "currently_refreshing_changes": False,
         }
         if not force_get:
             filters["owner"] = request.user
-        for instance in queryset.filter(**filters):
+        for instance in queryset.filter(**filters).exclude(url=""):
             instance.queue_get_unsaved_changes(
                 force_get=force_get, originating_user_id=str(request.user.id)
             )

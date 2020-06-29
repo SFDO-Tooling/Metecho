@@ -32,20 +32,22 @@ export interface Task {
   description_rendered: string;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
+  branch_name: string;
   branch_url: string | null;
   branch_diff_url: string | null;
   pr_url: string | null;
   pr_is_open: boolean;
   commits: Commit[];
-  origin_sha: string | null;
+  origin_sha: string;
   assigned_dev: GitHubUser | null;
   assigned_qa: GitHubUser | null;
   status: TaskStatuses;
   currently_submitting_review: boolean;
   review_submitted_at: string | null;
   review_valid: boolean;
-  review_status: ReviewStatuses | null;
-  review_sha: string | null;
+  review_status: ReviewStatuses | '';
+  review_sha: string;
+  org_config_name: string;
 }
 
 export interface TaskState {

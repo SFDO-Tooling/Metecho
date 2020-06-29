@@ -69,7 +69,7 @@ export const refreshRepos = (): ThunkResult<
       },
     });
     return dispatch({
-      type: 'REFRESH_REPOS_ACCEPTED' as 'REFRESH_REPOS_ACCEPTED',
+      type: 'REFRESH_REPOS_ACCEPTED' as const,
     });
   } catch (err) {
     dispatch({ type: 'REFRESH_REPOS_REJECTED' });
@@ -106,7 +106,7 @@ export const refreshGitHubUsers = (
       },
     });
     return dispatch({
-      type: 'REFRESH_GH_USERS_ACCEPTED' as 'REFRESH_GH_USERS_ACCEPTED',
+      type: 'REFRESH_GH_USERS_ACCEPTED' as const,
       payload: repoId,
     });
   } catch (err) {

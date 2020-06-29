@@ -12,7 +12,7 @@ import {
   CommitData,
   ModalCard,
 } from '@/components/tasks/capture';
-import { UseFormProps } from '@/components/utils/useForm';
+import { UseFormProps } from '@/components/utils';
 import { Changeset } from '@/store/orgs/reducer';
 import { mergeChangesets, splitChangeset } from '@/utils/helpers';
 
@@ -231,7 +231,7 @@ const ChangesForm = ({
               <Checkbox
                 id="select-all-changes"
                 labels={{
-                  label: `${i18n.t('All Changes')}`,
+                  label: i18n.t('All Changes'),
                 }}
                 checked={allChangesChecked}
                 indeterminate={Boolean(!allChangesChecked && !noChangesChecked)}

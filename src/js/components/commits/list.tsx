@@ -50,7 +50,7 @@ const AuthorTableCell = ({ item, className, ...props }: TableCellProps) => {
       className={classNames(className, 'commits-author')}
     >
       <Avatar
-        imgAlt={author}
+        imgAlt={`${i18n.t('avatar for user')} ${author}`}
         imgSrc={item.author.avatar_url}
         title={author}
         size="small"

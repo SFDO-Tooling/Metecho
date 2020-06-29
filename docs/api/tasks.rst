@@ -32,7 +32,9 @@ Retrieve
         "old_slugs": [],
         "has_unmerged_commits": true,
         "currently_creating_pr": false,
+        "branch_name": "feature/test-project__test-task",
         "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project__test-task",
+        "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-project...feature/test-project__test-task",
         "commits": [
           {
             "id": "617a512",
@@ -49,7 +51,6 @@ Retrieve
           ...
         ],
         "origin_sha": "723b342",
-        "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-project...feature/test-project__test-task",
         "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
         "pr_is_open": true,
         "status": "Planned",
@@ -57,7 +58,8 @@ Retrieve
         "review_submitted_at": "2019-03-01T19:47:49Z",
         "review_valid": true,
         "review_status": "Approved",
-        "review_sha": "617a512"
+        "review_sha": "617a512",
+        "org_config_name": "dev"
       }
       ...
     ]

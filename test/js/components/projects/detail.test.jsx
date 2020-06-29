@@ -41,6 +41,8 @@ const defaultState = {
         description: 'This is a test repository.',
         description_rendered: '<p>This is a test repository.</p>',
         repo_url: 'https://github.com/test/test-repo',
+        repo_owner: 'test',
+        repo_name: 'test-repo',
         github_users: [
           {
             id: '123456',
@@ -70,6 +72,8 @@ const defaultState = {
           repository: 'r1',
           description: 'Project Description',
           description_rendered: '<p>Project Description</p>',
+          branch_url: 'https://github.com/test/test-repo/tree/branch-name',
+          branch_name: 'branch-name',
           old_slugs: ['old-slug'],
           github_users: [
             {
@@ -80,7 +84,9 @@ const defaultState = {
               id: '234567',
               login: 'OtherUser',
             },
+            { id: 'user-id', login: 'currentUser' },
           ],
+          available_task_org_config_names: [],
         },
       ],
       next: null,
@@ -97,6 +103,8 @@ const defaultState = {
         project: 'project1',
         description: 'Task Description',
         description_rendered: '<p>Task Description</p>',
+        branch_url: 'https://github.com/test/test-repo/tree/project__task',
+        branch_name: 'project__task',
         review_valid: true,
         review_status: 'Approved',
         status: 'Completed',
@@ -143,6 +151,12 @@ const defaultState = {
         review_status: 'Approved',
       },
     ],
+  },
+  user: {
+    id: 'user-id',
+    username: 'currentUser',
+    valid_token_for: 'my-org',
+    is_devhub_enabled: true,
   },
 };
 
@@ -298,7 +312,7 @@ describe('<ProjectDetail/>', () => {
       expect(updateObject).toHaveBeenCalled();
       expect(
         updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
-      ).toEqual(['TestGitHubUser', 'ThirdUser']);
+      ).toEqual(['currentUser', 'TestGitHubUser', 'ThirdUser']);
     });
 
     test('opens confirm modal if removing assigned user', () => {
@@ -434,23 +448,28 @@ describe('<ProjectDetail/>', () => {
 
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
         expect(updateObject).toHaveBeenCalled();
-        expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
+        expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
+          { id: 'user-id', login: 'currentUser' },
+        ]);
       });
     });
   });
 
   describe('task assignUser', () => {
     test('updates task assigned user', () => {
-      const { getAllByText, baseElement } = setup();
+      const { getAllByText, baseElement, getByText } = setup();
       fireEvent.click(getAllByText('Assign Tester')[0]);
       fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+        baseElement.querySelector('.collaborator-button[title="currentUser"]'),
       );
+      fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
-        'OtherUser',
-      );
+
+      const data = updateObject.mock.calls[0][0].data;
+
+      expect(data.assigned_qa.login).toEqual('currentUser');
+      expect(data.should_alert_qa).toBe(false);
     });
 
     test('closes modal if no users to assign', () => {
@@ -474,6 +493,32 @@ describe('<ProjectDetail/>', () => {
       fireEvent.click(getByText('Add Project Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
+    });
+
+    describe('alerts assigned user', () => {
+      test('assigning tester', () => {
+        const { getAllByText, baseElement, getByText } = setup();
+        fireEvent.click(getAllByText('Assign Tester')[0]);
+        fireEvent.click(
+          baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+        );
+        fireEvent.click(getByText('Notify Assigned Tester by Email'));
+        fireEvent.click(getByText('Save'));
+
+        expect(updateObject.mock.calls[0][0].data.should_alert_qa).toBe(false);
+      });
+
+      test('assigning developer', () => {
+        const { getAllByText, baseElement, getByText } = setup();
+        fireEvent.click(getAllByText('Assign Developer')[0]);
+        fireEvent.click(getByText('Notify Assigned Developer by Email'));
+        fireEvent.click(
+          baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
+        );
+        fireEvent.click(getByText('Save'));
+
+        expect(updateObject.mock.calls[0][0].data.should_alert_dev).toBe(true);
+      });
     });
   });
 
@@ -500,6 +545,30 @@ describe('<ProjectDetail/>', () => {
       getAllByText('Submit Project for Review on GitHub').forEach((element) => {
         expect(element).toBeVisible();
       });
+    });
+  });
+
+  describe('"Submit this project for review on GitHub" step click', () => {
+    test('opens modal', () => {
+      const { getByText, getByLabelText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            r1: {
+              ...defaultState.projects.r1,
+              projects: [
+                {
+                  ...defaultState.projects.r1.projects[0],
+                  has_unmerged_commits: true,
+                },
+              ],
+            },
+          },
+        },
+      });
+      fireEvent.click(getByText('Submit this project for review on GitHub'));
+
+      expect(getByLabelText('Developer notes')).toBeVisible();
     });
   });
 

@@ -255,7 +255,7 @@ const UserDropdown = () => {
                   <div className="slds-is-absolute">
                     <Avatar
                       imgSrc={user.avatar_url}
-                      imgAlt={user.username}
+                      imgAlt={`${i18n.t('avatar for user')} ${user.username}`}
                       title={user.username}
                       size="small"
                     />
@@ -299,7 +299,7 @@ const UserDropdown = () => {
           label={
             <Avatar
               imgSrc={user.avatar_url}
-              imgAlt={user.username}
+              imgAlt={`${i18n.t('avatar for user')} ${user.username}`}
               title={user.username}
             />
           }

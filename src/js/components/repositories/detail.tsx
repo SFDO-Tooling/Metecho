@@ -1,5 +1,4 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -7,11 +6,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import ProjectForm from '@/components/projects/createForm';
-import ProjectListItem from '@/components/projects/listItem';
+import ProjectTable from '@/components/projects/table';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
-  ExternalLink,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
   SpinnerWrapper,
@@ -77,27 +75,15 @@ const RepositoryDetail = (props: RouteComponentProps) => {
     }
   };
 
-  const sidebarContent = (
-    <ExternalLink url={repository.repo_url}>
-      {i18n.t('GitHub Repo')}
-      <Icon
-        category="utility"
-        name="new_window"
-        size="xx-small"
-        className="slds-m-bottom_xx-small"
-        containerClassName="slds-m-left_xx-small slds-current-color"
-      />
-    </ExternalLink>
-  );
-
   return (
     <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
         title={repository.name}
         description={repository.description_rendered}
-        repoUrl={repository.repo_url}
+        headerUrl={repository.repo_url}
+        headerUrlText={`${repository.repo_owner}/${repository.repo_name}`}
         breadcrumb={[{ name: repository.name }]}
-        sidebar={sidebarContent}
+        image={repository.repo_image_url}
       >
         {!projects || !projects.fetched ? (
           // Fetching projects from API
@@ -105,32 +91,21 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {projects.projects.length ? (
-                <>
-                  {i18n.t('Projects for')} {repository.name}
-                </>
-              ) : (
-                <>
-                  {i18n.t('Create a Project for')} {repository.name}
-                </>
-              )}
+              {projects.projects.length
+                ? `${i18n.t('Projects for')} ${repository.name}`
+                : `${i18n.t('Create a Project for')} ${repository.name}`}
             </h2>
             <ProjectForm
               user={user}
               repository={repository}
-              startOpen={!projects.projects.length}
+              hasProjects={projects.projects.length > 0}
             />
             {Boolean(projects.projects.length) && (
               <>
-                <ul className="slds-has-dividers_bottom">
-                  {projects.projects.map((project) => (
-                    <ProjectListItem
-                      key={project.id}
-                      project={project}
-                      repository={repository}
-                    />
-                  ))}
-                </ul>
+                <ProjectTable
+                  projects={projects.projects}
+                  repositorySlug={repository.slug}
+                />
                 {projects.next ? (
                   <div className="slds-m-top_large">
                     <Button

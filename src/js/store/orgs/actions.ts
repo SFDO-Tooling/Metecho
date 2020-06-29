@@ -93,7 +93,7 @@ export const provisionOrg = ({
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_PROVISION' as 'SCRATCH_ORG_PROVISION',
+    type: 'SCRATCH_ORG_PROVISION' as const,
     payload: model,
   });
 };
@@ -137,7 +137,7 @@ export const provisionFailed = ({
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_PROVISION_FAILED' as 'SCRATCH_ORG_PROVISION_FAILED',
+    type: 'SCRATCH_ORG_PROVISION_FAILED' as const,
     payload: model,
   });
 };
@@ -161,12 +161,12 @@ export const refetchOrg = (
     });
     if (!response) {
       return dispatch({
-        type: 'REFETCH_ORG_FAILED' as 'REFETCH_ORG_FAILED',
+        type: 'REFETCH_ORG_FAILED' as const,
         payload: { org, url, response },
       });
     }
     return dispatch({
-      type: 'REFETCH_ORG_SUCCEEDED' as 'REFETCH_ORG_SUCCEEDED',
+      type: 'REFETCH_ORG_SUCCEEDED' as const,
       payload: { org: response, url },
     });
   } catch (err) {
@@ -271,7 +271,7 @@ export const deleteOrg = ({
     }
   }
   return dispatch({
-    type: 'SCRATCH_ORG_DELETE' as 'SCRATCH_ORG_DELETE',
+    type: 'SCRATCH_ORG_DELETE' as const,
     payload: model,
   });
 };
@@ -317,7 +317,7 @@ export const deleteFailed = ({
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_DELETE_FAILED' as 'SCRATCH_ORG_DELETE_FAILED',
+    type: 'SCRATCH_ORG_DELETE_FAILED' as const,
     payload: model,
   });
 };
@@ -344,7 +344,7 @@ export const commitSucceeded = ({
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_COMMIT_CHANGES' as 'SCRATCH_ORG_COMMIT_CHANGES',
+    type: 'SCRATCH_ORG_COMMIT_CHANGES' as const,
     payload: model,
   });
 };
@@ -377,7 +377,7 @@ export const commitFailed = ({
     );
   }
   return dispatch({
-    type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED' as 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
+    type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED' as const,
     payload: model,
   });
 };
@@ -395,7 +395,7 @@ export const refreshOrg = (
       },
     });
     return dispatch({
-      type: 'SCRATCH_ORG_REFRESH_ACCEPTED' as 'SCRATCH_ORG_REFRESH_ACCEPTED',
+      type: 'SCRATCH_ORG_REFRESH_ACCEPTED' as const,
       payload: org,
     });
   } catch (err) {

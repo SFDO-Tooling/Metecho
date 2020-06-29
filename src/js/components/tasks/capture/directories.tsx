@@ -6,7 +6,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 
 import { CommitData, ModalCard } from '@/components/tasks/capture';
-import { UseFormProps } from '@/components/utils/useForm';
+import { UseFormProps } from '@/components/utils';
 import { TargetDirectories } from '@/store/orgs/reducer';
 
 interface Props {
@@ -23,10 +23,10 @@ const TargetDirectoriesForm = ({
   handleInputChange,
 }: Props) => {
   const keys = [
-    'source' as 'source',
-    'pre' as 'pre',
-    'post' as 'post',
-    'config' as 'config',
+    'source' as const,
+    'pre' as const,
+    'post' as const,
+    'config' as const,
   ];
   const orderedDirectories = new Map<
     'source' | 'pre' | 'post' | 'config',

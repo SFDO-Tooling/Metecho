@@ -6,25 +6,42 @@ import i18n from 'i18next';
 import { omit } from 'lodash';
 import React, { useRef, useState } from 'react';
 
+import SelectFlowType from '@/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
   useForm,
   useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
-import { Project } from '@/store/projects/reducer';
+import { OrgConfig, Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
-import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import {
+  DEFAULT_ORG_CONFIG_NAME,
+  OBJECT_TYPES,
+  ObjectTypes,
+} from '@/utils/constants';
 
 interface EditModalProps {
   model: Project | Task;
   modelType: ObjectTypes;
+  hasOrgs?: boolean;
+  projectId?: string;
+  orgConfigsLoading?: boolean;
+  orgConfigs?: OrgConfig[];
   isOpen: boolean;
   handleClose: () => void;
 }
+
+const isTask = (model: Project | Task, modelType: ObjectTypes): model is Task =>
+  modelType === OBJECT_TYPES.TASK;
+
 const EditModal = ({
   model,
   modelType,
+  hasOrgs,
+  projectId,
+  orgConfigsLoading,
+  orgConfigs,
   isOpen,
   handleClose,
 }: EditModalProps) => {
@@ -49,6 +66,16 @@ const EditModal = ({
 
   const defaultName = model.name;
   const defaultDescription = model.description;
+  let defaultConfigName;
+  const fields: { [key: string]: any } = {
+    name: defaultName,
+    description: defaultDescription,
+  };
+
+  if (isTask(model, modelType)) {
+    defaultConfigName = model.org_config_name || DEFAULT_ORG_CONFIG_NAME;
+    fields.org_config_name = defaultConfigName;
+  }
 
   const {
     inputs,
@@ -58,10 +85,7 @@ const EditModal = ({
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: {
-      name: defaultName,
-      description: defaultDescription,
-    },
+    fields,
     additionalData: omit(model, ['name', 'description']),
     onSuccess: handleSuccess,
     onError: handleError,
@@ -69,7 +93,7 @@ const EditModal = ({
     update: true,
   });
 
-  // When name or description changes, update default selection
+  // When name, description or org_config_name changes, update default selection
   useFormDefaults({
     field: 'name',
     value: defaultName,
@@ -79,6 +103,12 @@ const EditModal = ({
   useFormDefaults({
     field: 'description',
     value: defaultDescription,
+    inputs,
+    setInputs,
+  });
+  useFormDefaults({
+    field: 'org_config_name',
+    value: defaultConfigName,
     inputs,
     setInputs,
   });
@@ -101,7 +131,7 @@ const EditModal = ({
     }
   };
 
-  let heading, nameLabel;
+  let heading, nameLabel; // eslint-disable-line one-var
   switch (modelType) {
     case OBJECT_TYPES.TASK:
       nameLabel = i18n.t('Task Name');
@@ -164,6 +194,18 @@ const EditModal = ({
           errorText={errors.description}
           onChange={handleInputChange}
         />
+        {/* display for tasks, disable if task has a scratch org */}
+        {isTask(model, modelType) ? (
+          <SelectFlowType
+            orgConfigs={orgConfigs || []}
+            projectId={projectId}
+            value={inputs.org_config_name}
+            errors={errors.org_config_name}
+            isDisabled={hasOrgs}
+            isLoading={orgConfigsLoading}
+            handleSelect={handleInputChange}
+          />
+        ) : null}
         {/* Clicking hidden button allows for native browser form validation */}
         <button
           ref={submitButton}

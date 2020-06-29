@@ -16,6 +16,7 @@ from ..gh import (
     is_safe_path,
     local_github_checkout,
     log_unsafe_zipfile_error,
+    normalize_commit,
     try_to_make_branch,
     validate_cumulusci_yml_unchanged,
     zip_file_is_safe,
@@ -69,6 +70,10 @@ def test_log_unsafe_zipfile_error():
 
 @pytest.mark.django_db
 class TestGetRepoInfo:
+    def test_invalid_arguments(self):
+        with pytest.raises(TypeError):
+            get_repo_info(None, repo_id=123)
+
     def test_with_repo_id(self, user_factory):
         with patch(f"{PATCH_ROOT}.gh_given_user") as gh_given_user:
             user = user_factory()
@@ -207,3 +212,37 @@ def test_validate_cumulusci_yml_unchanged():
 
     with pytest.raises(Exception):
         validate_cumulusci_yml_unchanged(repo)
+
+
+class TestNormalizeCommit:
+    def test_dict(self):
+        data = {
+            "id": "id",
+            "timestamp": "timestamp",
+            "author": {
+                "name": "name",
+                "email": "email",
+                "username": "username",
+                "avatar_url": "avatar_url",
+            },
+            "message": "message",
+            "url": "url",
+        }
+        expected = {
+            "id": "id",
+            "timestamp": "timestamp",
+            "author": {
+                "name": "name",
+                "email": "email",
+                "username": "username",
+                "avatar_url": "avatar_url",
+            },
+            "message": "message",
+            "url": "url",
+        }
+        assert (
+            normalize_commit(
+                data, sender={"avatar_url": "avatar_url", "login": "username"},
+            )
+            == expected
+        )

@@ -18,7 +18,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from github3 import GitHub, login
 from github3.exceptions import NotFoundError, UnprocessableEntity
 
-from .custom_cci_configs import GlobalConfig
+from .custom_cci_configs import GlobalConfig, ProjectConfig
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,8 @@ def zip_file_is_safe(zip_file):
 
 
 def get_repo_info(user, repo_id=None, repo_owner=None, repo_name=None):
+    if user is None and (repo_owner is None or repo_name is None):
+        raise TypeError("If user=None, you must call with repo_owner and repo_name")
     gh = gh_given_user(user) if user else gh_as_app(repo_owner, repo_name)
     if repo_id is None:
         return gh.repository(repo_owner, repo_name)
@@ -138,7 +140,7 @@ def get_project_config(**kwargs):
     Expects to be in a local_github_checkout.
     """
     global_config = GlobalConfig()
-    return global_config.get_project_config(**kwargs)
+    return ProjectConfig(global_config, **kwargs)
 
 
 def get_cumulus_prefix(**kwargs):
@@ -160,7 +162,7 @@ def get_source_format(**kwargs):
 def try_to_make_branch(repository, *, new_branch, base_branch):
     branch_name = new_branch
     counter = 0
-    max_length = 100  # From models::Project.branch_name
+    max_length = 100  # From models.Project.branch_name
     while True:
         suffix = f"-{counter}" if counter else ""
         branch_name = f"{new_branch[:max_length-len(suffix)]}{suffix}"
@@ -238,4 +240,4 @@ def validate_cumulusci_yml_unchanged(repo):
     except IOError:
         cci_config_branch = ""
     if cci_config_master != cci_config_branch:
-        raise Exception(f"cumulusci.yml contains unreviewed changes.")
+        raise Exception("cumulusci.yml contains unreviewed changes.")

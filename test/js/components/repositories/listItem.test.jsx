@@ -8,11 +8,9 @@ describe('<RepositoryListItem />', () => {
   const setup = (initialState) => {
     const { getByText } = render(
       <MemoryRouter>
-        <>
-          {initialState.repositories.repositories.map((repository) => (
-            <RepositoryListItem repository={repository} key={repository.id} />
-          ))}
-        </>
+        {initialState.repositories.repositories.map((repository) => (
+          <RepositoryListItem repository={repository} key={repository.id} />
+        ))}
       </MemoryRouter>,
     );
     return { getByText };
@@ -29,6 +27,7 @@ describe('<RepositoryListItem />', () => {
             description: 'This is a test repository.',
             description_rendered: '<p>This is a test repository.</p>',
             repo_url: 'https://github.com/test/test-repo',
+            repo_image_url: '',
           },
           {
             id: 'p2',
@@ -37,6 +36,7 @@ describe('<RepositoryListItem />', () => {
             description: '',
             description_rendered: '',
             repo_url: 'https://github.com/test/another-test-repo',
+            repo_image_url: 'https://github.com/repo-image',
           },
         ],
         notFound: [],

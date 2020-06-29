@@ -4,6 +4,12 @@ import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
 import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ObjectTypes, ProjectStatuses } from '@/utils/constants';
 
+export interface OrgConfig {
+  key: string;
+  label?: string;
+  description?: string;
+}
+
 export interface Project {
   id: string;
   repository: string;
@@ -12,6 +18,7 @@ export interface Project {
   old_slugs: string[];
   description: string;
   description_rendered: string;
+  branch_name: string;
   branch_url: string | null;
   branch_diff_url: string | null;
   pr_url: string | null;
@@ -19,8 +26,10 @@ export interface Project {
   pr_is_merged: boolean;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
+  currently_fetching_org_config_names: boolean;
   github_users: GitHubUser[];
   status: ProjectStatuses;
+  available_task_org_config_names: OrgConfig[];
 }
 
 export interface ProjectsByRepositoryState {

@@ -15,7 +15,11 @@ import welcomeMatBG from '#/welcome-mat-bg.png';
 import welcomeMatFG from '#/welcome-mat-fg.png';
 
 interface Props
-  extends RouteComponentProps<{}, StaticContext, { from?: Location }> {
+  extends RouteComponentProps<
+    { [key: string]: any },
+    StaticContext,
+    { from?: Location }
+  > {
   id?: string;
   label?: string | ReactElement;
   from?: { pathname?: string };
@@ -141,7 +145,10 @@ const Login = () => {
               )}
             </li>
           </ul>
-          <img src={welcomeMatFG} alt="screenshots of Metecho app interface" />
+          <img
+            src={welcomeMatFG}
+            alt={i18n.t('screenshots of Metecho app interface')}
+          />
         </div>
       </div>
     </div>

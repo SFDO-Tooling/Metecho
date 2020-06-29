@@ -36,7 +36,11 @@ interface OrgCardProps {
   repoUrl: string;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
-  handleAssignUser: ({ type, assignee }: AssignedUserTracker) => void;
+  handleAssignUser: ({
+    type,
+    assignee,
+    shouldAlertAssignee,
+  }: AssignedUserTracker) => void;
   handleCreate: (type: OrgTypes) => void;
   handleDelete: (org: Org) => void;
   handleCheckForOrgChanges: (org: Org) => void;
@@ -91,6 +95,7 @@ const OrgCard = ({
     org = null;
   }
 
+  // assign user modal related
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);
@@ -117,15 +122,14 @@ const OrgCard = ({
   };
 
   const doAssignUser = useCallback(
-    (assignee: GitHubUser | null) => {
-      closeAssignUserModal();
-      handleAssignUser({ type, assignee });
+    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
+      handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
     [handleAssignUser, type],
   );
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
-    if (org?.org_type === ORG_TYPES.QA && handleRefresh) {
+    if (org && org.org_type === ORG_TYPES.QA && handleRefresh) {
       handleRefresh(org);
     }
   }, [handleRefresh, org]);
@@ -171,10 +175,6 @@ const OrgCard = ({
     type === ORG_TYPES.QA ? i18n.t('Tester') : i18n.t('Developer');
   const orgHeading =
     type === ORG_TYPES.QA ? i18n.t('Test Org') : i18n.t('Dev Org');
-  const userModalHeading =
-    type === ORG_TYPES.QA
-      ? i18n.t('Assign Tester')
-      : i18n.t('Assign Developer');
 
   return (
     <div
@@ -282,7 +282,7 @@ const OrgCard = ({
       <AssignUserModal
         allUsers={projectUsers}
         selectedUser={assignedUser}
-        heading={userModalHeading}
+        orgType={type}
         isOpen={assignUserModalOpen}
         emptyMessageText={i18n.t('View Project to Add Collaborators')}
         emptyMessageAction={handleEmptyMessageClick}

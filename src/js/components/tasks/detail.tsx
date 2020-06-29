@@ -15,22 +15,22 @@ import OrgCards from '@/components/tasks/cards';
 import TaskStatusPath from '@/components/tasks/path';
 import TaskStatusSteps from '@/components/tasks/steps';
 import {
+  DeleteModal,
   DetailPageLayout,
+  EditModal,
   ExternalLink,
   getProjectLoadingOrNotFound,
   getRepositoryLoadingOrNotFound,
   getTaskLoadingOrNotFound,
   LabelWithSpinner,
+  PageOptions,
   SpinnerWrapper,
+  SubmitModal,
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
-import DeleteModal from '@/components/utils/deleteModal';
-import EditModal from '@/components/utils/editModal';
-import PageOptions from '@/components/utils/pageOptions';
-import SubmitModal from '@/components/utils/submitModal';
 import { AppState, ThunkDispatch } from '@/store';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
@@ -84,6 +84,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   let orgHasChanges = false;
   let userIsOwner = false;
   let devOrg: Org | null | undefined;
+  let hasOrgs = false;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
     orgHasChanges =
@@ -95,6 +96,10 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
+    /* istanbul ignore next */
+    if (devOrg || orgs[ORG_TYPES.QA]) {
+      hasOrgs = true;
+    }
   }
 
   const openCaptureModal = () => {
@@ -227,7 +232,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         modelType={OBJECT_TYPES.TASK}
         handleOptionSelect={handlePageOptionSelect}
       />
-      {branchLink ? (
+      {branchLink && (
         <ExternalLink
           url={branchLink}
           showButtonIcon
@@ -235,7 +240,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         >
           {branchLinkText}
         </ExternalLink>
-      ) : null}
+      )}
     </PageHeaderControl>
   );
 
@@ -325,6 +330,18 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   const projectUrl = routes.project_detail(repository.slug, project.slug);
+  let headerUrl, headerUrlText; // eslint-disable-line one-var
+  /* istanbul ignore else */
+  if (task.branch_url && task.branch_name) {
+    headerUrl = task.branch_url;
+    headerUrlText = task.branch_name;
+  } else if (project.branch_url && project.branch_name) {
+    headerUrl = project.branch_url;
+    headerUrlText = project.branch_name;
+  } else {
+    headerUrl = repository.repo_url;
+    headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
+  }
 
   return (
     <DocumentTitle
@@ -335,7 +352,8 @@ const TaskDetail = (props: RouteComponentProps) => {
       <DetailPageLayout
         title={task.name}
         description={task.description_rendered}
-        repoUrl={repository.repo_url}
+        headerUrl={headerUrl}
+        headerUrlText={headerUrlText}
         breadcrumb={[
           {
             name: repository.name,
@@ -350,9 +368,13 @@ const TaskDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <TaskStatusPath task={task} />
+            <div className="slds-m-bottom_x-large ms-secondary-block">
+              <TaskStatusPath task={task} />
+            </div>
             {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
-              <TaskStatusSteps task={task} orgs={orgs} />
+              <div className="slds-m-bottom_x-large ms-secondary-block">
+                <TaskStatusSteps task={task} orgs={orgs} />
+              </div>
             ) : null}
           </>
         }
@@ -394,6 +416,10 @@ const TaskDetail = (props: RouteComponentProps) => {
         <EditModal
           model={task}
           modelType={OBJECT_TYPES.TASK}
+          hasOrgs={hasOrgs}
+          projectId={project.id}
+          orgConfigsLoading={project.currently_fetching_org_config_names}
+          orgConfigs={project.available_task_org_config_names}
           isOpen={editModalOpen}
           handleClose={closeEditModal}
         />

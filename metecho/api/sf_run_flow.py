@@ -238,11 +238,11 @@ def create_org(
     user,
     project_path,
     scratch_org,
+    org_name,
     originating_user_id,
     sf_username=None,
 ):
     """Create a new scratch org"""
-    org_name = "dev"
     devhub_username = sf_username or user.sf_username
     email = user.email  # TODO: check that this is reliably right.
 

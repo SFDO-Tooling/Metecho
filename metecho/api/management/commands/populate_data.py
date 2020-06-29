@@ -58,7 +58,13 @@ class Command(BaseCommand):
                 "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
-        return Task.objects.create(name=name, description=description, **kwargs)
+        org_config_name = kwargs.pop("org_config_name", "dev")
+        return Task.objects.create(
+            name=name,
+            description=description,
+            org_config_name=org_config_name,
+            **kwargs,
+        )
 
     def handle(self, *args, **options):
         metecho = self.create_repository(
@@ -66,7 +72,7 @@ class Command(BaseCommand):
             repo_owner="oddbird",
             repo_name="Metecho-Test",
             description=(
-                f"# Welcome to Metecho!\n\n"
+                "# Welcome to Metecho!\n\n"
                 "This is a description of the repository. "
                 "It might contain [links](https://install.salesforce.org)."
             ),

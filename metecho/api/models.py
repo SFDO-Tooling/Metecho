@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from allauth.account.signals import user_logged_in
@@ -10,6 +11,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
+from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
 from django.db.models.signals import post_save
@@ -36,6 +38,8 @@ from .model_mixins import (
 )
 from .sf_run_flow import get_devhub_api
 from .validators import validate_unicode_branch
+
+logger = logging.getLogger(__name__)
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA")
@@ -69,9 +73,20 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(HashIdMixin, AbstractUser):
     objects = UserManager()
     currently_fetching_repos = models.BooleanField(default=False)
-    devhub_username = StringField(null=True, blank=True)
+    devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
     agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
+
+    def notify(self, subject, body):
+        # Right now, the only way we notify is via email. In future, we
+        # may add in-app notifications.
+        send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [self.email],
+            fail_silently=False,
+        )
 
     def queue_refresh_repositories(self):
         """Queue a job to refresh repositories unless we're already doing so"""
@@ -258,13 +273,15 @@ class Repository(
     description = MarkdownField(blank=True, property_suffix="_markdown")
     is_managed = models.BooleanField(default=False)
     repo_id = models.IntegerField(null=True, blank=True, unique=True)
+    repo_image_url = models.URLField(blank=True)
+    include_repo_image_url = models.BooleanField(default=True)
     branch_name = models.CharField(
         max_length=100,
         blank=True,
-        null=True,
         validators=[validate_unicode_branch],
         default="master",
     )
+    branch_prefix = StringField(blank=True)
     # User data is shaped like this:
     #   {
     #     "id": str,
@@ -310,6 +327,13 @@ class Repository(
         if not self.github_users:
             self.queue_populate_github_users(originating_user_id=None)
 
+        if not self.repo_image_url:
+            user = self.get_a_matching_user()
+            if user:
+                from .jobs import get_social_image_job
+
+                get_social_image_job.delay(repository=self, user=user)
+
         super().save(*args, **kwargs)
 
     def get_a_matching_user(self):
@@ -321,6 +345,10 @@ class Repository(
             return github_repository.user
 
         return None
+
+    def finalize_get_social_image(self):
+        self.save()
+        self.notify_changed(originating_user_id=None)
 
     def queue_populate_github_users(self, *, originating_user_id):
         from .jobs import populate_github_users_job
@@ -382,7 +410,7 @@ class Project(
     name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, blank=True, null=True, validators=[validate_unicode_branch]
+        max_length=100, blank=True, default="", validators=[validate_unicode_branch]
     )
     has_unmerged_commits = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
@@ -392,6 +420,13 @@ class Project(
     status = models.CharField(
         max_length=20, choices=PROJECT_STATUSES, default=PROJECT_STATUSES.Planned
     )
+    # List of {
+    #   "key": str,
+    #   "label": str,
+    #   "description": str,
+    # }
+    available_task_org_config_names = JSONField(default=list, blank=True)
+    currently_fetching_org_config_names = models.BooleanField(default=False)
 
     repository = models.ForeignKey(
         Repository, on_delete=models.PROTECT, related_name="projects"
@@ -451,6 +486,11 @@ class Project(
 
     # end CreatePrMixin configuration
 
+    def create_gh_branch(self, user):
+        from .jobs import create_gh_branch_for_new_project_job
+
+        create_gh_branch_for_new_project_job.delay(self, user=user)
+
     def should_update_in_progress(self):
         task_statuses = self.tasks.values_list("status", flat=True)
         return task_statuses and any(
@@ -483,13 +523,16 @@ class Project(
         elif self.should_update_in_progress():
             self.status = PROJECT_STATUSES["In progress"]
 
-    def finalize_pr_closed(self, *, originating_user_id):
+    def finalize_pr_closed(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_open = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_reopened(self, *, originating_user_id):
+    def finalize_pr_opened(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_open = True
+        self.pr_is_merged = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -497,16 +540,33 @@ class Project(
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_status_completed(self, *, originating_user_id):
+    def finalize_status_completed(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_merged = True
         self.has_unmerged_commits = False
         self.pr_is_open = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
+    def queue_available_task_org_config_names(self, user):
+        from .jobs import available_task_org_config_names_job
+
+        self.currently_fetching_org_config_names = True
+        self.save()
+        self.notify_changed(originating_user_id=str(user.id))
+        available_task_org_config_names_job.delay(self, user=user)
+
+    def finalize_available_task_org_config_names(self, originating_user_id=None):
+        self.currently_fetching_org_config_names = False
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "repository"),)
+        # We enforce this in business logic, not in the database, as we
+        # need to limit this constraint only to active Projects, and
+        # make the name column case-insensitive:
+        # unique_together = (("name", "repository"),)
 
 
 class TaskSlug(AbstractSlug):
@@ -526,11 +586,12 @@ class Task(
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="tasks")
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
-        max_length=100, null=True, blank=True, validators=[validate_unicode_branch]
+        max_length=100, blank=True, default="", validators=[validate_unicode_branch]
     )
+    org_config_name = StringField()
 
     commits = JSONField(default=list, blank=True)
-    origin_sha = StringField(null=True, blank=True)
+    origin_sha = StringField(blank=True, default="")
     ms_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
 
@@ -542,9 +603,9 @@ class Task(
     review_submitted_at = models.DateTimeField(null=True, blank=True)
     review_valid = models.BooleanField(default=False)
     review_status = models.CharField(
-        choices=TASK_REVIEW_STATUS, null=True, blank=True, max_length=32
+        choices=TASK_REVIEW_STATUS, blank=True, default="", max_length=32
     )
-    review_sha = StringField(null=True, blank=True)
+    review_sha = StringField(blank=True, default="")
 
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
@@ -615,26 +676,44 @@ class Task(
         )
         self.review_valid = review_valid
 
+    def update_has_unmerged_commits(self, user=None):
+        if user is None:
+            user = self.project.repository.get_a_matching_user()
+        base = self.get_base()
+        head = self.get_head()
+        if user and head and base:
+            repo_id = self.get_repo_id(user)
+            repo = gh.get_repo_info(user, repo_id=repo_id)
+            base_sha = repo.branch(base).commit.sha
+            head_sha = repo.branch(head).commit.sha
+            self.has_unmerged_commits = (
+                repo.compare_commits(base_sha, head_sha).ahead_by > 0
+            )
+
     def finalize_task_update(self, *, originating_user_id):
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_status_completed(self, *, originating_user_id):
+    def finalize_status_completed(self, pr_number, *, originating_user_id):
         self.status = TASK_STATUSES.Completed
         self.has_unmerged_commits = False
+        self.pr_number = pr_number
         self.pr_is_open = False
         self.project.has_unmerged_commits = True
         # This will save the project, too:
         self.save(force_project_save=True)
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_closed(self, *, originating_user_id):
+    def finalize_pr_closed(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_open = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_pr_reopened(self, *, originating_user_id):
+    def finalize_pr_opened(self, pr_number, *, originating_user_id):
+        self.pr_number = pr_number
         self.pr_is_open = True
+        self.pr_is_merged = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -654,6 +733,7 @@ class Task(
         self.commits = [
             gh.normalize_commit(c, sender=sender) for c in commits
         ] + self.commits
+        self.update_has_unmerged_commits()
         self.update_review_valid()
         self.save()
         # This comes from the GitHub hook, and so has no originating user:
@@ -678,10 +758,10 @@ class Task(
         *,
         error=None,
         sha=None,
-        status=None,
+        status="",
         delete_org=False,
         org=None,
-        originating_user_id
+        originating_user_id,
     ):
         self.currently_submitting_review = False
         if error:
@@ -708,7 +788,10 @@ class Task(
 
     class Meta:
         ordering = ("-created_at", "name")
-        unique_together = (("name", "project"),)
+        # We enforce this in business logic, not in the database, as we
+        # need to limit this constraint only to active Tasks, and
+        # make the name column case-insensitive:
+        # unique_together = (("name", "project"),)
 
 
 class ScratchOrg(
@@ -722,7 +805,7 @@ class ScratchOrg(
     latest_commit = StringField(blank=True)
     latest_commit_url = models.URLField(blank=True)
     latest_commit_at = models.DateTimeField(null=True, blank=True)
-    url = models.URLField(null=True, blank=True)
+    url = models.URLField(blank=True, default="")
     last_checked_unsaved_changes_at = models.DateTimeField(null=True, blank=True)
     unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     ignored_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
@@ -735,7 +818,7 @@ class ScratchOrg(
     is_created = models.BooleanField(default=False)
     config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
-    expiry_job_id = StringField(null=True, blank=True)
+    expiry_job_id = StringField(blank=True, default="")
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
     has_been_visited = models.BooleanField(default=False)
@@ -909,7 +992,7 @@ class ScratchOrg(
         desired_changes,
         commit_message,
         target_directory,
-        originating_user_id
+        originating_user_id,
     ):
         from .jobs import commit_changes_from_org_job
 

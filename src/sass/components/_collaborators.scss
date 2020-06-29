@@ -6,17 +6,27 @@
 .collaborator-username {
   margin-left: $spacing-x-small;
 
-  .collaborator-button.is-selected & {
+  .collaborator-button.is-assigned & {
     color: $color-text-default;
+  }
+
+  .collaborator-button.is-selected & {
+    color: $color-border-selection;
   }
 }
 
 .collaborator-button {
-  &.is-selected {
+  &.is-assigned {
     background-color: $color-background-row-active;
   }
 
-  &:not(.is-selected) {
+  &.is-selected {
+    color: $color-border-selection;
+    border: 1px solid;
+    border-color: $color-border-selection;
+  }
+
+  &:not(.is-assigned) {
     &:hover {
       border: 1px solid;
     }

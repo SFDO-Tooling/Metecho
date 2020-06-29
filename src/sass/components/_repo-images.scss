@@ -1,0 +1,37 @@
+// Repo Images
+
+// Variables specific to repo images
+$repo-img-size: calc(3.5rem + 3vw);
+$repo-img-size-static: 4.75rem;
+$repo-img-pos-adjust: -1.125rem;
+
+.ms-repo-item {
+  // increase default height/weight of icon in repo visualpicker
+  .slds-media__figure {
+    > div {
+      height: $repo-img-size;
+      width: $repo-img-size;
+    }
+  }
+
+  .slds-avatar_large {
+    font-size: $font-size-10;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+// When image, name and description are displayed on project list sidebar
+.ms-repo-image-wrapper {
+  height: $repo-img-size;
+  width: $repo-img-size;
+}
+
+// When image and name are displayed in header
+.ms-repo-image-header {
+  height: $repo-img-size-static;
+  // .slds-page-header__icon is 2.25rem -- account for vertical space
+  margin-bottom: $repo-img-pos-adjust;
+  margin-top: $repo-img-pos-adjust;
+  width: $repo-img-size-static;
+}

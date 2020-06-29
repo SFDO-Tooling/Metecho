@@ -27,10 +27,12 @@ type AssignUserAction = ({
   task,
   type,
   assignee,
+  shouldAlertAssignee,
 }: {
   task: Task;
   type: OrgTypes;
   assignee: GitHubUser | null;
+  shouldAlertAssignee: boolean;
 }) => void;
 
 interface TableCellProps {
@@ -109,10 +111,10 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     <DataTableCell
       {...props}
       title={displayStatus || status}
-      className={classNames(className, 'project-task-status')}
+      className={classNames(className, 'project-task-status', 'status-cell')}
     >
       {icon}
-      <span className="slds-m-left_x-small project-task-status-text">
+      <span className="slds-m-left_x-small status-cell-text">
         {displayStatus || status}
       </span>
     </DataTableCell>
@@ -137,24 +139,26 @@ const AssigneeTableCell = ({
   children?: GitHubUser | null;
 }) => {
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
+
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);
   };
   const closeAssignUserModal = () => {
+    // setAssigneeSelection(null);
     setAssignUserModalOpen(false);
   };
   const handleEmptyMessageClick = useCallback(() => {
     closeAssignUserModal();
     openAssignProjectUsersModal();
   }, [openAssignProjectUsersModal]);
+
   const doAssignUserAction = useCallback(
-    (assignee: GitHubUser | null) => {
+    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
       /* istanbul ignore if */
       if (!item || !type) {
         return;
       }
-      assignUserAction({ task: item, type, assignee });
-      closeAssignUserModal();
+      assignUserAction({ task: item, type, assignee, shouldAlertAssignee });
     },
     [assignUserAction, item, type],
   );
@@ -178,6 +182,7 @@ const AssigneeTableCell = ({
         assignedUser = item.assigned_qa;
         break;
     }
+
     contents = (
       <>
         <Button
@@ -193,7 +198,7 @@ const AssigneeTableCell = ({
         <AssignUserModal
           allUsers={projectUsers}
           selectedUser={assignedUser}
-          heading={title}
+          orgType={type}
           isOpen={assignUserModalOpen}
           emptyMessageText={i18n.t('Add Project Collaborators')}
           emptyMessageAction={handleEmptyMessageClick}

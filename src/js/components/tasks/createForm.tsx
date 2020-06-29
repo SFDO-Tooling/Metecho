@@ -6,9 +6,10 @@ import i18n from 'i18next';
 import React, { useEffect, useRef, useState } from 'react';
 import { AnyAction } from 'redux';
 
+import SelectFlowType from '@/components/tasks/selectFlowType';
 import { useForm, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
   project: Project;
@@ -67,7 +68,11 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
     handleSubmit,
     resetForm,
   } = useForm({
-    fields: { name: '', description: '' },
+    fields: {
+      name: '',
+      description: '',
+      org_config_name: DEFAULT_ORG_CONFIG_NAME,
+    },
     objectType: OBJECT_TYPES.TASK,
     additionalData: {
       project: project.id,
@@ -103,6 +108,14 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
             value={inputs.description}
             errorText={errors.description}
             onChange={handleInputChange}
+          />
+          <SelectFlowType
+            orgConfigs={project.available_task_org_config_names}
+            projectId={project.id}
+            value={inputs.org_config_name}
+            errors={errors.org_config_name}
+            isLoading={project.currently_fetching_org_config_names}
+            handleSelect={handleInputChange}
           />
         </>
       )}

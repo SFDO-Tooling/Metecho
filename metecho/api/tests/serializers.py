@@ -1,8 +1,9 @@
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ..models import SCRATCH_ORG_TYPES
+from ..models import SCRATCH_ORG_TYPES, Task
 from ..serializers import (
     FullUserSerializer,
     HashidPrimaryKeyRelatedField,
@@ -53,12 +54,23 @@ class TestProjectSerializer:
         )
         assert serializer.is_valid()
 
-        with patch("metecho.api.gh.gh_given_user") as gh_given_user:
+        with ExitStack() as stack:
+            gh_given_user = stack.enter_context(patch("metecho.api.gh.gh_given_user"))
+            gh_module = stack.enter_context(patch("metecho.api.models.gh"))
             repo = MagicMock()
             repo.url = "test"
             gh = MagicMock()
             gh.repositories.return_value = [repo]
             gh_given_user.return_value = gh
+            gh_module.get_repo_info.return_value = MagicMock(
+                **{
+                    "pull_requests.return_value": (
+                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        for _ in range(1)
+                    ),
+                }
+            )
+
             project = serializer.save()
 
         assert project.description_markdown == "<p>Test <code>project</code></p>"
@@ -71,12 +83,70 @@ class TestProjectSerializer:
             == "<p>Test <code>project</code></p>"
         )
 
-    def test_branch_url__present(self, project_factory):
-        project = project_factory(
-            name="Test project",
-            description="Test `project`",
-            branch_name="test-project",
+    def test_validate_branch_name__non_feature(self, repository_factory):
+        repo = repository_factory()
+        serializer = ProjectSerializer(
+            data={
+                "branch_name": "test__non-feature",
+                "name": "Test",
+                "repository": str(repo.id),
+            }
         )
+        assert not serializer.is_valid()
+        assert "branch_name" in serializer.errors
+
+    def test_validate_branch_name__already_used(
+        self, repository_factory, project_factory
+    ):
+        with ExitStack() as stack:
+            gh = stack.enter_context(patch("metecho.api.models.gh"))
+            gh.get_repo_info.return_value = MagicMock(
+                **{
+                    "pull_requests.return_value": (
+                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        for _ in range(1)
+                    ),
+                }
+            )
+
+            repo = repository_factory()
+            project_factory(branch_name="test")
+
+        serializer = ProjectSerializer(
+            data={"branch_name": "test", "name": "Test", "repository": str(repo.id)}
+        )
+        assert not serializer.is_valid()
+        assert "branch_name" in serializer.errors
+
+    def test_validate_branch_name__repo_default_branch(self, repository_factory):
+        repo = repository_factory()
+        serializer = ProjectSerializer(
+            data={
+                "branch_name": repo.branch_name,
+                "name": "Test",
+                "repository": str(repo.id),
+            }
+        )
+        assert not serializer.is_valid()
+        assert "branch_name" in serializer.errors
+
+    def test_branch_url__present(self, project_factory):
+        with ExitStack() as stack:
+            gh = stack.enter_context(patch("metecho.api.models.gh"))
+            gh.get_repo_info.return_value = MagicMock(
+                **{
+                    "pull_requests.return_value": (
+                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        for _ in range(1)
+                    ),
+                }
+            )
+
+            project = project_factory(
+                name="Test project",
+                description="Test `project`",
+                branch_name="test-project",
+            )
         serializer = ProjectSerializer(project)
         owner = project.repository.repo_owner
         name = project.repository.repo_name
@@ -169,6 +239,26 @@ class TestProjectSerializer:
 
 @pytest.mark.django_db
 class TestTaskSerializer:
+    def test_create(self, rf, user_factory, project_factory):
+        user = user_factory()
+        project = project_factory()
+        data = {
+            "name": "Test Task",
+            "description": "Description.",
+            "project": str(project.id),
+            "assigned_dev": {"test": "id"},
+            "assigned_qa": {"test": "id"},
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
+        }
+        r = rf.get("/")
+        r.user = user
+        serializer = TaskSerializer(data=data, context={"request": r})
+        assert serializer.is_valid(), serializer.errors
+        serializer.save()
+        assert Task.objects.count() == 1
+
     def test_update(self, rf, user_factory, task_factory, scratch_org_factory):
         user = user_factory()
         task = task_factory()
@@ -180,6 +270,9 @@ class TestTaskSerializer:
             "project": str(task.project.id),
             "assigned_dev": {"test": "id"},
             "assigned_qa": {"test": "id"},
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
         }
         r = rf.get("/")
         r.user = user
@@ -199,6 +292,9 @@ class TestTaskSerializer:
             "project": str(task.project.id),
             "assigned_dev": {"test": "id"},
             "assigned_qa": {"test": "id"},
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
         }
         serializer = TaskSerializer(task, data=data)
         assert serializer.is_valid(), serializer.errors
@@ -220,8 +316,19 @@ class TestTaskSerializer:
         assert serializer.data["branch_url"] is None
 
     def test_branch_diff_url__present(self, project_factory, task_factory):
-        project = project_factory(branch_name="test-project")
-        task = task_factory(project=project, branch_name="test-task")
+        with ExitStack() as stack:
+            gh = stack.enter_context(patch("metecho.api.models.gh"))
+            gh.get_repo_info.return_value = MagicMock(
+                **{
+                    "pull_requests.return_value": (
+                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        for _ in range(1)
+                    ),
+                }
+            )
+
+            project = project_factory(branch_name="test-project")
+            task = task_factory(project=project, branch_name="test-task")
         serializer = TaskSerializer(task)
         owner = task.project.repository.repo_owner
         name = task.project.repository.repo_name
@@ -245,6 +352,27 @@ class TestTaskSerializer:
         task = task_factory(name="Test task")
         serializer = TaskSerializer(task)
         assert serializer.data["pr_url"] is None
+
+    def test_try_send_assignment_emails(self, mailoutbox, user_factory, task_factory):
+        user = user_factory()
+        task = task_factory()
+
+        serializer = TaskSerializer(
+            task,
+            data={
+                "assigned_dev": {"id": user.github_account.uid},
+                "assigned_qa": {"id": user.github_account.uid},
+                "should_alert_dev": True,
+                "should_alert_qa": True,
+                "name": task.name,
+                "project": str(task.project.id),
+                "org_config_name": task.org_config_name,
+            },
+        )
+        assert serializer.is_valid(), serializer.errors
+        serializer.save()
+
+        assert len(mailoutbox) == 2
 
 
 @pytest.mark.django_db
@@ -285,10 +413,12 @@ class TestScratchOrgSerializer:
         self, rf, user_factory, task_factory, scratch_org_factory
     ):
         user = user_factory()
-        task = task_factory()
-        instance = scratch_org_factory(
-            task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
-        )
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.gh.gh_as_app"))
+            task = task_factory()
+            instance = scratch_org_factory(
+                task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
+            )
 
         r = rf.get("/")
         serializer = ScratchOrgSerializer(instance, context={"request": r})
@@ -298,15 +428,23 @@ class TestScratchOrgSerializer:
         self, rf, user_factory, task_factory, scratch_org_factory
     ):
         user = user_factory()
-        task = task_factory()
-        instances = [
-            scratch_org_factory(
-                task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
-            ),
-            scratch_org_factory(
-                task=task, org_type="Dev", owner=user, ignored_changes={"test": "value"}
-            ),
-        ]
+        with ExitStack() as stack:
+            stack.enter_context(patch("metecho.api.gh.gh_as_app"))
+            task = task_factory()
+            instances = [
+                scratch_org_factory(
+                    task=task,
+                    org_type="Dev",
+                    owner=user,
+                    ignored_changes={"test": "value"},
+                ),
+                scratch_org_factory(
+                    task=task,
+                    org_type="Dev",
+                    owner=user,
+                    ignored_changes={"test": "value"},
+                ),
+            ]
 
         r = rf.get("/")
         serializer = ScratchOrgSerializer(instances, many=True, context={"request": r})
