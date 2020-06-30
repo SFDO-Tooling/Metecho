@@ -29,6 +29,7 @@ describe('<SubmitModal/>', () => {
         login: 'userlogin',
         avatar_url: 'https://url.com',
       },
+      originatingUser: 'anotherUser',
     };
     const opts = Object.assign({}, defaults, options);
     const toggleModal = jest.fn();
@@ -72,7 +73,7 @@ describe('<SubmitModal/>', () => {
           additional_changes: '',
           issues: '',
           notes: '',
-          alert_assigned_dev: false,
+          alert_assigned_dev: true,
         },
         hasForm: true,
         shouldSubscribeToObject: false,

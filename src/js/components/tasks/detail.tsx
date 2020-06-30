@@ -412,6 +412,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             isOpen={submitModalOpen}
             toggleModal={setSubmitModalOpen}
             assignee={task.assigned_qa}
+            originatingUser={user.username}
           />
         )}
         <EditModal

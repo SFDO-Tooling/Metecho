@@ -26,6 +26,7 @@ interface Props {
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
   assignee?: GitHubUser | null;
+  originatingUser?: string;
 }
 
 const SubmitModal = ({
@@ -36,6 +37,7 @@ const SubmitModal = ({
   isOpen,
   toggleModal,
   assignee,
+  originatingUser,
 }: Props) => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const isMounted = useIsMounted();
@@ -77,7 +79,8 @@ const SubmitModal = ({
       toSubmitLabel = i18n.t('Submit Project for Review on GitHub');
       break;
   }
-
+  const defaultChecked =
+    originatingUser && assignee && assignee?.login !== originatingUser;
   const {
     inputs,
     errors,
@@ -92,7 +95,7 @@ const SubmitModal = ({
       additional_changes: '',
       issues: '',
       notes: '',
-      alert_assigned_dev: false,
+      alert_assigned_dev: defaultChecked,
     },
     onSuccess: handleSuccess,
     onError: handleError,
@@ -125,6 +128,7 @@ const SubmitModal = ({
     setSubmittingReview(true);
     handleSubmit(e);
   };
+
   const alertLabel = (
     <>
       {' '}
