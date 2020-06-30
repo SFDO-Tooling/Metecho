@@ -1,3 +1,4 @@
+import html
 import logging
 from datetime import timedelta
 
@@ -83,6 +84,10 @@ class User(HashIdMixin, AbstractUser):
     def notify(self, subject, body):
         # Right now, the only way we notify is via email. In future, we
         # may add in-app notifications.
+
+        # Escape <>& in case the email gets accidentally rendered as HTML
+        subject = html.escape(subject)
+        body = html.escape(body)
         send_mail(
             subject,
             body,
