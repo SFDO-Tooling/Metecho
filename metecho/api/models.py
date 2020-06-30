@@ -681,12 +681,18 @@ class Task(
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         user = getattr(sa, "user", None)
         if user:
+            task = self
+            project = task.project
+            repo = project.repository
             subject = _("PR created for Metecho task")
             body = render_to_string(
                 "pr_created_for_task.txt",
                 {
-                    # TODO
-                },
+                    "task_name": task.name,
+                    "project_name": project.name,
+                    "repo_name": repo.name,
+                    "assigned_user_name": user,
+                }
             )
             user.notify(subject, body)
 
