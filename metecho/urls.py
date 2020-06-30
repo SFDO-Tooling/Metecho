@@ -38,7 +38,7 @@ urlpatterns = [
     path("api/", include("metecho.api.urls")),
     # Routes to pass through to the front end JS route-handler
     re_path(
-        r"^($|login\/?$|terms\/?$|repositories|accounts)",
+        r"^($|login\/?$|terms\/?$|repositories(\/|$)|accounts(\/|$))",
         TemplateView.as_view(template_name="index.html"),
         name="frontend",
     ),
