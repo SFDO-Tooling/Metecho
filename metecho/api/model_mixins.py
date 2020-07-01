@@ -54,9 +54,15 @@ class PushMixin:
         push_update_type: str
         push_error_type: str
         get_serialized_representation: Callable[self, Optional[User]]
+        get_list_serialized_representation: Callable[cls, Optional[User]]
     """
 
-    def _create_context_with_user(self, user):
+    @classmethod
+    def get_list_serialized_representation(cls, user):
+        raise NotImplementedError
+
+    @classmethod
+    def _create_context_with_user(cls, user):
         return {
             "request": Request(user),
         }
@@ -80,6 +86,13 @@ class PushMixin:
         prepared_message.update(message or {})
         self._push_message(
             type_ or self.push_update_type, prepared_message,
+        )
+
+    def notify_list_changed(self, *, type_, originating_user_id, message=None):
+        prepared_message = {"originating_user_id": originating_user_id}
+        prepared_message.update(message or {})
+        async_to_sync(push.push_message_about_instance)(
+            self, {"type": type_, "payload": prepared_message}
         )
 
     def notify_error(self, error, *, type_=None, originating_user_id, message=None):

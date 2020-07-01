@@ -59,15 +59,28 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
         # would cause every generic-message to include the user who's
         # getting the message. It'd just be noise on the wire.
         if model_name.lower() != "user":
-            try:
-                instance = await self.get_instance(model=model_name, id=id)
-            except ObjectDoesNotExist:
-                pass
+            # Handle single instances:
+            if id != "list":
+                try:
+                    instance = await self.get_instance(model=model_name, id=id)
+                except ObjectDoesNotExist:
+                    pass
+                else:
+                    content["payload"]["model"] = await database_sync_to_async(
+                        instance.get_serialized_representation
+                    )(self.scope["user"])
+            # Handle list events:
             else:
+                class_ = self.get_class(model=model_name)
                 content["payload"]["model"] = await database_sync_to_async(
-                    instance.get_serialized_representation
+                    class_.get_list_serialized_representation
                 )(self.scope["user"])
         return content
+
+    def get_class(self, *, model):
+        # XXX: We currently hard-code API as it's our only
+        # model-containing app:
+        return apps.get_model("api", model)
 
     @database_sync_to_async
     def get_instance(self, *, model, id, **kwargs):
@@ -136,6 +149,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             ValueError,
             TypeError,
         )
+        if content["id"] == "list":
+            return True
         try:
             obj = await self.get_instance(**content)
             return obj.subscribable_by(self.scope["user"])

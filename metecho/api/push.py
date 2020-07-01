@@ -36,6 +36,7 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_COMMIT_CHANGES_FAILED
         SCRATCH_ORG_REFRESH
         SCRATCH_ORG_REFRESH_FAILED
+        SCRATCH_ORG_RECREATE
 """
 from copy import deepcopy
 
@@ -60,6 +61,20 @@ async def push_message_about_instance(instance, message):
     message_about_delete = "DELETE" in message["type"] or "REMOVE" in message["type"]
     semaphore_clear = await get_set_message_semaphore(channel_layer, sent_message)
     if (message_about_delete or not_deleted) and semaphore_clear:
+        await channel_layer.group_send(group_name, sent_message)
+
+
+async def push_message_about_list(cls, message):
+    model_name = cls._meta.model_name
+    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id="list")
+    channel_layer = get_channel_layer()
+
+    new_message = deepcopy(message)
+    new_message["model_name"] = model_name
+    new_message["id"] = "list"
+    sent_message = {"type": "notify", "content": new_message}
+    semaphore_clear = await get_set_message_semaphore(channel_layer, sent_message)
+    if semaphore_clear:
         await channel_layer.group_send(group_name, sent_message)
 
 

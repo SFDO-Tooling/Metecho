@@ -3,7 +3,11 @@ from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 
 from ..api.model_mixins import Request
-from ..api.push import push_message_about_instance, report_error
+from ..api.push import (
+    push_message_about_instance,
+    push_message_about_list,
+    report_error,
+)
 from ..api.serializers import (
     ProjectSerializer,
     RepositorySerializer,
@@ -45,6 +49,38 @@ async def test_push_notification_consumer__repository(user_factory, repository_f
     assert response == {
         "type": "TEST_MESSAGE",
         "payload": {"originating_user_id": "abc", "model": model},
+    }
+
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db
+async def test_push_notification_consumer__scratch_org__list(
+    user_factory, scratch_org_factory
+):
+    user = await database_sync_to_async(user_factory)()
+    scratch_org = await database_sync_to_async(scratch_org_factory)()
+
+    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator.scope["user"] = user
+    connected, _ = await communicator.connect()
+    assert connected
+
+    await communicator.send_json_to(
+        {"model": "scratch_org", "id": "list", "action": "SUBSCRIBE"}
+    )
+    response = await communicator.receive_json_from()
+    assert "ok" in response
+
+    await push_message_about_list(
+        scratch_org,
+        {"type": "SCRATCH_ORG_RECREATE", "payload": {"originating_user_id": "abc"}},
+    )
+    response = await communicator.receive_json_from()
+    model = await serialize_model(ScratchOrgSerializer, scratch_org, user)
+    assert response == {
+        "type": "SCRATCH_ORG_RECREATE",
+        "payload": {"originating_user_id": "abc", "model": [model]},
     }
 
     await communicator.disconnect()
@@ -142,18 +178,6 @@ async def test_push_notification_consumer__scratch_org(
 
 
 @pytest.mark.django_db
-async def test_push_notification_consumer__missing_instance():
-    content = {
-        "model_name": "scratchorg",
-        "id": "bet this is an invalid ID",
-        "payload": {},
-    }
-    consumer = PushNotificationConsumer({})
-    new_content = await consumer.hydrate_message(content)
-    assert new_content == {"payload": {}}
-
-
-@pytest.mark.django_db
 async def test_push_notification_consumer__report_error(user_factory):
     user = await database_sync_to_async(user_factory)()
 
@@ -216,3 +240,31 @@ async def test_push_notification_consumer__invalid_subscription(user_factory):
     assert "error" in response
 
     await communicator.disconnect()
+
+
+# These tests need to go last, after any tests that start up a Communicator:
+@pytest.mark.django_db
+async def test_push_notification_consumer__missing_instance():
+    content = {
+        "model_name": "scratchorg",
+        "id": "bet this is an invalid ID",
+        "payload": {},
+    }
+    consumer = PushNotificationConsumer({})
+    new_content = await consumer.hydrate_message(content)
+    assert new_content == {"payload": {}}
+
+
+@pytest.mark.django_db
+async def test_push_notification_consumer__list():
+    content = {
+        "model_name": "scratchorg",
+        "id": "list",
+        "payload": {},
+    }
+    consumer = PushNotificationConsumer({})
+    consumer.scope["user"] = None
+    new_content = await consumer.hydrate_message(content)
+    assert len(new_content["payload"]["model"]) == 2, new_content
+
+    assert await consumer.has_good_permissions(content)
