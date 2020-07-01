@@ -86,8 +86,8 @@ class User(HashIdMixin, AbstractUser):
         # may add in-app notifications.
 
         # Escape <>& in case the email gets accidentally rendered as HTML
-        subject = html.escape(subject)
-        body = html.escape(body)
+        subject = html.escape(subject, quote=False)
+        body = html.escape(body, quote=False)
         send_mail(
             subject,
             body,
