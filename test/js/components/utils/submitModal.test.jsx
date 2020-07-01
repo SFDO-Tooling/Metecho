@@ -73,7 +73,7 @@ describe('<SubmitModal/>', () => {
           additional_changes: '',
           issues: '',
           notes: '',
-          alert_assigned_dev: true,
+          alert_assigned_qa: true,
         },
         hasForm: true,
         shouldSubscribeToObject: false,

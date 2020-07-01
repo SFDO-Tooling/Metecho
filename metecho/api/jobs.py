@@ -440,7 +440,7 @@ def create_pr(
     additional_changes,
     issues,
     notes,
-    alert_assigned_dev,
+    alert_assigned_qa,
     originating_user_id,
 ):
     try:
@@ -468,7 +468,7 @@ def create_pr(
         raise
     else:
         instance.finalize_create_pr(
-            alert_assigned_dev=alert_assigned_dev,
+            alert_assigned_qa=alert_assigned_qa,
             originating_user_id=originating_user_id,
         )
 

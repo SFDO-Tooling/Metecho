@@ -130,7 +130,7 @@ class CreatePrMixin:
         additional_changes,
         issues,
         notes,
-        alert_assigned_dev,
+        alert_assigned_qa,
         originating_user_id,
     ):
         from .jobs import create_pr_job
@@ -154,17 +154,17 @@ class CreatePrMixin:
             additional_changes=additional_changes,
             issues=issues,
             notes=notes,
-            alert_assigned_dev=alert_assigned_dev,
+            alert_assigned_qa=alert_assigned_qa,
             originating_user_id=originating_user_id,
         )
 
     def finalize_create_pr(
-        self, *, alert_assigned_dev=False, error=None, originating_user_id
+        self, *, alert_assigned_qa=False, error=None, originating_user_id
     ):
         self.currently_creating_pr = False
         self.save()
 
-        if alert_assigned_dev:
+        if alert_assigned_qa:
             self.try_to_notify_assigned_user()
 
         if error is None:

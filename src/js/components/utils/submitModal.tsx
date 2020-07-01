@@ -1,4 +1,3 @@
-import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
@@ -8,6 +7,7 @@ import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { GitHubUserAvatar } from '@/components/user/githubUser';
 import {
   ExternalLink,
   LabelWithSpinner,
@@ -79,8 +79,11 @@ const SubmitModal = ({
       toSubmitLabel = i18n.t('Submit Project for Review on GitHub');
       break;
   }
-  const defaultChecked =
-    originatingUser && assignee && assignee?.login !== originatingUser;
+
+  const defaultChecked = Boolean(
+    originatingUser && assignee && assignee.login !== originatingUser,
+  );
+
   const {
     inputs,
     errors,
@@ -95,7 +98,7 @@ const SubmitModal = ({
       additional_changes: '',
       issues: '',
       notes: '',
-      alert_assigned_dev: defaultChecked,
+      alert_assigned_qa: defaultChecked,
     },
     onSuccess: handleSuccess,
     onError: handleError,
@@ -129,37 +132,35 @@ const SubmitModal = ({
     handleSubmit(e);
   };
 
-  const alertLabel = (
-    <>
-      {' '}
-      {assignee ? (
-        <span data-form="task-pr-create">
-          {i18n.t('Notify')}{' '}
-          <Avatar
-            assistiveText={{ icon: 'Avatar image' }}
-            imgSrc={assignee.avatar_url}
-            imgAlt={assignee.login}
-          />{' '}
-          <span>{assignee.login}</span> {i18n.t('by Email')}
-        </span>
-      ) : (
-        <div>{i18n.t('Notify Assignee by Email')}</div>
-      )}
-    </>
-  );
-  const AlertAssignee = () => (
-    <>
-      <Checkbox
-        className="slds-float_left slds-p-top_xx-small"
-        name="alert_assigned_dev"
-        onChange={handleInputChange}
-        checked={inputs.alert_assigned_dev}
-      />
-      <span key="alert-label" className="slds-float_left slds-p-top_xx-small">
+  const alertLabelText = assignee
+    ? `${i18n.t('Notify')} ${assignee.login} ${i18n.t('by email')}`
+    : '';
+  const alertLabel = assignee ? (
+    <div className="slds-float_left ms-avatar-container">
+      <div className="slds-p-top_xx-small slds-m-right_x-small">
+        {i18n.t('Notify')}
+      </div>
+      <GitHubUserAvatar user={assignee} size="medium" />{' '}
+      <div className="slds-p-top_xx-small slds-m-left_x-small">
+        <b>{assignee.login}</b> {i18n.t('by email')}
+      </div>
+    </div>
+  ) : null;
+
+  const AlertAssignee = () =>
+    assignee ? (
+      <div className="slds-float_left">
+        <Checkbox
+          assistiveText={{ label: alertLabelText }}
+          className="slds-float_left slds-p-top_xx-small"
+          name="alert_assigned_qa"
+          onChange={handleInputChange}
+          checked={inputs.alert_assigned_qa}
+        />
         {alertLabel}
-      </span>
-    </>
-  );
+      </div>
+    ) : null;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -168,7 +169,7 @@ const SubmitModal = ({
       heading={heading}
       directional
       footer={[
-        <AlertAssignee key="alert" />,
+        <AlertAssignee key="alert-qa" />,
         <Button
           key="cancel"
           label={i18n.t('Cancel')}

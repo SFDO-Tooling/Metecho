@@ -1,5 +1,7 @@
-{% load i18n %}{% trans "Pull Request Assignment Alert from Metecho" %}
+{% load i18n %}{% trans "Task Submitted For Testing on Metecho" %}
 
-{% blocktrans %}You have been assigned as the tester for "{{ task_name }}" on {{ repo_name }} project "{{ project_name }}". To view this task, please log into Metecho as user "{{ user_name }}". We appreciate your contribution to the Salesforce community. Thanks!{% endblocktrans %}
+{% blocktrans trimmed %}
+You are the assigned Tester for "{{ task_name }}" on {{ repo_name }} project "{{ project_name }}", and this task has been submitted for testing. To view this task, please log into Metecho as user "{{ assigned_user_name }}". We appreciate your contribution to the Salesforce community. Thanks!
+{% endblocktrans %}
 
 {{ metecho_link }}

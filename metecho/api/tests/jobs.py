@@ -629,7 +629,7 @@ def test_create_pr(user_factory, task_factory):
             additional_changes="",
             issues="",
             notes="",
-            alert_assigned_dev=True,
+            alert_assigned_qa=True,
             originating_user_id=None,
         )
 
@@ -662,7 +662,7 @@ def test_create_pr__error(user_factory, task_factory):
                 additional_changes="",
                 issues="",
                 notes="",
-                alert_assigned_dev=True,
+                alert_assigned_qa=True,
                 originating_user_id=None,
             )
 
