@@ -44,37 +44,25 @@ from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
 from ..consumer_utils import get_set_message_semaphore
-from .constants import CHANNELS_GROUP_NAME
+from .constants import CHANNELS_GROUP_NAME, LIST
 
 
-async def push_message_about_instance(instance, message):
+async def push_message_about_instance(instance, message, for_list=False):
     model_name = instance._meta.model_name
-    id = str(instance.id)
-    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
+    id_ = str(instance.id)
+    group_name = CHANNELS_GROUP_NAME.format(
+        model=model_name, id=LIST if for_list else id_
+    )
     channel_layer = get_channel_layer()
 
     new_message = deepcopy(message)
     new_message["model_name"] = model_name
-    new_message["id"] = id
+    new_message["id"] = id_
     sent_message = {"type": "notify", "content": new_message}
     not_deleted = getattr(instance, "deleted_at", None) is None
     message_about_delete = "DELETE" in message["type"] or "REMOVE" in message["type"]
     semaphore_clear = await get_set_message_semaphore(channel_layer, sent_message)
     if (message_about_delete or not_deleted) and semaphore_clear:
-        await channel_layer.group_send(group_name, sent_message)
-
-
-async def push_message_about_list(cls, message):
-    model_name = cls._meta.model_name
-    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id="list")
-    channel_layer = get_channel_layer()
-
-    new_message = deepcopy(message)
-    new_message["model_name"] = model_name
-    new_message["id"] = "list"
-    sent_message = {"type": "notify", "content": new_message}
-    semaphore_clear = await get_set_message_semaphore(channel_layer, sent_message)
-    if semaphore_clear:
         await channel_layer.group_send(group_name, sent_message)
 
 

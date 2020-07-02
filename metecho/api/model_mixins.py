@@ -54,20 +54,14 @@ class PushMixin:
         push_update_type: str
         push_error_type: str
         get_serialized_representation: Callable[self, Optional[User]]
-        get_list_serialized_representation: Callable[cls, Optional[User]]
     """
 
-    @classmethod
-    def get_list_serialized_representation(cls, user):
-        raise NotImplementedError
-
-    @classmethod
-    def _create_context_with_user(cls, user):
+    def _create_context_with_user(self, user):
         return {
             "request": Request(user),
         }
 
-    def _push_message(self, type_, message):
+    def _push_message(self, type_, message, for_list=False):
         """
         type_:
             str indicating frontend Redux action.
@@ -78,21 +72,16 @@ class PushMixin:
             }
         """
         async_to_sync(push.push_message_about_instance)(
-            self, {"type": type_, "payload": message}
+            self, {"type": type_, "payload": message}, for_list=for_list,
         )
 
-    def notify_changed(self, *, type_=None, originating_user_id, message=None):
+    def notify_changed(
+        self, *, type_=None, originating_user_id, message=None, for_list=False
+    ):
         prepared_message = {"originating_user_id": originating_user_id}
         prepared_message.update(message or {})
         self._push_message(
-            type_ or self.push_update_type, prepared_message,
-        )
-
-    def notify_list_changed(self, *, type_, originating_user_id, message=None):
-        prepared_message = {"originating_user_id": originating_user_id}
-        prepared_message.update(message or {})
-        async_to_sync(push.push_message_about_instance)(
-            self, {"type": type_, "payload": prepared_message}
+            type_ or self.push_update_type, prepared_message, for_list=for_list,
         )
 
     def notify_error(self, error, *, type_=None, originating_user_id, message=None):

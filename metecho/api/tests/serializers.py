@@ -2,6 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.utils import timezone
 
 from ..models import SCRATCH_ORG_TYPES, Task
 from ..serializers import (
@@ -369,12 +370,14 @@ class TestTaskSerializer:
             task=task,
             org_type=SCRATCH_ORG_TYPES.Dev,
             latest_commit="abc123",
+            deleted_at=timezone.now(),
         )
         scratch_org_factory(
             owner_sf_username="test",
             task=task,
             org_type=SCRATCH_ORG_TYPES.QA,
             latest_commit="abc123",
+            deleted_at=timezone.now(),
         )
 
         data = {

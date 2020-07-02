@@ -892,16 +892,6 @@ class ScratchOrg(
             self, context=self._create_context_with_user(user)
         ).data
 
-    @classmethod
-    def get_list_serialized_representation(cls, user):
-        from .serializers import ScratchOrgSerializer
-
-        return ScratchOrgSerializer(
-            cls.objects.active(),
-            many=True,
-            context=cls._create_context_with_user(user),
-        ).data
-
     # end PushMixin configuration
 
     def queue_delete(self, *, originating_user_id):
@@ -1058,9 +1048,7 @@ class ScratchOrg(
         self.has_been_visited = False
         self.currently_refreshing_org = True
         self.save()
-        self.notify_changed(
-            type_="SCRATCH_ORG_RECREATE", originating_user_id=originating_user_id,
-        )
+        self.notify_changed(originating_user_id=originating_user_id)
         refresh_scratch_org_job.delay(self, originating_user_id=originating_user_id)
 
     def finalize_refresh_org(self, *, error=None, originating_user_id):
@@ -1083,11 +1071,15 @@ class ScratchOrg(
         from .jobs import user_reassign_job
 
         self.currently_refreshing_org = True
+        was_deleted = self.deleted_at is not None
         self.deleted_at = None
         self.save()
-        self.notify_list_changed(
-            type_="SCRATCH_ORG_RECREATE", originating_user_id=originating_user_id,
-        )
+        if was_deleted:
+            self.notify_changed(
+                type_="SCRATCH_ORG_RECREATE",
+                originating_user_id=originating_user_id,
+                for_list=True,
+            )
         user_reassign_job.delay(
             self, new_user=new_user, originating_user_id=originating_user_id
         )
@@ -1105,6 +1097,7 @@ class ScratchOrg(
                 type_="SCRATCH_ORG_REASSIGN_FAILED",
                 originating_user_id=originating_user_id,
             )
+            self.delete()
 
 
 @receiver(user_logged_in)

@@ -3,11 +3,7 @@ from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 
 from ..api.model_mixins import Request
-from ..api.push import (
-    push_message_about_instance,
-    push_message_about_list,
-    report_error,
-)
+from ..api.push import push_message_about_instance, report_error
 from ..api.serializers import (
     ProjectSerializer,
     RepositorySerializer,
@@ -72,15 +68,16 @@ async def test_push_notification_consumer__scratch_org__list(
     response = await communicator.receive_json_from()
     assert "ok" in response
 
-    await push_message_about_list(
+    await push_message_about_instance(
         scratch_org,
         {"type": "SCRATCH_ORG_RECREATE", "payload": {"originating_user_id": "abc"}},
+        for_list=True,
     )
     response = await communicator.receive_json_from()
     model = await serialize_model(ScratchOrgSerializer, scratch_org, user)
     assert response == {
         "type": "SCRATCH_ORG_RECREATE",
-        "payload": {"originating_user_id": "abc", "model": [model]},
+        "payload": {"originating_user_id": "abc", "model": model},
     }
 
     await communicator.disconnect()
@@ -253,18 +250,3 @@ async def test_push_notification_consumer__missing_instance():
     consumer = PushNotificationConsumer({})
     new_content = await consumer.hydrate_message(content)
     assert new_content == {"payload": {}}
-
-
-@pytest.mark.django_db
-async def test_push_notification_consumer__list():
-    content = {
-        "model_name": "scratchorg",
-        "id": "list",
-        "payload": {},
-    }
-    consumer = PushNotificationConsumer({})
-    consumer.scope["user"] = None
-    new_content = await consumer.hydrate_message(content)
-    assert len(new_content["payload"]["model"]) == 2, new_content
-
-    assert await consumer.has_good_permissions(content)

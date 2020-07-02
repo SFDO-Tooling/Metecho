@@ -7,7 +7,7 @@ from django.apps import apps
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.translation import gettext as _
 
-from .api.constants import CHANNELS_GROUP_NAME
+from .api.constants import CHANNELS_GROUP_NAME, LIST
 from .consumer_utils import clear_message_semaphore
 
 KNOWN_MODELS = {"user", "repository", "project", "task", "scratchorg"}
@@ -54,33 +54,20 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     async def hydrate_message(self, content):
         content = deepcopy(content)
         model_name = content.pop("model_name")
-        id = content.pop("id")
+        id_ = content.pop("id")
         # We specifically don't want to include the user model, as that
         # would cause every generic-message to include the user who's
         # getting the message. It'd just be noise on the wire.
         if model_name.lower() != "user":
-            # Handle single instances:
-            if id != "list":
-                try:
-                    instance = await self.get_instance(model=model_name, id=id)
-                except ObjectDoesNotExist:
-                    pass
-                else:
-                    content["payload"]["model"] = await database_sync_to_async(
-                        instance.get_serialized_representation
-                    )(self.scope["user"])
-            # Handle list events:
+            try:
+                instance = await self.get_instance(model=model_name, id=id_)
+            except ObjectDoesNotExist:
+                pass
             else:
-                class_ = self.get_class(model=model_name)
                 content["payload"]["model"] = await database_sync_to_async(
-                    class_.get_list_serialized_representation
+                    instance.get_serialized_representation
                 )(self.scope["user"])
         return content
-
-    def get_class(self, *, model):
-        # XXX: We currently hard-code API as it's our only
-        # model-containing app:
-        return apps.get_model("api", model)
 
     @database_sync_to_async
     def get_instance(self, *, model, id, **kwargs):
@@ -149,7 +136,7 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             ValueError,
             TypeError,
         )
-        if content["id"] == "list":
+        if content["id"] == LIST:
             return True
         try:
             obj = await self.get_instance(**content)

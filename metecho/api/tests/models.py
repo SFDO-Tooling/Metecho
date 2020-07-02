@@ -13,7 +13,6 @@ from ..models import (
     Project,
     Repository,
     Task,
-    ScratchOrg,
     user_logged_in_handler,
 )
 
@@ -365,12 +364,6 @@ class TestTask:
 
         Task.objects.all().delete()
         assert task.scratchorg_set.active().count() == 0
-
-    def test_get_list_serialized_representation(self, user_factory):
-        user = user_factory()
-
-        with pytest.raises(NotImplementedError):
-            Task.get_list_serialized_representation(user)
 
 
 @pytest.mark.django_db
@@ -836,12 +829,6 @@ class TestScratchOrg:
 
         scratch_org.refresh_from_db()
         assert scratch_org.config == {"anything else": "good"}
-
-    def test_get_list_serialized_representation(self, user_factory, scratch_org_factory):
-        user = user_factory()
-        scratch_org_factory()
-
-        assert len(ScratchOrg.get_list_serialized_representation(user)) == 1
 
 
 @pytest.mark.django_db
