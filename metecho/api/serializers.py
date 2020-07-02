@@ -604,3 +604,8 @@ class SiteSerializer(serializers.ModelSerializer):
             "name",
             "clickthrough_agreement",
         )
+
+
+class CanReassignSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=("assigned_qa", "assigned_dev"))
+    gh_uid = serializers.CharField()

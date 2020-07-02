@@ -1,3 +1,4 @@
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django.utils import timezone
@@ -19,6 +20,7 @@ from .hook_serializers import PrHookSerializer, PushHookSerializer
 from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
+    CanReassignSerializer,
     CommitSerializer,
     CreatePrSerializer,
     FullUserSerializer,
@@ -227,6 +229,38 @@ class TaskViewSet(CreatePrMixin, ModelViewSet):
             originating_user_id=str(request.user.id),
         )
         return Response(self.get_serializer(task).data, status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=["POST"])
+    def can_reassign(self, request, pk=None):
+        serializer = CanReassignSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        task = self.get_object()
+        role = serializer.validated_data["role"]
+        role_org_type = {
+            "assigned_qa": SCRATCH_ORG_TYPES.QA,
+            "assigned_dev": SCRATCH_ORG_TYPES.Dev,
+        }.get(role, None)
+        gh_uid = serializer.validated_data["gh_uid"]
+        # We want to consider soft-deleted orgs, too:
+        org = task.scratchorg_set.all().filter(org_type=role_org_type).first()
+        new_user = getattr(
+            SocialAccount.objects.filter(provider="github", uid=gh_uid).first(),
+            "user",
+            None,
+        )
+        valid_commit = org and org.latest_commit == (
+            task.commits[0] if task.commits else task.origin_sha
+        )
+        return Response(
+            {
+                "can_reassign": bool(
+                    new_user
+                    and org.owner_sf_username == new_user.sf_username
+                    and valid_commit
+                )
+            }
+        )
 
 
 class ScratchOrgViewSet(

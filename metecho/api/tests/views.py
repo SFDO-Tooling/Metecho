@@ -706,6 +706,30 @@ class TestTaskView:
 
         assert response.status_code == 400
 
+    def test_can_reassign__good(self, client, task_factory):
+        task = task_factory()
+
+        data = {
+            "role": "assigned_qa",
+            "gh_uid": "123",
+        }
+        response = client.post(
+            reverse("task-can-reassign", kwargs={"pk": str(task.id)}), data
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"can_reassign": False}
+
+    def test_can_reassign__bad(self, client, task_factory):
+        task = task_factory()
+
+        data = {}
+        response = client.post(
+            reverse("task-can-reassign", kwargs={"pk": str(task.id)}), data
+        )
+
+        assert response.status_code == 400
+
 
 @pytest.mark.django_db
 class TestProjectView:
