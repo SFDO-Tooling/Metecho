@@ -32,6 +32,7 @@ from simple_salesforce.exceptions import SalesforceError
 
 from . import gh, push
 from .constants import ORGANIZATION_DETAILS
+from .email_utils import get_user_facing_url
 from .model_mixins import (
     CreatePrMixin,
     HashIdMixin,
@@ -686,8 +687,6 @@ class Task(
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         user = getattr(sa, "user", None)
         if user:
-            from .jobs import get_user_facing_url
-
             task = self
             project = task.project
             repo = project.repository
