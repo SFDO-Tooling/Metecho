@@ -8,16 +8,15 @@ import requests
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
-from furl import furl
 from github3.exceptions import NotFoundError
 
+from .email_utils import get_user_facing_url
 from .gh import (
     get_cumulus_prefix,
     get_project_config,
@@ -41,13 +40,6 @@ logger = logging.getLogger(__name__)
 
 class TaskReviewIntegrityError(Exception):
     pass
-
-
-def get_user_facing_url(*, path):
-    domain = Site.objects.first().domain
-    should_be_http = not settings.SECURE_SSL_REDIRECT or domain.startswith("localhost")
-    scheme = "http" if should_be_http else "https"
-    return furl(f"{scheme}://{domain}").set(path=path).url
 
 
 def project_create_branch(
