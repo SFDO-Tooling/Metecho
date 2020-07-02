@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.fields import JSONField
 
+from .email_utils import get_user_facing_url
 from .fields import MarkdownField
-from .jobs import get_user_facing_url
 from .models import (
     SCRATCH_ORG_TYPES,
     TASK_REVIEW_STATUS,
