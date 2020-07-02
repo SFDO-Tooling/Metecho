@@ -139,26 +139,20 @@ const SubmitModal = ({
     ? `${i18n.t('Notify')} ${assignee.login} ${i18n.t('by email')}`
     : '';
   const alertLabel = assignee ? (
-    <div
-      className="slds-float_left ms-avatar-container"
-      onClick={toggleAlertAssignee}
-    >
-      <div className="slds-p-top_xx-small slds-m-right_x-small">
-        {i18n.t('Notify')}
-      </div>
-      <GitHubUserAvatar user={assignee} size="medium" />{' '}
-      <div className="slds-p-top_xx-small slds-m-left_x-small">
+    <div className="ms-avatar-container" onClick={toggleAlertAssignee}>
+      <span className="slds-m-right_xx-small">{i18n.t('Notify')}</span>
+      <GitHubUserAvatar user={assignee} size="small" />{' '}
+      <span className="slds-m-left_xx-small">
         <b>{assignee.login}</b> {i18n.t('by email')}
-      </div>
+      </span>
     </div>
   ) : null;
 
   const AlertAssignee = () =>
     assignee ? (
-      <div className="slds-float_left">
+      <div className="slds-float_left slds-grid slds-p-top_xx-small">
         <Checkbox
           assistiveText={{ label: alertLabelText }}
-          className="slds-float_left slds-p-top_xx-small"
           name="alert_assigned_qa"
           onChange={handleInputChange}
           checked={inputs.alert_assigned_qa}

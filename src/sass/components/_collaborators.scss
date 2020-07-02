@@ -53,7 +53,8 @@
 .ms-avatar-container {
   cursor: default;
 
+  // display avatar inline with spans of text
   > div {
-    float: left;
+    display: inline-block;
   }
 }
