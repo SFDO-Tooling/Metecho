@@ -35,7 +35,7 @@ exports[`<ProjectStatusSteps /> renders steps: dev assigned 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a task
+          Add a task
         </div>
       </li>
       <li
@@ -145,7 +145,7 @@ exports[`<ProjectStatusSteps /> renders steps: merged project 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a task
+          Add a task
         </div>
       </li>
       <li
@@ -281,7 +281,7 @@ exports[`<ProjectStatusSteps /> renders steps: planned, no tasks 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a task
+          Add a task
         </div>
       </li>
       <li
@@ -372,7 +372,7 @@ exports[`<ProjectStatusSteps /> renders steps: project with commits 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a task
+          Add a task
         </div>
       </li>
       <li
@@ -500,7 +500,7 @@ exports[`<ProjectStatusSteps /> renders steps: project with pr 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a task
+          Add a task
         </div>
       </li>
       <li
@@ -653,7 +653,7 @@ exports[`<ProjectStatusSteps /> renders steps: task created, no assigned dev 1`]
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a task
+          Add a task
         </div>
       </li>
       <li
