@@ -56,6 +56,18 @@ describe('<SubmitModal/>', () => {
     });
   });
 
+  describe('alert_assigned_qa avatar click', () => {
+    test('toggles checkbox', () => {
+      const { getByLabelText, getByTitle } = setup();
+
+      expect(getByLabelText('Notify userlogin by email')).toBeChecked();
+
+      fireEvent.click(getByTitle('userlogin'));
+
+      expect(getByLabelText('Notify userlogin by email')).not.toBeChecked();
+    });
+  });
+
   describe('form submit', () => {
     test('creates a new task pr', () => {
       const { getByText } = setup();

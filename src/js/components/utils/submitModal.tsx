@@ -132,11 +132,17 @@ const SubmitModal = ({
     handleSubmit(e);
   };
 
+  const toggleAlertAssignee = () => {
+    setInputs({ ...inputs, alert_assigned_qa: !inputs.alert_assigned_qa });
+  };
   const alertLabelText = assignee
     ? `${i18n.t('Notify')} ${assignee.login} ${i18n.t('by email')}`
     : '';
   const alertLabel = assignee ? (
-    <div className="slds-float_left ms-avatar-container">
+    <div
+      className="slds-float_left ms-avatar-container"
+      onClick={toggleAlertAssignee}
+    >
       <div className="slds-p-top_xx-small slds-m-right_x-small">
         {i18n.t('Notify')}
       </div>

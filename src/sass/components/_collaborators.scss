@@ -50,6 +50,10 @@
 
 // Task Create PR form
 // -------------------
-.ms-avatar-container > div {
-  float: left;
+.ms-avatar-container {
+  cursor: default;
+
+  > div {
+    float: left;
+  }
 }
