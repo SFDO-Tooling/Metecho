@@ -36,11 +36,9 @@ urlpatterns = [
     path(PREFIX + "/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("api/", include("metecho.api.urls")),
-    # Catchall for the rest. Right now, it just trusts that PREFIX ==
-    # 'admin', because we don't want to do string munging to get just
-    # the part without the regex and path cruft on it.
+    # Routes to pass through to the front end JS route-handler
     re_path(
-        r"^(?!{admin}|accounts|api|static)".format(admin=PREFIX),
+        r"^($|login\/?$|terms\/?$|repositories(\/|$)|accounts(\/|$))",
         TemplateView.as_view(template_name="index.html"),
         name="frontend",
     ),
