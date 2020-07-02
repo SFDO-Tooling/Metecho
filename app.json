@@ -29,6 +29,10 @@
       "description": "The site settings to use",
       "value": "config.settings.production"
     },
+    "DEFAULT_FROM_EMAIL": {
+      "description": "Email \"from\" address for sending application emails",
+      "value": "no-reply@metecho.org"
+    },
     "DB_ENCRYPTION_KEY": {
       "description": "A key for encrypting using cryptography.fernet. Generate using cryptography.fernet.Fernet.generate_key"
     },
@@ -79,7 +83,7 @@
     },
     { "url": "heroku/python" }
   ],
-  "addons": ["heroku-postgresql", "heroku-redis"],
+  "addons": ["heroku-postgresql", "heroku-redis", "mailgun"],
   "scripts": {
     "postdeploy": "python manage.py migrate --noinput"
   }
