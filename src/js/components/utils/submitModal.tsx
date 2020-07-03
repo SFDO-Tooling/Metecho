@@ -1,4 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
@@ -6,6 +7,7 @@ import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
+import { GitHubUserAvatar } from '@/components/user/githubUser';
 import {
   ExternalLink,
   LabelWithSpinner,
@@ -13,6 +15,7 @@ import {
   useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
+import { GitHubUser } from '@/store/user/reducer';
 import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
 
 interface Props {
@@ -22,6 +25,8 @@ interface Props {
   instanceType: ObjectTypes;
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+  assignee?: GitHubUser | null;
+  originatingUser?: string;
 }
 
 const SubmitModal = ({
@@ -31,6 +36,8 @@ const SubmitModal = ({
   instanceType,
   isOpen,
   toggleModal,
+  assignee,
+  originatingUser,
 }: Props) => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const isMounted = useIsMounted();
@@ -73,6 +80,10 @@ const SubmitModal = ({
       break;
   }
 
+  const defaultChecked = Boolean(
+    originatingUser && assignee && assignee.login !== originatingUser,
+  );
+
   const {
     inputs,
     errors,
@@ -87,6 +98,7 @@ const SubmitModal = ({
       additional_changes: '',
       issues: '',
       notes: '',
+      alert_assigned_qa: defaultChecked,
     },
     onSuccess: handleSuccess,
     onError: handleError,
@@ -120,13 +132,44 @@ const SubmitModal = ({
     handleSubmit(e);
   };
 
+  const toggleAlertAssignee = () => {
+    setInputs({ ...inputs, alert_assigned_qa: !inputs.alert_assigned_qa });
+  };
+  const alertLabelText = assignee
+    ? `${i18n.t('Notify')} ${assignee.login} ${i18n.t('by email')}`
+    : '';
+  const alertLabel = assignee ? (
+    <div className="ms-avatar-container" onClick={toggleAlertAssignee}>
+      <span className="slds-m-right_xx-small">{i18n.t('Notify')}</span>
+      <GitHubUserAvatar user={assignee} />{' '}
+      <span className="slds-m-left_xx-small">
+        <b>{assignee.login}</b> {i18n.t('by email')}
+      </span>
+    </div>
+  ) : null;
+
+  const AlertAssignee = () =>
+    assignee ? (
+      <div className="slds-float_left slds-grid slds-p-top_xx-small">
+        <Checkbox
+          assistiveText={{ label: alertLabelText }}
+          name="alert_assigned_qa"
+          onChange={handleInputChange}
+          checked={inputs.alert_assigned_qa}
+        />
+        {alertLabel}
+      </div>
+    ) : null;
+
   return (
     <Modal
       isOpen={isOpen}
       size="medium"
       disableClose={submittingReview}
       heading={heading}
+      directional
       footer={[
+        <AlertAssignee key="alert-qa" />,
         <Button
           key="cancel"
           label={i18n.t('Cancel')}
