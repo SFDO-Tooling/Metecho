@@ -50,6 +50,11 @@
 
 // Task Create PR form
 // -------------------
-.ms-avatar-container > div {
-  float: left;
+.ms-avatar-container {
+  cursor: default;
+
+  // display avatar inline with spans of text
+  > div {
+    display: inline-block;
+  }
 }
