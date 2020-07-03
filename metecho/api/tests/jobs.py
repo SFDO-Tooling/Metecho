@@ -612,7 +612,7 @@ class TestRefreshCommits:
 @pytest.mark.django_db
 def test_create_pr(user_factory, task_factory):
     user = user_factory()
-    task = task_factory()
+    task = task_factory(assigned_qa={"id": user.github_account.uid})
     with ExitStack() as stack:
         pr = MagicMock(number=123)
         repository = MagicMock(**{"create_pull.return_value": pr})
@@ -630,6 +630,7 @@ def test_create_pr(user_factory, task_factory):
             additional_changes="",
             issues="",
             notes="",
+            alert_assigned_qa=True,
             originating_user_id=None,
         )
 
@@ -662,6 +663,7 @@ def test_create_pr__error(user_factory, task_factory):
                 additional_changes="",
                 issues="",
                 notes="",
+                alert_assigned_qa=True,
                 originating_user_id=None,
             )
 

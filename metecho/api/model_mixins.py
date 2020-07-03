@@ -118,6 +118,7 @@ class CreatePrMixin:
         get_repo_id: Fn(user: User) -> int
         get_base: Fn() -> str
         get_head: Fn() -> str
+        try_to_notify_assigned_user: Fn() -> None
     """
 
     create_pr_event = ""  # Implement this
@@ -131,6 +132,7 @@ class CreatePrMixin:
         additional_changes,
         issues,
         notes,
+        alert_assigned_qa,
         originating_user_id,
     ):
         from .jobs import create_pr_job
@@ -154,12 +156,19 @@ class CreatePrMixin:
             additional_changes=additional_changes,
             issues=issues,
             notes=notes,
+            alert_assigned_qa=alert_assigned_qa,
             originating_user_id=originating_user_id,
         )
 
-    def finalize_create_pr(self, *, error=None, originating_user_id):
+    def finalize_create_pr(
+        self, *, alert_assigned_qa=False, error=None, originating_user_id
+    ):
         self.currently_creating_pr = False
         self.save()
+
+        if alert_assigned_qa:
+            self.try_to_notify_assigned_user()
+
         if error is None:
             self.notify_changed(
                 type_=self.create_pr_event, originating_user_id=originating_user_id
