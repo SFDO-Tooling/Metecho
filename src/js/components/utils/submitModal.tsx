@@ -141,7 +141,7 @@ const SubmitModal = ({
   const alertLabel = assignee ? (
     <div className="ms-avatar-container" onClick={toggleAlertAssignee}>
       <span className="slds-m-right_xx-small">{i18n.t('Notify')}</span>
-      <GitHubUserAvatar user={assignee} size="small" />{' '}
+      <GitHubUserAvatar user={assignee} />{' '}
       <span className="slds-m-left_xx-small">
         <b>{assignee.login}</b> {i18n.t('by email')}
       </span>
