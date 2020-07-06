@@ -2,14 +2,12 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
-import { sortBy } from 'lodash';
 import React from 'react';
 
 import CollaboratorTableCell from '@/components/projects/table/collaboratorCell';
 import DetailTableCell from '@/components/projects/table/detailCell';
 import StatusTableCell from '@/components/projects/table/statusCell';
 import { Project } from '@/store/projects/reducer';
-import { PROJECT_STATUSES } from '@/utils/constants';
 
 export interface TableCellProps {
   [key: string]: any;
@@ -28,18 +26,9 @@ const ProjectTable = ({
     ...project,
     numCollaborators: project.github_users?.length || 0,
   }));
-  const statusOrder = {
-    [PROJECT_STATUSES.REVIEW]: 1,
-    [PROJECT_STATUSES.IN_PROGRESS]: 2,
-    [PROJECT_STATUSES.PLANNED]: 3,
-    [PROJECT_STATUSES.MERGED]: 4,
-  };
-  const projectDefaultSort = sortBy(items, [
-    (item) => statusOrder[item.status],
-  ]);
 
   return (
-    <DataTable items={projectDefaultSort} id="repo-projects-table" noRowHover>
+    <DataTable items={items} id="repo-projects-table" noRowHover>
       <DataTableColumn
         key="details"
         label={i18n.t('Project')}
