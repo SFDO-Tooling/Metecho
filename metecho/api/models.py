@@ -575,7 +575,11 @@ class Project(
         self.notify_changed(originating_user_id=originating_user_id)
 
     class Meta:
-        ordering = ("-created_at", "name")
+        ordering = (
+            "status",
+            "-created_at",
+            "name",
+        )
         # We enforce this in business logic, not in the database, as we
         # need to limit this constraint only to active Projects, and
         # make the name column case-insensitive:
