@@ -208,7 +208,7 @@ class ProjectViewSet(CreatePrMixin, ModelViewSet):
             When(status=PROJECT_STATUSES.Merged, then=3),
         ]
         return qs.annotate(ordering=Case(*whens, output_field=IntegerField())).order_by(
-            "ordering"
+            "ordering", "-created_at", "name"
         )
 
     @action(detail=True, methods=["POST"])
