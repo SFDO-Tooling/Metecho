@@ -26,7 +26,7 @@ const ProjectStatusSteps = ({
 
   const steps = [
     {
-      label: i18n.t('Create a task'),
+      label: i18n.t('Add a task'),
       active: !hasTasks,
       complete: hasTasks || isMerged,
     },
