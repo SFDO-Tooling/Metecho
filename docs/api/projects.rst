@@ -30,7 +30,7 @@ Retrieve
           "repository": "zVQYrye",
           "branch_name": "feature/test-project",
           "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project",
-          "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/master...feature/test-project",
+          "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/main...feature/test-project",
           "has_unmerged_commits": true,
           "currently_creating_pr": false,
           "currently_fetching_org_config_names": false,
