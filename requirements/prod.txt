@@ -16,7 +16,7 @@ beautifulsoup4==4.9.1     # via -r requirements/prod.in
 bleach==3.1.5             # via -r requirements/prod.in, sfdo-template-helpers
 certifi==2020.4.5.1       # via cumulusci, requests, sentry-sdk
 cffi==1.14.0              # via cryptography, cumulusci
-channels-redis==2.4.2     # via -r requirements/prod.in
+channels-redis==3.0.0     # via -r requirements/prod.in
 channels==2.4.0           # via -r requirements/prod.in, channels-redis
 chardet==3.0.4            # via cumulusci, requests
 click==7.1.2              # via cumulusci, rq, snowfakery
@@ -38,7 +38,7 @@ django-model-utils==4.0.0  # via -r requirements/prod.in
 django-parler==2.0.1      # via -r requirements/prod.in
 django-redis==4.12.1      # via -r requirements/prod.in
 django-rq==2.3.2          # via -r requirements/prod.in
-django==3.0.7             # via -r requirements/prod.in, channels, django-allauth, django-anymail, django-filter, django-hashid-field, django-js-reverse, django-log-request-id, django-model-utils, django-redis, django-rq, djangorestframework, sfdo-template-helpers
+django==3.0.8             # via -r requirements/prod.in, channels, django-allauth, django-anymail, django-filter, django-hashid-field, django-js-reverse, django-log-request-id, django-model-utils, django-redis, django-rq, djangorestframework, sfdo-template-helpers
 djangorestframework==3.11.0  # via -r requirements/prod.in, sfdo-template-helpers
 docutils==0.16            # via cumulusci
 factory-boy==2.12.0       # via cumulusci
@@ -61,7 +61,7 @@ logfmt==0.4               # via -r requirements/prod.in, sfdo-template-helpers
 lxml==4.5.1               # via cumulusci
 markdown==3.2.2           # via -r requirements/prod.in, sfdo-template-helpers
 markupsafe==1.1.1         # via cumulusci, jinja2
-msgpack==0.6.2            # via channels-redis
+msgpack==1.0.0            # via channels-redis
 oauthlib==3.1.0           # via requests-oauthlib
 orderedmultidict==1.0.1   # via furl
 packaging==20.3           # via bleach
@@ -91,7 +91,7 @@ salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
 secretstorage==3.1.2      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sentry-sdk==0.15.1        # via -r requirements/prod.in
+sentry-sdk==0.16.0        # via -r requirements/prod.in
 service_identity==18.1.0  # via -r requirements/prod.in
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.12.0.tar.gz  # via -r requirements/prod.in
 simple-salesforce==1.0.0  # via -r requirements/prod.in, cumulusci, salesforce-bulk

@@ -110,7 +110,7 @@ def _create_branches_on_github(*, user, repo_id, project, task, originating_user
 
 
 def alert_user_about_expiring_org(*, org, days):
-    from .models import User, ScratchOrg
+    from .models import ScratchOrg, User
 
     # if scratch org is there
     try:
