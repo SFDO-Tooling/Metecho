@@ -41,13 +41,6 @@ const SelectFlowType = ({
   const flowTypes = orgConfigs.length
     ? orgConfigs
     : [{ key: DEFAULT_ORG_CONFIG_NAME }];
-  const helpText = isDisabled
-    ? i18n.t(
-        'Org Type cannot be changed while a scratch org exists for this task.',
-      )
-    : i18n.t(
-        'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?',
-      );
   const hasErrors = Boolean(errors);
   return (
     <fieldset
@@ -59,7 +52,9 @@ const SelectFlowType = ({
       <legend className="slds-form-element__legend slds-form-element__label">
         <span className="slds-p-right_xx-small">{i18n.t('Org Type')}</span>
         <Tooltip
-          content={helpText}
+          content={i18n.t(
+            'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?',
+          )}
           position="overflowBoundaryElement"
           align="top left"
           dialogClassName="modal-tooltip"
@@ -89,14 +84,25 @@ const SelectFlowType = ({
             value={key}
             checked={key === value}
             name="org_config_name"
-            aria-describedby={hasErrors ? 'org_config_name-error' : undefined}
+            aria-describedby={
+              hasErrors || isDisabled ? 'org_config_name-error' : undefined
+            }
             disabled={isDisabled || isLoading}
             onChange={handleSelect}
           />
         ))}
       </div>
-      {hasErrors && (
-        <div id="org_config_name-error" className="slds-form-element__help">
+      {(hasErrors || isDisabled) && (
+        <div
+          id="org_config_name-error"
+          className={classNames('slds-form-element__help', {
+            'slds-text-color_error': isDisabled,
+          })}
+        >
+          {isDisabled &&
+            i18n.t(
+              'Org Type cannot be changed while a scratch org exists for this task.',
+            )}
           {errors}
         </div>
       )}
