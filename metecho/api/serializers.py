@@ -361,49 +361,44 @@ class TaskSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user = getattr(self.context.get("request"), "user", None)
         originating_user_id = str(user.id) if user else None
-        if instance.assigned_dev != validated_data["assigned_dev"]:
-            if validated_data.get("should_alert_dev"):
-                self.try_send_assignment_emails(instance, "dev", validated_data, user)
-            # We want to consider soft-deleted orgs, too:
-            orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.Dev)
-            reassigned_org = False
-            for org in orgs:
-                new_user = self._valid_reassign(
-                    "dev", org, validated_data["assigned_dev"]
-                )
-                valid_commit = org.latest_commit == (
-                    instance.commits[0] if instance.commits else instance.origin_sha
-                )
-                if new_user and valid_commit and not reassigned_org:
-                    org.queue_reassign(
-                        new_user=new_user, originating_user_id=originating_user_id
-                    )
-                    reassigned_org = True
-                else:
-                    org.delete(originating_user_id=originating_user_id)
-        if instance.assigned_qa != validated_data["assigned_qa"]:
-            if validated_data.get("should_alert_qa"):
-                self.try_send_assignment_emails(instance, "qa", validated_data, user)
-            # We want to consider soft-deleted orgs, too:
-            orgs = instance.scratchorg_set.all().filter(org_type=SCRATCH_ORG_TYPES.QA)
-            reassigned_org = False
-            for org in orgs:
-                new_user = self._valid_reassign(
-                    "qa", org, validated_data["assigned_qa"]
-                )
-                valid_commit = org.latest_commit == (
-                    instance.commits[0] if instance.commits else instance.origin_sha
-                )
-                if new_user and valid_commit and not reassigned_org:
-                    org.queue_reassign(
-                        new_user=new_user, originating_user_id=originating_user_id
-                    )
-                    reassigned_org = True
-                else:
-                    org.delete(originating_user_id=originating_user_id)
+        self._handle_reassign(
+            "dev", instance, validated_data, user, originating_user_id
+        )
+        self._handle_reassign("qa", instance, validated_data, user, originating_user_id)
         validated_data.pop("should_alert_dev", None)
         validated_data.pop("should_alert_qa", None)
         return super().update(instance, validated_data)
+
+    def _handle_reassign(
+        self, type_, instance, validated_data, user, originating_user_id
+    ):
+        if (
+            getattr(instance, f"assigned_{type_}")
+            != validated_data[f"assigned_{type_}"]
+        ):
+            if validated_data.get(f"should_alert_{type_}"):
+                self.try_send_assignment_emails(instance, type_, validated_data, user)
+            org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
+            reassigned_org = False
+            # We want to consider soft-deleted orgs, too:
+            orgs = [
+                *instance.scratchorg_set.active().filter(org_type=org_type),
+                *instance.scratchorg_set.inactive().filter(org_type=org_type),
+            ]
+            for org in orgs:
+                new_user = self._valid_reassign(
+                    type_, org, validated_data[f"assigned_{type_}"]
+                )
+                valid_commit = org.latest_commit == (
+                    instance.commits[0] if instance.commits else instance.origin_sha
+                )
+                if new_user and valid_commit and not reassigned_org:
+                    org.queue_reassign(
+                        new_user=new_user, originating_user_id=originating_user_id
+                    )
+                    reassigned_org = True
+                else:
+                    org.delete(originating_user_id=originating_user_id)
 
     def _valid_reassign(self, type_, org, new_assignee):
         new_user = self.get_matching_assigned_user(

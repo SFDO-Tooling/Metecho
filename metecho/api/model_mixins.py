@@ -181,6 +181,9 @@ class SoftDeleteQuerySet(models.QuerySet):
     def active(self):
         return self.filter(deleted_at__isnull=True)
 
+    def inactive(self):
+        return self.filter(deleted_at__isnull=False)
+
     def notify_soft_deleted(self):
         if self.model.__name__ == "ScratchOrg":
             for scratch_org in self:

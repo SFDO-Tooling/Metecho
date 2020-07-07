@@ -262,8 +262,7 @@ class TaskViewSet(CreatePrMixin, ModelViewSet):
             "assigned_dev": SCRATCH_ORG_TYPES.Dev,
         }.get(role, None)
         gh_uid = serializer.validated_data["gh_uid"]
-        # We want to consider soft-deleted orgs, too:
-        org = task.scratchorg_set.all().filter(org_type=role_org_type).first()
+        org = task.scratchorg_set.active().filter(org_type=role_org_type).first()
         new_user = getattr(
             SocialAccount.objects.filter(provider="github", uid=gh_uid).first(),
             "user",
@@ -276,6 +275,7 @@ class TaskViewSet(CreatePrMixin, ModelViewSet):
             {
                 "can_reassign": bool(
                     new_user
+                    and org
                     and org.owner_sf_username == new_user.sf_username
                     and valid_commit
                 )
