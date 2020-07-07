@@ -41,8 +41,8 @@ templates_path = ["_templates"]
 # source_suffix = ['.rst', '.md']
 source_suffix = ".rst"
 
-# The master toctree document.
-master_doc = "index"
+# The main toctree document.
+main_doc = "index"
 
 # General information about the project.
 project = u"Metecho"
@@ -123,7 +123,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "Metecho.tex", u"Metecho Documentation", u"Salesforce.org", "manual",)
+    (main_doc, "Metecho.tex", u"Metecho Documentation", u"Salesforce.org", "manual",)
 ]
 
 
@@ -131,7 +131,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "Metecho", u"Metecho Documentation", [author], 1)]
+man_pages = [(main_doc, "Metecho", u"Metecho Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -141,7 +141,7 @@ man_pages = [(master_doc, "Metecho", u"Metecho Documentation", [author], 1)]
 #  dir menu entry, description, category)
 texinfo_documents = [
     (
-        master_doc,
+        main_doc,
         "Metecho",
         u"Metecho Documentation",
         author,
