@@ -5,8 +5,8 @@ Metecho
      :target: https://circleci.com/gh/SFDO-Tooling/Metecho
      :alt: Build Status
 
-.. image:: https://coveralls.io/repos/github/SFDO-Tooling/Metecho/badge.svg?branch=main
-     :target: https://coveralls.io/github/SFDO-Tooling/Metecho?branch=main
+.. image:: https://coveralls.io/repos/github/SFDO-Tooling/Metecho/badge.svg
+     :target: https://coveralls.io/github/SFDO-Tooling/Metecho
      :alt: Test Coverage
 
 Development
