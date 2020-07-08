@@ -266,7 +266,7 @@ class TestHookView:
                 reverse("hook"),
                 json.dumps(
                     {
-                        "ref": "refs/heads/master",
+                        "ref": "refs/heads/main",
                         "forced": True,
                         "repository": {"id": 123},
                         "commits": [],
@@ -276,7 +276,7 @@ class TestHookView:
                 content_type="application/json",
                 # The sha1 hexdigest of the request body x the secret
                 # key above:
-                HTTP_X_HUB_SIGNATURE="sha1=01453662feaae85e7bb81452ffa7d3659294852d",
+                HTTP_X_HUB_SIGNATURE="sha1=7724a4777b8215f158efbe74f05ce6eaa5ec41a8",
                 HTTP_X_GITHUB_EVENT="push",
             )
             assert response.status_code == 202, response.content
@@ -292,7 +292,7 @@ class TestHookView:
             reverse("hook"),
             json.dumps(
                 {
-                    "ref": "refs/heads/master",
+                    "ref": "refs/heads/main",
                     "repository": {"id": 123},
                     "commits": [],
                     "sender": {},
@@ -301,7 +301,7 @@ class TestHookView:
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=6fc6f8c254a19276680948251ccb9644995c3692",
+            HTTP_X_HUB_SIGNATURE="sha1=b8a47d6885fbf7d64efa1d549600f1ac87c41f91",
             HTTP_X_GITHUB_EVENT="push",
         )
         assert response.status_code == 400, response.json()
@@ -313,7 +313,7 @@ class TestHookView:
             reverse("hook"),
             json.dumps(
                 {
-                    "ref": "refs/heads/master",
+                    "ref": "refs/heads/main",
                     "forced": False,
                     "repository": {"id": 8489},
                     "commits": [],
@@ -323,7 +323,7 @@ class TestHookView:
             content_type="application/json",
             # This is NOT the sha1 hexdigest of the request body x the
             # secret key above:
-            HTTP_X_HUB_SIGNATURE="sha1=b27899e561020cabc0f4f4584e16217c544143fd",
+            HTTP_X_HUB_SIGNATURE="sha1=5a3798b4d8aacbbc49e13f3fac3bb3187f46cf8b",
             HTTP_X_GITHUB_EVENT="push",
         )
         assert response.status_code == 404
@@ -335,7 +335,7 @@ class TestHookView:
             reverse("hook"),
             json.dumps(
                 {
-                    "ref": "refs/heads/master",
+                    "ref": "refs/heads/main",
                     "forced": False,
                     "repository": {"id": 123},
                     "commits": [],
@@ -343,8 +343,6 @@ class TestHookView:
                 }
             ),
             content_type="application/json",
-            # The sha1 hexdigest of the request body x the secret key
-            # above:
             HTTP_X_HUB_SIGNATURE="sha1=b5aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaae8c",
             HTTP_X_GITHUB_EVENT="push",
         )
