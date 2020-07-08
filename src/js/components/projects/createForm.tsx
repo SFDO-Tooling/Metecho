@@ -2,18 +2,18 @@ import Button from '@salesforce/design-system-react/components/button';
 import Combobox from '@salesforce/design-system-react/components/combobox';
 import comboboxFilter from '@salesforce/design-system-react/components/combobox/filter';
 import Input from '@salesforce/design-system-react/components/input';
+import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
-import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
 
-import { useForm, useIsMounted } from '@/components/utils';
+import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { Repository } from '@/store/repositories/reducer';
 import { User } from '@/store/user/reducer';
@@ -29,12 +29,11 @@ interface ComboboxOption {
 interface Props extends RouteComponentProps {
   user: User;
   repository: Repository;
-  hasProjects: boolean;
+  isOpen: boolean;
 }
 
-const ProjectForm = ({ user, repository, hasProjects, history }: Props) => {
+const CreateProjectModal = ({ user, repository, isOpen, history }: Props) => {
   const isMounted = useIsMounted();
-  const [isOpen, setIsOpen] = useState(!hasProjects);
   // state related to setting base branch on project creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
@@ -44,7 +43,7 @@ const ProjectForm = ({ user, repository, hasProjects, history }: Props) => {
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
-      setIsOpen(true);
+      // setIsOpen(true);
       e.preventDefault();
     }
   };
@@ -90,7 +89,7 @@ const ProjectForm = ({ user, repository, hasProjects, history }: Props) => {
   };
 
   const closeForm = () => {
-    setIsOpen(false);
+    // setIsOpen(false);
     setFromBranchChecked(false);
     resetFilterVal();
     resetForm();
@@ -190,124 +189,133 @@ const ProjectForm = ({ user, repository, hasProjects, history }: Props) => {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="slds-form slds-m-bottom--large"
-      data-form="create-project-branch"
-    >
-      {isOpen && (
-        <>
-          {!hasProjects && (
-            <p className="slds-form-element__help slds-m-bottom_small">
-              <Trans i18nKey="createProjectHelpText">
-                Projects in Metecho are the high-level features that can be
-                broken down into smaller parts by creating Tasks. You can create
-                a new project or create a project based on an existing GitHub
-                branch. Every project requires a unique project name, which
-                becomes the branch name in GitHub unless you choose to use an
-                existing branch.
-              </Trans>
-            </p>
-          )}
-          <RadioGroup
-            assistiveText={{
-              label: i18n.t('Project Branch'),
-              required: i18n.t('Required'),
-            }}
-            className="slds-form-element_stacked slds-p-left_none"
-            name="project-branch"
-            required
-            onChange={handleBranchCheckboxChange}
-          >
-            <Radio
-              id="project-branch-new"
-              labels={{ label: i18n.t('Create new branch on GitHub') }}
-              checked={!fromBranchChecked}
-              name="project-branch"
-              value="new"
-            />
-            <Radio
-              id="project-branch-existing"
-              labels={{ label: i18n.t('Use existing GitHub branch') }}
-              checked={fromBranchChecked}
-              name="project-branch"
-              value="existing"
-            />
-          </RadioGroup>
-          {fromBranchChecked && (
-            <Combobox
-              id="combobox-inline-single"
-              events={{
-                onSelect: handleBranchSelection,
-                onChange: handleBranchChange,
-                onRequestRemoveSelectedOption: handleBranchRemoveSelection,
-                onBlur: handleBranchBlur,
-              }}
-              labels={{
-                label: i18n.t('Select a branch to use for this project'),
-                noOptionsFound: noOptionsFoundText,
-              }}
-              menuItemVisibleLength={5}
-              predefinedOptionsOnly
-              options={comboboxFilter({
-                inputValue: filterVal,
-                options: branchOptions,
-                selection: selection ? [selection] : [],
-              })}
-              selection={selection ? [selection] : []}
-              value={selection ? selection.label : filterVal}
-              errorText={errors.branch_name}
-              hasInputSpinner={fetchingBranches}
-              required
-              variant="inline-listbox"
-              classNameContainer="slds-form-element_stacked slds-p-left_none"
-            />
-          )}
-          <Input
-            id="project-name"
-            label={i18n.t('Project Name')}
-            className="slds-form-element_stacked slds-p-left_none"
-            name="name"
-            value={inputs.name}
-            required
-            aria-required
-            errorText={errors.name}
-            onChange={handleInputChange}
-          />
-          <Textarea
-            id="project-description"
-            label={i18n.t('Description')}
-            classNameContainer="slds-form-element_stacked slds-p-left_none"
-            name="description"
-            value={inputs.description}
-            errorText={errors.description}
-            onChange={handleInputChange}
-          />
-        </>
-      )}
-      <div className={classNames({ 'slds-m-top--medium': isOpen })}>
+    <Modal
+      isOpen={isOpen}
+      size="medium"
+      // disableClose={isSaving}
+      heading={`${i18n.t('Create a Project for')} ${repository.name}`}
+      // onRequestClose={doClose}
+      footer={[
         <Button
-          label={isOpen ? i18n.t('Create Project') : i18n.t('Create a Project')}
-          className={classNames({
-            'slds-size_full hide-separator': !isOpen,
-            'show-separator': isOpen,
-          })}
-          variant="brand"
+          key="cancel"
+          label={i18n.t('Cancel')}
+          // onClick={doClose}
+          // disabled={isSaving}
+        />,
+        <Button
+          key="create-new"
+          label={i18n.t('Create & New')}
+          // onClick={doClose}
+          // disabled={isSaving}
+        />,
+        <Button
+          key="submit"
           type="submit"
-          onClick={submitClicked}
-        />
-        <span className="vertical-separator slds-m-left--large"></span>
-        {isOpen && (
-          <Button
-            label={i18n.t('Close Form')}
-            className="slds-p-left--medium slds-p-right--medium"
-            variant="base"
-            onClick={closeForm}
+          label={
+            false ? (
+              <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
+            ) : (
+              i18n.t('Create')
+            )
+          }
+          variant="brand"
+          // onClick={onSubmitClicked}
+          // disabled={isSaving}
+        />,
+      ]}
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="slds-form slds-m-bottom--large slds-p-around_large"
+        data-form="create-project-branch"
+      >
+        <RadioGroup
+          assistiveText={{
+            label: i18n.t('Project Branch'),
+            required: i18n.t('Required'),
+          }}
+          className="slds-form-element_stacked slds-p-left_none"
+          name="project-branch"
+          required
+          onChange={handleBranchCheckboxChange}
+        >
+          <Radio
+            id="project-branch-new"
+            labels={{ label: i18n.t('Create new branch on GitHub') }}
+            checked={!fromBranchChecked}
+            name="project-branch"
+            value="new"
+          />
+          <Radio
+            id="project-branch-existing"
+            labels={{ label: i18n.t('Use existing GitHub branch') }}
+            checked={fromBranchChecked}
+            name="project-branch"
+            value="existing"
+          />
+        </RadioGroup>
+        {fromBranchChecked && (
+          <Combobox
+            id="combobox-inline-single"
+            events={{
+              onSelect: handleBranchSelection,
+              onChange: handleBranchChange,
+              onRequestRemoveSelectedOption: handleBranchRemoveSelection,
+              onBlur: handleBranchBlur,
+            }}
+            labels={{
+              label: i18n.t('Select a branch to use for this project'),
+              noOptionsFound: noOptionsFoundText,
+            }}
+            menuItemVisibleLength={5}
+            predefinedOptionsOnly
+            options={comboboxFilter({
+              inputValue: filterVal,
+              options: branchOptions,
+              selection: selection ? [selection] : [],
+            })}
+            selection={selection ? [selection] : []}
+            value={selection ? selection.label : filterVal}
+            errorText={errors.branch_name}
+            hasInputSpinner={fetchingBranches}
+            required
+            variant="inline-listbox"
+            classNameContainer="slds-form-element_stacked slds-p-left_none"
           />
         )}
-      </div>
-    </form>
+        <Input
+          id="project-name"
+          label={i18n.t('Project Name')}
+          className="slds-form-element_stacked slds-p-left_none"
+          name="name"
+          value={inputs.name}
+          required
+          aria-required
+          errorText={errors.name}
+          onChange={handleInputChange}
+        />
+        <Textarea
+          id="project-description"
+          label={i18n.t('Description')}
+          classNameContainer="slds-form-element_stacked slds-p-left_none"
+          name="description"
+          value={inputs.description}
+          errorText={errors.description}
+          onChange={handleInputChange}
+        />
+        {/* <div className={classNames({ 'slds-m-top--medium': isOpen })}>
+          {isOpen && (
+            <Button
+              label={i18n.t('Close Form')}
+              className="slds-p-left--medium slds-p-right--medium"
+              variant="base"
+              onClick={closeForm}
+            />
+          )}
+        </div> */}
+      </form>
+    </Modal>
   );
 };
 
-export default withRouter(ProjectForm);
+export default withRouter(CreateProjectModal);
