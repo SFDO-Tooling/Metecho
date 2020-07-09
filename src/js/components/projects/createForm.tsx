@@ -6,7 +6,6 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
-import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';

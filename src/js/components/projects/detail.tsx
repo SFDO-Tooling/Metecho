@@ -13,7 +13,7 @@ import ProjectStatusPath from '@/components/projects/path';
 import ProjectProgress from '@/components/projects/progress';
 import ProjectStatusSteps from '@/components/projects/steps';
 import { Step } from '@/components/steps/stepsItem';
-import TaskForm from '@/components/tasks/createForm';
+import CreateTaskModal from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
 import {
@@ -57,6 +57,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -258,6 +259,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
+  const openCreateModal = () => {
+    setCreateModalOpen(true);
+  };
+  const closeCreateModal = () => {
+    setCreateModalOpen(false);
+  };
 
   // "Next Steps" action handler
   const handleStepAction = useCallback(
@@ -451,9 +458,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 ? `${i18n.t('Tasks for')} ${project.name}`
                 : `${i18n.t('Add a Task for')} ${project.name}`}
             </h2>
-            {project.status !== PROJECT_STATUSES.MERGED && (
-              <TaskForm project={project} startOpen={!tasks.length} />
-            )}
+            <Button
+              label={i18n.t('Add a Task')}
+              variant="brand"
+              type="submit"
+              onClick={openCreateModal}
+              className="slds-m-bottom_medium"
+            />
             {tasks.length ? (
               <>
                 <ProjectProgress range={projectProgress} />
@@ -495,6 +506,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
           redirect={repoUrl}
           handleClose={closeDeleteModal}
         />
+        {project.status !== PROJECT_STATUSES.MERGED && (
+          <CreateTaskModal
+            project={project}
+            isOpen={createModalOpen}
+            closeCreateModal={closeCreateModal}
+          />
+        )}
       </DetailPageLayout>
     </DocumentTitle>
   );
