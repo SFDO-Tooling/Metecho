@@ -7,7 +7,7 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
@@ -38,12 +38,22 @@ const CreateProjectModal = ({ user, repository, isOpen, history }: Props) => {
   const [fetchingBranches, setFetchingBranches] = useState(false);
   const [repoBranches, setRepoBranches] = useState<string[]>([]);
   const [filterVal, setFilterVal] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const submitButton = useRef<HTMLButtonElement | null>(null);
+
   const dispatch = useDispatch<ThunkDispatch>();
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
       // setIsOpen(true);
       e.preventDefault();
+    }
+    console.log('hi');
+    if (submitButton.current) {
+      submitButton.current.click();
+      // if (inputs.name) {
+      //   setIsSaving(true);
+      // }
     }
   };
 
@@ -191,7 +201,7 @@ const CreateProjectModal = ({ user, repository, isOpen, history }: Props) => {
     <Modal
       isOpen={isOpen}
       size="medium"
-      // disableClose={isSaving}
+      disableClose={isSaving}
       heading={`${i18n.t('Create a Project for')} ${repository.name}`}
       // onRequestClose={doClose}
       footer={[
@@ -199,27 +209,27 @@ const CreateProjectModal = ({ user, repository, isOpen, history }: Props) => {
           key="cancel"
           label={i18n.t('Cancel')}
           // onClick={doClose}
-          // disabled={isSaving}
+          disabled={isSaving}
         />,
         <Button
           key="create-new"
           label={i18n.t('Create & New')}
           // onClick={doClose}
-          // disabled={isSaving}
+          disabled={isSaving}
         />,
         <Button
           key="submit"
           type="submit"
           label={
-            false ? (
+            isSaving ? (
               <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
             ) : (
               i18n.t('Create')
             )
           }
           variant="brand"
-          // onClick={onSubmitClicked}
-          // disabled={isSaving}
+          onClick={submitClicked}
+          disabled={isSaving}
         />,
       ]}
     >
@@ -312,6 +322,13 @@ const CreateProjectModal = ({ user, repository, isOpen, history }: Props) => {
             />
           )}
         </div> */}
+        {/* Clicking hidden button allows for native browser form validation */}
+        <button
+          ref={submitButton}
+          type="submit"
+          style={{ display: 'none' }}
+          disabled={isSaving}
+        />
       </form>
     </Modal>
   );

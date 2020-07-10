@@ -21,6 +21,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
   const isMounted = useIsMounted();
   const [success, setSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [batchAdd, setBatchAdd] = useState(false);
   const successTimeout = useRef<NodeJS.Timeout | null>(null);
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
@@ -38,25 +39,6 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     [],
   );
 
-  const onSuccess = (action: AnyAction) => {
-    const {
-      type,
-      payload: { object, objectType },
-    } = action;
-    if (
-      isMounted.current &&
-      type === 'CREATE_OBJECT_SUCCEEDED' &&
-      objectType === OBJECT_TYPES.TASK &&
-      object
-    ) {
-      setIsSaving(false);
-      setSuccess(true);
-      successTimeout.current = setTimeout(() => {
-        setSuccess(false);
-      }, 3000);
-    }
-  };
-
   const {
     inputs,
     errors,
@@ -73,8 +55,35 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     additionalData: {
       project: project.id,
     },
-    onSuccess,
+    onSuccess: (action: AnyAction) => {
+      const {
+        type,
+        payload: { object, objectType },
+      } = action;
+      if (
+        isMounted.current &&
+        type === 'CREATE_OBJECT_SUCCEEDED' &&
+        objectType === OBJECT_TYPES.TASK &&
+        object
+      ) {
+        // @todo fix batchAdd here
+        setIsSaving(false);
+        setSuccess(true);
+        successTimeout.current = setTimeout(() => {
+          setSuccess(false);
+        }, 3000);
+      }
+    },
   });
+
+  useEffect(() => {
+    // re-enable submit btns on error
+    if (errors) {
+      if (isSaving) {
+        setIsSaving(false);
+      }
+    }
+  }, [errors, isSaving]);
 
   const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOpen) {
@@ -87,11 +96,18 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
       }
     }
   };
+
+  const batchSubmitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isOpen) {
+      e.preventDefault();
+    }
+    setBatchAdd(true);
+    submitClicked(e);
+  };
   const closeModal = () => {
     closeCreateModal();
     resetForm();
   };
-
   return (
     <Modal
       isOpen={isOpen}
@@ -107,7 +123,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
         <Button
           key="create-new"
           label={i18n.t('Add & New')}
-          // onClick={doClose}
+          onClick={batchSubmitClicked}
           disabled={isSaving}
           type="submit"
         />,
