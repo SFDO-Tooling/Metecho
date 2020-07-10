@@ -70,7 +70,7 @@ describe('<TaskForm/>', () => {
       fireEvent.click(getByText('Add a Task'));
 
       expect(getByText('Close Form')).toBeVisible();
-      expect(getByText('Create Task')).toBeVisible();
+      expect(getByText('Add Task')).toBeVisible();
       expect(queryByText('Add a Task')).toBeNull();
 
       fireEvent.click(getByText('Close Form'));
@@ -93,7 +93,7 @@ describe('<TaskForm/>', () => {
   describe('form submit', () => {
     test('creates a new task', () => {
       const { getByText, getByLabelText } = setup();
-      const submit = getByText('Create Task');
+      const submit = getByText('Add Task');
       const nameInput = getByLabelText('*Task Name');
       const descriptionInput = getByLabelText('Description');
       const radioInput = getByLabelText('QA - This is a QA flow');
@@ -137,7 +137,7 @@ describe('<TaskForm/>', () => {
           }),
         );
         const { getByText, getByLabelText, queryByText } = setup();
-        const submit = getByText('Create Task');
+        const submit = getByText('Add Task');
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
         fireEvent.click(submit);
@@ -145,11 +145,11 @@ describe('<TaskForm/>', () => {
         expect.assertions(2);
         await createObject;
 
-        expect(getByText('A task was successfully created.')).toBeVisible();
+        expect(getByText('A task was successfully added.')).toBeVisible();
 
         jest.runAllTimers();
 
-        expect(queryByText('A task was successfully created.')).toBeNull();
+        expect(queryByText('A task was successfully added.')).toBeNull();
       });
     });
 
@@ -169,7 +169,7 @@ describe('<TaskForm/>', () => {
         const { getByText, getByLabelText, findByText } = setup({
           project: { ...defaultProject, available_task_org_config_names: [] },
         });
-        const submit = getByText('Create Task');
+        const submit = getByText('Add Task');
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
         fireEvent.click(submit);

@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Case, IntegerField, When
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -16,7 +17,14 @@ from . import gh
 from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
 from .hook_serializers import PrHookSerializer, PushHookSerializer
-from .models import SCRATCH_ORG_TYPES, Project, Repository, ScratchOrg, Task
+from .models import (
+    PROJECT_STATUSES,
+    SCRATCH_ORG_TYPES,
+    Project,
+    Repository,
+    ScratchOrg,
+    Task,
+)
 from .paginators import CustomPaginator
 from .serializers import (
     CommitSerializer,
@@ -190,6 +198,18 @@ class ProjectViewSet(CreatePrMixin, ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
     error_pr_exists = _("Project has already been submitted for testing.")
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        whens = [
+            When(status=PROJECT_STATUSES.Review, then=0),
+            When(status=PROJECT_STATUSES["In progress"], then=1),
+            When(status=PROJECT_STATUSES.Planned, then=2),
+            When(status=PROJECT_STATUSES.Merged, then=3),
+        ]
+        return qs.annotate(ordering=Case(*whens, output_field=IntegerField())).order_by(
+            "ordering", "-created_at", "name"
+        )
 
     @action(detail=True, methods=["POST"])
     def refresh_org_config_names(self, request, pk=None):

@@ -121,7 +121,7 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
       )}
       <div className={classNames({ 'slds-m-top--medium': isOpen })}>
         <Button
-          label={isOpen ? i18n.t('Create Task') : i18n.t('Add a Task')}
+          label={isOpen ? i18n.t('Add Task') : i18n.t('Add a Task')}
           className={classNames({
             'hide-separator': !isOpen,
             'show-separator': isOpen,
@@ -145,7 +145,7 @@ const TaskForm = ({ project, startOpen = false }: Props) => {
               slds-p-right--medium
               slds-text-color_success"
           >
-            {i18n.t('A task was successfully created.')}
+            {i18n.t('A task was successfully added.')}
           </span>
         )}
       </div>
