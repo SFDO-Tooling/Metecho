@@ -51,7 +51,7 @@ hiredis==1.0.1            # via aioredis
 honcho==1.0.1             # via -r requirements/prod.in
 humanfriendly==8.2        # via coloredlogs, cumulusci
 hyperlink==19.0.0         # via twisted
-idna==2.9                 # via hyperlink, requests, twisted
+idna==2.10                # via hyperlink, requests, twisted
 incremental==17.5.0       # via twisted
 jeepney==0.4.3            # via keyring, secretstorage
 jinja2==2.11.2            # via cumulusci, snowfakery
