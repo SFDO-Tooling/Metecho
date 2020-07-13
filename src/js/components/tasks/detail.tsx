@@ -318,7 +318,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     captureButton = (
       <Button
         label={captureButtonText}
-        className={classNames('slds-size_full', {
+        className={classNames({
           'slds-m-bottom_medium': readyToSubmit,
           'slds-m-bottom_x-large': !readyToSubmit,
         })}
