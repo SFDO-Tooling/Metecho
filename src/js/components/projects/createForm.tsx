@@ -29,9 +29,16 @@ interface Props extends RouteComponentProps {
   user: User;
   repository: Repository;
   isOpen: boolean;
+  closeCreateModal: () => void;
 }
 
-const CreateProjectModal = ({ user, repository, isOpen, history }: Props) => {
+const CreateProjectModal = ({
+  user,
+  repository,
+  isOpen,
+  history,
+  closeCreateModal,
+}: Props) => {
   const isMounted = useIsMounted();
   // state related to setting base branch on project creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
@@ -197,24 +204,29 @@ const CreateProjectModal = ({ user, repository, isOpen, history }: Props) => {
     );
   }
 
+  const closeModal = () => {
+    resetForm();
+    closeCreateModal();
+  };
+
   return (
     <Modal
       isOpen={isOpen}
       size="medium"
       disableClose={isSaving}
       heading={`${i18n.t('Create a Project for')} ${repository.name}`}
-      // onRequestClose={doClose}
+      onRequestClose={closeModal}
       footer={[
         <Button
           key="cancel"
           label={i18n.t('Cancel')}
-          // onClick={doClose}
+          onClick={closeModal}
           disabled={isSaving}
         />,
         <Button
           key="create-new"
           label={i18n.t('Create & New')}
-          // onClick={doClose}
+          onClick={closeModal}
           disabled={isSaving}
         />,
         <Button

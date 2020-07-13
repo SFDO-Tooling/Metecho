@@ -76,10 +76,10 @@ const RepositoryDetail = (props: RouteComponentProps) => {
       });
     }
   };
+  // create modal related
+  const openCreateModal = () => setCreateModalOpen(true);
+  const closeCreateModal = () => setCreateModalOpen(false);
 
-  const openCreateModal = () => {
-    setCreateModalOpen(true);
-  };
   const hasProjects = projects && projects.projects.length > 0;
   return (
     <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
@@ -148,6 +148,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
           user={user}
           repository={repository}
           isOpen={createModalOpen}
+          closeCreateModal={closeCreateModal}
         />
       </DetailPageLayout>
     </DocumentTitle>
