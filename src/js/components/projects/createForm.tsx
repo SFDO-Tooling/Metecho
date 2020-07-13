@@ -7,7 +7,7 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
@@ -46,38 +46,25 @@ const CreateProjectModal = ({
   const [repoBranches, setRepoBranches] = useState<string[]>([]);
   const [filterVal, setFilterVal] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const successTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const clearSuccessTimeout = () => {
+    if (typeof successTimeout.current === 'number') {
+      clearTimeout(successTimeout.current);
+      successTimeout.current = null;
+    }
+  };
+
+  useEffect(
+    () => () => {
+      clearSuccessTimeout();
+    },
+    [],
+  );
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
   const dispatch = useDispatch<ThunkDispatch>();
-
-  const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!isOpen) {
-      // setIsOpen(true);
-      e.preventDefault();
-    }
-    console.log('hi');
-    if (submitButton.current) {
-      submitButton.current.click();
-      // if (inputs.name) {
-      //   setIsSaving(true);
-      // }
-    }
-  };
-
-  const onSuccess = (action: AnyAction) => {
-    const {
-      type,
-      payload: { object, objectType },
-    } = action;
-    if (
-      type === 'CREATE_OBJECT_SUCCEEDED' &&
-      objectType === OBJECT_TYPES.PROJECT &&
-      object?.slug
-    ) {
-      const url = routes.project_detail(repository.slug, object.slug);
-      history.push(url);
-    }
-  };
 
   const githubUser = repository.github_users.find(
     (ghUser) => ghUser.login === user.username,
@@ -97,7 +84,7 @@ const CreateProjectModal = ({
       repository: repository.id,
       github_users: githubUser ? [githubUser] : [],
     },
-    onSuccess,
+    // onSuccess,
   });
 
   const resetFilterVal = () => {
@@ -105,10 +92,10 @@ const CreateProjectModal = ({
   };
 
   const closeForm = () => {
-    // setIsOpen(false);
     setFromBranchChecked(false);
     resetFilterVal();
     resetForm();
+    closeCreateModal();
   };
 
   const doGetBranches = async () => {
@@ -203,10 +190,44 @@ const CreateProjectModal = ({
       </>
     );
   }
-
-  const closeModal = () => {
+  // "create and new" submit button events
+  const createSuccess = (action: AnyAction) => {
+    const {
+      type,
+      payload: { object, objectType },
+    } = action;
+    setIsSaving(false);
+    closeForm();
+    if (
+      type === 'CREATE_OBJECT_SUCCEEDED' &&
+      objectType === OBJECT_TYPES.PROJECT &&
+      object?.slug
+    ) {
+      const url = routes.project_detail(repository.slug, object.slug);
+      history.push(url);
+    }
+  };
+  const submitClicked = (e) => {
+    if (inputs.name) {
+      setIsSaving(true);
+      handleSubmit(e, undefined, (action) => createSuccess(action));
+    }
+  };
+  //  "create" submit button events
+  const batchCreateSuccess = () => {
+    setIsSaving(false);
+    setSuccess(true);
     resetForm();
-    closeCreateModal();
+    successTimeout.current = setTimeout(() => {
+      setSuccess(false);
+    }, 3000);
+  };
+  const batchSubmitClicked = (e) => {
+    if (inputs.name) {
+      setIsSaving(true);
+      batchCreateSuccess();
+      handleSubmit(e, undefined, () => batchCreateSuccess());
+    }
   };
 
   return (
@@ -215,18 +236,18 @@ const CreateProjectModal = ({
       size="medium"
       disableClose={isSaving}
       heading={`${i18n.t('Create a Project for')} ${repository.name}`}
-      onRequestClose={closeModal}
+      onRequestClose={closeForm}
       footer={[
         <Button
           key="cancel"
           label={i18n.t('Cancel')}
-          onClick={closeModal}
+          onClick={closeForm}
           disabled={isSaving}
         />,
         <Button
           key="create-new"
           label={i18n.t('Create & New')}
-          onClick={closeModal}
+          onClick={batchSubmitClicked}
           disabled={isSaving}
         />,
         <Button
@@ -250,6 +271,14 @@ const CreateProjectModal = ({
         className="slds-form slds-m-bottom--large slds-p-around_large"
         data-form="create-project-branch"
       >
+        {success && (
+          <span
+            className="slds-align_absolute-center
+              slds-text-color_success"
+          >
+            {i18n.t('A project was successfully created!')}
+          </span>
+        )}
         <RadioGroup
           assistiveText={{
             label: i18n.t('Project Branch'),
@@ -324,16 +353,6 @@ const CreateProjectModal = ({
           errorText={errors.description}
           onChange={handleInputChange}
         />
-        {/* <div className={classNames({ 'slds-m-top--medium': isOpen })}>
-          {isOpen && (
-            <Button
-              label={i18n.t('Close Form')}
-              className="slds-p-left--medium slds-p-right--medium"
-              variant="base"
-              onClick={closeForm}
-            />
-          )}
-        </div> */}
         {/* Clicking hidden button allows for native browser form validation */}
         <button
           ref={submitButton}

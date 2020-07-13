@@ -1,5 +1,6 @@
 {
   "404": "404",
+  "A project was successfully created!": "A project was successfully created!",
   "A task was successfully added!": "A task was successfully added!",
   "About": "About",
   "Active": "Active",
@@ -40,7 +41,6 @@
   "Check again": "Check again",
   "Check for Unretrieved Changes": "Check for Unretrieved Changes",
   "Checking for Unretrieved Changes…": "Checking for Unretrieved Changes…",
-  "Close Form": "Close Form",
   "Collaborators": "Collaborators",
   "Commit": "Commit",
   "Commit Message": "Commit Message",

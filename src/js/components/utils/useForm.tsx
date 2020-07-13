@@ -86,7 +86,7 @@ export default ({
   const handleSubmit = (
     e: React.FormEvent<HTMLFormElement>,
     action?: (...args: any[]) => Promise<AnyAction>,
-    success?: () => void,
+    success?: (...args: any[]) => void,
   ) => {
     e.preventDefault();
     setErrors({});

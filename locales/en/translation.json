@@ -60,6 +60,8 @@
   "Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Test scratch org.": "Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Test scratch org.",
   "Continue": "Continue",
   "Copyright 2019–2020 Salesforce.org. All rights reserved.": "Copyright 2019–2020 Salesforce.org. All rights reserved.",
+  "Create": "Create",
+  "Create & New": "Create & New",
   "Create Org": "Create Org",
   "Create Project": "Create Project",
   "Create Repository": "Create Repository",
