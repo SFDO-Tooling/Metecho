@@ -139,6 +139,14 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
       >
         {isOpen && (
           <>
+            {success && (
+              <span
+                className="slds-align_absolute-center
+              slds-text-color_success"
+              >
+                {i18n.t('A task was successfully added!')}
+              </span>
+            )}
             <Input
               id="task-name"
               label={i18n.t('Task Name')}
@@ -168,15 +176,6 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
               handleSelect={handleInputChange}
             />
           </>
-        )}
-        {success && (
-          <span
-            className="slds-p-left--medium
-              slds-p-right--medium
-              slds-text-color_success"
-          >
-            {i18n.t('A task was successfully added.')}
-          </span>
         )}
       </form>
     </Modal>
