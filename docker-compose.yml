@@ -30,7 +30,7 @@ services:
 
   # Runs the database process:
   postgres:
-    image: postgres:10.6
+    image: postgres:12.3
     environment:
       - POSTGRES_USER=metecho
     volumes:

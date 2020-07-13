@@ -89,7 +89,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.test
           SECURE_SSL_REDIRECT: False
       - image: circleci/redis:5.0
-      - image: circleci/postgres:10.6
+      - image: circleci/postgres:12.3
         environment:
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test

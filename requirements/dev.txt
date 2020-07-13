@@ -29,7 +29,7 @@ imagesize==1.2.0          # via sphinx
 inflection==0.5.0         # via pytest-factoryboy
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.16.1           # via -r requirements/dev.in
-isort==5.0.4              # via -r requirements/dev.in
+isort==5.0.9              # via -r requirements/dev.in
 jedi==0.17.1              # via ipython
 jinja2==2.11.2            # via -c requirements/prod.txt, sphinx
 markupsafe==1.1.1         # via -c requirements/prod.txt, jinja2
