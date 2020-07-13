@@ -32,5 +32,5 @@ rq-scheduler==0.10.0
 sentry-sdk==0.16.0
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.12.0.tar.gz
-simple-salesforce==1.0.0
+simple-salesforce==1.1.0
 whitenoise==5.1.0
