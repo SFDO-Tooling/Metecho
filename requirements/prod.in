@@ -3,7 +3,7 @@ beautifulsoup4==4.9.1
 bleach==3.1.5
 channels-redis==3.0.0
 channels==2.4.0
-cumulusci==3.13.0
+cumulusci==3.15.0
 dj-database-url==0.5.0
 django-allauth==0.42.0
 django-anymail[mailgun]==7.1.0
