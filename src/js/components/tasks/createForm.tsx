@@ -4,10 +4,9 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useEffect, useRef, useState } from 'react';
-import { AnyAction } from 'redux';
 
 import SelectFlowType from '@/components/tasks/selectFlowType';
-import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
+import { LabelWithSpinner, useForm } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '@/utils/constants';
 
@@ -18,12 +17,9 @@ interface Props {
 }
 
 const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
-  const isMounted = useIsMounted();
   const [success, setSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [batchAdd, setBatchAdd] = useState(false);
   const successTimeout = useRef<NodeJS.Timeout | null>(null);
-  const submitButton = useRef<HTMLButtonElement | null>(null);
 
   const clearSuccessTimeout = () => {
     if (typeof successTimeout.current === 'number') {
@@ -55,25 +51,6 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     additionalData: {
       project: project.id,
     },
-    onSuccess: (action: AnyAction) => {
-      const {
-        type,
-        payload: { object, objectType },
-      } = action;
-      if (
-        isMounted.current &&
-        type === 'CREATE_OBJECT_SUCCEEDED' &&
-        objectType === OBJECT_TYPES.TASK &&
-        object
-      ) {
-        // @todo fix batchAdd here
-        setIsSaving(false);
-        setSuccess(true);
-        successTimeout.current = setTimeout(() => {
-          setSuccess(false);
-        }, 3000);
-      }
-    },
   });
 
   useEffect(() => {
@@ -85,34 +62,48 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     }
   }, [errors, isSaving]);
 
-  const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const addSuccess = () => {
+    setIsSaving(false);
+    resetForm();
+    closeCreateModal();
+  };
+  const submitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
     if (!isOpen) {
       e.preventDefault();
     }
-    if (submitButton.current) {
-      submitButton.current.click();
-      if (inputs.name) {
-        setIsSaving(true);
-      }
+    if (inputs.name) {
+      setIsSaving(true);
+      handleSubmit(e, undefined, () => addSuccess());
     }
   };
 
-  const batchSubmitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!isOpen) {
-      e.preventDefault();
+  const batchAddSuccess = () => {
+    setIsSaving(false);
+    setSuccess(true);
+    resetForm();
+    successTimeout.current = setTimeout(() => {
+      setSuccess(false);
+    }, 3000);
+  };
+  const batchSubmitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (inputs.name) {
+      setIsSaving(true);
+      handleSubmit(e, undefined, () => batchAddSuccess());
     }
-    setBatchAdd(true);
-    submitClicked(e);
   };
   const closeModal = () => {
     closeCreateModal();
     resetForm();
   };
+
+  const emptyName = !inputs.name;
   return (
     <Modal
       isOpen={isOpen}
       size="medium"
       heading={`${i18n.t('Add a Task for')} ${project.name}`}
+      onRequestClose={closeModal}
       footer={[
         <Button
           key="cancel"
@@ -124,8 +115,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
           key="create-new"
           label={i18n.t('Add & New')}
           onClick={batchSubmitClicked}
-          disabled={isSaving}
-          type="submit"
+          disabled={isSaving || emptyName}
         />,
         <Button
           key="submit"
@@ -139,7 +129,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
           }
           variant="brand"
           onClick={submitClicked}
-          disabled={isSaving}
+          disabled={isSaving || emptyName}
         />,
       ]}
     >
@@ -188,13 +178,6 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
             {i18n.t('A task was successfully added.')}
           </span>
         )}
-        {/* Clicking hidden button allows for native browser form validation */}
-        <button
-          ref={submitButton}
-          type="submit"
-          style={{ display: 'none' }}
-          disabled={isSaving}
-        />
       </form>
     </Modal>
   );

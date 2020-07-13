@@ -107,7 +107,7 @@ export default ({
           hasForm: true,
         }),
       )
-        .then(handleSuccess)
+        .then(success || handleSuccess)
         .catch(catchError);
     }
     return dispatch(
@@ -122,7 +122,7 @@ export default ({
         shouldSubscribeToObject,
       }),
     )
-      .then(handleSuccess)
+      .then(success || handleSuccess)
       .catch(catchError);
   };
 
