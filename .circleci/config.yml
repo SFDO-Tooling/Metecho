@@ -10,9 +10,11 @@ jobs:
       - restore_cache:
           keys:
             - metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
+            - metecho-py-
       - restore_cache:
           keys:
             - metecho-npm-{{ checksum "yarn.lock" }}
+            - metecho-npm-
       - run:
           name: Install Dependencies
           command: |

@@ -41,7 +41,7 @@
     "test:js:report-coverage": "cat ./coverage/lcov.info | coveralls",
     "test:js:check-coverage": "nyc check-coverage --temp-dir coverage",
     "test:py": "pytest",
-    "test:py:report-coverage": "coveralls",
+    "test:py:report-coverage": "$VIRTUAL_ENV/bin/coveralls",
     "test:py:check-coverage": "coverage report --fail-under=100",
     "test": "run-s test:js test:py",
     "build": "webpack --config webpack.dev.js",
