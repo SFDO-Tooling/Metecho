@@ -334,7 +334,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     submitButton = (
       <Button
         label={submitButtonText}
-        className={classNames('slds-size_full slds-m-bottom_x-large')}
+        className={classNames('slds-m-bottom_x-large')}
         variant="brand"
         onClick={openSubmitModal}
         disabled={currentlySubmitting}
