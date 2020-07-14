@@ -670,6 +670,14 @@ class Task(
     # begin CreatePrMixin configuration:
     create_pr_event = "TASK_CREATE_PR"
 
+    def get_all_users_in_commits(self):
+        ret = []
+        for commit in self.commits:
+            if commit["author"] not in ret:
+                ret.append(commit["author"])
+        ret.sort(key=lambda d: d["username"])
+        return ret
+
     def get_repo_id(self, user):
         return self.project.repository.get_repo_id(user)
 
