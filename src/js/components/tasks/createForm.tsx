@@ -100,7 +100,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
   return (
     <Modal
       isOpen={isOpen}
-      size="medium"
+      size="small"
       heading={`${i18n.t('Add a Task for')} ${project.name}`}
       onRequestClose={closeModal}
       footer={[
