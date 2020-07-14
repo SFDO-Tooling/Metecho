@@ -52,9 +52,9 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
       project: project.id,
     },
   });
-
+  // re-enable submit btns on error
   useEffect(() => {
-    // re-enable submit btns on error
+    /* istanbul ignore else */
     if (errors) {
       if (isSaving) {
         setIsSaving(false);
@@ -68,9 +68,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     closeCreateModal();
   };
   const submitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
-    if (!isOpen) {
-      e.preventDefault();
-    }
+    /* istanbul ignore else */
     if (inputs.name) {
       setIsSaving(true);
       handleSubmit(e, undefined, () => addSuccess());
@@ -87,6 +85,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
   };
   const batchSubmitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
     e.preventDefault();
+    /* istanbul ignore else */
     if (inputs.name) {
       setIsSaving(true);
       handleSubmit(e, undefined, () => batchAddSuccess());
