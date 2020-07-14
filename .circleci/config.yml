@@ -10,9 +10,11 @@ jobs:
       - restore_cache:
           keys:
             - metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
+            - metecho-py-
       - restore_cache:
           keys:
             - metecho-npm-{{ checksum "yarn.lock" }}
+            - metecho-npm-
       - run:
           name: Install Dependencies
           command: |
@@ -79,7 +81,7 @@ jobs:
     docker:
       - image: oddbirds/pyjs:v0.2.0
         environment:
-          DATABASE_URL: postgres://ubuntu@localhost:5432/circle_test
+          DATABASE_URL: postgres://ubuntu:circle_test@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
           DJANGO_DEBUG: False
           DJANGO_HASHID_SALT: test_hash_id
@@ -87,7 +89,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.test
           SECURE_SSL_REDIRECT: False
       - image: circleci/redis:5.0
-      - image: circleci/postgres:10.6
+      - image: circleci/postgres:12.3
         environment:
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
