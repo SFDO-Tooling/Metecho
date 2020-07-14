@@ -665,4 +665,17 @@ describe('<ProjectDetail/>', () => {
       expect(queryByText('Confirm Deleting Project')).toBeNull();
     });
   });
+
+  describe('<CreateTaskModal/>', () => {
+    test('open/close modal', () => {
+      const { queryByText, getByText } = setup();
+      fireEvent.click(getByText('Add a Task'));
+
+      expect(getByText('Add a Task for Project 1')).toBeVisible();
+
+      fireEvent.click(queryByText('Close'));
+
+      expect(queryByText('Add a Task for Project 1')).toBeNull();
+    });
+  });
 });

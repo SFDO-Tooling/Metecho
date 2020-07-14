@@ -276,4 +276,17 @@ describe('<RepoDetail />', () => {
       expect(queryByText('Load More')).toBeNull();
     });
   });
+
+  describe('<CreateProjectModal />', () => {
+    test('opens/closes form', () => {
+      const { queryByText, getByText } = setup();
+      fireEvent.click(getByText('Create a Project'));
+
+      expect(getByText('Create a Project for Repository 1')).toBeVisible();
+
+      fireEvent.click(queryByText('Close'));
+
+      expect(queryByText('Create a Project for Repository 1')).toBeNull();
+    });
+  });
 });

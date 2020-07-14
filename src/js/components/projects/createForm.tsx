@@ -207,7 +207,8 @@ const CreateProjectModal = ({
       history.push(url);
     }
   };
-  const submitClicked = (e) => {
+  const submitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
+    /* istanbul ignore else */
     if (inputs.name) {
       setIsSaving(true);
       handleSubmit(e, undefined, (action) => createSuccess(action));
@@ -223,7 +224,8 @@ const CreateProjectModal = ({
       setSuccess(false);
     }, 3000);
   };
-  const batchSubmitClicked = (e) => {
+  const batchSubmitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
+    /* istanbul ignore else */
     if (inputs.name) {
       setIsSaving(true);
       batchCreateSuccess();
