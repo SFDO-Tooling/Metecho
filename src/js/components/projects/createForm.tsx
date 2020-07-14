@@ -217,6 +217,7 @@ const CreateProjectModal = ({
   const batchCreateSuccess = () => {
     setIsSaving(false);
     setSuccess(true);
+    closeBranchForm();
     resetForm();
     successTimeout.current = setTimeout(() => {
       setSuccess(false);
@@ -229,7 +230,9 @@ const CreateProjectModal = ({
       handleSubmit(e, undefined, () => batchCreateSuccess());
     }
   };
-
+  const disableCreate = fromBranchChecked
+    ? !inputVal || !inputs.name
+    : !inputs.name;
   return (
     <Modal
       isOpen={isOpen}
@@ -248,7 +251,7 @@ const CreateProjectModal = ({
           key="create-new"
           label={i18n.t('Create & New')}
           onClick={batchSubmitClicked}
-          disabled={isSaving}
+          disabled={isSaving || disableCreate}
         />,
         <Button
           key="submit"
@@ -262,7 +265,7 @@ const CreateProjectModal = ({
           }
           variant="brand"
           onClick={submitClicked}
-          disabled={isSaving}
+          disabled={isSaving || disableCreate}
         />,
       ]}
     >
