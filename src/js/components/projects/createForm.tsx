@@ -238,7 +238,7 @@ const CreateProjectModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      size="medium"
+      size="small"
       disableClose={isSaving}
       heading={`${i18n.t('Create a Project for')} ${repository.name}`}
       onRequestClose={closeForm}
