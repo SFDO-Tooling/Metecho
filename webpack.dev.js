@@ -10,7 +10,7 @@ const path = require('path');
 const I18nextWebpackPlugin = require('i18next-scanner-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const babel = require('@babel/core');
-const merge = require('webpack-merge');
+const merge = require('webpack-merge').merge;
 
 const common = require('./webpack.common.js');
 
