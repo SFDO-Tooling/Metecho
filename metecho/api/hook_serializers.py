@@ -35,6 +35,7 @@ class PrSerializer(serializers.Serializer):
     merged = serializers.BooleanField()
     head = PrBranchSerializer()
     base = PrBranchSerializer()
+    number = serializers.IntegerField()
     # All other fields are ignored by default.
 
 
@@ -147,3 +148,24 @@ class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
             repository.add_commits(
                 commits=self.validated_data["commits"], ref=ref, sender=sender,
             )
+
+
+class PrReviewHookSerializer(HookSerializerMixin, serializers.Serializer):
+    sender = HookSenderSerializer()
+    repository = HookRepositorySerializer()
+    pull_request = PrSerializer()
+
+    def process_hook(self):
+        repository = self.get_matching_repository()
+        if not repository:
+            raise NotFound("No matching repository.")
+
+        pr_number = self.validated_data["pull_request"]["number"]
+        task = Task.objects.filter(
+            project__repository=repository, pr_number=pr_number
+        ).first()
+        if not task:
+            raise NotFound("No matching task.")
+
+        sender = self.validated_data["sender"]
+        task.add_reviewer(sender)

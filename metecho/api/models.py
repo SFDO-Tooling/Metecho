@@ -619,6 +619,7 @@ class Task(
         choices=TASK_REVIEW_STATUS, blank=True, default="", max_length=32
     )
     review_sha = StringField(blank=True, default="")
+    reviewers = JSONField(default=list, blank=True)
 
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
@@ -677,6 +678,11 @@ class Task(
                 ret.append(commit["author"])
         ret.sort(key=lambda d: d["username"])
         return ret
+
+    def add_reviewer(self, user):
+        if user not in self.reviewers:
+            self.reviewers.append(user)
+            self.save()
 
     def get_repo_id(self, user):
         return self.project.repository.get_repo_id(user)

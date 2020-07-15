@@ -16,7 +16,11 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from . import gh
 from .authentication import GitHubHookAuthentication
 from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
-from .hook_serializers import PrHookSerializer, PushHookSerializer
+from .hook_serializers import (
+    PrHookSerializer,
+    PrReviewHookSerializer,
+    PushHookSerializer,
+)
 from .models import (
     PROJECT_STATUSES,
     SCRATCH_ORG_TYPES,
@@ -78,6 +82,8 @@ class HookView(APIView):
         serializers = {
             "push": PushHookSerializer,
             "pull_request": PrHookSerializer,
+            "pull_request_review": PrReviewHookSerializer,
+            "pull_request_review_comment": PrReviewHookSerializer,
         }
         serializer_class = serializers.get(request.META.get("HTTP_X_GITHUB_EVENT"))
         if serializer_class is None:

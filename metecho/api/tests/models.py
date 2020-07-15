@@ -417,6 +417,15 @@ class TestTask:
 
         assert task.get_all_users_in_commits() == expected
 
+    def test_add_reviewer(self, task_factory):
+        task = task_factory()
+        task.add_reviewer({"login": "login", "avatar_url": "https://example.com"})
+        task.add_reviewer({"login": "login", "avatar_url": "https://example.com"})
+        task.refresh_from_db()
+        assert task.reviewers == [
+            {"login": "login", "avatar_url": "https://example.com"}
+        ]
+
 
 @pytest.mark.django_db
 class TestUser:
