@@ -46,12 +46,15 @@ import {
 import { getBranchLink } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
+import { Step } from '../steps/stepsItem';
+
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -137,7 +140,22 @@ const TaskDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
+  // assign user modal related
+  const openAssignUserModal = () => {
+    setAssignUserModalOpen(true);
+  };
 
+  const closeAssignUserModal = () => {
+    setAssignUserModalOpen(false);
+  };
+  const handleStepAction = useCallback((step: Step) => {
+    const action = step.action;
+    switch (action) {
+      case 'assign-dev':
+        openAssignUserModal();
+        break;
+    }
+  }, []);
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
     const changesFetched =
@@ -373,7 +391,11 @@ const TaskDetail = (props: RouteComponentProps) => {
             </div>
             {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large ms-secondary-block">
-                <TaskStatusSteps task={task} orgs={orgs} />
+                <TaskStatusSteps
+                  task={task}
+                  orgs={orgs}
+                  handleAction={handleStepAction}
+                />
               </div>
             ) : null}
           </>
@@ -390,6 +412,9 @@ const TaskDetail = (props: RouteComponentProps) => {
             projectUrl={projectUrl}
             repoUrl={repository.repo_url}
             openCaptureModal={openCaptureModal}
+            assignUserModalOpen={assignUserModalOpen}
+            openAssignUserModal={openAssignUserModal}
+            closeAssignUserModal={closeAssignUserModal}
           />
         ) : (
           <SpinnerWrapper />

@@ -36,6 +36,7 @@ interface OrgCardProps {
   repoUrl: string;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
+  assignUserModalOpen: boolean;
   handleAssignUser: ({
     type,
     assignee,
@@ -46,6 +47,8 @@ interface OrgCardProps {
   handleCheckForOrgChanges: (org: Org) => void;
   handleRefresh?: (org: Org) => void;
   openCaptureModal?: () => void;
+  openAssignUserModal: () => void;
+  closeAssignUserModal: () => void;
 }
 
 const OrgCard = ({
@@ -65,6 +68,9 @@ const OrgCard = ({
   handleRefresh,
   openCaptureModal,
   history,
+  assignUserModalOpen,
+  openAssignUserModal,
+  closeAssignUserModal,
 }: OrgCardProps & RouteComponentProps) => {
   const assignedUser =
     type === ORG_TYPES.QA ? task.assigned_qa : task.assigned_dev;
@@ -95,14 +101,14 @@ const OrgCard = ({
     org = null;
   }
 
-  // assign user modal related
-  const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
-  const openAssignUserModal = () => {
-    setAssignUserModalOpen(true);
-  };
-  const closeAssignUserModal = () => {
-    setAssignUserModalOpen(false);
-  };
+  // // assign user modal related
+  // const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
+  // const openAssignUserModal = () => {
+  //   setAssignUserModalOpen(true);
+  // };
+  // const closeAssignUserModal = () => {
+  //   setAssignUserModalOpen(false);
+  // };
 
   // refresh org modal
   const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);

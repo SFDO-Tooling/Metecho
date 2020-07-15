@@ -39,14 +39,20 @@ const OrgCards = ({
   projectUsers,
   projectUrl,
   repoUrl,
+  assignUserModalOpen,
   openCaptureModal,
+  openAssignUserModal,
+  closeAssignUserModal,
 }: {
   orgs: OrgsByTask;
   task: Task;
   projectUsers: GitHubUser[];
   projectUrl: string;
   repoUrl: string;
+  assignUserModalOpen: boolean;
   openCaptureModal: () => void;
+  openAssignUserModal: () => void;
+  closeAssignUserModal: () => void;
 }) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
@@ -245,6 +251,9 @@ const OrgCards = ({
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
           openCaptureModal={openCaptureModal}
+          assignUserModalOpen={assignUserModalOpen}
+          openAssignUserModal={openAssignUserModal}
+          closeAssignUserModal={closeAssignUserModal}
         />
         <OrgCard
           org={orgs[ORG_TYPES.QA]}
@@ -261,6 +270,9 @@ const OrgCards = ({
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
           handleRefresh={handleRefresh}
+          assignUserModalOpen={assignUserModalOpen}
+          openAssignUserModal={openAssignUserModal}
+          closeAssignUserModal={closeAssignUserModal}
         />
       </div>
       <ConnectModal

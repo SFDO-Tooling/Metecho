@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import React from 'react';
 
 import Steps from '@/components/steps';
+import { Step } from '@/components/steps/stepsItem';
 import { OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { ORG_TYPES, REVIEW_STATUSES } from '@/utils/constants';
@@ -10,9 +11,14 @@ import { getTaskCommits } from '@/utils/helpers';
 interface TaskStatusStepsProps {
   task: Task;
   orgs: OrgsByTask;
+  handleAction: (step: Step) => void;
 }
 
-const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
+const TaskStatusSteps = ({
+  task,
+  orgs,
+  handleAction,
+}: TaskStatusStepsProps) => {
   const hasDev = Boolean(task.assigned_dev);
   const hasTester = Boolean(task.assigned_qa);
   const hasReviewApproved =
@@ -38,6 +44,7 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
       // consider this complete if there are commits and no rejected review
       complete: hasDev || hasValidCommits,
       assignee: null,
+      action: 'assign-dev',
     },
     {
       label: i18n.t('Create a Scratch Org for development'),
@@ -118,7 +125,13 @@ const TaskStatusSteps = ({ task, orgs }: TaskStatusStepsProps) => {
     },
   ];
 
-  return <Steps steps={steps} title={i18n.t('Next Steps for this Task')} />;
+  return (
+    <Steps
+      steps={steps}
+      title={i18n.t('Next Steps for this Task')}
+      handleAction={handleAction}
+    />
+  );
 };
 
 export default TaskStatusSteps;
