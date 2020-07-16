@@ -115,6 +115,25 @@ class ProjectSlugAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     list_display = ("name", "project", "deleted_at")
     list_filter = (SoftDeletedListFilter,)
+    fields = (
+        ("name", "project"),
+        "description",
+        ("branch_name", "org_config_name"),
+        "commits",
+        "origin_sha",
+        "ms_commits",
+        "has_unmerged_commits",
+        ("pr_number", "pr_is_open"),
+        ("review_submitted_at", "review_valid", "review_status", "review_sha"),
+        ("reviewers", "get_all_users_in_commits"),
+        "status",
+        ("assigned_dev", "assigned_qa"),
+    )
+    readonly_fields = (
+        "commits",
+        "reviewers",
+        "get_all_users_in_commits",
+    )
 
 
 @admin.register(TaskSlug)

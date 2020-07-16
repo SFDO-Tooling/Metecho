@@ -415,7 +415,7 @@ class TestTask:
             },
         ]
 
-        assert task.get_all_users_in_commits() == expected
+        assert task.get_all_users_in_commits == expected
 
     def test_add_reviewer(self, task_factory):
         task = task_factory()

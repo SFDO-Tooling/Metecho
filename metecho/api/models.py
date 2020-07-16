@@ -671,6 +671,7 @@ class Task(
     # begin CreatePrMixin configuration:
     create_pr_event = "TASK_CREATE_PR"
 
+    @property
     def get_all_users_in_commits(self):
         ret = []
         for commit in self.commits:
