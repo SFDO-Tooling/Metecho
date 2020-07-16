@@ -92,6 +92,7 @@ The App will need the following permissions:
     - Email addresses: Read-only
 - Subscribe to events:
     - Pull request
+    - Pull request review
     - Push
 
 To enable logging in with GitHub, set the "User authorization callback URL" to
