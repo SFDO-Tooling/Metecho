@@ -115,28 +115,22 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   }
   // create org here...
-  // const createOrg = useCallback(
-  //   (type: OrgTypes) => {
-  //     setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
-  //     dispatch(
-  //       createObject({
-  //         objectType: OBJECT_TYPES.ORG,
-  //         data: { task: task?.id, org_type: type },
-  //       }),
-  //     ).finally(() => {
-  //       /* istanbul ignore else */
-  //       if (isMounted.current) {
-  //         setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
-  //       }
-  //     });
-  //   },
-  //   [dispatch, isCreatingOrg, isMounted, task?.id],
-  // );
   const createOrg = useCallback(
-    (type) => {
-      console.log(type, task);
+    (type: OrgTypes) => {
+      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
+      dispatch(
+        createObject({
+          objectType: OBJECT_TYPES.ORG,
+          data: { task: task?.id, org_type: type },
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
+        }
+      });
     },
-    [task],
+    [dispatch, isCreatingOrg, isMounted, task?.id],
   );
 
   const openCaptureModal = () => {
@@ -189,6 +183,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         openAssignUserModal();
         break;
       case 'Dev':
+        console.log(task); // @todo why is task undefined here?
         createOrg(action);
         break;
       case 'retrieve-changes':
