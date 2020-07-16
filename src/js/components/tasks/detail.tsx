@@ -184,7 +184,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     },
     [dispatch],
   );
-  const captureButtonAction = () => {
+  const captureAction = () => {
     /* istanbul ignore else */
     if (devOrg) {
       let shouldCheck = true;
@@ -219,7 +219,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           break;
         case 'retrieve-changes':
           if (readyToCaptureChanges) {
-            captureButtonAction();
+            captureAction();
           }
           break;
         case 'submit-changes':
@@ -239,7 +239,8 @@ const TaskDetail = (props: RouteComponentProps) => {
           break;
       }
     },
-    [createOrg, readyToCaptureChanges, captureButtonAction],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [createOrg, readyToCaptureChanges],
   );
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
@@ -397,7 +398,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           'slds-m-bottom_x-large': !readyToSubmit,
         })}
         variant={isPrimary ? 'brand' : 'outline-brand'}
-        onClick={captureButtonAction}
+        onClick={captureAction}
         disabled={fetchingChanges || currentlyFetching || currentlyCommitting}
       />
     );
