@@ -60,3 +60,5 @@ export const PROJECT_STATUSES = {
   REVIEW: 'Review' as const,
   MERGED: 'Merged' as const,
 };
+
+export const LIST_CHANNEL_ID = 'list';

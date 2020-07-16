@@ -399,7 +399,7 @@ class TaskSerializer(serializers.ModelSerializer):
                         new_user=new_user, originating_user_id=originating_user_id
                     )
                     reassigned_org = True
-                else:
+                elif org.deleted_at is None:
                     org.delete(originating_user_id=originating_user_id)
         elif not has_assigned_user:
             instance.scratchorg_set.active().filter(org_type=org_type).delete()

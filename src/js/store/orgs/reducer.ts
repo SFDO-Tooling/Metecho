@@ -140,6 +140,9 @@ const reducer = (
     case 'SCRATCH_ORG_DELETE_FAILED':
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
     case 'SCRATCH_ORG_COMMIT_CHANGES':
+    case 'SCRATCH_ORG_RECREATE':
+    case 'SCRATCH_ORG_REASSIGN':
+    case 'SCRATCH_ORG_REASSIGN_FAILED':
     case 'UPDATE_OBJECT_SUCCEEDED': {
       let maybeOrg;
       if (action.type === 'UPDATE_OBJECT_SUCCEEDED') {

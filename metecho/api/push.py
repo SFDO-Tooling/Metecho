@@ -36,6 +36,10 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_COMMIT_CHANGES_FAILED
         SCRATCH_ORG_REFRESH
         SCRATCH_ORG_REFRESH_FAILED
+        SCRATCH_ORG_REASSIGN
+        SCRATCH_ORG_REASSIGN_FAILED
+
+    scratchorg.list
         SCRATCH_ORG_RECREATE
 """
 from copy import deepcopy

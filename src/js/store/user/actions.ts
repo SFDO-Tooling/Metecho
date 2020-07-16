@@ -2,7 +2,7 @@ import { ThunkResult } from '@/store';
 import { reposRefreshed, reposRefreshing } from '@/store/repositories/actions';
 import { User } from '@/store/user/reducer';
 import apiFetch from '@/utils/api';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { LIST_CHANNEL_ID, OBJECT_TYPES } from '@/utils/constants';
 
 interface LoginAction {
   type: 'USER_LOGGED_IN';
@@ -58,6 +58,10 @@ export const login = (payload: User): LoginAction => {
     window.socket.subscribe({
       model: OBJECT_TYPES.USER,
       id: payload.id,
+    });
+    window.socket.subscribe({
+      model: OBJECT_TYPES.ORG,
+      id: LIST_CHANNEL_ID,
     });
   }
   return {

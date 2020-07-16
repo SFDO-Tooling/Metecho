@@ -1105,7 +1105,7 @@ class ScratchOrg(
     def queue_reassign(self, *, new_user, originating_user_id):
         from .jobs import user_reassign_job
 
-        self.currently_refreshing_org = True
+        self.currently_reassigning_user = True
         was_deleted = self.deleted_at is not None
         self.deleted_at = None
         self.save()
