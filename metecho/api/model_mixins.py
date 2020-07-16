@@ -185,17 +185,8 @@ class SoftDeleteQuerySet(models.QuerySet):
         return self.filter(deleted_at__isnull=False)
 
     def notify_soft_deleted(self):
-        if self.model.__name__ == "ScratchOrg":
-            for scratch_org in self:
-                try:
-                    scratch_org.queue_delete(originating_user_id=None)
-                except Exception:  # pragma: nocover
-                    # If there's a problem deleting it, it's probably
-                    # already been deleted.
-                    pass
-        else:
-            for instance in self:
-                instance.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
+        for instance in self:
+            instance.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
 
     def delete(self):
         soft_delete_child_class = getattr(self.model, "soft_delete_child_class", None)
@@ -226,15 +217,7 @@ class SoftDeleteMixin(models.Model):
     objects = SoftDeleteQuerySet.as_manager()
 
     def notify_soft_deleted(self):
-        if self.__class__.__name__ == "ScratchOrg":
-            try:
-                self.queue_delete(originating_user_id=None)
-            except Exception:  # pragma: nocover
-                # If there's a problem deleting it, it's probably
-                # already been deleted.
-                pass
-        else:
-            self.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
+        self.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
 
     def delete(self, *args, **kwargs):
         soft_delete_child_class = getattr(self, "soft_delete_child_class", None)

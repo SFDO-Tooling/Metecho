@@ -288,23 +288,25 @@ class TestTaskSerializer:
 
     def test_update__no_user(self, task_factory, scratch_org_factory):
         task = task_factory(commits=["abc123"])
-        scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
+        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
         data = {
             "name": task.name,
             "description": task.description,
             "project": str(task.project.id),
-            "assigned_dev": {"test": "id"},
-            "assigned_qa": {"test": "id"},
+            "assigned_dev": {},
+            "assigned_qa": {},
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
         }
         serializer = TaskSerializer(task, data=data)
         assert serializer.is_valid(), serializer.errors
-        with patch("metecho.api.models.ScratchOrg.queue_delete") as queue_delete:
-            serializer.update(task, serializer.validated_data)
-            assert queue_delete.call_args.kwargs == {"originating_user_id": None}
+        serializer.update(task, serializer.validated_data)
+        so1.refresh_from_db()
+        so2.refresh_from_db()
+        assert so1.deleted_at is not None
+        assert so2.deleted_at is not None
 
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")

@@ -372,13 +372,15 @@ class TaskSerializer(serializers.ModelSerializer):
     def _handle_reassign(
         self, type_, instance, validated_data, user, originating_user_id
     ):
-        if (
+        assigned_user_has_changed = (
             getattr(instance, f"assigned_{type_}")
             != validated_data[f"assigned_{type_}"]
-        ):
+        )
+        has_assigned_user = bool(validated_data[f"assigned_{type_}"])
+        org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
+        if assigned_user_has_changed and has_assigned_user:
             if validated_data.get(f"should_alert_{type_}"):
                 self.try_send_assignment_emails(instance, type_, validated_data, user)
-            org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
             reassigned_org = False
             # We want to consider soft-deleted orgs, too:
             orgs = [
@@ -399,6 +401,8 @@ class TaskSerializer(serializers.ModelSerializer):
                     reassigned_org = True
                 else:
                     org.delete(originating_user_id=originating_user_id)
+        elif not has_assigned_user:
+            instance.scratchorg_set.active().filter(org_type=org_type).delete()
 
     def _valid_reassign(self, type_, org, new_assignee):
         new_user = self.get_matching_assigned_user(
