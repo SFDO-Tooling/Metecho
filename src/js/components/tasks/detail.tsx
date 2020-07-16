@@ -154,6 +154,27 @@ const TaskDetail = (props: RouteComponentProps) => {
       case 'assign-dev':
         openAssignUserModal();
         break;
+      case 'create-dev-org':
+        console.log('create scratch org if user is assigned');
+        break;
+      case 'retrieve-changes':
+        console.log('open capture changes modal if user is assigned dev');
+        break;
+      case 'submit-changes':
+        console.log('open review modal is user is assigned dev');
+        break;
+      case 'assign-qa':
+        openAssignUserModal();
+        break;
+      case 'create-test-org':
+        console.log('create test org if user is assigned tester');
+        break;
+      case 'refresh-test-org':
+        console.log('refresh test orf if user is assigned tester');
+        break;
+      case 'submit-review':
+        console.log('open review modal if user us assigned tester');
+        break;
     }
   }, []);
   // When capture changes has been triggered, wait until org has been refreshed
