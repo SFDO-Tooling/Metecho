@@ -32,7 +32,7 @@ class PrBranchSerializer(serializers.Serializer):
 
 
 class PrSerializer(serializers.Serializer):
-    merged = serializers.BooleanField()
+    merged = serializers.BooleanField(required=False)
     head = PrBranchSerializer()
     base = PrBranchSerializer()
     number = serializers.IntegerField()

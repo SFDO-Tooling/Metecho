@@ -83,7 +83,6 @@ class HookView(APIView):
             "push": PushHookSerializer,
             "pull_request": PrHookSerializer,
             "pull_request_review": PrReviewHookSerializer,
-            "pull_request_review_comment": PrReviewHookSerializer,
         }
         serializer_class = serializers.get(request.META.get("HTTP_X_GITHUB_EVENT"))
         if serializer_class is None:
