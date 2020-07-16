@@ -132,7 +132,8 @@ const TaskDetail = (props: RouteComponentProps) => {
     },
     [dispatch, isCreatingOrg, isMounted, task?.id],
   );
-
+  const readyToCaptureChanges =
+    userIsOwner && (orgHasChanges || devOrg?.has_been_visited);
   const openCaptureModal = () => {
     setCaptureModalOpen(true);
     setSubmitModalOpen(false);
@@ -176,36 +177,70 @@ const TaskDetail = (props: RouteComponentProps) => {
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(false);
   };
-  const handleStepAction = useCallback((step: Step) => {
-    const action = step.action;
-    switch (action) {
-      case 'assign-dev':
-        openAssignUserModal();
-        break;
-      case 'Dev':
-        console.log(task); // @todo why is task undefined here?
-        createOrg(action);
-        break;
-      case 'retrieve-changes':
-        console.log('open capture changes modal if user is assigned dev');
-        break;
-      case 'submit-changes':
-        console.log('open review modal is user is assigned dev');
-        break;
-      case 'assign-qa':
-        openAssignUserModal();
-        break;
-      case 'create-test-org':
-        console.log('create test org if user is assigned tester');
-        break;
-      case 'refresh-test-org':
-        console.log('refresh test orf if user is assigned tester');
-        break;
-      case 'submit-review':
-        console.log('open review modal if user us assigned tester');
-        break;
+
+  const doRefetchOrg = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
+  const captureButtonAction = () => {
+    /* istanbul ignore else */
+    if (devOrg) {
+      let shouldCheck = true;
+      const checkAfterMinutes = window.GLOBALS.ORG_RECHECK_MINUTES;
+      if (
+        orgHasChanges &&
+        devOrg.last_checked_unsaved_changes_at !== null &&
+        typeof checkAfterMinutes === 'number'
+      ) {
+        const lastChecked = parseISO(devOrg.last_checked_unsaved_changes_at);
+        const shouldCheckAfter = addMinutes(lastChecked, checkAfterMinutes);
+        shouldCheck = isPast(shouldCheckAfter);
+      }
+      if (shouldCheck) {
+        setFetchingChanges(true);
+        doRefetchOrg(devOrg);
+      } else {
+        openCaptureModal();
+      }
     }
-  }, []);
+  };
+  const handleStepAction = useCallback(
+    (step: Step) => {
+      const action = step.action;
+      switch (action) {
+        case 'assign-dev':
+          openAssignUserModal();
+          break;
+        case 'Dev':
+          // @todo why is task undefined here?
+          createOrg(action);
+          break;
+        case 'retrieve-changes':
+          if (readyToCaptureChanges) {
+            captureButtonAction();
+          }
+          break;
+        case 'submit-changes':
+          console.log('open review modal is user is assigned dev');
+          break;
+        case 'assign-qa':
+          openAssignUserModal();
+          break;
+        case 'create-test-org':
+          console.log('create test org if user is assigned tester');
+          break;
+        case 'refresh-test-org':
+          console.log('refresh test orf if user is assigned tester');
+          break;
+        case 'submit-review':
+          console.log('open review modal if user us assigned tester');
+          break;
+      }
+    },
+    [createOrg, readyToCaptureChanges, captureButtonAction],
+  );
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
     const changesFetched =
@@ -226,13 +261,6 @@ const TaskDetail = (props: RouteComponentProps) => {
       setEditModalOpen(false);
     }
   }, [task, taskSlug]);
-
-  const doRefetchOrg = useCallback(
-    (org: Org) => {
-      dispatch(refetchOrg(org));
-    },
-    [dispatch],
-  );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -335,29 +363,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   let captureButton: React.ReactNode = null;
-  if (userIsOwner && (orgHasChanges || devOrg?.has_been_visited)) {
-    const captureButtonAction = () => {
-      /* istanbul ignore else */
-      if (devOrg) {
-        let shouldCheck = true;
-        const checkAfterMinutes = window.GLOBALS.ORG_RECHECK_MINUTES;
-        if (
-          orgHasChanges &&
-          devOrg.last_checked_unsaved_changes_at !== null &&
-          typeof checkAfterMinutes === 'number'
-        ) {
-          const lastChecked = parseISO(devOrg.last_checked_unsaved_changes_at);
-          const shouldCheckAfter = addMinutes(lastChecked, checkAfterMinutes);
-          shouldCheck = isPast(shouldCheckAfter);
-        }
-        if (shouldCheck) {
-          setFetchingChanges(true);
-          doRefetchOrg(devOrg);
-        } else {
-          openCaptureModal();
-        }
-      }
-    };
+  if (readyToCaptureChanges) {
     let captureButtonText: JSX.Element = i18n.t(
       'Check for Unretrieved Changes',
     );
