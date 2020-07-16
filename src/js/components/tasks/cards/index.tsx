@@ -9,7 +9,7 @@ import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
 import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { createObject, deleteObject, updateObject } from '@/store/actions';
+import { deleteObject, updateObject } from '@/store/actions';
 import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
@@ -23,12 +23,12 @@ export interface AssignedUserTracker {
   shouldAlertAssignee: boolean;
 }
 
-interface OrgTypeTracker {
+export interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
   [ORG_TYPES.QA]: boolean;
 }
 
-const OrgTypeTrackerDefault = {
+export const OrgTypeTrackerDefault = {
   [ORG_TYPES.DEV]: false,
   [ORG_TYPES.QA]: false,
 };
@@ -40,9 +40,11 @@ const OrgCards = ({
   projectUrl,
   repoUrl,
   assignUserModalOpen,
+  isCreatingOrg,
   openCaptureModal,
   openAssignUserModal,
   closeAssignUserModal,
+  createOrg,
 }: {
   orgs: OrgsByTask;
   task: Task;
@@ -50,9 +52,11 @@ const OrgCards = ({
   projectUrl: string;
   repoUrl: string;
   assignUserModalOpen: boolean;
+  isCreatingOrg: OrgTypeTracker;
   openCaptureModal: () => void;
   openAssignUserModal: () => void;
   closeAssignUserModal: () => void;
+  createOrg: (type: OrgTypes) => void;
 }) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
@@ -67,9 +71,6 @@ const OrgCards = ({
     isWaitingToRemoveUser,
     setIsWaitingToRemoveUser,
   ] = useState<AssignedUserTracker | null>(null);
-  const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
-    OrgTypeTrackerDefault,
-  );
   const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
     OrgTypeTrackerDefault,
   );
@@ -105,24 +106,6 @@ const OrgCards = ({
       });
     },
     [dispatch, isDeletingOrg, isMounted],
-  );
-
-  const createOrg = useCallback(
-    (type: OrgTypes) => {
-      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
-      dispatch(
-        createObject({
-          objectType: OBJECT_TYPES.ORG,
-          data: { task: task.id, org_type: type },
-        }),
-      ).finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
-        }
-      });
-    },
-    [dispatch, isCreatingOrg, isMounted, task.id],
   );
 
   const assignUser = useCallback(
@@ -254,6 +237,7 @@ const OrgCards = ({
           assignUserModalOpen={assignUserModalOpen}
           openAssignUserModal={openAssignUserModal}
           closeAssignUserModal={closeAssignUserModal}
+          createOrg={createOrg}
         />
         <OrgCard
           org={orgs[ORG_TYPES.QA]}
@@ -273,6 +257,7 @@ const OrgCards = ({
           assignUserModalOpen={assignUserModalOpen}
           openAssignUserModal={openAssignUserModal}
           closeAssignUserModal={closeAssignUserModal}
+          createOrg={createOrg}
         />
       </div>
       <ConnectModal

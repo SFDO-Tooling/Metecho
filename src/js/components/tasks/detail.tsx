@@ -11,7 +11,10 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
 import CaptureModal from '@/components/tasks/capture';
-import OrgCards from '@/components/tasks/cards';
+import OrgCards, {
+  OrgTypeTracker,
+  OrgTypeTrackerDefault,
+} from '@/components/tasks/cards';
 import TaskStatusPath from '@/components/tasks/path';
 import TaskStatusSteps from '@/components/tasks/steps';
 import {
@@ -30,8 +33,10 @@ import {
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
+  useIsMounted,
 } from '@/components/utils';
 import { AppState, ThunkDispatch } from '@/store';
+import { createObject } from '@/store/actions';
 import { refetchOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
@@ -40,6 +45,7 @@ import { selectUserState } from '@/store/user/selectors';
 import {
   OBJECT_TYPES,
   ORG_TYPES,
+  OrgTypes,
   REVIEW_STATUSES,
   TASK_STATUSES,
 } from '@/utils/constants';
@@ -55,6 +61,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
+  const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
+    OrgTypeTrackerDefault,
+  );
+  const isMounted = useIsMounted();
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -104,6 +114,30 @@ const TaskDetail = (props: RouteComponentProps) => {
       hasOrgs = true;
     }
   }
+  // create org here...
+  // const createOrg = useCallback(
+  //   (type: OrgTypes) => {
+  //     setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
+  //     dispatch(
+  //       createObject({
+  //         objectType: OBJECT_TYPES.ORG,
+  //         data: { task: task?.id, org_type: type },
+  //       }),
+  //     ).finally(() => {
+  //       /* istanbul ignore else */
+  //       if (isMounted.current) {
+  //         setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
+  //       }
+  //     });
+  //   },
+  //   [dispatch, isCreatingOrg, isMounted, task?.id],
+  // );
+  const createOrg = useCallback(
+    (type) => {
+      console.log(type, task);
+    },
+    [task],
+  );
 
   const openCaptureModal = () => {
     setCaptureModalOpen(true);
@@ -154,8 +188,8 @@ const TaskDetail = (props: RouteComponentProps) => {
       case 'assign-dev':
         openAssignUserModal();
         break;
-      case 'create-dev-org':
-        console.log('create scratch org if user is assigned');
+      case 'Dev':
+        createOrg(action);
         break;
       case 'retrieve-changes':
         console.log('open capture changes modal if user is assigned dev');
@@ -434,8 +468,10 @@ const TaskDetail = (props: RouteComponentProps) => {
             repoUrl={repository.repo_url}
             openCaptureModal={openCaptureModal}
             assignUserModalOpen={assignUserModalOpen}
+            isCreatingOrg={isCreatingOrg}
             openAssignUserModal={openAssignUserModal}
             closeAssignUserModal={closeAssignUserModal}
+            createOrg={createOrg}
           />
         ) : (
           <SpinnerWrapper />

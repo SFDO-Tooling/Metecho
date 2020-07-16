@@ -49,6 +49,7 @@ interface OrgCardProps {
   openCaptureModal?: () => void;
   openAssignUserModal: () => void;
   closeAssignUserModal: () => void;
+  createOrg: (type: OrgTypes) => void;
 }
 
 const OrgCard = ({

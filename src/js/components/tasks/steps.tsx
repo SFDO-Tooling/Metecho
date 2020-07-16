@@ -58,7 +58,7 @@ const TaskStatusSteps = ({
       // consider this complete if there are commits and no rejected review
       complete: (hasDev && hasDevOrg) || hasValidCommits,
       assignee: task.assigned_dev,
-      action: userIsDev && 'create-dev-org', // if user is assigned dev
+      action: userIsDev ? 'Dev' : undefined, // if user is assigned dev
     },
     {
       label: i18n.t('Make changes in Dev Org'),
