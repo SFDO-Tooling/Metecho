@@ -69,7 +69,7 @@ const TaskStatusSteps = ({
       // (without rejected review)
       complete: Boolean(devOrg?.has_unsaved_changes || hasValidCommits),
       assignee: task.assigned_dev,
-      link: devOrg?.url, // if user is assigned_dev
+      link: userIsDev ? devOrg?.url : undefined, // if user is assigned_dev
     },
     {
       label: i18n.t('Retrieve changes from Dev Org'),
