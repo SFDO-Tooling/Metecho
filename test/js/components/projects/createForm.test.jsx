@@ -91,7 +91,7 @@ describe('<CreateProjectModal/>', () => {
       });
     });
 
-    describe('single create success', () => {
+    describe('success', () => {
       test('redirects to project detail', async () => {
         createObject.mockReturnValueOnce(() =>
           Promise.resolve({
@@ -120,37 +120,6 @@ describe('<CreateProjectModal/>', () => {
         expect(context.url).toEqual(
           routes.project_detail('repository-1', 'name-of-project'),
         );
-      });
-    });
-
-    describe('batch create success', () => {
-      test('shows success msg for 3 seconds', async () => {
-        jest.useFakeTimers();
-        createObject.mockReturnValueOnce(() =>
-          Promise.resolve({
-            type: 'CREATE_OBJECT_SUCCEEDED',
-            payload: {
-              objectType: 'project',
-              object: {
-                id: 'project1',
-                slug: 'name-of-project',
-                name: 'Name of Project',
-                description: '',
-                repository: 'r1',
-              },
-            },
-          }),
-        );
-        const { getByText, getByLabelText, queryByText } = setup();
-        const submit = getByText('Create & New');
-        const nameInput = getByLabelText('*Project Name');
-        fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
-        fireEvent.click(submit);
-        // expect.assertions(2);
-        await createObject;
-        expect(getByText('A project was successfully created!')).toBeVisible();
-        jest.runAllTimers();
-        expect(queryByText('A task was successfully created!')).toBeNull();
       });
     });
 

@@ -1,6 +1,5 @@
 {
   "404": "404",
-  "A project was successfully created!": "A project was successfully created!",
   "A task was successfully added!": "A task was successfully added!",
   "About": "About",
   "Active": "Active",
@@ -60,7 +59,6 @@
   "Continue": "Continue",
   "Copyright 2019–2020 Salesforce.org. All rights reserved.": "Copyright 2019–2020 Salesforce.org. All rights reserved.",
   "Create": "Create",
-  "Create & New": "Create & New",
   "Create Org": "Create Org",
   "Create Repository": "Create Repository",
   "Create a Project": "Create a Project",
