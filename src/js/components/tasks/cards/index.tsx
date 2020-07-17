@@ -10,7 +10,7 @@ import { ConnectionInfoModal } from '@/components/user/info';
 import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
+import { refetchOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
@@ -45,6 +45,7 @@ const OrgCards = ({
   openAssignUserModal,
   closeAssignUserModal,
   createOrg,
+  doRefreshOrg,
 }: {
   orgs: OrgsByTask;
   task: Task;
@@ -57,6 +58,7 @@ const OrgCards = ({
   openAssignUserModal: () => void;
   closeAssignUserModal: () => void;
   createOrg: (type: OrgTypes) => void;
+  doRefreshOrg: (org: Org) => void;
 }) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
@@ -85,9 +87,9 @@ const OrgCards = ({
 
   const handleRefresh = useCallback(
     (org: Org) => {
-      dispatch(refreshOrg(org));
+      doRefreshOrg(org);
     },
-    [dispatch],
+    [doRefreshOrg],
   );
 
   const deleteOrg = useCallback(

@@ -103,7 +103,7 @@ const TaskStatusSteps = ({
       complete: (hasTester && hasTestOrg) || task.review_valid,
       hidden: testOrgOutOfDate,
       assignee: task.assigned_qa,
-      action: 'create-test-org', // if the user is the assigned dev
+      action: userIsTester ? 'QA' : undefined,
     },
     {
       label: i18n.t('Refresh Test Org'),
@@ -111,7 +111,7 @@ const TaskStatusSteps = ({
       complete: false,
       hidden: !testOrgOutOfDate,
       assignee: task.assigned_qa,
-      action: 'refresh-test-org', // if user is the assigned tester
+      action: userIsTester ? 'refresh-test-org' : undefined, // if user is the assigned tester
     },
     {
       label: i18n.t('Test changes in Test Org'),
@@ -119,7 +119,10 @@ const TaskStatusSteps = ({
       complete:
         Boolean(hasTestOrg && testOrg?.has_been_visited) || task.review_valid,
       assignee: task.assigned_qa,
-      link: testOrg?.url, // link to org if user is assigned tester
+      link:
+        testOrg && userIsTester
+          ? window.api_urls.scratch_org_redirect(testOrg.id)
+          : undefined,
     },
     {
       label: i18n.t('Submit a review'),

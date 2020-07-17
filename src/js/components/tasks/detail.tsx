@@ -37,7 +37,7 @@ import {
 } from '@/components/utils';
 import { AppState, ThunkDispatch } from '@/store';
 import { createObject } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
@@ -206,6 +206,13 @@ const TaskDetail = (props: RouteComponentProps) => {
       }
     }
   };
+
+  const doRefreshOrg = useCallback(
+    (...args: Org[]) => {
+      dispatch(refreshOrg(args[0]));
+    },
+    [dispatch],
+  );
   const handleStepAction = useCallback(
     (step: Step) => {
       const action = step.action;
@@ -223,16 +230,16 @@ const TaskDetail = (props: RouteComponentProps) => {
           }
           break;
         case 'submit-changes':
-          console.log('open review modal is user is assigned dev');
+          openSubmitModal();
           break;
         case 'assign-qa':
           openAssignUserModal();
           break;
-        case 'create-test-org':
-          console.log('create test org if user is assigned tester');
+        case 'QA':
+          createOrg(action);
           break;
         case 'refresh-test-org':
-          console.log('refresh test orf if user is assigned tester');
+          doRefreshOrg();
           break;
         case 'submit-review':
           console.log('open review modal if user us assigned tester');
@@ -474,6 +481,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             openAssignUserModal={openAssignUserModal}
             closeAssignUserModal={closeAssignUserModal}
             createOrg={createOrg}
+            doRefreshOrg={doRefreshOrg}
           />
         ) : (
           <SpinnerWrapper />
