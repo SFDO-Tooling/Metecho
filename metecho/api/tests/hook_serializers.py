@@ -3,7 +3,11 @@ from unittest.mock import patch
 import pytest
 from rest_framework.exceptions import NotFound
 
-from ..hook_serializers import PrHookSerializer, PushHookSerializer
+from ..hook_serializers import (
+    PrHookSerializer,
+    PrReviewHookSerializer,
+    PushHookSerializer,
+)
 from ..models import TASK_STATUSES
 
 
@@ -50,6 +54,7 @@ class TestPrHookSerializer:
                 "merged": False,
                 "head": {"ref": "head-ref", "sha": "head-sha"},
                 "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
             },
             "repository": {"id": 123},
         }
@@ -67,6 +72,7 @@ class TestPrHookSerializer:
                 "merged": True,
                 "head": {"ref": "head-ref", "sha": "head-sha"},
                 "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
             },
             "repository": {"id": 123},
         }
@@ -90,6 +96,7 @@ class TestPrHookSerializer:
                 "merged": True,
                 "head": {"ref": "head-ref", "sha": "head-sha"},
                 "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
             },
             "repository": {"id": 123},
         }
@@ -114,6 +121,7 @@ class TestPrHookSerializer:
                 "merged": False,
                 "head": {"ref": "head-ref", "sha": "head-sha"},
                 "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
             },
             "repository": {"id": 123},
         }
@@ -139,6 +147,7 @@ class TestPrHookSerializer:
                 "merged": False,
                 "head": {"ref": "head-ref", "sha": "head-sha"},
                 "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
             },
             "repository": {"id": 123},
         }
@@ -162,6 +171,7 @@ class TestPrHookSerializer:
                 "merged": True,
                 "head": {"ref": "head-ref", "sha": "head-sha"},
                 "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
             },
             "repository": {"id": 123},
         }
@@ -186,6 +196,7 @@ class TestPrHookSerializer:
                 "merged": False,
                 "head": {"ref": "head-ref", "sha": "head-sha"},
                 "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
             },
             "repository": {"id": 123},
         }
@@ -208,6 +219,7 @@ class TestPrHookSerializer:
                 "merged": False,
                 "head": {"ref": "head-ref", "sha": "head-sha"},
                 "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
             },
             "repository": {"id": 123},
         }
@@ -217,3 +229,62 @@ class TestPrHookSerializer:
 
         project.refresh_from_db()
         assert project.pr_is_open
+
+
+@pytest.mark.django_db
+class TestPrReviewHookSerializer:
+    def test_no_repository(self):
+        data = {
+            "sender": {"login": "login", "avatar_url": "https://example.com"},
+            "repository": {"id": 123},
+            "pull_request": {
+                "merged": False,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
+            },
+        }
+        serializer = PrReviewHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+
+        with pytest.raises(NotFound):
+            serializer.process_hook()
+
+    def test_no_task(self, repository_factory):
+        repository_factory(repo_id=123)
+        data = {
+            "sender": {"login": "login", "avatar_url": "https://example.com"},
+            "repository": {"id": 123},
+            "pull_request": {
+                "merged": False,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
+            },
+        }
+        serializer = PrReviewHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+
+        with pytest.raises(NotFound):
+            serializer.process_hook()
+
+    def test_good(self, task_factory):
+        task = task_factory(project__repository__repo_id=123, pr_number=123)
+        data = {
+            "sender": {"login": "login", "avatar_url": "https://example.com"},
+            "repository": {"id": 123},
+            "pull_request": {
+                "merged": False,
+                "head": {"ref": "head-ref", "sha": "head-sha"},
+                "base": {"ref": "base-ref", "sha": "base-sha"},
+                "number": 123,
+            },
+        }
+        serializer = PrReviewHookSerializer(data=data)
+        assert serializer.is_valid(), serializer.errors
+
+        serializer.process_hook()
+        task.refresh_from_db()
+        assert task.reviewers == [
+            {"login": "login", "avatar_url": "https://example.com"},
+        ]
