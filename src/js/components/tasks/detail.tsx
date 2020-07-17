@@ -242,7 +242,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           doRefreshOrg();
           break;
         case 'submit-review':
-          console.log('open review modal if user us assigned tester');
+          openSubmitModal();
           break;
       }
     },

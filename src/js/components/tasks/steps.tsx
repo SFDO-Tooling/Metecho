@@ -120,7 +120,7 @@ const TaskStatusSteps = ({
         Boolean(hasTestOrg && testOrg?.has_been_visited) || task.review_valid,
       assignee: task.assigned_qa,
       link:
-        testOrg && userIsTester
+        testOrg && userIsTester && !testOrgOutOfDate
           ? window.api_urls.scratch_org_redirect(testOrg.id)
           : undefined,
     },
@@ -135,7 +135,7 @@ const TaskStatusSteps = ({
         !task.review_valid,
       complete: task.review_valid,
       assignee: task.assigned_qa,
-      action: 'submit-review',
+      action: userIsTester ? 'submit-review' : undefined,
     },
     {
       label: i18n.t('Merge pull request on GitHub'),
