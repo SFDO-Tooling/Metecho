@@ -111,7 +111,7 @@ const TaskStatusSteps = ({
       complete: false,
       hidden: !testOrgOutOfDate,
       assignee: task.assigned_qa,
-      action: userIsTester ? 'refresh-test-org' : undefined, // if user is the assigned tester
+      action: userIsTester ? 'refresh-test-org' : undefined,
     },
     {
       label: i18n.t('Test changes in Test Org'),
