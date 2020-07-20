@@ -4,11 +4,6 @@ ARG BUILD_ENV=development
 
 # Env setup:
 ENV PYTHONPATH /app
-ENV DATABASE_URL postgres://metecho@postgres:5432/metecho
-# A sample key, not to be used for realsies:
-ENV DB_ENCRYPTION_KEY 'IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE='
-ENV DJANGO_HASHID_SALT 'sample hashid salt'
-ENV DJANGO_SECRET_KEY 'sample secret key'
 ENV DJANGO_SETTINGS_MODULE config.settings.production
 
 # Python server setup:
@@ -35,6 +30,11 @@ RUN yarn install --check-files
 
 # Avoid building prod assets in development
 RUN if [ "${BUILD_ENV}" = "production" ] ; then yarn prod ; else mkdir -p dist/prod ; fi
-RUN python manage.py collectstatic --noinput
+RUN DATABASE_URL="" \
+  # Sample keys, not to be used for realsies:
+  DB_ENCRYPTION_KEY="IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE=" \
+  DJANGO_HASHID_SALT="sample hashid salt" \
+  DJANGO_SECRET_KEY="sample secret key" \
+  python manage.py collectstatic --noinput
 
 CMD /start-server.sh
