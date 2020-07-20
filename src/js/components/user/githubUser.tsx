@@ -330,21 +330,34 @@ export const AssignUserModal = ({
 
   const [selection, setSelection] = useState<GitHubUser | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
+  const [autoToggle, setAutoToggle] = useState(false);
   const handleAlertAssignee = (
     event: React.FormEvent<HTMLFormElement>,
     { checked }: { checked: boolean },
   ) => {
     setShouldAlertAssignee(checked);
+    if (event.currentTarget.id) {
+      // do automatically toggle sending an alert if user explicity says no thanks
+      setAutoToggle(shouldAlertAssignee);
+    }
   };
-  const handleAssigneeSelection = (user: GitHubUser) => {
+  const handleAssigneeSelection = (
+    event: React.FormEvent<HTMLFormElement>,
+    user: GitHubUser,
+  ) => {
     const currentUserSelected = user.login === currentUser.username;
-    setShouldAlertAssignee(!currentUserSelected);
     setSelection(user);
+    if (currentUserSelected) {
+      handleAlertAssignee(event, { checked: false });
+    } else if (!autoToggle) {
+      handleAlertAssignee(event, { checked: true });
+    }
   };
   const handleClose = () => {
     onRequestClose();
     setSelection(null);
     setShouldAlertAssignee(true);
+    setAutoToggle(false);
   };
   const handleSave = () => {
     setUser(selection, shouldAlertAssignee);
@@ -386,6 +399,7 @@ export const AssignUserModal = ({
           [
             <Checkbox
               key="alert"
+              id="alert"
               labels={{ label: checkboxLabel }}
               className="slds-float_left slds-p-top_xx-small"
               name={alertType}
@@ -435,7 +449,9 @@ export const AssignUserModal = ({
                 <GitHubUserButton
                   user={user}
                   isSelected={selection === user}
-                  onClick={() => handleAssigneeSelection(user)}
+                  onClick={(event: React.FormEvent<HTMLFormElement>) =>
+                    handleAssigneeSelection(event, user)
+                  }
                 />
               </li>
             ))}
