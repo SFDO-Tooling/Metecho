@@ -104,6 +104,14 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
       heading={`${i18n.t('Add a Task for')} ${project.name}`}
       onRequestClose={closeModal}
       footer={[
+        success && (
+          <span
+            key="success"
+            className="slds-text-color_success slds-float_left slds-p-top_xx-small ms-transition-out"
+          >
+            {i18n.t('A task was successfully added!')}
+          </span>
+        ),
         <Button
           key="cancel"
           label={i18n.t('Cancel')}
@@ -138,11 +146,6 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
       >
         {isOpen && (
           <>
-            {success && (
-              <span className="slds-text-color_success ms-transition-out">
-                {i18n.t('A task was successfully added!')}
-              </span>
-            )}
             <Input
               id="task-name"
               label={i18n.t('Task Name')}
