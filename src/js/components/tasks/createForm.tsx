@@ -107,7 +107,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
         success && (
           <span
             key="success"
-            className="slds-text-color_success slds-float_left slds-p-top_xx-small ms-transition-out"
+            className="slds-text-color_success slds-float_left slds-p-left_x-small slds-p-top_xx-small ms-transition-out"
           >
             {i18n.t('A task was successfully added!')}
           </span>
