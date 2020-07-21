@@ -2,10 +2,11 @@ import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import ProjectForm from '@/components/projects/createForm';
+import CreateProjectModal from '@/components/projects/createForm';
 import ProjectTable from '@/components/projects/table';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
@@ -26,6 +27,7 @@ import routes from '@/utils/routes';
 
 const RepositoryDetail = (props: RouteComponentProps) => {
   const [fetchingProjects, setFetchingProjects] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
@@ -74,6 +76,11 @@ const RepositoryDetail = (props: RouteComponentProps) => {
       });
     }
   };
+  // create modal related
+  const openCreateModal = () => setCreateModalOpen(true);
+  const closeCreateModal = () => setCreateModalOpen(false);
+
+  const hasProjects = projects && projects.projects.length > 0;
 
   return (
     <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
@@ -91,16 +98,29 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {projects.projects.length
+              {hasProjects
                 ? `${i18n.t('Projects for')} ${repository.name}`
                 : `${i18n.t('Create a Project for')} ${repository.name}`}
             </h2>
-            <ProjectForm
-              user={user}
-              repository={repository}
-              hasProjects={projects.projects.length > 0}
+            {!hasProjects && (
+              <p className="slds-m-bottom_large">
+                <Trans i18nKey="createProjectHelpText">
+                  Projects in Metecho are the high-level features that can be
+                  broken down into smaller parts by creating Tasks. You can
+                  create a new project or create a project based on an existing
+                  GitHub branch. Every project requires a unique project name,
+                  which becomes the branch name in GitHub unless you choose to
+                  use an existing branch.
+                </Trans>
+              </p>
+            )}
+            <Button
+              label={i18n.t('Create a Project')}
+              variant="brand"
+              onClick={openCreateModal}
+              className="slds-m-bottom_large"
             />
-            {Boolean(projects.projects.length) && (
+            {hasProjects && (
               <>
                 <ProjectTable
                   projects={projects.projects}
@@ -124,6 +144,12 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             )}
           </>
         )}
+        <CreateProjectModal
+          user={user}
+          repository={repository}
+          isOpen={createModalOpen}
+          closeCreateModal={closeCreateModal}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );

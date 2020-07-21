@@ -371,7 +371,7 @@ export const AssignUserModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      onRequestClose={onRequestClose}
+      onRequestClose={handleClose}
       heading={heading}
       directional
       tagline={
