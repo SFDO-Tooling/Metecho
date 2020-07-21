@@ -41,6 +41,7 @@ const OrgCards = ({
   repoUrl,
   assignUserModalOpen,
   isCreatingOrg,
+  currentOrgType,
   openCaptureModal,
   openAssignUserModal,
   closeAssignUserModal,
@@ -54,8 +55,9 @@ const OrgCards = ({
   repoUrl: string;
   assignUserModalOpen: boolean;
   isCreatingOrg: OrgTypeTracker;
+  currentOrgType: OrgTypes;
   openCaptureModal: () => void;
-  openAssignUserModal: () => void;
+  openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
   createOrg: (type: OrgTypes) => void;
   doRefreshOrg: (org: Org) => void;
@@ -185,6 +187,12 @@ const OrgCards = ({
     handleCreate = user.is_devhub_enabled ? createOrg : openInfoModal;
   }
 
+  const openAssignDevModal = () => {
+    openAssignUserModal(ORG_TYPES.DEV);
+  };
+  const openAssignTesterModal = () => {
+    openAssignUserModal(ORG_TYPES.QA);
+  };
   const devOrg = orgs[ORG_TYPES.DEV];
 
   // When dev org delete has been triggered, wait until it has been refreshed...
@@ -237,9 +245,10 @@ const OrgCards = ({
           handleCheckForOrgChanges={checkForOrgChanges}
           openCaptureModal={openCaptureModal}
           assignUserModalOpen={assignUserModalOpen}
-          openAssignUserModal={openAssignUserModal}
+          openAssignUserModal={openAssignDevModal}
           closeAssignUserModal={closeAssignUserModal}
           createOrg={createOrg}
+          currentOrgType={currentOrgType}
         />
         <OrgCard
           org={orgs[ORG_TYPES.QA]}
@@ -257,9 +266,10 @@ const OrgCards = ({
           handleCheckForOrgChanges={checkForOrgChanges}
           handleRefresh={handleRefresh}
           assignUserModalOpen={assignUserModalOpen}
-          openAssignUserModal={openAssignUserModal}
+          openAssignUserModal={openAssignTesterModal}
           closeAssignUserModal={closeAssignUserModal}
           createOrg={createOrg}
+          currentOrgType={currentOrgType}
         />
       </div>
       <ConnectModal

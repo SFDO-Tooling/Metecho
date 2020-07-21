@@ -319,7 +319,7 @@ export const AssignUserModal = ({
 }: {
   allUsers: GitHubUser[];
   selectedUser: GitHubUser | null;
-  orgType: OrgTypes;
+  orgType: OrgTypes | null;
   isOpen: boolean;
   emptyMessageText: string;
   emptyMessageAction: () => void;

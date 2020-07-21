@@ -64,6 +64,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
     OrgTypeTrackerDefault,
   );
+  const [currentOrgType, setCurrentOrgType] = useState<OrgTypes>(ORG_TYPES.DEV);
   const isMounted = useIsMounted();
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
@@ -170,11 +171,13 @@ const TaskDetail = (props: RouteComponentProps) => {
     setDeleteModalOpen(false);
   };
   // assign user modal related
-  const openAssignUserModal = () => {
+  const openAssignUserModal = (type: OrgTypes) => {
+    setCurrentOrgType(type);
     setAssignUserModalOpen(true);
   };
 
   const closeAssignUserModal = () => {
+    setCurrentOrgType(ORG_TYPES.DEV);
     setAssignUserModalOpen(false);
   };
 
@@ -218,7 +221,7 @@ const TaskDetail = (props: RouteComponentProps) => {
       const action = step.action;
       switch (action) {
         case 'assign-dev':
-          openAssignUserModal();
+          openAssignUserModal(ORG_TYPES.DEV);
           break;
         case 'Dev':
           // @todo why is task undefined here?
@@ -233,7 +236,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           openSubmitModal();
           break;
         case 'assign-qa':
-          openAssignUserModal();
+          openAssignUserModal(ORG_TYPES.QA);
           break;
         case 'QA':
           createOrg(action);
@@ -482,6 +485,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             closeAssignUserModal={closeAssignUserModal}
             createOrg={createOrg}
             doRefreshOrg={doRefreshOrg}
+            currentOrgType={currentOrgType}
           />
         ) : (
           <SpinnerWrapper />

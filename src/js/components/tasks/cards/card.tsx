@@ -37,6 +37,7 @@ interface OrgCardProps {
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
   assignUserModalOpen: boolean;
+  currentOrgType: OrgTypes;
   handleAssignUser: ({
     type,
     assignee,
@@ -62,6 +63,7 @@ const OrgCard = ({
   repoUrl,
   isCreatingOrg,
   isDeletingOrg,
+  currentOrgType,
   handleAssignUser,
   handleCreate,
   handleDelete,
@@ -102,15 +104,6 @@ const OrgCard = ({
     org = null;
   }
 
-  // // assign user modal related
-  // const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
-  // const openAssignUserModal = () => {
-  //   setAssignUserModalOpen(true);
-  // };
-  // const closeAssignUserModal = () => {
-  //   setAssignUserModalOpen(false);
-  // };
-
   // refresh org modal
   const [refreshOrgModalOpen, setRefreshOrgModalOpen] = useState(false);
   const openRefreshOrgModal = () => {
@@ -130,9 +123,9 @@ const OrgCard = ({
 
   const doAssignUser = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
-      handleAssignUser({ type, assignee, shouldAlertAssignee });
+      handleAssignUser({ type: currentOrgType, assignee, shouldAlertAssignee });
     },
-    [handleAssignUser, type],
+    [handleAssignUser, currentOrgType],
   );
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
@@ -242,7 +235,7 @@ const OrgCard = ({
               headerActions={
                 <OrgActions
                   org={org}
-                  type={type}
+                  type={currentOrgType}
                   task={task}
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
@@ -262,7 +255,7 @@ const OrgCard = ({
             >
               <OrgInfo
                 org={org}
-                type={type}
+                type={currentOrgType}
                 task={task}
                 taskCommits={taskCommits}
                 repoUrl={repoUrl}
@@ -289,7 +282,7 @@ const OrgCard = ({
       <AssignUserModal
         allUsers={projectUsers}
         selectedUser={assignedUser}
-        orgType={type}
+        orgType={currentOrgType}
         isOpen={assignUserModalOpen}
         emptyMessageText={i18n.t('View Project to Add Collaborators')}
         emptyMessageAction={handleEmptyMessageClick}
