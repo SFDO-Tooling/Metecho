@@ -23,8 +23,8 @@ export default ({
   objectType,
   url,
   additionalData = {},
-  onSuccess = /* istanbul ignore next */ () => {},
-  onError = /* istanbul ignore next */ () => {},
+  onSuccess = () => {},
+  onError = () => {},
   shouldSubscribeToObject = true,
   update = false,
 }: {
