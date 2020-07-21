@@ -508,7 +508,7 @@ describe('<ProjectDetail/>', () => {
         expect(updateObject.mock.calls[0][0].data.should_alert_qa).toBe(false);
       });
 
-      test('assigning developer', () => {
+      test('does not auto toggle when assigning user (developer)', () => {
         const { getAllByText, baseElement, getByText } = setup();
         fireEvent.click(getAllByText('Assign Developer')[0]);
         fireEvent.click(getByText('Notify Assigned Developer by Email'));
@@ -517,7 +517,7 @@ describe('<ProjectDetail/>', () => {
         );
         fireEvent.click(getByText('Save'));
 
-        expect(updateObject.mock.calls[0][0].data.should_alert_dev).toBe(true);
+        expect(updateObject.mock.calls[0][0].data.should_alert_dev).toBe(false);
       });
     });
   });
