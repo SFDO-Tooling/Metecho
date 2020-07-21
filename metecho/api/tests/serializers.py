@@ -280,7 +280,12 @@ class TestTaskSerializer:
         serializer = TaskSerializer(task, data=data, context={"request": r})
         assert serializer.is_valid(), serializer.errors
 
-        serializer.update(task, serializer.validated_data)
+        with ExitStack() as stack:
+            jwt_session = stack.enter_context(
+                patch("metecho.api.sf_run_flow.jwt_session")
+            )
+            jwt_session.return_value = {"access_token": None}
+            serializer.update(task, serializer.validated_data)
         so1.refresh_from_db()
         so2.refresh_from_db()
         assert so1.deleted_at is not None
