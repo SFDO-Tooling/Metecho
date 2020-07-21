@@ -48,7 +48,7 @@ const SelectFlowType = ({
         'slds-has-error': hasErrors,
       })}
     >
-      {isLoading && <SpinnerWrapper size="small" />}
+      {isLoading && /* istanbul ignore next */ <SpinnerWrapper size="small" />}
       <legend className="slds-form-element__legend slds-form-element__label">
         <span className="slds-p-right_xx-small">{i18n.t('Org Type')}</span>
         <Tooltip

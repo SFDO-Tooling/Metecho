@@ -22,3 +22,16 @@
 .v-align-center {
   vertical-align: middle;
 }
+
+@keyframes fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.ms-transition-out {
+  animation: fadeout $duration-slowly ease-in 2s forwards;
+}

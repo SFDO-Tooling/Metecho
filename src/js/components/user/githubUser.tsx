@@ -330,21 +330,26 @@ export const AssignUserModal = ({
 
   const [selection, setSelection] = useState<GitHubUser | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
+  const [autoToggle, setAutoToggle] = useState(true);
   const handleAlertAssignee = (
     event: React.FormEvent<HTMLFormElement>,
     { checked }: { checked: boolean },
   ) => {
     setShouldAlertAssignee(checked);
+    setAutoToggle(false);
   };
   const handleAssigneeSelection = (user: GitHubUser) => {
     const currentUserSelected = user.login === currentUser.username;
-    setShouldAlertAssignee(!currentUserSelected);
     setSelection(user);
+    if (autoToggle) {
+      setShouldAlertAssignee(!currentUserSelected);
+    }
   };
   const handleClose = () => {
     onRequestClose();
     setSelection(null);
     setShouldAlertAssignee(true);
+    setAutoToggle(true);
   };
   const handleSave = () => {
     setUser(selection, shouldAlertAssignee);

@@ -3,7 +3,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import ChangesForm from '@/components/tasks/capture/changes';
@@ -14,6 +14,7 @@ import {
   useForm,
   useFormDefaults,
   useIsMounted,
+  useTransientMessage,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
@@ -71,7 +72,10 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [ignoringChanges, setIgnoringChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
-  const [ignoredSuccess, setIgnoredSuccess] = useState(false);
+  const {
+    showTransientMessage,
+    isShowingTransientMessage,
+  } = useTransientMessage();
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
 
@@ -82,21 +86,6 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   const prevPage = () => {
     setPageIndex(pageIndex - 1 || 0);
   };
-
-  // success timeout after ignoring changes
-  const successTimeout = useRef<NodeJS.Timeout | null>(null);
-  const clearSuccessTimeout = () => {
-    if (typeof successTimeout.current === 'number') {
-      clearTimeout(successTimeout.current);
-      successTimeout.current = null;
-    }
-  };
-  useEffect(
-    () => () => {
-      clearSuccessTimeout();
-    },
-    [],
-  );
 
   const handleSuccess = () => {
     /* istanbul ignore else */
@@ -199,10 +188,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
     if (isMounted.current) {
       setInputs({ ...inputs, changes: {} });
       setIgnoringChanges(false);
-      setIgnoredSuccess(true);
-      successTimeout.current = setTimeout(() => {
-        setIgnoredSuccess(false);
-      }, 3000);
+      showTransientMessage();
     }
   };
 
@@ -231,7 +217,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
 
   const saveIgnored = (e: React.FormEvent<HTMLFormElement>) => {
     setIgnoringChanges(true);
-    handleSubmit(e, submitIgnored, handleIgnoredSuccess);
+    handleSubmit(e, { action: submitIgnored, success: handleIgnoredSuccess });
   };
 
   const pages = [
@@ -268,7 +254,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
           ignoredChecked={ignoredChecked}
           errors={errors}
           setInputs={setInputs}
-          ignoredSuccess={ignoredSuccess}
+          ignoredSuccess={isShowingTransientMessage}
         />
       ),
       footer: [

@@ -146,7 +146,7 @@ const EditModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      size="medium"
+      size="small"
       disableClose={isSaving}
       heading={heading}
       onRequestClose={doClose}

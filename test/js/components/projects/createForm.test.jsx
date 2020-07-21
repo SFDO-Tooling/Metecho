@@ -3,7 +3,7 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import ProjectForm from '@/components/projects/createForm';
+import CreateProjectModal from '@/components/projects/createForm';
 import { createObject } from '@/store/actions';
 import { addError } from '@/store/errors/actions';
 import routes from '@/utils/routes';
@@ -35,22 +35,24 @@ const defaultRepository = {
 
 const defaultUser = { username: 'test-user' };
 
-describe('<ProjectForm/>', () => {
+describe('<CreateProjectModal/>', () => {
   const setup = (options) => {
     const defaults = {
       repository: defaultRepository,
       user: defaultUser,
-      hasProjects: false,
+      isOpen: true,
     };
     const opts = Object.assign({}, defaults, options);
-    const { user, repository, hasProjects } = opts;
+    const { user, repository, isOpen } = opts;
     const context = {};
+    const closeCreateModal = jest.fn();
     const result = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectForm
+        <CreateProjectModal
           user={user}
           repository={repository}
-          hasProjects={hasProjects}
+          closeCreateModal={closeCreateModal}
+          isOpen={isOpen}
         />
       </StaticRouter>,
       {},
@@ -59,29 +61,10 @@ describe('<ProjectForm/>', () => {
     return { ...result, context };
   };
 
-  describe('submit/close buttons', () => {
-    test('toggle form open/closed', () => {
-      const { getByText, queryByText } = setup({ hasProjects: true });
-
-      expect(queryByText('Close Form')).toBeNull();
-
-      fireEvent.click(getByText('Create a Project'));
-
-      expect(getByText('Close Form')).toBeVisible();
-      expect(getByText('Create Project')).toBeVisible();
-      expect(queryByText('Create a Project')).toBeNull();
-
-      fireEvent.click(getByText('Close Form'));
-
-      expect(queryByText('Close Form')).toBeNull();
-      expect(getByText('Create a Project')).toBeVisible();
-    });
-  });
-
   describe('form submit', () => {
     test('creates a new project', () => {
       const { getByText, getByLabelText } = setup();
-      const submit = getByText('Create Project');
+      const submit = getByText('Create');
       const nameInput = getByLabelText('*Project Name');
       const descriptionInput = getByLabelText('Description');
       fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
@@ -111,7 +94,7 @@ describe('<ProjectForm/>', () => {
         github_users: [ghUser, { id: '2', login: 'other-username' }],
       };
       const { getByText, getByLabelText } = setup({ repository });
-      const submit = getByText('Create Project');
+      const submit = getByText('Create');
       const nameInput = getByLabelText('*Project Name');
       fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
       fireEvent.click(submit);
@@ -147,7 +130,7 @@ describe('<ProjectForm/>', () => {
           }),
         );
         const { getByText, getByLabelText, context } = setup();
-        const submit = getByText('Create Project');
+        const submit = getByText('Create');
         const nameInput = getByLabelText('*Project Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
         fireEvent.click(submit);
@@ -178,7 +161,7 @@ describe('<ProjectForm/>', () => {
           }),
         );
         const { getByText, getByLabelText, queryByText, findByText } = setup();
-        const submit = getByText('Create Project');
+        const submit = getByText('Create');
         const nameInput = getByLabelText('*Project Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
         fireEvent.click(submit);
@@ -203,7 +186,7 @@ describe('<ProjectForm/>', () => {
           }),
         );
         const { getByText, getByLabelText } = setup();
-        const submit = getByText('Create Project');
+        const submit = getByText('Create');
         const nameInput = getByLabelText('*Project Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
         fireEvent.click(submit);

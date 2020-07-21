@@ -1,6 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -13,7 +12,7 @@ import ProjectStatusPath from '@/components/projects/path';
 import ProjectProgress from '@/components/projects/progress';
 import ProjectStatusSteps from '@/components/projects/steps';
 import { Step } from '@/components/steps/stepsItem';
-import TaskForm from '@/components/tasks/createForm';
+import CreateTaskModal from '@/components/tasks/createForm';
 import TaskTable from '@/components/tasks/table';
 import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
 import {
@@ -57,6 +56,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // "Assign users to project" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -258,6 +258,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
+  const openCreateModal = () => {
+    setCreateModalOpen(true);
+  };
+  const closeCreateModal = () => {
+    setCreateModalOpen(false);
+  };
 
   // "Next Steps" action handler
   const handleStepAction = useCallback(
@@ -327,7 +333,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     submitButton = (
       <Button
         label={submitButtonText}
-        className={classNames('slds-size_full slds-m-bottom_x-large')}
+        className="slds-m-bottom_x-large"
         variant="brand"
         onClick={openSubmitModal}
         disabled={currentlySubmitting}
@@ -374,6 +380,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
     headerUrl = repository.repo_url;
     headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
   }
+
+  const projectIsMerged = project.status === PROJECT_STATUSES.MERGED;
+  const projectHasTasks = Boolean(tasks && tasks.length > 0);
 
   return (
     <DocumentTitle
@@ -447,14 +456,19 @@ const ProjectDetail = (props: RouteComponentProps) => {
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {tasks.length || project.status === PROJECT_STATUSES.MERGED
+              {projectHasTasks || projectIsMerged
                 ? `${i18n.t('Tasks for')} ${project.name}`
                 : `${i18n.t('Add a Task for')} ${project.name}`}
             </h2>
-            {project.status !== PROJECT_STATUSES.MERGED && (
-              <TaskForm project={project} startOpen={!tasks.length} />
+            {!projectIsMerged && (
+              <Button
+                label={i18n.t('Add a Task')}
+                variant="brand"
+                onClick={openCreateModal}
+                className="slds-m-bottom_large"
+              />
             )}
-            {tasks.length ? (
+            {projectHasTasks && (
               <>
                 <ProjectProgress range={projectProgress} />
                 <TaskTable
@@ -466,7 +480,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
                   assignUserAction={assignUser}
                 />
               </>
-            ) : null}
+            )}
           </>
         ) : (
           // Fetching tasks from API
@@ -495,6 +509,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
           redirect={repoUrl}
           handleClose={closeDeleteModal}
         />
+        {!projectIsMerged && (
+          <CreateTaskModal
+            project={project}
+            isOpen={createModalOpen}
+            closeCreateModal={closeCreateModal}
+          />
+        )}
       </DetailPageLayout>
     </DocumentTitle>
   );

@@ -211,9 +211,10 @@ def _create_org_and_run_flow(
             user=user,
         )
     finally:
-        if Path(".cumulusci/logs/cci.log").exists():
+        log_path = Path(project_path, ".cumulusci/logs/cci.log")
+        if log_path.exists():
             scratch_org.refresh_from_db()
-            scratch_org.cci_logs = Path(".cumulusci/logs/cci.log").read_text()
+            scratch_org.cci_logs = log_path.read_text()
             scratch_org.save()
     scratch_org.refresh_from_db()
     # We don't need to explicitly save the following, because this
