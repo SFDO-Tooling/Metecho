@@ -18,6 +18,7 @@ from .models import (
     SiteProfile,
     Task,
 )
+from .sf_run_flow import is_org_good
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
@@ -394,7 +395,13 @@ class TaskSerializer(serializers.ModelSerializer):
                 valid_commit = org.latest_commit == (
                     instance.commits[0] if instance.commits else instance.origin_sha
                 )
-                if new_user and valid_commit and not reassigned_org:
+                org_still_exists = is_org_good(org)
+                if (
+                    org_still_exists
+                    and new_user
+                    and valid_commit
+                    and not reassigned_org
+                ):
                     org.queue_reassign(
                         new_user=new_user, originating_user_id=originating_user_id
                     )

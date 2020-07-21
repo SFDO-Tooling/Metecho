@@ -391,7 +391,14 @@ class TestTaskSerializer:
             "org_config_name": "dev",
         }
         serializer = TaskSerializer(instance=task, data=data)
-        with patch("metecho.api.jobs.user_reassign_job") as user_reassign_job:
+        with ExitStack() as stack:
+            user_reassign_job = stack.enter_context(
+                patch("metecho.api.jobs.user_reassign_job")
+            )
+            jwt_session = stack.enter_context(
+                patch("metecho.api.sf_run_flow.jwt_session")
+            )
+            jwt_session.return_value = {"access_token": None}
             assert serializer.is_valid()
             serializer.save()
             assert user_reassign_job.delay.called
