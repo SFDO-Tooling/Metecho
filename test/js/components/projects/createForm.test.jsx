@@ -36,9 +36,6 @@ const defaultRepository = {
 const defaultUser = { username: 'test-user' };
 
 describe('<CreateProjectModal/>', () => {
-  test('truthiness', () => {
-    expect(true).toBeTruthy();
-  });
   const setup = (options) => {
     const defaults = {
       repository: defaultRepository,
@@ -65,6 +62,31 @@ describe('<CreateProjectModal/>', () => {
   };
 
   describe('form submit', () => {
+    test('creates a new project', () => {
+      const { getByText, getByLabelText } = setup();
+      const submit = getByText('Create');
+      const nameInput = getByLabelText('*Project Name');
+      const descriptionInput = getByLabelText('Description');
+      fireEvent.change(nameInput, { target: { value: 'Name of Project' } });
+      fireEvent.change(descriptionInput, {
+        target: { value: 'This is the description' },
+      });
+      fireEvent.click(submit);
+
+      expect(createObject).toHaveBeenCalledWith({
+        objectType: 'project',
+        data: {
+          name: 'Name of Project',
+          description: 'This is the description',
+          repository: 'r1',
+          branch_name: '',
+          github_users: [],
+        },
+        hasForm: true,
+        shouldSubscribeToObject: true,
+      });
+    });
+
     test('adds current user to github_users', () => {
       const ghUser = { id: '1', login: 'test-user' };
       const repository = {

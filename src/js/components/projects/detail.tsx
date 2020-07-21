@@ -1,6 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
@@ -334,7 +333,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     submitButton = (
       <Button
         label={submitButtonText}
-        className={classNames('slds-m-bottom_x-large')}
+        className="slds-m-bottom_x-large"
         variant="brand"
         onClick={openSubmitModal}
         disabled={currentlySubmitting}
@@ -381,6 +380,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
     headerUrl = repository.repo_url;
     headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
   }
+
+  const projectIsMerged = project.status === PROJECT_STATUSES.MERGED;
+  const projectHasTasks = Boolean(tasks && tasks.length > 0);
 
   return (
     <DocumentTitle
@@ -454,18 +456,19 @@ const ProjectDetail = (props: RouteComponentProps) => {
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {tasks.length || project.status === PROJECT_STATUSES.MERGED
+              {projectHasTasks || projectIsMerged
                 ? `${i18n.t('Tasks for')} ${project.name}`
                 : `${i18n.t('Add a Task for')} ${project.name}`}
             </h2>
-            <Button
-              label={i18n.t('Add a Task')}
-              variant="brand"
-              type="submit"
-              onClick={openCreateModal}
-              className="slds-m-bottom_medium"
-            />
-            {tasks.length ? (
+            {!projectIsMerged && (
+              <Button
+                label={i18n.t('Add a Task')}
+                variant="brand"
+                onClick={openCreateModal}
+                className="slds-m-bottom_large"
+              />
+            )}
+            {projectHasTasks && (
               <>
                 <ProjectProgress range={projectProgress} />
                 <TaskTable
@@ -477,7 +480,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
                   assignUserAction={assignUser}
                 />
               </>
-            ) : null}
+            )}
           </>
         ) : (
           // Fetching tasks from API
@@ -506,7 +509,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           redirect={repoUrl}
           handleClose={closeDeleteModal}
         />
-        {project.status !== PROJECT_STATUSES.MERGED && (
+        {!projectIsMerged && (
           <CreateTaskModal
             project={project}
             isOpen={createModalOpen}

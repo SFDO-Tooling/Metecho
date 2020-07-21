@@ -36,46 +36,44 @@ const CreateProjectModal = ({
   user,
   repository,
   isOpen,
-  history,
   closeCreateModal,
+  history,
 }: Props) => {
   const isMounted = useIsMounted();
+  const [isSaving, setIsSaving] = useState(false);
   // state related to setting base branch on project creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
   const [repoBranches, setRepoBranches] = useState<string[]>([]);
   const [filterVal, setFilterVal] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
 
   const submitButton = useRef<HTMLButtonElement | null>(null);
 
   const dispatch = useDispatch<ThunkDispatch>();
-
-  const submitClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-    /* istanbul ignore if */
-    if (!isOpen) {
-      e.preventDefault();
-    }
-    /* istanbul ignore else */
-    if (submitButton.current) {
-      submitButton.current.click();
-      setIsSaving(true);
-    }
-  };
 
   const onSuccess = (action: AnyAction) => {
     const {
       type,
       payload: { object, objectType },
     } = action;
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      setIsSaving(false);
+    }
     if (
       type === 'CREATE_OBJECT_SUCCEEDED' &&
       objectType === OBJECT_TYPES.PROJECT &&
       object?.slug
     ) {
-      setIsSaving(false);
       const url = routes.project_detail(repository.slug, object.slug);
       history.push(url);
+    }
+  };
+
+  /* istanbul ignore next */
+  const onError = () => {
+    if (isMounted.current) {
+      setIsSaving(false);
     }
   };
 
@@ -97,7 +95,21 @@ const CreateProjectModal = ({
       github_users: githubUser ? [githubUser] : [],
     },
     onSuccess,
+    onError,
   });
+
+  const submitClicked = () => {
+    // Click hidden button inside form to activate native browser validation
+    /* istanbul ignore else */
+    if (submitButton.current) {
+      submitButton.current.click();
+    }
+  };
+
+  const doSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    setIsSaving(true);
+    handleSubmit(e);
+  };
 
   const resetFilterVal = () => {
     setFilterVal('');
@@ -222,7 +234,7 @@ const CreateProjectModal = ({
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
+              <LabelWithSpinner label={i18n.t('Creating…')} variant="inverse" />
             ) : (
               i18n.t('Create')
             )
@@ -234,8 +246,8 @@ const CreateProjectModal = ({
       ]}
     >
       <form
-        onSubmit={handleSubmit}
-        className="slds-form slds-m-bottom--large slds-p-around_large"
+        onSubmit={doSubmit}
+        className="slds-form slds-p-around_large"
         data-form="create-project-branch"
       >
         <RadioGroup

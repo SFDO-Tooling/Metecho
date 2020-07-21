@@ -81,6 +81,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
   const closeCreateModal = () => setCreateModalOpen(false);
 
   const hasProjects = projects && projects.projects.length > 0;
+
   return (
     <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
@@ -97,12 +98,12 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {projects.projects.length
+              {hasProjects
                 ? `${i18n.t('Projects for')} ${repository.name}`
                 : `${i18n.t('Create a Project for')} ${repository.name}`}
             </h2>
             {!hasProjects && (
-              <p className="slds-form-element__help slds-m-bottom_small">
+              <p className="slds-m-bottom_large">
                 <Trans i18nKey="createProjectHelpText">
                   Projects in Metecho are the high-level features that can be
                   broken down into smaller parts by creating Tasks. You can
@@ -116,11 +117,10 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             <Button
               label={i18n.t('Create a Project')}
               variant="brand"
-              type="submit"
               onClick={openCreateModal}
-              className="slds-m-bottom_medium"
+              className="slds-m-bottom_large"
             />
-            {Boolean(projects.projects.length) && (
+            {hasProjects && (
               <>
                 <ProjectTable
                   projects={projects.projects}

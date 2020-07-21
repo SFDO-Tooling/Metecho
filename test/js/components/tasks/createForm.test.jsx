@@ -61,18 +61,6 @@ describe('<TaskForm/>', () => {
     );
   };
 
-  test('toggle form open/closed', () => {
-    const { getByText, queryByText } = setup({
-      project: {
-        ...defaultProject,
-        currently_fetching_org_config_names: true,
-      },
-    });
-    fireEvent.click(getByText('Cancel'));
-
-    expect(queryByText('Add a Task for Project 1')).toBeInTheDocument();
-  });
-
   describe('refresh org types button click', () => {
     test('triggers refreshOrgConfigs actions', () => {
       const { getByText } = setup();
@@ -83,8 +71,8 @@ describe('<TaskForm/>', () => {
     });
   });
 
-  describe('form submit', () => {
-    test('add a single task', () => {
+  describe('add a single task', () => {
+    test('calls createObject with data', () => {
       const { getByText, getByLabelText } = setup();
       const submit = getByText('Add');
       const nameInput = getByLabelText('*Task Name');
@@ -96,6 +84,7 @@ describe('<TaskForm/>', () => {
       });
       fireEvent.click(radioInput);
       fireEvent.click(submit);
+
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'task',
         data: {
@@ -109,7 +98,38 @@ describe('<TaskForm/>', () => {
       });
     });
 
-    describe('add another task', () => {
+    describe('error', () => {
+      test('displays errors', async () => {
+        createObject.mockReturnValueOnce(() =>
+          // eslint-disable-next-line prefer-promise-reject-errors
+          Promise.reject({
+            body: {
+              org_config_name: ['Do not do that'],
+            },
+            response: {
+              status: 400,
+            },
+          }),
+        );
+        const { getByText, getByLabelText, findByText } = setup({
+          project: { ...defaultProject, available_task_org_config_names: [] },
+        });
+
+        const submit = getByText('Add');
+        const nameInput = getByLabelText('*Task Name');
+        fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
+        fireEvent.click(submit);
+
+        expect.assertions(1);
+        await findByText('Do not do that');
+
+        expect(getByText('Do not do that')).toBeVisible();
+      });
+    });
+  });
+
+  describe('add and create another task', () => {
+    describe('success', () => {
       test('displays success message for 3 seconds', async () => {
         jest.useFakeTimers();
         createObject.mockReturnValueOnce(() =>
@@ -132,38 +152,16 @@ describe('<TaskForm/>', () => {
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
         fireEvent.click(submit);
-        // expect.assertions(2);
-        await createObject;
-        expect(getByText('A task was successfully added!')).toBeVisible();
-        jest.runAllTimers();
-        expect(queryByText('A task was successfully added!')).toBeNull();
-      });
-    });
-  });
 
-  describe('error', () => {
-    test('displays errors', async () => {
-      createObject.mockReturnValueOnce(() =>
-        // eslint-disable-next-line prefer-promise-reject-errors
-        Promise.reject({
-          body: {
-            org_config_name: ['Do not do that'],
-          },
-          response: {
-            status: 400,
-          },
-        }),
-      );
-      const { getByText, getByLabelText, findByText } = setup({
-        project: { ...defaultProject, available_task_org_config_names: [] },
+        expect.assertions(2);
+        await createObject;
+
+        expect(getByText('A task was successfully added.')).toBeVisible();
+
+        jest.runAllTimers();
+
+        expect(queryByText('A task was successfully added.')).toBeNull();
       });
-      const submit = getByText('Add');
-      const nameInput = getByLabelText('*Task Name');
-      fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
-      fireEvent.click(submit);
-      expect.assertions(1);
-      await findByText('Do not do that');
-      expect(getByText('Do not do that')).toBeVisible();
     });
   });
 });

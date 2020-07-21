@@ -6,7 +6,7 @@ import i18n from 'i18next';
 import React, { useEffect, useRef, useState } from 'react';
 
 import SelectFlowType from '@/components/tasks/selectFlowType';
-import { LabelWithSpinner, useForm } from '@/components/utils';
+import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '@/utils/constants';
 
@@ -17,9 +17,13 @@ interface Props {
 }
 
 const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
+  const isMounted = useIsMounted();
   const [success, setSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingBatch, setIsSavingBatch] = useState(false);
+
   const successTimeout = useRef<NodeJS.Timeout | null>(null);
+  const submitButton = useRef<HTMLButtonElement | null>(null);
 
   const clearSuccessTimeout = () => {
     if (typeof successTimeout.current === 'number') {
@@ -34,6 +38,14 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     },
     [],
   );
+
+  /* istanbul ignore next */
+  const onError = () => {
+    if (isMounted.current) {
+      setIsSaving(false);
+      setIsSavingBatch(false);
+    }
+  };
 
   const {
     inputs,
@@ -51,131 +63,139 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     additionalData: {
       project: project.id,
     },
+    onError,
   });
-  // re-enable submit btns on error
-  useEffect(() => {
-    /* istanbul ignore else */
-    if (errors) {
-      if (isSaving) {
-        setIsSaving(false);
-      }
-    }
-  }, [errors, isSaving]);
 
-  const addSuccess = () => {
-    setIsSaving(false);
-    resetForm();
-    closeCreateModal();
-  };
-  const submitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
-    /* istanbul ignore else */
-    if (inputs.name) {
-      setIsSaving(true);
-      handleSubmit(e, undefined, () => addSuccess());
-    }
-  };
-
-  const batchAddSuccess = () => {
-    setIsSaving(false);
-    setSuccess(true);
-    resetForm();
-    successTimeout.current = setTimeout(() => {
-      setSuccess(false);
-    }, 3000);
-  };
-  const batchSubmitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    /* istanbul ignore else */
-    if (inputs.name) {
-      setIsSaving(true);
-      handleSubmit(e, undefined, () => batchAddSuccess());
-    }
-  };
   const closeModal = () => {
     closeCreateModal();
     resetForm();
   };
 
-  const emptyName = !inputs.name;
+  const addSuccess = () => {
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      setIsSaving(false);
+      closeModal();
+    }
+  };
+  const submitClicked = () => {
+    // Click hidden button inside form to activate native browser validation
+    /* istanbul ignore else */
+    if (submitButton.current) {
+      submitButton.current.click();
+    }
+  };
+  const doSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    setIsSaving(true);
+    handleSubmit(e, undefined, addSuccess);
+  };
+
+  const batchAddSuccess = () => {
+    /* istanbul ignore else */
+    if (isMounted.current) {
+      resetForm();
+      setIsSavingBatch(false);
+      setSuccess(true);
+      successTimeout.current = setTimeout(() => {
+        setSuccess(false);
+      }, 3000);
+    }
+  };
+  const batchSubmitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
+    setIsSavingBatch(true);
+    handleSubmit(e, undefined, batchAddSuccess);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
       size="small"
+      disableClose={isSaving || isSavingBatch}
       heading={`${i18n.t('Add a Task for')} ${project.name}`}
       onRequestClose={closeModal}
       footer={[
         success && (
           <span
             key="success"
-            className="slds-text-color_success slds-float_left slds-p-left_x-small slds-p-top_xx-small ms-transition-out"
+            className="slds-text-color_success
+              slds-float_left
+              slds-p-left_x-small
+              slds-p-top_xx-small
+              ms-transition-out"
           >
-            {i18n.t('A task was successfully added!')}
+            {i18n.t('A task was successfully added.')}
           </span>
         ),
         <Button
           key="cancel"
           label={i18n.t('Cancel')}
           onClick={closeModal}
-          disabled={isSaving}
+          disabled={isSaving || isSavingBatch}
         />,
         <Button
           key="create-new"
-          label={i18n.t('Add & New')}
+          label={
+            isSavingBatch ? (
+              <LabelWithSpinner label={i18n.t('Adding…')} />
+            ) : (
+              i18n.t('Add & New')
+            )
+          }
           onClick={batchSubmitClicked}
-          disabled={isSaving || emptyName}
+          disabled={isSaving || isSavingBatch}
         />,
         <Button
           key="submit"
           type="submit"
           label={
             isSaving ? (
-              <LabelWithSpinner label={i18n.t('Saving…')} variant="inverse" />
+              <LabelWithSpinner label={i18n.t('Adding…')} variant="inverse" />
             ) : (
               i18n.t('Add')
             )
           }
           variant="brand"
           onClick={submitClicked}
-          disabled={isSaving || emptyName}
+          disabled={isSaving || isSavingBatch}
         />,
       ]}
     >
-      <form
-        onSubmit={handleSubmit}
-        className="slds-form slds-m-bottom--large slds-p-around_large"
-      >
-        {isOpen && (
-          <>
-            <Input
-              id="task-name"
-              label={i18n.t('Task Name')}
-              className="slds-form-element_stacked slds-p-left_none"
-              name="name"
-              value={inputs.name}
-              required
-              aria-required
-              errorText={errors.name}
-              onChange={handleInputChange}
-            />
-            <Textarea
-              id="task-description"
-              label={i18n.t('Description')}
-              classNameContainer="slds-form-element_stacked slds-p-left_none"
-              name="description"
-              value={inputs.description}
-              errorText={errors.description}
-              onChange={handleInputChange}
-            />
-            <SelectFlowType
-              orgConfigs={project.available_task_org_config_names}
-              projectId={project.id}
-              value={inputs.org_config_name}
-              errors={errors.org_config_name}
-              isLoading={project.currently_fetching_org_config_names}
-              handleSelect={handleInputChange}
-            />
-          </>
-        )}
+      <form onSubmit={doSubmit} className="slds-form slds-p-around_large">
+        <Input
+          id="task-name"
+          label={i18n.t('Task Name')}
+          className="slds-form-element_stacked slds-p-left_none"
+          name="name"
+          value={inputs.name}
+          required
+          aria-required
+          errorText={errors.name}
+          onChange={handleInputChange}
+        />
+        <Textarea
+          id="task-description"
+          label={i18n.t('Description')}
+          classNameContainer="slds-form-element_stacked slds-p-left_none"
+          name="description"
+          value={inputs.description}
+          errorText={errors.description}
+          onChange={handleInputChange}
+        />
+        <SelectFlowType
+          orgConfigs={project.available_task_org_config_names}
+          projectId={project.id}
+          value={inputs.org_config_name}
+          errors={errors.org_config_name}
+          isLoading={project.currently_fetching_org_config_names}
+          handleSelect={handleInputChange}
+        />
+        {/* Clicking hidden button allows for native browser form validation */}
+        <button
+          ref={submitButton}
+          type="submit"
+          style={{ display: 'none' }}
+          disabled={isSaving || isSavingBatch}
+        />
       </form>
     </Modal>
   );

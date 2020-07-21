@@ -1,6 +1,6 @@
 {
   "404": "404",
-  "A task was successfully added!": "A task was successfully added!",
+  "A task was successfully added.": "A task was successfully added.",
   "About": "About",
   "Active": "Active",
   "Add": "Add",
@@ -11,6 +11,7 @@
   "Add a task": "Add a task",
   "Add or Remove Collaborators": "Add or Remove Collaborators",
   "Add or Remove Collaborators for": "Add or Remove Collaborators for",
+  "Adding…": "Adding…",
   "All Changes": "All Changes",
   "All Ignored Changes": "All Ignored Changes",
   "Approve": "Approve",
@@ -67,6 +68,7 @@
   "Create a Scratch Org for testing": "Create a Scratch Org for testing",
   "Create new branch on GitHub": "Create new branch on GitHub",
   "Creating Org…": "Creating Org…",
+  "Creating…": "Creating…",
   "CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?": "CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?",
   "Current Stage:": "Current Stage:",
   "Currently Assigned": "Currently Assigned",
