@@ -50,7 +50,7 @@ describe('useForm', () => {
         {
           preventDefault: jest.fn(),
         },
-        action,
+        { action },
       );
 
       expect(action).toHaveBeenCalledTimes(1);

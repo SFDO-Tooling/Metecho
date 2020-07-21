@@ -3,10 +3,15 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import SelectFlowType from '@/components/tasks/selectFlowType';
-import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
+import {
+  LabelWithSpinner,
+  useForm,
+  useIsMounted,
+  useTransientMessage,
+} from '@/components/utils';
 import { Project } from '@/store/projects/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '@/utils/constants';
 
@@ -18,26 +23,14 @@ interface Props {
 
 const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
   const isMounted = useIsMounted();
-  const [success, setSuccess] = useState(false);
+  const {
+    showTransientMessage,
+    isShowingTransientMessage,
+  } = useTransientMessage();
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingBatch, setIsSavingBatch] = useState(false);
 
-  const successTimeout = useRef<NodeJS.Timeout | null>(null);
   const submitButton = useRef<HTMLButtonElement | null>(null);
-
-  const clearSuccessTimeout = () => {
-    if (typeof successTimeout.current === 'number') {
-      clearTimeout(successTimeout.current);
-      successTimeout.current = null;
-    }
-  };
-
-  useEffect(
-    () => () => {
-      clearSuccessTimeout();
-    },
-    [],
-  );
 
   /* istanbul ignore next */
   const onError = () => {
@@ -87,7 +80,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
   };
   const doSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     setIsSaving(true);
-    handleSubmit(e, undefined, addSuccess);
+    handleSubmit(e, { success: addSuccess });
   };
 
   const batchAddSuccess = () => {
@@ -95,15 +88,12 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     if (isMounted.current) {
       resetForm();
       setIsSavingBatch(false);
-      setSuccess(true);
-      successTimeout.current = setTimeout(() => {
-        setSuccess(false);
-      }, 3000);
+      showTransientMessage();
     }
   };
   const batchSubmitClicked = (e: React.MouseEvent<HTMLFormElement>) => {
     setIsSavingBatch(true);
-    handleSubmit(e, undefined, batchAddSuccess);
+    handleSubmit(e, { success: batchAddSuccess });
   };
 
   return (
@@ -114,7 +104,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
       heading={`${i18n.t('Add a Task for')} ${project.name}`}
       onRequestClose={closeModal}
       footer={[
-        success && (
+        isShowingTransientMessage && (
           <span
             key="success"
             className="slds-text-color_success
