@@ -111,7 +111,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
               slds-float_left
               slds-p-left_x-small
               slds-p-top_xx-small
-              ms-transition-out"
+              metecho-transition-out"
           >
             {i18n.t('A task was successfully added.')}
           </span>

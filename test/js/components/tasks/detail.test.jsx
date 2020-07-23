@@ -351,6 +351,28 @@ describe('<TaskDetail/>', () => {
     });
   });
 
+  describe('reassigning org', () => {
+    test('renders loading button', () => {
+      const { getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            ...defaultState.orgs,
+            task1: {
+              ...defaultState.orgs.task1,
+              Dev: {
+                ...defaultState.orgs.task1.Dev,
+                currently_reassigning_user: true,
+              },
+            },
+          },
+        },
+      });
+
+      expect(getAllByText('Reassigning Org Ownership…')).toHaveLength(2);
+    });
+  });
+
   describe('pr is closed', () => {
     test('renders "Submit Task for Testing" button', () => {
       const { getByText } = setup({

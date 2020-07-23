@@ -32,6 +32,7 @@ beforeAll(() => {
     task_detail: (id) => `/api/tasks/${id}/`,
     task_create_pr: (id) => `/api/tasks/${id}/create_pr/`,
     task_review: (id) => `/api/tasks/${id}/review/`,
+    task_can_reassign: (id) => `/api/tasks/${id}/can_reassign/`,
     project_detail: (id) => `/api/projects/${id}/`,
     project_create_pr: (id) => `/api/projects/${id}/create_pr/`,
     project_refresh_org_config_names: (id) =>

@@ -18,6 +18,7 @@ from .models import (
     SiteProfile,
     Task,
 )
+from .sf_run_flow import is_org_good
 from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
 
 User = get_user_model()
@@ -361,25 +362,67 @@ class TaskSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user = getattr(self.context.get("request"), "user", None)
         originating_user_id = str(user.id) if user else None
-        if instance.assigned_dev != validated_data["assigned_dev"]:
-            if validated_data.get("should_alert_dev"):
-                self.try_send_assignment_emails(instance, "dev", validated_data, user)
-            orgs = instance.scratchorg_set.active().filter(
-                org_type=SCRATCH_ORG_TYPES.Dev
-            )
-            for org in orgs:
-                org.queue_delete(originating_user_id=originating_user_id)
-        if instance.assigned_qa != validated_data["assigned_qa"]:
-            if validated_data.get("should_alert_qa"):
-                self.try_send_assignment_emails(instance, "qa", validated_data, user)
-            orgs = instance.scratchorg_set.active().filter(
-                org_type=SCRATCH_ORG_TYPES.QA
-            )
-            for org in orgs:
-                org.queue_delete(originating_user_id=originating_user_id)
+        self._handle_reassign(
+            "dev", instance, validated_data, user, originating_user_id
+        )
+        self._handle_reassign("qa", instance, validated_data, user, originating_user_id)
         validated_data.pop("should_alert_dev", None)
         validated_data.pop("should_alert_qa", None)
         return super().update(instance, validated_data)
+
+    def _handle_reassign(
+        self, type_, instance, validated_data, user, originating_user_id
+    ):
+        assigned_user_has_changed = (
+            getattr(instance, f"assigned_{type_}")
+            != validated_data[f"assigned_{type_}"]
+        )
+        has_assigned_user = bool(validated_data[f"assigned_{type_}"])
+        org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
+        if assigned_user_has_changed and has_assigned_user:
+            if validated_data.get(f"should_alert_{type_}"):
+                self.try_send_assignment_emails(instance, type_, validated_data, user)
+            reassigned_org = False
+            # We want to consider soft-deleted orgs, too:
+            orgs = [
+                *instance.scratchorg_set.active().filter(org_type=org_type),
+                *instance.scratchorg_set.inactive().filter(org_type=org_type),
+            ]
+            for org in orgs:
+                new_user = self._valid_reassign(
+                    type_, org, validated_data[f"assigned_{type_}"]
+                )
+                valid_commit = org.latest_commit == (
+                    instance.commits[0] if instance.commits else instance.origin_sha
+                )
+                org_still_exists = is_org_good(org)
+                if (
+                    org_still_exists
+                    and new_user
+                    and valid_commit
+                    and not reassigned_org
+                ):
+                    org.queue_reassign(
+                        new_user=new_user, originating_user_id=originating_user_id
+                    )
+                    reassigned_org = True
+                elif org.deleted_at is None:
+                    org.delete(
+                        originating_user_id=originating_user_id, preserve_sf_org=True
+                    )
+        elif not has_assigned_user:
+            for org in [*instance.scratchorg_set.active().filter(org_type=org_type)]:
+                org.delete(
+                    originating_user_id=originating_user_id, preserve_sf_org=True
+                )
+
+    def _valid_reassign(self, type_, org, new_assignee):
+        new_user = self.get_matching_assigned_user(
+            type_, {f"assigned_{type_}": new_assignee}
+        )
+        if new_user and org.owner_sf_username == new_user.sf_username:
+            return new_user
+        return None
 
     def try_send_assignment_emails(self, instance, type_, validated_data, user):
         assigned_user = self.get_matching_assigned_user(type_, validated_data)
@@ -477,6 +520,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes",
             "currently_capturing_changes",
             "currently_refreshing_org",
+            "currently_reassigning_user",
             "is_created",
             "delete_queued_at",
             "owner_gh_username",
@@ -494,6 +538,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "currently_refreshing_changes": {"read_only": True},
             "currently_capturing_changes": {"read_only": True},
             "currently_refreshing_org": {"read_only": True},
+            "currently_reassigning_user": {"read_only": True},
             "is_created": {"read_only": True},
             "delete_queued_at": {"read_only": True},
             "owner_gh_username": {"read_only": True},
@@ -571,3 +616,8 @@ class SiteSerializer(serializers.ModelSerializer):
             "name",
             "clickthrough_agreement",
         )
+
+
+class CanReassignSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=("assigned_qa", "assigned_dev"))
+    gh_uid = serializers.CharField()

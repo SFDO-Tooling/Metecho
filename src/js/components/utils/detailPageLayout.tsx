@@ -48,7 +48,7 @@ const DetailPageLayout = ({
         onRenderControls={onRenderHeaderActions}
         icon={
           showHeaderImage ? (
-            <div className="ms-repo-image-header">
+            <div className="metecho-repo-image-header">
               <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
             </div>
           ) : null
@@ -57,7 +57,7 @@ const DetailPageLayout = ({
       <div
         className="slds-p-horizontal_x-large
           slds-p-top_x-small
-          ms-breadcrumb
+          metecho-breadcrumb
           slds-truncate"
       >
         <BreadCrumb

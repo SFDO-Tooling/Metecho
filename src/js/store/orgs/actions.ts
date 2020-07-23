@@ -44,6 +44,18 @@ interface OrgRefreshRejected {
   type: 'SCRATCH_ORG_REFRESH_REJECTED';
   payload: Org | MinimalOrg;
 }
+interface OrgRecreated {
+  type: 'SCRATCH_ORG_RECREATE';
+  payload: Org | MinimalOrg;
+}
+interface OrgReassigned {
+  type: 'SCRATCH_ORG_REASSIGN';
+  payload: Org | MinimalOrg;
+}
+interface OrgReassignFailed {
+  type: 'SCRATCH_ORG_REASSIGN_FAILED';
+  payload: Org | MinimalOrg;
+}
 
 export type OrgsAction =
   | OrgProvisioned
@@ -54,7 +66,10 @@ export type OrgsAction =
   | OrgDeleteFailed
   | CommitEvent
   | OrgRefresh
-  | OrgRefreshRejected;
+  | OrgRefreshRejected
+  | OrgRecreated
+  | OrgReassigned
+  | OrgReassignFailed;
 
 export const provisionOrg = ({
   model,
@@ -461,6 +476,58 @@ export const refreshError = ({
   }
   return dispatch({
     type: 'SCRATCH_ORG_REFRESH_REJECTED',
+    payload: model,
+  });
+};
+
+export const recreateOrg = (model: Org): ThunkResult<OrgRecreated> => (
+  dispatch,
+) => {
+  /* istanbul ignore else */
+  if (window.socket) {
+    window.socket.subscribe({
+      model: OBJECT_TYPES.ORG,
+      id: model.id,
+    });
+  }
+  return dispatch({
+    type: 'SCRATCH_ORG_RECREATE',
+    payload: model,
+  });
+};
+
+export const orgReassigned = (model: Org): OrgReassigned => ({
+  type: 'SCRATCH_ORG_REASSIGN',
+  payload: model,
+});
+
+export const orgReassignFailed = ({
+  model,
+  message,
+  originating_user_id,
+}: {
+  model: Org;
+  message?: string;
+  originating_user_id: string | null;
+}): ThunkResult<OrgReassignFailed> => (dispatch, getState) => {
+  const state = getState();
+  /* istanbul ignore else */
+  if (isCurrentUser(originating_user_id, state)) {
+    const task = selectTaskById(state, model.task);
+    dispatch(
+      addToast({
+        heading: task
+          ? `${i18n.t(
+              'Uh oh. There was an error reassigning the scratch org on task',
+            )} “${task.name}”.`
+          : i18n.t('Uh oh. There was an error reassigning this scratch org.'),
+        details: message,
+        variant: 'error',
+      }),
+    );
+  }
+  return dispatch({
+    type: 'SCRATCH_ORG_REASSIGN_FAILED',
     payload: model,
   });
 };

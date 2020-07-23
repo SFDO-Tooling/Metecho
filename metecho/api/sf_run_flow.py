@@ -56,6 +56,20 @@ def capitalize(s):
     return s[0].upper() + s[1:]
 
 
+def is_org_good(org):
+    config = org.config
+    org_name = org.task.org_config_name
+    try:
+        org_config = OrgConfig(config, org_name)
+        org_config.refresh_oauth_token = Mock()
+        info = jwt_session(
+            SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
+        )
+        return "access_token" in info
+    except HTTPError:
+        return False
+
+
 def refresh_access_token(*, config, org_name, scratch_org, originating_user_id):
     """
     Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx

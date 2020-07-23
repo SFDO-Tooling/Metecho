@@ -8,7 +8,7 @@ import routes from '@/utils/routes';
 
 const RepositoryListItem = ({ repository }: { repository: Repository }) => (
   <div
-    className="ms-repo-item
+    className="metecho-repo-item
       slds-p-around_small
       slds-size_1-of-1
       slds-medium-size_1-of-2

@@ -26,6 +26,7 @@ from ..jobs import (
     refresh_github_repositories_for_user,
     refresh_scratch_org,
     submit_review,
+    user_reassign,
 )
 from ..models import SCRATCH_ORG_TYPES
 
@@ -971,3 +972,37 @@ def test_get_social_image(repository_factory, user_factory):
 
         repository.refresh_from_db()
         assert repository.repo_image_url == "https://example.com/"
+
+
+@pytest.mark.django_db
+class TestUserReassign:
+    def test_happy(self, scratch_org_factory, user_factory):
+        scratch_org = scratch_org_factory()
+        user = user_factory()
+
+        with ExitStack() as stack:
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+            stack.enter_context(
+                patch("metecho.api.models.ScratchOrg.get_refreshed_org_config")
+            )
+            user_reassign(scratch_org, new_user=user, originating_user_id=str(user.id))
+
+            assert async_to_sync.called
+
+    def test_sad(self, scratch_org_factory, user_factory):
+        scratch_org = scratch_org_factory()
+        user = user_factory()
+
+        with ExitStack() as stack:
+            async_to_sync = stack.enter_context(
+                patch("metecho.api.model_mixins.async_to_sync")
+            )
+            get_refreshed_org_config = stack.enter_context(
+                patch("metecho.api.models.ScratchOrg.get_refreshed_org_config")
+            )
+            get_refreshed_org_config.side_effect = ValueError()
+            user_reassign(scratch_org, new_user=user, originating_user_id=str(user.id))
+
+            assert async_to_sync.called

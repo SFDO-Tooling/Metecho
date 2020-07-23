@@ -121,7 +121,7 @@ class TaskAdmin(admin.ModelAdmin):
         ("branch_name", "org_config_name"),
         "commits",
         "origin_sha",
-        "ms_commits",
+        "metecho_commits",
         "has_unmerged_commits",
         ("pr_number", "pr_is_open"),
         ("review_submitted_at", "review_valid", "review_status", "review_sha"),

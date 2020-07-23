@@ -7,9 +7,12 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgReassigned,
+  orgReassignFailed,
   orgRefreshed,
   provisionFailed,
   provisionOrg,
+  recreateOrg,
   refreshError,
   updateFailed,
   updateOrg,
@@ -208,6 +211,28 @@ interface OrgRefreshFailedEvent {
     originating_user_id: string | null;
   };
 }
+interface OrgRecreatedEvent {
+  type: 'SCRATCH_ORG_RECREATE';
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
+}
+interface OrgReassignedEvent {
+  type: 'SCRATCH_ORG_REASSIGN';
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
+}
+interface OrgReassignFailedEvent {
+  type: 'SCRATCH_ORG_REASSIGN_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+    originating_user_id: string | null;
+  };
+}
 interface CommitSucceededEvent {
   type: 'SCRATCH_ORG_COMMIT_CHANGES';
   payload: {
@@ -250,6 +275,9 @@ type ModelEvent =
   | OrgRemovedEvent
   | OrgRefreshedEvent
   | OrgRefreshFailedEvent
+  | OrgRecreatedEvent
+  | OrgReassignedEvent
+  | OrgReassignFailedEvent
   | CommitSucceededEvent
   | CommitFailedEvent
   | SoftDeletedEvent;
@@ -313,6 +341,12 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && commitSucceeded(event.payload);
     case 'SCRATCH_ORG_COMMIT_CHANGES_FAILED':
       return hasModel(event) && commitFailed(event.payload);
+    case 'SCRATCH_ORG_RECREATE':
+      return hasModel(event) && recreateOrg(event.payload.model);
+    case 'SCRATCH_ORG_REASSIGN':
+      return hasModel(event) && orgReassigned(event.payload.model);
+    case 'SCRATCH_ORG_REASSIGN_FAILED':
+      return hasModel(event) && orgReassignFailed(event.payload);
     case 'SOFT_DELETE':
       return hasModel(event) && removeObject(event.payload.model);
   }
