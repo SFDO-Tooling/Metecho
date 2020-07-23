@@ -605,7 +605,7 @@ class Task(
 
     commits = JSONField(default=list, blank=True)
     origin_sha = StringField(blank=True, default="")
-    ms_commits = JSONField(default=list, blank=True)
+    metecho_commits = JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
 
     currently_creating_pr = models.BooleanField(default=False)
@@ -794,8 +794,8 @@ class Task(
         # This comes from the GitHub hook, and so has no originating user:
         self.notify_changed(originating_user_id=None)
 
-    def add_ms_git_sha(self, sha):
-        self.ms_commits.append(sha)
+    def add_metecho_git_sha(self, sha):
+        self.metecho_commits.append(sha)
 
     def queue_submit_review(self, *, user, data, originating_user_id):
         from .jobs import submit_review_job
