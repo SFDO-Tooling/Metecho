@@ -184,18 +184,27 @@ class SoftDeleteQuerySet(models.QuerySet):
     def inactive(self):
         return self.filter(deleted_at__isnull=False)
 
-    def notify_soft_deleted(self):
-        for instance in self:
-            instance.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
+    def notify_soft_deleted(self, *, preserve_sf_org=False):
+        if self.model.__name__ == "ScratchOrg" and not preserve_sf_org:
+            for scratch_org in self:
+                try:
+                    scratch_org.queue_delete(originating_user_id=None)
+                except Exception:  # pragma: nocover
+                    # If there's a problem deleting it, it's probably
+                    # already been deleted.
+                    pass
+        else:
+            for instance in self:
+                instance.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
 
-    def delete(self):
+    def delete(self, *, preserve_sf_org=False):
         soft_delete_child_class = getattr(self.model, "soft_delete_child_class", None)
         if soft_delete_child_class:
             parent = camel_to_snake(self.model.__name__)
             soft_delete_child_class(None).objects.filter(
                 **{f"{parent}__in": self}
-            ).delete()
-        self.active().notify_soft_deleted()
+            ).delete(preserve_sf_org=preserve_sf_org)
+        self.active().notify_soft_deleted(preserve_sf_org=preserve_sf_org)
         return self.active().update(deleted_at=timezone.now())
 
     def hard_delete(self):  # pragma: nocover
@@ -216,18 +225,28 @@ class SoftDeleteMixin(models.Model):
 
     objects = SoftDeleteQuerySet.as_manager()
 
-    def notify_soft_deleted(self):
-        self.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
+    def notify_soft_deleted(self, *, preserve_sf_org=False):
+        if self.__class__.__name__ == "ScratchOrg" and not preserve_sf_org:
+            try:
+                self.queue_delete(originating_user_id=None)
+            except Exception:  # pragma: nocover
+                # If there's a problem deleting it, it's probably
+                # already been deleted.
+                pass
+        else:
+            self.notify_changed(type_="SOFT_DELETE", originating_user_id=None)
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, preserve_sf_org=False, **kwargs):
         soft_delete_child_class = getattr(self, "soft_delete_child_class", None)
         if soft_delete_child_class:
             parent = camel_to_snake(self.__class__.__name__)
-            soft_delete_child_class().objects.filter(**{parent: self}).delete()
+            soft_delete_child_class().objects.filter(**{parent: self}).delete(
+                preserve_sf_org=preserve_sf_org
+            )
         if self.deleted_at is None:
             self.deleted_at = timezone.now()
             self.save()
-            self.notify_soft_deleted()
+            self.notify_soft_deleted(preserve_sf_org=preserve_sf_org)
 
     def hard_delete(self):  # pragma: nocover
         return super().delete()
