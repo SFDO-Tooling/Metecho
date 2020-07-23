@@ -102,7 +102,7 @@ const ChangesList = ({
                 <Checkbox
                   key={`${uniqueGroupName}-${change}`}
                   labels={{ label: change }}
-                  className="ms-nested-checkboxes"
+                  className="metecho-nested-checkboxes"
                   name="changes"
                   checked={Boolean(checkedChanges[groupName]?.includes(change))}
                   onChange={(

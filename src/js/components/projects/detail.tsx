@@ -403,7 +403,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_x-large ms-secondary-block">
+            <div className="slds-m-bottom_x-large metecho-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
                 {i18n.t('Collaborators')}
               </h2>
@@ -437,7 +437,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 />
               ) : null}
             </div>
-            <div className="slds-m-bottom_x-large ms-secondary-block">
+            <div className="slds-m-bottom_x-large metecho-secondary-block">
               <ProjectStatusSteps
                 project={project}
                 tasks={tasks || []}
