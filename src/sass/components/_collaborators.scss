@@ -47,3 +47,14 @@
     font-size: $font-size-3;
   }
 }
+
+// Task Create PR form
+// -------------------
+.ms-avatar-container {
+  cursor: default;
+
+  // display avatar inline with spans of text
+  > div {
+    display: inline-block;
+  }
+}

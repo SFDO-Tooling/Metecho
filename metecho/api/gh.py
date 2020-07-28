@@ -129,7 +129,7 @@ def local_github_checkout(user, repo_id, commit_ish=None):
             # repo (we hope):
             extract_zip_file(zip_file, repo.owner.login, repo.name)
 
-            # validate that cumulusci.yml is the same as master
+            # validate that cumulusci.yml is the same as default_branch
             validate_cumulusci_yml_unchanged(repo)
 
             yield repo_root
@@ -228,16 +228,16 @@ def normalize_commit(commit, **kwargs):
 
 
 def validate_cumulusci_yml_unchanged(repo):
-    """Confirm cumulusci.yml is unchanged between master and the cwd."""
+    """Confirm cumulusci.yml is unchanged between default_branch and the cwd."""
     try:
-        cci_config_master = repo.file_contents(
+        cci_config_default_branch = repo.file_contents(
             "cumulusci.yml", ref=repo.default_branch
         ).decoded.decode("utf-8")
     except NotFoundError:
-        cci_config_master = ""
+        cci_config_default_branch = ""
     try:
         cci_config_branch = pathlib.Path("cumulusci.yml").read_text()
     except IOError:
         cci_config_branch = ""
-    if cci_config_master != cci_config_branch:
+    if cci_config_default_branch != cci_config_branch:
         raise Exception("cumulusci.yml contains unreviewed changes.")

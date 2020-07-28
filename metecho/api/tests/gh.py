@@ -126,7 +126,7 @@ class TestLocalGitHubCheckout:
             gh_given_user = stack.enter_context(patch(f"{PATCH_ROOT}.gh_given_user"))
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
-            repository = MagicMock(default_branch="master")
+            repository = MagicMock(default_branch="main")
             repository.file_contents.side_effect = NotFoundError(MagicMock())
             gh = MagicMock()
             gh.repository_with_id.return_value = repository
