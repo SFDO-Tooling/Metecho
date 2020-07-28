@@ -98,10 +98,11 @@ const TaskDetail = (props: RouteComponentProps) => {
   let currentlyReassigning = false;
   let orgHasChanges = false;
   let userIsOwner = false;
-  let devOrg: Org | null | undefined;
+  let devOrg: Org | null | undefined, testOrg: Org | null | undefined;
   let hasOrgs = false;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
+    testOrg = orgs[ORG_TYPES.QA];
     orgHasChanges =
       (devOrg?.total_unsaved_changes || 0) -
         (devOrg?.total_ignored_changes || 0) >
@@ -189,7 +190,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     },
     [dispatch],
   );
-  const captureAction = () => {
+  const captureAction = useCallback(() => {
     /* istanbul ignore else */
     if (devOrg) {
       let shouldCheck = true;
@@ -210,7 +211,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         openCaptureModal();
       }
     }
-  };
+  }, [devOrg, doRefetchOrg, orgHasChanges]);
 
   const doRefreshOrg = useCallback(
     (...args: Org[]) => {
@@ -226,8 +227,9 @@ const TaskDetail = (props: RouteComponentProps) => {
           openAssignUserModal(ORG_TYPES.DEV);
           break;
         case 'Dev':
-          // @todo why is task undefined here?
-          createOrg(action);
+          if (!devOrg) {
+            createOrg(action);
+          }
           break;
         case 'retrieve-changes':
           if (readyToCaptureChanges) {
@@ -241,18 +243,28 @@ const TaskDetail = (props: RouteComponentProps) => {
           openAssignUserModal(ORG_TYPES.QA);
           break;
         case 'QA':
-          createOrg(action);
+          if (!testOrg) {
+            createOrg(action);
+          }
           break;
         case 'refresh-test-org':
-          doRefreshOrg();
+          if (testOrg) {
+            doRefreshOrg(testOrg);
+          }
           break;
         case 'submit-review':
           openSubmitModal();
           break;
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [createOrg, readyToCaptureChanges],
+    [
+      createOrg,
+      readyToCaptureChanges,
+      captureAction,
+      doRefreshOrg,
+      testOrg,
+      devOrg,
+    ],
   );
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
@@ -476,6 +488,7 @@ const TaskDetail = (props: RouteComponentProps) => {
                 <TaskStatusSteps
                   task={task}
                   orgs={orgs}
+                  orgHasChanges={orgHasChanges}
                   handleAction={handleStepAction}
                 />
               </div>

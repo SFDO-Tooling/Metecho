@@ -14,12 +14,14 @@ import { getTaskCommits } from '@/utils/helpers';
 interface TaskStatusStepsProps {
   task: Task;
   orgs: OrgsByTask;
+  orgHasChanges: boolean;
   handleAction: (step: Step) => void;
 }
 
 const TaskStatusSteps = ({
   task,
   orgs,
+  orgHasChanges,
   handleAction,
 }: TaskStatusStepsProps) => {
   const hasDev = Boolean(task.assigned_dev);
@@ -70,7 +72,7 @@ const TaskStatusSteps = ({
       complete: Boolean(devOrg?.has_unsaved_changes || hasValidCommits),
       assignee: task.assigned_dev,
       link:
-        devOrg && userIsDev
+        devOrg && userIsDev && !orgHasChanges
           ? window.api_urls.scratch_org_redirect(devOrg.id)
           : undefined,
     },
@@ -120,7 +122,7 @@ const TaskStatusSteps = ({
         Boolean(hasTestOrg && testOrg?.has_been_visited) || task.review_valid,
       assignee: task.assigned_qa,
       link:
-        testOrg && userIsTester && !testOrgOutOfDate
+        testOrg && userIsTester
           ? window.api_urls.scratch_org_redirect(testOrg.id)
           : undefined,
     },
