@@ -3,12 +3,12 @@ import os.path
 from collections import defaultdict
 
 import simple_salesforce
-from cumulusci.core.config import BaseGlobalConfig
 from cumulusci.core.runtime import BaseCumulusCI
 from cumulusci.tasks.github.util import CommitDir
 from cumulusci.tasks.salesforce.sourcetracking import retrieve_components
 from django.conf import settings
 
+from .custom_cci_configs import MetechoUniversalConfig
 from .gh import get_repo_info, get_source_format, local_github_checkout
 from .sf_run_flow import refresh_access_token
 
@@ -179,7 +179,7 @@ def get_salesforce_connection(*, config, scratch_org, originating_user_id, base_
     conn = simple_salesforce.Salesforce(
         instance_url=org_config.instance_url,
         session_id=org_config.access_token,
-        version=BaseGlobalConfig().project__package__api_version,
+        version=MetechoUniversalConfig().project__package__api_version,
     )
     conn.headers.setdefault(
         "Sforce-Call-Options", "client={}".format(settings.SF_CLIENT_ID)
