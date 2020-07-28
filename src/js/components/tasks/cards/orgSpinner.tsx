@@ -8,15 +8,18 @@ const OrgSpinner = ({
   ownedByCurrentUser,
   isDeleting,
   isRefreshingChanges,
+  isReassigningOrg,
 }: {
   org: Org | null;
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
   isRefreshingChanges: boolean;
+  isReassigningOrg: boolean;
 }) => {
   if (
     isDeleting ||
     isRefreshingChanges ||
+    isReassigningOrg ||
     (ownedByCurrentUser && org?.currently_capturing_changes)
   ) {
     return <SpinnerWrapper size="small" />;

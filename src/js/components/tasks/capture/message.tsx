@@ -49,7 +49,7 @@ const CommitMessageForm = ({ inputs, errors, handleInputChange }: Props) => {
       >
         <Textarea
           id="commit-message"
-          className="ms-textarea"
+          className="metecho-textarea"
           assistiveText={{ label: i18n.t('Commit Message') }}
           name="commit_message"
           value={inputs.commit_message}

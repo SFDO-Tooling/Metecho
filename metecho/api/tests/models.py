@@ -799,7 +799,6 @@ class TestScratchOrg:
 
             scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.queue_delete(originating_user_id=None)
-
             assert delete_scratch_org_job.delay.called
 
     def test_notify_delete(self, scratch_org_factory):

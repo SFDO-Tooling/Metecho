@@ -1,7 +1,7 @@
 // Form Elements
 // =============
 
-.ms-textarea {
+.metecho-textarea {
   min-height: $size-xx-small;
 }
 
@@ -55,7 +55,7 @@
   }
 }
 
-.ms-nested-checkboxes {
+.metecho-nested-checkboxes {
   // line up with above label; add grid + (faux checkbox + label margin)
   padding-left: $square-icon-x-small-boundary + $spacing-large;
 }

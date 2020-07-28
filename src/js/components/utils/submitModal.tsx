@@ -139,7 +139,7 @@ const SubmitModal = ({
     ? `${i18n.t('Notify')} ${assignee.login} ${i18n.t('by email')}`
     : '';
   const alertLabel = assignee ? (
-    <div className="ms-avatar-container" onClick={toggleAlertAssignee}>
+    <div className="metecho-avatar-container" onClick={toggleAlertAssignee}>
       <span className="slds-m-right_xx-small">{i18n.t('Notify')}</span>
       <GitHubUserAvatar user={assignee} />{' '}
       <span className="slds-m-left_xx-small">
@@ -224,7 +224,7 @@ const SubmitModal = ({
               label={i18n.t(
                 'Describe any critical changes which might impact existing functionality',
               )}
-              className="ms-textarea slds-p-bottom_small"
+              className="metecho-textarea slds-p-bottom_small"
               name="critical_changes"
               value={inputs.critical_changes}
               errorText={errors.critical_changes}
@@ -235,7 +235,7 @@ const SubmitModal = ({
               label={i18n.t(
                 'Describe additional changes including instructions for users for any post-upgrade tasks',
               )}
-              className="ms-textarea slds-p-bottom_small"
+              className="metecho-textarea slds-p-bottom_small"
               name="additional_changes"
               value={inputs.additional_changes}
               errorText={errors.additional_changes}
@@ -244,7 +244,7 @@ const SubmitModal = ({
             <Textarea
               id="pr-notes"
               label={i18n.t('Developer notes')}
-              className="ms-textarea slds-p-bottom_small"
+              className="metecho-textarea slds-p-bottom_small"
               name="notes"
               value={inputs.notes}
               errorText={errors.notes}

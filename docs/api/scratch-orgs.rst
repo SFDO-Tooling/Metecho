@@ -37,6 +37,7 @@ Retrieve
         "currently_refreshing_changes": false,
         "currently_capturing_changes": false,
         "currently_refreshing_org": false,
+        "currently_reassigning_user": false,
         "is_created": true,
         "delete_queued_at": null,
         "owner_gh_username": "user123",

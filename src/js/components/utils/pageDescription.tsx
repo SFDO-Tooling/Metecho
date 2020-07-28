@@ -36,13 +36,13 @@ const PageDescription = ({
   );
 
   return (
-    <div className="slds-m-bottom_x-large ms-secondary-block">
+    <div className="slds-m-bottom_x-large metecho-secondary-block">
       {image ? (
         <div className="slds-media container-fill-space">
           <div
             className="slds-media__figure
               slds-m-left_xx-small
-              ms-repo-image-wrapper"
+              metecho-repo-image-wrapper"
           >
             <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
           </div>

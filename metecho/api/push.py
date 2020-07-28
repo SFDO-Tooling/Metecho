@@ -36,6 +36,11 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_COMMIT_CHANGES_FAILED
         SCRATCH_ORG_REFRESH
         SCRATCH_ORG_REFRESH_FAILED
+        SCRATCH_ORG_REASSIGN
+        SCRATCH_ORG_REASSIGN_FAILED
+
+    scratchorg.list
+        SCRATCH_ORG_RECREATE
 """
 from copy import deepcopy
 
@@ -43,18 +48,20 @@ from channels.layers import get_channel_layer
 from django.utils.translation import gettext_lazy as _
 
 from ..consumer_utils import get_set_message_semaphore
-from .constants import CHANNELS_GROUP_NAME
+from .constants import CHANNELS_GROUP_NAME, LIST
 
 
-async def push_message_about_instance(instance, message):
+async def push_message_about_instance(instance, message, for_list=False):
     model_name = instance._meta.model_name
-    id = str(instance.id)
-    group_name = CHANNELS_GROUP_NAME.format(model=model_name, id=id)
+    id_ = str(instance.id)
+    group_name = CHANNELS_GROUP_NAME.format(
+        model=model_name, id=LIST if for_list else id_
+    )
     channel_layer = get_channel_layer()
 
     new_message = deepcopy(message)
     new_message["model_name"] = model_name
-    new_message["id"] = id
+    new_message["id"] = id_
     sent_message = {"type": "notify", "content": new_message}
     not_deleted = getattr(instance, "deleted_at", None) is None
     message_about_delete = "DELETE" in message["type"] or "REMOVE" in message["type"]

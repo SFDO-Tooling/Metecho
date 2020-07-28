@@ -799,3 +799,104 @@ describe('refreshError', () => {
     ]);
   });
 });
+
+describe('recreateOrg', () => {
+  beforeEach(() => {
+    window.socket = { subscribe: jest.fn() };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
+  test('subscribes to socket and returns action', () => {
+    const store = storeWithThunk({});
+    const org = { id: 'org-id' };
+    const action = { type: 'SCRATCH_ORG_RECREATE', payload: org };
+    store.dispatch(actions.recreateOrg(org));
+    expect(store.getActions()).toEqual([action]);
+    expect(window.socket.subscribe).toHaveBeenCalledWith({
+      model: 'scratch_org',
+      id: 'org-id',
+    });
+  });
+});
+
+describe('orgReassigned', () => {
+  test('returns SCRATCH_ORG_REASSIGN action', () => {
+    const org = { id: 'org-id' };
+    const expected = { type: 'SCRATCH_ORG_REASSIGN', payload: org };
+
+    expect(actions.orgReassigned(org)).toEqual(expected);
+  });
+});
+
+describe('orgReassignFailed', () => {
+  test('adds error message', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {
+        'project-id': [
+          { id: 'task-id', name: 'My Task', project: 'project-id' },
+        ],
+      },
+    });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+      owner: 'user-id',
+    };
+    const action = {
+      type: 'SCRATCH_ORG_REASSIGN_FAILED',
+      payload: org,
+    };
+    store.dispatch(
+      actions.orgReassignFailed({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error reassigning the scratch org on task “My Task”.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[1]).toEqual(action);
+  });
+
+  test('adds error message [no known task]', () => {
+    const store = storeWithThunk({
+      user: { id: 'user-id' },
+      tasks: {},
+    });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+      owner: 'user-id',
+    };
+    const action = {
+      type: 'SCRATCH_ORG_REASSIGN_FAILED',
+      payload: org,
+    };
+    store.dispatch(
+      actions.orgReassignFailed({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error reassigning this scratch org.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(allActions[1]).toEqual(action);
+  });
+});

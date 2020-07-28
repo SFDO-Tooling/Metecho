@@ -167,11 +167,11 @@ def commit_changes_to_github(
         )
 
 
-def get_salesforce_connection(*, config, scratch_org, originating_user_id, base_url=""):
+def get_salesforce_connection(*, scratch_org, originating_user_id, base_url=""):
     org_name = "dev"
     org_config = refresh_access_token(
-        config=config,
         org_name=org_name,
+        config=scratch_org.config,
         scratch_org=scratch_org,
         originating_user_id=originating_user_id,
     )
@@ -191,7 +191,6 @@ def get_salesforce_connection(*, config, scratch_org, originating_user_id, base_
 
 def get_latest_revision_numbers(scratch_org, *, originating_user_id):
     conn = get_salesforce_connection(
-        config=scratch_org.config,
         scratch_org=scratch_org,
         base_url="tooling/",
         originating_user_id=originating_user_id,

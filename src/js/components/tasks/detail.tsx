@@ -95,6 +95,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
   let currentlyFetching = false;
   let currentlyCommitting = false;
+  let currentlyReassigning = false;
   let orgHasChanges = false;
   let userIsOwner = false;
   let devOrg: Org | null | undefined;
@@ -110,6 +111,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
+    currentlyReassigning = Boolean(devOrg?.currently_reassigning_user);
     /* istanbul ignore next */
     if (devOrg || orgs[ORG_TYPES.QA]) {
       hasOrgs = true;
@@ -397,6 +399,14 @@ const TaskDetail = (props: RouteComponentProps) => {
           variant={isPrimary ? 'inverse' : 'base'}
         />
       );
+    } else if (currentlyReassigning) {
+      /* istanbul ignore next */
+      captureButtonText = (
+        <LabelWithSpinner
+          label={i18n.t('Reassigning Org Ownership…')}
+          variant={isPrimary ? 'inverse' : 'base'}
+        />
+      );
     } else if (orgHasChanges) {
       captureButtonText = i18n.t('Retrieve Changes from Dev Org');
     }
@@ -409,7 +419,12 @@ const TaskDetail = (props: RouteComponentProps) => {
         })}
         variant={isPrimary ? 'brand' : 'outline-brand'}
         onClick={captureAction}
-        disabled={fetchingChanges || currentlyFetching || currentlyCommitting}
+        disabled={
+          fetchingChanges ||
+          currentlyFetching ||
+          currentlyCommitting ||
+          currentlyReassigning
+        }
       />
     );
   }
@@ -453,7 +468,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_x-large ms-secondary-block">
+            <div className="slds-m-bottom_x-large metecho-secondary-block">
               <TaskStatusPath task={task} />
             </div>
             {orgs && task.status !== TASK_STATUSES.COMPLETED ? (

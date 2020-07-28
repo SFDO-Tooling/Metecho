@@ -188,7 +188,7 @@ const EditModal = ({
         <Textarea
           id="edit-description"
           label={i18n.t('Description')}
-          className="ms-textarea"
+          className="metecho-textarea"
           name="description"
           value={inputs.description}
           errorText={errors.description}

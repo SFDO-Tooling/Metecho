@@ -87,6 +87,7 @@ const OrgCard = ({
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
   const isRefreshingOrg = Boolean(org?.currently_refreshing_org);
+  const isReassigningOrg = Boolean(org?.currently_reassigning_user);
   const isSubmittingReview = Boolean(
     type === ORG_TYPES.QA && task.currently_submitting_review,
   );
@@ -201,6 +202,7 @@ const OrgCard = ({
             isCreating={isCreating}
             isDeleting={isDeleting}
             isRefreshingChanges={isRefreshingChanges}
+            isReassigningOrg={isReassigningOrg}
             isRefreshingOrg={isRefreshingOrg}
             testOrgOutOfDate={testOrgOutOfDate}
             readyForReview={readyForReview}
@@ -274,6 +276,7 @@ const OrgCard = ({
                 ownedByCurrentUser={ownedByCurrentUser}
                 isDeleting={isDeleting}
                 isRefreshingChanges={isRefreshingChanges}
+                isReassigningOrg={isReassigningOrg}
               />
             </Card>
           </>
