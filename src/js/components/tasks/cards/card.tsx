@@ -37,7 +37,7 @@ interface OrgCardProps {
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
   assignUserModalOpen: boolean;
-  currentOrgType: OrgTypes;
+  currentOrgType: OrgTypes | null;
   handleAssignUser: ({
     type,
     assignee,
@@ -48,7 +48,7 @@ interface OrgCardProps {
   handleCheckForOrgChanges: (org: Org) => void;
   handleRefresh?: (org: Org) => void;
   openCaptureModal?: () => void;
-  openAssignUserModal: () => void;
+  openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
   createOrg: (type: OrgTypes) => void;
 }
@@ -123,9 +123,10 @@ const OrgCard = ({
 
   const doAssignUser = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
-      handleAssignUser({ type: currentOrgType, assignee, shouldAlertAssignee });
+      const orgType = currentOrgType || type;
+      handleAssignUser({ type: orgType, assignee, shouldAlertAssignee });
     },
-    [handleAssignUser, currentOrgType],
+    [handleAssignUser, currentOrgType, type],
   );
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
@@ -175,7 +176,6 @@ const OrgCard = ({
     type === ORG_TYPES.QA ? i18n.t('Tester') : i18n.t('Developer');
   const orgHeading =
     type === ORG_TYPES.QA ? i18n.t('Test Org') : i18n.t('Dev Org');
-
   return (
     <div
       className="slds-size_1-of-1
@@ -235,7 +235,7 @@ const OrgCard = ({
               headerActions={
                 <OrgActions
                   org={org}
-                  type={currentOrgType}
+                  type={type}
                   task={task}
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
@@ -255,7 +255,7 @@ const OrgCard = ({
             >
               <OrgInfo
                 org={org}
-                type={currentOrgType}
+                type={type}
                 task={task}
                 taskCommits={taskCommits}
                 repoUrl={repoUrl}

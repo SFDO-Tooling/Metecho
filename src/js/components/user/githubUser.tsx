@@ -327,7 +327,6 @@ export const AssignUserModal = ({
   setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
 }) => {
   const currentUser = useSelector(selectUserState) as User;
-
   const [selection, setSelection] = useState<GitHubUser | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
   const [autoToggle, setAutoToggle] = useState(true);

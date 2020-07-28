@@ -55,7 +55,7 @@ const OrgCards = ({
   repoUrl: string;
   assignUserModalOpen: boolean;
   isCreatingOrg: OrgTypeTracker;
-  currentOrgType: OrgTypes;
+  currentOrgType: OrgTypes | null;
   openCaptureModal: () => void;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
@@ -244,7 +244,9 @@ const OrgCards = ({
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
           openCaptureModal={openCaptureModal}
-          assignUserModalOpen={assignUserModalOpen}
+          assignUserModalOpen={
+            currentOrgType === ORG_TYPES.DEV && assignUserModalOpen
+          }
           openAssignUserModal={openAssignDevModal}
           closeAssignUserModal={closeAssignUserModal}
           createOrg={createOrg}
@@ -265,7 +267,9 @@ const OrgCards = ({
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
           handleRefresh={handleRefresh}
-          assignUserModalOpen={assignUserModalOpen}
+          assignUserModalOpen={
+            currentOrgType === ORG_TYPES.QA && assignUserModalOpen
+          }
           openAssignUserModal={openAssignTesterModal}
           closeAssignUserModal={closeAssignUserModal}
           createOrg={createOrg}

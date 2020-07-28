@@ -64,7 +64,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
     OrgTypeTrackerDefault,
   );
-  const [currentOrgType, setCurrentOrgType] = useState<OrgTypes>(ORG_TYPES.DEV);
+  const [currentOrgType, setCurrentOrgType] = useState<OrgTypes | null>(null);
   const isMounted = useIsMounted();
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
@@ -177,7 +177,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   };
 
   const closeAssignUserModal = () => {
-    setCurrentOrgType(ORG_TYPES.DEV);
+    setCurrentOrgType(null);
     setAssignUserModalOpen(false);
   };
 

@@ -14,14 +14,14 @@ const UserActions = ({
 }: {
   type: OrgTypes;
   assignedUser: GitHubUser | null;
-  openAssignUserModal: () => void;
+  openAssignUserModal: (type: OrgTypes) => void;
   setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
 }) => {
   if (assignedUser) {
     const handleSelect = (option: { id: string; label: string }) => {
       switch (option.id) {
         case 'edit':
-          openAssignUserModal();
+          openAssignUserModal(type);
           break;
         case 'remove':
           setUser(null, false);
