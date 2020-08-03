@@ -38,7 +38,7 @@ django-model-utils==4.0.0  # via -r requirements/prod.in
 django-parler==2.0.1      # via -r requirements/prod.in
 django-redis==4.12.1      # via -r requirements/prod.in
 django-rq==2.3.2          # via -r requirements/prod.in
-django==3.0.8             # via -r requirements/prod.in, channels, django-allauth, django-anymail, django-filter, django-hashid-field, django-js-reverse, django-log-request-id, django-model-utils, django-redis, django-rq, djangorestframework, sfdo-template-helpers
+django==3.0.9             # via -r requirements/prod.in, channels, django-allauth, django-anymail, django-filter, django-hashid-field, django-js-reverse, django-log-request-id, django-model-utils, django-redis, django-rq, djangorestframework, sfdo-template-helpers
 djangorestframework==3.11.0  # via -r requirements/prod.in, sfdo-template-helpers
 docutils==0.16            # via cumulusci
 factory-boy==2.12.0       # via cumulusci
@@ -46,7 +46,7 @@ faker==4.1.1              # via cumulusci, factory-boy, snowfakery
 furl==2.1.0               # via -r requirements/prod.in
 github3-py==1.3.0         # via -r requirements/prod.in
 github3.py==1.3.0         # via cumulusci
-hashids==1.2.0            # via django-hashid-field
+hashids==1.3.1            # via django-hashid-field
 hiredis==1.1.0            # via aioredis
 honcho==1.0.1             # via -r requirements/prod.in
 humanfriendly==8.2        # via coloredlogs, cumulusci
@@ -87,13 +87,13 @@ robotframework-lint==1.1  # via cumulusci
 robotframework-seleniumlibrary==4.4.0  # via cumulusci
 robotframework==3.2.1     # via cumulusci, robotframework-lint, robotframework-seleniumlibrary
 rq-scheduler==0.10.0      # via -r requirements/prod.in
-rq==1.4.3                 # via django-rq, rq-scheduler
+rq==1.5.0                 # via django-rq, rq-scheduler
 rst2ansi==0.1.5           # via cumulusci
 salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.5.post0        # via cumulusci
 secretstorage==3.1.2      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sentry-sdk==0.16.1        # via -r requirements/prod.in
+sentry-sdk==0.16.3        # via -r requirements/prod.in
 service-identity==18.1.0  # via -r requirements/prod.in, twisted
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.12.0.tar.gz  # via -r requirements/prod.in
 simple-salesforce==1.1.0  # via -r requirements/prod.in, cumulusci, salesforce-bulk
