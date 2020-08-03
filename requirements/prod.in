@@ -1,4 +1,4 @@
-Django==3.0.8
+Django==3.0.9
 beautifulsoup4==4.9.1
 bleach==3.1.5
 channels-redis==3.0.1
@@ -29,7 +29,7 @@ markdown==3.2.2
 psycopg2-binary==2.8.5
 
 rq-scheduler==0.10.0
-sentry-sdk==0.16.1
+sentry-sdk==0.16.3
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.12.0.tar.gz
 simple-salesforce==1.1.0
