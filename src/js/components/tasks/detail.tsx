@@ -1,6 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
-import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -425,10 +424,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     captureButton = (
       <Button
         label={captureButtonText}
-        className={classNames({
-          'slds-m-bottom_medium': readyToSubmit,
-          'slds-m-bottom_x-large': !readyToSubmit,
-        })}
+        className="slds-m-bottom_x-large slds-m-right_medium"
         variant={isPrimary ? 'brand' : 'outline-brand'}
         onClick={captureAction}
         disabled={
@@ -484,7 +480,7 @@ const TaskDetail = (props: RouteComponentProps) => {
               <TaskStatusPath task={task} />
             </div>
             {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
-              <div className="slds-m-bottom_x-large ms-secondary-block">
+              <div className="slds-m-bottom_x-large metecho-secondary-block">
                 <TaskStatusSteps
                   task={task}
                   orgs={orgs}
