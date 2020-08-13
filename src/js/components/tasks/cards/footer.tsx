@@ -11,6 +11,7 @@ const Footer = ({
   isCreating,
   isDeleting,
   isRefreshingChanges,
+  isReassigningOrg,
   isRefreshingOrg,
   testOrgOutOfDate,
   readyForReview,
@@ -21,6 +22,7 @@ const Footer = ({
   isCreating: boolean;
   isDeleting: boolean;
   isRefreshingChanges: boolean;
+  isReassigningOrg: boolean;
   isRefreshingOrg: boolean;
   testOrgOutOfDate: boolean;
   readyForReview: boolean;
@@ -38,6 +40,9 @@ const Footer = ({
   }
   if (isRefreshingChanges) {
     return i18n.t('Checking for Unretrieved Changes…') as JSX.Element;
+  }
+  if (isReassigningOrg) {
+    return i18n.t('Reassigning Org Ownership…') as JSX.Element;
   }
   if (org && ownedByCurrentUser) {
     if (org.currently_capturing_changes) {

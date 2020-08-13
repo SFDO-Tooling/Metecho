@@ -367,6 +367,65 @@ class TestTask:
         Task.objects.all().delete()
         assert task.scratchorg_set.active().count() == 0
 
+    def test_get_all_users_in_commits(self, task_factory):
+        task = task_factory(
+            commits=[
+                {
+                    "id": "123",
+                    "author": {
+                        "name": "Name 1",
+                        "email": "name1@example.com",
+                        "username": "name1",
+                        "avatar_url": "https://example.com/",
+                    },
+                },
+                {
+                    "id": "456",
+                    "author": {
+                        "name": "Name 2",
+                        "email": "name2@example.com",
+                        "username": "name2",
+                        "avatar_url": "https://example.com/",
+                    },
+                },
+                {
+                    "id": "789",
+                    "author": {
+                        "name": "Name 1",
+                        "email": "name1@example.com",
+                        "username": "name1",
+                        "avatar_url": "https://example.com/",
+                    },
+                },
+            ],
+        )
+
+        expected = [
+            {
+                "name": "Name 1",
+                "email": "name1@example.com",
+                "username": "name1",
+                "avatar_url": "https://example.com/",
+            },
+            {
+                "name": "Name 2",
+                "email": "name2@example.com",
+                "username": "name2",
+                "avatar_url": "https://example.com/",
+            },
+        ]
+
+        assert task.get_all_users_in_commits == expected
+
+    def test_add_reviewer(self, task_factory):
+        task = task_factory()
+        task.add_reviewer({"login": "login", "avatar_url": "https://example.com"})
+        task.add_reviewer({"login": "login", "avatar_url": "https://example.com"})
+        task.refresh_from_db()
+        assert task.reviewers == [
+            {"login": "login", "avatar_url": "https://example.com"}
+        ]
+
 
 @pytest.mark.django_db
 class TestUser:
@@ -740,7 +799,6 @@ class TestScratchOrg:
 
             scratch_org = scratch_org_factory(last_modified_at=now())
             scratch_org.queue_delete(originating_user_id=None)
-
             assert delete_scratch_org_job.delay.called
 
     def test_notify_delete(self, scratch_org_factory):

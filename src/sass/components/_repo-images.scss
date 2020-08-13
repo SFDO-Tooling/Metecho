@@ -5,7 +5,7 @@ $repo-img-size: calc(3.5rem + 3vw);
 $repo-img-size-static: 4.75rem;
 $repo-img-pos-adjust: -1.125rem;
 
-.ms-repo-item {
+.metecho-repo-item {
   // increase default height/weight of icon in repo visualpicker
   .slds-media__figure {
     > div {
@@ -22,13 +22,13 @@ $repo-img-pos-adjust: -1.125rem;
 }
 
 // When image, name and description are displayed on project list sidebar
-.ms-repo-image-wrapper {
+.metecho-repo-image-wrapper {
   height: $repo-img-size;
   width: $repo-img-size;
 }
 
 // When image and name are displayed in header
-.ms-repo-image-header {
+.metecho-repo-image-header {
   height: $repo-img-size-static;
   // .slds-page-header__icon is 2.25rem -- account for vertical space
   margin-bottom: $repo-img-pos-adjust;

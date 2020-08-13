@@ -211,9 +211,10 @@ def _create_org_and_run_flow(
             user=user,
         )
     finally:
-        if Path(".cumulusci/logs/cci.log").exists():
+        log_path = Path(project_path, ".cumulusci/logs/cci.log")
+        if log_path.exists():
             scratch_org.refresh_from_db()
-            scratch_org.cci_logs = Path(".cumulusci/logs/cci.log").read_text()
+            scratch_org.cci_logs = log_path.read_text()
             scratch_org.save()
     scratch_org.refresh_from_db()
     # We don't need to explicitly save the following, because this
@@ -371,7 +372,7 @@ def commit_changes_from_org(
         commit = repository.branch(branch).commit
 
         scratch_org.task.refresh_from_db()
-        scratch_org.task.add_ms_git_sha(commit.sha)
+        scratch_org.task.add_metecho_git_sha(commit.sha)
         scratch_org.task.has_unmerged_commits = True
         scratch_org.task.finalize_task_update(originating_user_id=originating_user_id)
 
@@ -774,3 +775,24 @@ def available_task_org_config_names(project, *, user):
 
 
 available_task_org_config_names_job = job(available_task_org_config_names)
+
+
+def user_reassign(scratch_org, *, new_user, originating_user_id):
+    try:
+        scratch_org.refresh_from_db()
+        scratch_org.config["email"] = new_user.email
+        scratch_org.owner = new_user
+        org_config = scratch_org.get_refreshed_org_config()
+        username = org_config.username
+        org_config.salesforce_client.User.update(
+            f"Username/{username}", {"Email": new_user.email},
+        )
+    except Exception as err:
+        scratch_org.finalize_reassign(
+            error=err, originating_user_id=originating_user_id
+        )
+    else:
+        scratch_org.finalize_reassign(originating_user_id=originating_user_id)
+
+
+user_reassign_job = job(user_reassign)

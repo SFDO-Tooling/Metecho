@@ -36,7 +36,7 @@ describe('useForm', () => {
       });
     });
 
-    test('uses custom action and success handlers', async () => {
+    test('uses custom action handler', async () => {
       const action = jest.fn().mockResolvedValue();
       const { result } = renderHookWithRedux(() =>
         useForm({
@@ -50,11 +50,35 @@ describe('useForm', () => {
         {
           preventDefault: jest.fn(),
         },
-        action,
+        { action },
       );
 
       expect(action).toHaveBeenCalledTimes(1);
       expect(createObject).not.toHaveBeenCalled();
+    });
+
+    describe('error', () => {
+      test('updates error values', async () => {
+        const err = new Error('Nope');
+        err.response = { status: 400 };
+        err.body = { testing: ['Do not do that.'] };
+        createObject.mockReturnValueOnce(() => Promise.reject(err));
+        const { result } = renderHookWithRedux(() =>
+          useForm({
+            fields: { testing: '' },
+            objectType: 'test-type',
+          }),
+        );
+
+        expect.assertions(1);
+        await result.current.handleSubmit({
+          preventDefault: jest.fn(),
+        });
+
+        expect(result.current.errors).toEqual({
+          testing: 'Do not do that.',
+        });
+      });
     });
   });
 

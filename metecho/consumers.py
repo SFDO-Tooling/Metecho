@@ -7,7 +7,7 @@ from django.apps import apps
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.utils.translation import gettext as _
 
-from .api.constants import CHANNELS_GROUP_NAME
+from .api.constants import CHANNELS_GROUP_NAME, LIST
 from .consumer_utils import clear_message_semaphore
 
 KNOWN_MODELS = {"user", "repository", "project", "task", "scratchorg"}
@@ -54,13 +54,13 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
     async def hydrate_message(self, content):
         content = deepcopy(content)
         model_name = content.pop("model_name")
-        id = content.pop("id")
+        id_ = content.pop("id")
         # We specifically don't want to include the user model, as that
         # would cause every generic-message to include the user who's
         # getting the message. It'd just be noise on the wire.
         if model_name.lower() != "user":
             try:
-                instance = await self.get_instance(model=model_name, id=id)
+                instance = await self.get_instance(model=model_name, id=id_)
             except ObjectDoesNotExist:
                 pass
             else:
@@ -136,6 +136,8 @@ class PushNotificationConsumer(AsyncJsonWebsocketConsumer):
             ValueError,
             TypeError,
         )
+        if content["id"] == LIST:
+            return True
         try:
             obj = await self.get_instance(**content)
             return obj.subscribable_by(self.scope["user"])

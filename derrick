@@ -52,8 +52,8 @@ case "$1" in
         dcrq yarn add "${@:2}"
         ;;
     "lock:py")
-        dcrq pip-compile --output-file=requirements/prod.txt requirements/prod.in
-        dcrq pip-compile --output-file=requirements/dev.txt requirements/dev.in
+        dcrq pip-compile --upgrade --output-file=requirements/prod.txt requirements/prod.in
+        dcrq pip-compile --upgrade --output-file=requirements/dev.txt requirements/dev.in
         ;;
     "migrate")
         dcr python manage.py migrate "${@:2}"

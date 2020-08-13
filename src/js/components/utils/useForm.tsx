@@ -14,7 +14,13 @@ export interface UseFormProps {
   errors: { [key: string]: string };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setInputs: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>;
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleSubmit: (
+    e: React.FormEvent<HTMLFormElement>,
+    opts?: {
+      action?: (...args: any[]) => Promise<AnyAction>;
+      success?: (...args: any[]) => void;
+    },
+  ) => void;
   resetForm: () => void;
 }
 
@@ -85,14 +91,17 @@ export default ({
   };
   const handleSubmit = (
     e: React.FormEvent<HTMLFormElement>,
-    action?: (...args: any[]) => Promise<AnyAction>,
-    success?: () => void,
+    opts?: {
+      action?: (...args: any[]) => Promise<AnyAction>;
+      success?: (...args: any[]) => void;
+    },
   ) => {
     e.preventDefault();
     setErrors({});
-    if (action) {
-      return action()
-        .then(success || handleSuccess)
+    if (opts?.action) {
+      return opts
+        ?.action()
+        .then(opts?.success || handleSuccess)
         .catch(catchError);
     }
     if (update) {
@@ -107,7 +116,7 @@ export default ({
           hasForm: true,
         }),
       )
-        .then(handleSuccess)
+        .then(opts?.success || handleSuccess)
         .catch(catchError);
     }
     return dispatch(
@@ -122,7 +131,7 @@ export default ({
         shouldSubscribeToObject,
       }),
     )
-      .then(handleSuccess)
+      .then(opts?.success || handleSuccess)
       .catch(catchError);
   };
 

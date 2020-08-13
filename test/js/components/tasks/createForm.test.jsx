@@ -42,43 +42,24 @@ describe('<TaskForm/>', () => {
   const setup = (options) => {
     const defaults = {
       project: defaultProject,
-      startOpen: true,
+      isOpen: true,
+      closeCreateModal: jest.fn(),
     };
     const opts = Object.assign({}, defaults, options);
-    const { project, startOpen } = opts;
+    const { project, isOpen } = opts;
+    const closeCreateModal = jest.fn();
     return renderWithRedux(
       <MemoryRouter>
-        <TaskForm project={project} startOpen={startOpen} />
+        <TaskForm
+          project={project}
+          isOpen={isOpen}
+          closeCreateModal={closeCreateModal}
+        />
       </MemoryRouter>,
       {},
       storeWithThunk,
     );
   };
-
-  describe('submit/close buttons', () => {
-    test('toggle form open/closed', () => {
-      const { getByText, queryByText } = setup({
-        startOpen: undefined,
-        project: {
-          ...defaultProject,
-          currently_fetching_org_config_names: true,
-        },
-      });
-
-      expect(queryByText('Close Form')).toBeNull();
-
-      fireEvent.click(getByText('Add a Task'));
-
-      expect(getByText('Close Form')).toBeVisible();
-      expect(getByText('Add Task')).toBeVisible();
-      expect(queryByText('Add a Task')).toBeNull();
-
-      fireEvent.click(getByText('Close Form'));
-
-      expect(queryByText('Close Form')).toBeNull();
-      expect(getByText('Add a Task')).toBeVisible();
-    });
-  });
 
   describe('refresh org types button click', () => {
     test('triggers refreshOrgConfigs actions', () => {
@@ -90,10 +71,10 @@ describe('<TaskForm/>', () => {
     });
   });
 
-  describe('form submit', () => {
-    test('creates a new task', () => {
+  describe('add a single task', () => {
+    test('calls createObject with data', () => {
       const { getByText, getByLabelText } = setup();
-      const submit = getByText('Add Task');
+      const submit = getByText('Add');
       const nameInput = getByLabelText('*Task Name');
       const descriptionInput = getByLabelText('Description');
       const radioInput = getByLabelText('QA - This is a QA flow');
@@ -117,42 +98,6 @@ describe('<TaskForm/>', () => {
       });
     });
 
-    describe('success', () => {
-      test('displays success message for 3 seconds', async () => {
-        jest.useFakeTimers();
-
-        createObject.mockReturnValueOnce(() =>
-          Promise.resolve({
-            type: 'CREATE_OBJECT_SUCCEEDED',
-            payload: {
-              objectType: 'task',
-              object: {
-                id: 'task1',
-                slug: 'name-of-task',
-                name: 'Name of Task',
-                description: '',
-                project: 'p1',
-              },
-            },
-          }),
-        );
-        const { getByText, getByLabelText, queryByText } = setup();
-        const submit = getByText('Add Task');
-        const nameInput = getByLabelText('*Task Name');
-        fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
-        fireEvent.click(submit);
-
-        expect.assertions(2);
-        await createObject;
-
-        expect(getByText('A task was successfully added.')).toBeVisible();
-
-        jest.runAllTimers();
-
-        expect(queryByText('A task was successfully added.')).toBeNull();
-      });
-    });
-
     describe('error', () => {
       test('displays errors', async () => {
         createObject.mockReturnValueOnce(() =>
@@ -169,7 +114,8 @@ describe('<TaskForm/>', () => {
         const { getByText, getByLabelText, findByText } = setup({
           project: { ...defaultProject, available_task_org_config_names: [] },
         });
-        const submit = getByText('Add Task');
+
+        const submit = getByText('Add');
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
         fireEvent.click(submit);
@@ -178,6 +124,43 @@ describe('<TaskForm/>', () => {
         await findByText('Do not do that');
 
         expect(getByText('Do not do that')).toBeVisible();
+      });
+    });
+  });
+
+  describe('add and create another task', () => {
+    describe('success', () => {
+      test('displays success message for 3 seconds', async () => {
+        jest.useFakeTimers();
+        createObject.mockReturnValueOnce(() =>
+          Promise.resolve({
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              objectType: 'task',
+              object: {
+                id: 'task1',
+                slug: 'name-of-task',
+                name: 'Name of Task',
+                description: '',
+                project: 'p1',
+              },
+            },
+          }),
+        );
+        const { getByText, getByLabelText, queryByText } = setup();
+        const submit = getByText('Add & New');
+        const nameInput = getByLabelText('*Task Name');
+        fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
+        fireEvent.click(submit);
+
+        expect.assertions(2);
+        await createObject;
+
+        expect(getByText('A task was successfully added.')).toBeVisible();
+
+        jest.runAllTimers();
+
+        expect(queryByText('A task was successfully added.')).toBeNull();
       });
     });
   });

@@ -15,6 +15,7 @@ import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
 import { selectUserState } from '@/store/user/selectors';
+import apiFetch from '@/utils/api';
 import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/utils/constants';
 
 export interface AssignedUserTracker {
@@ -75,6 +76,24 @@ const OrgCards = ({
     },
     [dispatch],
   );
+
+  const checkIfTaskCanBeReassigned = async (assignee: GitHubUser) => {
+    const { can_reassign } = await apiFetch({
+      url: `${window.api_urls.task_can_reassign(task.id)}`,
+      dispatch,
+      opts: {
+        method: 'POST',
+        body: JSON.stringify({
+          role: 'assigned_dev',
+          gh_uid: assignee.id,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    });
+    return can_reassign;
+  };
 
   const handleRefresh = useCallback(
     (org: Org) => {
@@ -166,22 +185,30 @@ const OrgCards = ({
 
   const handleDelete = (org: Org) => {
     if (org.org_type === ORG_TYPES.DEV) {
-      setIsWaitingToDeleteDevOrg(true);
       checkForOrgChanges(org);
+      setIsWaitingToDeleteDevOrg(true);
     } else {
       deleteOrg(org);
     }
   };
 
-  const handleAssignUser = ({
+  const handleAssignUser = async ({
     type,
     assignee,
     shouldAlertAssignee,
   }: AssignedUserTracker) => {
     const org = orgs[type];
     if (org && type === ORG_TYPES.DEV) {
-      setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
-      checkForOrgChanges(org);
+      let canReassign = false;
+      if (assignee) {
+        canReassign = await checkIfTaskCanBeReassigned(assignee);
+      }
+      if (canReassign) {
+        assignUser({ type, assignee, shouldAlertAssignee });
+      } else {
+        checkForOrgChanges(org);
+        setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
+      }
     } else {
       assignUser({ type, assignee, shouldAlertAssignee });
     }

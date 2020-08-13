@@ -19,12 +19,20 @@ from ..sf_run_flow import (
     get_devhub_api,
     get_org_details,
     get_org_result,
+    is_org_good,
     mutate_scratch_org,
     refresh_access_token,
     run_flow,
 )
 
 PATCH_ROOT = "metecho.api.sf_run_flow"
+
+
+@pytest.mark.django_db
+def test_is_org_good(scratch_org_factory):
+    with patch("metecho.api.sf_run_flow.jwt_session") as jwt_session:
+        jwt_session.side_effect = HTTPError()
+        assert not is_org_good(scratch_org_factory())
 
 
 def test_capitalize():

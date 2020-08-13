@@ -1,4 +1,5 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -271,12 +272,18 @@ describe('<OrgCards/>', () => {
       };
 
       describe('org has changes', () => {
-        test('refetches, opens confirm modal, updates assignment', () => {
-          const { getByText } = setup({ task });
+        test('refetches, opens confirm modal, updates assignment', async () => {
+          const { findByText, getByText } = setup({ task });
+          fetchMock.postOnce(window.api_urls.task_can_reassign(task.id), {
+            can_reassign: false,
+          });
           fireEvent.click(getByText('User Actions'));
           fireEvent.click(getByText('Change Developer'));
           fireEvent.click(getByText('other-user'));
           fireEvent.click(getByText('Save'));
+
+          expect.assertions(5);
+          await findByText('Confirm');
 
           expect(refetchOrg).toHaveBeenCalledTimes(1);
           expect(updateObject).not.toHaveBeenCalled();
@@ -286,6 +293,32 @@ describe('<OrgCards/>', () => {
 
           fireEvent.click(getByText('Confirm'));
 
+          expect(updateObject).toHaveBeenCalledTimes(1);
+          expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
+            'other-user',
+          );
+        });
+      });
+
+      describe('org can be reassigned', () => {
+        test('updates assignment without refetching', async () => {
+          const { getByText } = setup({ task });
+          fetchMock.postOnce(window.api_urls.task_can_reassign(task.id), {
+            can_reassign: true,
+          });
+          fireEvent.click(getByText('User Actions'));
+          fireEvent.click(getByText('Change Developer'));
+          fireEvent.click(getByText('other-user'));
+          fireEvent.click(getByText('Save'));
+
+          expect.assertions(3);
+          await waitFor(() => {
+            if (!updateObject.mock.calls.length) {
+              throw new Error('waiting...');
+            }
+          });
+
+          expect(refetchOrg).not.toHaveBeenCalled();
           expect(updateObject).toHaveBeenCalledTimes(1);
           expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
             'other-user',
@@ -810,6 +843,22 @@ describe('<OrgCards/>', () => {
 
         expect(getByText('Checking for Unretrieved Changes…')).toBeVisible();
       });
+    });
+  });
+
+  describe('reassigning org', () => {
+    test('displays spinner and message', () => {
+      const { getByText } = setup({
+        orgs: {
+          ...defaultOrgs,
+          Dev: {
+            ...defaultOrgs.Dev,
+            currently_reassigning_user: true,
+          },
+        },
+      });
+
+      expect(getByText('Reassigning Org Ownership…')).toBeVisible();
     });
   });
 
