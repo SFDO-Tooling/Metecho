@@ -3,7 +3,7 @@ beautifulsoup4==4.9.1
 bleach==3.1.5
 channels-redis==3.0.1
 channels==2.4.0
-cumulusci==3.15.0
+cumulusci==3.16.0.dev3
 dj-database-url==0.5.0
 django-allauth==0.42.0
 django-anymail[mailgun]==7.1.0
@@ -31,6 +31,5 @@ psycopg2-binary==2.8.5
 rq-scheduler==0.10.0
 sentry-sdk==0.16.3
 service_identity==18.1.0
-https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.12.0.tar.gz
-simple-salesforce==1.1.0
+https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.16.0.tar.gz
 whitenoise==5.1.0

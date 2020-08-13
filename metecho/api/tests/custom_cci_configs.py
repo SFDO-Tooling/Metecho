@@ -1,7 +1,7 @@
 from contextlib import ExitStack
 from unittest.mock import patch
 
-from ..custom_cci_configs import GlobalConfig, ProjectConfig
+from ..custom_cci_configs import MetechoUniversalConfig, ProjectConfig
 
 
 def test_project_config():
@@ -26,16 +26,16 @@ def test_project_config():
         assert project_config.repo_commit == "repo_commit"
 
 
-def test_global_config():
+def test_universal_config():
     with ExitStack() as stack:
         project_init = stack.enter_context(
             patch("metecho.api.custom_cci_configs.BaseProjectConfig.__init__")
         )
-        global_init = stack.enter_context(
-            patch("metecho.api.custom_cci_configs.BaseGlobalConfig.__init__")
+        universal_init = stack.enter_context(
+            patch("metecho.api.custom_cci_configs.UniversalConfig.__init__")
         )
         project_init.return_value = None
-        global_init.return_value = None
-        global_config = GlobalConfig()
+        universal_init.return_value = None
+        universal_config = MetechoUniversalConfig()
 
-        assert global_config.config_global_local_path is None
+        assert universal_config.config_global_path is None
