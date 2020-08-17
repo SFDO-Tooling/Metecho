@@ -11,11 +11,11 @@ from cumulusci.oauth.salesforce import jwt_session
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
+from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string

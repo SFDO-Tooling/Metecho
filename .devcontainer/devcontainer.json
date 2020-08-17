@@ -14,6 +14,7 @@
     "lextudio.restructuredtext",
     "ms-azuretools.vscode-docker",
     "ms-python.python",
+    "ms-python.vscode-pylance",
     "ms-vscode.sublime-keybindings",
     "naumovs.color-highlight",
     "prettier.prettier-vscode",
@@ -36,10 +37,12 @@
     "files.trimTrailingWhitespace": true,
     "javascript.suggestionActions.enabled": false,
     "typescript.preferences.quoteStyle": "single",
+    "python.formatting.provider": "black",
+    "python.languageServer": "Pylance",
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
-    "python.formatting.provider": "black",
     "python.pythonPath": "/usr/local/bin/python",
+    "python.showStartPage": false,
     "remote.extensionKind": {
       "ms-azuretools.vscode-docker": "workspace"
     },
