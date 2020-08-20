@@ -24,7 +24,7 @@ const ProjectStatusSteps = ({
   const hasDev = tasks.some((task) => task.assigned_dev);
   const isMerged = project.status === PROJECT_STATUSES.MERGED;
 
-  const steps = [
+  const steps: Step[] = [
     {
       label: i18n.t('Add a task'),
       active: !hasTasks,

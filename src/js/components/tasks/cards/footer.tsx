@@ -25,7 +25,7 @@ const Footer = ({
   isReassigningOrg: boolean;
   isRefreshingOrg: boolean;
   testOrgOutOfDate: boolean;
-  readyForReview: boolean;
+  readyForReview?: boolean;
   openRefreshOrgModal: () => void;
 }) => {
   const loadingMsg: JSX.Element = i18n.t(

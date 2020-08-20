@@ -319,7 +319,7 @@ export const AssignUserModal = ({
 }: {
   allUsers: GitHubUser[];
   selectedUser: GitHubUser | null;
-  orgType: OrgTypes | null;
+  orgType: OrgTypes;
   isOpen: boolean;
   emptyMessageText: string;
   emptyMessageAction: () => void;
@@ -327,6 +327,7 @@ export const AssignUserModal = ({
   setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
 }) => {
   const currentUser = useSelector(selectUserState) as User;
+
   const [selection, setSelection] = useState<GitHubUser | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
   const [autoToggle, setAutoToggle] = useState(true);

@@ -36,7 +36,7 @@ const OrgInfo = ({
   ownedByWrongUser: Org | null;
   isCreating: boolean;
   isRefreshingOrg: boolean;
-  isSubmittingReview: boolean;
+  isSubmittingReview?: boolean;
   testOrgOutOfDate: boolean;
   missingCommits: number;
   doCheckForOrgChanges: () => void;

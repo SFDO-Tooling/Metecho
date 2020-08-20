@@ -1,9 +1,8 @@
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import TaskStatusSteps from '@/components/tasks/steps';
 import { REVIEW_STATUSES, TASK_STATUSES } from '@/utils/constants';
-
-import { renderWithRedux } from './../../utils';
 
 const defaultTask = {
   id: 'task',
@@ -119,13 +118,7 @@ describe('<TaskStatusSteps />', () => {
       Dev: devOrg,
       QA: testOrg,
     };
-    const initialState = {
-      user: { id: 'user-id', username: 'currentUser' },
-    };
-    const { container } = renderWithRedux(
-      <TaskStatusSteps task={task} orgs={orgs} />,
-      initialState,
-    );
+    const { container } = render(<TaskStatusSteps task={task} orgs={orgs} />);
 
     expect(container).toMatchSnapshot();
   });

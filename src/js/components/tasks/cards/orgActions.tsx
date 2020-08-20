@@ -33,12 +33,12 @@ const OrgActions = ({
   assignedToCurrentUser: boolean;
   ownedByWrongUser: Org | null;
   testOrgOutOfDate: boolean;
-  readyForReview: boolean;
+  readyForReview?: boolean;
   isCreating: boolean;
   isDeleting: boolean;
   isRefreshingOrg: boolean;
-  isSubmittingReview: boolean;
-  openSubmitReviewModal: () => void;
+  isSubmittingReview?: boolean;
+  openSubmitReviewModal?: () => void;
   doCreateOrg: () => void;
   doDeleteOrg: () => void;
   doRefreshOrg: () => void;
