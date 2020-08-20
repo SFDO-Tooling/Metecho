@@ -275,13 +275,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
       switch (action) {
         case 'submit':
           /* istanbul ignore else */
-          if (readyToSubmit) {
+          if (readyToSubmit && !currentlySubmitting) {
             openSubmitModal();
           }
           break;
       }
     },
-    [readyToSubmit],
+    [readyToSubmit, currentlySubmitting],
   );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -445,6 +445,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 project={project}
                 tasks={tasks || []}
                 readyToSubmit={readyToSubmit}
+                currentlySubmitting={currentlySubmitting}
                 handleAction={handleStepAction}
               />
             </div>

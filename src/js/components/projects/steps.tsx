@@ -11,6 +11,7 @@ interface ProjectStatusStepsProps {
   project: Project;
   tasks: Task[];
   readyToSubmit: boolean;
+  currentlySubmitting: boolean;
   handleAction: (step: Step) => void;
 }
 
@@ -18,6 +19,7 @@ const ProjectStatusSteps = ({
   project,
   tasks,
   readyToSubmit,
+  currentlySubmitting,
   handleAction,
 }: ProjectStatusStepsProps) => {
   const hasTasks = Boolean(tasks.length);
@@ -42,10 +44,12 @@ const ProjectStatusSteps = ({
       complete: project.has_unmerged_commits || isMerged,
     },
     {
-      label: i18n.t('Submit this project for review on GitHub'),
+      label: currentlySubmitting
+        ? i18n.t('Submitting project for review on GitHub…')
+        : i18n.t('Submit this project for review on GitHub'),
       active: readyToSubmit,
       complete: project.pr_is_open || isMerged,
-      action: 'submit',
+      action: currentlySubmitting ? undefined : 'submit',
     },
     {
       label: i18n.t('Merge pull request on GitHub'),
