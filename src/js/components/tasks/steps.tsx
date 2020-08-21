@@ -3,6 +3,7 @@ import React from 'react';
 
 import Steps from '@/components/steps';
 import { Step } from '@/components/steps/stepsItem';
+import { OrgTypeTracker } from '@/components/tasks/cards';
 import { OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { User } from '@/store/user/reducer';
@@ -13,6 +14,7 @@ interface TaskStatusStepsProps {
   task: Task;
   orgs: OrgsByTask;
   user: User;
+  isCreatingOrg: OrgTypeTracker;
   handleAction: (step: Step) => void;
 }
 
@@ -20,6 +22,7 @@ const TaskStatusSteps = ({
   task,
   orgs,
   user,
+  isCreatingOrg,
   handleAction,
 }: TaskStatusStepsProps) => {
   const hasDev = Boolean(task.assigned_dev);
@@ -50,10 +53,14 @@ const TaskStatusSteps = ({
   const taskIsSubmitting = Boolean(task?.currently_creating_pr);
   const devOrgFetching = Boolean(devOrg?.currently_refreshing_changes);
   const devOrgCommitting = Boolean(devOrg?.currently_capturing_changes);
-  const devOrgIsCreating = Boolean(devOrg && !devOrg.is_created);
+  const devOrgIsCreating = Boolean(
+    isCreatingOrg[ORG_TYPES.DEV] || (devOrg && !devOrg.is_created),
+  );
   const devOrgIsDeleting = Boolean(devOrg?.delete_queued_at);
   const devOrgIsReassigning = Boolean(devOrg?.currently_reassigning_user);
-  const testOrgIsCreating = Boolean(testOrg && !testOrg.is_created);
+  const testOrgIsCreating = Boolean(
+    isCreatingOrg[ORG_TYPES.QA] || (testOrg && !testOrg.is_created),
+  );
   const testOrgIsDeleting = Boolean(testOrg?.delete_queued_at);
   const testOrgIsRefreshing = Boolean(testOrg?.currently_refreshing_org);
   const testOrgIsSubmittingReview = Boolean(task?.currently_submitting_review);

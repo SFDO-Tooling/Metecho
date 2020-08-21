@@ -136,8 +136,12 @@ const TaskDetail = (props: RouteComponentProps) => {
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
     currentlyReassigning = Boolean(devOrg?.currently_reassigning_user);
     testOrgSubmittingReview = Boolean(task?.currently_submitting_review);
-    devOrgIsCreating = Boolean(devOrg && !devOrg.is_created);
-    testOrgIsCreating = Boolean(testOrg && !testOrg.is_created);
+    devOrgIsCreating = Boolean(
+      isCreatingOrg[ORG_TYPES.DEV] || (devOrg && !devOrg.is_created),
+    );
+    testOrgIsCreating = Boolean(
+      isCreatingOrg[ORG_TYPES.QA] || (testOrg && !testOrg.is_created),
+    );
     devOrgIsDeleting = Boolean(devOrg?.delete_queued_at);
     testOrgIsDeleting = Boolean(testOrg?.delete_queued_at);
     testOrgIsRefreshing = Boolean(testOrg?.currently_refreshing_org);
@@ -563,6 +567,7 @@ const TaskDetail = (props: RouteComponentProps) => {
                   task={task}
                   orgs={orgs}
                   user={user}
+                  isCreatingOrg={isCreatingOrg}
                   handleAction={handleStepAction}
                 />
               </div>

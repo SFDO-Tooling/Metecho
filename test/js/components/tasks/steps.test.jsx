@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
+import { ORG_TYPE_TRACKER_DEFAULT } from '@/components/tasks/cards';
 import TaskStatusSteps from '@/components/tasks/steps';
 import { REVIEW_STATUSES, TASK_STATUSES } from '@/utils/constants';
 
@@ -138,7 +139,12 @@ describe('<TaskStatusSteps />', () => {
       QA: testOrg,
     };
     const { container } = render(
-      <TaskStatusSteps task={task} orgs={orgs} user={jonny} />,
+      <TaskStatusSteps
+        task={task}
+        orgs={orgs}
+        user={jonny}
+        isCreatingOrg={ORG_TYPE_TRACKER_DEFAULT}
+      />,
     );
 
     expect(container).toMatchSnapshot();
