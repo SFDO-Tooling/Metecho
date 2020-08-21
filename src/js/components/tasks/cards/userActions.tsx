@@ -20,6 +20,7 @@ const UserActions = ({
   if (assignedUser) {
     const handleSelect = (option: { id: string; label: string }) => {
       switch (option.id) {
+        /* istanbul ignore next */
         case 'edit':
           openAssignUserModal(type);
           break;

@@ -5,44 +5,21 @@ import Steps from '@/components/steps';
 import { Step } from '@/components/steps/stepsItem';
 import { OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
+import { User } from '@/store/user/reducer';
 import { ORG_TYPES, REVIEW_STATUSES } from '@/utils/constants';
 import { getTaskCommits } from '@/utils/helpers';
 
 interface TaskStatusStepsProps {
   task: Task;
   orgs: OrgsByTask;
-  userIsAssignedDev: boolean;
-  userIsAssignedTester: boolean;
-  userIsDevOrgOwner: boolean;
-  userIsTestOrgOwner: boolean;
-  devOrgLoading: boolean;
-  testOrgLoading: boolean;
-  devOrgIsCreating: boolean;
-  testOrgIsCreating: boolean;
-  currentlyFetching: boolean;
-  currentlyCommitting: boolean;
-  currentlySubmitting: boolean;
-  testOrgIsRefreshing: boolean;
-  testOrgSubmittingReview: boolean;
+  user: User;
   handleAction: (step: Step) => void;
 }
 
 const TaskStatusSteps = ({
   task,
   orgs,
-  userIsAssignedDev,
-  userIsAssignedTester,
-  userIsDevOrgOwner,
-  userIsTestOrgOwner,
-  devOrgLoading,
-  testOrgLoading,
-  devOrgIsCreating,
-  testOrgIsCreating,
-  currentlyFetching,
-  currentlyCommitting,
-  currentlySubmitting,
-  testOrgIsRefreshing,
-  testOrgSubmittingReview,
+  user,
   handleAction,
 }: TaskStatusStepsProps) => {
   const hasDev = Boolean(task.assigned_dev);
@@ -53,20 +30,54 @@ const TaskStatusSteps = ({
     task.review_valid &&
     task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
   const readyForReview = task.has_unmerged_commits && task.pr_is_open;
+  const hasValidCommits = task.has_unmerged_commits && !hasReviewRejected;
   const devOrg = orgs[ORG_TYPES.DEV];
   const testOrg = orgs[ORG_TYPES.QA];
   const hasDevOrg = Boolean(devOrg?.is_created);
   const hasTestOrg = Boolean(testOrg?.is_created);
-  const hasValidCommits = task.has_unmerged_commits && !hasReviewRejected;
+  const userIsAssignedDev = Boolean(
+    user.username === task?.assigned_dev?.login,
+  );
+  const userIsAssignedTester = Boolean(
+    user.username === task?.assigned_qa?.login,
+  );
+  const userIsDevOrgOwner = Boolean(
+    userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
+  );
+  const userIsTestOrgOwner = Boolean(
+    userIsAssignedTester && testOrg?.is_created && testOrg?.owner === user.id,
+  );
+  const taskIsSubmitting = Boolean(task?.currently_creating_pr);
+  const devOrgFetching = Boolean(devOrg?.currently_refreshing_changes);
+  const devOrgCommitting = Boolean(devOrg?.currently_capturing_changes);
+  const devOrgIsCreating = Boolean(devOrg && !devOrg.is_created);
+  const devOrgIsDeleting = Boolean(devOrg?.delete_queued_at);
+  const devOrgIsReassigning = Boolean(devOrg?.currently_reassigning_user);
+  const testOrgIsCreating = Boolean(testOrg && !testOrg.is_created);
+  const testOrgIsDeleting = Boolean(testOrg?.delete_queued_at);
+  const testOrgIsRefreshing = Boolean(testOrg?.currently_refreshing_org);
+  const testOrgIsSubmittingReview = Boolean(task?.currently_submitting_review);
   const taskCommits = getTaskCommits(task);
   const testOrgOutOfDate =
     hasTestOrg && taskCommits.indexOf(testOrg?.latest_commit || '') !== 0;
 
+  const devOrgLoading =
+    devOrgIsCreating ||
+    devOrgIsDeleting ||
+    devOrgFetching ||
+    devOrgIsReassigning ||
+    devOrgCommitting;
+  const testOrgLoading =
+    testOrgIsCreating ||
+    testOrgIsDeleting ||
+    testOrgIsRefreshing ||
+    testOrgIsSubmittingReview;
+
   let retrieveChangesLabel = i18n.t('Retrieve changes from Dev Org');
-  if (currentlyFetching) {
+  if (devOrgFetching) {
     retrieveChangesLabel = i18n.t('Checking for Unretrieved Changes…');
   }
-  if (currentlyCommitting) {
+  if (devOrgCommitting) {
     retrieveChangesLabel = i18n.t('Retrieving changes from Dev Org…');
   }
 
@@ -116,13 +127,13 @@ const TaskStatusSteps = ({
       action: devOrgLoading ? undefined : 'retrieve-changes',
     },
     {
-      label: currentlySubmitting
+      label: taskIsSubmitting
         ? i18n.t('Submitting changes for testing…')
         : i18n.t('Submit changes for testing'),
       active: task.has_unmerged_commits && !task.pr_is_open,
       complete: task.pr_is_open,
       assignee: null,
-      action: currentlySubmitting ? undefined : 'submit-changes',
+      action: taskIsSubmitting ? undefined : 'submit-changes',
     },
     {
       label: i18n.t('Assign a Tester'),
@@ -165,7 +176,7 @@ const TaskStatusSteps = ({
           : undefined,
     },
     {
-      label: testOrgSubmittingReview
+      label: testOrgIsSubmittingReview
         ? i18n.t('Submitting a review…')
         : i18n.t('Submit a review'),
       // Active if Task PR is still open, a up-to-date Test Org exists,
@@ -178,7 +189,7 @@ const TaskStatusSteps = ({
       complete: task.review_valid,
       assignee: task.assigned_qa,
       action:
-        userIsAssignedTester && !testOrgSubmittingReview
+        userIsAssignedTester && !testOrgIsSubmittingReview
           ? 'submit-review'
           : undefined,
     },

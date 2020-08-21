@@ -29,7 +29,7 @@ export interface OrgTypeTracker {
   [ORG_TYPES.QA]: boolean;
 }
 
-export const OrgTypeTrackerDefault = {
+export const ORG_TYPE_TRACKER_DEFAULT = {
   [ORG_TYPES.DEV]: false,
   [ORG_TYPES.QA]: false,
 };
@@ -42,12 +42,12 @@ const OrgCards = ({
   repoUrl,
   assignUserModalOpen,
   isCreatingOrg,
+  testOrgReadyForReview,
+  testOrgSubmittingReview,
   openCaptureModal,
   openAssignUserModal,
   closeAssignUserModal,
   openSubmitReviewModal,
-  testOrgReadyForReview,
-  testOrgSubmittingReview,
   doCreateOrg,
   doRefreshOrg,
 }: {
@@ -58,12 +58,12 @@ const OrgCards = ({
   repoUrl: string;
   assignUserModalOpen: OrgTypes | null;
   isCreatingOrg: OrgTypeTracker;
+  testOrgReadyForReview: boolean;
+  testOrgSubmittingReview: boolean;
   openCaptureModal: () => void;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
   openSubmitReviewModal: () => void;
-  testOrgReadyForReview: boolean;
-  testOrgSubmittingReview: boolean;
   doCreateOrg: (type: OrgTypes) => void;
   doRefreshOrg: (org: Org) => void;
 }) => {
@@ -81,7 +81,7 @@ const OrgCards = ({
     setIsWaitingToRemoveUser,
   ] = useState<AssignedUserTracker | null>(null);
   const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
-    OrgTypeTrackerDefault,
+    ORG_TYPE_TRACKER_DEFAULT,
   );
   const dispatch = useDispatch<ThunkDispatch>();
 
@@ -211,9 +211,11 @@ const OrgCards = ({
     handleCreate = user.is_devhub_enabled ? doCreateOrg : openInfoModal;
   }
 
+  /* istanbul ignore next */
   const openAssignDevModal = () => {
     openAssignUserModal(ORG_TYPES.DEV);
   };
+  /* istanbul ignore next */
   const openAssignTesterModal = () => {
     openAssignUserModal(ORG_TYPES.QA);
   };

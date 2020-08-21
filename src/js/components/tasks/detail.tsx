@@ -13,8 +13,8 @@ import CommitList from '@/components/commits/list';
 import { Step } from '@/components/steps/stepsItem';
 import CaptureModal from '@/components/tasks/capture';
 import OrgCards, {
+  ORG_TYPE_TRACKER_DEFAULT,
   OrgTypeTracker,
-  OrgTypeTrackerDefault,
 } from '@/components/tasks/cards';
 import SubmitReviewModal from '@/components/tasks/cards/submitReview';
 import TaskStatusPath from '@/components/tasks/path';
@@ -65,7 +65,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     setAssignUserModalOpen,
   ] = useState<OrgTypes | null>(null);
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
-    OrgTypeTrackerDefault,
+    ORG_TYPE_TRACKER_DEFAULT,
   );
   const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
   const openSubmitReviewModal = () => {
@@ -141,7 +141,6 @@ const TaskDetail = (props: RouteComponentProps) => {
     devOrgIsDeleting = Boolean(devOrg?.delete_queued_at);
     testOrgIsDeleting = Boolean(testOrg?.delete_queued_at);
     testOrgIsRefreshing = Boolean(testOrg?.currently_refreshing_org);
-    /* istanbul ignore next */
     if (devOrg || testOrg) {
       hasOrgs = true;
     }
@@ -278,16 +277,19 @@ const TaskDetail = (props: RouteComponentProps) => {
           openAssignUserModal(ORG_TYPES.DEV);
           break;
         case 'create-dev-org':
+          /* istanbul ignore else */
           if (!devOrg && userIsAssignedDev) {
             doCreateOrg(ORG_TYPES.DEV);
           }
           break;
         case 'retrieve-changes':
+          /* istanbul ignore else */
           if (readyToCaptureChanges && !devOrgLoading) {
             doCaptureChanges();
           }
           break;
         case 'submit-changes':
+          /* istanbul ignore else */
           if (readyToSubmit && !currentlySubmitting) {
             openSubmitModal();
           }
@@ -296,11 +298,13 @@ const TaskDetail = (props: RouteComponentProps) => {
           openAssignUserModal(ORG_TYPES.QA);
           break;
         case 'create-qa-org':
+          /* istanbul ignore else */
           if (!testOrg && userIsAssignedTester) {
             doCreateOrg(ORG_TYPES.QA);
           }
           break;
         case 'refresh-test-org':
+          /* istanbul ignore else */
           if (
             testOrg &&
             userIsTestOwner &&
@@ -311,6 +315,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           }
           break;
         case 'submit-review':
+          /* istanbul ignore else */
           if (userIsAssignedTester && !testOrgSubmittingReview) {
             openSubmitReviewModal();
           }
@@ -557,19 +562,7 @@ const TaskDetail = (props: RouteComponentProps) => {
                 <TaskStatusSteps
                   task={task}
                   orgs={orgs}
-                  userIsAssignedDev={userIsAssignedDev}
-                  userIsAssignedTester={userIsAssignedTester}
-                  userIsDevOrgOwner={userIsDevOwner}
-                  userIsTestOrgOwner={userIsTestOwner}
-                  devOrgLoading={devOrgLoading}
-                  testOrgLoading={testOrgLoading}
-                  devOrgIsCreating={devOrgIsCreating}
-                  testOrgIsCreating={testOrgIsCreating}
-                  currentlyFetching={currentlyFetching}
-                  currentlyCommitting={currentlyCommitting}
-                  currentlySubmitting={currentlySubmitting}
-                  testOrgIsRefreshing={testOrgIsRefreshing}
-                  testOrgSubmittingReview={testOrgSubmittingReview}
+                  user={user}
                   handleAction={handleStepAction}
                 />
               </div>
