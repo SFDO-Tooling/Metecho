@@ -3,9 +3,9 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import OrgCards from '@/components/tasks/cards';
-import { createObject, deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
+import OrgCards, { ORG_TYPE_TRACKER_DEFAULT } from '@/components/tasks/cards';
+import { deleteObject, updateObject } from '@/store/actions';
+import { refetchOrg } from '@/store/orgs/actions';
 import { addUrlParams } from '@/utils/api';
 import { SHOW_PROJECT_COLLABORATORS } from '@/utils/constants';
 
@@ -14,9 +14,6 @@ import { renderWithRedux, storeWithThunk } from '../../utils';
 jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
 
-createObject.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
 deleteObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
@@ -26,16 +23,11 @@ updateObject.mockReturnValue(() =>
 refetchOrg.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
-refreshOrg.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
 
 afterEach(() => {
-  createObject.mockClear();
   deleteObject.mockClear();
   updateObject.mockClear();
   refetchOrg.mockClear();
-  refreshOrg.mockClear();
 });
 
 const defaultOrgs = {
@@ -81,6 +73,8 @@ const defaultProjectUsers = [
   { id: 'user-id', login: 'user-name' },
   { id: 'other-user', login: 'other-user' },
 ];
+const createOrg = jest.fn();
+const refreshOrg = jest.fn();
 
 describe('<OrgCards/>', () => {
   const setup = (options) => {
@@ -89,6 +83,10 @@ describe('<OrgCards/>', () => {
       orgs: defaultOrgs,
       task: defaultTask,
       projectUsers: defaultProjectUsers,
+      assignUserModalOpen: null,
+      isCreatingOrg: ORG_TYPE_TRACKER_DEFAULT,
+      testOrgReadyForReview: false,
+      testOrgSubmittingReview: false,
       rerender: false,
     };
     const opts = Object.assign({}, defaults, options);
@@ -101,6 +99,15 @@ describe('<OrgCards/>', () => {
             task={opts.task}
             projectUsers={opts.projectUsers}
             projectUrl="project-url"
+            assignUserModalOpen={opts.assignUserModalOpen}
+            isCreatingOrg={opts.isCreatingOrg}
+            testOrgReadyForReview={opts.testOrgReadyForReview}
+            testOrgSubmittingReview={opts.testOrgSubmittingReview}
+            openAssignUserModal={jest.fn()}
+            closeAssignUserModal={jest.fn()}
+            openSubmitReviewModal={jest.fn()}
+            doCreateOrg={createOrg}
+            doRefreshOrg={refreshOrg}
           />
         </StaticRouter>,
         opts.initialState,
@@ -212,8 +219,11 @@ describe('<OrgCards/>', () => {
         ...defaultTask,
         assigned_dev: null,
       };
-      const { getByText, baseElement } = setup({ task, orgs: {} });
-      fireEvent.click(getByText('Assign'));
+      const { getByText, baseElement } = setup({
+        task,
+        orgs: {},
+        assignUserModalOpen: 'Dev',
+      });
       fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="user-name"]'),
       );
@@ -234,8 +244,11 @@ describe('<OrgCards/>', () => {
         assigned_dev: null,
       };
       const projectUsers = [];
-      const { getByText, context } = setup({ task, projectUsers });
-      fireEvent.click(getByText('Assign'));
+      const { getByText, context } = setup({
+        task,
+        projectUsers,
+        assignUserModalOpen: 'Dev',
+      });
       fireEvent.click(getByText('View Project to Add Collaborators'));
 
       expect(context.action).toEqual('PUSH');
@@ -251,9 +264,11 @@ describe('<OrgCards/>', () => {
         ...defaultTask,
         assigned_dev: null,
       };
-      const { getByText } = setup({ task, orgs: {} });
-      fireEvent.click(getByText('User Actions'));
-      fireEvent.click(getByText('Change Tester'));
+      const { getByText } = setup({
+        task,
+        orgs: {},
+        assignUserModalOpen: 'QA',
+      });
       fireEvent.click(getByText('other-user'));
       fireEvent.click(getByText('Save'));
 
@@ -273,12 +288,13 @@ describe('<OrgCards/>', () => {
 
       describe('org has changes', () => {
         test('refetches, opens confirm modal, updates assignment', async () => {
-          const { findByText, getByText } = setup({ task });
           fetchMock.postOnce(window.api_urls.task_can_reassign(task.id), {
             can_reassign: false,
           });
-          fireEvent.click(getByText('User Actions'));
-          fireEvent.click(getByText('Change Developer'));
+          const { findByText, getByText } = setup({
+            task,
+            assignUserModalOpen: 'Dev',
+          });
           fireEvent.click(getByText('other-user'));
           fireEvent.click(getByText('Save'));
 
@@ -302,12 +318,10 @@ describe('<OrgCards/>', () => {
 
       describe('org can be reassigned', () => {
         test('updates assignment without refetching', async () => {
-          const { getByText } = setup({ task });
           fetchMock.postOnce(window.api_urls.task_can_reassign(task.id), {
             can_reassign: true,
           });
-          fireEvent.click(getByText('User Actions'));
-          fireEvent.click(getByText('Change Developer'));
+          const { getByText } = setup({ task, assignUserModalOpen: 'Dev' });
           fireEvent.click(getByText('other-user'));
           fireEvent.click(getByText('Save'));
 
@@ -531,96 +545,7 @@ describe('<OrgCards/>', () => {
     });
 
     describe('submitting a review', () => {
-      test('opens submit review modal', () => {
-        const { getByText, queryByText } = setup({
-          task: { ...defaultTask, commits: [], pr_is_open: true },
-          orgs: {
-            ...orgs,
-            QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
-          },
-        });
-        fireEvent.click(getByText('Submit Review'));
-
-        expect(getByText('Submit Task Review')).toBeVisible();
-
-        fireEvent.click(getByText('Cancel'));
-
-        expect(queryByText('Submit Task Review')).toBeNull();
-      });
-
-      test('updates default fields when props change', () => {
-        let task = { ...defaultTask, commits: [], pr_is_open: true };
-        const theseOrgs = {
-          ...orgs,
-          QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
-        };
-        const {
-          getByText,
-          getByLabelText,
-          queryByLabelText,
-          store,
-          rerender,
-        } = setup({
-          task,
-          orgs: theseOrgs,
-        });
-        fireEvent.click(getByText('Submit Review'));
-
-        expect(getByLabelText('Approve')).toBeChecked();
-        expect(getByLabelText('Request changes')).not.toBeChecked();
-
-        task = {
-          ...task,
-          review_valid: true,
-          review_status: 'Changes requested',
-        };
-        setup({ task, orgs: theseOrgs, store, rerender });
-
-        expect(getByLabelText('Approve')).not.toBeChecked();
-        expect(getByLabelText('Request changes')).toBeChecked();
-        expect(getByLabelText('Delete Test Org')).toBeChecked();
-
-        setup({ task, orgs: { Dev: null, QA: null }, store, rerender });
-
-        expect(queryByLabelText('Delete Test Org')).toBeNull();
-      });
-
-      describe('form submit', () => {
-        test('submits task review', () => {
-          const { getByText, baseElement } = setup({
-            task: { ...defaultTask, commits: [], pr_is_open: true },
-            orgs: {
-              ...orgs,
-              QA: {
-                ...orgs.QA,
-                latest_commit: 'parent',
-                has_been_visited: true,
-              },
-            },
-          });
-          fireEvent.click(getByText('Submit Review'));
-          const submit = baseElement.querySelector(
-            '.slds-button[type="submit"]',
-          );
-          fireEvent.click(submit);
-
-          expect(getByText('Submitting Review…')).toBeVisible();
-          expect(createObject).toHaveBeenCalledTimes(1);
-          expect(createObject).toHaveBeenCalledWith({
-            url: window.api_urls.task_review('task-id'),
-            data: {
-              notes: '',
-              status: 'Approved',
-              delete_org: true,
-              org: 'org-id',
-            },
-            hasForm: true,
-            shouldSubscribeToObject: false,
-          });
-        });
-      });
-
-      test('currently submitting', () => {
+      test('shows status of currently submitting', () => {
         const { getByText } = setup({
           task: {
             ...defaultTask,
@@ -632,6 +557,7 @@ describe('<OrgCards/>', () => {
             ...orgs,
             QA: { ...orgs.QA, latest_commit: 'parent', has_been_visited: true },
           },
+          testOrgSubmittingReview: true,
         });
 
         expect(getByText('Submitting Review…')).toBeVisible();
@@ -650,6 +576,7 @@ describe('<OrgCards/>', () => {
               Dev: null,
               QA: null,
             },
+            testOrgReadyForReview: true,
           });
 
           expect(getByText('Update Review')).toBeVisible();
@@ -671,6 +598,7 @@ describe('<OrgCards/>', () => {
                 has_been_visited: false,
               },
             },
+            testOrgReadyForReview: true,
           });
 
           expect(getByText('Test Changes in Org')).toBeVisible();
@@ -757,13 +685,14 @@ describe('<OrgCards/>', () => {
       const { getByText } = setup();
       fireEvent.click(getByText('Create Org'));
 
-      expect(createObject).toHaveBeenCalledWith({
-        objectType: 'scratch_org',
-        data: {
-          org_type: 'QA',
-          task: 'task-id',
-        },
+      expect(createOrg).toHaveBeenCalledWith('QA');
+    });
+
+    test('shows status of currently creating', () => {
+      const { getByText } = setup({
+        isCreatingOrg: { Dev: true, QA: false },
       });
+
       expect(getByText('Creating Org…')).toBeVisible();
     });
 
@@ -780,14 +709,7 @@ describe('<OrgCards/>', () => {
         });
         fireEvent.click(getByText('Create Org'));
 
-        expect(createObject).toHaveBeenCalledWith({
-          objectType: 'scratch_org',
-          data: {
-            org_type: 'QA',
-            task: 'task-id',
-          },
-        });
-        expect(getByText('Creating Org…')).toBeVisible();
+        expect(createOrg).toHaveBeenCalledWith('QA');
       });
     });
 
@@ -800,7 +722,7 @@ describe('<OrgCards/>', () => {
         });
         fireEvent.click(getByText('Create Org'));
 
-        expect(createObject).not.toHaveBeenCalled();
+        expect(createOrg).not.toHaveBeenCalled();
         expect(getByText('Use Custom Domain')).toBeVisible();
       });
     });
@@ -814,7 +736,7 @@ describe('<OrgCards/>', () => {
         });
         fireEvent.click(getByText('Create Org'));
 
-        expect(createObject).not.toHaveBeenCalled();
+        expect(createOrg).not.toHaveBeenCalled();
         expect(getByText('Enable Dev Hub')).toBeVisible();
       });
     });

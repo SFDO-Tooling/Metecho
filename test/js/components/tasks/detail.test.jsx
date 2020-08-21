@@ -3,8 +3,9 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import TaskDetail from '@/components/tasks/detail';
-import { fetchObjects } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
+import { createObject, fetchObjects } from '@/store/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
+import { TASK_STATUSES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -12,16 +13,24 @@ import { renderWithRedux, storeWithThunk } from './../../utils';
 jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
 
+createObject.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 fetchObjects.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
 refetchOrg.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
+refreshOrg.mockReturnValue(() =>
+  Promise.resolve({ type: 'TEST', payload: {} }),
+);
 
 afterEach(() => {
+  createObject.mockClear();
   fetchObjects.mockClear();
   refetchOrg.mockClear();
+  refreshOrg.mockClear();
 });
 
 const defaultState = {
@@ -140,6 +149,7 @@ describe('<TaskDetail/>', () => {
       repositorySlug: 'repository-1',
       projectSlug: 'project-1',
       taskSlug: 'task-1',
+      rerender: false,
     };
     const opts = Object.assign({}, defaults, options);
     const { initialState, repositorySlug, projectSlug, taskSlug } = opts;
@@ -152,6 +162,8 @@ describe('<TaskDetail/>', () => {
       </StaticRouter>,
       initialState,
       storeWithThunk,
+      opts.rerender,
+      opts.store,
     );
     return { ...result, context };
   };
@@ -518,5 +530,294 @@ describe('<TaskDetail/>', () => {
     fireEvent.click(getByText('Cancel'));
 
     expect(queryByText('Confirm Deleting Task')).toBeNull();
+  });
+
+  describe('submitting a review', () => {
+    const tasks = {
+      ...defaultState.tasks,
+      project1: [
+        {
+          ...defaultState.tasks.project1[0],
+          pr_is_open: true,
+          assigned_qa: { id: 'user-id', login: 'user-name' },
+          commits: [],
+          origin_sha: 'parent',
+          review_submitted_at: '2019-10-16T12:58:53.721Z',
+          has_unmerged_commits: true,
+        },
+      ],
+    };
+    const orgs = {
+      ...defaultState.orgs,
+      task1: {
+        Dev: null,
+        QA: {
+          ...defaultState.orgs.task1.Dev,
+          org_type: 'QA',
+          latest_commit: 'parent',
+          has_been_visited: true,
+        },
+      },
+    };
+
+    test('opens submit review modal', () => {
+      const { getByText, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          tasks,
+          orgs,
+        },
+      });
+      fireEvent.click(getByText('Submit Review'));
+
+      expect(getByText('Submit Task Review')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('Submit Task Review')).toBeNull();
+    });
+
+    describe('form submit', () => {
+      test('submits task review', () => {
+        const { getByText, baseElement } = setup({
+          initialState: {
+            ...defaultState,
+            tasks,
+            orgs,
+          },
+        });
+        fireEvent.click(getByText('Submit Review'));
+        const submit = baseElement.querySelector('.slds-button[type="submit"]');
+        fireEvent.click(submit);
+
+        expect(getByText('Submitting Review…')).toBeVisible();
+        expect(createObject).toHaveBeenCalledTimes(1);
+        expect(createObject).toHaveBeenCalledWith({
+          url: window.api_urls.task_review('task1'),
+          data: {
+            notes: '',
+            status: 'Approved',
+            delete_org: true,
+            org: 'org-id',
+          },
+          hasForm: true,
+          shouldSubscribeToObject: false,
+        });
+      });
+
+      test('submits task review without org', () => {
+        const { getByText, baseElement } = setup({
+          initialState: {
+            ...defaultState,
+            tasks: {
+              ...defaultState.tasks,
+              project1: [
+                {
+                  ...defaultState.tasks.project1[0],
+                  pr_is_open: true,
+                  assigned_qa: { id: 'user-id', login: 'user-name' },
+                  commits: [],
+                  origin_sha: 'parent',
+                  review_submitted_at: '2019-10-16T12:58:53.721Z',
+                  has_unmerged_commits: true,
+                  review_valid: true,
+                },
+              ],
+            },
+            orgs: { task1: { Dev: null, QA: null } },
+          },
+        });
+        fireEvent.click(getByText('Update Review'));
+        const submit = baseElement.querySelector('.slds-button[type="submit"]');
+        fireEvent.click(submit);
+
+        expect(getByText('Submitting Review…')).toBeVisible();
+        expect(createObject).toHaveBeenCalledTimes(1);
+        expect(createObject).toHaveBeenCalledWith({
+          url: window.api_urls.task_review('task1'),
+          data: {
+            notes: '',
+            status: 'Approved',
+            delete_org: false,
+            org: null,
+          },
+          hasForm: true,
+          shouldSubscribeToObject: false,
+        });
+      });
+    });
+  });
+
+  describe('step actions', () => {
+    const defaultTask = {
+      id: 'task1',
+      review_valid: false,
+      review_status: '',
+      pr_is_open: false,
+      status: TASK_STATUSES.PLANNED,
+      assigned_dev: null,
+      assigned_qa: null,
+      has_unmerged_commits: false,
+      commits: [],
+      origin_sha: 'parent_sha',
+    };
+    const defaultDevOrg = {
+      id: 'dev-org',
+      task: 'task1',
+      org_type: 'Dev',
+      owner: 'user-id',
+      owner_gh_username: 'user-name',
+      url: '/foo/',
+      is_created: true,
+      has_unsaved_changes: false,
+      valid_target_directories: {},
+    };
+    const defaultTestOrg = {
+      id: 'review-org',
+      task: 'task1',
+      org_type: 'QA',
+      owner: 'user-id',
+      owner_gh_username: 'user-name',
+      url: '/bar/',
+      is_created: true,
+      has_been_visited: false,
+    };
+    const testOrgVisited = {
+      has_been_visited: true,
+      latest_commit: 'foo',
+    };
+    const jonny = {
+      id: 'user-id',
+      login: 'user-name',
+    };
+    const taskWithDev = {
+      assigned_dev: jonny,
+      status: TASK_STATUSES.IN_PROGRESS,
+    };
+    const taskWithChanges = {
+      ...taskWithDev,
+      has_unmerged_commits: true,
+      commits: [
+        { id: 'foo', timestamp: '2019-08-16T12:58:53.721Z', author: {} },
+      ],
+    };
+    const taskWithPR = {
+      ...taskWithChanges,
+      pr_is_open: true,
+    };
+    const taskWithTester = {
+      ...taskWithPR,
+      assigned_qa: jonny,
+    };
+
+    test.each([
+      ['assign-dev', {}, null, null, 'Assign a Developer', 'Assign Developer'],
+      [
+        'create-dev-org',
+        taskWithDev,
+        null,
+        null,
+        'Create a Scratch Org for development',
+        'Creating Org…',
+      ],
+      [
+        'retrieve-changes',
+        taskWithDev,
+        { has_unsaved_changes: true, total_unsaved_changes: 1 },
+        null,
+        'Retrieve changes from Dev Org',
+        'Select the location to retrieve changes',
+      ],
+      [
+        'submit-changes',
+        taskWithChanges,
+        {},
+        null,
+        'Submit changes for testing',
+        'Submit this task for testing',
+      ],
+      ['assign-qa', taskWithPR, {}, null, 'Assign a Tester', 'Assign Tester'],
+      [
+        'create-qa-org',
+        taskWithTester,
+        {},
+        null,
+        'Create a Scratch Org for testing',
+        'Creating Org…',
+      ],
+      [
+        'refresh-test-org',
+        taskWithTester,
+        {},
+        {},
+        'Refresh Test Org',
+        refreshOrg,
+      ],
+      [
+        'submit-review',
+        taskWithTester,
+        {},
+        testOrgVisited,
+        'Submit a review',
+        'Submit Task Review',
+      ],
+    ])(
+      'step action click: %s',
+      (name, taskOpts, devOrgOpts, testOrgOpts, trigger, expected) => {
+        const task = {
+          ...defaultState.tasks.project1[0],
+          ...defaultTask,
+          ...taskOpts,
+        };
+        let devOrg, testOrg;
+        if (devOrgOpts === null) {
+          devOrg = null;
+        } else {
+          devOrg = { ...defaultDevOrg, ...devOrgOpts };
+        }
+        if (testOrgOpts === null) {
+          testOrg = null;
+        } else {
+          testOrg = { ...defaultTestOrg, ...testOrgOpts };
+        }
+        const orgs = {
+          Dev: devOrg,
+          QA: testOrg,
+        };
+        const { getByText } = setup({
+          initialState: {
+            ...defaultState,
+            tasks: {
+              ...defaultState.tasks,
+              project1: [task],
+            },
+            orgs: {
+              ...defaultState.orgs,
+              task1: orgs,
+            },
+          },
+        });
+        fireEvent.click(getByText(trigger));
+
+        if (typeof expected === 'string') {
+          expect(getByText(expected)).toBeVisible();
+        } else {
+          expect(expected).toHaveBeenCalledTimes(1);
+        }
+      },
+    );
+  });
+
+  describe('assign user click', () => {
+    test('opens/closed modal', () => {
+      const { getByText, queryByText } = setup();
+      fireEvent.click(getByText('Assign'));
+
+      expect(getByText('Assign Tester')).toBeVisible();
+
+      fireEvent.click(getByText('Cancel'));
+
+      expect(queryByText('Assign Tester')).toBeNull();
+    });
   });
 });

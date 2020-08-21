@@ -10,8 +10,13 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import CommitList from '@/components/commits/list';
+import { Step } from '@/components/steps/stepsItem';
 import CaptureModal from '@/components/tasks/capture';
-import OrgCards from '@/components/tasks/cards';
+import OrgCards, {
+  ORG_TYPE_TRACKER_DEFAULT,
+  OrgTypeTracker,
+} from '@/components/tasks/cards';
+import SubmitReviewModal from '@/components/tasks/cards/submitReview';
 import TaskStatusPath from '@/components/tasks/path';
 import TaskStatusSteps from '@/components/tasks/steps';
 import {
@@ -30,9 +35,11 @@ import {
   useFetchProjectIfMissing,
   useFetchRepositoryIfMissing,
   useFetchTasksIfMissing,
+  useIsMounted,
 } from '@/components/utils';
 import { AppState, ThunkDispatch } from '@/store';
-import { refetchOrg } from '@/store/orgs/actions';
+import { createObject } from '@/store/actions';
+import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
 import { Org } from '@/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
 import { User } from '@/store/user/reducer';
@@ -40,10 +47,11 @@ import { selectUserState } from '@/store/user/selectors';
 import {
   OBJECT_TYPES,
   ORG_TYPES,
+  OrgTypes,
   REVIEW_STATUSES,
   TASK_STATUSES,
 } from '@/utils/constants';
-import { getBranchLink } from '@/utils/helpers';
+import { getBranchLink, getTaskCommits } from '@/utils/helpers';
 import routes from '@/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
@@ -52,6 +60,21 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [
+    assignUserModalOpen,
+    setAssignUserModalOpen,
+  ] = useState<OrgTypes | null>(null);
+  const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
+    ORG_TYPE_TRACKER_DEFAULT,
+  );
+  const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
+  const openSubmitReviewModal = () => {
+    setSubmitReviewModalOpen(true);
+  };
+  const closeSubmitReviewModal = () => {
+    setSubmitReviewModalOpen(false);
+  };
+  const isMounted = useIsMounted();
 
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
   const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
@@ -75,6 +98,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   const userIsAssignedDev = Boolean(
     user.username === task?.assigned_dev?.login,
   );
+  const userIsAssignedTester = Boolean(
+    user.username === task?.assigned_qa?.login,
+  );
   const hasReviewRejected = Boolean(
     task?.review_valid &&
       task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED,
@@ -83,26 +109,70 @@ const TaskDetail = (props: RouteComponentProps) => {
   let currentlyCommitting = false;
   let currentlyReassigning = false;
   let orgHasChanges = false;
-  let userIsOwner = false;
-  let devOrg: Org | null | undefined;
+  let userIsDevOwner = false;
+  let userIsTestOwner = false;
+  let devOrg: Org | null | undefined, testOrg: Org | null | undefined;
   let hasOrgs = false;
+  let testOrgSubmittingReview = false;
+  let devOrgIsCreating = false;
+  let testOrgIsCreating = false;
+  let devOrgIsDeleting = false;
+  let testOrgIsDeleting = false;
+  let testOrgIsRefreshing = false;
   if (orgs) {
     devOrg = orgs[ORG_TYPES.DEV];
+    testOrg = orgs[ORG_TYPES.QA];
     orgHasChanges =
       (devOrg?.total_unsaved_changes || 0) -
         (devOrg?.total_ignored_changes || 0) >
       0;
-    userIsOwner = Boolean(
+    userIsDevOwner = Boolean(
       userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
+    );
+    userIsTestOwner = Boolean(
+      userIsAssignedTester && testOrg?.is_created && testOrg?.owner === user.id,
     );
     currentlyFetching = Boolean(devOrg?.currently_refreshing_changes);
     currentlyCommitting = Boolean(devOrg?.currently_capturing_changes);
     currentlyReassigning = Boolean(devOrg?.currently_reassigning_user);
-    /* istanbul ignore next */
-    if (devOrg || orgs[ORG_TYPES.QA]) {
+    testOrgSubmittingReview = Boolean(task?.currently_submitting_review);
+    devOrgIsCreating = Boolean(
+      isCreatingOrg[ORG_TYPES.DEV] || (devOrg && !devOrg.is_created),
+    );
+    testOrgIsCreating = Boolean(
+      isCreatingOrg[ORG_TYPES.QA] || (testOrg && !testOrg.is_created),
+    );
+    devOrgIsDeleting = Boolean(devOrg?.delete_queued_at);
+    testOrgIsDeleting = Boolean(testOrg?.delete_queued_at);
+    testOrgIsRefreshing = Boolean(testOrg?.currently_refreshing_org);
+    if (devOrg || testOrg) {
       hasOrgs = true;
     }
   }
+  const readyToCaptureChanges: boolean = userIsDevOwner && orgHasChanges;
+  const orgHasBeenVisited = Boolean(userIsDevOwner && devOrg?.has_been_visited);
+  const taskCommits = task ? getTaskCommits(task) : [];
+  const testOrgOutOfDate = Boolean(
+    testOrg?.is_created &&
+      taskCommits.indexOf(testOrg.latest_commit || '') !== 0,
+  );
+  const testOrgReadyForReview = Boolean(
+    task?.pr_is_open &&
+      userIsAssignedTester &&
+      !testOrgOutOfDate &&
+      (userIsTestOwner || (!testOrg && task.review_valid)),
+  );
+  const devOrgLoading =
+    devOrgIsCreating ||
+    devOrgIsDeleting ||
+    currentlyFetching ||
+    currentlyReassigning ||
+    currentlyCommitting;
+  const testOrgLoading =
+    testOrgIsCreating ||
+    testOrgIsDeleting ||
+    testOrgIsRefreshing ||
+    testOrgSubmittingReview;
 
   const openCaptureModal = () => {
     setCaptureModalOpen(true);
@@ -140,6 +210,141 @@ const TaskDetail = (props: RouteComponentProps) => {
     setDeleteModalOpen(false);
   };
 
+  // assign user modal related
+  const openAssignUserModal = (type: OrgTypes) => {
+    setAssignUserModalOpen(type);
+  };
+  const closeAssignUserModal = () => {
+    setAssignUserModalOpen(null);
+  };
+
+  const doCreateOrg = useCallback(
+    (type: OrgTypes) => {
+      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
+      dispatch(
+        createObject({
+          objectType: OBJECT_TYPES.ORG,
+          data: { task: task?.id, org_type: type },
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
+        }
+      });
+    },
+    [dispatch, isCreatingOrg, isMounted, task?.id],
+  );
+
+  const doRefetchOrg = useCallback(
+    (org: Org) => {
+      dispatch(refetchOrg(org));
+    },
+    [dispatch],
+  );
+
+  const doRefreshOrg = useCallback(
+    (org: Org) => {
+      dispatch(refreshOrg(org));
+    },
+    [dispatch],
+  );
+
+  const doCaptureChanges = useCallback(() => {
+    /* istanbul ignore else */
+    if (devOrg) {
+      let shouldCheck = true;
+      const checkAfterMinutes = window.GLOBALS.ORG_RECHECK_MINUTES;
+      if (
+        orgHasChanges &&
+        devOrg.last_checked_unsaved_changes_at !== null &&
+        typeof checkAfterMinutes === 'number'
+      ) {
+        const lastChecked = parseISO(devOrg.last_checked_unsaved_changes_at);
+        const shouldCheckAfter = addMinutes(lastChecked, checkAfterMinutes);
+        shouldCheck = isPast(shouldCheckAfter);
+      }
+      if (shouldCheck) {
+        setFetchingChanges(true);
+        doRefetchOrg(devOrg);
+      } else {
+        openCaptureModal();
+      }
+    }
+  }, [devOrg, doRefetchOrg, orgHasChanges]);
+
+  const handleStepAction = useCallback(
+    (step: Step) => {
+      const action = step.action;
+      switch (action) {
+        case 'assign-dev':
+          openAssignUserModal(ORG_TYPES.DEV);
+          break;
+        case 'create-dev-org':
+          /* istanbul ignore else */
+          if (!devOrg && userIsAssignedDev) {
+            doCreateOrg(ORG_TYPES.DEV);
+          }
+          break;
+        case 'retrieve-changes':
+          /* istanbul ignore else */
+          if (readyToCaptureChanges && !devOrgLoading) {
+            doCaptureChanges();
+          }
+          break;
+        case 'submit-changes':
+          /* istanbul ignore else */
+          if (readyToSubmit && !currentlySubmitting) {
+            openSubmitModal();
+          }
+          break;
+        case 'assign-qa':
+          openAssignUserModal(ORG_TYPES.QA);
+          break;
+        case 'create-qa-org':
+          /* istanbul ignore else */
+          if (!testOrg && userIsAssignedTester) {
+            doCreateOrg(ORG_TYPES.QA);
+          }
+          break;
+        case 'refresh-test-org':
+          /* istanbul ignore else */
+          if (
+            testOrg &&
+            userIsTestOwner &&
+            testOrgOutOfDate &&
+            !testOrgLoading
+          ) {
+            doRefreshOrg(testOrg);
+          }
+          break;
+        case 'submit-review':
+          /* istanbul ignore else */
+          if (userIsAssignedTester && !testOrgSubmittingReview) {
+            openSubmitReviewModal();
+          }
+          break;
+      }
+    },
+    [
+      devOrg,
+      testOrg,
+      userIsAssignedDev,
+      userIsAssignedTester,
+      userIsTestOwner,
+      readyToCaptureChanges,
+      readyToSubmit,
+      testOrgOutOfDate,
+      devOrgLoading,
+      testOrgLoading,
+      currentlySubmitting,
+      testOrgSubmittingReview,
+      doCreateOrg,
+      doCaptureChanges,
+      doRefreshOrg,
+    ],
+  );
+
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
     const changesFetched =
@@ -160,13 +365,6 @@ const TaskDetail = (props: RouteComponentProps) => {
       setEditModalOpen(false);
     }
   }, [task, taskSlug]);
-
-  const doRefetchOrg = useCallback(
-    (org: Org) => {
-      dispatch(refetchOrg(org));
-    },
-    [dispatch],
-  );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
     repository,
@@ -248,7 +446,7 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   let submitButton: React.ReactNode = null;
   if (readyToSubmit) {
-    const isPrimary = !(userIsOwner && orgHasChanges);
+    const isPrimary = !readyToCaptureChanges;
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
         label={i18n.t('Submitting Task for Testing…')}
@@ -269,29 +467,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   let captureButton: React.ReactNode = null;
-  if (userIsOwner && (orgHasChanges || devOrg?.has_been_visited)) {
-    const captureButtonAction = () => {
-      /* istanbul ignore else */
-      if (devOrg) {
-        let shouldCheck = true;
-        const checkAfterMinutes = window.GLOBALS.ORG_RECHECK_MINUTES;
-        if (
-          orgHasChanges &&
-          devOrg.last_checked_unsaved_changes_at !== null &&
-          typeof checkAfterMinutes === 'number'
-        ) {
-          const lastChecked = parseISO(devOrg.last_checked_unsaved_changes_at);
-          const shouldCheckAfter = addMinutes(lastChecked, checkAfterMinutes);
-          shouldCheck = isPast(shouldCheckAfter);
-        }
-        if (shouldCheck) {
-          setFetchingChanges(true);
-          doRefetchOrg(devOrg);
-        } else {
-          openCaptureModal();
-        }
-      }
-    };
+  if (readyToCaptureChanges || orgHasBeenVisited) {
     let captureButtonText: JSX.Element = i18n.t(
       'Check for Unretrieved Changes',
     );
@@ -328,12 +504,11 @@ const TaskDetail = (props: RouteComponentProps) => {
     captureButton = (
       <Button
         label={captureButtonText}
-        className={classNames({
-          'slds-m-bottom_medium': readyToSubmit,
-          'slds-m-bottom_x-large': !readyToSubmit,
+        className={classNames('slds-m-bottom_x-large', {
+          'slds-m-right_medium': readyToSubmit,
         })}
         variant={isPrimary ? 'brand' : 'outline-brand'}
-        onClick={captureButtonAction}
+        onClick={doCaptureChanges}
         disabled={
           fetchingChanges ||
           currentlyFetching ||
@@ -388,7 +563,13 @@ const TaskDetail = (props: RouteComponentProps) => {
             </div>
             {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large metecho-secondary-block">
-                <TaskStatusSteps task={task} orgs={orgs} />
+                <TaskStatusSteps
+                  task={task}
+                  orgs={orgs}
+                  user={user}
+                  isCreatingOrg={isCreatingOrg}
+                  handleAction={handleStepAction}
+                />
               </div>
             ) : null}
           </>
@@ -405,12 +586,21 @@ const TaskDetail = (props: RouteComponentProps) => {
             projectUrl={projectUrl}
             repoUrl={repository.repo_url}
             openCaptureModal={openCaptureModal}
+            assignUserModalOpen={assignUserModalOpen}
+            isCreatingOrg={isCreatingOrg}
+            openAssignUserModal={openAssignUserModal}
+            closeAssignUserModal={closeAssignUserModal}
+            openSubmitReviewModal={openSubmitReviewModal}
+            testOrgReadyForReview={testOrgReadyForReview}
+            testOrgSubmittingReview={testOrgSubmittingReview}
+            doCreateOrg={doCreateOrg}
+            doRefreshOrg={doRefreshOrg}
           />
         ) : (
           <SpinnerWrapper />
         )}
         {devOrg &&
-          userIsOwner &&
+          userIsDevOwner &&
           (orgHasChanges || devOrg.has_ignored_changes) && (
             <CaptureModal
               org={devOrg}
@@ -428,6 +618,15 @@ const TaskDetail = (props: RouteComponentProps) => {
             toggleModal={setSubmitModalOpen}
             assignee={task.assigned_qa}
             originatingUser={user.username}
+          />
+        )}
+        {testOrgReadyForReview && (
+          <SubmitReviewModal
+            orgId={testOrg?.id}
+            url={window.api_urls.task_review(task.id)}
+            reviewStatus={task.review_valid ? task.review_status : null}
+            isOpen={submitReviewModalOpen && !testOrgSubmittingReview}
+            handleClose={closeSubmitReviewModal}
           />
         )}
         <EditModal

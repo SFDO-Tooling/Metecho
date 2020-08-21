@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
+import { ORG_TYPE_TRACKER_DEFAULT } from '@/components/tasks/cards';
 import TaskStatusSteps from '@/components/tasks/steps';
 import { REVIEW_STATUSES, TASK_STATUSES } from '@/utils/constants';
 
@@ -65,6 +66,10 @@ const taskWithTester = {
   ...taskWithPR,
   assigned_qa: stacy,
 };
+const taskSubmittingReview = {
+  ...taskWithTester,
+  currently_submitting_review: true,
+};
 const taskWithReviewRejected = {
   ...taskWithTester,
   review_valid: true,
@@ -85,7 +90,14 @@ describe('<TaskStatusSteps />', () => {
   test.each([
     ['planned, no orgs', {}, null, null],
     ['dev assigned, no orgs', { assigned_dev: jonny }, null, null],
+    ['dev org creating', taskWithDev, { is_created: false }, null],
     ['dev org', taskWithDev, {}, null],
+    [
+      'dev org checking for changes',
+      taskWithDev,
+      { currently_refreshing_changes: true },
+      null,
+    ],
     [
       'dev org with unretrieved changes',
       taskWithDev,
@@ -95,9 +107,17 @@ describe('<TaskStatusSteps />', () => {
     ['changes retrieved', taskWithChanges, {}, null],
     ['submitted for testing', taskWithPR, {}, null],
     ['tester assigned, no org', taskWithTester, {}, null],
+    ['test org creating', taskWithTester, {}, { is_created: false }],
     ['test org', taskWithTester, {}, { latest_commit: 'foo' }],
     ['test org out-of-date', taskWithTester, {}, {}],
+    [
+      'test org refreshing',
+      taskWithTester,
+      {},
+      { currently_refreshing_org: true },
+    ],
     ['test org visited', taskWithTester, {}, testOrgVisited],
+    ['submitting review', taskSubmittingReview, {}, testOrgVisited],
     ['review rejected', taskWithReviewRejected, {}, testOrgVisited],
     ['review approved', taskWithReviewApproved, {}, testOrgVisited],
     ['review invalid', taskWithReviewInvalid, {}, testOrgVisited],
@@ -118,7 +138,14 @@ describe('<TaskStatusSteps />', () => {
       Dev: devOrg,
       QA: testOrg,
     };
-    const { container } = render(<TaskStatusSteps task={task} orgs={orgs} />);
+    const { container } = render(
+      <TaskStatusSteps
+        task={task}
+        orgs={orgs}
+        user={jonny}
+        isCreatingOrg={ORG_TYPE_TRACKER_DEFAULT}
+      />,
+    );
 
     expect(container).toMatchSnapshot();
   });
