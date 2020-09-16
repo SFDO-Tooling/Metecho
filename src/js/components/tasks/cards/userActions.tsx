@@ -14,7 +14,7 @@ const UserActions = ({
 }: {
   type: OrgTypes;
   assignedUser: GitHubUser | null;
-  openAssignUserModal: (type: OrgTypes) => void;
+  openAssignUserModal: (t: OrgTypes) => void;
   setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
 }) => {
   if (assignedUser) {
