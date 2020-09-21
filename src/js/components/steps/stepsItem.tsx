@@ -25,7 +25,7 @@ const StepsItem = ({
 }: {
   step: Step;
   someAssignees: boolean;
-  handleAction?: (step: Step) => void;
+  handleAction?: (s: Step) => void;
 }) => {
   const isActive = step.active && !step.complete;
   const hasAssignee = Boolean(step.assignee && !step.complete);

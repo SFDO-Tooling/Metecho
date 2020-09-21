@@ -14,7 +14,7 @@ export default ({
   field: string;
   value: any;
   inputs: Inputs;
-  setInputs: (inputs: Inputs) => void;
+  setInputs: (i: Inputs) => void;
 }) => {
   const defaultRef = useRef(value);
   useEffect(() => {

@@ -42,7 +42,7 @@ const ChangesList = ({
   expandedPanels: BooleanObject;
   handlePanelToggle: (groupName: string) => void;
   handleSelectGroup: (
-    type: 'changes' | 'ignored',
+    t: 'changes' | 'ignored',
     groupName: string,
     checked: boolean,
   ) => void;

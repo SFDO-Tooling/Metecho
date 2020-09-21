@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
@@ -100,15 +100,18 @@ const ProjectDetail = (props: RouteComponentProps) => {
     }
   }, [project, projectSlug]);
 
-  const usersAssignedToTasks = new Set<string>();
-  (tasks || []).forEach((task) => {
-    if (task.assigned_dev) {
-      usersAssignedToTasks.add(task.assigned_dev.login);
-    }
-    if (task.assigned_qa) {
-      usersAssignedToTasks.add(task.assigned_qa.login);
-    }
-  });
+  const usersAssignedToTasks = useMemo(() => {
+    const users = new Set<string>();
+    (tasks || []).forEach((task) => {
+      if (task.assigned_dev) {
+        users.add(task.assigned_dev.login);
+      }
+      if (task.assigned_qa) {
+        users.add(task.assigned_qa.login);
+      }
+    });
+    return users;
+  }, [tasks]);
 
   const getRemovedUsers = useCallback(
     (users: GitHubUser[]) => {
@@ -272,13 +275,13 @@ const ProjectDetail = (props: RouteComponentProps) => {
       switch (action) {
         case 'submit':
           /* istanbul ignore else */
-          if (readyToSubmit) {
+          if (readyToSubmit && !currentlySubmitting) {
             openSubmitModal();
           }
           break;
       }
     },
-    [readyToSubmit],
+    [readyToSubmit, currentlySubmitting],
   );
 
   const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -333,7 +336,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
     submitButton = (
       <Button
         label={submitButtonText}
-        className="slds-m-bottom_x-large"
+        className="slds-m-bottom_large"
         variant="brand"
         onClick={openSubmitModal}
         disabled={currentlySubmitting}
@@ -442,6 +445,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
                 project={project}
                 tasks={tasks || []}
                 readyToSubmit={readyToSubmit}
+                currentlySubmitting={currentlySubmitting}
                 handleAction={handleStepAction}
               />
             </div>

@@ -287,7 +287,7 @@ export const deleteObject = ({
 }: {
   objectType: ObjectTypes;
   object: { id: string; [key: string]: any };
-  shouldSubscribeToObject?: boolean | ((object: any) => boolean);
+  shouldSubscribeToObject?: boolean | ((obj: any) => boolean);
 }): ThunkResult<Promise<DeleteObjectAction>> => async (dispatch) => {
   const urlFn = window.api_urls[`${objectType}_detail`];
   let baseUrl;

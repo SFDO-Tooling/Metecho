@@ -1,6 +1,6 @@
 import React, { ComponentType } from 'react';
 import { useSelector } from 'react-redux';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, RouteProps } from 'react-router-dom';
 
 import { selectUserState } from '@/store/user/selectors';
 import routes from '@/utils/routes';
@@ -11,7 +11,7 @@ const PrivateRoute = ({
 }: {
   component: ComponentType<any>;
   [key: string]: any;
-}) => {
+} & RouteProps) => {
   const user = useSelector(selectUserState);
 
   return (

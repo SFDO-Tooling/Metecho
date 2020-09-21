@@ -1,4 +1,4 @@
-from cumulusci.core.config import UniversalConfig, BaseProjectConfig
+from cumulusci.core.config import BaseProjectConfig, UniversalConfig
 
 
 class ProjectConfig(BaseProjectConfig):

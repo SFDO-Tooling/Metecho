@@ -39,6 +39,40 @@ export const GitHubUserAvatar = ({
   />
 );
 
+const GitHubUserButton = ({
+  user,
+  isAssigned,
+  isSelected,
+  ...props
+}: {
+  user: GitHubUser;
+  isAssigned?: boolean;
+  isSelected?: boolean;
+  [key: string]: any;
+}) => (
+  <Button
+    className={classNames(
+      'slds-size_full',
+      'slds-p-around_xx-small',
+      'collaborator-button',
+      {
+        'is-assigned': isAssigned,
+        'is-selected': isSelected,
+      },
+    )}
+    title={user.login}
+    label={
+      <>
+        <GitHubUserAvatar user={user} />
+        <span className="collaborator-username">{user.login}</span>
+      </>
+    }
+    variant="base"
+    disabled={isSelected || isAssigned}
+    {...props}
+  />
+);
+
 export const UserCard = ({
   user,
   removeUser,
@@ -273,40 +307,6 @@ export const AssignUsersModal = ({
   );
 };
 
-const GitHubUserButton = ({
-  user,
-  isAssigned,
-  isSelected,
-  ...props
-}: {
-  user: GitHubUser;
-  isAssigned?: boolean;
-  isSelected?: boolean;
-  [key: string]: any;
-}) => (
-  <Button
-    className={classNames(
-      'slds-size_full',
-      'slds-p-around_xx-small',
-      'collaborator-button',
-      {
-        'is-assigned': isAssigned,
-        'is-selected': isSelected,
-      },
-    )}
-    title={user.login}
-    label={
-      <>
-        <GitHubUserAvatar user={user} />
-        <span className="collaborator-username">{user.login}</span>
-      </>
-    }
-    variant="base"
-    disabled={isSelected || isAssigned}
-    {...props}
-  />
-);
-
 export const AssignUserModal = ({
   allUsers,
   selectedUser,
@@ -371,7 +371,7 @@ export const AssignUserModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      onRequestClose={onRequestClose}
+      onRequestClose={handleClose}
       heading={heading}
       directional
       tagline={

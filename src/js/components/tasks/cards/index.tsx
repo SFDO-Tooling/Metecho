@@ -9,8 +9,8 @@ import ConnectModal from '@/components/user/connect';
 import { ConnectionInfoModal } from '@/components/user/info';
 import { useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { createObject, deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
+import { deleteObject, updateObject } from '@/store/actions';
+import { refetchOrg } from '@/store/orgs/actions';
 import { Org, OrgsByTask } from '@/store/orgs/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser, User } from '@/store/user/reducer';
@@ -24,12 +24,12 @@ export interface AssignedUserTracker {
   shouldAlertAssignee: boolean;
 }
 
-interface OrgTypeTracker {
+export interface OrgTypeTracker {
   [ORG_TYPES.DEV]: boolean;
   [ORG_TYPES.QA]: boolean;
 }
 
-const OrgTypeTrackerDefault = {
+export const ORG_TYPE_TRACKER_DEFAULT = {
   [ORG_TYPES.DEV]: false,
   [ORG_TYPES.QA]: false,
 };
@@ -40,14 +40,32 @@ const OrgCards = ({
   projectUsers,
   projectUrl,
   repoUrl,
+  assignUserModalOpen,
+  isCreatingOrg,
+  testOrgReadyForReview,
+  testOrgSubmittingReview,
   openCaptureModal,
+  openAssignUserModal,
+  closeAssignUserModal,
+  openSubmitReviewModal,
+  doCreateOrg,
+  doRefreshOrg,
 }: {
   orgs: OrgsByTask;
   task: Task;
   projectUsers: GitHubUser[];
   projectUrl: string;
   repoUrl: string;
+  assignUserModalOpen: OrgTypes | null;
+  isCreatingOrg: OrgTypeTracker;
+  testOrgReadyForReview: boolean;
+  testOrgSubmittingReview: boolean;
   openCaptureModal: () => void;
+  openAssignUserModal: (type: OrgTypes) => void;
+  closeAssignUserModal: () => void;
+  openSubmitReviewModal: () => void;
+  doCreateOrg: (type: OrgTypes) => void;
+  doRefreshOrg: (org: Org) => void;
 }) => {
   const user = useSelector(selectUserState) as User;
   const isMounted = useIsMounted();
@@ -62,11 +80,8 @@ const OrgCards = ({
     isWaitingToRemoveUser,
     setIsWaitingToRemoveUser,
   ] = useState<AssignedUserTracker | null>(null);
-  const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
-    OrgTypeTrackerDefault,
-  );
   const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
-    OrgTypeTrackerDefault,
+    ORG_TYPE_TRACKER_DEFAULT,
   );
   const dispatch = useDispatch<ThunkDispatch>();
 
@@ -95,13 +110,6 @@ const OrgCards = ({
     return can_reassign;
   };
 
-  const handleRefresh = useCallback(
-    (org: Org) => {
-      dispatch(refreshOrg(org));
-    },
-    [dispatch],
-  );
-
   const deleteOrg = useCallback(
     (org: Org) => {
       setIsDeletingOrg({ ...isDeletingOrg, [org.org_type]: true });
@@ -118,24 +126,6 @@ const OrgCards = ({
       });
     },
     [dispatch, isDeletingOrg, isMounted],
-  );
-
-  const createOrg = useCallback(
-    (type: OrgTypes) => {
-      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
-      dispatch(
-        createObject({
-          objectType: OBJECT_TYPES.ORG,
-          data: { task: task.id, org_type: type },
-        }),
-      ).finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
-        }
-      });
-    },
-    [dispatch, isCreatingOrg, isMounted, task.id],
   );
 
   const assignUser = useCallback(
@@ -218,9 +208,17 @@ const OrgCards = ({
   const userIsConnected =
     user.valid_token_for || user.devhub_username || user.uses_global_devhub;
   if (userIsConnected) {
-    handleCreate = user.is_devhub_enabled ? createOrg : openInfoModal;
+    handleCreate = user.is_devhub_enabled ? doCreateOrg : openInfoModal;
   }
 
+  /* istanbul ignore next */
+  const openAssignDevModal = () => {
+    openAssignUserModal(ORG_TYPES.DEV);
+  };
+  /* istanbul ignore next */
+  const openAssignTesterModal = () => {
+    openAssignUserModal(ORG_TYPES.QA);
+  };
   const devOrg = orgs[ORG_TYPES.DEV];
 
   // When dev org delete has been triggered, wait until it has been refreshed...
@@ -267,6 +265,9 @@ const OrgCards = ({
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
+          assignUserModalOpen={assignUserModalOpen}
+          openAssignUserModal={openAssignDevModal}
+          closeAssignUserModal={closeAssignUserModal}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}
@@ -283,11 +284,17 @@ const OrgCards = ({
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
+          assignUserModalOpen={assignUserModalOpen}
+          openAssignUserModal={openAssignTesterModal}
+          closeAssignUserModal={closeAssignUserModal}
           handleAssignUser={handleAssignUser}
           handleCreate={handleCreate}
           handleDelete={handleDelete}
           handleCheckForOrgChanges={checkForOrgChanges}
-          handleRefresh={handleRefresh}
+          handleRefresh={doRefreshOrg}
+          openSubmitReviewModal={openSubmitReviewModal}
+          testOrgReadyForReview={testOrgReadyForReview}
+          testOrgSubmittingReview={testOrgSubmittingReview}
         />
       </div>
       <ConnectModal

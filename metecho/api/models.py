@@ -11,7 +11,6 @@ from cumulusci.oauth.salesforce import jwt_session
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
@@ -297,7 +296,7 @@ class Repository(
     #     "login": str,
     #     "avatar_url": str,
     #   }
-    github_users = JSONField(default=list, blank=True)
+    github_users = models.JSONField(default=list, blank=True)
 
     slug_class = RepositorySlug
     tracker = FieldTracker(fields=["name"])
@@ -434,7 +433,7 @@ class Project(
     #   "label": str,
     #   "description": str,
     # }
-    available_task_org_config_names = JSONField(default=list, blank=True)
+    available_task_org_config_names = models.JSONField(default=list, blank=True)
     currently_fetching_org_config_names = models.BooleanField(default=False)
 
     repository = models.ForeignKey(
@@ -447,7 +446,7 @@ class Project(
     #     "login": str,
     #     "avatar_url": str,
     #   }
-    github_users = JSONField(default=list, blank=True)
+    github_users = models.JSONField(default=list, blank=True)
 
     slug_class = ProjectSlug
     tracker = FieldTracker(fields=["name"])
@@ -603,9 +602,9 @@ class Task(
     )
     org_config_name = StringField()
 
-    commits = JSONField(default=list, blank=True)
+    commits = models.JSONField(default=list, blank=True)
     origin_sha = StringField(blank=True, default="")
-    metecho_commits = JSONField(default=list, blank=True)
+    metecho_commits = models.JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
 
     currently_creating_pr = models.BooleanField(default=False)
@@ -619,7 +618,7 @@ class Task(
         choices=TASK_REVIEW_STATUS, blank=True, default="", max_length=32
     )
     review_sha = StringField(blank=True, default="")
-    reviewers = JSONField(default=list, blank=True)
+    reviewers = models.JSONField(default=list, blank=True)
 
     status = models.CharField(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
@@ -631,8 +630,8 @@ class Task(
     #     "login": str,
     #     "avatar_url": str,
     #   }
-    assigned_dev = JSONField(null=True, blank=True)
-    assigned_qa = JSONField(null=True, blank=True)
+    assigned_dev = models.JSONField(null=True, blank=True)
+    assigned_qa = models.JSONField(null=True, blank=True)
 
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])
@@ -862,9 +861,13 @@ class ScratchOrg(
     latest_commit_at = models.DateTimeField(null=True, blank=True)
     url = models.URLField(blank=True, default="")
     last_checked_unsaved_changes_at = models.DateTimeField(null=True, blank=True)
-    unsaved_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
-    ignored_changes = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
-    latest_revision_numbers = JSONField(
+    unsaved_changes = models.JSONField(
+        default=dict, encoder=DjangoJSONEncoder, blank=True
+    )
+    ignored_changes = models.JSONField(
+        default=dict, encoder=DjangoJSONEncoder, blank=True
+    )
+    latest_revision_numbers = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
     currently_refreshing_changes = models.BooleanField(default=False)
@@ -872,13 +875,13 @@ class ScratchOrg(
     currently_refreshing_org = models.BooleanField(default=False)
     currently_reassigning_user = models.BooleanField(default=False)
     is_created = models.BooleanField(default=False)
-    config = JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
+    config = models.JSONField(default=dict, encoder=DjangoJSONEncoder, blank=True)
     delete_queued_at = models.DateTimeField(null=True, blank=True)
     expiry_job_id = StringField(blank=True, default="")
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
     has_been_visited = models.BooleanField(default=False)
-    valid_target_directories = JSONField(
+    valid_target_directories = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True
     )
     cci_log = models.TextField(blank=True)

@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
+from django.db.models import JSONField
 from django.forms.widgets import Textarea
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin

@@ -5,13 +5,15 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import classNames from 'classnames';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { ExternalLink } from '@/components/utils';
 import { Commit } from '@/store/tasks/reducer';
 
 interface TableCellProps {
   [key: string]: any;
+  className?: string;
+  children?: ReactNode;
   item?: Commit;
 }
 
