@@ -6,7 +6,7 @@ import ProgressRing from '@salesforce/design-system-react/components/progress-ri
 import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -37,6 +37,8 @@ type AssignUserAction = ({
 
 interface TableCellProps {
   [key: string]: any;
+  className?: string;
+  children?: ReactNode;
   item?: Task;
 }
 
