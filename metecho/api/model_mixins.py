@@ -28,21 +28,21 @@ class TimestampsMixin(models.Model):
 
 
 class PopulateRepoIdMixin:
-    def get_repo_id(self, user):
+    def get_repo_id(self):
         """
-        We need to get the repo ID as a particular user, and not all
-        users have access to all repos, so we can't do this in a data
-        migration. Therefore we have an incremental population approach;
-        every time the repo_id needs to be accessed, we use this method,
-        and get it from the model if present, or query the GitHub API as
-        a fallback, assuming that the current user can access the
-        current repo via the repo URL.
+        Get the repo's GitHub id, looking it up based on the owner and name
+        if not already populated.
+
+        Authentication is via the Metecho GitHub app,
+        so it must already be installed for this repository.
         """
 
         if self.repo_id:
             return self.repo_id
 
-        repo = get_repo_info(user, repo_owner=self.repo_owner, repo_name=self.repo_name)
+        repo = get_repo_info(
+            user=None, repo_owner=self.repo_owner, repo_name=self.repo_name
+        )
         self.repo_id = repo.id
         self.save()
         return self.repo_id
@@ -72,7 +72,9 @@ class PushMixin:
             }
         """
         async_to_sync(push.push_message_about_instance)(
-            self, {"type": type_, "payload": message}, for_list=for_list,
+            self,
+            {"type": type_, "payload": message},
+            for_list=for_list,
         )
 
     def notify_changed(
@@ -81,7 +83,9 @@ class PushMixin:
         prepared_message = {"originating_user_id": originating_user_id}
         prepared_message.update(message or {})
         self._push_message(
-            type_ or self.push_update_type, prepared_message, for_list=for_list,
+            type_ or self.push_update_type,
+            prepared_message,
+            for_list=for_list,
         )
 
     def notify_error(self, error, *, type_=None, originating_user_id, message=None):
@@ -91,7 +95,8 @@ class PushMixin:
         }
         prepared_message.update(message or {})
         self._push_message(
-            type_ or self.push_error_type, prepared_message,
+            type_ or self.push_error_type,
+            prepared_message,
         )
 
     def notify_scratch_org_error(
@@ -141,7 +146,7 @@ class CreatePrMixin:
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-        repo_id = self.get_repo_id(user)
+        repo_id = self.get_repo_id()
         base = self.get_base()
         head = self.get_head()
 

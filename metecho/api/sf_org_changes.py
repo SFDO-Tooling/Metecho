@@ -18,15 +18,17 @@ def get_valid_target_directories(user, scratch_org, repo_root):
     Expects to be called from within a `local_github_checkout`.
     """
     package_directories = {}
-    repo_id = scratch_org.task.project.repository.get_repo_id(user)
-    repository = get_repo_info(user, repo_id=repo_id)
+    repository = scratch_org.task.project.repository
+    repo = get_repo_info(
+        None, repo_owner=repository.repo_owner, repo_name=repository.repo_name
+    )
     source_format = get_source_format(
         repo_root=repo_root,
-        repo_name=repository.name,
-        repo_url=repository.html_url,
-        repo_owner=repository.owner.login,
+        repo_name=repo.name,
+        repo_url=repo.html_url,
+        repo_owner=repo.owner.login,
         repo_branch=scratch_org.task.branch_name,
-        repo_commit=repository.branch(scratch_org.task.branch_name).latest_sha(),
+        repo_commit=repo.branch(scratch_org.task.branch_name).latest_sha(),
     )
     sfdx = source_format == "sfdx"
     if sfdx:
@@ -83,7 +85,7 @@ def run_retrieve_task(
     target_directory,
     originating_user_id,
 ):
-    repo_id = scratch_org.task.project.repository.get_repo_id(user)
+    repo_id = scratch_org.task.project.repository.get_repo_id()
     org_config = refresh_access_token(
         config=scratch_org.config,
         org_name="dev",
