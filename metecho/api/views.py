@@ -162,7 +162,7 @@ class RepositoryViewSet(
 
         for repo in Repository.objects.filter(repo_id__isnull=True):
             try:
-                repo.get_repo_id(self.request.user)
+                repo.get_repo_id()
             except ResponseError:
                 pass
 
@@ -178,7 +178,7 @@ class RepositoryViewSet(
     def feature_branches(self, request, pk=None):
         instance = self.get_object()
         repo = gh.get_repo_info(
-            request.user, repo_id=instance.get_repo_id(request.user)
+            None, repo_owner=instance.repo_owner, repo_name=instance.repo_name
         )
         existing_branches = set(
             Project.objects.active()

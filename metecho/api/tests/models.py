@@ -39,23 +39,13 @@ class TestRepository:
     def test_get_repo_id(self, repository_factory):
         with patch("metecho.api.model_mixins.get_repo_info") as get_repo_info:
             get_repo_info.return_value = MagicMock(id=123)
-            user = MagicMock()
 
             gh_repo = repository_factory(repo_id=None)
-            gh_repo.get_repo_id(user)
+            gh_repo.get_repo_id()
 
             gh_repo.refresh_from_db()
             assert get_repo_info.called
             assert gh_repo.repo_id == 123
-
-    def test_get_a_matching_user__none(self, repository_factory):
-        repo = repository_factory()
-        assert repo.get_a_matching_user() is None
-
-    def test_get_a_matching_user(self, repository_factory, git_hub_repository_factory):
-        repo = repository_factory(repo_id=123)
-        gh_repo = git_hub_repository_factory(repo_id=123)
-        assert repo.get_a_matching_user() == gh_repo.user
 
     def test_queue_populate_github_users(self, repository_factory, user_factory):
         repo = repository_factory()
@@ -111,11 +101,10 @@ class TestProject:
         assert str(project) == "Test Project"
 
     def test_get_repo_id(self, repository_factory, project_factory):
-        user = MagicMock()
         repo = repository_factory(repo_id=123)
         project = project_factory(repository=repo)
 
-        assert project.get_repo_id(user) == 123
+        assert project.get_repo_id() == 123
 
     def test_finalize_status_completed(self, project_factory):
         with ExitStack() as stack:
@@ -548,7 +537,9 @@ class TestUser:
         settings.DEVHUB_USERNAME = "devhub username"
         user = user_factory(devhub_username="", allow_devhub_override=False)
         social_account_factory(
-            user=user, provider="salesforce", extra_data={},
+            user=user,
+            provider="salesforce",
+            extra_data={},
         )
         assert user.sf_username == "devhub username"
 

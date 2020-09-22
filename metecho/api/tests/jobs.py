@@ -162,7 +162,11 @@ class TestCreateBranchesOnGitHub:
             get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
-                        MagicMock(number=123, closed_at=None, merged_at=None,)
+                        MagicMock(
+                            number=123,
+                            closed_at=None,
+                            merged_at=None,
+                        )
                         for _ in range(1)
                     ),
                     "compare_commits.return_value": MagicMock(ahead_by=0),
@@ -474,7 +478,8 @@ class TestErrorHandling:
 
             with pytest.raises(Exception):
                 create_branches_on_github_then_create_scratch_org(
-                    scratch_org=scratch_org, originating_user_id=None,
+                    scratch_org=scratch_org,
+                    originating_user_id=None,
                 )
 
             assert scratch_org.delete.called
@@ -519,47 +524,6 @@ class TestErrorHandling:
                 )
 
             assert async_to_sync.called
-
-
-@pytest.mark.django_db
-class TestRefreshCommits:
-    def test_task__no_user(self, repository_factory, project_factory, task_factory):
-        repository = repository_factory()
-        project = project_factory(repository=repository)
-        task = task_factory(project=project, branch_name="task", origin_sha="1234abcd")
-        with ExitStack() as stack:
-            commit1 = Commit(
-                **{
-                    "sha": "abcd1234",
-                    "author": Author(
-                        **{
-                            "avatar_url": "https://example.com/img.png",
-                            "login": "test_user",
-                        }
-                    ),
-                    "message": "Test message 1",
-                    "commit": Commit(**{"author": {"date": "2019-12-09 13:00"}}),
-                    "html_url": "https://github.com/test/user/foo",
-                }
-            )
-            commit2 = Commit(
-                **{
-                    "sha": "1234abcd",
-                    "author": None,
-                    "message": "Test message 2",
-                    "commit": Commit(**{"author": {"date": "2019-12-09 12:30"}}),
-                    "html_url": "https://github.com/test/user/foo",
-                }
-            )
-            repo = MagicMock(**{"commits.return_value": [commit1, commit2]})
-            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            get_repo_info.return_value = repo
-
-            refresh_commits(
-                repository=repository, branch_name="task", originating_user_id=None
-            )
-            task.refresh_from_db()
-            assert len(task.commits) == 0
 
     def test_task__user(
         self,
@@ -672,8 +636,11 @@ def test_create_pr__error(user_factory, task_factory):
 
 @pytest.mark.django_db
 class TestPopulateGitHubUsers:
-    def test_user_present(
-        self, user_factory, repository_factory, git_hub_repository_factory,
+    def test_populate_github_users(
+        self,
+        user_factory,
+        repository_factory,
+        git_hub_repository_factory,
     ):
         user = user_factory()
         repository = repository_factory(repo_id=123)
@@ -695,12 +662,6 @@ class TestPopulateGitHubUsers:
             populate_github_users(repository, originating_user_id=None)
             repository.refresh_from_db()
             assert len(repository.github_users) == 2
-
-    def test_user_missing(self, repository_factory):
-        repository = repository_factory(repo_id=123)
-        with patch(f"{PATCH_ROOT}.logger") as logger:
-            populate_github_users(repository, originating_user_id=None)
-            assert logger.warning.called
 
     def test__error(self, user_factory, repository_factory, git_hub_repository_factory):
         user = user_factory()
@@ -952,9 +913,8 @@ class TestAvailableTaskOrgConfigNames:
 
 
 @pytest.mark.django_db
-def test_get_social_image(repository_factory, user_factory):
+def test_get_social_image(repository_factory):
     repository = repository_factory()
-    user = user_factory()
     with ExitStack() as stack:
         stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
         get = stack.enter_context(patch("metecho.api.jobs.requests.get"))
@@ -968,7 +928,7 @@ def test_get_social_image(repository_factory, user_factory):
             </html>
             """
         )
-        get_social_image(repository=repository, user=user)
+        get_social_image(repository=repository)
 
         repository.refresh_from_db()
         assert repository.repo_image_url == "https://example.com/"
