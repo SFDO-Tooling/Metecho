@@ -43,7 +43,13 @@ class TaskReviewIntegrityError(Exception):
 
 
 def project_create_branch(
-    *, user, project, repository, repo_id, originating_user_id, should_finalize=True,
+    *,
+    user,
+    project,
+    repository,
+    repo_id,
+    originating_user_id,
+    should_finalize=True,
 ):
     if project.branch_name:
         project_branch_name = project.branch_name
@@ -222,7 +228,8 @@ def _create_org_and_run_flow(
     # finalize_* method, which will save the model.
     scratch_org.last_modified_at = now()
     scratch_org.latest_revision_numbers = get_latest_revision_numbers(
-        scratch_org, originating_user_id=originating_user_id,
+        scratch_org,
+        originating_user_id=originating_user_id,
     )
     scratch_org.is_created = True
 
@@ -230,7 +237,10 @@ def _create_org_and_run_flow(
     days = settings.DAYS_BEFORE_ORG_EXPIRY_TO_ALERT
     before_expiry = scratch_org.expires_at - timedelta(days=days)
     scratch_org.expiry_job_id = scheduler.enqueue_at(
-        before_expiry, alert_user_about_expiring_org, org=scratch_org, days=days,
+        before_expiry,
+        alert_user_about_expiring_org,
+        org=scratch_org,
+        days=days,
     ).id
 
 
@@ -243,7 +253,7 @@ def create_branches_on_github_then_create_scratch_org(
     project = task.project
 
     try:
-        repo_id = task.get_repo_id(user)
+        repo_id = task.get_repo_id()
         commit_ish = _create_branches_on_github(
             user=user,
             repo_id=repo_id,
@@ -278,7 +288,7 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
     try:
         scratch_org.refresh_from_db()
         user = scratch_org.owner
-        repo_id = scratch_org.task.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id()
         commit_ish = scratch_org.task.branch_name
         sf_username = scratch_org.owner_sf_username
 
@@ -318,11 +328,13 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
         )
         unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
         user = scratch_org.owner
-        repo_id = scratch_org.task.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id()
         commit_ish = scratch_org.task.branch_name
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             scratch_org.valid_target_directories, _ = get_valid_target_directories(
-                user, scratch_org, repo_root,
+                user,
+                scratch_org,
+                repo_root,
             )
         scratch_org.unsaved_changes = unsaved_changes
     except Exception as e:
@@ -355,7 +367,7 @@ def commit_changes_from_org(
     branch = scratch_org.task.branch_name
 
     try:
-        repo_id = scratch_org.task.get_repo_id(user)
+        repo_id = scratch_org.task.get_repo_id()
         commit_changes_to_github(
             user=user,
             scratch_org=scratch_org,
@@ -485,7 +497,8 @@ def delete_scratch_org(scratch_org, *, originating_user_id):
             scratch_org.last_modified_at = now()
         if not scratch_org.latest_revision_numbers:
             scratch_org.latest_revision_numbers = get_latest_revision_numbers(
-                scratch_org, originating_user_id=originating_user_id,
+                scratch_org,
+                originating_user_id=originating_user_id,
             )
         scratch_org.save()
         async_to_sync(report_scratch_org_error)(
@@ -509,10 +522,11 @@ def refresh_github_repositories_for_user(user):
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
 
 
-def get_social_image(*, repository, user):
+def get_social_image(*, repository):
     try:
-        repo_id = repository.get_repo_id(user)
-        repo = get_repo_info(user, repo_id=repo_id)
+        repo = get_repo_info(
+            None, repo_owner=repository.repo_owner, repo_name=repository.repo_name
+        )
         soup = BeautifulSoup(requests.get(repo.html_url).content, "html.parser")
         og_image = soup.find("meta", property="og:image").attrs.get("content", "")
     except Exception:  # pragma: nocover
@@ -537,12 +551,9 @@ def refresh_commits(*, repository, branch_name, originating_user_id):
     """
     from .models import Task
 
-    user = repository.get_a_matching_user()
-    if user is None:
-        logger.warning(f"No matching user for repository {repository.pk}")
-        return
-    repo_id = repository.get_repo_id(user)
-    repo = get_repo_info(user, repo_id=repo_id)
+    repo = get_repo_info(
+        None, repo_owner=repository.repo_owner, repo_name=repository.repo_name
+    )
     # We get this as a GitHubIterator, but we want to slice it later, so
     # we will convert it to a list.
     # We limit it to 1000 commits to avoid hammering the API, and on the
@@ -556,7 +567,7 @@ def refresh_commits(*, repository, branch_name, originating_user_id):
         task.commits = [
             normalize_commit(commit) for commit in commits[:origin_sha_index]
         ]
-        task.update_has_unmerged_commits(user=user)
+        task.update_has_unmerged_commits()
         task.update_review_valid()
         task.finalize_task_update(originating_user_id=originating_user_id)
 
@@ -566,12 +577,9 @@ refresh_commits_job = job(refresh_commits)
 
 def populate_github_users(repository, *, originating_user_id):
     try:
-        user = repository.get_a_matching_user()
-        if user is None:
-            logger.warning(f"No matching user for repository {repository.pk}")
-            return
-        repo_id = repository.get_repo_id(user)
-        repo = get_repo_info(user, repo_id=repo_id)
+        repo = get_repo_info(
+            None, repo_owner=repository.repo_owner, repo_name=repository.repo_name
+        )
         repository.refresh_from_db()
         repository.github_users = list(
             sorted(
@@ -619,7 +627,7 @@ def submit_review(*, user, task, data, originating_user_id):
         if not (task.pr_is_open and review_sha):
             raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
 
-        repo_id = task.get_repo_id(user)
+        repo_id = task.get_repo_id()
         repository = get_repo_info(user, repo_id=repo_id)
         pr = repository.pull_request(task.pr_number)
 
@@ -683,7 +691,7 @@ submit_review_job = job(submit_review)
 def create_gh_branch_for_new_project(project, *, user):
     try:
         project.refresh_from_db()
-        repo_id = project.get_repo_id(user)
+        repo_id = project.get_repo_id()
         repository = get_repo_info(user, repo_id=repo_id)
 
         if project.branch_name:
@@ -747,16 +755,20 @@ create_gh_branch_for_new_project_job = job(create_gh_branch_for_new_project)
 def available_task_org_config_names(project, *, user):
     try:
         project.refresh_from_db()
-        repo_id = project.get_repo_id(user)
-        repository = get_repo_info(user, repo_id=repo_id)
+        repo_id = project.get_repo_id()
+        repo = get_repo_info(
+            None,
+            repo_owner=project.repository.repo_owner,
+            repo_name=project.repository.repo_name,
+        )
         with local_github_checkout(user, repo_id) as repo_root:
             config = get_project_config(
                 repo_root=repo_root,
-                repo_name=repository.name,
-                repo_url=repository.html_url,
-                repo_owner=repository.owner.login,
+                repo_name=repo.name,
+                repo_url=repo.html_url,
+                repo_owner=repo.owner.login,
                 repo_branch=project.branch_name,
-                repo_commit=repository.branch(project.branch_name).latest_sha(),
+                repo_commit=repo.branch(project.branch_name).latest_sha(),
             )
             project.available_task_org_config_names = [
                 {"key": key, **value} for key, value in config.orgs__scratch.items()
@@ -785,7 +797,8 @@ def user_reassign(scratch_org, *, new_user, originating_user_id):
         org_config = scratch_org.get_refreshed_org_config()
         username = org_config.username
         org_config.salesforce_client.User.update(
-            f"Username/{username}", {"Email": new_user.email},
+            f"Username/{username}",
+            {"Email": new_user.email},
         )
     except Exception as err:
         scratch_org.finalize_reassign(

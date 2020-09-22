@@ -327,32 +327,20 @@ class Repository(
 
     def save(self, *args, **kwargs):
         if not self.branch_name:
-            user = self.get_a_matching_user()
-            if user:
-                repo = gh.get_repo_info(user, repo_id=self.id)
-                self.branch_name = repo.default_branch
+            repo = gh.get_repo_info(
+                None, repo_owner=self.repo_owner, repo_name=self.repo_name
+            )
+            self.branch_name = repo.default_branch
 
         if not self.github_users:
             self.queue_populate_github_users(originating_user_id=None)
 
         if not self.repo_image_url:
-            user = self.get_a_matching_user()
-            if user:
-                from .jobs import get_social_image_job
+            from .jobs import get_social_image_job
 
-                get_social_image_job.delay(repository=self, user=user)
+            get_social_image_job.delay(repository=self)
 
         super().save(*args, **kwargs)
-
-    def get_a_matching_user(self):
-        github_repository = GitHubRepository.objects.filter(
-            repo_id=self.repo_id
-        ).first()
-
-        if github_repository:
-            return github_repository.user
-
-        return None
 
     def finalize_get_social_image(self):
         self.save()
@@ -483,8 +471,8 @@ class Project(
     # begin CreatePrMixin configuration:
     create_pr_event = "PROJECT_CREATE_PR"
 
-    def get_repo_id(self, user):
-        return self.repository.get_repo_id(user)
+    def get_repo_id(self):
+        return self.repository.get_repo_id()
 
     def get_base(self):
         return self.repository.branch_name
@@ -684,8 +672,8 @@ class Task(
             self.reviewers.append(user)
             self.save()
 
-    def get_repo_id(self, user):
-        return self.project.repository.get_repo_id(user)
+    def get_repo_id(self):
+        return self.project.repository.get_repo_id()
 
     def get_base(self):
         return self.project.branch_name
@@ -730,14 +718,15 @@ class Task(
         )
         self.review_valid = review_valid
 
-    def update_has_unmerged_commits(self, user=None):
-        if user is None:
-            user = self.project.repository.get_a_matching_user()
+    def update_has_unmerged_commits(self):
         base = self.get_base()
         head = self.get_head()
-        if user and head and base:
-            repo_id = self.get_repo_id(user)
-            repo = gh.get_repo_info(user, repo_id=repo_id)
+        if head and base:
+            repo = gh.get_repo_info(
+                None,
+                repo_owner=self.project.repository.repo_owner,
+                repo_name=self.project.repository.repo_name,
+            )
             base_sha = repo.branch(base).commit.sha
             head_sha = repo.branch(head).commit.sha
             self.has_unmerged_commits = (
