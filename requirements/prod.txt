@@ -13,7 +13,7 @@ attrs==20.2.0             # via automat, service-identity, twisted
 authlib==0.14.3           # via simple-salesforce
 autobahn==20.7.1          # via daphne
 automat==20.2.0           # via twisted
-beautifulsoup4==4.9.1     # via -r requirements/prod.in
+beautifulsoup4==4.9.2     # via -r requirements/prod.in
 bleach==3.2.1             # via -r requirements/prod.in, sfdo-template-helpers
 certifi==2020.6.20        # via cumulusci, requests, sentry-sdk
 cffi==1.14.2              # via cryptography, cumulusci
@@ -31,7 +31,7 @@ defusedxml==0.6.0         # via python3-openid
 dj-database-url==0.5.0    # via -r requirements/prod.in
 django-allauth==0.42.0    # via -r requirements/prod.in
 django-anymail[mailgun]==8.0  # via -r requirements/prod.in
-django-filter==2.3.0      # via sfdo-template-helpers
+django-filter==2.4.0      # via sfdo-template-helpers
 django-hashid-field==3.1.3  # via -r requirements/prod.in
 django-js-reverse==0.9.1  # via -r requirements/prod.in
 django-log-request-id==1.6.0  # via -r requirements/prod.in
@@ -40,7 +40,7 @@ django-parler==2.2        # via -r requirements/prod.in
 django-redis==4.12.1      # via -r requirements/prod.in
 django-rq==2.3.2          # via -r requirements/prod.in
 django==3.1.1             # via -r requirements/prod.in, channels, django-allauth, django-anymail, django-filter, django-hashid-field, django-js-reverse, django-log-request-id, django-model-utils, django-redis, django-rq, djangorestframework, sfdo-template-helpers
-djangorestframework==3.11.1  # via -r requirements/prod.in, sfdo-template-helpers
+djangorestframework==3.12.1  # via -r requirements/prod.in, sfdo-template-helpers
 docutils==0.16            # via cumulusci
 faker==4.1.2              # via cumulusci, snowfakery
 fs==2.4.11                # via cumulusci
@@ -97,7 +97,7 @@ salesforce-bulk==2.1.0    # via cumulusci
 sarge==0.1.6              # via cumulusci
 secretstorage==3.1.2      # via keyring
 selenium==3.141.0         # via cumulusci, robotframework-seleniumlibrary
-sentry-sdk==0.17.6        # via -r requirements/prod.in
+sentry-sdk==0.17.8        # via -r requirements/prod.in
 service-identity==18.1.0  # via -r requirements/prod.in, twisted
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.16.0.tar.gz  # via -r requirements/prod.in
 simple-salesforce==1.10.1  # via cumulusci, salesforce-bulk
