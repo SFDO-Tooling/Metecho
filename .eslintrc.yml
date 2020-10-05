@@ -51,10 +51,12 @@ rules:
       trailingComma: all
 
   # Import
+  import/default: 0
+  import/named: 0
+  import/no-named-as-default: 0
   import/order:
     - 1
     - newlines-between: always
-  import/named: 1
 
   # Possible Errors
   getter-return: 2
