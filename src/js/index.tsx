@@ -8,7 +8,7 @@ import settings from '@salesforce/design-system-react/components/settings';
 import i18n from 'i18next';
 import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
-import ReactDOM from 'react-dom';
+import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import {
   BrowserRouter,
@@ -175,7 +175,7 @@ initializeI18n((i18nError?: string) => {
     settings.setAppElement(el);
 
     const renderApp = () => {
-      ReactDOM.render(
+      render(
         <Provider store={appStore}>
           <BrowserRouter>
             <IconSettings
