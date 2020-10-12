@@ -1,0 +1,15 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: weekly
+    time: "04:00"
+    timezone: America/New_York
+  open-pull-requests-limit: 99
+  reviewers:
+  - jgerigmeyer
+  - wlonk
+  allow:
+  - dependency-type: direct
+  - dependency-type: indirect
