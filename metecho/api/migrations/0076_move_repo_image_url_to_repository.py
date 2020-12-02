@@ -10,7 +10,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="githubrepository", name="repo_image_url",),
+        migrations.RemoveField(
+            model_name="githubrepository",
+            name="repo_image_url",
+        ),
         migrations.AddField(
             model_name="repository",
             name="repo_image_url",

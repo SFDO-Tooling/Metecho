@@ -11,7 +11,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="scratchorg", name="cci_log", field=models.TextField(blank=True),
+            model_name="scratchorg",
+            name="cci_log",
+            field=models.TextField(blank=True),
         ),
         migrations.AddField(
             model_name="scratchorg",

@@ -6,8 +6,8 @@ from django.db import migrations
 
 
 def forwards(apps, schema_editor):
-    client_id = environ.get("SF_CLIENT_ID")
-    secret = environ.get("SF_CLIENT_SECRET")
+    client_id = environ.get("SFDX_CLIENT_ID")
+    secret = environ.get("SFDX_CLIENT_SECRET")
     if client_id and secret:
         SocialApp = apps.get_model("socialaccount", "SocialApp")
         SocialApp.objects.get_or_create(

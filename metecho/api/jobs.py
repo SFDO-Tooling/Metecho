@@ -792,7 +792,6 @@ available_task_org_config_names_job = job(available_task_org_config_names)
 def user_reassign(scratch_org, *, new_user, originating_user_id):
     try:
         scratch_org.refresh_from_db()
-        scratch_org.config["email"] = new_user.email
         scratch_org.owner = new_user
         org_config = scratch_org.get_refreshed_org_config()
         username = org_config.username

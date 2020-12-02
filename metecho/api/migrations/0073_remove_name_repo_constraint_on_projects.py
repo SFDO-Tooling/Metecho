@@ -10,5 +10,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(name="project", unique_together=set(),),
+        migrations.AlterUniqueTogether(
+            name="project",
+            unique_together=set(),
+        ),
     ]

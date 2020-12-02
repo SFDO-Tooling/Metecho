@@ -187,7 +187,9 @@ class TestPrHookSerializer:
     ):
         repository = repository_factory(repo_id=123)
         project = project_factory(
-            pr_number=456, repository=repository, pr_is_open=True,
+            pr_number=456,
+            repository=repository,
+            pr_is_open=True,
         )
         data = {
             "action": "closed",
@@ -210,7 +212,9 @@ class TestPrHookSerializer:
     def test_process_hook__project_reopened(self, repository_factory, project_factory):
         repository = repository_factory(repo_id=123)
         project = project_factory(
-            pr_number=456, repository=repository, pr_is_open=True,
+            pr_number=456,
+            repository=repository,
+            pr_is_open=True,
         )
         data = {
             "action": "reopened",

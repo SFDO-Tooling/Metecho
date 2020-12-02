@@ -43,19 +43,19 @@ Docker-based development
    can find these values in the shared Keybase team folder --
    ``metecho/env``)::
 
-    SF_CLIENT_KEY=...
-    SF_CLIENT_ID=...
-    SF_CLIENT_SECRET=...
+    DOCKER_SFDX_HUB_KEY=...
+    SFDX_CLIENT_ID=...
+    SFDX_CLIENT_SECRET=...
     GITHUB_HOOK_SECRET=...
     GITHUB_CLIENT_ID=...
     GITHUB_CLIENT_SECRET=...
     GITHUB_APP_ID=...
-    GITHUB_APP_KEY=...
+    DOCKER_GITHUB_APP_KEY=...
 
-   Note that none of the values should be quoted, and while ``SF_CLIENT_KEY``
-   and ``GITHUB_APP_KEY`` are RSA private keys, they must have newlines replaced
-   with ``\n`` in order to work properly with the Docker ``env_file``
-   configuration option (see `this issue`_).
+   Note that none of the values should be quoted, and while
+   ``DOCKER_SFDX_HUB_KEY`` and ``DOCKER_GITHUB_APP_KEY`` are RSA private keys,
+   they must have newlines replaced with ``\n`` in order to work properly with
+   the Docker ``env_file`` configuration option (see `this issue`_).
 
 3. Run ``./derrick build`` to build/re-build all the container images.
 
@@ -109,8 +109,9 @@ variable in Metecho.
 Use the app's "App ID" as ``GITHUB_APP_ID``, "Client ID" as
 ``GITHUB_CLIENT_ID``, and "Client secret" as ``GITHUB_CLIENT_SECRET``.
 
-Finally, generate a new private key for the app, and set it as the
-``GITHUB_APP_KEY`` environment variable (the entire key, not a path to one).
+Finally, generate a new private key for the app, replace newlines with ``\n``,
+and set it as the ``DOCKER_GITHUB_APP_KEY`` environment variable (the entire
+key, not a path to one).
 
 Logging in as a superuser
 ~~~~~~~~~~~~~~~~~~~~~~~~~

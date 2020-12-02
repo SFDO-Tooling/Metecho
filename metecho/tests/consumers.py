@@ -11,6 +11,7 @@ from ..api.serializers import (
     TaskSerializer,
 )
 from ..consumers import PushNotificationConsumer
+from ..routing import websockets
 
 pytestmark = pytest.mark.asyncio
 
@@ -26,7 +27,7 @@ async def test_push_notification_consumer__repository(user_factory, repository_f
     user = await database_sync_to_async(user_factory)()
     repository = await database_sync_to_async(repository_factory)()
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected
@@ -57,7 +58,7 @@ async def test_push_notification_consumer__scratch_org__list(
     user = await database_sync_to_async(user_factory)()
     scratch_org = await database_sync_to_async(scratch_org_factory)()
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected
@@ -88,7 +89,7 @@ async def test_push_notification_consumer__project(user_factory, project_factory
     user = await database_sync_to_async(user_factory)()
     project = await database_sync_to_async(project_factory)(repository__repo_id=1234)
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected
@@ -117,7 +118,7 @@ async def test_push_notification_consumer__task(user_factory, task_factory):
     user = await database_sync_to_async(user_factory)()
     task = await database_sync_to_async(task_factory)(project__repository__repo_id=4321)
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected
@@ -150,7 +151,7 @@ async def test_push_notification_consumer__scratch_org(
         task__project__repository__repo_id=2468
     )
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected
@@ -178,7 +179,7 @@ async def test_push_notification_consumer__scratch_org(
 async def test_push_notification_consumer__report_error(user_factory):
     user = await database_sync_to_async(user_factory)()
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected
@@ -203,7 +204,7 @@ async def test_push_notification_consumer__report_error(user_factory):
 async def test_push_notification_consumer__unsubscribe(user_factory):
     user = await database_sync_to_async(user_factory)()
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected
@@ -227,7 +228,7 @@ async def test_push_notification_consumer__unsubscribe(user_factory):
 async def test_push_notification_consumer__invalid_subscription(user_factory):
     user = await database_sync_to_async(user_factory)()
 
-    communicator = WebsocketCommunicator(PushNotificationConsumer, "/ws/notifications/")
+    communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected
@@ -247,6 +248,6 @@ async def test_push_notification_consumer__missing_instance():
         "id": "bet this is an invalid ID",
         "payload": {},
     }
-    consumer = PushNotificationConsumer({})
+    consumer = PushNotificationConsumer()
     new_content = await consumer.hydrate_message(content)
     assert new_content == {"payload": {}}

@@ -184,7 +184,7 @@ def get_salesforce_connection(*, scratch_org, originating_user_id, base_url=""):
         version=MetechoUniversalConfig().project__package__api_version,
     )
     conn.headers.setdefault(
-        "Sforce-Call-Options", "client={}".format(settings.SF_CLIENT_ID)
+        "Sforce-Call-Options", "client={}".format(settings.SFDX_CLIENT_ID)
     )
     conn.base_url += base_url
 

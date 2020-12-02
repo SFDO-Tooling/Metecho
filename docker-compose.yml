@@ -18,6 +18,7 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings.local
       DATABASE_URL: postgres://metecho:sample_db_password@postgres:5432/metecho
       REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
     volumes:
       - .:/app:cached
       - /app/node_modules
@@ -34,7 +35,7 @@ services:
 
   # Runs the database process:
   postgres:
-    image: postgres:12.3
+    image: postgres:13.1
     restart: always
     environment:
       POSTGRES_USER: metecho
@@ -44,4 +45,4 @@ services:
 
   # Runs the queue process:
   redis:
-    image: redis:5.0
+    image: redis:6.0

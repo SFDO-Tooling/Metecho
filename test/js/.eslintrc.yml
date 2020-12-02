@@ -16,5 +16,5 @@ extends:
   - plugin:jest/style
 rules:
   # Import
-  simple-import-sort/sort: 1
+  simple-import-sort/imports: 1
   import/order: 0

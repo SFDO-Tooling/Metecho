@@ -6,8 +6,6 @@ from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
 from asgiref.sync import async_to_sync
 from cryptography.fernet import InvalidToken
-from cumulusci.core.config import OrgConfig
-from cumulusci.oauth.salesforce import jwt_session
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -40,7 +38,7 @@ from .model_mixins import (
     SoftDeleteMixin,
     TimestampsMixin,
 )
-from .sf_run_flow import get_devhub_api
+from .sf_run_flow import get_devhub_api, refresh_access_token
 from .validators import validate_unicode_branch
 
 logger = logging.getLogger(__name__)
@@ -898,7 +896,7 @@ class ScratchOrg(
         return ret
 
     def clean_config(self):
-        banned_keys = {"access_token"}
+        banned_keys = {"email", "access_token", "refresh_token"}
         self.config = {k: v for (k, v) in self.config.items() if k not in banned_keys}
 
     def mark_visited(self, *, originating_user_id):
@@ -906,17 +904,13 @@ class ScratchOrg(
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def get_refreshed_org_config(self):
-        org_config = OrgConfig(self.config, "dev")
-        info = jwt_session(
-            settings.SF_CLIENT_ID,
-            settings.SF_CLIENT_KEY,
-            org_config.username,
-            org_config.instance_url,
+    def get_refreshed_org_config(self, org_name=None, keychain=None):
+        org_config = refresh_access_token(
+            scratch_org=self,
+            config=self.config,
+            org_name=org_name or self.task.org_config_name,
+            keychain=keychain,
         )
-        org_config.config.update(info)
-        org_config._load_userinfo()
-        org_config._load_orginfo()
         return org_config
 
     def get_login_url(self):
