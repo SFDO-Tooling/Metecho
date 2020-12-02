@@ -51,16 +51,16 @@
     "GITHUB_APP_KEY": {
       "description": "RSA private key for GitHub App"
     },
-    "SF_CALLBACK_URL": {
+    "SFDX_CLIENT_CALLBACK_URL": {
       "description": "Callback URL for Salesforce Connected App (e.g. \"https://<...>/accounts/salesforce/login/callback/\")"
     },
-    "SF_CLIENT_ID": {
+    "SFDX_CLIENT_ID": {
       "description": "Consumer Key for Salesforce Connected App"
     },
-    "SF_CLIENT_SECRET": {
+    "SFDX_CLIENT_SECRET": {
       "description": "Consumer Secret for Salesforce Connected App"
     },
-    "SF_CLIENT_KEY": {
+    "SFDX_HUB_KEY": {
       "description": "RSA private key matching digital certificate on Salesforce Connected App"
     }
   },

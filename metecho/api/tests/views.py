@@ -187,7 +187,11 @@ class TestHookView:
             gh.get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
-                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        MagicMock(
+                            number=123,
+                            closed_at=None,
+                            is_merged=False,
+                        )
                         for _ in range(1)
                     ),
                     "compare_commits.return_value": MagicMock(ahead_by=0),
@@ -241,7 +245,9 @@ class TestHookView:
             assert len(task.commits) == 1
 
     def test_400__no_handler(
-        self, settings, client,
+        self,
+        settings,
+        client,
     ):
         settings.GITHUB_HOOK_SECRET = b""
         response = client.post(
@@ -517,7 +523,8 @@ class TestScratchOrgView:
     def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
         with ExitStack() as stack:
             social_account_factory(
-                user=client.user, provider="salesforce",
+                user=client.user,
+                provider="salesforce",
             )
             scratch_org = scratch_org_factory(owner=client.user)
 
@@ -532,7 +539,8 @@ class TestScratchOrgView:
     ):
         with ExitStack() as stack:
             social_account_factory(
-                user=client.user, provider="salesforce-production",
+                user=client.user,
+                provider="salesforce-production",
             )
             scratch_org = scratch_org_factory()
 

@@ -16,6 +16,8 @@ class Migration(migrations.Migration):
             field=models.DateTimeField(null=True),
         ),
         migrations.AddField(
-            model_name="task", name="deleted_at", field=models.DateTimeField(null=True),
+            model_name="task",
+            name="deleted_at",
+            field=models.DateTimeField(null=True),
         ),
     ]

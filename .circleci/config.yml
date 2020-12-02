@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.2.0
+      - image: oddbirds/pyjs:v0.4.0
     steps:
       - checkout
       - restore_cache:
@@ -44,7 +44,7 @@ jobs:
   lint:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.2.0
+      - image: oddbirds/pyjs:v0.4.0
     steps:
       - checkout
       - attach_workspace:
@@ -58,7 +58,7 @@ jobs:
   test-client:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.2.0
+      - image: oddbirds/pyjs:v0.4.0
     steps:
       - checkout
       - attach_workspace:
@@ -79,7 +79,7 @@ jobs:
   test-python:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.2.0
+      - image: oddbirds/pyjs:v0.4.0
         environment:
           DATABASE_URL: postgres://ubuntu:circle_test@localhost:5432/circle_test
           DB_ENCRYPTION_KEY: MMkDMBfYL0Xoz3Xu1ENs3AkdCZdJoks5PNlUBkK7KDc=
@@ -88,8 +88,11 @@ jobs:
           DJANGO_SECRET_KEY: test_secret_key
           DJANGO_SETTINGS_MODULE: config.settings.test
           SECURE_SSL_REDIRECT: False
-      - image: circleci/redis:5.0
-      - image: circleci/postgres:12.3
+          SFDX_CLIENT_CALLBACK_URL: circle_test
+          SFDX_CLIENT_ID: circle_test
+          SFDX_CLIENT_SECRET: circle_test
+      - image: circleci/redis:6.0
+      - image: circleci/postgres:13.1
         environment:
           POSTGRES_DB: circle_test
           POSTGRES_PASSWORD: circle_test
@@ -121,7 +124,7 @@ jobs:
   report-test-coverage:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.2.0
+      - image: oddbirds/pyjs:v0.4.0
     environment:
       COVERALLS_PARALLEL: true
     steps:
@@ -147,7 +150,7 @@ jobs:
   build-docs:
     working_directory: ~/metecho
     docker:
-      - image: oddbirds/pyjs:v0.2.0
+      - image: oddbirds/pyjs:v0.4.0
     steps:
       - checkout
       - attach_workspace:

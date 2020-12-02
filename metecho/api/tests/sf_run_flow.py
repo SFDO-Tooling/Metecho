@@ -11,6 +11,7 @@ import pytest
 from requests.exceptions import HTTPError
 
 from ..sf_run_flow import (
+    ScratchOrgError,
     capitalize,
     create_org,
     delete_org,
@@ -30,8 +31,8 @@ PATCH_ROOT = "metecho.api.sf_run_flow"
 
 @pytest.mark.django_db
 def test_is_org_good(scratch_org_factory):
-    with patch("metecho.api.sf_run_flow.jwt_session") as jwt_session:
-        jwt_session.side_effect = HTTPError()
+    with patch("metecho.api.sf_run_flow.OrgConfig") as OrgConfig:
+        OrgConfig.side_effect = HTTPError()
         assert not is_org_good(scratch_org_factory())
 
 
@@ -42,7 +43,6 @@ def test_capitalize():
 class TestRefreshAccessToken:
     def test_good(self):
         with ExitStack() as stack:
-            stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
             OrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
             refresh_access_token(
@@ -60,14 +60,13 @@ class TestRefreshAccessToken:
                 patch(f"{PATCH_ROOT}.get_current_job")
             )
             get_current_job.return_value = MagicMock(id=123)
-            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
-            jwt_session.side_effect = HTTPError(
+            OrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
+            OrgConfig.side_effect = HTTPError(
                 "Error message.", response=MagicMock(status_code=400)
             )
-            stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
             scratch_org = MagicMock()
-            with pytest.raises(HTTPError, match=".*job ID.*"):
+            with pytest.raises(ScratchOrgError, match=".*job ID.*"):
                 refresh_access_token(
                     config=MagicMock(),
                     org_name=MagicMock(),
@@ -79,14 +78,13 @@ class TestRefreshAccessToken:
 
     def test_bad__no_job(self):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
-            jwt_session.side_effect = HTTPError(
+            OrgConfig = stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
+            OrgConfig.side_effect = HTTPError(
                 "Error message.", response=MagicMock(status_code=400)
             )
-            stack.enter_context(patch(f"{PATCH_ROOT}.OrgConfig"))
 
             scratch_org = MagicMock()
-            with pytest.raises(HTTPError, match=".*org still exists*"):
+            with pytest.raises(ScratchOrgError, match=".*org still exists*"):
                 refresh_access_token(
                     config=MagicMock(),
                     org_name=MagicMock(),
@@ -97,14 +95,32 @@ class TestRefreshAccessToken:
             assert scratch_org.remove_scratch_org.called
 
 
-def test_get_devhub_api():
-    with ExitStack() as stack:
-        stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
-        SimpleSalesforce = stack.enter_context(patch(f"{PATCH_ROOT}.SimpleSalesforce"))
+class TestGetDevhubApi:
+    def test_good(self):
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
+            SimpleSalesforce = stack.enter_context(
+                patch(f"{PATCH_ROOT}.SimpleSalesforce")
+            )
 
-        get_devhub_api(devhub_username="devhub_username")
+            get_devhub_api(devhub_username="devhub_username")
 
-        assert SimpleSalesforce.called
+            assert SimpleSalesforce.called
+
+    def test_bad(self):
+        with ExitStack() as stack:
+            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
+            jwt_session.side_effect = HTTPError(
+                "Error message.", response=MagicMock(status_code=400)
+            )
+
+            scratch_org = MagicMock()
+            with pytest.raises(ScratchOrgError, match=".*org still exists*"):
+                get_devhub_api(
+                    devhub_username="devhub_username", scratch_org=scratch_org
+                )
+
+            assert scratch_org.remove_scratch_org.called
 
 
 def test_get_org_details():
@@ -120,7 +136,6 @@ def test_get_org_details():
 
 
 def test_get_org_result(settings):
-    settings.SF_SIGNUP_INSTANCE = "cs68"
     result = get_org_result(
         email=MagicMock(),
         repo_owner=MagicMock(),
@@ -187,7 +202,9 @@ class TestRunFlow:
     def test_create_org_and_run_flow__exception(self, user_factory, project_factory):
         user = user_factory()
         org_config = MagicMock(
-            org_id="org_id", instance_url="instance_url", access_token="access_token",
+            org_id="org_id",
+            instance_url="instance_url",
+            access_token="access_token",
         )
         project = project_factory()
         with ExitStack() as stack:

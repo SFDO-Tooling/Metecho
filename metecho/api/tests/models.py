@@ -855,13 +855,16 @@ class TestScratchOrg:
 
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(patch("metecho.api.models.jwt_session"))
-            OrgConfig = stack.enter_context(patch("metecho.api.models.OrgConfig"))
-            OrgConfig.return_value = MagicMock(start_url="https://example.com")
+            refresh_access_token = stack.enter_context(
+                patch("metecho.api.models.refresh_access_token")
+            )
+            refresh_access_token.return_value = MagicMock(
+                start_url="https://example.com"
+            )
 
             scratch_org = scratch_org_factory()
             assert scratch_org.get_login_url() == "https://example.com"
-            assert jwt_session.called
+            assert refresh_access_token.called
 
     def test_remove_scratch_org(self, scratch_org_factory):
         with ExitStack() as stack:

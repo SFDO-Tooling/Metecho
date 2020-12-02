@@ -242,7 +242,8 @@ class TestNormalizeCommit:
         }
         assert (
             normalize_commit(
-                data, sender={"avatar_url": "avatar_url", "login": "username"},
+                data,
+                sender={"avatar_url": "avatar_url", "login": "username"},
             )
             == expected
         )

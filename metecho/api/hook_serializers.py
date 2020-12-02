@@ -146,7 +146,9 @@ class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
         else:
             sender = self.validated_data["sender"]
             repository.add_commits(
-                commits=self.validated_data["commits"], ref=ref, sender=sender,
+                commits=self.validated_data["commits"],
+                ref=ref,
+                sender=sender,
             )
 
 

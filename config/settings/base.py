@@ -227,7 +227,8 @@ GITHUB_HOOK_SECRET = env(
 GITHUB_USER_NAME = env("GITHUB_USER_NAME", default="GitHub user")
 GITHUB_APP_ID = env("GITHUB_APP_ID", default=0, type_=int)
 # Ugly hack to fix https://github.com/moby/moby/issues/12997
-GITHUB_APP_KEY = bytes(env("GITHUB_APP_KEY", default="").replace("\\n", "\n"), "utf-8")
+DOCKER_GITHUB_APP_KEY = env("DOCKER_GITHUB_APP_KEY", default="").replace("\\n", "\n")
+GITHUB_APP_KEY = bytes(env("GITHUB_APP_KEY", default=DOCKER_GITHUB_APP_KEY), "utf-8")
 
 
 # Salesforce Devhub settings:
@@ -343,12 +344,34 @@ GITHUB_OAUTH_SCOPES = ["read:user", "user:email"]
 GITHUB_OAUTH_SCOPES.append("repo" if GITHUB_OAUTH_PRIVATE_REPO else "public_repo")
 
 # SF client settings:
-SF_CALLBACK_URL = env("SF_CALLBACK_URL", default=None)
+SFDX_CLIENT_CALLBACK_URL = env(
+    "SFDX_CLIENT_CALLBACK_URL", default=env("SF_CALLBACK_URL", default=None)
+)
+SFDX_CLIENT_ID = env("SFDX_CLIENT_ID", default=env("SF_CLIENT_ID", default=None))
+SFDX_CLIENT_SECRET = env(
+    "SFDX_CLIENT_SECRET", default=env("SF_CLIENT_SECRET", default=None)
+)
+SFDX_SIGNUP_INSTANCE = env(
+    "SFDX_SIGNUP_INSTANCE", default=env("SF_SIGNUP_INSTANCE", default=None)
+)
 # Ugly hack to fix https://github.com/moby/moby/issues/12997
-SF_CLIENT_KEY = env("SF_CLIENT_KEY", default="").replace("\\n", "\n")
-SF_CLIENT_ID = env("SF_CLIENT_ID", default=None)
-SF_CLIENT_SECRET = env("SF_CLIENT_SECRET", default=None)
-SF_SIGNUP_INSTANCE = env("SF_SIGNUP_INSTANCE", default=None)
+DOCKER_SFDX_HUB_KEY = env("DOCKER_SFDX_HUB_KEY", default="").replace("\\n", "\n")
+SFDX_HUB_KEY = env(
+    "SFDX_HUB_KEY", default=env("SF_CLIENT_KEY", default=DOCKER_SFDX_HUB_KEY)
+)
+
+if not SFDX_CLIENT_SECRET:
+    raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_SECRET.")
+if not SFDX_CLIENT_CALLBACK_URL:
+    raise ImproperlyConfigured(
+        "Missing environment variable: SFDX_CLIENT_CALLBACK_URL."
+    )
+if not SFDX_CLIENT_ID:
+    raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_ID.")
+
+# CCI expects these env vars to be set to refresh org oauth tokens
+environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
+environ["SFDX_HUB_KEY"] = SFDX_HUB_KEY
 
 SOCIALACCOUNT_PROVIDERS = {
     "github": {
@@ -357,7 +380,7 @@ SOCIALACCOUNT_PROVIDERS = {
     },
     "salesforce": {
         "SCOPE": ["web", "full", "refresh_token"],
-        "APP": {"client_id": SF_CLIENT_ID, "secret": SF_CLIENT_SECRET},
+        "APP": {"client_id": SFDX_CLIENT_ID, "secret": SFDX_CLIENT_SECRET},
     },
 }
 ACCOUNT_EMAIL_REQUIRED = True

@@ -66,7 +66,11 @@ class TestProjectSerializer:
             gh_module.get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
-                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        MagicMock(
+                            number=123,
+                            closed_at=None,
+                            is_merged=False,
+                        )
                         for _ in range(1)
                     ),
                 }
@@ -104,7 +108,11 @@ class TestProjectSerializer:
             gh.get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
-                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        MagicMock(
+                            number=123,
+                            closed_at=None,
+                            is_merged=False,
+                        )
                         for _ in range(1)
                     ),
                 }
@@ -137,7 +145,11 @@ class TestProjectSerializer:
             gh.get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
-                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        MagicMock(
+                            number=123,
+                            closed_at=None,
+                            is_merged=False,
+                        )
                         for _ in range(1)
                     ),
                 }
@@ -281,10 +293,9 @@ class TestTaskSerializer:
         assert serializer.is_valid(), serializer.errors
 
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(
-                patch("metecho.api.sf_run_flow.jwt_session")
-            )
-            jwt_session.return_value = {"access_token": None}
+            OrgConfig = stack.enter_context(patch("metecho.api.sf_run_flow.OrgConfig"))
+            org_config = MagicMock(config={"access_token": None})
+            OrgConfig.return_value = org_config
             serializer.update(task, serializer.validated_data)
         so1.refresh_from_db()
         so2.refresh_from_db()
@@ -332,7 +343,11 @@ class TestTaskSerializer:
             gh.get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
-                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        MagicMock(
+                            number=123,
+                            closed_at=None,
+                            is_merged=False,
+                        )
                         for _ in range(1)
                     ),
                 }
@@ -400,10 +415,9 @@ class TestTaskSerializer:
             user_reassign_job = stack.enter_context(
                 patch("metecho.api.jobs.user_reassign_job")
             )
-            jwt_session = stack.enter_context(
-                patch("metecho.api.sf_run_flow.jwt_session")
-            )
-            jwt_session.return_value = {"access_token": None}
+            OrgConfig = stack.enter_context(patch("metecho.api.sf_run_flow.OrgConfig"))
+            org_config = MagicMock(config={"access_token": None})
+            OrgConfig.return_value = org_config
             assert serializer.is_valid()
             serializer.save()
             assert user_reassign_job.delay.called
