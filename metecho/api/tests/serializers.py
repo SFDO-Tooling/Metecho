@@ -293,10 +293,9 @@ class TestTaskSerializer:
         assert serializer.is_valid(), serializer.errors
 
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(
-                patch("metecho.api.sf_run_flow.jwt_session")
-            )
-            jwt_session.return_value = {"access_token": None}
+            OrgConfig = stack.enter_context(patch("metecho.api.sf_run_flow.OrgConfig"))
+            org_config = MagicMock(config={"access_token": None})
+            OrgConfig.return_value = org_config
             serializer.update(task, serializer.validated_data)
         so1.refresh_from_db()
         so2.refresh_from_db()
