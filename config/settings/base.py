@@ -368,6 +368,8 @@ if not SFDX_CLIENT_CALLBACK_URL:
     )
 if not SFDX_CLIENT_ID:
     raise ImproperlyConfigured("Missing environment variable: SFDX_CLIENT_ID.")
+if not SFDX_HUB_KEY:
+    raise ImproperlyConfigured("Missing environment variable: SFDX_HUB_KEY.")
 
 # CCI expects these env vars to be set to refresh org oauth tokens
 environ["SFDX_CLIENT_ID"] = SFDX_CLIENT_ID
