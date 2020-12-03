@@ -42,6 +42,7 @@ RUN DATABASE_URL="" \
   SFDX_CLIENT_SECRET="sample secret" \
   SFDX_CLIENT_CALLBACK_URL="sample callback" \
   SFDX_CLIENT_ID="sample id" \
+  SFDX_HUB_KEY="sample key" \
   python manage.py collectstatic --noinput
 
 CMD /start-server.sh

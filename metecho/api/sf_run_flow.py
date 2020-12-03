@@ -1,3 +1,4 @@
+import contextlib
 import json
 import logging
 import os
@@ -51,30 +52,36 @@ class ScratchOrgError(Exception):
     pass
 
 
-def handle_sf_error(err, scratch_org=None, originating_user_id=None):
-    if get_current_job():
-        job_id = get_current_job().id
-        # This error is user-facing, and so for makemessages to
-        # pick it up correctly, we need it to be a single,
-        # unbroken, string literal (even though adjacent string
-        # literals should be parsed by the AST into a single
-        # string literal and picked up by makemessages, but
-        # that's a gripe for another day). We have relatively
-        # few errors that propagate directly from the backend
-        # like this, but when we do, this is the pattern we
-        # should use.
-        #
-        # This is also why we repeat the first sentence.
-        error_msg = _(
-            f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
-        )
-    else:
-        error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
+@contextlib.contextmanager
+def delete_org_on_error(scratch_org=None, originating_user_id=None):
+    try:
+        yield
+    except HTTPError as err:
+        if get_current_job():
+            job_id = get_current_job().id
+            # This error is user-facing, and so for makemessages to
+            # pick it up correctly, we need it to be a single,
+            # unbroken, string literal (even though adjacent string
+            # literals should be parsed by the AST into a single
+            # string literal and picked up by makemessages, but
+            # that's a gripe for another day). We have relatively
+            # few errors that propagate directly from the backend
+            # like this, but when we do, this is the pattern we
+            # should use.
+            #
+            # This is also why we repeat the first sentence.
+            error_msg = _(
+                f"Are you certain that the org still exists? If you need support, your job ID is {job_id}."  # noqa: B950
+            )
+        else:
+            error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
 
-    error = ScratchOrgError(error_msg)
-    if scratch_org:
-        scratch_org.remove_scratch_org(error, originating_user_id=originating_user_id)
-    raise error
+        error = ScratchOrgError(error_msg)
+        if scratch_org:
+            scratch_org.remove_scratch_org(
+                error, originating_user_id=originating_user_id
+            )
+        raise error
 
 
 def capitalize(s):
@@ -105,14 +112,12 @@ def refresh_access_token(
     which we don't want now -- this is a total hack which I'll try to
     smooth over with some improvements in CumulusCI
     """
-    try:
+    with delete_org_on_error(
+        scratch_org=scratch_org, originating_user_id=originating_user_id
+    ):
         org_config = OrgConfig(config, org_name, keychain=keychain)
         org_config.refresh_oauth_token(keychain)
         return org_config
-    except HTTPError as err:
-        handle_sf_error(
-            err, scratch_org=scratch_org, originating_user_id=originating_user_id
-        )
 
 
 def get_devhub_api(*, devhub_username, scratch_org=None):
@@ -121,7 +126,7 @@ def get_devhub_api(*, devhub_username, scratch_org=None):
     This only works if the user has already authorized the connected app
     via an interactive login flow, such as the django-allauth login.
     """
-    try:
+    with delete_org_on_error(scratch_org=scratch_org):
         jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, devhub_username)
         return SimpleSalesforce(
             instance_url=jwt["instance_url"],
@@ -129,8 +134,6 @@ def get_devhub_api(*, devhub_username, scratch_org=None):
             client_id="Metecho",
             version="49.0",
         )
-    except HTTPError as err:
-        handle_sf_error(err, scratch_org=scratch_org)
 
 
 def get_org_details(*, cci, org_name, project_path):
