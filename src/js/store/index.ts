@@ -1,9 +1,9 @@
 import { AnyAction, combineReducers, Reducer } from 'redux';
 import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
+import epicsReducer, { EpicsState } from '@/store/epics/reducer';
 import errorsReducer, { ErrorType } from '@/store/errors/reducer';
 import orgReducer, { OrgState } from '@/store/orgs/reducer';
-import projectsReducer, { ProjectsState } from '@/store/projects/reducer';
 import repositoriesReducer, {
   RepositoriesState,
 } from '@/store/repositories/reducer';
@@ -16,7 +16,7 @@ export interface AppState {
   errors: ErrorType[];
   toasts: ToastType[];
   orgs: OrgState;
-  projects: ProjectsState;
+  epics: EpicsState;
   repositories: RepositoriesState;
   socket: Socket;
   tasks: TaskState;
@@ -35,7 +35,7 @@ const reducer: Reducer<AppState> = combineReducers({
   toasts: toastsReducer,
   errors: errorsReducer,
   orgs: orgReducer,
-  projects: projectsReducer,
+  epics: epicsReducer,
   repositories: repositoriesReducer,
   socket: socketReducer,
   tasks: taskReducer,

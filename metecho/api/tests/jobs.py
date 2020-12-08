@@ -16,7 +16,7 @@ from ..jobs import (
     available_task_org_config_names,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
-    create_gh_branch_for_new_project,
+    create_gh_branch_for_new_epic,
     create_pr,
     delete_scratch_org,
     get_social_image,
@@ -44,7 +44,7 @@ class TestCreateBranchesOnGitHub:
     def test_create_branches_on_github(self, user_factory, task_factory):
         user = user_factory()
         task = task_factory()
-        project = task.project
+        epic = task.epic
 
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
@@ -61,14 +61,14 @@ class TestCreateBranchesOnGitHub:
             _create_branches_on_github(
                 user=user,
                 repo_id=123,
-                project=project,
+                epic=epic,
                 task=task,
                 originating_user_id="123abc",
             )
 
             assert repository.create_branch_ref.called
 
-    def test_create_branches_on_github__missing(self, user_factory, project_factory):
+    def test_create_branches_on_github__missing(self, user_factory, epic_factory):
         user = user_factory()
         with ExitStack() as stack:
             try_to_make_branch = stack.enter_context(
@@ -78,8 +78,8 @@ class TestCreateBranchesOnGitHub:
             get_repo_info.return_value = MagicMock(
                 **{"branch.side_effect": NotFoundError(MagicMock())}
             )
-            project = project_factory(branch_name="placeholder")
-            create_gh_branch_for_new_project(project, user=user)
+            epic = epic_factory(branch_name="placeholder")
+            create_gh_branch_for_new_epic(epic, user=user)
             assert try_to_make_branch.called
 
     def test_create_branches_on_github__settings(
@@ -88,7 +88,7 @@ class TestCreateBranchesOnGitHub:
         settings.BRANCH_PREFIX = "test_prefix"
         user = user_factory()
         task = task_factory()
-        project = task.project
+        epic = task.epic
 
         with ExitStack() as stack:
             local_github_checkout = stack.enter_context(
@@ -108,7 +108,7 @@ class TestCreateBranchesOnGitHub:
             _create_branches_on_github(
                 user=user,
                 repo_id=123,
-                project=project,
+                epic=epic,
                 task=task,
                 originating_user_id="123abc",
             )
@@ -120,8 +120,8 @@ class TestCreateBranchesOnGitHub:
         self, user_factory, task_factory
     ):
         user = user_factory()
-        task = task_factory(project__repository__branch_prefix="test_prefix")
-        project = task.project
+        task = task_factory(epic__repository__branch_prefix="test_prefix")
+        epic = task.epic
 
         with ExitStack() as stack:
             local_github_checkout = stack.enter_context(
@@ -141,7 +141,7 @@ class TestCreateBranchesOnGitHub:
             _create_branches_on_github(
                 user=user,
                 repo_id=123,
-                project=project,
+                epic=epic,
                 task=task,
                 originating_user_id="123abc",
             )
@@ -150,7 +150,7 @@ class TestCreateBranchesOnGitHub:
             assert not local_github_checkout.called
 
     def test_create_branches_on_github__already_there(
-        self, user_factory, project_factory, task_factory
+        self, user_factory, epic_factory, task_factory
     ):
         user = user_factory()
         with ExitStack() as stack:
@@ -158,7 +158,7 @@ class TestCreateBranchesOnGitHub:
                 patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.project_create_branch"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.epic_create_branch"))
             get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
@@ -173,11 +173,11 @@ class TestCreateBranchesOnGitHub:
                 }
             )
 
-            project = project_factory(branch_name="pepin")
-            create_gh_branch_for_new_project(project, user=user)
+            epic = epic_factory(branch_name="pepin")
+            create_gh_branch_for_new_epic(epic, user=user)
             assert not try_to_make_branch.called
 
-            task = task_factory(branch_name="charlemagne", project=project)
+            task = task_factory(branch_name="charlemagne", epic=epic)
 
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
@@ -187,7 +187,7 @@ class TestCreateBranchesOnGitHub:
             _create_branches_on_github(
                 user=user,
                 repo_id=123,
-                project=project,
+                epic=epic,
                 task=task,
                 originating_user_id="123abc",
             )
@@ -529,15 +529,15 @@ class TestErrorHandling:
         self,
         user_factory,
         repository_factory,
-        project_factory,
+        epic_factory,
         task_factory,
         git_hub_repository_factory,
     ):
         user = user_factory()
         repository = repository_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
-        project = project_factory(repository=repository)
-        task = task_factory(project=project, branch_name="task", origin_sha="1234abcd")
+        epic = epic_factory(repository=repository)
+        task = task_factory(epic=epic, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:
             commit1 = Commit(
                 **{
@@ -730,7 +730,7 @@ class TestSubmitReview:
             task = task_factory(pr_is_open=True, review_valid=True, review_sha="none")
             scratch_org = scratch_org_factory(task=task, latest_commit="test_sha")
             task.finalize_submit_review = MagicMock()
-            task.project.repository.get_repo_id = MagicMock()
+            task.epic.repository.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
@@ -768,7 +768,7 @@ class TestSubmitReview:
                 pr_is_open=True, review_valid=False, review_sha="test_sha"
             )
             task.finalize_submit_review = MagicMock()
-            task.project.repository.get_repo_id = MagicMock()
+            task.epic.repository.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
@@ -817,12 +817,12 @@ class TestSubmitReview:
 
 
 @pytest.mark.django_db
-class TestCreateGhBranchForNewProject:
-    def test_no_pr(self, user_factory, project_factory):
+class TestCreateGhBranchForNewEpic:
+    def test_no_pr(self, user_factory, epic_factory):
         user = user_factory()
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            stack.enter_context(patch(f"{PATCH_ROOT}.project_create_branch"))
+            stack.enter_context(patch(f"{PATCH_ROOT}.epic_create_branch"))
             get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
@@ -832,45 +832,45 @@ class TestCreateGhBranchForNewProject:
                 }
             )
 
-            project = project_factory(branch_name="pepin")
-            create_gh_branch_for_new_project(project, user=user)
-            assert project.pr_number is None
+            epic = epic_factory(branch_name="pepin")
+            create_gh_branch_for_new_epic(epic, user=user)
+            assert epic.pr_number is None
 
-    def test_no_branch_name(self, user_factory, project_factory):
+    def test_no_branch_name(self, user_factory, epic_factory):
         user = user_factory()
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            project_create_branch = stack.enter_context(
-                patch(f"{PATCH_ROOT}.project_create_branch")
+            epic_create_branch = stack.enter_context(
+                patch(f"{PATCH_ROOT}.epic_create_branch")
             )
             get_repo_info.return_value = MagicMock()
 
-            project = project_factory()
-            create_gh_branch_for_new_project(project, user=user)
-            assert project_create_branch.called
+            epic = epic_factory()
+            create_gh_branch_for_new_epic(epic, user=user)
+            assert epic_create_branch.called
 
-    def test_exception(self, user_factory, project_factory):
+    def test_exception(self, user_factory, epic_factory):
         user = user_factory()
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            project_create_branch = stack.enter_context(
-                patch(f"{PATCH_ROOT}.project_create_branch")
+            epic_create_branch = stack.enter_context(
+                patch(f"{PATCH_ROOT}.epic_create_branch")
             )
             get_repo_info.side_effect = ValueError()
 
-            project = project_factory()
+            epic = epic_factory()
             with pytest.raises(ValueError):
-                create_gh_branch_for_new_project(project, user=user)
+                create_gh_branch_for_new_epic(epic, user=user)
 
-            assert not project_create_branch.called
+            assert not epic_create_branch.called
 
 
 @pytest.mark.django_db
 class TestAvailableTaskOrgConfigNames:
-    def test_available_task_org_config_names(self, project_factory, user_factory):
-        project = project_factory()
+    def test_available_task_org_config_names(self, epic_factory, user_factory):
+        epic = epic_factory()
         user = user_factory()
-        project.finalize_available_task_org_config_names = MagicMock()
+        epic.finalize_available_task_org_config_names = MagicMock()
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
@@ -892,24 +892,22 @@ class TestAvailableTaskOrgConfigNames:
                 **{"project_config.orgs__scratch": {}}
             )
 
-            available_task_org_config_names(project, user=user)
+            available_task_org_config_names(epic, user=user)
 
-            assert project.finalize_available_task_org_config_names.called
+            assert epic.finalize_available_task_org_config_names.called
 
-    def test_available_task_org_config_names__error(
-        self, project_factory, user_factory
-    ):
-        project = project_factory()
+    def test_available_task_org_config_names__error(self, epic_factory, user_factory):
+        epic = epic_factory()
         user = user_factory()
-        project.finalize_available_task_org_config_names = MagicMock()
+        epic.finalize_available_task_org_config_names = MagicMock()
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_repo_info.side_effect = ValueError
 
             with pytest.raises(ValueError):
-                available_task_org_config_names(project, user=user)
+                available_task_org_config_names(epic, user=user)
 
-            assert project.finalize_available_task_org_config_names.called
+            assert epic.finalize_available_task_org_config_names.called
 
 
 @pytest.mark.django_db

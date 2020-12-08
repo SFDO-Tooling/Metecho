@@ -44,30 +44,30 @@ interface TableCellProps {
 
 interface Props {
   repositorySlug: string;
-  projectSlug: string;
+  epicSlug: string;
   tasks: Task[];
-  projectUsers: GitHubUser[];
-  openAssignProjectUsersModal: () => void;
+  epicUsers: GitHubUser[];
+  openAssignEpicUsersModal: () => void;
   assignUserAction: AssignUserAction;
 }
 
 const NameTableCell = ({
   repositorySlug,
-  projectSlug,
+  epicSlug,
   item,
   className,
   children,
   ...props
 }: TableCellProps & {
   repositorySlug: string;
-  projectSlug: string;
+  epicSlug: string;
 }) => (
   <DataTableCell
     {...props}
-    className={classNames(className, 'project-task-name', 'truncated-cell')}
+    className={classNames(className, 'epic-task-name', 'truncated-cell')}
   >
-    {repositorySlug && projectSlug && item && (
-      <Link to={routes.task_detail(repositorySlug, projectSlug, item.slug)}>
+    {repositorySlug && epicSlug && item && (
+      <Link to={routes.task_detail(repositorySlug, epicSlug, item.slug)}>
         {children}
       </Link>
     )}
@@ -113,7 +113,7 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     <DataTableCell
       {...props}
       title={displayStatus || status}
-      className={classNames(className, 'project-task-status', 'status-cell')}
+      className={classNames(className, 'epic-task-status', 'status-cell')}
     >
       {icon}
       <span className="slds-m-left_x-small status-cell-text">
@@ -126,8 +126,8 @@ StatusTableCell.displayName = DataTableCell.displayName;
 
 const AssigneeTableCell = ({
   type,
-  projectUsers,
-  openAssignProjectUsersModal,
+  epicUsers,
+  openAssignEpicUsersModal,
   assignUserAction,
   item,
   className,
@@ -135,8 +135,8 @@ const AssigneeTableCell = ({
   ...props
 }: TableCellProps & {
   type: OrgTypes;
-  projectUsers: GitHubUser[];
-  openAssignProjectUsersModal: () => void;
+  epicUsers: GitHubUser[];
+  openAssignEpicUsersModal: () => void;
   assignUserAction: AssignUserAction;
   children?: GitHubUser | null;
 }) => {
@@ -151,8 +151,8 @@ const AssigneeTableCell = ({
   };
   const handleEmptyMessageClick = useCallback(() => {
     closeAssignUserModal();
-    openAssignProjectUsersModal();
-  }, [openAssignProjectUsersModal]);
+    openAssignEpicUsersModal();
+  }, [openAssignEpicUsersModal]);
 
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
@@ -198,11 +198,11 @@ const AssigneeTableCell = ({
           onClick={openAssignUserModal}
         />
         <AssignUserModal
-          allUsers={projectUsers}
+          allUsers={epicUsers}
           selectedUser={assignedUser}
           orgType={type}
           isOpen={assignUserModalOpen}
-          emptyMessageText={i18n.t('Add Project Collaborators')}
+          emptyMessageText={i18n.t('Add Epic Collaborators')}
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
@@ -214,7 +214,7 @@ const AssigneeTableCell = ({
     <DataTableCell
       {...props}
       title={title}
-      className={classNames(className, 'project-task-assignee')}
+      className={classNames(className, 'epic-task-assignee')}
     >
       {contents}
     </DataTableCell>
@@ -224,10 +224,10 @@ AssigneeTableCell.displayName = DataTableCell.displayName;
 
 const TaskTable = ({
   repositorySlug,
-  projectSlug,
+  epicSlug,
   tasks,
-  projectUsers,
-  openAssignProjectUsersModal,
+  epicUsers,
+  openAssignEpicUsersModal,
   assignUserAction,
 }: Props) => {
   const statusOrder = {
@@ -240,7 +240,7 @@ const TaskTable = ({
     'name',
   ]);
   return (
-    <DataTable items={taskDefaultSort} id="project-tasks-table" noRowHover>
+    <DataTable items={taskDefaultSort} id="epic-tasks-table" noRowHover>
       <DataTableColumn
         key="name"
         label={i18n.t('Task')}
@@ -248,10 +248,7 @@ const TaskTable = ({
         width="65%"
         primaryColumn
       >
-        <NameTableCell
-          repositorySlug={repositorySlug}
-          projectSlug={projectSlug}
-        />
+        <NameTableCell repositorySlug={repositorySlug} epicSlug={epicSlug} />
       </DataTableColumn>
       <DataTableColumn
         key="status"
@@ -269,8 +266,8 @@ const TaskTable = ({
       >
         <AssigneeTableCell
           type={ORG_TYPES.DEV}
-          projectUsers={projectUsers}
-          openAssignProjectUsersModal={openAssignProjectUsersModal}
+          epicUsers={epicUsers}
+          openAssignEpicUsersModal={openAssignEpicUsersModal}
           assignUserAction={assignUserAction}
         />
       </DataTableColumn>
@@ -282,8 +279,8 @@ const TaskTable = ({
       >
         <AssigneeTableCell
           type={ORG_TYPES.QA}
-          projectUsers={projectUsers}
-          openAssignProjectUsersModal={openAssignProjectUsersModal}
+          epicUsers={epicUsers}
+          openAssignEpicUsersModal={openAssignEpicUsersModal}
           assignUserAction={assignUserAction}
         />
       </DataTableColumn>

@@ -7,10 +7,10 @@ from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
 from ..models import (
-    PROJECT_STATUSES,
+    EPIC_STATUSES,
     SCRATCH_ORG_TYPES,
     TASK_STATUSES,
-    Project,
+    Epic,
     Repository,
     Task,
     user_logged_in_handler,
@@ -87,58 +87,58 @@ class TestRepository:
 
 
 @pytest.mark.django_db
-class TestProject:
+class TestEpic:
     def test_signal(self, repository_factory):
         repository = repository_factory()
-        project = Project(name="Test Project", repository=repository)
-        project.save()
+        epic = Epic(name="Test Epic", repository=repository)
+        epic.save()
 
-        assert project.slug == "test-project"
+        assert epic.slug == "test-epic"
 
     def test_str(self, repository_factory):
         repository = repository_factory()
-        project = Project(name="Test Project", repository=repository)
-        assert str(project) == "Test Project"
+        epic = Epic(name="Test Epic", repository=repository)
+        assert str(epic) == "Test Epic"
 
-    def test_get_repo_id(self, repository_factory, project_factory):
+    def test_get_repo_id(self, repository_factory, epic_factory):
         repo = repository_factory(repo_id=123)
-        project = project_factory(repository=repo)
+        epic = epic_factory(repository=repo)
 
-        assert project.get_repo_id() == 123
+        assert epic.get_repo_id() == 123
 
-    def test_finalize_status_completed(self, project_factory):
+    def test_finalize_status_completed(self, epic_factory):
         with ExitStack() as stack:
-            project = project_factory(has_unmerged_commits=True)
+            epic = epic_factory(has_unmerged_commits=True)
 
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
             )
-            project.finalize_status_completed(123, originating_user_id=None)
-            project.refresh_from_db()
-            assert project.pr_number == 123
-            assert not project.has_unmerged_commits
+            epic.finalize_status_completed(123, originating_user_id=None)
+            epic.refresh_from_db()
+            assert epic.pr_number == 123
+            assert not epic.has_unmerged_commits
             assert async_to_sync.called
 
-    def test_should_update_status(self, project_factory):
-        project = project_factory()
-        assert not project.should_update_status()
+    def test_should_update_status(self, epic_factory):
+        epic = epic_factory()
+        assert not epic.should_update_status()
 
-    def test_should_update_status__already_merged(self, project_factory):
-        project = project_factory(status=PROJECT_STATUSES.Merged, pr_is_merged=True)
-        assert not project.should_update_status()
+    def test_should_update_status__already_merged(self, epic_factory):
+        epic = epic_factory(status=EPIC_STATUSES.Merged, pr_is_merged=True)
+        assert not epic.should_update_status()
 
-    def test_should_update_status__already_review(self, project_factory, task_factory):
-        project = project_factory(status=PROJECT_STATUSES.Review)
-        task_factory(project=project, status=TASK_STATUSES.Completed)
-        assert not project.should_update_status()
+    def test_should_update_status__already_review(self, epic_factory, task_factory):
+        epic = epic_factory(status=EPIC_STATUSES.Review)
+        task_factory(epic=epic, status=TASK_STATUSES.Completed)
+        assert not epic.should_update_status()
 
-    def test_queue_create_pr(self, project_factory, user_factory):
+    def test_queue_create_pr(self, epic_factory, user_factory):
         with ExitStack() as stack:
             create_pr_job = stack.enter_context(patch("metecho.api.jobs.create_pr_job"))
 
-            project = project_factory()
+            epic = epic_factory()
             user = user_factory()
-            project.queue_create_pr(
+            epic.queue_create_pr(
                 user,
                 title="My PR",
                 critical_changes="",
@@ -151,49 +151,49 @@ class TestProject:
 
             assert create_pr_job.delay.called
 
-    def test_soft_delete(self, project_factory, task_factory):
-        project = project_factory()
-        task_factory(project=project)
-        task_factory(project=project)
+    def test_soft_delete(self, epic_factory, task_factory):
+        epic = epic_factory()
+        task_factory(epic=epic)
+        task_factory(epic=epic)
 
-        project.delete()
-        project.refresh_from_db()
-        assert project.deleted_at is not None
-        assert project.tasks.active().count() == 0
+        epic.delete()
+        epic.refresh_from_db()
+        assert epic.deleted_at is not None
+        assert epic.tasks.active().count() == 0
 
-    def test_queryset_soft_delete(self, project_factory, task_factory):
-        project1 = project_factory()
-        project2 = project_factory()
-        project_factory()
+    def test_queryset_soft_delete(self, epic_factory, task_factory):
+        epic1 = epic_factory()
+        epic2 = epic_factory()
+        epic_factory()
 
-        task_factory(project=project1)
-        task_factory(project=project2)
+        task_factory(epic=epic1)
+        task_factory(epic=epic2)
 
-        assert Project.objects.count() == 3
-        assert Project.objects.active().count() == 3
+        assert Epic.objects.count() == 3
+        assert Epic.objects.active().count() == 3
         assert Task.objects.active().count() == 2
-        Project.objects.all().delete()
+        Epic.objects.all().delete()
 
-        assert Project.objects.count() == 3
-        assert Project.objects.active().count() == 0
+        assert Epic.objects.count() == 3
+        assert Epic.objects.active().count() == 0
         assert Task.objects.active().count() == 0
 
-    def test_queue_available_task_org_config_names(self, user_factory, project_factory):
+    def test_queue_available_task_org_config_names(self, user_factory, epic_factory):
         user = user_factory()
-        project = project_factory()
+        epic = epic_factory()
         with ExitStack() as stack:
             available_task_org_config_names_job = stack.enter_context(
                 patch("metecho.api.jobs.available_task_org_config_names_job")
             )
-            project.queue_available_task_org_config_names(user)
+            epic.queue_available_task_org_config_names(user)
 
             assert available_task_org_config_names_job.delay.called
 
-    def test_finalize_available_task_org_config_names(self, project_factory):
-        project = project_factory()
-        project.notify_changed = MagicMock()
-        project.finalize_available_task_org_config_names()
-        assert project.notify_changed.called
+    def test_finalize_available_task_org_config_names(self, epic_factory):
+        epic = epic_factory()
+        epic.notify_changed = MagicMock()
+        epic.finalize_available_task_org_config_names()
+        assert epic.notify_changed.called
 
 
 @pytest.mark.django_db

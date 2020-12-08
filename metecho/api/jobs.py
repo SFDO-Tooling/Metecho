@@ -42,19 +42,19 @@ class TaskReviewIntegrityError(Exception):
     pass
 
 
-def project_create_branch(
+def epic_create_branch(
     *,
     user,
-    project,
+    epic,
     repository,
     repo_id,
     originating_user_id,
     should_finalize=True,
 ):
-    if project.branch_name:
-        project_branch_name = project.branch_name
+    if epic.branch_name:
+        epic_branch_name = epic.branch_name
     else:
-        branch_prefix = project.repository.branch_prefix
+        branch_prefix = epic.repository.branch_prefix
         if branch_prefix:
             prefix = branch_prefix
         elif settings.BRANCH_PREFIX:
@@ -71,28 +71,28 @@ def project_create_branch(
                         repository.default_branch
                     ).latest_sha(),
                 )
-        project_branch_name = f"{prefix}{slugify(project.name)}"
-        project_branch_name = try_to_make_branch(
+        epic_branch_name = f"{prefix}{slugify(epic.name)}"
+        epic_branch_name = try_to_make_branch(
             repository,
-            new_branch=project_branch_name,
+            new_branch=epic_branch_name,
             base_branch=repository.default_branch,
         )
-        project.branch_name = project_branch_name
+        epic.branch_name = epic_branch_name
         if should_finalize:
-            project.finalize_project_update(originating_user_id=originating_user_id)
-    return project_branch_name
+            epic.finalize_epic_update(originating_user_id=originating_user_id)
+    return epic_branch_name
 
 
-def _create_branches_on_github(*, user, repo_id, project, task, originating_user_id):
+def _create_branches_on_github(*, user, repo_id, epic, task, originating_user_id):
     """
     Expects to be called in the context of a local github checkout.
     """
     repository = get_repo_info(user, repo_id=repo_id)
 
-    # Make project branch, with latest from project:
-    project.refresh_from_db()
-    project_branch_name = project_create_branch(
-        project=project,
+    # Make epic branch, with latest from epic:
+    epic.refresh_from_db()
+    epic_branch_name = epic_create_branch(
+        epic=epic,
         repository=repository,
         user=user,
         repo_id=repo_id,
@@ -105,11 +105,11 @@ def _create_branches_on_github(*, user, repo_id, project, task, originating_user
     else:
         task_branch_name = try_to_make_branch(
             repository,
-            new_branch=f"{project_branch_name}__{slugify(task.name)}",
-            base_branch=project_branch_name,
+            new_branch=f"{epic_branch_name}__{slugify(task.name)}",
+            base_branch=epic_branch_name,
         )
         task.branch_name = task_branch_name
-        task.origin_sha = repository.branch(project_branch_name).latest_sha()
+        task.origin_sha = repository.branch(epic_branch_name).latest_sha()
         task.finalize_task_update(originating_user_id=originating_user_id)
 
     return task_branch_name
@@ -135,10 +135,10 @@ def alert_user_about_expiring_org(*, org, days):
     get_unsaved_changes(org, originating_user_id=None)
     if org.unsaved_changes:
         task = org.task
-        project = task.project
-        repo = project.repository
+        epic = task.epic
+        repo = epic.repository
         metecho_link = get_user_facing_url(
-            path=["repositories", repo.slug, project.slug, task.slug]
+            path=["repositories", repo.slug, epic.slug, task.slug]
         )
 
         # email user
@@ -147,7 +147,7 @@ def alert_user_about_expiring_org(*, org, days):
             "scratch_org_expiry_email.txt",
             {
                 "repo_name": repo.name,
-                "project_name": project.name,
+                "epic_name": epic.name,
                 "task_name": task.name,
                 "days": days,
                 "expiry_date": org.expires_at,
@@ -250,14 +250,14 @@ def create_branches_on_github_then_create_scratch_org(
     scratch_org.refresh_from_db()
     user = scratch_org.owner
     task = scratch_org.task
-    project = task.project
+    epic = task.epic
 
     try:
         repo_id = task.get_repo_id()
         commit_ish = _create_branches_on_github(
             user=user,
             repo_id=repo_id,
-            project=project,
+            epic=epic,
             task=task,
             originating_user_id=originating_user_id,
         )
@@ -561,7 +561,7 @@ def refresh_commits(*, repository, branch_name, originating_user_id):
     # that limit.
     commits = list(repo.commits(repo.branch(branch_name).latest_sha(), number=1000))
 
-    tasks = Task.objects.filter(project__repository=repository, branch_name=branch_name)
+    tasks = Task.objects.filter(epic__repository=repository, branch_name=branch_name)
     for task in tasks:
         origin_sha_index = [commit.sha for commit in commits].index(task.origin_sha)
         task.commits = [
@@ -645,8 +645,8 @@ def submit_review(*, user, task, data, originating_user_id):
         target_url = get_user_facing_url(
             path=[
                 "repositories",
-                task.project.repository.slug,
-                task.project.slug,
+                task.epic.repository.slug,
+                task.epic.slug,
                 task.slug,
             ]
         )
@@ -688,29 +688,29 @@ def submit_review(*, user, task, data, originating_user_id):
 submit_review_job = job(submit_review)
 
 
-def create_gh_branch_for_new_project(project, *, user):
+def create_gh_branch_for_new_epic(epic, *, user):
     try:
-        project.refresh_from_db()
-        repo_id = project.get_repo_id()
+        epic.refresh_from_db()
+        repo_id = epic.get_repo_id()
         repository = get_repo_info(user, repo_id=repo_id)
 
-        if project.branch_name:
+        if epic.branch_name:
             try:
-                head = repository.branch(project.branch_name).commit.sha
+                head = repository.branch(epic.branch_name).commit.sha
             except NotFoundError:
                 try_to_make_branch(
                     repository,
-                    new_branch=project.branch_name,
+                    new_branch=epic.branch_name,
                     base_branch=repository.default_branch,
                 )
             else:
                 base = repository.branch(repository.default_branch).commit.sha
-                project.has_unmerged_commits = (
+                epic.has_unmerged_commits = (
                     repository.compare_commits(base, head).ahead_by > 0
                 )
                 # Check if has PR
                 try:
-                    head_str = f"{repository.owner}:{project.branch_name}"
+                    head_str = f"{repository.owner}:{epic.branch_name}"
                     # Defaults to descending order, so we'll find
                     # the most recent one, if there is one to be
                     # found:
@@ -720,14 +720,14 @@ def create_gh_branch_for_new_project(project, *, user):
                         )
                     )
                     # Check PR status
-                    project.pr_number = pr.number
-                    project.pr_is_merged = pr.merged_at is not None
-                    project.pr_is_open = pr.closed_at is None and pr.merged_at is None
+                    epic.pr_number = pr.number
+                    epic.pr_is_merged = pr.merged_at is not None
+                    epic.pr_is_open = pr.closed_at is None and pr.merged_at is None
                 except StopIteration:
                     pass
         else:
-            project_create_branch(
-                project=project,
+            epic_create_branch(
+                epic=epic,
                 repository=repository,
                 repo_id=repo_id,
                 user=user,
@@ -735,31 +735,31 @@ def create_gh_branch_for_new_project(project, *, user):
                 should_finalize=False,
             )
     except Exception:
-        project.refresh_from_db()
-        project.branch_name = ""
-        project.pr_number = None
-        project.pr_is_merged = False
-        project.pr_is_open = False
-        project.has_unmerged_commits = False
-        project.finalize_project_update(originating_user_id=str(user.id))
+        epic.refresh_from_db()
+        epic.branch_name = ""
+        epic.pr_number = None
+        epic.pr_is_merged = False
+        epic.pr_is_open = False
+        epic.has_unmerged_commits = False
+        epic.finalize_epic_update(originating_user_id=str(user.id))
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        project.finalize_project_update(originating_user_id=str(user.id))
+        epic.finalize_epic_update(originating_user_id=str(user.id))
 
 
-create_gh_branch_for_new_project_job = job(create_gh_branch_for_new_project)
+create_gh_branch_for_new_epic_job = job(create_gh_branch_for_new_epic)
 
 
-def available_task_org_config_names(project, *, user):
+def available_task_org_config_names(epic, *, user):
     try:
-        project.refresh_from_db()
-        repo_id = project.get_repo_id()
+        epic.refresh_from_db()
+        repo_id = epic.get_repo_id()
         repo = get_repo_info(
             None,
-            repo_owner=project.repository.repo_owner,
-            repo_name=project.repository.repo_name,
+            repo_owner=epic.repository.repo_owner,
+            repo_name=epic.repository.repo_name,
         )
         with local_github_checkout(user, repo_id) as repo_root:
             config = get_project_config(
@@ -767,23 +767,19 @@ def available_task_org_config_names(project, *, user):
                 repo_name=repo.name,
                 repo_url=repo.html_url,
                 repo_owner=repo.owner.login,
-                repo_branch=project.branch_name,
-                repo_commit=repo.branch(project.branch_name).latest_sha(),
+                repo_branch=epic.branch_name,
+                repo_commit=repo.branch(epic.branch_name).latest_sha(),
             )
-            project.available_task_org_config_names = [
+            epic.available_task_org_config_names = [
                 {"key": key, **value} for key, value in config.orgs__scratch.items()
             ]
     except Exception:
-        project.finalize_available_task_org_config_names(
-            originating_user_id=str(user.id)
-        )
+        epic.finalize_available_task_org_config_names(originating_user_id=str(user.id))
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        project.finalize_available_task_org_config_names(
-            originating_user_id=str(user.id)
-        )
+        epic.finalize_available_task_org_config_names(originating_user_id=str(user.id))
 
 
 available_task_org_config_names_job = job(available_task_org_config_names)

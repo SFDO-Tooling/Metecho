@@ -3,7 +3,7 @@ import logging
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from .models import Project, Repository, Task
+from .models import Epic, Repository, Task
 
 logger = logging.getLogger(__name__)
 
@@ -62,17 +62,15 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
         pr_base_ref = self.validated_data["pull_request"]["base"]["ref"]
         return (
             Task.objects.filter(
-                project__repository=repository, pr_number=pr_number
+                epic__repository=repository, pr_number=pr_number
             ).first()
-            or Project.objects.filter(
-                repository=repository, pr_number=pr_number
-            ).first()
+            or Epic.objects.filter(repository=repository, pr_number=pr_number).first()
             or Task.objects.filter(
-                project__repository=repository,
+                epic__repository=repository,
                 branch_name=pr_head_ref,
-                project__branch_name=pr_base_ref,
+                epic__branch_name=pr_base_ref,
             ).first()
-            or Project.objects.filter(
+            or Epic.objects.filter(
                 repository=repository,
                 branch_name=pr_head_ref,
                 repository__branch_name=pr_base_ref,
@@ -164,7 +162,7 @@ class PrReviewHookSerializer(HookSerializerMixin, serializers.Serializer):
 
         pr_number = self.validated_data["pull_request"]["number"]
         task = Task.objects.filter(
-            project__repository=repository, pr_number=pr_number
+            epic__repository=repository, pr_number=pr_number
         ).first()
         if not task:
             raise NotFound("No matching task.")

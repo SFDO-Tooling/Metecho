@@ -16,28 +16,21 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from . import gh
 from .authentication import GitHubHookAuthentication
-from .filters import ProjectFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
+from .filters import EpicFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
 from .hook_serializers import (
     PrHookSerializer,
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from .models import (
-    PROJECT_STATUSES,
-    SCRATCH_ORG_TYPES,
-    Project,
-    Repository,
-    ScratchOrg,
-    Task,
-)
+from .models import EPIC_STATUSES, SCRATCH_ORG_TYPES, Epic, Repository, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
     CommitSerializer,
     CreatePrSerializer,
+    EpicSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
-    ProjectSerializer,
     RepositorySerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
@@ -181,7 +174,7 @@ class RepositoryViewSet(
             None, repo_owner=instance.repo_owner, repo_name=instance.repo_name
         )
         existing_branches = set(
-            Project.objects.active()
+            Epic.objects.active()
             .exclude(branch_name="")
             .values_list("branch_name", flat=True)
         )
@@ -197,22 +190,22 @@ class RepositoryViewSet(
         return Response(data)
 
 
-class ProjectViewSet(CreatePrMixin, ModelViewSet):
+class EpicViewSet(CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    serializer_class = ProjectSerializer
+    serializer_class = EpicSerializer
     pagination_class = CustomPaginator
-    queryset = Project.objects.active()
+    queryset = Epic.objects.active()
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = ProjectFilter
-    error_pr_exists = _("Project has already been submitted for testing.")
+    filterset_class = EpicFilter
+    error_pr_exists = _("Epic has already been submitted for testing.")
 
     def get_queryset(self):
         qs = super().get_queryset()
         whens = [
-            When(status=PROJECT_STATUSES.Review, then=0),
-            When(status=PROJECT_STATUSES["In progress"], then=1),
-            When(status=PROJECT_STATUSES.Planned, then=2),
-            When(status=PROJECT_STATUSES.Merged, then=3),
+            When(status=EPIC_STATUSES.Review, then=0),
+            When(status=EPIC_STATUSES["In progress"], then=1),
+            When(status=EPIC_STATUSES.Planned, then=2),
+            When(status=EPIC_STATUSES.Merged, then=3),
         ]
         return qs.annotate(ordering=Case(*whens, output_field=IntegerField())).order_by(
             "ordering", "-created_at", "name"
@@ -220,11 +213,9 @@ class ProjectViewSet(CreatePrMixin, ModelViewSet):
 
     @action(detail=True, methods=["POST"])
     def refresh_org_config_names(self, request, pk=None):
-        project = self.get_object()
-        project.queue_available_task_org_config_names(request.user)
-        return Response(
-            self.get_serializer(project).data, status=status.HTTP_202_ACCEPTED
-        )
+        epic = self.get_object()
+        epic.queue_available_task_org_config_names(request.user)
+        return Response(self.get_serializer(epic).data, status=status.HTTP_202_ACCEPTED)
 
 
 class TaskViewSet(CreatePrMixin, ModelViewSet):

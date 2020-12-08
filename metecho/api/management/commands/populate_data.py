@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from ...models import Project, Repository, Task
+from ...models import Epic, Repository, Task
 
 
 class Command(BaseCommand):
@@ -26,8 +26,8 @@ class Command(BaseCommand):
         )
         return repository
 
-    def create_project(self, **kwargs):
-        name = kwargs.pop("name", "Sample Project")
+    def create_epic(self, **kwargs):
+        name = kwargs.pop("name", "Sample Epic")
         description = kwargs.pop(
             "description",
             (
@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
-        return Project.objects.create(name=name, description=description, **kwargs)
+        return Epic.objects.create(name=name, description=description, **kwargs)
 
     def create_task(self, **kwargs):
         name = kwargs.pop("name", "Sample Task")
@@ -114,13 +114,13 @@ class Command(BaseCommand):
         )
 
         for i in range(55):
-            self.create_project(name=f"Sample Project {i+1}", repository=metecho)
+            self.create_epic(name=f"Sample Epic {i+1}", repository=metecho)
 
-        project = self.create_project(
-            name="Project With Tasks",
-            description="This project has tasks.",
+        epic = self.create_epic(
+            name="Epic With Tasks",
+            description="This epic has tasks.",
             repository=metecho,
         )
 
         for i in range(5):
-            self.create_task(name=f"Sample Task {i+1}", project=project)
+            self.create_task(name=f"Sample Task {i+1}", epic=epic)

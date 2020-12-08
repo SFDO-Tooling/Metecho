@@ -3,8 +3,8 @@ from rest_framework import routers
 
 from .views import (
     AgreeToTosView,
+    EpicViewSet,
     HookView,
-    ProjectViewSet,
     RepositoryViewSet,
     ScratchOrgViewSet,
     TaskViewSet,
@@ -17,7 +17,7 @@ from .views import (
 router = routers.DefaultRouter()
 router.register("users", UserViewSet, basename="user")
 router.register("repositories", RepositoryViewSet, basename="repository")
-router.register("projects", ProjectViewSet, basename="project")
+router.register("epics", EpicViewSet, basename="epic")
 router.register("tasks", TaskViewSet, basename="task")
 router.register("scratch-orgs", ScratchOrgViewSet, basename="scratch-org")
 urlpatterns = router.urls + [

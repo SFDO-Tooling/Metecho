@@ -178,7 +178,7 @@ class TestHookView:
         client,
         repository_factory,
         git_hub_repository_factory,
-        project_factory,
+        epic_factory,
         task_factory,
     ):
         settings.GITHUB_HOOK_SECRET = b""
@@ -201,8 +201,8 @@ class TestHookView:
 
             repo = repository_factory(repo_id=123)
             git_hub_repository_factory(repo_id=123)
-            project = project_factory(repository=repo, branch_name="test-project")
-            task = task_factory(project=project, branch_name="test-task")
+            epic = epic_factory(repository=repo, branch_name="test-epic")
+            task = task_factory(epic=epic, branch_name="test-task")
 
             refresh_commits_job = stack.enter_context(
                 patch("metecho.api.jobs.refresh_commits_job")
@@ -740,18 +740,16 @@ class TestTaskView:
 
 
 @pytest.mark.django_db
-class TestProjectView:
-    def test_refresh_org_config_names(self, client, project_factory):
+class TestEpicView:
+    def test_refresh_org_config_names(self, client, epic_factory):
         with ExitStack() as stack:
-            project = project_factory()
+            epic = epic_factory()
 
             available_task_org_config_names_job = stack.enter_context(
                 patch("metecho.api.jobs.available_task_org_config_names_job")
             )
             response = client.post(
-                reverse(
-                    "project-refresh-org-config-names", kwargs={"pk": str(project.id)}
-                )
+                reverse("epic-refresh-org-config-names", kwargs={"pk": str(epic.id)})
             )
 
             assert response.status_code == 202, response.json()

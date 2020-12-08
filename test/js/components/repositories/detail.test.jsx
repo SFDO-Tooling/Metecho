@@ -36,46 +36,46 @@ const defaultState = {
     notFound: ['yet-another-repository'],
     next: null,
   },
-  projects: {
+  epics: {
     r1: {
-      projects: [
+      epics: [
         {
-          id: 'project1',
-          slug: 'project-1',
-          name: 'Project 1',
+          id: 'epic1',
+          slug: 'epic-1',
+          name: 'Epic 1',
           repository: 'r1',
-          description: 'Project Description',
-          description_rendered: '<p>Project Description</p>',
+          description: 'Epic Description',
+          description_rendered: '<p>Epic Description</p>',
           github_users: [],
           status: 'In progress',
         },
         {
-          id: 'project2',
-          slug: 'project-2',
-          name: 'Project 2',
+          id: 'epic2',
+          slug: 'epic-2',
+          name: 'Epic 2',
           repository: 'r1',
-          description: 'Project Description',
-          description_rendered: '<p>Project Description</p>',
+          description: 'Epic Description',
+          description_rendered: '<p>Epic Description</p>',
           github_users: [],
           status: 'Planned',
         },
         {
-          id: 'project3',
-          slug: 'project-3',
-          name: 'Project 3',
+          id: 'epic3',
+          slug: 'epic-3',
+          name: 'Epic 3',
           repository: 'r1',
-          description: 'Project Description',
-          description_rendered: '<p>Project Description</p>',
+          description: 'Epic Description',
+          description_rendered: '<p>Epic Description</p>',
           github_users: [],
           status: 'Merged',
         },
         {
-          id: 'project4',
-          slug: 'project-4',
-          name: 'Project 4',
+          id: 'epic4',
+          slug: 'epic-4',
+          name: 'Epic 4',
           repository: 'r1',
-          description: 'Project Description',
-          description_rendered: '<p>Project Description</p>',
+          description: 'Epic Description',
+          description_rendered: '<p>Epic Description</p>',
           github_users: [],
           status: 'Review',
         },
@@ -112,22 +112,22 @@ describe('<RepoDetail />', () => {
     };
   };
 
-  test('renders repository detail and projects list', () => {
+  test('renders repository detail and epics list', () => {
     const { getByText, getAllByTitle } = setup();
 
     expect(getAllByTitle('Repository 1')[0]).toBeVisible();
     expect(getByText('This is a test repository.')).toBeVisible();
-    expect(getByText('Project 1')).toBeVisible();
-    expect(getByText('Projects for Repository 1')).toBeVisible();
+    expect(getByText('Epic 1')).toBeVisible();
+    expect(getByText('Epics for Repository 1')).toBeVisible();
   });
 
-  test('renders with form expanded if no projects', () => {
+  test('renders with form expanded if no epics', () => {
     const { getByText, queryByText } = setup({
       initialState: {
         ...defaultState,
-        projects: {
+        epics: {
           r1: {
-            projects: [],
+            epics: [],
             next: null,
             notFound: [],
             fetched: true,
@@ -136,8 +136,8 @@ describe('<RepoDetail />', () => {
       },
     });
 
-    expect(getByText('Create a Project for Repository 1')).toBeVisible();
-    expect(queryByText('Projects for Repository 1')).toBeNull();
+    expect(getByText('Create an Epic for Repository 1')).toBeVisible();
+    expect(queryByText('Epics for Repository 1')).toBeNull();
   });
 
   describe('repository not found', () => {
@@ -181,14 +181,14 @@ describe('<RepoDetail />', () => {
     });
   });
 
-  describe('projects have not been fetched', () => {
-    test('fetches projects from API', () => {
+  describe('epics have not been fetched', () => {
+    test('fetches epics from API', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
-          projects: {
+          epics: {
             r1: {
-              projects: [],
+              epics: [],
               next: null,
               notFound: [],
               fetched: false,
@@ -197,32 +197,32 @@ describe('<RepoDetail />', () => {
         },
       });
 
-      expect(queryByText('Projects for Repository 1')).toBeNull();
+      expect(queryByText('Epics for Repository 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { repository: 'r1' },
-        objectType: 'project',
+        objectType: 'epic',
         reset: true,
       });
     });
   });
 
-  describe('fetching more projects', () => {
-    test('fetches next page of projects', () => {
+  describe('fetching more epics', () => {
+    test('fetches next page of epics', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
-          projects: {
+          epics: {
             r1: {
-              projects: [
+              epics: [
                 {
                   branch_url: 'branch-url',
                   description: 'repository description',
                   description_rendered: '<p>repository description</p>',
-                  id: 'project1',
-                  name: 'Project 1',
+                  id: 'epic1',
+                  name: 'Epic 1',
                   old_slugs: [],
                   repository: 'r1',
-                  slug: 'project-1',
+                  slug: 'epic-1',
                 },
               ],
               next: 'next-url',
@@ -240,7 +240,7 @@ describe('<RepoDetail />', () => {
 
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { repository: 'r1' },
-        objectType: 'project',
+        objectType: 'epic',
         url: 'next-url',
       });
 
@@ -251,18 +251,18 @@ describe('<RepoDetail />', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
-          projects: {
+          epics: {
             r1: {
-              projects: [
+              epics: [
                 {
                   branch_url: 'branch-url',
                   description: 'repository description',
                   description_rendered: '<p>repository description</p>',
-                  id: 'project1',
-                  name: 'Project 1',
+                  id: 'epic1',
+                  name: 'Epic 1',
                   old_slugs: [],
                   repository: 'r1',
-                  slug: 'project-1',
+                  slug: 'epic-1',
                 },
               ],
               next: null,
@@ -277,16 +277,16 @@ describe('<RepoDetail />', () => {
     });
   });
 
-  describe('<CreateProjectModal />', () => {
+  describe('<CreateEpicModal />', () => {
     test('opens/closes form', () => {
       const { queryByText, getByText } = setup();
-      fireEvent.click(getByText('Create a Project'));
+      fireEvent.click(getByText('Create an Epic'));
 
-      expect(getByText('Create a Project for Repository 1')).toBeVisible();
+      expect(getByText('Create an Epic for Repository 1')).toBeVisible();
 
       fireEvent.click(queryByText('Close'));
 
-      expect(queryByText('Create a Project for Repository 1')).toBeNull();
+      expect(queryByText('Create an Epic for Repository 1')).toBeNull();
     });
   });
 });

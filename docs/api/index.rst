@@ -7,6 +7,6 @@ API Reference
 
    user
    repositories
-   projects
+   epics
    tasks
    scratch-orgs

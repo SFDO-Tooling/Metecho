@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from .api.constants import CHANNELS_GROUP_NAME, LIST
 from .consumer_utils import clear_message_semaphore
 
-KNOWN_MODELS = {"user", "repository", "project", "task", "scratchorg"}
+KNOWN_MODELS = {"user", "repository", "epic", "task", "scratchorg"}
 
 
 class Actions(Enum):

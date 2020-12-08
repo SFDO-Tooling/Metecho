@@ -9,9 +9,9 @@ from parler.admin import TranslatableAdmin
 
 from . import gh
 from .models import (
+    Epic,
+    EpicSlug,
     GitHubRepository,
-    Project,
-    ProjectSlug,
     Repository,
     RepositorySlug,
     ScratchOrg,
@@ -100,23 +100,23 @@ class GitHubRepositoryAdmin(admin.ModelAdmin):
     list_display = ("repo_url", "user")
 
 
-@admin.register(Project)
-class ProjectAdmin(admin.ModelAdmin):
+@admin.register(Epic)
+class EpicAdmin(admin.ModelAdmin):
     list_display = ("name", "repository", "deleted_at")
     list_filter = (SoftDeletedListFilter,)
 
 
-@admin.register(ProjectSlug)
-class ProjectSlugAdmin(admin.ModelAdmin):
+@admin.register(EpicSlug)
+class EpicSlugAdmin(admin.ModelAdmin):
     list_display = ("slug", "parent")
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("name", "project", "deleted_at")
+    list_display = ("name", "epic", "deleted_at")
     list_filter = (SoftDeletedListFilter,)
     fields = (
-        ("name", "project"),
+        ("name", "epic"),
         "description",
         ("branch_name", "org_config_name"),
         "commits",

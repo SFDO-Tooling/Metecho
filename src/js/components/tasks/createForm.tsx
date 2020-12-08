@@ -12,16 +12,16 @@ import {
   useIsMounted,
   useTransientMessage,
 } from '@/components/utils';
-import { Project } from '@/store/projects/reducer';
+import { Epic } from '@/store/epics/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '@/utils/constants';
 
 interface Props {
-  project: Project;
+  epic: Epic;
   isOpen: boolean;
   closeCreateModal: () => void;
 }
 
-const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
+const CreateTaskModal = ({ epic, isOpen, closeCreateModal }: Props) => {
   const isMounted = useIsMounted();
   const {
     showTransientMessage,
@@ -54,7 +54,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
     },
     objectType: OBJECT_TYPES.TASK,
     additionalData: {
-      project: project.id,
+      epic: epic.id,
     },
     onError,
   });
@@ -101,7 +101,7 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
       isOpen={isOpen}
       size="small"
       disableClose={isSaving || isSavingBatch}
-      heading={`${i18n.t('Add a Task for')} ${project.name}`}
+      heading={`${i18n.t('Add a Task for')} ${epic.name}`}
       onRequestClose={closeModal}
       footer={[
         isShowingTransientMessage && (
@@ -172,11 +172,11 @@ const CreateTaskModal = ({ project, isOpen, closeCreateModal }: Props) => {
           onChange={handleInputChange}
         />
         <SelectFlowType
-          orgConfigs={project.available_task_org_config_names}
-          projectId={project.id}
+          orgConfigs={epic.available_task_org_config_names}
+          epicId={epic.id}
           value={inputs.org_config_name}
           errors={errors.org_config_name}
-          isLoading={project.currently_fetching_org_config_names}
+          isLoading={epic.currently_fetching_org_config_names}
           handleSelect={handleInputChange}
         />
         {/* Clicking hidden button allows for native browser form validation */}

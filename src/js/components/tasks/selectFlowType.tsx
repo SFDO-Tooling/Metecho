@@ -8,13 +8,13 @@ import { useDispatch } from 'react-redux';
 
 import { SpinnerWrapper, UseFormProps } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { refreshOrgConfigs } from '@/store/projects/actions';
-import { OrgConfig } from '@/store/projects/reducer';
+import { refreshOrgConfigs } from '@/store/epics/actions';
+import { OrgConfig } from '@/store/epics/reducer';
 import { DEFAULT_ORG_CONFIG_NAME } from '@/utils/constants';
 
 const SelectFlowType = ({
   orgConfigs,
-  projectId,
+  epicId,
   value,
   errors,
   isDisabled,
@@ -22,7 +22,7 @@ const SelectFlowType = ({
   handleSelect,
 }: {
   orgConfigs: OrgConfig[];
-  projectId?: string;
+  epicId?: string;
   value: string;
   errors?: string;
   isDisabled?: boolean;
@@ -33,10 +33,10 @@ const SelectFlowType = ({
 
   const doRefreshOrgConfigs = useCallback(() => {
     /* istanbul ignore else */
-    if (projectId) {
-      dispatch(refreshOrgConfigs(projectId));
+    if (epicId) {
+      dispatch(refreshOrgConfigs(epicId));
     }
-  }, [dispatch, projectId]);
+  }, [dispatch, epicId]);
 
   const flowTypes = orgConfigs.length
     ? orgConfigs

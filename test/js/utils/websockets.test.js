@@ -2,6 +2,11 @@ import Sockette from 'sockette';
 
 import { removeObject } from '@/store/actions';
 import {
+  createEpicPR,
+  createEpicPRFailed,
+  updateEpic,
+} from '@/store/epics/actions';
+import {
   commitFailed,
   commitSucceeded,
   deleteFailed,
@@ -16,11 +21,6 @@ import {
   updateFailed,
   updateOrg,
 } from '@/store/orgs/actions';
-import {
-  createProjectPR,
-  createProjectPRFailed,
-  updateProject,
-} from '@/store/projects/actions';
 import {
   repoError,
   reposRefreshed,
@@ -38,15 +38,15 @@ import * as sockets from '@/utils/websockets';
 
 jest.mock('@/store/actions');
 jest.mock('@/store/orgs/actions');
-jest.mock('@/store/projects/actions');
+jest.mock('@/store/epics/actions');
 jest.mock('@/store/repositories/actions');
 jest.mock('@/store/tasks/actions');
 
 const actions = {
   commitFailed,
   commitSucceeded,
-  createProjectPR,
-  createProjectPRFailed,
+  createEpicPR,
+  createEpicPRFailed,
   createTaskPR,
   createTaskPRFailed,
   deleteFailed,
@@ -65,7 +65,7 @@ const actions = {
   submitReviewFailed,
   updateFailed,
   updateOrg,
-  updateProject,
+  updateEpic,
   updateRepo,
   updateTask,
 };
@@ -102,9 +102,9 @@ describe('getAction', () => {
   test.each([
     ['REPOSITORY_UPDATE', 'updateRepo', true],
     ['REPOSITORY_UPDATE_ERROR', 'repoError', false],
-    ['PROJECT_UPDATE', 'updateProject', true],
-    ['PROJECT_CREATE_PR', 'createProjectPR', false],
-    ['PROJECT_CREATE_PR_FAILED', 'createProjectPRFailed', false],
+    ['EPIC_UPDATE', 'updateEpic', true],
+    ['EPIC_CREATE_PR', 'createEpicPR', false],
+    ['EPIC_CREATE_PR_FAILED', 'createEpicPRFailed', false],
     ['TASK_UPDATE', 'updateTask', true],
     ['TASK_CREATE_PR', 'createTaskPR', false],
     ['TASK_CREATE_PR_FAILED', 'createTaskPRFailed', false],

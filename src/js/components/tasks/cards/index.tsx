@@ -37,8 +37,8 @@ export const ORG_TYPE_TRACKER_DEFAULT = {
 const OrgCards = ({
   orgs,
   task,
-  projectUsers,
-  projectUrl,
+  epicUsers,
+  epicUrl,
   repoUrl,
   assignUserModalOpen,
   isCreatingOrg,
@@ -53,8 +53,8 @@ const OrgCards = ({
 }: {
   orgs: OrgsByTask;
   task: Task;
-  projectUsers: GitHubUser[];
-  projectUrl: string;
+  epicUsers: GitHubUser[];
+  epicUrl: string;
   repoUrl: string;
   assignUserModalOpen: OrgTypes | null;
   isCreatingOrg: OrgTypeTracker;
@@ -260,8 +260,8 @@ const OrgCards = ({
           type={ORG_TYPES.DEV}
           user={user}
           task={task}
-          projectUsers={projectUsers}
-          projectUrl={projectUrl}
+          epicUsers={epicUsers}
+          epicUrl={epicUrl}
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
@@ -279,8 +279,8 @@ const OrgCards = ({
           type={ORG_TYPES.QA}
           user={user}
           task={task}
-          projectUsers={projectUsers}
-          projectUrl={projectUrl}
+          epicUsers={epicUsers}
+          epicUrl={epicUrl}
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}

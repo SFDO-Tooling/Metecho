@@ -27,7 +27,7 @@ export interface Task {
   name: string;
   slug: string;
   old_slugs: string[];
-  project: string;
+  epic: string;
   description: string;
   description_rendered: string;
   has_unmerged_commits: boolean;
@@ -57,7 +57,7 @@ export interface TaskState {
 const defaultState = {};
 
 const modelIsTask = (model: any): model is Task =>
-  Boolean((model as Task).project);
+  Boolean((model as Task).epic);
 
 const reducer = (
   tasks: TaskState = defaultState,
@@ -71,12 +71,12 @@ const reducer = (
       const {
         response,
         objectType,
-        filters: { project },
+        filters: { epic },
       } = action.payload;
-      if (objectType === OBJECT_TYPES.TASK && project) {
+      if (objectType === OBJECT_TYPES.TASK && epic) {
         return {
           ...tasks,
-          [project]: response,
+          [epic]: response,
         };
       }
       return tasks;
@@ -89,13 +89,13 @@ const reducer = (
       switch (objectType) {
         case OBJECT_TYPES.TASK: {
           if (object) {
-            const projectTasks = tasks[object.project] || [];
+            const epicTasks = tasks[object.epic] || [];
             // Do not store if (somehow) we already know about this task
-            if (!projectTasks.filter((t) => object.id === t.id).length) {
+            if (!epicTasks.filter((t) => object.id === t.id).length) {
               return {
                 ...tasks,
                 // Prepend new task (tasks are ordered by `-created_at`)
-                [object.project]: [object, ...projectTasks],
+                [object.epic]: [object, ...epicTasks],
               };
             }
           }
@@ -103,13 +103,13 @@ const reducer = (
         }
         case OBJECT_TYPES.TASK_PR: {
           if (object) {
-            const projectTasks = tasks[object.project] || [];
+            const epicTasks = tasks[object.epic] || [];
             const newTask = { ...object, currently_creating_pr: true };
-            const existingTask = projectTasks.find((t) => t.id === object.id);
+            const existingTask = epicTasks.find((t) => t.id === object.id);
             if (existingTask) {
               return {
                 ...tasks,
-                [object.project]: projectTasks.map((t) => {
+                [object.epic]: epicTasks.map((t) => {
                   if (t.id === object.id) {
                     return newTask;
                   }
@@ -119,7 +119,7 @@ const reducer = (
             }
             return {
               ...tasks,
-              [object.project]: [newTask, ...projectTasks],
+              [object.epic]: [newTask, ...epicTasks],
             };
           }
           return tasks;
@@ -146,12 +146,12 @@ const reducer = (
         return tasks;
       }
       const task = maybeTask;
-      const projectTasks = tasks[task.project] || [];
-      const existingTask = projectTasks.find((t) => t.id === task.id);
+      const epicTasks = tasks[task.epic] || [];
+      const existingTask = epicTasks.find((t) => t.id === task.id);
       if (existingTask) {
         return {
           ...tasks,
-          [task.project]: projectTasks.map((t) => {
+          [task.epic]: epicTasks.map((t) => {
             if (t.id === task.id) {
               return { ...task };
             }
@@ -161,17 +161,17 @@ const reducer = (
       }
       return {
         ...tasks,
-        [task.project]: [task, ...projectTasks],
+        [task.epic]: [task, ...epicTasks],
       };
     }
     case 'TASK_CREATE_PR_FAILED': {
       const task = action.payload;
-      const projectTasks = tasks[task.project] || [];
-      const existingTask = projectTasks.find((t) => t.id === task.id);
+      const epicTasks = tasks[task.epic] || [];
+      const existingTask = epicTasks.find((t) => t.id === task.id);
       if (existingTask) {
         return {
           ...tasks,
-          [task.project]: projectTasks.map((t) => {
+          [task.epic]: epicTasks.map((t) => {
             if (t.id === task.id) {
               return { ...task, currently_creating_pr: false };
             }
@@ -201,10 +201,10 @@ const reducer = (
       }
       const task = maybeTask;
       /* istanbul ignore next */
-      const projectTasks = tasks[task.project] || [];
+      const epicTasks = tasks[task.epic] || [];
       return {
         ...tasks,
-        [task.project]: projectTasks.filter((t) => t.id !== task.id),
+        [task.epic]: epicTasks.filter((t) => t.id !== task.id),
       };
     }
   }

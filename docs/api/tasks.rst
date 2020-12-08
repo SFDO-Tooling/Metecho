@@ -21,7 +21,7 @@ Retrieve
         "name": "Test Task",
         "description": "This is *safely* rendered Markdown.",
         "description_rendered": "<p>This is <em>safely</em> rendered Markdown.</p>",
-        "project": "3Lw7OwK",
+        "epic": "3Lw7OwK",
         "assigned_dev": {
           "id": "12345",
           "login": "username",
@@ -32,9 +32,9 @@ Retrieve
         "old_slugs": [],
         "has_unmerged_commits": true,
         "currently_creating_pr": false,
-        "branch_name": "feature/test-project__test-task",
-        "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-project__test-task",
-        "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-project...feature/test-project__test-task",
+        "branch_name": "feature/test-epic__test-task",
+        "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-epic__test-task",
+        "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-epic...feature/test-epic__test-task",
         "commits": [
           {
             "id": "617a512",

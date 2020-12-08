@@ -424,9 +424,9 @@ describe('createObject', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.project_list();
+    url = window.api_urls.epic_list();
     objectPayload = {
-      objectType: 'project',
+      objectType: 'epic',
       data: {
         name: 'Object Name',
       },
@@ -455,13 +455,13 @@ describe('createObject', () => {
     });
 
     describe('with shouldSubscribeToObject', () => {
-      let store, project;
+      let store, epic;
 
       beforeEach(() => {
         window.socket = { subscribe: jest.fn() };
         store = storeWithThunk({});
-        project = {
-          id: 'project-id',
+        epic = {
+          id: 'epic-id',
           shouldSubscribe: true,
         };
       });
@@ -471,33 +471,33 @@ describe('createObject', () => {
       });
 
       test('subscribes to socket if test passes', () => {
-        fetchMock.postOnce(url, project);
+        fetchMock.postOnce(url, epic);
 
         expect.assertions(2);
         return store
           .dispatch(
             actions.createObject({
-              objectType: 'project',
+              objectType: 'epic',
               shouldSubscribeToObject: (o) => o.shouldSubscribe,
             }),
           )
           .then(() => {
             expect(window.socket.subscribe).toHaveBeenCalledTimes(1);
             expect(window.socket.subscribe).toHaveBeenCalledWith({
-              model: 'project',
-              id: 'project-id',
+              model: 'epic',
+              id: 'epic-id',
             });
           });
       });
 
       test('does not subscribe if test fails', () => {
-        fetchMock.postOnce(url, project);
+        fetchMock.postOnce(url, epic);
 
         expect.assertions(1);
         return store
           .dispatch(
             actions.createObject({
-              objectType: 'project',
+              objectType: 'epic',
               shouldSubscribeToObject: false,
             }),
           )
@@ -700,14 +700,14 @@ describe('updateObject', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.project_detail('project-id');
-    const project = {
-      id: 'project-id',
+    url = window.api_urls.epic_detail('epic-id');
+    const epic = {
+      id: 'epic-id',
     };
     objectPayload = {
-      objectType: 'project',
+      objectType: 'epic',
       url,
-      data: { ...project, foo: 'bar' },
+      data: { ...epic, foo: 'bar' },
     };
   });
 
@@ -803,9 +803,9 @@ describe('updateObject', () => {
 
 describe('removeObject', () => {
   test('returns OBJECT_REMOVED action', () => {
-    const project = { id: 'project-id' };
-    const expected = { type: 'OBJECT_REMOVED', payload: project };
+    const epic = { id: 'epic-id' };
+    const expected = { type: 'OBJECT_REMOVED', payload: epic };
 
-    expect(actions.removeObject(project)).toEqual(expected);
+    expect(actions.removeObject(epic)).toEqual(expected);
   });
 });

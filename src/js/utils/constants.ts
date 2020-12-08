@@ -1,25 +1,25 @@
 export type ObjectTypes =
   | 'user'
   | 'repository'
-  | 'project'
+  | 'epic'
   | 'task'
   | 'scratch_org'
   | 'scratch_org_commit'
   | 'task_pr'
-  | 'project_pr';
+  | 'epic_pr';
 
 export const OBJECT_TYPES = {
   USER: 'user' as const,
   REPOSITORY: 'repository' as const,
-  PROJECT: 'project' as const,
+  EPIC: 'epic' as const,
   TASK: 'task' as const,
   ORG: 'scratch_org' as const,
   COMMIT: 'scratch_org_commit' as const,
   TASK_PR: 'task_pr' as const,
-  PROJECT_PR: 'project_pr' as const,
+  EPIC_PR: 'epic_pr' as const,
 };
 
-export const SHOW_PROJECT_COLLABORATORS = 'show_collaborators';
+export const SHOW_EPIC_COLLABORATORS = 'show_collaborators';
 
 export const DEFAULT_ORG_CONFIG_NAME = 'dev';
 
@@ -52,9 +52,9 @@ export const REVIEW_STATUSES = {
   CHANGES_REQUESTED: 'Changes requested' as const,
 };
 
-export type ProjectStatuses = 'Planned' | 'In progress' | 'Review' | 'Merged';
+export type EpicStatuses = 'Planned' | 'In progress' | 'Review' | 'Merged';
 
-export const PROJECT_STATUSES = {
+export const EPIC_STATUSES = {
   PLANNED: 'Planned' as const,
   IN_PROGRESS: 'In progress' as const,
   REVIEW: 'Review' as const,

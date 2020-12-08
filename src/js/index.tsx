@@ -24,10 +24,10 @@ import logger from 'redux-logger';
 import thunk, { ThunkDispatch } from 'redux-thunk';
 
 import FourOhFour from '@/components/404';
+import EpicDetail from '@/components/epics/detail';
 import ErrorBoundary from '@/components/error';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
-import ProjectDetail from '@/components/projects/detail';
 import RepositoryDetail from '@/components/repositories/detail';
 import RepositoryList from '@/components/repositories/list';
 import TaskDetail from '@/components/tasks/detail';
@@ -91,8 +91,8 @@ const App = withRouter(
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.project_detail()}
-                    component={ProjectDetail}
+                    path={routePatterns.epic_detail()}
+                    component={EpicDetail}
                   />
                   <PrivateRoute
                     exact

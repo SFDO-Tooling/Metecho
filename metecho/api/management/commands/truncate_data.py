@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 
 from ...models import (
+    Epic,
+    EpicSlug,
     GitHubRepository,
-    Project,
-    ProjectSlug,
     Repository,
     RepositorySlug,
     ScratchOrg,
@@ -20,8 +20,8 @@ class Command(BaseCommand):
             ScratchOrg,
             TaskSlug,
             Task,
-            ProjectSlug,
-            Project,
+            EpicSlug,
+            Epic,
             GitHubRepository,
             RepositorySlug,
             Repository,

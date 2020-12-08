@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for task in Task.objects.exclude(Q(branch_name="") | Q(origin_sha="")):
             refresh_commits(
-                repository=task.project.repository,
+                repository=task.epic.repository,
                 branch_name=task.branch_name,
                 originating_user_id=None,
             )

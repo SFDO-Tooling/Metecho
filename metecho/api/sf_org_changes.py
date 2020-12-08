@@ -18,7 +18,7 @@ def get_valid_target_directories(user, scratch_org, repo_root):
     Expects to be called from within a `local_github_checkout`.
     """
     package_directories = {}
-    repository = scratch_org.task.project.repository
+    repository = scratch_org.task.epic.repository
     repo = get_repo_info(
         None, repo_owner=repository.repo_owner, repo_name=repository.repo_name
     )
@@ -85,7 +85,7 @@ def run_retrieve_task(
     target_directory,
     originating_user_id,
 ):
-    repo_id = scratch_org.task.project.repository.get_repo_id()
+    repo_id = scratch_org.task.epic.repository.get_repo_id()
     org_config = refresh_access_token(
         config=scratch_org.config,
         org_name="dev",

@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from github3.exceptions import NotFoundError
 
 from ..admin import JSONWidget, RepositoryForm, SiteAdminForm, SoftDeletedListFilter
-from ..models import Project
+from ..models import Epic
 
 
 @pytest.mark.django_db
@@ -22,9 +22,9 @@ class TestSoftDeletedListFilter:
         lookups = SoftDeletedListFilter(*args).lookups(None, None)
         assert lookups == (("true", _("Deleted")),)
 
-    def test_queryset__not_deleted(self, project_factory):
-        project = project_factory()
-        project_factory(deleted_at=now())
+    def test_queryset__not_deleted(self, epic_factory):
+        epic = epic_factory()
+        epic_factory(deleted_at=now())
 
         args = (
             None,
@@ -32,12 +32,12 @@ class TestSoftDeletedListFilter:
             None,
             None,
         )
-        actual = SoftDeletedListFilter(*args).queryset(None, Project.objects.all())
-        assert list(actual) == [project]
+        actual = SoftDeletedListFilter(*args).queryset(None, Epic.objects.all())
+        assert list(actual) == [epic]
 
-    def test_queryset__deleted(self, project_factory):
-        project_factory()
-        project = project_factory(deleted_at=now())
+    def test_queryset__deleted(self, epic_factory):
+        epic_factory()
+        epic = epic_factory(deleted_at=now())
 
         args = (
             None,
@@ -45,8 +45,8 @@ class TestSoftDeletedListFilter:
             None,
             None,
         )
-        actual = SoftDeletedListFilter(*args).queryset(None, Project.objects.all())
-        assert list(actual) == [project]
+        actual = SoftDeletedListFilter(*args).queryset(None, Epic.objects.all())
+        assert list(actual) == [epic]
 
     def test_choices(self):
         args = (

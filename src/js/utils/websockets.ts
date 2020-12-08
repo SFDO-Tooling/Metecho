@@ -3,6 +3,12 @@ import Sockette from 'sockette';
 
 import { removeObject } from '@/store/actions';
 import {
+  createEpicPR,
+  createEpicPRFailed,
+  updateEpic,
+} from '@/store/epics/actions';
+import { Epic } from '@/store/epics/reducer';
+import {
   commitFailed,
   commitSucceeded,
   deleteFailed,
@@ -18,12 +24,6 @@ import {
   updateOrg,
 } from '@/store/orgs/actions';
 import { MinimalOrg, Org } from '@/store/orgs/reducer';
-import {
-  createProjectPR,
-  createProjectPRFailed,
-  updateProject,
-} from '@/store/projects/actions';
-import { Project } from '@/store/projects/reducer';
 import {
   repoError,
   reposRefreshed,
@@ -84,25 +84,25 @@ interface RepoUpdateErrorEvent {
     originating_user_id: string | null;
   };
 }
-interface ProjectUpdatedEvent {
-  type: 'PROJECT_UPDATE';
+interface EpicUpdatedEvent {
+  type: 'EPIC_UPDATE';
   payload: {
-    model: Project;
+    model: Epic;
     originating_user_id: string | null;
   };
 }
-interface ProjectCreatePREvent {
-  type: 'PROJECT_CREATE_PR';
+interface EpicCreatePREvent {
+  type: 'EPIC_CREATE_PR';
   payload: {
-    model: Project;
+    model: Epic;
     originating_user_id: string | null;
   };
 }
-interface ProjectCreatePRFailedEvent {
-  type: 'PROJECT_CREATE_PR_FAILED';
+interface EpicCreatePRFailedEvent {
+  type: 'EPIC_CREATE_PR_FAILED';
   payload: {
     message?: string;
-    model: Project;
+    model: Epic;
     originating_user_id: string | null;
   };
 }
@@ -251,16 +251,16 @@ interface CommitFailedEvent {
 interface SoftDeletedEvent {
   type: 'SOFT_DELETE';
   payload: {
-    model: Project | Task;
+    model: Epic | Task;
     originating_user_id: null;
   };
 }
 type ModelEvent =
   | RepoUpdatedEvent
   | RepoUpdateErrorEvent
-  | ProjectUpdatedEvent
-  | ProjectCreatePREvent
-  | ProjectCreatePRFailedEvent
+  | EpicUpdatedEvent
+  | EpicCreatePREvent
+  | EpicCreatePRFailedEvent
   | TaskUpdatedEvent
   | TaskCreatePREvent
   | TaskCreatePRFailedEvent
@@ -303,12 +303,12 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && updateRepo(event.payload.model);
     case 'REPOSITORY_UPDATE_ERROR':
       return hasModel(event) && repoError(event.payload);
-    case 'PROJECT_UPDATE':
-      return hasModel(event) && updateProject(event.payload.model);
-    case 'PROJECT_CREATE_PR':
-      return hasModel(event) && createProjectPR(event.payload);
-    case 'PROJECT_CREATE_PR_FAILED':
-      return hasModel(event) && createProjectPRFailed(event.payload);
+    case 'EPIC_UPDATE':
+      return hasModel(event) && updateEpic(event.payload.model);
+    case 'EPIC_CREATE_PR':
+      return hasModel(event) && createEpicPR(event.payload);
+    case 'EPIC_CREATE_PR_FAILED':
+      return hasModel(event) && createEpicPRFailed(event.payload);
     case 'TASK_UPDATE':
       return hasModel(event) && updateTask(event.payload.model);
     case 'TASK_CREATE_PR':

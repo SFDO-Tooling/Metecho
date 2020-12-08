@@ -6,15 +6,15 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import CreateProjectModal from '@/components/projects/createForm';
-import ProjectTable from '@/components/projects/table';
+import CreateEpicModal from '@/components/epics/createForm';
+import EpicTable from '@/components/epics/table';
 import RepositoryNotFound from '@/components/repositories/repository404';
 import {
   DetailPageLayout,
   getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
   SpinnerWrapper,
-  useFetchProjectsIfMissing,
+  useFetchEpicsIfMissing,
   useFetchRepositoryIfMissing,
   useIsMounted,
 } from '@/components/utils';
@@ -26,12 +26,12 @@ import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const RepositoryDetail = (props: RouteComponentProps) => {
-  const [fetchingProjects, setFetchingProjects] = useState(false);
+  const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
-  const { projects } = useFetchProjectsIfMissing(repository, props);
+  const { epics } = useFetchEpicsIfMissing(repository, props);
   const user = useSelector(selectUserState) as User;
 
   const loadingOrNotFound = getRepositoryLoadingOrNotFound({
@@ -54,24 +54,24 @@ const RepositoryDetail = (props: RouteComponentProps) => {
     return <Redirect to={routes.repository_detail(repository.slug)} />;
   }
 
-  const fetchMoreProjects = () => {
+  const fetchMoreEpics = () => {
     /* istanbul ignore else */
-    if (projects?.next) {
+    if (epics?.next) {
       /* istanbul ignore else */
       if (isMounted.current) {
-        setFetchingProjects(true);
+        setFetchingEpics(true);
       }
 
       dispatch(
         fetchObjects({
-          objectType: OBJECT_TYPES.PROJECT,
+          objectType: OBJECT_TYPES.EPIC,
           filters: { repository: repository.id },
-          url: projects.next,
+          url: epics.next,
         }),
       ).finally(() => {
         /* istanbul ignore else */
         if (isMounted.current) {
-          setFetchingProjects(false);
+          setFetchingEpics(false);
         }
       });
     }
@@ -80,7 +80,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
   const openCreateModal = () => setCreateModalOpen(true);
   const closeCreateModal = () => setCreateModalOpen(false);
 
-  const hasProjects = projects && projects.projects.length > 0;
+  const hasEpics = epics && epics.epics.length > 0;
 
   return (
     <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
@@ -92,51 +92,51 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         breadcrumb={[{ name: repository.name }]}
         image={repository.repo_image_url}
       >
-        {!projects || !projects.fetched ? (
-          // Fetching projects from API
+        {!epics || !epics.fetched ? (
+          // Fetching epics from API
           <SpinnerWrapper />
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {hasProjects
-                ? `${i18n.t('Projects for')} ${repository.name}`
-                : `${i18n.t('Create a Project for')} ${repository.name}`}
+              {hasEpics
+                ? `${i18n.t('Epics for')} ${repository.name}`
+                : `${i18n.t('Create an Epic for')} ${repository.name}`}
             </h2>
-            {!hasProjects && (
+            {!hasEpics && (
               <p className="slds-m-bottom_large">
-                <Trans i18nKey="createProjectHelpText">
-                  Projects in Metecho are the high-level features that can be
+                <Trans i18nKey="createEpicHelpText">
+                  Epics in Metecho are the high-level features that can be
                   broken down into smaller parts by creating Tasks. You can
-                  create a new project or create a project based on an existing
-                  GitHub branch. Every project requires a unique project name,
-                  which becomes the branch name in GitHub unless you choose to
-                  use an existing branch.
+                  create a new epic or create an epic based on an existing
+                  GitHub branch. Every epic requires a unique epic name, which
+                  becomes the branch name in GitHub unless you choose to use an
+                  existing branch.
                 </Trans>
               </p>
             )}
             <Button
-              label={i18n.t('Create a Project')}
+              label={i18n.t('Create an Epic')}
               variant="brand"
               onClick={openCreateModal}
               className="slds-m-bottom_large"
             />
-            {hasProjects && (
+            {hasEpics && (
               <>
-                <ProjectTable
-                  projects={projects.projects}
+                <EpicTable
+                  epics={epics.epics}
                   repositorySlug={repository.slug}
                 />
-                {projects.next ? (
+                {epics.next ? (
                   <div className="slds-m-top_large">
                     <Button
                       label={
-                        fetchingProjects ? (
+                        fetchingEpics ? (
                           <LabelWithSpinner />
                         ) : (
                           i18n.t('Load More')
                         )
                       }
-                      onClick={fetchMoreProjects}
+                      onClick={fetchMoreEpics}
                     />
                   </div>
                 ) : null}
@@ -144,7 +144,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             )}
           </>
         )}
-        <CreateProjectModal
+        <CreateEpicModal
           user={user}
           repository={repository}
           isOpen={createModalOpen}

@@ -5,7 +5,7 @@ from channels.testing import WebsocketCommunicator
 from ..api.model_mixins import Request
 from ..api.push import push_message_about_instance, report_error
 from ..api.serializers import (
-    ProjectSerializer,
+    EpicSerializer,
     RepositorySerializer,
     ScratchOrgSerializer,
     TaskSerializer,
@@ -85,9 +85,9 @@ async def test_push_notification_consumer__scratch_org__list(
 
 
 @pytest.mark.django_db
-async def test_push_notification_consumer__project(user_factory, project_factory):
+async def test_push_notification_consumer__epic(user_factory, epic_factory):
     user = await database_sync_to_async(user_factory)()
-    project = await database_sync_to_async(project_factory)(repository__repo_id=1234)
+    epic = await database_sync_to_async(epic_factory)(repository__repo_id=1234)
 
     communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -95,16 +95,16 @@ async def test_push_notification_consumer__project(user_factory, project_factory
     assert connected
 
     await communicator.send_json_to(
-        {"model": "project", "id": str(project.id), "action": "SUBSCRIBE"}
+        {"model": "epic", "id": str(epic.id), "action": "SUBSCRIBE"}
     )
     response = await communicator.receive_json_from()
     assert "ok" in response
 
     await push_message_about_instance(
-        project, {"type": "TEST_MESSAGE", "payload": {"originating_user_id": "abc"}}
+        epic, {"type": "TEST_MESSAGE", "payload": {"originating_user_id": "abc"}}
     )
     response = await communicator.receive_json_from()
-    model = await serialize_model(ProjectSerializer, project, user)
+    model = await serialize_model(EpicSerializer, epic, user)
     assert response == {
         "type": "TEST_MESSAGE",
         "payload": {"originating_user_id": "abc", "model": model},
@@ -116,7 +116,7 @@ async def test_push_notification_consumer__project(user_factory, project_factory
 @pytest.mark.django_db
 async def test_push_notification_consumer__task(user_factory, task_factory):
     user = await database_sync_to_async(user_factory)()
-    task = await database_sync_to_async(task_factory)(project__repository__repo_id=4321)
+    task = await database_sync_to_async(task_factory)(epic__repository__repo_id=4321)
 
     communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
     communicator.scope["user"] = user
@@ -148,7 +148,7 @@ async def test_push_notification_consumer__scratch_org(
 ):
     user = await database_sync_to_async(user_factory)()
     scratch_org = await database_sync_to_async(scratch_org_factory)(
-        task__project__repository__repo_id=2468
+        task__epic__repository__repo_id=2468
     )
 
     communicator = WebsocketCommunicator(websockets, "/ws/notifications/")
