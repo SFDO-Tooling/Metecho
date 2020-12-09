@@ -15,8 +15,7 @@ COPY ./requirements /requirements
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements/prod.txt
 RUN if [ "${BUILD_ENV}" = "development" ] ; then \
-    pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements/dev.txt; \
+    pip install --no-cache-dir -r requirements/dev.txt; \
     fi
 
 # Install sfdx

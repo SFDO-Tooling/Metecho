@@ -1,11 +1,11 @@
-// Repo Images
+// Project Images
 
 // Variables specific to repo images
 $repo-img-size: calc(3.5rem + 3vw);
 $repo-img-size-static: 4.75rem;
 $repo-img-pos-adjust: -1.125rem;
 
-.metecho-repo-item {
+.metecho-project-item {
   // increase default height/weight of icon in repo visualpicker
   .slds-media__figure {
     > div {
@@ -21,7 +21,7 @@ $repo-img-pos-adjust: -1.125rem;
   }
 }
 
-// When image, name and description are displayed on project list sidebar
+// When image, name and description are displayed on epic list sidebar
 .metecho-repo-image-wrapper {
   height: $repo-img-size;
   width: $repo-img-size;

@@ -16,7 +16,7 @@ describe('reducer', () => {
         slug: 'task-1',
         name: 'Task 1',
         description: 'This is a test task.',
-        project: 'p1',
+        epic: 'p1',
       };
       const expected = {};
       const actual = reducer(
@@ -31,36 +31,36 @@ describe('reducer', () => {
   );
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
-    test('resets task list for project', () => {
+    test('resets task list for epic', () => {
       const task1 = {
         id: 't1',
         slug: 'task-1',
         name: 'Task 1',
         description: 'This is a test task.',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const task2 = {
         id: 't2',
         slug: 'task-2',
         name: 'Task 2',
         description: 'This is another test task.',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const expected = {
-        'project-1': [task2],
-        'project-2': [],
+        'epic-1': [task2],
+        'epic-2': [],
       };
       const actual = reducer(
         {
-          'project-1': [task1],
-          'project-2': [],
+          'epic-1': [task1],
+          'epic-2': [],
         },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
             response: [task2],
             objectType: 'task',
-            filters: { project: 'project-1' },
+            filters: { epic: 'epic-1' },
           },
         },
       );
@@ -73,7 +73,7 @@ describe('reducer', () => {
         id: 't1',
         slug: 'task-1',
         name: 'Task 1',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const expected = {};
       const actual = reducer(expected, {
@@ -81,7 +81,7 @@ describe('reducer', () => {
         payload: {
           response: [task],
           objectType: 'other-object',
-          filters: { project: 'project-1' },
+          filters: { epic: 'epic-1' },
         },
       });
 
@@ -96,10 +96,10 @@ describe('reducer', () => {
           id: 't1',
           slug: 'task-1',
           name: 'Task 1',
-          project: 'project-1',
+          epic: 'epic-1',
         };
         const expected = {
-          'project-1': [task],
+          'epic-1': [task],
         };
         const actual = reducer(
           {},
@@ -120,10 +120,10 @@ describe('reducer', () => {
           id: 't1',
           slug: 'task-1',
           name: 'Task 1',
-          project: 'project-1',
+          epic: 'epic-1',
         };
         const expected = {
-          'project-1': [task],
+          'epic-1': [task],
         };
         const actual = reducer(expected, {
           type: 'CREATE_OBJECT_SUCCEEDED',
@@ -157,18 +157,18 @@ describe('reducer', () => {
           id: 't1',
           slug: 'task-1',
           name: 'Task 1',
-          project: 'project-1',
+          epic: 'epic-1',
           currently_creating_pr: false,
         };
         const task2 = {
           id: 't2',
-          project: 'project-1',
+          epic: 'epic-1',
         };
         const expected = {
-          'project-1': [{ ...task, currently_creating_pr: true }, task2],
+          'epic-1': [{ ...task, currently_creating_pr: true }, task2],
         };
         const actual = reducer(
-          { 'project-1': [task, task2] },
+          { 'epic-1': [task, task2] },
           {
             type: 'CREATE_OBJECT_SUCCEEDED',
             payload: {
@@ -186,11 +186,11 @@ describe('reducer', () => {
           id: 't1',
           slug: 'task-1',
           name: 'Task 1',
-          project: 'project-1',
+          epic: 'epic-1',
           currently_creating_pr: false,
         };
         const expected = {
-          'project-1': [{ ...task, currently_creating_pr: true }],
+          'epic-1': [{ ...task, currently_creating_pr: true }],
         };
         const actual = reducer(
           {},
@@ -241,10 +241,10 @@ describe('reducer', () => {
     test('adds new task to list', () => {
       const task = {
         id: 't1',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const expected = {
-        'project-1': [task],
+        'epic-1': [task],
       };
       const actual = reducer(
         {},
@@ -260,20 +260,20 @@ describe('reducer', () => {
     test('updates existing task', () => {
       const task = {
         id: 't1',
-        project: 'project-1',
+        epic: 'epic-1',
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
-        'project-1': [editedTask, task2],
+        'epic-1': [editedTask, task2],
       };
       const actual = reducer(
         {
-          'project-1': [task, task2],
+          'epic-1': [task, task2],
         },
         {
           type: 'TASK_UPDATE',
@@ -289,20 +289,20 @@ describe('reducer', () => {
     test('updates existing task', () => {
       const task = {
         id: 't1',
-        project: 'project-1',
+        epic: 'epic-1',
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
-        'project-1': [editedTask, task2],
+        'epic-1': [editedTask, task2],
       };
       const actual = reducer(
         {
-          'project-1': [task, task2],
+          'epic-1': [task, task2],
         },
         {
           type: 'UPDATE_OBJECT_SUCCEEDED',
@@ -316,20 +316,20 @@ describe('reducer', () => {
     test('ignores if unknown objectType', () => {
       const task = {
         id: 't1',
-        project: 'project-1',
+        epic: 'epic-1',
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const editedTask = { ...task, name: 'Edited Task Name' };
       const expected = {
-        'project-1': [task, task2],
+        'epic-1': [task, task2],
       };
       const actual = reducer(
         {
-          'project-1': [task, task2],
+          'epic-1': [task, task2],
         },
         {
           type: 'UPDATE_OBJECT_SUCCEEDED',
@@ -347,18 +347,18 @@ describe('reducer', () => {
         id: 't1',
         slug: 'task-1',
         name: 'Task 1',
-        project: 'project-1',
+        epic: 'epic-1',
         currently_creating_pr: true,
       };
       const task2 = {
         id: 't2',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const expected = {
-        'project-1': [{ ...task, currently_creating_pr: false }, task2],
+        'epic-1': [{ ...task, currently_creating_pr: false }, task2],
       };
       const actual = reducer(
-        { 'project-1': [task, task2] },
+        { 'epic-1': [task, task2] },
         {
           type: 'TASK_CREATE_PR_FAILED',
           payload: task,
@@ -373,7 +373,7 @@ describe('reducer', () => {
         id: 't1',
         slug: 'task-1',
         name: 'Task 1',
-        project: 'project-1',
+        epic: 'epic-1',
         currently_creating_pr: true,
       };
       const actual = reducer(
@@ -392,35 +392,35 @@ describe('reducer', () => {
     test('removes task', () => {
       const task = {
         id: 't1',
-        project: 'project-1',
+        epic: 'epic-1',
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const actual = reducer(
-        { 'project-1': [task, task2] },
+        { 'epic-1': [task, task2] },
         {
           type: 'DELETE_OBJECT_SUCCEEDED',
           payload: { object: task, objectType: 'task' },
         },
       );
 
-      expect(actual['project-1']).toEqual([task2]);
+      expect(actual['epic-1']).toEqual([task2]);
     });
 
     test('ignores if unknown objectType', () => {
       const task = {
         id: 't1',
-        project: 'project-1',
+        epic: 'epic-1',
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        project: 'project-1',
+        epic: 'epic-1',
       };
-      const initial = { 'project-1': [task, task2] };
+      const initial = { 'epic-1': [task, task2] };
       const actual = reducer(initial, {
         type: 'DELETE_OBJECT_SUCCEEDED',
         payload: { object: task, objectType: 'foobar' },
@@ -434,35 +434,35 @@ describe('reducer', () => {
     test('removes task', () => {
       const task = {
         id: 't1',
-        project: 'project-1',
+        epic: 'epic-1',
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        project: 'project-1',
+        epic: 'epic-1',
       };
       const actual = reducer(
-        { 'project-1': [task, task2] },
+        { 'epic-1': [task, task2] },
         {
           type: 'OBJECT_REMOVED',
           payload: task,
         },
       );
 
-      expect(actual['project-1']).toEqual([task2]);
+      expect(actual['epic-1']).toEqual([task2]);
     });
 
     test('ignores if payload is not a task', () => {
       const task = {
         id: 't1',
-        project: 'project-1',
+        epic: 'epic-1',
         name: 'Task Name',
       };
       const task2 = {
         id: 't2',
-        project: 'project-1',
+        epic: 'epic-1',
       };
-      const initial = { 'project-1': [task, task2] };
+      const initial = { 'epic-1': [task, task2] };
       const actual = reducer(initial, {
         type: 'OBJECT_REMOVED',
         payload: {},

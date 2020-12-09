@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 
 from ...models import (
+    Epic,
+    EpicSlug,
     GitHubRepository,
     Project,
     ProjectSlug,
-    Repository,
-    RepositorySlug,
     ScratchOrg,
     Task,
     TaskSlug,
@@ -20,11 +20,11 @@ class Command(BaseCommand):
             ScratchOrg,
             TaskSlug,
             Task,
+            EpicSlug,
+            Epic,
+            GitHubRepository,
             ProjectSlug,
             Project,
-            GitHubRepository,
-            RepositorySlug,
-            Repository,
         ]
 
         for model_class in ordered_models:

@@ -9,9 +9,9 @@ describe('fetchObjects with `reset: true`', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.repository_list();
+    url = window.api_urls.project_list();
     objectPayload = {
-      objectType: 'repository',
+      objectType: 'project',
       url,
       reset: true,
       filters: {},
@@ -19,16 +19,16 @@ describe('fetchObjects with `reset: true`', () => {
   });
 
   describe('success', () => {
-    test('GETs repositories from api', () => {
+    test('GETs projects from api', () => {
       const store = storeWithThunk({});
-      const repository = {
+      const project = {
         id: 'r1',
-        name: 'Repository 1',
-        slug: 'repository-1',
-        description: 'This is a test repository.',
+        name: 'Project 1',
+        slug: 'project-1',
+        description: 'This is a test project.',
         repo_url: 'http://www.test.test',
       };
-      const response = { next: null, results: [repository] };
+      const response = { next: null, results: [project] };
       fetchMock.getOnce(url, response);
       const started = {
         type: 'FETCH_OBJECTS_STARTED',
@@ -41,25 +41,23 @@ describe('fetchObjects with `reset: true`', () => {
 
       expect.assertions(1);
       return store
-        .dispatch(
-          actions.fetchObjects({ objectType: 'repository', reset: true }),
-        )
+        .dispatch(actions.fetchObjects({ objectType: 'project', reset: true }))
         .then(() => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
     });
 
     describe('with shouldSubscribeToObject', () => {
-      let store, repo;
+      let store, project;
 
       beforeEach(() => {
         window.socket = { subscribe: jest.fn() };
         store = storeWithThunk({});
-        repo = {
+        project = {
           id: 'r1',
-          name: 'Repository 1',
-          slug: 'repository-1',
-          description: 'This is a test repository.',
+          name: 'Project 1',
+          slug: 'project-1',
+          description: 'This is a test project.',
           repo_url: 'http://www.test.test',
           shouldSubscribe: true,
         };
@@ -70,14 +68,14 @@ describe('fetchObjects with `reset: true`', () => {
       });
 
       test('subscribes to socket if test passes', () => {
-        const response = [repo, { ...repo, shouldSubscribe: false }];
+        const response = [project, { ...project, shouldSubscribe: false }];
         fetchMock.getOnce(url, response);
 
         expect.assertions(2);
         return store
           .dispatch(
             actions.fetchObjects({
-              objectType: 'repository',
+              objectType: 'project',
               reset: true,
               shouldSubscribeToObject: (obj) => obj.shouldSubscribe,
             }),
@@ -85,21 +83,21 @@ describe('fetchObjects with `reset: true`', () => {
           .then(() => {
             expect(window.socket.subscribe).toHaveBeenCalledTimes(1);
             expect(window.socket.subscribe).toHaveBeenCalledWith({
-              model: 'repository',
+              model: 'project',
               id: 'r1',
             });
           });
       });
 
       test('does not subscribe if test fails', () => {
-        const response = { next: null, results: [repo] };
+        const response = { next: null, results: [project] };
         fetchMock.getOnce(url, response);
 
         expect.assertions(1);
         return store
           .dispatch(
             actions.fetchObjects({
-              objectType: 'repository',
+              objectType: 'project',
               reset: true,
               shouldSubscribeToObject: false,
             }),
@@ -149,9 +147,7 @@ describe('fetchObjects with `reset: true`', () => {
 
       expect.assertions(5);
       return store
-        .dispatch(
-          actions.fetchObjects({ objectType: 'repository', reset: true }),
-        )
+        .dispatch(actions.fetchObjects({ objectType: 'project', reset: true }))
         .catch(() => {
           const allActions = store.getActions();
 
@@ -171,11 +167,11 @@ describe('fetchObjects with `reset: false`', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    const baseUrl = window.api_urls.repository_list();
+    const baseUrl = window.api_urls.project_list();
     const filters = { page: 2 };
     url = addUrlParams(baseUrl, filters);
     objectPayload = {
-      objectType: 'repository',
+      objectType: 'project',
       url,
       reset: false,
       filters: {},
@@ -183,14 +179,12 @@ describe('fetchObjects with `reset: false`', () => {
   });
 
   describe('success', () => {
-    test('GETs next repositories page', () => {
+    test('GETs next projects page', () => {
       const store = storeWithThunk({});
-      const nextRepositories = [
-        { id: 'p2', name: 'Repository 2', slug: 'repository-2' },
-      ];
+      const nextProjects = [{ id: 'p2', name: 'Project 2', slug: 'project-2' }];
       const mockResponse = {
         next: null,
-        results: nextRepositories,
+        results: nextProjects,
       };
       fetchMock.getOnce(url, mockResponse);
       const started = {
@@ -204,7 +198,7 @@ describe('fetchObjects with `reset: false`', () => {
 
       expect.assertions(1);
       return store
-        .dispatch(actions.fetchObjects({ url, objectType: 'repository' }))
+        .dispatch(actions.fetchObjects({ url, objectType: 'project' }))
         .then(() => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
@@ -226,7 +220,7 @@ describe('fetchObjects with `reset: false`', () => {
 
       expect.assertions(5);
       return store
-        .dispatch(actions.fetchObjects({ url, objectType: 'repository' }))
+        .dispatch(actions.fetchObjects({ url, objectType: 'project' }))
         .catch(() => {
           const allActions = store.getActions();
 
@@ -246,43 +240,43 @@ describe('fetchObject', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.repository_list();
+    url = window.api_urls.project_list();
     objectPayload = {
-      objectType: 'repository',
+      objectType: 'project',
       url,
     };
   });
 
   describe('success', () => {
-    test('GETs repository from api', () => {
+    test('GETs project from api', () => {
       const store = storeWithThunk({});
-      const filters = { slug: 'repository-1' };
-      const repository = {
+      const filters = { slug: 'project-1' };
+      const project = {
         id: 'r1',
-        name: 'Repository 1',
-        slug: 'repository-1',
+        name: 'Project 1',
+        slug: 'project-1',
       };
-      fetchMock.getOnce(addUrlParams(url, filters), { results: [repository] });
+      fetchMock.getOnce(addUrlParams(url, filters), { results: [project] });
       const started = {
         type: 'FETCH_OBJECT_STARTED',
         payload: { filters, ...objectPayload },
       };
       const succeeded = {
         type: 'FETCH_OBJECT_SUCCEEDED',
-        payload: { filters, object: repository, ...objectPayload },
+        payload: { filters, object: project, ...objectPayload },
       };
 
       expect.assertions(1);
       return store
-        .dispatch(actions.fetchObject({ objectType: 'repository', filters }))
+        .dispatch(actions.fetchObject({ objectType: 'project', filters }))
         .then(() => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
     });
 
-    test('stores null if no repository returned from api', () => {
+    test('stores null if no project returned from api', () => {
       const store = storeWithThunk({});
-      const filters = { slug: 'repository-1' };
+      const filters = { slug: 'project-1' };
       fetchMock.getOnce(addUrlParams(url, filters), 404);
       const started = {
         type: 'FETCH_OBJECT_STARTED',
@@ -295,23 +289,23 @@ describe('fetchObject', () => {
 
       expect.assertions(1);
       return store
-        .dispatch(actions.fetchObject({ objectType: 'repository', filters }))
+        .dispatch(actions.fetchObject({ objectType: 'project', filters }))
         .then(() => {
           expect(store.getActions()).toEqual([started, succeeded]);
         });
     });
 
     describe('with shouldSubscribeToObject', () => {
-      let store, filters, repository;
+      let store, filters, project;
 
       beforeEach(() => {
         window.socket = { subscribe: jest.fn() };
         store = storeWithThunk({});
-        filters = { slug: 'repository-1' };
-        repository = {
+        filters = { slug: 'project-1' };
+        project = {
           id: 'r1',
-          name: 'Repository 1',
-          slug: 'repository-1',
+          name: 'Project 1',
+          slug: 'project-1',
         };
       });
 
@@ -321,14 +315,14 @@ describe('fetchObject', () => {
 
       test('subscribes to socket if test passes', () => {
         fetchMock.getOnce(addUrlParams(url, filters), {
-          results: [repository],
+          results: [project],
         });
 
         expect.assertions(2);
         return store
           .dispatch(
             actions.fetchObject({
-              objectType: 'repository',
+              objectType: 'project',
               filters,
               shouldSubscribeToObject: () => true,
             }),
@@ -336,7 +330,7 @@ describe('fetchObject', () => {
           .then(() => {
             expect(window.socket.subscribe).toHaveBeenCalledTimes(1);
             expect(window.socket.subscribe).toHaveBeenCalledWith({
-              model: 'repository',
+              model: 'project',
               id: 'r1',
             });
           });
@@ -344,14 +338,14 @@ describe('fetchObject', () => {
 
       test('does not subscribe if test fails', () => {
         fetchMock.getOnce(addUrlParams(url, filters), {
-          results: [repository],
+          results: [project],
         });
 
         expect.assertions(1);
         return store
           .dispatch(
             actions.fetchObject({
-              objectType: 'repository',
+              objectType: 'project',
               filters,
               shouldSubscribeToObject: () => false,
             }),
@@ -406,7 +400,7 @@ describe('fetchObject', () => {
 
       expect.assertions(5);
       return store
-        .dispatch(actions.fetchObject({ objectType: 'repository' }))
+        .dispatch(actions.fetchObject({ objectType: 'project' }))
         .catch(() => {
           const allActions = store.getActions();
 
@@ -424,9 +418,9 @@ describe('createObject', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.project_list();
+    url = window.api_urls.epic_list();
     objectPayload = {
-      objectType: 'project',
+      objectType: 'epic',
       data: {
         name: 'Object Name',
       },
@@ -455,13 +449,13 @@ describe('createObject', () => {
     });
 
     describe('with shouldSubscribeToObject', () => {
-      let store, project;
+      let store, epic;
 
       beforeEach(() => {
         window.socket = { subscribe: jest.fn() };
         store = storeWithThunk({});
-        project = {
-          id: 'project-id',
+        epic = {
+          id: 'epic-id',
           shouldSubscribe: true,
         };
       });
@@ -471,33 +465,33 @@ describe('createObject', () => {
       });
 
       test('subscribes to socket if test passes', () => {
-        fetchMock.postOnce(url, project);
+        fetchMock.postOnce(url, epic);
 
         expect.assertions(2);
         return store
           .dispatch(
             actions.createObject({
-              objectType: 'project',
+              objectType: 'epic',
               shouldSubscribeToObject: (o) => o.shouldSubscribe,
             }),
           )
           .then(() => {
             expect(window.socket.subscribe).toHaveBeenCalledTimes(1);
             expect(window.socket.subscribe).toHaveBeenCalledWith({
-              model: 'project',
-              id: 'project-id',
+              model: 'epic',
+              id: 'epic-id',
             });
           });
       });
 
       test('does not subscribe if test fails', () => {
-        fetchMock.postOnce(url, project);
+        fetchMock.postOnce(url, epic);
 
         expect.assertions(1);
         return store
           .dispatch(
             actions.createObject({
-              objectType: 'project',
+              objectType: 'epic',
               shouldSubscribeToObject: false,
             }),
           )
@@ -700,14 +694,14 @@ describe('updateObject', () => {
   let url, objectPayload;
 
   beforeAll(() => {
-    url = window.api_urls.project_detail('project-id');
-    const project = {
-      id: 'project-id',
+    url = window.api_urls.epic_detail('epic-id');
+    const epic = {
+      id: 'epic-id',
     };
     objectPayload = {
-      objectType: 'project',
+      objectType: 'epic',
       url,
-      data: { ...project, foo: 'bar' },
+      data: { ...epic, foo: 'bar' },
     };
   });
 
@@ -803,9 +797,9 @@ describe('updateObject', () => {
 
 describe('removeObject', () => {
   test('returns OBJECT_REMOVED action', () => {
-    const project = { id: 'project-id' };
-    const expected = { type: 'OBJECT_REMOVED', payload: project };
+    const epic = { id: 'epic-id' };
+    const expected = { type: 'OBJECT_REMOVED', payload: epic };
 
-    expect(actions.removeObject(project)).toEqual(expected);
+    expect(actions.removeObject(epic)).toEqual(expected);
   });
 });

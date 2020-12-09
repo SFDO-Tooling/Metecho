@@ -1,525 +1,152 @@
 import Button from '@salesforce/design-system-react/components/button';
-import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { useDispatch } from 'react-redux';
+import { Trans } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import FourOhFour from '@/components/404';
-import ConfirmRemoveUserModal from '@/components/projects/confirmRemoveUserModal';
-import ProjectStatusPath from '@/components/projects/path';
-import ProjectProgress from '@/components/projects/progress';
-import ProjectStatusSteps from '@/components/projects/steps';
-import { Step } from '@/components/steps/stepsItem';
-import CreateTaskModal from '@/components/tasks/createForm';
-import TaskTable from '@/components/tasks/table';
-import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
+import CreateEpicModal from '@/components/epics/createForm';
+import EpicTable from '@/components/epics/table';
+import ProjectNotFound from '@/components/projects/project404';
 import {
-  DeleteModal,
   DetailPageLayout,
-  EditModal,
-  ExternalLink,
   getProjectLoadingOrNotFound,
-  getRepositoryLoadingOrNotFound,
   LabelWithSpinner,
-  PageOptions,
   SpinnerWrapper,
-  SubmitModal,
+  useFetchEpicsIfMissing,
   useFetchProjectIfMissing,
-  useFetchRepositoryIfMissing,
-  useFetchTasksIfMissing,
+  useIsMounted,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { updateObject } from '@/store/actions';
-import { refreshGitHubUsers } from '@/store/repositories/actions';
-import { Task } from '@/store/tasks/reducer';
-import { GitHubUser } from '@/store/user/reducer';
-import { getUrlParam, removeUrlParam } from '@/utils/api';
-import {
-  OBJECT_TYPES,
-  ORG_TYPES,
-  OrgTypes,
-  PROJECT_STATUSES,
-  SHOW_PROJECT_COLLABORATORS,
-} from '@/utils/constants';
-import { getBranchLink, getCompletedTasks } from '@/utils/helpers';
+import { fetchObjects } from '@/store/actions';
+import { User } from '@/store/user/reducer';
+import { selectUserState } from '@/store/user/selectors';
+import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
-  const dispatch = useDispatch<ThunkDispatch>();
-  const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
-  const { project, projectSlug } = useFetchProjectIfMissing(repository, props);
-  const { tasks } = useFetchTasksIfMissing(project, props);
-
-  const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
-  const [submitModalOpen, setSubmitModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const isMounted = useIsMounted();
+  const dispatch = useDispatch<ThunkDispatch>();
+  const { project, projectSlug } = useFetchProjectIfMissing(props);
+  const { epics } = useFetchEpicsIfMissing(project, props);
+  const user = useSelector(selectUserState) as User;
 
-  // "Assign users to project" modal related:
-  const openAssignUsersModal = useCallback(() => {
-    setAssignUsersModalOpen(true);
-    setSubmitModalOpen(false);
-    setEditModalOpen(false);
-    setDeleteModalOpen(false);
-  }, []);
-  const closeAssignUsersModal = useCallback(() => {
-    setAssignUsersModalOpen(false);
-  }, []);
-
-  // "Confirm remove user from project" modal related:
-  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
-    GitHubUser[] | null
-  >(null);
-  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
-    GitHubUser[] | null
-  >(null);
-  const closeConfirmRemoveUsersModal = useCallback(() => {
-    setWaitingToUpdateUsers(null);
-    setConfirmRemoveUsers(null);
-  }, []);
-
-  // Auto-open the assign-users modal if `SHOW_PROJECT_COLLABORATORS` param
-  const { history } = props;
-  useEffect(() => {
-    const showCollaborators = getUrlParam(SHOW_PROJECT_COLLABORATORS);
-    if (showCollaborators === 'true') {
-      // Remove query-string from URL
-      history.replace({ search: removeUrlParam(SHOW_PROJECT_COLLABORATORS) });
-      // Show collaborators modal
-      openAssignUsersModal();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // If the project slug changes, make sure EditProject modal is closed
-  useEffect(() => {
-    if (projectSlug && project && projectSlug !== project.slug) {
-      setEditModalOpen(false);
-    }
-  }, [project, projectSlug]);
-
-  const usersAssignedToTasks = useMemo(() => {
-    const users = new Set<string>();
-    (tasks || []).forEach((task) => {
-      if (task.assigned_dev) {
-        users.add(task.assigned_dev.login);
-      }
-      if (task.assigned_qa) {
-        users.add(task.assigned_qa.login);
-      }
-    });
-    return users;
-  }, [tasks]);
-
-  const getRemovedUsers = useCallback(
-    (users: GitHubUser[]) => {
-      /* istanbul ignore if */
-      if (!project) {
-        return [];
-      }
-      return project.github_users.filter(
-        (oldUser) =>
-          usersAssignedToTasks.has(oldUser.login) &&
-          !users.find((user) => user.id === oldUser.id),
-      );
-    },
-    [project, usersAssignedToTasks],
-  );
-  const updateProjectUsers = useCallback(
-    (users: GitHubUser[]) => {
-      /* istanbul ignore if */
-      if (!project) {
-        return;
-      }
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.PROJECT,
-          data: {
-            ...project,
-            github_users: users.sort((a, b) =>
-              /* istanbul ignore next */
-              a.login.toLowerCase() > b.login.toLowerCase() ? 1 : -1,
-            ),
-          },
-        }),
-      );
-    },
-    [project, dispatch],
-  );
-  const setProjectUsers = useCallback(
-    (users: GitHubUser[]) => {
-      const removedUsers = getRemovedUsers(users);
-      if (removedUsers.length) {
-        setWaitingToUpdateUsers(users);
-        setConfirmRemoveUsers(removedUsers);
-        setAssignUsersModalOpen(false);
-        setSubmitModalOpen(false);
-        setEditModalOpen(false);
-        setDeleteModalOpen(false);
-      } else {
-        updateProjectUsers(users);
-      }
-      setAssignUsersModalOpen(false);
-    },
-    [updateProjectUsers, getRemovedUsers],
-  );
-  const removeProjectUser = useCallback(
-    (user: GitHubUser) => {
-      /* istanbul ignore if */
-      if (!project) {
-        return;
-      }
-      const users = project.github_users.filter(
-        (possibleUser) => user.id !== possibleUser.id,
-      );
-      const removedUsers = getRemovedUsers(users);
-      if (removedUsers.length) {
-        setWaitingToUpdateUsers(users);
-        setConfirmRemoveUsers(removedUsers);
-        setAssignUsersModalOpen(false);
-        setSubmitModalOpen(false);
-        setEditModalOpen(false);
-        setDeleteModalOpen(false);
-      } else {
-        updateProjectUsers(users);
-      }
-    },
-    [project, updateProjectUsers, getRemovedUsers],
-  );
-  const doRefreshGitHubUsers = useCallback(() => {
-    /* istanbul ignore if */
-    if (!repository) {
-      return;
-    }
-    dispatch(refreshGitHubUsers(repository.id));
-  }, [repository, dispatch]);
-
-  // "Assign user to task" modal related:
-  const assignUser = useCallback(
-    ({
-      task,
-      type,
-      assignee,
-      shouldAlertAssignee,
-    }: {
-      task: Task;
-      type: OrgTypes;
-      assignee: GitHubUser | null;
-      shouldAlertAssignee: boolean;
-    }) => {
-      /* istanbul ignore next */
-      const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
-      const alertType =
-        type === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.TASK,
-          data: {
-            ...task,
-            [userType]: assignee,
-            [alertType]: shouldAlertAssignee,
-          },
-        }),
-      );
-    },
-    [dispatch],
-  );
-
-  // "Submit" modal related:
-  const openSubmitModal = () => {
-    setSubmitModalOpen(true);
-    setEditModalOpen(false);
-    setDeleteModalOpen(false);
-    setAssignUsersModalOpen(false);
-  };
-  const currentlySubmitting = Boolean(project?.currently_creating_pr);
-  const readyToSubmit = Boolean(
-    project?.has_unmerged_commits &&
-      !project?.pr_is_open &&
-      project?.status !== PROJECT_STATUSES.MERGED,
-  );
-
-  // "edit" modal related:
-  const openEditModal = () => {
-    setEditModalOpen(true);
-    setDeleteModalOpen(false);
-    setSubmitModalOpen(false);
-    setAssignUsersModalOpen(false);
-  };
-  const closeEditModal = () => {
-    setEditModalOpen(false);
-  };
-  // "delete" modal related:
-  const openDeleteModal = () => {
-    setDeleteModalOpen(true);
-    setEditModalOpen(false);
-    setSubmitModalOpen(false);
-    setAssignUsersModalOpen(false);
-  };
-  const closeDeleteModal = () => {
-    setDeleteModalOpen(false);
-  };
-  const openCreateModal = () => {
-    setCreateModalOpen(true);
-  };
-  const closeCreateModal = () => {
-    setCreateModalOpen(false);
-  };
-
-  // "Next Steps" action handler
-  const handleStepAction = useCallback(
-    (step: Step) => {
-      const action = step.action;
-      switch (action) {
-        case 'submit':
-          /* istanbul ignore else */
-          if (readyToSubmit && !currentlySubmitting) {
-            openSubmitModal();
-          }
-          break;
-      }
-    },
-    [readyToSubmit, currentlySubmitting],
-  );
-
-  const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
-    repository,
-    repositorySlug,
-  });
-  if (repositoryLoadingOrNotFound !== false) {
-    return repositoryLoadingOrNotFound;
-  }
-
-  const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
-    repository,
+  const loadingOrNotFound = getProjectLoadingOrNotFound({
     project,
     projectSlug,
   });
-  if (projectLoadingOrNotFound !== false) {
-    return projectLoadingOrNotFound;
+
+  if (loadingOrNotFound !== false) {
+    return loadingOrNotFound;
   }
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!repository || !project) {
-    return <FourOhFour />;
+  if (!project) {
+    return <ProjectNotFound />;
   }
 
-  if (
-    (repositorySlug && repositorySlug !== repository.slug) ||
-    (projectSlug && projectSlug !== project.slug)
-  ) {
-    // Redirect to most recent repository/project slug
-    return (
-      <Redirect to={routes.project_detail(repository.slug, project.slug)} />
-    );
+  if (projectSlug && projectSlug !== project.slug) {
+    // Redirect to most recent project slug
+    return <Redirect to={routes.project_detail(project.slug)} />;
   }
 
-  // Progress Bar:
-  const tasksCompleted = tasks ? getCompletedTasks(tasks).length : 0;
-  const tasksTotal = tasks?.length || 0;
-  const projectProgress: [number, number] = [tasksCompleted, tasksTotal];
+  const fetchMoreEpics = () => {
+    /* istanbul ignore else */
+    if (epics?.next) {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        setFetchingEpics(true);
+      }
 
-  // "Submit Project for Review on GitHub" button:
-  let submitButton: React.ReactNode = null;
-  if (readyToSubmit) {
-    const submitButtonText = currentlySubmitting ? (
-      <LabelWithSpinner
-        label={i18n.t('Submitting Project for Review on GitHub…')}
-        variant="inverse"
-      />
-    ) : (
-      i18n.t('Submit Project for Review on GitHub')
-    );
-    submitButton = (
-      <Button
-        label={submitButtonText}
-        className="slds-m-bottom_large"
-        variant="brand"
-        onClick={openSubmitModal}
-        disabled={currentlySubmitting}
-      />
-    );
-  }
-
-  const handlePageOptionSelect = (selection: 'edit' | 'delete') => {
-    switch (selection) {
-      case 'edit':
-        openEditModal();
-        break;
-      case 'delete':
-        openDeleteModal();
-        break;
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.EPIC,
+          filters: { project: project.id },
+          url: epics.next,
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setFetchingEpics(false);
+        }
+      });
     }
   };
-  const { branchLink, branchLinkText } = getBranchLink(project);
-  const onRenderHeaderActions = () => (
-    <PageHeaderControl>
-      <PageOptions
-        modelType={OBJECT_TYPES.PROJECT}
-        handleOptionSelect={handlePageOptionSelect}
-      />
-      {branchLink && (
-        <ExternalLink
-          url={branchLink}
-          showButtonIcon
-          className="slds-button slds-button_outline-brand"
-        >
-          {branchLinkText}
-        </ExternalLink>
-      )}
-    </PageHeaderControl>
-  );
+  // create modal related
+  const openCreateModal = () => setCreateModalOpen(true);
+  const closeCreateModal = () => setCreateModalOpen(false);
 
-  const repoUrl = routes.repository_detail(repository.slug);
-  let headerUrl, headerUrlText;
-  /* istanbul ignore else */
-  if (project.branch_url && project.branch_name) {
-    headerUrl = project.branch_url;
-    headerUrlText = project.branch_name;
-  } else {
-    headerUrl = repository.repo_url;
-    headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
-  }
-
-  const projectIsMerged = project.status === PROJECT_STATUSES.MERGED;
-  const projectHasTasks = Boolean(tasks && tasks.length > 0);
+  const hasEpics = epics && epics.epics.length > 0;
 
   return (
-    <DocumentTitle
-      title={`${project.name} | ${repository.name} | ${i18n.t('Metecho')}`}
-    >
+    <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
         title={project.name}
         description={project.description_rendered}
-        headerUrl={headerUrl}
-        headerUrlText={headerUrlText}
-        breadcrumb={[
-          {
-            name: repository.name,
-            url: repoUrl,
-          },
-          { name: project.name },
-        ]}
-        onRenderHeaderActions={onRenderHeaderActions}
-        sidebar={
-          <>
-            <div className="slds-m-bottom_x-large metecho-secondary-block">
-              <h2 className="slds-text-heading_medium slds-p-bottom_small">
-                {i18n.t('Collaborators')}
-              </h2>
-              <Button
-                label={i18n.t('Add or Remove Collaborators')}
-                variant="outline-brand"
-                onClick={openAssignUsersModal}
-              />
-              <AssignUsersModal
-                allUsers={repository.github_users}
-                selectedUsers={project.github_users}
-                heading={`${i18n.t('Add or Remove Collaborators for')} ${
-                  project.name
-                }`}
-                isOpen={assignUsersModalOpen}
-                onRequestClose={closeAssignUsersModal}
-                setUsers={setProjectUsers}
-                isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
-                refreshUsers={doRefreshGitHubUsers}
-              />
-              <ConfirmRemoveUserModal
-                confirmRemoveUsers={confirmRemoveUsers}
-                waitingToUpdateUsers={waitingToUpdateUsers}
-                handleClose={closeConfirmRemoveUsersModal}
-                handleUpdateUsers={updateProjectUsers}
-              />
-              {project.github_users.length ? (
-                <UserCards
-                  users={project.github_users}
-                  removeUser={removeProjectUser}
-                />
-              ) : null}
-            </div>
-            <div className="slds-m-bottom_x-large metecho-secondary-block">
-              <ProjectStatusSteps
-                project={project}
-                tasks={tasks || []}
-                readyToSubmit={readyToSubmit}
-                currentlySubmitting={currentlySubmitting}
-                handleAction={handleStepAction}
-              />
-            </div>
-          </>
-        }
+        headerUrl={project.repo_url}
+        headerUrlText={`${project.repo_owner}/${project.repo_name}`}
+        breadcrumb={[{ name: project.name }]}
+        image={project.repo_image_url}
       >
-        <ProjectStatusPath
-          status={project.status}
-          prIsOpen={project.pr_is_open}
-        />
-        {submitButton}
-        {tasks ? (
+        {!epics || !epics.fetched ? (
+          // Fetching epics from API
+          <SpinnerWrapper />
+        ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {projectHasTasks || projectIsMerged
-                ? `${i18n.t('Tasks for')} ${project.name}`
-                : `${i18n.t('Add a Task for')} ${project.name}`}
+              {hasEpics
+                ? `${i18n.t('Epics for')} ${project.name}`
+                : `${i18n.t('Create an Epic for')} ${project.name}`}
             </h2>
-            {!projectIsMerged && (
-              <Button
-                label={i18n.t('Add a Task')}
-                variant="brand"
-                onClick={openCreateModal}
-                className="slds-m-bottom_large"
-              />
+            {!hasEpics && (
+              <p className="slds-m-bottom_large">
+                <Trans i18nKey="createEpicHelpText">
+                  Epics in Metecho are the high-level features that can be
+                  broken down into smaller parts by creating Tasks. You can
+                  create a new epic or create an epic based on an existing
+                  GitHub branch. Every epic requires a unique epic name, which
+                  becomes the branch name in GitHub unless you choose to use an
+                  existing branch.
+                </Trans>
+              </p>
             )}
-            {projectHasTasks && (
+            <Button
+              label={i18n.t('Create an Epic')}
+              variant="brand"
+              onClick={openCreateModal}
+              className="slds-m-bottom_large"
+            />
+            {hasEpics && (
               <>
-                <ProjectProgress range={projectProgress} />
-                <TaskTable
-                  repositorySlug={repository.slug}
-                  projectSlug={project.slug}
-                  tasks={tasks}
-                  projectUsers={project.github_users}
-                  openAssignProjectUsersModal={openAssignUsersModal}
-                  assignUserAction={assignUser}
-                />
+                <EpicTable epics={epics.epics} projectSlug={project.slug} />
+                {epics.next ? (
+                  <div className="slds-m-top_large">
+                    <Button
+                      label={
+                        fetchingEpics ? (
+                          <LabelWithSpinner />
+                        ) : (
+                          i18n.t('Load More')
+                        )
+                      }
+                      onClick={fetchMoreEpics}
+                    />
+                  </div>
+                ) : null}
               </>
             )}
           </>
-        ) : (
-          // Fetching tasks from API
-          <SpinnerWrapper />
         )}
-        {readyToSubmit && (
-          <SubmitModal
-            instanceId={project.id}
-            instanceName={project.name}
-            instanceDiffUrl={project.branch_diff_url}
-            instanceType={OBJECT_TYPES.PROJECT}
-            isOpen={submitModalOpen}
-            toggleModal={setSubmitModalOpen}
-          />
-        )}
-        <EditModal
-          model={project}
-          modelType={OBJECT_TYPES.PROJECT}
-          isOpen={editModalOpen}
-          handleClose={closeEditModal}
+        <CreateEpicModal
+          user={user}
+          project={project}
+          isOpen={createModalOpen}
+          closeCreateModal={closeCreateModal}
         />
-        <DeleteModal
-          model={project}
-          modelType={OBJECT_TYPES.PROJECT}
-          isOpen={deleteModalOpen}
-          redirect={repoUrl}
-          handleClose={closeDeleteModal}
-        />
-        {!projectIsMerged && (
-          <CreateTaskModal
-            project={project}
-            isOpen={createModalOpen}
-            closeCreateModal={closeCreateModal}
-          />
-        )}
       </DetailPageLayout>
     </DocumentTitle>
   );

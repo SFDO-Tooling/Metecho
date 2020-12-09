@@ -3,15 +3,15 @@ import logging
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
-from .models import Project, Repository, Task
+from .models import Epic, Project, Task
 
 logger = logging.getLogger(__name__)
 
 
 class HookSerializerMixin:
-    def get_matching_repository(self):
+    def get_matching_project(self):
         repo_id = self.validated_data["repository"]["id"]
-        return Repository.objects.filter(repo_id=repo_id).first()
+        return Project.objects.filter(repo_id=repo_id).first()
 
 
 class HookRepositorySerializer(HookSerializerMixin, serializers.Serializer):
@@ -56,36 +56,32 @@ class PrHookSerializer(HookSerializerMixin, serializers.Serializer):
     def _is_merged(self):
         return self._is_closed() and self.validated_data["pull_request"]["merged"]
 
-    def _get_matching_instance(self, repository):
+    def _get_matching_instance(self, project):
         pr_number = self.validated_data["number"]
         pr_head_ref = self.validated_data["pull_request"]["head"]["ref"]
         pr_base_ref = self.validated_data["pull_request"]["base"]["ref"]
         return (
-            Task.objects.filter(
-                project__repository=repository, pr_number=pr_number
-            ).first()
-            or Project.objects.filter(
-                repository=repository, pr_number=pr_number
-            ).first()
+            Task.objects.filter(epic__project=project, pr_number=pr_number).first()
+            or Epic.objects.filter(project=project, pr_number=pr_number).first()
             or Task.objects.filter(
-                project__repository=repository,
+                epic__project=project,
+                branch_name=pr_head_ref,
+                epic__branch_name=pr_base_ref,
+            ).first()
+            or Epic.objects.filter(
+                project=project,
                 branch_name=pr_head_ref,
                 project__branch_name=pr_base_ref,
-            ).first()
-            or Project.objects.filter(
-                repository=repository,
-                branch_name=pr_head_ref,
-                repository__branch_name=pr_base_ref,
             ).first()
         )
 
     def process_hook(self):
-        repository = self.get_matching_repository()
-        if not repository:
-            raise NotFound("No matching repository.")
+        project = self.get_matching_project()
+        if not project:
+            raise NotFound("No matching project.")
 
         if self._is_closed() or self._is_opened():
-            instance = self._get_matching_instance(repository)
+            instance = self._get_matching_instance(project)
             if instance is None:
                 return
             # In all these, our originating user is None, because this
@@ -125,9 +121,9 @@ class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
         return self.validated_data["forced"]
 
     def process_hook(self):
-        repository = self.get_matching_repository()
-        if not repository:
-            raise NotFound("No matching repository.")
+        project = self.get_matching_project()
+        if not project:
+            raise NotFound("No matching project.")
 
         ref = self.validated_data["ref"]
         branch_prefix = "refs/heads/"
@@ -142,10 +138,10 @@ class PushHookSerializer(HookSerializerMixin, serializers.Serializer):
         ref = ref[prefix_len:]
 
         if self._is_force_push():
-            repository.queue_refresh_commits(ref=ref, originating_user_id=None)
+            project.queue_refresh_commits(ref=ref, originating_user_id=None)
         else:
             sender = self.validated_data["sender"]
-            repository.add_commits(
+            project.add_commits(
                 commits=self.validated_data["commits"],
                 ref=ref,
                 sender=sender,
@@ -158,14 +154,12 @@ class PrReviewHookSerializer(HookSerializerMixin, serializers.Serializer):
     pull_request = PrSerializer()
 
     def process_hook(self):
-        repository = self.get_matching_repository()
-        if not repository:
-            raise NotFound("No matching repository.")
+        project = self.get_matching_project()
+        if not project:
+            raise NotFound("No matching project.")
 
         pr_number = self.validated_data["pull_request"]["number"]
-        task = Task.objects.filter(
-            project__repository=repository, pr_number=pr_number
-        ).first()
+        task = Task.objects.filter(epic__project=project, pr_number=pr_number).first()
         if not task:
             raise NotFound("No matching task.")
 

@@ -4,14 +4,14 @@ import { MemoryRouter } from 'react-router-dom';
 
 import TaskForm from '@/components/tasks/createForm';
 import { createObject } from '@/store/actions';
+import { refreshOrgConfigs } from '@/store/epics/actions';
 import { addError } from '@/store/errors/actions';
-import { refreshOrgConfigs } from '@/store/projects/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
 jest.mock('@/store/errors/actions');
-jest.mock('@/store/projects/actions');
+jest.mock('@/store/epics/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
@@ -25,12 +25,12 @@ afterEach(() => {
   refreshOrgConfigs.mockClear();
 });
 
-const defaultProject = {
+const defaultEpic = {
   id: 'p1',
-  name: 'Project 1',
-  slug: 'project-1',
+  name: 'Epic 1',
+  slug: 'epic-1',
   old_slugs: [],
-  description: 'This is a test project.',
+  description: 'This is a test epic.',
   available_task_org_config_names: [
     { key: 'dev' },
     { key: 'qa', label: 'QA', description: 'This is a QA flow' },
@@ -41,17 +41,17 @@ const defaultProject = {
 describe('<TaskForm/>', () => {
   const setup = (options) => {
     const defaults = {
-      project: defaultProject,
+      epic: defaultEpic,
       isOpen: true,
       closeCreateModal: jest.fn(),
     };
     const opts = Object.assign({}, defaults, options);
-    const { project, isOpen } = opts;
+    const { epic, isOpen } = opts;
     const closeCreateModal = jest.fn();
     return renderWithRedux(
       <MemoryRouter>
         <TaskForm
-          project={project}
+          epic={epic}
           isOpen={isOpen}
           closeCreateModal={closeCreateModal}
         />
@@ -90,7 +90,7 @@ describe('<TaskForm/>', () => {
         data: {
           name: 'Name of Task',
           description: 'This is the description',
-          project: 'p1',
+          epic: 'p1',
           org_config_name: 'qa',
         },
         hasForm: true,
@@ -112,7 +112,7 @@ describe('<TaskForm/>', () => {
           }),
         );
         const { getByText, getByLabelText, findByText } = setup({
-          project: { ...defaultProject, available_task_org_config_names: [] },
+          epic: { ...defaultEpic, available_task_org_config_names: [] },
         });
 
         const submit = getByText('Add');
@@ -142,7 +142,7 @@ describe('<TaskForm/>', () => {
                 slug: 'name-of-task',
                 name: 'Name of Task',
                 description: '',
-                project: 'p1',
+                epic: 'p1',
               },
             },
           }),

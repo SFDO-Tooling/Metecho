@@ -1,0 +1,160 @@
+import { fireEvent } from '@testing-library/react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+
+import ProjectList from '@/components/projects/list';
+import { fetchObjects } from '@/store/actions';
+import { refreshProjects } from '@/store/projects/actions';
+
+import { renderWithRedux, storeWithThunk } from './../../utils';
+
+jest.mock('react-fns', () => ({
+  withScroll(Component) {
+    // eslint-disable-next-line react/display-name
+    return (props) => <Component x={0} y={0} {...props} />;
+  },
+}));
+jest.mock('@/store/actions');
+jest.mock('@/store/projects/actions');
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshProjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+
+afterEach(() => {
+  fetchObjects.mockClear();
+  refreshProjects.mockClear();
+});
+
+describe('<ProjectList />', () => {
+  const setup = ({
+    initialState = {
+      projects: { projects: [], notFound: [], next: null },
+    },
+    props = {},
+    rerender = null,
+    store,
+  } = {}) =>
+    renderWithRedux(
+      <MemoryRouter>
+        <ProjectList {...props} />
+      </MemoryRouter>,
+      initialState,
+      storeWithThunk,
+      rerender,
+      store,
+    );
+
+  test('renders projects list (empty)', () => {
+    const { getByText } = setup();
+
+    expect(getByText('¯\\_(ツ)_/¯')).toBeVisible();
+  });
+
+  test('renders projects list', () => {
+    const initialState = {
+      projects: {
+        projects: [
+          {
+            id: 'r1',
+            name: 'Project 1',
+            slug: 'project-1',
+            description: 'This is a test project.',
+            description_rendered: '<p>This is a test project.</p>',
+            repo_url: 'https://github.com/test/test-repo',
+          },
+        ],
+        notFound: [],
+        next: null,
+      },
+    };
+    const { getByText } = setup({ initialState });
+
+    expect(getByText('Project 1')).toBeVisible();
+    expect(getByText('This is a test project.')).toBeVisible();
+  });
+
+  describe('fetching more projects', () => {
+    const initialState = {
+      projects: {
+        projects: [
+          {
+            id: 'r1',
+            name: 'Project 1',
+            slug: 'project-1',
+            description: 'This is a test project.',
+            description_rendered: '<p>This is a test project.</p>',
+            repo_url: 'https://github.com/test/test-repo',
+          },
+        ],
+        notFound: [],
+        next: 'next-url',
+      },
+    };
+
+    beforeAll(() => {
+      jest
+        .spyOn(document.documentElement, 'scrollHeight', 'get')
+        .mockImplementation(() => 1100);
+    });
+
+    afterEach(() => {
+      window.sessionStorage.removeItem('activeProjectsTab');
+    });
+
+    test('fetches next page of projects', () => {
+      const { rerender, getByText, store } = setup({ initialState });
+      setup({ props: { y: 1000 }, rerender, store });
+
+      expect(getByText('Loading…')).toBeVisible();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        url: 'next-url',
+        objectType: 'project',
+      });
+    });
+
+    test('does not fetch next page if no more projects', () => {
+      const state = {
+        ...initialState,
+        projects: {
+          ...initialState.projects,
+          next: null,
+        },
+      };
+      const { rerender, queryByText, store } = setup({ initialState: state });
+
+      setup({ props: { y: 1000 }, rerender, store });
+
+      expect(queryByText('Loading…')).toBeNull();
+      expect(fetchObjects).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sync projects clicked', () => {
+    test('syncs projects', () => {
+      const { getByText } = setup();
+      const btn = getByText('Re-Sync Projects');
+
+      expect(btn).toBeVisible();
+
+      fireEvent.click(btn);
+
+      expect(refreshProjects).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('syncing projects', () => {
+    test('displays button as loading', () => {
+      const { getByText } = setup({
+        initialState: {
+          projects: {
+            projects: [],
+            notFound: [],
+            next: null,
+            refreshing: true,
+          },
+        },
+      });
+
+      expect(getByText('Syncing Projects…')).toBeVisible();
+    });
+  });
+});

@@ -13,7 +13,7 @@ import {
   useFormDefaults,
   useIsMounted,
 } from '@/components/utils';
-import { OrgConfig, Project } from '@/store/projects/reducer';
+import { Epic, OrgConfig } from '@/store/epics/reducer';
 import { Task } from '@/store/tasks/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
@@ -22,24 +22,24 @@ import {
 } from '@/utils/constants';
 
 interface EditModalProps {
-  model: Project | Task;
+  model: Epic | Task;
   modelType: ObjectTypes;
   hasOrgs?: boolean;
-  projectId?: string;
+  epicId?: string;
   orgConfigsLoading?: boolean;
   orgConfigs?: OrgConfig[];
   isOpen: boolean;
   handleClose: () => void;
 }
 
-const isTask = (model: Project | Task, modelType: ObjectTypes): model is Task =>
+const isTask = (model: Epic | Task, modelType: ObjectTypes): model is Task =>
   modelType === OBJECT_TYPES.TASK;
 
 const EditModal = ({
   model,
   modelType,
   hasOrgs,
-  projectId,
+  epicId,
   orgConfigsLoading,
   orgConfigs,
   isOpen,
@@ -137,9 +137,9 @@ const EditModal = ({
       nameLabel = i18n.t('Task Name');
       heading = i18n.t('Edit Task');
       break;
-    case OBJECT_TYPES.PROJECT:
-      nameLabel = i18n.t('Project Name');
-      heading = i18n.t('Edit Project');
+    case OBJECT_TYPES.EPIC:
+      nameLabel = i18n.t('Epic Name');
+      heading = i18n.t('Edit Epic');
       break;
   }
 
@@ -198,7 +198,7 @@ const EditModal = ({
         {isTask(model, modelType) ? (
           <SelectFlowType
             orgConfigs={orgConfigs || []}
-            projectId={projectId}
+            epicId={epicId}
             value={inputs.org_config_name}
             errors={errors.org_config_name}
             isDisabled={hasOrgs}

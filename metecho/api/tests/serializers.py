@@ -6,9 +6,9 @@ from django.utils import timezone
 
 from ..models import SCRATCH_ORG_TYPES, Task
 from ..serializers import (
+    EpicSerializer,
     FullUserSerializer,
     HashidPrimaryKeyRelatedField,
-    ProjectSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
 )
@@ -38,17 +38,17 @@ class TestHashidPrimaryKeyRelatedField:
 
 
 @pytest.mark.django_db
-class TestProjectSerializer:
-    def test_markdown_fields_input(self, rf, user_factory, repository_factory):
+class TestEpicSerializer:
+    def test_markdown_fields_input(self, rf, user_factory, project_factory):
         request = rf.post("/")
         request.user = user_factory()
-        repository = repository_factory()
-        serializer = ProjectSerializer(
+        project = project_factory()
+        serializer = EpicSerializer(
             data={
-                "name": "Test project",
-                "description": "Test `project`",
+                "name": "Test epic",
+                "description": "Test `epic`",
                 "branch_name": "some-branch",
-                "repository": str(repository.id),
+                "project": str(project.id),
                 "github_users": [],
             },
             context={"request": request},
@@ -76,33 +76,30 @@ class TestProjectSerializer:
                 }
             )
 
-            project = serializer.save()
+            epic = serializer.save()
 
-        assert project.description_markdown == "<p>Test <code>project</code></p>"
+        assert epic.description_markdown == "<p>Test <code>epic</code></p>"
 
-    def test_markdown_fields_output(self, project_factory):
-        project = project_factory(name="Test project", description="Test `project`")
-        serializer = ProjectSerializer(project)
+    def test_markdown_fields_output(self, epic_factory):
+        epic = epic_factory(name="Test epic", description="Test `epic`")
+        serializer = EpicSerializer(epic)
         assert (
-            serializer.data["description_rendered"]
-            == "<p>Test <code>project</code></p>"
+            serializer.data["description_rendered"] == "<p>Test <code>epic</code></p>"
         )
 
-    def test_validate_branch_name__non_feature(self, repository_factory):
-        repo = repository_factory()
-        serializer = ProjectSerializer(
+    def test_validate_branch_name__non_feature(self, project_factory):
+        project = project_factory()
+        serializer = EpicSerializer(
             data={
                 "branch_name": "test__non-feature",
                 "name": "Test",
-                "repository": str(repo.id),
+                "project": str(project.id),
             }
         )
         assert not serializer.is_valid()
         assert "branch_name" in serializer.errors
 
-    def test_validate_branch_name__already_used(
-        self, repository_factory, project_factory
-    ):
+    def test_validate_branch_name__already_used(self, project_factory, epic_factory):
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
             gh.get_repo_info.return_value = MagicMock(
@@ -118,28 +115,28 @@ class TestProjectSerializer:
                 }
             )
 
-            repo = repository_factory()
-            project_factory(branch_name="test")
+            project = project_factory()
+            epic_factory(branch_name="test")
 
-        serializer = ProjectSerializer(
-            data={"branch_name": "test", "name": "Test", "repository": str(repo.id)}
+        serializer = EpicSerializer(
+            data={"branch_name": "test", "name": "Test", "project": str(project.id)}
         )
         assert not serializer.is_valid()
         assert "branch_name" in serializer.errors
 
-    def test_validate_branch_name__repo_default_branch(self, repository_factory):
-        repo = repository_factory()
-        serializer = ProjectSerializer(
+    def test_validate_branch_name__repo_default_branch(self, project_factory):
+        project = project_factory()
+        serializer = EpicSerializer(
             data={
-                "branch_name": repo.branch_name,
+                "branch_name": project.branch_name,
                 "name": "Test",
-                "repository": str(repo.id),
+                "project": str(project.id),
             }
         )
         assert not serializer.is_valid()
         assert "branch_name" in serializer.errors
 
-    def test_branch_url__present(self, project_factory):
+    def test_branch_url__present(self, epic_factory):
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
             gh.get_repo_info.return_value = MagicMock(
@@ -155,28 +152,28 @@ class TestProjectSerializer:
                 }
             )
 
-            project = project_factory(
-                name="Test project",
-                description="Test `project`",
-                branch_name="test-project",
+            epic = epic_factory(
+                name="Test epic",
+                description="Test `epic`",
+                branch_name="test-epic",
             )
-        serializer = ProjectSerializer(project)
-        owner = project.repository.repo_owner
-        name = project.repository.repo_name
-        expected = f"https://github.com/{owner}/{name}/tree/test-project"
+        serializer = EpicSerializer(epic)
+        owner = epic.project.repo_owner
+        name = epic.project.repo_name
+        expected = f"https://github.com/{owner}/{name}/tree/test-epic"
         assert serializer.data["branch_url"] == expected
 
-    def test_branch_url__missing(self, project_factory):
-        project = project_factory(name="Test project", description="Test `project`")
-        serializer = ProjectSerializer(project)
+    def test_branch_url__missing(self, epic_factory):
+        epic = epic_factory(name="Test epic", description="Test `epic`")
+        serializer = EpicSerializer(epic)
         assert serializer.data["branch_url"] is None
 
-    def test_unique_name_for_repository(self, repository_factory, project_factory):
-        repository = repository_factory()
-        project_factory(repository=repository, name="Duplicate me")
-        serializer = ProjectSerializer(
+    def test_unique_name_for_project(self, project_factory, epic_factory):
+        project = project_factory()
+        epic_factory(project=project, name="Duplicate me")
+        serializer = EpicSerializer(
             data={
-                "repository": str(repository.id),
+                "project": str(project.id),
                 "name": "Duplicate Me",
                 "description": "Blorp",
                 "github_users": [],
@@ -184,17 +181,17 @@ class TestProjectSerializer:
         )
         assert not serializer.is_valid()
         assert [str(err) for err in serializer.errors["name"]] == [
-            "A project with this name already exists."
+            "An epic with this name already exists."
         ]
 
-    def test_unique_name_for_repository__case_insensitive(
-        self, repository_factory, project_factory
+    def test_unique_name_for_project__case_insensitive(
+        self, project_factory, epic_factory
     ):
-        repository = repository_factory()
-        project_factory(repository=repository, name="Duplicate me")
-        serializer = ProjectSerializer(
+        project = project_factory()
+        epic_factory(project=project, name="Duplicate me")
+        serializer = EpicSerializer(
             data={
-                "repository": str(repository.id),
+                "project": str(project.id),
                 "name": "duplicate me",
                 "description": "Blorp",
                 "github_users": [],
@@ -202,18 +199,18 @@ class TestProjectSerializer:
         )
         assert not serializer.is_valid()
         assert [str(err) for err in serializer.errors["name"]] == [
-            "A project with this name already exists."
+            "An epic with this name already exists."
         ]
 
-    def test_unique_name_for_repository__case_insensitive__update(
-        self, repository_factory, project_factory
+    def test_unique_name_for_project__case_insensitive__update(
+        self, project_factory, epic_factory
     ):
-        repository = repository_factory()
-        project = project_factory(repository=repository, name="Duplicate me")
-        serializer = ProjectSerializer(
-            instance=project,
+        project = project_factory()
+        epic = epic_factory(project=project, name="Duplicate me")
+        serializer = EpicSerializer(
+            instance=epic,
             data={
-                "repository": str(repository.id),
+                "project": str(project.id),
                 "description": "Blorp",
                 "github_users": [],
             },
@@ -221,13 +218,13 @@ class TestProjectSerializer:
         )
         assert serializer.is_valid(), serializer.errors
 
-    def test_invalid_github_user_value(self, repository_factory, project_factory):
-        repository = repository_factory()
-        project = project_factory(repository=repository, name="Duplicate me")
-        serializer = ProjectSerializer(
-            instance=project,
+    def test_invalid_github_user_value(self, project_factory, epic_factory):
+        project = project_factory()
+        epic = epic_factory(project=project, name="Duplicate me")
+        serializer = EpicSerializer(
+            instance=epic,
             data={
-                "repository": str(repository.id),
+                "project": str(project.id),
                 "description": "Blorp",
                 "github_users": [{"test": "value"}],
             },
@@ -236,29 +233,29 @@ class TestProjectSerializer:
         assert not serializer.is_valid()
         assert "non_field_errors" in serializer.errors
 
-    def test_pr_url__present(self, project_factory):
-        project = project_factory(name="Test project", pr_number=123)
-        serializer = ProjectSerializer(project)
-        owner = project.repository.repo_owner
-        name = project.repository.repo_name
+    def test_pr_url__present(self, epic_factory):
+        epic = epic_factory(name="Test epic", pr_number=123)
+        serializer = EpicSerializer(epic)
+        owner = epic.project.repo_owner
+        name = epic.project.repo_name
         expected = f"https://github.com/{owner}/{name}/pull/123"
         assert serializer.data["pr_url"] == expected
 
-    def test_pr_url__missing(self, project_factory):
-        project = project_factory(name="Test project")
-        serializer = ProjectSerializer(project)
+    def test_pr_url__missing(self, epic_factory):
+        epic = epic_factory(name="Test epic")
+        serializer = EpicSerializer(epic)
         assert serializer.data["pr_url"] is None
 
 
 @pytest.mark.django_db
 class TestTaskSerializer:
-    def test_create(self, rf, user_factory, project_factory):
+    def test_create(self, rf, user_factory, epic_factory):
         user = user_factory()
-        project = project_factory()
+        epic = epic_factory()
         data = {
             "name": "Test Task",
             "description": "Description.",
-            "project": str(project.id),
+            "epic": str(epic.id),
             "assigned_dev": {"test": "id"},
             "assigned_qa": {"test": "id"},
             "should_alert_dev": False,
@@ -280,7 +277,7 @@ class TestTaskSerializer:
         data = {
             "name": task.name,
             "description": task.description,
-            "project": str(task.project.id),
+            "epic": str(task.epic.id),
             "assigned_dev": {"test": "id"},
             "assigned_qa": {"test": "id"},
             "should_alert_dev": False,
@@ -309,7 +306,7 @@ class TestTaskSerializer:
         data = {
             "name": task.name,
             "description": task.description,
-            "project": str(task.project.id),
+            "epic": str(task.epic.id),
             "assigned_dev": {},
             "assigned_qa": {},
             "should_alert_dev": False,
@@ -327,8 +324,8 @@ class TestTaskSerializer:
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
         serializer = TaskSerializer(task)
-        owner = task.project.repository.repo_owner
-        name = task.project.repository.repo_name
+        owner = task.epic.project.repo_owner
+        name = task.epic.project.repo_name
         expected = f"https://github.com/{owner}/{name}/tree/test-task"
         assert serializer.data["branch_url"] == expected
 
@@ -337,7 +334,7 @@ class TestTaskSerializer:
         serializer = TaskSerializer(task)
         assert serializer.data["branch_url"] is None
 
-    def test_branch_diff_url__present(self, project_factory, task_factory):
+    def test_branch_diff_url__present(self, epic_factory, task_factory):
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
             gh.get_repo_info.return_value = MagicMock(
@@ -353,12 +350,12 @@ class TestTaskSerializer:
                 }
             )
 
-            project = project_factory(branch_name="test-project")
-            task = task_factory(project=project, branch_name="test-task")
+            epic = epic_factory(branch_name="test-epic")
+            task = task_factory(epic=epic, branch_name="test-task")
         serializer = TaskSerializer(task)
-        owner = task.project.repository.repo_owner
-        name = task.project.repository.repo_name
-        expected = f"https://github.com/{owner}/{name}/compare/test-project...test-task"
+        owner = task.epic.project.repo_owner
+        name = task.epic.project.repo_name
+        expected = f"https://github.com/{owner}/{name}/compare/test-epic...test-task"
         assert serializer.data["branch_diff_url"] == expected
 
     def test_branch_diff_url__missing(self, task_factory):
@@ -369,8 +366,8 @@ class TestTaskSerializer:
     def test_pr_url__present(self, task_factory):
         task = task_factory(name="Test task", pr_number=123)
         serializer = TaskSerializer(task)
-        owner = task.project.repository.repo_owner
-        name = task.project.repository.repo_name
+        owner = task.epic.project.repo_owner
+        name = task.epic.project.repo_name
         expected = f"https://github.com/{owner}/{name}/pull/123"
         assert serializer.data["pr_url"] == expected
 
@@ -405,7 +402,7 @@ class TestTaskSerializer:
         data = {
             "name": task.name,
             "description": task.description,
-            "project": str(task.project.id),
+            "epic": str(task.epic.id),
             "assigned_dev": {"id": new_id},
             "assigned_qa": {"id": new_id},
             "org_config_name": "dev",
@@ -434,7 +431,7 @@ class TestTaskSerializer:
                 "should_alert_dev": True,
                 "should_alert_qa": True,
                 "name": task.name,
-                "project": str(task.project.id),
+                "epic": str(task.epic.id),
                 "org_config_name": task.org_config_name,
             },
         )
