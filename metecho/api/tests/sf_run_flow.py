@@ -122,6 +122,16 @@ class TestGetDevhubApi:
 
             assert scratch_org.remove_scratch_org.called
 
+    def test_bad_no_org(self):
+        with ExitStack() as stack:
+            jwt_session = stack.enter_context(patch(f"{PATCH_ROOT}.jwt_session"))
+            jwt_session.side_effect = HTTPError(
+                "Error message.", response=MagicMock(status_code=400)
+            )
+
+            with pytest.raises(HTTPError, match="Error message."):
+                get_devhub_api(devhub_username="devhub_username")
+
 
 def test_get_org_details():
     with ExitStack() as stack:

@@ -22,6 +22,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices, FieldTracker
 from parler.models import TranslatableModel, TranslatedFields
+from requests.exceptions import HTTPError
 from sfdo_template_helpers.crypto import fernet_decrypt
 from sfdo_template_helpers.fields import MarkdownField, StringField
 from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
@@ -249,13 +250,13 @@ class User(HashIdMixin, AbstractUser):
         if self.full_org_type in (ORG_TYPES.Scratch, ORG_TYPES.Sandbox):
             return False
 
-        client = get_devhub_api(devhub_username=self.sf_username)
         try:
+            client = get_devhub_api(devhub_username=self.sf_username)
             resp = client.restful("sobjects/ScratchOrgInfo")
             if resp:
                 return True
             return False
-        except SalesforceError:
+        except (SalesforceError, HTTPError):
             return False
 
 
