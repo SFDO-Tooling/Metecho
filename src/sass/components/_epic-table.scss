@@ -1,0 +1,11 @@
+// Epic Table
+// ==========
+
+// override alignment for slds table th for number columns
+#project-epics-table {
+  thead {
+    th:last-child {
+      text-align: right;
+    }
+  }
+}

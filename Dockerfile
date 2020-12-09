@@ -1,4 +1,4 @@
-FROM oddbirds/pyjs:v0.2.0
+FROM oddbirds/pyjs:v0.4.0
 
 ARG BUILD_ENV=development
 
@@ -12,8 +12,11 @@ RUN chmod +x /start-server.sh
 
 # Python requirements:
 COPY ./requirements /requirements
-RUN pip install --no-cache-dir -r requirements/prod.txt
-RUN if [ "${BUILD_ENV}" = "development" ]; then pip install --no-cache-dir -r requirements/dev.txt; fi
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements/prod.txt
+RUN if [ "${BUILD_ENV}" = "development" ] ; then \
+    pip install --no-cache-dir -r requirements/dev.txt; \
+    fi
 
 # Install sfdx
 RUN mkdir sfdx && wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1 && ./sfdx/install && rm -rf sfdx
@@ -35,6 +38,10 @@ RUN DATABASE_URL="" \
   DB_ENCRYPTION_KEY="IfFzxkuTnuk-J-TnjisNz0wlBHmAILOnAzoG-NpMQNE=" \
   DJANGO_HASHID_SALT="sample hashid salt" \
   DJANGO_SECRET_KEY="sample secret key" \
+  SFDX_CLIENT_SECRET="sample secret" \
+  SFDX_CLIENT_CALLBACK_URL="sample callback" \
+  SFDX_CLIENT_ID="sample id" \
+  SFDX_HUB_KEY="sample key" \
   python manage.py collectstatic --noinput
 
 CMD /start-server.sh

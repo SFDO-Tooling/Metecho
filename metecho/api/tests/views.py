@@ -52,29 +52,27 @@ def test_user_refresh_view(client):
 
 
 @pytest.mark.django_db
-class TestRepositoryView:
+class TestProjectView:
     def test_refresh_github_users(
-        self, client, repository_factory, git_hub_repository_factory
+        self, client, project_factory, git_hub_repository_factory
     ):
         git_hub_repository_factory(user=client.user, repo_id=123)
-        repository = repository_factory(repo_id=123)
+        project = project_factory(repo_id=123)
         with patch(
             "metecho.api.jobs.populate_github_users_job"
         ) as populate_github_users_job:
             response = client.post(
-                reverse(
-                    "repository-refresh-github-users", kwargs={"pk": str(repository.pk)}
-                )
+                reverse("project-refresh-github-users", kwargs={"pk": str(project.pk)})
             )
 
             assert response.status_code == 202
             assert populate_github_users_job.delay.called
 
     def test_feature_branches(
-        self, client, repository_factory, git_hub_repository_factory
+        self, client, project_factory, git_hub_repository_factory
     ):
         git_hub_repository_factory(user=client.user, repo_id=123)
-        repository = repository_factory(repo_id=123)
+        project = project_factory(repo_id=123)
         with patch("metecho.api.views.gh.get_repo_info") as get_repo_info:
             repo = MagicMock(
                 **{
@@ -87,22 +85,20 @@ class TestRepositoryView:
             get_repo_info.return_value = repo
 
             response = client.get(
-                reverse(
-                    "repository-feature-branches", kwargs={"pk": str(repository.id)}
-                )
+                reverse("project-feature-branches", kwargs={"pk": str(project.id)})
             )
             assert response.json() == ["include_me"]
 
-    def test_get_queryset(self, client, repository_factory, git_hub_repository_factory):
+    def test_get_queryset(self, client, project_factory, git_hub_repository_factory):
         git_hub_repository_factory(
             user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
         )
-        repo = repository_factory(repo_name="repo", repo_id=123)
-        repository_factory(repo_name="repo2", repo_id=456)
-        repository_factory(repo_name="repo3", repo_id=None)
+        project = project_factory(repo_name="repo", repo_id=123)
+        project_factory(repo_name="repo2", repo_id=456)
+        project_factory(repo_name="repo3", repo_id=None)
         with patch("metecho.api.model_mixins.get_repo_info") as get_repo_info:
             get_repo_info.return_value = MagicMock(id=789)
-            response = client.get(reverse("repository-list"))
+            response = client.get(reverse("project-list"))
 
         assert response.status_code == 200
         assert response.json() == {
@@ -111,18 +107,18 @@ class TestRepositoryView:
             "next": None,
             "results": [
                 {
-                    "id": str(repo.id),
-                    "name": str(repo.name),
+                    "id": str(project.id),
+                    "name": str(project.name),
                     "description": "",
                     "description_rendered": "",
                     "is_managed": False,
-                    "slug": str(repo.slug),
+                    "slug": str(project.slug),
                     "old_slugs": [],
                     "repo_url": (
-                        f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
+                        f"https://github.com/{project.repo_owner}/{project.repo_name}"
                     ),
-                    "repo_owner": str(repo.repo_owner),
-                    "repo_name": str(repo.repo_name),
+                    "repo_owner": str(project.repo_owner),
+                    "repo_name": str(project.repo_name),
                     "branch_prefix": "",
                     "github_users": [],
                     "repo_image_url": "",
@@ -131,17 +127,17 @@ class TestRepositoryView:
         }
 
     def test_get_queryset__bad(
-        self, client, repository_factory, git_hub_repository_factory
+        self, client, project_factory, git_hub_repository_factory
     ):
         git_hub_repository_factory(
             user=client.user, repo_id=123, repo_url="https://example.com/test-repo.git"
         )
-        repo = repository_factory(repo_name="repo", repo_id=123)
-        repository_factory(repo_name="repo2", repo_id=456)
-        repository_factory(repo_name="repo3", repo_id=None)
+        project = project_factory(repo_name="repo", repo_id=123)
+        project_factory(repo_name="repo2", repo_id=456)
+        project_factory(repo_name="repo3", repo_id=None)
         with patch("metecho.api.model_mixins.get_repo_info") as get_repo_info:
             get_repo_info.side_effect = ResponseError(MagicMock())
-            response = client.get(reverse("repository-list"))
+            response = client.get(reverse("project-list"))
 
         assert response.status_code == 200
         assert response.json() == {
@@ -150,18 +146,18 @@ class TestRepositoryView:
             "next": None,
             "results": [
                 {
-                    "id": str(repo.id),
-                    "name": str(repo.name),
+                    "id": str(project.id),
+                    "name": str(project.name),
                     "description": "",
                     "description_rendered": "",
                     "is_managed": False,
-                    "slug": str(repo.slug),
+                    "slug": str(project.slug),
                     "old_slugs": [],
                     "repo_url": (
-                        f"https://github.com/{repo.repo_owner}/{repo.repo_name}"
+                        f"https://github.com/{project.repo_owner}/{project.repo_name}"
                     ),
-                    "repo_owner": str(repo.repo_owner),
-                    "repo_name": str(repo.repo_name),
+                    "repo_owner": str(project.repo_owner),
+                    "repo_name": str(project.repo_name),
                     "branch_prefix": "",
                     "github_users": [],
                     "repo_image_url": "",
@@ -176,9 +172,9 @@ class TestHookView:
         self,
         settings,
         client,
-        repository_factory,
-        git_hub_repository_factory,
         project_factory,
+        git_hub_repository_factory,
+        epic_factory,
         task_factory,
     ):
         settings.GITHUB_HOOK_SECRET = b""
@@ -187,7 +183,11 @@ class TestHookView:
             gh.get_repo_info.return_value = MagicMock(
                 **{
                     "pull_requests.return_value": (
-                        MagicMock(number=123, closed_at=None, is_merged=False,)
+                        MagicMock(
+                            number=123,
+                            closed_at=None,
+                            is_merged=False,
+                        )
                         for _ in range(1)
                     ),
                     "compare_commits.return_value": MagicMock(ahead_by=0),
@@ -195,10 +195,10 @@ class TestHookView:
             )
             gh.normalize_commit.return_value = "1234abcd"
 
-            repo = repository_factory(repo_id=123)
+            project = project_factory(repo_id=123)
             git_hub_repository_factory(repo_id=123)
-            project = project_factory(repository=repo, branch_name="test-project")
-            task = task_factory(project=project, branch_name="test-task")
+            epic = epic_factory(project=project, branch_name="test-epic")
+            task = task_factory(epic=epic, branch_name="test-task")
 
             refresh_commits_job = stack.enter_context(
                 patch("metecho.api.jobs.refresh_commits_job")
@@ -241,7 +241,9 @@ class TestHookView:
             assert len(task.commits) == 1
 
     def test_400__no_handler(
-        self, settings, client,
+        self,
+        settings,
+        client,
     ):
         settings.GITHUB_HOOK_SECRET = b""
         response = client.post(
@@ -256,10 +258,10 @@ class TestHookView:
         assert response.status_code == 400, response.content
 
     def test_202__push_forced(
-        self, settings, client, repository_factory, git_hub_repository_factory
+        self, settings, client, project_factory, git_hub_repository_factory
     ):
         settings.GITHUB_HOOK_SECRET = b""
-        repository_factory(repo_id=123)
+        project_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
         with patch("metecho.api.jobs.refresh_commits_job") as refresh_commits_job:
             response = client.post(
@@ -283,10 +285,10 @@ class TestHookView:
             assert refresh_commits_job.delay.called
 
     def test_400__push_error(
-        self, settings, client, repository_factory, git_hub_repository_factory
+        self, settings, client, project_factory, git_hub_repository_factory
     ):
         settings.GITHUB_HOOK_SECRET = b""
-        repository_factory(repo_id=123)
+        project_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123)
         response = client.post(
             reverse("hook"),
@@ -306,9 +308,9 @@ class TestHookView:
         )
         assert response.status_code == 400, response.json()
 
-    def test_404__push_no_matching_repo(self, settings, client, repository_factory):
+    def test_404__push_no_matching_repo(self, settings, client, project_factory):
         settings.GITHUB_HOOK_SECRET = b""
-        repository_factory(repo_id=456)
+        project_factory(repo_id=456)
         response = client.post(
             reverse("hook"),
             json.dumps(
@@ -328,9 +330,9 @@ class TestHookView:
         )
         assert response.status_code == 404
 
-    def test_403__push_bad_signature(self, settings, client, repository_factory):
+    def test_403__push_bad_signature(self, settings, client, project_factory):
         settings.GITHUB_HOOK_SECRET = b""
-        repository_factory(repo_id=123)
+        project_factory(repo_id=123)
         response = client.post(
             reverse("hook"),
             json.dumps(
@@ -517,7 +519,8 @@ class TestScratchOrgView:
     def test_queue_delete(self, client, scratch_org_factory, social_account_factory):
         with ExitStack() as stack:
             social_account_factory(
-                user=client.user, provider="salesforce",
+                user=client.user,
+                provider="salesforce",
             )
             scratch_org = scratch_org_factory(owner=client.user)
 
@@ -532,7 +535,8 @@ class TestScratchOrgView:
     ):
         with ExitStack() as stack:
             social_account_factory(
-                user=client.user, provider="salesforce-production",
+                user=client.user,
+                provider="salesforce-production",
             )
             scratch_org = scratch_org_factory()
 
@@ -732,18 +736,16 @@ class TestTaskView:
 
 
 @pytest.mark.django_db
-class TestProjectView:
-    def test_refresh_org_config_names(self, client, project_factory):
+class TestEpicView:
+    def test_refresh_org_config_names(self, client, epic_factory):
         with ExitStack() as stack:
-            project = project_factory()
+            epic = epic_factory()
 
             available_task_org_config_names_job = stack.enter_context(
                 patch("metecho.api.jobs.available_task_org_config_names_job")
             )
             response = client.post(
-                reverse(
-                    "project-refresh-org-config-names", kwargs={"pk": str(project.id)}
-                )
+                reverse("epic-refresh-org-config-names", kwargs={"pk": str(epic.id)})
             )
 
             assert response.status_code == 202, response.json()

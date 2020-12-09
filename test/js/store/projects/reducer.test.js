@@ -2,13 +2,18 @@ import reducer from '@/store/projects/reducer';
 
 describe('reducer', () => {
   test('returns initial state if no action', () => {
-    const expected = {};
+    const expected = {
+      projects: [],
+      next: null,
+      notFound: [],
+      refreshing: false,
+    };
     const actual = reducer(undefined, {});
 
     expect(actual).toEqual(expected);
   });
 
-  test.each([['USER_LOGGED_OUT'], ['REFETCH_DATA_SUCCEEDED']])(
+  test.each([['USER_LOGGED_OUT']])(
     'returns initial state on %s action',
     (action) => {
       const project1 = {
@@ -16,16 +21,18 @@ describe('reducer', () => {
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
-        repository: 'repository-1',
       };
-      const expected = {};
+      const expected = {
+        projects: [],
+        next: null,
+        notFound: [],
+        refreshing: false,
+      };
       const actual = reducer(
         {
-          'repository-1': {
-            projects: [project1],
-            next: 'next-url',
-            notFound: ['project-2'],
-          },
+          projects: [project1],
+          next: 'next-url',
+          notFound: ['project-1'],
         },
         { type: action },
       );
@@ -34,90 +41,99 @@ describe('reducer', () => {
     },
   );
 
+  describe('REFRESH_PROJECTS_REQUESTED', () => {
+    test('sets refreshing: true', () => {
+      const expected = {
+        projects: [],
+        next: null,
+        notFound: [],
+        refreshing: true,
+      };
+      const actual = reducer(
+        {
+          projects: [],
+          next: null,
+          notFound: [],
+          refreshing: false,
+        },
+        { type: 'REFRESH_PROJECTS_REQUESTED' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESHING_PROJECTS', () => {
+    test('sets refreshing: true', () => {
+      const expected = {
+        projects: [],
+        next: null,
+        notFound: [],
+        refreshing: true,
+      };
+      const actual = reducer(
+        {
+          projects: [],
+          next: null,
+          notFound: [],
+          refreshing: false,
+        },
+        { type: 'REFRESHING_PROJECTS' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_PROJECTS_REJECTED', () => {
+    test('sets refreshing: false', () => {
+      const expected = {
+        projects: [],
+        next: null,
+        notFound: [],
+        refreshing: false,
+      };
+      const actual = reducer(
+        {
+          projects: [],
+          next: null,
+          notFound: [],
+          refreshing: true,
+        },
+        { type: 'REFRESH_PROJECTS_REJECTED' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
-    test('resets projects list for repository if `reset: true`', () => {
+    test('resets projects list if `reset: true`', () => {
       const project1 = {
         id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
-        repository: 'repository-1',
       };
       const project2 = {
-        id: 'p2',
+        id: 'r2',
         slug: 'project-2',
         name: 'Project 2',
         description: 'This is another test project.',
-        repository: 'repository-1',
       };
       const expected = {
-        'repository-1': {
-          projects: [project2],
-          next: 'next-url',
-          notFound: [],
-          fetched: true,
-        },
-        'repository-2': {
-          projects: [],
-          next: null,
-          notFound: [],
-          fetched: false,
-        },
+        projects: [project2],
+        next: 'next-url',
+        refreshing: false,
       };
       const actual = reducer(
-        {
-          'repository-1': {
-            projects: [project1],
-            next: null,
-            notFound: [],
-            fetched: false,
-          },
-          'repository-2': {
-            projects: [],
-            next: null,
-            notFound: [],
-            fetched: false,
-          },
-        },
+        { projects: [project1], next: null, refreshing: true },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
             response: { results: [project2], next: 'next-url' },
             objectType: 'project',
             reset: true,
-            filters: { repository: 'repository-1' },
-          },
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('creates repository-project data if not already known', () => {
-      const project1 = {
-        id: 'r1',
-        slug: 'project-1',
-        name: 'Project 1',
-        description: 'This is a test project.',
-        repository: 'repository-1',
-      };
-      const expected = {
-        'repository-1': {
-          projects: [project1],
-          next: 'next-url',
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const actual = reducer(
-        {},
-        {
-          type: 'FETCH_OBJECTS_SUCCEEDED',
-          payload: {
-            response: { results: [project1], next: 'next-url' },
-            objectType: 'project',
-            reset: true,
-            filters: { repository: 'repository-1' },
           },
         },
       );
@@ -126,140 +142,52 @@ describe('reducer', () => {
     });
 
     test('adds to projects list if `reset: false`', () => {
-      const project1 = {
-        id: 'project1',
-        slug: 'project-1',
-        name: 'Project 1',
-        repository: 'repository-1',
-      };
       const mockProjects = {
         notFound: [],
-        projects: [project1],
+        projects: [
+          {
+            id: 'project1',
+            slug: 'project-1',
+            name: 'Project 1',
+          },
+        ],
         next: null,
-        fetched: false,
+        refreshing: false,
       };
-      const project2 = {
+      const fetchedProject = {
         id: 'project2',
         slug: 'project-2',
         name: 'Project 2',
-        repository: 'repository-1',
       };
       const expected = {
-        'repository-1': {
-          ...mockProjects,
-          projects: [...mockProjects.projects, project2],
-          fetched: true,
-        },
+        ...mockProjects,
+        projects: [...mockProjects.projects, fetchedProject],
       };
-      const actual = reducer(
-        { 'repository-1': mockProjects },
-        {
-          type: 'FETCH_OBJECTS_SUCCEEDED',
-          payload: {
-            response: { results: [project1, project2], next: null },
-            objectType: 'project',
-            reset: false,
-            filters: { repository: 'repository-1' },
-          },
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('ignores if objectType !== "project"', () => {
-      const project = {
-        id: 'r1',
-        slug: 'project-1',
-        name: 'Project 1',
-        repository: 'repository-1',
-      };
-      const expected = {};
-      const actual = reducer(expected, {
+      const actual = reducer(mockProjects, {
         type: 'FETCH_OBJECTS_SUCCEEDED',
         payload: {
-          response: { results: [project], next: null },
-          objectType: 'other-object',
-          reset: true,
-          filters: { repository: 'repository-1' },
+          response: { results: [fetchedProject], next: null },
+          objectType: 'project',
+          reset: false,
         },
       });
 
       expect(actual).toEqual(expected);
     });
-  });
-
-  describe('CREATE_OBJECT_SUCCEEDED', () => {
-    test('adds project to list', () => {
-      const project1 = {
-        id: 'r1',
-        slug: 'project-1',
-        name: 'Project 1',
-        description: 'This is a test project.',
-        repository: 'repository-1',
-      };
-      const expected = {
-        'repository-1': {
-          projects: [project1],
-          next: null,
-          notFound: [],
-          fetched: false,
-        },
-      };
-      const actual = reducer(
-        {},
-        {
-          type: 'CREATE_OBJECT_SUCCEEDED',
-          payload: {
-            object: project1,
-            objectType: 'project',
-          },
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('does not add duplicate project', () => {
-      const project1 = {
-        id: 'r1',
-        slug: 'project-1',
-        name: 'Project 1',
-        description: 'This is a test project.',
-        repository: 'repository-1',
-      };
-      const expected = {
-        'repository-1': { projects: [project1], next: null, notFound: [] },
-      };
-      const actual = reducer(
-        {
-          'repository-1': { projects: [project1], next: null, notFound: [] },
-        },
-        {
-          type: 'CREATE_OBJECT_SUCCEEDED',
-          payload: {
-            object: project1,
-            objectType: 'project',
-          },
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
 
     test('ignores if objectType !== "project"', () => {
       const project = {
         id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
-        repository: 'repository-1',
       };
-      const expected = {};
+      const expected = { projects: [project], next: 'next-url' };
       const actual = reducer(expected, {
-        type: 'CREATE_OBJECT_SUCCEEDED',
+        type: 'FETCH_OBJECTS_SUCCEEDED',
         payload: {
-          object: project,
+          response: { results: [], next: null },
           objectType: 'other-object',
+          reset: true,
         },
       });
 
@@ -273,30 +201,20 @@ describe('reducer', () => {
         id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
-        repository: 'repository1',
       };
       const project2 = {
-        id: 'p2',
+        id: 'r2',
         slug: 'project-2',
         name: 'Project 2',
-        repository: 'repository1',
       };
-      const expected = {
-        repository1: {
-          projects: [project1, project2],
-          next: null,
-          notFound: [],
-        },
-      };
+      const expected = { projects: [project1, project2] };
       const actual = reducer(
-        {
-          repository1: { projects: [project1], next: null, notFound: [] },
-        },
+        { projects: [project1] },
         {
           type: 'FETCH_OBJECT_SUCCEEDED',
           payload: {
             object: project2,
-            filters: { repository: 'repository1', slug: 'project-2' },
+            filters: { slug: 'project-2' },
             objectType: 'project',
           },
         },
@@ -306,21 +224,22 @@ describe('reducer', () => {
     });
 
     test('stores id of missing project', () => {
+      const project1 = {
+        id: 'r1',
+        slug: 'project-1',
+        name: 'Project 1',
+      };
       const expected = {
-        repository1: {
-          projects: [],
-          next: null,
-          notFound: ['project-2'],
-          fetched: false,
-        },
+        projects: [project1],
+        notFound: ['project-2', 'project-3'],
       };
       const actual = reducer(
-        {},
+        { projects: [project1], notFound: ['project-2'] },
         {
           type: 'FETCH_OBJECT_SUCCEEDED',
           payload: {
             object: null,
-            filters: { repository: 'repository1', slug: 'project-2' },
+            filters: { slug: 'project-3' },
             objectType: 'project',
           },
         },
@@ -334,16 +253,16 @@ describe('reducer', () => {
         id: 'r1',
         slug: 'project-1',
         name: 'Project 1',
-        repository: 'repository1',
       };
       const expected = {
-        repository1: { projects: [project1], next: null, notFound: [] },
+        projects: [project1],
+        notFound: ['project-2'],
       };
       const actual = reducer(expected, {
         type: 'FETCH_OBJECT_SUCCEEDED',
         payload: {
           object: project1,
-          filters: { repository: 'repository1', slug: 'project-1' },
+          filters: { slug: 'project-1' },
           objectType: 'project',
         },
       });
@@ -352,16 +271,91 @@ describe('reducer', () => {
     });
 
     test('ignores if objectType !== "project"', () => {
-      const expected = {};
-      const actual = reducer(
-        {},
-        {
-          type: 'FETCH_OBJECT_SUCCEEDED',
-          payload: {
-            objectType: 'repository',
-            filters: {},
-          },
+      const project = {
+        id: 'r1',
+        slug: 'project-1',
+        name: 'Project 1',
+      };
+      const project2 = {
+        id: 'r2',
+        slug: 'project-2',
+        name: 'Project 2',
+      };
+      const expected = { projects: [project], next: null };
+      const actual = reducer(expected, {
+        type: 'FETCH_OBJECT_SUCCEEDED',
+        payload: {
+          object: project2,
+          filters: { slug: 'project-2' },
+          objectType: 'other-object',
         },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_GH_USERS_REQUESTED', () => {
+    const project = {
+      id: 'r1',
+      slug: 'project-1',
+      name: 'Project 1',
+    };
+    const project2 = {
+      id: 'r2',
+      slug: 'project-2',
+      name: 'Project 2',
+    };
+
+    test('sets currently_refreshing_gh_users: true', () => {
+      const expected = {
+        projects: [
+          { ...project, currently_refreshing_gh_users: true },
+          project2,
+        ],
+      };
+      const actual = reducer(
+        { projects: [project, project2] },
+        { type: 'REFRESH_GH_USERS_REQUESTED', payload: 'r1' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if payload is not known project id', () => {
+      const expected = { projects: [project, project2] };
+      const actual = reducer(expected, {
+        type: 'REFRESH_GH_USERS_REQUESTED',
+        payload: 'unknown',
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_GH_USERS_REJECTED', () => {
+    const project = {
+      id: 'r1',
+      slug: 'project-1',
+      name: 'Project 1',
+      currently_refreshing_gh_users: true,
+    };
+    const project2 = {
+      id: 'r2',
+      slug: 'project-2',
+      name: 'Project 2',
+    };
+
+    test('sets currently_refreshing_gh_users: false', () => {
+      const expected = {
+        projects: [
+          { ...project, currently_refreshing_gh_users: false },
+          project2,
+        ],
+      };
+      const actual = reducer(
+        { projects: [project, project2] },
+        { type: 'REFRESH_GH_USERS_REJECTED', payload: 'r1' },
       );
 
       expect(actual).toEqual(expected);
@@ -369,338 +363,48 @@ describe('reducer', () => {
   });
 
   describe('PROJECT_UPDATE', () => {
-    test('adds new project to list', () => {
-      const project = {
-        id: 'p1',
-        repository: 'repository-1',
-        name: 'Project 1',
+    const project = {
+      id: 'r1',
+      slug: 'project-1',
+      name: 'Project 1',
+    };
+    const project2 = {
+      id: 'r2',
+      slug: 'project-2',
+      name: 'Project 2',
+    };
+
+    test('updates known project', () => {
+      const changedProject = {
+        ...project,
+        name: 'Changed Project',
       };
       const expected = {
-        'repository-1': {
-          projects: [project],
-          next: null,
-          notFound: [],
-          fetched: false,
-        },
+        projects: [changedProject, project2],
       };
       const actual = reducer(
-        {},
-        {
-          type: 'PROJECT_UPDATE',
-          payload: project,
-        },
+        { projects: [project, project2] },
+        { type: 'PROJECT_UPDATE', payload: changedProject },
       );
 
       expect(actual).toEqual(expected);
     });
 
-    test('updates existing project', () => {
-      const project = {
-        id: 'p1',
-        repository: 'repository-1',
-        name: 'Project 1',
+    test('adds unknown project', () => {
+      const project3 = {
+        id: 'r3',
+        slug: 'project-3',
+        name: 'Project 3',
       };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const editedProject = { ...project, name: 'Edited Project Name' };
       const expected = {
-        'repository-1': {
-          projects: [editedProject, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
+        projects: [project, project2, project3],
       };
       const actual = reducer(
-        {
-          'repository-1': {
-            projects: [project, project2],
-            next: null,
-            notFound: [],
-            fetched: true,
-          },
-        },
-        {
-          type: 'PROJECT_UPDATE',
-          payload: editedProject,
-        },
+        { projects: [project, project2] },
+        { type: 'PROJECT_UPDATE', payload: project3 },
       );
 
       expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('UPDATE_OBJECT_SUCCEEDED', () => {
-    test('updates existing project', () => {
-      const project = {
-        id: 'p1',
-        repository: 'repository-1',
-        name: 'Project 1',
-      };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const editedProject = { ...project, name: 'Edited Project Name' };
-      const expected = {
-        'repository-1': {
-          projects: [editedProject, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const actual = reducer(
-        {
-          'repository-1': {
-            projects: [project, project2],
-            next: null,
-            notFound: [],
-            fetched: true,
-          },
-        },
-        {
-          type: 'UPDATE_OBJECT_SUCCEEDED',
-          payload: {
-            objectType: 'project',
-            object: editedProject,
-          },
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('ignores if unknown objectType', () => {
-      const project = {
-        id: 'p1',
-        repository: 'repository-1',
-        name: 'Project 1',
-      };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const editedProject = { ...project, name: 'Edited Project Name' };
-      const expected = {
-        'repository-1': {
-          projects: [project, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const actual = reducer(
-        {
-          'repository-1': {
-            projects: [project, project2],
-            next: null,
-            notFound: [],
-            fetched: true,
-          },
-        },
-        {
-          type: 'UPDATE_OBJECT_SUCCEEDED',
-          payload: {
-            objectType: 'foobar',
-            object: editedProject,
-          },
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('PROJECT_CREATE_PR_FAILED', () => {
-    test('sets currently_creating_pr: false', () => {
-      const project = {
-        id: 'p1',
-        repository: 'repository-1',
-        name: 'Project 1',
-        currently_creating_pr: true,
-      };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const editedProject = { ...project, currently_creating_pr: false };
-      const expected = {
-        'repository-1': {
-          projects: [editedProject, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const actual = reducer(
-        {
-          'repository-1': {
-            projects: [project, project2],
-            next: null,
-            notFound: [],
-            fetched: true,
-          },
-        },
-        {
-          type: 'PROJECT_CREATE_PR_FAILED',
-          payload: project,
-        },
-      );
-
-      expect(actual).toEqual(expected);
-    });
-
-    test('ignores if no existing project', () => {
-      const project = {
-        id: 'p1',
-        repository: 'repository-1',
-        name: 'Project 1',
-        currently_creating_pr: true,
-      };
-      const actual = reducer(
-        {},
-        {
-          type: 'PROJECT_CREATE_PR_FAILED',
-          payload: project,
-        },
-      );
-
-      expect(actual).toEqual({});
-    });
-  });
-
-  describe('DELETE_OBJECT_SUCCEEDED', () => {
-    test('removes project', () => {
-      const project = {
-        id: 'r1',
-        slug: 'project-1',
-        name: 'Project 1',
-        description: 'This is a test project.',
-        repository: 'repository-1',
-      };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const initial = {
-        'repository-1': {
-          projects: [project, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const expected = [project2];
-      const actual = reducer(initial, {
-        type: 'DELETE_OBJECT_SUCCEEDED',
-        payload: {
-          object: project,
-          objectType: 'project',
-        },
-      });
-
-      expect(actual['repository-1'].projects).toEqual(expected);
-    });
-
-    test('ignores if unknown objectType', () => {
-      const project = {
-        id: 'r1',
-        slug: 'project-1',
-        name: 'Project 1',
-        description: 'This is a test project.',
-        repository: 'repository-1',
-      };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const initial = {
-        'repository-1': {
-          projects: [project, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const actual = reducer(initial, {
-        type: 'DELETE_OBJECT_SUCCEEDED',
-        payload: {
-          object: project,
-          objectType: 'foobar',
-        },
-      });
-
-      expect(actual).toEqual(initial);
-    });
-  });
-
-  describe('OBJECT_REMOVED', () => {
-    test('removes project', () => {
-      const project = {
-        id: 'r1',
-        slug: 'project-1',
-        name: 'Project 1',
-        description: 'This is a test project.',
-        repository: 'repository-1',
-      };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const initial = {
-        'repository-1': {
-          projects: [project, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const expected = [project2];
-      const actual = reducer(initial, {
-        type: 'OBJECT_REMOVED',
-        payload: project,
-      });
-
-      expect(actual['repository-1'].projects).toEqual(expected);
-    });
-
-    test('ignores if payload is not a project', () => {
-      const project = {
-        id: 'r1',
-        slug: 'project-1',
-        name: 'Project 1',
-        description: 'This is a test project.',
-        repository: 'repository-1',
-      };
-      const project2 = {
-        id: 'p2',
-        repository: 'repository-1',
-        name: 'Project 2',
-      };
-      const initial = {
-        'repository-1': {
-          projects: [project, project2],
-          next: null,
-          notFound: [],
-          fetched: true,
-        },
-      };
-      const actual = reducer(initial, {
-        type: 'OBJECT_REMOVED',
-        payload: {},
-      });
-
-      expect(actual).toEqual(initial);
     });
   });
 });

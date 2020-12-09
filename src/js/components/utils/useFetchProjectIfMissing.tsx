@@ -5,13 +5,9 @@ import { RouteComponentProps } from 'react-router-dom';
 import { AppState, ThunkDispatch } from '@/store';
 import { fetchObject } from '@/store/actions';
 import { selectProject, selectProjectSlug } from '@/store/projects/selectors';
-import { Repository } from '@/store/repositories/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 
-export default (
-  repository: Repository | null | undefined,
-  routeProps: RouteComponentProps,
-) => {
+export default (routeProps: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const selectProjectWithProps = useCallback(selectProject, []);
   const selectProjectSlugWithProps = useCallback(selectProjectSlug, []);
@@ -23,16 +19,16 @@ export default (
   );
 
   useEffect(() => {
-    if (repository && projectSlug && project === undefined) {
+    if (projectSlug && project === undefined) {
       // Fetch project from API
       dispatch(
         fetchObject({
           objectType: OBJECT_TYPES.PROJECT,
-          filters: { repository: repository.id, slug: projectSlug },
+          filters: { slug: projectSlug },
         }),
       );
     }
-  }, [dispatch, repository, project, projectSlug]);
+  }, [dispatch, project, projectSlug]);
 
   return { project, projectSlug };
 };

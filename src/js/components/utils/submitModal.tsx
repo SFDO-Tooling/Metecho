@@ -69,14 +69,14 @@ const SubmitModal = ({
       submittingLabel = i18n.t('Submitting Task for Testing…');
       toSubmitLabel = i18n.t('Submit Task for Testing');
       break;
-    case OBJECT_TYPES.PROJECT:
+    case OBJECT_TYPES.EPIC:
       objectType = {
-        objectType: OBJECT_TYPES.PROJECT_PR,
-        url: window.api_urls.project_create_pr(instanceId),
+        objectType: OBJECT_TYPES.EPIC_PR,
+        url: window.api_urls.epic_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this project for review on GitHub');
-      submittingLabel = i18n.t('Submitting Project for Review on GitHub…');
-      toSubmitLabel = i18n.t('Submit Project for Review on GitHub');
+      heading = i18n.t('Submit this epic for review on GitHub');
+      submittingLabel = i18n.t('Submitting Epic for Review on GitHub…');
+      toSubmitLabel = i18n.t('Submit Epic for Review on GitHub');
       break;
   }
 

@@ -26,6 +26,7 @@
     "xabikos.javascriptsnippets"
   ],
   "settings": {
+    "terminal.integrated.shell.linux": null,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },

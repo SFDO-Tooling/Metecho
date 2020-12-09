@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name="task", old_name="ms_commits", new_name="metecho_commits",
+            model_name="task",
+            old_name="ms_commits",
+            new_name="metecho_commits",
         ),
     ]

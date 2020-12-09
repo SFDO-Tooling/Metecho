@@ -1,10 +1,10 @@
+import contextlib
 import json
 import logging
 import os
 import shutil
 import subprocess
 from datetime import datetime
-from unittest.mock import Mock
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
@@ -21,10 +21,11 @@ logger = logging.getLogger(__name__)
 
 # Salesforce connected app
 # Assign these locally, for brevity:
-SF_CALLBACK_URL = settings.SF_CALLBACK_URL
-SF_CLIENT_KEY = settings.SF_CLIENT_KEY
-SF_CLIENT_ID = settings.SF_CLIENT_ID
-SF_CLIENT_SECRET = settings.SF_CLIENT_SECRET
+SF_CALLBACK_URL = settings.SFDX_CLIENT_CALLBACK_URL
+SF_CLIENT_KEY = settings.SFDX_HUB_KEY
+SF_CLIENT_ID = settings.SFDX_CLIENT_ID
+SF_CLIENT_SECRET = settings.SFDX_CLIENT_SECRET
+SFDX_SIGNUP_INSTANCE = settings.SFDX_SIGNUP_INSTANCE
 
 DURATION_DAYS = 30
 
@@ -47,44 +48,17 @@ PACKAGE_XML = """<?xml version="1.0" encoding="UTF-8"?>
 </Package>"""
 
 
-def capitalize(s):
-    """
-    Just capitalize first letter (different from .title, as it preserves
-    the rest of the case).
-    e.g. accountSettings -> AccountSettings
-    """
-    return s[0].upper() + s[1:]
+class ScratchOrgError(Exception):
+    pass
 
 
-def is_org_good(org):
-    config = org.config
-    org_name = org.task.org_config_name
+@contextlib.contextmanager
+def delete_org_on_error(scratch_org=None, originating_user_id=None):
     try:
-        org_config = OrgConfig(config, org_name)
-        org_config.refresh_oauth_token = Mock()
-        info = jwt_session(
-            SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
-        )
-        return "access_token" in info
-    except HTTPError:
-        return False
-
-
-def refresh_access_token(*, config, org_name, scratch_org, originating_user_id):
-    """
-    Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
-    which we don't want now -- this is a total hack which I'll try to
-    smooth over with some improvements in CumulusCI
-    """
-    try:
-        org_config = OrgConfig(config, org_name)
-        org_config.refresh_oauth_token = Mock()
-        info = jwt_session(
-            SF_CLIENT_ID, SF_CLIENT_KEY, org_config.username, org_config.instance_url
-        )
-        org_config.config["access_token"] = info["access_token"]
-        return org_config
+        yield
     except HTTPError as err:
+        if not scratch_org:
+            raise err
         if get_current_job():
             job_id = get_current_job().id
             # This error is user-facing, and so for makemessages to
@@ -104,24 +78,61 @@ def refresh_access_token(*, config, org_name, scratch_org, originating_user_id):
         else:
             error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
 
-        err = err.__class__(error_msg, *err.args[1:],)
-        scratch_org.remove_scratch_org(err, originating_user_id=originating_user_id)
-        raise err
+        error = ScratchOrgError(error_msg)
+        scratch_org.remove_scratch_org(error, originating_user_id=originating_user_id)
+        raise error
 
 
-def get_devhub_api(*, devhub_username):
+def capitalize(s):
+    """
+    Just capitalize first letter (different from .title, as it preserves
+    the rest of the case).
+    e.g. accountSettings -> AccountSettings
+    """
+    return s[0].upper() + s[1:]
+
+
+def is_org_good(org):
+    config = org.config
+    org_name = org.task.org_config_name
+    try:
+        org_config = OrgConfig(config, org_name)
+        org_config.refresh_oauth_token(None)
+        return "access_token" in org_config.config
+    except HTTPError:
+        return False
+
+
+def refresh_access_token(
+    *, scratch_org, config, org_name, keychain=None, originating_user_id=None
+):
+    """
+    Construct a new OrgConfig because ScratchOrgConfig tries to use sfdx
+    which we don't want now -- this is a total hack which I'll try to
+    smooth over with some improvements in CumulusCI
+    """
+    with delete_org_on_error(
+        scratch_org=scratch_org, originating_user_id=originating_user_id
+    ):
+        org_config = OrgConfig(config, org_name, keychain=keychain)
+        org_config.refresh_oauth_token(keychain)
+        return org_config
+
+
+def get_devhub_api(*, devhub_username, scratch_org=None):
     """
     Get an access token (session) for the specified dev hub username.
     This only works if the user has already authorized the connected app
     via an interactive login flow, such as the django-allauth login.
     """
-    jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, devhub_username)
-    return SimpleSalesforce(
-        instance_url=jwt["instance_url"],
-        session_id=jwt["access_token"],
-        client_id="Metecho",
-        version="47.0",
-    )
+    with delete_org_on_error(scratch_org=scratch_org):
+        jwt = jwt_session(SF_CLIENT_ID, SF_CLIENT_KEY, devhub_username)
+        return SimpleSalesforce(
+            instance_url=jwt["instance_url"],
+            session_id=jwt["access_token"],
+            client_id="Metecho",
+            version="49.0",
+        )
 
 
 def get_org_details(*, cci, org_name, project_path):
@@ -178,8 +189,8 @@ def get_org_result(
         # optional fields from the scratch org definition file,
         # but this will work for a start
     }
-    if settings.SF_SIGNUP_INSTANCE:
-        create_args["Instance"] = settings.SF_SIGNUP_INSTANCE
+    if SFDX_SIGNUP_INSTANCE:  # pragma: nocover
+        create_args["Instance"] = SFDX_SIGNUP_INSTANCE
     response = devhub_api.ScratchOrgInfo.create(create_args)
 
     # Get details and update scratch org config
@@ -231,9 +242,10 @@ def deploy_org_settings(
     as specified in the scratch org definition file.
     """
     org_config = refresh_access_token(
+        scratch_org=scratch_org,
         config=scratch_org_config.config,
         org_name=org_name,
-        scratch_org=scratch_org,
+        keychain=cci.keychain,
         originating_user_id=originating_user_id,
     )
     path = os.path.join(cci.project_config.repo_root, scratch_org_config.config_file)
@@ -269,7 +281,9 @@ def create_org(
             "commit": repo_branch,
         }
     )
-    devhub_api = get_devhub_api(devhub_username=devhub_username)
+    devhub_api = get_devhub_api(
+        devhub_username=devhub_username, scratch_org=scratch_org
+    )
     scratch_org_config, scratch_org_definition = get_org_details(
         cci=cci, org_name=org_name, project_path=project_path
     )
@@ -347,7 +361,9 @@ def delete_org(scratch_org):
     in the Dev Hub org."""
     devhub_username = scratch_org.owner_sf_username
     org_id = scratch_org.config["org_id"]
-    devhub_api = get_devhub_api(devhub_username=devhub_username)
+    devhub_api = get_devhub_api(
+        devhub_username=devhub_username, scratch_org=scratch_org
+    )
 
     records = (
         devhub_api.query(

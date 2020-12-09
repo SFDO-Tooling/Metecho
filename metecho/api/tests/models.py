@@ -7,138 +7,138 @@ from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
 from ..models import (
-    PROJECT_STATUSES,
+    EPIC_STATUSES,
     SCRATCH_ORG_TYPES,
     TASK_STATUSES,
+    Epic,
     Project,
-    Repository,
     Task,
     user_logged_in_handler,
 )
 
 
 @pytest.mark.django_db
-class TestRepository:
+class TestProject:
     def test_signal(self):
-        repository = Repository(name="Test Repository")
-        repository.save()
-        assert repository.slug == "test-repository"
+        project = Project(name="Test Project")
+        project.save()
+        assert project.slug == "test-project"
 
     def test_signal__recreate(self):
-        repository = Repository(name="Test Repository")
-        repository.save()
-        assert repository.slug == "test-repository"
-        repository.name = "Test Repository with a Twist"
-        repository.save()
-        assert repository.slug == "test-repository-with-a-twist"
+        project = Project(name="Test Project")
+        project.save()
+        assert project.slug == "test-project"
+        project.name = "Test Project with a Twist"
+        project.save()
+        assert project.slug == "test-project-with-a-twist"
 
     def test_str(self):
-        repository = Repository(name="Test Repository")
-        assert str(repository) == "Test Repository"
+        project = Project(name="Test Project")
+        assert str(project) == "Test Project"
 
-    def test_get_repo_id(self, repository_factory):
+    def test_get_repo_id(self, project_factory):
         with patch("metecho.api.model_mixins.get_repo_info") as get_repo_info:
             get_repo_info.return_value = MagicMock(id=123)
 
-            gh_repo = repository_factory(repo_id=None)
-            gh_repo.get_repo_id()
+            project = project_factory(repo_id=None)
+            project.get_repo_id()
 
-            gh_repo.refresh_from_db()
+            project.refresh_from_db()
             assert get_repo_info.called
-            assert gh_repo.repo_id == 123
+            assert project.repo_id == 123
 
-    def test_queue_populate_github_users(self, repository_factory, user_factory):
-        repo = repository_factory()
+    def test_queue_populate_github_users(self, project_factory, user_factory):
+        project = project_factory()
         with patch(
             "metecho.api.jobs.populate_github_users_job"
         ) as populate_github_users_job:
-            repo.queue_populate_github_users(originating_user_id=None)
+            project.queue_populate_github_users(originating_user_id=None)
             assert populate_github_users_job.delay.called
 
-    def test_queue_refresh_commits(self, repository_factory, user_factory):
-        repo = repository_factory()
+    def test_queue_refresh_commits(self, project_factory, user_factory):
+        project = project_factory()
         with patch("metecho.api.jobs.refresh_commits_job") as refresh_commits_job:
-            repo.queue_refresh_commits(ref="some branch", originating_user_id=None)
+            project.queue_refresh_commits(ref="some branch", originating_user_id=None)
             assert refresh_commits_job.delay.called
 
-    def test_save(self, repository_factory, git_hub_repository_factory):
+    def test_save(self, project_factory, git_hub_repository_factory):
         with patch("metecho.api.gh.get_repo_info") as get_repo_info:
             get_repo_info.return_value = MagicMock(default_branch="main-branch")
             git_hub_repository_factory(repo_id=123)
-            repo = repository_factory(branch_name="", repo_id=123)
-            repo.save()
+            project = project_factory(branch_name="", repo_id=123)
+            project.save()
             assert get_repo_info.called
-            repo.refresh_from_db()
-            assert repo.branch_name == "main-branch"
+            project.refresh_from_db()
+            assert project.branch_name == "main-branch"
 
-    def test_finalize_populate_github_users(self, repository_factory):
+    def test_finalize_populate_github_users(self, project_factory):
         with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
-            repo = repository_factory()
-            repo.finalize_populate_github_users(originating_user_id=None)
+            project = project_factory()
+            project.finalize_populate_github_users(originating_user_id=None)
 
             assert async_to_sync.called
 
-    def test_finalize_populate_github_users__error(self, repository_factory):
+    def test_finalize_populate_github_users__error(self, project_factory):
         with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
-            repo = repository_factory()
-            repo.finalize_populate_github_users(error=True, originating_user_id=None)
+            project = project_factory()
+            project.finalize_populate_github_users(error=True, originating_user_id=None)
 
             assert async_to_sync.called
 
 
 @pytest.mark.django_db
-class TestProject:
-    def test_signal(self, repository_factory):
-        repository = repository_factory()
-        project = Project(name="Test Project", repository=repository)
-        project.save()
+class TestEpic:
+    def test_signal(self, project_factory):
+        project = project_factory()
+        epic = Epic(name="Test Epic", project=project)
+        epic.save()
 
-        assert project.slug == "test-project"
+        assert epic.slug == "test-epic"
 
-    def test_str(self, repository_factory):
-        repository = repository_factory()
-        project = Project(name="Test Project", repository=repository)
-        assert str(project) == "Test Project"
+    def test_str(self, project_factory):
+        project = project_factory()
+        epic = Epic(name="Test Epic", project=project)
+        assert str(epic) == "Test Epic"
 
-    def test_get_repo_id(self, repository_factory, project_factory):
-        repo = repository_factory(repo_id=123)
-        project = project_factory(repository=repo)
+    def test_get_repo_id(self, project_factory, epic_factory):
+        project = project_factory(repo_id=123)
+        epic = epic_factory(project=project)
 
-        assert project.get_repo_id() == 123
+        assert epic.get_repo_id() == 123
 
-    def test_finalize_status_completed(self, project_factory):
+    def test_finalize_status_completed(self, epic_factory):
         with ExitStack() as stack:
-            project = project_factory(has_unmerged_commits=True)
+            epic = epic_factory(has_unmerged_commits=True)
 
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
             )
-            project.finalize_status_completed(123, originating_user_id=None)
-            project.refresh_from_db()
-            assert project.pr_number == 123
-            assert not project.has_unmerged_commits
+            epic.finalize_status_completed(123, originating_user_id=None)
+            epic.refresh_from_db()
+            assert epic.pr_number == 123
+            assert not epic.has_unmerged_commits
             assert async_to_sync.called
 
-    def test_should_update_status(self, project_factory):
-        project = project_factory()
-        assert not project.should_update_status()
+    def test_should_update_status(self, epic_factory):
+        epic = epic_factory()
+        assert not epic.should_update_status()
 
-    def test_should_update_status__already_merged(self, project_factory):
-        project = project_factory(status=PROJECT_STATUSES.Merged, pr_is_merged=True)
-        assert not project.should_update_status()
+    def test_should_update_status__already_merged(self, epic_factory):
+        epic = epic_factory(status=EPIC_STATUSES.Merged, pr_is_merged=True)
+        assert not epic.should_update_status()
 
-    def test_should_update_status__already_review(self, project_factory, task_factory):
-        project = project_factory(status=PROJECT_STATUSES.Review)
-        task_factory(project=project, status=TASK_STATUSES.Completed)
-        assert not project.should_update_status()
+    def test_should_update_status__already_review(self, epic_factory, task_factory):
+        epic = epic_factory(status=EPIC_STATUSES.Review)
+        task_factory(epic=epic, status=TASK_STATUSES.Completed)
+        assert not epic.should_update_status()
 
-    def test_queue_create_pr(self, project_factory, user_factory):
+    def test_queue_create_pr(self, epic_factory, user_factory):
         with ExitStack() as stack:
             create_pr_job = stack.enter_context(patch("metecho.api.jobs.create_pr_job"))
 
-            project = project_factory()
+            epic = epic_factory()
             user = user_factory()
-            project.queue_create_pr(
+            epic.queue_create_pr(
                 user,
                 title="My PR",
                 critical_changes="",
@@ -151,49 +151,49 @@ class TestProject:
 
             assert create_pr_job.delay.called
 
-    def test_soft_delete(self, project_factory, task_factory):
-        project = project_factory()
-        task_factory(project=project)
-        task_factory(project=project)
+    def test_soft_delete(self, epic_factory, task_factory):
+        epic = epic_factory()
+        task_factory(epic=epic)
+        task_factory(epic=epic)
 
-        project.delete()
-        project.refresh_from_db()
-        assert project.deleted_at is not None
-        assert project.tasks.active().count() == 0
+        epic.delete()
+        epic.refresh_from_db()
+        assert epic.deleted_at is not None
+        assert epic.tasks.active().count() == 0
 
-    def test_queryset_soft_delete(self, project_factory, task_factory):
-        project1 = project_factory()
-        project2 = project_factory()
-        project_factory()
+    def test_queryset_soft_delete(self, epic_factory, task_factory):
+        epic1 = epic_factory()
+        epic2 = epic_factory()
+        epic_factory()
 
-        task_factory(project=project1)
-        task_factory(project=project2)
+        task_factory(epic=epic1)
+        task_factory(epic=epic2)
 
-        assert Project.objects.count() == 3
-        assert Project.objects.active().count() == 3
+        assert Epic.objects.count() == 3
+        assert Epic.objects.active().count() == 3
         assert Task.objects.active().count() == 2
-        Project.objects.all().delete()
+        Epic.objects.all().delete()
 
-        assert Project.objects.count() == 3
-        assert Project.objects.active().count() == 0
+        assert Epic.objects.count() == 3
+        assert Epic.objects.active().count() == 0
         assert Task.objects.active().count() == 0
 
-    def test_queue_available_task_org_config_names(self, user_factory, project_factory):
+    def test_queue_available_task_org_config_names(self, user_factory, epic_factory):
         user = user_factory()
-        project = project_factory()
+        epic = epic_factory()
         with ExitStack() as stack:
             available_task_org_config_names_job = stack.enter_context(
                 patch("metecho.api.jobs.available_task_org_config_names_job")
             )
-            project.queue_available_task_org_config_names(user)
+            epic.queue_available_task_org_config_names(user)
 
             assert available_task_org_config_names_job.delay.called
 
-    def test_finalize_available_task_org_config_names(self, project_factory):
-        project = project_factory()
-        project.notify_changed = MagicMock()
-        project.finalize_available_task_org_config_names()
-        assert project.notify_changed.called
+    def test_finalize_available_task_org_config_names(self, epic_factory):
+        epic = epic_factory()
+        epic.notify_changed = MagicMock()
+        epic.finalize_available_task_org_config_names()
+        assert epic.notify_changed.called
 
 
 @pytest.mark.django_db
@@ -418,9 +418,9 @@ class TestTask:
 
 @pytest.mark.django_db
 class TestUser:
-    def test_refresh_repositories(self, user_factory, repository_factory):
+    def test_refresh_repositories(self, user_factory, project_factory):
         user = user_factory()
-        repository_factory(repo_id=8558)
+        project_factory(repo_id=8558)
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
             async_to_sync = stack.enter_context(
@@ -855,13 +855,16 @@ class TestScratchOrg:
 
     def test_get_login_url(self, scratch_org_factory):
         with ExitStack() as stack:
-            jwt_session = stack.enter_context(patch("metecho.api.models.jwt_session"))
-            OrgConfig = stack.enter_context(patch("metecho.api.models.OrgConfig"))
-            OrgConfig.return_value = MagicMock(start_url="https://example.com")
+            refresh_access_token = stack.enter_context(
+                patch("metecho.api.models.refresh_access_token")
+            )
+            refresh_access_token.return_value = MagicMock(
+                start_url="https://example.com"
+            )
 
             scratch_org = scratch_org_factory()
             assert scratch_org.get_login_url() == "https://example.com"
-            assert jwt_session.called
+            assert refresh_access_token.called
 
     def test_remove_scratch_org(self, scratch_org_factory):
         with ExitStack() as stack:

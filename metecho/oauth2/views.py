@@ -21,7 +21,9 @@ def ensure_socialapp_in_db(token):
     if token.app.pk is None:
         provider = providers.registry.by_id(token.app.provider)
         app, created = SocialApp.objects.get_or_create(
-            provider=provider.id, name=provider.name, client_id="-",
+            provider=provider.id,
+            name=provider.name,
+            client_id="-",
         )
         token.app = app
 

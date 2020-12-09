@@ -2,16 +2,12 @@ const routes = {
   home: () => '/',
   login: () => '/login',
   terms: () => '/terms',
-  repository_list: () => '/repositories',
-  repository_detail: (repositorySlug: string) =>
-    `/repositories/${repositorySlug}`,
-  project_detail: (repositorySlug: string, projectSlug: string) =>
-    `/repositories/${repositorySlug}/${projectSlug}`,
-  task_detail: (
-    repositorySlug: string,
-    projectSlug: string,
-    taskSlug: string,
-  ) => `/repositories/${repositorySlug}/${projectSlug}/${taskSlug}`,
+  project_list: () => '/projects',
+  project_detail: (projectSlug: string) => `/projects/${projectSlug}`,
+  epic_detail: (projectSlug: string, epicSlug: string) =>
+    `/projects/${projectSlug}/${epicSlug}`,
+  task_detail: (projectSlug: string, epicSlug: string, taskSlug: string) =>
+    `/projects/${projectSlug}/${epicSlug}/${taskSlug}`,
 };
 
 /* istanbul ignore next */
@@ -20,10 +16,10 @@ export const routePatterns = {
   login: () => '/login',
   terms: () => '/terms',
   auth_error: () => '/accounts/*',
-  repository_list: () => '/repositories',
-  repository_detail: () => '/repositories/:repositorySlug',
-  project_detail: () => '/repositories/:repositorySlug/:projectSlug',
-  task_detail: () => '/repositories/:repositorySlug/:projectSlug/:taskSlug',
+  project_list: () => '/projects',
+  project_detail: () => '/projects/:projectSlug',
+  epic_detail: () => '/projects/:projectSlug/:epicSlug',
+  task_detail: () => '/projects/:projectSlug/:epicSlug/:taskSlug',
 };
 
 export default routes;

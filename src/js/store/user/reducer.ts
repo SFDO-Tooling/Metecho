@@ -1,4 +1,4 @@
-import { ReposRefreshed } from '@/store/repositories/actions';
+import { ProjectsRefreshed } from '@/store/projects/actions';
 import { UserAction } from '@/store/user/actions';
 
 export interface GitHubUser {
@@ -26,7 +26,7 @@ export interface User {
 
 const reducer = (
   user: User | null = null,
-  action: UserAction | ReposRefreshed,
+  action: UserAction | ProjectsRefreshed,
 ): User | null => {
   switch (action.type) {
     case 'USER_LOGGED_IN':
@@ -36,7 +36,7 @@ const reducer = (
       return action.payload;
     case 'USER_LOGGED_OUT':
       return null;
-    case 'REPOS_REFRESHED':
+    case 'PROJECTS_REFRESHED':
       return user ? { ...user, currently_fetching_repos: false } : user;
   }
   return user;

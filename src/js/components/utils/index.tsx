@@ -9,14 +9,14 @@ export { default as PrivateRoute } from './privateRoute';
 export { default as SpinnerWrapper } from './spinnerWrapper';
 export { default as SubmitModal } from './submitModal';
 
+export { default as getEpicLoadingOrNotFound } from './getEpicLoadingOrNotFound';
 export { default as getProjectLoadingOrNotFound } from './getProjectLoadingOrNotFound';
-export { default as getRepositoryLoadingOrNotFound } from './getRepositoryLoadingOrNotFound';
 export { default as getTaskLoadingOrNotFound } from './getTaskLoadingOrNotFound';
 
 export { default as useFetchOrgsIfMissing } from './useFetchOrgsIfMissing';
+export { default as useFetchEpicIfMissing } from './useFetchEpicIfMissing';
+export { default as useFetchEpicsIfMissing } from './useFetchEpicsIfMissing';
 export { default as useFetchProjectIfMissing } from './useFetchProjectIfMissing';
-export { default as useFetchProjectsIfMissing } from './useFetchProjectsIfMissing';
-export { default as useFetchRepositoryIfMissing } from './useFetchRepositoryIfMissing';
 export { default as useFetchTasksIfMissing } from './useFetchTasksIfMissing';
 export { default as useForm } from './useForm';
 export type { UseFormProps } from './useForm';

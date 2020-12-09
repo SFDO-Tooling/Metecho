@@ -2,18 +2,18 @@ import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
-import { selectProject } from '@/store/projects/selectors';
+import { selectEpic } from '@/store/epics/selectors';
 import { Task, TaskState } from '@/store/tasks/reducer';
 
 export const selectTaskState = (appState: AppState): TaskState =>
   appState.tasks;
 
-export const selectTasksByProject = createSelector(
-  [selectTaskState, selectProject],
-  (tasks, project) => {
+export const selectTasksByEpic = createSelector(
+  [selectTaskState, selectEpic],
+  (tasks, epic) => {
     /* istanbul ignore else */
-    if (project) {
-      return tasks[project.id];
+    if (epic) {
+      return tasks[epic.id];
     }
     return undefined;
   },
@@ -25,7 +25,7 @@ export const selectTaskSlug = (
 ) => params.taskSlug;
 
 export const selectTask = createSelector(
-  [selectTasksByProject, selectTaskSlug],
+  [selectTasksByEpic, selectTaskSlug],
   (tasks, slug) => {
     if (!tasks || !slug) {
       return undefined;

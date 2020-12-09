@@ -6,7 +6,7 @@ from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from sfdo_template_helpers.crypto import fernet_encrypt
 
-from .api.models import GitHubRepository, Project, Repository, ScratchOrg, Task
+from .api.models import Epic, GitHubRepository, Project, ScratchOrg, Task
 
 User = get_user_model()
 
@@ -63,11 +63,11 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @register
-class RepositoryFactory(factory.django.DjangoModelFactory):
+class ProjectFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Repository
+        model = Project
 
-    name = factory.Sequence("Repository {}".format)
+    name = factory.Sequence("Project {}".format)
     repo_owner = factory.Sequence("user_{}".format)
     repo_name = factory.Sequence("repo_{}".format)
     repo_id = factory.Sequence(lambda n: n)
@@ -85,12 +85,12 @@ class GitHubRepositoryFactory(factory.django.DjangoModelFactory):
 
 
 @register
-class ProjectFactory(factory.django.DjangoModelFactory):
+class EpicFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Project
+        model = Epic
 
-    name = factory.Sequence("Project {}".format)
-    repository = factory.SubFactory(RepositoryFactory)
+    name = factory.Sequence("Epic {}".format)
+    project = factory.SubFactory(ProjectFactory)
 
 
 @register
@@ -98,8 +98,8 @@ class TaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Task
 
-    name = factory.Sequence("Project {}".format)
-    project = factory.SubFactory(ProjectFactory)
+    name = factory.Sequence("Epic {}".format)
+    epic = factory.SubFactory(EpicFactory)
     org_config_name = "dev"
 
 
