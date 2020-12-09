@@ -57,6 +57,8 @@ def delete_org_on_error(scratch_org=None, originating_user_id=None):
     try:
         yield
     except HTTPError as err:
+        if not scratch_org:
+            raise err
         if get_current_job():
             job_id = get_current_job().id
             # This error is user-facing, and so for makemessages to
@@ -77,10 +79,7 @@ def delete_org_on_error(scratch_org=None, originating_user_id=None):
             error_msg = _(f"Are you certain that the org still exists? {err.args[0]}")
 
         error = ScratchOrgError(error_msg)
-        if scratch_org:
-            scratch_org.remove_scratch_org(
-                error, originating_user_id=originating_user_id
-            )
+        scratch_org.remove_scratch_org(error, originating_user_id=originating_user_id)
         raise error
 
 
