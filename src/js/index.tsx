@@ -24,12 +24,12 @@ import logger from 'redux-logger';
 import thunk, { ThunkDispatch } from 'redux-thunk';
 
 import FourOhFour from '@/components/404';
+import EpicDetail from '@/components/epics/detail';
 import ErrorBoundary from '@/components/error';
 import Footer from '@/components/footer';
 import Header from '@/components/header';
 import ProjectDetail from '@/components/projects/detail';
-import RepositoryDetail from '@/components/repositories/detail';
-import RepositoryList from '@/components/repositories/list';
+import ProjectList from '@/components/projects/list';
 import TaskDetail from '@/components/tasks/detail';
 import Terms from '@/components/terms';
 import AuthError from '@/components/user/authError';
@@ -39,8 +39,8 @@ import initializeI18n from '@/i18n';
 import reducer from '@/store';
 import { fetchObjects } from '@/store/actions';
 import { clearErrors } from '@/store/errors/actions';
-import { reposRefreshing } from '@/store/repositories/actions';
-import { selectRepositories } from '@/store/repositories/selectors';
+import { projectsRefreshing } from '@/store/projects/actions';
+import { selectProjects } from '@/store/projects/selectors';
 import { clearToasts } from '@/store/toasts/actions';
 import { login, refetchAllData } from '@/store/user/actions';
 import { User } from '@/store/user/reducer';
@@ -77,22 +77,22 @@ const App = withRouter(
                   <Route
                     exact
                     path={routePatterns.home()}
-                    render={() => <Redirect to={routes.repository_list()} />}
+                    render={() => <Redirect to={routes.project_list()} />}
                   />
                   <PrivateRoute
                     exact
-                    path={routePatterns.repository_list()}
-                    component={RepositoryList}
-                  />
-                  <PrivateRoute
-                    exact
-                    path={routePatterns.repository_detail()}
-                    component={RepositoryDetail}
+                    path={routePatterns.project_list()}
+                    component={ProjectList}
                   />
                   <PrivateRoute
                     exact
                     path={routePatterns.project_detail()}
                     component={ProjectDetail}
+                  />
+                  <PrivateRoute
+                    exact
+                    path={routePatterns.epic_detail()}
+                    component={EpicDetail}
                   />
                   <PrivateRoute
                     exact
@@ -194,17 +194,17 @@ initializeI18n((i18nError?: string) => {
     };
 
     if (userData) {
-      // If logged in, fetch repositories before rendering App
+      // If logged in, fetch projects before rendering App
       (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-        fetchObjects({ objectType: OBJECT_TYPES.REPOSITORY, reset: true }),
+        fetchObjects({ objectType: OBJECT_TYPES.PROJECT, reset: true }),
       ).finally(() => {
         const state = appStore.getState();
-        const repos = selectRepositories(state);
+        const projects = selectProjects(state);
         const user = selectUserState(state);
-        // If user has no repos and is currently fetching repos, update state
-        // to show spinner instead of empty repos-list.
-        if (user?.currently_fetching_repos && !repos.length) {
-          appStore.dispatch(reposRefreshing());
+        // If user has no projects and is currently fetching projects, update state
+        // to show spinner instead of empty projects-list.
+        if (user?.currently_fetching_repos && !projects.length) {
+          appStore.dispatch(projectsRefreshing());
         }
         renderApp();
       });

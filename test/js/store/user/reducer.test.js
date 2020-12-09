@@ -49,18 +49,18 @@ describe('reducer', () => {
     expect(actual).toEqual(expected);
   });
 
-  test('handles REPOS_REFRESHED action', () => {
+  test('handles PROJECTS_REFRESHED action', () => {
     const initial = { id: 'id', currently_fetching_repos: true };
     const expected = { id: 'id', currently_fetching_repos: false };
-    const actual = reducer(initial, { type: 'REPOS_REFRESHED' });
+    const actual = reducer(initial, { type: 'PROJECTS_REFRESHED' });
 
     expect(actual).toEqual(expected);
   });
 
-  test('handles REPOS_REFRESHED action [no user]', () => {
+  test('handles PROJECTS_REFRESHED action [no user]', () => {
     const initial = null;
     const expected = null;
-    const actual = reducer(initial, { type: 'REPOS_REFRESHED' });
+    const actual = reducer(initial, { type: 'PROJECTS_REFRESHED' });
 
     expect(actual).toEqual(expected);
   });

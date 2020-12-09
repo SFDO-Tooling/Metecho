@@ -5,14 +5,14 @@ Websocket notifications you can subscribe to:
         BACKEND_ERROR
         USER_REPOS_REFRESH
 
-    repository.:id
-        REPOSITORY_UPDATE
-        REPOSITORY_UPDATE_ERROR
-
     project.:id
         PROJECT_UPDATE
-        PROJECT_CREATE_PR
-        PROJECT_CREATE_PR_FAILED
+        PROJECT_UPDATE_ERROR
+
+    epic.:id
+        EPIC_UPDATE
+        EPIC_CREATE_PR
+        EPIC_CREATE_PR_FAILED
         SOFT_DELETE
 
     task.:id

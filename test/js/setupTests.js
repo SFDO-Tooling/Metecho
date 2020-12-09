@@ -19,11 +19,11 @@ beforeAll(() => {
     user_refresh: () => '/api/user/refresh/',
     user_disconnect_sf: () => '/api/user/disconnect/',
     agree_to_tos: () => '/api/agree_to_tos/',
-    repository_list: () => '/api/repositories/',
-    repository_detail: (slug) => `/api/repositories/${slug}/`,
-    repository_refresh_github_users: (id) =>
-      `/api/repositories/${id}/refresh_github_users/`,
     project_list: () => '/api/projects/',
+    project_detail: (slug) => `/api/projects/${slug}/`,
+    project_refresh_github_users: (id) =>
+      `/api/projects/${id}/refresh_github_users/`,
+    epic_list: () => '/api/epics/',
     scratch_org_list: () => '/api/scratch_orgs/',
     scratch_org_detail: (id) => `/api/scratch_orgs/${id}/`,
     scratch_org_commit: (id) => `/api/scratch_orgs/${id}/commit/`,
@@ -33,12 +33,11 @@ beforeAll(() => {
     task_create_pr: (id) => `/api/tasks/${id}/create_pr/`,
     task_review: (id) => `/api/tasks/${id}/review/`,
     task_can_reassign: (id) => `/api/tasks/${id}/can_reassign/`,
-    project_detail: (id) => `/api/projects/${id}/`,
-    project_create_pr: (id) => `/api/projects/${id}/create_pr/`,
-    project_refresh_org_config_names: (id) =>
-      `/api/projects/${id}/refresh_org_config_names/`,
-    repository_feature_branches: (id) =>
-      `/api/repositories/${id}/feature_branches/`,
+    epic_detail: (id) => `/api/epics/${id}/`,
+    epic_create_pr: (id) => `/api/epics/${id}/create_pr/`,
+    epic_refresh_org_config_names: (id) =>
+      `/api/epics/${id}/refresh_org_config_names/`,
+    project_feature_branches: (id) => `/api/projects/${id}/feature_branches/`,
   };
   window.GLOBALS = {};
   window.console.error = jest.fn();

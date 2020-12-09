@@ -30,7 +30,7 @@ class TimestampsMixin(models.Model):
 class PopulateRepoIdMixin:
     def get_repo_id(self):
         """
-        Get the repo's GitHub id, looking it up based on the owner and name
+        Get the project's GitHub repo id, looking it up based on the owner and name
         if not already populated.
 
         Authentication is via the Metecho GitHub app,

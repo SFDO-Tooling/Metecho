@@ -1,259 +1,138 @@
 import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
-import { ProjectAction } from '@/store/projects/actions';
-import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
+import { ProjectsAction } from '@/store/projects/actions';
+import { LogoutAction } from '@/store/user/actions';
 import { GitHubUser } from '@/store/user/reducer';
-import { OBJECT_TYPES, ObjectTypes, ProjectStatuses } from '@/utils/constants';
-
-export interface OrgConfig {
-  key: string;
-  label?: string;
-  description?: string;
-}
+import { OBJECT_TYPES } from '@/utils/constants';
 
 export interface Project {
   id: string;
-  repository: string;
   name: string;
   slug: string;
   old_slugs: string[];
+  repo_url: string;
+  repo_owner: string;
+  repo_name: string;
   description: string;
   description_rendered: string;
-  branch_name: string;
-  branch_url: string | null;
-  branch_diff_url: string | null;
-  pr_url: string | null;
-  pr_is_open: boolean;
-  pr_is_merged: boolean;
-  has_unmerged_commits: boolean;
-  currently_creating_pr: boolean;
-  currently_fetching_org_config_names: boolean;
+  is_managed: boolean;
+  branch_prefix: string;
   github_users: GitHubUser[];
-  status: ProjectStatuses;
-  available_task_org_config_names: OrgConfig[];
+  currently_refreshing_gh_users?: boolean;
+  repo_image_url: string;
 }
-
-export interface ProjectsByRepositoryState {
+export interface ProjectsState {
   projects: Project[];
   next: string | null;
   notFound: string[];
-  fetched: boolean;
-}
-
-export interface ProjectsState {
-  [key: string]: ProjectsByRepositoryState;
+  refreshing: boolean;
 }
 
 const defaultState = {
   projects: [],
   next: null,
   notFound: [],
-  fetched: false,
+  refreshing: false,
 };
 
-const modelIsProject = (model: any): model is Project =>
-  Boolean((model as Project).repository);
-
 const reducer = (
-  projects: ProjectsState = {},
-  action: ProjectAction | ObjectsAction | LogoutAction | RefetchDataAction,
-) => {
+  projects: ProjectsState = defaultState,
+  action: ProjectsAction | ObjectsAction | LogoutAction,
+): ProjectsState => {
   switch (action.type) {
-    case 'REFETCH_DATA_SUCCEEDED':
     case 'USER_LOGGED_OUT':
-      return {};
+      return { ...defaultState };
+    case 'REFRESH_PROJECTS_REQUESTED':
+    case 'REFRESHING_PROJECTS':
+    case 'REFRESH_PROJECTS_REJECTED': {
+      return {
+        ...projects,
+        refreshing: action.type !== 'REFRESH_PROJECTS_REJECTED',
+      };
+    }
     case 'FETCH_OBJECTS_SUCCEEDED': {
-      const {
-        response,
-        objectType,
-        reset,
-        filters: { repository },
-      } = action.payload;
+      const { response, objectType, reset } = action.payload;
       const { results, next } = response as PaginatedObjectResponse;
-      if (objectType === OBJECT_TYPES.PROJECT && repository) {
-        const repositoryProjects = projects[repository] || { ...defaultState };
+      if (objectType === OBJECT_TYPES.PROJECT) {
         if (reset) {
           return {
             ...projects,
-            [repository]: {
-              ...repositoryProjects,
-              projects: results,
-              next,
-              fetched: true,
-            },
+            projects: results,
+            next,
+            refreshing: false,
           };
         }
         // Store list of known project IDs to filter out duplicates
-        const ids = repositoryProjects.projects.map((p) => p.id);
+        const ids = projects.projects.map((project) => project.id);
         return {
           ...projects,
-          [repository]: {
-            ...repositoryProjects,
-            projects: [
-              ...repositoryProjects.projects,
-              ...results.filter((p) => !ids.includes(p.id)),
-            ],
-            next,
-            fetched: true,
-          },
+          projects: [
+            ...projects.projects,
+            ...results.filter((project) => !ids.includes(project.id)),
+          ],
+          next,
+          refreshing: false,
         };
-      }
-      return projects;
-    }
-    case 'CREATE_OBJECT_SUCCEEDED': {
-      const {
-        object,
-        objectType,
-      }: { object: Project; objectType?: ObjectTypes } = action.payload;
-      if (objectType === OBJECT_TYPES.PROJECT && object) {
-        const repository = projects[object.repository] || { ...defaultState };
-        // Do not store if (somehow) we already know about this project
-        if (!repository.projects.filter((p) => object.id === p.id).length) {
-          return {
-            ...projects,
-            [object.repository]: {
-              ...repository,
-              // Prepend new project (projects are ordered by `-created_at`)
-              projects: [object, ...repository.projects],
-            },
-          };
-        }
       }
       return projects;
     }
     case 'FETCH_OBJECT_SUCCEEDED': {
       const {
         object,
-        filters: { repository, slug },
+        filters: { slug },
         objectType,
       } = action.payload;
-      if (objectType === OBJECT_TYPES.PROJECT && repository) {
-        const repositoryProjects = projects[repository] || { ...defaultState };
+      if (objectType === OBJECT_TYPES.PROJECT) {
         if (!object) {
           return {
             ...projects,
-            [repository]: {
-              ...repositoryProjects,
-              notFound: [...repositoryProjects.notFound, slug],
-            },
+            notFound: [...projects.notFound, slug],
           };
         }
-        // Do not store if we already know about this project
-        if (
-          !repositoryProjects.projects.filter((p) => object.id === p.id).length
-        ) {
+        if (!projects.projects.find((project) => project.id === object.id)) {
           return {
             ...projects,
-            [object.repository]: {
-              ...repositoryProjects,
-              projects: [...repositoryProjects.projects, object],
-            },
+            projects: [...projects.projects, object],
           };
         }
       }
       return projects;
     }
-    case 'PROJECT_UPDATE':
-    case 'UPDATE_OBJECT_SUCCEEDED': {
-      let maybeProject;
-      if (action.type === 'PROJECT_UPDATE') {
-        maybeProject = action.payload;
-      } else {
-        const {
-          object,
-          objectType,
-        }: { object: Project; objectType?: ObjectTypes } = action.payload;
-        if (objectType === OBJECT_TYPES.PROJECT && object) {
-          maybeProject = object;
-        }
-      }
-      /* istanbul ignore if */
-      if (!maybeProject) {
-        return projects;
-      }
-      const project = maybeProject;
-      const repositoryProjects = projects[project.repository] || {
-        ...defaultState,
-      };
-      const existingProject = repositoryProjects.projects.find(
-        (p) => p.id === project.id,
-      );
-      if (existingProject) {
+    case 'REFRESH_GH_USERS_REQUESTED':
+    case 'REFRESH_GH_USERS_REJECTED': {
+      const projectId = action.payload;
+      if (projects.projects.find((project) => project.id === projectId)) {
         return {
           ...projects,
-          [project.repository]: {
-            ...repositoryProjects,
-            projects: repositoryProjects.projects.map((p) => {
-              if (p.id === project.id) {
-                return { ...project };
-              }
-              return p;
-            }),
-          },
-        };
-      }
-      return {
-        ...projects,
-        [project.repository]: {
-          ...repositoryProjects,
-          projects: [...repositoryProjects.projects, project],
-        },
-      };
-    }
-    case 'PROJECT_CREATE_PR_FAILED': {
-      const project = action.payload;
-      const repositoryProjects = projects[project.repository] || {
-        ...defaultState,
-      };
-      const existingProject = repositoryProjects.projects.find(
-        (p) => p.id === project.id,
-      );
-      if (existingProject) {
-        return {
-          ...projects,
-          [project.repository]: {
-            ...repositoryProjects,
-            projects: repositoryProjects.projects.map((p) => {
-              if (p.id === project.id) {
-                return { ...project, currently_creating_pr: false };
-              }
-              return p;
-            }),
-          },
+          projects: projects.projects.map((project) => {
+            if (project.id === projectId) {
+              return {
+                ...project,
+                currently_refreshing_gh_users:
+                  action.type === 'REFRESH_GH_USERS_REQUESTED',
+              };
+            }
+            return project;
+          }),
         };
       }
       return projects;
     }
-    case 'OBJECT_REMOVED':
-    case 'DELETE_OBJECT_SUCCEEDED': {
-      let maybeProject;
-      if (action.type === 'OBJECT_REMOVED') {
-        maybeProject = modelIsProject(action.payload) ? action.payload : null;
-      } else {
-        const {
-          object,
-          objectType,
-        }: { object: Project; objectType?: ObjectTypes } = action.payload;
-        if (objectType === OBJECT_TYPES.PROJECT && object) {
-          maybeProject = object;
-        }
+    case 'PROJECT_UPDATE': {
+      const project = action.payload;
+      if (projects.projects.find((r) => r.id === project.id)) {
+        return {
+          ...projects,
+          projects: projects.projects.map((r) => {
+            if (r.id === project.id) {
+              return project;
+            }
+            return r;
+          }),
+        };
       }
-      /* istanbul ignore if */
-      if (!maybeProject) {
-        return projects;
-      }
-      const project = maybeProject;
-      /* istanbul ignore next */
-      const repositoryProjects = projects[project.repository] || {
-        ...defaultState,
-      };
       return {
         ...projects,
-        [project.repository]: {
-          ...repositoryProjects,
-          projects: repositoryProjects.projects.filter(
-            (p) => p.id !== project.id,
-          ),
-        },
+        projects: [...projects.projects, project],
       };
     }
   }

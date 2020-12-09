@@ -162,7 +162,7 @@ def get_source_format(**kwargs):
 def try_to_make_branch(repository, *, new_branch, base_branch):
     branch_name = new_branch
     counter = 0
-    max_length = 100  # From models.Project.branch_name
+    max_length = 100  # From models.Epic.branch_name
     while True:
         suffix = f"-{counter}" if counter else ""
         branch_name = f"{new_branch[:max_length-len(suffix)]}{suffix}"

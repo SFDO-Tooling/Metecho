@@ -20,7 +20,7 @@ import { addUrlParams } from '@/utils/api';
 import {
   ORG_TYPES,
   OrgTypes,
-  SHOW_PROJECT_COLLABORATORS,
+  SHOW_EPIC_COLLABORATORS,
 } from '@/utils/constants';
 import { getTaskCommits } from '@/utils/helpers';
 import { logError } from '@/utils/logging';
@@ -30,8 +30,8 @@ interface OrgCardProps {
   type: OrgTypes;
   user: User;
   task: Task;
-  projectUsers: GitHubUser[];
-  projectUrl: string;
+  epicUsers: GitHubUser[];
+  epicUrl: string;
   repoUrl: string;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
@@ -58,8 +58,8 @@ const OrgCard = ({
   type,
   user,
   task,
-  projectUsers,
-  projectUrl,
+  epicUsers,
+  epicUrl,
   repoUrl,
   isCreatingOrg,
   isDeletingOrg,
@@ -143,10 +143,8 @@ const OrgCard = ({
   }, [handleCheckForOrgChanges, org]);
 
   const handleEmptyMessageClick = useCallback(() => {
-    history.push(
-      addUrlParams(projectUrl, { [SHOW_PROJECT_COLLABORATORS]: true }),
-    );
-  }, [projectUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+    history.push(addUrlParams(epicUrl, { [SHOW_EPIC_COLLABORATORS]: true }));
+  }, [epicUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const taskCommits = getTaskCommits(task);
   const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;
@@ -266,11 +264,11 @@ const OrgCard = ({
         )}
       </Card>
       <AssignUserModal
-        allUsers={projectUsers}
+        allUsers={epicUsers}
         selectedUser={assignedUser}
         orgType={type}
         isOpen={assignUserModalOpen === type}
-        emptyMessageText={i18n.t('View Project to Add Collaborators')}
+        emptyMessageText={i18n.t('View Epic to Add Collaborators')}
         emptyMessageAction={handleEmptyMessageClick}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}

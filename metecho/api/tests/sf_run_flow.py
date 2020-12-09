@@ -199,14 +199,14 @@ class TestDeployOrgSettings:
 
 @pytest.mark.django_db
 class TestRunFlow:
-    def test_create_org_and_run_flow__exception(self, user_factory, project_factory):
+    def test_create_org_and_run_flow__exception(self, user_factory, epic_factory):
         user = user_factory()
         org_config = MagicMock(
             org_id="org_id",
             instance_url="instance_url",
             access_token="access_token",
         )
-        project = project_factory()
+        epic = epic_factory()
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.os"))
             subprocess = stack.enter_context(patch(f"{PATCH_ROOT}.subprocess"))
@@ -240,7 +240,7 @@ class TestRunFlow:
                     cci=MagicMock(),
                     org_config=org_config,
                     flow_name=MagicMock(),
-                    project_path=project,
+                    project_path=epic,
                     user=user,
                 )
 

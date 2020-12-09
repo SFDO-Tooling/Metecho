@@ -3,225 +3,141 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '@/components/projects/detail';
-import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
-import { refreshGitHubUsers } from '@/store/repositories/actions';
-import { getUrlParam, removeUrlParam } from '@/utils/api';
+import { fetchObject, fetchObjects } from '@/store/actions';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
-jest.mock('@/store/repositories/actions');
-jest.mock('@/utils/api');
 
-fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+fetchObject.mockReturnValue({ type: 'TEST' });
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-getUrlParam.mockReturnValue(null);
-removeUrlParam.mockReturnValue('');
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
-  updateObject.mockClear();
-  refreshGitHubUsers.mockClear();
-  getUrlParam.mockClear();
-  removeUrlParam.mockClear();
 });
 
 const defaultState = {
-  repositories: {
-    repositories: [
+  projects: {
+    projects: [
       {
         id: 'r1',
-        name: 'Repository 1',
-        slug: 'repository-1',
-        old_slugs: [],
-        description: 'This is a test repository.',
-        description_rendered: '<p>This is a test repository.</p>',
+        name: 'Project 1',
+        slug: 'project-1',
+        old_slugs: ['old-slug'],
+        description: 'This is a test project.',
+        description_rendered: '<p>This is a test project.</p>',
         repo_url: 'https://github.com/test/test-repo',
-        repo_owner: 'test',
-        repo_name: 'test-repo',
-        github_users: [
-          {
-            id: '123456',
-            login: 'TestGitHubUser',
-          },
-          {
-            id: '234567',
-            login: 'OtherUser',
-          },
-          {
-            id: '345678',
-            login: 'ThirdUser',
-          },
-        ],
+        github_users: [],
+        repo_image_url: 'https://github.com/repo-image',
       },
     ],
-    notFound: ['different-repository'],
+    notFound: ['yet-another-project'],
     next: null,
   },
-  projects: {
+  epics: {
     r1: {
-      projects: [
+      epics: [
         {
-          id: 'project1',
-          slug: 'project-1',
-          name: 'Project 1',
-          repository: 'r1',
-          description: 'Project Description',
-          description_rendered: '<p>Project Description</p>',
-          branch_url: 'https://github.com/test/test-repo/tree/branch-name',
-          branch_name: 'branch-name',
-          old_slugs: ['old-slug'],
-          github_users: [
-            {
-              id: '123456',
-              login: 'TestGitHubUser',
-            },
-            {
-              id: '234567',
-              login: 'OtherUser',
-            },
-            { id: 'user-id', login: 'currentUser' },
-          ],
-          available_task_org_config_names: [],
+          id: 'epic1',
+          slug: 'epic-1',
+          name: 'Epic 1',
+          project: 'r1',
+          description: 'Epic Description',
+          description_rendered: '<p>Epic Description</p>',
+          github_users: [],
+          status: 'In progress',
+        },
+        {
+          id: 'epic2',
+          slug: 'epic-2',
+          name: 'Epic 2',
+          project: 'r1',
+          description: 'Epic Description',
+          description_rendered: '<p>Epic Description</p>',
+          github_users: [],
+          status: 'Planned',
+        },
+        {
+          id: 'epic3',
+          slug: 'epic-3',
+          name: 'Epic 3',
+          project: 'r1',
+          description: 'Epic Description',
+          description_rendered: '<p>Epic Description</p>',
+          github_users: [],
+          status: 'Merged',
+        },
+        {
+          id: 'epic4',
+          slug: 'epic-4',
+          name: 'Epic 4',
+          project: 'r1',
+          description: 'Epic Description',
+          description_rendered: '<p>Epic Description</p>',
+          github_users: [],
+          status: 'Review',
         },
       ],
-      next: null,
-      notFound: ['different-project'],
+      next: 'next-url',
+      notFound: [],
       fetched: true,
     },
   },
-  tasks: {
-    project1: [
-      {
-        id: 'task1',
-        name: 'Task 1',
-        slug: 'task-1',
-        project: 'project1',
-        description: 'Task Description',
-        description_rendered: '<p>Task Description</p>',
-        branch_url: 'https://github.com/test/test-repo/tree/project__task',
-        branch_name: 'project__task',
-        review_valid: true,
-        review_status: 'Approved',
-        status: 'Completed',
-      },
-      {
-        id: 'task2',
-        name: 'Task 2',
-        slug: 'task-2',
-        project: 'project1',
-        status: 'In progress',
-        assigned_dev: {
-          id: '123456',
-          login: 'TestGitHubUser',
-          avatar_url: 'https://example.com/avatar.png',
-        },
-      },
-      {
-        id: 'task3',
-        name: 'Task 3',
-        slug: 'task-3',
-        project: 'project1',
-        status: 'Planned',
-      },
-      {
-        id: 'task4',
-        name: 'Task 4',
-        slug: 'task-4',
-        project: 'project1',
-      },
-      {
-        id: 'task5',
-        name: 'Task 5',
-        slug: 'task-5',
-        project: 'project1',
-        review_valid: true,
-        review_status: 'Changes requested',
-      },
-      {
-        id: 'task6',
-        name: 'Task 6',
-        slug: 'task-6',
-        project: 'project1',
-        review_valid: true,
-        review_status: 'Approved',
-      },
-    ],
-  },
   user: {
-    id: 'user-id',
-    username: 'currentUser',
-    valid_token_for: 'my-org',
-    is_devhub_enabled: true,
+    username: 'my-user',
   },
 };
 
-describe('<ProjectDetail/>', () => {
+describe('<ProjectDetail />', () => {
   const setup = (options) => {
     const defaults = {
       initialState: defaultState,
-      repositorySlug: 'repository-1',
       projectSlug: 'project-1',
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, repositorySlug, projectSlug } = opts;
+    const { initialState, projectSlug } = opts;
     const context = {};
-    const history = { replace: jest.fn() };
-    const response = renderWithRedux(
+    const result = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectDetail
-          match={{ params: { repositorySlug, projectSlug } }}
-          history={history}
-        />
+        <ProjectDetail match={{ params: { projectSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { ...response, context, history };
+    return {
+      ...result,
+      context,
+    };
   };
 
-  test('renders project detail and tasks list', () => {
-    const { getByText, getByTitle } = setup();
+  test('renders project detail and epics list', () => {
+    const { getByText, getAllByTitle } = setup();
 
-    expect(getByTitle('Project 1')).toBeVisible();
-    expect(getByText('Project Description')).toBeVisible();
-    expect(getByText('Tasks for Project 1')).toBeVisible();
-    expect(getByText('Task 1')).toBeVisible();
-    expect(getByText('Approved')).toBeVisible();
-    expect(getByText('Changes Requested')).toBeVisible();
+    expect(getAllByTitle('Project 1')[0]).toBeVisible();
+    expect(getByText('This is a test project.')).toBeVisible();
+    expect(getByText('Epic 1')).toBeVisible();
+    expect(getByText('Epics for Project 1')).toBeVisible();
   });
 
-  test('renders with form expanded if no tasks', () => {
+  test('renders with form expanded if no epics', () => {
     const { getByText, queryByText } = setup({
       initialState: {
         ...defaultState,
-        tasks: { project1: [] },
+        epics: {
+          r1: {
+            epics: [],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
       },
     });
 
-    expect(getByText('Add a Task for Project 1')).toBeVisible();
-    expect(queryByText('Tasks for Project 1')).toBeNull();
-  });
-
-  describe('`SHOW_PROJECT_COLLABORATORS` param is truthy', () => {
-    beforeAll(() => {
-      getUrlParam.mockReturnValue('true');
-    });
-
-    afterAll(() => {
-      getUrlParam.mockReturnValue(null);
-    });
-
-    test('opens assign-users modal', () => {
-      const { history, getByText } = setup();
-
-      expect(history.replace).toHaveBeenCalledWith({ search: '' });
-      expect(getByText('GitHub Users')).toBeVisible();
-    });
+    expect(getByText('Create an Epic for Project 1')).toBeVisible();
+    expect(queryByText('Epics for Project 1')).toBeNull();
   });
 
   describe('project not found', () => {
@@ -230,31 +146,20 @@ describe('<ProjectDetail/>', () => {
 
       expect(queryByText('Project 1')).toBeNull();
       expect(fetchObject).toHaveBeenCalledWith({
-        filters: { repository: 'r1', slug: 'other-project' },
+        filters: { slug: 'other-project' },
         objectType: 'project',
       });
-    });
-  });
-
-  describe('repository does not exist', () => {
-    test('renders <RepositoryNotFound />', () => {
-      const { getByText, queryByText } = setup({
-        repositorySlug: 'different-repository',
-      });
-
-      expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('list of all repositories')).toBeVisible();
     });
   });
 
   describe('project does not exist', () => {
     test('renders <ProjectNotFound />', () => {
       const { getByText, queryByText } = setup({
-        projectSlug: 'different-project',
+        projectSlug: 'yet-another-project',
       });
 
       expect(queryByText('Project 1')).toBeNull();
-      expect(getByText('another project')).toBeVisible();
+      expect(getByText('list of all projects')).toBeVisible();
     });
   });
 
@@ -263,419 +168,125 @@ describe('<ProjectDetail/>', () => {
       const { context } = setup({ projectSlug: 'old-slug' });
 
       expect(context.action).toEqual('REPLACE');
-      expect(context.url).toEqual(
-        routes.project_detail('repository-1', 'project-1'),
-      );
+      expect(context.url).toEqual(routes.project_detail('project-1'));
     });
   });
 
-  describe('tasks have not been fetched', () => {
-    test('fetches tasks from API', () => {
+  describe('no project slug', () => {
+    test('renders <ProjectNotFound />', () => {
+      const { getByText, queryByText } = setup({ projectSlug: '' });
+
+      expect(queryByText('Project 1')).toBeNull();
+      expect(getByText('list of all projects')).toBeVisible();
+    });
+  });
+
+  describe('epics have not been fetched', () => {
+    test('fetches epics from API', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
-          tasks: {},
+          epics: {
+            r1: {
+              epics: [],
+              next: null,
+              notFound: [],
+              fetched: false,
+            },
+          },
         },
       });
 
-      expect(queryByText('Tasks for Project 1')).toBeNull();
+      expect(queryByText('Epics for Project 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { project: 'project1' },
-        objectType: 'task',
+        filters: { project: 'r1' },
+        objectType: 'epic',
+        reset: true,
       });
     });
   });
 
-  describe('<AssignUsersModal />', () => {
-    test('opens and closes', () => {
-      const { getByText, queryByText } = setup();
-      fireEvent.click(getByText('Add or Remove Collaborators'));
-
-      expect(getByText('GitHub Users')).toBeVisible();
-
-      fireEvent.click(getByText('Cancel'));
-
-      expect(queryByText('GitHub Users')).toBeNull();
-    });
-
-    test('updates users', () => {
-      const { getByText, baseElement } = setup();
-      fireEvent.click(getByText('Add or Remove Collaborators'));
-      fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
-      );
-      fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="ThirdUser"]'),
-      );
-      fireEvent.click(getByText('Save'));
-
-      expect(updateObject).toHaveBeenCalled();
-      expect(
-        updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
-      ).toEqual(['currentUser', 'TestGitHubUser', 'ThirdUser']);
-    });
-
-    test('opens confirm modal if removing assigned user', () => {
-      const { getByText, baseElement } = setup();
-      fireEvent.click(getByText('Add or Remove Collaborators'));
-      fireEvent.click(
-        baseElement.querySelector(
-          '.collaborator-button[title="TestGitHubUser"]',
-        ),
-      );
-      fireEvent.click(getByText('Save'));
-
-      expect(updateObject).not.toHaveBeenCalled();
-      expect(getByText('Confirm Removing Collaborator')).toBeVisible();
-    });
-
-    describe('"re-sync collaborators" click', () => {
-      test('updates users', () => {
-        const { getByText } = setup();
-        fireEvent.click(getByText('Add or Remove Collaborators'));
-        fireEvent.click(getByText('Re-Sync Collaborators'));
-
-        expect(refreshGitHubUsers).toHaveBeenCalledWith('r1');
-      });
-    });
-  });
-
-  describe('removeProjectUser', () => {
-    test('removes user from project', () => {
-      const { getByTitle } = setup({
-        initialState: {
-          ...defaultState,
-          projects: {
-            r1: {
-              ...defaultState.projects.r1,
-              projects: [
-                {
-                  ...defaultState.projects.r1.projects[0],
-                  github_users: [
-                    {
-                      id: '234567',
-                      login: 'OtherUser',
-                      avatar_url: 'https://example.com/avatar.png',
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        },
-      });
-      fireEvent.click(getByTitle('Remove'));
-
-      expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.github_users).toEqual([]);
-    });
-
-    test('opens confirm modal if removing assigned user', () => {
-      const { getByTitle, getByText } = setup({
-        initialState: {
-          ...defaultState,
-          projects: {
-            r1: {
-              ...defaultState.projects.r1,
-              projects: [
-                {
-                  ...defaultState.projects.r1.projects[0],
-                  github_users: [
-                    {
-                      id: '123456',
-                      login: 'TestGitHubUser',
-                      avatar_url: 'https://example.com/avatar.png',
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        },
-      });
-      fireEvent.click(getByTitle('Remove'));
-
-      expect(updateObject).not.toHaveBeenCalled();
-      expect(getByText('Confirm Removing Collaborator')).toBeVisible();
-    });
-  });
-
-  describe('<ConfirmRemoveUserModal />', () => {
-    let result;
-
-    beforeEach(() => {
-      const task = {
-        ...defaultState.tasks.project1[0],
-        assigned_qa: {
-          id: '234567',
-          login: 'OtherUser',
-          avatar_url: 'https://example.com/avatar.png',
-        },
-      };
-      result = setup({
-        initialState: {
-          ...defaultState,
-          tasks: { project1: [task, defaultState.tasks.project1[1]] },
-        },
-      });
-      fireEvent.click(result.getByText('Add or Remove Collaborators'));
-      fireEvent.click(
-        result.baseElement.querySelector(
-          '.collaborator-button[title="TestGitHubUser"]',
-        ),
-      );
-      fireEvent.click(
-        result.baseElement.querySelector(
-          '.collaborator-button[title="OtherUser"]',
-        ),
-      );
-      fireEvent.click(result.getByText('Save'));
-    });
-
-    describe('"cancel" click', () => {
-      test('closes modal', () => {
-        const { getByText, queryByText } = result;
-        fireEvent.click(getByText('Cancel'));
-
-        expect(queryByText('Confirm Removing Collaborators')).toBeNull();
-      });
-    });
-
-    describe('"confirm" click', () => {
-      test('removes user', () => {
-        const { getByText, queryByText } = result;
-        fireEvent.click(getByText('Confirm'));
-
-        expect(queryByText('Confirm Removing Collaborators')).toBeNull();
-        expect(updateObject).toHaveBeenCalled();
-        expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
-          { id: 'user-id', login: 'currentUser' },
-        ]);
-      });
-    });
-  });
-
-  describe('task assignUser', () => {
-    test('updates task assigned user', () => {
-      const { getAllByText, baseElement, getByText } = setup();
-      fireEvent.click(getAllByText('Assign Tester')[0]);
-      fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="currentUser"]'),
-      );
-      fireEvent.click(getByText('Save'));
-
-      expect(updateObject).toHaveBeenCalled();
-
-      const data = updateObject.mock.calls[0][0].data;
-
-      expect(data.assigned_qa.login).toEqual('currentUser');
-      expect(data.should_alert_qa).toBe(false);
-    });
-
-    test('closes modal if no users to assign', () => {
-      const { getByText, getAllByText } = setup({
-        initialState: {
-          ...defaultState,
-          projects: {
-            r1: {
-              ...defaultState.projects.r1,
-              projects: [
-                {
-                  ...defaultState.projects.r1.projects[0],
-                  github_users: [],
-                },
-              ],
-            },
-          },
-        },
-      });
-      fireEvent.click(getAllByText('Assign Tester')[0]);
-      fireEvent.click(getByText('Add Project Collaborators'));
-
-      expect(getByText('GitHub Users')).toBeVisible();
-    });
-
-    describe('alerts assigned user', () => {
-      test('assigning tester', () => {
-        const { getAllByText, baseElement, getByText } = setup();
-        fireEvent.click(getAllByText('Assign Tester')[0]);
-        fireEvent.click(
-          baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
-        );
-        fireEvent.click(getByText('Notify Assigned Tester by Email'));
-        fireEvent.click(getByText('Save'));
-
-        expect(updateObject.mock.calls[0][0].data.should_alert_qa).toBe(false);
-      });
-
-      test('does not auto toggle when assigning user (developer)', () => {
-        const { getAllByText, baseElement, getByText } = setup();
-        fireEvent.click(getAllByText('Assign Developer')[0]);
-        fireEvent.click(getByText('Notify Assigned Developer by Email'));
-        fireEvent.click(
-          baseElement.querySelector('.collaborator-button[title="OtherUser"]'),
-        );
-        fireEvent.click(getByText('Save'));
-
-        expect(updateObject.mock.calls[0][0].data.should_alert_dev).toBe(false);
-      });
-    });
-  });
-
-  describe('"Submit Project for Review on GitHub" click', () => {
-    test('opens modal', () => {
-      const { getByText, getAllByText } = setup({
-        initialState: {
-          ...defaultState,
-          projects: {
-            r1: {
-              ...defaultState.projects.r1,
-              projects: [
-                {
-                  ...defaultState.projects.r1.projects[0],
-                  has_unmerged_commits: true,
-                },
-              ],
-            },
-          },
-        },
-      });
-      fireEvent.click(getByText('Submit Project for Review on GitHub'));
-
-      getAllByText('Submit Project for Review on GitHub').forEach((element) => {
-        expect(element).toBeVisible();
-      });
-    });
-  });
-
-  describe('"Submit this project for review on GitHub" step click', () => {
-    test('opens modal', () => {
-      const { getByText, getByLabelText } = setup({
-        initialState: {
-          ...defaultState,
-          projects: {
-            r1: {
-              ...defaultState.projects.r1,
-              projects: [
-                {
-                  ...defaultState.projects.r1.projects[0],
-                  has_unmerged_commits: true,
-                },
-              ],
-            },
-          },
-        },
-      });
-      fireEvent.click(getByText('Submit this project for review on GitHub'));
-
-      expect(getByLabelText('Developer notes')).toBeVisible();
-    });
-  });
-
-  describe('submitting project for review', () => {
-    test('renders loading button', () => {
+  describe('fetching more epics', () => {
+    test('fetches next page of epics', () => {
       const { getByText } = setup({
         initialState: {
           ...defaultState,
-          projects: {
+          epics: {
             r1: {
-              ...defaultState.projects.r1,
-              projects: [
+              epics: [
                 {
-                  ...defaultState.projects.r1.projects[0],
-                  has_unmerged_commits: true,
-                  currently_creating_pr: true,
+                  branch_url: 'branch-url',
+                  description: 'project description',
+                  description_rendered: '<p>project description</p>',
+                  id: 'epic1',
+                  name: 'Epic 1',
+                  old_slugs: [],
+                  project: 'r1',
+                  slug: 'epic-1',
                 },
               ],
+              next: 'next-url',
+              notFound: [],
+              fetched: true,
             },
           },
         },
       });
+      const btn = getByText('Load More');
 
-      expect(
-        getByText('Submitting Project for Review on GitHub…'),
-      ).toBeVisible();
+      expect(btn).toBeVisible();
+
+      fireEvent.click(btn);
+
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { project: 'r1' },
+        objectType: 'epic',
+        url: 'next-url',
+      });
+
+      expect(getByText('Loading…')).toBeVisible();
     });
 
-    test('renders view pr button if pr_url exists', () => {
-      const { getByText } = setup({
+    test('hides btn when at end of list', () => {
+      const { queryByText } = setup({
         initialState: {
           ...defaultState,
-          projects: {
+          epics: {
             r1: {
-              ...defaultState.projects.r1,
-              projects: [
+              epics: [
                 {
-                  ...defaultState.projects.r1.projects[0],
-                  pr_url: 'https://example.com/',
+                  branch_url: 'branch-url',
+                  description: 'project description',
+                  description_rendered: '<p>project description</p>',
+                  id: 'epic1',
+                  name: 'Epic 1',
+                  old_slugs: [],
+                  project: 'r1',
+                  slug: 'epic-1',
                 },
               ],
+              next: null,
+              notFound: [],
+              fetched: true,
             },
           },
         },
       });
 
-      expect(getByText('View Pull Request')).toBeVisible();
-    });
-
-    test('renders view branch button if branch_url exists', () => {
-      const { getByText } = setup({
-        initialState: {
-          ...defaultState,
-          projects: {
-            r1: {
-              ...defaultState.projects.r1,
-              projects: [
-                {
-                  ...defaultState.projects.r1.projects[0],
-                  branch_url: 'https://example.com/',
-                },
-              ],
-            },
-          },
-        },
-      });
-
-      expect(getByText('View Branch')).toBeVisible();
+      expect(queryByText('Load More')).toBeNull();
     });
   });
 
-  describe('project options click', () => {
-    test('opens and closes edit modal', () => {
-      const { getByText, queryByText } = setup();
-      fireEvent.click(getByText('Project Options'));
-      fireEvent.click(getByText('Edit Project'));
-
-      expect(getByText('Edit Project')).toBeVisible();
-
-      fireEvent.click(getByText('Cancel'));
-
-      expect(queryByText('Edit Project')).toBeNull();
-    });
-
-    test('opens and closes delete modal', () => {
-      const { getByText, queryByText } = setup();
-      fireEvent.click(getByText('Project Options'));
-      fireEvent.click(getByText('Delete Project'));
-
-      expect(getByText('Confirm Deleting Project')).toBeVisible();
-
-      fireEvent.click(getByText('Cancel'));
-
-      expect(queryByText('Confirm Deleting Project')).toBeNull();
-    });
-  });
-
-  describe('<CreateTaskModal/>', () => {
-    test('open/close modal', () => {
+  describe('<CreateEpicModal />', () => {
+    test('opens/closes form', () => {
       const { queryByText, getByText } = setup();
-      fireEvent.click(getByText('Add a Task'));
+      fireEvent.click(getByText('Create an Epic'));
 
-      expect(getByText('Add a Task for Project 1')).toBeVisible();
+      expect(getByText('Create an Epic for Project 1')).toBeVisible();
 
       fireEvent.click(queryByText('Close'));
 
-      expect(queryByText('Add a Task for Project 1')).toBeNull();
+      expect(queryByText('Create an Epic for Project 1')).toBeNull();
     });
   });
 });

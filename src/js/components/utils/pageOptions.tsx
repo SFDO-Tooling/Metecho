@@ -23,10 +23,10 @@ const PageOptions = ({
       editLabel = i18n.t('Edit Task');
       deleteLabel = i18n.t('Delete Task');
       break;
-    case OBJECT_TYPES.PROJECT:
-      assistiveText = i18n.t('Project Options');
-      editLabel = i18n.t('Edit Project');
-      deleteLabel = i18n.t('Delete Project');
+    case OBJECT_TYPES.EPIC:
+      assistiveText = i18n.t('Epic Options');
+      editLabel = i18n.t('Edit Epic');
+      deleteLabel = i18n.t('Delete Epic');
       break;
   }
   return (

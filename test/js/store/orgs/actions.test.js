@@ -23,9 +23,7 @@ describe('provisionOrg', () => {
     const store = storeWithThunk({
       user: { id: 'user-id' },
       tasks: {
-        'project-id': [
-          { id: 'task-id', name: 'My Task', project: 'project-id' },
-        ],
+        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
       },
     });
     store.dispatch(
@@ -45,9 +43,7 @@ describe('provisionOrg', () => {
       const store = storeWithThunk({
         user: { id: 'user-id' },
         tasks: {
-          'project-id': [
-            { id: 'task-id', name: 'My Task', project: 'project-id' },
-          ],
+          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
         },
       });
       store.dispatch(
@@ -109,9 +105,7 @@ describe('provisionFailed', () => {
       const store = storeWithThunk({
         user: { id: 'user-id' },
         tasks: {
-          'project-id': [
-            { id: 'task-id', name: 'My Task', project: 'project-id' },
-          ],
+          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
         },
       });
       const org = {
@@ -264,9 +258,7 @@ describe('updateFailed', () => {
     const store = storeWithThunk({
       user: { id: 'user-id' },
       tasks: {
-        'project-id': [
-          { id: 'task-id', name: 'My Task', project: 'project-id' },
-        ],
+        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
       },
     });
     const org = {
@@ -353,9 +345,7 @@ describe('deleteOrg', () => {
       const store = storeWithThunk({
         user: { id: 'user-id' },
         tasks: {
-          'project-id': [
-            { id: 'task-id', name: 'My Task', project: 'project-id' },
-          ],
+          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
         },
       });
       const org = {
@@ -386,9 +376,7 @@ describe('deleteOrg', () => {
       const store = storeWithThunk({
         user: { id: 'user-id' },
         tasks: {
-          'project-id': [
-            { id: 'task-id', name: 'My Task', project: 'project-id' },
-          ],
+          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
         },
       });
       const org = {
@@ -424,9 +412,7 @@ describe('deleteFailed', () => {
       const store = storeWithThunk({
         user: { id: 'user-id' },
         tasks: {
-          'project-id': [
-            { id: 'task-id', name: 'My Task', project: 'project-id' },
-          ],
+          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
         },
       });
       const org = {
@@ -464,9 +450,7 @@ describe('commitSucceeded', () => {
     const store = storeWithThunk({
       user: { id: 'user-id' },
       tasks: {
-        'project-id': [
-          { id: 'task-id', name: 'My Task', project: 'project-id' },
-        ],
+        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
       },
     });
     const org = {
@@ -522,9 +506,7 @@ describe('commitFailed', () => {
     const store = storeWithThunk({
       user: { id: 'user-id' },
       tasks: {
-        'project-id': [
-          { id: 'task-id', name: 'My Task', project: 'project-id' },
-        ],
+        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
       },
     });
     const org = {
@@ -653,9 +635,7 @@ describe('orgRefreshed', () => {
     const store = storeWithThunk({
       user: { id: 'user-id' },
       tasks: {
-        'project-id': [
-          { id: 'task-id', name: 'My Task', project: 'project-id' },
-        ],
+        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
       },
     });
     const org = {
@@ -711,9 +691,7 @@ describe('refreshError', () => {
     const store = storeWithThunk({
       user: { id: 'user-id' },
       tasks: {
-        'project-id': [
-          { id: 'task-id', name: 'My Task', project: 'project-id' },
-        ],
+        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
       },
     });
     const org = {
@@ -836,9 +814,7 @@ describe('orgReassignFailed', () => {
     const store = storeWithThunk({
       user: { id: 'user-id' },
       tasks: {
-        'project-id': [
-          { id: 'task-id', name: 'My Task', project: 'project-id' },
-        ],
+        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
       },
     });
     const org = {

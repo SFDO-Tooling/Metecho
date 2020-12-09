@@ -122,7 +122,7 @@ const Login = () => {
                 size="x-small"
                 className="slds-m-right_x-small"
               />
-              {i18n.t('Assign projects and tasks to members of your team.')}
+              {i18n.t('Assign epics and tasks to members of your team.')}
             </li>
             <li className="slds-p-bottom_small slds-grid">
               <Icon
@@ -131,7 +131,7 @@ const Login = () => {
                 size="x-small"
                 className="slds-m-right_x-small"
               />
-              {i18n.t('Easily create a scratch org with the existing project.')}
+              {i18n.t('Easily create a scratch org with the existing epic.')}
             </li>
             <li className="slds-p-bottom_small slds-grid">
               <Icon

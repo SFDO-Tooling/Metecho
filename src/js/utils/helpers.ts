@@ -1,8 +1,8 @@
 import i18n from 'i18next';
 import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
 
+import { Epic } from '@/store/epics/reducer';
 import { Changeset, Org } from '@/store/orgs/reducer';
-import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
 import { TASK_STATUSES } from '@/utils/constants';
 
@@ -40,7 +40,7 @@ export const getOrgBehindLatestMsg = (
   return '';
 };
 
-export const getBranchLink = (object: Task | Project) => {
+export const getBranchLink = (object: Task | Epic) => {
   let branchLink, branchLinkText;
   if (object.pr_url) {
     branchLink = object.pr_url;
