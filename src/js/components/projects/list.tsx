@@ -8,7 +8,7 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '@/components/404';
-import RepositoryListItem from '@/components/repositories/listItem';
+import ProjectListItem from '@/components/projects/listItem';
 import {
   LabelWithSpinner,
   SpinnerWrapper,
@@ -16,47 +16,47 @@ import {
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { fetchObjects } from '@/store/actions';
-import { refreshRepos } from '@/store/repositories/actions';
+import { refreshProjects } from '@/store/projects/actions';
 import {
   selectNextUrl,
-  selectRepositories,
-  selectReposRefreshing,
-} from '@/store/repositories/selectors';
+  selectProjects,
+  selectProjectsRefreshing,
+} from '@/store/projects/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 
-const RepositoryList = withScroll(({ y }: ScrollProps) => {
-  const [fetchingRepositories, setFetchingRepositories] = useState(false);
+const ProjectList = withScroll(({ y }: ScrollProps) => {
+  const [fetchingProjects, setFetchingProjects] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
-  const repositories = useSelector(selectRepositories);
-  const refreshing = useSelector(selectReposRefreshing);
+  const projects = useSelector(selectProjects);
+  const refreshing = useSelector(selectProjectsRefreshing);
   const next = useSelector(selectNextUrl);
 
-  const doRefreshRepos = useCallback(() => {
-    dispatch(refreshRepos());
+  const doRefreshProjects = useCallback(() => {
+    dispatch(refreshProjects());
   }, [dispatch]);
 
   useEffect(() => {
-    if (fetchingRepositories || !next) {
+    if (fetchingProjects || !next) {
       return;
     }
 
-    const maybeFetchMoreRepositories = () => {
+    const maybeFetchMoreProjects = () => {
       /* istanbul ignore else */
-      if (next && !fetchingRepositories) {
+      if (next && !fetchingProjects) {
         /* istanbul ignore else */
         if (isMounted.current) {
-          setFetchingRepositories(true);
+          setFetchingProjects(true);
         }
         dispatch(
           fetchObjects({
-            objectType: OBJECT_TYPES.REPOSITORY,
+            objectType: OBJECT_TYPES.PROJECT,
             url: next,
           }),
         ).finally(() => {
           /* istanbul ignore else */
           if (isMounted.current) {
-            setFetchingRepositories(false);
+            setFetchingProjects(false);
           }
         });
       }
@@ -69,24 +69,24 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
       Infinity;
     const clientHeight =
       document.documentElement?.clientHeight || window.innerHeight;
-    // Fetch more repositories if within 100px of bottom of page...
+    // Fetch more projects if within 100px of bottom of page...
     const scrolledToBottom = scrollHeight - Math.ceil(y + clientHeight) <= 100;
 
     /* istanbul ignore else */
     if (scrolledToBottom) {
-      maybeFetchMoreRepositories();
+      maybeFetchMoreProjects();
     }
-  }, [y, next, fetchingRepositories, isMounted, dispatch]);
+  }, [y, next, fetchingProjects, isMounted, dispatch]);
 
   let contents;
-  switch (repositories.length) {
+  switch (projects.length) {
     case 0: {
-      // No repositories; show empty message
+      // No projects; show empty message
       const msg = (
-        <Trans i18nKey="noRepositoriesHelper">
-          We couldn’t find any repositories you have access to on GitHub.
-          Confirm that you are logged into the correct account or contact an
-          admin on GitHub.
+        <Trans i18nKey="noProjectsHelper">
+          We couldn’t find any projects you have access to on GitHub. Confirm
+          that you are logged into the correct account or contact an admin on
+          GitHub.
         </Trans>
       );
       contents = <EmptyIllustration message={msg} />;
@@ -95,8 +95,8 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
     default: {
       contents = (
         <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
-          {repositories.map((repository) => (
-            <RepositoryListItem repository={repository} key={repository.id} />
+          {projects.map((project) => (
+            <ProjectListItem project={project} key={project.id} />
           ))}
         </div>
       );
@@ -105,11 +105,11 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
   }
 
   return (
-    <DocumentTitle title={`${i18n.t('Repositories')} | ${i18n.t('Metecho')}`}>
+    <DocumentTitle title={`${i18n.t('Projects')} | ${i18n.t('Metecho')}`}>
       <>
         <PageHeader
           className="page-header slds-p-around_x-large"
-          title={i18n.t('Select a Repository')}
+          title={i18n.t('Select a Project')}
         />
         <div className="slds-p-around_x-large">
           <div className="slds-grid slds-grid_vertical-align-start">
@@ -122,15 +122,15 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
                 restricted-container"
             >
               <p className="slds-p-bottom_small">
-                <Trans i18nKey="repositoryListHelper">
-                  Contributor access on GitHub is required to view repositories.
-                  If you do not see the repository you’re looking for below,
-                  confirm that you are logged into the correct account or
-                  contact an admin on GitHub.
+                <Trans i18nKey="projectListHelper">
+                  Contributor access on GitHub is required to view projects. If
+                  you do not see the project you’re looking for below, confirm
+                  that you are logged into the correct account or contact an
+                  admin on GitHub.
                 </Trans>
               </p>
               {/* <Button
-                label={i18n.t('Create Repository')}
+                label={i18n.t('Create Project')}
                 variant="brand"
                 disabled
               /> */}
@@ -144,19 +144,19 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
               {refreshing ? (
                 <Button
                   label={
-                    <LabelWithSpinner label={i18n.t('Syncing GitHub Repos…')} />
+                    <LabelWithSpinner label={i18n.t('Syncing Projects…')} />
                   }
                   variant="outline-brand"
                   disabled
                 />
               ) : (
                 <Button
-                  label={i18n.t('Re-Sync GitHub Repositories')}
+                  label={i18n.t('Re-Sync Projects')}
                   variant="outline-brand"
                   iconCategory="utility"
                   iconName="refresh"
                   iconPosition="left"
-                  onClick={doRefreshRepos}
+                  onClick={doRefreshProjects}
                 />
               )}
             </div>
@@ -170,7 +170,7 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
           ) : (
             contents
           )}
-          {fetchingRepositories ? (
+          {fetchingProjects ? (
             <div className="slds-align_absolute-center slds-m-top_x-large">
               <span className="slds-is-relative slds-m-right_large">
                 <SpinnerWrapper variant="brand" size="small" />
@@ -184,4 +184,4 @@ const RepositoryList = withScroll(({ y }: ScrollProps) => {
   );
 });
 
-export default RepositoryList;
+export default ProjectList;

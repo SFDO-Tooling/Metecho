@@ -1,17 +1,17 @@
 from django_filters import rest_framework as filters
 
-from .models import Epic, Repository, ScratchOrg, Task
+from .models import Epic, Project, ScratchOrg, Task
 
 
 def slug_is_active(queryset, name, value):
     return queryset.filter(**{f"{name}__slug": value, f"{name}__is_active": True})
 
 
-class RepositoryFilter(filters.FilterSet):
+class ProjectFilter(filters.FilterSet):
     slug = filters.CharFilter(field_name="slugs", method=slug_is_active)
 
     class Meta:
-        model = Repository
+        model = Project
         fields = ("slug",)
 
 
@@ -20,7 +20,7 @@ class EpicFilter(filters.FilterSet):
 
     class Meta:
         model = Epic
-        fields = ("repository", "slug")
+        fields = ("project", "slug")
 
 
 class TaskFilter(filters.FilterSet):

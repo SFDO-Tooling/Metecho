@@ -1,7 +1,7 @@
 import fetchMock from 'fetch-mock';
 
 import { fetchObjects } from '@/store/actions';
-import * as actions from '@/store/repositories/actions';
+import * as actions from '@/store/projects/actions';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 import { storeWithThunk } from './../../utils';
@@ -10,14 +10,14 @@ jest.mock('@/store/actions');
 
 fetchObjects.mockReturnValue({ type: 'TEST', payload: {} });
 
-describe('refreshRepos', () => {
+describe('refreshProjects', () => {
   let url;
 
   beforeAll(() => {
-    url = window.api_urls.repository_list();
+    url = window.api_urls.project_list();
   });
 
-  test('dispatches RefreshRepos action', () => {
+  test('dispatches RefreshProjects action', () => {
     const store = storeWithThunk({});
     fetchMock.getOnce(url, {
       next: null,
@@ -27,38 +27,38 @@ describe('refreshRepos', () => {
       status: 204,
       body: {},
     });
-    const RefreshReposRequested = {
-      type: 'REFRESH_REPOS_REQUESTED',
+    const RefreshProjectsRequested = {
+      type: 'REFRESH_PROJECTS_REQUESTED',
     };
-    const RefreshReposAccepted = {
-      type: 'REFRESH_REPOS_ACCEPTED',
+    const RefreshProjectsAccepted = {
+      type: 'REFRESH_PROJECTS_ACCEPTED',
     };
 
     expect.assertions(1);
-    return store.dispatch(actions.refreshRepos()).then(() => {
+    return store.dispatch(actions.refreshProjects()).then(() => {
       expect(store.getActions()).toEqual([
-        RefreshReposRequested,
-        RefreshReposAccepted,
+        RefreshProjectsRequested,
+        RefreshProjectsAccepted,
       ]);
     });
   });
 
   describe('error', () => {
-    test('dispatches REFRESH_REPOS_REJECTED action', () => {
+    test('dispatches REFRESH_PROJECTS_REJECTED action', () => {
       const store = storeWithThunk({});
       fetchMock.postOnce(window.api_urls.user_refresh(), {
         status: 500,
         body: { non_field_errors: ['Foobar'] },
       });
       const started = {
-        type: 'REFRESH_REPOS_REQUESTED',
+        type: 'REFRESH_PROJECTS_REQUESTED',
       };
       const failed = {
-        type: 'REFRESH_REPOS_REJECTED',
+        type: 'REFRESH_PROJECTS_REJECTED',
       };
 
       expect.assertions(5);
-      return store.dispatch(actions.refreshRepos()).catch(() => {
+      return store.dispatch(actions.refreshProjects()).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
@@ -71,36 +71,36 @@ describe('refreshRepos', () => {
   });
 });
 
-describe('reposRefreshing', () => {
-  test('returns REFRESHING_REPOS action', () => {
-    const expected = { type: 'REFRESHING_REPOS' };
+describe('projectsRefreshing', () => {
+  test('returns REFRESHING_PROJECTS action', () => {
+    const expected = { type: 'REFRESHING_PROJECTS' };
 
-    expect(actions.reposRefreshing()).toEqual(expected);
+    expect(actions.projectsRefreshing()).toEqual(expected);
   });
 });
 
-describe('reposRefreshed', () => {
-  test('dispatches ReposRefreshed action', () => {
+describe('projectsRefreshed', () => {
+  test('dispatches ProjectsRefreshed action', () => {
     const store = storeWithThunk({});
-    const ReposRefreshed = {
-      type: 'REPOS_REFRESHED',
+    const ProjectsRefreshed = {
+      type: 'PROJECTS_REFRESHED',
     };
-    store.dispatch(actions.reposRefreshed());
+    store.dispatch(actions.projectsRefreshed());
 
-    expect(store.getActions()[0]).toEqual(ReposRefreshed);
+    expect(store.getActions()[0]).toEqual(ProjectsRefreshed);
     expect(fetchObjects).toHaveBeenCalledWith({
-      objectType: OBJECT_TYPES.REPOSITORY,
+      objectType: OBJECT_TYPES.PROJECT,
       reset: true,
     });
   });
 });
 
 describe('refreshGitHubUsers', () => {
-  const repoId = 'repo-id';
+  const projectId = 'project-id';
   let url;
 
   beforeAll(() => {
-    url = window.api_urls.repository_refresh_github_users(repoId);
+    url = window.api_urls.project_refresh_github_users(projectId);
   });
 
   test('dispatches RefreshGitHubUsers actions', () => {
@@ -108,15 +108,15 @@ describe('refreshGitHubUsers', () => {
     fetchMock.postOnce(url, 202);
     const RefreshGitHubUsersRequested = {
       type: 'REFRESH_GH_USERS_REQUESTED',
-      payload: repoId,
+      payload: projectId,
     };
     const RefreshGitHubUsersAccepted = {
       type: 'REFRESH_GH_USERS_ACCEPTED',
-      payload: repoId,
+      payload: projectId,
     };
 
     expect.assertions(1);
-    return store.dispatch(actions.refreshGitHubUsers(repoId)).then(() => {
+    return store.dispatch(actions.refreshGitHubUsers(projectId)).then(() => {
       expect(store.getActions()).toEqual([
         RefreshGitHubUsersRequested,
         RefreshGitHubUsersAccepted,
@@ -133,15 +133,15 @@ describe('refreshGitHubUsers', () => {
       });
       const started = {
         type: 'REFRESH_GH_USERS_REQUESTED',
-        payload: repoId,
+        payload: projectId,
       };
       const failed = {
         type: 'REFRESH_GH_USERS_REJECTED',
-        payload: repoId,
+        payload: projectId,
       };
 
       expect.assertions(5);
-      return store.dispatch(actions.refreshGitHubUsers(repoId)).catch(() => {
+      return store.dispatch(actions.refreshGitHubUsers(projectId)).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
@@ -154,28 +154,28 @@ describe('refreshGitHubUsers', () => {
   });
 });
 
-describe('updateRepo', () => {
-  test('returns RepoUpdated', () => {
-    const expected = { type: 'REPOSITORY_UPDATE', payload: {} };
+describe('updateProject', () => {
+  test('returns ProjectUpdated', () => {
+    const expected = { type: 'PROJECT_UPDATE', payload: {} };
 
-    expect(actions.updateRepo({})).toEqual(expected);
+    expect(actions.updateProject({})).toEqual(expected);
   });
 });
 
-describe('repoError', () => {
-  test('adds error message and updates repo', () => {
+describe('projectError', () => {
+  test('adds error message and updates project', () => {
     const store = storeWithThunk({ user: { id: 'user-id' } });
-    const repo = {
-      id: 'repo-id',
-      name: 'My Repo',
+    const project = {
+      id: 'project-id',
+      name: 'My Project',
     };
     const action = {
-      type: 'REPOSITORY_UPDATE',
-      payload: repo,
+      type: 'PROJECT_UPDATE',
+      payload: project,
     };
     store.dispatch(
-      actions.repoError({
-        model: repo,
+      actions.projectError({
+        model: project,
         message: 'error msg',
         originating_user_id: 'user-id',
       }),
@@ -184,7 +184,7 @@ describe('repoError', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error re-syncing collaborators for this repository: “My Repo”.',
+      'Uh oh. There was an error re-syncing GitHub users for this project: “My Project”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -193,17 +193,17 @@ describe('repoError', () => {
 
   test('does not add message if not owned by current user', () => {
     const store = storeWithThunk({ user: { id: 'user-id' } });
-    const repo = {
-      id: 'repo-id',
-      name: 'My Repo',
+    const project = {
+      id: 'project-id',
+      name: 'My Project',
     };
     const action = {
-      type: 'REPOSITORY_UPDATE',
-      payload: repo,
+      type: 'PROJECT_UPDATE',
+      payload: project,
     };
     store.dispatch(
-      actions.repoError({
-        model: repo,
+      actions.projectError({
+        model: project,
         message: 'error msg',
         originating_user_id: 'another-user-id',
       }),

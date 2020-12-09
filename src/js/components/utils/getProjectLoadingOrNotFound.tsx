@@ -1,29 +1,21 @@
 import React, { ReactElement } from 'react';
 
-import EpicNotFound from '@/components/epics/epic404';
 import ProjectNotFound from '@/components/projects/project404';
 import { SpinnerWrapper } from '@/components/utils';
-import { Epic } from '@/store/epics/reducer';
 import { Project } from '@/store/projects/reducer';
 
 export default ({
   project,
-  epic,
-  epicSlug,
+  projectSlug,
 }: {
   project?: Project | null;
-  epic?: Epic | null;
-  epicSlug?: string;
+  projectSlug?: string;
 }): ReactElement | false => {
-  if (!epic) {
-    /* istanbul ignore if */
-    if (!project) {
+  if (!project) {
+    if (!projectSlug || project === null) {
       return <ProjectNotFound />;
     }
-    if (!epicSlug || epic === null) {
-      return <EpicNotFound project={project} />;
-    }
-    // Fetching epic from API
+    // Fetching project from API
     return <SpinnerWrapper />;
   }
   return false;

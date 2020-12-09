@@ -4,8 +4,8 @@ from ...models import (
     Epic,
     EpicSlug,
     GitHubRepository,
-    Repository,
-    RepositorySlug,
+    Project,
+    ProjectSlug,
     ScratchOrg,
     Task,
     TaskSlug,
@@ -23,8 +23,8 @@ class Command(BaseCommand):
             EpicSlug,
             Epic,
             GitHubRepository,
-            RepositorySlug,
-            Repository,
+            ProjectSlug,
+            Project,
         ]
 
         for model_class in ordered_models:

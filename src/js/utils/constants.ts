@@ -1,6 +1,6 @@
 export type ObjectTypes =
   | 'user'
-  | 'repository'
+  | 'project'
   | 'epic'
   | 'task'
   | 'scratch_org'
@@ -10,7 +10,7 @@ export type ObjectTypes =
 
 export const OBJECT_TYPES = {
   USER: 'user' as const,
-  REPOSITORY: 'repository' as const,
+  PROJECT: 'project' as const,
   EPIC: 'epic' as const,
   TASK: 'task' as const,
   ORG: 'scratch_org' as const,

@@ -14,7 +14,7 @@ import { AnyAction } from 'redux';
 
 import { LabelWithSpinner, useForm, useIsMounted } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
-import { Repository } from '@/store/repositories/reducer';
+import { Project } from '@/store/projects/reducer';
 import { User } from '@/store/user/reducer';
 import apiFetch from '@/utils/api';
 import { OBJECT_TYPES } from '@/utils/constants';
@@ -27,14 +27,14 @@ interface ComboboxOption {
 
 interface Props extends RouteComponentProps {
   user: User;
-  repository: Repository;
+  project: Project;
   isOpen: boolean;
   closeCreateModal: () => void;
 }
 
 const CreateEpicModal = ({
   user,
-  repository,
+  project,
   isOpen,
   closeCreateModal,
   history,
@@ -44,7 +44,7 @@ const CreateEpicModal = ({
   // state related to setting base branch on epic creation
   const [fromBranchChecked, setFromBranchChecked] = useState(false);
   const [fetchingBranches, setFetchingBranches] = useState(false);
-  const [repoBranches, setRepoBranches] = useState<string[]>([]);
+  const [projectBranches, setProjectBranches] = useState<string[]>([]);
   const [filterVal, setFilterVal] = useState('');
 
   const submitButton = useRef<HTMLButtonElement | null>(null);
@@ -65,7 +65,7 @@ const CreateEpicModal = ({
       objectType === OBJECT_TYPES.EPIC &&
       object?.slug
     ) {
-      const url = routes.epic_detail(repository.slug, object.slug);
+      const url = routes.epic_detail(project.slug, object.slug);
       history.push(url);
     }
   };
@@ -77,7 +77,7 @@ const CreateEpicModal = ({
     }
   };
 
-  const githubUser = repository.github_users.find(
+  const githubUser = project.github_users.find(
     (ghUser) => ghUser.login === user.username,
   );
   const {
@@ -91,7 +91,7 @@ const CreateEpicModal = ({
     fields: { name: '', description: '', branch_name: '' },
     objectType: OBJECT_TYPES.EPIC,
     additionalData: {
-      repository: repository.id,
+      project: project.id,
       github_users: githubUser ? [githubUser] : [],
     },
     onSuccess,
@@ -127,12 +127,12 @@ const CreateEpicModal = ({
     // fetching feature branches here when option selected,
     // in lieu of storing in store...
     const baseBranches = await apiFetch({
-      url: `${window.api_urls.repository_feature_branches(repository.id)}`,
+      url: `${window.api_urls.project_feature_branches(project.id)}`,
       dispatch,
     });
     /* istanbul ignore else */
     if (isMounted.current) {
-      setRepoBranches(baseBranches);
+      setProjectBranches(baseBranches);
       setFetchingBranches(false);
     }
   };
@@ -178,18 +178,20 @@ const CreateEpicModal = ({
   };
 
   const handleBranchBlur = () => {
-    if (repoBranches.includes(filterVal)) {
+    if (projectBranches.includes(filterVal)) {
       setBranch(filterVal);
     }
     resetFilterVal();
   };
 
-  const noFeatureBranches = !repoBranches.length;
+  const noFeatureBranches = !projectBranches.length;
   const inputVal = inputs.branch_name;
-  const branchOptions: ComboboxOption[] = repoBranches.map((item, index) => ({
-    id: `${index + 1}`,
-    label: item,
-  }));
+  const branchOptions: ComboboxOption[] = projectBranches.map(
+    (item, index) => ({
+      id: `${index + 1}`,
+      label: item,
+    }),
+  );
   const selection = branchOptions.find((branch) => branch.label === inputVal);
   let noOptionsFoundText = null;
   if (fetchingBranches) {
@@ -220,7 +222,7 @@ const CreateEpicModal = ({
       isOpen={isOpen}
       size="small"
       disableClose={isSaving}
-      heading={`${i18n.t('Create an Epic for')} ${repository.name}`}
+      heading={`${i18n.t('Create an Epic for')} ${project.name}`}
       onRequestClose={closeForm}
       footer={[
         <Button

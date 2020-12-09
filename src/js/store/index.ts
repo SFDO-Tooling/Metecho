@@ -4,9 +4,7 @@ import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 import epicsReducer, { EpicsState } from '@/store/epics/reducer';
 import errorsReducer, { ErrorType } from '@/store/errors/reducer';
 import orgReducer, { OrgState } from '@/store/orgs/reducer';
-import repositoriesReducer, {
-  RepositoriesState,
-} from '@/store/repositories/reducer';
+import projectsReducer, { ProjectsState } from '@/store/projects/reducer';
 import socketReducer, { Socket } from '@/store/socket/reducer';
 import taskReducer, { TaskState } from '@/store/tasks/reducer';
 import toastsReducer, { ToastType } from '@/store/toasts/reducer';
@@ -17,7 +15,7 @@ export interface AppState {
   toasts: ToastType[];
   orgs: OrgState;
   epics: EpicsState;
-  repositories: RepositoriesState;
+  projects: ProjectsState;
   socket: Socket;
   tasks: TaskState;
   user: User | null;
@@ -36,7 +34,7 @@ const reducer: Reducer<AppState> = combineReducers({
   errors: errorsReducer,
   orgs: orgReducer,
   epics: epicsReducer,
-  repositories: repositoriesReducer,
+  projects: projectsReducer,
   socket: socketReducer,
   tasks: taskReducer,
   user: userReducer,

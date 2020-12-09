@@ -4,32 +4,32 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { AppState, ThunkDispatch } from '@/store';
 import { fetchObjects } from '@/store/actions';
-import { selectEpicsByRepository } from '@/store/epics/selectors';
-import { Repository } from '@/store/repositories/reducer';
+import { selectEpicsByProject } from '@/store/epics/selectors';
+import { Project } from '@/store/projects/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 export default (
-  repository: Repository | null | undefined,
+  project: Project | null | undefined,
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const selectEpicsWithProps = useCallback(selectEpicsByRepository, []);
+  const selectEpicsWithProps = useCallback(selectEpicsByProject, []);
   const epics = useSelector((state: AppState) =>
     selectEpicsWithProps(state, routeProps),
   );
 
   useEffect(() => {
-    if (repository && !epics?.fetched) {
+    if (project && !epics?.fetched) {
       // Fetch epics from API
       dispatch(
         fetchObjects({
           objectType: OBJECT_TYPES.EPIC,
-          filters: { repository: repository.id },
+          filters: { project: project.id },
           reset: true,
         }),
       );
     }
-  }, [dispatch, repository, epics?.fetched]);
+  }, [dispatch, project, epics?.fetched]);
 
   return { epics };
 };

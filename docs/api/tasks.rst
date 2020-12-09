@@ -33,8 +33,8 @@ Retrieve
         "has_unmerged_commits": true,
         "currently_creating_pr": false,
         "branch_name": "feature/test-epic__test-task",
-        "branch_url": "https://github.com/SFDO-Tooling/test-repository/tree/feature/test-epic__test-task",
-        "branch_diff_url": "https://github.com/SFDO-Tooling/test-repository/compare/feature/test-epic...feature/test-epic__test-task",
+        "branch_url": "https://github.com/SFDO-Tooling/test-project/tree/feature/test-epic__test-task",
+        "branch_diff_url": "https://github.com/SFDO-Tooling/test-project/compare/feature/test-epic...feature/test-epic__test-task",
         "commits": [
           {
             "id": "617a512",
@@ -51,7 +51,7 @@ Retrieve
           ...
         ],
         "origin_sha": "723b342",
-        "pr_url": "https://github.com/SFDO-Tooling/test-repository/pull/1357",
+        "pr_url": "https://github.com/SFDO-Tooling/test-project/pull/1357",
         "pr_is_open": true,
         "status": "Planned",
         "currently_submitting_review": false,

@@ -259,13 +259,13 @@ class User(HashIdMixin, AbstractUser):
             return False
 
 
-class RepositorySlug(AbstractSlug):
+class ProjectSlug(AbstractSlug):
     parent = models.ForeignKey(
-        "Repository", on_delete=models.CASCADE, related_name="slugs"
+        "Project", on_delete=models.CASCADE, related_name="slugs"
     )
 
 
-class Repository(
+class Project(
     PushMixin,
     PopulateRepoIdMixin,
     HashIdMixin,
@@ -296,20 +296,20 @@ class Repository(
     #   }
     github_users = models.JSONField(default=list, blank=True)
 
-    slug_class = RepositorySlug
+    slug_class = ProjectSlug
     tracker = FieldTracker(fields=["name"])
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
     # begin PushMixin configuration:
-    push_update_type = "REPOSITORY_UPDATE"
-    push_error_type = "REPOSITORY_UPDATE_ERROR"
+    push_update_type = "PROJECT_UPDATE"
+    push_error_type = "PROJECT_UPDATE_ERROR"
 
     def get_serialized_representation(self, user):
-        from .serializers import RepositorySerializer
+        from .serializers import ProjectSerializer
 
-        return RepositorySerializer(
+        return ProjectSerializer(
             self, context=self._create_context_with_user(user)
         ).data
 
@@ -319,7 +319,6 @@ class Repository(
         return self.name
 
     class Meta:
-        verbose_name_plural = "repositories"
         ordering = ("name",)
         unique_together = (("repo_owner", "repo_name"),)
 
@@ -336,7 +335,7 @@ class Repository(
         if not self.repo_image_url:
             from .jobs import get_social_image_job
 
-            get_social_image_job.delay(repository=self)
+            get_social_image_job.delay(project=self)
 
         super().save(*args, **kwargs)
 
@@ -360,12 +359,12 @@ class Repository(
         from .jobs import refresh_commits_job
 
         refresh_commits_job.delay(
-            repository=self, branch_name=ref, originating_user_id=originating_user_id
+            project=self, branch_name=ref, originating_user_id=originating_user_id
         )
 
     @transaction.atomic
     def add_commits(self, *, commits, ref, sender):
-        matching_tasks = Task.objects.filter(branch_name=ref, epic__repository=self)
+        matching_tasks = Task.objects.filter(branch_name=ref, epic__project=self)
 
         for task in matching_tasks:
             task.add_commits(commits, sender)
@@ -420,9 +419,7 @@ class Epic(
     available_task_org_config_names = models.JSONField(default=list, blank=True)
     currently_fetching_org_config_names = models.BooleanField(default=False)
 
-    repository = models.ForeignKey(
-        Repository, on_delete=models.PROTECT, related_name="epics"
-    )
+    project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="epics")
 
     # User data is shaped like this:
     #   {
@@ -466,10 +463,10 @@ class Epic(
     create_pr_event = "EPIC_CREATE_PR"
 
     def get_repo_id(self):
-        return self.repository.get_repo_id()
+        return self.project.get_repo_id()
 
     def get_base(self):
-        return self.repository.branch_name
+        return self.project.branch_name
 
     def get_head(self):
         return self.branch_name
@@ -560,7 +557,7 @@ class Epic(
         # We enforce this in business logic, not in the database, as we
         # need to limit this constraint only to active Epics, and
         # make the name column case-insensitive:
-        # unique_together = (("name", "repository"),)
+        # unique_together = (("name", "project"),)
 
 
 class TaskSlug(AbstractSlug):
@@ -667,7 +664,7 @@ class Task(
             self.save()
 
     def get_repo_id(self):
-        return self.epic.repository.get_repo_id()
+        return self.epic.project.get_repo_id()
 
     def get_base(self):
         return self.epic.branch_name
@@ -685,9 +682,9 @@ class Task(
         if user:
             task = self
             epic = task.epic
-            repo = epic.repository
+            project = epic.project
             metecho_link = get_user_facing_url(
-                path=["repositories", repo.slug, epic.slug, task.slug]
+                path=["projects", project.slug, epic.slug, task.slug]
             )
             subject = _("Metecho Task Submitted for Testing")
             body = render_to_string(
@@ -695,7 +692,7 @@ class Task(
                 {
                     "task_name": task.name,
                     "epic_name": epic.name,
-                    "repo_name": repo.name,
+                    "project_name": project.name,
                     "assigned_user_name": user.username,
                     "metecho_link": metecho_link,
                 },
@@ -718,8 +715,8 @@ class Task(
         if head and base:
             repo = gh.get_repo_info(
                 None,
-                repo_owner=self.epic.repository.repo_owner,
-                repo_name=self.epic.repository.repo_name,
+                repo_owner=self.epic.project.repo_owner,
+                repo_name=self.epic.project.repo_name,
             )
             base_sha = repo.branch(base).commit.sha
             head_sha = repo.branch(head).commit.sha
@@ -1151,6 +1148,6 @@ def ensure_slug_handler(sender, *, created, instance, **kwargs):
         )
 
 
-post_save.connect(ensure_slug_handler, sender=Repository)
+post_save.connect(ensure_slug_handler, sender=Project)
 post_save.connect(ensure_slug_handler, sender=Epic)
 post_save.connect(ensure_slug_handler, sender=Task)

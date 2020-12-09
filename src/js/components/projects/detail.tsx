@@ -8,14 +8,14 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import CreateEpicModal from '@/components/epics/createForm';
 import EpicTable from '@/components/epics/table';
-import RepositoryNotFound from '@/components/repositories/repository404';
+import ProjectNotFound from '@/components/projects/project404';
 import {
   DetailPageLayout,
-  getRepositoryLoadingOrNotFound,
+  getProjectLoadingOrNotFound,
   LabelWithSpinner,
   SpinnerWrapper,
   useFetchEpicsIfMissing,
-  useFetchRepositoryIfMissing,
+  useFetchProjectIfMissing,
   useIsMounted,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
@@ -25,18 +25,18 @@ import { selectUserState } from '@/store/user/selectors';
 import { OBJECT_TYPES } from '@/utils/constants';
 import routes from '@/utils/routes';
 
-const RepositoryDetail = (props: RouteComponentProps) => {
+const ProjectDetail = (props: RouteComponentProps) => {
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
-  const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
-  const { epics } = useFetchEpicsIfMissing(repository, props);
+  const { project, projectSlug } = useFetchProjectIfMissing(props);
+  const { epics } = useFetchEpicsIfMissing(project, props);
   const user = useSelector(selectUserState) as User;
 
-  const loadingOrNotFound = getRepositoryLoadingOrNotFound({
-    repository,
-    repositorySlug,
+  const loadingOrNotFound = getProjectLoadingOrNotFound({
+    project,
+    projectSlug,
   });
 
   if (loadingOrNotFound !== false) {
@@ -45,13 +45,13 @@ const RepositoryDetail = (props: RouteComponentProps) => {
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!repository) {
-    return <RepositoryNotFound />;
+  if (!project) {
+    return <ProjectNotFound />;
   }
 
-  if (repositorySlug && repositorySlug !== repository.slug) {
-    // Redirect to most recent repository slug
-    return <Redirect to={routes.repository_detail(repository.slug)} />;
+  if (projectSlug && projectSlug !== project.slug) {
+    // Redirect to most recent project slug
+    return <Redirect to={routes.project_detail(project.slug)} />;
   }
 
   const fetchMoreEpics = () => {
@@ -65,7 +65,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
       dispatch(
         fetchObjects({
           objectType: OBJECT_TYPES.EPIC,
-          filters: { repository: repository.id },
+          filters: { project: project.id },
           url: epics.next,
         }),
       ).finally(() => {
@@ -83,14 +83,14 @@ const RepositoryDetail = (props: RouteComponentProps) => {
   const hasEpics = epics && epics.epics.length > 0;
 
   return (
-    <DocumentTitle title={`${repository.name} | ${i18n.t('Metecho')}`}>
+    <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
-        title={repository.name}
-        description={repository.description_rendered}
-        headerUrl={repository.repo_url}
-        headerUrlText={`${repository.repo_owner}/${repository.repo_name}`}
-        breadcrumb={[{ name: repository.name }]}
-        image={repository.repo_image_url}
+        title={project.name}
+        description={project.description_rendered}
+        headerUrl={project.repo_url}
+        headerUrlText={`${project.repo_owner}/${project.repo_name}`}
+        breadcrumb={[{ name: project.name }]}
+        image={project.repo_image_url}
       >
         {!epics || !epics.fetched ? (
           // Fetching epics from API
@@ -99,8 +99,8 @@ const RepositoryDetail = (props: RouteComponentProps) => {
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
               {hasEpics
-                ? `${i18n.t('Epics for')} ${repository.name}`
-                : `${i18n.t('Create an Epic for')} ${repository.name}`}
+                ? `${i18n.t('Epics for')} ${project.name}`
+                : `${i18n.t('Create an Epic for')} ${project.name}`}
             </h2>
             {!hasEpics && (
               <p className="slds-m-bottom_large">
@@ -122,10 +122,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
             />
             {hasEpics && (
               <>
-                <EpicTable
-                  epics={epics.epics}
-                  repositorySlug={repository.slug}
-                />
+                <EpicTable epics={epics.epics} projectSlug={project.slug} />
                 {epics.next ? (
                   <div className="slds-m-top_large">
                     <Button
@@ -146,7 +143,7 @@ const RepositoryDetail = (props: RouteComponentProps) => {
         )}
         <CreateEpicModal
           user={user}
-          repository={repository}
+          project={project}
           isOpen={createModalOpen}
           closeCreateModal={closeCreateModal}
         />
@@ -155,4 +152,4 @@ const RepositoryDetail = (props: RouteComponentProps) => {
   );
 };
 
-export default RepositoryDetail;
+export default ProjectDetail;

@@ -6,7 +6,7 @@ API Reference
    :caption: Contents:
 
    user
-   repositories
+   projects
    epics
    tasks
    scratch-orgs

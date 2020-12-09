@@ -16,7 +16,7 @@ const defaultEpic = {
   id: 'epic1',
   slug: 'epic-1',
   name: 'Epic 1',
-  repository: 'r1',
+  project: 'r1',
   branch_url: 'https://github.com/test/test-repo/tree/branch-name',
   branch_name: 'branch-name',
   github_users: [jonny, stacy],

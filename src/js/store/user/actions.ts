@@ -1,5 +1,8 @@
 import { ThunkResult } from '@/store';
-import { reposRefreshed, reposRefreshing } from '@/store/repositories/actions';
+import {
+  projectsRefreshed,
+  projectsRefreshing,
+} from '@/store/projects/actions';
 import { User } from '@/store/user/reducer';
 import apiFetch from '@/utils/api';
 import { LIST_CHANNEL_ID, OBJECT_TYPES } from '@/utils/constants';
@@ -102,8 +105,8 @@ export const refetchAllData = (): ThunkResult<
       return dispatch({ type: 'USER_LOGGED_OUT' as const });
     }
     dispatch(login(payload));
-    dispatch(reposRefreshing());
-    dispatch(reposRefreshed());
+    dispatch(projectsRefreshing());
+    dispatch(projectsRefreshed());
     return dispatch({
       type: 'REFETCH_DATA_SUCCEEDED' as const,
     });

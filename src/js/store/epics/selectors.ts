@@ -2,26 +2,22 @@ import { RouteComponentProps } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '@/store';
-import {
-  Epic,
-  EpicsByRepositoryState,
-  EpicsState,
-} from '@/store/epics/reducer';
-import { Repository } from '@/store/repositories/reducer';
-import { selectRepository } from '@/store/repositories/selectors';
+import { Epic, EpicsByProjectState, EpicsState } from '@/store/epics/reducer';
+import { Project } from '@/store/projects/reducer';
+import { selectProject } from '@/store/projects/selectors';
 
 export const selectEpicState = (appState: AppState): EpicsState =>
   appState.epics;
 
-export const selectEpicsByRepository = createSelector(
-  [selectEpicState, selectRepository],
+export const selectEpicsByProject = createSelector(
+  [selectEpicState, selectProject],
   (
     epics: EpicsState,
-    repository?: Repository | null,
-  ): EpicsByRepositoryState | undefined => {
+    project?: Project | null,
+  ): EpicsByProjectState | undefined => {
     /* istanbul ignore else */
-    if (repository) {
-      return epics[repository.id];
+    if (project) {
+      return epics[project.id];
     }
     return undefined;
   },
@@ -33,13 +29,13 @@ export const selectEpicSlug = (
 ) => params.epicSlug;
 
 export const selectEpicNotFound = createSelector(
-  [selectEpicsByRepository, selectEpicSlug],
+  [selectEpicsByProject, selectEpicSlug],
   (epics, epicSlug): boolean =>
     Boolean(epicSlug && epics?.notFound.includes(epicSlug)),
 );
 
 export const selectEpic = createSelector(
-  [selectEpicsByRepository, selectEpicSlug, selectEpicNotFound],
+  [selectEpicsByProject, selectEpicSlug, selectEpicNotFound],
   (epics, epicSlug, notFound): Epic | null | undefined => {
     if (!epicSlug || !epics) {
       return undefined;

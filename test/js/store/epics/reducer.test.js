@@ -16,12 +16,12 @@ describe('reducer', () => {
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const expected = {};
       const actual = reducer(
         {
-          'repository-1': {
+          'project-1': {
             epics: [epic1],
             next: 'next-url',
             notFound: ['epic-2'],
@@ -35,29 +35,29 @@ describe('reducer', () => {
   );
 
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
-    test('resets epics list for repository if `reset: true`', () => {
+    test('resets epics list for project if `reset: true`', () => {
       const epic1 = {
         id: 'r1',
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const epic2 = {
         id: 'p2',
         slug: 'epic-2',
         name: 'Epic 2',
         description: 'This is another test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const expected = {
-        'repository-1': {
+        'project-1': {
           epics: [epic2],
           next: 'next-url',
           notFound: [],
           fetched: true,
         },
-        'repository-2': {
+        'project-2': {
           epics: [],
           next: null,
           notFound: [],
@@ -66,13 +66,13 @@ describe('reducer', () => {
       };
       const actual = reducer(
         {
-          'repository-1': {
+          'project-1': {
             epics: [epic1],
             next: null,
             notFound: [],
             fetched: false,
           },
-          'repository-2': {
+          'project-2': {
             epics: [],
             next: null,
             notFound: [],
@@ -85,7 +85,7 @@ describe('reducer', () => {
             response: { results: [epic2], next: 'next-url' },
             objectType: 'epic',
             reset: true,
-            filters: { repository: 'repository-1' },
+            filters: { project: 'project-1' },
           },
         },
       );
@@ -93,16 +93,16 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
 
-    test('creates repository-epic data if not already known', () => {
+    test('creates project-epic data if not already known', () => {
       const epic1 = {
         id: 'r1',
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const expected = {
-        'repository-1': {
+        'project-1': {
           epics: [epic1],
           next: 'next-url',
           notFound: [],
@@ -117,7 +117,7 @@ describe('reducer', () => {
             response: { results: [epic1], next: 'next-url' },
             objectType: 'epic',
             reset: true,
-            filters: { repository: 'repository-1' },
+            filters: { project: 'project-1' },
           },
         },
       );
@@ -130,7 +130,7 @@ describe('reducer', () => {
         id: 'epic1',
         slug: 'epic-1',
         name: 'Epic 1',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const mockEpics = {
         notFound: [],
@@ -142,24 +142,24 @@ describe('reducer', () => {
         id: 'epic2',
         slug: 'epic-2',
         name: 'Epic 2',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const expected = {
-        'repository-1': {
+        'project-1': {
           ...mockEpics,
           epics: [...mockEpics.epics, epic2],
           fetched: true,
         },
       };
       const actual = reducer(
-        { 'repository-1': mockEpics },
+        { 'project-1': mockEpics },
         {
           type: 'FETCH_OBJECTS_SUCCEEDED',
           payload: {
             response: { results: [epic1, epic2], next: null },
             objectType: 'epic',
             reset: false,
-            filters: { repository: 'repository-1' },
+            filters: { project: 'project-1' },
           },
         },
       );
@@ -172,7 +172,7 @@ describe('reducer', () => {
         id: 'r1',
         slug: 'epic-1',
         name: 'Epic 1',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const expected = {};
       const actual = reducer(expected, {
@@ -181,7 +181,7 @@ describe('reducer', () => {
           response: { results: [epic], next: null },
           objectType: 'other-object',
           reset: true,
-          filters: { repository: 'repository-1' },
+          filters: { project: 'project-1' },
         },
       });
 
@@ -196,10 +196,10 @@ describe('reducer', () => {
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const expected = {
-        'repository-1': {
+        'project-1': {
           epics: [epic1],
           next: null,
           notFound: [],
@@ -226,14 +226,14 @@ describe('reducer', () => {
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const expected = {
-        'repository-1': { epics: [epic1], next: null, notFound: [] },
+        'project-1': { epics: [epic1], next: null, notFound: [] },
       };
       const actual = reducer(
         {
-          'repository-1': { epics: [epic1], next: null, notFound: [] },
+          'project-1': { epics: [epic1], next: null, notFound: [] },
         },
         {
           type: 'CREATE_OBJECT_SUCCEEDED',
@@ -252,7 +252,7 @@ describe('reducer', () => {
         id: 'r1',
         slug: 'epic-1',
         name: 'Epic 1',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const expected = {};
       const actual = reducer(expected, {
@@ -273,16 +273,16 @@ describe('reducer', () => {
         id: 'r1',
         slug: 'epic-1',
         name: 'Epic 1',
-        repository: 'repository1',
+        project: 'project1',
       };
       const epic2 = {
         id: 'p2',
         slug: 'epic-2',
         name: 'Epic 2',
-        repository: 'repository1',
+        project: 'project1',
       };
       const expected = {
-        repository1: {
+        project1: {
           epics: [epic1, epic2],
           next: null,
           notFound: [],
@@ -290,13 +290,13 @@ describe('reducer', () => {
       };
       const actual = reducer(
         {
-          repository1: { epics: [epic1], next: null, notFound: [] },
+          project1: { epics: [epic1], next: null, notFound: [] },
         },
         {
           type: 'FETCH_OBJECT_SUCCEEDED',
           payload: {
             object: epic2,
-            filters: { repository: 'repository1', slug: 'epic-2' },
+            filters: { project: 'project1', slug: 'epic-2' },
             objectType: 'epic',
           },
         },
@@ -307,7 +307,7 @@ describe('reducer', () => {
 
     test('stores id of missing epic', () => {
       const expected = {
-        repository1: {
+        project1: {
           epics: [],
           next: null,
           notFound: ['epic-2'],
@@ -320,7 +320,7 @@ describe('reducer', () => {
           type: 'FETCH_OBJECT_SUCCEEDED',
           payload: {
             object: null,
-            filters: { repository: 'repository1', slug: 'epic-2' },
+            filters: { project: 'project1', slug: 'epic-2' },
             objectType: 'epic',
           },
         },
@@ -334,16 +334,16 @@ describe('reducer', () => {
         id: 'r1',
         slug: 'epic-1',
         name: 'Epic 1',
-        repository: 'repository1',
+        project: 'project1',
       };
       const expected = {
-        repository1: { epics: [epic1], next: null, notFound: [] },
+        project1: { epics: [epic1], next: null, notFound: [] },
       };
       const actual = reducer(expected, {
         type: 'FETCH_OBJECT_SUCCEEDED',
         payload: {
           object: epic1,
-          filters: { repository: 'repository1', slug: 'epic-1' },
+          filters: { project: 'project1', slug: 'epic-1' },
           objectType: 'epic',
         },
       });
@@ -358,7 +358,7 @@ describe('reducer', () => {
         {
           type: 'FETCH_OBJECT_SUCCEEDED',
           payload: {
-            objectType: 'repository',
+            objectType: 'project',
             filters: {},
           },
         },
@@ -372,11 +372,11 @@ describe('reducer', () => {
     test('adds new epic to list', () => {
       const epic = {
         id: 'p1',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 1',
       };
       const expected = {
-        'repository-1': {
+        'project-1': {
           epics: [epic],
           next: null,
           notFound: [],
@@ -397,17 +397,17 @@ describe('reducer', () => {
     test('updates existing epic', () => {
       const epic = {
         id: 'p1',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 1',
       };
       const epic2 = {
         id: 'p2',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 2',
       };
       const editedEpic = { ...epic, name: 'Edited Epic Name' };
       const expected = {
-        'repository-1': {
+        'project-1': {
           epics: [editedEpic, epic2],
           next: null,
           notFound: [],
@@ -416,7 +416,7 @@ describe('reducer', () => {
       };
       const actual = reducer(
         {
-          'repository-1': {
+          'project-1': {
             epics: [epic, epic2],
             next: null,
             notFound: [],
@@ -437,17 +437,17 @@ describe('reducer', () => {
     test('updates existing epic', () => {
       const epic = {
         id: 'p1',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 1',
       };
       const epic2 = {
         id: 'p2',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 2',
       };
       const editedEpic = { ...epic, name: 'Edited Epic Name' };
       const expected = {
-        'repository-1': {
+        'project-1': {
           epics: [editedEpic, epic2],
           next: null,
           notFound: [],
@@ -456,7 +456,7 @@ describe('reducer', () => {
       };
       const actual = reducer(
         {
-          'repository-1': {
+          'project-1': {
             epics: [epic, epic2],
             next: null,
             notFound: [],
@@ -478,17 +478,17 @@ describe('reducer', () => {
     test('ignores if unknown objectType', () => {
       const epic = {
         id: 'p1',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 1',
       };
       const epic2 = {
         id: 'p2',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 2',
       };
       const editedEpic = { ...epic, name: 'Edited Epic Name' };
       const expected = {
-        'repository-1': {
+        'project-1': {
           epics: [epic, epic2],
           next: null,
           notFound: [],
@@ -497,7 +497,7 @@ describe('reducer', () => {
       };
       const actual = reducer(
         {
-          'repository-1': {
+          'project-1': {
             epics: [epic, epic2],
             next: null,
             notFound: [],
@@ -521,18 +521,18 @@ describe('reducer', () => {
     test('sets currently_creating_pr: false', () => {
       const epic = {
         id: 'p1',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 1',
         currently_creating_pr: true,
       };
       const epic2 = {
         id: 'p2',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 2',
       };
       const editedEpic = { ...epic, currently_creating_pr: false };
       const expected = {
-        'repository-1': {
+        'project-1': {
           epics: [editedEpic, epic2],
           next: null,
           notFound: [],
@@ -541,7 +541,7 @@ describe('reducer', () => {
       };
       const actual = reducer(
         {
-          'repository-1': {
+          'project-1': {
             epics: [epic, epic2],
             next: null,
             notFound: [],
@@ -560,7 +560,7 @@ describe('reducer', () => {
     test('ignores if no existing epic', () => {
       const epic = {
         id: 'p1',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 1',
         currently_creating_pr: true,
       };
@@ -583,15 +583,15 @@ describe('reducer', () => {
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const epic2 = {
         id: 'p2',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 2',
       };
       const initial = {
-        'repository-1': {
+        'project-1': {
           epics: [epic, epic2],
           next: null,
           notFound: [],
@@ -607,7 +607,7 @@ describe('reducer', () => {
         },
       });
 
-      expect(actual['repository-1'].epics).toEqual(expected);
+      expect(actual['project-1'].epics).toEqual(expected);
     });
 
     test('ignores if unknown objectType', () => {
@@ -616,15 +616,15 @@ describe('reducer', () => {
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const epic2 = {
         id: 'p2',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 2',
       };
       const initial = {
-        'repository-1': {
+        'project-1': {
           epics: [epic, epic2],
           next: null,
           notFound: [],
@@ -650,15 +650,15 @@ describe('reducer', () => {
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const epic2 = {
         id: 'p2',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 2',
       };
       const initial = {
-        'repository-1': {
+        'project-1': {
           epics: [epic, epic2],
           next: null,
           notFound: [],
@@ -671,7 +671,7 @@ describe('reducer', () => {
         payload: epic,
       });
 
-      expect(actual['repository-1'].epics).toEqual(expected);
+      expect(actual['project-1'].epics).toEqual(expected);
     });
 
     test('ignores if payload is not an epic', () => {
@@ -680,15 +680,15 @@ describe('reducer', () => {
         slug: 'epic-1',
         name: 'Epic 1',
         description: 'This is a test epic.',
-        repository: 'repository-1',
+        project: 'project-1',
       };
       const epic2 = {
         id: 'p2',
-        repository: 'repository-1',
+        project: 'project-1',
         name: 'Epic 2',
       };
       const initial = {
-        'repository-1': {
+        'project-1': {
           epics: [epic, epic2],
           next: null,
           notFound: [],

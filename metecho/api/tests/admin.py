@@ -6,7 +6,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from github3.exceptions import NotFoundError
 
-from ..admin import JSONWidget, RepositoryForm, SiteAdminForm, SoftDeletedListFilter
+from ..admin import JSONWidget, ProjectForm, SiteAdminForm, SoftDeletedListFilter
 from ..models import Epic
 
 
@@ -71,11 +71,9 @@ class TestSoftDeletedListFilter:
 
 
 @pytest.mark.django_db
-class TestRepositoryForm:
+class TestProjectForm:
     def test_clean__repo_missing(self, user_factory):
-        form = RepositoryForm(
-            {"name": "Test", "repo_owner": "test", "repo_name": "test"}
-        )
+        form = ProjectForm({"name": "Test", "repo_owner": "test", "repo_name": "test"})
         # This is how the user gets there in real circumstances, just
         # jammed on:
         form.user = user_factory()

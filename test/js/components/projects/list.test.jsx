@@ -2,9 +2,9 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import RepositoryList from '@/components/repositories/list';
+import ProjectList from '@/components/projects/list';
 import { fetchObjects } from '@/store/actions';
-import { refreshRepos } from '@/store/repositories/actions';
+import { refreshProjects } from '@/store/projects/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
@@ -15,19 +15,19 @@ jest.mock('react-fns', () => ({
   },
 }));
 jest.mock('@/store/actions');
-jest.mock('@/store/repositories/actions');
+jest.mock('@/store/projects/actions');
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-refreshRepos.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshProjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObjects.mockClear();
-  refreshRepos.mockClear();
+  refreshProjects.mockClear();
 });
 
-describe('<RepositoryList />', () => {
+describe('<ProjectList />', () => {
   const setup = ({
     initialState = {
-      repositories: { repositories: [], notFound: [], next: null },
+      projects: { projects: [], notFound: [], next: null },
     },
     props = {},
     rerender = null,
@@ -35,7 +35,7 @@ describe('<RepositoryList />', () => {
   } = {}) =>
     renderWithRedux(
       <MemoryRouter>
-        <RepositoryList {...props} />
+        <ProjectList {...props} />
       </MemoryRouter>,
       initialState,
       storeWithThunk,
@@ -43,22 +43,22 @@ describe('<RepositoryList />', () => {
       store,
     );
 
-  test('renders repositories list (empty)', () => {
+  test('renders projects list (empty)', () => {
     const { getByText } = setup();
 
     expect(getByText('¯\\_(ツ)_/¯')).toBeVisible();
   });
 
-  test('renders repositories list', () => {
+  test('renders projects list', () => {
     const initialState = {
-      repositories: {
-        repositories: [
+      projects: {
+        projects: [
           {
             id: 'r1',
-            name: 'Repository 1',
-            slug: 'repository-1',
-            description: 'This is a test repository.',
-            description_rendered: '<p>This is a test repository.</p>',
+            name: 'Project 1',
+            slug: 'project-1',
+            description: 'This is a test project.',
+            description_rendered: '<p>This is a test project.</p>',
             repo_url: 'https://github.com/test/test-repo',
           },
         ],
@@ -68,20 +68,20 @@ describe('<RepositoryList />', () => {
     };
     const { getByText } = setup({ initialState });
 
-    expect(getByText('Repository 1')).toBeVisible();
-    expect(getByText('This is a test repository.')).toBeVisible();
+    expect(getByText('Project 1')).toBeVisible();
+    expect(getByText('This is a test project.')).toBeVisible();
   });
 
-  describe('fetching more repositories', () => {
+  describe('fetching more projects', () => {
     const initialState = {
-      repositories: {
-        repositories: [
+      projects: {
+        projects: [
           {
             id: 'r1',
-            name: 'Repository 1',
-            slug: 'repository-1',
-            description: 'This is a test repository.',
-            description_rendered: '<p>This is a test repository.</p>',
+            name: 'Project 1',
+            slug: 'project-1',
+            description: 'This is a test project.',
+            description_rendered: '<p>This is a test project.</p>',
             repo_url: 'https://github.com/test/test-repo',
           },
         ],
@@ -97,25 +97,25 @@ describe('<RepositoryList />', () => {
     });
 
     afterEach(() => {
-      window.sessionStorage.removeItem('activeRepositoriesTab');
+      window.sessionStorage.removeItem('activeProjectsTab');
     });
 
-    test('fetches next page of repositories', () => {
+    test('fetches next page of projects', () => {
       const { rerender, getByText, store } = setup({ initialState });
       setup({ props: { y: 1000 }, rerender, store });
 
       expect(getByText('Loading…')).toBeVisible();
       expect(fetchObjects).toHaveBeenCalledWith({
         url: 'next-url',
-        objectType: 'repository',
+        objectType: 'project',
       });
     });
 
-    test('does not fetch next page if no more repositories', () => {
+    test('does not fetch next page if no more projects', () => {
       const state = {
         ...initialState,
-        repositories: {
-          ...initialState.repositories,
+        projects: {
+          ...initialState.projects,
           next: null,
         },
       };
@@ -128,25 +128,25 @@ describe('<RepositoryList />', () => {
     });
   });
 
-  describe('sync repos clicked', () => {
-    test('syncs repos', () => {
+  describe('sync projects clicked', () => {
+    test('syncs projects', () => {
       const { getByText } = setup();
-      const btn = getByText('Re-Sync GitHub Repositories');
+      const btn = getByText('Re-Sync Projects');
 
       expect(btn).toBeVisible();
 
       fireEvent.click(btn);
 
-      expect(refreshRepos).toHaveBeenCalledTimes(1);
+      expect(refreshProjects).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('syncing repos', () => {
+  describe('syncing projects', () => {
     test('displays button as loading', () => {
       const { getByText } = setup({
         initialState: {
-          repositories: {
-            repositories: [],
+          projects: {
+            projects: [],
             notFound: [],
             next: null,
             refreshing: true,
@@ -154,7 +154,7 @@ describe('<RepositoryList />', () => {
         },
       });
 
-      expect(getByText('Syncing GitHub Repos…')).toBeVisible();
+      expect(getByText('Syncing Projects…')).toBeVisible();
     });
   });
 });

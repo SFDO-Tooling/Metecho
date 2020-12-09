@@ -23,12 +23,12 @@ afterEach(() => {
   addError.mockClear();
 });
 
-const defaultRepository = {
+const defaultProject = {
   id: 'r1',
-  name: 'Repository 1',
-  slug: 'repository-1',
+  name: 'Project 1',
+  slug: 'project-1',
   old_slugs: [],
-  description: 'This is a test repository.',
+  description: 'This is a test project.',
   repo_url: 'https://github.com/test/test-repo',
   github_users: [],
 };
@@ -38,19 +38,19 @@ const defaultUser = { username: 'test-user' };
 describe('<CreateEpicModal/>', () => {
   const setup = (options) => {
     const defaults = {
-      repository: defaultRepository,
+      project: defaultProject,
       user: defaultUser,
       isOpen: true,
     };
     const opts = Object.assign({}, defaults, options);
-    const { user, repository, isOpen } = opts;
+    const { user, project, isOpen } = opts;
     const context = {};
     const closeCreateModal = jest.fn();
     const result = renderWithRedux(
       <StaticRouter context={context}>
         <CreateEpicModal
           user={user}
-          repository={repository}
+          project={project}
           closeCreateModal={closeCreateModal}
           isOpen={isOpen}
         />
@@ -78,7 +78,7 @@ describe('<CreateEpicModal/>', () => {
         data: {
           name: 'Name of Epic',
           description: 'This is the description',
-          repository: 'r1',
+          project: 'r1',
           branch_name: '',
           github_users: [],
         },
@@ -89,11 +89,11 @@ describe('<CreateEpicModal/>', () => {
 
     test('adds current user to github_users', () => {
       const ghUser = { id: '1', login: 'test-user' };
-      const repository = {
-        ...defaultRepository,
+      const project = {
+        ...defaultProject,
         github_users: [ghUser, { id: '2', login: 'other-username' }],
       };
-      const { getByText, getByLabelText } = setup({ repository });
+      const { getByText, getByLabelText } = setup({ project });
       const submit = getByText('Create');
       const nameInput = getByLabelText('*Epic Name');
       fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
@@ -104,7 +104,7 @@ describe('<CreateEpicModal/>', () => {
         data: {
           name: 'Name of Epic',
           description: '',
-          repository: 'r1',
+          project: 'r1',
           branch_name: '',
           github_users: [ghUser],
         },
@@ -124,7 +124,7 @@ describe('<CreateEpicModal/>', () => {
                 id: 'epic1',
                 slug: 'name-of-epic',
                 name: 'Name of Epic',
-                repository: 'r1',
+                project: 'r1',
               },
             },
           }),
@@ -140,7 +140,7 @@ describe('<CreateEpicModal/>', () => {
 
         expect(context.action).toEqual('PUSH');
         expect(context.url).toEqual(
-          routes.epic_detail('repository-1', 'name-of-epic'),
+          routes.epic_detail('project-1', 'name-of-epic'),
         );
       });
     });
@@ -208,7 +208,7 @@ describe('<CreateEpicModal/>', () => {
 
     beforeEach(async () => {
       result = setup();
-      url = window.api_urls.repository_feature_branches(defaultRepository.id);
+      url = window.api_urls.project_feature_branches(defaultProject.id);
       fakeBranches = ['feature/foo', 'feature/bar'];
       fetchMock.getOnce(url, fakeBranches);
       fireEvent.click(result.getByText('Use existing GitHub branch'));

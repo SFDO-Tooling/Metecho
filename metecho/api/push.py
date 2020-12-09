@@ -5,9 +5,9 @@ Websocket notifications you can subscribe to:
         BACKEND_ERROR
         USER_REPOS_REFRESH
 
-    repository.:id
-        REPOSITORY_UPDATE
-        REPOSITORY_UPDATE_ERROR
+    project.:id
+        PROJECT_UPDATE
+        PROJECT_UPDATE_ERROR
 
     epic.:id
         EPIC_UPDATE

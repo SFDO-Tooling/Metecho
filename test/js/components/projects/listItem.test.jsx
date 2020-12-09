@@ -2,37 +2,37 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import RepositoryListItem from '@/components/repositories/listItem';
+import ProjectListItem from '@/components/projects/listItem';
 
-describe('<RepositoryListItem />', () => {
+describe('<ProjectListItem />', () => {
   const setup = (initialState) => {
     const { getByText } = render(
       <MemoryRouter>
-        {initialState.repositories.repositories.map((repository) => (
-          <RepositoryListItem repository={repository} key={repository.id} />
+        {initialState.projects.projects.map((project) => (
+          <ProjectListItem project={project} key={project.id} />
         ))}
       </MemoryRouter>,
     );
     return { getByText };
   };
 
-  test('renders repository', () => {
+  test('renders project', () => {
     const initialState = {
-      repositories: {
-        repositories: [
+      projects: {
+        projects: [
           {
             id: 'r1',
-            name: 'Repository 1',
-            slug: 'repository-1',
-            description: 'This is a test repository.',
-            description_rendered: '<p>This is a test repository.</p>',
+            name: 'Project 1',
+            slug: 'project-1',
+            description: 'This is a test project.',
+            description_rendered: '<p>This is a test project.</p>',
             repo_url: 'https://github.com/test/test-repo',
             repo_image_url: '',
           },
           {
             id: 'p2',
-            name: 'Repository 2',
-            slug: 'repository-2',
+            name: 'Project 2',
+            slug: 'project-2',
             description: '',
             description_rendered: '',
             repo_url: 'https://github.com/test/another-test-repo',
@@ -45,8 +45,8 @@ describe('<RepositoryListItem />', () => {
     };
     const { getByText } = setup(initialState);
 
-    expect(getByText('Repository 1')).toBeVisible();
-    expect(getByText('This is a test repository.')).toBeVisible();
-    expect(getByText('Repository 2')).toBeVisible();
+    expect(getByText('Project 1')).toBeVisible();
+    expect(getByText('This is a test project.')).toBeVisible();
+    expect(getByText('Project 2')).toBeVisible();
   });
 });

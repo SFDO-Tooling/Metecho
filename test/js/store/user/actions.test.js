@@ -125,28 +125,28 @@ describe('logout', () => {
 
 describe('refetchAllData', () => {
   describe('success', () => {
-    test('GETs user from api, re-fetches repos', () => {
+    test('GETs user from api, re-fetches projects', () => {
       const store = storeWithThunk({});
       const user = { id: 'me' };
       fetchMock.getOnce(window.api_urls.user(), user);
-      fetchMock.getOnce(window.api_urls.repository_list(), []);
+      fetchMock.getOnce(window.api_urls.project_list(), []);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
       const loggedIn = {
         type: 'USER_LOGGED_IN',
         payload: user,
       };
-      const refreshingRepos = { type: 'REFRESHING_REPOS' };
-      const refreshedRepos = { type: 'REPOS_REFRESHED' };
-      const repoPayload = {
+      const refreshingProjects = { type: 'REFRESHING_PROJECTS' };
+      const refreshedProjects = { type: 'PROJECTS_REFRESHED' };
+      const projectPayload = {
         filters: {},
-        objectType: 'repository',
+        objectType: 'project',
         reset: true,
-        url: window.api_urls.repository_list(),
+        url: window.api_urls.project_list(),
       };
-      const fetchingRepos = {
+      const fetchingProjects = {
         type: 'FETCH_OBJECTS_STARTED',
-        payload: repoPayload,
+        payload: projectPayload,
       };
 
       expect.assertions(1);
@@ -154,9 +154,9 @@ describe('refetchAllData', () => {
         expect(store.getActions()).toEqual([
           started,
           loggedIn,
-          refreshingRepos,
-          refreshedRepos,
-          fetchingRepos,
+          refreshingProjects,
+          refreshedProjects,
+          fetchingProjects,
           succeeded,
         ]);
       });

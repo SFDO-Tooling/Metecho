@@ -10,12 +10,12 @@ import { ExternalLink } from '@/components/utils';
 import routes from '@/utils/routes';
 
 const DetailTableCell = ({
-  repositorySlug,
+  projectSlug,
   item,
   className,
   ...props
 }: TableCellProps & {
-  repositorySlug: string;
+  projectSlug: string;
 }) => {
   /* istanbul ignore if */
   if (!item) {
@@ -36,7 +36,7 @@ const DetailTableCell = ({
     >
       <div className="cell-stacked slds-truncate">
         <Link
-          to={routes.epic_detail(repositorySlug, slug)}
+          to={routes.epic_detail(projectSlug, slug)}
           className="slds-text-heading_small
             slds-p-bottom_xx-small
             epic-name-link"

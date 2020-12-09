@@ -10,7 +10,7 @@ describe('reducer', () => {
         'errors',
         'orgs',
         'epics',
-        'repositories',
+        'projects',
         'socket',
         'tasks',
         'user',

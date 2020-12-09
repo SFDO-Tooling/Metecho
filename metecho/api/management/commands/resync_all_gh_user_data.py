@@ -1,12 +1,12 @@
 from django.core.management.base import BaseCommand
 
 from ...jobs import populate_github_users
-from ...models import Repository
+from ...models import Project
 
 
 class Command(BaseCommand):
     help = "Reset and resync all stored collaborator lists from GitHub."
 
     def handle(self, *args, **options):
-        for repository in Repository.objects.all():
-            populate_github_users(repository, originating_user_id=None)
+        for project in Project.objects.all():
+            populate_github_users(project, originating_user_id=None)

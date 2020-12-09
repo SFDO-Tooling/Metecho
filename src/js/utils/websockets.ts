@@ -25,11 +25,11 @@ import {
 } from '@/store/orgs/actions';
 import { MinimalOrg, Org } from '@/store/orgs/reducer';
 import {
-  repoError,
-  reposRefreshed,
-  updateRepo,
-} from '@/store/repositories/actions';
-import { Repository } from '@/store/repositories/reducer';
+  projectError,
+  projectsRefreshed,
+  updateProject,
+} from '@/store/projects/actions';
+import { Project } from '@/store/projects/reducer';
 import { connectSocket, disconnectSocket } from '@/store/socket/actions';
 import {
   createTaskPR,
@@ -69,18 +69,18 @@ interface ErrorEvent {
 interface ReposRefreshedEvent {
   type: 'USER_REPOS_REFRESH';
 }
-interface RepoUpdatedEvent {
-  type: 'REPOSITORY_UPDATE';
+interface ProjectUpdatedEvent {
+  type: 'PROJECT_UPDATE';
   payload: {
-    model: Repository;
+    model: Project;
     originating_user_id: string | null;
   };
 }
-interface RepoUpdateErrorEvent {
-  type: 'REPOSITORY_UPDATE_ERROR';
+interface ProjectUpdateErrorEvent {
+  type: 'PROJECT_UPDATE_ERROR';
   payload: {
     message?: string;
-    model: Repository;
+    model: Project;
     originating_user_id: string | null;
   };
 }
@@ -256,8 +256,8 @@ interface SoftDeletedEvent {
   };
 }
 type ModelEvent =
-  | RepoUpdatedEvent
-  | RepoUpdateErrorEvent
+  | ProjectUpdatedEvent
+  | ProjectUpdateErrorEvent
   | EpicUpdatedEvent
   | EpicCreatePREvent
   | EpicCreatePRFailedEvent
@@ -298,11 +298,11 @@ export const getAction = (event: EventType) => {
   }
   switch (event.type) {
     case 'USER_REPOS_REFRESH':
-      return reposRefreshed();
-    case 'REPOSITORY_UPDATE':
-      return hasModel(event) && updateRepo(event.payload.model);
-    case 'REPOSITORY_UPDATE_ERROR':
-      return hasModel(event) && repoError(event.payload);
+      return projectsRefreshed();
+    case 'PROJECT_UPDATE':
+      return hasModel(event) && updateProject(event.payload.model);
+    case 'PROJECT_UPDATE_ERROR':
+      return hasModel(event) && projectError(event.payload);
     case 'EPIC_UPDATE':
       return hasModel(event) && updateEpic(event.payload.model);
     case 'EPIC_CREATE_PR':

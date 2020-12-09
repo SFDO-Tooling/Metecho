@@ -13,7 +13,7 @@ from .models import (
     SCRATCH_ORG_TYPES,
     TASK_REVIEW_STATUS,
     Epic,
-    Repository,
+    Project,
     ScratchOrg,
     SiteProfile,
     Task,
@@ -85,14 +85,14 @@ class MinimalUserSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "avatar_url")
 
 
-class RepositorySerializer(serializers.ModelSerializer):
+class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
     repo_url = serializers.SerializerMethodField()
     repo_image_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = Repository
+        model = Project
         fields = (
             "id",
             "name",
@@ -119,8 +119,8 @@ class RepositorySerializer(serializers.ModelSerializer):
 class EpicSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
-    repository = serializers.PrimaryKeyRelatedField(
-        queryset=Repository.objects.all(), pk_field=serializers.CharField()
+    project = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(), pk_field=serializers.CharField()
     )
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
@@ -135,7 +135,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "description_rendered",
             "slug",
             "old_slugs",
-            "repository",
+            "project",
             "branch_url",
             "branch_diff_url",
             "branch_name",
@@ -164,12 +164,12 @@ class EpicSerializer(serializers.ModelSerializer):
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Epic.objects.all(),
-                fields=("name", "repository"),
+                fields=("name", "project"),
                 message=FormattableDict(
                     "name", _("An epic with this name already exists.")
                 ),
             ),
-            GitHubUserValidator(parent="repository"),
+            GitHubUserValidator(parent="project"),
         )
 
     def create(self, validated_data):
@@ -180,7 +180,7 @@ class EpicSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         branch_name = data.get("branch_name", "")
-        repo = data.get("repository", None)
+        project = data.get("project", None)
         branch_name_differs = branch_name != getattr(self.instance, "branch_name", "")
         branch_name_changed = branch_name and branch_name_differs
         if branch_name_changed:
@@ -193,14 +193,14 @@ class EpicSerializer(serializers.ModelSerializer):
                     }
                 )
 
-            branch_name_is_repo_default_branch = (
-                repo and branch_name == repo.branch_name
+            branch_name_is_project_default_branch = (
+                project and branch_name == project.branch_name
             )
-            if branch_name_is_repo_default_branch:
+            if branch_name_is_project_default_branch:
                 raise serializers.ValidationError(
                     {
                         "branch_name": _(
-                            "Cannot create an epic from the repository default branch."
+                            "Cannot create an epic from the project default branch."
                         )
                     }
                 )
@@ -219,31 +219,31 @@ class EpicSerializer(serializers.ModelSerializer):
         return data
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
-        repo = obj.repository
-        repo_owner = repo.repo_owner
-        repo_name = repo.repo_name
-        repository_branch = repo.branch_name
+        project = obj.project
+        repo_owner = project.repo_owner
+        repo_name = project.repo_name
+        project_branch = project.branch_name
         branch = obj.branch_name
-        if repo_owner and repo_name and repository_branch and branch:
+        if repo_owner and repo_name and project_branch and branch:
             return (
                 f"https://github.com/{repo_owner}/{repo_name}/compare/"
-                f"{repository_branch}...{branch}"
+                f"{project_branch}...{branch}"
             )
         return None
 
     def get_branch_url(self, obj) -> Optional[str]:
-        repo = obj.repository
-        repo_owner = repo.repo_owner
-        repo_name = repo.repo_name
+        project = obj.project
+        repo_owner = project.repo_owner
+        repo_name = project.repo_name
         branch = obj.branch_name
         if repo_owner and repo_name and branch:
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
         return None
 
     def get_pr_url(self, obj) -> Optional[str]:
-        repo = obj.repository
-        repo_owner = repo.repo_owner
-        repo_name = repo.repo_name
+        project = obj.project
+        repo_owner = project.repo_owner
+        repo_name = project.repo_name
         pr_number = obj.pr_number
         if repo_owner and repo_name and pr_number:
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
@@ -323,9 +323,9 @@ class TaskSerializer(serializers.ModelSerializer):
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
-        repo = obj.epic.repository
-        repo_owner = repo.repo_owner
-        repo_name = repo.repo_name
+        project = obj.epic.project
+        repo_owner = project.repo_owner
+        repo_name = project.repo_name
         branch = obj.branch_name
         if repo_owner and repo_name and branch:
             return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}"
@@ -334,9 +334,9 @@ class TaskSerializer(serializers.ModelSerializer):
     def get_branch_diff_url(self, obj) -> Optional[str]:
         epic = obj.epic
         epic_branch = epic.branch_name
-        repo = epic.repository
-        repo_owner = repo.repo_owner
-        repo_name = repo.repo_name
+        project = epic.project
+        repo_owner = project.repo_owner
+        repo_name = project.repo_name
         branch = obj.branch_name
         if repo_owner and repo_name and epic_branch and branch:
             return (
@@ -346,9 +346,9 @@ class TaskSerializer(serializers.ModelSerializer):
         return None
 
     def get_pr_url(self, obj) -> Optional[str]:
-        repo = obj.epic.repository
-        repo_owner = repo.repo_owner
-        repo_name = repo.repo_name
+        project = obj.epic.project
+        repo_owner = project.repo_owner
+        repo_name = project.repo_name
         pr_number = obj.pr_number
         if repo_owner and repo_name and pr_number:
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
@@ -429,9 +429,9 @@ class TaskSerializer(serializers.ModelSerializer):
         if assigned_user:
             task = instance
             epic = task.epic
-            repo = epic.repository
+            project = epic.project
             metecho_link = get_user_facing_url(
-                path=["repositories", repo.slug, epic.slug, task.slug]
+                path=["projects", project.slug, epic.slug, task.slug]
             )
             subject = _("Metecho Task Assigned to You")
             body = render_to_string(
@@ -440,7 +440,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     "role": "Tester" if type_ == "qa" else "Developer",
                     "task_name": task.name,
                     "epic_name": epic.name,
-                    "repo_name": repo.name,
+                    "project_name": project.name,
                     "assigned_user_name": assigned_user.username,
                     "user_name": user.username if user else None,
                     "metecho_link": metecho_link,

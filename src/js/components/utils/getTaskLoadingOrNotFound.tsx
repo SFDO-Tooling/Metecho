@@ -1,35 +1,35 @@
 import React, { ReactElement } from 'react';
 
 import EpicNotFound from '@/components/epics/epic404';
-import RepositoryNotFound from '@/components/repositories/repository404';
+import ProjectNotFound from '@/components/projects/project404';
 import TaskNotFound from '@/components/tasks/task404';
 import { SpinnerWrapper } from '@/components/utils';
 import { Epic } from '@/store/epics/reducer';
-import { Repository } from '@/store/repositories/reducer';
+import { Project } from '@/store/projects/reducer';
 import { Task } from '@/store/tasks/reducer';
 
 export default ({
-  repository,
+  project,
   epic,
   task,
   taskSlug,
 }: {
-  repository?: Repository | null;
+  project?: Project | null;
   epic?: Epic | null;
   task?: Task | null;
   taskSlug?: string;
 }): ReactElement | false => {
   if (!task) {
     /* istanbul ignore if */
-    if (!repository) {
-      return <RepositoryNotFound />;
+    if (!project) {
+      return <ProjectNotFound />;
     }
     /* istanbul ignore if */
     if (!epic) {
-      return <EpicNotFound repository={repository} />;
+      return <EpicNotFound project={project} />;
     }
     if (!taskSlug || task === null) {
-      return <TaskNotFound repository={repository} epic={epic} />;
+      return <TaskNotFound project={project} epic={epic} />;
     }
     // Fetching task from API
     return <SpinnerWrapper />;

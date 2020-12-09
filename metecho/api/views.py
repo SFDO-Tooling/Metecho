@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
-from github3.exceptions import ResponseError
+from github3.exceptions import ConnectionError, ResponseError
 from rest_framework import generics, mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -16,13 +16,13 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from . import gh
 from .authentication import GitHubHookAuthentication
-from .filters import EpicFilter, RepositoryFilter, ScratchOrgFilter, TaskFilter
+from .filters import EpicFilter, ProjectFilter, ScratchOrgFilter, TaskFilter
 from .hook_serializers import (
     PrHookSerializer,
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from .models import EPIC_STATUSES, SCRATCH_ORG_TYPES, Epic, Repository, ScratchOrg, Task
+from .models import EPIC_STATUSES, SCRATCH_ORG_TYPES, Epic, Project, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
@@ -31,7 +31,7 @@ from .serializers import (
     EpicSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
-    RepositorySerializer,
+    ProjectSerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
@@ -140,26 +140,24 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     queryset = User.objects.all()
 
 
-class RepositoryViewSet(
-    mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
-):
+class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     permission_classes = (IsAuthenticated,)
-    serializer_class = RepositorySerializer
+    serializer_class = ProjectSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = RepositoryFilter
+    filterset_class = ProjectFilter
     pagination_class = CustomPaginator
-    model = Repository
+    model = Project
 
     def get_queryset(self):
         repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
 
-        for repo in Repository.objects.filter(repo_id__isnull=True):
+        for project in Project.objects.filter(repo_id__isnull=True):
             try:
-                repo.get_repo_id()
-            except ResponseError:
+                project.get_repo_id()
+            except (ResponseError, ConnectionError):
                 pass
 
-        return Repository.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
+        return Project.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
 
     @action(detail=True, methods=["POST"])
     def refresh_github_users(self, request, pk=None):

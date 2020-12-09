@@ -3,19 +3,19 @@ import i18n from 'i18next';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Repository } from '@/store/repositories/reducer';
+import { Project } from '@/store/projects/reducer';
 import routes from '@/utils/routes';
 
-const RepositoryListItem = ({ repository }: { repository: Repository }) => (
+const ProjectListItem = ({ project }: { project: Project }) => (
   <div
-    className="metecho-repo-item
+    className="metecho-project-item
       slds-p-around_small
       slds-size_1-of-1
       slds-medium-size_1-of-2
       slds-large-size_1-of-3"
   >
     <Link
-      to={routes.repository_detail(repository.slug)}
+      to={routes.project_detail(project.slug)}
       className="slds-box
         slds-box_link
         slds-box_x-small
@@ -24,19 +24,19 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
         container-fill-space"
     >
       <div className="slds-media__figure slds-m-left_xx-small">
-        {repository.repo_image_url ? (
+        {project.repo_image_url ? (
           <div>
             <img
-              src={repository.repo_image_url}
-              alt={`${i18n.t('social image for')} ${repository.name}`}
+              src={project.repo_image_url}
+              alt={`${i18n.t('social image for')} ${project.name}`}
             />
           </div>
         ) : (
           <Avatar
             variant="entity"
             size="large"
-            label={repository.name}
-            title={repository.name}
+            label={project.name}
+            title={project.name}
           />
         )}
       </div>
@@ -50,17 +50,17 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
       >
         <h2
           className="slds-truncate slds-text-heading_small"
-          title={repository.name}
+          title={project.name}
         >
-          {repository.name}
+          {project.name}
         </h2>
         <div className="slds-m-top_small">
-          {repository.description_rendered ? (
+          {project.description_rendered ? (
             <div
               className="truncate-children"
               // This description is pre-cleaned by the API
               dangerouslySetInnerHTML={{
-                __html: repository.description_rendered,
+                __html: project.description_rendered,
               }}
             />
           ) : null}
@@ -70,4 +70,4 @@ const RepositoryListItem = ({ repository }: { repository: Repository }) => (
   </div>
 );
 
-export default RepositoryListItem;
+export default ProjectListItem;

@@ -4,17 +4,17 @@ describe('routes', () => {
   test.each([
     ['home', [], '/'],
     ['login', [], '/login'],
-    ['repository_list', [], '/repositories'],
-    ['repository_detail', ['slug'], '/repositories/slug'],
+    ['project_list', [], '/projects'],
+    ['project_detail', ['slug'], '/projects/slug'],
     [
       'epic_detail',
-      ['repository-slug', 'epic-slug'],
-      '/repositories/repository-slug/epic-slug',
+      ['project-slug', 'epic-slug'],
+      '/projects/project-slug/epic-slug',
     ],
     [
       'task_detail',
-      ['repository-slug', 'epic-slug', 'task-slug'],
-      '/repositories/repository-slug/epic-slug/task-slug',
+      ['project-slug', 'epic-slug', 'task-slug'],
+      '/projects/project-slug/epic-slug/task-slug',
     ],
   ])('%s returns path with args: %o', (name, args, expected) => {
     expect(routes[name](...args)).toBe(expected);
@@ -26,10 +26,10 @@ describe('routePatterns', () => {
     ['home', '/'],
     ['login', '/login'],
     ['auth_error', '/accounts/*'],
-    ['repository_list', '/repositories'],
-    ['repository_detail', '/repositories/:repositorySlug'],
-    ['epic_detail', '/repositories/:repositorySlug/:epicSlug'],
-    ['task_detail', '/repositories/:repositorySlug/:epicSlug/:taskSlug'],
+    ['project_list', '/projects'],
+    ['project_detail', '/projects/:projectSlug'],
+    ['epic_detail', '/projects/:projectSlug/:epicSlug'],
+    ['task_detail', '/projects/:projectSlug/:epicSlug/:taskSlug'],
   ])('%s returns path', (name, expected) => {
     expect(routePatterns[name]()).toBe(expected);
   });

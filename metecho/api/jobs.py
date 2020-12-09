@@ -54,7 +54,7 @@ def epic_create_branch(
     if epic.branch_name:
         epic_branch_name = epic.branch_name
     else:
-        branch_prefix = epic.repository.branch_prefix
+        branch_prefix = epic.project.branch_prefix
         if branch_prefix:
             prefix = branch_prefix
         elif settings.BRANCH_PREFIX:
@@ -136,9 +136,9 @@ def alert_user_about_expiring_org(*, org, days):
     if org.unsaved_changes:
         task = org.task
         epic = task.epic
-        repo = epic.repository
+        project = epic.project
         metecho_link = get_user_facing_url(
-            path=["repositories", repo.slug, epic.slug, task.slug]
+            path=["projects", project.slug, epic.slug, task.slug]
         )
 
         # email user
@@ -146,7 +146,7 @@ def alert_user_about_expiring_org(*, org, days):
         body = render_to_string(
             "scratch_org_expiry_email.txt",
             {
-                "repo_name": repo.name,
+                "project_name": project.name,
                 "epic_name": epic.name,
                 "task_name": task.name,
                 "days": days,
@@ -522,10 +522,10 @@ def refresh_github_repositories_for_user(user):
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
 
 
-def get_social_image(*, repository):
+def get_social_image(*, project):
     try:
         repo = get_repo_info(
-            None, repo_owner=repository.repo_owner, repo_name=repository.repo_name
+            None, repo_owner=project.repo_owner, repo_name=project.repo_name
         )
         soup = BeautifulSoup(requests.get(repo.html_url).content, "html.parser")
         og_image = soup.find("meta", property="og:image").attrs.get("content", "")
@@ -534,9 +534,9 @@ def get_social_image(*, repository):
         logger.error(tb)
         raise
     else:
-        repository.refresh_from_db()
-        repository.repo_image_url = og_image
-        repository.finalize_get_social_image()
+        project.refresh_from_db()
+        project.repo_image_url = og_image
+        project.finalize_get_social_image()
 
 
 get_social_image_job = job(get_social_image)
@@ -544,7 +544,7 @@ get_social_image_job = job(get_social_image)
 
 # This avoids partially-applied saving:
 @transaction.atomic
-def refresh_commits(*, repository, branch_name, originating_user_id):
+def refresh_commits(*, project, branch_name, originating_user_id):
     """
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
@@ -552,7 +552,7 @@ def refresh_commits(*, repository, branch_name, originating_user_id):
     from .models import Task
 
     repo = get_repo_info(
-        None, repo_owner=repository.repo_owner, repo_name=repository.repo_name
+        None, repo_owner=project.repo_owner, repo_name=project.repo_name
     )
     # We get this as a GitHubIterator, but we want to slice it later, so
     # we will convert it to a list.
@@ -561,7 +561,7 @@ def refresh_commits(*, repository, branch_name, originating_user_id):
     # that limit.
     commits = list(repo.commits(repo.branch(branch_name).latest_sha(), number=1000))
 
-    tasks = Task.objects.filter(epic__repository=repository, branch_name=branch_name)
+    tasks = Task.objects.filter(epic__project=project, branch_name=branch_name)
     for task in tasks:
         origin_sha_index = [commit.sha for commit in commits].index(task.origin_sha)
         task.commits = [
@@ -575,13 +575,13 @@ def refresh_commits(*, repository, branch_name, originating_user_id):
 refresh_commits_job = job(refresh_commits)
 
 
-def populate_github_users(repository, *, originating_user_id):
+def populate_github_users(project, *, originating_user_id):
     try:
         repo = get_repo_info(
-            None, repo_owner=repository.repo_owner, repo_name=repository.repo_name
+            None, repo_owner=project.repo_owner, repo_name=project.repo_name
         )
-        repository.refresh_from_db()
-        repository.github_users = list(
+        project.refresh_from_db()
+        project.github_users = list(
             sorted(
                 [
                     {
@@ -595,16 +595,14 @@ def populate_github_users(repository, *, originating_user_id):
             )
         )
     except Exception as e:
-        repository.finalize_populate_github_users(
+        project.finalize_populate_github_users(
             error=e, originating_user_id=originating_user_id
         )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        repository.finalize_populate_github_users(
-            originating_user_id=originating_user_id
-        )
+        project.finalize_populate_github_users(originating_user_id=originating_user_id)
 
 
 populate_github_users_job = job(populate_github_users)
@@ -644,8 +642,8 @@ def submit_review(*, user, task, data, originating_user_id):
 
         target_url = get_user_facing_url(
             path=[
-                "repositories",
-                task.epic.repository.slug,
+                "projects",
+                task.epic.project.slug,
                 task.epic.slug,
                 task.slug,
             ]
@@ -758,8 +756,8 @@ def available_task_org_config_names(epic, *, user):
         repo_id = epic.get_repo_id()
         repo = get_repo_info(
             None,
-            repo_owner=epic.repository.repo_owner,
-            repo_name=epic.repository.repo_name,
+            repo_owner=epic.project.repo_owner,
+            repo_name=epic.project.repo_name,
         )
         with local_github_checkout(user, repo_id) as repo_root:
             config = get_project_config(

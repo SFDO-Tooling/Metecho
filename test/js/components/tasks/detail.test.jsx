@@ -40,15 +40,15 @@ const defaultState = {
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
-  repositories: {
-    repositories: [
+  projects: {
+    projects: [
       {
         id: 'r1',
-        name: 'Repository 1',
-        slug: 'repository-1',
+        name: 'Project 1',
+        slug: 'project-1',
         old_slugs: [],
-        description: 'This is a test repository.',
-        description_rendered: '<p>This is a test repository.</p>',
+        description: 'This is a test project.',
+        description_rendered: '<p>This is a test project.</p>',
         repo_url: 'https://github.com/test/test-repo',
         repo_owner: 'test',
         repo_name: 'test-repo',
@@ -60,7 +60,7 @@ const defaultState = {
         ],
       },
     ],
-    notFound: ['different-repository'],
+    notFound: ['different-project'],
     next: null,
   },
   epics: {
@@ -70,7 +70,7 @@ const defaultState = {
           id: 'epic1',
           slug: 'epic-1',
           name: 'Epic 1',
-          repository: 'r1',
+          project: 'r1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
@@ -146,19 +146,17 @@ describe('<TaskDetail/>', () => {
   const setup = (options) => {
     const defaults = {
       initialState: defaultState,
-      repositorySlug: 'repository-1',
+      projectSlug: 'project-1',
       epicSlug: 'epic-1',
       taskSlug: 'task-1',
       rerender: false,
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, repositorySlug, epicSlug, taskSlug } = opts;
+    const { initialState, projectSlug, epicSlug, taskSlug } = opts;
     const context = {};
     const result = renderWithRedux(
       <StaticRouter context={context}>
-        <TaskDetail
-          match={{ params: { repositorySlug, epicSlug, taskSlug } }}
-        />
+        <TaskDetail match={{ params: { projectSlug, epicSlug, taskSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
@@ -233,14 +231,14 @@ describe('<TaskDetail/>', () => {
     });
   });
 
-  describe('repository does not exist', () => {
-    test('renders <RepositoryNotFound />', () => {
+  describe('project does not exist', () => {
+    test('renders <ProjectNotFound />', () => {
       const { getByText, queryByText } = setup({
-        repositorySlug: 'different-repository',
+        projectSlug: 'different-project',
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('list of all repositories')).toBeVisible();
+      expect(getByText('list of all projects')).toBeVisible();
     });
   });
 
@@ -272,7 +270,7 @@ describe('<TaskDetail/>', () => {
 
       expect(context.action).toEqual('REPLACE');
       expect(context.url).toEqual(
-        routes.task_detail('repository-1', 'epic-1', 'task-1'),
+        routes.task_detail('project-1', 'epic-1', 'task-1'),
       );
     });
   });

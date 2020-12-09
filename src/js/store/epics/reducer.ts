@@ -12,7 +12,7 @@ export interface OrgConfig {
 
 export interface Epic {
   id: string;
-  repository: string;
+  project: string;
   name: string;
   slug: string;
   old_slugs: string[];
@@ -32,7 +32,7 @@ export interface Epic {
   available_task_org_config_names: OrgConfig[];
 }
 
-export interface EpicsByRepositoryState {
+export interface EpicsByProjectState {
   epics: Epic[];
   next: string | null;
   notFound: string[];
@@ -40,7 +40,7 @@ export interface EpicsByRepositoryState {
 }
 
 export interface EpicsState {
-  [key: string]: EpicsByRepositoryState;
+  [key: string]: EpicsByProjectState;
 }
 
 const defaultState = {
@@ -51,7 +51,7 @@ const defaultState = {
 };
 
 const modelIsEpic = (model: any): model is Epic =>
-  Boolean((model as Epic).repository);
+  Boolean((model as Epic).project);
 
 const reducer = (
   epics: EpicsState = {},
@@ -66,16 +66,16 @@ const reducer = (
         response,
         objectType,
         reset,
-        filters: { repository },
+        filters: { project },
       } = action.payload;
       const { results, next } = response as PaginatedObjectResponse;
-      if (objectType === OBJECT_TYPES.EPIC && repository) {
-        const repositoryEpics = epics[repository] || { ...defaultState };
+      if (objectType === OBJECT_TYPES.EPIC && project) {
+        const projectEpics = epics[project] || { ...defaultState };
         if (reset) {
           return {
             ...epics,
-            [repository]: {
-              ...repositoryEpics,
+            [project]: {
+              ...projectEpics,
               epics: results,
               next,
               fetched: true,
@@ -83,13 +83,13 @@ const reducer = (
           };
         }
         // Store list of known epic IDs to filter out duplicates
-        const ids = repositoryEpics.epics.map((p) => p.id);
+        const ids = projectEpics.epics.map((p) => p.id);
         return {
           ...epics,
-          [repository]: {
-            ...repositoryEpics,
+          [project]: {
+            ...projectEpics,
             epics: [
-              ...repositoryEpics.epics,
+              ...projectEpics.epics,
               ...results.filter((p) => !ids.includes(p.id)),
             ],
             next,
@@ -105,15 +105,15 @@ const reducer = (
         objectType,
       }: { object: Epic; objectType?: ObjectTypes } = action.payload;
       if (objectType === OBJECT_TYPES.EPIC && object) {
-        const repository = epics[object.repository] || { ...defaultState };
+        const project = epics[object.project] || { ...defaultState };
         // Do not store if (somehow) we already know about this epic
-        if (!repository.epics.filter((p) => object.id === p.id).length) {
+        if (!project.epics.filter((p) => object.id === p.id).length) {
           return {
             ...epics,
-            [object.repository]: {
-              ...repository,
+            [object.project]: {
+              ...project,
               // Prepend new epic (epics are ordered by `-created_at`)
-              epics: [object, ...repository.epics],
+              epics: [object, ...project.epics],
             },
           };
         }
@@ -123,27 +123,27 @@ const reducer = (
     case 'FETCH_OBJECT_SUCCEEDED': {
       const {
         object,
-        filters: { repository, slug },
+        filters: { project, slug },
         objectType,
       } = action.payload;
-      if (objectType === OBJECT_TYPES.EPIC && repository) {
-        const repositoryEpics = epics[repository] || { ...defaultState };
+      if (objectType === OBJECT_TYPES.EPIC && project) {
+        const projectEpics = epics[project] || { ...defaultState };
         if (!object) {
           return {
             ...epics,
-            [repository]: {
-              ...repositoryEpics,
-              notFound: [...repositoryEpics.notFound, slug],
+            [project]: {
+              ...projectEpics,
+              notFound: [...projectEpics.notFound, slug],
             },
           };
         }
         // Do not store if we already know about this epic
-        if (!repositoryEpics.epics.filter((p) => object.id === p.id).length) {
+        if (!projectEpics.epics.filter((p) => object.id === p.id).length) {
           return {
             ...epics,
-            [object.repository]: {
-              ...repositoryEpics,
-              epics: [...repositoryEpics.epics, object],
+            [object.project]: {
+              ...projectEpics,
+              epics: [...projectEpics.epics, object],
             },
           };
         }
@@ -169,16 +169,16 @@ const reducer = (
         return epics;
       }
       const epic = maybeEpic;
-      const repositoryEpics = epics[epic.repository] || {
+      const projectEpics = epics[epic.project] || {
         ...defaultState,
       };
-      const existingEpic = repositoryEpics.epics.find((p) => p.id === epic.id);
+      const existingEpic = projectEpics.epics.find((p) => p.id === epic.id);
       if (existingEpic) {
         return {
           ...epics,
-          [epic.repository]: {
-            ...repositoryEpics,
-            epics: repositoryEpics.epics.map((p) => {
+          [epic.project]: {
+            ...projectEpics,
+            epics: projectEpics.epics.map((p) => {
               if (p.id === epic.id) {
                 return { ...epic };
               }
@@ -189,24 +189,24 @@ const reducer = (
       }
       return {
         ...epics,
-        [epic.repository]: {
-          ...repositoryEpics,
-          epics: [...repositoryEpics.epics, epic],
+        [epic.project]: {
+          ...projectEpics,
+          epics: [...projectEpics.epics, epic],
         },
       };
     }
     case 'EPIC_CREATE_PR_FAILED': {
       const epic = action.payload;
-      const repositoryEpics = epics[epic.repository] || {
+      const projectEpics = epics[epic.project] || {
         ...defaultState,
       };
-      const existingEpic = repositoryEpics.epics.find((p) => p.id === epic.id);
+      const existingEpic = projectEpics.epics.find((p) => p.id === epic.id);
       if (existingEpic) {
         return {
           ...epics,
-          [epic.repository]: {
-            ...repositoryEpics,
-            epics: repositoryEpics.epics.map((p) => {
+          [epic.project]: {
+            ...projectEpics,
+            epics: projectEpics.epics.map((p) => {
               if (p.id === epic.id) {
                 return { ...epic, currently_creating_pr: false };
               }
@@ -237,14 +237,14 @@ const reducer = (
       }
       const epic = maybeEpic;
       /* istanbul ignore next */
-      const repositoryEpics = epics[epic.repository] || {
+      const projectEpics = epics[epic.project] || {
         ...defaultState,
       };
       return {
         ...epics,
-        [epic.repository]: {
-          ...repositoryEpics,
-          epics: repositoryEpics.epics.filter((p) => p.id !== epic.id),
+        [epic.project]: {
+          ...projectEpics,
+          epics: projectEpics.epics.filter((p) => p.id !== epic.id),
         },
       };
     }

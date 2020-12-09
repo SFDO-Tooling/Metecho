@@ -43,7 +43,7 @@ interface TableCellProps {
 }
 
 interface Props {
-  repositorySlug: string;
+  projectSlug: string;
   epicSlug: string;
   tasks: Task[];
   epicUsers: GitHubUser[];
@@ -52,22 +52,22 @@ interface Props {
 }
 
 const NameTableCell = ({
-  repositorySlug,
+  projectSlug,
   epicSlug,
   item,
   className,
   children,
   ...props
 }: TableCellProps & {
-  repositorySlug: string;
+  projectSlug: string;
   epicSlug: string;
 }) => (
   <DataTableCell
     {...props}
     className={classNames(className, 'epic-task-name', 'truncated-cell')}
   >
-    {repositorySlug && epicSlug && item && (
-      <Link to={routes.task_detail(repositorySlug, epicSlug, item.slug)}>
+    {projectSlug && epicSlug && item && (
+      <Link to={routes.task_detail(projectSlug, epicSlug, item.slug)}>
         {children}
       </Link>
     )}
@@ -223,7 +223,7 @@ const AssigneeTableCell = ({
 AssigneeTableCell.displayName = DataTableCell.displayName;
 
 const TaskTable = ({
-  repositorySlug,
+  projectSlug,
   epicSlug,
   tasks,
   epicUsers,
@@ -248,7 +248,7 @@ const TaskTable = ({
         width="65%"
         primaryColumn
       >
-        <NameTableCell repositorySlug={repositorySlug} epicSlug={epicSlug} />
+        <NameTableCell projectSlug={projectSlug} epicSlug={epicSlug} />
       </DataTableColumn>
       <DataTableColumn
         key="status"

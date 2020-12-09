@@ -25,7 +25,7 @@ import {
   EditModal,
   ExternalLink,
   getEpicLoadingOrNotFound,
-  getRepositoryLoadingOrNotFound,
+  getProjectLoadingOrNotFound,
   getTaskLoadingOrNotFound,
   LabelWithSpinner,
   PageOptions,
@@ -33,7 +33,7 @@ import {
   SubmitModal,
   useFetchEpicIfMissing,
   useFetchOrgsIfMissing,
-  useFetchRepositoryIfMissing,
+  useFetchProjectIfMissing,
   useFetchTasksIfMissing,
   useIsMounted,
 } from '@/components/utils';
@@ -76,8 +76,8 @@ const TaskDetail = (props: RouteComponentProps) => {
   };
   const isMounted = useIsMounted();
 
-  const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
-  const { epic, epicSlug } = useFetchEpicIfMissing(repository, props);
+  const { project, projectSlug } = useFetchProjectIfMissing(props);
+  const { epic, epicSlug } = useFetchEpicIfMissing(project, props);
   const dispatch = useDispatch<ThunkDispatch>();
   useFetchTasksIfMissing(epic, props);
   const selectTaskWithProps = useCallback(selectTask, []);
@@ -366,16 +366,16 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   }, [task, taskSlug]);
 
-  const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
-    repository,
-    repositorySlug,
+  const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
+    project,
+    projectSlug,
   });
-  if (repositoryLoadingOrNotFound !== false) {
-    return repositoryLoadingOrNotFound;
+  if (projectLoadingOrNotFound !== false) {
+    return projectLoadingOrNotFound;
   }
 
   const epicLoadingOrNotFound = getEpicLoadingOrNotFound({
-    repository,
+    project,
     epic,
     epicSlug,
   });
@@ -385,7 +385,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   const taskLoadingOrNotFound = getTaskLoadingOrNotFound({
-    repository,
+    project,
     epic,
     task,
     taskSlug,
@@ -397,20 +397,18 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!repository || !epic || !task) {
+  if (!project || !epic || !task) {
     return <FourOhFour />;
   }
 
   if (
-    (repositorySlug && repositorySlug !== repository.slug) ||
+    (projectSlug && projectSlug !== project.slug) ||
     (epicSlug && epicSlug !== epic.slug) ||
     (taskSlug && taskSlug !== task.slug)
   ) {
-    // Redirect to most recent repository/epic/task slug
+    // Redirect to most recent project/epic/task slug
     return (
-      <Redirect
-        to={routes.task_detail(repository.slug, epic.slug, task.slug)}
-      />
+      <Redirect to={routes.task_detail(project.slug, epic.slug, task.slug)} />
     );
   }
 
@@ -519,7 +517,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     );
   }
 
-  const epicUrl = routes.epic_detail(repository.slug, epic.slug);
+  const epicUrl = routes.epic_detail(project.slug, epic.slug);
   let headerUrl, headerUrlText; // eslint-disable-line one-var
   /* istanbul ignore else */
   if (task.branch_url && task.branch_name) {
@@ -529,13 +527,13 @@ const TaskDetail = (props: RouteComponentProps) => {
     headerUrl = epic.branch_url;
     headerUrlText = epic.branch_name;
   } else {
-    headerUrl = repository.repo_url;
-    headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
+    headerUrl = project.repo_url;
+    headerUrlText = `${project.repo_owner}/${project.repo_name}`;
   }
 
   return (
     <DocumentTitle
-      title={` ${task.name} | ${epic.name} | ${repository.name} | ${i18n.t(
+      title={` ${task.name} | ${epic.name} | ${project.name} | ${i18n.t(
         'Metecho',
       )}`}
     >
@@ -546,8 +544,8 @@ const TaskDetail = (props: RouteComponentProps) => {
         headerUrlText={headerUrlText}
         breadcrumb={[
           {
-            name: repository.name,
-            url: routes.repository_detail(repository.slug),
+            name: project.name,
+            url: routes.project_detail(project.slug),
           },
           {
             name: epic.name,
@@ -584,7 +582,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             task={task}
             epicUsers={epic.github_users}
             epicUrl={epicUrl}
-            repoUrl={repository.repo_url}
+            repoUrl={project.repo_url}
             openCaptureModal={openCaptureModal}
             assignUserModalOpen={assignUserModalOpen}
             isCreatingOrg={isCreatingOrg}

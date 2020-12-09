@@ -4,14 +4,14 @@ import { StaticRouter } from 'react-router-dom';
 
 import EpicDetail from '@/components/epics/detail';
 import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
-import { refreshGitHubUsers } from '@/store/repositories/actions';
+import { refreshGitHubUsers } from '@/store/projects/actions';
 import { getUrlParam, removeUrlParam } from '@/utils/api';
 import routes from '@/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('@/store/actions');
-jest.mock('@/store/repositories/actions');
+jest.mock('@/store/projects/actions');
 jest.mock('@/utils/api');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
@@ -31,15 +31,15 @@ afterEach(() => {
 });
 
 const defaultState = {
-  repositories: {
-    repositories: [
+  projects: {
+    projects: [
       {
         id: 'r1',
-        name: 'Repository 1',
-        slug: 'repository-1',
+        name: 'Project 1',
+        slug: 'project-1',
         old_slugs: [],
-        description: 'This is a test repository.',
-        description_rendered: '<p>This is a test repository.</p>',
+        description: 'This is a test project.',
+        description_rendered: '<p>This is a test project.</p>',
         repo_url: 'https://github.com/test/test-repo',
         repo_owner: 'test',
         repo_name: 'test-repo',
@@ -59,7 +59,7 @@ const defaultState = {
         ],
       },
     ],
-    notFound: ['different-repository'],
+    notFound: ['different-project'],
     next: null,
   },
   epics: {
@@ -69,7 +69,7 @@ const defaultState = {
           id: 'epic1',
           slug: 'epic-1',
           name: 'Epic 1',
-          repository: 'r1',
+          project: 'r1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
@@ -164,17 +164,17 @@ describe('<EpicDetail/>', () => {
   const setup = (options) => {
     const defaults = {
       initialState: defaultState,
-      repositorySlug: 'repository-1',
+      projectSlug: 'project-1',
       epicSlug: 'epic-1',
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, repositorySlug, epicSlug } = opts;
+    const { initialState, projectSlug, epicSlug } = opts;
     const context = {};
     const history = { replace: jest.fn() };
     const response = renderWithRedux(
       <StaticRouter context={context}>
         <EpicDetail
-          match={{ params: { repositorySlug, epicSlug } }}
+          match={{ params: { projectSlug, epicSlug } }}
           history={history}
         />
       </StaticRouter>,
@@ -230,20 +230,20 @@ describe('<EpicDetail/>', () => {
 
       expect(queryByText('Epic 1')).toBeNull();
       expect(fetchObject).toHaveBeenCalledWith({
-        filters: { repository: 'r1', slug: 'other-epic' },
+        filters: { project: 'r1', slug: 'other-epic' },
         objectType: 'epic',
       });
     });
   });
 
-  describe('repository does not exist', () => {
-    test('renders <RepositoryNotFound />', () => {
+  describe('project does not exist', () => {
+    test('renders <ProjectNotFound />', () => {
       const { getByText, queryByText } = setup({
-        repositorySlug: 'different-repository',
+        projectSlug: 'different-project',
       });
 
       expect(queryByText('Epic 1')).toBeNull();
-      expect(getByText('list of all repositories')).toBeVisible();
+      expect(getByText('list of all projects')).toBeVisible();
     });
   });
 
@@ -263,7 +263,7 @@ describe('<EpicDetail/>', () => {
       const { context } = setup({ epicSlug: 'old-slug' });
 
       expect(context.action).toEqual('REPLACE');
-      expect(context.url).toEqual(routes.epic_detail('repository-1', 'epic-1'));
+      expect(context.url).toEqual(routes.epic_detail('project-1', 'epic-1'));
     });
   });
 

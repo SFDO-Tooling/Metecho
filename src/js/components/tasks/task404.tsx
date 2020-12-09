@@ -4,20 +4,20 @@ import { Link } from 'react-router-dom';
 
 import FourOhFour from '@/components/404';
 import { Epic } from '@/store/epics/reducer';
-import { Repository } from '@/store/repositories/reducer';
+import { Project } from '@/store/projects/reducer';
 import routes from '@/utils/routes';
 
 interface Props {
-  repository: Repository;
+  project: Project;
   epic: Epic;
 }
 
-const TaskNotFound = ({ repository, epic }: Props) => (
+const TaskNotFound = ({ project, epic }: Props) => (
   <FourOhFour
     message={
       <Trans i18nKey="taskNotFound">
         We can’t find the task you’re looking for. Try{' '}
-        <Link to={routes.epic_detail(repository.slug, epic.slug)}>
+        <Link to={routes.epic_detail(project.slug, epic.slug)}>
           another task
         </Link>{' '}
         from that epic?

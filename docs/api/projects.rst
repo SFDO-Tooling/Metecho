@@ -1,15 +1,15 @@
-============
-Repositories
-============
+========
+Projects
+========
 
-This allows list, retrieve, create, update, and delete of Repositories.
+This allows list, retrieve, create, update, and delete of Projects.
 
 Retrieve
 --------
 
 .. sourcecode:: http
 
-   GET /api/repositories/ HTTP/1.1
+   GET /api/projects/ HTTP/1.1
 
 .. sourcecode:: http
 
@@ -17,19 +17,19 @@ Retrieve
 
     {
       "count": 150,
-      "next": "https://.../api/repositories/?page=2",
+      "next": "https://.../api/projects/?page=2",
       "previous": null,
       "results": [
         {
           "id": "zVQYrye",
-          "name": "Test Repository",
-          "repo_url": "https://github.com/SFDO-Tooling/test-repository",
+          "name": "Test Project",
+          "repo_url": "https://github.com/SFDO-Tooling/test-project",
           "repo_owner": "SFDO-Tooling",
-          "repo_name": "test-repository",
+          "repo_name": "test-project",
           "description": "This is *safely* rendered Markdown.",
           "description_rendered": "<p>This is <em>safely</em> rendered Markdown.</p>",
           "is_managed": false,
-          "slug": "test-repository",
+          "slug": "test-project",
           "old_slugs": [],
           "branch_prefix": "",
           "github_users": [
@@ -50,7 +50,7 @@ Refresh GitHub Users
 
 .. sourcecode:: http
 
-   POST /api/repositories/:id/refresh_github_users/ HTTP/1.1
+   POST /api/projects/:id/refresh_github_users/ HTTP/1.1
 
 .. sourcecode:: http
 

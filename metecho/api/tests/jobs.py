@@ -120,7 +120,7 @@ class TestCreateBranchesOnGitHub:
         self, user_factory, task_factory
     ):
         user = user_factory()
-        task = task_factory(epic__repository__branch_prefix="test_prefix")
+        task = task_factory(epic__project__branch_prefix="test_prefix")
         epic = task.epic
 
         with ExitStack() as stack:
@@ -528,15 +528,15 @@ class TestErrorHandling:
     def test_task__user(
         self,
         user_factory,
-        repository_factory,
+        project_factory,
         epic_factory,
         task_factory,
         git_hub_repository_factory,
     ):
         user = user_factory()
-        repository = repository_factory(repo_id=123)
+        project = project_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
-        epic = epic_factory(repository=repository)
+        epic = epic_factory(project=project)
         task = task_factory(epic=epic, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:
             commit1 = Commit(
@@ -567,7 +567,7 @@ class TestErrorHandling:
             get_repo_info.return_value = repo
 
             refresh_commits(
-                repository=repository, branch_name="task", originating_user_id=None
+                project=project, branch_name="task", originating_user_id=None
             )
             task.refresh_from_db()
             assert len(task.commits) == 1
@@ -639,11 +639,11 @@ class TestPopulateGitHubUsers:
     def test_populate_github_users(
         self,
         user_factory,
-        repository_factory,
+        project_factory,
         git_hub_repository_factory,
     ):
         user = user_factory()
-        repository = repository_factory(repo_id=123)
+        project = project_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
         with patch(f"{PATCH_ROOT}.get_repo_info") as get_repo_info:
             collab1 = MagicMock(
@@ -659,13 +659,13 @@ class TestPopulateGitHubUsers:
             repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
             get_repo_info.return_value = repo
 
-            populate_github_users(repository, originating_user_id=None)
-            repository.refresh_from_db()
-            assert len(repository.github_users) == 2
+            populate_github_users(project, originating_user_id=None)
+            project.refresh_from_db()
+            assert len(project.github_users) == 2
 
-    def test__error(self, user_factory, repository_factory, git_hub_repository_factory):
+    def test__error(self, user_factory, project_factory, git_hub_repository_factory):
         user = user_factory()
-        repository = repository_factory(repo_id=123)
+        project = project_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
@@ -676,7 +676,7 @@ class TestPopulateGitHubUsers:
             logger = stack.enter_context(patch(f"{PATCH_ROOT}.logger"))
 
             with pytest.raises(Exception):
-                populate_github_users(repository, originating_user_id=None)
+                populate_github_users(project, originating_user_id=None)
 
             assert logger.error.called
             assert async_to_sync.called
@@ -730,7 +730,7 @@ class TestSubmitReview:
             task = task_factory(pr_is_open=True, review_valid=True, review_sha="none")
             scratch_org = scratch_org_factory(task=task, latest_commit="test_sha")
             task.finalize_submit_review = MagicMock()
-            task.epic.repository.get_repo_id = MagicMock()
+            task.epic.project.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
@@ -768,7 +768,7 @@ class TestSubmitReview:
                 pr_is_open=True, review_valid=False, review_sha="test_sha"
             )
             task.finalize_submit_review = MagicMock()
-            task.epic.repository.get_repo_id = MagicMock()
+            task.epic.project.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
@@ -911,8 +911,8 @@ class TestAvailableTaskOrgConfigNames:
 
 
 @pytest.mark.django_db
-def test_get_social_image(repository_factory):
-    repository = repository_factory()
+def test_get_social_image(project_factory):
+    project = project_factory()
     with ExitStack() as stack:
         stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
         get = stack.enter_context(patch("metecho.api.jobs.requests.get"))
@@ -926,10 +926,10 @@ def test_get_social_image(repository_factory):
             </html>
             """
         )
-        get_social_image(repository=repository)
+        get_social_image(project=project)
 
-        repository.refresh_from_db()
-        assert repository.repo_image_url == "https://example.com/"
+        project.refresh_from_db()
+        assert project.repo_image_url == "https://example.com/"
 
 
 @pytest.mark.django_db

@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import RepoDetail from '@/components/repositories/detail';
+import ProjectDetail from '@/components/projects/detail';
 import { fetchObject, fetchObjects } from '@/store/actions';
 import routes from '@/utils/routes';
 
@@ -19,21 +19,21 @@ afterEach(() => {
 });
 
 const defaultState = {
-  repositories: {
-    repositories: [
+  projects: {
+    projects: [
       {
         id: 'r1',
-        name: 'Repository 1',
-        slug: 'repository-1',
+        name: 'Project 1',
+        slug: 'project-1',
         old_slugs: ['old-slug'],
-        description: 'This is a test repository.',
-        description_rendered: '<p>This is a test repository.</p>',
+        description: 'This is a test project.',
+        description_rendered: '<p>This is a test project.</p>',
         repo_url: 'https://github.com/test/test-repo',
         github_users: [],
         repo_image_url: 'https://github.com/repo-image',
       },
     ],
-    notFound: ['yet-another-repository'],
+    notFound: ['yet-another-project'],
     next: null,
   },
   epics: {
@@ -43,7 +43,7 @@ const defaultState = {
           id: 'epic1',
           slug: 'epic-1',
           name: 'Epic 1',
-          repository: 'r1',
+          project: 'r1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           github_users: [],
@@ -53,7 +53,7 @@ const defaultState = {
           id: 'epic2',
           slug: 'epic-2',
           name: 'Epic 2',
-          repository: 'r1',
+          project: 'r1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           github_users: [],
@@ -63,7 +63,7 @@ const defaultState = {
           id: 'epic3',
           slug: 'epic-3',
           name: 'Epic 3',
-          repository: 'r1',
+          project: 'r1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           github_users: [],
@@ -73,7 +73,7 @@ const defaultState = {
           id: 'epic4',
           slug: 'epic-4',
           name: 'Epic 4',
-          repository: 'r1',
+          project: 'r1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           github_users: [],
@@ -90,18 +90,18 @@ const defaultState = {
   },
 };
 
-describe('<RepoDetail />', () => {
+describe('<ProjectDetail />', () => {
   const setup = (options) => {
     const defaults = {
       initialState: defaultState,
-      repositorySlug: 'repository-1',
+      projectSlug: 'project-1',
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, repositorySlug } = opts;
+    const { initialState, projectSlug } = opts;
     const context = {};
     const result = renderWithRedux(
       <StaticRouter context={context}>
-        <RepoDetail match={{ params: { repositorySlug } }} />
+        <ProjectDetail match={{ params: { projectSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
@@ -112,13 +112,13 @@ describe('<RepoDetail />', () => {
     };
   };
 
-  test('renders repository detail and epics list', () => {
+  test('renders project detail and epics list', () => {
     const { getByText, getAllByTitle } = setup();
 
-    expect(getAllByTitle('Repository 1')[0]).toBeVisible();
-    expect(getByText('This is a test repository.')).toBeVisible();
+    expect(getAllByTitle('Project 1')[0]).toBeVisible();
+    expect(getByText('This is a test project.')).toBeVisible();
     expect(getByText('Epic 1')).toBeVisible();
-    expect(getByText('Epics for Repository 1')).toBeVisible();
+    expect(getByText('Epics for Project 1')).toBeVisible();
   });
 
   test('renders with form expanded if no epics', () => {
@@ -136,48 +136,48 @@ describe('<RepoDetail />', () => {
       },
     });
 
-    expect(getByText('Create an Epic for Repository 1')).toBeVisible();
-    expect(queryByText('Epics for Repository 1')).toBeNull();
+    expect(getByText('Create an Epic for Project 1')).toBeVisible();
+    expect(queryByText('Epics for Project 1')).toBeNull();
   });
 
-  describe('repository not found', () => {
-    test('fetches repository from API', () => {
-      const { queryByText } = setup({ repositorySlug: 'other-repository' });
+  describe('project not found', () => {
+    test('fetches project from API', () => {
+      const { queryByText } = setup({ projectSlug: 'other-project' });
 
-      expect(queryByText('Repository 1')).toBeNull();
+      expect(queryByText('Project 1')).toBeNull();
       expect(fetchObject).toHaveBeenCalledWith({
-        filters: { slug: 'other-repository' },
-        objectType: 'repository',
+        filters: { slug: 'other-project' },
+        objectType: 'project',
       });
     });
   });
 
-  describe('repository does not exist', () => {
-    test('renders <RepositoryNotFound />', () => {
+  describe('project does not exist', () => {
+    test('renders <ProjectNotFound />', () => {
       const { getByText, queryByText } = setup({
-        repositorySlug: 'yet-another-repository',
+        projectSlug: 'yet-another-project',
       });
 
-      expect(queryByText('Repository 1')).toBeNull();
-      expect(getByText('list of all repositories')).toBeVisible();
+      expect(queryByText('Project 1')).toBeNull();
+      expect(getByText('list of all projects')).toBeVisible();
     });
   });
 
-  describe('old repository slug', () => {
-    test('redirects to repository_detail with new slug', () => {
-      const { context } = setup({ repositorySlug: 'old-slug' });
+  describe('old project slug', () => {
+    test('redirects to project_detail with new slug', () => {
+      const { context } = setup({ projectSlug: 'old-slug' });
 
       expect(context.action).toEqual('REPLACE');
-      expect(context.url).toEqual(routes.repository_detail('repository-1'));
+      expect(context.url).toEqual(routes.project_detail('project-1'));
     });
   });
 
-  describe('no repository slug', () => {
-    test('renders <RepositoryNotFound />', () => {
-      const { getByText, queryByText } = setup({ repositorySlug: '' });
+  describe('no project slug', () => {
+    test('renders <ProjectNotFound />', () => {
+      const { getByText, queryByText } = setup({ projectSlug: '' });
 
-      expect(queryByText('Repository 1')).toBeNull();
-      expect(getByText('list of all repositories')).toBeVisible();
+      expect(queryByText('Project 1')).toBeNull();
+      expect(getByText('list of all projects')).toBeVisible();
     });
   });
 
@@ -197,9 +197,9 @@ describe('<RepoDetail />', () => {
         },
       });
 
-      expect(queryByText('Epics for Repository 1')).toBeNull();
+      expect(queryByText('Epics for Project 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { repository: 'r1' },
+        filters: { project: 'r1' },
         objectType: 'epic',
         reset: true,
       });
@@ -216,12 +216,12 @@ describe('<RepoDetail />', () => {
               epics: [
                 {
                   branch_url: 'branch-url',
-                  description: 'repository description',
-                  description_rendered: '<p>repository description</p>',
+                  description: 'project description',
+                  description_rendered: '<p>project description</p>',
                   id: 'epic1',
                   name: 'Epic 1',
                   old_slugs: [],
-                  repository: 'r1',
+                  project: 'r1',
                   slug: 'epic-1',
                 },
               ],
@@ -239,7 +239,7 @@ describe('<RepoDetail />', () => {
       fireEvent.click(btn);
 
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { repository: 'r1' },
+        filters: { project: 'r1' },
         objectType: 'epic',
         url: 'next-url',
       });
@@ -256,12 +256,12 @@ describe('<RepoDetail />', () => {
               epics: [
                 {
                   branch_url: 'branch-url',
-                  description: 'repository description',
-                  description_rendered: '<p>repository description</p>',
+                  description: 'project description',
+                  description_rendered: '<p>project description</p>',
                   id: 'epic1',
                   name: 'Epic 1',
                   old_slugs: [],
-                  repository: 'r1',
+                  project: 'r1',
                   slug: 'epic-1',
                 },
               ],
@@ -282,11 +282,11 @@ describe('<RepoDetail />', () => {
       const { queryByText, getByText } = setup();
       fireEvent.click(getByText('Create an Epic'));
 
-      expect(getByText('Create an Epic for Repository 1')).toBeVisible();
+      expect(getByText('Create an Epic for Project 1')).toBeVisible();
 
       fireEvent.click(queryByText('Close'));
 
-      expect(queryByText('Create an Epic for Repository 1')).toBeNull();
+      expect(queryByText('Create an Epic for Project 1')).toBeNull();
     });
   });
 });

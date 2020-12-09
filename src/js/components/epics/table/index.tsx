@@ -17,10 +17,10 @@ export interface TableCellProps {
 
 const EpicTable = ({
   epics,
-  repositorySlug,
+  projectSlug,
 }: {
   epics: Epic[];
-  repositorySlug: string;
+  projectSlug: string;
 }) => {
   const items = epics.map((epic) => ({
     ...epic,
@@ -28,7 +28,7 @@ const EpicTable = ({
   }));
 
   return (
-    <DataTable items={items} id="repo-epics-table" noRowHover>
+    <DataTable items={items} id="project-epics-table" noRowHover>
       <DataTableColumn
         key="details"
         label={i18n.t('Epic')}
@@ -36,7 +36,7 @@ const EpicTable = ({
         width="100%"
         primaryColumn
       >
-        <DetailTableCell repositorySlug={repositorySlug} />
+        <DetailTableCell projectSlug={projectSlug} />
       </DataTableColumn>
       <DataTableColumn
         key="status"

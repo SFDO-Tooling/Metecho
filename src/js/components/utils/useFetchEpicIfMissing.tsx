@@ -5,11 +5,11 @@ import { RouteComponentProps } from 'react-router-dom';
 import { AppState, ThunkDispatch } from '@/store';
 import { fetchObject } from '@/store/actions';
 import { selectEpic, selectEpicSlug } from '@/store/epics/selectors';
-import { Repository } from '@/store/repositories/reducer';
+import { Project } from '@/store/projects/reducer';
 import { OBJECT_TYPES } from '@/utils/constants';
 
 export default (
-  repository: Repository | null | undefined,
+  project: Project | null | undefined,
   routeProps: RouteComponentProps,
 ) => {
   const dispatch = useDispatch<ThunkDispatch>();
@@ -23,16 +23,16 @@ export default (
   );
 
   useEffect(() => {
-    if (repository && epicSlug && epic === undefined) {
+    if (project && epicSlug && epic === undefined) {
       // Fetch epic from API
       dispatch(
         fetchObject({
           objectType: OBJECT_TYPES.EPIC,
-          filters: { repository: repository.id, slug: epicSlug },
+          filters: { project: project.id, slug: epicSlug },
         }),
       );
     }
-  }, [dispatch, repository, epic, epicSlug]);
+  }, [dispatch, project, epic, epicSlug]);
 
   return { epic, epicSlug };
 };

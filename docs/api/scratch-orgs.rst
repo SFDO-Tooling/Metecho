@@ -25,7 +25,7 @@ Retrieve
         "expires_at": "2019-01-08T17:21:37Z",
         "last_checked_unsaved_changes_at": "2019-01-03T17:21:37Z",
         "latest_commit": "617a512",
-        "latest_commit_url": "https://github.com/SFDO-Tooling/test-repository/commit/617a512",
+        "latest_commit_url": "https://github.com/SFDO-Tooling/test-project/commit/617a512",
         "latest_commit_at": "2019-02-01T19:47:49Z",
         "url": "https://sample-org-url.my.salesforce.com/",
         "unsaved_changes": {},

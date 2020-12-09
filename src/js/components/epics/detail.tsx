@@ -21,18 +21,18 @@ import {
   EditModal,
   ExternalLink,
   getEpicLoadingOrNotFound,
-  getRepositoryLoadingOrNotFound,
+  getProjectLoadingOrNotFound,
   LabelWithSpinner,
   PageOptions,
   SpinnerWrapper,
   SubmitModal,
   useFetchEpicIfMissing,
-  useFetchRepositoryIfMissing,
+  useFetchProjectIfMissing,
   useFetchTasksIfMissing,
 } from '@/components/utils';
 import { ThunkDispatch } from '@/store';
 import { updateObject } from '@/store/actions';
-import { refreshGitHubUsers } from '@/store/repositories/actions';
+import { refreshGitHubUsers } from '@/store/projects/actions';
 import { Task } from '@/store/tasks/reducer';
 import { GitHubUser } from '@/store/user/reducer';
 import { getUrlParam, removeUrlParam } from '@/utils/api';
@@ -48,8 +48,8 @@ import routes from '@/utils/routes';
 
 const EpicDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
-  const { repository, repositorySlug } = useFetchRepositoryIfMissing(props);
-  const { epic, epicSlug } = useFetchEpicIfMissing(repository, props);
+  const { project, projectSlug } = useFetchProjectIfMissing(props);
+  const { epic, epicSlug } = useFetchEpicIfMissing(project, props);
   const { tasks } = useFetchTasksIfMissing(epic, props);
 
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
@@ -190,11 +190,11 @@ const EpicDetail = (props: RouteComponentProps) => {
   );
   const doRefreshGitHubUsers = useCallback(() => {
     /* istanbul ignore if */
-    if (!repository) {
+    if (!project) {
       return;
     }
-    dispatch(refreshGitHubUsers(repository.id));
-  }, [repository, dispatch]);
+    dispatch(refreshGitHubUsers(project.id));
+  }, [project, dispatch]);
 
   // "Assign user to task" modal related:
   const assignUser = useCallback(
@@ -284,16 +284,16 @@ const EpicDetail = (props: RouteComponentProps) => {
     [readyToSubmit, currentlySubmitting],
   );
 
-  const repositoryLoadingOrNotFound = getRepositoryLoadingOrNotFound({
-    repository,
-    repositorySlug,
+  const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
+    project,
+    projectSlug,
   });
-  if (repositoryLoadingOrNotFound !== false) {
-    return repositoryLoadingOrNotFound;
+  if (projectLoadingOrNotFound !== false) {
+    return projectLoadingOrNotFound;
   }
 
   const epicLoadingOrNotFound = getEpicLoadingOrNotFound({
-    repository,
+    project,
     epic,
     epicSlug,
   });
@@ -303,16 +303,16 @@ const EpicDetail = (props: RouteComponentProps) => {
 
   // This redundant check is used to satisfy TypeScript...
   /* istanbul ignore if */
-  if (!repository || !epic) {
+  if (!project || !epic) {
     return <FourOhFour />;
   }
 
   if (
-    (repositorySlug && repositorySlug !== repository.slug) ||
+    (projectSlug && projectSlug !== project.slug) ||
     (epicSlug && epicSlug !== epic.slug)
   ) {
-    // Redirect to most recent repository/epic slug
-    return <Redirect to={routes.epic_detail(repository.slug, epic.slug)} />;
+    // Redirect to most recent project/epic slug
+    return <Redirect to={routes.epic_detail(project.slug, epic.slug)} />;
   }
 
   // Progress Bar:
@@ -371,15 +371,15 @@ const EpicDetail = (props: RouteComponentProps) => {
     </PageHeaderControl>
   );
 
-  const repoUrl = routes.repository_detail(repository.slug);
+  const projectUrl = routes.project_detail(project.slug);
   let headerUrl, headerUrlText;
   /* istanbul ignore else */
   if (epic.branch_url && epic.branch_name) {
     headerUrl = epic.branch_url;
     headerUrlText = epic.branch_name;
   } else {
-    headerUrl = repository.repo_url;
-    headerUrlText = `${repository.repo_owner}/${repository.repo_name}`;
+    headerUrl = project.repo_url;
+    headerUrlText = `${project.repo_owner}/${project.repo_name}`;
   }
 
   const epicIsMerged = epic.status === EPIC_STATUSES.MERGED;
@@ -387,7 +387,7 @@ const EpicDetail = (props: RouteComponentProps) => {
 
   return (
     <DocumentTitle
-      title={`${epic.name} | ${repository.name} | ${i18n.t('Metecho')}`}
+      title={`${epic.name} | ${project.name} | ${i18n.t('Metecho')}`}
     >
       <DetailPageLayout
         title={epic.name}
@@ -396,8 +396,8 @@ const EpicDetail = (props: RouteComponentProps) => {
         headerUrlText={headerUrlText}
         breadcrumb={[
           {
-            name: repository.name,
-            url: repoUrl,
+            name: project.name,
+            url: projectUrl,
           },
           { name: epic.name },
         ]}
@@ -414,7 +414,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 onClick={openAssignUsersModal}
               />
               <AssignUsersModal
-                allUsers={repository.github_users}
+                allUsers={project.github_users}
                 selectedUsers={epic.github_users}
                 heading={`${i18n.t('Add or Remove Collaborators for')} ${
                   epic.name
@@ -422,7 +422,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 isOpen={assignUsersModalOpen}
                 onRequestClose={closeAssignUsersModal}
                 setUsers={setEpicUsers}
-                isRefreshing={Boolean(repository.currently_refreshing_gh_users)}
+                isRefreshing={Boolean(project.currently_refreshing_gh_users)}
                 refreshUsers={doRefreshGitHubUsers}
               />
               <ConfirmRemoveUserModal
@@ -471,7 +471,7 @@ const EpicDetail = (props: RouteComponentProps) => {
               <>
                 <EpicProgress range={epicProgress} />
                 <TaskTable
-                  repositorySlug={repository.slug}
+                  projectSlug={project.slug}
                   epicSlug={epic.slug}
                   tasks={tasks}
                   epicUsers={epic.github_users}
@@ -505,7 +505,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           model={epic}
           modelType={OBJECT_TYPES.EPIC}
           isOpen={deleteModalOpen}
-          redirect={repoUrl}
+          redirect={projectUrl}
           handleClose={closeDeleteModal}
         />
         {!epicIsMerged && (

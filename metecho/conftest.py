@@ -6,7 +6,7 @@ from pytest_factoryboy import register
 from rest_framework.test import APIClient
 from sfdo_template_helpers.crypto import fernet_encrypt
 
-from .api.models import Epic, GitHubRepository, Repository, ScratchOrg, Task
+from .api.models import Epic, GitHubRepository, Project, ScratchOrg, Task
 
 User = get_user_model()
 
@@ -63,11 +63,11 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 
 @register
-class RepositoryFactory(factory.django.DjangoModelFactory):
+class ProjectFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Repository
+        model = Project
 
-    name = factory.Sequence("Repository {}".format)
+    name = factory.Sequence("Project {}".format)
     repo_owner = factory.Sequence("user_{}".format)
     repo_name = factory.Sequence("repo_{}".format)
     repo_id = factory.Sequence(lambda n: n)
@@ -90,7 +90,7 @@ class EpicFactory(factory.django.DjangoModelFactory):
         model = Epic
 
     name = factory.Sequence("Epic {}".format)
-    repository = factory.SubFactory(RepositoryFactory)
+    project = factory.SubFactory(ProjectFactory)
 
 
 @register

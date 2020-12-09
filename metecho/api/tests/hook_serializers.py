@@ -13,8 +13,8 @@ from ..models import TASK_STATUSES
 
 @pytest.mark.django_db
 class TestPushHookSerializer:
-    def test_process_hook__weird_ref(self, repository_factory):
-        repository_factory(repo_id=123)
+    def test_process_hook__weird_ref(self, project_factory):
+        project_factory(repo_id=123)
         data = {
             "forced": False,
             "ref": "not a branch?",
@@ -28,8 +28,8 @@ class TestPushHookSerializer:
             serializer.process_hook()
             assert logger.warn.called
 
-    def test_process_hook__tag(self, repository_factory):
-        repository_factory(repo_id=123)
+    def test_process_hook__tag(self, project_factory):
+        project_factory(repo_id=123)
         data = {
             "forced": False,
             "ref": "refs/tags/v0.1",
@@ -46,7 +46,7 @@ class TestPushHookSerializer:
 
 @pytest.mark.django_db
 class TestPrHookSerializer:
-    def test_process_hook__no_matching_repository(self):
+    def test_process_hook__no_matching_project(self):
         data = {
             "action": "closed",
             "number": 123,
@@ -63,8 +63,8 @@ class TestPrHookSerializer:
         with pytest.raises(NotFound):
             serializer.process_hook()
 
-    def test_process_hook__no_matching_task(self, repository_factory):
-        repository_factory(repo_id=123)
+    def test_process_hook__no_matching_task(self, project_factory):
+        project_factory(repo_id=123)
         data = {
             "action": "closed",
             "number": 456,
@@ -81,12 +81,12 @@ class TestPrHookSerializer:
         serializer.process_hook()
 
     def test_process_hook__mark_matching_tasks_as_completed(
-        self, repository_factory, task_factory
+        self, project_factory, task_factory
     ):
-        repository = repository_factory(repo_id=123)
+        project = project_factory(repo_id=123)
         task = task_factory(
             pr_number=456,
-            epic__repository=repository,
+            epic__project=project,
             status=TASK_STATUSES["In progress"],
         )
         data = {
@@ -107,11 +107,11 @@ class TestPrHookSerializer:
         task.refresh_from_db()
         assert task.status == TASK_STATUSES.Completed
 
-    def test_process_hook__closed_not_merged(self, repository_factory, task_factory):
-        repository = repository_factory(repo_id=123)
+    def test_process_hook__closed_not_merged(self, project_factory, task_factory):
+        project = project_factory(repo_id=123)
         task = task_factory(
             pr_number=456,
-            epic__repository=repository,
+            epic__project=project,
             status=TASK_STATUSES["In progress"],
         )
         data = {
@@ -133,11 +133,11 @@ class TestPrHookSerializer:
         assert task.status == TASK_STATUSES["In progress"]
         assert not task.pr_is_open
 
-    def test_process_hook__reopened(self, repository_factory, task_factory):
-        repository = repository_factory(repo_id=123)
+    def test_process_hook__reopened(self, project_factory, task_factory):
+        project = project_factory(repo_id=123)
         task = task_factory(
             pr_number=456,
-            epic__repository=repository,
+            epic__project=project,
             status=TASK_STATUSES["In progress"],
         )
         data = {
@@ -159,9 +159,9 @@ class TestPrHookSerializer:
         assert task.status == TASK_STATUSES["In progress"]
         assert task.pr_is_open
 
-    def test_process_hook__close_matching_epics(self, repository_factory, epic_factory):
-        repository = repository_factory(repo_id=123)
-        epic = epic_factory(pr_number=456, repository=repository, pr_is_open=True)
+    def test_process_hook__close_matching_epics(self, project_factory, epic_factory):
+        project = project_factory(repo_id=123)
+        epic = epic_factory(pr_number=456, project=project, pr_is_open=True)
         data = {
             "action": "closed",
             "number": 456,
@@ -180,13 +180,11 @@ class TestPrHookSerializer:
         epic.refresh_from_db()
         assert not epic.pr_is_open
 
-    def test_process_hook__epic_closed_not_merged(
-        self, repository_factory, epic_factory
-    ):
-        repository = repository_factory(repo_id=123)
+    def test_process_hook__epic_closed_not_merged(self, project_factory, epic_factory):
+        project = project_factory(repo_id=123)
         epic = epic_factory(
             pr_number=456,
-            repository=repository,
+            project=project,
             pr_is_open=True,
         )
         data = {
@@ -207,11 +205,11 @@ class TestPrHookSerializer:
         epic.refresh_from_db()
         assert not epic.pr_is_open
 
-    def test_process_hook__epic_reopened(self, repository_factory, epic_factory):
-        repository = repository_factory(repo_id=123)
+    def test_process_hook__epic_reopened(self, project_factory, epic_factory):
+        project = project_factory(repo_id=123)
         epic = epic_factory(
             pr_number=456,
-            repository=repository,
+            project=project,
             pr_is_open=True,
         )
         data = {
@@ -235,7 +233,7 @@ class TestPrHookSerializer:
 
 @pytest.mark.django_db
 class TestPrReviewHookSerializer:
-    def test_no_repository(self):
+    def test_no_project(self):
         data = {
             "sender": {"login": "login", "avatar_url": "https://example.com"},
             "repository": {"id": 123},
@@ -252,8 +250,8 @@ class TestPrReviewHookSerializer:
         with pytest.raises(NotFound):
             serializer.process_hook()
 
-    def test_no_task(self, repository_factory):
-        repository_factory(repo_id=123)
+    def test_no_task(self, project_factory):
+        project_factory(repo_id=123)
         data = {
             "sender": {"login": "login", "avatar_url": "https://example.com"},
             "repository": {"id": 123},
@@ -271,7 +269,7 @@ class TestPrReviewHookSerializer:
             serializer.process_hook()
 
     def test_good(self, task_factory):
-        task = task_factory(epic__repository__repo_id=123, pr_number=123)
+        task = task_factory(epic__project__repo_id=123, pr_number=123)
         data = {
             "sender": {"login": "login", "avatar_url": "https://example.com"},
             "repository": {"id": 123},

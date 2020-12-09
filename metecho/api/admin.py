@@ -12,8 +12,8 @@ from .models import (
     Epic,
     EpicSlug,
     GitHubRepository,
-    Repository,
-    RepositorySlug,
+    Project,
+    ProjectSlug,
     ScratchOrg,
     SiteProfile,
     Task,
@@ -22,9 +22,9 @@ from .models import (
 )
 
 
-class RepositoryForm(forms.ModelForm):
+class ProjectForm(forms.ModelForm):
     class Meta:
-        model = Repository
+        model = Project
         exclude = ()
 
     def clean(self):
@@ -84,14 +84,14 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ("username",)
 
 
-@admin.register(Repository)
-class RepositoryAdmin(admin.ModelAdmin):
-    form = RepositoryForm
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+    form = ProjectForm
     list_display = ("name", "repo_owner", "repo_name")
 
 
-@admin.register(RepositorySlug)
-class RepositorySlugAdmin(admin.ModelAdmin):
+@admin.register(ProjectSlug)
+class ProjectSlugAdmin(admin.ModelAdmin):
     list_display = ("slug", "parent")
 
 
@@ -102,7 +102,7 @@ class GitHubRepositoryAdmin(admin.ModelAdmin):
 
 @admin.register(Epic)
 class EpicAdmin(admin.ModelAdmin):
-    list_display = ("name", "repository", "deleted_at")
+    list_display = ("name", "project", "deleted_at")
     list_filter = (SoftDeletedListFilter,)
 
 
