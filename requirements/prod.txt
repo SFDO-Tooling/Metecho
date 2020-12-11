@@ -25,7 +25,7 @@ coloredlogs==14.0         # via cumulusci
 constantly==15.1.0        # via twisted
 croniter==0.3.36          # via rq-scheduler
 cryptography==3.2.1       # via authlib, autobahn, cumulusci, jwcrypto, pyjwt, pyopenssl, secretstorage, service-identity, sfdo-template-helpers
-cumulusci==3.24.1         # via -r requirements/prod.in
+cumulusci==3.26.0.dev0    # via -r requirements/prod.in
 daphne==3.0.1             # via channels
 defusedxml==0.6.0         # via python3-openid
 dj-database-url==0.5.0    # via -r requirements/prod.in
