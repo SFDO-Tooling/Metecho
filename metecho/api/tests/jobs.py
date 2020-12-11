@@ -237,8 +237,9 @@ def test_create_org_and_run_flow():
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
         Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
         Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
+        scratch_org = MagicMock(org_type=SCRATCH_ORG_TYPES.Dev)
         _create_org_and_run_flow(
-            MagicMock(org_type=SCRATCH_ORG_TYPES.Dev),
+            scratch_org,
             user=MagicMock(),
             repo_id=123,
             repo_branch=MagicMock(),
@@ -248,6 +249,7 @@ def test_create_org_and_run_flow():
 
         assert create_org.called
         assert run_flow.called
+        assert isinstance(scratch_org.cci_log, str)
 
 
 def test_create_org_and_run_flow__fall_back_to_cases():
