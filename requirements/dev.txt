@@ -56,7 +56,7 @@ pytest-django==4.1.0      # via -r requirements/dev.in
 pytest-factoryboy==2.0.3  # via -r requirements/dev.in
 pytest-mock==3.3.1        # via -r requirements/dev.in
 pytest-sugar==0.9.4       # via -r requirements/dev.in
-pytest==6.1.2             # via -r requirements/dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-factoryboy, pytest-mock, pytest-sugar
+pytest==6.2.1             # via -r requirements/dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-factoryboy, pytest-mock, pytest-sugar
 python-dateutil==2.8.1    # via -c requirements/prod.txt, faker
 pytz==2020.4              # via -c requirements/prod.txt, babel
 regex==2020.11.13         # via black
