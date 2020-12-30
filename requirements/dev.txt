@@ -20,7 +20,7 @@ django-extensions==3.1.0  # via -r requirements/dev.in
 doc8==0.8.1               # via -r requirements/dev.in
 docopt==0.6.2             # via coveralls
 docutils==0.16            # via -c requirements/prod.txt, doc8, restructuredtext-lint, sphinx
-factory-boy==3.1.0        # via -r requirements/dev.in, pytest-factoryboy
+factory-boy==3.2.0        # via -r requirements/dev.in, pytest-factoryboy
 faker==4.17.1             # via -c requirements/prod.txt, factory-boy
 flake8-bugbear==20.11.1   # via -r requirements/dev.in
 flake8==3.8.4             # via -r requirements/dev.in, flake8-bugbear
