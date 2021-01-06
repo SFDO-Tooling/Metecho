@@ -93,11 +93,21 @@ module.exports = {
       },
       {
         test: /\.(svg|gif|jpe?g|png)$/,
-        type: 'asset',
+        use: [
+          {
+            loader: 'url-loader',
+            options: { limit: 10000 },
+          },
+        ],
       },
       {
         test: /\.(eot|woff|woff2|ttf)$/,
-        type: 'asset',
+        use: [
+          {
+            loader: 'url-loader',
+            options: { limit: 30 },
+          },
+        ],
       },
     ],
   },

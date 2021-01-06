@@ -22,18 +22,22 @@ module.exports = merge(common, {
   },
   devtool: 'inline-cheap-module-source-map',
   devServer: {
-    index: '',
+    dev: {
+      index: '',
+      publicPath: '/static/',
+      writeToDisk: true,
+    },
     proxy: {
       '**': 'http://localhost:8000',
-      '/ws': {
+      '/ws/notifications': {
         target: 'http://localhost:8000',
         ws: true,
       },
     },
+    static: false,
     host: '0.0.0.0',
     port: 8080,
     hot: false,
-    writeToDisk: true,
   },
   plugins: [
     new MiniCssExtractPlugin({
