@@ -20,8 +20,8 @@ module.exports = {
     modules: ['src', 'static', 'node_modules'],
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
-      '@': path.join(__dirname, 'src', 'js'),
-      img: path.join(__dirname, 'static', 'images'),
+      '~js': path.join(__dirname, 'src', 'js'),
+      '~img': path.join(__dirname, 'static', 'images'),
     },
   },
   output: {

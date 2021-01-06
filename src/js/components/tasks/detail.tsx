@@ -8,17 +8,17 @@ import DocumentTitle from 'react-document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import FourOhFour from '@/components/404';
-import CommitList from '@/components/commits/list';
-import { Step } from '@/components/steps/stepsItem';
-import CaptureModal from '@/components/tasks/capture';
+import FourOhFour from '~js/components/404';
+import CommitList from '~js/components/commits/list';
+import { Step } from '~js/components/steps/stepsItem';
+import CaptureModal from '~js/components/tasks/capture';
 import OrgCards, {
   ORG_TYPE_TRACKER_DEFAULT,
   OrgTypeTracker,
-} from '@/components/tasks/cards';
-import SubmitReviewModal from '@/components/tasks/cards/submitReview';
-import TaskStatusPath from '@/components/tasks/path';
-import TaskStatusSteps from '@/components/tasks/steps';
+} from '~js/components/tasks/cards';
+import SubmitReviewModal from '~js/components/tasks/cards/submitReview';
+import TaskStatusPath from '~js/components/tasks/path';
+import TaskStatusSteps from '~js/components/tasks/steps';
 import {
   DeleteModal,
   DetailPageLayout,
@@ -36,23 +36,23 @@ import {
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
   useIsMounted,
-} from '@/components/utils';
-import { AppState, ThunkDispatch } from '@/store';
-import { createObject } from '@/store/actions';
-import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
-import { Org } from '@/store/orgs/reducer';
-import { selectTask, selectTaskSlug } from '@/store/tasks/selectors';
-import { User } from '@/store/user/reducer';
-import { selectUserState } from '@/store/user/selectors';
+} from '~js/components/utils';
+import { AppState, ThunkDispatch } from '~js/store';
+import { createObject } from '~js/store/actions';
+import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
+import { Org } from '~js/store/orgs/reducer';
+import { selectTask, selectTaskSlug } from '~js/store/tasks/selectors';
+import { User } from '~js/store/user/reducer';
+import { selectUserState } from '~js/store/user/selectors';
 import {
   OBJECT_TYPES,
   ORG_TYPES,
   OrgTypes,
   REVIEW_STATUSES,
   TASK_STATUSES,
-} from '@/utils/constants';
-import { getBranchLink, getTaskCommits } from '@/utils/helpers';
-import routes from '@/utils/routes';
+} from '~js/utils/constants';
+import { getBranchLink, getTaskCommits } from '~js/utils/helpers';
+import routes from '~js/utils/routes';
 
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);

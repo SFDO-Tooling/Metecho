@@ -4,26 +4,26 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { AssignedUserTracker } from '@/components/tasks/cards';
-import Footer from '@/components/tasks/cards/footer';
-import OrgActions from '@/components/tasks/cards/orgActions';
-import OrgIcon from '@/components/tasks/cards/orgIcon';
-import OrgInfo from '@/components/tasks/cards/orgInfo';
-import OrgSpinner from '@/components/tasks/cards/orgSpinner';
-import RefreshOrgModal from '@/components/tasks/cards/refresh';
-import UserActions from '@/components/tasks/cards/userActions';
-import { AssignUserModal, UserCard } from '@/components/user/githubUser';
-import { Org } from '@/store/orgs/reducer';
-import { Task } from '@/store/tasks/reducer';
-import { GitHubUser, User } from '@/store/user/reducer';
-import { addUrlParams } from '@/utils/api';
+import { AssignedUserTracker } from '~js/components/tasks/cards';
+import Footer from '~js/components/tasks/cards/footer';
+import OrgActions from '~js/components/tasks/cards/orgActions';
+import OrgIcon from '~js/components/tasks/cards/orgIcon';
+import OrgInfo from '~js/components/tasks/cards/orgInfo';
+import OrgSpinner from '~js/components/tasks/cards/orgSpinner';
+import RefreshOrgModal from '~js/components/tasks/cards/refresh';
+import UserActions from '~js/components/tasks/cards/userActions';
+import { AssignUserModal, UserCard } from '~js/components/user/githubUser';
+import { Org } from '~js/store/orgs/reducer';
+import { Task } from '~js/store/tasks/reducer';
+import { GitHubUser, User } from '~js/store/user/reducer';
+import { addUrlParams } from '~js/utils/api';
 import {
   ORG_TYPES,
   OrgTypes,
   SHOW_EPIC_COLLABORATORS,
-} from '@/utils/constants';
-import { getTaskCommits } from '@/utils/helpers';
-import { logError } from '@/utils/logging';
+} from '~js/utils/constants';
+import { getTaskCommits } from '~js/utils/helpers';
+import { logError } from '~js/utils/logging';
 
 interface OrgCardProps {
   org: Org | null;

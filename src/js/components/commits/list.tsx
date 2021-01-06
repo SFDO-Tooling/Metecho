@@ -7,8 +7,8 @@ import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { ReactNode } from 'react';
 
-import { ExternalLink } from '@/components/utils';
-import { Commit } from '@/store/tasks/reducer';
+import { ExternalLink } from '~js/components/utils';
+import { Commit } from '~js/store/tasks/reducer';
 
 interface TableCellProps {
   [key: string]: any;

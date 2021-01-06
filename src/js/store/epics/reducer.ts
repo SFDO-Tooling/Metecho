@@ -1,8 +1,8 @@
-import { ObjectsAction, PaginatedObjectResponse } from '@/store/actions';
-import { EpicAction } from '@/store/epics/actions';
-import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
-import { GitHubUser } from '@/store/user/reducer';
-import { EpicStatuses, OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import { ObjectsAction, PaginatedObjectResponse } from '~js/store/actions';
+import { EpicAction } from '~js/store/epics/actions';
+import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
+import { GitHubUser } from '~js/store/user/reducer';
+import { EpicStatuses, OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
 
 export interface OrgConfig {
   key: string;

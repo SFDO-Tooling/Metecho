@@ -4,13 +4,13 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-import Errors from '@/components/apiErrors';
-import OfflineAlert from '@/components/offlineAlert';
-import Toasts from '@/components/toasts';
-import UserInfo from '@/components/user/info';
-import { selectSocketState } from '@/store/socket/selectors';
-import { selectUserState } from '@/store/user/selectors';
-import routes from '@/utils/routes';
+import Errors from '~js/components/apiErrors';
+import OfflineAlert from '~js/components/offlineAlert';
+import Toasts from '~js/components/toasts';
+import UserInfo from '~js/components/user/info';
+import { selectSocketState } from '~js/store/socket/selectors';
+import { selectUserState } from '~js/store/user/selectors';
+import routes from '~js/utils/routes';
 
 const Header = () => {
   const user = useSelector(selectUserState);

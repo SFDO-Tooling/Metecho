@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { ORG_TYPE_TRACKER_DEFAULT } from '@/components/tasks/cards';
-import TaskStatusSteps from '@/components/tasks/steps';
-import { REVIEW_STATUSES, TASK_STATUSES } from '@/utils/constants';
+import { ORG_TYPE_TRACKER_DEFAULT } from '~js/components/tasks/cards';
+import TaskStatusSteps from '~js/components/tasks/steps';
+import { REVIEW_STATUSES, TASK_STATUSES } from '~js/utils/constants';
 
 const defaultTask = {
   id: 'task',

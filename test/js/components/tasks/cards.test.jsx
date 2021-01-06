@@ -3,16 +3,16 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import OrgCards, { ORG_TYPE_TRACKER_DEFAULT } from '@/components/tasks/cards';
-import { deleteObject, updateObject } from '@/store/actions';
-import { refetchOrg } from '@/store/orgs/actions';
-import { addUrlParams } from '@/utils/api';
-import { SHOW_EPIC_COLLABORATORS } from '@/utils/constants';
+import OrgCards, { ORG_TYPE_TRACKER_DEFAULT } from '~js/components/tasks/cards';
+import { deleteObject, updateObject } from '~js/store/actions';
+import { refetchOrg } from '~js/store/orgs/actions';
+import { addUrlParams } from '~js/utils/api';
+import { SHOW_EPIC_COLLABORATORS } from '~js/utils/constants';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
-jest.mock('@/store/actions');
-jest.mock('@/store/orgs/actions');
+jest.mock('~js/store/actions');
+jest.mock('~js/store/orgs/actions');
 
 deleteObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

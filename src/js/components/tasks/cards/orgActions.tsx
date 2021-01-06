@@ -3,10 +3,10 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
 import React from 'react';
 
-import { LabelWithSpinner } from '@/components/utils';
-import { Org } from '@/store/orgs/reducer';
-import { Task } from '@/store/tasks/reducer';
-import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '@/utils/constants';
+import { LabelWithSpinner } from '~js/components/utils';
+import { Org } from '~js/store/orgs/reducer';
+import { Task } from '~js/store/tasks/reducer';
+import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '~js/utils/constants';
 
 const OrgActions = ({
   org,

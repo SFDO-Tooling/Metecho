@@ -2,13 +2,13 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import ProjectDetail from '@/components/projects/detail';
-import { fetchObject, fetchObjects } from '@/store/actions';
-import routes from '@/utils/routes';
+import ProjectDetail from '~js/components/projects/detail';
+import { fetchObject, fetchObjects } from '~js/store/actions';
+import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('@/store/actions');
+jest.mock('~js/store/actions');
 
 fetchObject.mockReturnValue({ type: 'TEST' });
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

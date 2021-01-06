@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { DetailPageLayout } from '@/components/utils';
+import { DetailPageLayout } from '~js/components/utils';
 
 describe('<DetailPageLayout />', () => {
   test('shows social img if no description', () => {

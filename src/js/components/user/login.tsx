@@ -2,17 +2,17 @@ import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { Location } from 'history';
 import i18n from 'i18next';
-import welcomeMatBG from 'img/welcome-mat-bg.png';
-import welcomeMatFG from 'img/welcome-mat-fg.png';
 import React, { ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { StaticContext, withRouter } from 'react-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { selectUserState } from '@/store/user/selectors';
-import { addUrlParams } from '@/utils/api';
-import routes from '@/utils/routes';
+import welcomeMatBG from '~img/welcome-mat-bg.png';
+import welcomeMatFG from '~img/welcome-mat-fg.png';
+import { selectUserState } from '~js/store/user/selectors';
+import { addUrlParams } from '~js/utils/api';
+import routes from '~js/utils/routes';
 
 interface Props
   extends RouteComponentProps<

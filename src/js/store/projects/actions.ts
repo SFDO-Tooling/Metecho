@@ -1,12 +1,12 @@
 import i18n from 'i18next';
 
-import { ThunkResult } from '@/store';
-import { fetchObjects, FetchObjectsSucceeded } from '@/store/actions';
-import { isCurrentUser } from '@/store/helpers';
-import { Project } from '@/store/projects/reducer';
-import { addToast } from '@/store/toasts/actions';
-import apiFetch from '@/utils/api';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { ThunkResult } from '~js/store';
+import { fetchObjects, FetchObjectsSucceeded } from '~js/store/actions';
+import { isCurrentUser } from '~js/store/helpers';
+import { Project } from '~js/store/projects/reducer';
+import { addToast } from '~js/store/toasts/actions';
+import apiFetch from '~js/utils/api';
+import { OBJECT_TYPES } from '~js/utils/constants';
 
 interface ProjectUpdated {
   type: 'PROJECT_UPDATE';

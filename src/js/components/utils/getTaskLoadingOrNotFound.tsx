@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react';
 
-import EpicNotFound from '@/components/epics/epic404';
-import ProjectNotFound from '@/components/projects/project404';
-import TaskNotFound from '@/components/tasks/task404';
-import { SpinnerWrapper } from '@/components/utils';
-import { Epic } from '@/store/epics/reducer';
-import { Project } from '@/store/projects/reducer';
-import { Task } from '@/store/tasks/reducer';
+import EpicNotFound from '~js/components/epics/epic404';
+import ProjectNotFound from '~js/components/projects/project404';
+import TaskNotFound from '~js/components/tasks/task404';
+import { SpinnerWrapper } from '~js/components/utils';
+import { Epic } from '~js/store/epics/reducer';
+import { Project } from '~js/store/projects/reducer';
+import { Task } from '~js/store/tasks/reducer';
 
 export default ({
   project,

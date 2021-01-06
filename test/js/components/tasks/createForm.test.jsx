@@ -2,16 +2,16 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import TaskForm from '@/components/tasks/createForm';
-import { createObject } from '@/store/actions';
-import { refreshOrgConfigs } from '@/store/epics/actions';
-import { addError } from '@/store/errors/actions';
+import TaskForm from '~js/components/tasks/createForm';
+import { createObject } from '~js/store/actions';
+import { refreshOrgConfigs } from '~js/store/epics/actions';
+import { addError } from '~js/store/errors/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('@/store/actions');
-jest.mock('@/store/errors/actions');
-jest.mock('@/store/epics/actions');
+jest.mock('~js/store/actions');
+jest.mock('~js/store/errors/actions');
+jest.mock('~js/store/epics/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

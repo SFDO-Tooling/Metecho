@@ -1,4 +1,4 @@
-import reducer from '@/store/tasks/reducer';
+import reducer from '~js/store/tasks/reducer';
 
 describe('reducer', () => {
   test('returns initial state if no action', () => {

@@ -2,12 +2,12 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { AppState, ThunkDispatch } from '@/store';
-import { fetchObjects } from '@/store/actions';
-import { selectOrgsByTask } from '@/store/orgs/selectors';
-import { Task } from '@/store/tasks/reducer';
-import { selectUserState } from '@/store/user/selectors';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { AppState, ThunkDispatch } from '~js/store';
+import { fetchObjects } from '~js/store/actions';
+import { selectOrgsByTask } from '~js/store/orgs/selectors';
+import { Task } from '~js/store/tasks/reducer';
+import { selectUserState } from '~js/store/user/selectors';
+import { OBJECT_TYPES } from '~js/utils/constants';
 
 export default (
   task: Task | null | undefined,

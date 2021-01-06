@@ -7,12 +7,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { StaticContext, withRouter } from 'react-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import Logout from '@/components/user/logout';
-import { LabelWithSpinner, useIsMounted } from '@/components/utils';
-import { ThunkDispatch } from '@/store';
-import { agreeToTerms } from '@/store/user/actions';
-import { selectUserState } from '@/store/user/selectors';
-import routes from '@/utils/routes';
+import Logout from '~js/components/user/logout';
+import { LabelWithSpinner, useIsMounted } from '~js/components/utils';
+import { ThunkDispatch } from '~js/store';
+import { agreeToTerms } from '~js/store/user/actions';
+import { selectUserState } from '~js/store/user/selectors';
+import routes from '~js/utils/routes';
 
 interface TermsProps
   extends RouteComponentProps<

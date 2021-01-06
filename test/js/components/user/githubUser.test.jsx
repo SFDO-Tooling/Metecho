@@ -4,7 +4,7 @@ import React from 'react';
 import {
   AssignUserModal,
   AssignUsersModal,
-} from '@/components/user/githubUser';
+} from '~js/components/user/githubUser';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 

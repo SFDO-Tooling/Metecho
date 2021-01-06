@@ -3,15 +3,15 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import CreateEpicModal from '@/components/epics/createForm';
-import { createObject } from '@/store/actions';
-import { addError } from '@/store/errors/actions';
-import routes from '@/utils/routes';
+import CreateEpicModal from '~js/components/epics/createForm';
+import { createObject } from '~js/store/actions';
+import { addError } from '~js/store/errors/actions';
+import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('@/store/actions');
-jest.mock('@/store/errors/actions');
+jest.mock('~js/store/actions');
+jest.mock('~js/store/errors/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
