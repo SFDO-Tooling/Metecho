@@ -30,7 +30,7 @@ inflection==0.5.1         # via pytest-factoryboy
 iniconfig==1.1.1          # via pytest
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.19.0           # via -r requirements/dev.in
-isort==5.6.4              # via -r requirements/dev.in
+isort==5.7.0              # via -r requirements/dev.in
 jedi==0.17.2              # via ipython
 jinja2==2.11.2            # via -c requirements/prod.txt, sphinx
 markupsafe==1.1.1         # via -c requirements/prod.txt, jinja2
