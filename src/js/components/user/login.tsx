@@ -2,6 +2,8 @@ import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { Location } from 'history';
 import i18n from 'i18next';
+import welcomeMatBG from 'img/welcome-mat-bg.png';
+import welcomeMatFG from 'img/welcome-mat-fg.png';
 import React, { ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -11,8 +13,6 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { selectUserState } from '@/store/user/selectors';
 import { addUrlParams } from '@/utils/api';
 import routes from '@/utils/routes';
-import welcomeMatBG from '#/welcome-mat-bg.png';
-import welcomeMatFG from '#/welcome-mat-fg.png';
 
 interface Props
   extends RouteComponentProps<

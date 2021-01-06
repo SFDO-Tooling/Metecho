@@ -6,6 +6,7 @@ process.env.BROWSERSLIST_CONFIG = './.browserslistrc';
 
 const path = require('path');
 
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -20,17 +21,18 @@ module.exports = {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
       '@': path.join(__dirname, 'src', 'js'),
-      '#': path.join(__dirname, 'static', 'images'),
+      img: path.join(__dirname, 'static', 'images'),
     },
   },
   output: {
     publicPath: '/static/',
   },
   optimization: {
+    minimizer: ['...', new CssMinimizerPlugin()],
     runtimeChunk: 'single',
     splitChunks: {
       cacheGroups: {
-        vendor: {
+        defaultVendors: {
           name: 'vendors',
           test: /[\\/]node_modules[\\/](?!@sentry)/,
           chunks: 'all',
@@ -91,21 +93,11 @@ module.exports = {
       },
       {
         test: /\.(svg|gif|jpe?g|png)$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: { limit: 10000 },
-          },
-        ],
+        type: 'asset',
       },
       {
         test: /\.(eot|woff|woff2|ttf)$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: { limit: 30 },
-          },
-        ],
+        type: 'asset',
       },
     ],
   },
@@ -115,4 +107,7 @@ module.exports = {
       template: path.join(__dirname, 'src', 'index.html'),
     }),
   ],
+  performance: {
+    hints: false,
+  },
 };

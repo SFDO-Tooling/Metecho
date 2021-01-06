@@ -21,7 +21,7 @@
     "paths": {
       "*": ["*", "src/*"],
       "@/*": ["src/js/*"],
-      "#/*": ["static/images/*"]
+      "img/*": ["static/images/*"]
     }
   },
   "include": ["src/js/**/*.ts", "src/js/**/*.tsx"],

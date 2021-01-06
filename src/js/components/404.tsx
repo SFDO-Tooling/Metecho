@@ -4,7 +4,7 @@ import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import desertSvg from '!svg-inline-loader!#/desert.svg';
+import desertSvg from '!raw-loader!img/desert.svg';
 import routes from '@/utils/routes';
 
 export const EmptyIllustration = ({ message }: { message: ReactNode }) => (

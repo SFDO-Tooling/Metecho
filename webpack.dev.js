@@ -20,7 +20,7 @@ module.exports = merge(common, {
     filename: '[name].js',
     path: path.join(__dirname, 'dist'),
   },
-  devtool: 'cheap-module-inline-source-map',
+  devtool: 'inline-cheap-module-source-map',
   devServer: {
     index: '',
     proxy: {

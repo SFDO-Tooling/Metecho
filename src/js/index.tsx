@@ -6,6 +6,7 @@ import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-spr
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
 import i18n from 'i18next';
+import SFLogo from 'img/salesforce-logo.png';
 import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { render } from 'react-dom';
@@ -49,7 +50,6 @@ import { OBJECT_TYPES } from '@/utils/constants';
 import { log, logError } from '@/utils/logging';
 import routes, { routePatterns } from '@/utils/routes';
 import { createSocket } from '@/utils/websockets';
-import SFLogo from '#/salesforce-logo.png';
 
 const App = withRouter(
   ({
