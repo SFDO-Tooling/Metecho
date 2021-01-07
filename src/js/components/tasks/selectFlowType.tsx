@@ -6,11 +6,11 @@ import i18n from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { SpinnerWrapper, UseFormProps } from '@/components/utils';
-import { ThunkDispatch } from '@/store';
-import { refreshOrgConfigs } from '@/store/epics/actions';
-import { OrgConfig } from '@/store/epics/reducer';
-import { DEFAULT_ORG_CONFIG_NAME } from '@/utils/constants';
+import { SpinnerWrapper, UseFormProps } from '~js/components/utils';
+import { ThunkDispatch } from '~js/store';
+import { refreshOrgConfigs } from '~js/store/epics/actions';
+import { OrgConfig } from '~js/store/epics/reducer';
+import { DEFAULT_ORG_CONFIG_NAME } from '~js/utils/constants';
 
 const SelectFlowType = ({
   orgConfigs,

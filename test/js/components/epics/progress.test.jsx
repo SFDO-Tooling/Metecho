@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import EpicProgress from '@/components/epics/progress';
+import EpicProgress from '~js/components/epics/progress';
 
 describe('<EpicProgress />', () => {
   test.each([

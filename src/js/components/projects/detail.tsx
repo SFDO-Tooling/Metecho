@@ -6,9 +6,9 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import CreateEpicModal from '@/components/epics/createForm';
-import EpicTable from '@/components/epics/table';
-import ProjectNotFound from '@/components/projects/project404';
+import CreateEpicModal from '~js/components/epics/createForm';
+import EpicTable from '~js/components/epics/table';
+import ProjectNotFound from '~js/components/projects/project404';
 import {
   DetailPageLayout,
   getProjectLoadingOrNotFound,
@@ -17,13 +17,13 @@ import {
   useFetchEpicsIfMissing,
   useFetchProjectIfMissing,
   useIsMounted,
-} from '@/components/utils';
-import { ThunkDispatch } from '@/store';
-import { fetchObjects } from '@/store/actions';
-import { User } from '@/store/user/reducer';
-import { selectUserState } from '@/store/user/selectors';
-import { OBJECT_TYPES } from '@/utils/constants';
-import routes from '@/utils/routes';
+} from '~js/components/utils';
+import { ThunkDispatch } from '~js/store';
+import { fetchObjects } from '~js/store/actions';
+import { User } from '~js/store/user/reducer';
+import { selectUserState } from '~js/store/user/selectors';
+import { OBJECT_TYPES } from '~js/utils/constants';
+import routes from '~js/utils/routes';
 
 const ProjectDetail = (props: RouteComponentProps) => {
   const [fetchingEpics, setFetchingEpics] = useState(false);

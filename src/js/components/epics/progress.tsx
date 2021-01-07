@@ -2,7 +2,7 @@ import ProgressBar from '@salesforce/design-system-react/components/progress-bar
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { getPercentage } from '@/utils/helpers';
+import { getPercentage } from '~js/utils/helpers';
 
 interface Props {
   range: [number, number];

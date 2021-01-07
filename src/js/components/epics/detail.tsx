@@ -6,15 +6,15 @@ import DocumentTitle from 'react-document-title';
 import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import FourOhFour from '@/components/404';
-import ConfirmRemoveUserModal from '@/components/epics/confirmRemoveUserModal';
-import EpicStatusPath from '@/components/epics/path';
-import EpicProgress from '@/components/epics/progress';
-import EpicStatusSteps from '@/components/epics/steps';
-import { Step } from '@/components/steps/stepsItem';
-import CreateTaskModal from '@/components/tasks/createForm';
-import TaskTable from '@/components/tasks/table';
-import { AssignUsersModal, UserCards } from '@/components/user/githubUser';
+import FourOhFour from '~js/components/404';
+import ConfirmRemoveUserModal from '~js/components/epics/confirmRemoveUserModal';
+import EpicStatusPath from '~js/components/epics/path';
+import EpicProgress from '~js/components/epics/progress';
+import EpicStatusSteps from '~js/components/epics/steps';
+import { Step } from '~js/components/steps/stepsItem';
+import CreateTaskModal from '~js/components/tasks/createForm';
+import TaskTable from '~js/components/tasks/table';
+import { AssignUsersModal, UserCards } from '~js/components/user/githubUser';
 import {
   DeleteModal,
   DetailPageLayout,
@@ -29,22 +29,22 @@ import {
   useFetchEpicIfMissing,
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
-} from '@/components/utils';
-import { ThunkDispatch } from '@/store';
-import { updateObject } from '@/store/actions';
-import { refreshGitHubUsers } from '@/store/projects/actions';
-import { Task } from '@/store/tasks/reducer';
-import { GitHubUser } from '@/store/user/reducer';
-import { getUrlParam, removeUrlParam } from '@/utils/api';
+} from '~js/components/utils';
+import { ThunkDispatch } from '~js/store';
+import { updateObject } from '~js/store/actions';
+import { refreshGitHubUsers } from '~js/store/projects/actions';
+import { Task } from '~js/store/tasks/reducer';
+import { GitHubUser } from '~js/store/user/reducer';
+import { getUrlParam, removeUrlParam } from '~js/utils/api';
 import {
   EPIC_STATUSES,
   OBJECT_TYPES,
   ORG_TYPES,
   OrgTypes,
   SHOW_EPIC_COLLABORATORS,
-} from '@/utils/constants';
-import { getBranchLink, getCompletedTasks } from '@/utils/helpers';
-import routes from '@/utils/routes';
+} from '~js/utils/constants';
+import { getBranchLink, getCompletedTasks } from '~js/utils/helpers';
+import routes from '~js/utils/routes';
 
 const EpicDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();

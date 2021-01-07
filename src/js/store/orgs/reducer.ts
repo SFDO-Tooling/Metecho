@@ -1,12 +1,12 @@
-import { ObjectsAction } from '@/store/actions';
-import { OrgsAction } from '@/store/orgs/actions';
-import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
+import { ObjectsAction } from '~js/store/actions';
+import { OrgsAction } from '~js/store/orgs/actions';
+import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
 import {
   OBJECT_TYPES,
   ObjectTypes,
   ORG_TYPES,
   OrgTypes,
-} from '@/utils/constants';
+} from '~js/utils/constants';
 
 export interface MinimalOrg {
   id: string;

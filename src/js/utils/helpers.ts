@@ -1,10 +1,10 @@
 import i18n from 'i18next';
 import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
 
-import { Epic } from '@/store/epics/reducer';
-import { Changeset, Org } from '@/store/orgs/reducer';
-import { Task } from '@/store/tasks/reducer';
-import { TASK_STATUSES } from '@/utils/constants';
+import { Epic } from '~js/store/epics/reducer';
+import { Changeset, Org } from '~js/store/orgs/reducer';
+import { Task } from '~js/store/tasks/reducer';
+import { TASK_STATUSES } from '~js/utils/constants';
 
 export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;

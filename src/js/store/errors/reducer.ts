@@ -1,4 +1,4 @@
-import { ErrorAction } from '@/store/errors/actions';
+import { ErrorAction } from '~js/store/errors/actions';
 
 export interface ErrorType {
   id: string;

@@ -1,12 +1,12 @@
 import i18n from 'i18next';
 
-import { ThunkResult } from '@/store';
-import { isCurrentUser } from '@/store/helpers';
-import { MinimalOrg, Org } from '@/store/orgs/reducer';
-import { selectTaskById } from '@/store/tasks/selectors';
-import { addToast } from '@/store/toasts/actions';
-import apiFetch, { addUrlParams } from '@/utils/api';
-import { OBJECT_TYPES, ORG_TYPES } from '@/utils/constants';
+import { ThunkResult } from '~js/store';
+import { isCurrentUser } from '~js/store/helpers';
+import { MinimalOrg, Org } from '~js/store/orgs/reducer';
+import { selectTaskById } from '~js/store/tasks/selectors';
+import { addToast } from '~js/store/toasts/actions';
+import apiFetch, { addUrlParams } from '~js/utils/api';
+import { OBJECT_TYPES, ORG_TYPES } from '~js/utils/constants';
 
 interface OrgProvisioned {
   type: 'SCRATCH_ORG_PROVISION';

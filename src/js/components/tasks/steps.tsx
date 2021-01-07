@@ -1,14 +1,14 @@
 import i18n from 'i18next';
 import React from 'react';
 
-import Steps from '@/components/steps';
-import { Step } from '@/components/steps/stepsItem';
-import { OrgTypeTracker } from '@/components/tasks/cards';
-import { OrgsByTask } from '@/store/orgs/reducer';
-import { Task } from '@/store/tasks/reducer';
-import { User } from '@/store/user/reducer';
-import { ORG_TYPES, REVIEW_STATUSES } from '@/utils/constants';
-import { getTaskCommits } from '@/utils/helpers';
+import Steps from '~js/components/steps';
+import { Step } from '~js/components/steps/stepsItem';
+import { OrgTypeTracker } from '~js/components/tasks/cards';
+import { OrgsByTask } from '~js/store/orgs/reducer';
+import { Task } from '~js/store/tasks/reducer';
+import { User } from '~js/store/user/reducer';
+import { ORG_TYPES, REVIEW_STATUSES } from '~js/utils/constants';
+import { getTaskCommits } from '~js/utils/helpers';
 
 interface TaskStatusStepsProps {
   task: Task;

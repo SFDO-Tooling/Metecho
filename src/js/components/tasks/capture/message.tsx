@@ -10,8 +10,8 @@ import {
   BooleanObject,
   CommitData,
   ModalCard,
-} from '@/components/tasks/capture';
-import { UseFormProps } from '@/components/utils';
+} from '~js/components/tasks/capture';
+import { UseFormProps } from '~js/components/utils';
 
 interface Props {
   inputs: CommitData;

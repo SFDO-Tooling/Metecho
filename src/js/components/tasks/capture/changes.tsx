@@ -11,10 +11,10 @@ import {
   BooleanObject,
   CommitData,
   ModalCard,
-} from '@/components/tasks/capture';
-import { UseFormProps } from '@/components/utils';
-import { Changeset } from '@/store/orgs/reducer';
-import { mergeChangesets, splitChangeset } from '@/utils/helpers';
+} from '~js/components/tasks/capture';
+import { UseFormProps } from '~js/components/utils';
+import { Changeset } from '~js/store/orgs/reducer';
+import { mergeChangesets, splitChangeset } from '~js/utils/helpers';
 
 interface Props {
   changeset: Changeset;
