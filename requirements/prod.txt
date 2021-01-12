@@ -23,7 +23,7 @@ chardet==3.0.4            # via cumulusci, requests
 click==7.1.2              # via cumulusci, rq, snowfakery
 coloredlogs==14.0         # via cumulusci
 constantly==15.1.0        # via twisted
-croniter==0.3.37          # via rq-scheduler
+croniter==1.0.1           # via rq-scheduler
 cryptography==3.2.1       # via authlib, autobahn, cumulusci, jwcrypto, pyjwt, pyopenssl, secretstorage, service-identity, sfdo-template-helpers
 cumulusci==3.25.0         # via -r requirements/prod.in
 daphne==3.0.1             # via channels
