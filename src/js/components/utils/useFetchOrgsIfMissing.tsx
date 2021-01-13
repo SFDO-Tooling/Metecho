@@ -7,9 +7,9 @@ import { fetchObjects } from '~js/store/actions';
 import { Epic } from '~js/store/epics/reducer';
 import { Org } from '~js/store/orgs/reducer';
 import {
-  selectOrgsByEpic,
-  selectOrgsByProject,
   selectOrgsByTask,
+  selectPlaygroundOrgsByEpic,
+  selectPlaygroundOrgsByProject,
 } from '~js/store/orgs/selectors';
 import { Project } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
@@ -33,11 +33,14 @@ export default ({
   const taskOrgs = useSelector((state: AppState) =>
     selectTaskOrgsWithProps(state, props),
   );
-  const selectEpicOrgsWithProps = useCallback(selectOrgsByEpic, []);
+  const selectEpicOrgsWithProps = useCallback(selectPlaygroundOrgsByEpic, []);
   const epicOrgs = useSelector((state: AppState) =>
     selectEpicOrgsWithProps(state, props),
   );
-  const selectProjectOrgsWithProps = useCallback(selectOrgsByProject, []);
+  const selectProjectOrgsWithProps = useCallback(
+    selectPlaygroundOrgsByProject,
+    [],
+  );
   const projectOrgs = useSelector((state: AppState) =>
     selectProjectOrgsWithProps(state, props),
   );

@@ -20,7 +20,7 @@ export const selectOrgsByTask = createSelector(
   },
 );
 
-export const selectOrgsByEpic = createSelector(
+export const selectPlaygroundOrgsByEpic = createSelector(
   [selectOrgState, selectEpic],
   (orgs, epic): Org[] | undefined => {
     /* istanbul ignore else */
@@ -34,7 +34,7 @@ export const selectOrgsByEpic = createSelector(
   },
 );
 
-export const selectOrgsByProject = createSelector(
+export const selectPlaygroundOrgsByProject = createSelector(
   [selectOrgState, selectProject],
   (orgs, project): Org[] | undefined => {
     /* istanbul ignore else */
