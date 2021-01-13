@@ -48,7 +48,7 @@ ptyprocess==0.6.0         # via pexpect
 py==1.9.0                 # via pytest
 pycodestyle==2.6.0        # via flake8
 pyflakes==2.2.0           # via flake8
-pygments==2.7.3           # via doc8, ipython, sphinx
+pygments==2.7.4           # via doc8, ipython, sphinx
 pyparsing==2.4.7          # via -c requirements/prod.txt, packaging
 pytest-asyncio==0.14.0    # via -r requirements/dev.in
 pytest-cov==2.10.1        # via -r requirements/dev.in
