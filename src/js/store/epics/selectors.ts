@@ -60,9 +60,7 @@ export const selectEpicById = (
     return undefined;
   }
   for (const project of Object.values(appState.epics)) {
-    const epic = Object.values(project.epics)
-      .flat()
-      .find((e) => e.id === id);
+    const epic = Object.values(project.epics).find((e) => e.id === id);
     if (epic) {
       return epic;
     }
