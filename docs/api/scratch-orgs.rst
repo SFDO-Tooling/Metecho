@@ -18,6 +18,8 @@ Retrieve
     [
       {
         "id": "n1057Rw",
+        "project": null,
+        "epic": null",
         "task": "M13MnQO",
         "org_type": "Dev",
         "owner": "3Lw7OwK",

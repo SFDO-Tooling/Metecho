@@ -385,8 +385,8 @@ class TaskSerializer(serializers.ModelSerializer):
             reassigned_org = False
             # We want to consider soft-deleted orgs, too:
             orgs = [
-                *instance.scratchorg_set.active().filter(org_type=org_type),
-                *instance.scratchorg_set.inactive().filter(org_type=org_type),
+                *instance.orgs.active().filter(org_type=org_type),
+                *instance.orgs.inactive().filter(org_type=org_type),
             ]
             for org in orgs:
                 new_user = self._valid_reassign(
@@ -411,7 +411,7 @@ class TaskSerializer(serializers.ModelSerializer):
                         originating_user_id=originating_user_id, preserve_sf_org=True
                     )
         elif not has_assigned_user:
-            for org in [*instance.scratchorg_set.active().filter(org_type=org_type)]:
+            for org in [*instance.orgs.active().filter(org_type=org_type)]:
                 org.delete(
                     originating_user_id=originating_user_id, preserve_sf_org=True
                 )
@@ -477,8 +477,23 @@ class ReviewSerializer(serializers.Serializer):
 
 class ScratchOrgSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    project = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+        required=False,
+    )
+    epic = serializers.PrimaryKeyRelatedField(
+        queryset=Epic.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+        required=False,
+    )
     task = serializers.PrimaryKeyRelatedField(
-        queryset=Task.objects.all(), pk_field=serializers.CharField()
+        queryset=Task.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+        required=False,
     )
     owner = serializers.PrimaryKeyRelatedField(
         pk_field=serializers.CharField(),
@@ -500,6 +515,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         model = ScratchOrg
         fields = (
             "id",
+            "project",
+            "epic",
             "task",
             "org_type",
             "owner",

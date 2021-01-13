@@ -26,7 +26,7 @@ export const selectTaskSlug = (
 
 export const selectTask = createSelector(
   [selectTasksByEpic, selectTaskSlug],
-  (tasks, slug) => {
+  (tasks, slug): Task | null | undefined => {
     if (!tasks || !slug) {
       return undefined;
     }
@@ -39,7 +39,7 @@ export const selectTask = createSelector(
 
 export const selectTaskById = (
   appState: AppState,
-  id: string,
+  id?: string | null,
 ): Task | undefined =>
   Object.values(appState.tasks)
     .flat()

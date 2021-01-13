@@ -40,7 +40,7 @@ import {
 import { AppState, ThunkDispatch } from '~js/store';
 import { createObject } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
-import { Org } from '~js/store/orgs/reducer';
+import { Org, OrgsByParent } from '~js/store/orgs/reducer';
 import { selectTask, selectTaskSlug } from '~js/store/tasks/selectors';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -88,7 +88,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const taskSlug = useSelector((state: AppState) =>
     selectTaskSlugWithProps(state, props),
   );
-  const { orgs } = useFetchOrgsIfMissing(task, props);
+  const { orgs } = useFetchOrgsIfMissing({ task, props });
   const user = useSelector(selectUserState) as User;
 
   const readyToSubmit = Boolean(
@@ -111,7 +111,9 @@ const TaskDetail = (props: RouteComponentProps) => {
   let orgHasChanges = false;
   let userIsDevOwner = false;
   let userIsTestOwner = false;
-  let devOrg: Org | null | undefined, testOrg: Org | null | undefined;
+  let devOrg: Org | null | undefined,
+    testOrg: Org | null | undefined,
+    taskOrgs: OrgsByParent | undefined;
   let hasOrgs = false;
   let testOrgSubmittingReview = false;
   let devOrgIsCreating = false;
@@ -120,8 +122,16 @@ const TaskDetail = (props: RouteComponentProps) => {
   let testOrgIsDeleting = false;
   let testOrgIsRefreshing = false;
   if (orgs) {
-    devOrg = orgs[ORG_TYPES.DEV];
-    testOrg = orgs[ORG_TYPES.QA];
+    taskOrgs = {
+      [ORG_TYPES.DEV]:
+        orgs.find((org) => org.org_type === ORG_TYPES.DEV) || null,
+      [ORG_TYPES.QA]: orgs.find((org) => org.org_type === ORG_TYPES.QA) || null,
+      [ORG_TYPES.PLAYGROUND]: orgs.filter(
+        (org) => org.org_type === ORG_TYPES.PLAYGROUND,
+      ),
+    };
+    devOrg = taskOrgs[ORG_TYPES.DEV];
+    testOrg = taskOrgs[ORG_TYPES.QA];
     orgHasChanges =
       (devOrg?.total_unsaved_changes || 0) -
         (devOrg?.total_ignored_changes || 0) >
@@ -225,6 +235,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         createObject({
           objectType: OBJECT_TYPES.ORG,
           data: { task: task?.id, org_type: type },
+          shouldSubscribeToObject: false,
         }),
       ).finally(() => {
         /* istanbul ignore else */
@@ -559,11 +570,11 @@ const TaskDetail = (props: RouteComponentProps) => {
             <div className="slds-m-bottom_x-large metecho-secondary-block">
               <TaskStatusPath task={task} />
             </div>
-            {orgs && task.status !== TASK_STATUSES.COMPLETED ? (
+            {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large metecho-secondary-block">
                 <TaskStatusSteps
                   task={task}
-                  orgs={orgs}
+                  orgs={taskOrgs}
                   user={user}
                   isCreatingOrg={isCreatingOrg}
                   handleAction={handleStepAction}
@@ -576,9 +587,9 @@ const TaskDetail = (props: RouteComponentProps) => {
         {captureButton}
         {submitButton}
 
-        {orgs ? (
+        {taskOrgs ? (
           <OrgCards
-            orgs={orgs}
+            orgs={taskOrgs}
             task={task}
             epicUsers={epic.github_users}
             epicUrl={epicUrl}

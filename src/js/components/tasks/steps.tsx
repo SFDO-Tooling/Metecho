@@ -4,7 +4,7 @@ import React from 'react';
 import Steps from '~js/components/steps';
 import { Step } from '~js/components/steps/stepsItem';
 import { OrgTypeTracker } from '~js/components/tasks/cards';
-import { OrgsByTask } from '~js/store/orgs/reducer';
+import { OrgsByParent } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { User } from '~js/store/user/reducer';
 import { ORG_TYPES, REVIEW_STATUSES } from '~js/utils/constants';
@@ -12,7 +12,7 @@ import { getTaskCommits } from '~js/utils/helpers';
 
 interface TaskStatusStepsProps {
   task: Task;
-  orgs: OrgsByTask;
+  orgs: OrgsByParent;
   user: User;
   isCreatingOrg: OrgTypeTracker;
   handleAction: (step: Step) => void;

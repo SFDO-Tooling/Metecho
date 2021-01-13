@@ -5,6 +5,7 @@ import { StaticRouter } from 'react-router-dom';
 import TaskDetail from '~js/components/tasks/detail';
 import { createObject, fetchObjects } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
+import { defaultState as defaultOrgsState } from '~js/store/orgs/reducer';
 import { TASK_STATUSES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
@@ -32,6 +33,32 @@ afterEach(() => {
   refetchOrg.mockClear();
   refreshOrg.mockClear();
 });
+
+const defaultOrg = {
+  id: 'org-id',
+  task: 'task1',
+  org_type: 'Dev',
+  owner: 'user-id',
+  owner_gh_username: 'user-name',
+  expires_at: '2019-09-16T12:58:53.721Z',
+  latest_commit: '617a51',
+  latest_commit_url: '/test/commit/url/',
+  latest_commit_at: '2019-08-16T12:58:53.721Z',
+  last_checked_unsaved_changes_at: new Date().toISOString(),
+  url: '/test/org/url/',
+  is_created: true,
+  unsaved_changes: { Foo: ['Bar'] },
+  has_unsaved_changes: true,
+  total_unsaved_changes: 1,
+  ignored_changes: {},
+  has_ignored_changes: false,
+  total_ignored_changes: 0,
+  valid_target_directories: {
+    source: ['src'],
+    post: ['foo/bar', 'buz/baz'],
+  },
+  has_been_visited: true,
+};
 
 const defaultState = {
   user: {
@@ -111,33 +138,13 @@ const defaultState = {
     ],
   },
   orgs: {
-    task1: {
-      Dev: {
-        id: 'org-id',
-        task: 'task1',
-        org_type: 'Dev',
-        owner: 'user-id',
-        owner_gh_username: 'user-name',
-        expires_at: '2019-09-16T12:58:53.721Z',
-        latest_commit: '617a51',
-        latest_commit_url: '/test/commit/url/',
-        latest_commit_at: '2019-08-16T12:58:53.721Z',
-        last_checked_unsaved_changes_at: new Date().toISOString(),
-        url: '/test/org/url/',
-        is_created: true,
-        unsaved_changes: { Foo: ['Bar'] },
-        has_unsaved_changes: true,
-        total_unsaved_changes: 1,
-        ignored_changes: {},
-        has_ignored_changes: false,
-        total_ignored_changes: 0,
-        valid_target_directories: {
-          source: ['src'],
-          post: ['foo/bar', 'buz/baz'],
-        },
-        has_been_visited: true,
-      },
-      QA: null,
+    orgs: {
+      [defaultOrg.id]: defaultOrg,
+    },
+    fetched: {
+      projects: [],
+      epics: [],
+      tasks: ['task1'],
     },
   },
 };
@@ -280,7 +287,7 @@ describe('<TaskDetail/>', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
-          orgs: {},
+          orgs: defaultOrgsState,
         },
       });
 
@@ -346,10 +353,9 @@ describe('<TaskDetail/>', () => {
           ...defaultState,
           orgs: {
             ...defaultState.orgs,
-            task1: {
-              ...defaultState.orgs.task1,
-              Dev: {
-                ...defaultState.orgs.task1.Dev,
+            orgs: {
+              [defaultOrg.id]: {
+                ...defaultOrg,
                 currently_capturing_changes: true,
               },
             },
@@ -368,10 +374,9 @@ describe('<TaskDetail/>', () => {
           ...defaultState,
           orgs: {
             ...defaultState.orgs,
-            task1: {
-              ...defaultState.orgs.task1,
-              Dev: {
-                ...defaultState.orgs.task1.Dev,
+            orgs: {
+              [defaultOrg.id]: {
+                ...defaultOrg,
                 currently_reassigning_user: true,
               },
             },
@@ -490,10 +495,9 @@ describe('<TaskDetail/>', () => {
         },
         orgs: {
           ...defaultState.orgs,
-          task1: {
-            ...defaultState.orgs.task1,
-            Dev: {
-              ...defaultState.orgs.task1.Dev,
+          orgs: {
+            [defaultOrg.id]: {
+              ...defaultOrg,
               total_unsaved_changes: 0,
             },
           },
@@ -547,10 +551,9 @@ describe('<TaskDetail/>', () => {
     };
     const orgs = {
       ...defaultState.orgs,
-      task1: {
-        Dev: null,
-        QA: {
-          ...defaultState.orgs.task1.Dev,
+      orgs: {
+        [defaultOrg.id]: {
+          ...defaultOrg,
           org_type: 'QA',
           latest_commit: 'parent',
           has_been_visited: true,
@@ -622,7 +625,10 @@ describe('<TaskDetail/>', () => {
                 },
               ],
             },
-            orgs: { task1: { Dev: null, QA: null } },
+            orgs: {
+              ...defaultState.orgs,
+              orgs: {},
+            },
           },
         });
         fireEvent.click(getByText('Update Review'));
@@ -768,20 +774,15 @@ describe('<TaskDetail/>', () => {
           ...taskOpts,
         };
         let devOrg, testOrg;
-        if (devOrgOpts === null) {
-          devOrg = null;
-        } else {
+        const orgs = {};
+        if (devOrgOpts !== null) {
           devOrg = { ...defaultDevOrg, ...devOrgOpts };
+          orgs[devOrg.id] = devOrg;
         }
-        if (testOrgOpts === null) {
-          testOrg = null;
-        } else {
+        if (testOrgOpts !== null) {
           testOrg = { ...defaultTestOrg, ...testOrgOpts };
+          orgs[testOrg.id] = testOrg;
         }
-        const orgs = {
-          Dev: devOrg,
-          QA: testOrg,
-        };
         const { getByText } = setup({
           initialState: {
             ...defaultState,
@@ -791,7 +792,7 @@ describe('<TaskDetail/>', () => {
             },
             orgs: {
               ...defaultState.orgs,
-              task1: orgs,
+              orgs,
             },
           },
         });

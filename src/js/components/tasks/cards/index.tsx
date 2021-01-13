@@ -11,7 +11,7 @@ import { useIsMounted } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { deleteObject, updateObject } from '~js/store/actions';
 import { refetchOrg } from '~js/store/orgs/actions';
-import { Org, OrgsByTask } from '~js/store/orgs/reducer';
+import { Org, OrgsByParent } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -51,7 +51,7 @@ const OrgCards = ({
   doCreateOrg,
   doRefreshOrg,
 }: {
-  orgs: OrgsByTask;
+  orgs: OrgsByParent;
   task: Task;
   epicUsers: GitHubUser[];
   epicUrl: string;
@@ -196,7 +196,7 @@ const OrgCards = ({
       if (canReassign) {
         assignUser({ type, assignee, shouldAlertAssignee });
       } else {
-        checkForOrgChanges(org);
+        checkForOrgChanges(org as Org);
         setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
       }
     } else {

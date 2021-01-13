@@ -256,7 +256,7 @@ class TaskViewSet(CreatePrMixin, ModelViewSet):
             "assigned_dev": SCRATCH_ORG_TYPES.Dev,
         }.get(role, None)
         gh_uid = serializer.validated_data["gh_uid"]
-        org = task.scratchorg_set.active().filter(org_type=role_org_type).first()
+        org = task.orgs.active().filter(org_type=role_org_type).first()
         new_user = getattr(
             SocialAccount.objects.filter(provider="github", uid=gh_uid).first(),
             "user",

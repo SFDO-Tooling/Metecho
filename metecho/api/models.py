@@ -29,7 +29,7 @@ from sfdo_template_helpers.slugs import AbstractSlug, SlugMixin
 from simple_salesforce.exceptions import SalesforceError
 
 from . import gh, push
-from .constants import ORGANIZATION_DETAILS
+from .constants import CHANNELS_GROUP_NAME, ORGANIZATION_DETAILS
 from .email_utils import get_user_facing_url
 from .model_mixins import (
     CreatePrMixin,
@@ -45,7 +45,7 @@ from .validators import validate_unicode_branch
 logger = logging.getLogger(__name__)
 
 ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
-SCRATCH_ORG_TYPES = Choices("Dev", "QA")
+SCRATCH_ORG_TYPES = Choices("Dev", "QA", "Playground")
 EPIC_STATUSES = Choices("Planned", "In progress", "Review", "Merged")
 TASK_STATUSES = Choices(
     ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed")
@@ -832,7 +832,27 @@ class Task(
 class ScratchOrg(
     SoftDeleteMixin, PushMixin, HashIdMixin, TimestampsMixin, models.Model
 ):
-    task = models.ForeignKey(Task, on_delete=models.PROTECT)
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.PROTECT,
+        related_name="orgs",
+        null=True,
+        blank=True,
+    )
+    epic = models.ForeignKey(
+        Epic,
+        on_delete=models.PROTECT,
+        related_name="orgs",
+        null=True,
+        blank=True,
+    )
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.PROTECT,
+        related_name="orgs",
+        null=True,
+        blank=True,
+    )
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     last_modified_at = models.DateTimeField(null=True, blank=True)
@@ -870,7 +890,9 @@ class ScratchOrg(
     def _build_message_extras(self):
         return {
             "model": {
-                "task": str(self.task.id),
+                "task": str(self.task.id) if self.task else None,
+                "epic": str(self.epic.id) if self.epic else None,
+                "project": str(self.project.id) if self.project else None,
                 "org_type": self.org_type,
                 "id": str(self.id),
             }
@@ -886,6 +908,7 @@ class ScratchOrg(
 
         if is_new:
             self.queue_provision(originating_user_id=str(self.owner.id))
+            self.notify_org_provisioning(originating_user_id=str(self.owner.id))
 
         return ret
 
@@ -1128,6 +1151,18 @@ class ScratchOrg(
                 originating_user_id=originating_user_id,
             )
             self.delete()
+
+    def notify_org_provisioning(self, originating_user_id):
+        parent = self.task or self.epic or self.project
+        if parent:
+            group_name = CHANNELS_GROUP_NAME.format(
+                model=parent._meta.model_name, id=parent.id
+            )
+            self.notify_changed(
+                type_="SCRATCH_ORG_PROVISIONING",
+                originating_user_id=originating_user_id,
+                group_name=group_name,
+            )
 
 
 @receiver(user_logged_in)

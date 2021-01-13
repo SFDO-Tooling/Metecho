@@ -341,20 +341,20 @@ class TestTask:
         scratch_org_factory(task=task)
         scratch_org_factory(task=task)
 
-        assert task.scratchorg_set.active().count() == 2
+        assert task.orgs.active().count() == 2
 
         task.delete()
-        assert task.scratchorg_set.active().count() == 0
+        assert task.orgs.active().count() == 0
 
     def test_soft_delete_cascade__manager(self, task_factory, scratch_org_factory):
         task = task_factory()
         scratch_org_factory(task=task)
         scratch_org_factory(task=task)
 
-        assert task.scratchorg_set.active().count() == 2
+        assert task.orgs.active().count() == 2
 
         Task.objects.all().delete()
-        assert task.scratchorg_set.active().count() == 0
+        assert task.orgs.active().count() == 0
 
     def test_get_all_users_in_commits(self, task_factory):
         task = task_factory(

@@ -5,6 +5,19 @@ import { addUrlParams } from '~js/utils/api';
 
 import { storeWithThunk } from './../../utils';
 
+const defaultState = {
+  user: { id: 'user-id' },
+  tasks: {
+    'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
+  },
+  epics: {
+    epics: [{ id: 'epic-id' }],
+  },
+  projects: {
+    projects: [{ id: 'project-id' }],
+  },
+};
+
 describe('provisionOrg', () => {
   const org = {
     id: 'org-id',
@@ -20,12 +33,7 @@ describe('provisionOrg', () => {
   };
 
   test('triggers action', () => {
-    const store = storeWithThunk({
-      user: { id: 'user-id' },
-      tasks: {
-        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-      },
-    });
+    const store = storeWithThunk(defaultState);
     store.dispatch(
       actions.provisionOrg({
         model: org,
@@ -40,12 +48,7 @@ describe('provisionOrg', () => {
 
   describe('owned by current user', () => {
     test('adds success message', () => {
-      const store = storeWithThunk({
-        user: { id: 'user-id' },
-        tasks: {
-          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-        },
-      });
+      const store = storeWithThunk(defaultState);
       store.dispatch(
         actions.provisionOrg({
           model: org,
@@ -67,7 +70,7 @@ describe('provisionOrg', () => {
   });
 
   test('does not fail if not yet created', () => {
-    const store = storeWithThunk({ user: { id: 'user-id' }, tasks: {} });
+    const store = storeWithThunk({ ...defaultState, tasks: {} });
     const thisOrg = { ...org, is_created: false };
     const thisOrgAction = { ...orgAction, payload: thisOrg };
     store.dispatch(
@@ -90,7 +93,7 @@ describe('provisionOrg', () => {
 
 describe('provisionFailed', () => {
   test('returns action', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
     const org = { id: 'org-id' };
     const action = { type: 'SCRATCH_ORG_PROVISION_FAILED', payload: org };
     store.dispatch(
@@ -102,12 +105,7 @@ describe('provisionFailed', () => {
 
   describe('owned by current user', () => {
     test('adds error message', () => {
-      const store = storeWithThunk({
-        user: { id: 'user-id' },
-        tasks: {
-          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-        },
-      });
+      const store = storeWithThunk(defaultState);
       const org = {
         id: 'org-id',
         owner: 'user-id',
@@ -139,7 +137,7 @@ describe('provisionFailed', () => {
     });
 
     test('does not fail if missing url', () => {
-      const store = storeWithThunk({ user: { id: 'user-id' }, tasks: {} });
+      const store = storeWithThunk({ ...defaultState, tasks: {} });
       const org = {
         id: 'org-id',
         owner: 'user-id',
@@ -184,7 +182,7 @@ describe('refetchOrg', () => {
   });
 
   test('GETs org from api', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
     fetchMock.getOnce(url, payload.org);
     const started = {
       type: 'REFETCH_ORG_STARTED',
@@ -202,7 +200,7 @@ describe('refetchOrg', () => {
   });
 
   test('handles null response', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
     fetchMock.getOnce(url, 404);
     const started = {
       type: 'REFETCH_ORG_STARTED',
@@ -221,7 +219,7 @@ describe('refetchOrg', () => {
 
   describe('error', () => {
     test('dispatches REFETCH_ORG_FAILED action', () => {
-      const store = storeWithThunk({});
+      const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
       fetchMock.getOnce(url, 500);
       const started = {
         type: 'REFETCH_ORG_STARTED',
@@ -255,12 +253,7 @@ describe('updateOrg', () => {
 
 describe('updateFailed', () => {
   test('adds error message', () => {
-    const store = storeWithThunk({
-      user: { id: 'user-id' },
-      tasks: {
-        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-      },
-    });
+    const store = storeWithThunk(defaultState);
     const org = {
       id: 'org-id',
       task: 'task-id',
@@ -289,7 +282,7 @@ describe('updateFailed', () => {
   });
 
   test('adds error message (no task)', () => {
-    const store = storeWithThunk({ tasks: {}, user: { id: 'user-id' } });
+    const store = storeWithThunk({ ...defaultState, tasks: {} });
     const org = {
       id: 'org-id',
       task: 'task-id',
@@ -327,7 +320,7 @@ describe('deleteOrg', () => {
   });
 
   test('unsubscribes from socket and returns action', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
     const org = { id: 'org-id' };
     const action = { type: 'SCRATCH_ORG_DELETE', payload: org };
     store.dispatch(
@@ -342,12 +335,7 @@ describe('deleteOrg', () => {
 
   describe('owned by current user', () => {
     test('adds success message', () => {
-      const store = storeWithThunk({
-        user: { id: 'user-id' },
-        tasks: {
-          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-        },
-      });
+      const store = storeWithThunk(defaultState);
       const org = {
         id: 'org-id',
         owner: 'user-id',
@@ -373,12 +361,7 @@ describe('deleteOrg', () => {
     });
 
     test('adds error message if exists', () => {
-      const store = storeWithThunk({
-        user: { id: 'user-id' },
-        tasks: {
-          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-        },
-      });
+      const store = storeWithThunk(defaultState);
       const org = {
         id: 'org-id',
         owner: 'user-id',
@@ -409,12 +392,7 @@ describe('deleteOrg', () => {
 describe('deleteFailed', () => {
   describe('owned by current user', () => {
     test('adds error message', () => {
-      const store = storeWithThunk({
-        user: { id: 'user-id' },
-        tasks: {
-          'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-        },
-      });
+      const store = storeWithThunk(defaultState);
       const org = {
         id: 'org-id',
         owner: 'user-id',
@@ -447,12 +425,7 @@ describe('deleteFailed', () => {
 
 describe('commitSucceeded', () => {
   test('adds success message', () => {
-    const store = storeWithThunk({
-      user: { id: 'user-id' },
-      tasks: {
-        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-      },
-    });
+    const store = storeWithThunk(defaultState);
     const org = {
       id: 'org-id',
       task: 'task-id',
@@ -476,7 +449,7 @@ describe('commitSucceeded', () => {
 
   test('adds success message [no known task]', () => {
     const store = storeWithThunk({
-      user: { id: 'user-id' },
+      ...defaultState,
       tasks: {},
     });
     const org = {
@@ -503,12 +476,7 @@ describe('commitSucceeded', () => {
 
 describe('commitFailed', () => {
   test('adds error message', () => {
-    const store = storeWithThunk({
-      user: { id: 'user-id' },
-      tasks: {
-        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-      },
-    });
+    const store = storeWithThunk(defaultState);
     const org = {
       id: 'commit-id',
       task: 'task-id',
@@ -538,7 +506,7 @@ describe('commitFailed', () => {
 
   test('adds error message [no known task]', () => {
     const store = storeWithThunk({
-      user: { id: 'user-id' },
+      ...defaultState,
       tasks: {},
     });
     const org = {
@@ -580,7 +548,7 @@ describe('refreshOrg', () => {
   });
 
   test('dispatches refreshOrg actions', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
     fetchMock.postOnce(url, 202);
     const refreshOrgRequested = {
       type: 'SCRATCH_ORG_REFRESH_REQUESTED',
@@ -602,7 +570,7 @@ describe('refreshOrg', () => {
 
   describe('error', () => {
     test('dispatches SCRATCH_ORG_REFRESH_REJECTED action', () => {
-      const store = storeWithThunk({});
+      const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
       fetchMock.postOnce(url, {
         status: 500,
         body: { non_field_errors: ['Foobar'] },
@@ -632,12 +600,7 @@ describe('refreshOrg', () => {
 
 describe('orgRefreshed', () => {
   test('adds success message', () => {
-    const store = storeWithThunk({
-      user: { id: 'user-id' },
-      tasks: {
-        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-      },
-    });
+    const store = storeWithThunk(defaultState);
     const org = {
       id: 'org-id',
       task: 'task-id',
@@ -661,7 +624,7 @@ describe('orgRefreshed', () => {
 
   test('adds success message [no known task]', () => {
     const store = storeWithThunk({
-      user: { id: 'user-id' },
+      ...defaultState,
       tasks: {},
     });
     const org = {
@@ -688,12 +651,7 @@ describe('orgRefreshed', () => {
 
 describe('refreshError', () => {
   test('adds error message', () => {
-    const store = storeWithThunk({
-      user: { id: 'user-id' },
-      tasks: {
-        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-      },
-    });
+    const store = storeWithThunk(defaultState);
     const org = {
       id: 'commit-id',
       task: 'task-id',
@@ -723,7 +681,7 @@ describe('refreshError', () => {
 
   test('adds error message [no known task]', () => {
     const store = storeWithThunk({
-      user: { id: 'user-id' },
+      ...defaultState,
       tasks: {},
     });
     const org = {
@@ -755,7 +713,7 @@ describe('refreshError', () => {
 
   test('does not update if no full model', () => {
     const store = storeWithThunk({
-      user: { id: 'user-id' },
+      ...defaultState,
       tasks: {},
     });
     const org = {
@@ -788,7 +746,7 @@ describe('recreateOrg', () => {
   });
 
   test('subscribes to socket and returns action', () => {
-    const store = storeWithThunk({});
+    const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
     const org = { id: 'org-id' };
     const action = { type: 'SCRATCH_ORG_RECREATE', payload: org };
     store.dispatch(actions.recreateOrg(org));
@@ -811,12 +769,7 @@ describe('orgReassigned', () => {
 
 describe('orgReassignFailed', () => {
   test('adds error message', () => {
-    const store = storeWithThunk({
-      user: { id: 'user-id' },
-      tasks: {
-        'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
-      },
-    });
+    const store = storeWithThunk(defaultState);
     const org = {
       id: 'org-id',
       task: 'task-id',
@@ -846,7 +799,7 @@ describe('orgReassignFailed', () => {
 
   test('adds error message [no known task]', () => {
     const store = storeWithThunk({
-      user: { id: 'user-id' },
+      ...defaultState,
       tasks: {},
     });
     const org = {
@@ -874,5 +827,27 @@ describe('orgReassignFailed', () => {
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
     expect(allActions[1]).toEqual(action);
+  });
+});
+
+describe('orgProvisioning', () => {
+  beforeEach(() => {
+    window.socket = { subscribe: jest.fn() };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'socket');
+  });
+
+  test('subscribes to socket and returns action', () => {
+    const store = storeWithThunk(defaultState);
+    const org = { id: 'org-id' };
+    const action = { type: 'SCRATCH_ORG_PROVISIONING', payload: org };
+    store.dispatch(actions.orgProvisioning(org));
+    expect(store.getActions()).toEqual([action]);
+    expect(window.socket.subscribe).toHaveBeenCalledWith({
+      model: 'scratch_org',
+      id: 'org-id',
+    });
   });
 });

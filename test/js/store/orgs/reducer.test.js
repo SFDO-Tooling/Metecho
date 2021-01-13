@@ -1,11 +1,10 @@
-import reducer from '~js/store/orgs/reducer';
+import reducer, { defaultState } from '~js/store/orgs/reducer';
 
 describe('reducer', () => {
   test('returns initial state if no action', () => {
-    const expected = {};
     const actual = reducer(undefined, {});
 
-    expect(actual).toEqual(expected);
+    expect(actual).toEqual(defaultState);
   });
 
   test.each([['USER_LOGGED_OUT'], ['REFETCH_DATA_SUCCEEDED']])(
@@ -16,18 +15,17 @@ describe('reducer', () => {
         task: 'task-id',
         org_type: 'Dev',
       };
-      const expected = {};
       const actual = reducer(
         {
-          'task-id': {
-            Dev: org1,
-            QA: null,
+          ...defaultState,
+          orgs: {
+            [org1.id]: org1,
           },
         },
         { type: action },
       );
 
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual(defaultState);
     },
   );
 
@@ -43,59 +41,51 @@ describe('reducer', () => {
         task: 'task-1',
         org_type: 'QA',
       };
-      const badOrg = {
-        id: 'this-should-not-happen',
+      const org3 = {
+        id: 'org-id-3',
         task: 'task-1',
-        org_type: 'QA',
+        org_type: 'Playground',
       };
       const expected = {
-        'task-1': {
-          Dev: org1,
-          QA: org2,
+        ...defaultState,
+        orgs: {
+          [org1.id]: org1,
+          [org2.id]: org2,
+          [org3.id]: org3,
         },
-        'task-2': {
-          Dev: null,
-          QA: null,
+        fetched: {
+          ...defaultState.fetched,
+          tasks: ['task-1'],
         },
       };
-      const actual = reducer(
-        {
-          'task-2': {
-            Dev: null,
-            QA: null,
-          },
+      const actual = reducer(defaultState, {
+        type: 'FETCH_OBJECTS_SUCCEEDED',
+        payload: {
+          response: [org1, org2, org3],
+          objectType: 'scratch_org',
+          filters: { task: 'task-1' },
         },
-        {
-          type: 'FETCH_OBJECTS_SUCCEEDED',
-          payload: {
-            response: [org1, org2, badOrg],
-            objectType: 'scratch_org',
-            filters: { task: 'task-1' },
-          },
-        },
-      );
+      });
 
       expect(actual).toEqual(expected);
     });
 
     test('stores null if no org for task', () => {
       const expected = {
-        'task-1': {
-          Dev: null,
-          QA: null,
+        ...defaultState,
+        fetched: {
+          ...defaultState.fetched,
+          tasks: ['task-1'],
         },
       };
-      const actual = reducer(
-        {},
-        {
-          type: 'FETCH_OBJECTS_SUCCEEDED',
-          payload: {
-            response: [],
-            objectType: 'scratch_org',
-            filters: { task: 'task-1' },
-          },
+      const actual = reducer(defaultState, {
+        type: 'FETCH_OBJECTS_SUCCEEDED',
+        payload: {
+          response: [],
+          objectType: 'scratch_org',
+          filters: { task: 'task-1' },
         },
-      );
+      });
 
       expect(actual).toEqual(expected);
     });
@@ -106,8 +96,7 @@ describe('reducer', () => {
         task: 'task-1',
         org_type: 'Dev',
       };
-      const expected = {};
-      const actual = reducer(expected, {
+      const actual = reducer(defaultState, {
         type: 'FETCH_OBJECTS_SUCCEEDED',
         payload: {
           response: [org],
@@ -116,50 +105,44 @@ describe('reducer', () => {
         },
       });
 
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual(defaultState);
     });
   });
 
   describe('CREATE_OBJECT_SUCCEEDED', () => {
     describe('OBJECT_TYPES.ORG', () => {
-      test('adds org to task', () => {
+      test('adds org', () => {
         const org = {
           id: 'org-id',
           task: 'task-1',
           org_type: 'Dev',
         };
         const expected = {
-          'task-1': {
-            Dev: org,
-            QA: null,
+          ...defaultState,
+          orgs: {
+            [org.id]: org,
           },
         };
-        const actual = reducer(
-          {},
-          {
-            type: 'CREATE_OBJECT_SUCCEEDED',
-            payload: {
-              object: org,
-              objectType: 'scratch_org',
-            },
+        const actual = reducer(defaultState, {
+          type: 'CREATE_OBJECT_SUCCEEDED',
+          payload: {
+            object: org,
+            objectType: 'scratch_org',
           },
-        );
+        });
 
         expect(actual).toEqual(expected);
       });
 
       test('ignores if no object', () => {
-        const actual = reducer(
-          {},
-          {
-            type: 'CREATE_OBJECT_SUCCEEDED',
-            payload: {
-              objectType: 'scratch_org',
-            },
+        const actual = reducer(defaultState, {
+          type: 'CREATE_OBJECT_SUCCEEDED',
+          payload: {
+            objectType: 'scratch_org',
           },
-        );
+        });
 
-        expect(actual).toEqual({});
+        expect(actual).toEqual(defaultState);
       });
     });
 
@@ -172,108 +155,110 @@ describe('reducer', () => {
           currently_capturing_changes: true,
         };
         const expected = {
-          'task-1': {
-            Dev: org,
-            QA: null,
+          ...defaultState,
+          orgs: {
+            [org.id]: org,
           },
         };
-        const actual = reducer(
-          {},
-          {
-            type: 'CREATE_OBJECT_SUCCEEDED',
-            payload: {
-              object: org,
-              objectType: 'scratch_org_commit',
-            },
+        const actual = reducer(defaultState, {
+          type: 'CREATE_OBJECT_SUCCEEDED',
+          payload: {
+            object: org,
+            objectType: 'scratch_org_commit',
           },
-        );
+        });
 
         expect(actual).toEqual(expected);
       });
 
       test('ignores if no object', () => {
-        const actual = reducer(
-          {},
-          {
-            type: 'CREATE_OBJECT_SUCCEEDED',
-            payload: {
-              objectType: 'scratch_org_commit',
-            },
+        const actual = reducer(defaultState, {
+          type: 'CREATE_OBJECT_SUCCEEDED',
+          payload: {
+            objectType: 'scratch_org_commit',
           },
-        );
+        });
 
-        expect(actual).toEqual({});
+        expect(actual).toEqual(defaultState);
       });
     });
 
     test('ignores if objectType unknown', () => {
-      const actual = reducer(
-        {},
-        {
-          type: 'CREATE_OBJECT_SUCCEEDED',
-          payload: {
-            object: {},
-            objectType: 'other-object',
-          },
+      const actual = reducer(defaultState, {
+        type: 'CREATE_OBJECT_SUCCEEDED',
+        payload: {
+          object: {},
+          objectType: 'other-object',
         },
-      );
+      });
 
-      expect(actual).toEqual({});
+      expect(actual).toEqual(defaultState);
     });
   });
 
   describe('SCRATCH_ORG_PROVISION', () => {
-    test('adds org to task', () => {
+    test('adds org', () => {
       const org = {
         id: 'org-id',
         task: 'task-1',
         org_type: 'Dev',
       };
       const expected = {
-        'task-1': {
-          Dev: org,
-          QA: null,
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
       };
-      const actual = reducer(
-        {},
-        {
-          type: 'SCRATCH_ORG_PROVISION',
-          payload: org,
+      const actual = reducer(defaultState, {
+        type: 'SCRATCH_ORG_PROVISION',
+        payload: org,
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('SCRATCH_ORG_PROVISIONING', () => {
+    test('adds org', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const expected = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
-      );
+      };
+      const actual = reducer(defaultState, {
+        type: 'SCRATCH_ORG_PROVISIONING',
+        payload: org,
+      });
 
       expect(actual).toEqual(expected);
     });
   });
 
   describe('SCRATCH_ORG_PROVISION_FAILED', () => {
-    test('removes org from task', () => {
+    test('removes org', () => {
       const org = {
         id: 'org-id',
         task: 'task-1',
         org_type: 'Dev',
       };
-      const expected = {
-        'task-1': {
-          Dev: null,
-          QA: null,
+      const initial = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
       };
-      const actual = reducer(
-        {
-          'task-1': {
-            Dev: org,
-            QA: null,
-          },
-        },
-        {
-          type: 'SCRATCH_ORG_PROVISION_FAILED',
-          payload: org,
-        },
-      );
+      const actual = reducer(initial, {
+        type: 'SCRATCH_ORG_PROVISION_FAILED',
+        payload: org,
+      });
 
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual(defaultState);
     });
 
     test('does not error if org not found', () => {
@@ -282,21 +267,12 @@ describe('reducer', () => {
         task: 'task-1',
         org_type: 'Dev',
       };
-      const expected = {
-        'task-1': {
-          Dev: null,
-          QA: null,
-        },
-      };
-      const actual = reducer(
-        {},
-        {
-          type: 'SCRATCH_ORG_PROVISION_FAILED',
-          payload: org,
-        },
-      );
+      const actual = reducer(defaultState, {
+        type: 'SCRATCH_ORG_PROVISION_FAILED',
+        payload: org,
+      });
 
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual(defaultState);
     });
   });
 
@@ -310,26 +286,24 @@ describe('reducer', () => {
       };
       const changedOrg = { ...org, has_unsaved_changes: true };
       const expected = {
-        'task-1': {
-          Dev: changedOrg,
-          QA: null,
+        ...defaultState,
+        orgs: {
+          [changedOrg.id]: changedOrg,
         },
       };
-      const actual = reducer(
-        {
-          'task-1': {
-            Dev: org,
-            QA: null,
-          },
+      const initial = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
-        {
-          type: 'UPDATE_OBJECT_SUCCEEDED',
-          payload: {
-            objectType: 'scratch_org',
-            object: changedOrg,
-          },
+      };
+      const actual = reducer(initial, {
+        type: 'UPDATE_OBJECT_SUCCEEDED',
+        payload: {
+          objectType: 'scratch_org',
+          object: changedOrg,
         },
-      );
+      });
 
       expect(actual).toEqual(expected);
     });
@@ -342,13 +316,13 @@ describe('reducer', () => {
         has_unsaved_changes: false,
       };
       const changedOrg = { ...org, has_unsaved_changes: true };
-      const expected = {
-        'task-1': {
-          Dev: org,
-          QA: null,
+      const initial = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
       };
-      const actual = reducer(expected, {
+      const actual = reducer(initial, {
         type: 'UPDATE_OBJECT_SUCCEEDED',
         payload: {
           objectType: 'foobar',
@@ -356,7 +330,7 @@ describe('reducer', () => {
         },
       });
 
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual(initial);
     });
   });
 
@@ -368,24 +342,23 @@ describe('reducer', () => {
         org_type: 'Dev',
         currently_refreshing_changes: false,
       };
-      const expected = {
-        'task-1': {
-          Dev: { ...org, currently_refreshing_changes: true },
-          QA: null,
+      const initial = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
       };
-      const actual = reducer(
-        {
-          'task-1': {
-            Dev: org,
-            QA: null,
-          },
+      const changedOrg = { ...org, currently_refreshing_changes: true };
+      const expected = {
+        ...defaultState,
+        orgs: {
+          [changedOrg.id]: changedOrg,
         },
-        {
-          type: 'REFETCH_ORG_STARTED',
-          payload: { org },
-        },
-      );
+      };
+      const actual = reducer(initial, {
+        type: 'REFETCH_ORG_STARTED',
+        payload: { org },
+      });
 
       expect(actual).toEqual(expected);
     });
@@ -400,18 +373,15 @@ describe('reducer', () => {
         currently_refreshing_changes: false,
       };
       const expected = {
-        'task-1': {
-          Dev: org,
-          QA: null,
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
       };
-      const actual = reducer(
-        {},
-        {
-          type: 'REFETCH_ORG_SUCCEEDED',
-          payload: { org },
-        },
-      );
+      const actual = reducer(defaultState, {
+        type: 'REFETCH_ORG_SUCCEEDED',
+        payload: { org },
+      });
 
       expect(actual).toEqual(expected);
     });
@@ -425,19 +395,23 @@ describe('reducer', () => {
         org_type: 'Dev',
         currently_refreshing_changes: true,
       };
-      const expected = {
-        'task-1': {
-          Dev: { ...org, currently_refreshing_changes: false },
-          QA: null,
+      const initial = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
       };
-      const actual = reducer(
-        {},
-        {
-          type: 'REFETCH_ORG_FAILED',
-          payload: { org },
+      const changedOrg = { ...org, currently_refreshing_changes: false };
+      const expected = {
+        ...defaultState,
+        orgs: {
+          [changedOrg.id]: changedOrg,
         },
-      );
+      };
+      const actual = reducer(initial, {
+        type: 'REFETCH_ORG_FAILED',
+        payload: { org },
+      });
 
       expect(actual).toEqual(expected);
     });
@@ -450,18 +424,15 @@ describe('reducer', () => {
         task: 'task-1',
         org_type: 'Dev',
       };
-      const actual = reducer(
-        {},
-        {
-          type: 'DELETE_OBJECT_SUCCEEDED',
-          payload: {
-            object: org,
-            objectType: 'scratch_org',
-          },
+      const actual = reducer(defaultState, {
+        type: 'DELETE_OBJECT_SUCCEEDED',
+        payload: {
+          object: org,
+          objectType: 'scratch_org',
         },
-      );
+      });
 
-      expect(actual['task-1'].Dev.delete_queued_at).not.toBeUndefined();
+      expect(actual.orgs[org.id].delete_queued_at).not.toBeUndefined();
     });
 
     test('ignores if objectType !== "scratch_org"', () => {
@@ -470,8 +441,7 @@ describe('reducer', () => {
         task: 'task-1',
         org_type: 'Dev',
       };
-      const expected = {};
-      const actual = reducer(expected, {
+      const actual = reducer(defaultState, {
         type: 'DELETE_OBJECT_SUCCEEDED',
         payload: {
           object: org,
@@ -479,7 +449,7 @@ describe('reducer', () => {
         },
       });
 
-      expect(actual).toEqual(expected);
+      expect(actual).toEqual(defaultState);
     });
   });
 
@@ -492,18 +462,15 @@ describe('reducer', () => {
         currently_capturing_changes: false,
       };
       const expected = {
-        'task-1': {
-          Dev: org,
-          QA: null,
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
       };
-      const actual = reducer(
-        {},
-        {
-          type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
-          payload: org,
-        },
-      );
+      const actual = reducer(defaultState, {
+        type: 'SCRATCH_ORG_COMMIT_CHANGES_FAILED',
+        payload: org,
+      });
 
       expect(actual).toEqual(expected);
     });
@@ -520,47 +487,50 @@ describe('reducer', () => {
       task: 'task-1',
       org_type: 'Dev',
     };
+    const initial = {
+      ...defaultState,
+      orgs: {
+        [org.id]: org,
+        [org2.id]: org2,
+      },
+    };
 
     test('sets currently_refreshing_org: true', () => {
+      const changedOrg = { ...org, currently_refreshing_org: true };
       const expected = {
-        'task-1': {
-          QA: { ...org, currently_refreshing_org: true },
-          Dev: org2,
+        ...initial,
+        orgs: {
+          ...initial.orgs,
+          [org.id]: changedOrg,
         },
       };
-      const actual = reducer(
-        {
-          'task-1': {
-            QA: org,
-            Dev: org2,
-          },
-        },
-        { type: 'SCRATCH_ORG_REFRESH_REQUESTED', payload: org },
-      );
+      const actual = reducer(initial, {
+        type: 'SCRATCH_ORG_REFRESH_REQUESTED',
+        payload: org,
+      });
 
       expect(actual).toEqual(expected);
     });
   });
 
   describe('SCRATCH_ORG_REFRESH_REJECTED', () => {
-    const org = {
-      id: 'org-1',
-      task: 'task-1',
-      org_type: 'QA',
-      currently_refreshing_org: true,
-    };
-
     test('sets currently_refreshing_org: false', () => {
+      const org = {
+        id: 'org-1',
+        task: 'task-1',
+        org_type: 'QA',
+        currently_refreshing_org: false,
+      };
       const expected = {
-        'task-1': {
-          QA: { ...org, currently_refreshing_org: false },
-          Dev: null,
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
         },
       };
-      const actual = reducer(
-        {},
-        { type: 'SCRATCH_ORG_REFRESH_REJECTED', payload: org },
-      );
+      const actual = reducer(defaultState, {
+        type: 'SCRATCH_ORG_REFRESH_REJECTED',
+        payload: org,
+      });
 
       expect(actual).toEqual(expected);
     });
