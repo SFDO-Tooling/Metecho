@@ -1,4 +1,4 @@
-Django==3.1.4
+Django==3.1.5
 beautifulsoup4==4.9.3
 bleach==3.2.1
 channels-redis==3.2.0
