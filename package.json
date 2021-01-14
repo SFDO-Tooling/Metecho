@@ -46,7 +46,9 @@
     "test": "run-s test:js test:py",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
-    "heroku-postbuild": "yarn prod"
+    "heroku-postbuild": "yarn prod",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.13.7",
@@ -84,6 +86,10 @@
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-react": "^7.12.10",
     "@babel/preset-typescript": "^7.12.7",
+    "@storybook/addon-actions": "^6.1.14",
+    "@storybook/addon-essentials": "^6.1.14",
+    "@storybook/addon-links": "^6.1.14",
+    "@storybook/react": "^6.1.14",
     "@testing-library/jest-dom": "^5.11.8",
     "@testing-library/react": "^11.2.2",
     "@testing-library/react-hooks": "^3.7.0",
