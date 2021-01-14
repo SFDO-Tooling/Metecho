@@ -14,7 +14,7 @@ certifi==2020.12.5        # via -c requirements/prod.txt, requests
 chardet==4.0.0            # via -c requirements/prod.txt, doc8, requests
 click==7.1.2              # via -c requirements/prod.txt, black
 coverage==5.3.1           # via coveralls, pytest-cov
-coveralls==2.2.0          # via -r requirements/dev.in
+coveralls==3.0.0          # via -r requirements/dev.in
 decorator==4.4.2          # via ipython
 django-extensions==3.1.0  # via -r requirements/dev.in
 doc8==0.8.1               # via -r requirements/dev.in
