@@ -383,6 +383,6 @@ def delete_org(scratch_org):
         scheduler.cancel(scratch_org.expiry_job_id)
 
 
-def _last_line(s):
+def _last_line(s: str) -> str:
     lines = [line for line in s.splitlines() if line.strip()]
     return lines[-1] if lines else ""
