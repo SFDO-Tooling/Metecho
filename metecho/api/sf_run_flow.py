@@ -346,14 +346,16 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         env=env,
         cwd=project_path,
     )
-    _, err = p.communicate()
+    orig_stdout, _ = p.communicate()
     if p.returncode:
         p = subprocess.run(
             [command, "error", "info"], capture_output=True, env={"HOME": project_path}
         )
         traceback = p.stdout.decode("utf-8")
         logger.warning(traceback)
-        raise Exception(_last_line(traceback) or _last_line(err))
+        raise Exception(
+            _last_line(traceback) or _last_line(orig_stdout.decode("utf-8"))
+        )
 
 
 def delete_org(scratch_org):
