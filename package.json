@@ -47,7 +47,7 @@
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
     "heroku-postbuild": "yarn prod",
-    "storybook": "start-storybook -p 6006",
+    "storybook": "start-storybook -p 6006 --ci",
     "build-storybook": "build-storybook"
   },
   "dependencies": {
