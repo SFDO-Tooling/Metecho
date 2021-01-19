@@ -149,7 +149,7 @@ def commit_changes_to_github(
     target_directory,
     originating_user_id,
 ):
-    with local_github_checkout(user, repo_id) as project_path:
+    with local_github_checkout(user, repo_id, branch) as project_path:
         # This won't return anything in-memory, but rather it will emit
         # files which we then copy into a source checkout, and then
         # commit and push all that.
