@@ -49,7 +49,7 @@ case "$1" in
         dcrq yarn test:js "${@:2}"
         ;;
     "storybook")
-        dcrq yarn run storybook "${@:2}"
+        dcrq yarn storybook "${@:2}"
         ;;
     "add:js")
         dcrq yarn add "${@:2}"
