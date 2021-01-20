@@ -1,5 +1,6 @@
 import json
-import os.path
+import os
+import pathlib
 from collections import defaultdict
 
 import simple_salesforce
@@ -113,6 +114,9 @@ def run_retrieve_task(
         is_main_project_directory = target_directory == valid_directories["source"][0]
     else:
         is_main_project_directory = target_directory == "src"
+
+    # make sure target directory exists
+    pathlib.Path(target_directory).mkdir(parents=True, exist_ok=True)
 
     if is_main_project_directory:
         package_xml_opts = {
