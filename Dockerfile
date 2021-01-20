@@ -13,6 +13,7 @@ RUN chmod +x /start-server.sh
 # Python requirements:
 COPY ./requirements /requirements
 RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir --upgrade pip-tools \
     && pip install --no-cache-dir -r requirements/prod.txt
 RUN if [ "${BUILD_ENV}" = "development" ] ; then \
     pip install --no-cache-dir -r requirements/dev.txt; \
