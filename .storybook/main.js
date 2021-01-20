@@ -1,5 +1,37 @@
-'use strict';
-const custom = require('../webpack.dev.js');
+const merge = require('webpack-merge').merge;
+
+const webpackConfig = require('../webpack.common.js');
+
+// Add some of our custom webpack settings...
+const minimalWebpackConfig = {
+  resolve: {
+    modules: webpackConfig.resolve.modules,
+    alias: webpackConfig.resolve.alias,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.scss$/,
+        use: [
+          { loader: 'style-loader' },
+          {
+            loader: 'css-loader',
+            options: {
+              url: (url) => !url.startsWith('/'),
+              importLoaders: 2,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+          },
+          {
+            loader: 'sass-loader',
+          },
+        ],
+      },
+    ],
+  },
+};
 
 module.exports = {
   stories: [
@@ -8,10 +40,7 @@ module.exports = {
   ],
   // stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: ['@storybook/addon-links', '@storybook/addon-essentials'],
-  webpackFinal: (config) => ({
-    ...config,
-    module: { ...config.module, rules: custom.module.rules },
-  }),
+  webpackFinal: (config) => merge(config, minimalWebpackConfig),
   typescript: {
     check: false,
     checkOptions: {},
