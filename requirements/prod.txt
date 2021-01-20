@@ -10,7 +10,7 @@ asgiref==3.3.1            # via channels, channels-redis, daphne, django
 asn1crypto==1.4.0         # via cumulusci
 async-timeout==3.0.1      # via aioredis
 attrs==20.3.0             # via automat, service-identity, twisted
-authlib==0.15.2           # via simple-salesforce
+authlib==0.15.3           # via simple-salesforce
 autobahn==20.12.3         # via daphne
 automat==20.2.0           # via twisted
 beautifulsoup4==4.9.3     # via -r requirements/prod.in
@@ -23,7 +23,7 @@ chardet==4.0.0            # via cumulusci, requests
 click==7.1.2              # via cumulusci, rq, snowfakery
 coloredlogs==15.0         # via cumulusci
 constantly==15.1.0        # via twisted
-croniter==1.0.1           # via rq-scheduler
+croniter==1.0.2           # via rq-scheduler
 cryptography==3.3.1       # via authlib, autobahn, cumulusci, jwcrypto, pyjwt, pyopenssl, secretstorage, service-identity, sfdo-template-helpers
 cumulusci==3.26.0         # via -r requirements/prod.in
 daphne==3.0.1             # via channels
