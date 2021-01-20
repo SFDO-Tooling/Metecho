@@ -220,7 +220,7 @@ def _create_org_and_run_flow(
         log_path = Path(project_path, ".cumulusci/logs/cci.log")
         if log_path.exists():
             scratch_org.refresh_from_db()
-            scratch_org.cci_logs = log_path.read_text()
+            scratch_org.cci_log = log_path.read_text()
             scratch_org.save()
     scratch_org.refresh_from_db()
     # We don't need to explicitly save the following, because this
@@ -765,8 +765,6 @@ def available_task_org_config_names(epic, *, user):
                 repo_name=repo.name,
                 repo_url=repo.html_url,
                 repo_owner=repo.owner.login,
-                repo_branch=epic.branch_name,
-                repo_commit=repo.branch(epic.branch_name).latest_sha(),
             )
             epic.available_task_org_config_names = [
                 {"key": key, **value} for key, value in config.orgs__scratch.items()
