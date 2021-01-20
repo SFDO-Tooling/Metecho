@@ -4,16 +4,15 @@ import React, { ComponentProps } from 'react';
 import FourOhFour from '~js/components/404';
 
 export default {
-  title: 'FourOhFour',
-  component: FourOhFour,
+  title: 'Pages/404/Component',
 };
 
 const Template: Story<ComponentProps<typeof FourOhFour>> = (args) => (
   <FourOhFour {...args} />
 );
 
-export const FirstStory = Template.bind({});
+export const FourOFour = Template.bind({});
 
-FirstStory.args = {
+FourOFour.args = {
   message: 'Lorem Ipsum',
 };
