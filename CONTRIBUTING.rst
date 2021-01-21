@@ -189,8 +189,6 @@ will see you can run e.g.::
     $ ./derrick prune  # clean up unused Docker images and containers
     $ ./derrick storybook  # build storybook and run dev server
 
-
-
 To run any development tasks (such as changing Python or JS dependencies, or
 generating or running migrations, or running a Django shell), you will need to
 run them inside the Docker image. This takes the general form ``docker-compose
@@ -293,7 +291,7 @@ When doing development for the component library in Storybook,
 use one of these two commands::
 
     $ ./derrick storybook  # if running outside of container
-    $ yarn storybook # if working in a remote container in VS Code
+    $ yarn storybook  # if working in a remote container in VS Code
 
-After running one of these commands, you can view the running Storybook at
+After running one of these commands, you can view the Storybook at
 `<http://localhost:6006/>`_ in your browser.
