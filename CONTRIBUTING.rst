@@ -290,7 +290,7 @@ Storybook Development Workflow
 ------------------------------
 
 When doing development for the component library in Storybook,
-use one of these two commands:
+use one of these two commands::
 
     $ ./derrick storybook  # if running outside of container
     $ yarn storybook # if working in a remote container in VS Code
