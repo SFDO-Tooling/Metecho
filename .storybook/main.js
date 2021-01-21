@@ -10,6 +10,7 @@ const minimalWebpackConfig = {
   },
   module: {
     rules: [
+      webpackConfig.module.rules[0],
       {
         test: /\.scss$/,
         use: [
