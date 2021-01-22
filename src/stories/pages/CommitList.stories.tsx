@@ -5,6 +5,7 @@ import CommitListComponent from '~js/components/commits/list';
 
 export default {
   title: 'Pages/CommitList/Component',
+  component: CommitListComponent,
 };
 
 const Template: Story<ComponentProps<typeof CommitListComponent>> = (args) => (
@@ -12,7 +13,6 @@ const Template: Story<ComponentProps<typeof CommitListComponent>> = (args) => (
 );
 
 export const CommitList = Template.bind({});
-
 CommitList.args = {
   commits: [
     {

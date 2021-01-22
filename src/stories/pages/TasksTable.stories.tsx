@@ -1,10 +1,22 @@
+import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
 import TasksTableComponent from '~js/components/tasks/table';
 
+import { withRedux } from '../../../.storybook/decorators';
+
 export default {
   title: 'Pages/Tasks/Table/Component',
+  component: TasksTableComponent,
+  decorators: [
+    withRedux({
+      user: {
+        id: 'user-id',
+        username: 'currentUser',
+      },
+    }),
+  ],
 };
 
 const Template: Story<ComponentProps<typeof TasksTableComponent>> = (args) => (
@@ -12,7 +24,6 @@ const Template: Story<ComponentProps<typeof TasksTableComponent>> = (args) => (
 );
 
 export const TasksTable = Template.bind({});
-
 TasksTable.args = {
   projectSlug: 'my-project',
   epicSlug: 'data-controls',
@@ -24,9 +35,9 @@ TasksTable.args = {
       description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
       epic: '3Lw7OwK',
       assigned_dev: {
-        id: '12345',
-        login: 'username',
-        avatar_url: 'https://avatars0.githubusercontent.com/u/someId?v=4',
+        id: '123456',
+        login: 'TestGitHubUser',
+        avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
       },
       assigned_qa: null,
       slug: 'test-task',
@@ -44,9 +55,9 @@ TasksTable.args = {
           timestamp: '2019-02-01T19:47:49Z',
           author: {
             name: 'Full Name',
-            username: 'username',
+            username: 'TestGitHubUser',
             email: 'user@example.com',
-            avatar_url: 'https://avatars0.githubusercontent.com/u/someId?v=4',
+            avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
           },
           message: 'Some commit message',
           url: 'https://github.com/SFDO-Tooling/commit/617a512',
@@ -64,4 +75,23 @@ TasksTable.args = {
       org_config_name: 'dev',
     },
   ],
+  epicUsers: [
+    {
+      id: '123456',
+      login: 'TestGitHubUser',
+      avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+    },
+    {
+      id: '234567',
+      login: 'OtherUser',
+      avatar_url: 'https://randomuser.me/api/portraits/women/1.jpg',
+    },
+    {
+      id: '345678',
+      login: 'ThirdUser',
+      avatar_url: 'https://randomuser.me/api/portraits/men/2.jpg',
+    },
+  ],
+  openAssignEpicUsersModal: action('openAssignEpicUsersModal'),
+  assignUserAction: action('assignUserAction'),
 };

@@ -5,6 +5,7 @@ import FourOhFourComponent from '~js/components/404';
 
 export default {
   title: 'Pages/404/Component',
+  component: FourOhFourComponent,
 };
 
 const Template: Story<ComponentProps<typeof FourOhFourComponent>> = (args) => (
@@ -12,7 +13,6 @@ const Template: Story<ComponentProps<typeof FourOhFourComponent>> = (args) => (
 );
 
 export const FourOhFour = Template.bind({});
-
 FourOhFour.args = {
   message: 'Lorem Ipsum',
 };
