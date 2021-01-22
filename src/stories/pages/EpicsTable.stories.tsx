@@ -5,6 +5,7 @@ import EpicsTableComponent from '~js/components/epics/table';
 
 export default {
   title: 'Pages/Epics/Table/Component',
+  description: 'something here',
 };
 
 const Template: Story<ComponentProps<typeof EpicsTableComponent>> = (args) => (
@@ -57,14 +58,16 @@ EpicsTable.args = {
       has_unmerged_commits: false,
       currently_creating_pr: false,
       currently_fetching_org_config_names: false,
-      github_users: [1],
+      github_users: [],
       status: 'In progress',
+      available_task_org_config_names: [],
     },
     {
       id: 'regbackup',
       project: 'my-project',
       name: 'Regular Database Backups',
       slug: 'database-backups',
+      old_slugs: [],
       description: 'Fulfilling the requirements to access specific tech specs.',
       description_rendered:
         '<p>Fulfilling the requirements to access specific tech specs.</p>',
@@ -87,6 +90,7 @@ EpicsTable.args = {
       project: 'my-project',
       name: 'Data Controls',
       slug: 'data-controls',
+      old_slugs: [],
       description: 'Links the controller field to the static items',
       description_rendered:
         '<p>Links the controller field to the static items</p>',
