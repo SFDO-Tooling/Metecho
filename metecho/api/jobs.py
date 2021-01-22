@@ -760,11 +760,14 @@ def available_task_org_config_names(epic, *, user):
             repo_name=epic.project.repo_name,
         )
         with local_github_checkout(user, repo_id) as repo_root:
+            branch_name = epic.branch_name or epic.get_base()
             config = get_project_config(
                 repo_root=repo_root,
                 repo_name=repo.name,
                 repo_url=repo.html_url,
                 repo_owner=repo.owner.login,
+                repo_branch=branch_name,
+                repo_commit=repo.branch(branch_name).latest_sha(),
             )
             epic.available_task_org_config_names = [
                 {"key": key, **value} for key, value in config.orgs__scratch.items()
