@@ -60,11 +60,11 @@ describe('<SubmitModal/>', () => {
     test('toggles checkbox', () => {
       const { getByLabelText, getByTitle } = setup();
 
-      expect(getByLabelText('Notify userlogin by email')).toBeChecked();
+      expect(getByLabelText('Notify {{username}} by email')).toBeChecked();
 
       fireEvent.click(getByTitle('userlogin'));
 
-      expect(getByLabelText('Notify userlogin by email')).not.toBeChecked();
+      expect(getByLabelText('Notify {{username}} by email')).not.toBeChecked();
     });
   });
 

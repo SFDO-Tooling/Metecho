@@ -43,9 +43,10 @@ export const createEpicPR = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t(
-          'Successfully submitted epic for review on GitHub:',
-        )} “${model.name}”.`,
+        heading: i18n.t(
+          'Successfully submitted epic for review on GitHub: “{{epic_name}}”.',
+          { epic_name: model.name },
+        ),
         linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
         linkUrl: model.pr_url ? model.pr_url : undefined,
         openLinkInNewWindow: true,
@@ -72,9 +73,10 @@ export const createEpicPRFailed = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t(
-          'Uh oh. There was an error submitting epic for review on GitHub',
-        )}: “${model.name}”.`,
+        heading: i18n.t(
+          'Uh oh. There was an error submitting epic for review on GitHub: “{{epic_name}}”.',
+          { epic_name: model.name },
+        ),
         details: message,
         variant: 'error',
       }),

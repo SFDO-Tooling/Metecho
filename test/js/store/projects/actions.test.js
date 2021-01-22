@@ -183,8 +183,8 @@ describe('projectError', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error re-syncing GitHub users for this project: “My Project”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error re-syncing GitHub users for this project:',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

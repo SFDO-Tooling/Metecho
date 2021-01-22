@@ -132,9 +132,10 @@ export const projectError = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t(
-          'Uh oh. There was an error re-syncing GitHub users for this project',
-        )}: “${model.name}”.`,
+        heading: i18n.t(
+          'Uh oh. There was an error re-syncing GitHub users for this project: “{{project_name}}”.',
+          { project_name: model.name },
+        ),
         details: message,
         variant: 'error',
       }),

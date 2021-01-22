@@ -33,8 +33,8 @@ describe('createEpicPR', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Successfully submitted epic for review on GitHub: “My Epic”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Successfully submitted epic for review on GitHub',
     );
     expect(allActions[0].payload.linkText).toEqual('View pull request.');
     expect(allActions[0].payload.linkUrl).toEqual('my-pr-url');
@@ -60,8 +60,8 @@ describe('createEpicPR', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Successfully submitted epic for review on GitHub: “My Epic”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Successfully submitted epic for review on GitHub',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
     expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -90,8 +90,8 @@ describe('createEpicPRFailed', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error submitting epic for review on GitHub: “My Epic”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error submitting epic for review on GitHub',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

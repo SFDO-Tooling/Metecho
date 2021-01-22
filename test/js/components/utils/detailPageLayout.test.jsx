@@ -18,6 +18,6 @@ describe('<DetailPageLayout />', () => {
       </StaticRouter>,
     );
 
-    expect(getByAltText('social image for project-1')).toBeDefined();
+    expect(getByAltText('social image for {{title}}')).toBeDefined();
   });
 });

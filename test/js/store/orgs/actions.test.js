@@ -58,8 +58,8 @@ describe('provisionOrg', () => {
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
-      expect(allActions[0].payload.heading).toEqual(
-        'Successfully created Dev Org for task “My Task”.',
+      expect(allActions[0].payload.heading).toMatch(
+        'Successfully created scratch org for',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
       expect(allActions[0].payload.linkUrl).toEqual(
@@ -83,7 +83,7 @@ describe('provisionOrg', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully created Dev Org.',
+      'Successfully created scratch org.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
     expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -128,8 +128,8 @@ describe('provisionFailed', () => {
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
-      expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error creating your new Dev Org for task “My Task”.',
+      expect(allActions[0].payload.heading).toMatch(
+        'Uh oh. There was an error creating your new scratch org for',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');
@@ -159,7 +159,7 @@ describe('provisionFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error creating your new Dev Org.',
+        'Uh oh. There was an error creating your new scratch org.',
       );
       expect(allActions[0].payload.linkText).toBeUndefined();
       expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -273,8 +273,8 @@ describe('updateFailed', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error checking for changes on your scratch org for task “My Task”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error checking for changes on your scratch org for',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -354,8 +354,8 @@ describe('deleteOrg', () => {
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
-      expect(allActions[0].payload.heading).toEqual(
-        'Successfully deleted Dev Org for task “My Task”.',
+      expect(allActions[0].payload.heading).toMatch(
+        'Successfully deleted scratch org for',
       );
       expect(allActions[1]).toEqual(orgAction);
     });
@@ -413,8 +413,8 @@ describe('deleteFailed', () => {
       const allActions = store.getActions();
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
-      expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error deleting your Dev Org for task “My Task”.',
+      expect(allActions[0].payload.heading).toMatch(
+        'Uh oh. There was an error deleting your scratch org for',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');
@@ -441,8 +441,8 @@ describe('commitSucceeded', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Successfully retrieved changes from your scratch org on task “My Task”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Successfully retrieved changes from your scratch org',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -496,8 +496,8 @@ describe('commitFailed', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error retrieving changes from your scratch org on task “My Task”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error retrieving changes from your scratch org',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -616,8 +616,8 @@ describe('orgRefreshed', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Successfully refreshed your scratch org on task “My Task”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Successfully refreshed your scratch org',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -671,8 +671,8 @@ describe('refreshError', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error refreshing your scratch org on task “My Task”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error refreshing your scratch org',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -789,8 +789,8 @@ describe('orgReassignFailed', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error reassigning the scratch org on task “My Task”.',
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error reassigning the scratch org',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

@@ -416,9 +416,10 @@ const EpicDetail = (props: RouteComponentProps) => {
               <AssignUsersModal
                 allUsers={project.github_users}
                 selectedUsers={epic.github_users}
-                heading={`${i18n.t('Add or Remove Collaborators for')} ${
-                  epic.name
-                }`}
+                heading={i18n.t(
+                  'Add or Remove Collaborators for {{epic_name}}',
+                  { epic_name: epic.name },
+                )}
                 isOpen={assignUsersModalOpen}
                 onRequestClose={closeAssignUsersModal}
                 setUsers={setEpicUsers}
@@ -456,8 +457,10 @@ const EpicDetail = (props: RouteComponentProps) => {
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
               {epicHasTasks || epicIsMerged
-                ? `${i18n.t('Tasks for')} ${epic.name}`
-                : `${i18n.t('Add a Task for')} ${epic.name}`}
+                ? i18n.t('Tasks for {{epic_name}}', { epic_name: epic.name })
+                : i18n.t('Add a Task for {{epic_name}}', {
+                    epic_name: epic.name,
+                  })}
             </h2>
             {!epicIsMerged && (
               <Button

@@ -136,15 +136,17 @@ const SubmitModal = ({
     setInputs({ ...inputs, alert_assigned_qa: !inputs.alert_assigned_qa });
   };
   const alertLabelText = assignee
-    ? `${i18n.t('Notify')} ${assignee.login} ${i18n.t('by email')}`
+    ? i18n.t('Notify {{username}} by email', { username: assignee.login })
     : '';
   const alertLabel = assignee ? (
     <div className="metecho-avatar-container" onClick={toggleAlertAssignee}>
-      <span className="slds-m-right_xx-small">{i18n.t('Notify')}</span>
-      <GitHubUserAvatar user={assignee} />{' '}
-      <span className="slds-m-left_xx-small">
-        <b>{assignee.login}</b> {i18n.t('by email')}
-      </span>
+      <Trans i18nKey="notifyUser">
+        <span className="slds-m-right_xx-small">Notify</span>
+        <GitHubUserAvatar user={assignee} />{' '}
+        <span className="slds-m-left_xx-small">
+          <b>{assignee.login}</b> by email
+        </span>
+      </Trans>
     </div>
   ) : null;
 
