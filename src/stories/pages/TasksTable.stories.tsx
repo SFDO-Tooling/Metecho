@@ -4,7 +4,7 @@ import React, { ComponentProps } from 'react';
 
 import TasksTableComponent from '~js/components/tasks/table';
 
-import { withRedux } from '../../../.storybook/decorators';
+import { withRedux } from '../decorators';
 
 export default {
   title: 'Pages/Tasks/Table/Component',
