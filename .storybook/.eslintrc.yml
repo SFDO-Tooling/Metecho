@@ -2,3 +2,9 @@ parserOptions:
   sourceType: module
   ecmaFeatures:
     jsx: true
+plugins:
+  - simple-import-sort
+rules:
+  # Import
+  simple-import-sort/imports: 1
+  import/order: 0

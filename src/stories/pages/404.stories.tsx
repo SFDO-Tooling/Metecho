@@ -16,3 +16,10 @@ export const FourOhFour = Template.bind({});
 FourOhFour.args = {
   message: 'Lorem Ipsum',
 };
+FourOhFour.storyName = '404 (custom text)';
+
+export const EmptyFourOhFour = Template.bind({});
+EmptyFourOhFour.parameters = {
+  controls: { hideNoControlsWarning: true },
+};
+EmptyFourOhFour.storyName = '404 (default text)';
