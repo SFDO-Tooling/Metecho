@@ -9,7 +9,11 @@ import { defaultState as defaultOrgsState } from '~js/store/orgs/reducer';
 import { TASK_STATUSES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
-import { renderWithRedux, storeWithThunk } from './../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithThunk,
+} from './../../utils';
 
 jest.mock('~js/store/actions');
 jest.mock('~js/store/orgs/actions');
@@ -161,16 +165,21 @@ describe('<TaskDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, projectSlug, epicSlug, taskSlug } = opts;
     const context = {};
-    const result = renderWithRedux(
+    const ui = (
       <StaticRouter context={context}>
         <TaskDetail match={{ params: { projectSlug, epicSlug, taskSlug } }} />
-      </StaticRouter>,
-      initialState,
-      storeWithThunk,
-      opts.rerender,
-      opts.store,
+      </StaticRouter>
     );
-    return { ...result, context };
+    if (opts.rerender) {
+      return {
+        ...reRenderWithRedux(ui, opts.store, opts.rerender),
+        context,
+      };
+    }
+    return {
+      ...renderWithRedux(ui, initialState, storeWithThunk),
+      context,
+    };
   };
 
   test('renders task detail with org', () => {

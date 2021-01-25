@@ -1,8 +1,9 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 
 import EpicStatusSteps from '~js/components/epics/steps';
 import { EPIC_STATUSES, TASK_STATUSES } from '~js/utils/constants';
+
+import { render } from './../../utils';
 
 const jonny = {
   id: 'jonny',

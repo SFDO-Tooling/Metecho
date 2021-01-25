@@ -59,7 +59,7 @@ describe('provisionOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Successfully created scratch org for',
+        'Successfully created scratch org for Task “My Task”.',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
       expect(allActions[0].payload.linkUrl).toEqual(
@@ -129,7 +129,7 @@ describe('provisionFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Uh oh. There was an error creating your new scratch org for',
+        'Uh oh. There was an error creating your new scratch org for Task “My Task”.',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');
@@ -274,7 +274,7 @@ describe('updateFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error checking for changes on your scratch org for',
+      'Uh oh. There was an error checking for changes on your scratch org for Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -355,7 +355,7 @@ describe('deleteOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Successfully deleted scratch org for',
+        'Successfully deleted scratch org for Task “My Task”.',
       );
       expect(allActions[1]).toEqual(orgAction);
     });
@@ -414,7 +414,7 @@ describe('deleteFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Uh oh. There was an error deleting your scratch org for',
+        'Uh oh. There was an error deleting your scratch org for Task “My Task”.',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');
@@ -442,7 +442,7 @@ describe('commitSucceeded', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Successfully retrieved changes from your scratch org',
+      'Successfully retrieved changes from your scratch org for Task “My Task”.',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -497,7 +497,7 @@ describe('commitFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error retrieving changes from your scratch org',
+      'Uh oh. There was an error retrieving changes from your scratch org for Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -617,7 +617,7 @@ describe('orgRefreshed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Successfully refreshed your scratch org',
+      'Successfully refreshed your scratch org for Task “My Task”.',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -672,7 +672,7 @@ describe('refreshError', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error refreshing your scratch org',
+      'Uh oh. There was an error refreshing your scratch org for Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -790,7 +790,7 @@ describe('orgReassignFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error reassigning the scratch org',
+      'Uh oh. There was an error reassigning the scratch org for Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');

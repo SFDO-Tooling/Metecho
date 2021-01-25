@@ -118,6 +118,7 @@ describe('<ProjectDetail />', () => {
     expect(getAllByTitle('Project 1')[0]).toBeVisible();
     expect(getByText('This is a test project.')).toBeVisible();
     expect(getByText('Epic 1')).toBeVisible();
+    expect(getByText('Epics for Project 1')).toBeVisible();
   });
 
   test('renders with form expanded if no epics', () => {
@@ -135,8 +136,8 @@ describe('<ProjectDetail />', () => {
       },
     });
 
-    expect(getByText('Create an Epic for {{project_name}}')).toBeVisible();
-    expect(queryByText('Epics for')).toBeNull();
+    expect(getByText('Create an Epic for Project 1')).toBeVisible();
+    expect(queryByText('Epics for Project 1')).toBeNull();
   });
 
   describe('project not found', () => {
@@ -196,7 +197,7 @@ describe('<ProjectDetail />', () => {
         },
       });
 
-      expect(queryByText('Epics for')).toBeNull();
+      expect(queryByText('Epics for Project 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'r1' },
         objectType: 'epic',
@@ -281,11 +282,11 @@ describe('<ProjectDetail />', () => {
       const { queryByText, getByText } = setup();
       fireEvent.click(getByText('Create an Epic'));
 
-      expect(getByText('Create an Epic for {{project_name}}')).toBeVisible();
+      expect(getByText('Create an Epic for Project 1')).toBeVisible();
 
       fireEvent.click(queryByText('Close'));
 
-      expect(queryByText('Create an Epic for {{project_name}}')).toBeNull();
+      expect(queryByText('Create an Epic for Project 1')).toBeNull();
     });
   });
 });

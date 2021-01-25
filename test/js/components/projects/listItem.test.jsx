@@ -1,8 +1,9 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import ProjectListItem from '~js/components/projects/listItem';
+
+import { render } from './../../utils';
 
 describe('<ProjectListItem />', () => {
   const setup = (initialState) => {

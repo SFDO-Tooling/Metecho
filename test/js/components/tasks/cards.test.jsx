@@ -9,7 +9,11 @@ import { refetchOrg } from '~js/store/orgs/actions';
 import { addUrlParams } from '~js/utils/api';
 import { SHOW_EPIC_COLLABORATORS } from '~js/utils/constants';
 
-import { renderWithRedux, storeWithThunk } from '../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithThunk,
+} from '../../utils';
 
 jest.mock('~js/store/actions');
 jest.mock('~js/store/orgs/actions');
@@ -91,30 +95,33 @@ describe('<OrgCards/>', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const context = {};
+    const ui = (
+      <StaticRouter context={context}>
+        <OrgCards
+          orgs={opts.orgs}
+          task={opts.task}
+          epicUsers={opts.epicUsers}
+          epicUrl="epic-url"
+          assignUserModalOpen={opts.assignUserModalOpen}
+          isCreatingOrg={opts.isCreatingOrg}
+          testOrgReadyForReview={opts.testOrgReadyForReview}
+          testOrgSubmittingReview={opts.testOrgSubmittingReview}
+          openAssignUserModal={jest.fn()}
+          closeAssignUserModal={jest.fn()}
+          openSubmitReviewModal={jest.fn()}
+          doCreateOrg={createOrg}
+          doRefreshOrg={refreshOrg}
+        />
+      </StaticRouter>
+    );
+    if (opts.rerender) {
+      return {
+        ...reRenderWithRedux(ui, opts.store, opts.rerender),
+        context,
+      };
+    }
     return {
-      ...renderWithRedux(
-        <StaticRouter context={context}>
-          <OrgCards
-            orgs={opts.orgs}
-            task={opts.task}
-            epicUsers={opts.epicUsers}
-            epicUrl="epic-url"
-            assignUserModalOpen={opts.assignUserModalOpen}
-            isCreatingOrg={opts.isCreatingOrg}
-            testOrgReadyForReview={opts.testOrgReadyForReview}
-            testOrgSubmittingReview={opts.testOrgSubmittingReview}
-            openAssignUserModal={jest.fn()}
-            closeAssignUserModal={jest.fn()}
-            openSubmitReviewModal={jest.fn()}
-            doCreateOrg={createOrg}
-            doRefreshOrg={refreshOrg}
-          />
-        </StaticRouter>,
-        opts.initialState,
-        storeWithThunk,
-        opts.rerender,
-        opts.store,
-      ),
+      ...renderWithRedux(ui, opts.initialState, storeWithThunk),
       context,
     };
   };

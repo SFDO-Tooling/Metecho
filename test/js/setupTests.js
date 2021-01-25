@@ -2,6 +2,8 @@ import '@testing-library/jest-dom/extend-expect';
 
 import fetchMock from 'fetch-mock';
 
+import { initI18n } from './utils';
+
 beforeAll(() => {
   document.createRange = () => ({
     setStart: jest.fn(),
@@ -43,6 +45,7 @@ beforeAll(() => {
   window.console.error = jest.fn();
   window.console.warn = jest.fn();
   window.console.info = jest.fn();
+  initI18n();
 });
 
 afterEach(fetchMock.reset);

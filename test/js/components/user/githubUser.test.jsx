@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import {
@@ -6,7 +6,7 @@ import {
   AssignUsersModal,
 } from '~js/components/user/githubUser';
 
-import { renderWithRedux, storeWithThunk } from '../../utils';
+import { render, renderWithRedux, storeWithThunk } from '../../utils';
 
 describe('AssignUsersModal', () => {
   test('responds to checkbox clicks', () => {

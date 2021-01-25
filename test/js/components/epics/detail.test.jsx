@@ -189,7 +189,7 @@ describe('<EpicDetail/>', () => {
 
     expect(getByTitle('Epic 1')).toBeVisible();
     expect(getByText('Epic Description')).toBeVisible();
-    expect(getByText('Tasks for {{epic_name}}')).toBeVisible();
+    expect(getByText('Tasks for Epic 1')).toBeVisible();
     expect(getByText('Task 1')).toBeVisible();
     expect(getByText('Approved')).toBeVisible();
     expect(getByText('Changes Requested')).toBeVisible();
@@ -203,8 +203,8 @@ describe('<EpicDetail/>', () => {
       },
     });
 
-    expect(getByText('Add a Task for {{epic_name}}')).toBeVisible();
-    expect(queryByText('Tasks for {{epic_name}}')).toBeNull();
+    expect(getByText('Add a Task for Epic 1')).toBeVisible();
+    expect(queryByText('Tasks for Epic 1')).toBeNull();
   });
 
   describe('`SHOW_EPIC_COLLABORATORS` param is truthy', () => {
@@ -276,7 +276,7 @@ describe('<EpicDetail/>', () => {
         },
       });
 
-      expect(queryByText('Tasks for {{epic_name}}')).toBeNull();
+      expect(queryByText('Tasks for Epic 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { epic: 'epic1' },
         objectType: 'task',
@@ -667,11 +667,11 @@ describe('<EpicDetail/>', () => {
       const { queryByText, getByText } = setup();
       fireEvent.click(getByText('Add a Task'));
 
-      expect(getByText('Add a Task for {{epic_name}}')).toBeVisible();
+      expect(getByText('Add a Task for Epic 1')).toBeVisible();
 
       fireEvent.click(queryByText('Close'));
 
-      expect(queryByText('Add a Task for {{epic_name}}')).toBeNull();
+      expect(queryByText('Add a Task for Epic 1')).toBeNull();
     });
   });
 });
