@@ -23,8 +23,8 @@ settings:
             - static
             - node_modules
           alias:
-            '@': js
-            '#': images
+            '~js': js
+            '~img': images
   react:
     version: 'detect'
 plugins:

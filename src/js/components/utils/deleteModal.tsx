@@ -6,12 +6,12 @@ import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { LabelWithSpinner, useIsMounted } from '@/components/utils';
-import { ThunkDispatch } from '@/store';
-import { deleteObject } from '@/store/actions';
-import { Epic } from '@/store/epics/reducer';
-import { Task } from '@/store/tasks/reducer';
-import { OBJECT_TYPES, ObjectTypes } from '@/utils/constants';
+import { LabelWithSpinner, useIsMounted } from '~js/components/utils';
+import { ThunkDispatch } from '~js/store';
+import { deleteObject } from '~js/store/actions';
+import { Epic } from '~js/store/epics/reducer';
+import { Task } from '~js/store/tasks/reducer';
+import { OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
 
 interface Props extends RouteComponentProps {
   model: Epic | Task;

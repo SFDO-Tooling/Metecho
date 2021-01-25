@@ -1,9 +1,9 @@
-import { useForm } from '@/components/utils';
-import { createObject } from '@/store/actions';
+import { useForm } from '~js/components/utils';
+import { createObject } from '~js/store/actions';
 
 import { renderHookWithRedux } from './../../utils';
 
-jest.mock('@/store/actions');
+jest.mock('~js/store/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

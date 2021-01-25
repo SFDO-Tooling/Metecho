@@ -5,15 +5,15 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
 
-import SelectFlowType from '@/components/tasks/selectFlowType';
+import SelectFlowType from '~js/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
   useForm,
   useIsMounted,
   useTransientMessage,
-} from '@/components/utils';
-import { Epic } from '@/store/epics/reducer';
-import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '@/utils/constants';
+} from '~js/components/utils';
+import { Epic } from '~js/store/epics/reducer';
+import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '~js/utils/constants';
 
 interface Props {
   epic: Epic;

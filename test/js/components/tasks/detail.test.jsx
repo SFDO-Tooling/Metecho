@@ -2,16 +2,16 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import TaskDetail from '@/components/tasks/detail';
-import { createObject, fetchObjects } from '@/store/actions';
-import { refetchOrg, refreshOrg } from '@/store/orgs/actions';
-import { TASK_STATUSES } from '@/utils/constants';
-import routes from '@/utils/routes';
+import TaskDetail from '~js/components/tasks/detail';
+import { createObject, fetchObjects } from '~js/store/actions';
+import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
+import { TASK_STATUSES } from '~js/utils/constants';
+import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('@/store/actions');
-jest.mock('@/store/orgs/actions');
+jest.mock('~js/store/actions');
+jest.mock('~js/store/orgs/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

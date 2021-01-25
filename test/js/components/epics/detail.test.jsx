@@ -2,17 +2,17 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import EpicDetail from '@/components/epics/detail';
-import { fetchObject, fetchObjects, updateObject } from '@/store/actions';
-import { refreshGitHubUsers } from '@/store/projects/actions';
-import { getUrlParam, removeUrlParam } from '@/utils/api';
-import routes from '@/utils/routes';
+import EpicDetail from '~js/components/epics/detail';
+import { fetchObject, fetchObjects, updateObject } from '~js/store/actions';
+import { refreshGitHubUsers } from '~js/store/projects/actions';
+import { getUrlParam, removeUrlParam } from '~js/utils/api';
+import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('@/store/actions');
-jest.mock('@/store/projects/actions');
-jest.mock('@/utils/api');
+jest.mock('~js/store/actions');
+jest.mock('~js/store/projects/actions');
+jest.mock('~js/utils/api');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

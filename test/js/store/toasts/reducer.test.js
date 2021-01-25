@@ -1,4 +1,4 @@
-import reducer from '@/store/toasts/reducer';
+import reducer from '~js/store/toasts/reducer';
 
 describe('reducer', () => {
   test('returns initial state', () => {

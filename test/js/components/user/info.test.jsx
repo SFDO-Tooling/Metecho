@@ -2,12 +2,12 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import UserDropdown, { ConnectionInfoModal } from '@/components/user/info';
-import { disconnect, refreshDevHubStatus } from '@/store/user/actions';
+import UserDropdown, { ConnectionInfoModal } from '~js/components/user/info';
+import { disconnect, refreshDevHubStatus } from '~js/store/user/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('@/store/user/actions');
+jest.mock('~js/store/user/actions');
 
 disconnect.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshDevHubStatus.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

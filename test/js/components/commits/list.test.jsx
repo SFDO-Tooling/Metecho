@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import CommitList from '@/components/commits/list';
+import CommitList from '~js/components/commits/list';
 
 describe('<CommitList/>', () => {
   test('renders a table of commits', () => {

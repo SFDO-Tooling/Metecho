@@ -8,11 +8,11 @@ import { useSelector } from 'react-redux';
 import { StaticContext, withRouter } from 'react-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { selectUserState } from '@/store/user/selectors';
-import { addUrlParams } from '@/utils/api';
-import routes from '@/utils/routes';
-import welcomeMatBG from '#/welcome-mat-bg.png';
-import welcomeMatFG from '#/welcome-mat-fg.png';
+import welcomeMatBG from '~img/welcome-mat-bg.png';
+import welcomeMatFG from '~img/welcome-mat-fg.png';
+import { selectUserState } from '~js/store/user/selectors';
+import { addUrlParams } from '~js/utils/api';
+import routes from '~js/utils/routes';
 
 interface Props
   extends RouteComponentProps<

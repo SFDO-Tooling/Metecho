@@ -2,11 +2,11 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { AppState, ThunkDispatch } from '@/store';
-import { fetchObjects } from '@/store/actions';
-import { Epic } from '@/store/epics/reducer';
-import { selectTasksByEpic } from '@/store/tasks/selectors';
-import { OBJECT_TYPES } from '@/utils/constants';
+import { AppState, ThunkDispatch } from '~js/store';
+import { fetchObjects } from '~js/store/actions';
+import { Epic } from '~js/store/epics/reducer';
+import { selectTasksByEpic } from '~js/store/tasks/selectors';
+import { OBJECT_TYPES } from '~js/utils/constants';
 
 export default (
   epic: Epic | null | undefined,

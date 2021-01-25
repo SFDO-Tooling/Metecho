@@ -3,7 +3,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React from 'react';
 
-import { AssignedUserTracker } from '@/components/tasks/cards';
+import { AssignedUserTracker } from '~js/components/tasks/cards';
 
 const ConfirmRemoveUserModal = ({
   isOpen,

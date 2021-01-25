@@ -1,4 +1,4 @@
-import reducer from '@/store/orgs/reducer';
+import reducer from '~js/store/orgs/reducer';
 
 describe('reducer', () => {
   test('returns initial state if no action', () => {

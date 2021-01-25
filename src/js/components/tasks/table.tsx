@@ -12,16 +12,16 @@ import { Link } from 'react-router-dom';
 import {
   AssignUserModal,
   GitHubUserAvatar,
-} from '@/components/user/githubUser';
-import { Task } from '@/store/tasks/reducer';
-import { GitHubUser } from '@/store/user/reducer';
+} from '~js/components/user/githubUser';
+import { Task } from '~js/store/tasks/reducer';
+import { GitHubUser } from '~js/store/user/reducer';
 import {
   ORG_TYPES,
   OrgTypes,
   REVIEW_STATUSES,
   TASK_STATUSES,
-} from '@/utils/constants';
-import routes from '@/utils/routes';
+} from '~js/utils/constants';
+import routes from '~js/utils/routes';
 
 type AssignUserAction = ({
   task,

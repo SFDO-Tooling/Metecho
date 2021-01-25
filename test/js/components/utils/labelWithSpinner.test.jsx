@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { LabelWithSpinner } from '@/components/utils';
+import { LabelWithSpinner } from '~js/components/utils';
 
 describe('<LabelWithSpinner />', () => {
   test('renders with defaults', () => {

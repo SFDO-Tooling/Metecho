@@ -12,8 +12,8 @@ import {
   useForm,
   useFormDefaults,
   useIsMounted,
-} from '@/components/utils';
-import { REVIEW_STATUSES, ReviewStatuses } from '@/utils/constants';
+} from '~js/components/utils';
+import { REVIEW_STATUSES, ReviewStatuses } from '~js/utils/constants';
 
 interface Props {
   orgId?: string;

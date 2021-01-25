@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect';
 
-import { AppState } from '@/store';
-import { OrgState } from '@/store/orgs/reducer';
-import { selectTask } from '@/store/tasks/selectors';
+import { AppState } from '~js/store';
+import { OrgState } from '~js/store/orgs/reducer';
+import { selectTask } from '~js/store/tasks/selectors';
 
 export const selectOrgState = (appState: AppState): OrgState => appState.orgs;
 

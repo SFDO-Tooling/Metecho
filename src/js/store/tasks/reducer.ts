@@ -1,13 +1,13 @@
-import { ObjectsAction } from '@/store/actions';
-import { TaskAction } from '@/store/tasks/actions';
-import { LogoutAction, RefetchDataAction } from '@/store/user/actions';
-import { GitHubUser } from '@/store/user/reducer';
+import { ObjectsAction } from '~js/store/actions';
+import { TaskAction } from '~js/store/tasks/actions';
+import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
+import { GitHubUser } from '~js/store/user/reducer';
 import {
   OBJECT_TYPES,
   ObjectTypes,
   ReviewStatuses,
   TaskStatuses,
-} from '@/utils/constants';
+} from '~js/utils/constants';
 
 export interface Commit {
   id: string;

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import Path from '@/components/path';
+import Path from '~js/components/path';
 
 describe('<Path />', () => {
   const steps = ['First', 'Second', 'Third', 'Fourth'];

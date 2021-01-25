@@ -1,5 +1,5 @@
-import { ProjectsRefreshed } from '@/store/projects/actions';
-import { UserAction } from '@/store/user/actions';
+import { ProjectsRefreshed } from '~js/store/projects/actions';
+import { UserAction } from '~js/store/user/actions';
 
 export interface GitHubUser {
   id: string;
