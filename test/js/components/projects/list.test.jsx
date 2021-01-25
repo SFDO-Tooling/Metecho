@@ -37,22 +37,15 @@ describe('<ProjectList />', () => {
     rerender = null,
     store,
   } = {}) => {
-    if (rerender) {
-      return reRenderWithRedux(
-        <MemoryRouter>
-          <ProjectList {...props} />
-        </MemoryRouter>,
-        store,
-        rerender,
-      );
-    }
-    return renderWithRedux(
+    const ui = (
       <MemoryRouter>
         <ProjectList {...props} />
-      </MemoryRouter>,
-      initialState,
-      storeWithThunk,
+      </MemoryRouter>
     );
+    if (rerender) {
+      return reRenderWithRedux(ui, store, rerender);
+    }
+    return renderWithRedux(ui, initialState, storeWithThunk);
   };
 
   test('renders projects list (empty)', () => {
