@@ -101,12 +101,10 @@ export const sampleEpic3 = {
   slug: 'database-backups',
   old_slugs: [],
   description: 'Fulfilling the requirements to access specific tech specs.',
-  description_rendered:
-    '<p>Fulfilling the requirements to access specific tech specs.</p>',
-  branch_name: 'feature/database-backups',
-  branch_url: 'https://github.com/test/test-repo/tree/feature/database-backups',
-  branch_diff_url:
-    'https://github.com/test/test-repo/compare/main...feature/database-backups',
+  description_rendered: '',
+  branch_name: '',
+  branch_url: null,
+  branch_diff_url: null,
   pr_url: null,
   pr_is_open: false,
   pr_is_merged: false,
