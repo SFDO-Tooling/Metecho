@@ -1,16 +1,19 @@
-import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
-import { linkTo } from '@storybook/addon-links';
+import { Meta } from '@storybook/addon-docs/blocks';
 
-import { EpicTableComponent } from './EpicTable.stories';
-import EpicTable from '~js/components/epics/table';
+import { EpicTable } from './EpicTable.stories';
 
-<Meta title="Epics/Table/Intro" component={EpicTableComponent} />
+<Meta title="Epics/Table/Intro" component={EpicTable} />
 
 ## Overview
 
-**Epics** are bodies of work that are large enough to be broken down to a number of smaller **tasks** within a given **project**.
+**Epics** are bodies of work that are large enough to be broken down to a number
+of smaller **tasks** within a given **project**.
 
-The **EpicTable** renders an [SLDS DataTable](https://react.lightningdesignsystem.com/components/data-tables/) accepting an `epic` as the collection of items to render in the table. This allows users to view a list of epics and it's related information created within a given task.
+The **EpicTable** renders an [SLDS
+DataTable](https://react.lightningdesignsystem.com/components/data-tables/)
+accepting a collection of `epics` to render in the table. This allows users to
+view a list of epics and their related information created within a given
+project.
 
 ## Sub components
 
@@ -18,12 +21,13 @@ The **EpicTable** renders an [SLDS DataTable](https://react.lightningdesignsyste
 
 **Details**
 
-Displays the name of the epic, linking to it's detail page and it's description if provided.
+Displays the name of the epic (linking to its detail page), description (if
+provided), and link to the epic's branch on GitHub (if it has one).
 
 **Status**
 
-Displays the epic's status as `Planned`, `In Progress`, or `Completed`.
+Displays the epic's status as `Planned`, `In Progress`, `Review`, or `Merged`.
 
 **Number of Collaborators**
 
-Tally of github users assigned as **collaborators** within the project.
+Number of GitHub users assigned as **collaborators** on that epic.

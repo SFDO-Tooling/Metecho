@@ -8,6 +8,7 @@ import {
   sampleEpic2,
   sampleEpic3,
   sampleEpic4,
+  sampleEpic5,
 } from '../fixtures';
 
 export default {
@@ -22,6 +23,6 @@ const Template: Story<ComponentProps<typeof EpicTableComponent>> = (args) => (
 
 export const EpicTable = Template.bind({});
 EpicTable.args = {
-  epics: [sampleEpic1, sampleEpic2, sampleEpic3, sampleEpic4],
+  epics: [sampleEpic1, sampleEpic2, sampleEpic3, sampleEpic4, sampleEpic5],
   projectSlug: 'my-project',
 };

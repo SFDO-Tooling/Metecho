@@ -35,10 +35,7 @@ const minimalWebpackConfig = {
 };
 
 module.exports = {
-  stories: [
-    '../src/stories/**/*.stories.mdx',
-    '../src/stories/**/*.stories.@(js|jsx|ts|tsx)',
-  ],
+  stories: ['../src/stories/**/*.stories.@(js|jsx|ts|tsx|mdx)'],
   addons: ['@storybook/addon-links', '@storybook/addon-essentials'],
   webpackFinal: (config) => merge(config, minimalWebpackConfig),
   typescript: {
