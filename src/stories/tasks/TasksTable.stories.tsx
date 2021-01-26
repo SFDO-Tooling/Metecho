@@ -14,7 +14,7 @@ import {
 } from '../fixtures';
 
 export default {
-  title: 'Pages/Tasks/Table/Component',
+  title: 'Tasks/Table/Component',
   component: TasksTableComponent,
   decorators: [
     withRedux({

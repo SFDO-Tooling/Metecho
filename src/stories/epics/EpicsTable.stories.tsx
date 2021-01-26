@@ -11,7 +11,7 @@ import {
 } from '../fixtures';
 
 export default {
-  title: 'Pages/Epics/Table/Component',
+  title: 'Epics/Table/Component',
   component: EpicsTableComponent,
   description: 'something here',
 };

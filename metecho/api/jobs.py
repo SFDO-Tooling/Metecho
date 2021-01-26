@@ -765,6 +765,8 @@ def available_task_org_config_names(epic, *, user):
                 repo_name=repo.name,
                 repo_url=repo.html_url,
                 repo_owner=repo.owner.login,
+                repo_branch=repo.default_branch,
+                repo_commit=repo.branch(repo.default_branch).latest_sha(),
             )
             epic.available_task_org_config_names = [
                 {"key": key, **value} for key, value in config.orgs__scratch.items()
