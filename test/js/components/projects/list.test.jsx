@@ -103,10 +103,7 @@ describe('<ProjectList />', () => {
 
     test('fetches next page of projects', async () => {
       fetchObjects.mockReturnValueOnce(() => new Promise(() => {}));
-      const { findByText, rerender, store } = setup({
-        initialState,
-        props: { y: 1000 },
-      });
+      const { findByText, rerender, store } = setup({ initialState });
       setup({ props: { y: 1000 }, rerender, store });
 
       expect.assertions(1);
