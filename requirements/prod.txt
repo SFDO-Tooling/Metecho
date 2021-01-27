@@ -31,7 +31,7 @@ automat==20.2.0
     # via twisted
 beautifulsoup4==4.9.3
     # via -r requirements/prod.in
-bleach==3.2.1
+bleach==3.2.3
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
