@@ -181,7 +181,7 @@ six==1.15.0
     #   doc8
     #   python-dateutil
     #   sphinxcontrib-httpdomain
-snowballstemmer==2.0.0
+snowballstemmer==2.1.0
     # via sphinx
 sphinx==3.4.3
     # via
