@@ -15,7 +15,7 @@ const Template: Story<ComponentProps<typeof FourOhFourComponent>> = (args) => (
 const Message404 = () => (
   <>
     We can’t find the epic you’re looking for. Try another epic from{' '}
-    <a href="#">this projects</a>
+    <a href="#">this project</a>.
   </>
 );
 export const FourOhFour = Template.bind({});
