@@ -1,14 +1,14 @@
+import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
-import { sample } from 'lodash';
 import React, { ComponentProps } from 'react';
 
 import CreateEpicModalComponent from '~js/components/epics/createForm';
 
 import { withRedux } from '../decorators';
-import { sampleEpic1, sampleGitHubUser1 } from '../fixtures';
+import { sampleProject1, sampleUser1 } from '../fixtures';
 
 export default {
-  title: 'Epics/CreateEpic/Component',
+  title: 'Epics/CreateEpicModal/Component',
   component: CreateEpicModalComponent,
   decorators: [
     withRedux({
@@ -26,14 +26,10 @@ const Template: Story<ComponentProps<typeof CreateEpicModalComponent>> = (
 
 export const CreateEpicModal = Template.bind({});
 CreateEpicModal.args = {
-  project: {
-    name: sampleEpic1.name,
-    id: sampleEpic1.id,
-    description: sampleEpic1.description,
-    github_users: [sampleGitHubUser1],
-    slug: sampleEpic1.slug,
-    old_slugs: sampleEpic1.old_slugs,
-  },
+  project: sampleProject1,
+  user: sampleUser1,
+  isOpen: true,
+  closeCreateModal: action('closeCreateModal'),
 };
 
 /*  user,

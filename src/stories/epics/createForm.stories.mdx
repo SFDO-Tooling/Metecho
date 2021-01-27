@@ -1,0 +1,18 @@
+import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
+import { linkTo } from '@storybook/addon-links';
+
+import { CreateEpicModal } from './createForm.stories';
+
+<Meta title="Epics/CreateEpicModal/Intro" component={CreateEpicModal} />
+
+# CreateEpicModal
+
+** Initializes details of new Epic.**
+
+The **CreateEpicModal** component is a form used for entering inital configuration options when creating a new **Epic**.
+
+In addition to a mandatory field for the **Epic** name, there is also an optional description field. Radio buttons allow for making a selection between creating a new GitHub branch or using an existing one for the new **Epic**.
+
+Pressing the create button creates the **Epic** and closes the modal.
+
+<Story id="epics-createepic-component--create-epic-modal" />

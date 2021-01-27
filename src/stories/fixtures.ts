@@ -170,3 +170,37 @@ export const sampleTask1 = {
   review_sha: '617a512',
   org_config_name: 'dev',
 };
+
+export const sampleUser1 = {
+  id: 'U1',
+  username: 'someuser1',
+  email: 'developer@web.com',
+  avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+  valid_token_for: null,
+  sf_username: 'someuser',
+  org_name: 'org1',
+  org_type: 'active',
+  is_devhub_enabled: true,
+  is_staff: true,
+  currently_fetching_repos: true,
+  devhub_username: 'someuser1',
+  uses_global_devhub: true,
+  agreed_to_tos_at: null,
+};
+
+export const sampleProject1 = {
+  id: '7265',
+  name: 'Sample Project',
+  slug: 'a_project',
+  old_slugs: [],
+  repo_url: 'https://github.com/test/test-repo',
+  repo_owner: 'owner',
+  repo_name: 'project-repo',
+  description: 'some description',
+  description_rendered: '2019-02-01T19:47:49Z',
+  is_managed: true,
+  branch_prefix: 'test',
+  github_users: [sampleGitHubUser1],
+  currently_refreshing_gh_users: false,
+  repo_image_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+};
