@@ -14,7 +14,6 @@ import {
 export default {
   title: 'Epics/Table/Component',
   component: EpicTableComponent,
-  description: 'something here',
 };
 
 const Template: Story<ComponentProps<typeof EpicTableComponent>> = (args) => (
