@@ -13,15 +13,14 @@ import {
 export default {
   title: 'Epics/Table/Component',
   component: EpicsTableComponent,
-  description: 'something here',
 };
 
 const Template: Story<ComponentProps<typeof EpicsTableComponent>> = (args) => (
   <EpicsTableComponent {...args} />
 );
 
-export const EpicsTable = Template.bind({});
-EpicsTable.args = {
+export const Component = Template.bind({});
+Component.args = {
   epics: [sampleEpic1, sampleEpic2, sampleEpic3, sampleEpic4],
   projectSlug: 'my-project',
 };

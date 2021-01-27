@@ -5,7 +5,7 @@ import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 
 const storyMiddleware = () => (next: (act: any) => any) => (act: any) => {
-  action('dispatch');
+  action('dispatch')(act);
   return next(act);
 };
 

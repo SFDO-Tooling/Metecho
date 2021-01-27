@@ -1,9 +1,6 @@
-import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
-import { linkTo } from '@storybook/addon-links';
+import { Meta, Story } from '@storybook/addon-docs/blocks';
 
-import { FourOhFour } from './404.stories';
-
-<Meta title="Pages/404/Intro" component={FourOhFour} />
+<Meta title="Pages/404/Intro" />
 
 # 404
 
@@ -11,16 +8,22 @@ import { FourOhFour } from './404.stories';
 
 ## Overview
 
-The **404** component is a page that indicates that the user reached the domain they requested but the URL path provided no information.
+The **404** component is a page that indicates that the user reached the domain
+they requested but the URL path provided no information.
 
-The component consists of an illustration, an emoticon of a person shrugging, and a message indicating the invalid address that should also guide the user to a valid page on the site.
-
-Typically, a `message` would be passed at the instance to provide meaningful information on how to recover from an error, for example, navigating to an `epic` or `task` that doesn't exist.
+The component consists of an illustration, an emoticon of a person shrugging,
+and a message indicating the invalid address that should also guide the user to
+a valid page on the site.
 
 ## Guidelines
 
-<Story id="pages-404-component--four-oh-four" />
+Typically, a custom `message` provides meaningful information on how to recover
+from an error -- for example, after navigating to an **Epic** or **Task** that
+doesn't exist.
 
-If a custom message is not passed, then the default message is displayed with a link to the home page.
+<Story id="pages-404-components--four-oh-four" />
 
-<Story id="pages-404-component--empty-four-oh-four" />
+If a custom message is not provided, then the default message is displayed with
+a link to the home page.
+
+<Story id="pages-404-components--empty-four-oh-four" />

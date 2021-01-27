@@ -1,18 +1,19 @@
-import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
-import { linkTo } from '@storybook/addon-links';
+import { Meta } from '@storybook/addon-docs/blocks';
 
-import { CreateEpicModal } from './createForm.stories';
-
-<Meta title="Epics/CreateEpicModal/Intro" component={CreateEpicModal} />
+<Meta title="Epics/CreateEpicModal/Intro" />
 
 # CreateEpicModal
 
-** Initializes details of new Epic.**
+**Initializes details of a new Epic.**
 
-The **CreateEpicModal** component is a form used for entering inital configuration options when creating a new **Epic**.
+The **CreateEpicModal** component is a form used for entering inital options
+when creating a new **Epic**.
 
-In addition to a mandatory field for the **Epic** name, there is also an optional description field. Radio buttons allow for making a selection between creating a new GitHub branch or using an existing one for the new **Epic**.
+In addition to a mandatory field for the **Epic** `name`, there is also an
+optional `description` field. Radio buttons allow for making a selection between
+creating a new GitHub branch or using an existing one for the new **Epic**. If
+the "Use existing GitHub branch" radio is selected, a
+[combobox](https://react.lightningdesignsystem.com/components/comboboxes/) is
+rendered to allow the user to search for and select an existing branch.
 
-Pressing the create button creates the **Epic** and closes the modal.
-
-<Story id="epics-createepic-component--create-epic-modal" />
+Pressing the "Create" button creates the **Epic** and closes the modal.
