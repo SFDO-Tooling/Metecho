@@ -34,7 +34,7 @@ click==7.1.2
     # via
     #   -c requirements/prod.txt
     #   black
-coverage==5.3.1
+coverage==5.4
     # via
     #   coveralls
     #   pytest-cov
