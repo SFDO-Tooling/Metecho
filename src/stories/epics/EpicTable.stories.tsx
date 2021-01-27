@@ -20,8 +20,8 @@ const Template: Story<ComponentProps<typeof EpicTableComponent>> = (args) => (
   <EpicTableComponent {...args} />
 );
 
-export const EpicTable = Template.bind({});
-EpicTable.args = {
+export const Component = Template.bind({});
+Component.args = {
   epics: [sampleEpic1, sampleEpic2, sampleEpic3, sampleEpic4, sampleEpic5],
   projectSlug: 'my-project',
 };

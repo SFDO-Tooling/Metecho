@@ -1,13 +1,15 @@
-import { Meta } from '@storybook/addon-docs/blocks';
+import { Meta, Story } from '@storybook/addon-docs/blocks';
 
-import { EpicTable } from './EpicTable.stories';
+<Meta title="Epics/Table/Intro" />
 
-<Meta title="Epics/Table/Intro" component={EpicTable} />
+# EpicTable
+
+**Shows a list of epics.**
 
 ## Overview
 
 **Epics** are bodies of work that are large enough to be broken down to a number
-of smaller **tasks** within a given **project**.
+of smaller **Tasks** within a given **Project**.
 
 The **EpicTable** renders an [SLDS
 DataTable](https://react.lightningdesignsystem.com/components/data-tables/)
@@ -15,9 +17,11 @@ accepting a collection of `epics` to render in the table. This allows users to
 view a list of epics and their related information created within a given
 project.
 
-## Sub components
+<Story id="epics-table-component--component" />
 
-#### Columns & Cells
+## Sub-components
+
+### Columns & Cells
 
 **Details**
 
@@ -30,4 +34,4 @@ Displays the epic's status as `Planned`, `In Progress`, `Review`, or `Merged`.
 
 **Number of Collaborators**
 
-Number of GitHub users assigned as **collaborators** on that epic.
+Number of GitHub users assigned as `collaborators` on that epic.
