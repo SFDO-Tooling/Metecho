@@ -191,3 +191,95 @@ export const sampleTask1 = {
   review_sha: '617a512',
   org_config_name: 'dev',
 };
+
+export const sampleTask2 = {
+  id: 't2',
+  name: 'Control Toggles for Accessible Actions',
+  slug: 'control-toggles',
+  old_slugs: [],
+  epic: 'e1',
+  description:
+    'Add panel for controls toggles allowing for accessible interaction',
+  description_rendered:
+    '<p>Add panel for controls toggles allowing for accessible interaction.</p>',
+  has_unmerged_commits: false,
+  currently_creating_pr: false,
+  branch_name: '',
+  branch_url: '',
+  branch_diff_url: '',
+  pr_url: '',
+  pr_is_open: false,
+  commits: [],
+  origin_sha: '',
+  assigned_dev: null,
+  assigned_qa: null,
+  status: TASK_STATUSES.PLANNED,
+  currently_submitting_review: false,
+  review_submitted_at: '',
+  review_valid: false,
+  review_status: null,
+  review_sha: '',
+  org_config_name: '',
+};
+
+export const sampleTask3 = {
+  id: 't3',
+  name: 'Dark Mode and High Contrast Options',
+  slug: 'dark-mode',
+  old_slugs: [],
+  epic: 'e1',
+  description: 'Include options set by operating system preferences',
+  description_rendered:
+    '<p>Include options set by **operating system preferences**</p>',
+  has_unmerged_commits: false,
+  currently_creating_pr: false,
+  branch_name: 'feature/my-epic__dark-mode',
+  branch_url:
+    'https://github.com/test/test-repo/tree/feature/my-epic__dark-modee',
+  branch_diff_url:
+    'https://github.com/test/test-repo/compare/feature/my-epic...feature/my-epic__dark-mode',
+  pr_url: 'https://github.com/test/test-repo/pull/1357',
+  pr_is_open: true,
+  commits: [sampleCommit1],
+  origin_sha: '723b342',
+  assigned_dev: sampleGitHubUser3,
+  assigned_qa: sampleGitHubUser1,
+  status: TASK_STATUSES.COMPLETED,
+  currently_submitting_review: false,
+  review_submitted_at: '2019-03-01T19:47:49Z',
+  review_valid: true,
+  review_status: REVIEW_STATUSES.APPROVED,
+  review_sha: '617a512',
+  org_config_name: 'dev',
+};
+
+export const sampleTask4 = {
+  id: 't4',
+  name: 'Universal Language Selectors',
+  slug: 'universal-language',
+  old_slugs: [],
+  epic: 'e1',
+  description: 'Internationalization and Localization built in options',
+  description_rendered:
+    '<p>Internationalization and Localization built in options</p>',
+  has_unmerged_commits: false,
+  currently_creating_pr: false,
+  branch_name: 'feature/my-epic__universal-language',
+  branch_url:
+    'https://github.com/test/test-repo/tree/feature/my-epic__universal-languagee',
+  branch_diff_url:
+    'https://github.com/test/test-repo/compare/feature/my-epic...feature/my-epic__universal-language',
+  pr_url: 'https://github.com/test/test-repo/pull/1357',
+  pr_is_open: true,
+  commits: [sampleCommit1],
+  origin_sha: '723b342',
+  assigned_dev: sampleGitHubUser2,
+  assigned_qa: sampleGitHubUser3,
+  status: TASK_STATUSES.IN_PROGRESS,
+  currently_submitting_review: false,
+  review_submitted_at: '2019-03-01T19:47:49Z',
+  review_valid: true,
+  review_status: REVIEW_STATUSES.CHANGES_REQUESTED,
+  review_sha: '617a512',
+  org_config_name: 'dev',
+};
