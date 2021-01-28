@@ -100,13 +100,11 @@ export const sampleEpic3 = {
   name: 'Regular Database Backups',
   slug: 'database-backups',
   old_slugs: [],
-  description: 'Fulfilling the requirements to access specific tech specs.',
-  description_rendered:
-    '<p>Fulfilling the requirements to access specific tech specs.</p>',
-  branch_name: 'feature/database-backups',
-  branch_url: 'https://github.com/test/test-repo/tree/feature/database-backups',
-  branch_diff_url:
-    'https://github.com/test/test-repo/compare/main...feature/database-backups',
+  description: '',
+  description_rendered: '',
+  branch_name: '',
+  branch_url: null,
+  branch_diff_url: null,
   pr_url: null,
   pr_is_open: false,
   pr_is_merged: false,
@@ -138,6 +136,29 @@ export const sampleEpic4 = {
   currently_fetching_org_config_names: false,
   github_users: [],
   status: EPIC_STATUSES.MERGED,
+  available_task_org_config_names: [],
+};
+
+export const sampleEpic5 = {
+  id: 'e5',
+  project: 'p1',
+  name: 'Widgets',
+  slug: 'widgets',
+  old_slugs: [],
+  description: 'These are the widgets.',
+  description_rendered: '<p>These are the widgets.</p>',
+  branch_name: 'feature/widgets',
+  branch_url: 'https://github.com/test/test-repo/tree/feature/widgets',
+  branch_diff_url:
+    'https://github.com/test/test-repo/compare/main...feature/widgets',
+  pr_url: 'https://github.com/test/test-repo/pull/5678',
+  pr_is_open: true,
+  pr_is_merged: false,
+  has_unmerged_commits: true,
+  currently_creating_pr: false,
+  currently_fetching_org_config_names: false,
+  github_users: [sampleGitHubUser1, sampleGitHubUser2],
+  status: EPIC_STATUSES.REVIEW,
   available_task_org_config_names: [],
 };
 
