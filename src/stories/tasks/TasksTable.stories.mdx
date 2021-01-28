@@ -11,7 +11,15 @@ import { Meta, Story } from '@storybook/addon-docs/blocks';
 The **TasksTable** component is an
 [SLDS DataTable](https://react.lightningdesignsystem.com/components/data-tables/)
 that shows a list of **Tasks** and their respective current statuses within an
-Epic.
+**Epic**.
+
+**Tasks** are shown in the order of three status categories:
+
+1. `In Progress` which includes `Approved` and `Changes Requested`.
+2. `Planned`
+3. `Complete`
+
+Within the three categories, sorting is alphabetical by **Task** name.
 
 <Story id="tasks-table-component--component" />
 
@@ -25,8 +33,20 @@ A description of the **Task** that links to its details page.
 
 **Status**
 
-Displays the **Task**'s status based on the work of the `Developer` (`Planned`,
-`In Progress`, `Complete`), and the `Tester` (`Changes Requested`, `Approved`).
+Displays the **Task**'s status based on the work of the `Developer` and the
+`Tester`.
+
+- A Task begins with a status of `Planned` until a scratch org has been created,
+  which updates the status to `In Progress`.
+- It remains `In Progress` until a `Tester` submits a review, at which point the
+  status becomes `Changes Requested` or `Approved`.
+- If changes are made or retrieved (even after review), it goes back to
+  `In Progress` and will be updated once another review from the `Tester` is
+  submitted.
+- The review status is only shown if the review was submitted on the _most
+  recent commit_ of the **Task** branch.
+- Once the **Task** pull request has been merged on GitHub, it becomes
+  `Complete`.
 
 **Developer**
 
