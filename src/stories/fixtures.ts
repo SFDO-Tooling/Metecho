@@ -191,3 +191,42 @@ export const sampleTask1 = {
   review_sha: '617a512',
   org_config_name: 'dev',
 };
+
+export const sampleSteps = [
+  {
+    label: 'Do',
+    active: true,
+    complete: false,
+    hidden: true,
+    assignee: null,
+    action: '',
+    link: null,
+  },
+  {
+    label: '',
+    active: false,
+    complete: false,
+    hidden: true,
+    assignee: null,
+    action: '',
+    link: null,
+  },
+  {
+    label: '',
+    active: false,
+    complete: false,
+    hidden: true,
+    assignee: null,
+    action: '',
+    link: null,
+  },
+  {
+    label: '',
+    active: false,
+    complete: false,
+    hidden: true,
+    assignee: null,
+    action: '',
+    link: null,
+  },
+];
