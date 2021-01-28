@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -576,7 +576,7 @@ describe('<TaskDetail/>', () => {
     });
 
     describe('form submit', () => {
-      test('submits task review', () => {
+      test('submits task review', async () => {
         const { getByText, baseElement } = setup({
           initialState: {
             ...defaultState,
@@ -601,9 +601,10 @@ describe('<TaskDetail/>', () => {
           hasForm: true,
           shouldSubscribeToObject: false,
         });
+        await waitForElementToBeRemoved(getByText('Submitting Review…'));
       });
 
-      test('submits task review without org', () => {
+      test('submits task review without org', async () => {
         const { getByText, baseElement } = setup({
           initialState: {
             ...defaultState,
@@ -642,6 +643,7 @@ describe('<TaskDetail/>', () => {
           hasForm: true,
           shouldSubscribeToObject: false,
         });
+        await waitForElementToBeRemoved(getByText('Submitting Review…'));
       });
     });
   });
@@ -709,7 +711,15 @@ describe('<TaskDetail/>', () => {
     };
 
     test.each([
-      ['assign-dev', {}, null, null, 'Assign a Developer', 'Assign Developer'],
+      [
+        'assign-dev',
+        {},
+        null,
+        null,
+        'Assign a Developer',
+        'Assign Developer',
+        false,
+      ],
       [
         'create-dev-org',
         taskWithDev,
@@ -717,6 +727,7 @@ describe('<TaskDetail/>', () => {
         null,
         'Create a Scratch Org for development',
         'Creating Org…',
+        true,
       ],
       [
         'retrieve-changes',
@@ -725,6 +736,7 @@ describe('<TaskDetail/>', () => {
         null,
         'Retrieve changes from Dev Org',
         'Select the location to retrieve changes',
+        false,
       ],
       [
         'submit-changes',
@@ -733,8 +745,17 @@ describe('<TaskDetail/>', () => {
         null,
         'Submit changes for testing',
         'Submit this task for testing',
+        false,
       ],
-      ['assign-qa', taskWithPR, {}, null, 'Assign a Tester', 'Assign Tester'],
+      [
+        'assign-qa',
+        taskWithPR,
+        {},
+        null,
+        'Assign a Tester',
+        'Assign Tester',
+        false,
+      ],
       [
         'create-qa-org',
         taskWithTester,
@@ -742,6 +763,7 @@ describe('<TaskDetail/>', () => {
         null,
         'Create a Scratch Org for testing',
         'Creating Org…',
+        true,
       ],
       [
         'refresh-test-org',
@@ -750,6 +772,7 @@ describe('<TaskDetail/>', () => {
         {},
         'Refresh Test Org',
         refreshOrg,
+        false,
       ],
       [
         'submit-review',
@@ -758,10 +781,19 @@ describe('<TaskDetail/>', () => {
         testOrgVisited,
         'Submit a review',
         'Submit Task Review',
+        false,
       ],
     ])(
       'step action click: %s',
-      (name, taskOpts, devOrgOpts, testOrgOpts, trigger, expected) => {
+      async (
+        name,
+        taskOpts,
+        devOrgOpts,
+        testOrgOpts,
+        trigger,
+        expected,
+        waitForRemoval,
+      ) => {
         const task = {
           ...defaultState.tasks.epic1[0],
           ...defaultTask,
@@ -799,6 +831,9 @@ describe('<TaskDetail/>', () => {
 
         if (typeof expected === 'string') {
           expect(getByText(expected)).toBeVisible();
+          if (waitForRemoval) {
+            await waitForElementToBeRemoved(getByText(expected));
+          }
         } else {
           expect(expected).toHaveBeenCalledTimes(1);
         }

@@ -20,22 +20,15 @@ import {
 export default {
   title: 'Tasks/Table/Component',
   component: TasksTableComponent,
-  decorators: [
-    withRedux({
-      user: {
-        id: 'user-id',
-        username: 'currentUser',
-      },
-    }),
-  ],
+  decorators: [withRedux()],
 };
 
 const Template: Story<ComponentProps<typeof TasksTableComponent>> = (args) => (
   <TasksTableComponent {...args} />
 );
 
-export const TasksTable = Template.bind({});
-TasksTable.args = {
+export const Component = Template.bind({});
+Component.args = {
   projectSlug: 'my-project',
   epicSlug: sampleEpic1.slug,
   tasks: [sampleTask1, sampleTask2, sampleTask3, sampleTask4, sampleTask5],

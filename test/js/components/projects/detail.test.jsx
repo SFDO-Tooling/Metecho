@@ -10,7 +10,7 @@ import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('~js/store/actions');
 
-fetchObject.mockReturnValue({ type: 'TEST' });
+fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
@@ -207,8 +207,8 @@ describe('<ProjectDetail />', () => {
   });
 
   describe('fetching more epics', () => {
-    test('fetches next page of epics', () => {
-      const { getByText } = setup({
+    test('fetches next page of epics', async () => {
+      const { findByText, getByText } = setup({
         initialState: {
           ...defaultState,
           epics: {
@@ -234,6 +234,7 @@ describe('<ProjectDetail />', () => {
       });
       const btn = getByText('Load More');
 
+      expect.assertions(2);
       expect(btn).toBeVisible();
 
       fireEvent.click(btn);
@@ -244,7 +245,8 @@ describe('<ProjectDetail />', () => {
         url: 'next-url',
       });
 
-      expect(getByText('Loading…')).toBeVisible();
+      await findByText('Loading…');
+      await findByText('Load More');
     });
 
     test('hides btn when at end of list', () => {
