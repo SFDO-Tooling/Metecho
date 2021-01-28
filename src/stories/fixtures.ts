@@ -283,3 +283,33 @@ export const sampleTask4 = {
   review_sha: '617a512',
   org_config_name: 'dev',
 };
+
+export const sampleTask5 = {
+  id: 't5',
+  name: 'Additional User Role Permissions',
+  slug: 'user-roles',
+  old_slugs: [],
+  epic: 'e1',
+  description: '',
+  description_rendered: '',
+  has_unmerged_commits: false,
+  currently_creating_pr: false,
+  branch_name: 'feature/my-epic__user-roles',
+  branch_url:
+    'https://github.com/test/test-repo/tree/feature/my-epic__user-roles',
+  branch_diff_url:
+    'https://github.com/test/test-repo/compare/feature/my-epic...feature/my-epic__user-roles',
+  pr_url: '',
+  pr_is_open: false,
+  commits: [sampleCommit2],
+  origin_sha: '723b342',
+  assigned_dev: sampleGitHubUser1,
+  assigned_qa: null,
+  status: TASK_STATUSES.IN_PROGRESS,
+  currently_submitting_review: false,
+  review_submitted_at: '',
+  review_valid: false,
+  review_status: null,
+  review_sha: '',
+  org_config_name: 'dev',
+};

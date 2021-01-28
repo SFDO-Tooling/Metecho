@@ -14,6 +14,7 @@ import {
   sampleTask2,
   sampleTask3,
   sampleTask4,
+  sampleTask5,
 } from '../fixtures';
 
 export default {
@@ -37,7 +38,7 @@ export const TasksTable = Template.bind({});
 TasksTable.args = {
   projectSlug: 'my-project',
   epicSlug: sampleEpic1.slug,
-  tasks: [sampleTask1, sampleTask2, sampleTask3, sampleTask4],
+  tasks: [sampleTask1, sampleTask2, sampleTask3, sampleTask4, sampleTask5],
   epicUsers: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   openAssignEpicUsersModal: action('openAssignEpicUsersModal'),
   assignUserAction: action('assignUserAction'),
