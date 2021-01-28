@@ -342,6 +342,8 @@ export const sampleTask5 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
+};
+
 export const sampleUser1 = {
   id: 'U1',
   username: 'someuser1',
