@@ -8,13 +8,8 @@ import { Meta, Story } from '@storybook/addon-docs/blocks';
 
 ## Overview
 
-The **TasksTable** component is a data table that shows a list of tasks and their current status within a project.
-
-The **EpicTable** renders an [SLDS
-DataTable](https://react.lightningdesignsystem.com/components/data-tables/)
-accepting a collection of `epics` to render in the table. This allows users to
-view a list of epics and their related information created within a given
-project.
+The **TasksTable** component is an [SLDS
+DataTable](https://react.lightningdesignsystem.com/components/data-tables/) that shows a list of **Tasks** and their respective current statuses within a project.
 
 <Story id="tasks-table-component--component" />
 
@@ -22,14 +17,20 @@ project.
 
 ### Columns & Cells
 
+**Tasks**
+
+A description of the **Task** that links to its details page.
+
 **Status**
 
-Displays the task's status as `Planned`, `In Progress`, `Review`, or `Merged`.
+Displays the **Task**'s status as `Planned`, `In Progress`, `Complete`, `Changes Requested`, or `Approved`.
 
 **Developer**
 
-GitHub user assigned as `Developer` on that task.
+GitHub user assigned as `Developer` for a **Task**.
 
 **Tester**
 
-GitHub user assigned as `Tester` on that task.
+GitHub user assigned as `Tester` for a **Task**
+
+**Note**: **Tasks** not yet assigned to a `Developer` or `Tester` display buttons that allow the selection of a GitHub `collborator` on a project to fulfull the specified role.
