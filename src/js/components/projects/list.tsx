@@ -53,12 +53,13 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
             objectType: OBJECT_TYPES.PROJECT,
             url: next,
           }),
-        ).finally(() => {
-          /* istanbul ignore else */
-          if (isMounted.current) {
-            setFetchingProjects(false);
-          }
-        });
+        ).finally(
+          /* istanbul ignore next */ () => {
+            if (isMounted.current) {
+              setFetchingProjects(false);
+            }
+          },
+        );
       }
     };
 

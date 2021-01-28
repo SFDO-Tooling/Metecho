@@ -31,7 +31,7 @@ describe('<Header />', () => {
     test('renders nothing', () => {
       const { container } = setup({ user: null, socket: true });
 
-      expect(container).toBeEmpty();
+      expect(container).toBeEmptyDOMElement();
     });
   });
 

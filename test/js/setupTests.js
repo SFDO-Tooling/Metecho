@@ -1,8 +1,10 @@
 import '@testing-library/jest-dom/extend-expect';
 
+import settings from '@salesforce/design-system-react/components/settings';
 import fetchMock from 'fetch-mock';
 
 beforeAll(() => {
+  settings.setAppElement(document.documentElement);
   document.createRange = () => ({
     setStart: jest.fn(),
     setEnd: jest.fn(),
@@ -40,9 +42,10 @@ beforeAll(() => {
     project_feature_branches: (id) => `/api/projects/${id}/feature_branches/`,
   };
   window.GLOBALS = {};
+  window.open = jest.fn();
   window.console.error = jest.fn();
   window.console.warn = jest.fn();
   window.console.info = jest.fn();
 });
 
-afterEach(fetchMock.reset);
+afterEach(() => fetchMock.reset());
