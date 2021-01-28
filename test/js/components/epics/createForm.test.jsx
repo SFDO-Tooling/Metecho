@@ -16,7 +16,7 @@ jest.mock('~js/store/errors/actions');
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
-addError.mockReturnValue({ type: 'TEST' });
+addError.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   createObject.mockClear();
@@ -62,8 +62,8 @@ describe('<CreateEpicModal/>', () => {
   };
 
   describe('form submit', () => {
-    test('creates a new epic', () => {
-      const { getByText, getByLabelText } = setup();
+    test('creates a new epic', async () => {
+      const { findByText, getByText, getByLabelText } = setup();
       const submit = getByText('Create');
       const nameInput = getByLabelText('*Epic Name');
       const descriptionInput = getByLabelText('Description');
@@ -72,6 +72,10 @@ describe('<CreateEpicModal/>', () => {
         target: { value: 'This is the description' },
       });
       fireEvent.click(submit);
+
+      expect.assertions(1);
+      await findByText('Creating…');
+      await findByText('Create');
 
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'epic',
@@ -87,17 +91,21 @@ describe('<CreateEpicModal/>', () => {
       });
     });
 
-    test('adds current user to github_users', () => {
+    test('adds current user to github_users', async () => {
       const ghUser = { id: '1', login: 'test-user' };
       const project = {
         ...defaultProject,
         github_users: [ghUser, { id: '2', login: 'other-username' }],
       };
-      const { getByText, getByLabelText } = setup({ project });
+      const { findByText, getByText, getByLabelText } = setup({ project });
       const submit = getByText('Create');
       const nameInput = getByLabelText('*Epic Name');
       fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
       fireEvent.click(submit);
+
+      expect.assertions(1);
+      await findByText('Creating…');
+      await findByText('Create');
 
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'epic',
@@ -129,13 +137,15 @@ describe('<CreateEpicModal/>', () => {
             },
           }),
         );
-        const { getByText, getByLabelText, context } = setup();
+        const { findByText, getByText, getByLabelText, context } = setup();
         const submit = getByText('Create');
         const nameInput = getByLabelText('*Epic Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
         fireEvent.click(submit);
 
         expect.assertions(2);
+        await findByText('Creating…');
+        await findByText('Create');
         await createObject;
 
         expect(context.action).toEqual('PUSH');
@@ -160,13 +170,15 @@ describe('<CreateEpicModal/>', () => {
             },
           }),
         );
-        const { getByText, getByLabelText, queryByText, findByText } = setup();
+        const { findByText, getByText, getByLabelText, queryByText } = setup();
         const submit = getByText('Create');
         const nameInput = getByLabelText('*Epic Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
         fireEvent.click(submit);
 
         expect.assertions(3);
+        await findByText('Creating…');
+        await findByText('Create');
         await findByText('Do not do that');
 
         expect(getByText('Do not do that')).toBeVisible();
@@ -185,13 +197,15 @@ describe('<CreateEpicModal/>', () => {
             message: 'This is an error.',
           }),
         );
-        const { getByText, getByLabelText } = setup();
+        const { findByText, getByText, getByLabelText } = setup();
         const submit = getByText('Create');
         const nameInput = getByLabelText('*Epic Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
         fireEvent.click(submit);
 
         expect.assertions(1);
+        await findByText('Creating…');
+        await findByText('Create');
         await waitFor(() => {
           if (!addError.mock.calls.length) {
             throw new Error('waiting...');

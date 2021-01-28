@@ -16,6 +16,7 @@ jest.mock('react-fns', () => ({
 }));
 jest.mock('~js/store/actions');
 jest.mock('~js/store/projects/actions');
+
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshProjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
@@ -100,11 +101,14 @@ describe('<ProjectList />', () => {
       window.sessionStorage.removeItem('activeProjectsTab');
     });
 
-    test('fetches next page of projects', () => {
-      const { rerender, getByText, store } = setup({ initialState });
+    test('fetches next page of projects', async () => {
+      fetchObjects.mockReturnValueOnce(() => new Promise(() => {}));
+      const { findByText, rerender, store } = setup({ initialState });
       setup({ props: { y: 1000 }, rerender, store });
 
-      expect(getByText('Loading…')).toBeVisible();
+      expect.assertions(1);
+      await findByText('Loading…');
+
       expect(fetchObjects).toHaveBeenCalledWith({
         url: 'next-url',
         objectType: 'project',

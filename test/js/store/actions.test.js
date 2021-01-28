@@ -145,7 +145,7 @@ describe('fetchObjects with `reset: true`', () => {
         payload: objectPayload,
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store
         .dispatch(actions.fetchObjects({ objectType: 'project', reset: true }))
         .catch(() => {
@@ -157,7 +157,6 @@ describe('fetchObjects with `reset: true`', () => {
             'Internal Server Error: {}',
           );
           expect(allActions[2]).toEqual(failed);
-          expect(window.console.error).toHaveBeenCalled();
         });
     });
   });
@@ -218,7 +217,7 @@ describe('fetchObjects with `reset: false`', () => {
         payload: objectPayload,
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store
         .dispatch(actions.fetchObjects({ url, objectType: 'project' }))
         .catch(() => {
@@ -230,7 +229,6 @@ describe('fetchObjects with `reset: false`', () => {
             'Internal Server Error: Oops.',
           );
           expect(allActions[2]).toEqual(failed);
-          expect(window.console.error).toHaveBeenCalled();
         });
     });
   });
@@ -398,7 +396,7 @@ describe('fetchObject', () => {
         payload: { filters: {}, ...objectPayload },
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store
         .dispatch(actions.fetchObject({ objectType: 'project' }))
         .catch(() => {
@@ -408,7 +406,6 @@ describe('fetchObject', () => {
           expect(allActions[1].type).toEqual('ERROR_ADDED');
           expect(allActions[1].payload.message).toEqual('Nope.');
           expect(allActions[2]).toEqual(failed);
-          expect(window.console.error).toHaveBeenCalled();
         });
     });
   });
@@ -540,7 +537,7 @@ describe('createObject', () => {
         payload: objectPayload,
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store.dispatch(actions.createObject(objectPayload)).catch(() => {
         const allActions = store.getActions();
 
@@ -548,7 +545,6 @@ describe('createObject', () => {
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-        expect(window.console.error).toHaveBeenCalled();
       });
     });
   });
@@ -676,7 +672,7 @@ describe('deleteObject', () => {
         payload: objectPayload,
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store.dispatch(actions.deleteObject(objectPayload)).catch(() => {
         const allActions = store.getActions();
 
@@ -684,7 +680,6 @@ describe('deleteObject', () => {
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-        expect(window.console.error).toHaveBeenCalled();
       });
     });
   });
@@ -781,7 +776,7 @@ describe('updateObject', () => {
         payload: objectPayload,
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store.dispatch(actions.updateObject(payload)).catch(() => {
         const allActions = store.getActions();
 
@@ -789,7 +784,6 @@ describe('updateObject', () => {
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-        expect(window.console.error).toHaveBeenCalled();
       });
     });
   });

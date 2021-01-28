@@ -786,7 +786,7 @@ describe('<OrgCards/>', () => {
 
   describe('delete org click', () => {
     describe('QA org', () => {
-      test('deletes org', () => {
+      test('deletes org', async () => {
         const task = {
           ...defaultTask,
           assigned_qa: {
@@ -803,9 +803,12 @@ describe('<OrgCards/>', () => {
             has_unsaved_changes: false,
           },
         };
-        const { getByText } = setup({ orgs, task });
+        const { findByText, getByText } = setup({ orgs, task });
         fireEvent.click(getByText('Org Actions'));
         fireEvent.click(getByText('Delete Org'));
+
+        expect.assertions(3);
+        await findByText('Deleting Org…');
 
         expect(deleteObject).toHaveBeenCalledTimes(1);
 
@@ -813,13 +816,12 @@ describe('<OrgCards/>', () => {
 
         expect(args.objectType).toEqual('scratch_org');
         expect(args.object.id).toEqual('org-id');
-        expect(getByText('Deleting Org…')).toBeVisible();
       });
     });
 
     describe('Dev org', () => {
-      test('refreshes and then deletes org', () => {
-        const { getByText } = setup({
+      test('refreshes and then deletes org', async () => {
+        const { findByText, getByText } = setup({
           orgs: {
             ...defaultOrgs,
             Dev: {
@@ -833,6 +835,9 @@ describe('<OrgCards/>', () => {
         fireEvent.click(getByText('Org Actions'));
         fireEvent.click(getByText('Delete Org'));
 
+        expect.assertions(5);
+        await findByText('Deleting Org…');
+
         expect(refetchOrg).toHaveBeenCalledTimes(1);
 
         const refetchArgs = refetchOrg.mock.calls[0][0];
@@ -844,7 +849,6 @@ describe('<OrgCards/>', () => {
 
         expect(deleteArgs.objectType).toEqual('scratch_org');
         expect(deleteArgs.object.id).toEqual('org-id');
-        expect(getByText('Deleting Org…')).toBeVisible();
       });
 
       describe('org has changes', () => {
@@ -880,9 +884,12 @@ describe('<OrgCards/>', () => {
           });
 
           describe('"delete" click', () => {
-            test('deletes org', () => {
-              const { getByText, queryByText } = result;
+            test('deletes org', async () => {
+              const { findByText, getByText, queryByText } = result;
               fireEvent.click(getByText('Delete'));
+
+              expect.assertions(4);
+              await findByText('Deleting Org…');
 
               expect(
                 queryByText('Confirm Deleting Org With Unretrieved Changes'),
@@ -893,7 +900,6 @@ describe('<OrgCards/>', () => {
 
               expect(args.objectType).toEqual('scratch_org');
               expect(args.object.id).toEqual('org-id');
-              expect(getByText('Deleting Org…')).toBeVisible();
             });
           });
         });
