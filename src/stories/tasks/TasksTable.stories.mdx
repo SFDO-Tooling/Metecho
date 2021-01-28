@@ -4,14 +4,14 @@ import { Meta, Story } from '@storybook/addon-docs/blocks';
 
 # TasksTable
 
-**Shows a list of tasks within an epic.**
+**Shows a list of tasks within an Epic.**
 
 ## Overview
 
 The **TasksTable** component is an
 [SLDS DataTable](https://react.lightningdesignsystem.com/components/data-tables/)
 that shows a list of **Tasks** and their respective current statuses within an
-epic.
+Epic.
 
 <Story id="tasks-table-component--component" />
 
@@ -25,8 +25,8 @@ A description of the **Task** that links to its details page.
 
 **Status**
 
-Displays the **Task**'s status as `Planned`, `In Progress`, `Complete`,
-`Changes Requested`, or `Approved`.
+Displays the **Task**'s status based on the work of the `Developer` (`Planned`,
+`In Progress`, `Complete`), and the `Tester` (`Changes Requested`, `Approved`).
 
 **Developer**
 
@@ -37,5 +37,5 @@ GitHub user assigned as `Developer` for a **Task**.
 GitHub user assigned as `Tester` for a **Task**
 
 **Note**: **Tasks** without an assigned `Developer` or `Tester` display buttons
-that allow the selection of a GitHub `collaborator` from the parent epic to
+that allow the selection of a GitHub `Collaborator` from the parent epic to
 fulfill the specified role.
