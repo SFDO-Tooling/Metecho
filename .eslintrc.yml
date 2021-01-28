@@ -49,6 +49,7 @@ rules:
     - 2
     - singleQuote: true
       trailingComma: all
+      proseWrap: always
 
   # Import
   import/default: 0
