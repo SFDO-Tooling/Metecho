@@ -21,9 +21,17 @@ export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
 };
 
+// Enable translations
 i18n.use(initReactI18next).init();
+
+// Mock in Django-provided API URLs
 window.api_urls = api_urls;
+
+// Make all API requests return a `404`
 fetchMock.mock('*', 404);
+
+// For React-SLDS modal a11y
+// https://react.lightningdesignsystem.com/components/modals/
 settings.setAppElement(document.documentElement);
 
 export const decorators = [
