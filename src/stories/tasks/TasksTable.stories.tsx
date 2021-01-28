@@ -30,8 +30,8 @@ const Template: Story<ComponentProps<typeof TasksTableComponent>> = (args) => (
   <TasksTableComponent {...args} />
 );
 
-export const TasksTable = Template.bind({});
-TasksTable.args = {
+export const Component = Template.bind({});
+Component.args = {
   projectSlug: 'my-project',
   epicSlug: sampleEpic1.slug,
   tasks: [sampleTask1],
