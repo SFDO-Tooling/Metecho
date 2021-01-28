@@ -67,8 +67,8 @@ describe('<EditModal />', () => {
     expect(descriptionInput.value).toEqual('New description');
   });
 
-  test('submit clicked', () => {
-    const { getByText, getByLabelText } = setup();
+  test('submit clicked', async () => {
+    const { findByText, getByText, getByLabelText } = setup();
     const nameInput = getByLabelText('*Epic Name');
     const descriptionInput = getByLabelText('Description');
     const submit = getByText('Save');
@@ -78,6 +78,9 @@ describe('<EditModal />', () => {
       target: { value: 'New description' },
     });
     fireEvent.click(submit);
+
+    expect.assertions(2);
+    await findByText('Saving…');
 
     expect(updateObject).toHaveBeenCalledTimes(1);
     expect(updateObject).toHaveBeenCalledWith({

@@ -1,3 +1,5 @@
+import { act } from '@testing-library/react-hooks';
+
 import { useForm } from '~js/components/utils';
 import { createObject } from '~js/store/actions';
 
@@ -15,16 +17,20 @@ afterEach(() => {
 
 describe('useForm', () => {
   describe('handleSubmit', () => {
-    test('creates a new object', () => {
+    test('creates a new object', async () => {
       const { result } = renderHookWithRedux(() =>
         useForm({
           fields: { testing: '' },
           objectType: 'test-type',
         }),
       );
-      result.current.handleSubmit({
-        preventDefault: jest.fn(),
-      });
+
+      expect.assertions(1);
+      await act(() =>
+        result.current.handleSubmit({
+          preventDefault: jest.fn(),
+        }),
+      );
 
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'test-type',
@@ -46,11 +52,13 @@ describe('useForm', () => {
       );
 
       expect.assertions(2);
-      await result.current.handleSubmit(
-        {
-          preventDefault: jest.fn(),
-        },
-        { action },
+      await act(() =>
+        result.current.handleSubmit(
+          {
+            preventDefault: jest.fn(),
+          },
+          { action },
+        ),
       );
 
       expect(action).toHaveBeenCalledTimes(1);
@@ -71,9 +79,11 @@ describe('useForm', () => {
         );
 
         expect.assertions(1);
-        await result.current.handleSubmit({
-          preventDefault: jest.fn(),
-        });
+        await act(() =>
+          result.current.handleSubmit({
+            preventDefault: jest.fn(),
+          }),
+        );
 
         expect(result.current.errors).toEqual({
           testing: 'Do not do that.',
@@ -90,20 +100,25 @@ describe('useForm', () => {
           objectType: 'test-type',
         }),
       );
-      result.current.handleInputChange({
-        target: {
-          name: 'test_input',
-          value: 'foobar',
-        },
-      });
-      result.current.handleInputChange({
-        target: {
-          name: 'test_checkbox',
-          value: 'buzbaz',
-          type: 'checkbox',
-          checked: true,
-        },
-      });
+
+      act(() =>
+        result.current.handleInputChange({
+          target: {
+            name: 'test_input',
+            value: 'foobar',
+          },
+        }),
+      );
+      act(() =>
+        result.current.handleInputChange({
+          target: {
+            name: 'test_checkbox',
+            value: 'buzbaz',
+            type: 'checkbox',
+            checked: true,
+          },
+        }),
+      );
 
       expect(result.current.inputs).toEqual({
         test_input: 'foobar',

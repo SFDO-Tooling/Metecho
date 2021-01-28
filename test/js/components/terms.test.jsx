@@ -78,14 +78,16 @@ describe('<Terms/>', () => {
   });
 
   describe('submit buttom', () => {
-    test('PUTs to API', () => {
-      const { getByText } = setup();
+    test('PUTs to API', async () => {
+      const { findByText, getByText } = setup();
 
+      expect.assertions(4);
       expect(getByText('Metecho Terms of Service')).toBeVisible();
       expect(getByText('Resistance is futile.')).toBeVisible();
       expect(getByText('I Agree')).toBeVisible();
 
       fireEvent.click(getByText('I Agree'));
+      await findByText('Saving…');
 
       expect(agreeToTerms).toHaveBeenCalledTimes(1);
     });
