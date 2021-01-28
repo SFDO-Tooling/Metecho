@@ -217,7 +217,7 @@ export const sampleTask2 = {
   currently_submitting_review: false,
   review_submitted_at: '',
   review_valid: false,
-  review_status: null,
+  review_status: REVIEW_STATUSES.CHANGES_REQUESTED,
   review_sha: '',
   org_config_name: '',
 };

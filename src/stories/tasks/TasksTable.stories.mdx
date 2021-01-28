@@ -1,0 +1,35 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks';
+
+<Meta title="Tasks/Table/Intro" />
+
+# TasksTable
+
+**Shows a list of tasks within a Project.**
+
+## Overview
+
+The **TasksTable** component is a data table that shows a list of tasks and their current status within a project.
+
+The **EpicTable** renders an [SLDS
+DataTable](https://react.lightningdesignsystem.com/components/data-tables/)
+accepting a collection of `epics` to render in the table. This allows users to
+view a list of epics and their related information created within a given
+project.
+
+<Story id="tasks-table-component--component" />
+
+## Sub-components
+
+### Columns & Cells
+
+**Status**
+
+Displays the task's status as `Planned`, `In Progress`, `Review`, or `Merged`.
+
+**Developer**
+
+GitHub user assigned as `Developer` on that task.
+
+**Tester**
+
+GitHub user assigned as `Tester` on that task.
