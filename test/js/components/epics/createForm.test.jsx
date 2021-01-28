@@ -280,4 +280,23 @@ describe('<CreateEpicModal/>', () => {
       expect(input.value).toEqual('');
     });
   });
+
+  test('does not break if no existing branches found', async () => {
+    const { getByText, queryByLabelText, findByText } = setup();
+    const url = window.api_urls.project_feature_branches(defaultProject.id);
+    fetchMock.getOnce(url, 404);
+    fireEvent.click(getByText('Use existing GitHub branch'));
+    const input = queryByLabelText('*Select a branch to use for this epic');
+    fireEvent.click(input);
+    await findByText('Loading existing branches…');
+    await findByText("There aren't any available branches at this time.", {
+      exact: false,
+    });
+
+    expect(
+      getByText("There aren't any available branches at this time.", {
+        exact: false,
+      }),
+    ).toBeInTheDocument();
+  });
 });

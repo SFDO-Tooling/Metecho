@@ -4,6 +4,36 @@ import {
   TASK_STATUSES,
 } from '~js/utils/constants';
 
+export const api_urls = {
+  account_logout: () => '/accounts/logout/',
+  github_login: () => '/accounts/github/login/',
+  salesforce_login: () => '/accounts/salesforce/login/',
+  user: () => '/api/user/',
+  user_refresh: () => '/api/user/refresh/',
+  user_disconnect_sf: () => '/api/user/disconnect/',
+  agree_to_tos: () => '/api/agree_to_tos/',
+  project_list: () => '/api/projects/',
+  project_detail: (slug: string) => `/api/projects/${slug}/`,
+  project_refresh_github_users: (id: string) =>
+    `/api/projects/${id}/refresh_github_users/`,
+  epic_list: () => '/api/epics/',
+  scratch_org_list: () => '/api/scratch_orgs/',
+  scratch_org_detail: (id: string) => `/api/scratch_orgs/${id}/`,
+  scratch_org_commit: (id: string) => `/api/scratch_orgs/${id}/commit/`,
+  scratch_org_redirect: (id: string) => `/api/scratch_orgs/${id}/redirect/`,
+  scratch_org_refresh: (id: string) => `/api/scratch_orgs/${id}/refresh/`,
+  task_detail: (id: string) => `/api/tasks/${id}/`,
+  task_create_pr: (id: string) => `/api/tasks/${id}/create_pr/`,
+  task_review: (id: string) => `/api/tasks/${id}/review/`,
+  task_can_reassign: (id: string) => `/api/tasks/${id}/can_reassign/`,
+  epic_detail: (id: string) => `/api/epics/${id}/`,
+  epic_create_pr: (id: string) => `/api/epics/${id}/create_pr/`,
+  epic_refresh_org_config_names: (id: string) =>
+    `/api/epics/${id}/refresh_org_config_names/`,
+  project_feature_branches: (id: string) =>
+    `/api/projects/${id}/feature_branches/`,
+};
+
 export const sampleGitHubUser1 = {
   id: '123456',
   login: 'TestGitHubUser',
@@ -22,7 +52,7 @@ export const sampleGitHubUser3 = {
   avatar_url: 'https://randomuser.me/api/portraits/men/2.jpg',
 };
 
-export const sampleCommitAuther = {
+export const sampleCommitAuthor = {
   name: 'Jack Brown',
   email: 'developer@web.com',
   username: 'adeveloper',
@@ -33,7 +63,7 @@ export const sampleCommit1 = {
   id: '8471ad6',
   timestamp: '2019-02-01T19:47:49Z',
   message: 'fix homepage image',
-  author: sampleCommitAuther,
+  author: sampleCommitAuthor,
   url: '/',
 };
 
@@ -41,7 +71,7 @@ export const sampleCommit2 = {
   id: '8761ad7',
   timestamp: '2020-02-01T19:47:49Z',
   message: 'add color filter to header',
-  author: sampleCommitAuther,
+  author: sampleCommitAuthor,
   url: '/',
 };
 
@@ -312,4 +342,37 @@ export const sampleTask5 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
+export const sampleUser1 = {
+  id: 'U1',
+  username: 'someuser1',
+  email: 'developer@web.com',
+  avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+  valid_token_for: '00Dxxxxxxxxxxxxxxx',
+  sf_username: 'developer@web.com',
+  org_name: 'OddBird',
+  org_type: 'Developer Edition',
+  is_devhub_enabled: true,
+  is_staff: false,
+  currently_fetching_repos: false,
+  devhub_username: '',
+  uses_global_devhub: false,
+  agreed_to_tos_at: '2019-02-01T19:47:49Z',
+};
+
+export const sampleProject1 = {
+  id: 'p1',
+  name: 'Sample Project',
+  slug: 'my-project',
+  old_slugs: [],
+  repo_url: 'https://github.com/test/test-repo',
+  repo_owner: 'test',
+  repo_name: 'test-repo',
+  description: 'This is *safely* rendered Markdown.',
+  description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
+  is_managed: false,
+  branch_prefix: '',
+  github_users: [sampleGitHubUser1],
+  currently_refreshing_gh_users: false,
+  repo_image_url:
+    'https://repository-images.githubusercontent.com/123456/123-456',
 };

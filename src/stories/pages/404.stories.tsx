@@ -4,7 +4,7 @@ import React, { ComponentProps } from 'react';
 import FourOhFourComponent from '~js/components/404';
 
 export default {
-  title: 'Pages/404/Component',
+  title: 'Pages/404/Components',
   component: FourOhFourComponent,
 };
 
