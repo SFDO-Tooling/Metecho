@@ -57,7 +57,7 @@ describe('refreshProjects', () => {
         type: 'REFRESH_PROJECTS_REJECTED',
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store.dispatch(actions.refreshProjects()).catch(() => {
         const allActions = store.getActions();
 
@@ -65,7 +65,6 @@ describe('refreshProjects', () => {
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
-        expect(window.console.error).toHaveBeenCalled();
       });
     });
   });
@@ -140,7 +139,7 @@ describe('refreshGitHubUsers', () => {
         payload: projectId,
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store.dispatch(actions.refreshGitHubUsers(projectId)).catch(() => {
         const allActions = store.getActions();
 
@@ -148,7 +147,6 @@ describe('refreshGitHubUsers', () => {
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
-        expect(window.console.error).toHaveBeenCalled();
       });
     });
   });

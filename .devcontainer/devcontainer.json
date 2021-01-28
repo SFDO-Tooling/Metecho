@@ -11,6 +11,7 @@
     "csstools.postcss",
     "dbaeumer.vscode-eslint",
     "formulahendry.auto-rename-tag",
+    "jounqin.vscode-mdx",
     "ms-azuretools.vscode-docker",
     "ms-python.python",
     "ms-python.vscode-pylance",
@@ -32,6 +33,9 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.tabSize": 2,
+    "eslint.options": {
+      "extensions": [".js", ".jsx", ".md", ".mdx", ".ts", ".tsx"]
+    },
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,

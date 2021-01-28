@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ jest.mock('~js/store/epics/actions');
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
 );
-addError.mockReturnValue({ type: 'TEST' });
+addError.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
@@ -72,7 +72,7 @@ describe('<TaskForm/>', () => {
   });
 
   describe('add a single task', () => {
-    test('calls createObject with data', () => {
+    test('calls createObject with data', async () => {
       const { getByText, getByLabelText } = setup();
       const submit = getByText('Add');
       const nameInput = getByLabelText('*Task Name');
@@ -85,17 +85,20 @@ describe('<TaskForm/>', () => {
       fireEvent.click(radioInput);
       fireEvent.click(submit);
 
-      expect(createObject).toHaveBeenCalledWith({
-        objectType: 'task',
-        data: {
-          name: 'Name of Task',
-          description: 'This is the description',
-          epic: 'p1',
-          org_config_name: 'qa',
-        },
-        hasForm: true,
-        shouldSubscribeToObject: true,
-      });
+      expect.assertions(1);
+      await waitFor(() =>
+        expect(createObject).toHaveBeenCalledWith({
+          objectType: 'task',
+          data: {
+            name: 'Name of Task',
+            description: 'This is the description',
+            epic: 'p1',
+            org_config_name: 'qa',
+          },
+          hasForm: true,
+          shouldSubscribeToObject: true,
+        }),
+      );
     });
 
     describe('error', () => {
@@ -147,20 +150,21 @@ describe('<TaskForm/>', () => {
             },
           }),
         );
-        const { getByText, getByLabelText, queryByText } = setup();
+        const { findByText, getByText, getByLabelText, queryByText } = setup();
         const submit = getByText('Add & New');
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
         fireEvent.click(submit);
 
-        expect.assertions(2);
-        await createObject;
+        expect.assertions(1);
+        await findByText('A task was successfully added.');
 
-        expect(getByText('A task was successfully added.')).toBeVisible();
-
-        jest.runAllTimers();
-
-        expect(queryByText('A task was successfully added.')).toBeNull();
+        await waitFor(() => {
+          jest.runAllTimers();
+          return expect(
+            queryByText('A task was successfully added.'),
+          ).toBeNull();
+        });
       });
     });
   });

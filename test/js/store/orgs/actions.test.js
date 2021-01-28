@@ -584,7 +584,7 @@ describe('refreshOrg', () => {
         payload: org,
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
       return store.dispatch(actions.refreshOrg(org)).catch(() => {
         const allActions = store.getActions();
 
@@ -592,7 +592,6 @@ describe('refreshOrg', () => {
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
-        expect(window.console.error).toHaveBeenCalled();
       });
     });
   });

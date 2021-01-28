@@ -46,19 +46,18 @@ describe('<DeleteModal />', () => {
   };
 
   test('deletes epic and redirects', async () => {
-    const { getByText, context } = setup();
+    const { findByText, getByText, context } = setup();
 
     fireEvent.click(getByText('Delete'));
+
+    expect.assertions(4);
+    await findByText('Deleting…');
 
     expect(deleteObject).toHaveBeenCalledTimes(1);
     expect(deleteObject).toHaveBeenCalledWith({
       objectType: 'epic',
       object: defaultEpic,
     });
-
-    expect.assertions(4);
-    await deleteObject;
-
     expect(context.action).toEqual('PUSH');
     expect(context.url).toEqual('/foo');
   });
