@@ -48,7 +48,6 @@ describe('<Toasts />', () => {
       const { getByText } = setup({
         toasts: [{ ...defaultToast, openLinkInNewWindow: true }],
       });
-      jest.spyOn(window, 'open');
       fireEvent.click(getByText('open link'));
 
       expect(window.open).toHaveBeenCalledWith('/test/url/', '_blank');
@@ -58,7 +57,6 @@ describe('<Toasts />', () => {
       const { getByText } = setup({
         toasts: [{ ...defaultToast, openLinkInNewWindow: true, linkUrl: '' }],
       });
-      jest.spyOn(window, 'open');
       fireEvent.click(getByText('open link'));
 
       expect(window.open).not.toHaveBeenCalled();

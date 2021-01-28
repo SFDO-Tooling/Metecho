@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -99,8 +99,8 @@ describe('<CaptureModal/>', () => {
   });
 
   describe('form submit', () => {
-    test('creates a new commit', () => {
-      const { getByText, getByLabelText } = setup();
+    test('creates a new commit', async () => {
+      const { findByText, getByText, getByLabelText } = setup();
 
       // Click forward to the select-changes modal:
       fireEvent.click(getByText('Save & Next'));
@@ -115,7 +115,9 @@ describe('<CaptureModal/>', () => {
       fireEvent.change(commitInput, { target: { value: 'My Commit' } });
       fireEvent.click(submit);
 
-      expect(getByText('Retrieving Selected Changes…')).toBeVisible();
+      expect.assertions(2);
+      await findByText('Retrieving Selected Changes…');
+
       expect(createObject).toHaveBeenCalledTimes(1);
       expect(createObject).toHaveBeenCalledWith({
         objectType: 'scratch_org_commit',
@@ -132,8 +134,8 @@ describe('<CaptureModal/>', () => {
   });
 
   describe('form secondary submit', () => {
-    test('updates ignored changes', () => {
-      const { getByText, getByLabelText } = setup();
+    test('updates ignored changes', async () => {
+      const { findByText, getByText, getByLabelText } = setup();
 
       // Click forward to the select-changes modal:
       fireEvent.click(getByText('Save & Next'));
@@ -142,7 +144,9 @@ describe('<CaptureModal/>', () => {
       fireEvent.click(selectAll);
       fireEvent.click(getByText('Ignore Selected Changes'));
 
-      expect(getByText('Saving Ignored Changes…')).toBeVisible();
+      expect.assertions(3);
+      await findByText('Saving Ignored Changes…');
+
       expect(createObject).not.toHaveBeenCalled();
       expect(updateObject).toHaveBeenCalledTimes(1);
       expect(updateObject).toHaveBeenCalledWith({
@@ -160,7 +164,7 @@ describe('<CaptureModal/>', () => {
       test('displays success class for 3 seconds', async () => {
         jest.useFakeTimers();
         updateObject.mockReturnValueOnce(() => Promise.resolve({}));
-        const { getByText, getByLabelText, baseElement } = setup();
+        const { findByText, getByText, getByLabelText, baseElement } = setup();
 
         // Click forward to the select-changes modal:
         fireEvent.click(getByText('Save & Next'));
@@ -169,8 +173,9 @@ describe('<CaptureModal/>', () => {
         fireEvent.click(selectAll);
         fireEvent.click(getByText('Un-ignore Selected Changes'));
 
-        expect.assertions(4);
-        expect(getByText('Saving Ignored Changes…')).toBeVisible();
+        expect.assertions(3);
+        await findByText('Saving Ignored Changes…');
+
         expect(updateObject).toHaveBeenCalledWith({
           objectType: 'scratch_org',
           url: window.api_urls.scratch_org_detail('org-id'),
@@ -182,20 +187,22 @@ describe('<CaptureModal/>', () => {
         });
 
         await updateObject;
+        await waitFor(() =>
+          expect(
+            baseElement
+              .querySelector('.accordion-no-padding')
+              .classList.contains('success-highlight'),
+          ).toBe(true),
+        );
 
-        expect(
-          baseElement
-            .querySelector('.accordion-no-padding')
-            .classList.contains('success-highlight'),
-        ).toBe(true);
-
-        jest.runAllTimers();
-
-        expect(
-          baseElement
-            .querySelector('.accordion-no-padding')
-            .classList.contains('success-highlight'),
-        ).toBe(false);
+        await waitFor(() => {
+          jest.runAllTimers();
+          return expect(
+            baseElement
+              .querySelector('.accordion-no-padding')
+              .classList.contains('success-highlight'),
+          ).toBe(false);
+        });
       });
     });
   });
@@ -233,6 +240,7 @@ describe('<CaptureModal/>', () => {
         fireEvent.click(submit);
 
         expect.assertions(showsErr ? 2 : 1);
+        await findByText('Retrieving Selected Changes…');
         await findByText(text);
 
         expect(getByText(text)).toBeVisible();

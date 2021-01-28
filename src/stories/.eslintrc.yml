@@ -1,2 +1,3 @@
 extends:
   - '../js/.eslintrc.yml'
+  - 'plugin:mdx/recommended'
