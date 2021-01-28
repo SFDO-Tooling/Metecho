@@ -205,9 +205,9 @@ export const sampleTask2 = {
   has_unmerged_commits: false,
   currently_creating_pr: false,
   branch_name: '',
-  branch_url: '',
-  branch_diff_url: '',
-  pr_url: '',
+  branch_url: null,
+  branch_diff_url: null,
+  pr_url: null,
   pr_is_open: false,
   commits: [],
   origin_sha: '',
@@ -215,11 +215,11 @@ export const sampleTask2 = {
   assigned_qa: null,
   status: TASK_STATUSES.PLANNED,
   currently_submitting_review: false,
-  review_submitted_at: '',
+  review_submitted_at: null,
   review_valid: false,
-  review_status: REVIEW_STATUSES.CHANGES_REQUESTED,
+  review_status: '' as const,
   review_sha: '',
-  org_config_name: '',
+  org_config_name: 'dev',
 };
 
 export const sampleTask3 = {
@@ -235,11 +235,11 @@ export const sampleTask3 = {
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__dark-mode',
   branch_url:
-    'https://github.com/test/test-repo/tree/feature/my-epic__dark-modee',
+    'https://github.com/test/test-repo/tree/feature/my-epic__dark-mode',
   branch_diff_url:
     'https://github.com/test/test-repo/compare/feature/my-epic...feature/my-epic__dark-mode',
   pr_url: 'https://github.com/test/test-repo/pull/1357',
-  pr_is_open: true,
+  pr_is_open: false,
   commits: [sampleCommit1],
   origin_sha: '723b342',
   assigned_dev: sampleGitHubUser3,
@@ -266,10 +266,10 @@ export const sampleTask4 = {
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__universal-language',
   branch_url:
-    'https://github.com/test/test-repo/tree/feature/my-epic__universal-languagee',
+    'https://github.com/test/test-repo/tree/feature/my-epic__universal-language',
   branch_diff_url:
     'https://github.com/test/test-repo/compare/feature/my-epic...feature/my-epic__universal-language',
-  pr_url: 'https://github.com/test/test-repo/pull/1357',
+  pr_url: 'https://github.com/test/test-repo/pull/9999',
   pr_is_open: true,
   commits: [sampleCommit1],
   origin_sha: '723b342',
