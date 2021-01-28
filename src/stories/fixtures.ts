@@ -52,7 +52,7 @@ export const sampleGitHubUser3 = {
   avatar_url: 'https://randomuser.me/api/portraits/men/2.jpg',
 };
 
-export const sampleCommitAuther = {
+export const sampleCommitAuthor = {
   name: 'Jack Brown',
   email: 'developer@web.com',
   username: 'adeveloper',
@@ -63,7 +63,7 @@ export const sampleCommit1 = {
   id: '8471ad6',
   timestamp: '2019-02-01T19:47:49Z',
   message: 'fix homepage image',
-  author: sampleCommitAuther,
+  author: sampleCommitAuthor,
   url: '/',
 };
 
@@ -71,7 +71,7 @@ export const sampleCommit2 = {
   id: '8761ad7',
   timestamp: '2020-02-01T19:47:49Z',
   message: 'add color filter to header',
-  author: sampleCommitAuther,
+  author: sampleCommitAuthor,
   url: '/',
 };
 
