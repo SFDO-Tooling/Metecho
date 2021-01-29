@@ -11,19 +11,16 @@ import {
   sampleGitHubUser2,
   sampleGitHubUser3,
   sampleTask1,
+  sampleTask2,
+  sampleTask3,
+  sampleTask4,
+  sampleTask5,
 } from '../fixtures';
 
 export default {
   title: 'Tasks/Table/Component',
   component: TasksTableComponent,
-  decorators: [
-    withRedux({
-      user: {
-        id: 'user-id',
-        username: 'currentUser',
-      },
-    }),
-  ],
+  decorators: [withRedux()],
 };
 
 const Template: Story<ComponentProps<typeof TasksTableComponent>> = (args) => (
@@ -34,7 +31,7 @@ export const Component = Template.bind({});
 Component.args = {
   projectSlug: 'my-project',
   epicSlug: sampleEpic1.slug,
-  tasks: [sampleTask1],
+  tasks: [sampleTask1, sampleTask2, sampleTask3, sampleTask4, sampleTask5],
   epicUsers: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   openAssignEpicUsersModal: action('openAssignEpicUsersModal'),
   assignUserAction: action('assignUserAction'),

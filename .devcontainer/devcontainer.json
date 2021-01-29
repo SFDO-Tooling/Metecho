@@ -59,6 +59,9 @@
     "[markdown]": {
       "editor.rulers": [80]
     },
+    "[mdx]": {
+      "editor.rulers": [80]
+    },
     "[html]": {
       "editor.formatOnSave": false
     },
