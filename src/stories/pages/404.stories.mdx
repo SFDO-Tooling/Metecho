@@ -1,6 +1,6 @@
-import { Meta, Story } from '@storybook/addon-docs/blocks';
+import { Canvas, Meta, Story } from '@storybook/addon-docs/blocks';
 
-<Meta title="Pages/404/Intro" />
+<Meta title="Pages/404/Docs" />
 
 # 404
 
@@ -21,9 +21,13 @@ Typically, a custom `message` provides meaningful information on how to recover
 from an error -- for example, after navigating to an **Epic** or **Task** that
 doesn't exist.
 
-<Story id="pages-404-components--four-oh-four" />
+<Canvas>
+  <Story id="pages-404-examples--custom-404" />
+</Canvas>
 
 If a custom message is not provided, then the default message is displayed with
 a link to the home page.
 
-<Story id="pages-404-components--empty-four-oh-four" />
+<Canvas>
+  <Story id="pages-404-examples--default-404" />
+</Canvas>
