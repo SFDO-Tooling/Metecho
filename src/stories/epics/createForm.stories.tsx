@@ -8,7 +8,7 @@ import { withRedux } from '../decorators';
 import { sampleProject1, sampleUser1 } from '../fixtures';
 
 export default {
-  title: 'Epics/CreateEpicModal/Component',
+  title: 'Epics/CreateEpicModal/Example',
   component: CreateEpicModalComponent,
   decorators: [withRedux()],
 };
@@ -17,10 +17,15 @@ const Template: Story<ComponentProps<typeof CreateEpicModalComponent>> = (
   args,
 ) => <CreateEpicModalComponent {...args} />;
 
-export const Component = Template.bind({});
-Component.args = {
+export const CreateEpicModal = Template.bind({});
+CreateEpicModal.args = {
   user: sampleUser1,
   project: sampleProject1,
   isOpen: true,
   closeCreateModal: action('closeCreateModal'),
 };
+CreateEpicModal.argTypes = {
+  user: { control: { disable: true } },
+  project: { control: { disable: true } },
+};
+CreateEpicModal.storyName = 'Example';

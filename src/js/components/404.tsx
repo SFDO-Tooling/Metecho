@@ -24,13 +24,11 @@ const FourOhFour = ({ message }: { message?: ReactNode }) => (
   <DocumentTitle title={`${i18n.t('404')} | ${i18n.t('Metecho')}`}>
     <EmptyIllustration
       message={
-        message === undefined ? (
+        message || (
           <Trans i18nKey="pageCannotBeFound">
             That page cannot be found. Try the{' '}
             <Link to={routes.home()}>home page</Link>?
           </Trans>
-        ) : (
-          message
         )
       }
     />

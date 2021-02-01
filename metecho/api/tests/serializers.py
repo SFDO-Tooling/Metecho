@@ -226,7 +226,7 @@ class TestEpicSerializer:
             data={
                 "project": str(project.id),
                 "description": "Blorp",
-                "github_users": [{"test": "value"}],
+                "github_users": [{"id": "value"}],
             },
             partial=True,
         )

@@ -33,7 +33,9 @@ services:
     stdin_open: true
     tty: true
     # Wait for Postgres DB to be ready before running server
-    command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done; /start-server.sh'
+    command:
+      bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done;
+      /start-server.sh'
 
   # Runs the database process:
   postgres:
