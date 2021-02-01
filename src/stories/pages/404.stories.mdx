@@ -1,0 +1,29 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks';
+
+<Meta title="Pages/404/Intro" />
+
+# 404
+
+**Indicates that the page requested can't be found.**
+
+## Overview
+
+The **404** component is a page that indicates that the user reached the domain
+they requested but the URL path provided no information.
+
+The component consists of an illustration, an emoticon of a person shrugging,
+and a message indicating the invalid address that should also guide the user to
+a valid page on the site.
+
+## Guidelines
+
+Typically, a custom `message` provides meaningful information on how to recover
+from an error -- for example, after navigating to an **Epic** or **Task** that
+doesn't exist.
+
+<Story id="pages-404-components--four-oh-four" />
+
+If a custom message is not provided, then the default message is displayed with
+a link to the home page.
+
+<Story id="pages-404-components--empty-four-oh-four" />

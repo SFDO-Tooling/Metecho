@@ -187,6 +187,7 @@ will see you can run e.g.::
     $ ./derrick messages <locale>  # build messages for i18n
     $ ./derrick shell  # open Python shell
     $ ./derrick prune  # clean up unused Docker images and containers
+    $ ./derrick storybook  # build storybook and run dev server
 
 To run any development tasks (such as changing Python or JS dependencies, or
 generating or running migrations, or running a Django shell), you will need to
@@ -282,3 +283,15 @@ exposed to the front end, to properly generate translation files. See error
 message handling in ``metecho/api/sf_run_flow.py`` for an example.
 
 .. _user language is auto-detected at runtime: https://github.com/i18next/i18next-browser-languageDetector
+
+Storybook Development Workflow
+------------------------------
+
+When doing development for the component library in Storybook,
+use one of these two commands::
+
+    $ ./derrick storybook  # if running outside of container
+    $ yarn storybook  # if working in a remote container in VS Code
+
+After running one of these commands, you can view the Storybook at
+`<http://localhost:6006/>`_ in your browser.

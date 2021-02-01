@@ -9,7 +9,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
+            - metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum
+              "requirements/dev.txt" }}
             - metecho-py-
       - restore_cache:
           keys:
@@ -33,7 +34,9 @@ jobs:
             - ./venv
             - ./node_modules
       - save_cache:
-          key: metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum "requirements/dev.txt" }}
+          key:
+            metecho-py-{{ checksum "requirements/prod.txt" }}-{{ checksum
+            "requirements/dev.txt" }}
           paths:
             - ./venv
       - save_cache:

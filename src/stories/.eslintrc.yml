@@ -1,0 +1,9 @@
+extends:
+  - '../js/.eslintrc.yml'
+  - 'plugin:mdx/recommended'
+overrides:
+  - files:
+      - '*.mdx'
+      - '*.md'
+    rules:
+      max-len: 0

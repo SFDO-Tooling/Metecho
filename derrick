@@ -48,6 +48,9 @@ case "$1" in
     "test:js")
         dcrq yarn test:js "${@:2}"
         ;;
+    "storybook")
+        docker-compose run --rm --no-deps --service-ports web yarn storybook "${@:2}"
+        ;;
     "add:js")
         dcrq yarn add "${@:2}"
         ;;

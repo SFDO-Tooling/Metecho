@@ -50,6 +50,6 @@ describe('<CommitList/>', () => {
   test('does not render if list is empty', () => {
     const { container } = render(<CommitList commits={[]} />);
 
-    expect(container).toBeEmpty();
+    expect(container).toBeEmptyDOMElement();
   });
 });
