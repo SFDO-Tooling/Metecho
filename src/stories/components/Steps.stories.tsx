@@ -7,7 +7,7 @@ import Steps from '~js/components/steps';
 import { sampleSteps } from '../fixtures';
 
 export default {
-  title: 'Components/Steps/Component',
+  title: 'Components/Steps/Example',
   component: Steps,
 };
 
