@@ -22,5 +22,9 @@ RemoveUser.args = {
   handleClose: action('handleClose'),
   handleUpdateUsers: action('handleUpdateUsers'),
 };
+RemoveUser.argTypes = {
+  confirmRemoveUsers: { control: { disable: true } },
+  waitingToUpdateUsers: { control: { disable: true } },
+};
 
 RemoveUser.storyName = 'Example';
