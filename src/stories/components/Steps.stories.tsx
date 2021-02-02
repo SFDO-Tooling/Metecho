@@ -23,9 +23,9 @@ interface StoryProps extends Omit<Props, 'steps'> {
   steps: string;
 }
 
-const Template = ({ steps, ...rest }: StoryProps) => {
-  return <Steps steps={sampleSteps[steps]} {...rest} />;
-};
+const Template = ({ steps, ...rest }: StoryProps) => (
+  <Steps steps={sampleSteps[steps]} {...rest} />
+);
 
 export const EpicSteps: Story<StoryProps> = Template.bind({});
 EpicSteps.args = {
