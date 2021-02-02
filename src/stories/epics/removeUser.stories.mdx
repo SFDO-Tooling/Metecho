@@ -9,10 +9,15 @@ import LinkTo from '@storybook/addon-links/react';
 
 ## Overview
 
-<LinkTo kind="Epics/RemoveUser/Example">View Example</LinkTo>
+The **RemoveUser** component is a
+[SLDS Modal](http://design-system-react-components.herokuapp.com/?path=/story/sldsmodal--modal-with-custom-parent-node)
+used to confirm the removal of a user from an **Epic** when that user has a
+**Task** assigned to them.
 
-The **RemoveUser** component is a modal used to confirm the removal of a user
-from an **Epic** even though that user has a **Task** assigned to them.
+The modal displays a list containing the GitHub avatar and user name for each
+user selected for removal.
 
 Pressing the `Confirm` button closes the modal and removes the user from the
 **Epic**. Pressing `Cancel` closes the modal.
+
+<LinkTo kind="Epics/RemoveUser/Example">View Example</LinkTo>
