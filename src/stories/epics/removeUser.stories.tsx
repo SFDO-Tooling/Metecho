@@ -26,5 +26,4 @@ RemoveUser.argTypes = {
   confirmRemoveUsers: { control: { disable: true } },
   waitingToUpdateUsers: { control: { disable: true } },
 };
-
 RemoveUser.storyName = 'Example';
