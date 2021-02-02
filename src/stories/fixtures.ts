@@ -379,7 +379,7 @@ export const sampleProject1 = {
     'https://repository-images.githubusercontent.com/123456/123-456',
 };
 
-export const initialSteps = [
+export const sampleSteps1 = [
   {
     label: 'Add a task',
     active: true,
@@ -407,7 +407,7 @@ export const initialSteps = [
   },
 ];
 
-export const step2 = [
+export const sampleSteps2 = [
   {
     label: 'Add a task',
     active: false,
