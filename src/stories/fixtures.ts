@@ -379,41 +379,57 @@ export const sampleProject1 = {
     'https://repository-images.githubusercontent.com/123456/123-456',
 };
 
-export const sampleSteps = [
+export const initialSteps = [
   {
-    label: 'Do the thing',
+    label: 'Add a task',
     active: true,
     complete: false,
-    hidden: false,
     assignee: null,
-    action: '',
-    link: null,
   },
   {
-    label: 'Make it work',
+    label: 'Assign a Developer to a task',
+    active: false,
+    complete: false,
+    assignee: null,
+  },
+  {
+    label: 'Submit this epic for review on GitHub',
+    active: false,
+    complete: false,
+    assignee: null,
+  },
+  {
+    label: 'Merge pull request on GitHub',
     active: false,
     complete: false,
     hidden: false,
     assignee: null,
-    action: '',
-    link: null,
+  },
+];
+
+export const step2 = [
+  {
+    label: 'Add a task',
+    active: false,
+    complete: true,
+    assignee: null,
   },
   {
-    label: 'Get some feedback',
+    label: 'Assign a Developer to a task',
     active: false,
     complete: false,
-    hidden: false,
     assignee: null,
-    action: '',
-    link: null,
   },
   {
-    label: 'Release the thing',
+    label: 'Submit this epic for review on GitHub',
     active: false,
     complete: false,
-    hidden: false,
     assignee: null,
-    action: '',
-    link: null,
+  },
+  {
+    label: 'Merge pull request on GitHub',
+    active: false,
+    complete: false,
+    assignee: null,
   },
 ];
