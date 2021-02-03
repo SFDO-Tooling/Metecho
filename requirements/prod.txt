@@ -104,7 +104,7 @@ django-redis==4.12.1
     # via -r requirements/prod.in
 django-rq==2.4.0
     # via -r requirements/prod.in
-django==3.1.5
+django==3.1.6
     # via
     #   -r requirements/prod.in
     #   channels
