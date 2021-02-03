@@ -86,7 +86,7 @@ dj-database-url==0.5.0
     # via -r requirements/prod.in
 django-allauth==0.44.0
     # via -r requirements/prod.in
-django-anymail[mailgun]==8.1
+django-anymail[mailgun]==8.2
     # via -r requirements/prod.in
 django-filter==2.4.0
     # via sfdo-template-helpers
