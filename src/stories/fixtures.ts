@@ -93,7 +93,7 @@ export const sampleEpic1 = {
   has_unmerged_commits: false,
   currently_creating_pr: false,
   currently_fetching_org_config_names: false,
-  github_users: [],
+  github_users: [sampleGitHubUser2],
   status: EPIC_STATUSES.PLANNED,
   available_task_org_config_names: [],
 };
