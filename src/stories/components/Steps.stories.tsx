@@ -5,17 +5,28 @@ import { Step } from 'src/js/components/steps/stepsItem';
 
 import Steps from '~js/components/steps';
 
-import { sampleSteps1, sampleSteps2, sampleSteps3 } from '../fixtures';
+import {
+  epicSteps1,
+  epicSteps2,
+  epicSteps3,
+  taskSteps1,
+  taskSteps2,
+} from '../fixtures';
 
 export default {
   title: 'Components/Steps/Example',
   component: Steps,
 };
 
-const sampleSteps: { [key: string]: Step[] } = {
-  'Initial steps': sampleSteps1,
-  'Steps with action': sampleSteps2,
-  'Steps with link': sampleSteps3,
+const epicSteps: { [key: string]: Step[] } = {
+  'Initial steps': epicSteps1,
+  'Steps with action': epicSteps2,
+  'Steps with link': epicSteps3,
+};
+
+const taskSteps: { [key: string]: Step[] } = {
+  'New Task': taskSteps1,
+  'With assignee': taskSteps2,
 };
 
 type Props = ComponentProps<typeof Steps>;
@@ -24,11 +35,11 @@ interface StoryProps extends Omit<Props, 'steps'> {
   steps: string;
 }
 
-const Template = ({ steps, ...rest }: StoryProps) => (
-  <Steps steps={sampleSteps[steps]} {...rest} />
+const EpicTemplate = ({ steps, ...rest }: StoryProps) => (
+  <Steps steps={epicSteps[steps]} {...rest} />
 );
 
-export const EpicSteps: Story<StoryProps> = Template.bind({});
+export const EpicSteps: Story<StoryProps> = EpicTemplate.bind({});
 EpicSteps.args = {
   title: 'Steps for this Epic',
   handleAction: action('handleAction'),
@@ -38,16 +49,27 @@ EpicSteps.argTypes = {
     defaultValue: 'Initial steps',
     control: {
       type: 'select',
-      options: Object.keys(sampleSteps),
+      options: Object.keys(epicSteps),
     },
   },
 };
 EpicSteps.storyName = 'Epic Steps';
 
-// export const TaskSteps = Template.bind({});
-// TaskSteps.args = {
-//   steps: initialSteps,
-//   title: 'Steps for Development',
-//   handleAction: action('handleAction'),
-// };
-// TaskSteps.storyName = 'Task Steps';
+const TaskTemplate = ({ steps, ...rest }: StoryProps) => (
+  <Steps steps={taskSteps[steps]} {...rest} />
+);
+export const TaskSteps: Story<StoryProps> = TaskTemplate.bind({});
+TaskSteps.args = {
+  title: 'Steps for this Task',
+  handleAction: action('handleAction'),
+};
+TaskSteps.argTypes = {
+  steps: {
+    defaultValue: 'New Task',
+    control: {
+      type: 'select',
+      options: Object.keys(taskSteps),
+    },
+  },
+};
+TaskSteps.storyName = 'Task Steps';
