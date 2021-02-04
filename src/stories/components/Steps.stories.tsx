@@ -5,7 +5,7 @@ import { Step } from 'src/js/components/steps/stepsItem';
 
 import Steps from '~js/components/steps';
 
-import { sampleSteps1, sampleSteps2 } from '../fixtures';
+import { sampleSteps1, sampleSteps2, sampleSteps3 } from '../fixtures';
 
 export default {
   title: 'Components/Steps/Example',
@@ -13,8 +13,9 @@ export default {
 };
 
 const sampleSteps: { [key: string]: Step[] } = {
-  'Sample steps': sampleSteps1,
-  'Different sample steps': sampleSteps2,
+  'Initial steps': sampleSteps1,
+  'Steps with action': sampleSteps2,
+  'Steps with link': sampleSteps3,
 };
 
 type Props = ComponentProps<typeof Steps>;
@@ -29,12 +30,12 @@ const Template = ({ steps, ...rest }: StoryProps) => (
 
 export const EpicSteps: Story<StoryProps> = Template.bind({});
 EpicSteps.args = {
-  title: 'Steps for Development',
+  title: 'Steps for this Epic',
   handleAction: action('handleAction'),
 };
 EpicSteps.argTypes = {
   steps: {
-    defaultValue: 'Sample steps',
+    defaultValue: 'Initial steps',
     control: {
       type: 'select',
       options: Object.keys(sampleSteps),

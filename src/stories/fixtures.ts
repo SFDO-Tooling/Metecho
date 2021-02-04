@@ -378,32 +378,28 @@ export const sampleProject1 = {
   repo_image_url:
     'https://repository-images.githubusercontent.com/123456/123-456',
 };
-
+// epic steps...
 export const sampleSteps1 = [
   {
     label: 'Add a task',
     active: true,
     complete: false,
-    assignee: null,
   },
   {
     label: 'Assign a Developer to a task',
     active: false,
     complete: false,
-    assignee: null,
   },
   {
     label: 'Submit this epic for review on GitHub',
     active: false,
     complete: false,
-    assignee: null,
   },
   {
     label: 'Merge pull request on GitHub',
     active: false,
     complete: false,
     hidden: false,
-    assignee: null,
   },
 ];
 
@@ -412,24 +408,47 @@ export const sampleSteps2 = [
     label: 'Add a task',
     active: false,
     complete: true,
-    assignee: null,
   },
   {
     label: 'Assign a Developer to a task',
     active: false,
-    complete: false,
-    assignee: null,
+    complete: true,
   },
   {
     label: 'Submit this epic for review on GitHub',
-    active: false,
+    active: true,
     complete: false,
-    assignee: null,
+    action: 'submit',
   },
   {
     label: 'Merge pull request on GitHub',
     active: false,
     complete: false,
-    assignee: null,
+    link: '#',
+  },
+];
+
+export const sampleSteps3 = [
+  {
+    label: 'Add a task',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Assign a Developer to a task',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Submit this epic for review on GitHub',
+    active: false,
+    complete: true,
+    action: 'submit',
+  },
+  {
+    label: 'Merge pull request on GitHub',
+    active: true,
+    complete: false,
+    link: '#',
   },
 ];
