@@ -1,0 +1,60 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks';
+
+<Meta title="Tasks/Table/Docs" />
+
+# TasksTable
+
+**Shows a list of tasks within an Epic.**
+
+## Overview
+
+The **TasksTable** component is an
+[SLDS DataTable](https://react.lightningdesignsystem.com/components/data-tables/)
+that shows a list of **Tasks** and their respective current statuses within an
+**Epic**.
+
+**Tasks** are shown in the order of three status categories:
+
+1. `In Progress`, `Approved`, or `Changes Requested`
+2. `Planned`
+3. `Complete`
+
+Within the three categories, sorting is alphabetical by **Task** `Name`.
+
+<Story id="tasks-table-example--tasks-table" />
+
+## Sub-components
+
+### Columns & Cells
+
+**Tasks**
+
+A description of the **Task** that links to its details page.
+
+**Status**
+
+Displays the **Task**'s status based on the work of the `Developer` and the
+`Tester`.
+
+- A **Task** begins with a status of `Planned` until a `Scratch Org` has been
+  created, which updates the status to `In Progress`.
+- It remains `In Progress` until a `Tester` submits a review, at which point the
+  status becomes `Changes Requested` or `Approved`.
+- If changes are retrieved and a commit is made after review, it becomes
+  `In Progress` until another review from the `Tester` is submitted.
+- The review status is only shown if the review was submitted on the _most
+  recent commit_ of the **Task** branch. Otherwise it is `In Progress`.
+- Once the **Task** pull request has been merged on GitHub, it becomes
+  `Complete`.
+
+**Developer**
+
+GitHub user assigned as `Developer` for a **Task**.
+
+**Tester**
+
+GitHub user assigned as `Tester` for a **Task**.
+
+**Note**: **Tasks** without an assigned `Developer` or `Tester` display buttons
+that allow the selection of a GitHub `Collaborator` from the parent epic to
+fulfill the specified role.

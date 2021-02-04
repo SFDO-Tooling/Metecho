@@ -133,7 +133,7 @@ const CreateEpicModal = ({
     });
     /* istanbul ignore else */
     if (isMounted.current) {
-      setProjectBranches(baseBranches);
+      setProjectBranches(baseBranches || []);
       setFetchingBranches(false);
     }
   };

@@ -1,31 +1,33 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import FourOhFourComponent from '~js/components/404';
+import FourOhFour from '~js/components/404';
 
 export default {
-  title: 'Pages/404/Component',
-  component: FourOhFourComponent,
+  title: 'Pages/404/Examples',
+  component: FourOhFour,
 };
 
-const Template: Story<ComponentProps<typeof FourOhFourComponent>> = (args) => (
-  <FourOhFourComponent {...args} />
+const Template: Story<ComponentProps<typeof FourOhFour>> = (args) => (
+  <FourOhFour {...args} />
 );
 
-const Message404 = () => (
-  <>
-    We can’t find the epic you’re looking for. Try another epic from{' '}
-    <a href="#">this project</a>.
-  </>
-);
-export const FourOhFour = Template.bind({});
-FourOhFour.args = {
-  message: <Message404 />,
+export const Default404 = Template.bind({});
+Default404.argTypes = {
+  message: { control: 'text' },
 };
-FourOhFour.storyName = '404 (custom text)';
+Default404.storyName = 'Default';
 
-export const EmptyFourOhFour = Template.bind({});
-EmptyFourOhFour.parameters = {
-  controls: { hideNoControlsWarning: true },
+export const Custom404 = Template.bind({});
+Custom404.args = {
+  message: (
+    <>
+      We can’t find the epic you’re looking for. Try another epic from{' '}
+      <a href="#">this project</a>.
+    </>
+  ),
 };
-EmptyFourOhFour.storyName = '404 (default text)';
+Custom404.argTypes = {
+  message: { control: { disable: true } },
+};
+Custom404.storyName = 'Custom Message';
