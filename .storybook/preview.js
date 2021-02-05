@@ -1,4 +1,5 @@
 /* eslint-env browser */
+/* eslint-disable import/no-duplicates */
 
 import 'sass/app.scss';
 

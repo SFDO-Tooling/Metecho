@@ -1,7 +1,8 @@
-export const settings: {
-  setAssetsPaths: (path: string) => void;
-  getAssetsPaths: () => string;
-  setAppElement: (el: Element) => void;
-  getAppElement: () => Element | undefined;
+export let settings: {
+  setAssetsPath: (path: string) => void;
+  getAssetsPath: () => string;
+  setAppElement: (el: string | Element) => void;
+  getAppElement: () => string | Element | undefined;
 };
+
 export default settings;

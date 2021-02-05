@@ -15,8 +15,6 @@ npm-debug.log
 yarn-error.log
 staticfiles/
 webpack-stats.json
-.yarnrc
-.yarn/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -74,12 +72,6 @@ jscache/
 
 # Sphinx documentation
 docs/_build/
-
-# pyenv
-.python-version
-
-# nvm
-.nvmrc
 
 # celery beat schedule file
 celerybeat-schedule
