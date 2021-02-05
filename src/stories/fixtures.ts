@@ -378,8 +378,8 @@ export const sampleProject1 = {
   repo_image_url:
     'https://repository-images.githubusercontent.com/123456/123-456',
 };
-// epic steps...
-export const epicSteps1 = [
+
+export const sampleEpicSteps = [
   {
     label: 'Add a task',
     active: true,
@@ -402,7 +402,8 @@ export const epicSteps1 = [
     hidden: false,
   },
 ];
-export const epicSteps2 = [
+
+export const sampleEpicStepsWithAction = [
   {
     label: 'Add a task',
     active: false,
@@ -426,7 +427,8 @@ export const epicSteps2 = [
     link: '#',
   },
 ];
-export const epicSteps3 = [
+
+export const sampleEpicStepsWithLink = [
   {
     label: 'Add a task',
     active: false,
@@ -450,129 +452,130 @@ export const epicSteps3 = [
     link: '#',
   },
 ];
-// task steps
-export const taskSteps1 = [
+
+export const sampleTaskSteps = [
   {
     label: 'Assign a Developer',
     active: true,
     complete: false,
-    assignee: null,
-  },
-  {
-    label: 'Make changes in Dev Org',
-    active: false,
-    complete: false,
-    assignee: null,
-  },
-  {
-    label: 'Submit changes for testing',
-    active: false,
-    complete: false,
-    assignee: null,
-  },
-  {
-    label: 'Assign a Tester',
-    active: false,
-    complete: false,
-    assignee: null,
-  },
-  {
-    label: 'Create a Scratch Org for testing',
-    active: false,
-    complete: false,
-    assignee: null,
-  },
-  {
-    label: 'Refresh Test Org',
-    active: false,
-    complete: false,
-    assignee: null,
-  },
-  {
-    label: 'Test changes in Test Org',
-    active: false,
-    complete: false,
-    assignee: null,
-  },
-  {
-    label: 'Submit a review',
-    active: false,
-    complete: false,
-    assignee: null,
-  },
-  {
-    label: 'Merge pull request on GitHub',
-    active: false,
-    complete: false,
-    assignee: null,
-  },
-];
-export const taskSteps2 = [
-  {
-    label: 'Assign a Developer',
-    active: false,
-    complete: true,
-    assignee: null,
+    action: 'assign-dev',
   },
   {
     label: 'Create a Scratch Org for development',
-    active: true,
+    active: false,
     complete: false,
-    assignee: sampleGitHubUser1,
   },
   {
     label: 'Make changes in Dev Org',
     active: false,
     complete: false,
-    assignee: null,
   },
   {
     label: 'Retrieve changes from Dev Org',
     active: false,
     complete: false,
-    assignee: null,
+    action: 'retrieve-changes',
   },
   {
     label: 'Submit changes for testing',
     active: false,
     complete: false,
-    assignee: null,
+    action: 'submit-changes',
   },
   {
     label: 'Assign a Tester',
     active: false,
     complete: false,
-    assignee: null,
+    action: 'assign-qa',
   },
   {
     label: 'Create a Scratch Org for testing',
     active: false,
     complete: false,
-    assignee: null,
   },
   {
     label: 'Refresh Test Org',
     active: false,
     complete: false,
-    assignee: null,
+    hidden: true,
   },
   {
     label: 'Test changes in Test Org',
     active: false,
     complete: false,
-    assignee: null,
   },
   {
     label: 'Submit a review',
     active: false,
     complete: false,
-    assignee: null,
   },
   {
     label: 'Merge pull request on GitHub',
     active: false,
     complete: false,
-    assignee: null,
-    link: '#',
+  },
+];
+
+export const sampleTaskStepsWithAssignee = [
+  {
+    label: 'Assign a Developer',
+    active: false,
+    complete: true,
+    action: 'assign-dev',
+  },
+  {
+    label: 'Create a Scratch Org for development',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Make changes in Dev Org',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Retrieve changes from Dev Org',
+    active: true,
+    complete: false,
+    assignee: sampleGitHubUser2,
+    action: 'retrieve-changes',
+  },
+  {
+    label: 'Submit changes for testing',
+    active: false,
+    complete: false,
+    action: 'submit-changes',
+  },
+  {
+    label: 'Assign a Tester',
+    active: false,
+    complete: false,
+    action: 'assign-qa',
+  },
+  {
+    label: 'Create a Scratch Org for testing',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Refresh Test Org',
+    active: false,
+    complete: false,
+    hidden: true,
+  },
+  {
+    label: 'Test changes in Test Org',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Submit a review',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Merge pull request on GitHub',
+    active: false,
+    complete: false,
   },
 ];
