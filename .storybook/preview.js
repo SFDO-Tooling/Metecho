@@ -15,6 +15,7 @@ import React from 'react';
 import { initReactI18next } from 'react-i18next';
 import { MemoryRouter } from 'react-router-dom';
 
+import translations from '../locales/en/translation.json';
 import { api_urls } from '../src/stories/fixtures';
 
 export const parameters = {
@@ -24,7 +25,21 @@ export const parameters = {
 };
 
 // Enable translations
-i18n.use(initReactI18next).init();
+i18n.use(initReactI18next).init({
+  lng: 'en',
+  resources: {
+    en: {
+      translation: translations,
+    },
+  },
+  keySeparator: false,
+  nsSeparator: false,
+  returnNull: false,
+  returnEmptyString: false,
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 // Mock in Django-provided API URLs
 window.api_urls = api_urls;
