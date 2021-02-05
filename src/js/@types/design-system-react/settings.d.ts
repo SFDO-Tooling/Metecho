@@ -1,8 +1,8 @@
 export let settings: {
-  setAssetsPath: (arg0: string) => void;
+  setAssetsPath: (path: string) => void;
   getAssetsPath: () => string;
-  setAppElement: (arg0: string) => void;
-  getAppElement: () => string;
+  setAppElement: (el: string | Element) => void;
+  getAppElement: () => string | Element | undefined;
 };
 
 export default settings;
