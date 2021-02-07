@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,14 +25,18 @@ import { selectUserState } from '~js/store/user/selectors';
 import { OBJECT_TYPES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
+import TourLandingModal from '../tour/landing';
+
 const ProjectDetail = (props: RouteComponentProps) => {
+  const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  /* @@@ todo set open based on whether user's first visit */
+  const [tourLandingModalOpen, setTourLandingModalOpen] = useState(true);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
-  const user = useSelector(selectUserState) as User;
 
   const loadingOrNotFound = getProjectLoadingOrNotFound({
     project,
@@ -79,6 +83,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
   // create modal related
   const openCreateModal = () => setCreateModalOpen(true);
   const closeCreateModal = () => setCreateModalOpen(false);
+
+  const closeTourLandingModal = () => setTourLandingModalOpen(false);
 
   const hasEpics = epics && epics.epics.length > 0;
 
@@ -146,6 +152,10 @@ const ProjectDetail = (props: RouteComponentProps) => {
           project={project}
           isOpen={createModalOpen}
           closeCreateModal={closeCreateModal}
+        />
+        <TourLandingModal
+          isOpen={tourLandingModalOpen}
+          onRequestClose={closeTourLandingModal}
         />
       </DetailPageLayout>
     </DocumentTitle>

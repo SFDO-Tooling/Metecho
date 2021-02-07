@@ -286,9 +286,25 @@ describe('<ProjectDetail />', () => {
 
       expect(getByText('Create an Epic for Project 1')).toBeVisible();
 
-      fireEvent.click(queryByText('Close'));
+      fireEvent.click(queryByText('Cancel epic creation'));
 
       expect(queryByText('Create an Epic for Project 1')).toBeNull();
+    });
+  });
+
+  describe('<TourLandingModal />', () => {
+    test('opens/closes form', () => {
+      const { queryByText, getByText, debug } = setup();
+      debug();
+      expect(
+        getByText("Click on a box below to discover what's possible."),
+      ).toBeVisible();
+
+      fireEvent.click(queryByText('Close'));
+
+      expect(
+        queryByText("Click on a box below to discover what's possible."),
+      ).toBeNull();
     });
   });
 });

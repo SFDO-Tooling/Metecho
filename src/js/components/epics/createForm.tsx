@@ -224,6 +224,7 @@ const CreateEpicModal = ({
       disableClose={isSaving}
       heading={`${i18n.t('Create an Epic for')} ${project.name}`}
       onRequestClose={closeForm}
+      assistiveText={{ closeButton: i18n.t('Cancel epic creation') }}
       footer={[
         <Button
           key="cancel"
