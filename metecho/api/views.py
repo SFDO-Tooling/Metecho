@@ -112,6 +112,18 @@ class AgreeToTosView(CurrentUserObjectMixin, generics.UpdateAPIView):
         return Response(serializer.data)
 
 
+class CompleteOnboardingView(CurrentUserObjectMixin, generics.UpdateAPIView):
+    model = User
+    serializer_class = FullUserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def update(self, request, pk=None):
+        request.user.onboarded_at = timezone.now()
+        request.user.save()
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
+
 class UserRefreshView(CurrentUserObjectMixin, APIView):
     model = User
     permission_classes = (IsAuthenticated,)

@@ -29,6 +29,7 @@ def test_serialize(user_factory):
                 "devhub_username": "",
                 "uses_global_devhub": False,
                 "agreed_to_tos_at": None,
+                "onboarded_at": None,
             }
         )
     )

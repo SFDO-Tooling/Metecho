@@ -3,6 +3,7 @@ from rest_framework import routers
 
 from .views import (
     AgreeToTosView,
+    CompleteOnboardingView,
     EpicViewSet,
     HookView,
     ProjectViewSet,
@@ -24,6 +25,11 @@ urlpatterns = router.urls + [
     path("hook/", HookView.as_view(), name="hook"),
     path("user/", UserView.as_view(), name="user"),
     path("agree_to_tos/", AgreeToTosView.as_view(), name="agree-to-tos"),
+    path(
+        "complete_onboarding/",
+        CompleteOnboardingView.as_view(),
+        name="complete-onboarding",
+    ),
     path("user/disconnect/", UserDisconnectSFView.as_view(), name="user-disconnect-sf"),
     path("user/refresh/", UserRefreshView.as_view(), name="user-refresh"),
 ]

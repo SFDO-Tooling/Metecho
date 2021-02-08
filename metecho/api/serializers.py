@@ -69,6 +69,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "devhub_username",
             "uses_global_devhub",
             "agreed_to_tos_at",
+            "onboarded_at",
         )
 
     def get_sf_username(self, obj) -> dict:
