@@ -42,7 +42,7 @@ coveralls==3.0.0
     # via -r requirements/dev.in
 decorator==4.4.2
     # via ipython
-django-extensions==3.1.0
+django-extensions==3.1.1
     # via -r requirements/dev.in
 doc8==0.8.1
     # via -r requirements/dev.in
