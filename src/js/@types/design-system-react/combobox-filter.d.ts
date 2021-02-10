@@ -15,7 +15,7 @@ export type Selection = {
   type?: string;
 };
 
-export const filter: (opts: {
+export let filter: (opts: {
   inputValue: string;
   limit?: number;
   options: Option[];

@@ -42,7 +42,7 @@ coveralls==3.0.0
     # via -r requirements/dev.in
 decorator==4.4.2
     # via ipython
-django-extensions==3.1.0
+django-extensions==3.1.1
     # via -r requirements/dev.in
 doc8==0.8.1
     # via -r requirements/dev.in
@@ -58,7 +58,7 @@ factory-boy==3.2.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==5.6.3
+faker==5.8.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
@@ -86,7 +86,7 @@ isort==5.7.0
     # via -r requirements/dev.in
 jedi==0.18.0
     # via ipython
-jinja2==2.11.2
+jinja2==2.11.3
     # via
     #   -c requirements/prod.txt
     #   sphinx
@@ -116,7 +116,7 @@ pickleshare==0.7.5
     # via ipython
 pluggy==0.13.1
     # via pytest
-prompt-toolkit==3.0.14
+prompt-toolkit==3.0.15
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
@@ -160,7 +160,7 @@ python-dateutil==2.8.1
     # via
     #   -c requirements/prod.txt
     #   faker
-pytz==2020.5
+pytz==2021.1
     # via
     #   -c requirements/prod.txt
     #   babel
@@ -221,7 +221,7 @@ typing-extensions==3.7.4.3
     # via
     #   -c requirements/prod.txt
     #   black
-urllib3==1.26.2
+urllib3==1.26.3
     # via
     #   -c requirements/prod.txt
     #   requests
