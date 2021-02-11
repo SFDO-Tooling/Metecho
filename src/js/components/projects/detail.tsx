@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,8 +31,9 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  /* @@@ todo set open based on whether user's first visit */
-  const [tourLandingModalOpen, setTourLandingModalOpen] = useState(true);
+  const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
+    Boolean(!user.onboarded_at),
+  );
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
@@ -124,7 +125,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               label={i18n.t('Create an Epic')}
               variant="brand"
               onClick={openCreateModal}
-              className="slds-m-bottom_large"
+              className="slds-m-bottom_large create-epic"
             />
             {hasEpics && (
               <>

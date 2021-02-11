@@ -3,6 +3,7 @@ import PageHeaderControl from '@salesforce/design-system-react/components/page-h
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { EVENTS } from 'react-joyride';
 import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -14,6 +15,7 @@ import EpicStatusSteps from '~js/components/epics/steps';
 import { Step } from '~js/components/steps/stepsItem';
 import CreateTaskModal from '~js/components/tasks/createForm';
 import TaskTable from '~js/components/tasks/table';
+import PlanTour from '~js/components/tour/plan';
 import { AssignUsersModal, UserCards } from '~js/components/user/githubUser';
 import {
   DeleteModal,
@@ -57,7 +59,8 @@ const EpicDetail = (props: RouteComponentProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-
+  const [runTour, setRunTour] = useState(false);
+  const joyride = {};
   // "Assign users to epic" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
@@ -283,6 +286,19 @@ const EpicDetail = (props: RouteComponentProps) => {
     },
     [readyToSubmit, currentlySubmitting],
   );
+  const handleTourCallback = (data: any) => {
+    const { type } = data;
+    if (type === EVENTS.TOUR_END && runTour) {
+      // Need to set our running state to false, so we can restart if we click start again.
+      setRunTour(false);
+    }
+
+    if (typeof joyride.callback === 'function') {
+      joyride.callback(data);
+    } else {
+      console.log(type, data);
+    }
+  };
 
   const projectLoadingOrNotFound = getProjectLoadingOrNotFound({
     project,
@@ -515,6 +531,11 @@ const EpicDetail = (props: RouteComponentProps) => {
             closeCreateModal={closeCreateModal}
           />
         )}
+        <PlanTour
+          run={runTour}
+          joyride={joyride}
+          handleCallback={handleTourCallback}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );

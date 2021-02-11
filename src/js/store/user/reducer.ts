@@ -22,6 +22,7 @@ export interface User {
   devhub_username: string;
   uses_global_devhub: boolean;
   agreed_to_tos_at: string | null;
+  onboarded_at: string | null;
 }
 
 const reducer = (
