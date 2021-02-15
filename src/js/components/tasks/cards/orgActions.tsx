@@ -15,7 +15,7 @@ const OrgActions = ({
   ownedByCurrentUser,
   assignedToCurrentUser,
   ownedByWrongUser,
-  testOrgOutOfDate,
+  orgOutOfDate,
   readyForReview,
   isCreating,
   isDeleting,
@@ -28,20 +28,20 @@ const OrgActions = ({
 }: {
   org: Org | null;
   type: OrgTypes;
-  task: Task;
+  task?: Task;
   ownedByCurrentUser: boolean;
-  assignedToCurrentUser: boolean;
-  ownedByWrongUser: Org | null;
-  testOrgOutOfDate: boolean;
+  assignedToCurrentUser?: boolean;
+  ownedByWrongUser?: Org | null;
+  orgOutOfDate?: boolean;
   readyForReview?: boolean;
   isCreating: boolean;
   isDeleting: boolean;
-  isRefreshingOrg: boolean;
+  isRefreshingOrg?: boolean;
   isSubmittingReview?: boolean;
   openSubmitReviewModal?: () => void;
-  doCreateOrg: () => void;
+  doCreateOrg?: () => void;
   doDeleteOrg: () => void;
-  doRefreshOrg: () => void;
+  doRefreshOrg?: () => void;
 }) => {
   if (isCreating) {
     return (
@@ -77,7 +77,7 @@ const OrgActions = ({
   let submitReviewBtn = null;
 
   if (readyForReview) {
-    if (task.review_valid) {
+    if (task?.review_valid) {
       submitReviewBtn = (
         <Button
           label={i18n.t('Update Review')}
@@ -101,14 +101,14 @@ const OrgActions = ({
   if (ownedByCurrentUser && (org || ownedByWrongUser)) {
     return (
       <>
-        {testOrgOutOfDate && (
+        {orgOutOfDate && doRefreshOrg ? (
           <Button
             label={i18n.t('Refresh Org')}
             variant="brand"
-            className="slds-m-right_x-small"
+            className="slds-m-horizontal_x-small"
             onClick={doRefreshOrg}
           />
-        )}
+        ) : null}
         {submitReviewBtn}
         <Dropdown
           align="right"
@@ -127,7 +127,7 @@ const OrgActions = ({
     );
   }
 
-  if (assignedToCurrentUser && !(org || ownedByWrongUser)) {
+  if (task && assignedToCurrentUser && !(org || ownedByWrongUser)) {
     const preventNewTestOrg =
       type === ORG_TYPES.QA && !task.has_unmerged_commits;
     const hasReviewRejected =

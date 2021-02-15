@@ -144,7 +144,7 @@ const SubmitModal = ({
         <span className="slds-m-right_xx-small">Notify</span>
         <GitHubUserAvatar user={assignee} />{' '}
         <span className="slds-m-left_xx-small">
-          <b>{assignee.login}</b> by email
+          <b>{{ username: assignee.login }}</b> by email
         </span>
       </Trans>
     </div>

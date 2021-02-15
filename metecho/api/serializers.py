@@ -107,13 +107,24 @@ class ProjectSerializer(serializers.ModelSerializer):
             "branch_prefix",
             "github_users",
             "repo_image_url",
+            "org_config_names",
+            "currently_fetching_org_config_names",
+            "latest_sha",
         )
+        extra_kwargs = {
+            "latest_sha": {"read_only": True},
+        }
 
     def get_repo_url(self, obj) -> Optional[str]:
         return f"https://github.com/{obj.repo_owner}/{obj.repo_name}"
 
     def get_repo_image_url(self, obj) -> Optional[str]:
         return obj.repo_image_url if obj.include_repo_image_url else ""
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        instance.queue_available_org_config_names(user=self.context["request"].user)
+        return instance
 
 
 class EpicSerializer(serializers.ModelSerializer):
@@ -146,8 +157,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "pr_is_merged",
             "status",
             "github_users",
-            "available_task_org_config_names",
-            "currently_fetching_org_config_names",
+            "latest_sha",
         )
         extra_kwargs = {
             "slug": {"read_only": True},
@@ -160,6 +170,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "pr_is_open": {"read_only": True},
             "pr_is_merged": {"read_only": True},
             "status": {"read_only": True},
+            "latest_sha": {"read_only": True},
         }
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -175,7 +186,9 @@ class EpicSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = super().create(validated_data)
         instance.create_gh_branch(self.context["request"].user)
-        instance.queue_available_task_org_config_names(self.context["request"].user)
+        instance.project.queue_available_org_config_names(
+            user=self.context["request"].user
+        )
         return instance
 
     def validate(self, data):
@@ -500,6 +513,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
         read_only=True,
     )
+    description_rendered = MarkdownField(source="description", read_only=True)
     unsaved_changes = serializers.SerializerMethodField()
     has_unsaved_changes = serializers.SerializerMethodField()
     total_unsaved_changes = serializers.SerializerMethodField()
@@ -520,6 +534,8 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "task",
             "org_type",
             "owner",
+            "description",
+            "description_rendered",
             "last_modified_at",
             "expires_at",
             "latest_commit",
@@ -543,6 +559,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "owner_gh_username",
             "has_been_visited",
             "valid_target_directories",
+            "org_config_name",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -599,15 +616,24 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         return {}
 
     def validate(self, data):
-        if (
-            not self.instance
-            and ScratchOrg.objects.active()
-            .filter(task=data["task"], org_type=data["org_type"])
-            .exists()
-        ):
+        if not (data.get("task") or data.get("epic") or data.get("project")):
             raise serializers.ValidationError(
-                _("A ScratchOrg of this type already exists for this task.")
+                _("A ScratchOrg must belong to a project, epic, or task.")
             )
+        if not self.instance:
+            orgs = ScratchOrg.objects.active().filter(org_type=data["org_type"])
+            if data.get("task") and orgs.filter(task=data["task"]).exists():
+                raise serializers.ValidationError(
+                    _("A ScratchOrg of this type already exists for this task.")
+                )
+            if data.get("epic") and orgs.filter(epic=data["epic"]).exists():
+                raise serializers.ValidationError(
+                    _("A ScratchOrg of this type already exists for this epic.")
+                )
+            if data.get("project") and orgs.filter(project=data["project"]).exists():
+                raise serializers.ValidationError(
+                    _("A ScratchOrg of this type already exists for this project.")
+                )
         return data
 
     def save(self, **kwargs):

@@ -165,6 +165,14 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         instance.queue_populate_github_users(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
+    @action(detail=True, methods=["POST"])
+    def refresh_org_config_names(self, request, pk=None):
+        project = self.get_object()
+        project.queue_available_org_config_names(user=request.user)
+        return Response(
+            self.get_serializer(project).data, status=status.HTTP_202_ACCEPTED
+        )
+
     @action(detail=True, methods=["GET"])
     def feature_branches(self, request, pk=None):
         instance = self.get_object()
@@ -208,12 +216,6 @@ class EpicViewSet(CreatePrMixin, ModelViewSet):
         return qs.annotate(ordering=Case(*whens, output_field=IntegerField())).order_by(
             "ordering", "-created_at", "name"
         )
-
-    @action(detail=True, methods=["POST"])
-    def refresh_org_config_names(self, request, pk=None):
-        epic = self.get_object()
-        epic.queue_available_task_org_config_names(request.user)
-        return Response(self.get_serializer(epic).data, status=status.HTTP_202_ACCEPTED)
 
 
 class TaskViewSet(CreatePrMixin, ModelViewSet):
@@ -324,7 +326,7 @@ class ScratchOrgViewSet(
         # XXX: I am apprehensive about the possibility of flooding the
         # worker queues easily this way:
         filters = {
-            "org_type": SCRATCH_ORG_TYPES.Dev,
+            "org_type__in": [SCRATCH_ORG_TYPES.Dev, SCRATCH_ORG_TYPES.Playground],
             "delete_queued_at__isnull": True,
             "currently_capturing_changes": False,
             "currently_refreshing_changes": False,
@@ -350,7 +352,7 @@ class ScratchOrgViewSet(
         instance = self.get_object()
         force_get = request.query_params.get("get_unsaved_changes", False)
         conditions = [
-            instance.org_type == SCRATCH_ORG_TYPES.Dev,
+            instance.org_type in [SCRATCH_ORG_TYPES.Dev, SCRATCH_ORG_TYPES.Playground],
             instance.is_created,
             instance.delete_queued_at is None,
             not instance.currently_capturing_changes,

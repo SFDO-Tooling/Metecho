@@ -296,6 +296,14 @@ class Project(
     #     "avatar_url": str,
     #   }
     github_users = models.JSONField(default=list, blank=True)
+    # List of {
+    #   "key": str,
+    #   "label": str,
+    #   "description": str,
+    # }
+    org_config_names = models.JSONField(default=list, blank=True)
+    currently_fetching_org_config_names = models.BooleanField(default=False)
+    latest_sha = StringField(blank=True)
 
     slug_class = ProjectSlug
     tracker = FieldTracker(fields=["name"])
@@ -329,6 +337,7 @@ class Project(
                 None, repo_owner=self.repo_owner, repo_name=self.repo_name
             )
             self.branch_name = repo.default_branch
+            self.latest_sha = repo.branch(repo.default_branch).latest_sha()
 
         if not self.github_users:
             self.queue_populate_github_users(originating_user_id=None)
@@ -363,10 +372,33 @@ class Project(
             project=self, branch_name=ref, originating_user_id=originating_user_id
         )
 
+    def queue_available_org_config_names(self, user=None):
+        from .jobs import available_org_config_names_job
+
+        self.currently_fetching_org_config_names = True
+        self.save()
+        self.notify_changed(originating_user_id=str(user.id) if user else None)
+        available_org_config_names_job.delay(self, user=user)
+
+    def finalize_available_org_config_names(self, originating_user_id=None):
+        self.currently_fetching_org_config_names = False
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
+    def finalize_project_update(self, *, originating_user_id=None):
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
     @transaction.atomic
     def add_commits(self, *, commits, ref, sender):
-        matching_tasks = Task.objects.filter(branch_name=ref, epic__project=self)
+        self.latest_sha = commits[0].sha if commits else ""
+        self.finalize_project_update()
 
+        matching_epics = Epic.objects.filter(branch_name=ref, project=self)
+        for epic in matching_epics:
+            epic.add_commits(commits)
+
+        matching_tasks = Task.objects.filter(branch_name=ref, epic__project=self)
         for task in matching_tasks:
             task.add_commits(commits, sender)
 
@@ -412,13 +444,7 @@ class Epic(
     status = models.CharField(
         max_length=20, choices=EPIC_STATUSES, default=EPIC_STATUSES.Planned
     )
-    # List of {
-    #   "key": str,
-    #   "label": str,
-    #   "description": str,
-    # }
-    available_task_org_config_names = models.JSONField(default=list, blank=True)
-    currently_fetching_org_config_names = models.BooleanField(default=False)
+    latest_sha = StringField(blank=True)
 
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="epics")
 
@@ -528,7 +554,7 @@ class Epic(
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def finalize_epic_update(self, *, originating_user_id):
+    def finalize_epic_update(self, *, originating_user_id=None):
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
@@ -540,18 +566,9 @@ class Epic(
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
-    def queue_available_task_org_config_names(self, user):
-        from .jobs import available_task_org_config_names_job
-
-        self.currently_fetching_org_config_names = True
-        self.save()
-        self.notify_changed(originating_user_id=str(user.id))
-        available_task_org_config_names_job.delay(self, user=user)
-
-    def finalize_available_task_org_config_names(self, originating_user_id=None):
-        self.currently_fetching_org_config_names = False
-        self.save()
-        self.notify_changed(originating_user_id=originating_user_id)
+    def add_commits(self, commits):
+        self.latest_sha = commits[0].sha if commits else ""
+        self.finalize_epic_update()
 
     class Meta:
         ordering = ("-created_at", "name")
@@ -853,7 +870,9 @@ class ScratchOrg(
         null=True,
         blank=True,
     )
+    description = MarkdownField(blank=True, property_suffix="_markdown")
     org_type = StringField(choices=SCRATCH_ORG_TYPES)
+    org_config_name = StringField()
     owner = models.ForeignKey(User, on_delete=models.PROTECT)
     last_modified_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
@@ -901,6 +920,20 @@ class ScratchOrg(
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
+    @property
+    def parent(self):
+        return self.project or self.epic or self.task
+
+    @property
+    def root_project(self):
+        if self.project:
+            return self.project
+        if self.epic:
+            return self.epic.project
+        if self.task:
+            return self.task.epic.project
+        return None
+
     def save(self, *args, **kwargs):
         is_new = self.id is None
         self.clean_config()
@@ -925,7 +958,7 @@ class ScratchOrg(
         org_config = refresh_access_token(
             scratch_org=self,
             config=self.config,
-            org_name=org_name or self.task.org_config_name,
+            org_name=org_name or self.org_config_name,
             keychain=keychain,
         )
         return org_config
@@ -992,7 +1025,8 @@ class ScratchOrg(
             self.notify_changed(
                 type_="SCRATCH_ORG_PROVISION", originating_user_id=originating_user_id
             )
-            self.task.finalize_provision(originating_user_id=originating_user_id)
+            if self.task:
+                self.task.finalize_provision(originating_user_id=originating_user_id)
         else:
             self.notify_scratch_org_error(
                 error=error,
@@ -1076,7 +1110,10 @@ class ScratchOrg(
                 type_="SCRATCH_ORG_COMMIT_CHANGES",
                 originating_user_id=originating_user_id,
             )
-            self.task.finalize_commit_changes(originating_user_id=originating_user_id)
+            if self.task:
+                self.task.finalize_commit_changes(
+                    originating_user_id=originating_user_id
+                )
         else:
             self.notify_scratch_org_error(
                 error=error,
@@ -1153,7 +1190,7 @@ class ScratchOrg(
             self.delete()
 
     def notify_org_provisioning(self, originating_user_id):
-        parent = self.task or self.epic or self.project
+        parent = self.parent
         if parent:
             group_name = CHANNELS_GROUP_NAME.format(
                 model=parent._meta.model_name, id=parent.id

@@ -100,8 +100,8 @@ const TaskStatusSteps = ({
     },
     {
       label: devOrgIsCreating
-        ? i18n.t('Creating a Scratch Org for development…')
-        : i18n.t('Create a Scratch Org for development'),
+        ? i18n.t('Creating a Dev Org…')
+        : i18n.t('Create a Dev Org'),
       active: hasDev && !hasDevOrg,
       // Even if no dev is currently assigned and there's no Dev Org,
       // consider this complete if there are commits and no rejected review
@@ -151,8 +151,8 @@ const TaskStatusSteps = ({
     },
     {
       label: testOrgIsCreating
-        ? i18n.t('Creating a Scratch Org for testing…')
-        : i18n.t('Create a Scratch Org for testing'),
+        ? i18n.t('Creating a Test Org…')
+        : i18n.t('Create a Test Org'),
       active: readyForReview && hasTester && !hasTestOrg,
       complete: (hasTester && hasTestOrg) || task.review_valid,
       hidden: testOrgOutOfDate,

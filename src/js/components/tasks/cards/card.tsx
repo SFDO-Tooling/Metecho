@@ -77,12 +77,25 @@ const OrgCard = ({
   testOrgSubmittingReview,
   history,
 }: OrgCardProps & RouteComponentProps) => {
-  const assignedUser =
-    type === ORG_TYPES.QA ? task.assigned_qa : task.assigned_dev;
+  let assignedUser: GitHubUser | null = null;
+  let heading = i18n.t('Developer');
+  let orgHeading = i18n.t('Dev Org');
+  switch (type) {
+    case ORG_TYPES.QA:
+      assignedUser = task.assigned_qa;
+      heading = i18n.t('Tester');
+      orgHeading = i18n.t('Test Org');
+      break;
+    case ORG_TYPES.DEV:
+      assignedUser = task.assigned_dev;
+      break;
+  }
   const assignedToCurrentUser = user.username === assignedUser?.login;
   const ownedByCurrentUser = Boolean(org?.is_created && user.id === org?.owner);
   const ownedByWrongUser =
-    org?.is_created && org.owner_gh_username !== assignedUser?.login
+    type !== ORG_TYPES.PLAYGROUND &&
+    org?.is_created &&
+    org.owner_gh_username !== assignedUser?.login
       ? org
       : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.is_created));
@@ -121,8 +134,8 @@ const OrgCard = ({
   );
   const doRefreshOrg = useCallback(() => {
     /* istanbul ignore else */
-    if (org && org.org_type === ORG_TYPES.QA && handleRefresh) {
-      handleRefresh(org);
+    if (org && org.org_type === ORG_TYPES.QA) {
+      handleRefresh?.(org);
     }
   }, [handleRefresh, org]);
   const doCreateOrg = useCallback(() => {
@@ -152,11 +165,6 @@ const OrgCard = ({
   const testOrgOutOfDate = Boolean(
     type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
   );
-
-  const heading =
-    type === ORG_TYPES.QA ? i18n.t('Tester') : i18n.t('Developer');
-  const orgHeading =
-    type === ORG_TYPES.QA ? i18n.t('Test Org') : i18n.t('Dev Org');
 
   return (
     <div
@@ -223,7 +231,7 @@ const OrgCard = ({
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
                   ownedByWrongUser={ownedByWrongUser}
-                  testOrgOutOfDate={testOrgOutOfDate}
+                  orgOutOfDate={testOrgOutOfDate}
                   readyForReview={testOrgReadyForReview}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
@@ -240,14 +248,14 @@ const OrgCard = ({
                 org={org}
                 type={type}
                 task={task}
-                taskCommits={taskCommits}
+                baseCommit={taskCommits[0]}
                 repoUrl={repoUrl}
                 ownedByCurrentUser={ownedByCurrentUser}
                 ownedByWrongUser={ownedByWrongUser}
                 isCreating={isCreating}
                 isRefreshingOrg={isRefreshingOrg}
                 isSubmittingReview={testOrgSubmittingReview}
-                testOrgOutOfDate={testOrgOutOfDate}
+                orgOutOfDate={testOrgOutOfDate}
                 missingCommits={orgCommitIdx}
                 doCheckForOrgChanges={doCheckForOrgChanges}
                 openCaptureModal={openCaptureModal}

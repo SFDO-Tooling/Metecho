@@ -31,7 +31,7 @@ const defaultEpic = {
   slug: 'epic-1',
   old_slugs: [],
   description: 'This is a test epic.',
-  available_task_org_config_names: [
+  org_config_names: [
     { key: 'dev' },
     { key: 'qa', label: 'QA', description: 'This is a QA flow' },
     { key: 'release', description: 'This is a Release flow' },
@@ -115,7 +115,7 @@ describe('<TaskForm/>', () => {
           }),
         );
         const { getByText, getByLabelText, findByText } = setup({
-          epic: { ...defaultEpic, available_task_org_config_names: [] },
+          epic: { ...defaultEpic, org_config_names: [] },
         });
 
         const submit = getByText('Add');

@@ -4,6 +4,12 @@ import { LogoutAction } from '~js/store/user/actions';
 import { GitHubUser } from '~js/store/user/reducer';
 import { OBJECT_TYPES } from '~js/utils/constants';
 
+export interface OrgConfig {
+  key: string;
+  label?: string;
+  description?: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -19,6 +25,9 @@ export interface Project {
   github_users: GitHubUser[];
   currently_refreshing_gh_users?: boolean;
   repo_image_url: string;
+  org_config_names: OrgConfig[];
+  currently_fetching_org_config_names: boolean;
+  latest_sha: string;
 }
 export interface ProjectsState {
   projects: Project[];
@@ -109,6 +118,26 @@ const reducer = (
                 ...project,
                 currently_refreshing_gh_users:
                   action.type === 'REFRESH_GH_USERS_REQUESTED',
+              };
+            }
+            return project;
+          }),
+        };
+      }
+      return projects;
+    }
+    case 'REFRESH_ORG_CONFIGS_REQUESTED':
+    case 'REFRESH_ORG_CONFIGS_REJECTED': {
+      const projectId = action.payload;
+      if (projects.projects.find((project) => project.id === projectId)) {
+        return {
+          ...projects,
+          projects: projects.projects.map((project) => {
+            if (project.id === projectId) {
+              return {
+                ...project,
+                currently_fetching_org_config_names:
+                  action.type === 'REFRESH_ORG_CONFIGS_REQUESTED',
               };
             }
             return project;

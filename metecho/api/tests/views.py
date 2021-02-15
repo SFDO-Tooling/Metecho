@@ -741,12 +741,12 @@ class TestEpicView:
         with ExitStack() as stack:
             epic = epic_factory()
 
-            available_task_org_config_names_job = stack.enter_context(
-                patch("metecho.api.jobs.available_task_org_config_names_job")
+            available_org_config_names_job = stack.enter_context(
+                patch("metecho.api.jobs.available_org_config_names_job")
             )
             response = client.post(
                 reverse("epic-refresh-org-config-names", kwargs={"pk": str(epic.id)})
             )
 
             assert response.status_code == 202, response.json()
-            assert available_task_org_config_names_job.delay.called
+            assert available_org_config_names_job.delay.called

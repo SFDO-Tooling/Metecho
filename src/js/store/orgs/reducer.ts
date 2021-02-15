@@ -21,6 +21,9 @@ export interface MinimalOrg {
 export interface Org extends MinimalOrg {
   owner: string;
   owner_gh_username: string;
+  description: string;
+  description_rendered: string;
+  org_config_name: string;
   last_modified_at: string | null;
   expires_at: string | null;
   latest_commit: string;
@@ -58,7 +61,7 @@ export interface Changeset {
 export interface OrgsByParent {
   [ORG_TYPES.DEV]: Org | null;
   [ORG_TYPES.QA]: Org | null;
-  [ORG_TYPES.PLAYGROUND]: Org[];
+  [ORG_TYPES.PLAYGROUND]: Org | null;
 }
 
 export interface OrgState {

@@ -72,12 +72,13 @@ def epic_create_branch(
                     ).latest_sha(),
                 )
         epic_branch_name = f"{prefix}{slugify(epic.name)}"
-        epic_branch_name = try_to_make_branch(
+        epic_branch_name, latest_sha = try_to_make_branch(
             repository,
             new_branch=epic_branch_name,
             base_branch=repository.default_branch,
         )
         epic.branch_name = epic_branch_name
+        epic.latest_sha = latest_sha
         if should_finalize:
             epic.finalize_epic_update(originating_user_id=originating_user_id)
     return epic_branch_name
@@ -103,7 +104,7 @@ def _create_branches_on_github(*, user, repo_id, epic, task, originating_user_id
     if task.branch_name:
         task_branch_name = task.branch_name
     else:
-        task_branch_name = try_to_make_branch(
+        task_branch_name, latest_sha = try_to_make_branch(
             repository,
             new_branch=f"{epic_branch_name}__{slugify(task.name)}",
             base_branch=epic_branch_name,
@@ -170,6 +171,7 @@ def _create_org_and_run_flow(
 ):
     repository = get_repo_info(user, repo_id=repo_id)
     commit = repository.branch(repo_branch).commit
+    org_config_name = scratch_org.org_config_name
 
     scratch_org_config, cci, org_config = create_org(
         repo_owner=repository.owner.login,
@@ -179,7 +181,7 @@ def _create_org_and_run_flow(
         user=user,
         project_path=project_path,
         scratch_org=scratch_org,
-        org_name=scratch_org.task.org_config_name,
+        org_name=org_config_name,
         originating_user_id=originating_user_id,
         sf_username=sf_username,
     )
@@ -206,7 +208,7 @@ def _create_org_and_run_flow(
         "beta": "install_beta",
         "release": "install_prod",
     }
-    flow_name = scratch_org_config.setup_flow or cases[scratch_org.task.org_config_name]
+    flow_name = scratch_org_config.setup_flow or cases[org_config_name]
 
     try:
         run_flow(
@@ -250,17 +252,19 @@ def create_branches_on_github_then_create_scratch_org(
     scratch_org.refresh_from_db()
     user = scratch_org.owner
     task = scratch_org.task
-    epic = task.epic
+    parent = scratch_org.parent
 
     try:
-        repo_id = task.get_repo_id()
-        commit_ish = _create_branches_on_github(
-            user=user,
-            repo_id=repo_id,
-            epic=epic,
-            task=task,
-            originating_user_id=originating_user_id,
-        )
+        repo_id = parent.get_repo_id()
+        commit_ish = parent.branch_name
+        if task:
+            commit_ish = _create_branches_on_github(
+                user=user,
+                repo_id=repo_id,
+                epic=task.epic,
+                task=task,
+                originating_user_id=originating_user_id,
+            )
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             _create_org_and_run_flow(
                 scratch_org,
@@ -288,8 +292,8 @@ def refresh_scratch_org(scratch_org, *, originating_user_id):
     try:
         scratch_org.refresh_from_db()
         user = scratch_org.owner
-        repo_id = scratch_org.task.get_repo_id()
-        commit_ish = scratch_org.task.branch_name
+        repo_id = scratch_org.parent.get_repo_id()
+        commit_ish = scratch_org.parent.branch_name
         sf_username = scratch_org.owner_sf_username
 
         delete_org(scratch_org)
@@ -328,8 +332,8 @@ def get_unsaved_changes(scratch_org, *, originating_user_id):
         )
         unsaved_changes = compare_revisions(old_revision_numbers, new_revision_numbers)
         user = scratch_org.owner
-        repo_id = scratch_org.task.get_repo_id()
-        commit_ish = scratch_org.task.branch_name
+        repo_id = scratch_org.parent.get_repo_id()
+        commit_ish = scratch_org.parent.branch_name
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             scratch_org.valid_target_directories, _ = get_valid_target_directories(
                 user,
@@ -549,7 +553,7 @@ def refresh_commits(*, project, branch_name, originating_user_id):
     This should only run when we're notified of a force-commit. It's the
     nuclear option.
     """
-    from .models import Task
+    from .models import Epic, Task
 
     repo = get_repo_info(
         None, repo_owner=project.repo_owner, repo_name=project.repo_name
@@ -560,6 +564,15 @@ def refresh_commits(*, project, branch_name, originating_user_id):
     # assumption that we will find the origin of the task branch within
     # that limit.
     commits = list(repo.commits(repo.branch(branch_name).latest_sha(), number=1000))
+
+    if project.branch_name == branch_name:
+        project.latest_sha = commits[0].sha if commits else ""
+        project.finalize_project_update(originating_user_id=originating_user_id)
+
+    epics = Epic.objects.filter(project=project, branch_name=branch_name)
+    for epic in epics:
+        epic.latest_sha = commits[0].sha if commits else ""
+        epic.finalize_epic_update(originating_user_id=originating_user_id)
 
     tasks = Task.objects.filter(epic__project=project, branch_name=branch_name)
     for task in tasks:
@@ -696,12 +709,14 @@ def create_gh_branch_for_new_epic(epic, *, user):
             try:
                 head = repository.branch(epic.branch_name).commit.sha
             except NotFoundError:
-                try_to_make_branch(
+                branch_name, latest_sha = try_to_make_branch(
                     repository,
                     new_branch=epic.branch_name,
                     base_branch=repository.default_branch,
                 )
+                epic.latest_sha = latest_sha
             else:
+                epic.latest_sha = head
                 base = repository.branch(repository.default_branch).commit.sha
                 epic.has_unmerged_commits = (
                     repository.compare_commits(base, head).ahead_by > 0
@@ -735,6 +750,7 @@ def create_gh_branch_for_new_epic(epic, *, user):
     except Exception:
         epic.refresh_from_db()
         epic.branch_name = ""
+        epic.latest_sha = ""
         epic.pr_number = None
         epic.pr_is_merged = False
         epic.pr_is_open = False
@@ -750,14 +766,14 @@ def create_gh_branch_for_new_epic(epic, *, user):
 create_gh_branch_for_new_epic_job = job(create_gh_branch_for_new_epic)
 
 
-def available_task_org_config_names(epic, *, user):
+def available_org_config_names(project, *, user):
     try:
-        epic.refresh_from_db()
-        repo_id = epic.get_repo_id()
+        project.refresh_from_db()
+        repo_id = project.get_repo_id()
         repo = get_repo_info(
             None,
-            repo_owner=epic.project.repo_owner,
-            repo_name=epic.project.repo_name,
+            repo_owner=project.repo_owner,
+            repo_name=project.repo_name,
         )
         with local_github_checkout(user, repo_id) as repo_root:
             config = get_project_config(
@@ -768,19 +784,23 @@ def available_task_org_config_names(epic, *, user):
                 repo_branch=repo.default_branch,
                 repo_commit=repo.branch(repo.default_branch).latest_sha(),
             )
-            epic.available_task_org_config_names = [
+            project.org_config_names = [
                 {"key": key, **value} for key, value in config.orgs__scratch.items()
             ]
     except Exception:
-        epic.finalize_available_task_org_config_names(originating_user_id=str(user.id))
+        project.finalize_available_org_config_names(
+            originating_user_id=str(user.id) if user else None
+        )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        epic.finalize_available_task_org_config_names(originating_user_id=str(user.id))
+        project.finalize_available_org_config_names(
+            originating_user_id=str(user.id) if user else None
+        )
 
 
-available_task_org_config_names_job = job(available_task_org_config_names)
+available_org_config_names_job = job(available_org_config_names)
 
 
 def user_reassign(scratch_org, *, new_user, originating_user_id):

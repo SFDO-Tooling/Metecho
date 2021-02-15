@@ -34,4 +34,8 @@ class TaskFilter(filters.FilterSet):
 class ScratchOrgFilter(filters.FilterSet):
     class Meta:
         model = ScratchOrg
-        fields = ("task",)
+        fields = (
+            "project",
+            "epic",
+            "task",
+        )

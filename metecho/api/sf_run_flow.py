@@ -94,7 +94,7 @@ def capitalize(s):
 
 def is_org_good(org):
     config = org.config
-    org_name = org.task.org_config_name
+    org_name = org.org_config_name
     try:
         org_config = OrgConfig(config, org_name)
         org_config.refresh_oauth_token(None)

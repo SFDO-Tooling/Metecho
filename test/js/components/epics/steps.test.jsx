@@ -21,7 +21,6 @@ const defaultEpic = {
   branch_url: 'https://github.com/test/test-repo/tree/branch-name',
   branch_name: 'branch-name',
   github_users: [jonny, stacy],
-  available_task_org_config_names: [],
   has_unmerged_commits: false,
   status: EPIC_STATUSES.PLANNED,
 };

@@ -13,7 +13,7 @@ from ..jobs import (
     _create_branches_on_github,
     _create_org_and_run_flow,
     alert_user_about_expiring_org,
-    available_task_org_config_names,
+    available_org_config_names,
     commit_changes_from_org,
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_epic,
@@ -280,9 +280,7 @@ def test_create_org_and_run_flow__fall_back_to_cases():
         Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
         Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
         _create_org_and_run_flow(
-            MagicMock(
-                **{"org_type": SCRATCH_ORG_TYPES.Dev, "task.org_config_name": "dev"}
-            ),
+            MagicMock(**{"org_type": SCRATCH_ORG_TYPES.Dev, "org_config_name": "dev"}),
             user=MagicMock(),
             repo_id=123,
             repo_branch=MagicMock(),
@@ -869,10 +867,10 @@ class TestCreateGhBranchForNewEpic:
 
 @pytest.mark.django_db
 class TestAvailableTaskOrgConfigNames:
-    def test_available_task_org_config_names(self, epic_factory, user_factory):
-        epic = epic_factory()
+    def test_available_org_config_names(self, project_factory, user_factory):
+        project = project_factory()
         user = user_factory()
-        epic.finalize_available_task_org_config_names = MagicMock()
+        project.finalize_available_org_config_names = MagicMock()
         with ExitStack() as stack:
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
@@ -894,22 +892,22 @@ class TestAvailableTaskOrgConfigNames:
                 **{"project_config.orgs__scratch": {}}
             )
 
-            available_task_org_config_names(epic, user=user)
+            available_org_config_names(project, user=user)
 
-            assert epic.finalize_available_task_org_config_names.called
+            assert project.finalize_available_org_config_names.called
 
-    def test_available_task_org_config_names__error(self, epic_factory, user_factory):
-        epic = epic_factory()
+    def test_available_org_config_names__error(self, project_factory, user_factory):
+        project = project_factory()
         user = user_factory()
-        epic.finalize_available_task_org_config_names = MagicMock()
+        project.finalize_available_org_config_names = MagicMock()
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
             get_repo_info.side_effect = ValueError
 
             with pytest.raises(ValueError):
-                available_task_org_config_names(epic, user=user)
+                available_org_config_names(project, user=user)
 
-            assert epic.finalize_available_task_org_config_names.called
+            assert project.finalize_available_org_config_names.called
 
 
 @pytest.mark.django_db

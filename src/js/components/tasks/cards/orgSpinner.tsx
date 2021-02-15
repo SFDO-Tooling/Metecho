@@ -14,7 +14,7 @@ const OrgSpinner = ({
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
   isRefreshingChanges: boolean;
-  isReassigningOrg: boolean;
+  isReassigningOrg?: boolean;
 }) => {
   if (
     isDeleting ||

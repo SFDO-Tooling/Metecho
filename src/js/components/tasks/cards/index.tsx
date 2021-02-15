@@ -199,7 +199,7 @@ const OrgCards = ({
         checkForOrgChanges(org as Org);
         setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
       }
-    } else {
+    } else if (type === ORG_TYPES.QA) {
       assignUser({ type, assignee, shouldAlertAssignee });
     }
   };

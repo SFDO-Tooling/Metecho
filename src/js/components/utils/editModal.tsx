@@ -25,7 +25,7 @@ interface EditModalProps {
   model: Epic | Task;
   modelType: ObjectTypes;
   hasOrgs?: boolean;
-  epicId?: string;
+  projectId?: string;
   orgConfigsLoading?: boolean;
   orgConfigs?: OrgConfig[];
   isOpen: boolean;
@@ -39,7 +39,7 @@ const EditModal = ({
   model,
   modelType,
   hasOrgs,
-  epicId,
+  projectId,
   orgConfigsLoading,
   orgConfigs,
   isOpen,
@@ -198,7 +198,7 @@ const EditModal = ({
         {isTask(model, modelType) ? (
           <SelectFlowType
             orgConfigs={orgConfigs || []}
-            epicId={epicId}
+            projectId={projectId}
             value={inputs.org_config_name}
             errors={errors.org_config_name}
             isDisabled={hasOrgs}

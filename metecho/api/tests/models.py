@@ -85,6 +85,23 @@ class TestProject:
 
             assert async_to_sync.called
 
+    def test_queue_available_org_config_names(self, user_factory, project_factory):
+        user = user_factory()
+        project = project_factory()
+        with ExitStack() as stack:
+            available_org_config_names_job = stack.enter_context(
+                patch("metecho.api.jobs.available_org_config_names_job")
+            )
+            project.queue_available_org_config_names(user=user)
+
+            assert available_org_config_names_job.delay.called
+
+    def test_finalize_available_org_config_names(self, project_factory):
+        project = project_factory()
+        project.notify_changed = MagicMock()
+        project.finalize_available_org_config_names()
+        assert project.notify_changed.called
+
 
 @pytest.mark.django_db
 class TestEpic:
@@ -177,23 +194,6 @@ class TestEpic:
         assert Epic.objects.count() == 3
         assert Epic.objects.active().count() == 0
         assert Task.objects.active().count() == 0
-
-    def test_queue_available_task_org_config_names(self, user_factory, epic_factory):
-        user = user_factory()
-        epic = epic_factory()
-        with ExitStack() as stack:
-            available_task_org_config_names_job = stack.enter_context(
-                patch("metecho.api.jobs.available_task_org_config_names_job")
-            )
-            epic.queue_available_task_org_config_names(user)
-
-            assert available_task_org_config_names_job.delay.called
-
-    def test_finalize_available_task_org_config_names(self, epic_factory):
-        epic = epic_factory()
-        epic.notify_changed = MagicMock()
-        epic.finalize_available_task_org_config_names()
-        assert epic.notify_changed.called
 
 
 @pytest.mark.django_db

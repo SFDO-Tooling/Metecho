@@ -22,11 +22,11 @@ const Footer = ({
   isCreating: boolean;
   isDeleting: boolean;
   isRefreshingChanges: boolean;
-  isReassigningOrg: boolean;
-  isRefreshingOrg: boolean;
-  testOrgOutOfDate: boolean;
+  isReassigningOrg?: boolean;
+  isRefreshingOrg?: boolean;
+  testOrgOutOfDate?: boolean;
   readyForReview?: boolean;
-  openRefreshOrgModal: () => void;
+  openRefreshOrgModal?: () => void;
 }) => {
   const loadingMsg: JSX.Element = i18n.t(
     'This process could take a number of minutes. Feel free to leave this page and check back later.',

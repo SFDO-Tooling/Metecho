@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
@@ -45,6 +47,7 @@ import { selectTask, selectTaskSlug } from '~js/store/tasks/selectors';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
 import {
+  DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
   ORG_TYPES,
   OrgTypes,
@@ -68,12 +71,6 @@ const TaskDetail = (props: RouteComponentProps) => {
     ORG_TYPE_TRACKER_DEFAULT,
   );
   const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
-  const openSubmitReviewModal = () => {
-    setSubmitReviewModalOpen(true);
-  };
-  const closeSubmitReviewModal = () => {
-    setSubmitReviewModalOpen(false);
-  };
   const isMounted = useIsMounted();
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
@@ -126,9 +123,8 @@ const TaskDetail = (props: RouteComponentProps) => {
       [ORG_TYPES.DEV]:
         orgs.find((org) => org.org_type === ORG_TYPES.DEV) || null,
       [ORG_TYPES.QA]: orgs.find((org) => org.org_type === ORG_TYPES.QA) || null,
-      [ORG_TYPES.PLAYGROUND]: orgs.filter(
-        (org) => org.org_type === ORG_TYPES.PLAYGROUND,
-      ),
+      [ORG_TYPES.PLAYGROUND]:
+        orgs.find((org) => org.org_type === ORG_TYPES.PLAYGROUND) || null,
     };
     devOrg = taskOrgs[ORG_TYPES.DEV];
     testOrg = taskOrgs[ORG_TYPES.QA];
@@ -184,8 +180,19 @@ const TaskDetail = (props: RouteComponentProps) => {
     testOrgIsRefreshing ||
     testOrgSubmittingReview;
 
+  const openSubmitReviewModal = () => {
+    setSubmitReviewModalOpen(true);
+    setCaptureModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+  };
+  const closeSubmitReviewModal = () => {
+    setSubmitReviewModalOpen(false);
+  };
   const openCaptureModal = () => {
     setCaptureModalOpen(true);
+    setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -195,6 +202,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   };
   const openSubmitModal = () => {
     setSubmitModalOpen(true);
+    setSubmitReviewModalOpen(false);
     setCaptureModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
@@ -202,6 +210,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   // edit modal related...
   const openEditModal = () => {
     setEditModalOpen(true);
+    setSubmitReviewModalOpen(false);
     setSubmitModalOpen(false);
     setCaptureModalOpen(false);
     setDeleteModalOpen(false);
@@ -212,6 +221,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   // delete modal related
   const openDeleteModal = () => {
     setDeleteModalOpen(true);
+    setSubmitReviewModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setCaptureModalOpen(false);
@@ -223,29 +233,15 @@ const TaskDetail = (props: RouteComponentProps) => {
   // assign user modal related
   const openAssignUserModal = (type: OrgTypes) => {
     setAssignUserModalOpen(type);
+    setSubmitReviewModalOpen(false);
+    setCaptureModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
   };
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(null);
   };
-
-  const doCreateOrg = useCallback(
-    (type: OrgTypes) => {
-      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
-      dispatch(
-        createObject({
-          objectType: OBJECT_TYPES.ORG,
-          data: { task: task?.id, org_type: type },
-          shouldSubscribeToObject: false,
-        }),
-      ).finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
-        }
-      });
-    },
-    [dispatch, isCreatingOrg, isMounted, task?.id],
-  );
 
   const doRefetchOrg = useCallback(
     (org: Org) => {
@@ -259,6 +255,29 @@ const TaskDetail = (props: RouteComponentProps) => {
       dispatch(refreshOrg(org));
     },
     [dispatch],
+  );
+
+  const doCreateOrg = useCallback(
+    (type: OrgTypes) => {
+      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
+      dispatch(
+        createObject({
+          objectType: OBJECT_TYPES.ORG,
+          data: {
+            task: task?.id,
+            org_type: type,
+            org_config_name: task?.org_config_name || DEFAULT_ORG_CONFIG_NAME,
+          },
+          shouldSubscribeToObject: false,
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
+        }
+      });
+    },
+    [dispatch, isCreatingOrg, isMounted, task?.id, task?.org_config_name],
   );
 
   const doCaptureChanges = useCallback(() => {
@@ -288,37 +307,43 @@ const TaskDetail = (props: RouteComponentProps) => {
     (step: Step) => {
       const action = step.action;
       switch (action) {
-        case 'assign-dev':
+        case 'assign-dev': {
           openAssignUserModal(ORG_TYPES.DEV);
           break;
-        case 'create-dev-org':
+        }
+        case 'create-dev-org': {
           /* istanbul ignore else */
           if (!devOrg && userIsAssignedDev) {
             doCreateOrg(ORG_TYPES.DEV);
           }
           break;
-        case 'retrieve-changes':
+        }
+        case 'retrieve-changes': {
           /* istanbul ignore else */
           if (readyToCaptureChanges && !devOrgLoading) {
             doCaptureChanges();
           }
           break;
-        case 'submit-changes':
+        }
+        case 'submit-changes': {
           /* istanbul ignore else */
           if (readyToSubmit && !currentlySubmitting) {
             openSubmitModal();
           }
           break;
-        case 'assign-qa':
+        }
+        case 'assign-qa': {
           openAssignUserModal(ORG_TYPES.QA);
           break;
-        case 'create-qa-org':
+        }
+        case 'create-qa-org': {
           /* istanbul ignore else */
           if (!testOrg && userIsAssignedTester) {
             doCreateOrg(ORG_TYPES.QA);
           }
           break;
-        case 'refresh-test-org':
+        }
+        case 'refresh-test-org': {
           /* istanbul ignore else */
           if (
             testOrg &&
@@ -329,12 +354,14 @@ const TaskDetail = (props: RouteComponentProps) => {
             doRefreshOrg(testOrg);
           }
           break;
-        case 'submit-review':
+        }
+        case 'submit-review': {
           /* istanbul ignore else */
           if (userIsAssignedTester && !testOrgSubmittingReview) {
             openSubmitReviewModal();
           }
           break;
+        }
       }
     },
     [
@@ -425,12 +452,14 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   const handlePageOptionSelect = (selection: 'edit' | 'delete') => {
     switch (selection) {
-      case 'edit':
+      case 'edit': {
         openEditModal();
         break;
-      case 'delete':
+      }
+      case 'delete': {
         openDeleteModal();
         break;
+      }
     }
   };
 
@@ -642,9 +671,9 @@ const TaskDetail = (props: RouteComponentProps) => {
           model={task}
           modelType={OBJECT_TYPES.TASK}
           hasOrgs={hasOrgs}
-          epicId={epic.id}
-          orgConfigsLoading={epic.currently_fetching_org_config_names}
-          orgConfigs={epic.available_task_org_config_names}
+          projectId={project.id}
+          orgConfigsLoading={project.currently_fetching_org_config_names}
+          orgConfigs={project.org_config_names}
           isOpen={editModalOpen}
           handleClose={closeEditModal}
         />

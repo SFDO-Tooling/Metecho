@@ -43,6 +43,13 @@ interface RefreshGitHubUsersRejected {
   type: 'REFRESH_GH_USERS_REJECTED';
   payload: string;
 }
+interface RefreshOrgConfigsAction {
+  type:
+    | 'REFRESH_ORG_CONFIGS_REQUESTED'
+    | 'REFRESH_ORG_CONFIGS_ACCEPTED'
+    | 'REFRESH_ORG_CONFIGS_REJECTED';
+  payload: string;
+}
 
 export type ProjectsAction =
   | ProjectUpdated
@@ -54,7 +61,8 @@ export type ProjectsAction =
   | ProjectsRefreshed
   | RefreshGitHubUsersRequested
   | RefreshGitHubUsersAccepted
-  | RefreshGitHubUsersRejected;
+  | RefreshGitHubUsersRejected
+  | RefreshOrgConfigsAction;
 
 export const refreshProjects = (): ThunkResult<
   Promise<RefreshProjectsAccepted>
@@ -143,4 +151,26 @@ export const projectError = ({
   }
 
   return dispatch(updateProject(model));
+};
+
+export const refreshOrgConfigs = (
+  id: string,
+): ThunkResult<Promise<RefreshOrgConfigsAction>> => async (dispatch) => {
+  dispatch({ type: 'REFRESH_ORG_CONFIGS_REQUESTED', payload: id });
+  try {
+    await apiFetch({
+      url: window.api_urls.project_refresh_org_config_names(id),
+      dispatch,
+      opts: {
+        method: 'POST',
+      },
+    });
+    return dispatch({
+      type: 'REFRESH_ORG_CONFIGS_ACCEPTED' as const,
+      payload: id,
+    });
+  } catch (err) {
+    dispatch({ type: 'REFRESH_ORG_CONFIGS_REJECTED', payload: id });
+    throw err;
+  }
 };

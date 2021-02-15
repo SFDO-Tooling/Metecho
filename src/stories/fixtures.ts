@@ -28,8 +28,8 @@ export const api_urls = {
   task_can_reassign: (id: string) => `/api/tasks/${id}/can_reassign/`,
   epic_detail: (id: string) => `/api/epics/${id}/`,
   epic_create_pr: (id: string) => `/api/epics/${id}/create_pr/`,
-  epic_refresh_org_config_names: (id: string) =>
-    `/api/epics/${id}/refresh_org_config_names/`,
+  project_refresh_org_config_names: (id: string) =>
+    `/api/projects/${id}/refresh_org_config_names/`,
   project_feature_branches: (id: string) =>
     `/api/projects/${id}/feature_branches/`,
 };
@@ -92,10 +92,8 @@ export const sampleEpic1 = {
   pr_is_merged: false,
   has_unmerged_commits: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [sampleGitHubUser2],
   status: EPIC_STATUSES.PLANNED,
-  available_task_org_config_names: [],
 };
 
 export const sampleEpic2 = {
@@ -118,10 +116,8 @@ export const sampleEpic2 = {
   pr_is_merged: false,
   has_unmerged_commits: true,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   status: EPIC_STATUSES.IN_PROGRESS,
-  available_task_org_config_names: [],
 };
 
 export const sampleEpic3 = {
@@ -140,10 +136,8 @@ export const sampleEpic3 = {
   pr_is_merged: false,
   has_unmerged_commits: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [],
   status: EPIC_STATUSES.PLANNED,
-  available_task_org_config_names: [],
 };
 
 export const sampleEpic4 = {
@@ -163,10 +157,8 @@ export const sampleEpic4 = {
   pr_is_merged: false,
   has_unmerged_commits: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [],
   status: EPIC_STATUSES.MERGED,
-  available_task_org_config_names: [],
 };
 
 export const sampleEpic5 = {
@@ -186,10 +178,8 @@ export const sampleEpic5 = {
   pr_is_merged: false,
   has_unmerged_commits: true,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2],
   status: EPIC_STATUSES.REVIEW,
-  available_task_org_config_names: [],
 };
 
 export const sampleTask1 = {
@@ -377,4 +367,6 @@ export const sampleProject1 = {
   currently_refreshing_gh_users: false,
   repo_image_url:
     'https://repository-images.githubusercontent.com/123456/123-456',
+  currently_fetching_org_config_names: false,
+  org_config_names: [],
 };

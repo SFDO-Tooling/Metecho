@@ -4,12 +4,6 @@ import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
 import { GitHubUser } from '~js/store/user/reducer';
 import { EpicStatuses, OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
 
-export interface OrgConfig {
-  key: string;
-  label?: string;
-  description?: string;
-}
-
 export interface Epic {
   id: string;
   project: string;
@@ -26,10 +20,9 @@ export interface Epic {
   pr_is_merged: boolean;
   has_unmerged_commits: boolean;
   currently_creating_pr: boolean;
-  currently_fetching_org_config_names: boolean;
   github_users: GitHubUser[];
   status: EpicStatuses;
-  available_task_org_config_names: OrgConfig[];
+  latest_sha: string;
 }
 
 export interface EpicsByProjectState {

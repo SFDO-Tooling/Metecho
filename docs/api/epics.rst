@@ -33,7 +33,6 @@ Retrieve
           "branch_diff_url": "https://github.com/SFDO-Tooling/test-project/compare/main...feature/test-epic",
           "has_unmerged_commits": true,
           "currently_creating_pr": false,
-          "currently_fetching_org_config_names": false,
           "pr_url": "https://github.com/SFDO-Tooling/test-project/pull/1357",
           "pr_is_open": true,
           "pr_is_merged": false,
@@ -45,16 +44,7 @@ Retrieve
             }
           ],
           "status": "In progress",
-          "available_task_org_config_names": [
-            {
-              "key": "dev",
-              "label": "Dev Org",
-              "description": "Org set up for package development"
-            },
-            {
-              "key": "qa"
-            }
-          ]
+          "latest_sha": "12345abc"
         }
         ...
       ]

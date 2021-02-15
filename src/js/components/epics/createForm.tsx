@@ -322,6 +322,7 @@ const CreateEpicModal = ({
           id="epic-description"
           label={i18n.t('Description')}
           classNameContainer="slds-form-element_stacked slds-p-left_none"
+          className="metecho-textarea"
           name="description"
           value={inputs.description}
           errorText={errors.description}
