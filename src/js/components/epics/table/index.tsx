@@ -31,7 +31,11 @@ const EpicTable = ({
     <DataTable items={items} id="project-epics-table" noRowHover>
       <DataTableColumn
         key="details"
-        label={i18n.t('Epic')}
+        label={
+          <div>
+            <span className="epic-name-column">{i18n.t('Epic')}</span>
+          </div>
+        }
         property="name"
         width="100%"
         primaryColumn
@@ -40,7 +44,11 @@ const EpicTable = ({
       </DataTableColumn>
       <DataTableColumn
         key="status"
-        label={i18n.t('Status')}
+        label={
+          <div>
+            <span className="epic-status-column">{i18n.t('Status')}</span>
+          </div>
+        }
         property="status"
         width="0"
       >
@@ -53,7 +61,7 @@ const EpicTable = ({
             category="utility"
             name="user"
             size="xx-small"
-            className="slds-m-bottom_xx-small"
+            className="slds-m-bottom_xx-small epic-collaborators-column"
             containerClassName="slds-current-color"
             title={i18n.t('Collaborators')}
           />

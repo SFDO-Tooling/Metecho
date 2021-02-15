@@ -8,9 +8,12 @@ export default {
   buttonNext: {
     backgroundColor: '#0070d2',
   },
-  // tooltipContainer: {
-  //   textAlign: 'left',
-  // },
+  tooltipContainer: {
+    textAlign: 'left',
+  },
+  buttonBack: {
+    color: '#fff',
+  },
   tooltipTitle: {
     margin: '10px 0 0 10px',
   },

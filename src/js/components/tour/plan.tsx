@@ -24,6 +24,37 @@ const steps: Step[] = [
     placement: 'right',
     disableBeacon: true,
   },
+  {
+    target: '.epic-name-column',
+    content: (
+      <Trans i18nKey="epicNameHelper">
+        Here is some information on the names of Epics in a project
+      </Trans>
+    ),
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '.epic-status-column',
+    content: (
+      <Trans i18nKey="epicStatusHelper">
+        You can assign yourself as tester any time. When the Task has a status
+        of Review, you can begin testing.
+      </Trans>
+    ),
+    placement: 'right',
+    disableBeacon: true,
+  },
+  {
+    target: '.epic-collaborators-column',
+    content: (
+      <Trans i18nKey="epicCollaboratorsHelper">
+        Here is some information on project collaborators
+      </Trans>
+    ),
+    placement: 'right',
+    disableBeacon: true,
+  },
 ];
 
 const PlanTour = (props: Props) => (
