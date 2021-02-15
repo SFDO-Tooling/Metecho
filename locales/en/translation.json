@@ -30,6 +30,7 @@
   "Behind Latest": "Behind Latest",
   "Behind Latest:": "Behind Latest:",
   "Branch:": "Branch:",
+  "Browse available tasks; give your input": "Browse available tasks; give your input",
   "Cancel": "Cancel",
   "Cancel and Log Out": "Cancel and Log Out",
   "Cancel epic creation": "Cancel epic creation",
@@ -65,6 +66,7 @@
   "Create Project": "Create Project",
   "Create a Scratch Org for development": "Create a Scratch Org for development",
   "Create a Scratch Org for testing": "Create a Scratch Org for testing",
+  "Create a task or an epic; add your work": "Create a task or an epic; add your work",
   "Create an Epic": "Create an Epic",
   "Create an Epic for": "Create an Epic for",
   "Create new branch on GitHub": "Create new branch on GitHub",
@@ -189,6 +191,8 @@
   "Select the location to retrieve changes": "Select the location to retrieve changes",
   "Selected Changes": "Selected Changes",
   "Stage Complete": "Stage Complete",
+  "Start Help Walkthrough": "Start Help Walkthrough",
+  "Start Plan Walkthrough": "Start Plan Walkthrough",
   "Start Play Walkthrough": "Start Play Walkthrough",
   "Status": "Status",
   "Status:": "Status:",
@@ -313,6 +317,7 @@
   "errorWithAccount": "An error occurred with your account. Try the <2>home page</2>?",
   "ignored": "ignored",
   "markdownGuide": "For more options, view this <2>Markdown Guide</2>.",
+  "metechoTourHelper": "Review these walkthroughs anytime you need them or <1></1>take a self-guided tour when you gave specific questions.",
   "metechoTourHelp": "Click on a box below to discover what's possible.",
   "metechoWelcome": "Hello! What can Metecho help you do today?",
   "noGitHubUsers": "We couldn’t find any GitHub users who have access to this project. Try re-syncing the list of available collaborators, or contact an admin for this project on GitHub.",
@@ -345,5 +350,6 @@
   "up to date": "up to date",
   "view changes": "view changes",
   "viewOutdatedOrg": "You may proceed with the outdated org, but be aware that you will not be testing the latest changes.",
-  "welcomeMessage": "<0>To get started</0> log in with your GitHub account."
+  "welcomeMessage": "<0>To get started</0> log in with your GitHub account.",
+  "whatsAnEpic": "Epics are groups of related Tasks, representing larger changes to the Project.You can invite multiple Collaborators to your Epic and assign different people as Developers and Testers for each Task."
 }

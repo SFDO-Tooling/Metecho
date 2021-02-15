@@ -3,12 +3,14 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
+import { CallBackProps, STATUS } from 'react-joyride';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import CreateEpicModal from '~js/components/epics/createForm';
 import EpicTable from '~js/components/epics/table';
 import ProjectNotFound from '~js/components/projects/project404';
+import PlanTour from '~js/components/tour/plan';
 import {
   DetailPageLayout,
   getProjectLoadingOrNotFound,
@@ -25,7 +27,7 @@ import { selectUserState } from '~js/store/user/selectors';
 import { OBJECT_TYPES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
-import TourLandingModal from '../tour/landing';
+import LandingModal from '../tour/landing';
 
 const ProjectDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
@@ -34,6 +36,8 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
     Boolean(!user.onboarded_at),
   );
+  const [runTour, setRunTour] = useState(false);
+  const joyride = {};
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
@@ -86,7 +90,20 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeCreateModal = () => setCreateModalOpen(false);
 
   const closeTourLandingModal = () => setTourLandingModalOpen(false);
-
+  const doRunTour = (type: string) => {
+    switch (type) {
+      case 'plan':
+        closeTourLandingModal();
+        setRunTour(true);
+    }
+  };
+  const handleTourCallback = (data: CallBackProps) => {
+    const { status } = data;
+    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+    if (finishedStatuses.includes(status)) {
+      setRunTour(false);
+    }
+  };
   const hasEpics = epics && epics.epics.length > 0;
 
   return (
@@ -154,9 +171,15 @@ const ProjectDetail = (props: RouteComponentProps) => {
           isOpen={createModalOpen}
           closeCreateModal={closeCreateModal}
         />
-        <TourLandingModal
+        <LandingModal
           isOpen={tourLandingModalOpen}
+          runTour={doRunTour}
           onRequestClose={closeTourLandingModal}
+        />
+        <PlanTour
+          run={runTour}
+          joyride={joyride}
+          handleCallback={handleTourCallback}
         />
       </DetailPageLayout>
     </DocumentTitle>
