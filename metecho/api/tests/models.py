@@ -63,9 +63,15 @@ class TestProject:
 
     def test_save(self, project_factory, git_hub_repository_factory):
         with patch("metecho.api.gh.get_repo_info") as get_repo_info:
-            get_repo_info.return_value = MagicMock(default_branch="main-branch")
+            repo_branch = MagicMock()
+            repo_branch.latest_sha.return_value = "abcd1234"
+            repo_info = MagicMock(default_branch="main-branch")
+            repo_info.branch.return_value = repo_branch
+            get_repo_info.return_value = repo_info
             git_hub_repository_factory(repo_id=123)
-            project = project_factory(branch_name="", repo_id=123)
+            project = project_factory(
+                branch_name="", repo_id=123, github_users=[{}], repo_image_url="/foo"
+            )
             project.save()
             assert get_repo_info.called
             project.refresh_from_db()
@@ -97,7 +103,9 @@ class TestProject:
             assert available_org_config_names_job.delay.called
 
     def test_finalize_available_org_config_names(self, project_factory):
-        project = project_factory()
+        project = project_factory(
+            github_users=[{}], repo_image_url="/foo", branch_name="main"
+        )
         project.notify_changed = MagicMock()
         project.finalize_available_org_config_names()
         assert project.notify_changed.called

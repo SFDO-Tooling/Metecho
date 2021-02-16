@@ -391,8 +391,9 @@ class Project(
 
     @transaction.atomic
     def add_commits(self, *, commits, ref, sender):
-        self.latest_sha = commits[0].sha if commits else ""
-        self.finalize_project_update()
+        if self.branch_name == ref:
+            self.latest_sha = commits[0].get("id") if commits else ""
+            self.finalize_project_update()
 
         matching_epics = Epic.objects.filter(branch_name=ref, project=self)
         for epic in matching_epics:
@@ -567,7 +568,7 @@ class Epic(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def add_commits(self, commits):
-        self.latest_sha = commits[0].sha if commits else ""
+        self.latest_sha = commits[0].get("id") if commits else ""
         self.finalize_epic_update()
 
     class Meta:

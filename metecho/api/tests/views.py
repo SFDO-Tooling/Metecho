@@ -168,7 +168,7 @@ class TestProjectView:
 
 @pytest.mark.django_db
 class TestHookView:
-    def test_202__push_not_forced(
+    def test_202__push_task_commits(
         self,
         settings,
         client,
@@ -239,6 +239,112 @@ class TestHookView:
             assert not refresh_commits_job.delay.called
             task.refresh_from_db()
             assert len(task.commits) == 1
+
+    def test_202__push_epic_commits(
+        self,
+        settings,
+        client,
+        project_factory,
+        git_hub_repository_factory,
+        epic_factory,
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        with ExitStack() as stack:
+            project = project_factory(repo_id=123)
+            git_hub_repository_factory(repo_id=123)
+            epic = epic_factory(project=project, branch_name="test-epic")
+
+            refresh_commits_job = stack.enter_context(
+                patch("metecho.api.jobs.refresh_commits_job")
+            )
+            response = client.post(
+                reverse("hook"),
+                json.dumps(
+                    {
+                        "ref": "refs/heads/test-epic",
+                        "forced": False,
+                        "repository": {"id": 123},
+                        "commits": [
+                            {
+                                "id": "123",
+                                "author": {
+                                    "name": "Test",
+                                    "email": "test@example.com",
+                                    "username": "test123",
+                                },
+                                "timestamp": "2019-11-20 21:32:53.668260+00:00",
+                                "message": "Message",
+                                "url": "https://github.com/test/user/foo",
+                            }
+                        ],
+                        "sender": {
+                            "login": "test123",
+                            "avatar_url": "https://avatar_url/",
+                        },
+                    }
+                ),
+                content_type="application/json",
+                # The sha1 hexdigest of the request body x the secret
+                # key above:
+                HTTP_X_HUB_SIGNATURE="sha1=211e9ad524fda925bf573d380386cf995efe6829",
+                HTTP_X_GITHUB_EVENT="push",
+            )
+            assert response.status_code == 202, response.content
+            assert not refresh_commits_job.delay.called
+            epic.refresh_from_db()
+            assert epic.latest_sha == "123"
+
+    def test_202__push_project_commits(
+        self,
+        settings,
+        client,
+        project_factory,
+        git_hub_repository_factory,
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        with ExitStack() as stack:
+            project = project_factory(repo_id=123, branch_name="test-project")
+            git_hub_repository_factory(repo_id=123)
+
+            refresh_commits_job = stack.enter_context(
+                patch("metecho.api.jobs.refresh_commits_job")
+            )
+            response = client.post(
+                reverse("hook"),
+                json.dumps(
+                    {
+                        "ref": "refs/heads/test-project",
+                        "forced": False,
+                        "repository": {"id": 123},
+                        "commits": [
+                            {
+                                "id": "123",
+                                "author": {
+                                    "name": "Test",
+                                    "email": "test@example.com",
+                                    "username": "test123",
+                                },
+                                "timestamp": "2019-11-20 21:32:53.668260+00:00",
+                                "message": "Message",
+                                "url": "https://github.com/test/user/foo",
+                            }
+                        ],
+                        "sender": {
+                            "login": "test123",
+                            "avatar_url": "https://avatar_url/",
+                        },
+                    }
+                ),
+                content_type="application/json",
+                # The sha1 hexdigest of the request body x the secret
+                # key above:
+                HTTP_X_HUB_SIGNATURE="sha1=dd348e0a076589952d3d8f2b19b8d8e8592127ed",
+                HTTP_X_GITHUB_EVENT="push",
+            )
+            assert response.status_code == 202, response.content
+            assert not refresh_commits_job.delay.called
+            project.refresh_from_db()
+            assert project.latest_sha == "123"
 
     def test_400__no_handler(
         self,
