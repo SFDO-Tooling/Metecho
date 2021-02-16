@@ -280,7 +280,7 @@ def test_create_org_and_run_flow__fall_back_to_cases():
         Path = stack.enter_context(patch(f"{PATCH_ROOT}.Path"))
         Path.return_value = MagicMock(**{"read_text.return_value": "test logs"})
         _create_org_and_run_flow(
-            MagicMock(**{"org_type": SCRATCH_ORG_TYPES.Dev, "org_config_name": "dev"}),
+            MagicMock(org_type=SCRATCH_ORG_TYPES.Dev, org_config_name="dev"),
             user=MagicMock(),
             repo_id=123,
             repo_branch=MagicMock(),
