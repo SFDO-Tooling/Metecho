@@ -116,7 +116,7 @@ pickleshare==0.7.5
     # via ipython
 pluggy==0.13.1
     # via pytest
-prompt-toolkit==3.0.15
+prompt-toolkit==3.0.16
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
@@ -126,7 +126,7 @@ pycodestyle==2.6.0
     # via flake8
 pyflakes==2.2.0
     # via flake8
-pygments==2.7.4
+pygments==2.8.0
     # via
     #   doc8
     #   ipython
@@ -183,7 +183,7 @@ six==1.15.0
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.1.0
     # via sphinx
-sphinx==3.4.3
+sphinx==3.5.1
     # via
     #   -r requirements/dev.in
     #   sphinxcontrib-httpdomain
