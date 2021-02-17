@@ -115,7 +115,7 @@
     "css-minimizer-webpack-plugin": "^1.2.0",
     "eslint": "^7.18.0",
     "eslint-config-prettier": "^7.2.0",
-    "eslint-import-resolver-typescript": "^2.3.0",
+    "eslint-import-resolver-typescript": "^2.4.0",
     "eslint-import-resolver-webpack": "^0.13.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jest": "^24.1.3",
