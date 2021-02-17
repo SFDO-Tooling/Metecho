@@ -1,0 +1,32 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs/blocks';
+import LinkTo from '@storybook/addon-links/react';
+
+<Meta title="Components/Steps/Docs" />
+
+# Steps
+
+**Show collaborators what to do next.**
+
+## Overview
+
+The **Steps** component communicates the individual steps and progress of a
+particular process.
+
+It renders a customized version of the
+[vertical progress indicator](https://www.lightningdesignsystem.com/components/progress-indicator/#Vertical),
+with toned-down colors as to not draw the user's attention away from more
+important pieces of information on the page.
+
+<Canvas>
+  <Story id="components-steps-examples--epic-steps" />
+</Canvas>
+
+**Steps** can optionally:
+
+- Display the avatar of an assigned user.
+- Render as a clickable `<button>` to perform an action.
+- Render as an `<a>` to link to an external URL.
+
+<LinkTo kind="Components/Steps/Examples" story="Epic Steps">
+  View Example
+</LinkTo>
