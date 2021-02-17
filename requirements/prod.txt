@@ -295,7 +295,7 @@ selenium==3.141.0
     # via
     #   cumulusci
     #   robotframework-seleniumlibrary
-sentry-sdk==0.19.5
+sentry-sdk==0.20.2
     # via -r requirements/prod.in
 service-identity==18.1.0
     # via
