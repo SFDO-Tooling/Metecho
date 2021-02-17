@@ -19,6 +19,8 @@ const Overview = ({
 }) => {
   let type, name;
   let isProject = false;
+  // @@@
+  /* istanbul ignore next */
   if (task) {
     type = i18n.t('Task');
     name = task.name;
@@ -32,6 +34,8 @@ const Overview = ({
   }
   const projectUrl = routes.project_detail(project.slug);
 
+  // @@@
+  /* istanbul ignore if */
   if (isProject) {
     return (
       <div className="slds-p-around_large">

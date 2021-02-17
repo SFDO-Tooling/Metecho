@@ -70,7 +70,63 @@ describe('reducer', () => {
       expect(actual).toEqual(expected);
     });
 
-    test('stores null if no org for task', () => {
+    test('resets orgs for epic', () => {
+      const org = {
+        id: 'org-id',
+        epic: 'epic-1',
+        org_type: 'Playground',
+      };
+      const expected = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
+        },
+        fetched: {
+          ...defaultState.fetched,
+          epics: ['epic-1'],
+        },
+      };
+      const actual = reducer(defaultState, {
+        type: 'FETCH_OBJECTS_SUCCEEDED',
+        payload: {
+          response: [org],
+          objectType: 'scratch_org',
+          filters: { epic: 'epic-1' },
+        },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('resets orgs for project', () => {
+      const org = {
+        id: 'org-id',
+        project: 'project-1',
+        org_type: 'Playground',
+      };
+      const expected = {
+        ...defaultState,
+        orgs: {
+          [org.id]: org,
+        },
+        fetched: {
+          ...defaultState.fetched,
+          projects: ['project-1'],
+        },
+      };
+      const actual = reducer(defaultState, {
+        type: 'FETCH_OBJECTS_SUCCEEDED',
+        payload: {
+          response: [org],
+          objectType: 'scratch_org',
+          filters: { project: 'project-1' },
+        },
+      });
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('does not store if no org for task', () => {
       const expected = {
         ...defaultState,
         fetched: {
@@ -106,6 +162,55 @@ describe('reducer', () => {
       });
 
       expect(actual).toEqual(defaultState);
+    });
+
+    test('ignores if no org filter', () => {
+      const org = {
+        id: 'org-id',
+        epic: 'epic-1',
+        org_type: 'Playground',
+      };
+      const actual = reducer(defaultState, {
+        type: 'FETCH_OBJECTS_SUCCEEDED',
+        payload: {
+          response: [org],
+          objectType: 'other-object',
+          filters: {},
+        },
+      });
+
+      expect(actual).toEqual(defaultState);
+    });
+
+    test('does not duplicate id in "fetched" lists', () => {
+      const org = {
+        id: 'org-id',
+        task: 'task-1',
+        org_type: 'Dev',
+      };
+      const initial = {
+        ...defaultState,
+        fetched: {
+          ...defaultState.fetched,
+          tasks: ['task-1'],
+        },
+      };
+      const expected = {
+        ...initial,
+        orgs: {
+          [org.id]: org,
+        },
+      };
+      const actual = reducer(initial, {
+        type: 'FETCH_OBJECTS_SUCCEEDED',
+        payload: {
+          response: [org],
+          objectType: 'scratch_org',
+          filters: { task: 'task-1' },
+        },
+      });
+
+      expect(actual).toEqual(expected);
     });
   });
 

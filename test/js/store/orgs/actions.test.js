@@ -11,10 +11,12 @@ const defaultState = {
     'epic-id': [{ id: 'task-id', name: 'My Task', epic: 'epic-id' }],
   },
   epics: {
-    epics: [{ id: 'epic-id' }],
+    'project-id': {
+      epics: [{ id: 'epic-id', name: 'My Epic', project: 'project-id' }],
+    },
   },
   projects: {
-    projects: [{ id: 'project-id' }],
+    projects: [{ id: 'project-id', name: 'My Project' }],
   },
 };
 
@@ -47,7 +49,7 @@ describe('provisionOrg', () => {
   });
 
   describe('owned by current user', () => {
-    test('adds success message', () => {
+    test('adds success message [task org]', () => {
       const store = storeWithThunk(defaultState);
       store.dispatch(
         actions.provisionOrg({
@@ -66,6 +68,96 @@ describe('provisionOrg', () => {
         window.api_urls.scratch_org_redirect(org.id),
       );
       expect(allActions[1]).toEqual(orgAction);
+    });
+
+    test('adds success message [epic org]', () => {
+      const store = storeWithThunk(defaultState);
+      const thisOrg = {
+        ...org,
+        org_type: 'Playground',
+        task: undefined,
+        epic: 'epic-id',
+      };
+      store.dispatch(
+        actions.provisionOrg({
+          model: thisOrg,
+          originating_user_id: 'user-id',
+        }),
+      );
+      const allActions = store.getActions();
+
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toMatch(
+        'Successfully created scratch org for Epic “My Epic”.',
+      );
+      expect(allActions[0].payload.linkText).toEqual('View your new org.');
+      expect(allActions[0].payload.linkUrl).toEqual(
+        window.api_urls.scratch_org_redirect(thisOrg.id),
+      );
+      expect(allActions[1]).toEqual({
+        type: 'SCRATCH_ORG_PROVISION',
+        payload: thisOrg,
+      });
+    });
+
+    test('adds success message [missing epic org parent]', () => {
+      const store = storeWithThunk(defaultState);
+      const thisOrg = {
+        ...org,
+        org_type: 'Playground',
+        task: undefined,
+        epic: 'other-epic-id',
+      };
+      store.dispatch(
+        actions.provisionOrg({
+          model: thisOrg,
+          originating_user_id: 'user-id',
+        }),
+      );
+      const allActions = store.getActions();
+
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toMatch(
+        'Successfully created scratch org.',
+      );
+      expect(allActions[0].payload.linkText).toEqual('View your new org.');
+      expect(allActions[0].payload.linkUrl).toEqual(
+        window.api_urls.scratch_org_redirect(thisOrg.id),
+      );
+      expect(allActions[1]).toEqual({
+        type: 'SCRATCH_ORG_PROVISION',
+        payload: thisOrg,
+      });
+    });
+
+    test('adds success message [project org]', () => {
+      const store = storeWithThunk(defaultState);
+      const thisOrg = {
+        ...org,
+        org_type: 'Playground',
+        task: undefined,
+        project: 'project-id',
+      };
+      store.dispatch(
+        actions.provisionOrg({
+          model: thisOrg,
+          originating_user_id: 'user-id',
+        }),
+      );
+      const allActions = store.getActions();
+
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toMatch(
+        'Successfully created scratch org for Project “My Project”.',
+      );
+      expect(allActions[0].payload.linkText).toEqual('View your new org.');
+      expect(allActions[0].payload.linkUrl).toEqual(
+        window.api_urls.scratch_org_redirect(thisOrg.id),
+      );
+      expect(allActions[1]).toEqual({
+        type: 'SCRATCH_ORG_PROVISION',
+        payload: thisOrg,
+      });
     });
   });
 

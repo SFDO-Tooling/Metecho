@@ -1,3 +1,5 @@
+// For some reason Eslint is getting confused about `useCallback` being used
+// after conditional variable declarations (e.g. `"foo" || "bar"`)...
 /* eslint-disable react-hooks/rules-of-hooks */
 
 import Button from '@salesforce/design-system-react/components/button';
@@ -12,13 +14,13 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '~js/components/404';
 import CommitList from '~js/components/commits/list';
-import { Step } from '~js/components/steps/stepsItem';
-import CaptureModal from '~js/components/tasks/capture';
-import OrgCards, {
+import SubmitReviewModal from '~js/components/orgs/cards/submitReview';
+import TaskOrgCards, {
   ORG_TYPE_TRACKER_DEFAULT,
   OrgTypeTracker,
-} from '~js/components/tasks/cards';
-import SubmitReviewModal from '~js/components/tasks/cards/submitReview';
+} from '~js/components/orgs/taskOrgCards';
+import { Step } from '~js/components/steps/stepsItem';
+import CaptureModal from '~js/components/tasks/capture';
 import TaskStatusPath from '~js/components/tasks/path';
 import TaskStatusSteps from '~js/components/tasks/steps';
 import {
@@ -617,7 +619,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         {submitButton}
 
         {taskOrgs ? (
-          <OrgCards
+          <TaskOrgCards
             orgs={taskOrgs}
             task={task}
             epicUsers={epic.github_users}

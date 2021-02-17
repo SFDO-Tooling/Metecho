@@ -37,7 +37,8 @@ export const selectPlaygroundOrgsByEpic = createSelector(
 export const selectPlaygroundOrgsByProject = createSelector(
   [selectOrgState, selectProject],
   (orgs, project): Org[] | undefined => {
-    /* istanbul ignore else */
+    // @@@
+    /* istanbul ignore next */
     if (project && orgs.fetched.projects.includes(project.id)) {
       return Object.values(orgs.orgs).filter(
         (org) =>

@@ -4,14 +4,14 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { AssignedUserTracker } from '~js/components/tasks/cards';
-import Footer from '~js/components/tasks/cards/footer';
-import OrgActions from '~js/components/tasks/cards/orgActions';
-import OrgIcon from '~js/components/tasks/cards/orgIcon';
-import OrgInfo from '~js/components/tasks/cards/orgInfo';
-import OrgSpinner from '~js/components/tasks/cards/orgSpinner';
-import RefreshOrgModal from '~js/components/tasks/cards/refresh';
-import UserActions from '~js/components/tasks/cards/userActions';
+import Footer from '~js/components/orgs/cards/footer';
+import OrgActions from '~js/components/orgs/cards/orgActions';
+import OrgIcon from '~js/components/orgs/cards/orgIcon';
+import OrgInfo from '~js/components/orgs/cards/orgInfo';
+import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
+import RefreshOrgModal from '~js/components/orgs/cards/refresh';
+import UserActions from '~js/components/orgs/cards/userActions';
+import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
 import { AssignUserModal, UserCard } from '~js/components/user/githubUser';
 import { Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
@@ -25,7 +25,7 @@ import {
 import { getTaskCommits } from '~js/utils/helpers';
 import { logError } from '~js/utils/logging';
 
-interface OrgCardProps {
+interface TaskOrgCardProps {
   org: Org | null;
   type: OrgTypes;
   user: User;
@@ -53,7 +53,7 @@ interface OrgCardProps {
   testOrgSubmittingReview?: boolean;
 }
 
-const OrgCard = ({
+const TaskOrgCard = ({
   org,
   type,
   user,
@@ -76,7 +76,7 @@ const OrgCard = ({
   testOrgReadyForReview,
   testOrgSubmittingReview,
   history,
-}: OrgCardProps & RouteComponentProps) => {
+}: TaskOrgCardProps & RouteComponentProps) => {
   let assignedUser: GitHubUser | null = null;
   let heading = i18n.t('Developer');
   let orgHeading = i18n.t('Dev Org');
@@ -294,4 +294,4 @@ const OrgCard = ({
   );
 };
 
-export default withRouter(OrgCard);
+export default withRouter(TaskOrgCard);

@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import OrgCard from '~js/components/tasks/cards/card';
+import TaskOrgCard from '~js/components/orgs/taskOrgCard';
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
 import ConfirmRemoveUserModal from '~js/components/tasks/confirmRemoveUserModal';
 import ConnectModal from '~js/components/user/connect';
@@ -34,7 +34,7 @@ export const ORG_TYPE_TRACKER_DEFAULT = {
   [ORG_TYPES.QA]: false,
 };
 
-const OrgCards = ({
+const TaskOrgCards = ({
   orgs,
   task,
   epicUsers,
@@ -199,7 +199,7 @@ const OrgCards = ({
         checkForOrgChanges(org as Org);
         setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
       }
-    } else if (type === ORG_TYPES.QA) {
+    } /* istanbul ignore next */ else if (type !== ORG_TYPES.PLAYGROUND) {
       assignUser({ type, assignee, shouldAlertAssignee });
     }
   };
@@ -255,7 +255,7 @@ const OrgCards = ({
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Team & Orgs')}</h2>
       <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
-        <OrgCard
+        <TaskOrgCard
           org={orgs[ORG_TYPES.DEV]}
           type={ORG_TYPES.DEV}
           user={user}
@@ -274,7 +274,7 @@ const OrgCards = ({
           handleCheckForOrgChanges={checkForOrgChanges}
           openCaptureModal={openCaptureModal}
         />
-        <OrgCard
+        <TaskOrgCard
           org={orgs[ORG_TYPES.QA]}
           type={ORG_TYPES.QA}
           user={user}
@@ -326,4 +326,4 @@ const OrgCards = ({
   );
 };
 
-export default OrgCards;
+export default TaskOrgCards;

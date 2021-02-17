@@ -1,9 +1,9 @@
 import i18n from 'i18next';
 import React from 'react';
 
+import { OrgTypeTracker } from '~js/components/orgs/taskOrgCards';
 import Steps from '~js/components/steps';
 import { Step } from '~js/components/steps/stepsItem';
-import { OrgTypeTracker } from '~js/components/tasks/cards';
 import { OrgsByParent } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { User } from '~js/store/user/reducer';

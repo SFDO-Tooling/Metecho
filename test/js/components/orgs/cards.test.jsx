@@ -3,7 +3,9 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import OrgCards, { ORG_TYPE_TRACKER_DEFAULT } from '~js/components/tasks/cards';
+import TaskOrgCards, {
+  ORG_TYPE_TRACKER_DEFAULT,
+} from '~js/components/orgs/taskOrgCards';
 import { deleteObject, updateObject } from '~js/store/actions';
 import { refetchOrg } from '~js/store/orgs/actions';
 import { addUrlParams } from '~js/utils/api';
@@ -80,7 +82,7 @@ const defaultEpicUsers = [
 const createOrg = jest.fn();
 const refreshOrg = jest.fn();
 
-describe('<OrgCards/>', () => {
+describe('<TaskOrgCards/>', () => {
   const setup = (options) => {
     const defaults = {
       initialState: defaultState,
@@ -97,7 +99,7 @@ describe('<OrgCards/>', () => {
     const context = {};
     const ui = (
       <StaticRouter context={context}>
-        <OrgCards
+        <TaskOrgCards
           orgs={opts.orgs}
           task={opts.task}
           epicUsers={opts.epicUsers}
@@ -221,7 +223,7 @@ describe('<OrgCards/>', () => {
   });
 
   describe('Assign click', () => {
-    test('updates assigned user', () => {
+    test('updates assigned user', async () => {
       const task = {
         ...defaultTask,
         assigned_dev: null,
@@ -231,11 +233,13 @@ describe('<OrgCards/>', () => {
         orgs: {},
         assignUserModalOpen: 'Dev',
       });
-      fireEvent.click(
+
+      expect.assertions(3);
+      await fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="user-name"]'),
       );
-      fireEvent.click(getByText('Notify Assigned Developer by Email'));
-      fireEvent.click(getByText('Save'));
+      await fireEvent.click(getByText('Notify Assigned Developer by Email'));
+      await fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
 

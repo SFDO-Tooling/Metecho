@@ -3,11 +3,11 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import Footer from '~js/components/tasks/cards/footer';
-import OrgActions from '~js/components/tasks/cards/orgActions';
-import OrgIcon from '~js/components/tasks/cards/orgIcon';
-import OrgInfo from '~js/components/tasks/cards/orgInfo';
-import OrgSpinner from '~js/components/tasks/cards/orgSpinner';
+import Footer from '~js/components/orgs/cards/footer';
+import OrgActions from '~js/components/orgs/cards/orgActions';
+import OrgIcon from '~js/components/orgs/cards/orgIcon';
+import OrgInfo from '~js/components/orgs/cards/orgInfo';
+import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
 import { useIsMounted } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { deleteObject } from '~js/store/actions';
@@ -46,6 +46,8 @@ const PlaygroundOrgCard = ({
     parentName: string;
   let missingCommits = -1;
   let orgOutOfDate = false;
+  // @@@
+  /* istanbul ignore next */
   if (task) {
     heading = i18n.t('Task Scratch Org');
     const taskCommits = getTaskCommits(task);
@@ -94,7 +96,7 @@ const PlaygroundOrgCard = ({
     dispatch(refreshOrg(org));
   }, [dispatch, org]);
 
-  /* istanbul ignore if */
+  /* istanbul ignore next */
   if (!(project || epic || task)) {
     return null;
   }
