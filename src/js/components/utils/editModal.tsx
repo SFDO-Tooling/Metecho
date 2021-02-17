@@ -13,7 +13,8 @@ import {
   useFormDefaults,
   useIsMounted,
 } from '~js/components/utils';
-import { Epic, OrgConfig } from '~js/store/epics/reducer';
+import { Epic } from '~js/store/epics/reducer';
+import { OrgConfig } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,

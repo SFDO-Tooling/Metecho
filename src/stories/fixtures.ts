@@ -94,6 +94,7 @@ export const sampleEpic1 = {
   currently_creating_pr: false,
   github_users: [sampleGitHubUser2],
   status: EPIC_STATUSES.PLANNED,
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic2 = {
@@ -118,6 +119,7 @@ export const sampleEpic2 = {
   currently_creating_pr: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   status: EPIC_STATUSES.IN_PROGRESS,
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic3 = {
@@ -138,6 +140,7 @@ export const sampleEpic3 = {
   currently_creating_pr: false,
   github_users: [],
   status: EPIC_STATUSES.PLANNED,
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic4 = {
@@ -159,6 +162,7 @@ export const sampleEpic4 = {
   currently_creating_pr: false,
   github_users: [],
   status: EPIC_STATUSES.MERGED,
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic5 = {
@@ -180,6 +184,7 @@ export const sampleEpic5 = {
   currently_creating_pr: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2],
   status: EPIC_STATUSES.REVIEW,
+  latest_sha: 'abc123',
 };
 
 export const sampleTask1 = {
@@ -369,6 +374,7 @@ export const sampleProject1 = {
     'https://repository-images.githubusercontent.com/123456/123-456',
   currently_fetching_org_config_names: false,
   org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpicSteps = [
