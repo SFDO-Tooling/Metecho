@@ -25,7 +25,7 @@ attrs==20.3.0
     #   twisted
 authlib==0.15.3
     # via simple-salesforce
-autobahn==21.1.1
+autobahn==21.2.1
     # via daphne
 automat==20.2.0
     # via twisted
@@ -297,7 +297,7 @@ selenium==3.141.0
     # via
     #   cumulusci
     #   robotframework-seleniumlibrary
-sentry-sdk==0.19.5
+sentry-sdk==0.20.2
     # via -r requirements/prod.in
 service-identity==18.1.0
     # via
