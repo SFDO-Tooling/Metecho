@@ -774,6 +774,19 @@ class TestUser:
 
 @pytest.mark.django_db
 class TestScratchOrg:
+    def test_root_project(self, project_factory, epic_factory, scratch_org_factory):
+        invalid_scratch_org = scratch_org_factory(task=None)
+        task_scratch_org = scratch_org_factory()
+        epic = epic_factory()
+        epic_scratch_org = scratch_org_factory(task=None, epic=epic)
+        project = project_factory()
+        project_scratch_org = scratch_org_factory(task=None, project=project)
+
+        assert invalid_scratch_org.root_project is None
+        assert task_scratch_org.root_project == task_scratch_org.task.epic.project
+        assert epic_scratch_org.root_project == epic.project
+        assert project_scratch_org.root_project == project
+
     def test_notify_changed(self, scratch_org_factory):
         with ExitStack() as stack:
             stack.enter_context(

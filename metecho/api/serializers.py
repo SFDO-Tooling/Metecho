@@ -112,6 +112,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             "latest_sha",
         )
         extra_kwargs = {
+            "org_config_names": {"read_only": True},
+            "currently_fetching_org_config_names": {"read_only": True},
             "latest_sha": {"read_only": True},
         }
 

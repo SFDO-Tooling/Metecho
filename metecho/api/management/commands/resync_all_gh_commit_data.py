@@ -17,8 +17,8 @@ class Command(BaseCommand):
                     branch_name=project.branch_name,
                     originating_user_id=None,
                 )
-            except NotFoundError:
-                return
+            except NotFoundError:  # pragma: nocover
+                pass
         for epic in Epic.objects.exclude(branch_name=""):
             refresh_commits(
                 project=epic.project,

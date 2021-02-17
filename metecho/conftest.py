@@ -111,6 +111,7 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
     task = factory.SubFactory(TaskFactory)
     owner = factory.SubFactory(UserFactory)
     org_type = "Dev"
+    org_config_name = "dev"
     valid_target_directories = {"source": []}
 
 
