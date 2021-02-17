@@ -25,7 +25,7 @@ attrs==20.3.0
     #   twisted
 authlib==0.15.3
     # via simple-salesforce
-autobahn==20.12.3
+autobahn==21.2.1
     # via daphne
 automat==20.2.0
     # via twisted
