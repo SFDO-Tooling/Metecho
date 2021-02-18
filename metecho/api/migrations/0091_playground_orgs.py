@@ -5,6 +5,15 @@ import sfdo_template_helpers.fields.string
 from django.db import migrations, models
 
 
+def forwards(apps, schema_editor):
+    pass
+
+
+def backwards(apps, schema_editor):
+    ScratchOrg = apps.get_model("api", "ScratchOrg")
+    ScratchOrg.objects.filter(task__isnull=True).delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -52,4 +61,5 @@ class Migration(migrations.Migration):
                 to="api.task",
             ),
         ),
+        migrations.RunPython(forwards, backwards),
     ]
