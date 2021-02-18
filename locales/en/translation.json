@@ -313,13 +313,14 @@
   "devHubInfo": "Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Test scratch org. Learn how to <2>create a Developer Edition org</2> and <6>enable Dev Hub</6>.",
   "devHubNotEnabled": "This Salesforce org does not have Dev Hub enabled or your user does not have permission to create scratch orgs. Learn how to <2>enable Dev Hub</2>.",
   "epicCollaborators": "Only users who have access to the GitHub repository for this epic will appear in the list below. Visit GitHub to invite additional collaborators.",
+  "epicCollaboratorsHelper": "Here is some information on project collaborators",
+  "epicNameHelper": "Here is some information on the names of Epics in a project",
   "epicNotFound": "We can’t find the epic you’re looking for. Try <2>another epic</2> from that project?",
+  "epicStatusHelper": "You can assign yourself as tester any time. When the Task has a status of Review, you can begin testing.",
   "errorWithAccount": "An error occurred with your account. Try the <2>home page</2>?",
   "ignored": "ignored",
   "markdownGuide": "For more options, view this <2>Markdown Guide</2>.",
   "metechoTourHelper": "Review these walkthroughs anytime you need them or <1></1>take a self-guided tour when you gave specific questions.",
-  "metechoTourHelp": "Click on a box below to discover what's possible.",
-  "metechoWelcome": "Hello! What can Metecho help you do today?",
   "noGitHubUsers": "We couldn’t find any GitHub users who have access to this project. Try re-syncing the list of available collaborators, or contact an admin for this project on GitHub.",
   "noProjectsHelper": "We couldn’t find any projects you have access to on GitHub. Confirm that you are logged into the correct account or contact an admin on GitHub.",
   "orgNotYetCreated": "<0>Status:</0> not yet created",
@@ -351,5 +352,5 @@
   "view changes": "view changes",
   "viewOutdatedOrg": "You may proceed with the outdated org, but be aware that you will not be testing the latest changes.",
   "welcomeMessage": "<0>To get started</0> log in with your GitHub account.",
-  "whatsAnEpic": "Epics are groups of related Tasks, representing larger changes to the Project.You can invite multiple Collaborators to your Epic and assign different people as Developers and Testers for each Task."
+  "whatsAnEpic": "Epics are groups of related Tasks, representing larger changes to the Project. You can invite multiple Collaborators to your Epic and assign different people as Developers and Testers for each Task."
 }

@@ -12,6 +12,7 @@ export const api_urls = {
   user_refresh: () => '/api/user/refresh/',
   user_disconnect_sf: () => '/api/user/disconnect/',
   agree_to_tos: () => '/api/agree_to_tos/',
+  complete_onboarding: () => '/api/complete_onboarding/',
   project_list: () => '/api/projects/',
   project_detail: (slug: string) => `/api/projects/${slug}/`,
   project_refresh_github_users: (id: string) =>
