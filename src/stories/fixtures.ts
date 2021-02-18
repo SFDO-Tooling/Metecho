@@ -360,6 +360,7 @@ export const sampleUser1 = {
   devhub_username: '',
   uses_global_devhub: false,
   agreed_to_tos_at: '2019-02-01T19:47:49Z',
+  onboarded_at: '2019-02-01T19:47:49Z',
 };
 
 export const sampleProject1 = {
