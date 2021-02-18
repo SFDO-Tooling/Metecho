@@ -322,7 +322,7 @@ describe('<TaskDetail/>', () => {
       });
 
       test('just opens modal', () => {
-        const { getByText, queryByText } = setup();
+        const { getByText, getByTitle, queryByText } = setup();
         fireEvent.click(getByText('Retrieve Changes from Dev Org'));
 
         expect(refetchOrg).not.toHaveBeenCalled();
@@ -330,7 +330,7 @@ describe('<TaskDetail/>', () => {
           getByText('Select the location to retrieve changes'),
         ).toBeVisible();
 
-        fireEvent.click(getByText('Close'));
+        fireEvent.click(getByTitle('Close'));
 
         expect(
           queryByText('Select the location to retrieve changes'),
@@ -506,26 +506,26 @@ describe('<TaskDetail/>', () => {
 
   describe('edit task click', () => {
     test('opens and closes modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Task Options'));
       fireEvent.click(getByText('Edit Task'));
 
       expect(getByText('Edit Task')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Edit Task')).toBeNull();
     });
   });
 
   test('opens/closed deleted modal', () => {
-    const { getByText, queryByText } = setup();
+    const { getByText, getByTitle, queryByText } = setup();
     fireEvent.click(getByText('Task Options'));
     fireEvent.click(getByText('Delete Task'));
 
     expect(getByText('Confirm Deleting Task')).toBeVisible();
 
-    fireEvent.click(getByText('Cancel'));
+    fireEvent.click(getByTitle('Cancel'));
 
     expect(queryByText('Confirm Deleting Task')).toBeNull();
   });
@@ -559,7 +559,7 @@ describe('<TaskDetail/>', () => {
     };
 
     test('opens submit review modal', () => {
-      const { getByText, queryByText } = setup({
+      const { getByText, getByTitle, queryByText } = setup({
         initialState: {
           ...defaultState,
           tasks,
@@ -570,7 +570,7 @@ describe('<TaskDetail/>', () => {
 
       expect(getByText('Submit Task Review')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Submit Task Review')).toBeNull();
     });
@@ -843,12 +843,12 @@ describe('<TaskDetail/>', () => {
 
   describe('assign user click', () => {
     test('opens/closed modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Assign'));
 
       expect(getByText('Assign Tester')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Assign Tester')).toBeNull();
     });

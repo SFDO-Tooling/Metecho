@@ -102,6 +102,7 @@ const CreateTaskModal = ({ epic, isOpen, closeCreateModal }: Props) => {
       size="small"
       disableClose={isSaving || isSavingBatch}
       heading={`${i18n.t('Add a Task for')} ${epic.name}`}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       onRequestClose={closeModal}
       footer={[
         isShowingTransientMessage && (

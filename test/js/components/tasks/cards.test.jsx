@@ -415,8 +415,8 @@ describe('<OrgCards/>', () => {
 
         describe('"cancel" click', () => {
           test('closes modal', () => {
-            const { getByText, queryByText } = result;
-            fireEvent.click(getByText('Cancel'));
+            const { getByTitle, queryByText } = result;
+            fireEvent.click(getByTitle('Cancel'));
 
             expect(
               queryByText('Confirm Removing Developer and Deleting Dev Org'),
@@ -874,8 +874,8 @@ describe('<OrgCards/>', () => {
 
           describe('"cancel" click', () => {
             test('closes modal', () => {
-              const { getByText, queryByText } = result;
-              fireEvent.click(getByText('Cancel'));
+              const { getByTitle, queryByText } = result;
+              fireEvent.click(getByTitle('Cancel'));
 
               expect(
                 queryByText('Confirm Deleting Org With Unretrieved Changes'),

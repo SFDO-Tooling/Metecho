@@ -87,6 +87,7 @@ const defaultState = {
   },
   user: {
     username: 'my-user',
+    onboarded_at: 'now',
   },
 };
 
@@ -280,30 +281,43 @@ describe('<ProjectDetail />', () => {
   });
 
   describe('<CreateEpicModal />', () => {
-    test('opens/closes form', () => {
-      const { queryByText, getByText } = setup();
-      fireEvent.click(getByText('Create an Epic'));
+    test('opens/closes form', async () => {
+      const { queryByText, getByText, getByTitle } = setup();
+
+      expect.assertions(2);
+      await fireEvent.click(getByText('Create an Epic'));
 
       expect(getByText('Create an Epic for Project 1')).toBeVisible();
 
-      fireEvent.click(queryByText('Cancel epic creation'));
+      await fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Create an Epic for Project 1')).toBeNull();
     });
   });
 
   describe('<TourLandingModal />', () => {
-    test('opens/closes form', () => {
-      const { queryByText, getByText, debug } = setup();
-      debug();
-      expect(
-        getByText("Click on a box below to discover what's possible."),
-      ).toBeVisible();
+    test('opens/closes form', async () => {
+      const { queryByText, findByText, getByTitle } = setup({
+        initialState: {
+          ...defaultState,
+          user: {
+            username: 'foobar',
+            onboarded_at: null,
+          },
+        },
+      });
 
-      fireEvent.click(queryByText('Close'));
+      expect.assertions(2);
+      const heading = await findByText('What can Metecho help you do today?', {
+        exact: false,
+      });
+
+      expect(heading).toBeVisible();
+
+      await fireEvent.click(getByTitle('Close'));
 
       expect(
-        queryByText("Click on a box below to discover what's possible."),
+        queryByText('What can Metecho help you do today?', { exact: false }),
       ).toBeNull();
     });
   });

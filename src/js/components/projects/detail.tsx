@@ -1,6 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { CallBackProps, STATUS } from 'react-joyride';
@@ -10,6 +10,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import CreateEpicModal from '~js/components/epics/createForm';
 import EpicTable from '~js/components/epics/table';
 import ProjectNotFound from '~js/components/projects/project404';
+import LandingModal, { TourType } from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
 import {
   DetailPageLayout,
@@ -27,21 +28,65 @@ import { selectUserState } from '~js/store/user/selectors';
 import { OBJECT_TYPES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
-import LandingModal from '../tour/landing';
-
 const ProjectDetail = (props: RouteComponentProps) => {
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
-    Boolean(!user.onboarded_at),
+    !user.onboarded_at,
   );
-  const [runTour, setRunTour] = useState(false);
-  const joyride = {};
+  const [tourRunning, setTourRunning] = useState<TourType | null>(null);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
+
+  const fetchMoreEpics = useCallback(() => {
+    /* istanbul ignore else */
+    if (project?.id && epics?.next) {
+      /* istanbul ignore else */
+      if (isMounted.current) {
+        setFetchingEpics(true);
+      }
+
+      dispatch(
+        fetchObjects({
+          objectType: OBJECT_TYPES.EPIC,
+          filters: { project: project.id },
+          url: epics.next,
+        }),
+      ).finally(() => {
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setFetchingEpics(false);
+        }
+      });
+    }
+  }, [dispatch, epics?.next, isMounted, project?.id]);
+
+  // create modal related
+  const openCreateModal = useCallback(() => setCreateModalOpen(true), []);
+  const closeCreateModal = useCallback(() => setCreateModalOpen(false), []);
+
+  // guided tour related
+  const closeTourLandingModal = useCallback(
+    () => setTourLandingModalOpen(false),
+    [],
+  );
+  const doRunTour = useCallback(
+    (type: TourType) => {
+      closeTourLandingModal();
+      setTourRunning(type);
+    },
+    [closeTourLandingModal],
+  );
+  const handleTourCallback = useCallback((data: CallBackProps) => {
+    const { status } = data;
+    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+    if (finishedStatuses.includes(status)) {
+      setTourRunning(null);
+    }
+  }, []);
 
   const loadingOrNotFound = getProjectLoadingOrNotFound({
     project,
@@ -63,47 +108,6 @@ const ProjectDetail = (props: RouteComponentProps) => {
     return <Redirect to={routes.project_detail(project.slug)} />;
   }
 
-  const fetchMoreEpics = () => {
-    /* istanbul ignore else */
-    if (epics?.next) {
-      /* istanbul ignore else */
-      if (isMounted.current) {
-        setFetchingEpics(true);
-      }
-
-      dispatch(
-        fetchObjects({
-          objectType: OBJECT_TYPES.EPIC,
-          filters: { project: project.id },
-          url: epics.next,
-        }),
-      ).finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setFetchingEpics(false);
-        }
-      });
-    }
-  };
-  // create modal related
-  const openCreateModal = () => setCreateModalOpen(true);
-  const closeCreateModal = () => setCreateModalOpen(false);
-
-  const closeTourLandingModal = () => setTourLandingModalOpen(false);
-  const doRunTour = (type: string) => {
-    switch (type) {
-      case 'plan':
-        closeTourLandingModal();
-        setRunTour(true);
-    }
-  };
-  const handleTourCallback = (data: CallBackProps) => {
-    const { status } = data;
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
-    if (finishedStatuses.includes(status)) {
-      setRunTour(false);
-    }
-  };
   const hasEpics = epics && epics.epics.length > 0;
 
   return (
@@ -142,7 +146,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
               label={i18n.t('Create an Epic')}
               variant="brand"
               onClick={openCreateModal}
-              className="slds-m-bottom_large create-epic"
+              className="slds-m-bottom_large tour-create-epic"
             />
             {hasEpics && (
               <>
@@ -177,8 +181,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           onRequestClose={closeTourLandingModal}
         />
         <PlanTour
-          run={runTour}
-          joyride={joyride}
+          run={tourRunning === 'plan'}
           handleCallback={handleTourCallback}
         />
       </DetailPageLayout>

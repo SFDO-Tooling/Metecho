@@ -286,12 +286,12 @@ describe('<EpicDetail/>', () => {
 
   describe('<AssignUsersModal />', () => {
     test('opens and closes', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Add or Remove Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('GitHub Users')).toBeNull();
     });
@@ -432,8 +432,8 @@ describe('<EpicDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
-        fireEvent.click(getByText('Cancel'));
+        const { getByTitle, queryByText } = result;
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
       });
@@ -638,25 +638,25 @@ describe('<EpicDetail/>', () => {
 
   describe('epic options click', () => {
     test('opens and closes edit modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Epic Options'));
       fireEvent.click(getByText('Edit Epic'));
 
       expect(getByText('Edit Epic')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Edit Epic')).toBeNull();
     });
 
     test('opens and closes delete modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Epic Options'));
       fireEvent.click(getByText('Delete Epic'));
 
       expect(getByText('Confirm Deleting Epic')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Confirm Deleting Epic')).toBeNull();
     });
@@ -664,12 +664,12 @@ describe('<EpicDetail/>', () => {
 
   describe('<CreateTaskModal/>', () => {
     test('open/close modal', () => {
-      const { queryByText, getByText } = setup();
+      const { queryByText, getByText, getByTitle } = setup();
       fireEvent.click(getByText('Add a Task'));
 
       expect(getByText('Add a Task for Epic 1')).toBeVisible();
 
-      fireEvent.click(queryByText('Close'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Add a Task for Epic 1')).toBeNull();
     });

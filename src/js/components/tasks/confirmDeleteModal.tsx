@@ -33,6 +33,7 @@ const ConfirmDeleteModal = ({
       isOpen={isOpen}
       heading={i18n.t('Confirm Deleting Org With Unretrieved Changes')}
       prompt="warning"
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       onRequestClose={handleCancel}
       footer={[
         <Button key="cancel" label={i18n.t('Cancel')} onClick={handleCancel} />,

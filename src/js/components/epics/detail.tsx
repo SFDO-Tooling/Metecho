@@ -57,6 +57,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
   // "Assign users to epic" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);

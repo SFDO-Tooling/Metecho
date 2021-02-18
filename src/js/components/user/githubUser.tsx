@@ -208,6 +208,7 @@ export const AssignUsersModal = ({
     <Modal
       isOpen={isOpen}
       heading={heading}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       footer={
         allUsers.length
           ? [
@@ -371,6 +372,7 @@ export const AssignUserModal = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={handleClose}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       heading={heading}
       directional
       tagline={

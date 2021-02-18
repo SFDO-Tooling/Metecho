@@ -96,8 +96,8 @@ describe('AssignUserModal', () => {
   });
 
   test('closes on Cancel click', () => {
-    const { getByText } = setup();
-    fireEvent.click(getByText('Cancel'));
+    const { getByTitle } = setup();
+    fireEvent.click(getByTitle('Cancel'));
 
     expect(onRequestClose).toHaveBeenCalled();
   });
