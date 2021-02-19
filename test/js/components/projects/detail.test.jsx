@@ -4,18 +4,22 @@ import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '~js/components/projects/detail';
 import { fetchObject, fetchObjects } from '~js/store/actions';
+import { onboard } from '~js/store/user/actions';
 import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('~js/store/actions');
+jest.mock('~js/store/user/actions');
 
+onboard.mockReturnValue(() => Promise.resolve({ type: 'TEST', payload: {} }));
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
+  onboard.mockClear();
 });
 
 const defaultState = {
