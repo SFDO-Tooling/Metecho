@@ -314,11 +314,43 @@ describe('<ProjectDetail />', () => {
 
       expect(heading).toBeVisible();
 
-      await fireEvent.click(getByTitle('Close'));
+      fireEvent.click(getByTitle('Close'));
 
       expect(
         queryByText('What can Metecho help you do today?', { exact: false }),
       ).toBeNull();
+    });
+
+    test('runs play tour', async () => {
+      const { queryByText, findByText, getByText, container } = setup({
+        initialState: {
+          ...defaultState,
+          user: {
+            username: 'foobar',
+            onboarded_at: null,
+          },
+        },
+      });
+
+      // expect.assertions(3);
+      const heading = await findByText('What can Metecho help you do today?', {
+        exact: false,
+      });
+
+      expect(heading).toBeVisible();
+
+      fireEvent.click(getByText('Start Plan Walkthrough'));
+      const dialog = await findByText(
+        'Epics are groups of related Tasks, representing larger changes to the Project. You can invite multiple collaborators to your Epic and assign different people as Developers and Testers for each Task.',
+        { exact: false },
+      );
+      expect(
+        queryByText('What can Metecho help you do today?', { exact: false }),
+      ).toBeNull();
+
+      expect(dialog).toBeVisible();
+
+      fireEvent.click(getByText('Close'));
     });
   });
 });
