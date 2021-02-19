@@ -322,7 +322,7 @@ describe('<ProjectDetail />', () => {
     });
 
     test('runs play tour', async () => {
-      const { queryByText, findByText, getByText, container } = setup({
+      const { queryByText, findByText, getByText } = setup({
         initialState: {
           ...defaultState,
           user: {

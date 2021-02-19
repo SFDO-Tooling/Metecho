@@ -34,6 +34,7 @@ const reducer = (
     case 'USER_DISCONNECT_SUCCEEDED':
     case 'DEV_HUB_STATUS_SUCCEEDED':
     case 'AGREE_TO_TERMS_SUCCEEDED':
+    case 'ONBOARDING_SUCCEEDED':
       return action.payload;
     case 'USER_LOGGED_OUT':
       return null;

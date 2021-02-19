@@ -41,6 +41,14 @@ interface AgreeToTermsSucceeded {
   type: 'AGREE_TO_TERMS_SUCCEEDED';
   payload: User;
 }
+interface OnboardingAction {
+  type: 'ONBOARDING_REQUESTED' | 'ONBOARDING_FAILED';
+}
+interface OnboardingSuccedded {
+  type: 'ONBOARDING_SUCCEEDED';
+  payload: User;
+}
+
 export type UserAction =
   | LoginAction
   | LogoutAction
@@ -50,7 +58,9 @@ export type UserAction =
   | RefreshDevHubAction
   | RefreshDevHubSucceeded
   | AgreeToTermsAction
-  | AgreeToTermsSucceeded;
+  | AgreeToTermsSucceeded
+  | OnboardingAction
+  | OnboardingSuccedded;
 
 export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
@@ -172,6 +182,28 @@ export const agreeToTerms = (): ThunkResult<
     });
   } catch (err) {
     dispatch({ type: 'AGREE_TO_TERMS_FAILED' });
+    throw err;
+  }
+};
+
+export const onboard = (): ThunkResult<Promise<OnboardingSuccedded>> => async (
+  dispatch,
+) => {
+  dispatch({ type: 'ONBOARDING_REQUESTED' });
+  try {
+    const payload = await apiFetch({
+      url: window.api_urls.complete_onboarding(),
+      dispatch,
+      opts: {
+        method: 'PUT',
+      },
+    });
+    return dispatch({
+      type: 'ONBOARDING_SUCCEEDED' as const,
+      payload,
+    });
+  } catch (err) {
+    dispatch({ type: 'ONBOARDING_FAILED' });
     throw err;
   }
 };
