@@ -340,6 +340,12 @@ class Project(
             self.branch_name = repo.default_branch
             self.latest_sha = repo.branch(repo.default_branch).latest_sha()
 
+        if not self.latest_sha:
+            repo = gh.get_repo_info(
+                None, repo_owner=self.repo_owner, repo_name=self.repo_name
+            )
+            self.latest_sha = repo.branch(self.branch_name).latest_sha()
+
         if not self.github_users:
             self.queue_populate_github_users(originating_user_id=None)
 

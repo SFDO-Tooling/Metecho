@@ -3,7 +3,7 @@ import Radio from '@salesforce/design-system-react/components/radio-group/radio'
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { SpinnerWrapper, UseFormProps } from '~js/components/utils';
@@ -39,6 +39,13 @@ const SelectFlowType = ({
       dispatch(refreshOrgConfigs(projectId));
     }
   }, [dispatch, projectId]);
+
+  // If there are no known org configs, check again once...
+  useEffect(() => {
+    if (!orgConfigs.length) {
+      doRefreshOrgConfigs();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const flowTypes = orgConfigs.length
     ? orgConfigs
