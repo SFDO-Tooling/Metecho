@@ -9,7 +9,6 @@ from ..serializers import (
     EpicSerializer,
     FullUserSerializer,
     HashidPrimaryKeyRelatedField,
-    ProjectSerializer,
     ScratchOrgSerializer,
     TaskSerializer,
 )
@@ -39,35 +38,12 @@ class TestHashidPrimaryKeyRelatedField:
 
 
 @pytest.mark.django_db
-class TestProjectSerializer:
-    def test_create(self, rf, user_factory):
-        data = {
-            "name": "Test project",
-            "description": "Test `project`",
-            "branch_name": "some-branch",
-            "repo_owner": "repo_org",
-            "repo_name": "my_repo",
-        }
-        r = rf.get("/")
-        r.user = user_factory()
-        with ExitStack() as stack:
-            available_org_config_names_job = stack.enter_context(
-                patch("metecho.api.jobs.available_org_config_names_job")
-            )
-            serializer = ProjectSerializer(data=data, context={"request": r})
-            assert serializer.is_valid(), serializer.errors
-            serializer.save()
-            assert available_org_config_names_job.delay.called
-
-
-@pytest.mark.django_db
 class TestEpicSerializer:
     def test_create(self, rf, user_factory, project_factory):
         project = project_factory()
         data = {
             "name": "Test epic",
             "description": "Test `epic`",
-            "branch_name": "some-branch",
             "project": str(project.id),
             "github_users": [],
         }
@@ -486,15 +462,20 @@ class TestTaskSerializer:
 
 @pytest.mark.django_db
 class TestScratchOrgSerializer:
-    def test_valid(self, rf, user_factory, task_factory):
+    def test_valid(self, rf, user_factory, task_factory, scratch_org_factory):
         user = user_factory()
         task = task_factory()
+        scratch_org_factory(task=task, org_type="Playground")
 
         r = rf.get("/")
         r.user = user
 
         serializer = ScratchOrgSerializer(
-            data={"task": str(task.id), "org_type": "Dev", "org_config_name": "dev"},
+            data={
+                "task": str(task.id),
+                "org_type": "Playground",
+                "org_config_name": "dev",
+            },
             context={"request": r},
         )
         assert serializer.is_valid(), serializer.errors
@@ -505,15 +486,6 @@ class TestScratchOrgSerializer:
             instance = serializer.save()
 
         assert instance.owner == user
-
-    def test_invalid__no_parent(self, rf, user_factory):
-        r = rf.get("/")
-        r.user = user_factory()
-
-        serializer = ScratchOrgSerializer(
-            data={"org_type": "Dev", "org_config_name": "dev"}, context={"request": r}
-        )
-        assert not serializer.is_valid()
 
     def test_invalid__existing_org_for_project(
         self, rf, user_factory, project_factory, scratch_org_factory
@@ -540,13 +512,17 @@ class TestScratchOrgSerializer:
     ):
         user = user_factory()
         epic = epic_factory()
-        scratch_org_factory(epic=epic, org_type="Dev")
+        scratch_org_factory(epic=epic, org_type="Playground", owner=user)
 
         r = rf.get("/")
         r.user = user
 
         serializer = ScratchOrgSerializer(
-            data={"epic": str(epic.id), "org_type": "Dev", "org_config_name": "dev"},
+            data={
+                "epic": str(epic.id),
+                "org_type": "Playground",
+                "org_config_name": "dev",
+            },
             context={"request": r},
         )
         assert not serializer.is_valid()

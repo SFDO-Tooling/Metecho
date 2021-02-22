@@ -97,7 +97,9 @@ def epic_create_branch(
     return epic_branch_name
 
 
-def _create_branches_on_github(*, user, repo_id, epic, task=None, originating_user_id=None):
+def _create_branches_on_github(
+    *, user, repo_id, epic, task=None, originating_user_id=None
+):
     repository = get_repo_info(user, repo_id=repo_id)
 
     # Make epic branch, with latest from epic:
@@ -275,7 +277,7 @@ def create_branches_on_github_then_create_scratch_org(
     try:
         repo_id = parent.get_repo_id()
         commit_ish = parent.branch_name
-        if not commit_ish and (task or epic):
+        if (task or epic) and not commit_ish:
             commit_ish = _create_branches_on_github(
                 user=user,
                 repo_id=repo_id,
@@ -283,7 +285,7 @@ def create_branches_on_github_then_create_scratch_org(
                 task=task,
                 originating_user_id=originating_user_id,
             )
-        if commit_ish and not parent.latest_sha:
+        if commit_ish and not task and not parent.latest_sha:
             repository = get_repo_info(user, repo_id=repo_id)
             parent.latest_sha = repository.branch(commit_ish).latest_sha()
             parent.save()

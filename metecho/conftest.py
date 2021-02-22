@@ -72,6 +72,7 @@ class ProjectFactory(factory.django.DjangoModelFactory):
     repo_name = factory.Sequence("repo_{}".format)
     repo_id = factory.Sequence(lambda n: n)
     branch_name = "main"
+    latest_sha = "abcd1234"
 
 
 @register

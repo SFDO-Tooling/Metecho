@@ -6,6 +6,7 @@ import TaskDetail from '~js/components/tasks/detail';
 import { createObject, fetchObjects } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
 import { defaultState as defaultOrgsState } from '~js/store/orgs/reducer';
+import { refreshOrgConfigs } from '~js/store/projects/actions';
 import { TASK_STATUSES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
@@ -17,25 +18,20 @@ import {
 
 jest.mock('~js/store/actions');
 jest.mock('~js/store/orgs/actions');
+jest.mock('~js/store/projects/actions');
 
-createObject.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
-fetchObjects.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
-refetchOrg.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
-refreshOrg.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
+createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refetchOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   createObject.mockClear();
   fetchObjects.mockClear();
   refetchOrg.mockClear();
   refreshOrg.mockClear();
+  refreshOrgConfigs.mockClear();
 });
 
 const defaultOrg = {
@@ -89,6 +85,7 @@ const defaultState = {
             login: 'user-name',
           },
         ],
+        org_config_names: [],
       },
     ],
     notFound: ['different-project'],
@@ -113,6 +110,7 @@ const defaultState = {
               login: 'user-name',
             },
           ],
+          currently_creating_branch: false,
         },
       ],
       next: null,
@@ -138,6 +136,7 @@ const defaultState = {
           login: 'user-name',
         },
         assigned_qa: null,
+        currently_creating_branch: false,
       },
     ],
   },
@@ -518,27 +517,30 @@ describe('<TaskDetail/>', () => {
   });
 
   describe('edit task click', () => {
-    test('opens and closes modal', () => {
+    test('opens and closes modal', async () => {
       const { getByText, queryByText } = setup();
-      fireEvent.click(getByText('Task Options'));
-      fireEvent.click(getByText('Edit Task'));
+
+      expect.assertions(2);
+      await fireEvent.click(getByText('Task Options'));
+      await fireEvent.click(getByText('Edit Task'));
 
       expect(getByText('Edit Task')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      await fireEvent.click(getByText('Cancel'));
 
       expect(queryByText('Edit Task')).toBeNull();
     });
   });
 
-  test('opens/closed deleted modal', () => {
+  test('opens/closed deleted modal', async () => {
     const { getByText, queryByText } = setup();
-    fireEvent.click(getByText('Task Options'));
-    fireEvent.click(getByText('Delete Task'));
+    expect.assertions(2);
+    await fireEvent.click(getByText('Task Options'));
+    await fireEvent.click(getByText('Delete Task'));
 
     expect(getByText('Confirm Deleting Task')).toBeVisible();
 
-    fireEvent.click(getByText('Cancel'));
+    await fireEvent.click(getByText('Cancel'));
 
     expect(queryByText('Confirm Deleting Task')).toBeNull();
   });
@@ -570,7 +572,7 @@ describe('<TaskDetail/>', () => {
       },
     };
 
-    test('opens submit review modal', () => {
+    test('opens submit review modal', async () => {
       const { getByText, queryByText } = setup({
         initialState: {
           ...defaultState,
@@ -578,11 +580,13 @@ describe('<TaskDetail/>', () => {
           orgs,
         },
       });
-      fireEvent.click(getByText('Submit Review'));
+
+      expect.assertions(2);
+      await fireEvent.click(getByText('Submit Review'));
 
       expect(getByText('Submit Task Review')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      await fireEvent.click(getByText('Cancel'));
 
       expect(queryByText('Submit Task Review')).toBeNull();
     });
@@ -596,11 +600,12 @@ describe('<TaskDetail/>', () => {
             orgs,
           },
         });
-        fireEvent.click(getByText('Submit Review'));
-        const submit = baseElement.querySelector('.slds-button[type="submit"]');
-        fireEvent.click(submit);
 
-        expect(getByText('Submitting Review…')).toBeVisible();
+        expect.assertions(2);
+        await fireEvent.click(getByText('Submit Review'));
+        const submit = baseElement.querySelector('.slds-button[type="submit"]');
+        await fireEvent.click(submit);
+
         expect(createObject).toHaveBeenCalledTimes(1);
         expect(createObject).toHaveBeenCalledWith({
           url: window.api_urls.task_review('task1'),
@@ -613,7 +618,6 @@ describe('<TaskDetail/>', () => {
           hasForm: true,
           shouldSubscribeToObject: false,
         });
-        await waitForElementToBeRemoved(getByText('Submitting Review…'));
       });
 
       test('submits task review without org', async () => {
@@ -641,11 +645,14 @@ describe('<TaskDetail/>', () => {
             },
           },
         });
-        fireEvent.click(getByText('Update Review'));
-        const submit = baseElement.querySelector('.slds-button[type="submit"]');
-        fireEvent.click(submit);
 
-        expect(getByText('Submitting Review…')).toBeVisible();
+        expect.assertions(2);
+        await fireEvent.click(getByText('Update Review'));
+        const submit = baseElement.querySelector(
+          '.slds-modal__footer .slds-button[type="submit"]',
+        );
+        await fireEvent.click(submit);
+
         expect(createObject).toHaveBeenCalledTimes(1);
         expect(createObject).toHaveBeenCalledWith({
           url: window.api_urls.task_review('task1'),
@@ -658,7 +665,6 @@ describe('<TaskDetail/>', () => {
           hasForm: true,
           shouldSubscribeToObject: false,
         });
-        await waitForElementToBeRemoved(getByText('Submitting Review…'));
       });
     });
   });

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from simple_salesforce.exceptions import SalesforceError
 
@@ -11,7 +12,6 @@ from ..models import (
     SCRATCH_ORG_TYPES,
     TASK_STATUSES,
     Epic,
-    Project,
     Task,
     user_logged_in_handler,
 )
@@ -19,21 +19,21 @@ from ..models import (
 
 @pytest.mark.django_db
 class TestProject:
-    def test_signal(self):
-        project = Project(name="Test Project")
+    def test_signal(self, project_factory):
+        project = project_factory(name="Test Project")
         project.save()
         assert project.slug == "test-project"
 
-    def test_signal__recreate(self):
-        project = Project(name="Test Project")
+    def test_signal__recreate(self, project_factory):
+        project = project_factory(name="Test Project")
         project.save()
         assert project.slug == "test-project"
         project.name = "Test Project with a Twist"
         project.save()
         assert project.slug == "test-project-with-a-twist"
 
-    def test_str(self):
-        project = Project(name="Test Project")
+    def test_str(self, project_factory):
+        project = project_factory(name="Test Project")
         assert str(project) == "Test Project"
 
     def test_get_repo_id(self, project_factory):
@@ -897,6 +897,25 @@ class TestScratchOrg:
             scratch_org.remove_scratch_org(error=Exception, originating_user_id=None)
 
             assert async_to_sync.called
+
+    def test_clean(self, scratch_org_factory):
+        scratch_org = scratch_org_factory()
+        try:
+            scratch_org.clean()
+        except Exception:  # pragma: nocover
+            raise pytest.fail(Exception)
+
+    def test_clean__no_parent(self, scratch_org_factory):
+        scratch_org = scratch_org_factory(project=None, epic=None, task=None)
+        with pytest.raises(ValidationError):
+            scratch_org.clean()
+
+    def test_clean__epic_dev_org(self, scratch_org_factory, epic_factory):
+        scratch_org = scratch_org_factory(
+            epic=epic_factory(), task=None, org_type="Dev"
+        )
+        with pytest.raises(ValidationError):
+            scratch_org.clean()
 
     def test_clean_config(self, scratch_org_factory):
         scratch_org = scratch_org_factory()

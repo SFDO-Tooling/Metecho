@@ -261,6 +261,7 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   const doCreateOrg = useCallback(
     (type: OrgTypes) => {
+      /* istanbul ignore else */
       if (!epic?.currently_creating_branch) {
         setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
         dispatch(

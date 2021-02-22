@@ -149,7 +149,7 @@ const OrgActions = ({
     return (
       <>
         {submitReviewBtn}
-        {!preventNewTestOrg && !disableCreation && (
+        {!(preventNewTestOrg || disableCreation) && (
           <Button
             label={i18n.t('Create Org')}
             variant={isActive ? 'brand' : 'neutral'}

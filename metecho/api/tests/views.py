@@ -142,7 +142,7 @@ class TestProjectView:
                     "repo_image_url": "",
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
-                    "latest_sha": "",
+                    "latest_sha": "abcd1234",
                 }
             ],
         }, response.json()
@@ -184,7 +184,7 @@ class TestProjectView:
                     "repo_image_url": "",
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
-                    "latest_sha": "",
+                    "latest_sha": "abcd1234",
                 }
             ],
         }, response.json()
@@ -558,6 +558,45 @@ class TestScratchOrgView:
             )
             assert response.status_code == 403
             assert not commit_changes_from_org_job.delay.called
+
+    def test_list__not_playground_owner(
+        self, client, user_factory, scratch_org_factory
+    ):
+        other_user = user_factory()
+        scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Playground,
+            url="https://example.com",
+            is_created=True,
+            delete_queued_at=None,
+            currently_capturing_changes=False,
+            currently_refreshing_changes=False,
+            owner=other_user,
+        )
+
+        url = reverse("scratch-org-list")
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert not response.json(), response.json()
+
+    def test_retrieve__not_playground_owner(
+        self, client, user_factory, scratch_org_factory
+    ):
+        other_user = user_factory()
+        scratch_org = scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Playground,
+            url="https://example.com",
+            is_created=True,
+            delete_queued_at=None,
+            currently_capturing_changes=False,
+            currently_refreshing_changes=False,
+            owner=other_user,
+        )
+
+        url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+        response = client.get(url)
+
+        assert response.status_code == 403
 
     def test_list_fetch_changes(self, client, scratch_org_factory):
         with ExitStack() as stack:

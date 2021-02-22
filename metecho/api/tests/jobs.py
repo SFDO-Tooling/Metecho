@@ -68,6 +68,31 @@ class TestCreateBranchesOnGitHub:
 
             assert repository.create_branch_ref.called
 
+    def test_create_branches_on_github__no_task(self, user_factory, epic_factory):
+        user = user_factory()
+        epic = epic_factory()
+
+        with ExitStack() as stack:
+            stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
+            project_config = stack.enter_context(patch("metecho.api.gh.ProjectConfig"))
+            project_config_instance = MagicMock(project__git__prefix_feature="feature/")
+            project_config.return_value = project_config_instance
+            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+            repository = MagicMock()
+            repository.branch.return_value = MagicMock(
+                **{"latest_sha.return_value": "123abc"}
+            )
+            get_repo_info.return_value = repository
+
+            _create_branches_on_github(
+                user=user,
+                repo_id=123,
+                epic=epic,
+                originating_user_id="123abc",
+            )
+
+            assert repository.create_branch_ref.called
+
     def test_create_branches_on_github__missing(self, user_factory, epic_factory):
         user = user_factory()
         with ExitStack() as stack:
@@ -335,13 +360,22 @@ def test_create_branches_on_github_then_create_scratch_org():
         _create_branches_on_github = stack.enter_context(
             patch(f"{PATCH_ROOT}._create_branches_on_github")
         )
+        _create_branches_on_github.return_value = "this_branch"
         _create_org_and_run_flow = stack.enter_context(
             patch(f"{PATCH_ROOT}._create_org_and_run_flow")
         )
         stack.enter_context(patch(f"{PATCH_ROOT}.get_scheduler"))
+        get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
+        latest_sha = MagicMock()
+        latest_sha.return_value = "abcd1234"
+        repository = MagicMock()
+        repository.branch.return_value = MagicMock(latest_sha=latest_sha)
+        get_repo_info.return_value = repository
 
+        org = MagicMock(task=None, epic=MagicMock())
+        org.parent = MagicMock(branch_name="", latest_sha="")
         create_branches_on_github_then_create_scratch_org(
-            scratch_org=MagicMock(), originating_user_id=None
+            scratch_org=org, originating_user_id=None
         )
 
         assert _create_branches_on_github.called

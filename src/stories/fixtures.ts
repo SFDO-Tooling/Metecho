@@ -91,6 +91,7 @@ export const sampleEpic1 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   github_users: [sampleGitHubUser2],
   status: EPIC_STATUSES.PLANNED,
@@ -116,6 +117,7 @@ export const sampleEpic2 = {
   pr_is_open: true,
   pr_is_merged: false,
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   status: EPIC_STATUSES.IN_PROGRESS,
@@ -137,6 +139,7 @@ export const sampleEpic3 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   github_users: [],
   status: EPIC_STATUSES.PLANNED,
@@ -159,6 +162,7 @@ export const sampleEpic4 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   github_users: [],
   status: EPIC_STATUSES.MERGED,
@@ -181,6 +185,7 @@ export const sampleEpic5 = {
   pr_is_open: true,
   pr_is_merged: false,
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2],
   status: EPIC_STATUSES.REVIEW,
@@ -196,6 +201,7 @@ export const sampleTask1 = {
   description: 'This is a description',
   description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__data-mapping',
   branch_url:
@@ -228,6 +234,7 @@ export const sampleTask2 = {
   description_rendered:
     '<p>Add panel for controls toggles allowing for accessible interaction.</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: '',
   branch_url: null,
@@ -257,6 +264,7 @@ export const sampleTask3 = {
   description_rendered:
     '<p>Include options set by **operating system preferences**</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__dark-mode',
   branch_url:
@@ -288,6 +296,7 @@ export const sampleTask4 = {
   description_rendered:
     '<p>Internationalization and Localization built in options</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__universal-language',
   branch_url:
@@ -318,6 +327,7 @@ export const sampleTask5 = {
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__user-roles',
   branch_url:
