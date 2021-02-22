@@ -19,6 +19,7 @@ export interface Epic {
   pr_is_open: boolean;
   pr_is_merged: boolean;
   has_unmerged_commits: boolean;
+  currently_creating_branch: boolean;
   currently_creating_pr: boolean;
   github_users: GitHubUser[];
   status: EpicStatuses;

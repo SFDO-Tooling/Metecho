@@ -125,6 +125,7 @@ const PlaygroundOrgCard = ({
           <OrgActions
             org={org}
             type={org.org_type}
+            disableCreation
             ownedByCurrentUser
             orgOutOfDate={orgOutOfDate}
             isCreating={isCreating}

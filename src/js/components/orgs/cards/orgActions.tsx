@@ -12,6 +12,7 @@ const OrgActions = ({
   org,
   type,
   task,
+  disableCreation,
   ownedByCurrentUser,
   assignedToCurrentUser,
   ownedByWrongUser,
@@ -29,6 +30,7 @@ const OrgActions = ({
   org: Org | null;
   type: OrgTypes;
   task?: Task;
+  disableCreation: boolean;
   ownedByCurrentUser: boolean;
   assignedToCurrentUser?: boolean;
   ownedByWrongUser?: Org | null;
@@ -147,7 +149,7 @@ const OrgActions = ({
     return (
       <>
         {submitReviewBtn}
-        {!preventNewTestOrg && (
+        {!preventNewTestOrg && !disableCreation && (
           <Button
             label={i18n.t('Create Org')}
             variant={isActive ? 'brand' : 'neutral'}

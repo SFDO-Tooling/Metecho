@@ -38,37 +38,42 @@ const Overview = ({
   /* istanbul ignore if */
   if (isProject) {
     return (
-      <div className="slds-p-around_large">
+      <div className="slds-p-around_large slds-text-align_center">
         <Trans i18nKey="createProjectScratchOrgHelp">
           <p>
             <strong>
               You are creating a Scratch Org for {{ type }} “{{ name }}”.
             </strong>
           </p>
-          <p>Your new org will expire in 30 days.</p>
-          <p>You will be able to access your org from this {{ type }} page.</p>
+          <p>
+            Your new org will expire in 30 days.
+            <br />
+            You will be able to access your org from this {{ type }} page.
+          </p>
         </Trans>
       </div>
     );
   }
 
   return (
-    <div className="slds-p-around_large">
+    <div className="slds-p-around_large slds-text-align_center">
       <Trans i18nKey="createScratchOrgHelp">
         <p>
           <strong>
             You are creating a Scratch Org for {{ type }} “{{ name }}”.
           </strong>
         </p>
-        <p>Your new org will expire in 30 days.</p>
         <p>
+          Your new org will expire in 30 days.
+          <br />
           You will be able to access your org from this {{ type }} page and from
           the <Link to={projectUrl}>project page</Link>.
         </p>
         <br />
         <p>
-          If you would like to create a scratch org for the entire project, go
-          to the <Link to={projectUrl}>project page</Link> and click “Create
+          If you would like to create a scratch org for the entire project,
+          <br />
+          go to the <Link to={projectUrl}>project page</Link> and click “Create
           Scratch Org” in the sidebar.
         </p>
       </Trans>

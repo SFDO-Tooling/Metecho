@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
@@ -438,6 +439,7 @@ class Epic(
         max_length=100, blank=True, default="", validators=[validate_unicode_branch]
     )
     has_unmerged_commits = models.BooleanField(default=False)
+    currently_creating_branch = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
@@ -605,6 +607,7 @@ class Task(
     metecho_commits = models.JSONField(default=list, blank=True)
     has_unmerged_commits = models.BooleanField(default=False)
 
+    currently_creating_branch = models.BooleanField(default=False)
     currently_creating_pr = models.BooleanField(default=False)
     pr_number = models.IntegerField(null=True, blank=True)
     pr_is_open = models.BooleanField(default=False)
@@ -945,6 +948,17 @@ class ScratchOrg(
             self.notify_org_provisioning(originating_user_id=str(self.owner.id))
 
         return ret
+
+    def clean(self):
+        if not (self.project or self.epic or self.task):
+            raise ValidationError(
+                _("A ScratchOrg must belong to a project, epic, or task.")
+            )
+        if self.org_type != SCRATCH_ORG_TYPES.Playground and not self.task:
+            raise ValidationError(
+                {"org_type": _("Dev and Test orgs must belong to a task.")}
+            )
+        return super().clean()
 
     def clean_config(self):
         banned_keys = {"email", "access_token", "refresh_token"}

@@ -32,6 +32,7 @@ Retrieve
           "branch_url": "https://github.com/SFDO-Tooling/test-project/tree/feature/test-epic",
           "branch_diff_url": "https://github.com/SFDO-Tooling/test-project/compare/main...feature/test-epic",
           "has_unmerged_commits": true,
+          "currently_creating_branch": false,
           "currently_creating_pr": false,
           "pr_url": "https://github.com/SFDO-Tooling/test-project/pull/1357",
           "pr_is_open": true,

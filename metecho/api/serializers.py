@@ -123,11 +123,6 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_repo_image_url(self, obj) -> Optional[str]:
         return obj.repo_image_url if obj.include_repo_image_url else ""
 
-    def create(self, validated_data):
-        instance = super().create(validated_data)
-        instance.queue_available_org_config_names(user=self.context["request"].user)
-        return instance
-
 
 class EpicSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
@@ -153,6 +148,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "branch_diff_url",
             "branch_name",
             "has_unmerged_commits",
+            "currently_creating_branch",
             "currently_creating_pr",
             "pr_url",
             "pr_is_open",
@@ -167,6 +163,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "branch_url": {"read_only": True},
             "branch_diff_url": {"read_only": True},
             "has_unmerged_commits": {"read_only": True},
+            "currently_creating_branch": {"read_only": True},
             "currently_creating_pr": {"read_only": True},
             "pr_url": {"read_only": True},
             "pr_is_open": {"read_only": True},
@@ -186,6 +183,11 @@ class EpicSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
+        if not validated_data.get("branch_name"):
+            # This temporarily prevents users from taking other actions
+            # (e.g. creating scratch orgs) that also might trigger branch creation
+            # and could result in race conditions and duplicate branches on GitHub.
+            validated_data["currently_creating_branch"] = True
         instance = super().create(validated_data)
         instance.create_gh_branch(self.context["request"].user)
         instance.project.queue_available_org_config_names(
@@ -289,6 +291,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "has_unmerged_commits",
+            "currently_creating_branch",
             "currently_creating_pr",
             "branch_name",
             "branch_url",
@@ -313,6 +316,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "slug": {"read_only": True},
             "old_slugs": {"read_only": True},
             "has_unmerged_commits": {"read_only": True},
+            "currently_creating_branch": {"read_only": True},
             "currently_creating_pr": {"read_only": True},
             "branch_url": {"read_only": True},
             "commits": {"read_only": True},
@@ -618,12 +622,12 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         return {}
 
     def validate(self, data):
-        if not (data.get("task") or data.get("epic") or data.get("project")):
-            raise serializers.ValidationError(
-                _("A ScratchOrg must belong to a project, epic, or task.")
-            )
         if not self.instance:
             orgs = ScratchOrg.objects.active().filter(org_type=data["org_type"])
+            if data["org_type"] == SCRATCH_ORG_TYPES.Playground:
+                orgs = orgs.filter(
+                    owner=data.get("owner", self.context["request"].user)
+                )
             if data.get("task") and orgs.filter(task=data["task"]).exists():
                 raise serializers.ValidationError(
                     _("A ScratchOrg of this type already exists for this task.")

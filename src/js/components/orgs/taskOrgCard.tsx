@@ -31,6 +31,7 @@ interface TaskOrgCardProps {
   user: User;
   task: Task;
   epicUsers: GitHubUser[];
+  epicCreatingBranch: boolean;
   epicUrl: string;
   repoUrl: string;
   isCreatingOrg: boolean;
@@ -59,6 +60,7 @@ const TaskOrgCard = ({
   user,
   task,
   epicUsers,
+  epicCreatingBranch,
   epicUrl,
   repoUrl,
   isCreatingOrg,
@@ -228,6 +230,7 @@ const TaskOrgCard = ({
                   org={org}
                   type={type}
                   task={task}
+                  disableCreation={epicCreatingBranch}
                   ownedByCurrentUser={ownedByCurrentUser}
                   assignedToCurrentUser={assignedToCurrentUser}
                   ownedByWrongUser={ownedByWrongUser}

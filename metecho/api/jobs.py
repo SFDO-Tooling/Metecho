@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import string
 import traceback
@@ -42,6 +43,17 @@ class TaskReviewIntegrityError(Exception):
     pass
 
 
+@contextlib.contextmanager
+def creating_gh_branch(instance):
+    instance.currently_creating_branch = True
+    instance.save()
+    instance.notify_changed(originating_user_id=None)
+    try:
+        yield
+    finally:
+        instance.currently_creating_branch = False
+
+
 def epic_create_branch(
     *,
     user,
@@ -72,11 +84,12 @@ def epic_create_branch(
                     ).latest_sha(),
                 )
         epic_branch_name = f"{prefix}{slugify(epic.name)}"
-        epic_branch_name, latest_sha = try_to_make_branch(
-            repository,
-            new_branch=epic_branch_name,
-            base_branch=repository.default_branch,
-        )
+        with creating_gh_branch(epic):
+            epic_branch_name, latest_sha = try_to_make_branch(
+                repository,
+                new_branch=epic_branch_name,
+                base_branch=repository.default_branch,
+            )
         epic.branch_name = epic_branch_name
         epic.latest_sha = latest_sha
         if should_finalize:
@@ -84,7 +97,7 @@ def epic_create_branch(
     return epic_branch_name
 
 
-def _create_branches_on_github(*, user, repo_id, epic, task, originating_user_id):
+def _create_branches_on_github(*, user, repo_id, epic, task=None, originating_user_id=None):
     """
     Expects to be called in the context of a local github checkout.
     """
@@ -99,19 +112,23 @@ def _create_branches_on_github(*, user, repo_id, epic, task, originating_user_id
         repo_id=repo_id,
         originating_user_id=originating_user_id,
     )
+    if not task:
+        return epic_branch_name
+
     # Make task branch, with latest from task:
     task.refresh_from_db()
     if task.branch_name:
-        task_branch_name = task.branch_name
-    else:
+        return task.branch_name
+
+    with creating_gh_branch(task):
         task_branch_name, latest_sha = try_to_make_branch(
             repository,
             new_branch=f"{epic_branch_name}__{slugify(task.name)}",
             base_branch=epic_branch_name,
         )
-        task.branch_name = task_branch_name
-        task.origin_sha = repository.branch(epic_branch_name).latest_sha()
-        task.finalize_task_update(originating_user_id=originating_user_id)
+    task.branch_name = task_branch_name
+    task.origin_sha = repository.branch(epic_branch_name).latest_sha()
+    task.finalize_task_update(originating_user_id=originating_user_id)
 
     return task_branch_name
 
@@ -252,16 +269,17 @@ def create_branches_on_github_then_create_scratch_org(
     scratch_org.refresh_from_db()
     user = scratch_org.owner
     task = scratch_org.task
+    epic = scratch_org.epic
     parent = scratch_org.parent
 
     try:
         repo_id = parent.get_repo_id()
         commit_ish = parent.branch_name
-        if task:
+        if not commit_ish and (task or epic):
             commit_ish = _create_branches_on_github(
                 user=user,
                 repo_id=repo_id,
-                epic=task.epic,
+                epic=task.epic if task else epic,
                 task=task,
                 originating_user_id=originating_user_id,
             )
@@ -709,12 +727,13 @@ def create_gh_branch_for_new_epic(epic, *, user):
             try:
                 head = repository.branch(epic.branch_name).commit.sha
             except NotFoundError:
-                branch_name, latest_sha = try_to_make_branch(
-                    repository,
-                    new_branch=epic.branch_name,
-                    base_branch=repository.default_branch,
-                )
-                epic.latest_sha = latest_sha
+                with creating_gh_branch(epic):
+                    branch_name, latest_sha = try_to_make_branch(
+                        repository,
+                        new_branch=epic.branch_name,
+                        base_branch=repository.default_branch,
+                    )
+                    epic.latest_sha = latest_sha
             else:
                 epic.latest_sha = head
                 base = repository.branch(repository.default_branch).commit.sha

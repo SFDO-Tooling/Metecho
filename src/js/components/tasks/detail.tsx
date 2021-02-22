@@ -261,25 +261,34 @@ const TaskDetail = (props: RouteComponentProps) => {
 
   const doCreateOrg = useCallback(
     (type: OrgTypes) => {
-      setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
-      dispatch(
-        createObject({
-          objectType: OBJECT_TYPES.ORG,
-          data: {
-            task: task?.id,
-            org_type: type,
-            org_config_name: task?.org_config_name || DEFAULT_ORG_CONFIG_NAME,
-          },
-          shouldSubscribeToObject: false,
-        }),
-      ).finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
-        }
-      });
+      if (!epic?.currently_creating_branch) {
+        setIsCreatingOrg({ ...isCreatingOrg, [type]: true });
+        dispatch(
+          createObject({
+            objectType: OBJECT_TYPES.ORG,
+            data: {
+              task: task?.id,
+              org_type: type,
+              org_config_name: task?.org_config_name || DEFAULT_ORG_CONFIG_NAME,
+            },
+            shouldSubscribeToObject: false,
+          }),
+        ).finally(() => {
+          /* istanbul ignore else */
+          if (isMounted.current) {
+            setIsCreatingOrg({ ...isCreatingOrg, [type]: false });
+          }
+        });
+      }
     },
-    [dispatch, isCreatingOrg, isMounted, task?.id, task?.org_config_name],
+    [
+      dispatch,
+      isCreatingOrg,
+      isMounted,
+      epic?.currently_creating_branch,
+      task?.id,
+      task?.org_config_name,
+    ],
   );
 
   const doCaptureChanges = useCallback(() => {
@@ -623,6 +632,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             orgs={taskOrgs}
             task={task}
             epicUsers={epic.github_users}
+            epicCreatingBranch={epic.currently_creating_branch}
             epicUrl={epicUrl}
             repoUrl={project.repo_url}
             openCaptureModal={openCaptureModal}

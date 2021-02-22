@@ -505,6 +505,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 label={i18n.t('Create Scratch Org')}
                 variant="outline-brand"
                 onClick={openCreateOrgModal}
+                disabled={epic.currently_creating_branch}
               />
             )}
           </div>

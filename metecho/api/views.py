@@ -1,6 +1,6 @@
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
-from django.db.models import Case, IntegerField, When
+from django.db.models import Case, IntegerField, Q, When
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -320,7 +320,11 @@ class ScratchOrgViewSet(
         # XXX: This method is copied verbatim from
         # rest_framework.mixins.RetrieveModelMixin, because I needed to
         # insert the get_unsaved_changes line in the middle.
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(
+            self.get_queryset().exclude(
+                ~Q(owner=request.user), org_type=SCRATCH_ORG_TYPES.Playground
+            )
+        )
 
         force_get = request.query_params.get("get_unsaved_changes", False)
         # XXX: I am apprehensive about the possibility of flooding the
@@ -350,6 +354,14 @@ class ScratchOrgViewSet(
         # change: we needed to insert the get_unsaved_changes line in
         # the middle.
         instance = self.get_object()
+        if (
+            instance.org_type == SCRATCH_ORG_TYPES.Playground
+            and not request.user == instance.owner
+        ):
+            return Response(
+                {"error": _("Requesting user did not create scratch org.")},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         force_get = request.query_params.get("get_unsaved_changes", False)
         conditions = [
             instance.org_type in [SCRATCH_ORG_TYPES.Dev, SCRATCH_ORG_TYPES.Playground],
