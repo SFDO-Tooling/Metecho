@@ -98,9 +98,6 @@ def epic_create_branch(
 
 
 def _create_branches_on_github(*, user, repo_id, epic, task=None, originating_user_id=None):
-    """
-    Expects to be called in the context of a local github checkout.
-    """
     repository = get_repo_info(user, repo_id=repo_id)
 
     # Make epic branch, with latest from epic:
@@ -186,6 +183,9 @@ def _create_org_and_run_flow(
     originating_user_id,
     sf_username=None,
 ):
+    """
+    Expects to be called in the context of a local github checkout.
+    """
     repository = get_repo_info(user, repo_id=repo_id)
     commit = repository.branch(repo_branch).commit
     org_config_name = scratch_org.org_config_name
@@ -283,6 +283,11 @@ def create_branches_on_github_then_create_scratch_org(
                 task=task,
                 originating_user_id=originating_user_id,
             )
+        if commit_ish and not parent.latest_sha:
+            repository = get_repo_info(user, repo_id=repo_id)
+            parent.latest_sha = repository.branch(commit_ish).latest_sha()
+            parent.save()
+            parent.notify_changed(originating_user_id=originating_user_id)
         with local_github_checkout(user, repo_id, commit_ish) as repo_root:
             _create_org_and_run_flow(
                 scratch_org,
