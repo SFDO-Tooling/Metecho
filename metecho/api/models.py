@@ -958,7 +958,7 @@ class ScratchOrg(
     def clean(self):
         if not (self.project or self.epic or self.task):
             raise ValidationError(
-                _("A ScratchOrg must belong to a project, epic, or task.")
+                _("A ScratchOrg must belong to either a project, an epic, or a task.")
             )
         if self.org_type != SCRATCH_ORG_TYPES.Playground and not self.task:
             raise ValidationError(
