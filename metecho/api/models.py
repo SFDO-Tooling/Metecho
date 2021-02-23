@@ -956,7 +956,7 @@ class ScratchOrg(
         return ret
 
     def clean(self):
-        if not (self.project or self.epic or self.task):
+        if len([x for x in [self.project, self.epic, self.task] if x is not None]) != 1:
             raise ValidationError(
                 _("A ScratchOrg must belong to either a project, an epic, or a task.")
             )
