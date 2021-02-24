@@ -49,6 +49,7 @@ const Header = ({ page }: { page: string }) => {
             iconName="question"
             iconSize="large"
             iconVariant="more"
+            width="x-small"
             onSelect={({ value }: { value: TourType }) => {
               doRunTour(value);
             }}
