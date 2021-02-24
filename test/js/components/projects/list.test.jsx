@@ -6,7 +6,11 @@ import ProjectList from '~js/components/projects/list';
 import { fetchObjects } from '~js/store/actions';
 import { refreshProjects } from '~js/store/projects/actions';
 
-import { renderWithRedux, storeWithThunk } from './../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithThunk,
+} from './../../utils';
 
 jest.mock('react-fns', () => ({
   withScroll(Component) {
@@ -33,16 +37,17 @@ describe('<ProjectList />', () => {
     props = {},
     rerender = null,
     store,
-  } = {}) =>
-    renderWithRedux(
+  } = {}) => {
+    const ui = (
       <MemoryRouter>
         <ProjectList {...props} />
-      </MemoryRouter>,
-      initialState,
-      storeWithThunk,
-      rerender,
-      store,
+      </MemoryRouter>
     );
+    if (rerender) {
+      return reRenderWithRedux(ui, store, rerender);
+    }
+    return renderWithRedux(ui, initialState, storeWithThunk);
+  };
 
   test('renders projects list (empty)', () => {
     const { getByText } = setup();

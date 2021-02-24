@@ -48,3 +48,11 @@ export const selectProject = createSelector(
     return notFound ? null : undefined;
   },
 );
+
+export const selectProjectById = (
+  appState: AppState,
+  id?: string | null,
+): Project | undefined =>
+  Object.values(appState.projects.projects)
+    .flat()
+    .find((p) => p.id === id);

@@ -1,5 +1,3 @@
-import fetchMock from 'fetch-mock';
-
 import * as actions from '~js/store/epics/actions';
 
 import { storeWithThunk } from './../../utils';
@@ -33,7 +31,7 @@ describe('createEpicPR', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted epic for review on GitHub: “My Epic”.',
     );
     expect(allActions[0].payload.linkText).toEqual('View pull request.');
@@ -60,7 +58,7 @@ describe('createEpicPR', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted epic for review on GitHub: “My Epic”.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
@@ -90,69 +88,11 @@ describe('createEpicPRFailed', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error submitting epic for review on GitHub: “My Epic”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
     expect(allActions[1]).toEqual(action);
-  });
-});
-
-describe('refreshOrgConfigs', () => {
-  const id = 'epic-id';
-  let url;
-
-  beforeAll(() => {
-    url = window.api_urls.epic_refresh_org_config_names(id);
-  });
-
-  test('dispatches RefreshOrgConfigs actions', () => {
-    const store = storeWithThunk({});
-    fetchMock.postOnce(url, 202);
-    const RefreshOrgConfigsRequested = {
-      type: 'REFRESH_ORG_CONFIGS_REQUESTED',
-      payload: id,
-    };
-    const RefreshOrgConfigsAccepted = {
-      type: 'REFRESH_ORG_CONFIGS_ACCEPTED',
-      payload: id,
-    };
-
-    expect.assertions(1);
-    return store.dispatch(actions.refreshOrgConfigs(id)).then(() => {
-      expect(store.getActions()).toEqual([
-        RefreshOrgConfigsRequested,
-        RefreshOrgConfigsAccepted,
-      ]);
-    });
-  });
-
-  describe('error', () => {
-    test('dispatches REFRESH_ORG_CONFIGS_REJECTED action', () => {
-      const store = storeWithThunk({});
-      fetchMock.postOnce(url, {
-        status: 500,
-        body: { non_field_errors: ['Foobar'] },
-      });
-      const started = {
-        type: 'REFRESH_ORG_CONFIGS_REQUESTED',
-        payload: id,
-      };
-      const failed = {
-        type: 'REFRESH_ORG_CONFIGS_REJECTED',
-        payload: id,
-      };
-
-      expect.assertions(4);
-      return store.dispatch(actions.refreshOrgConfigs(id)).catch(() => {
-        const allActions = store.getActions();
-
-        expect(allActions[0]).toEqual(started);
-        expect(allActions[1].type).toEqual('ERROR_ADDED');
-        expect(allActions[1].payload.message).toEqual(['Foobar']);
-        expect(allActions[2]).toEqual(failed);
-      });
-    });
   });
 });

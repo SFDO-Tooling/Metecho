@@ -72,6 +72,7 @@ class ProjectFactory(factory.django.DjangoModelFactory):
     repo_name = factory.Sequence("repo_{}".format)
     repo_id = factory.Sequence(lambda n: n)
     branch_name = "main"
+    latest_sha = "abcd1234"
 
 
 @register
@@ -111,6 +112,7 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
     task = factory.SubFactory(TaskFactory)
     owner = factory.SubFactory(UserFactory)
     org_type = "Dev"
+    org_config_name = "dev"
     valid_target_directories = {"source": []}
 
 

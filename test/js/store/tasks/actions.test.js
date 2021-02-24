@@ -28,7 +28,7 @@ describe('createTaskPR', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted task for testing: “My Task”.',
     );
     expect(allActions[0].payload.linkText).toEqual('View pull request.');
@@ -74,7 +74,7 @@ describe('createTaskPR', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted task for testing: “My Task”.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
@@ -104,7 +104,7 @@ describe('createTaskPRFailed', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error submitting task for testing: “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
@@ -153,7 +153,7 @@ describe('submitReview', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted review for task: “My Task”.',
     );
     expect(allActions[0].payload.linkText).toEqual('View pull request.');
@@ -199,7 +199,7 @@ describe('submitReview', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Successfully submitted review for task: “My Task”.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
@@ -229,7 +229,7 @@ describe('submitReviewFailed', () => {
     const allActions = store.getActions();
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
-    expect(allActions[0].payload.heading).toEqual(
+    expect(allActions[0].payload.heading).toMatch(
       'Uh oh. There was an error submitting review for task: “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');

@@ -13,7 +13,7 @@ const PageDescription = ({
   const descriptionHasTitle =
     description?.startsWith('<h1>') || description?.startsWith('<h2>');
 
-  const renderedTitle = `${i18n.t('About')} ${title}`;
+  const renderedTitle = i18n.t('About {{title}}', { title });
 
   const renderedDescription = (
     <>
@@ -44,7 +44,10 @@ const PageDescription = ({
               slds-m-left_xx-small
               metecho-repo-image-wrapper"
           >
-            <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
+            <img
+              src={image}
+              alt={i18n.t('social image for {{title}}', { title })}
+            />
           </div>
           <div
             className="slds-media__body

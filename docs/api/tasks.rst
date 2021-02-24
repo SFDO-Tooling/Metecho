@@ -31,6 +31,7 @@ Retrieve
         "slug": "test-task",
         "old_slugs": [],
         "has_unmerged_commits": true,
+        "currently_creating_branch": false,
         "currently_creating_pr": false,
         "branch_name": "feature/test-epic__test-task",
         "branch_url": "https://github.com/SFDO-Tooling/test-project/tree/feature/test-epic__test-task",
