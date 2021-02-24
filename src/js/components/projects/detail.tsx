@@ -23,6 +23,7 @@ import {
 } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { fetchObjects } from '~js/store/actions';
+import { onboard } from '~js/store/user/actions';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
 import { OBJECT_TYPES } from '~js/utils/constants';
@@ -75,11 +76,21 @@ const ProjectDetail = (props: RouteComponentProps) => {
   );
   const doRunTour = useCallback(
     (type: TourType) => {
-      closeTourLandingModal();
-      setTourRunning(type);
+      if (user.onboarded_at) {
+        setTourRunning(type);
+      } else {
+        dispatch(onboard()).finally(() => {
+          if (isMounted.current) {
+            /* istanbul ignore else */
+            closeTourLandingModal();
+            setTourRunning(type);
+          }
+        });
+      }
     },
-    [closeTourLandingModal],
+    [closeTourLandingModal, dispatch, user.onboarded_at, isMounted],
   );
+
   const handleTourCallback = useCallback((data: CallBackProps) => {
     const { status } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];

@@ -2,7 +2,7 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { CallBackProps, STATUS } from 'react-joyride';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -18,13 +18,15 @@ import PlanTour from '~js/components/tour/plan';
 import UserInfo from '~js/components/user/info';
 import { selectSocketState } from '~js/store/socket/selectors';
 import { selectUserState } from '~js/store/user/selectors';
-import routes from '~js/utils/routes';
+import routes, { routePatterns } from '~js/utils/routes';
 
-const Header = () => {
+const Header = ({ page }: { page: string }) => {
   const user = useSelector(selectUserState);
   const socket = useSelector(selectSocketState);
   const [tourRunning, setTourRunning] = useState<TourType | null>(null);
-
+  const [hideTourHelper, setHideTourHelper] = useState(
+    page === routePatterns.project_list(),
+  );
   const doRunTour = (type: TourType) => setTourRunning(type);
   const handleTourCallback = useCallback((data: CallBackProps) => {
     const { status } = data;
@@ -33,51 +35,56 @@ const Header = () => {
       setTourRunning(null);
     }
   }, []);
+  const doShowHelper = !hideTourHelper && user?.onboarded_at;
+  useEffect(() => {
+    setHideTourHelper(page === routePatterns.project_list());
+  }, [page]);
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
-      <div className="slds-col_padded">
-        <Dropdown
-          assistiveText={{ icon: `${i18n.t('Get Help')}` }}
-          buttonVariant="icon"
-          iconName="question"
-          iconSize="large"
-          iconVariant="more"
-          onSelect={({ value }: { value: TourType }) => {
-            doRunTour(value);
-          }}
-          options={[
-            {
-              label: `${i18n.t('Play Walkthrough')}`,
-              value: 'play',
-              leftIcon: {
-                name: seesawSvg,
-                category: 'utility',
+      {doShowHelper && (
+        <div className="slds-col_padded">
+          <Dropdown
+            assistiveText={{ icon: `${i18n.t('Get Help')}` }}
+            buttonVariant="icon"
+            iconName="question"
+            iconSize="large"
+            iconVariant="more"
+            onSelect={({ value }: { value: TourType }) => {
+              doRunTour(value);
+            }}
+            options={[
+              {
+                label: `${i18n.t('Play Walkthrough')}`,
+                value: 'play',
+                leftIcon: {
+                  name: seesawSvg,
+                  category: 'utility',
+                },
               },
-            },
-            {
-              label: `${i18n.t('Help Walkthrough')}`,
-              value: 'help',
-              leftIcon: {
-                name: backpackSvg,
-                category: 'utility',
+              {
+                label: `${i18n.t('Help Walkthrough')}`,
+                value: 'help',
+                leftIcon: {
+                  name: backpackSvg,
+                  category: 'utility',
+                },
               },
-            },
-            {
-              label: `${i18n.t('Plan Walkthrough')}`,
-              value: 'plan',
-              leftIcon: {
-                name: mapSvg,
-                category: 'utility',
+              {
+                label: `${i18n.t('Plan Walkthrough')}`,
+                value: 'plan',
+                leftIcon: {
+                  name: mapSvg,
+                  category: 'utility',
+                },
               },
-            },
-          ]}
-        />
-      </div>
+            ]}
+          />
+        </div>
+      )}
 
       <UserInfo />
     </PageHeaderControl>
   );
-
   return user ? (
     <>
       {socket ? null : <OfflineAlert />}

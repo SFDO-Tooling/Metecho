@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -48,5 +49,10 @@ describe('<Header />', () => {
 
       expect(queryByText('reload the page.')).toBeNull();
     });
+  });
+
+  test('show tour help', () => {
+    const { getByText } = setup();
+    fireEvent.click(getByText('Plan Walkthrough'));
   });
 });

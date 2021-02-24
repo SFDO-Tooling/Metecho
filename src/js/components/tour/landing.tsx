@@ -2,17 +2,14 @@ import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Trans } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import backpackSvg from '!raw-loader!~img/backpack-lg.svg';
 import mapSvg from '!raw-loader!~img/map-lg.svg';
 import seesawSvg from '!raw-loader!~img/seesaw-lg.svg';
 import { Illustration } from '~js/components/utils';
-import { useIsMounted } from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { onboard } from '~js/store/user/actions';
+
 export type TourType = 'play' | 'plan' | 'help';
 export interface Tour {
   header: string;
@@ -57,20 +54,20 @@ const LandingModal = ({
       icon: mapSvg,
     },
   ];
-  const isMounted = useIsMounted();
-  const dispatch = useDispatch<ThunkDispatch>();
+  // const isMounted = useIsMounted();
+  // const dispatch = useDispatch<ThunkDispatch>();
 
-  const doOnboard = useCallback(
-    (type: TourType) => {
-      dispatch(onboard()).finally(() => {
-        /* istanbul ignore else */
-        if (isMounted.current) {
-          runTour(type);
-        }
-      });
-    },
-    [dispatch, isMounted, runTour],
-  );
+  // const doOnboard = useCallback(
+  //   (type: TourType) => {
+  //     dispatch(onboard()).finally(() => {
+  //       /* istanbul ignore else */
+  //       if (isMounted.current) {
+  //         runTour(type);
+  //       }
+  //     });
+  //   },
+  //   [dispatch, isMounted, runTour],
+  // );
   return (
     <Modal
       isOpen={isOpen}
@@ -103,7 +100,7 @@ const LandingModal = ({
                   <Button
                     label={linkText}
                     variant="link"
-                    onClick={() => doOnboard(type)}
+                    onClick={() => runTour(type)}
                     disabled={disabled}
                   />
                 }
