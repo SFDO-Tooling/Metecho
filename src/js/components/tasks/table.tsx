@@ -199,7 +199,7 @@ const AssigneeTableCell = ({
         />
         <AssignUserModal
           allUsers={epicUsers}
-          selectedUser={assignedUser}
+          selectedUser={assignedUser || null}
           orgType={type}
           isOpen={assignUserModalOpen}
           emptyMessageText={i18n.t('Add Epic Collaborators')}

@@ -5,33 +5,60 @@ import { StaticRouter } from 'react-router-dom';
 import TaskDetail from '~js/components/tasks/detail';
 import { createObject, fetchObjects } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
+import { defaultState as defaultOrgsState } from '~js/store/orgs/reducer';
+import { refreshOrgConfigs } from '~js/store/projects/actions';
 import { TASK_STATUSES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
-import { renderWithRedux, storeWithThunk } from './../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithThunk,
+} from './../../utils';
 
 jest.mock('~js/store/actions');
 jest.mock('~js/store/orgs/actions');
+jest.mock('~js/store/projects/actions');
 
-createObject.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
-fetchObjects.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
-refetchOrg.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
-refreshOrg.mockReturnValue(() =>
-  Promise.resolve({ type: 'TEST', payload: {} }),
-);
+createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refetchOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   createObject.mockClear();
   fetchObjects.mockClear();
   refetchOrg.mockClear();
   refreshOrg.mockClear();
+  refreshOrgConfigs.mockClear();
 });
+
+const defaultOrg = {
+  id: 'org-id',
+  task: 'task1',
+  org_type: 'Dev',
+  owner: 'user-id',
+  owner_gh_username: 'user-name',
+  expires_at: '2019-09-16T12:58:53.721Z',
+  latest_commit: '617a51',
+  latest_commit_url: '/test/commit/url/',
+  latest_commit_at: '2019-08-16T12:58:53.721Z',
+  last_checked_unsaved_changes_at: new Date().toISOString(),
+  url: '/test/org/url/',
+  is_created: true,
+  unsaved_changes: { Foo: ['Bar'] },
+  has_unsaved_changes: true,
+  total_unsaved_changes: 1,
+  ignored_changes: {},
+  has_ignored_changes: false,
+  total_ignored_changes: 0,
+  valid_target_directories: {
+    source: ['src'],
+    post: ['foo/bar', 'buz/baz'],
+  },
+  has_been_visited: true,
+};
 
 const defaultState = {
   user: {
@@ -111,33 +138,13 @@ const defaultState = {
     ],
   },
   orgs: {
-    task1: {
-      Dev: {
-        id: 'org-id',
-        task: 'task1',
-        org_type: 'Dev',
-        owner: 'user-id',
-        owner_gh_username: 'user-name',
-        expires_at: '2019-09-16T12:58:53.721Z',
-        latest_commit: '617a51',
-        latest_commit_url: '/test/commit/url/',
-        latest_commit_at: '2019-08-16T12:58:53.721Z',
-        last_checked_unsaved_changes_at: new Date().toISOString(),
-        url: '/test/org/url/',
-        is_created: true,
-        unsaved_changes: { Foo: ['Bar'] },
-        has_unsaved_changes: true,
-        total_unsaved_changes: 1,
-        ignored_changes: {},
-        has_ignored_changes: false,
-        total_ignored_changes: 0,
-        valid_target_directories: {
-          source: ['src'],
-          post: ['foo/bar', 'buz/baz'],
-        },
-        has_been_visited: true,
-      },
-      QA: null,
+    orgs: {
+      [defaultOrg.id]: defaultOrg,
+    },
+    fetched: {
+      projects: [],
+      epics: [],
+      tasks: ['task1'],
     },
   },
 };
@@ -154,16 +161,21 @@ describe('<TaskDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, projectSlug, epicSlug, taskSlug } = opts;
     const context = {};
-    const result = renderWithRedux(
+    const ui = (
       <StaticRouter context={context}>
         <TaskDetail match={{ params: { projectSlug, epicSlug, taskSlug } }} />
-      </StaticRouter>,
-      initialState,
-      storeWithThunk,
-      opts.rerender,
-      opts.store,
+      </StaticRouter>
     );
-    return { ...result, context };
+    if (opts.rerender) {
+      return {
+        ...reRenderWithRedux(ui, opts.store, opts.rerender),
+        context,
+      };
+    }
+    return {
+      ...renderWithRedux(ui, initialState, storeWithThunk),
+      context,
+    };
   };
 
   test('renders task detail with org', () => {
@@ -280,7 +292,7 @@ describe('<TaskDetail/>', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
-          orgs: {},
+          orgs: defaultOrgsState,
         },
       });
 
@@ -346,10 +358,9 @@ describe('<TaskDetail/>', () => {
           ...defaultState,
           orgs: {
             ...defaultState.orgs,
-            task1: {
-              ...defaultState.orgs.task1,
-              Dev: {
-                ...defaultState.orgs.task1.Dev,
+            orgs: {
+              [defaultOrg.id]: {
+                ...defaultOrg,
                 currently_capturing_changes: true,
               },
             },
@@ -368,10 +379,9 @@ describe('<TaskDetail/>', () => {
           ...defaultState,
           orgs: {
             ...defaultState.orgs,
-            task1: {
-              ...defaultState.orgs.task1,
-              Dev: {
-                ...defaultState.orgs.task1.Dev,
+            orgs: {
+              [defaultOrg.id]: {
+                ...defaultOrg,
                 currently_reassigning_user: true,
               },
             },
@@ -490,10 +500,9 @@ describe('<TaskDetail/>', () => {
         },
         orgs: {
           ...defaultState.orgs,
-          task1: {
-            ...defaultState.orgs.task1,
-            Dev: {
-              ...defaultState.orgs.task1.Dev,
+          orgs: {
+            [defaultOrg.id]: {
+              ...defaultOrg,
               total_unsaved_changes: 0,
             },
           },
@@ -505,27 +514,30 @@ describe('<TaskDetail/>', () => {
   });
 
   describe('edit task click', () => {
-    test('opens and closes modal', () => {
+    test('opens and closes modal', async () => {
       const { getByText, getByTitle, queryByText } = setup();
-      fireEvent.click(getByText('Task Options'));
-      fireEvent.click(getByText('Edit Task'));
+
+      expect.assertions(2);
+      await fireEvent.click(getByText('Task Options'));
+      await fireEvent.click(getByText('Edit Task'));
 
       expect(getByText('Edit Task')).toBeVisible();
 
-      fireEvent.click(getByTitle('Cancel'));
+      await fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Edit Task')).toBeNull();
     });
   });
 
-  test('opens/closed deleted modal', () => {
+  test('opens/closed deleted modal', async () => {
     const { getByText, getByTitle, queryByText } = setup();
-    fireEvent.click(getByText('Task Options'));
-    fireEvent.click(getByText('Delete Task'));
+    expect.assertions(2);
+    await fireEvent.click(getByText('Task Options'));
+    await fireEvent.click(getByText('Delete Task'));
 
     expect(getByText('Confirm Deleting Task')).toBeVisible();
 
-    fireEvent.click(getByTitle('Cancel'));
+    await fireEvent.click(getByTitle('Cancel'));
 
     expect(queryByText('Confirm Deleting Task')).toBeNull();
   });
@@ -547,10 +559,9 @@ describe('<TaskDetail/>', () => {
     };
     const orgs = {
       ...defaultState.orgs,
-      task1: {
-        Dev: null,
-        QA: {
-          ...defaultState.orgs.task1.Dev,
+      orgs: {
+        [defaultOrg.id]: {
+          ...defaultOrg,
           org_type: 'QA',
           latest_commit: 'parent',
           has_been_visited: true,
@@ -558,7 +569,7 @@ describe('<TaskDetail/>', () => {
       },
     };
 
-    test('opens submit review modal', () => {
+    test('opens submit review modal', async () => {
       const { getByText, getByTitle, queryByText } = setup({
         initialState: {
           ...defaultState,
@@ -566,11 +577,13 @@ describe('<TaskDetail/>', () => {
           orgs,
         },
       });
-      fireEvent.click(getByText('Submit Review'));
+
+      expect.assertions(2);
+      await fireEvent.click(getByText('Submit Review'));
 
       expect(getByText('Submit Task Review')).toBeVisible();
 
-      fireEvent.click(getByTitle('Cancel'));
+      await fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Submit Task Review')).toBeNull();
     });
@@ -584,11 +597,12 @@ describe('<TaskDetail/>', () => {
             orgs,
           },
         });
-        fireEvent.click(getByText('Submit Review'));
-        const submit = baseElement.querySelector('.slds-button[type="submit"]');
-        fireEvent.click(submit);
 
-        expect(getByText('Submitting Review…')).toBeVisible();
+        expect.assertions(2);
+        await fireEvent.click(getByText('Submit Review'));
+        const submit = baseElement.querySelector('.slds-button[type="submit"]');
+        await fireEvent.click(submit);
+
         expect(createObject).toHaveBeenCalledTimes(1);
         expect(createObject).toHaveBeenCalledWith({
           url: window.api_urls.task_review('task1'),
@@ -601,7 +615,6 @@ describe('<TaskDetail/>', () => {
           hasForm: true,
           shouldSubscribeToObject: false,
         });
-        await waitForElementToBeRemoved(getByText('Submitting Review…'));
       });
 
       test('submits task review without org', async () => {
@@ -623,14 +636,20 @@ describe('<TaskDetail/>', () => {
                 },
               ],
             },
-            orgs: { task1: { Dev: null, QA: null } },
+            orgs: {
+              ...defaultState.orgs,
+              orgs: {},
+            },
           },
         });
-        fireEvent.click(getByText('Update Review'));
-        const submit = baseElement.querySelector('.slds-button[type="submit"]');
-        fireEvent.click(submit);
 
-        expect(getByText('Submitting Review…')).toBeVisible();
+        expect.assertions(2);
+        await fireEvent.click(getByText('Update Review'));
+        const submit = baseElement.querySelector(
+          '.slds-modal__footer .slds-button[type="submit"]',
+        );
+        await fireEvent.click(submit);
+
         expect(createObject).toHaveBeenCalledTimes(1);
         expect(createObject).toHaveBeenCalledWith({
           url: window.api_urls.task_review('task1'),
@@ -643,7 +662,6 @@ describe('<TaskDetail/>', () => {
           hasForm: true,
           shouldSubscribeToObject: false,
         });
-        await waitForElementToBeRemoved(getByText('Submitting Review…'));
       });
     });
   });
@@ -725,7 +743,7 @@ describe('<TaskDetail/>', () => {
         taskWithDev,
         null,
         null,
-        'Create a Scratch Org for development',
+        'Create a Dev Org',
         'Creating Org…',
         true,
       ],
@@ -761,7 +779,7 @@ describe('<TaskDetail/>', () => {
         taskWithTester,
         {},
         null,
-        'Create a Scratch Org for testing',
+        'Create a Test Org',
         'Creating Org…',
         true,
       ],
@@ -800,20 +818,15 @@ describe('<TaskDetail/>', () => {
           ...taskOpts,
         };
         let devOrg, testOrg;
-        if (devOrgOpts === null) {
-          devOrg = null;
-        } else {
+        const orgs = {};
+        if (devOrgOpts !== null) {
           devOrg = { ...defaultDevOrg, ...devOrgOpts };
+          orgs[devOrg.id] = devOrg;
         }
-        if (testOrgOpts === null) {
-          testOrg = null;
-        } else {
+        if (testOrgOpts !== null) {
           testOrg = { ...defaultTestOrg, ...testOrgOpts };
+          orgs[testOrg.id] = testOrg;
         }
-        const orgs = {
-          Dev: devOrg,
-          QA: testOrg,
-        };
         const { getByText } = setup({
           initialState: {
             ...defaultState,
@@ -823,7 +836,7 @@ describe('<TaskDetail/>', () => {
             },
             orgs: {
               ...defaultState.orgs,
-              task1: orgs,
+              orgs,
             },
           },
         });

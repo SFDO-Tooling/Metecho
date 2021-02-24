@@ -13,15 +13,22 @@ import {
   useTransientMessage,
 } from '~js/components/utils';
 import { Epic } from '~js/store/epics/reducer';
+import { Project } from '~js/store/projects/reducer';
 import { DEFAULT_ORG_CONFIG_NAME, OBJECT_TYPES } from '~js/utils/constants';
 
 interface Props {
+  project: Project;
   epic: Epic;
   isOpen: boolean;
   closeCreateModal: () => void;
 }
 
-const CreateTaskModal = ({ epic, isOpen, closeCreateModal }: Props) => {
+const CreateTaskModal = ({
+  project,
+  epic,
+  isOpen,
+  closeCreateModal,
+}: Props) => {
   const isMounted = useIsMounted();
   const {
     showTransientMessage,
@@ -101,7 +108,7 @@ const CreateTaskModal = ({ epic, isOpen, closeCreateModal }: Props) => {
       isOpen={isOpen}
       size="small"
       disableClose={isSaving || isSavingBatch}
-      heading={`${i18n.t('Add a Task for')} ${epic.name}`}
+      heading={i18n.t('Add a Task for {{epic_name}}', { epic_name: epic.name })}
       assistiveText={{ closeButton: i18n.t('Cancel') }}
       onRequestClose={closeModal}
       footer={[
@@ -167,17 +174,18 @@ const CreateTaskModal = ({ epic, isOpen, closeCreateModal }: Props) => {
           id="task-description"
           label={i18n.t('Description')}
           classNameContainer="slds-form-element_stacked slds-p-left_none"
+          className="metecho-textarea"
           name="description"
           value={inputs.description}
           errorText={errors.description}
           onChange={handleInputChange}
         />
         <SelectFlowType
-          orgConfigs={epic.available_task_org_config_names}
-          epicId={epic.id}
+          orgConfigs={project.org_config_names}
+          projectId={project.id}
           value={inputs.org_config_name}
           errors={errors.org_config_name}
-          isLoading={epic.currently_fetching_org_config_names}
+          isLoading={project.currently_fetching_org_config_names}
           handleSelect={handleInputChange}
         />
         {/* Clicking hidden button allows for native browser form validation */}

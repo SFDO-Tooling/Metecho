@@ -5,7 +5,11 @@ import { MemoryRouter } from 'react-router-dom';
 import CaptureModal from '~js/components/tasks/capture';
 import { createObject, updateObject } from '~js/store/actions';
 
-import { renderWithRedux, storeWithThunk } from '../../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithThunk,
+} from '../../../utils';
 
 jest.mock('~js/store/actions');
 
@@ -47,16 +51,21 @@ describe('<CaptureModal/>', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const closeModal = jest.fn();
-    const result = renderWithRedux(
+    const ui = (
       <MemoryRouter>
         <CaptureModal org={opts.org} isOpen closeModal={closeModal} />
-      </MemoryRouter>,
-      {},
-      storeWithThunk,
-      opts.rerender,
-      opts.store,
+      </MemoryRouter>
     );
-    return { ...result, closeModal };
+    if (opts.rerender) {
+      return {
+        ...reRenderWithRedux(ui, opts.store, opts.rerender),
+        closeModal,
+      };
+    }
+    return {
+      ...renderWithRedux(ui, {}, storeWithThunk),
+      closeModal,
+    };
   };
 
   test('can navigate forward/back, close modal', () => {

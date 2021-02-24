@@ -16,9 +16,9 @@ const OrgIcon = ({
   orgId: string;
   ownedByCurrentUser: boolean;
   isDeleting: boolean;
-  isRefreshingOrg: boolean;
-  testOrgOutOfDate: boolean;
-  openRefreshOrgModal: () => void;
+  isRefreshingOrg?: boolean;
+  testOrgOutOfDate?: boolean;
+  openRefreshOrgModal?: () => void;
 }) => {
   const orgUrl = window.api_urls.scratch_org_redirect(orgId);
 

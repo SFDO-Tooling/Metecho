@@ -3,18 +3,19 @@ import Radio from '@salesforce/design-system-react/components/radio-group/radio'
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { SpinnerWrapper, UseFormProps } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
-import { refreshOrgConfigs } from '~js/store/epics/actions';
-import { OrgConfig } from '~js/store/epics/reducer';
+import { refreshOrgConfigs } from '~js/store/projects/actions';
+import { OrgConfig } from '~js/store/projects/reducer';
 import { DEFAULT_ORG_CONFIG_NAME } from '~js/utils/constants';
 
 const SelectFlowType = ({
   orgConfigs,
-  epicId,
+  orgConfigHelp,
+  projectId,
   value,
   errors,
   isDisabled,
@@ -22,7 +23,8 @@ const SelectFlowType = ({
   handleSelect,
 }: {
   orgConfigs: OrgConfig[];
-  epicId?: string;
+  orgConfigHelp?: string;
+  projectId?: string;
   value: string;
   errors?: string;
   isDisabled?: boolean;
@@ -33,15 +35,23 @@ const SelectFlowType = ({
 
   const doRefreshOrgConfigs = useCallback(() => {
     /* istanbul ignore else */
-    if (epicId) {
-      dispatch(refreshOrgConfigs(epicId));
+    if (projectId) {
+      dispatch(refreshOrgConfigs(projectId));
     }
-  }, [dispatch, epicId]);
+  }, [dispatch, projectId]);
+
+  // If there are no known org configs, check again once...
+  useEffect(() => {
+    if (!orgConfigs.length) {
+      doRefreshOrgConfigs();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const flowTypes = orgConfigs.length
     ? orgConfigs
     : [{ key: DEFAULT_ORG_CONFIG_NAME }];
   const hasErrors = Boolean(errors);
+
   return (
     <fieldset
       className={classNames('slds-form-element', {
@@ -52,9 +62,12 @@ const SelectFlowType = ({
       <legend className="slds-form-element__legend slds-form-element__label">
         <span className="slds-p-right_xx-small">{i18n.t('Org Type')}</span>
         <Tooltip
-          content={i18n.t(
-            'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?',
-          )}
+          content={
+            orgConfigHelp ||
+            i18n.t(
+              'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?',
+            )
+          }
           position="overflowBoundaryElement"
           align="top left"
           dialogClassName="modal-tooltip"
@@ -72,25 +85,30 @@ const SelectFlowType = ({
         />
       </legend>
       <div className="slds-form-element__control">
-        {flowTypes.map(({ key, label, description }) => (
-          <Radio
-            key={key}
-            id={key}
-            labels={{
-              label: description
-                ? `${label || key} - ${description}`
-                : label || key,
-            }}
-            value={key}
-            checked={key === value}
-            name="org_config_name"
-            aria-describedby={
-              hasErrors || isDisabled ? 'org_config_name-error' : undefined
-            }
-            disabled={isDisabled || isLoading}
-            onChange={handleSelect}
-          />
-        ))}
+        {flowTypes.map(({ key, label, description }) => {
+          let displayLabel = label || key;
+          if (description) {
+            displayLabel = `${displayLabel} - ${description}`;
+          }
+          if (key === DEFAULT_ORG_CONFIG_NAME) {
+            displayLabel = `${displayLabel} (${i18n.t('recommended')})`;
+          }
+          return (
+            <Radio
+              key={key}
+              id={key}
+              labels={{ label: displayLabel }}
+              value={key}
+              checked={key === value}
+              name="org_config_name"
+              aria-describedby={
+                hasErrors || isDisabled ? 'org_config_name-error' : undefined
+              }
+              disabled={isDisabled || isLoading}
+              onChange={handleSelect}
+            />
+          );
+        })}
       </div>
       {(hasErrors || isDisabled) && (
         <div

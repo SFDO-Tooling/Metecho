@@ -1,8 +1,9 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 
 import TaskStatusPath from '~js/components/tasks/path';
 import { REVIEW_STATUSES, TASK_STATUSES } from '~js/utils/constants';
+
+import { render } from './../../utils';
 
 const defaultTask = {
   id: 'task',

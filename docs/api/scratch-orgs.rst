@@ -18,7 +18,11 @@ Retrieve
     [
       {
         "id": "n1057Rw",
+        "project": null,
+        "epic": null",
         "task": "M13MnQO",
+        "description": "This is *safely* rendered Markdown.",
+        "description_rendered": "<p>This is <em>safely</em> rendered Markdown.</p>",
         "org_type": "Dev",
         "owner": "3Lw7OwK",
         "last_modified_at": "2019-01-01T17:22:50Z",
@@ -44,7 +48,8 @@ Retrieve
         "has_been_visited": true,
         "valid_target_directories": {
           "source": ["src"]
-        }
+        },
+        "org_config_name": "dev"
       }
       ...
     ]

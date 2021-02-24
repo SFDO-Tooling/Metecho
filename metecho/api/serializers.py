@@ -108,7 +108,15 @@ class ProjectSerializer(serializers.ModelSerializer):
             "branch_prefix",
             "github_users",
             "repo_image_url",
+            "org_config_names",
+            "currently_fetching_org_config_names",
+            "latest_sha",
         )
+        extra_kwargs = {
+            "org_config_names": {"read_only": True},
+            "currently_fetching_org_config_names": {"read_only": True},
+            "latest_sha": {"read_only": True},
+        }
 
     def get_repo_url(self, obj) -> Optional[str]:
         return f"https://github.com/{obj.repo_owner}/{obj.repo_name}"
@@ -141,14 +149,14 @@ class EpicSerializer(serializers.ModelSerializer):
             "branch_diff_url",
             "branch_name",
             "has_unmerged_commits",
+            "currently_creating_branch",
             "currently_creating_pr",
             "pr_url",
             "pr_is_open",
             "pr_is_merged",
             "status",
             "github_users",
-            "available_task_org_config_names",
-            "currently_fetching_org_config_names",
+            "latest_sha",
         )
         extra_kwargs = {
             "slug": {"read_only": True},
@@ -156,11 +164,13 @@ class EpicSerializer(serializers.ModelSerializer):
             "branch_url": {"read_only": True},
             "branch_diff_url": {"read_only": True},
             "has_unmerged_commits": {"read_only": True},
+            "currently_creating_branch": {"read_only": True},
             "currently_creating_pr": {"read_only": True},
             "pr_url": {"read_only": True},
             "pr_is_open": {"read_only": True},
             "pr_is_merged": {"read_only": True},
             "status": {"read_only": True},
+            "latest_sha": {"read_only": True},
         }
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
@@ -174,9 +184,16 @@ class EpicSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
+        if not validated_data.get("branch_name"):
+            # This temporarily prevents users from taking other actions
+            # (e.g. creating scratch orgs) that also might trigger branch creation
+            # and could result in race conditions and duplicate branches on GitHub.
+            validated_data["currently_creating_branch"] = True
         instance = super().create(validated_data)
         instance.create_gh_branch(self.context["request"].user)
-        instance.queue_available_task_org_config_names(self.context["request"].user)
+        instance.project.queue_available_org_config_names(
+            user=self.context["request"].user
+        )
         return instance
 
     def validate(self, data):
@@ -275,6 +292,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "slug",
             "old_slugs",
             "has_unmerged_commits",
+            "currently_creating_branch",
             "currently_creating_pr",
             "branch_name",
             "branch_url",
@@ -299,6 +317,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "slug": {"read_only": True},
             "old_slugs": {"read_only": True},
             "has_unmerged_commits": {"read_only": True},
+            "currently_creating_branch": {"read_only": True},
             "currently_creating_pr": {"read_only": True},
             "branch_url": {"read_only": True},
             "commits": {"read_only": True},
@@ -386,8 +405,8 @@ class TaskSerializer(serializers.ModelSerializer):
             reassigned_org = False
             # We want to consider soft-deleted orgs, too:
             orgs = [
-                *instance.scratchorg_set.active().filter(org_type=org_type),
-                *instance.scratchorg_set.inactive().filter(org_type=org_type),
+                *instance.orgs.active().filter(org_type=org_type),
+                *instance.orgs.inactive().filter(org_type=org_type),
             ]
             for org in orgs:
                 new_user = self._valid_reassign(
@@ -412,7 +431,7 @@ class TaskSerializer(serializers.ModelSerializer):
                         originating_user_id=originating_user_id, preserve_sf_org=True
                     )
         elif not has_assigned_user:
-            for org in [*instance.scratchorg_set.active().filter(org_type=org_type)]:
+            for org in [*instance.orgs.active().filter(org_type=org_type)]:
                 org.delete(
                     originating_user_id=originating_user_id, preserve_sf_org=True
                 )
@@ -478,14 +497,30 @@ class ReviewSerializer(serializers.Serializer):
 
 class ScratchOrgSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    project = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+        required=False,
+    )
+    epic = serializers.PrimaryKeyRelatedField(
+        queryset=Epic.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+        required=False,
+    )
     task = serializers.PrimaryKeyRelatedField(
-        queryset=Task.objects.all(), pk_field=serializers.CharField()
+        queryset=Task.objects.all(),
+        pk_field=serializers.CharField(),
+        allow_null=True,
+        required=False,
     )
     owner = serializers.PrimaryKeyRelatedField(
         pk_field=serializers.CharField(),
         default=serializers.CurrentUserDefault(),
         read_only=True,
     )
+    description_rendered = MarkdownField(source="description", read_only=True)
     unsaved_changes = serializers.SerializerMethodField()
     has_unsaved_changes = serializers.SerializerMethodField()
     total_unsaved_changes = serializers.SerializerMethodField()
@@ -501,9 +536,13 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         model = ScratchOrg
         fields = (
             "id",
+            "project",
+            "epic",
             "task",
             "org_type",
             "owner",
+            "description",
+            "description_rendered",
             "last_modified_at",
             "expires_at",
             "latest_commit",
@@ -527,6 +566,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "owner_gh_username",
             "has_been_visited",
             "valid_target_directories",
+            "org_config_name",
         )
         extra_kwargs = {
             "last_modified_at": {"read_only": True},
@@ -583,15 +623,24 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
         return {}
 
     def validate(self, data):
-        if (
-            not self.instance
-            and ScratchOrg.objects.active()
-            .filter(task=data["task"], org_type=data["org_type"])
-            .exists()
-        ):
-            raise serializers.ValidationError(
-                _("A ScratchOrg of this type already exists for this task.")
-            )
+        if not self.instance:
+            orgs = ScratchOrg.objects.active().filter(org_type=data["org_type"])
+            if data["org_type"] == SCRATCH_ORG_TYPES.Playground:
+                orgs = orgs.filter(
+                    owner=data.get("owner", self.context["request"].user)
+                )
+            if data.get("task") and orgs.filter(task=data["task"]).exists():
+                raise serializers.ValidationError(
+                    _("A ScratchOrg of this type already exists for this task.")
+                )
+            if data.get("epic") and orgs.filter(epic=data["epic"]).exists():
+                raise serializers.ValidationError(
+                    _("A ScratchOrg of this type already exists for this epic.")
+                )
+            if data.get("project") and orgs.filter(project=data["project"]).exists():
+                raise serializers.ValidationError(
+                    _("A ScratchOrg of this type already exists for this project.")
+                )
         return data
 
     def save(self, **kwargs):

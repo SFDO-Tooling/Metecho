@@ -1,7 +1,9 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import OfflineAlert from '~js/components/offlineAlert';
+
+import { render } from './../utils';
 
 describe('<OfflineAlert />', () => {
   let location;

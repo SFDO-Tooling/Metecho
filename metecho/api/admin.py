@@ -143,7 +143,7 @@ class TaskSlugAdmin(admin.ModelAdmin):
 
 @admin.register(ScratchOrg)
 class ScratchOrgAdmin(admin.ModelAdmin):
-    list_display = ("owner", "org_type", "task", "deleted_at")
+    list_display = ("owner", "org_type", "project", "epic", "task", "deleted_at")
     list_filter = (SoftDeletedListFilter,)
     formfield_overrides = {JSONField: {"widget": JSONWidget}}
 

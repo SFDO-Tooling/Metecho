@@ -14,6 +14,7 @@ Websocket notifications you can subscribe to:
         EPIC_CREATE_PR
         EPIC_CREATE_PR_FAILED
         SOFT_DELETE
+        SCRATCH_ORG_PROVISIONING
 
     task.:id
         TASK_UPDATE
@@ -22,6 +23,7 @@ Websocket notifications you can subscribe to:
         TASK_SUBMIT_REVIEW
         TASK_SUBMIT_REVIEW_FAILED
         SOFT_DELETE
+        SCRATCH_ORG_PROVISIONING
 
     scratchorg.:id
         SCRATCH_ORG_PROVISION
@@ -51,10 +53,12 @@ from ..consumer_utils import get_set_message_semaphore
 from .constants import CHANNELS_GROUP_NAME, LIST
 
 
-async def push_message_about_instance(instance, message, for_list=False):
+async def push_message_about_instance(
+    instance, message, for_list=False, group_name=None
+):
     model_name = instance._meta.model_name
     id_ = str(instance.id)
-    group_name = CHANNELS_GROUP_NAME.format(
+    group_name = group_name or CHANNELS_GROUP_NAME.format(
         model=model_name, id=LIST if for_list else id_
     )
     channel_layer = get_channel_layer()
@@ -83,9 +87,8 @@ async def report_error(user):
 async def report_scratch_org_error(
     instance, *, error, type_, originating_user_id, message=None
 ):
-    # @jgerigmeyer asked for the error to be unwrapped in the case that
-    # there's only one, which is the most common case, per this
-    # discussion:
+    # Unwrap the error in the case that there's only one,
+    # which is the most common case, per this discussion:
     # https://github.com/SFDO-Tooling/Metecho/pull/149#discussion_r327308563
     try:
         prepared_message = error.content
