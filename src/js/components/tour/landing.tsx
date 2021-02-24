@@ -74,14 +74,15 @@ const LandingModal = ({
       onRequestClose={onRequestClose}
       assistiveText={{ closeButton: i18n.t('Close') }}
       size="large"
+      className="metecho-transition-in"
     >
       <div className="slds-p-around_x-large">
         <div className="slds-text-align_center slds-p-bottom_small">
-          <p className="slds-text-heading_small slds-p-bottom_x-small">
+          <h2 className="slds-text-heading_small slds-p-bottom_x-small">
             <strong>
               {i18n.t('Hello! What can Metecho help you do today?')}
             </strong>
-          </p>
+          </h2>
           <p>{i18n.t('Click on a box below to discover what’s possible.')}</p>
         </div>
         <div className="slds-grid slds-wrap slds-p-bottom_small">
@@ -107,9 +108,9 @@ const LandingModal = ({
               >
                 <Illustration svg={icon} />
                 <div className="slds-text-align_center">
-                  <p className="slds-text-heading_medium slds-p-vertical_x-small">
+                  <h3 className="slds-text-heading_medium slds-p-vertical_x-small">
                     {header}
-                  </p>
+                  </h3>
                   <p>{tag}</p>
                 </div>
               </Card>

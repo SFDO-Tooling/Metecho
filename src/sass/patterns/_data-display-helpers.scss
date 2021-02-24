@@ -32,6 +32,19 @@
   }
 }
 
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.metecho-transition-in {
+  animation: fadein $duration-slowly ease-in forwards;
+}
+
 .metecho-transition-out {
   animation: fadeout $duration-slowly ease-in 2s forwards;
 }
