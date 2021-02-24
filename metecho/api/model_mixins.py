@@ -61,7 +61,7 @@ class PushMixin:
             "request": Request(user),
         }
 
-    def _push_message(self, type_, message, for_list=False):
+    def _push_message(self, type_, message, for_list=False, group_name=None):
         """
         type_:
             str indicating frontend Redux action.
@@ -75,10 +75,17 @@ class PushMixin:
             self,
             {"type": type_, "payload": message},
             for_list=for_list,
+            group_name=group_name,
         )
 
     def notify_changed(
-        self, *, type_=None, originating_user_id, message=None, for_list=False
+        self,
+        *,
+        type_=None,
+        originating_user_id,
+        message=None,
+        for_list=False,
+        group_name=None,
     ):
         prepared_message = {"originating_user_id": originating_user_id}
         prepared_message.update(message or {})
@@ -86,6 +93,7 @@ class PushMixin:
             type_ or self.push_update_type,
             prepared_message,
             for_list=for_list,
+            group_name=group_name,
         )
 
     def notify_error(self, error, *, type_=None, originating_user_id, message=None):

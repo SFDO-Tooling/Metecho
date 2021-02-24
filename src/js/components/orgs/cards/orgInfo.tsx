@@ -4,6 +4,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 import { ExternalLink } from '~js/components/utils';
 import { Org } from '~js/store/orgs/reducer';
@@ -16,30 +17,36 @@ const OrgInfo = ({
   type,
   task,
   repoUrl,
-  taskCommits,
+  baseCommit,
   ownedByCurrentUser,
   ownedByWrongUser,
+  typeHeading,
+  parentLink,
+  parentName,
   isCreating,
   isRefreshingOrg,
   isSubmittingReview,
-  testOrgOutOfDate,
+  orgOutOfDate,
   missingCommits,
   doCheckForOrgChanges,
   openCaptureModal,
 }: {
   org: Org | null;
   type: OrgTypes;
-  task: Task;
+  task?: Task;
   repoUrl: string;
-  taskCommits?: string[];
+  baseCommit?: string;
   ownedByCurrentUser: boolean;
-  ownedByWrongUser: Org | null;
+  ownedByWrongUser?: Org | null;
+  typeHeading?: string;
+  parentLink?: string;
+  parentName?: string;
   isCreating: boolean;
-  isRefreshingOrg: boolean;
+  isRefreshingOrg?: boolean;
   isSubmittingReview?: boolean;
-  testOrgOutOfDate: boolean;
+  orgOutOfDate?: boolean;
   missingCommits: number;
-  doCheckForOrgChanges: () => void;
+  doCheckForOrgChanges?: () => void;
   openCaptureModal?: () => void;
 }) => {
   if (ownedByWrongUser) {
@@ -59,7 +66,7 @@ const OrgInfo = ({
     return null;
   }
 
-  if (!(org || task.review_status)) {
+  if (!(org || task?.review_status)) {
     return (
       <ul>
         <li>
@@ -73,7 +80,7 @@ const OrgInfo = ({
 
   const expiresAt = org?.expires_at && new Date(org.expires_at);
   const reviewSubmittedAt =
-    task.review_submitted_at && new Date(task.review_submitted_at);
+    task && task.review_submitted_at && new Date(task.review_submitted_at);
   let commitStatus = null;
   let compareChangesUrl = null;
   let orgStatus = null;
@@ -96,51 +103,57 @@ const OrgInfo = ({
         );
         break;
       }
-      case ORG_TYPES.QA: {
-        // synced status for QA org
-        if (testOrgOutOfDate && taskCommits?.length) {
+      case ORG_TYPES.QA:
+      case ORG_TYPES.PLAYGROUND: {
+        // synced status for orgs
+        if (orgOutOfDate && baseCommit) {
           // eslint-disable-next-line max-len
-          compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${taskCommits[0]}`;
+          compareChangesUrl = `${repoUrl}/compare/${org.latest_commit}...${baseCommit}`;
         }
-        commitStatus = testOrgOutOfDate ? (
-          <li>
-            <Icon
-              category="utility"
-              name="warning"
-              colorVariant="warning"
-              size="x-small"
-              className="slds-m-bottom_xx-small"
-              containerClassName="slds-m-right_xx-small"
-            />
-            <strong>
-              {missingCommits > 0
-                ? i18n.t('Behind Latest:')
-                : i18n.t('Behind Latest')}
-            </strong>{' '}
-            {getOrgBehindLatestMsg(missingCommits)}
-            {compareChangesUrl ? (
-              <>
-                {' '}
-                (
-                <ExternalLink url={compareChangesUrl}>
-                  {i18n.t('view changes')}
-                </ExternalLink>
-                )
-              </>
-            ) : null}
-          </li>
-        ) : (
-          <li>
-            <strong>{i18n.t('Up to Date')}</strong>
-          </li>
-        );
+        if (orgOutOfDate) {
+          commitStatus = (
+            <li>
+              <Icon
+                category="utility"
+                name="warning"
+                colorVariant="warning"
+                size="x-small"
+                className="slds-m-bottom_xx-small"
+                containerClassName="slds-m-right_xx-small"
+              />
+              <strong>
+                {missingCommits > 0
+                  ? i18n.t('Behind Latest:')
+                  : i18n.t('Behind Latest')}
+              </strong>{' '}
+              {getOrgBehindLatestMsg(missingCommits)}
+              {compareChangesUrl ? (
+                <>
+                  {' '}
+                  (
+                  <ExternalLink url={compareChangesUrl}>
+                    {i18n.t('view changes')}
+                  </ExternalLink>
+                  )
+                </>
+              ) : null}
+            </li>
+          );
+        } else if (type === ORG_TYPES.QA) {
+          commitStatus = (
+            <li>
+              <strong>{i18n.t('Up to Date')}</strong>
+            </li>
+          );
+        }
         break;
       }
     }
   }
 
   switch (type) {
-    case ORG_TYPES.DEV: {
+    case ORG_TYPES.DEV:
+    case ORG_TYPES.PLAYGROUND: {
       /* istanbul ignore else */
       if (org) {
         let ignoredChangesMsg = null;
@@ -177,14 +190,14 @@ const OrgInfo = ({
       break;
     }
     case ORG_TYPES.QA: {
-      const isWaitingForReview = org && task.pr_is_open;
+      const isWaitingForReview = org && task?.pr_is_open;
       if (isSubmittingReview) {
         orgStatus = i18n.t('Submitting review…');
-      } else if (task.review_status) {
-        const isApproved = task.review_status === REVIEW_STATUSES.APPROVED;
+      } else if (task?.review_status) {
+        const isApproved = task?.review_status === REVIEW_STATUSES.APPROVED;
         const isChangesRequested =
-          task.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
-        const isValid = task.review_valid;
+          task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED;
+        const isValid = task?.review_valid;
         if (isApproved) {
           if (isValid) {
             orgStatus = (
@@ -225,7 +238,24 @@ const OrgInfo = ({
 
   return org || orgStatus ? (
     <ul>
+      {org?.description_rendered ? (
+        <li>
+          <div
+            className="markdown slds-text-longform"
+            // This description is pre-cleaned by the API
+            dangerouslySetInnerHTML={{
+              __html: org.description_rendered,
+            }}
+          />
+        </li>
+      ) : null}
       {commitStatus}
+      {parentLink && typeHeading && parentName ? (
+        <li>
+          <strong>{typeHeading}</strong>{' '}
+          <Link to={parentLink}>{parentName}</Link>
+        </li>
+      ) : null}
       {/* expiration date for each org */}
       {expiresAt && (
         <li>

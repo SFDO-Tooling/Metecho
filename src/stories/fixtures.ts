@@ -29,8 +29,8 @@ export const api_urls = {
   task_can_reassign: (id: string) => `/api/tasks/${id}/can_reassign/`,
   epic_detail: (id: string) => `/api/epics/${id}/`,
   epic_create_pr: (id: string) => `/api/epics/${id}/create_pr/`,
-  epic_refresh_org_config_names: (id: string) =>
-    `/api/epics/${id}/refresh_org_config_names/`,
+  project_refresh_org_config_names: (id: string) =>
+    `/api/projects/${id}/refresh_org_config_names/`,
   project_feature_branches: (id: string) =>
     `/api/projects/${id}/feature_branches/`,
 };
@@ -92,11 +92,11 @@ export const sampleEpic1 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [sampleGitHubUser2],
   status: EPIC_STATUSES.PLANNED,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic2 = {
@@ -118,11 +118,11 @@ export const sampleEpic2 = {
   pr_is_open: true,
   pr_is_merged: false,
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   status: EPIC_STATUSES.IN_PROGRESS,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic3 = {
@@ -140,11 +140,11 @@ export const sampleEpic3 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [],
   status: EPIC_STATUSES.PLANNED,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic4 = {
@@ -163,11 +163,11 @@ export const sampleEpic4 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [],
   status: EPIC_STATUSES.MERGED,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic5 = {
@@ -186,11 +186,11 @@ export const sampleEpic5 = {
   pr_is_open: true,
   pr_is_merged: false,
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2],
   status: EPIC_STATUSES.REVIEW,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleTask1 = {
@@ -202,6 +202,7 @@ export const sampleTask1 = {
   description: 'This is a description',
   description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__data-mapping',
   branch_url:
@@ -234,6 +235,7 @@ export const sampleTask2 = {
   description_rendered:
     '<p>Add panel for controls toggles allowing for accessible interaction.</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: '',
   branch_url: null,
@@ -263,6 +265,7 @@ export const sampleTask3 = {
   description_rendered:
     '<p>Include options set by **operating system preferences**</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__dark-mode',
   branch_url:
@@ -294,6 +297,7 @@ export const sampleTask4 = {
   description_rendered:
     '<p>Internationalization and Localization built in options</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__universal-language',
   branch_url:
@@ -324,6 +328,7 @@ export const sampleTask5 = {
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__user-roles',
   branch_url:
@@ -379,6 +384,9 @@ export const sampleProject1 = {
   currently_refreshing_gh_users: false,
   repo_image_url:
     'https://repository-images.githubusercontent.com/123456/123-456',
+  currently_fetching_org_config_names: false,
+  org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpicSteps = [

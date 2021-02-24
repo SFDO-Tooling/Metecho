@@ -60,7 +60,7 @@ exports[`<TaskStatusSteps /> renders steps: changes retrieved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -152,7 +152,7 @@ exports[`<TaskStatusSteps /> renders steps: changes retrieved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -270,7 +270,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -372,7 +372,7 @@ exports[`<TaskStatusSteps /> renders steps: dev assigned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -476,7 +476,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -584,7 +584,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -688,7 +688,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org checking for changes 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -796,7 +796,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org checking for changes 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -914,7 +914,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org creating 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Creating a Scratch Org for development…
+          Creating a Dev Org…
         </div>
       </li>
       <li
@@ -1016,7 +1016,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org creating 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -1120,7 +1120,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with unretrieved changes 1`]
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -1220,7 +1220,7 @@ exports[`<TaskStatusSteps /> renders steps: dev org with unretrieved changes 1`]
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -1304,7 +1304,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -1364,7 +1364,7 @@ exports[`<TaskStatusSteps /> renders steps: planned, no orgs 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -1468,7 +1468,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -1593,7 +1593,7 @@ exports[`<TaskStatusSteps /> renders steps: review approved 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -1729,7 +1729,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -1854,7 +1854,7 @@ exports[`<TaskStatusSteps /> renders steps: review invalid 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -1998,7 +1998,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -2145,7 +2145,7 @@ exports[`<TaskStatusSteps /> renders steps: review rejected 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -2275,7 +2275,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for testing 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -2380,7 +2380,7 @@ exports[`<TaskStatusSteps /> renders steps: submitted for testing 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -2484,7 +2484,7 @@ exports[`<TaskStatusSteps /> renders steps: submitting review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -2609,7 +2609,7 @@ exports[`<TaskStatusSteps /> renders steps: submitting review 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -2753,7 +2753,7 @@ exports[`<TaskStatusSteps /> renders steps: test org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -2878,7 +2878,7 @@ exports[`<TaskStatusSteps /> renders steps: test org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -3030,7 +3030,7 @@ exports[`<TaskStatusSteps /> renders steps: test org creating 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -3169,7 +3169,7 @@ exports[`<TaskStatusSteps /> renders steps: test org creating 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Creating a Scratch Org for testing…
+          Creating a Test Org…
         </div>
       </li>
       <li
@@ -3315,7 +3315,7 @@ exports[`<TaskStatusSteps /> renders steps: test org out-of-date 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -3606,7 +3606,7 @@ exports[`<TaskStatusSteps /> renders steps: test org refreshing 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -3897,7 +3897,7 @@ exports[`<TaskStatusSteps /> renders steps: test org visited 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -4022,7 +4022,7 @@ exports[`<TaskStatusSteps /> renders steps: test org visited 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li
@@ -4166,7 +4166,7 @@ exports[`<TaskStatusSteps /> renders steps: tester assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for development
+          Create a Dev Org
         </div>
       </li>
       <li
@@ -4305,7 +4305,7 @@ exports[`<TaskStatusSteps /> renders steps: tester assigned, no org 1`] = `
         <div
           class="slds-progress__item_content slds-grid slds-grid_align-spread"
         >
-          Create a Scratch Org for testing
+          Create a Test Org
         </div>
       </li>
       <li

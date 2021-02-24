@@ -127,8 +127,12 @@ const ProjectDetail = (props: RouteComponentProps) => {
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
               {hasEpics
-                ? `${i18n.t('Epics for')} ${project.name}`
-                : `${i18n.t('Create an Epic for')} ${project.name}`}
+                ? i18n.t('Epics for {{project_name}}', {
+                    project_name: project.name,
+                  })
+                : i18n.t('Create an Epic for {{project_name}}', {
+                    project_name: project.name,
+                  })}
             </h2>
             {!hasEpics && (
               <p className="slds-m-bottom_large">
