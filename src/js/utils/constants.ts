@@ -23,11 +23,12 @@ export const SHOW_EPIC_COLLABORATORS = 'show_collaborators';
 
 export const DEFAULT_ORG_CONFIG_NAME = 'dev';
 
-export type OrgTypes = 'Dev' | 'QA';
+export type OrgTypes = 'Dev' | 'QA' | 'Playground';
 
 export const ORG_TYPES = {
   DEV: 'Dev' as const,
   QA: 'QA' as const,
+  PLAYGROUND: 'Playground' as const,
 };
 
 export type WebsocketActions = 'SUBSCRIBE' | 'UNSUBSCRIBE';
@@ -62,3 +63,5 @@ export const EPIC_STATUSES = {
 };
 
 export const LIST_CHANNEL_ID = 'list';
+
+export type OrgParentType = 'TASK' | 'EPIC' | 'PROJECT';

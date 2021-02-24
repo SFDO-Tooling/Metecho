@@ -30,8 +30,10 @@ export const selectEpicSlug = (
 
 export const selectEpicNotFound = createSelector(
   [selectEpicsByProject, selectEpicSlug],
-  (epics, epicSlug): boolean =>
-    Boolean(epicSlug && epics?.notFound.includes(epicSlug)),
+  (
+    epics: EpicsByProjectState | undefined,
+    epicSlug: string | undefined,
+  ): boolean => Boolean(epicSlug && epics?.notFound.includes(epicSlug)),
 );
 
 export const selectEpic = createSelector(
@@ -41,7 +43,7 @@ export const selectEpic = createSelector(
       return undefined;
     }
     const epic = epics.epics.find(
-      (p) => p.slug === epicSlug || p.old_slugs.includes(epicSlug),
+      (e) => e.slug === epicSlug || e.old_slugs.includes(epicSlug),
     );
     if (epic) {
       return epic;
@@ -49,3 +51,19 @@ export const selectEpic = createSelector(
     return notFound ? null : undefined;
   },
 );
+
+export const selectEpicById = (
+  appState: AppState,
+  id?: string | null,
+): Epic | undefined => {
+  if (!id) {
+    return undefined;
+  }
+  for (const epicsByProject of Object.values(appState.epics)) {
+    const epic = epicsByProject.epics.find((e) => e.id === id);
+    if (epic) {
+      return epic;
+    }
+  }
+  return undefined;
+};

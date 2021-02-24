@@ -3,7 +3,12 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import EpicDetail from '~js/components/epics/detail';
-import { fetchObject, fetchObjects, updateObject } from '~js/store/actions';
+import {
+  createObject,
+  fetchObject,
+  fetchObjects,
+  updateObject,
+} from '~js/store/actions';
 import { refreshGitHubUsers } from '~js/store/projects/actions';
 import { getUrlParam, removeUrlParam } from '~js/utils/api';
 import routes from '~js/utils/routes';
@@ -17,6 +22,7 @@ jest.mock('~js/utils/api');
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 getUrlParam.mockReturnValue(null);
 removeUrlParam.mockReturnValue('');
@@ -25,10 +31,37 @@ afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
   updateObject.mockClear();
+  createObject.mockClear();
   refreshGitHubUsers.mockClear();
   getUrlParam.mockClear();
   removeUrlParam.mockClear();
 });
+
+const defaultOrg = {
+  id: 'org-id',
+  epic: 'epic1',
+  org_type: 'Playground',
+  owner: 'user-id',
+  owner_gh_username: 'currentUser',
+  expires_at: '2019-09-16T12:58:53.721Z',
+  latest_commit: '617a51',
+  latest_commit_url: '/test/commit/url/',
+  latest_commit_at: '2019-08-16T12:58:53.721Z',
+  last_checked_unsaved_changes_at: new Date().toISOString(),
+  url: '/test/org/url/',
+  is_created: true,
+  unsaved_changes: { Foo: ['Bar'] },
+  has_unsaved_changes: true,
+  total_unsaved_changes: 1,
+  ignored_changes: {},
+  has_ignored_changes: false,
+  total_ignored_changes: 0,
+  valid_target_directories: {
+    source: ['src'],
+    post: ['foo/bar', 'buz/baz'],
+  },
+  has_been_visited: true,
+};
 
 const defaultState = {
   projects: {
@@ -57,6 +90,7 @@ const defaultState = {
             login: 'ThirdUser',
           },
         ],
+        org_config_names: [{ key: 'dev' }, { key: 'qa' }],
       },
     ],
     notFound: ['different-project'],
@@ -86,7 +120,6 @@ const defaultState = {
             },
             { id: 'user-id', login: 'currentUser' },
           ],
-          available_task_org_config_names: [],
         },
       ],
       next: null,
@@ -152,6 +185,16 @@ const defaultState = {
       },
     ],
   },
+  orgs: {
+    orgs: {
+      [defaultOrg.id]: defaultOrg,
+    },
+    fetched: {
+      projects: [],
+      epics: ['epic1'],
+      tasks: [],
+    },
+  },
   user: {
     id: 'user-id',
     username: 'currentUser',
@@ -184,10 +227,11 @@ describe('<EpicDetail/>', () => {
     return { ...response, context, history };
   };
 
-  test('renders epic detail and tasks list', () => {
+  test('renders epic detail, scratch org, and tasks list', () => {
     const { getByText, getByTitle } = setup();
 
     expect(getByTitle('Epic 1')).toBeVisible();
+    expect(getByText('Epic Scratch Org')).toBeVisible();
     expect(getByText('Epic Description')).toBeVisible();
     expect(getByText('Tasks for Epic 1')).toBeVisible();
     expect(getByText('Task 1')).toBeVisible();
@@ -264,6 +308,30 @@ describe('<EpicDetail/>', () => {
 
       expect(context.action).toEqual('REPLACE');
       expect(context.url).toEqual(routes.epic_detail('project-1', 'epic-1'));
+    });
+  });
+
+  describe('orgs have not been fetched', () => {
+    test('fetches orgs from API', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            orgs: {},
+            fetched: {
+              projects: [],
+              epics: [],
+              tasks: [],
+            },
+          },
+        },
+      });
+
+      expect(queryByText('Epic Scratch Org')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { epic: 'epic1' },
+        objectType: 'scratch_org',
+      });
     });
   });
 
@@ -672,6 +740,62 @@ describe('<EpicDetail/>', () => {
       fireEvent.click(queryByText('Close'));
 
       expect(queryByText('Add a Task for Epic 1')).toBeNull();
+    });
+  });
+
+  describe('<CreateOrgModal />', () => {
+    let result;
+
+    beforeEach(async () => {
+      result = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            orgs: {},
+            fetched: {
+              projects: [],
+              epics: ['epic1'],
+              tasks: [],
+            },
+          },
+        },
+      });
+      await fireEvent.click(result.getByText('Create Scratch Org'));
+    });
+
+    describe('"cancel" click', () => {
+      test('closes modal', async () => {
+        const { getByText, queryByText } = result;
+
+        expect(getByText('Scratch Org Overview')).toBeVisible();
+
+        expect.assertions(2);
+        await fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Scratch Org Overview')).toBeNull();
+      });
+    });
+
+    describe('"Create Org" click', () => {
+      test('creates scratch org', async () => {
+        const { getByText, getByLabelText, queryByText } = result;
+
+        expect.assertions(5);
+        await fireEvent.click(getByText('Next'));
+
+        expect(getByText('Scratch Org Details')).toBeVisible();
+
+        await fireEvent.click(getByText('Advanced Options'));
+        await fireEvent.click(getByLabelText('qa'));
+        await fireEvent.click(getByText('Create Org'));
+
+        expect(queryByText('Scratch Org Details')).toBeNull();
+        expect(createObject).toHaveBeenCalled();
+        expect(createObject.mock.calls[0][0].data.epic).toEqual('epic1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
+          'qa',
+        );
+      });
     });
   });
 });

@@ -39,7 +39,19 @@ Retrieve
               "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
             }
           ],
-          "repo_image_url": "https://repository-images.githubusercontent.com/123456/123-456"
+          "repo_image_url": "https://repository-images.githubusercontent.com/123456/123-456",
+          "org_config_names": [
+            {
+              "key": "dev",
+              "label": "Dev Org",
+              "description": "Org set up for package development"
+            },
+            {
+              "key": "qa"
+            }
+          ],
+          "currently_fetching_org_config_names": false,
+          "latest_sha": "12345abc"
         }
         ...
       ]

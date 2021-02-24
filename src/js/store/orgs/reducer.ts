@@ -1,3 +1,5 @@
+import { omit } from 'lodash';
+
 import { ObjectsAction } from '~js/store/actions';
 import { OrgsAction } from '~js/store/orgs/actions';
 import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
@@ -10,13 +12,18 @@ import {
 
 export interface MinimalOrg {
   id: string;
-  task: string;
+  task: string | null;
+  epic: string | null;
+  project: string | null;
   org_type: OrgTypes;
 }
 
 export interface Org extends MinimalOrg {
   owner: string;
   owner_gh_username: string;
+  description: string;
+  description_rendered: string;
+  org_config_name: string;
   last_modified_at: string | null;
   expires_at: string | null;
   latest_commit: string;
@@ -51,16 +58,31 @@ export interface Changeset {
   [key: string]: string[];
 }
 
-export interface OrgsByTask {
+export interface OrgsByParent {
   [ORG_TYPES.DEV]: Org | null;
   [ORG_TYPES.QA]: Org | null;
+  [ORG_TYPES.PLAYGROUND]: Org | null;
 }
 
 export interface OrgState {
-  [key: string]: OrgsByTask;
+  orgs: {
+    [key: string]: Org;
+  };
+  fetched: {
+    projects: string[];
+    epics: string[];
+    tasks: string[];
+  };
 }
 
-const defaultState = {};
+export const defaultState = {
+  orgs: {},
+  fetched: {
+    projects: [],
+    epics: [],
+    tasks: [],
+  },
+};
 
 const reducer = (
   orgs: OrgState = defaultState,
@@ -74,21 +96,25 @@ const reducer = (
       const {
         response,
         objectType,
-        filters: { task },
+        filters: { task, epic, project },
       } = action.payload;
-      if (objectType === OBJECT_TYPES.ORG && task) {
+      if (objectType === OBJECT_TYPES.ORG && (task || epic || project)) {
+        const fetched = { ...orgs.fetched };
+        if (task && !fetched.tasks.includes(task)) {
+          fetched.tasks = [...fetched.tasks, task];
+        } else if (epic && !fetched.epics.includes(epic)) {
+          fetched.epics = [...fetched.epics, epic];
+        } else if (project && !fetched.projects.includes(project)) {
+          fetched.projects = [...fetched.projects, project];
+        }
+        const allOrgs = { ...orgs.orgs };
+        for (const org of response as Org[]) {
+          allOrgs[org.id] = org;
+        }
         return {
           ...orgs,
-          [task]: {
-            [ORG_TYPES.DEV]:
-              (response as Org[])?.find(
-                (org) => org.org_type === ORG_TYPES.DEV,
-              ) || null,
-            [ORG_TYPES.QA]:
-              (response as Org[])?.find(
-                (org) => org.org_type === ORG_TYPES.QA,
-              ) || null,
-          },
+          orgs: allOrgs,
+          fetched,
         };
       }
       return orgs;
@@ -98,16 +124,9 @@ const reducer = (
         case OBJECT_TYPES.ORG: {
           const { object }: { object: Org } = action.payload;
           if (object) {
-            const taskOrgs = orgs[object.task] || {
-              [ORG_TYPES.DEV]: null,
-              [ORG_TYPES.QA]: null,
-            };
             return {
               ...orgs,
-              [object.task]: {
-                ...taskOrgs,
-                [object.org_type]: object,
-              },
+              orgs: { ...orgs.orgs, [object.id]: object },
             };
           }
           return orgs;
@@ -115,18 +134,11 @@ const reducer = (
         case OBJECT_TYPES.COMMIT: {
           const { object }: { object: Org } = action.payload;
           if (object) {
-            const taskOrgs = orgs[object.task] || {
-              [ORG_TYPES.DEV]: null,
-              [ORG_TYPES.QA]: null,
-            };
             return {
               ...orgs,
-              [object.task]: {
-                ...taskOrgs,
-                [object.org_type]: {
-                  ...object,
-                  currently_capturing_changes: true,
-                },
+              orgs: {
+                ...orgs.orgs,
+                [object.id]: { ...object, currently_capturing_changes: true },
               },
             };
           }
@@ -135,6 +147,7 @@ const reducer = (
       }
       return orgs;
     }
+    case 'SCRATCH_ORG_PROVISIONING':
     case 'SCRATCH_ORG_PROVISION':
     case 'SCRATCH_ORG_UPDATE':
     case 'SCRATCH_ORG_DELETE_FAILED':
@@ -161,46 +174,28 @@ const reducer = (
         return orgs;
       }
       const org = maybeOrg;
-      const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: null,
-        [ORG_TYPES.QA]: null,
-      };
       return {
         ...orgs,
-        [org.task]: {
-          ...taskOrgs,
-          [org.org_type]: org,
-        },
+        orgs: { ...orgs.orgs, [org.id]: org },
       };
     }
     case 'SCRATCH_ORG_PROVISION_FAILED':
     case 'SCRATCH_ORG_DELETE': {
       const org = action.payload;
-      const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: null,
-        [ORG_TYPES.QA]: null,
-      };
       return {
         ...orgs,
-        [org.task]: {
-          ...taskOrgs,
-          [org.org_type]: null,
-        },
+        orgs: omit(orgs.orgs, org.id),
       };
     }
     case 'REFETCH_ORG_STARTED':
     case 'REFETCH_ORG_SUCCEEDED':
     case 'REFETCH_ORG_FAILED': {
       const { org } = action.payload;
-      const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: null,
-        [ORG_TYPES.QA]: null,
-      };
       return {
         ...orgs,
-        [org.task]: {
-          ...taskOrgs,
-          [org.org_type]: {
+        orgs: {
+          ...orgs.orgs,
+          [org.id]: {
             ...org,
             currently_refreshing_changes:
               action.type === 'REFETCH_ORG_SUCCEEDED'
@@ -216,15 +211,11 @@ const reducer = (
         object,
       }: { objectType?: ObjectTypes; object: Org } = action.payload;
       if (objectType === OBJECT_TYPES.ORG && object) {
-        const taskOrgs = orgs[object.task] || {
-          [ORG_TYPES.DEV]: null,
-          [ORG_TYPES.QA]: null,
-        };
         return {
           ...orgs,
-          [object.task]: {
-            ...taskOrgs,
-            [object.org_type]: {
+          orgs: {
+            ...orgs.orgs,
+            [object.id]: {
               ...object,
               delete_queued_at: new Date().toISOString(),
             },
@@ -236,16 +227,12 @@ const reducer = (
     case 'SCRATCH_ORG_REFRESH_REQUESTED':
     case 'SCRATCH_ORG_REFRESH_REJECTED': {
       const org = action.payload;
-      const taskOrgs = orgs[org.task] || {
-        [ORG_TYPES.DEV]: null,
-        [ORG_TYPES.QA]: null,
-      };
-      const existingOrg = taskOrgs[org.org_type];
+      const existingOrg = orgs.orgs[org.id] ?? {};
       return {
         ...orgs,
-        [org.task]: {
-          ...taskOrgs,
-          [org.org_type]: {
+        orgs: {
+          ...orgs.orgs,
+          [org.id]: {
             ...existingOrg,
             ...org,
             currently_refreshing_org:

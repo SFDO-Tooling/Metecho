@@ -4,14 +4,14 @@ import { MemoryRouter } from 'react-router-dom';
 
 import TaskForm from '~js/components/tasks/createForm';
 import { createObject } from '~js/store/actions';
-import { refreshOrgConfigs } from '~js/store/epics/actions';
 import { addError } from '~js/store/errors/actions';
+import { refreshOrgConfigs } from '~js/store/projects/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('~js/store/actions');
 jest.mock('~js/store/errors/actions');
-jest.mock('~js/store/epics/actions');
+jest.mock('~js/store/projects/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
@@ -25,36 +25,40 @@ afterEach(() => {
   refreshOrgConfigs.mockClear();
 });
 
-const defaultEpic = {
+const defaultProject = {
   id: 'p1',
-  name: 'Epic 1',
-  slug: 'epic-1',
+  name: 'Project 1',
+  slug: 'project-1',
   old_slugs: [],
-  description: 'This is a test epic.',
-  available_task_org_config_names: [
+  description: 'This is a test project.',
+  org_config_names: [
     { key: 'dev' },
     { key: 'qa', label: 'QA', description: 'This is a QA flow' },
     { key: 'release', description: 'This is a Release flow' },
   ],
 };
 
+const defaultEpic = {
+  id: 'e1',
+  name: 'Epic 1',
+  slug: 'epic-1',
+  project: 'p1',
+  old_slugs: [],
+  description: 'This is a test epic.',
+};
+
 describe('<TaskForm/>', () => {
   const setup = (options) => {
     const defaults = {
+      project: defaultProject,
       epic: defaultEpic,
       isOpen: true,
       closeCreateModal: jest.fn(),
     };
     const opts = Object.assign({}, defaults, options);
-    const { epic, isOpen } = opts;
-    const closeCreateModal = jest.fn();
     return renderWithRedux(
       <MemoryRouter>
-        <TaskForm
-          epic={epic}
-          isOpen={isOpen}
-          closeCreateModal={closeCreateModal}
-        />
+        <TaskForm {...opts} />
       </MemoryRouter>,
       {},
       storeWithThunk,
@@ -92,7 +96,7 @@ describe('<TaskForm/>', () => {
           data: {
             name: 'Name of Task',
             description: 'This is the description',
-            epic: 'p1',
+            epic: 'e1',
             org_config_name: 'qa',
           },
           hasForm: true,
@@ -115,7 +119,7 @@ describe('<TaskForm/>', () => {
           }),
         );
         const { getByText, getByLabelText, findByText } = setup({
-          epic: { ...defaultEpic, available_task_org_config_names: [] },
+          epic: { ...defaultEpic, org_config_names: [] },
         });
 
         const submit = getByText('Add');
@@ -145,7 +149,7 @@ describe('<TaskForm/>', () => {
                 slug: 'name-of-task',
                 name: 'Name of Task',
                 description: '',
-                epic: 'p1',
+                epic: 'e1',
               },
             },
           }),

@@ -3,13 +3,19 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import OrgCards, { ORG_TYPE_TRACKER_DEFAULT } from '~js/components/tasks/cards';
+import TaskOrgCards, {
+  ORG_TYPE_TRACKER_DEFAULT,
+} from '~js/components/orgs/taskOrgCards';
 import { deleteObject, updateObject } from '~js/store/actions';
 import { refetchOrg } from '~js/store/orgs/actions';
 import { addUrlParams } from '~js/utils/api';
 import { SHOW_EPIC_COLLABORATORS } from '~js/utils/constants';
 
-import { renderWithRedux, storeWithThunk } from '../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithThunk,
+} from '../../utils';
 
 jest.mock('~js/store/actions');
 jest.mock('~js/store/orgs/actions');
@@ -76,7 +82,7 @@ const defaultEpicUsers = [
 const createOrg = jest.fn();
 const refreshOrg = jest.fn();
 
-describe('<OrgCards/>', () => {
+describe('<TaskOrgCards/>', () => {
   const setup = (options) => {
     const defaults = {
       initialState: defaultState,
@@ -91,30 +97,33 @@ describe('<OrgCards/>', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const context = {};
+    const ui = (
+      <StaticRouter context={context}>
+        <TaskOrgCards
+          orgs={opts.orgs}
+          task={opts.task}
+          epicUsers={opts.epicUsers}
+          epicUrl="epic-url"
+          assignUserModalOpen={opts.assignUserModalOpen}
+          isCreatingOrg={opts.isCreatingOrg}
+          testOrgReadyForReview={opts.testOrgReadyForReview}
+          testOrgSubmittingReview={opts.testOrgSubmittingReview}
+          openAssignUserModal={jest.fn()}
+          closeAssignUserModal={jest.fn()}
+          openSubmitReviewModal={jest.fn()}
+          doCreateOrg={createOrg}
+          doRefreshOrg={refreshOrg}
+        />
+      </StaticRouter>
+    );
+    if (opts.rerender) {
+      return {
+        ...reRenderWithRedux(ui, opts.store, opts.rerender),
+        context,
+      };
+    }
     return {
-      ...renderWithRedux(
-        <StaticRouter context={context}>
-          <OrgCards
-            orgs={opts.orgs}
-            task={opts.task}
-            epicUsers={opts.epicUsers}
-            epicUrl="epic-url"
-            assignUserModalOpen={opts.assignUserModalOpen}
-            isCreatingOrg={opts.isCreatingOrg}
-            testOrgReadyForReview={opts.testOrgReadyForReview}
-            testOrgSubmittingReview={opts.testOrgSubmittingReview}
-            openAssignUserModal={jest.fn()}
-            closeAssignUserModal={jest.fn()}
-            openSubmitReviewModal={jest.fn()}
-            doCreateOrg={createOrg}
-            doRefreshOrg={refreshOrg}
-          />
-        </StaticRouter>,
-        opts.initialState,
-        storeWithThunk,
-        opts.rerender,
-        opts.store,
-      ),
+      ...renderWithRedux(ui, opts.initialState, storeWithThunk),
       context,
     };
   };
@@ -214,7 +223,7 @@ describe('<OrgCards/>', () => {
   });
 
   describe('Assign click', () => {
-    test('updates assigned user', () => {
+    test('updates assigned user', async () => {
       const task = {
         ...defaultTask,
         assigned_dev: null,
@@ -224,11 +233,13 @@ describe('<OrgCards/>', () => {
         orgs: {},
         assignUserModalOpen: 'Dev',
       });
-      fireEvent.click(
+
+      expect.assertions(3);
+      await fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="user-name"]'),
       );
-      fireEvent.click(getByText('Notify Assigned Developer by Email'));
-      fireEvent.click(getByText('Save'));
+      await fireEvent.click(getByText('Notify Assigned Developer by Email'));
+      await fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
 
