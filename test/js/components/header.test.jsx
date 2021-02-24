@@ -19,13 +19,14 @@ describe('<Header />', () => {
       getByLabelText,
       getByText,
       queryByText,
+      findByText,
     } = renderWithRedux(
       <MemoryRouter>
         <Header />
       </MemoryRouter>,
       initialState,
     );
-    return { container, getByLabelText, getByText, queryByText };
+    return { container, getByLabelText, getByText, queryByText, findByText };
   };
 
   describe('logged out', () => {
@@ -51,8 +52,19 @@ describe('<Header />', () => {
     });
   });
 
-  test('show tour help', () => {
-    const { getByText } = setup();
-    fireEvent.click(getByText('Plan Walkthrough'));
+  test('show tour help', async () => {
+    const { getByText, findByText } = setup({
+      user: { onboarded_at: 'Today' },
+      page: '/projects/foo',
+    });
+
+    fireEvent.click(getByText('Get Help'));
+
+    fireEvent.click(getByText('Plan Walkthrough', { exact: false }));
+    const dialog = await findByText(
+      'Epics are groups of related Tasks, representing larger changes to the Project. You can invite multiple collaborators to your Epic and assign different people as Developers and Testers for each Task.',
+      { exact: false },
+    );
+    expect(dialog).toBeVisible();
   });
 });
