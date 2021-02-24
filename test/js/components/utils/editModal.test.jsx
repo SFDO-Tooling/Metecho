@@ -4,7 +4,11 @@ import React from 'react';
 import { EditModal } from '~js/components/utils';
 import { updateObject } from '~js/store/actions';
 
-import { renderWithRedux, storeWithThunk } from './../../utils';
+import {
+  renderWithRedux,
+  reRenderWithRedux,
+  storeWithThunk,
+} from './../../utils';
 
 jest.mock('~js/store/actions');
 
@@ -30,13 +34,11 @@ describe('<EditModal />', () => {
     };
     const opts = Object.assign({}, defaults, options);
     const closeEditModal = jest.fn();
-    return renderWithRedux(
-      <EditModal {...opts} isOpen handleClose={closeEditModal} />,
-      {},
-      storeWithThunk,
-      opts.rerender,
-      opts.store,
-    );
+    const ui = <EditModal {...opts} isOpen handleClose={closeEditModal} />;
+    if (opts.rerender) {
+      return reRenderWithRedux(ui, opts.store, opts.rerender);
+    }
+    return renderWithRedux(ui, {}, storeWithThunk);
   };
 
   test('updates default fields on input', () => {

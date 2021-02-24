@@ -17,7 +17,7 @@ describe('reducer', () => {
     'returns initial state on %s action',
     (action) => {
       const project1 = {
-        id: 'r1',
+        id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
@@ -110,13 +110,13 @@ describe('reducer', () => {
   describe('FETCH_OBJECTS_SUCCEEDED', () => {
     test('resets projects list if `reset: true`', () => {
       const project1 = {
-        id: 'r1',
+        id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
         description: 'This is a test project.',
       };
       const project2 = {
-        id: 'r2',
+        id: 'p2',
         slug: 'project-2',
         name: 'Project 2',
         description: 'This is another test project.',
@@ -177,7 +177,7 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "project"', () => {
       const project = {
-        id: 'r1',
+        id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
       };
@@ -198,12 +198,12 @@ describe('reducer', () => {
   describe('FETCH_OBJECT_SUCCEEDED', () => {
     test('adds project', () => {
       const project1 = {
-        id: 'r1',
+        id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
       };
       const project2 = {
-        id: 'r2',
+        id: 'p2',
         slug: 'project-2',
         name: 'Project 2',
       };
@@ -225,7 +225,7 @@ describe('reducer', () => {
 
     test('stores id of missing project', () => {
       const project1 = {
-        id: 'r1',
+        id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
       };
@@ -250,7 +250,7 @@ describe('reducer', () => {
 
     test('ignores duplicate project', () => {
       const project1 = {
-        id: 'r1',
+        id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
       };
@@ -272,12 +272,12 @@ describe('reducer', () => {
 
     test('ignores if objectType !== "project"', () => {
       const project = {
-        id: 'r1',
+        id: 'p1',
         slug: 'project-1',
         name: 'Project 1',
       };
       const project2 = {
-        id: 'r2',
+        id: 'p2',
         slug: 'project-2',
         name: 'Project 2',
       };
@@ -297,12 +297,12 @@ describe('reducer', () => {
 
   describe('REFRESH_GH_USERS_REQUESTED', () => {
     const project = {
-      id: 'r1',
+      id: 'p1',
       slug: 'project-1',
       name: 'Project 1',
     };
     const project2 = {
-      id: 'r2',
+      id: 'p2',
       slug: 'project-2',
       name: 'Project 2',
     };
@@ -316,7 +316,7 @@ describe('reducer', () => {
       };
       const actual = reducer(
         { projects: [project, project2] },
-        { type: 'REFRESH_GH_USERS_REQUESTED', payload: 'r1' },
+        { type: 'REFRESH_GH_USERS_REQUESTED', payload: 'p1' },
       );
 
       expect(actual).toEqual(expected);
@@ -335,13 +335,13 @@ describe('reducer', () => {
 
   describe('REFRESH_GH_USERS_REJECTED', () => {
     const project = {
-      id: 'r1',
+      id: 'p1',
       slug: 'project-1',
       name: 'Project 1',
       currently_refreshing_gh_users: true,
     };
     const project2 = {
-      id: 'r2',
+      id: 'p2',
       slug: 'project-2',
       name: 'Project 2',
     };
@@ -355,7 +355,74 @@ describe('reducer', () => {
       };
       const actual = reducer(
         { projects: [project, project2] },
-        { type: 'REFRESH_GH_USERS_REJECTED', payload: 'r1' },
+        { type: 'REFRESH_GH_USERS_REJECTED', payload: 'p1' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_ORG_CONFIGS_REQUESTED', () => {
+    const project = {
+      id: 'p1',
+      slug: 'project-1',
+      name: 'Project 1',
+    };
+    const project2 = {
+      id: 'p2',
+      slug: 'project-2',
+      name: 'Project 2',
+    };
+
+    test('sets currently_fetching_org_config_names: true', () => {
+      const expected = {
+        projects: [
+          { ...project, currently_fetching_org_config_names: true },
+          project2,
+        ],
+      };
+      const actual = reducer(
+        { projects: [project, project2] },
+        { type: 'REFRESH_ORG_CONFIGS_REQUESTED', payload: 'p1' },
+      );
+
+      expect(actual).toEqual(expected);
+    });
+
+    test('ignores if payload is not known project id', () => {
+      const expected = { projects: [project, project2] };
+      const actual = reducer(expected, {
+        type: 'REFRESH_ORG_CONFIGS_REQUESTED',
+        payload: 'unknown',
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('REFRESH_ORG_CONFIGS_REJECTED', () => {
+    const project = {
+      id: 'p1',
+      slug: 'project-1',
+      name: 'Project 1',
+      currently_fetching_org_config_names: true,
+    };
+    const project2 = {
+      id: 'p2',
+      slug: 'project-2',
+      name: 'Project 2',
+    };
+
+    test('sets currently_fetching_org_config_names: false', () => {
+      const expected = {
+        projects: [
+          { ...project, currently_fetching_org_config_names: false },
+          project2,
+        ],
+      };
+      const actual = reducer(
+        { projects: [project, project2] },
+        { type: 'REFRESH_ORG_CONFIGS_REJECTED', payload: 'p1' },
       );
 
       expect(actual).toEqual(expected);
@@ -364,12 +431,12 @@ describe('reducer', () => {
 
   describe('PROJECT_UPDATE', () => {
     const project = {
-      id: 'r1',
+      id: 'p1',
       slug: 'project-1',
       name: 'Project 1',
     };
     const project2 = {
-      id: 'r2',
+      id: 'p2',
       slug: 'project-2',
       name: 'Project 2',
     };

@@ -35,13 +35,6 @@ describe('logError', () => {
       expect(window.Sentry.captureMessage).toHaveBeenCalledWith('foobar');
     });
   });
-
-  test('logs error to console', () => {
-    const extra = { foo: 'bar' };
-    logging.logError('foobar', extra);
-
-    expect(window.console.error).toHaveBeenCalledWith('foobar', extra);
-  });
 });
 
 describe('log', () => {

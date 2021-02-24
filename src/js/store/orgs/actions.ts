@@ -1,13 +1,19 @@
 import i18n from 'i18next';
 
-import { ThunkResult } from '~js/store';
+import { AppState, ThunkResult } from '~js/store';
+import { selectEpicById } from '~js/store/epics/selectors';
 import { isCurrentUser } from '~js/store/helpers';
 import { MinimalOrg, Org } from '~js/store/orgs/reducer';
+import { selectProjectById } from '~js/store/projects/selectors';
 import { selectTaskById } from '~js/store/tasks/selectors';
 import { addToast } from '~js/store/toasts/actions';
 import apiFetch, { addUrlParams } from '~js/utils/api';
-import { OBJECT_TYPES, ORG_TYPES } from '~js/utils/constants';
+import { OBJECT_TYPES } from '~js/utils/constants';
 
+interface OrgProvisioning {
+  type: 'SCRATCH_ORG_PROVISIONING';
+  payload: Org;
+}
 interface OrgProvisioned {
   type: 'SCRATCH_ORG_PROVISION';
   payload: Org;
@@ -58,6 +64,7 @@ interface OrgReassignFailed {
 }
 
 export type OrgsAction =
+  | OrgProvisioning
   | OrgProvisioned
   | OrgProvisionFailed
   | RefetchOrg
@@ -71,6 +78,23 @@ export type OrgsAction =
   | OrgReassigned
   | OrgReassignFailed;
 
+const getOrgParent = (
+  org: Org | MinimalOrg,
+  state: AppState,
+): { name?: string; parent?: string } => {
+  const task = selectTaskById(state, org.task);
+  const epic = selectEpicById(state, org.epic);
+  const project = selectProjectById(state, org.project);
+  if (task) {
+    return { name: task.name, parent: i18n.t('Task') };
+  } else if (epic) {
+    return { name: epic.name, parent: i18n.t('Epic') };
+  } else if (project) {
+    return { name: project.name, parent: i18n.t('Project') };
+  }
+  return {};
+};
+
 export const provisionOrg = ({
   model,
   originating_user_id,
@@ -81,24 +105,18 @@ export const provisionOrg = ({
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
-    let msg = {
-      [ORG_TYPES.DEV]: i18n.t('Successfully created Dev Org.'),
-      [ORG_TYPES.QA]: i18n.t('Successfully created Test Org.'),
-    };
-    if (task) {
-      msg = {
-        [ORG_TYPES.DEV]: `${i18n.t('Successfully created Dev Org for task')} “${
-          task.name
-        }”.`,
-        [ORG_TYPES.QA]: `${i18n.t('Successfully created Test Org for task')} “${
-          task.name
-        }”.`,
-      };
+    let msg = i18n.t('Successfully created scratch org.');
+    const { name, parent } = getOrgParent(model, state);
+    /* istanbul ignore else */
+    if (name && parent) {
+      msg = i18n.t(
+        'Successfully created scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
     }
     dispatch(
       addToast({
-        heading: msg[model.org_type],
+        heading: msg,
         linkText: model.is_created ? i18n.t('View your new org.') : undefined,
         linkUrl: model.is_created
           ? window.api_urls.scratch_org_redirect(model.id)
@@ -124,28 +142,20 @@ export const provisionFailed = ({
 }): ThunkResult<OrgProvisionFailed> => (dispatch, getState) => {
   const state = getState();
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
-    let msg = {
-      [ORG_TYPES.DEV]: i18n.t(
-        'Uh oh. There was an error creating your new Dev Org.',
-      ),
-      [ORG_TYPES.QA]: i18n.t(
-        'Uh oh. There was an error creating your new Test Org.',
-      ),
-    };
-    if (task) {
-      msg = {
-        [ORG_TYPES.DEV]: `${i18n.t(
-          'Uh oh. There was an error creating your new Dev Org for task',
-        )} “${task.name}”.`,
-        [ORG_TYPES.QA]: `${i18n.t(
-          'Uh oh. There was an error creating your new Test Org for task',
-        )} “${task.name}”.`,
-      };
+    let msg = i18n.t(
+      'Uh oh. There was an error creating your new scratch org.',
+    );
+    const { name, parent } = getOrgParent(model, state);
+    /* istanbul ignore else */
+    if (name && parent) {
+      msg = i18n.t(
+        'Uh oh. There was an error creating your new scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
     }
     dispatch(
       addToast({
-        heading: msg[model.org_type],
+        heading: msg,
         details: message,
         variant: 'error',
       }),
@@ -210,16 +220,20 @@ export const updateFailed = ({
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
+    let msg = i18n.t(
+      'Uh oh. There was an error checking for changes on your scratch org.',
+    );
+    const { name, parent } = getOrgParent(model, state);
+    /* istanbul ignore else */
+    if (name && parent) {
+      msg = i18n.t(
+        'Uh oh. There was an error checking for changes on your scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
+    }
     dispatch(
       addToast({
-        heading: task
-          ? `${i18n.t(
-              'Uh oh. There was an error checking for changes on your scratch org for task',
-            )} “${task.name}”.`
-          : i18n.t(
-              'Uh oh. There was an error checking for changes on your scratch org.',
-            ),
+        heading: msg,
         details: message,
         variant: 'error',
       }),
@@ -266,23 +280,16 @@ export const deleteOrg = ({
         }),
       );
     } else {
-      const task = selectTaskById(state, model.task);
-      let msg = {
-        [ORG_TYPES.DEV]: i18n.t('Successfully deleted Dev Org.'),
-        [ORG_TYPES.QA]: i18n.t('Successfully deleted Test Org.'),
-      };
+      let msg = i18n.t('Successfully deleted scratch org.');
+      const { name, parent } = getOrgParent(model, state);
       /* istanbul ignore else */
-      if (task) {
-        msg = {
-          [ORG_TYPES.DEV]: `${i18n.t(
-            'Successfully deleted Dev Org for task',
-          )} “${task.name}”.`,
-          [ORG_TYPES.QA]: `${i18n.t(
-            'Successfully deleted Test Org for task',
-          )} “${task.name}”.`,
-        };
+      if (name && parent) {
+        msg = i18n.t(
+          'Successfully deleted scratch org for {{parent}} “{{name}}”.',
+          { parent, name },
+        );
       }
-      dispatch(addToast({ heading: msg[model.org_type] }));
+      dispatch(addToast({ heading: msg }));
     }
   }
   return dispatch({
@@ -303,29 +310,18 @@ export const deleteFailed = ({
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
-    let msg = {
-      [ORG_TYPES.DEV]: i18n.t(
-        'Uh oh. There was an error deleting your Dev Org.',
-      ),
-      [ORG_TYPES.QA]: i18n.t(
-        'Uh oh. There was an error deleting your Test Org.',
-      ),
-    };
+    let msg = i18n.t('Uh oh. There was an error deleting your scratch org.');
+    const { name, parent } = getOrgParent(model, state);
     /* istanbul ignore else */
-    if (task) {
-      msg = {
-        [ORG_TYPES.DEV]: `${i18n.t(
-          'Uh oh. There was an error deleting your Dev Org for task',
-        )} “${task.name}”.`,
-        [ORG_TYPES.QA]: `${i18n.t(
-          'Uh oh. There was an error deleting your Test Org for task',
-        )} “${task.name}”.`,
-      };
+    if (name && parent) {
+      msg = i18n.t(
+        'Uh oh. There was an error deleting your scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
     }
     dispatch(
       addToast({
-        heading: msg[model.org_type],
+        heading: msg,
         details: message,
         variant: 'error',
       }),
@@ -347,14 +343,18 @@ export const commitSucceeded = ({
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
+    let msg = i18n.t('Successfully retrieved changes from your scratch org.');
+    const { name, parent } = getOrgParent(model, state);
+    /* istanbul ignore else */
+    if (name && parent) {
+      msg = i18n.t(
+        'Successfully retrieved changes from your scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
+    }
     dispatch(
       addToast({
-        heading: task
-          ? `${i18n.t(
-              'Successfully retrieved changes from your scratch org on task',
-            )} “${task.name}”.`
-          : i18n.t('Successfully retrieved changes from your scratch org.'),
+        heading: msg,
       }),
     );
   }
@@ -376,16 +376,20 @@ export const commitFailed = ({
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
+    let msg = i18n.t(
+      'Uh oh. There was an error retrieving changes from your scratch org.',
+    );
+    const { name, parent } = getOrgParent(model, state);
+    /* istanbul ignore else */
+    if (name && parent) {
+      msg = i18n.t(
+        'Uh oh. There was an error retrieving changes from your scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
+    }
     dispatch(
       addToast({
-        heading: task
-          ? `${i18n.t(
-              'Uh oh. There was an error retrieving changes from your scratch org on task',
-            )} “${task.name}”.`
-          : i18n.t(
-              'Uh oh. There was an error retrieving changes from your scratch org.',
-            ),
+        heading: msg,
         details: message,
         variant: 'error',
       }),
@@ -432,16 +436,16 @@ export const orgRefreshed = ({
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
-    dispatch(
-      addToast({
-        heading: task
-          ? `${i18n.t('Successfully refreshed your scratch org on task')} “${
-              task.name
-            }”.`
-          : i18n.t('Successfully refreshed your scratch org.'),
-      }),
-    );
+    let msg = i18n.t('Successfully refreshed your scratch org.');
+    const { name, parent } = getOrgParent(model, state);
+    /* istanbul ignore else */
+    if (name && parent) {
+      msg = i18n.t(
+        'Successfully refreshed your scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
+    }
+    dispatch(addToast({ heading: msg }));
   }
   return dispatch(updateOrg(model));
 };
@@ -458,14 +462,18 @@ export const refreshError = ({
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
+    let msg = i18n.t('Uh oh. There was an error refreshing your scratch org.');
+    const { name, parent } = getOrgParent(model, state);
+    /* istanbul ignore else */
+    if (name && parent) {
+      msg = i18n.t(
+        'Uh oh. There was an error refreshing your scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
+    }
     dispatch(
       addToast({
-        heading: task
-          ? `${i18n.t(
-              'Uh oh. There was an error refreshing your scratch org on task',
-            )} “${task.name}”.`
-          : i18n.t('Uh oh. There was an error refreshing your scratch org.'),
+        heading: msg,
         details: message,
         variant: 'error',
       }),
@@ -513,14 +521,18 @@ export const orgReassignFailed = ({
   const state = getState();
   /* istanbul ignore else */
   if (isCurrentUser(originating_user_id, state)) {
-    const task = selectTaskById(state, model.task);
+    let msg = i18n.t('Uh oh. There was an error reassigning this scratch org.');
+    const { name, parent } = getOrgParent(model, state);
+    /* istanbul ignore else */
+    if (name && parent) {
+      msg = i18n.t(
+        'Uh oh. There was an error reassigning the scratch org for {{parent}} “{{name}}”.',
+        { parent, name },
+      );
+    }
     dispatch(
       addToast({
-        heading: task
-          ? `${i18n.t(
-              'Uh oh. There was an error reassigning the scratch org on task',
-            )} “${task.name}”.`
-          : i18n.t('Uh oh. There was an error reassigning this scratch org.'),
+        heading: msg,
         details: message,
         variant: 'error',
       }),
@@ -530,4 +542,18 @@ export const orgReassignFailed = ({
     type: 'SCRATCH_ORG_REASSIGN_FAILED',
     payload: model,
   });
+};
+
+export const orgProvisioning = (model: Org): OrgProvisioning => {
+  /* istanbul ignore else */
+  if (window.socket) {
+    window.socket.subscribe({
+      model: OBJECT_TYPES.ORG,
+      id: model.id,
+    });
+  }
+  return {
+    type: 'SCRATCH_ORG_PROVISIONING',
+    payload: model,
+  };
 };

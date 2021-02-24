@@ -1,8 +1,9 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 
 import EpicStatusSteps from '~js/components/epics/steps';
 import { EPIC_STATUSES, TASK_STATUSES } from '~js/utils/constants';
+
+import { render } from './../../utils';
 
 const jonny = {
   id: 'jonny',
@@ -20,7 +21,6 @@ const defaultEpic = {
   branch_url: 'https://github.com/test/test-repo/tree/branch-name',
   branch_name: 'branch-name',
   github_users: [jonny, stacy],
-  available_task_org_config_names: [],
   has_unmerged_commits: false,
   status: EPIC_STATUSES.PLANNED,
 };

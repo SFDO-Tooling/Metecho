@@ -19,7 +19,8 @@ def get_valid_target_directories(user, scratch_org, repo_root):
     Expects to be called from within a `local_github_checkout`.
     """
     package_directories = {}
-    project = scratch_org.task.epic.project
+    parent = scratch_org.parent
+    project = scratch_org.root_project
     repo = get_repo_info(
         None, repo_owner=project.repo_owner, repo_name=project.repo_name
     )
@@ -28,8 +29,8 @@ def get_valid_target_directories(user, scratch_org, repo_root):
         repo_name=repo.name,
         repo_url=repo.html_url,
         repo_owner=repo.owner.login,
-        repo_branch=scratch_org.task.branch_name,
-        repo_commit=repo.branch(scratch_org.task.branch_name).latest_sha(),
+        repo_branch=parent.branch_name,
+        repo_commit=repo.branch(parent.branch_name).latest_sha(),
     )
     sfdx = source_format == "sfdx"
     if sfdx:

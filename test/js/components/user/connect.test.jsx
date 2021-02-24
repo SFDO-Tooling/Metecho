@@ -1,8 +1,10 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import ConnectModal from '~js/components/user/connect';
 import { addUrlParams } from '~js/utils/api';
+
+import { render } from './../../utils';
 
 describe('<ConnectModal />', () => {
   const toggleModal = jest.fn();

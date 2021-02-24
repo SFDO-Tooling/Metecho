@@ -31,6 +31,7 @@ export interface Task {
   description: string;
   description_rendered: string;
   has_unmerged_commits: boolean;
+  currently_creating_branch: boolean;
   currently_creating_pr: boolean;
   branch_name: string;
   branch_url: string | null;

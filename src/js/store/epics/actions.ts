@@ -4,7 +4,6 @@ import { ThunkResult } from '~js/store';
 import { Epic } from '~js/store/epics/reducer';
 import { isCurrentUser } from '~js/store/helpers';
 import { addToast } from '~js/store/toasts/actions';
-import apiFetch from '~js/utils/api';
 
 interface EpicUpdated {
   type: 'EPIC_UPDATE';
@@ -14,18 +13,8 @@ interface EpicCreatePRFailed {
   type: 'EPIC_CREATE_PR_FAILED';
   payload: Epic;
 }
-interface RefreshOrgConfigsAction {
-  type:
-    | 'REFRESH_ORG_CONFIGS_REQUESTED'
-    | 'REFRESH_ORG_CONFIGS_ACCEPTED'
-    | 'REFRESH_ORG_CONFIGS_REJECTED';
-  payload: string;
-}
 
-export type EpicAction =
-  | EpicUpdated
-  | EpicCreatePRFailed
-  | RefreshOrgConfigsAction;
+export type EpicAction = EpicUpdated | EpicCreatePRFailed;
 
 export const updateEpic = (payload: Epic): EpicUpdated => ({
   type: 'EPIC_UPDATE',
@@ -43,9 +32,10 @@ export const createEpicPR = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t(
-          'Successfully submitted epic for review on GitHub:',
-        )} “${model.name}”.`,
+        heading: i18n.t(
+          'Successfully submitted epic for review on GitHub: “{{epic_name}}”.',
+          { epic_name: model.name },
+        ),
         linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
         linkUrl: model.pr_url ? model.pr_url : undefined,
         openLinkInNewWindow: true,
@@ -72,9 +62,10 @@ export const createEpicPRFailed = ({
   if (isCurrentUser(originating_user_id, getState())) {
     dispatch(
       addToast({
-        heading: `${i18n.t(
-          'Uh oh. There was an error submitting epic for review on GitHub',
-        )}: “${model.name}”.`,
+        heading: i18n.t(
+          'Uh oh. There was an error submitting epic for review on GitHub: “{{epic_name}}”.',
+          { epic_name: model.name },
+        ),
         details: message,
         variant: 'error',
       }),
@@ -84,26 +75,4 @@ export const createEpicPRFailed = ({
     type: 'EPIC_CREATE_PR_FAILED' as const,
     payload: model,
   });
-};
-
-export const refreshOrgConfigs = (
-  id: string,
-): ThunkResult<Promise<RefreshOrgConfigsAction>> => async (dispatch) => {
-  dispatch({ type: 'REFRESH_ORG_CONFIGS_REQUESTED', payload: id });
-  try {
-    await apiFetch({
-      url: window.api_urls.epic_refresh_org_config_names(id),
-      dispatch,
-      opts: {
-        method: 'POST',
-      },
-    });
-    return dispatch({
-      type: 'REFRESH_ORG_CONFIGS_ACCEPTED' as const,
-      payload: id,
-    });
-  } catch (err) {
-    dispatch({ type: 'REFRESH_ORG_CONFIGS_REJECTED', payload: id });
-    throw err;
-  }
 };

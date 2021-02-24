@@ -1,8 +1,9 @@
-import { render } from '@testing-library/react';
 import React from 'react';
 
 import EpicStatusPath from '~js/components/epics/path';
 import { EPIC_STATUSES } from '~js/utils/constants';
+
+import { render } from './../../utils';
 
 const defaultEpic = {
   status: EPIC_STATUSES.PLANNED,

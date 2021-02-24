@@ -32,7 +32,7 @@ export const GitHubUserAvatar = ({
   size?: string;
 }) => (
   <Avatar
-    imgAlt={`${i18n.t('avatar for user')} ${user.login}`}
+    imgAlt={i18n.t('avatar for user {{username}}', { username: user.login })}
     imgSrc={user.avatar_url}
     title={user.login}
     size={size || 'small'}

@@ -28,7 +28,9 @@ const ProjectListItem = ({ project }: { project: Project }) => (
           <div>
             <img
               src={project.repo_image_url}
-              alt={`${i18n.t('social image for')} ${project.name}`}
+              alt={i18n.t('social image for {{title}}', {
+                title: project.name,
+              })}
             />
           </div>
         ) : (

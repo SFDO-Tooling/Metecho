@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import OrgCard from '~js/components/tasks/cards/card';
+import TaskOrgCard from '~js/components/orgs/taskOrgCard';
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
 import ConfirmRemoveUserModal from '~js/components/tasks/confirmRemoveUserModal';
 import ConnectModal from '~js/components/user/connect';
@@ -11,7 +11,7 @@ import { useIsMounted } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { deleteObject, updateObject } from '~js/store/actions';
 import { refetchOrg } from '~js/store/orgs/actions';
-import { Org, OrgsByTask } from '~js/store/orgs/reducer';
+import { Org, OrgsByParent } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -34,10 +34,11 @@ export const ORG_TYPE_TRACKER_DEFAULT = {
   [ORG_TYPES.QA]: false,
 };
 
-const OrgCards = ({
+const TaskOrgCards = ({
   orgs,
   task,
   epicUsers,
+  epicCreatingBranch,
   epicUrl,
   repoUrl,
   assignUserModalOpen,
@@ -51,9 +52,10 @@ const OrgCards = ({
   doCreateOrg,
   doRefreshOrg,
 }: {
-  orgs: OrgsByTask;
+  orgs: OrgsByParent;
   task: Task;
   epicUsers: GitHubUser[];
+  epicCreatingBranch: boolean;
   epicUrl: string;
   repoUrl: string;
   assignUserModalOpen: OrgTypes | null;
@@ -196,10 +198,10 @@ const OrgCards = ({
       if (canReassign) {
         assignUser({ type, assignee, shouldAlertAssignee });
       } else {
-        checkForOrgChanges(org);
+        checkForOrgChanges(org as Org);
         setIsWaitingToRemoveUser({ type, assignee, shouldAlertAssignee });
       }
-    } else {
+    } /* istanbul ignore next */ else if (type !== ORG_TYPES.PLAYGROUND) {
       assignUser({ type, assignee, shouldAlertAssignee });
     }
   };
@@ -255,12 +257,13 @@ const OrgCards = ({
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Team & Orgs')}</h2>
       <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
-        <OrgCard
+        <TaskOrgCard
           org={orgs[ORG_TYPES.DEV]}
           type={ORG_TYPES.DEV}
           user={user}
           task={task}
           epicUsers={epicUsers}
+          epicCreatingBranch={epicCreatingBranch}
           epicUrl={epicUrl}
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
@@ -274,12 +277,13 @@ const OrgCards = ({
           handleCheckForOrgChanges={checkForOrgChanges}
           openCaptureModal={openCaptureModal}
         />
-        <OrgCard
+        <TaskOrgCard
           org={orgs[ORG_TYPES.QA]}
           type={ORG_TYPES.QA}
           user={user}
           task={task}
           epicUsers={epicUsers}
+          epicCreatingBranch={epicCreatingBranch}
           epicUrl={epicUrl}
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
@@ -326,4 +330,4 @@ const OrgCards = ({
   );
 };
 
-export default OrgCards;
+export default TaskOrgCards;
