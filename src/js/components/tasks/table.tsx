@@ -8,11 +8,10 @@ import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Project } from 'src/js/store/projects/reducer';
 
-import {
-  AssignUserModal,
-  GitHubUserAvatar,
-} from '~js/components/user/githubUser';
+import AssignUserModal from '~js/components/user/github/AssignUserModal';
+import { GitHubUserAvatar } from '~js/components/user/githubUser';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
 import {
@@ -44,6 +43,7 @@ interface TableCellProps {
 
 interface Props {
   projectSlug: string;
+  project: Project;
   epicSlug: string;
   tasks: Task[];
   epicUsers: GitHubUser[];
@@ -132,6 +132,7 @@ const AssigneeTableCell = ({
   item,
   className,
   children,
+  project,
   ...props
 }: TableCellProps & {
   type: OrgTypes;
@@ -139,6 +140,7 @@ const AssigneeTableCell = ({
   openAssignEpicUsersModal: () => void;
   assignUserAction: AssignUserAction;
   children?: GitHubUser | null;
+  project: Project;
 }) => {
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
 
@@ -206,6 +208,7 @@ const AssigneeTableCell = ({
           emptyMessageAction={handleEmptyMessageClick}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
+          project={project}
         />
       </>
     );
@@ -229,6 +232,7 @@ const TaskTable = ({
   epicUsers,
   openAssignEpicUsersModal,
   assignUserAction,
+  project,
 }: Props) => {
   const statusOrder = {
     [TASK_STATUSES.IN_PROGRESS]: 1,
@@ -269,6 +273,7 @@ const TaskTable = ({
           epicUsers={epicUsers}
           openAssignEpicUsersModal={openAssignEpicUsersModal}
           assignUserAction={assignUserAction}
+          project={project}
         />
       </DataTableColumn>
       <DataTableColumn
@@ -282,6 +287,7 @@ const TaskTable = ({
           epicUsers={epicUsers}
           openAssignEpicUsersModal={openAssignEpicUsersModal}
           assignUserAction={assignUserAction}
+          project={project}
         />
       </DataTableColumn>
     </DataTable>

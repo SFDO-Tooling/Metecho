@@ -246,7 +246,6 @@
   "Tester": "Tester",
   "The existing Dev Org for this task has unretrieved changes. Changing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?": "The existing Dev Org for this task has unretrieved changes. Changing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?",
   "The existing Dev Org for this task has unretrieved changes. Removing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?": "The existing Dev Org for this task has unretrieved changes. Removing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?",
-  "There are no collaborators on this epic. Add collaborators to the epic before assigning them to this task.": "There are no collaborators on this epic. Add collaborators to the epic before assigning them to this task.",
   "There aren't any available branches at this time.": "There aren't any available branches at this time.",
   "This becomes bold text": "This becomes bold text",
   "This becomes italic text": "This becomes italic text",

@@ -13,10 +13,12 @@ import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '~js/components/404';
-import { LabelWithSpinner, SpinnerWrapper } from '~js/components/utils';
+import { SpinnerWrapper } from '~js/components/utils';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
 import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
+
+import ReSyncGithubUserButton from '~js/components/user/github/ReSyncButton';
 
 interface TableCellProps {
   [key: string]: any;
@@ -38,8 +40,8 @@ export const GitHubUserAvatar = ({
     size={size || 'small'}
   />
 );
-
-const GitHubUserButton = ({
+// includes avatar and name (todo change to username && fullname)
+export const GitHubUserButton = ({
   user,
   isAssigned,
   isSelected,
@@ -149,6 +151,7 @@ const UserTableCell = ({ item, handleUserClick, ...props }: TableCellProps) => {
 };
 UserTableCell.displayName = DataTableCell.displayName;
 
+// has allUsers with avatar, login, & login
 export const AssignUsersModal = ({
   allUsers,
   selectedUsers,
@@ -249,24 +252,10 @@ export const AssignUsersModal = ({
             slds-shrink-none
             slds-grid_align-end"
         >
-          {isRefreshing ? (
-            <Button
-              label={
-                <LabelWithSpinner label={i18n.t('Syncing Collaborators…')} />
-              }
-              variant="outline-brand"
-              disabled
-            />
-          ) : (
-            <Button
-              label={i18n.t('Re-Sync Collaborators')}
-              variant="outline-brand"
-              iconCategory="utility"
-              iconName="refresh"
-              iconPosition="left"
-              onClick={refreshUsers}
-            />
-          )}
+          <ReSyncGithubUserButton
+            isRefreshing={isRefreshing}
+            refreshUsers={refreshUsers}
+          />
         </div>
       </div>
       <div className="slds-is-relative">
@@ -306,6 +295,7 @@ export const AssignUsersModal = ({
   );
 };
 
+// shown RN when there are no users...
 export const AssignUserModal = ({
   allUsers,
   selectedUser,
@@ -447,9 +437,14 @@ export const AssignUserModal = ({
         </div>
       ) : (
         <div className="slds-p-around_medium">
-          {i18n.t(
-            'There are no collaborators on this epic. Add collaborators to the epic before assigning them to this task.',
-          )}
+          <div>
+            <div>
+              Assign any Github user to this role. If they are not already, the
+              will also be added as an Epic Collaborator.
+            </div>
+            <button>Re-Sync Githuib Collaborators</button>
+            <input type="search" placeholder="Quick Find" />
+          </div>
         </div>
       )}
     </Modal>

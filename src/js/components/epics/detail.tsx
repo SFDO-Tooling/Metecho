@@ -535,6 +535,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 <EpicProgress range={epicProgress} />
                 <TaskTable
                   projectSlug={project.slug}
+                  project={project}
                   epicSlug={epic.slug}
                   tasks={tasks}
                   epicUsers={epic.github_users}
