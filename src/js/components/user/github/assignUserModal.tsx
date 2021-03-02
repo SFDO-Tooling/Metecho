@@ -16,7 +16,7 @@ import { Project } from 'src/js/store/projects/reducer';
 
 import { EmptyIllustration } from '~js/components/404';
 import ReSyncGithubUserButton from '~js/components/user/github/reSyncButton';
-import GithubUserTable from 'src/js/components/user/github/table';
+import GithubUserTable from '~js/components/user/github/table';
 import { GitHubUserButton } from '~js/components/user/githubUser';
 import { LabelWithSpinner, SpinnerWrapper } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';

@@ -295,6 +295,7 @@
   "What is Metecho?": "What is Metecho?",
   "You are in offline mode. We are trying to reconnect, but you may need to": "You are in offline mode. We are trying to reconnect, but you may need to",
   "anErrorOccurred": "An error occurred. Try the <1>home page</1>?",
+  "assignUserHelper": "Assign any Github user to this role. If they are not already, the will also be added as an Epic Collaborator.",
   "avatar for user {{username}}": "avatar for user {{username}}",
   "check again": "check again",
   "confirmDeleteEpic": "Are you sure you want to delete epic “<1>{{name}}</1>”? This will also delete any tasks and scratch orgs in this epic.",

@@ -13,12 +13,11 @@ import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '~js/components/404';
+import ReSyncGithubUserButton from '~js/components/user/github/reSyncButton';
 import { SpinnerWrapper } from '~js/components/utils';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
 import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
-
-import ReSyncGithubUserButton from '~js/components/user/github/ReSyncButton';
 
 interface TableCellProps {
   [key: string]: any;

@@ -8,10 +8,10 @@ import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Project } from 'src/js/store/projects/reducer';
 
-import AssignUserModal from '~js/components/user/github/AssignUserModal';
+import AssignUserModal from '~js/components/user/github/assignUserModal';
 import { GitHubUserAvatar } from '~js/components/user/githubUser';
+import { Project } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
 import {
@@ -200,7 +200,7 @@ const AssigneeTableCell = ({
           onClick={openAssignUserModal}
         />
         <AssignUserModal
-          allUsers={epicUsers}
+          epicUsers={epicUsers}
           selectedUser={assignedUser || null}
           orgType={type}
           isOpen={assignUserModalOpen}
