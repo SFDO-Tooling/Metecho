@@ -179,7 +179,7 @@ logfmt==0.4
     #   sfdo-template-helpers
 lxml==4.6.2
     # via cumulusci
-markdown==3.3.3
+markdown==3.3.4
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
