@@ -34,11 +34,11 @@ click==7.1.2
     # via
     #   -c requirements/prod.txt
     #   black
-coverage==5.4
+coverage==5.5
     # via
     #   coveralls
     #   pytest-cov
-coveralls==3.0.0
+coveralls==3.0.1
     # via -r requirements/dev.in
 decorator==4.4.2
     # via ipython
@@ -80,7 +80,7 @@ iniconfig==1.1.1
     # via pytest
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.20.0
+ipython==7.21.0
     # via -r requirements/dev.in
 isort==5.7.0
     # via -r requirements/dev.in

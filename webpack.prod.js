@@ -17,6 +17,7 @@ module.exports = merge(common, {
   output: {
     filename: '[name].[chunkhash].min.js',
     path: path.join(__dirname, 'dist', 'prod'),
+    clean: true,
   },
   devtool: 'source-map',
   plugins: [
