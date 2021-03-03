@@ -156,7 +156,7 @@ idna==2.10
     #   hyperlink
     #   requests
     #   twisted
-incremental==17.5.0
+incremental==21.3.0
     # via twisted
 jeepney==0.6.0
     # via
