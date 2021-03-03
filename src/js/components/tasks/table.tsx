@@ -158,7 +158,7 @@ const AssigneeTableCell = ({
 
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
-      /* istanbul ignore if */
+      // /* istanbul ignore if */
       if (!item || !type) {
         return;
       }

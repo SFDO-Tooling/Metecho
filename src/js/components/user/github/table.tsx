@@ -13,11 +13,18 @@ const UserNameDataTableCell = (props: any) => (
 );
 UserNameDataTableCell.displayName = DataTableCell.displayName;
 
-const GithubUserTable = ({ users, ...other }: { users: GitHubUser[] }) => {
-  const [selection, setSelection] = useState([]);
+const GithubUserTable = ({
+  users,
+  selection,
+  setSelection,
+  ...other
+}: {
+  users: GitHubUser[];
+  selection: any;
+  setSelection: (user: GitHubUser) => void;
+}) => {
   const handleRowChange = (event, data) => {
     setSelection(data.selection);
-    console.log(event, data);
   };
   return (
     <DataTable

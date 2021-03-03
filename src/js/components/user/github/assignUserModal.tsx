@@ -48,10 +48,11 @@ const AssignUserModal = ({
 }) => {
   const currentUser = useSelector(selectUserState) as User;
   const dispatch = useDispatch<ThunkDispatch>();
-  const [selection, setSelection] = useState<GitHubUser | null>(null);
+  const [selection, setSelection] = useState<GitHubUser[] | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
   const [autoToggle, setAutoToggle] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
   const handleAlertAssignee = (
     event: React.FormEvent<HTMLFormElement>,
     { checked }: { checked: boolean },
@@ -59,8 +60,8 @@ const AssignUserModal = ({
     setShouldAlertAssignee(checked);
     setAutoToggle(false);
   };
-  const handleAssigneeSelection = (user: GitHubUser) => {
-    const currentUserSelected = user.login === currentUser.username;
+  const handleAssigneeSelection = (user: GitHubUser[]) => {
+    const currentUserSelected = user[0].login === currentUser.username;
     setSelection(user);
     if (autoToggle) {
       setShouldAlertAssignee(!currentUserSelected);
@@ -73,12 +74,11 @@ const AssignUserModal = ({
     setAutoToggle(true);
   };
   const handleSave = () => {
-    console.log('setUser');
-    handleClose();
-    /* @@@ todo... does this need to chenge?
-    setUser(selection, shouldAlertAssignee);
-    handleClose();
-    */
+    if (selection) {
+      const selectedAssignee = selection[0];
+      setUser(selectedAssignee, shouldAlertAssignee);
+      handleClose();
+    }
   };
 
   const doRefreshGitHubUsers = useCallback(() => {
@@ -115,6 +115,7 @@ const AssignUserModal = ({
       onRequestClose={handleClose}
       heading={heading}
       directional
+      size="small"
       footer={[
         <Checkbox
           key="alert"
@@ -159,22 +160,32 @@ const AssignUserModal = ({
           />
         </div>
       </div>
-      <div className="slds-p-around_medium">
-        <input type="text" placeholder="Quick Find" />
+      <div className="slds-is-relative">
+        <div className="slds-p-horizontal_medium slds-p-top_medium">
+          <input type="text" placeholder="Quick Find" />
+        </div>
+        {filteredUsers.length ? (
+          <>
+            <h2 className="slds-text-heading_medium slds-p-left_medium slds-p-bottom_medium">
+              Epic Collaborators
+            </h2>
+            <GithubUserTable
+              users={epicUsers}
+              selection={selection}
+              setSelection={handleAssigneeSelection}
+            />
+          </>
+        ) : null}
+        <h2 className="slds-text-heading_medium slds-p-around_medium">
+          {githubCollaboratorHeading}
+        </h2>
+        <GithubUserTable
+          setSelection={handleAssigneeSelection}
+          selection={selection}
+          users={project.github_users}
+        />
+        {isRefreshing && <SpinnerWrapper />}
       </div>
-      {filteredUsers.length ? (
-        <>
-          <h2 className="slds-text-heading_medium slds-p-left_medium slds-p-bottom_medium">
-            Epic Collaborators
-          </h2>
-          <GithubUserTable users={epicUsers} />
-        </>
-      ) : null}
-      <h2 className="slds-text-heading_medium slds-p-around_medium">
-        {githubCollaboratorHeading}
-      </h2>
-      <GithubUserTable users={project.github_users} />
-      {isRefreshing && <SpinnerWrapper />}
     </Modal>
   );
 };
