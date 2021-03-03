@@ -1,7 +1,7 @@
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
-import React, { useState } from 'react';
+import React from 'react';
 import { GitHubUser } from 'src/js/store/user/reducer';
 
 import { GitHubUserButton } from '../githubUser';
@@ -21,7 +21,7 @@ const GithubUserTable = ({
 }: {
   users: GitHubUser[];
   selection: any;
-  setSelection: (user: GitHubUser) => void;
+  setSelection: (user: GitHubUser[]) => void;
 }) => {
   const handleRowChange = (event, data) => {
     setSelection(data.selection);

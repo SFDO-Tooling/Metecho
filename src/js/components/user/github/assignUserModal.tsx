@@ -1,24 +1,16 @@
-import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
-import Card from '@salesforce/design-system-react/components/card';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
-import DataTable from '@salesforce/design-system-react/components/data-table';
-import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
-import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
-import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { Project } from 'src/js/store/projects/reducer';
 
-import { EmptyIllustration } from '~js/components/404';
 import ReSyncGithubUserButton from '~js/components/user/github/reSyncButton';
 import GithubUserTable from '~js/components/user/github/table';
-import { GitHubUserButton } from '~js/components/user/githubUser';
-import { LabelWithSpinner, SpinnerWrapper } from '~js/components/utils';
+import { SpinnerWrapper } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { refreshGitHubUsers } from '~js/store/projects/actions';
 import { GitHubUser, User } from '~js/store/user/reducer';
@@ -30,8 +22,6 @@ const AssignUserModal = ({
   selectedUser,
   orgType,
   isOpen,
-  emptyMessageText,
-  emptyMessageAction,
   onRequestClose,
   setUser,
   project,
@@ -40,8 +30,6 @@ const AssignUserModal = ({
   selectedUser: GitHubUser | null;
   orgType: OrgTypes;
   isOpen: boolean;
-  emptyMessageText: string;
-  emptyMessageAction: () => void;
   onRequestClose: () => void;
   setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
   project: Project;
