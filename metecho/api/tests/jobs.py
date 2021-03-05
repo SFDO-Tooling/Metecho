@@ -700,6 +700,7 @@ def test_create_pr__error(user_factory, task_factory):
 class TestPopulateGitHubUsers:
     def test_populate_github_users(
         self,
+        mocker,
         user_factory,
         project_factory,
         git_hub_repository_factory,
@@ -707,23 +708,76 @@ class TestPopulateGitHubUsers:
         user = user_factory()
         project = project_factory(repo_id=123)
         git_hub_repository_factory(repo_id=123, user=user)
-        with patch(f"{PATCH_ROOT}.get_repo_info") as get_repo_info:
-            collab1 = MagicMock(
-                id=123,
-                login="test-user-1",
-                avatar_url="https://example.com/avatar1.png",
-            )
-            collab2 = MagicMock(
-                id=456,
-                login="test-user-2",
-                avatar_url="https://example.com/avatar2.png",
-            )
-            repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
-            get_repo_info.return_value = repo
 
-            populate_github_users(project, originating_user_id=None)
-            project.refresh_from_db()
-            assert len(project.github_users) == 2
+        collab1 = MagicMock(
+            id=123,
+            login="test-user-1",
+            avatar_url="https://example.com/avatar1.png",
+        )
+        collab2 = MagicMock(
+            id=456,
+            login="test-user-2",
+            avatar_url="https://example.com/avatar2.png",
+        )
+        repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
+        mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
+
+        get_cached_user = mocker.patch(f"{PATCH_ROOT}.get_cached_user")
+        get_cached_user.return_value.name = "FULL NAME"
+
+        populate_github_users(project, originating_user_id=None)
+        project.refresh_from_db()
+        assert project.github_users == [
+            {
+                "id": "123",
+                "name": "FULL NAME",
+                "login": "test-user-1",
+                "avatar_url": "https://example.com/avatar1.png",
+            },
+            {
+                "id": "456",
+                "name": "FULL NAME",
+                "login": "test-user-2",
+                "avatar_url": "https://example.com/avatar2.png",
+            },
+        ]
+
+    def test_populate_github_users__expand_user_error(
+        self,
+        caplog,
+        mocker,
+        user_factory,
+        project_factory,
+        git_hub_repository_factory,
+    ):
+        """
+        Expect the "simple" representation of the user if expanding them fails
+        """
+        user = user_factory()
+        project = project_factory(repo_id=123)
+        git_hub_repository_factory(repo_id=123, user=user)
+
+        collab1 = MagicMock(
+            id=123,
+            login="test-user-1",
+            avatar_url="https://example.com/avatar1.png",
+        )
+        repo = MagicMock(**{"collaborators.return_value": [collab1]})
+        mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
+        mocker.patch(
+            f"{PATCH_ROOT}.get_cached_user", side_effect=Exception("GITHUB ERROR")
+        )
+
+        populate_github_users(project, originating_user_id=None)
+        project.refresh_from_db()
+        assert project.github_users == [
+            {
+                "id": "123",
+                "login": "test-user-1",
+                "avatar_url": "https://example.com/avatar1.png",
+            },
+        ]
+        assert "GITHUB ERROR" in caplog.text
 
     def test__error(self, user_factory, project_factory, git_hub_repository_factory):
         user = user_factory()
