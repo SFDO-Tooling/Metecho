@@ -4,8 +4,8 @@ import React, { ComponentProps } from 'react';
 
 import CreateEpicModal from '~js/components/epics/createForm';
 
-import { withRedux } from '../decorators';
-import { sampleProject1, sampleUser1 } from '../fixtures';
+import { withRedux } from '../../decorators';
+import { sampleProject1, sampleUser1 } from '../../fixtures';
 
 export default {
   title: 'Epics/CreateForm/Example',
