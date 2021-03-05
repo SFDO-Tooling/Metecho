@@ -12,7 +12,8 @@ import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
 import RefreshOrgModal from '~js/components/orgs/cards/refresh';
 import UserActions from '~js/components/orgs/cards/userActions';
 import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
-import { AssignUserModal, UserCard } from '~js/components/user/githubUser';
+import AssignUserModal from '~js/components/user/github/assignUserModal';
+import { UserCard } from '~js/components/user/githubUser';
 import { Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
@@ -275,14 +276,13 @@ const TaskOrgCard = ({
         )}
       </Card>
       <AssignUserModal
-        allUsers={epicUsers}
+        epicUsers={epicUsers}
         selectedUser={assignedUser}
         orgType={type}
         isOpen={assignUserModalOpen === type}
-        emptyMessageText={i18n.t('View Epic to Add Collaborators')}
-        emptyMessageAction={handleEmptyMessageClick}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
+        // project={null}
       />
       {testOrgOutOfDate && (
         <RefreshOrgModal

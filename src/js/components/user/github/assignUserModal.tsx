@@ -1,5 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
+import DataTable from '@salesforce/design-system-react/components/data-table';
+import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
+import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
@@ -10,6 +13,10 @@ import { Project } from 'src/js/store/projects/reducer';
 
 import ReSyncGithubUserButton from '~js/components/user/github/reSyncButton';
 import GithubUserTable from '~js/components/user/github/table';
+import {
+  GitHubUserButton,
+  TableCellProps,
+} from '~js/components/user/githubUser';
 import { SpinnerWrapper } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { refreshGitHubUsers } from '~js/store/projects/actions';
@@ -36,7 +43,7 @@ const AssignUserModal = ({
 }) => {
   const currentUser = useSelector(selectUserState) as User;
   const dispatch = useDispatch<ThunkDispatch>();
-  const [selection, setSelection] = useState<GitHubUser[] | null>(null);
+  const [selection, setSelection] = useState<GitHubUser | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
   const [autoToggle, setAutoToggle] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -48,12 +55,13 @@ const AssignUserModal = ({
     setShouldAlertAssignee(checked);
     setAutoToggle(false);
   };
-  const handleAssigneeSelection = (user: GitHubUser[]) => {
-    const currentUserSelected = user[0].login === currentUser.username;
-    setSelection(user);
-    if (autoToggle) {
-      setShouldAlertAssignee(!currentUserSelected);
-    }
+  const handleAssigneeSelection = (user: GitHubUser) => {
+    console.log(user)
+    // const currentUserSelected = user.login === currentUser.username;
+    // setSelection(user);
+    // if (autoToggle) {
+    //   setShouldAlertAssignee(!currentUserSelected);
+    // }
   };
   const handleClose = () => {
     onRequestClose();
@@ -63,7 +71,7 @@ const AssignUserModal = ({
   };
   const handleSave = () => {
     if (selection) {
-      const selectedAssignee = selection[0];
+      const selectedAssignee = selection;
       setUser(selectedAssignee, shouldAlertAssignee);
       handleClose();
     }
@@ -95,8 +103,42 @@ const AssignUserModal = ({
     orgType === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
 
   const githubCollaboratorHeading = filteredUsers.length
-    ? 'Other Github Collaborators'
-    : 'Github Collaborators';
+    ? i18n.t('Other Github Collaborators')
+    : i18n.t('Github Collaborators');
+
+  const handleUserClick = useCallback(
+    (user: GitHubUser) => {
+      console.log(user)
+    //   const isSelected = selection.findIndex((u) => u.id === user.id) > -1;
+    //   if (isSelected) {
+    //     setSelection(selection.filter((u) => u.id !== user.id));
+    //   } else {
+    //     setSelection([...selection, user]);
+    //   }
+    // },
+    [selection],
+  );
+
+  const UserTableCell = ({
+    item,
+    handleUserClick,
+    ...props
+  }: TableCellProps) => {
+    /* istanbul ignore if */
+    if (!item) {
+      return null;
+    }
+    const { login } = item;
+    const handleClick = () => {
+      handleUserClick(item);
+    };
+    return (
+      <DataTableCell {...props} title={login} className="slds-p-around_none">
+        <GitHubUserButton withName user={item} onClick={handleClick} />
+      </DataTableCell>
+    );
+  };
+  UserTableCell.displayName = DataTableCell.displayName;
   return (
     <Modal
       isOpen={isOpen}
@@ -154,24 +196,47 @@ const AssignUserModal = ({
         </div>
         {filteredUsers.length ? (
           <>
-            <h2 className="slds-text-heading_medium slds-p-left_medium slds-p-bottom_medium">
+            {/* <h2 className="slds-text-heading_medium slds-p-left_medium slds-p-bottom_medium">
               Epic Collaborators
-            </h2>
-            <GithubUserTable
-              users={epicUsers}
-              selection={selection}
-              setSelection={handleAssigneeSelection}
-            />
+            </h2> */}
+            <DataTable
+              className="align-checkboxes table-row-targets"
+              items={filteredUsers}
+              onRowChange={handleAssigneeSelection}
+            >
+              <DataTableColumn
+                label={i18n.t('Epic Collaborators')}
+                property="login"
+                primaryColumn
+                truncate
+              >
+                <UserTableCell handleUserClick={handleUserClick} />
+              </DataTableColumn>
+            </DataTable>
           </>
         ) : null}
-        <h2 className="slds-text-heading_medium slds-p-around_medium">
+        {/* <h2 className="slds-text-heading_medium slds-p-around_medium">
           {githubCollaboratorHeading}
-        </h2>
-        <GithubUserTable
+        </h2> */}
+        <DataTable
+          className="align-checkboxes table-row-targets"
+          items={project.github_users}
+          onRowChange={handleAssigneeSelection}
+        >
+          <DataTableColumn
+            label={githubCollaboratorHeading}
+            property="login"
+            primaryColumn
+            truncate
+          >
+            <UserTableCell handleUserClick={handleAssigneeSelection} />
+          </DataTableColumn>
+        </DataTable>
+        {/* <GithubUserTable
           setSelection={handleAssigneeSelection}
           selection={selection}
           users={project.github_users}
-        />
+        /> */}
         {isRefreshing && <SpinnerWrapper />}
       </div>
     </Modal>

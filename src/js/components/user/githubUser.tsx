@@ -19,7 +19,7 @@ import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
 import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
 
-interface TableCellProps {
+export interface TableCellProps {
   [key: string]: any;
   item?: GitHubUser;
   handleUserClick: (user: GitHubUser) => void;
@@ -44,11 +44,13 @@ export const GitHubUserButton = ({
   user,
   isAssigned,
   isSelected,
+  withName,
   ...props
 }: {
   user: GitHubUser;
   isAssigned?: boolean;
   isSelected?: boolean;
+  withName?: boolean;
   [key: string]: any;
 }) => (
   <Button
@@ -64,8 +66,20 @@ export const GitHubUserButton = ({
     title={user.login}
     label={
       <>
-        <GitHubUserAvatar user={user} />
-        <span className="collaborator-username">{user.login}</span>
+        {withName ? (
+          <>
+            <GitHubUserAvatar user={user} size="medium" />
+            <div>
+              <span className="collaborator-username">{user.login}</span>
+              <span className="collaborator-username">{user.name}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <GitHubUserAvatar user={user} />
+            <span className="collaborator-username">{user.login}</span>
+          </>
+        )}
       </>
     }
     variant="base"
