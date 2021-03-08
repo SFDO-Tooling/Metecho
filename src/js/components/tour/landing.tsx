@@ -32,7 +32,7 @@ const LandingModal = ({
   const tours: Tour[] = [
     {
       header: i18n.t('I want to Play'),
-      tag: i18n.t('Make a scratch org to view project & play.'),
+      tag: i18n.t('Make a Scratch Org to view Project & play.'),
       linkText: i18n.t('Start Play Walkthrough'),
       type: 'play',
       icon: seesawSvg,
@@ -40,7 +40,7 @@ const LandingModal = ({
     },
     {
       header: i18n.t('I want to Help'),
-      tag: i18n.t('Browse available tasks; give your input.'),
+      tag: i18n.t('Browse available Tasks; give your input.'),
       linkText: i18n.t('Start Help Walkthrough'),
       type: 'help',
       icon: backpackSvg,
@@ -48,7 +48,7 @@ const LandingModal = ({
     },
     {
       header: i18n.t('I want to Plan'),
-      tag: i18n.t('Create a task or an epic; add your work.'),
+      tag: i18n.t('Create a Task or an Epic; add your work.'),
       linkText: i18n.t('Start Plan Walkthrough'),
       type: 'plan',
       icon: mapSvg,
@@ -83,7 +83,7 @@ const LandingModal = ({
               {i18n.t('Hello! What can Metecho help you do today?')}
             </strong>
           </h2>
-          <p>{i18n.t('Click on a box below to discover what’s possible.')}</p>
+          <p>{i18n.t('Select a box below to discover what’s possible.')}</p>
         </div>
         <div className="slds-grid slds-wrap slds-p-bottom_small">
           {tours.map(({ header, tag, linkText, type, icon, disabled }, idx) => (
@@ -120,8 +120,8 @@ const LandingModal = ({
         <div className="slds-align_absolute-center">
           <p className="slds-small-size_2-of-5 slds-text-align_center">
             <Trans i18nKey="tourHelp">
-              Review these walkthroughs anytime you need them, or take a
-              self-guided tour when you have specific questions.
+              Review these walkthroughs anytime you need them, or turn on the
+              self-guided tour feature when you have specific questions.
             </Trans>
           </p>
         </div>

@@ -14,7 +14,7 @@ const steps: Step[] = [
     content: (
       <Trans i18nKey="tourCreateEpic">
         Epics are groups of related Tasks, representing larger changes to the
-        Project. You can invite multiple collaborators to your Epic and assign
+        Project. You can invite multiple Collaborators to your Epic and assign
         different people as Developers and Testers for each Task.
       </Trans>
     ),

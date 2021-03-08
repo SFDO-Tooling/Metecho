@@ -318,7 +318,7 @@ describe('<ProjectDetail />', () => {
 
       expect(heading).toBeVisible();
 
-     await fireEvent.click(getByTitle('Close'));
+      await fireEvent.click(getByTitle('Close'));
 
       expect(
         queryByText('What can Metecho help you do today?', { exact: false }),
