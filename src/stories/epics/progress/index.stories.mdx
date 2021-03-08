@@ -1,0 +1,30 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import LinkTo from '@storybook/addon-links/react';
+import EpicProgress from '~js/components/epics/progress';
+
+<Meta title="Epics/Progress/Docs" />
+
+# Epic Progress
+
+**Visualize the overall progress/status of the entire project.**
+
+## Overview
+
+The **Epic Progress** component provides a quick view of the progress when
+viewing a project.
+
+## Guidelines
+
+It accepts a `range` (`[number, number]`) with the first number representing the
+number of tasks in a project with a `Completed` status, and the second represents the total
+number of project tasks.
+
+<Canvas>
+  <EpicProgress range={[7, 13]} />
+</Canvas>
+
+When all the tasks in a project are complete, we've added a <a href="https://www.lightningdesignsystem.com/components/progress-bar/#Modifiers">color modifier </a>to the underlyning progress bar.
+
+<Canvas>
+  <EpicProgress range={[10, 10]} />
+</Canvas>
