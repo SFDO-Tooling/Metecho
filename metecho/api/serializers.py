@@ -1,4 +1,3 @@
-from operator import itemgetter
 from typing import Optional
 
 from allauth.socialaccount.models import SocialAccount
