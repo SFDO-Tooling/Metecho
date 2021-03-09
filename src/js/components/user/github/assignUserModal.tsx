@@ -89,12 +89,6 @@ const AssignUserModal = ({
   const filteredUsers = epicUsers.filter(
     (user) => user.id !== selectedUser?.id,
   );
-  const filteredGithubUsers = project.github_users.map((person) => {
-    if (epicUsers.includes(person)) {
-      return person;
-    }
-    return [];
-  });
 
   const heading =
     orgType === ORG_TYPES.QA
@@ -125,7 +119,11 @@ const AssignUserModal = ({
       handleUserClick(item);
     };
     return (
-      <DataTableCell {...props} title={login} className="slds-p-around_none">
+      <DataTableCell
+        {...props}
+        title={login}
+        className="slds-p-horizontal_large"
+      >
         <GitHubUserButton withName user={item} onClick={handleClick} />
       </DataTableCell>
     );

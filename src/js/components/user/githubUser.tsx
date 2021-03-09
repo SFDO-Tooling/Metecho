@@ -66,20 +66,9 @@ export const GitHubUserButton = ({
     title={user.login}
     label={
       <>
-        {withName ? (
-          <>
-            <GitHubUserAvatar user={user} size="medium" />
-            <div>
-              <span className="collaborator-username">{user.login}</span>
-              <span className="collaborator-username">{user.name}</span>
-            </div>
-          </>
-        ) : (
-          <>
-            <GitHubUserAvatar user={user} />
-            <span className="collaborator-username">{user.login}</span>
-          </>
-        )}
+        <GitHubUserAvatar user={user} />
+        <span className="collaborator-username">{user.login}</span>
+        {withName && <span className="collaborator-username">{user.name}</span>}
       </>
     }
     variant="base"

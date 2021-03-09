@@ -12,6 +12,7 @@ import { ThunkDispatch } from '~js/store';
 import { deleteObject, updateObject } from '~js/store/actions';
 import { refetchOrg } from '~js/store/orgs/actions';
 import { Org, OrgsByParent } from '~js/store/orgs/reducer';
+import { Project } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
