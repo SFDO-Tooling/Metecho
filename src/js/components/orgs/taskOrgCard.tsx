@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { Project } from 'src/js/store/projects/reducer';
 
 import Footer from '~js/components/orgs/cards/footer';
 import OrgActions from '~js/components/orgs/cards/orgActions';
@@ -31,6 +32,7 @@ interface TaskOrgCardProps {
   type: OrgTypes;
   user: User;
   task: Task;
+  project: Project;
   epicUsers: GitHubUser[];
   epicCreatingBranch: boolean;
   epicUrl: string;
@@ -60,6 +62,7 @@ const TaskOrgCard = ({
   type,
   user,
   task,
+  project,
   epicUsers,
   epicCreatingBranch,
   epicUrl,
@@ -282,7 +285,7 @@ const TaskOrgCard = ({
         isOpen={assignUserModalOpen === type}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
-        // project={null}
+        project={project}
       />
       {testOrgOutOfDate && (
         <RefreshOrgModal

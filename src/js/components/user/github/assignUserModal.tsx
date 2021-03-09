@@ -12,7 +12,6 @@ import { useDispatch } from 'react-redux';
 import { Project } from 'src/js/store/projects/reducer';
 
 import ReSyncGithubUserButton from '~js/components/user/github/reSyncButton';
-import GithubUserTable from '~js/components/user/github/table';
 import {
   GitHubUserButton,
   TableCellProps,
@@ -56,12 +55,11 @@ const AssignUserModal = ({
     setAutoToggle(false);
   };
   const handleAssigneeSelection = (user: GitHubUser) => {
-    console.log(user)
-    // const currentUserSelected = user.login === currentUser.username;
-    // setSelection(user);
-    // if (autoToggle) {
-    //   setShouldAlertAssignee(!currentUserSelected);
-    // }
+    const currentUserSelected = user.login === currentUser.username;
+    setSelection(user);
+    if (autoToggle) {
+      setShouldAlertAssignee(!currentUserSelected);
+    }
   };
   const handleClose = () => {
     onRequestClose();
@@ -91,6 +89,13 @@ const AssignUserModal = ({
   const filteredUsers = epicUsers.filter(
     (user) => user.id !== selectedUser?.id,
   );
+  const filteredGithubUsers = project.github_users.map((person) => {
+    if (epicUsers.includes(person)) {
+      return person;
+    }
+    return [];
+  });
+
   const heading =
     orgType === ORG_TYPES.QA
       ? i18n.t('Assign Tester')
@@ -105,19 +110,6 @@ const AssignUserModal = ({
   const githubCollaboratorHeading = filteredUsers.length
     ? i18n.t('Other Github Collaborators')
     : i18n.t('Github Collaborators');
-
-  const handleUserClick = useCallback(
-    (user: GitHubUser) => {
-      console.log(user)
-    //   const isSelected = selection.findIndex((u) => u.id === user.id) > -1;
-    //   if (isSelected) {
-    //     setSelection(selection.filter((u) => u.id !== user.id));
-    //   } else {
-    //     setSelection([...selection, user]);
-    //   }
-    // },
-    [selection],
-  );
 
   const UserTableCell = ({
     item,
@@ -194,37 +186,43 @@ const AssignUserModal = ({
         <div className="slds-p-horizontal_medium slds-p-top_medium">
           <input type="text" placeholder="Quick Find" />
         </div>
+
+        <h2 className="slds-text-heading_medium slds-p-around_medium">
+          Epic Collaborators
+        </h2>
         {filteredUsers.length ? (
-          <>
-            {/* <h2 className="slds-text-heading_medium slds-p-left_medium slds-p-bottom_medium">
-              Epic Collaborators
-            </h2> */}
-            <DataTable
-              className="align-checkboxes table-row-targets"
-              items={filteredUsers}
-              onRowChange={handleAssigneeSelection}
+          <DataTable
+            className="align-checkboxes table-row-targets"
+            items={filteredUsers}
+            onRowChange={handleAssigneeSelection}
+          >
+            <DataTableColumn
+              label={i18n.t('Github User')}
+              property="login"
+              primaryColumn
+              truncate
             >
-              <DataTableColumn
-                label={i18n.t('Epic Collaborators')}
-                property="login"
-                primaryColumn
-                truncate
-              >
-                <UserTableCell handleUserClick={handleUserClick} />
-              </DataTableColumn>
-            </DataTable>
-          </>
-        ) : null}
-        {/* <h2 className="slds-text-heading_medium slds-p-around_medium">
+              <UserTableCell handleUserClick={handleAssigneeSelection} />
+            </DataTableColumn>
+          </DataTable>
+        ) : (
+          <div className="slds-p-horizontal_medium">
+            <Trans i18nKey="noEpicCollaborators">
+              There are no Epic Collaborators. Select GitHub users to add as
+              Collaborators
+            </Trans>
+          </div>
+        )}
+        <h2 className="slds-text-heading_medium slds-p-around_medium">
           {githubCollaboratorHeading}
-        </h2> */}
+        </h2>
         <DataTable
           className="align-checkboxes table-row-targets"
           items={project.github_users}
           onRowChange={handleAssigneeSelection}
         >
           <DataTableColumn
-            label={githubCollaboratorHeading}
+            label={i18n.t('Github User')}
             property="login"
             primaryColumn
             truncate
@@ -232,11 +230,6 @@ const AssignUserModal = ({
             <UserTableCell handleUserClick={handleAssigneeSelection} />
           </DataTableColumn>
         </DataTable>
-        {/* <GithubUserTable
-          setSelection={handleAssigneeSelection}
-          selection={selection}
-          users={project.github_users}
-        /> */}
         {isRefreshing && <SpinnerWrapper />}
       </div>
     </Modal>

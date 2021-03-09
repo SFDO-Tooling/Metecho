@@ -646,6 +646,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             testOrgSubmittingReview={testOrgSubmittingReview}
             doCreateOrg={doCreateOrg}
             doRefreshOrg={doRefreshOrg}
+            project={project}
           />
         ) : (
           <SpinnerWrapper />

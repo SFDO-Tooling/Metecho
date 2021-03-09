@@ -37,6 +37,7 @@ export const ORG_TYPE_TRACKER_DEFAULT = {
 const TaskOrgCards = ({
   orgs,
   task,
+  project,
   epicUsers,
   epicCreatingBranch,
   epicUrl,
@@ -54,6 +55,7 @@ const TaskOrgCards = ({
 }: {
   orgs: OrgsByParent;
   task: Task;
+  project: Project;
   epicUsers: GitHubUser[];
   epicCreatingBranch: boolean;
   epicUrl: string;
@@ -262,6 +264,7 @@ const TaskOrgCards = ({
           type={ORG_TYPES.DEV}
           user={user}
           task={task}
+          project={project}
           epicUsers={epicUsers}
           epicCreatingBranch={epicCreatingBranch}
           epicUrl={epicUrl}
@@ -282,6 +285,7 @@ const TaskOrgCards = ({
           type={ORG_TYPES.QA}
           user={user}
           task={task}
+          project={project}
           epicUsers={epicUsers}
           epicCreatingBranch={epicCreatingBranch}
           epicUrl={epicUrl}
