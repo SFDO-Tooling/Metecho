@@ -297,8 +297,8 @@ class TestTaskSerializer:
             "name": task.name,
             "description": task.description,
             "epic": str(task.epic.id),
-            "assigned_dev": {"test": "id"},
-            "assigned_qa": {"test": "id"},
+            "assigned_dev": {"id": 1},
+            "assigned_qa": {"id": 2},
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
@@ -339,6 +339,47 @@ class TestTaskSerializer:
         so2.refresh_from_db()
         assert so1.deleted_at is not None
         assert so2.deleted_at is not None
+
+    def test_update__collaborators(self, task_factory):
+        # Task assigness should be added as epic collaborators as well
+        task = task_factory(commits=["abc123"])
+        data = {
+            "name": task.name,
+            "description": task.description,
+            "epic": str(task.epic.id),
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
+            "assigned_dev": {"id": "dev_id"},
+            "assigned_qa": {"id": "qa_id"},
+        }
+        serializer = TaskSerializer(task, data=data)
+        assert serializer.is_valid(), serializer.errors
+
+        serializer.update(task, serializer.validated_data)
+        task.epic.refresh_from_db()
+        assert task.epic.github_users == [{"id": "dev_id"}, {"id": "qa_id"}]
+
+    def test_update__existing_collaborator(self, task_factory, epic_factory):
+        # Existing collaborators should not be re-added when assigned to a task
+        epic = epic_factory(github_users=[{"id": "existing_user"}])
+        task = task_factory(commits=["abc123"], epic=epic)
+        data = {
+            "name": task.name,
+            "description": task.description,
+            "epic": str(epic.id),
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
+            "assigned_dev": {"id": "existing_user"},
+            "assigned_qa": None,
+        }
+        serializer = TaskSerializer(task, data=data)
+        assert serializer.is_valid(), serializer.errors
+
+        serializer.update(task, serializer.validated_data)
+        task.epic.refresh_from_db()
+        assert task.epic.github_users == [{"id": "existing_user"}]
 
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
