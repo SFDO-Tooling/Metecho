@@ -10,22 +10,22 @@ import EpicProgress from '~js/components/epics/progress';
 
 ## Overview
 
-The **Epic Progress** component provides a quick view of the progress when
-viewing a project.
+The **Epic Progress** component visualizes the progress made on Tasks within an
+Epic.
 
 ## Guidelines
 
 It accepts a `range` (`[number, number]`) with the first number representing the
-number of  `Completed` **Tasks** in a project, and the second
-representing the total number of project tasks.
+number of `Completed` **Tasks** in a project, and the second representing the
+total number of project tasks.
 
 <Canvas>
   <EpicProgress range={[7, 13]} />
 </Canvas>
 
-When all the **Tasks** in a project are complete, a 
-<a href="https://www.lightningdesignsystem.com/components/progress-bar/#Modifiers">color
-modifier </a>changes the progress bar from blue to green.
+When all the **Tasks** in a project are complete, a
+[color modifier](https://www.lightningdesignsystem.com/components/progress-bar/#Modifiers)
+changes the progress bar from blue to green.
 
 <Canvas>
   <EpicProgress range={[10, 10]} />
