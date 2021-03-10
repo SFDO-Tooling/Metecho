@@ -68,7 +68,9 @@ export const GitHubUserButton = ({
       <>
         <GitHubUserAvatar user={user} />
         <span className="collaborator-username">{user.login}</span>
-        {withName && <span className="collaborator-username">{user.name}</span>}
+        {withName && (
+          <span className="collaborator-username">({user.name})</span>
+        )}
       </>
     }
     variant="base"

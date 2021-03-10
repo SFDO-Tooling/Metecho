@@ -119,12 +119,13 @@ const AssignUserModal = ({
       handleUserClick(item);
     };
     return (
-      <DataTableCell
-        {...props}
-        title={login}
-        className="slds-p-horizontal_large"
-      >
-        <GitHubUserButton withName user={item} onClick={handleClick} />
+      <DataTableCell {...props} title={login}>
+        <GitHubUserButton
+          withName
+          user={item}
+          onClick={handleClick}
+          className="slds-p-left_medium"
+        />
       </DataTableCell>
     );
   };
@@ -184,25 +185,23 @@ const AssignUserModal = ({
         <div className="slds-p-horizontal_medium slds-p-top_medium">
           <input type="text" placeholder="Quick Find" />
         </div>
-
-        <h2 className="slds-text-heading_medium slds-p-around_medium">
-          Epic Collaborators
-        </h2>
         {filteredUsers.length ? (
-          <DataTable
-            className="align-checkboxes table-row-targets"
-            items={filteredUsers}
-            onRowChange={handleAssigneeSelection}
-          >
-            <DataTableColumn
-              label={i18n.t('Github User')}
-              property="login"
-              primaryColumn
-              truncate
-            >
-              <UserTableCell handleUserClick={handleAssigneeSelection} />
-            </DataTableColumn>
-          </DataTable>
+          <div className="slds-p-around_small slds-p-bottom_none">
+            <div className="slds-text-title slds-m-bottom_xx-small">
+              {i18n.t('Epic Collaborators')}
+            </div>
+            <ul>
+              {filteredUsers.map((user) => (
+                <li key={user.id}>
+                  <GitHubUserButton
+                    user={user}
+                    isSelected={selection === user}
+                    onClick={() => handleAssigneeSelection(user)}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : (
           <div className="slds-p-horizontal_medium">
             <Trans i18nKey="noEpicCollaborators">
@@ -211,23 +210,23 @@ const AssignUserModal = ({
             </Trans>
           </div>
         )}
-        <h2 className="slds-text-heading_medium slds-p-around_medium">
-          {githubCollaboratorHeading}
-        </h2>
-        <DataTable
-          className="align-checkboxes table-row-targets"
-          items={project.github_users}
-          onRowChange={handleAssigneeSelection}
-        >
-          <DataTableColumn
-            label={i18n.t('Github User')}
-            property="login"
-            primaryColumn
-            truncate
-          >
-            <UserTableCell handleUserClick={handleAssigneeSelection} />
-          </DataTableColumn>
-        </DataTable>
+        <div className="slds-p-around_small">
+          <div className="slds-text-title slds-m-bottom_xx-small">
+            {githubCollaboratorHeading}
+          </div>
+          <ul>
+            {project.github_users.map((user) => (
+              <li key={user.id}>
+                <GitHubUserButton
+                  withName
+                  user={user}
+                  isSelected={selection === user}
+                  onClick={() => handleAssigneeSelection(user)}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
         {isRefreshing && <SpinnerWrapper />}
       </div>
     </Modal>
