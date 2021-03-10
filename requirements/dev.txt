@@ -126,7 +126,7 @@ pycodestyle==2.6.0
     # via flake8
 pyflakes==2.2.0
     # via flake8
-pygments==2.7.4
+pygments==2.8.1
     # via
     #   doc8
     #   ipython
