@@ -28,7 +28,7 @@ markdown==3.3.3
 # 3. Salesforce code does not derive from, is not based on, and remains separate (aside from linking) from the requested code
 psycopg2-binary==2.8.6
 
-rq-scheduler==0.10.0
+rq-scheduler==0.11.0
 sentry-sdk==0.19.5
 service_identity==18.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.16.0.tar.gz
