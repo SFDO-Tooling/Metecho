@@ -18,12 +18,7 @@ import { UserCard } from '~js/components/user/githubUser';
 import { Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
-import { addUrlParams } from '~js/utils/api';
-import {
-  ORG_TYPES,
-  OrgTypes,
-  SHOW_EPIC_COLLABORATORS,
-} from '~js/utils/constants';
+import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
 import { getTaskCommits } from '~js/utils/helpers';
 import { logError } from '~js/utils/logging';
 
@@ -65,7 +60,6 @@ const TaskOrgCard = ({
   project,
   epicUsers,
   epicCreatingBranch,
-  epicUrl,
   repoUrl,
   isCreatingOrg,
   isDeletingOrg,
@@ -81,7 +75,6 @@ const TaskOrgCard = ({
   openSubmitReviewModal,
   testOrgReadyForReview,
   testOrgSubmittingReview,
-  history,
 }: TaskOrgCardProps & RouteComponentProps) => {
   let assignedUser: GitHubUser | null = null;
   let heading = i18n.t('Developer');
@@ -160,10 +153,6 @@ const TaskOrgCard = ({
       handleCheckForOrgChanges(org);
     }
   }, [handleCheckForOrgChanges, org]);
-
-  const handleEmptyMessageClick = useCallback(() => {
-    history.push(addUrlParams(epicUrl, { [SHOW_EPIC_COLLABORATORS]: true }));
-  }, [epicUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const taskCommits = getTaskCommits(task);
   const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;

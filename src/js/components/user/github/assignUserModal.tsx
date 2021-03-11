@@ -1,8 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
-import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
-import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
@@ -212,7 +210,7 @@ const AssignUserModal = ({
             </ul>
           </div>
         ) : (
-          <div className="slds-p-horizontal_medium">
+          <div className="slds-p-horizontal_medium slds-p-top_medium">
             <Trans i18nKey="noEpicCollaborators">
               There are no Epic Collaborators. Select GitHub users to add as
               Collaborators
