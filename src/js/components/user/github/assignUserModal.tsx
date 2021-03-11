@@ -1,6 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
+import InputIcon from '@salesforce/design-system-react/components/icon/input-icon';
+import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
@@ -44,6 +46,7 @@ const AssignUserModal = ({
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
   const [autoToggle, setAutoToggle] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [findText, setFindText] = useState('');
 
   const handleAlertAssignee = (
     event: React.FormEvent<HTMLFormElement>,
@@ -84,6 +87,9 @@ const AssignUserModal = ({
     );
   }, [project, dispatch]);
 
+  const handleFindTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFindText(e.target.value);
+  };
   const filteredUsers = epicUsers.filter(
     (user) => user.id !== selectedUser?.id,
   );
@@ -181,7 +187,22 @@ const AssignUserModal = ({
       </div>
       <div className="slds-is-relative">
         <div className="slds-p-horizontal_medium slds-p-top_medium">
-          <input type="text" placeholder="Quick Find" />
+          <Input
+            id="quick-find-input"
+            name="name"
+            value={findText}
+            onChange={handleFindTextChange}
+            iconRight={
+              <InputIcon
+                assistiveText={{
+                  icon: i18n.t('Search'),
+                }}
+                name="search"
+                category="utility"
+              />
+            }
+            placeholder={i18n.t('Quick Find')}
+          />
         </div>
         {selectedUser && (
           <div className="slds-p-around_small slds-p-bottom_none">

@@ -1,7 +1,6 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
-import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
@@ -10,14 +9,11 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
-import { useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '~js/components/404';
 import ReSyncGithubUserButton from '~js/components/user/github/reSyncButton';
 import { SpinnerWrapper } from '~js/components/utils';
-import { GitHubUser, User } from '~js/store/user/reducer';
-import { selectUserState } from '~js/store/user/selectors';
-import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
+import { GitHubUser } from '~js/store/user/reducer';
 
 export interface TableCellProps {
   [key: string]: any;
@@ -295,162 +291,6 @@ export const AssignUsersModal = ({
         )}
         {isRefreshing && <SpinnerWrapper />}
       </div>
-    </Modal>
-  );
-};
-
-// shown RN when there are no users...
-export const AssignUserModal = ({
-  allUsers,
-  selectedUser,
-  orgType,
-  isOpen,
-  emptyMessageText,
-  emptyMessageAction,
-  onRequestClose,
-  setUser,
-}: {
-  allUsers: GitHubUser[];
-  selectedUser: GitHubUser | null;
-  orgType: OrgTypes;
-  isOpen: boolean;
-  emptyMessageText: string;
-  emptyMessageAction: () => void;
-  onRequestClose: () => void;
-  setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
-}) => {
-  const currentUser = useSelector(selectUserState) as User;
-
-  const [selection, setSelection] = useState<GitHubUser | null>(null);
-  const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
-  const [autoToggle, setAutoToggle] = useState(true);
-  const handleAlertAssignee = (
-    event: React.FormEvent<HTMLFormElement>,
-    { checked }: { checked: boolean },
-  ) => {
-    setShouldAlertAssignee(checked);
-    setAutoToggle(false);
-  };
-  const handleAssigneeSelection = (user: GitHubUser) => {
-    const currentUserSelected = user.login === currentUser.username;
-    setSelection(user);
-    if (autoToggle) {
-      setShouldAlertAssignee(!currentUserSelected);
-    }
-  };
-  const handleClose = () => {
-    onRequestClose();
-    setSelection(null);
-    setShouldAlertAssignee(true);
-    setAutoToggle(true);
-  };
-  const handleSave = () => {
-    setUser(selection, shouldAlertAssignee);
-    handleClose();
-  };
-
-  const filteredUsers = allUsers.filter((user) => user.id !== selectedUser?.id);
-  const heading =
-    orgType === ORG_TYPES.QA
-      ? i18n.t('Assign Tester')
-      : i18n.t('Assign Developer');
-  const checkboxLabel =
-    orgType === ORG_TYPES.QA
-      ? i18n.t('Notify Assigned Tester by Email')
-      : i18n.t('Notify Assigned Developer by Email');
-  const alertType =
-    orgType === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
-
-  return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={handleClose}
-      heading={heading}
-      directional
-      tagline={
-        filteredUsers.length ? (
-          <>
-            {i18n.t('Only epic collaborators appear in the list below.')}{' '}
-            <Button
-              label={i18n.t('View the epic to add collaborators.')}
-              variant="link"
-              onClick={emptyMessageAction}
-            />
-          </>
-        ) : null
-      }
-      footer={
-        filteredUsers.length ? (
-          [
-            <Checkbox
-              key="alert"
-              labels={{ label: checkboxLabel }}
-              className="slds-float_left slds-p-top_xx-small"
-              name={alertType}
-              checked={shouldAlertAssignee}
-              onChange={handleAlertAssignee}
-            />,
-            <Button
-              key="cancel"
-              label={i18n.t('Cancel')}
-              onClick={handleClose}
-            />,
-            <Button
-              key="submit"
-              label={i18n.t('Save')}
-              variant="brand"
-              onClick={handleSave}
-            />,
-          ]
-        ) : (
-          <Button
-            label={emptyMessageText}
-            variant="brand"
-            onClick={emptyMessageAction}
-          />
-        )
-      }
-    >
-      {selectedUser && (
-        <>
-          <div className="slds-p-around_small">
-            <div className="slds-text-title slds-m-bottom_xx-small">
-              {i18n.t('Currently Assigned')}
-            </div>
-            <GitHubUserButton user={selectedUser} isAssigned />
-          </div>
-          <hr className="slds-m-vertical_none slds-m-horizontal_small" />
-        </>
-      )}
-      {filteredUsers.length ? (
-        <div className="slds-p-around_small">
-          <div className="slds-text-title slds-m-bottom_xx-small">
-            {i18n.t('Assign To GitHub User')}
-          </div>
-          <ul>
-            {filteredUsers.map((user) => (
-              <li key={user.id}>
-                <GitHubUserButton
-                  user={user}
-                  isSelected={selection === user}
-                  onClick={() => handleAssigneeSelection(user)}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <div className="slds-p-around_medium">
-          <div>
-            <div>
-              Assign any Github user to this role. If they are not already, the
-              will also be added as an Epic Collaborator.
-            </div>
-            <button>Re-Sync Githuib Collaborators</button>
-            <input type="search" placeholder="Quick Find" />
-          </div>
-        </div>
-      )}
     </Modal>
   );
 };
