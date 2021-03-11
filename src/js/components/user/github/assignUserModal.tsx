@@ -185,6 +185,14 @@ const AssignUserModal = ({
         <div className="slds-p-horizontal_medium slds-p-top_medium">
           <input type="text" placeholder="Quick Find" />
         </div>
+        {selectedUser && (
+          <div className="slds-p-around_small slds-p-bottom_none">
+            <div className="slds-text-title slds-m-bottom_xx-small">
+              {i18n.t('Currently Assigned')}
+            </div>
+            <GitHubUserButton withName user={selectedUser} isAssigned />
+          </div>
+        )}
         {filteredUsers.length ? (
           <div className="slds-p-around_small slds-p-bottom_none">
             <div className="slds-text-title slds-m-bottom_xx-small">
@@ -194,6 +202,7 @@ const AssignUserModal = ({
               {filteredUsers.map((user) => (
                 <li key={user.id}>
                   <GitHubUserButton
+                    withName
                     user={user}
                     isSelected={selection === user}
                     onClick={() => handleAssigneeSelection(user)}
