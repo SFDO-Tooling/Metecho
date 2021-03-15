@@ -2,6 +2,7 @@ import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
 import TaskStatusPath from '~js/components/tasks/path';
+import EpicStatusPath from '~js/components/epics/path'
 import { Task } from '~js/store/tasks/reducer';
 
 import {
@@ -25,11 +26,17 @@ const sampleTasks: { [key: string]: Task } = {
   'In Progress': sampleTask5,
 };
 
-const Template: Story<ComponentProps<typeof TaskStatusPath>> = (args) => (
+const epicTemplate: Story<ComponentProps<typeof EpicStatusPath>> = (args) => (
+  <EpicStatusPath {...args} />
+);
+
+export const epicPath = epicTemplate.bind({});
+
+const taskTemplate: Story<ComponentProps<typeof TaskStatusPath>> = (args) => (
   <TaskStatusPath {...args} />
 );
 
-export const TaskPath = Template.bind({});
+export const TaskPath = taskTemplate.bind({});
 
 TaskPath.args = {
   task: sampleTask4,
