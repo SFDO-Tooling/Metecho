@@ -13,7 +13,7 @@ import {
 } from '../fixtures';
 
 export default {
-  title: 'Components/Path/Example',
+  title: 'Components/Path/Examples',
   component: TaskStatusPath,
 };
 
