@@ -221,7 +221,7 @@ typing-extensions==3.7.4.3
     # via
     #   -c requirements/prod.txt
     #   black
-urllib3==1.26.2
+urllib3==1.26.4
     # via
     #   -c requirements/prod.txt
     #   requests
