@@ -346,7 +346,7 @@ uritemplate==3.0.1
     #   cumulusci
     #   github3-py
     #   github3.py
-urllib3==1.26.2
+urllib3==1.26.4
     # via
     #   cumulusci
     #   requests
