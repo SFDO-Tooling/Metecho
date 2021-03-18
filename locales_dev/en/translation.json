@@ -355,6 +355,7 @@
   "taskNotFound": "We can’t find the task you’re looking for. Try <2>another task</2> from that epic?",
   "tasksComplete": "<0>{{complete}}</0> of <2>{{total}}</2> Complete",
   "tourCreateEpic": "Epics are groups of related Tasks, representing larger changes to the Project. You can invite multiple Collaborators to your Epic and assign different people as Developers and Testers for each Task.",
+  "tourCreateEpicTitle": "Create epics to group tasks",
   "tourHelp": "Review these walkthroughs anytime you need them, or turn on the self-guided tour feature when you have specific questions.",
   "up to date": "up to date",
   "view changes": "view changes",
