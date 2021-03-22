@@ -41,7 +41,7 @@ const epicTemplate: Story<ComponentProps<typeof EpicStatusPath>> = (args) => (
 export const EpicPath = epicTemplate.bind({});
 
 EpicPath.args = {
-  status: 'Review',
+  status: 'Merged',
 };
 EpicPath.argTypes = {
   status: {
