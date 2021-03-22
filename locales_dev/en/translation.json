@@ -314,7 +314,7 @@
   "errorWithAccount": "An error occurred with your account. Try the <2>home page</2>?",
   "ignored": "ignored",
   "markdownGuide": "For more options, view this <2>Markdown Guide</2>.",
-  "noEpicCollaborators": "There are no Epic Collaborators. Select GitHub users to add as Collaborators",
+  "noEpicCollaborators": "There are no Epic Collaborators. Select GitHub users to add as Collaborators.",
   "noGitHubUsers": "We couldn’t find any GitHub users who have access to this project. Try re-syncing the list of available collaborators, or contact an admin for this project on GitHub.",
   "noProjectsHelper": "We couldn’t find any projects you have access to on GitHub. Confirm that you are logged into the correct account or contact an admin on GitHub.",
   "notifyUser": "<0>Notify</0><1></1> <3><0><0>{{username}}</0></0> by email</3>",

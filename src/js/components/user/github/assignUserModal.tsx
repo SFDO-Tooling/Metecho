@@ -5,6 +5,7 @@ import InputIcon from '@salesforce/design-system-react/components/icon/input-ico
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
+import { filter } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -90,7 +91,7 @@ const AssignUserModal = ({
   const handleFindTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFindText(e.target.value);
   };
-  const filteredUsers = epicUsers.filter(
+  const usersWithoutAssignee = epicUsers.filter(
     (user) => user.id !== selectedUser?.id,
   );
 
@@ -105,7 +106,7 @@ const AssignUserModal = ({
   const alertType =
     orgType === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
 
-  const githubCollaboratorHeading = filteredUsers.length
+  const githubCollaboratorHeading = usersWithoutAssignee.length
     ? i18n.t('Other Github Collaborators')
     : i18n.t('Github Collaborators');
 
@@ -134,6 +135,29 @@ const AssignUserModal = ({
     );
   };
   UserTableCell.displayName = DataTableCell.displayName;
+
+  const emptyCollaboratorsText = (
+    <div className="slds-p-top_small">
+      <Trans i18nKey="noEpicCollaborators">
+        There are no Epic Collaborators. Select GitHub users to add as
+        Collaborators.
+      </Trans>
+    </div>
+  );
+  /* @@@ todo
+    - filter users in second list that appear in the first
+    - flatten the list into one list
+  */
+  const userList = [
+    {
+      heading: `${i18n.t('Epic Collaborators')}`,
+      list: usersWithoutAssignee,
+    },
+    {
+      heading: githubCollaboratorHeading,
+      list: project.github_users,
+    },
+  ];
   return (
     <Modal
       isOpen={isOpen}
@@ -212,48 +236,28 @@ const AssignUserModal = ({
             <GitHubUserButton withName user={selectedUser} isAssigned />
           </div>
         )}
-        {filteredUsers.length ? (
-          <div className="slds-p-around_small slds-p-bottom_none">
-            <div className="slds-text-title slds-m-bottom_xx-small">
-              {i18n.t('Epic Collaborators')}
+        <div>
+          {userList.map((person, idx) => (
+            <div key={idx} className="slds-p-around_small slds-p-bottom_none">
+              <div className="slds-text-title slds-m-bottom_xx-small">
+                {person.heading}
+              </div>
+              <ul>
+                {person.list.length
+                  ? person.list.map((user, i) => (
+                      <li key={user.id}>
+                        <GitHubUserButton
+                          withName
+                          user={user}
+                          isSelected={selection === user}
+                          onClick={() => handleAssigneeSelection(user)}
+                        />
+                      </li>
+                    ))
+                  : emptyCollaboratorsText}
+              </ul>
             </div>
-            <ul>
-              {filteredUsers.map((user) => (
-                <li key={user.id}>
-                  <GitHubUserButton
-                    withName
-                    user={user}
-                    isSelected={selection === user}
-                    onClick={() => handleAssigneeSelection(user)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <div className="slds-p-horizontal_medium slds-p-top_medium">
-            <Trans i18nKey="noEpicCollaborators">
-              There are no Epic Collaborators. Select GitHub users to add as
-              Collaborators
-            </Trans>
-          </div>
-        )}
-        <div className="slds-p-around_small">
-          <div className="slds-text-title slds-m-bottom_xx-small">
-            {githubCollaboratorHeading}
-          </div>
-          <ul>
-            {project.github_users.map((user) => (
-              <li key={user.id}>
-                <GitHubUserButton
-                  withName
-                  user={user}
-                  isSelected={selection === user}
-                  onClick={() => handleAssigneeSelection(user)}
-                />
-              </li>
-            ))}
-          </ul>
+          ))}
         </div>
         {isRefreshing && <SpinnerWrapper />}
       </div>
