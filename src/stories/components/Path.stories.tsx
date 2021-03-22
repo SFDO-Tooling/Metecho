@@ -1,6 +1,7 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
+import Path from '~js/components/path';
 import TaskStatusPath from '~js/components/tasks/path';
 import { Task } from '~js/store/tasks/reducer';
 
@@ -11,8 +12,6 @@ import {
   sampleTask4,
   sampleTask5,
 } from '../fixtures';
-
-import Path from '~js/components/path';
 
 export default {
   title: 'Components/Path/Examples',
@@ -31,14 +30,12 @@ type Props = ComponentProps<typeof Path>;
 interface StoryProps extends Omit<Props, 'task'> {
   task: Task;
 }
-const TaskTemplate = ({ task, ...rest }: StoryProps) => {
-  return (
-    <TaskStatusPath
-      task={Object.keys(sampleTasks).map((t) => sampleTasks[t])}
-      {...rest}
-    />
-  );
-};
+const TaskTemplate = ({ task, ...rest }: StoryProps) => (
+  <TaskStatusPath
+    task={Object.keys(sampleTasks).map((t) => sampleTasks[t])}
+    {...rest}
+  />
+);
 export const TaskPath: Story<StoryProps> = TaskTemplate.bind({});
 TaskPath.args = {
   task: sampleTask4,
