@@ -1,11 +1,8 @@
-import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import EpicStatusPath from '~js/components/epics/path';
 import TaskStatusPath from '~js/components/tasks/path';
 import { Task } from '~js/store/tasks/reducer';
-
 
 import {
   sampleTask1,
@@ -15,14 +12,12 @@ import {
   sampleTask5,
 } from '../fixtures';
 
-import { EPIC_STATUSES } from '~js/utils/constants';
+import Path from '~js/components/path';
 
 export default {
   title: 'Components/Path/Examples',
   component: TaskStatusPath,
 };
-
-
 
 const sampleTasks: { [key: string]: Task } = {
   Approved: sampleTask1,
@@ -32,49 +27,29 @@ const sampleTasks: { [key: string]: Task } = {
   'In Progress': sampleTask5,
 };
 
-
-
-const epicTemplate: Story<ComponentProps<typeof EpicStatusPath>> = (args) => (
-  <EpicStatusPath {...args} />
-);
-
-export const EpicPath = epicTemplate.bind({});
-
-EpicPath.args = {
-  status: 'Merged',
+type Props = ComponentProps<typeof Path>;
+interface StoryProps extends Omit<Props, 'task'> {
+  task: Task;
+}
+const TaskTemplate = ({ task, ...rest }: StoryProps) => {
+  return (
+    <TaskStatusPath
+      task={Object.keys(sampleTasks).map((t) => sampleTasks[t])}
+      {...rest}
+    />
+  );
 };
-EpicPath.argTypes = {
-  status: {
-    defaultValue: Object.keys(EPIC_STATUSES),
-    control: {
-      type: 'select',
-      options: Object.keys(EPIC_STATUSES),
-    },
-  },
-};
-
-EpicPath.storyName = 'Epic Path';
-
-
-
-
-const taskTemplate: Story<ComponentProps<typeof TaskStatusPath>> = (args) => (
-  <TaskStatusPath {...args} />
-);
-
-export const TaskPath = taskTemplate.bind({});
-
+export const TaskPath: Story<StoryProps> = TaskTemplate.bind({});
 TaskPath.args = {
   task: sampleTask4,
 };
 TaskPath.argTypes = {
   tasks: {
-    defaultValue: Object.keys(sampleTasks),
+    defaultValue: Object.keys(sampleTasks)[0],
     control: {
       type: 'select',
       options: Object.keys(sampleTasks),
     },
   },
 };
-
 TaskPath.storyName = 'Task Path';
