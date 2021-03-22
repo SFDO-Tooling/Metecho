@@ -137,12 +137,12 @@ const AssignUserModal = ({
   UserTableCell.displayName = DataTableCell.displayName;
 
   const emptyCollaboratorsText = (
-    <div className="slds-p-top_small">
+    <p className="slds-p-top_small">
       <Trans i18nKey="noEpicCollaborators">
         There are no Epic Collaborators. Select GitHub users to add as
         Collaborators.
       </Trans>
-    </div>
+    </p>
   );
   /* @@@ todo
     - filter users in second list that appear in the first
@@ -186,10 +186,16 @@ const AssignUserModal = ({
       <div
         className="slds-grid
           slds-grid_vertical-align-start
-          slds-p-top_medium
-          slds-p-horizontal_medium"
+          slds-p-horizontal_medium
+          slds-p-top_medium"
       >
-        <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
+        <div
+          className="slds-grid
+            slds-wrap
+            slds-shrink
+            slds-p-right_medium
+            slds-p-bottom_small"
+        >
           <p>
             <Trans i18nKey="assignUserHelper">
               Assign any Github user to this role. If they are not already, the
@@ -201,7 +207,8 @@ const AssignUserModal = ({
           className="slds-grid
             slds-grow
             slds-shrink-none
-            slds-grid_align-end"
+            slds-grid_align-end
+            slds-p-bottom_medium"
         >
           <ReSyncGithubUserButton
             isRefreshing={isRefreshing}
@@ -210,7 +217,11 @@ const AssignUserModal = ({
         </div>
       </div>
       <div className="slds-is-relative">
-        <div className="slds-p-horizontal_medium slds-p-top_medium">
+        <div
+          className="slds-medium-size_large
+            slds-p-horizontal_medium
+            slds-p-bottom_medium"
+        >
           <Input
             id="quick-find-input"
             name="name"
@@ -229,19 +240,19 @@ const AssignUserModal = ({
           />
         </div>
         {selectedUser && (
-          <div className="slds-p-around_small slds-p-bottom_none">
-            <div className="slds-text-title slds-m-bottom_xx-small">
+          <div className="slds-p-horizontal_medium slds-p-bottom_medium">
+            <h3 className="slds-text-heading_medium slds-m-bottom_xx-small">
               {i18n.t('Currently Assigned')}
-            </div>
+            </h3>
             <GitHubUserButton withName user={selectedUser} isAssigned />
           </div>
         )}
         <div>
           {userList.map((person, idx) => (
-            <div key={idx} className="slds-p-around_small slds-p-bottom_none">
-              <div className="slds-text-title slds-m-bottom_xx-small">
+            <div key={idx} className="slds-p-horizontal_medium slds-p-bottom_medium">
+              <h3 className="slds-text-heading_medium slds-m-bottom_xx-small ">
                 {person.heading}
-              </div>
+              </h3>
               <ul>
                 {person.list.length
                   ? person.list.map((user, i) => (
