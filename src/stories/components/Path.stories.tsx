@@ -1,9 +1,11 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
+import EpicStatusPath from '~js/components/epics/path';
 import Path from '~js/components/path';
 import TaskStatusPath from '~js/components/tasks/path';
 import { Task } from '~js/store/tasks/reducer';
+import { EPIC_STATUSES } from '~js/utils/constants';
 
 import {
   sampleTask1,
@@ -15,38 +17,66 @@ import {
 
 export default {
   title: 'Components/Path/Examples',
-  component: TaskStatusPath,
+  component: Path,
 };
 
-const sampleTasks: { [key: string]: Task } = {
-  Approved: sampleTask1,
+const sampleTaskStatuses: { [key: string]: Task } = {
   Planned: sampleTask2,
-  Complete: sampleTask3,
+  'In progress': sampleTask5,
+  Test: { ...sampleTask5, pr_is_open: true },
   'Changes Requested': sampleTask4,
-  'In Progress': sampleTask5,
+  Approved: sampleTask1,
+  Complete: sampleTask3,
 };
 
-type Props = ComponentProps<typeof Path>;
-interface StoryProps extends Omit<Props, 'task'> {
-  task: Task;
+type TaskPathProps = ComponentProps<typeof TaskStatusPath>;
+interface TaskStoryProps extends Omit<TaskPathProps, 'task'> {
+  status: string;
 }
-const TaskTemplate = ({ task, ...rest }: StoryProps) => (
-  <TaskStatusPath
-    task={Object.keys(sampleTasks).map((t) => sampleTasks[t])}
-    {...rest}
-  />
+
+const TaskTemplate = ({ status, ...rest }: TaskStoryProps) => (
+  <TaskStatusPath task={sampleTaskStatuses[status]} {...rest} />
 );
-export const TaskPath: Story<StoryProps> = TaskTemplate.bind({});
-TaskPath.args = {
-  task: sampleTask4,
-};
+export const TaskPath: Story<TaskStoryProps> = TaskTemplate.bind({});
 TaskPath.argTypes = {
-  tasks: {
-    defaultValue: Object.keys(sampleTasks)[0],
+  status: {
+    defaultValue: 'Planned',
     control: {
       type: 'select',
-      options: Object.keys(sampleTasks),
+      options: Object.keys(sampleTaskStatuses),
     },
   },
 };
 TaskPath.storyName = 'Task Path';
+
+type EpicPathProps = ComponentProps<typeof EpicStatusPath>;
+interface EpicStoryProps extends Omit<EpicPathProps, 'status' | 'prIsOpen'> {
+  status: string;
+}
+
+const sampleEpicStatuses: { [key: string]: EpicPathProps } = {
+  Planned: { status: EPIC_STATUSES.PLANNED, prIsOpen: false },
+  'In progress': { status: EPIC_STATUSES.IN_PROGRESS, prIsOpen: false },
+  Review: { status: EPIC_STATUSES.REVIEW, prIsOpen: false },
+  'Ready for Merge': { status: EPIC_STATUSES.REVIEW, prIsOpen: true },
+  Merged: { status: EPIC_STATUSES.MERGED, prIsOpen: false },
+};
+
+const EpicTemplate = ({ status, ...rest }: EpicStoryProps) => (
+  <EpicStatusPath
+    status={sampleEpicStatuses[status].status}
+    prIsOpen={sampleEpicStatuses[status].prIsOpen}
+    {...rest}
+  />
+);
+export const EpicPath: Story<EpicStoryProps> = EpicTemplate.bind({});
+EpicPath.argTypes = {
+  status: {
+    defaultValue: 'Planned',
+    control: {
+      type: 'select',
+      options: Object.keys(sampleEpicStatuses),
+    },
+  },
+};
+EpicPath.storyName = 'Epic Path';

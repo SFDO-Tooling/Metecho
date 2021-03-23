@@ -1,4 +1,5 @@
 import { Canvas, Meta, Story } from '@storybook/addon-docs/blocks';
+import LinkTo from '@storybook/addon-links/react';
 
 <Meta title="Components/Path/Docs" />
 
@@ -11,19 +12,27 @@ import { Canvas, Meta, Story } from '@storybook/addon-docs/blocks';
 The **Path** component visually communicates to a user the progress made on a
 particular **Task** or **Epic.**
 
-For **Tasks**, the progress indicators are labeled `Planned`, `In Progress`,
+For **Tasks**, the progress indicators are labeled `Planned`, `In progress`,
 `Test`, and `Merged`.
 
 <Canvas>
   <Story id="components-path-examples--task-path" />
 </Canvas>
 
-For **Epics**, the progress indicators are labeled `Planned`, `In Progress`,
+<LinkTo kind="Components/Path/Examples" story="Task Path">
+  View Task Example
+</LinkTo>
+
+For **Epics**, the progress indicators are labeled `Planned`, `In progress`,
 `Review`, and `Merged`.
 
 <Canvas>
   <Story id="components-path-examples--epic-path" />
 </Canvas>
+
+<LinkTo kind="Components/Path/Examples" story="Epic Path">
+  View Epic Example
+</LinkTo>
 
 The active status of a **Task** or **Epic** is indicated by the color blue.
 Completed statuses feature a checkmark in place of the text label.
