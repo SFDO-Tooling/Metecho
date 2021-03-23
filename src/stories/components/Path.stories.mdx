@@ -9,8 +9,10 @@ import LinkTo from '@storybook/addon-links/react';
 
 ## Overview
 
-The **Path** component visually communicates to a user the progress made on a
-particular **Task** or **Epic.**
+The **Path** component visually communicates to a user the progress,
+determined by its respective pull request on GitHub, made on a
+particular **Task** or **Epic**.
+
 
 For **Tasks**, the progress indicators are labeled `Planned`, `In progress`,
 `Test`, and `Merged`.
@@ -37,4 +39,5 @@ For **Epics**, the progress indicators are labeled `Planned`, `In progress`,
 The active status of a **Task** or **Epic** is indicated by the color blue.
 Completed statuses feature a checkmark in place of the text label.
 
-When an **Epic** is `Merged`, its label turns green.
+When an **Epic** or **Task** pull request is `Merged`
+on GitHub, the `Merge` label turns green.
