@@ -183,7 +183,7 @@ six==1.15.0
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.1.0
     # via sphinx
-sphinx==3.4.3
+sphinx==3.5.3
     # via
     #   -r requirements/dev.in
     #   sphinxcontrib-httpdomain
