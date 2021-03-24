@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 import Joyride, { CallBackProps, Step } from 'react-joyride';
+
 import PopoverHeader from '~img/popover-header.png';
 
 interface Props {
@@ -13,9 +14,7 @@ const steps: Step[] = [
   {
     target: '.tour-create-epic',
     title: (
-      <Trans i18nKey="tourCreateEpicTitle">
-        Create epics to group tasks
-      </Trans>
+      <Trans i18nKey="tourCreateEpicTitle">Create epics to group tasks</Trans>
     ),
     content: (
       <Trans i18nKey="tourCreateEpic">
@@ -61,7 +60,7 @@ const PlanTour = ({ run, handleCallback }: Props) => (
       },
       tooltipTitle: {
         backgroundColor: '#164a85',
-        backgroundImage: "url(" + PopoverHeader + ")",
+        backgroundImage: `url(${PopoverHeader})`,
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'bottom',
         backgroundSize: 'contain',

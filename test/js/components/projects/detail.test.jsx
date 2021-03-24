@@ -285,15 +285,13 @@ describe('<ProjectDetail />', () => {
   });
 
   describe('<CreateEpicModal />', () => {
-    test('opens/closes form', async () => {
+    test('opens/closes form', () => {
       const { queryByText, getByText, getByTitle } = setup();
-
-      expect.assertions(2);
-      await fireEvent.click(getByText('Create an Epic'));
+      fireEvent.click(getByText('Create an Epic'));
 
       expect(getByText('Create an Epic for Project 1')).toBeVisible();
 
-      await fireEvent.click(getByTitle('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Create an Epic for Project 1')).toBeNull();
     });
@@ -318,7 +316,7 @@ describe('<ProjectDetail />', () => {
 
       expect(heading).toBeVisible();
 
-      await fireEvent.click(getByTitle('Close'));
+      fireEvent.click(getByTitle('Close'));
 
       expect(
         queryByText('What can Metecho help you do today?', { exact: false }),

@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -746,7 +746,7 @@ describe('<EpicDetail/>', () => {
   describe('<CreateOrgModal />', () => {
     let result;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       result = setup({
         initialState: {
           ...defaultState,
@@ -760,17 +760,16 @@ describe('<EpicDetail/>', () => {
           },
         },
       });
-      await fireEvent.click(result.getByText('Create Scratch Org'));
+      fireEvent.click(result.getByText('Create Scratch Org'));
     });
 
     describe('"cancel" click', () => {
-      test('closes modal', async () => {
+      test('closes modal', () => {
         const { getByText, queryByText } = result;
 
         expect(getByText('Scratch Org Overview')).toBeVisible();
 
-        expect.assertions(2);
-        await fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByText('Cancel'));
 
         expect(queryByText('Scratch Org Overview')).toBeNull();
       });
@@ -781,13 +780,14 @@ describe('<EpicDetail/>', () => {
         const { getByText, getByLabelText, queryByText } = result;
 
         expect.assertions(5);
-        await fireEvent.click(getByText('Next'));
+        fireEvent.click(getByText('Next'));
 
         expect(getByText('Scratch Org Details')).toBeVisible();
 
-        await fireEvent.click(getByText('Advanced Options'));
-        await fireEvent.click(getByLabelText('qa'));
-        await fireEvent.click(getByText('Create Org'));
+        fireEvent.click(getByText('Advanced Options'));
+        fireEvent.click(getByLabelText('qa'));
+        fireEvent.click(getByText('Create Org'));
+        await waitForElementToBeRemoved(getByText('Scratch Org Details'));
 
         expect(queryByText('Scratch Org Details')).toBeNull();
         expect(createObject).toHaveBeenCalled();

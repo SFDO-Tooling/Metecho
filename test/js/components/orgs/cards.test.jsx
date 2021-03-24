@@ -223,7 +223,7 @@ describe('<TaskOrgCards/>', () => {
   });
 
   describe('Assign click', () => {
-    test('updates assigned user', async () => {
+    test('updates assigned user', () => {
       const task = {
         ...defaultTask,
         assigned_dev: null,
@@ -233,13 +233,11 @@ describe('<TaskOrgCards/>', () => {
         orgs: {},
         assignUserModalOpen: 'Dev',
       });
-
-      expect.assertions(3);
-      await fireEvent.click(
+      fireEvent.click(
         baseElement.querySelector('.collaborator-button[title="user-name"]'),
       );
-      await fireEvent.click(getByText('Notify Assigned Developer by Email'));
-      await fireEvent.click(getByText('Save'));
+      fireEvent.click(getByText('Notify Assigned Developer by Email'));
+      fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
 
