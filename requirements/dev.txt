@@ -34,11 +34,11 @@ click==7.1.2
     # via
     #   -c requirements/prod.txt
     #   black
-coverage==5.4
+coverage==5.5
     # via
     #   coveralls
     #   pytest-cov
-coveralls==3.0.0
+coveralls==3.0.1
     # via -r requirements/dev.in
 decorator==4.4.2
     # via ipython
@@ -58,13 +58,13 @@ factory-boy==3.2.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==6.1.1
+faker==6.6.1
     # via
     #   -c requirements/prod.txt
     #   factory-boy
-flake8-bugbear==20.11.1
+flake8-bugbear==21.3.2
     # via -r requirements/dev.in
-flake8==3.8.4
+flake8==3.9.0
     # via
     #   -r requirements/dev.in
     #   flake8-bugbear
@@ -80,9 +80,9 @@ iniconfig==1.1.1
     # via pytest
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.20.0
+ipython==7.21.0
     # via -r requirements/dev.in
-isort==5.7.0
+isort==5.8.0
     # via -r requirements/dev.in
 jedi==0.18.0
     # via ipython
@@ -116,17 +116,17 @@ pickleshare==0.7.5
     # via ipython
 pluggy==0.13.1
     # via pytest
-prompt-toolkit==3.0.16
+prompt-toolkit==3.0.18
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
 py==1.10.0
     # via pytest
-pycodestyle==2.6.0
+pycodestyle==2.7.0
     # via flake8
-pyflakes==2.2.0
+pyflakes==2.3.0
     # via flake8
-pygments==2.8.0
+pygments==2.8.1
     # via
     #   doc8
     #   ipython
@@ -164,7 +164,7 @@ pytz==2021.1
     # via
     #   -c requirements/prod.txt
     #   babel
-regex==2020.11.13
+regex==2021.3.17
     # via black
 remote-pdb==2.1.0
     # via -r requirements/dev.in
@@ -183,7 +183,7 @@ six==1.15.0
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.1.0
     # via sphinx
-sphinx==3.5.1
+sphinx==3.5.3
     # via
     #   -r requirements/dev.in
     #   sphinxcontrib-httpdomain
@@ -221,7 +221,7 @@ typing-extensions==3.7.4.3
     # via
     #   -c requirements/prod.txt
     #   black
-urllib3==1.26.3
+urllib3==1.26.4
     # via
     #   -c requirements/prod.txt
     #   requests

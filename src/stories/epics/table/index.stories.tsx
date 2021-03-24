@@ -10,7 +10,7 @@ import {
   sampleEpic3,
   sampleEpic4,
   sampleEpic5,
-} from '../fixtures';
+} from '../../fixtures';
 
 export default {
   title: 'Epics/Table/Example',

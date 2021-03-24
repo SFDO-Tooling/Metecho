@@ -4,7 +4,7 @@ import React, { ComponentProps } from 'react';
 
 import ConfirmRemoveUserModal from '~js/components/epics/confirmRemoveUserModal';
 
-import { sampleGitHubUser1, sampleGitHubUser2 } from '../fixtures';
+import { sampleGitHubUser1, sampleGitHubUser2 } from '../../fixtures';
 
 export default {
   title: 'Epics/RemoveUser/Example',
