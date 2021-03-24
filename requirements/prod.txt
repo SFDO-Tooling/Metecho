@@ -40,7 +40,7 @@ certifi==2020.12.5
     #   cumulusci
     #   requests
     #   sentry-sdk
-cffi==1.14.4
+cffi==1.14.5
     # via
     #   cryptography
     #   cumulusci
@@ -65,7 +65,7 @@ constantly==15.1.0
     # via twisted
 croniter==1.0.2
     # via rq-scheduler
-cryptography==3.3.1
+cryptography==3.4.6
     # via
     #   authlib
     #   autobahn
@@ -76,7 +76,7 @@ cryptography==3.3.1
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.27.0
+cumulusci==3.31.0
     # via -r requirements/prod.in
 daphne==3.0.1
     # via channels
@@ -125,7 +125,7 @@ djangorestframework==3.12.2
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
-faker==5.6.3
+faker==6.6.1
     # via
     #   cumulusci
     #   snowfakery
@@ -135,8 +135,10 @@ furl==2.1.0
     # via -r requirements/prod.in
 github3-py==1.3.0
     # via -r requirements/prod.in
-github3.py==1.3.0
+github3.py==2.0.0
     # via cumulusci
+gvgen==1.0
+    # via snowfakery
 hashids==1.3.1
     # via django-hashid-field
 hiredis==1.1.0
@@ -156,13 +158,15 @@ idna==2.10
     #   hyperlink
     #   requests
     #   twisted
+importlib-metadata==3.7.3
+    # via keyring
 incremental==17.5.0
     # via twisted
 jeepney==0.6.0
     # via
     #   keyring
     #   secretstorage
-jinja2==2.11.2
+jinja2==2.11.3
     # via
     #   cumulusci
     #   snowfakery
@@ -171,7 +175,7 @@ jwcrypto==0.8
     #   cumulusci
     #   github3-py
     #   github3.py
-keyring==21.8.0
+keyring==23.0.0
     # via cumulusci
 logfmt==0.4
     # via
@@ -209,7 +213,7 @@ pycparser==2.20
     # via
     #   cffi
     #   cumulusci
-pydantic==1.7.3
+pydantic==1.8.1
     # via cumulusci
 pyhamcrest==2.0.2
     # via twisted
@@ -231,22 +235,22 @@ python-dateutil==2.8.1
     #   snowfakery
 python3-openid==3.2.0
     # via django-allauth
-pytz==2020.5
+pytz==2021.1
     # via
     #   cumulusci
     #   django
     #   fs
-pyyaml==5.4
+pyyaml==5.4.1
     # via
     #   cumulusci
     #   snowfakery
-raven==6.10.0
-    # via cumulusci
 redis==3.5.3
     # via
     #   django-redis
     #   django-rq
     #   rq
+requests-futures==1.0.0
+    # via cumulusci
 requests-oauthlib==1.3.0
     # via django-allauth
 requests==2.25.1
@@ -256,6 +260,7 @@ requests==2.25.1
     #   django-anymail
     #   github3-py
     #   github3.py
+    #   requests-futures
     #   requests-oauthlib
     #   robotframework-requests
     #   salesforce-bulk
@@ -266,7 +271,7 @@ robotframework-pabot==1.10.1
     # via cumulusci
 robotframework-pythonlibcore==2.2.1
     # via robotframework-seleniumlibrary
-robotframework-requests==0.8.0
+robotframework-requests==0.8.1
     # via cumulusci
 robotframework-seleniumlibrary==4.5.0
     # via cumulusci
@@ -311,7 +316,6 @@ six==1.15.0
     # via
     #   automat
     #   bleach
-    #   cryptography
     #   cumulusci
     #   fs
     #   furl
@@ -319,11 +323,11 @@ six==1.15.0
     #   pyopenssl
     #   python-dateutil
     #   salesforce-bulk
-snowfakery==1.4
+snowfakery==1.7
     # via cumulusci
 soupsieve==2.1
     # via beautifulsoup4
-sqlalchemy==1.3.22
+sqlalchemy==1.3.23
     # via
     #   cumulusci
     #   snowfakery
@@ -338,7 +342,9 @@ twisted[tls]==20.3.0
 txaio==20.12.1
     # via autobahn
 typing-extensions==3.7.4.3
-    # via cumulusci
+    # via
+    #   cumulusci
+    #   pydantic
 unicodecsv==0.14.1
     # via salesforce-bulk
 uritemplate==3.0.1
@@ -346,7 +352,7 @@ uritemplate==3.0.1
     #   cumulusci
     #   github3-py
     #   github3.py
-urllib3==1.26.2
+urllib3==1.26.4
     # via
     #   cumulusci
     #   requests
@@ -358,6 +364,8 @@ whitenoise==5.2.0
     # via -r requirements/prod.in
 xmltodict==0.12.0
     # via cumulusci
+zipp==3.4.1
+    # via importlib-metadata
 zope.interface==5.2.0
     # via twisted
 
