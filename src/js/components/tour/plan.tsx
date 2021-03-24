@@ -61,7 +61,7 @@ const PlanTour = ({ run, onClose }: Props) => {
         }
       }
     },
-    [helpers, onClose],
+    [helpers, onClose, steps.length],
   );
 
   return (

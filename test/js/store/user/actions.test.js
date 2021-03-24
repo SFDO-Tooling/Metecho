@@ -340,21 +340,21 @@ describe('onboard', () => {
       };
 
       expect.assertions(1);
-      return store.dispatch(actions.onboard()).then(() => {
+      return store.dispatch(actions.onboarded()).then(() => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
   });
 
   describe('error', () => {
-    test('dispatches  ONBOARDING_FAILED action', () => {
+    test('dispatches ONBOARDING_FAILED action', () => {
       const store = storeWithThunk({});
       fetchMock.putOnce(url, 500);
       const started = { type: 'ONBOARDING_REQUESTED' };
       const failed = { type: 'ONBOARDING_FAILED' };
 
       expect.assertions(4);
-      return store.dispatch(actions.onboard()).catch(() => {
+      return store.dispatch(actions.onboarded()).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);

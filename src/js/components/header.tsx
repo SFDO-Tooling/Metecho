@@ -80,7 +80,7 @@ const TourDropdown = () => {
     <div className="slds-col_padded">
       <Dropdown
         align="right"
-        assistiveText={{ icon: `${i18n.t('Get Help')}` }}
+        assistiveText={{ icon: i18n.t('Get Help') }}
         buttonClassName="tour-walkthroughs"
         buttonVariant="icon"
         iconCategory="utility"
@@ -91,21 +91,21 @@ const TourDropdown = () => {
         listItemRenderer={TourLabel}
         options={[
           {
-            label: `${i18n.t('Play Walkthrough')}`,
+            label: i18n.t('Play Walkthrough'),
             value: WALKTHROUGH_TYPES.PLAY,
             iconPath: seesawIcon,
             iconName: 'seesaw-sm',
             disabled: true,
           },
           {
-            label: `${i18n.t('Help Walkthrough')}`,
+            label: i18n.t('Help Walkthrough'),
             value: WALKTHROUGH_TYPES.HELP,
             iconPath: backpackIcon,
             iconName: 'backpack-sm',
             disabled: true,
           },
           {
-            label: `${i18n.t('Plan Walkthrough')}`,
+            label: i18n.t('Plan Walkthrough'),
             value: WALKTHROUGH_TYPES.PLAN,
             iconPath: mapIcon,
             iconName: 'map-sm',
