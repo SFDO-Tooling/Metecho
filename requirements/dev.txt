@@ -164,7 +164,7 @@ pytz==2020.5
     # via
     #   -c requirements/prod.txt
     #   babel
-regex==2020.11.13
+regex==2021.3.17
     # via black
 remote-pdb==2.1.0
     # via -r requirements/dev.in
