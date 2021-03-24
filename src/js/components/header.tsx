@@ -1,91 +1,133 @@
+import Icon from '@salesforce/design-system-react/components/icon';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useState } from 'react';
-import { CallBackProps, STATUS } from 'react-joyride';
+import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import {
+  Link,
+  match as Match,
+  useHistory,
+  useRouteMatch,
+} from 'react-router-dom';
 
-import backpackSvg from '!raw-loader!~img/backpack-sm.svg';
-import mapSvg from '!raw-loader!~img/map-sm.svg';
-import seesawSvg from '!raw-loader!~img/seesaw-sm.svg';
+import backpackIcon from '~img/backpack-sm.svg';
+import mapIcon from '~img/map-sm.svg';
+import seesawIcon from '~img/seesaw-sm.svg';
 import Errors from '~js/components/apiErrors';
 import OfflineAlert from '~js/components/offlineAlert';
 import Toasts from '~js/components/toasts';
-import { TourType } from '~js/components/tour/landing';
-import PlanTour from '~js/components/tour/plan';
 import UserInfo from '~js/components/user/info';
+import { AppState } from '~js/store';
+import { Project } from '~js/store/projects/reducer';
+import { selectProject, selectProjects } from '~js/store/projects/selectors';
 import { selectSocketState } from '~js/store/socket/selectors';
 import { selectUserState } from '~js/store/user/selectors';
+import {
+  SHOW_WALKTHROUGH,
+  WALKTHROUGH_TYPES,
+  WalkthroughType,
+} from '~js/utils/constants';
 import routes, { routePatterns } from '~js/utils/routes';
 
-const Header = ({ page }: { page: string }) => {
+const TourLabel = ({
+  data: { label, iconPath, iconName },
+}: {
+  data: {
+    label: string;
+    iconPath: string;
+    iconName: string;
+  };
+}) => (
+  <span className="slds-truncate" title={label}>
+    <Icon
+      className="slds-m-right_x-small"
+      position="left"
+      size="small"
+      path={`${iconPath}#${iconName}`}
+    />
+    {label}
+  </span>
+);
+
+const TourDropdown = () => {
+  const history = useHistory();
+  const match =
+    useRouteMatch<{
+      projectSlug?: string;
+    }>(routePatterns.project_detail()) ||
+    ({ params: {} } as Match<{ projectSlug?: string }>);
+  const selectProjectWithProps = useCallback(selectProject, []);
+  const projects = useSelector(selectProjects);
+  const project: Project | undefined =
+    useSelector((state: AppState) =>
+      selectProjectWithProps(state, { match }),
+    ) || projects[0];
+  const projectUrl = project ? routes.project_detail(project.slug) : null;
+
+  const handleSelect = useCallback(
+    ({ value, disabled }: { value: WalkthroughType; disabled?: boolean }) => {
+      /* istanbul ignore else */
+      if (projectUrl && !disabled) {
+        history.push(projectUrl, { [SHOW_WALKTHROUGH]: value });
+      }
+    },
+    [projectUrl], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  return project ? (
+    <div className="slds-col_padded">
+      <Dropdown
+        align="right"
+        assistiveText={{ icon: `${i18n.t('Get Help')}` }}
+        buttonClassName="tour-walkthroughs"
+        buttonVariant="icon"
+        iconCategory="utility"
+        iconName="question"
+        iconSize="large"
+        iconVariant="more"
+        width="xx-small"
+        listItemRenderer={TourLabel}
+        options={[
+          {
+            label: `${i18n.t('Play Walkthrough')}`,
+            value: WALKTHROUGH_TYPES.PLAY,
+            iconPath: seesawIcon,
+            iconName: 'seesaw-sm',
+            disabled: true,
+          },
+          {
+            label: `${i18n.t('Help Walkthrough')}`,
+            value: WALKTHROUGH_TYPES.HELP,
+            iconPath: backpackIcon,
+            iconName: 'backpack-sm',
+            disabled: true,
+          },
+          {
+            label: `${i18n.t('Plan Walkthrough')}`,
+            value: WALKTHROUGH_TYPES.PLAN,
+            iconPath: mapIcon,
+            iconName: 'map-sm',
+          },
+        ]}
+        onSelect={handleSelect}
+      />
+    </div>
+  ) : null;
+};
+
+const Header = () => {
   const user = useSelector(selectUserState);
   const socket = useSelector(selectSocketState);
-  const [tourRunning, setTourRunning] = useState<TourType | null>(null);
-  const [hideTourHelper, setHideTourHelper] = useState(
-    page === routePatterns.project_list(),
-  );
-  const doRunTour = (type: TourType) => setTourRunning(type);
-  const handleTourCallback = useCallback((data: CallBackProps) => {
-    const { status } = data;
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
-    if (finishedStatuses.includes(status)) {
-      setTourRunning(null);
-    }
-  }, []);
-  const doShowHelper = !hideTourHelper && user?.onboarded_at;
-  useEffect(() => {
-    setHideTourHelper(page === routePatterns.project_list());
-  }, [page]);
+
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
-      {doShowHelper && (
-        <div className="slds-col_padded">
-          <Dropdown
-            assistiveText={{ icon: `${i18n.t('Get Help')}` }}
-            buttonVariant="icon"
-            iconName="question"
-            iconSize="large"
-            iconVariant="more"
-            width="x-small"
-            onSelect={({ value }: { value: TourType }) => {
-              doRunTour(value);
-            }}
-            options={[
-              {
-                label: `${i18n.t('Play Walkthrough')}`,
-                value: 'play',
-                leftIcon: {
-                  name: seesawSvg,
-                  category: 'utility',
-                },
-              },
-              {
-                label: `${i18n.t('Help Walkthrough')}`,
-                value: 'help',
-                leftIcon: {
-                  name: backpackSvg,
-                  category: 'utility',
-                },
-              },
-              {
-                label: `${i18n.t('Plan Walkthrough')}`,
-                value: 'plan',
-                leftIcon: {
-                  name: mapSvg,
-                  category: 'utility',
-                },
-              },
-            ]}
-          />
-        </div>
-      )}
-
+      <TourDropdown />
       <UserInfo />
     </PageHeaderControl>
   );
+
   return user ? (
     <>
       {socket ? null : <OfflineAlert />}
@@ -105,10 +147,6 @@ const Header = ({ page }: { page: string }) => {
           </Link>
         }
         onRenderControls={controls}
-      />
-      <PlanTour
-        run={tourRunning === 'plan'}
-        handleCallback={handleTourCallback}
       />
     </>
   ) : null;

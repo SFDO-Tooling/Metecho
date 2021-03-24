@@ -44,7 +44,7 @@ interface AgreeToTermsSucceeded {
 interface OnboardingAction {
   type: 'ONBOARDING_REQUESTED' | 'ONBOARDING_FAILED';
 }
-interface OnboardingSuccedded {
+interface OnboardingSucceeded {
   type: 'ONBOARDING_SUCCEEDED';
   payload: User;
 }
@@ -60,7 +60,7 @@ export type UserAction =
   | AgreeToTermsAction
   | AgreeToTermsSucceeded
   | OnboardingAction
-  | OnboardingSuccedded;
+  | OnboardingSucceeded;
 
 export const login = (payload: User): LoginAction => {
   if (window.Sentry) {
@@ -186,9 +186,9 @@ export const agreeToTerms = (): ThunkResult<
   }
 };
 
-export const onboard = (): ThunkResult<Promise<OnboardingSuccedded>> => async (
-  dispatch,
-) => {
+export const onboarded = (): ThunkResult<
+  Promise<OnboardingSucceeded>
+> => async (dispatch) => {
   dispatch({ type: 'ONBOARDING_REQUESTED' });
   try {
     const payload = await apiFetch({

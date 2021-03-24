@@ -9,13 +9,13 @@ import backpackSvg from '!raw-loader!~img/backpack-lg.svg';
 import mapSvg from '!raw-loader!~img/map-lg.svg';
 import seesawSvg from '!raw-loader!~img/seesaw-lg.svg';
 import { Illustration } from '~js/components/utils';
+import { WALKTHROUGH_TYPES, WalkthroughType } from '~js/utils/constants';
 
-export type TourType = 'play' | 'plan' | 'help';
 export interface Tour {
   header: string;
   tag: string;
   linkText: string;
-  type: TourType;
+  type: WalkthroughType;
   icon: string;
   disabled?: boolean;
 }
@@ -26,7 +26,7 @@ const LandingModal = ({
   onRequestClose,
 }: {
   isOpen: boolean;
-  runTour: (type: TourType) => void;
+  runTour: (type: WalkthroughType) => void;
   onRequestClose: () => void;
 }) => {
   const tours: Tour[] = [
@@ -34,7 +34,7 @@ const LandingModal = ({
       header: i18n.t('I want to Play'),
       tag: i18n.t('Make a Scratch Org to view Project & play.'),
       linkText: i18n.t('Start Play Walkthrough'),
-      type: 'play',
+      type: WALKTHROUGH_TYPES.PLAY,
       icon: seesawSvg,
       disabled: true,
     },
@@ -42,7 +42,7 @@ const LandingModal = ({
       header: i18n.t('I want to Help'),
       tag: i18n.t('Browse available Tasks; give your input.'),
       linkText: i18n.t('Start Help Walkthrough'),
-      type: 'help',
+      type: WALKTHROUGH_TYPES.HELP,
       icon: backpackSvg,
       disabled: true,
     },
@@ -50,24 +50,11 @@ const LandingModal = ({
       header: i18n.t('I want to Plan'),
       tag: i18n.t('Create a Task or an Epic; add your work.'),
       linkText: i18n.t('Start Plan Walkthrough'),
-      type: 'plan',
+      type: WALKTHROUGH_TYPES.PLAN,
       icon: mapSvg,
     },
   ];
-  // const isMounted = useIsMounted();
-  // const dispatch = useDispatch<ThunkDispatch>();
 
-  // const doOnboard = useCallback(
-  //   (type: TourType) => {
-  //     dispatch(onboard()).finally(() => {
-  //       /* istanbul ignore else */
-  //       if (isMounted.current) {
-  //         runTour(type);
-  //       }
-  //     });
-  //   },
-  //   [dispatch, isMounted, runTour],
-  // );
   return (
     <Modal
       isOpen={isOpen}
@@ -121,7 +108,7 @@ const LandingModal = ({
           <p className="slds-small-size_2-of-5 slds-text-align_center">
             <Trans i18nKey="tourHelp">
               Review these walkthroughs anytime you need them, or turn on the
-              self-guided tour feature when you have specific questions.
+              self-guided tour when you have specific questions.
             </Trans>
           </p>
         </div>

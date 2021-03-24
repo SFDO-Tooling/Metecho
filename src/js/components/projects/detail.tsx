@@ -1,16 +1,15 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
-import { CallBackProps, STATUS } from 'react-joyride';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import CreateEpicModal from '~js/components/epics/createForm';
 import EpicTable from '~js/components/epics/table';
 import ProjectNotFound from '~js/components/projects/project404';
-import LandingModal, { TourType } from '~js/components/tour/landing';
+import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
 import {
   DetailPageLayout,
@@ -23,24 +22,54 @@ import {
 } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { fetchObjects } from '~js/store/actions';
-import { onboard } from '~js/store/user/actions';
+import { onboarded } from '~js/store/user/actions';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
-import { OBJECT_TYPES } from '~js/utils/constants';
+import {
+  OBJECT_TYPES,
+  SHOW_WALKTHROUGH,
+  WALKTHROUGH_TYPES,
+  WalkthroughType,
+} from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
-const ProjectDetail = (props: RouteComponentProps) => {
+const ProjectDetail = (
+  props: RouteComponentProps<
+    any,
+    any,
+    { [SHOW_WALKTHROUGH]?: WalkthroughType }
+  >,
+) => {
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
     !user.onboarded_at,
   );
-  const [tourRunning, setTourRunning] = useState<TourType | null>(null);
+  const [tourRunning, setTourRunning] = useState<WalkthroughType | null>(null);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
+
+  // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param
+  const {
+    history,
+    location: { state },
+  } = props;
+  useEffect(() => {
+    const tours = Object.values(WALKTHROUGH_TYPES);
+    const showTour = state?.[SHOW_WALKTHROUGH];
+    if (epics?.fetched && showTour && tours.includes(showTour)) {
+      // Remove location state
+      history.replace({ state: {} });
+      if (!tourLandingModalOpen) {
+        // Start tour
+        setTourRunning(showTour);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, tourLandingModalOpen, epics?.fetched]);
 
   const fetchMoreEpics = useCallback(() => {
     /* istanbul ignore else */
@@ -70,33 +99,21 @@ const ProjectDetail = (props: RouteComponentProps) => {
   const closeCreateModal = useCallback(() => setCreateModalOpen(false), []);
 
   // guided tour related
-  const closeTourLandingModal = useCallback(
-    () => setTourLandingModalOpen(false),
-    [],
-  );
-  const doRunTour = useCallback(
-    (type: TourType) => {
-      if (user.onboarded_at) {
-        setTourRunning(type);
-      } else {
-        dispatch(onboard()).finally(() => {
-          if (isMounted.current) {
-            /* istanbul ignore else */
-            closeTourLandingModal();
-            setTourRunning(type);
-          }
-        });
-      }
-    },
-    [closeTourLandingModal, dispatch, user.onboarded_at, isMounted],
-  );
-
-  const handleTourCallback = useCallback((data: CallBackProps) => {
-    const { status } = data;
-    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
-    if (finishedStatuses.includes(status)) {
-      setTourRunning(null);
+  const closeTourLandingModal = useCallback(() => {
+    setTourLandingModalOpen(false);
+    if (!user.onboarded_at) {
+      dispatch(onboarded());
     }
+  }, [dispatch, user.onboarded_at]);
+  const doRunTour = useCallback(
+    (type: WalkthroughType) => {
+      setTourRunning(type);
+      closeTourLandingModal();
+    },
+    [closeTourLandingModal],
+  );
+  const handleTourClose = useCallback(() => {
+    setTourRunning(null);
   }, []);
 
   const loadingOrNotFound = getProjectLoadingOrNotFound({
@@ -195,10 +212,7 @@ const ProjectDetail = (props: RouteComponentProps) => {
           runTour={doRunTour}
           onRequestClose={closeTourLandingModal}
         />
-        <PlanTour
-          run={tourRunning === 'plan'}
-          handleCallback={handleTourCallback}
-        />
+        <PlanTour run={tourRunning === 'plan'} onClose={handleTourClose} />
       </DetailPageLayout>
     </DocumentTitle>
   );
