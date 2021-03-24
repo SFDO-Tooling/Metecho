@@ -321,7 +321,7 @@ six==1.15.0
     #   salesforce-bulk
 snowfakery==1.4
     # via cumulusci
-soupsieve==2.1
+soupsieve==2.2.1
     # via beautifulsoup4
 sqlalchemy==1.3.22
     # via
