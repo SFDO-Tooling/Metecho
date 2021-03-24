@@ -105,7 +105,7 @@
     "@types/redux-mock-store": "^1.0.2",
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
-    "@typescript-eslint/parser": "^4.14.1",
+    "@typescript-eslint/parser": "^4.19.0",
     "autoprefixer": "^10.2.3",
     "babel-jest": "^26.6.3",
     "babel-loader": "^8.2.2",
