@@ -20,8 +20,7 @@ import OfflineAlert from '~js/components/offlineAlert';
 import Toasts from '~js/components/toasts';
 import UserInfo from '~js/components/user/info';
 import { AppState } from '~js/store';
-import { Project } from '~js/store/projects/reducer';
-import { selectProject, selectProjects } from '~js/store/projects/selectors';
+import { selectProject } from '~js/store/projects/selectors';
 import { selectSocketState } from '~js/store/socket/selectors';
 import { selectUserState } from '~js/store/user/selectors';
 import {
@@ -59,11 +58,9 @@ const TourDropdown = () => {
     }>(routePatterns.project_detail()) ||
     ({ params: {} } as Match<{ projectSlug?: string }>);
   const selectProjectWithProps = useCallback(selectProject, []);
-  const projects = useSelector(selectProjects);
-  const project: Project | undefined =
-    useSelector((state: AppState) =>
-      selectProjectWithProps(state, { match }),
-    ) || projects[0];
+  const project = useSelector((state: AppState) =>
+    selectProjectWithProps(state, { match }),
+  );
   const projectUrl = project ? routes.project_detail(project.slug) : null;
 
   const handleSelect = useCallback(
@@ -123,7 +120,7 @@ const Header = () => {
 
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
-      <TourDropdown />
+      {window.GLOBALS.ENABLE_WALKTHROUGHS ? <TourDropdown /> : null}
       <UserInfo />
     </PageHeaderControl>
   );

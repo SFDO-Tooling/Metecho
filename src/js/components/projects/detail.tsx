@@ -44,7 +44,7 @@ const ProjectDetail = (
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
-    !user.onboarded_at,
+    Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
   const [tourRunning, setTourRunning] = useState<WalkthroughType | null>(null);
   const isMounted = useIsMounted();

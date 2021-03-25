@@ -5,6 +5,7 @@ import Joyride, {
   ACTIONS,
   CallBackProps,
   STATUS,
+  status as StatusType,
   Step,
   StoreHelpers,
 } from 'react-joyride';
@@ -51,17 +52,18 @@ const PlanTour = ({ run, onClose }: Props) => {
   const handleCallback = useCallback(
     (data: CallBackProps) => {
       const { action, status } = data;
-      if (status === STATUS.FINISHED) {
-        onClose();
-      } else if (action === ACTIONS.CLOSE || status === STATUS.SKIPPED) {
+      const finished: StatusType[keyof StatusType][] = [
+        STATUS.FINISHED,
+        STATUS.SKIPPED,
+      ];
+      if (finished.includes(status) || action === ACTIONS.CLOSE) {
         if (helpers) {
-          helpers.go(steps.length - 1);
-        } else {
-          onClose();
+          helpers.close();
         }
+        onClose();
       }
     },
-    [helpers, onClose, steps.length],
+    [onClose, helpers],
   );
 
   return (
