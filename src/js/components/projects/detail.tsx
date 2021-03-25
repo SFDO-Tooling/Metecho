@@ -63,6 +63,7 @@ const ProjectDetail = (
     if (epics?.fetched && showTour && tours.includes(showTour)) {
       // Remove location state
       history.replace({ state: {} });
+      /* istanbul ignore else */
       if (!tourLandingModalOpen) {
         // Start tour
         setTourRunning(showTour);
@@ -101,6 +102,7 @@ const ProjectDetail = (
   // guided tour related
   const closeTourLandingModal = useCallback(() => {
     setTourLandingModalOpen(false);
+    /* istanbul ignore else */
     if (!user.onboarded_at) {
       dispatch(onboarded());
     }

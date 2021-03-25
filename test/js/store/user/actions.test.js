@@ -321,7 +321,7 @@ describe('agreeToTerms', () => {
   });
 });
 
-describe('onboard', () => {
+describe('onboarded', () => {
   let url;
 
   beforeAll(() => {
@@ -329,9 +329,9 @@ describe('onboard', () => {
   });
 
   describe('success', () => {
-    test('sets onboarding complete to user', () => {
+    test('sets user onboarded_at', () => {
       const store = storeWithThunk({});
-      const user = { id: 'testuser' };
+      const user = { id: 'testuser', onboarded_at: 'now' };
       fetchMock.putOnce(url, user);
       const started = { type: 'ONBOARDING_REQUESTED' };
       const succeeded = {

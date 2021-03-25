@@ -57,6 +57,7 @@ const PlanTour = ({ run, onClose }: Props) => {
         STATUS.SKIPPED,
       ];
       if (finished.includes(status) || action === ACTIONS.CLOSE) {
+        /* istanbul ignore else */
         if (helpers) {
           helpers.close();
         }

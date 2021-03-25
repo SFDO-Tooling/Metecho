@@ -509,7 +509,7 @@ API_PAGE_SIZE = env("API_PAGE_SIZE", type_=int, default=50)
 # New feature branch prefix:
 BRANCH_PREFIX = env("BRANCH_PREFIX", default=None)
 
-ENABLE_WALKTHROUGHS = env("ENABLE_WALKTHROUGHS", default=False, type_=boolish)
+ENABLE_WALKTHROUGHS = env("ENABLE_WALKTHROUGHS", default=True, type_=boolish)
 
 # Sentry
 SENTRY_DSN = env("SENTRY_DSN", default="")

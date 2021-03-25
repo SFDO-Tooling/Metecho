@@ -1,8 +1,9 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 
 import Header from '~js/components/header';
+import routes from '~js/utils/routes';
 
 import { renderWithRedux } from './../utils';
 
@@ -13,20 +14,18 @@ describe('<Header />', () => {
       socket: false,
       errors: [],
     },
+    routerProps = {},
   ) => {
-    const {
-      container,
-      getByLabelText,
-      getByText,
-      queryByText,
-      findByText,
-    } = renderWithRedux(
-      <MemoryRouter>
-        <Header />
-      </MemoryRouter>,
-      initialState,
-    );
-    return { container, getByLabelText, getByText, queryByText, findByText };
+    const context = {};
+    return {
+      ...renderWithRedux(
+        <StaticRouter context={context} {...routerProps}>
+          <Header />
+        </StaticRouter>,
+        initialState,
+      ),
+      context,
+    };
   };
 
   describe('logged out', () => {
@@ -52,19 +51,64 @@ describe('<Header />', () => {
     });
   });
 
-  test('show tour help', async () => {
-    const { getByText, findByText } = setup({
-      user: { onboarded_at: 'Today' },
-      page: '/projects/foo',
+  describe('walkthrough click', () => {
+    let ENABLE_WALKTHROUGHS;
+
+    beforeAll(() => {
+      ENABLE_WALKTHROUGHS = window.GLOBALS.ENABLE_WALKTHROUGHS;
+      window.GLOBALS.ENABLE_WALKTHROUGHS = true;
     });
 
-    fireEvent.click(getByText('Get Help'));
+    afterAll(() => {
+      window.GLOBALS.ENABLE_WALKTHROUGHS = ENABLE_WALKTHROUGHS;
+    });
 
-    fireEvent.click(getByText('Plan Walkthrough', { exact: false }));
-    const dialog = await findByText(
-      'Epics are groups of related Tasks, representing larger changes to the Project. You can invite multiple collaborators to your Epic and assign different people as Developers and Testers for each Task.',
-      { exact: false },
-    );
-    expect(dialog).toBeVisible();
+    test('redirects to project detail', () => {
+      const initialState = {
+        user: {},
+        projects: {
+          projects: [
+            {
+              id: 'r1',
+              name: 'Project 1',
+              slug: 'project-1',
+              old_slugs: [],
+            },
+          ],
+          notFound: [],
+          next: null,
+        },
+      };
+      const url = routes.project_detail('project-1');
+      const { getByText, getByTitle, context } = setup(initialState, {
+        location: url,
+      });
+      fireEvent.click(getByText('Get Help'));
+      fireEvent.click(getByTitle('Plan Walkthrough'));
+
+      expect(context.action).toEqual('PUSH');
+      expect(context.url).toEqual(url);
+    });
+
+    test('does not render dropdown if no project', () => {
+      const initialState = {
+        user: {},
+        projects: {
+          projects: [
+            {
+              id: 'r1',
+              name: 'Project 1',
+              slug: 'project-1',
+              old_slugs: [],
+            },
+          ],
+          notFound: [],
+          next: null,
+        },
+      };
+      const { queryByText } = setup(initialState);
+
+      expect(queryByText('Get Help')).toBeNull();
+    });
   });
 });
