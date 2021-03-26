@@ -5,8 +5,7 @@ import InputIcon from '@salesforce/design-system-react/components/icon/input-ico
 import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
-import { filter } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
@@ -23,6 +22,11 @@ import { refreshGitHubUsers } from '~js/store/projects/actions';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
 import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
+
+type UserList = {
+  heading: string;
+  list: GitHubUser[];
+}[];
 
 const AssignUserModal = ({
   epicUsers,
@@ -48,6 +52,7 @@ const AssignUserModal = ({
   const [autoToggle, setAutoToggle] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [findText, setFindText] = useState('');
+  const [userList, setUserList] = useState<UserList>([]);
 
   const handleAlertAssignee = (
     event: React.FormEvent<HTMLFormElement>,
@@ -90,6 +95,17 @@ const AssignUserModal = ({
 
   const handleFindTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFindText(e.target.value);
+    const searchList = userList.map(({ list }) => [...list]);
+    console.info(searchList[1]);
+
+    // const searchStringInArray = (str, strArray) => {
+    //   for (let j = 0; j < strArray.length; j++) {
+    //     if (strArray[j].match(str)) {
+    //       return j;
+    //     }
+    //   }
+    //   return -1;
+    // };
   };
   const usersWithoutAssignee = epicUsers.filter(
     (user) => user.id !== selectedUser?.id,
@@ -148,16 +164,29 @@ const AssignUserModal = ({
     - filter users in second list that appear in the first
     - flatten the list into one list
   */
-  const userList = [
-    {
-      heading: `${i18n.t('Epic Collaborators')}`,
-      list: usersWithoutAssignee,
-    },
-    {
-      heading: githubCollaboratorHeading,
-      list: project.github_users,
-    },
-  ];
+
+  useEffect(() => {
+    const testList = project.github_users.filter((
+      s, //for every object in heroes
+    ) =>
+      usersWithoutAssignee.every((t) => {
+        const key = Object.keys(t)[0];
+        const user s[key] == t[key];
+      }),
+    );
+    console.info(testList);
+    const users = [
+      {
+        heading: `${i18n.t('Epic Collaborators')}`,
+        list: usersWithoutAssignee,
+      },
+      {
+        heading: githubCollaboratorHeading,
+        list: project.github_users,
+      },
+    ];
+    setUserList(users);
+  }, []);
   return (
     <Modal
       isOpen={isOpen}
