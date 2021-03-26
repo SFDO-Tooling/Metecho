@@ -70,7 +70,11 @@ class TestProject:
             get_repo_info.return_value = repo_info
             git_hub_repository_factory(repo_id=123)
             project = project_factory(
-                branch_name="", repo_id=123, github_users=[{}], repo_image_url="/foo"
+                branch_name="",
+                latest_sha="",
+                repo_id=123,
+                github_users=[{}],
+                repo_image_url="/foo",
             )
             project.save()
             assert get_repo_info.called
@@ -88,6 +92,7 @@ class TestProject:
             git_hub_repository_factory(repo_id=123)
             project = project_factory(
                 branch_name="main",
+                latest_sha="",
                 repo_id=123,
                 github_users=[{}],
                 repo_image_url="/foo",
