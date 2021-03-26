@@ -1,6 +1,6 @@
 import { Styles } from 'react-joyride';
 
-import PopoverHeader from '~img/popover-header.png';
+import popoverHeaderImg from '~img/popover-header.png';
 
 const tourStyles: Styles = {
   options: {
@@ -34,7 +34,7 @@ const tourStyles: Styles = {
   },
   tooltipTitle: {
     backgroundColor: '#164a85',
-    backgroundImage: `url(${PopoverHeader})`,
+    backgroundImage: `url(${popoverHeaderImg})`,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'bottom',
     backgroundSize: 'contain',
