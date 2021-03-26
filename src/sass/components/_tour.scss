@@ -1,0 +1,31 @@
+// Tour
+// ====
+
+// Overriding inline styles to add changes to hover and focus states
+
+/* stylelint-disable declaration-no-important */
+.react-joyride__tooltip {
+  [data-action='primary'] {
+    border: 1px solid $color-brand-dark !important;
+
+    &:hover,
+    &:focus {
+      background-color: $color-text-link-hover !important;
+      border: 1px solid $color-text-link-hover !important;
+      box-shadow: 0 0 3px $color-brand-dark !important;
+      outline: none !important;
+    }
+  }
+
+  [data-action='back'] {
+    &:hover,
+    &:focus {
+      background-color: $brand-light !important;
+      border-color: $button-color-border-primary !important;
+      box-shadow: 0 0 3px $button-color-border-primary !important;
+      color: $color-brand-dark !important;
+      outline: none !important;
+    }
+  }
+}
+/* stylelint-enable declaration-no-important */

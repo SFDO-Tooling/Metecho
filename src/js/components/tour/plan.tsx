@@ -89,6 +89,19 @@ const PlanTour = ({ run, onClose }: Props) => {
           textColor: '#ffffff',
           primaryColor: '#0070d2',
         },
+        buttonBack: {
+          border: '1px solid #dddbda',
+          borderRadius: '.25rem',
+          color: '#ecebea',
+          fontSize: '13px',
+        },
+        buttonNext: {
+          fontSize: '13px',
+        },
+        buttonSkip: {
+          border: '1px solid #0070d2',
+          fontSize: '13px',
+        },
         tooltip: {
           padding: '0',
         },
