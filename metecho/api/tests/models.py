@@ -61,7 +61,7 @@ class TestProject:
             project.queue_refresh_commits(ref="some branch", originating_user_id=None)
             assert refresh_commits_job.delay.called
 
-    def test_save(self, project_factory, git_hub_repository_factory):
+    def test_save__no_branch_name(self, project_factory, git_hub_repository_factory):
         with patch("metecho.api.gh.get_repo_info") as get_repo_info:
             repo_branch = MagicMock()
             repo_branch.latest_sha.return_value = "abcd1234"
@@ -76,6 +76,27 @@ class TestProject:
             assert get_repo_info.called
             project.refresh_from_db()
             assert project.branch_name == "main-branch"
+            assert project.latest_sha == "abcd1234"
+
+    def test_save__no_latest_sha(self, project_factory, git_hub_repository_factory):
+        with patch("metecho.api.gh.get_repo_info") as get_repo_info:
+            repo_branch = MagicMock()
+            repo_branch.latest_sha.return_value = "abcd1234"
+            repo_info = MagicMock(default_branch="main-branch")
+            repo_info.branch.return_value = repo_branch
+            get_repo_info.return_value = repo_info
+            git_hub_repository_factory(repo_id=123)
+            project = project_factory(
+                branch_name="main",
+                repo_id=123,
+                github_users=[{}],
+                repo_image_url="/foo",
+            )
+            project.save()
+            assert get_repo_info.called
+            project.refresh_from_db()
+            assert project.branch_name == "main"
+            assert project.latest_sha == "abcd1234"
 
     def test_finalize_populate_github_users(self, project_factory):
         with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:

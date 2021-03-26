@@ -24,4 +24,4 @@ def test_populate_data():
             get_repo_info.return_value = repo_info
             call_command("populate_data")
 
-    assert Project.objects.count() == 14
+    assert Project.objects.count() == 7
