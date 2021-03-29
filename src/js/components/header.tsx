@@ -18,6 +18,7 @@ import seesawIcon from '~img/seesaw-sm.svg';
 import Errors from '~js/components/apiErrors';
 import OfflineAlert from '~js/components/offlineAlert';
 import Toasts from '~js/components/toasts';
+import TourAlert from '~js/components/tour/alert';
 import UserInfo from '~js/components/user/info';
 import { AppState } from '~js/store';
 import { selectProject } from '~js/store/projects/selectors';
@@ -50,7 +51,7 @@ const TourLabel = ({
   </span>
 );
 
-const TourDropdown = () => {
+export const TourDropdown = () => {
   const history = useHistory();
   const match =
     useRouteMatch<{
@@ -133,7 +134,7 @@ const Header = () => {
   return user ? (
     <>
       {socket ? null : <OfflineAlert />}
-      {/* {tourStatus === 'on' ? null : <TourAlert />} */}
+      {tourStatus === 'on' ? null : <TourAlert />}
       <Errors />
       <Toasts />
       <PageHeader
