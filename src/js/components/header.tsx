@@ -51,7 +51,13 @@ const TourLabel = ({
   </span>
 );
 
-export const TourDropdown = () => {
+export const TourDropdown = ({
+  show,
+  handleTourStatus,
+}: {
+  show: boolean;
+  handleTourStatus: (status: 'on' | 'off') => void;
+}) => {
   const history = useHistory();
   const match =
     useRouteMatch<{
@@ -67,6 +73,9 @@ export const TourDropdown = () => {
   const handleSelect = useCallback(
     ({ value, disabled }: { value: WalkthroughType; disabled?: boolean }) => {
       /* istanbul ignore else */
+      if (value === WALKTHROUGH_TYPES.SELF) {
+        handleTourStatus('on');
+      }
       if (projectUrl && !disabled) {
         history.push(projectUrl, { [SHOW_WALKTHROUGH]: value });
       }
@@ -74,7 +83,7 @@ export const TourDropdown = () => {
     [projectUrl], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  return project ? (
+  return show && project ? (
     <div className="slds-col_padded">
       <Dropdown
         align="right"
@@ -123,10 +132,15 @@ const Header = () => {
   const user = useSelector(selectUserState);
   const socket = useSelector(selectSocketState);
   const [tourStatus, setTourStatus] = useState('off');
-
+  const handleTourStatus = (status: 'on' | 'off') => {
+    setTourStatus(status);
+  };
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
-      {window.GLOBALS.ENABLE_WALKTHROUGHS ? <TourDropdown /> : null}
+      <TourDropdown
+        show={window.GLOBALS.ENABLE_WALKTHROUGHS}
+        handleTourStatus={handleTourStatus}
+      />
       <UserInfo />
     </PageHeaderControl>
   );
@@ -134,7 +148,9 @@ const Header = () => {
   return user ? (
     <>
       {socket ? null : <OfflineAlert />}
-      {tourStatus === 'on' ? null : <TourAlert />}
+      {tourStatus === 'on' ? (
+        <TourAlert handleTourStatus={handleTourStatus} />
+      ) : null}
       <Errors />
       <Toasts />
       <PageHeader
