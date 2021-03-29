@@ -12,7 +12,7 @@ import ProjectNotFound from '~js/components/projects/project404';
 import GuidedTour from '~js/components/tour/guided';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
-import projectSteps from '~js/components/tour/projectSteps';
+import { selfSteps } from '~js/components/tour/projectSteps';
 import {
   DetailPageLayout,
   getProjectLoadingOrNotFound,
@@ -220,7 +220,7 @@ const ProjectDetail = (
         <GuidedTour
           run={tourRunning === 'self'}
           onClose={handleTourClose}
-          steps={projectSteps}
+          steps={selfSteps}
         />
       </DetailPageLayout>
     </DocumentTitle>

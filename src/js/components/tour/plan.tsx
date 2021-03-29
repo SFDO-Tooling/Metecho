@@ -9,7 +9,7 @@ import Joyride, {
 } from 'react-joyride';
 
 import PopoverHeader from '~img/popover-header.png';
-import steps from '~js/components/tour/projectSteps';
+import { planSteps } from '~js/components/tour/projectSteps';
 interface Props {
   run: boolean;
   onClose: () => void;
@@ -38,7 +38,7 @@ const PlanTour = ({ run, onClose }: Props) => {
 
   return (
     <Joyride
-      steps={steps}
+      steps={planSteps}
       run={run}
       locale={{
         back: i18n.t('Back'),
