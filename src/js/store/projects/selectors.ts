@@ -1,4 +1,4 @@
-import { RouteComponentProps } from 'react-router-dom';
+import { match } from 'react-router-dom';
 import { createSelector } from 'reselect';
 
 import { AppState } from '~js/store';
@@ -24,7 +24,7 @@ export const selectNextUrl = createSelector(
 
 export const selectProjectSlug = (
   appState: AppState,
-  { match: { params } }: RouteComponentProps<{ projectSlug?: string }>,
+  { match: { params } }: { match: match<{ projectSlug?: string }> },
 ) => params.projectSlug;
 
 export const selectProjectNotFound = createSelector(

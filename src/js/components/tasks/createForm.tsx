@@ -109,6 +109,7 @@ const CreateTaskModal = ({
       size="small"
       disableClose={isSaving || isSavingBatch}
       heading={i18n.t('Add a Task for {{epic_name}}', { epic_name: epic.name })}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       onRequestClose={closeModal}
       footer={[
         isShowingTransientMessage && (

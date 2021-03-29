@@ -34,6 +34,7 @@ const RefreshOrgModal = ({
       isOpen={isOpen}
       heading={heading}
       size="small"
+      assistiveText={{ closeButton: i18n.t('Close') }}
       onRequestClose={closeRefreshOrgModal}
     >
       <div className="slds-p-around_large">

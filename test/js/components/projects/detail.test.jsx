@@ -4,18 +4,23 @@ import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '~js/components/projects/detail';
 import { fetchObject, fetchObjects } from '~js/store/actions';
+import { onboarded } from '~js/store/user/actions';
+import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('~js/store/actions');
+jest.mock('~js/store/user/actions');
 
+onboarded.mockReturnValue(() => Promise.resolve({ type: 'TEST', payload: {} }));
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
+  onboarded.mockClear();
 });
 
 const defaultState = {
@@ -87,6 +92,7 @@ const defaultState = {
   },
   user: {
     username: 'my-user',
+    onboarded_at: 'now',
   },
 };
 
@@ -95,13 +101,19 @@ describe('<ProjectDetail />', () => {
     const defaults = {
       initialState: defaultState,
       projectSlug: 'project-1',
+      location: {},
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, projectSlug } = opts;
+    const { initialState, projectSlug, location } = opts;
     const context = {};
+    const history = { replace: jest.fn() };
     const result = renderWithRedux(
       <StaticRouter context={context}>
-        <ProjectDetail match={{ params: { projectSlug } }} />
+        <ProjectDetail
+          match={{ params: { projectSlug } }}
+          location={location}
+          history={history}
+        />
       </StaticRouter>,
       initialState,
       storeWithThunk,
@@ -109,6 +121,7 @@ describe('<ProjectDetail />', () => {
     return {
       ...result,
       context,
+      history,
     };
   };
 
@@ -281,14 +294,94 @@ describe('<ProjectDetail />', () => {
 
   describe('<CreateEpicModal />', () => {
     test('opens/closes form', () => {
-      const { queryByText, getByText } = setup();
+      const { queryByText, getByText, getByTitle } = setup();
       fireEvent.click(getByText('Create an Epic'));
 
       expect(getByText('Create an Epic for Project 1')).toBeVisible();
 
-      fireEvent.click(queryByText('Close'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Create an Epic for Project 1')).toBeNull();
+    });
+  });
+
+  describe('walkthrough tours', () => {
+    let ENABLE_WALKTHROUGHS;
+
+    beforeAll(() => {
+      ENABLE_WALKTHROUGHS = window.GLOBALS.ENABLE_WALKTHROUGHS;
+      window.GLOBALS.ENABLE_WALKTHROUGHS = true;
+    });
+
+    afterAll(() => {
+      window.GLOBALS.ENABLE_WALKTHROUGHS = ENABLE_WALKTHROUGHS;
+    });
+
+    test('opens/closes landing modal', async () => {
+      const { queryByText, findByText, getByTitle } = setup({
+        initialState: {
+          ...defaultState,
+          user: {
+            username: 'test-user',
+            onboarded_at: null,
+          },
+        },
+      });
+
+      expect.assertions(3);
+      const heading = await findByText('What can Metecho help you do today?', {
+        exact: false,
+      });
+
+      expect(heading).toBeVisible();
+
+      fireEvent.click(getByTitle('Close'));
+
+      expect(
+        queryByText('What can Metecho help you do today?', { exact: false }),
+      ).toBeNull();
+      expect(onboarded).toHaveBeenCalledTimes(1);
+    });
+
+    describe('plan tour click', () => {
+      test('runs tour', async () => {
+        const { queryByText, findByText, getByText, getByTitle } = setup({
+          initialState: {
+            ...defaultState,
+            user: {
+              username: 'foobar',
+              onboarded_at: null,
+            },
+          },
+        });
+
+        expect.assertions(2);
+        await findByText('What can Metecho help you do today?', {
+          exact: false,
+        });
+        fireEvent.click(getByText('Start Plan Walkthrough'));
+        const dialog = await findByText('Create Epics to group Tasks');
+
+        expect(dialog).toBeVisible();
+
+        fireEvent.click(getByTitle('Close'));
+
+        expect(queryByText('Create Epics to group Tasks')).toBeNull();
+      });
+    });
+
+    describe('redirect from menu dropdown', () => {
+      test('runs tour', async () => {
+        const { findByText, history } = setup({
+          location: { state: { [SHOW_WALKTHROUGH]: WALKTHROUGH_TYPES.PLAN } },
+        });
+
+        expect.assertions(2);
+        const dialog = await findByText('Create Epics to group Tasks');
+
+        expect(dialog).toBeVisible();
+        expect(history.replace).toHaveBeenCalledWith({ state: {} });
+      });
     });
   });
 });

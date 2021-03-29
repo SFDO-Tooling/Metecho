@@ -99,15 +99,13 @@ describe('<PlaygroundOrgCard/>', () => {
     });
 
     describe('Refresh Org click', () => {
-      test('calls refreshOrg action', async () => {
+      test('calls refreshOrg action', () => {
         const org = {
           ...defaultOrg,
           latest_commit: 'older',
         };
         const { getByText } = setup({ org });
-
-        expect.assertions(1);
-        await fireEvent.click(getByText('Refresh Org'));
+        fireEvent.click(getByText('Refresh Org'));
 
         expect(refreshOrg).toHaveBeenCalledWith(org);
       });
@@ -115,11 +113,9 @@ describe('<PlaygroundOrgCard/>', () => {
   });
 
   describe('refetch org click', () => {
-    test('refetches org', async () => {
+    test('refetches org', () => {
       const { getByText } = setup();
-
-      expect.assertions(1);
-      await fireEvent.click(getByText('check again'));
+      fireEvent.click(getByText('check again'));
 
       expect(refetchOrg).toHaveBeenCalledWith(defaultOrg);
     });

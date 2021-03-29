@@ -320,3 +320,48 @@ describe('agreeToTerms', () => {
     });
   });
 });
+
+describe('onboarded', () => {
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.complete_onboarding();
+  });
+
+  describe('success', () => {
+    test('sets user onboarded_at', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'testuser', onboarded_at: 'now' };
+      fetchMock.putOnce(url, user);
+      const started = { type: 'ONBOARDING_REQUESTED' };
+      const succeeded = {
+        type: 'ONBOARDING_SUCCEEDED',
+        payload: user,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.onboarded()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches ONBOARDING_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.putOnce(url, 500);
+      const started = { type: 'ONBOARDING_REQUESTED' };
+      const failed = { type: 'ONBOARDING_FAILED' };
+
+      expect.assertions(4);
+      return store.dispatch(actions.onboarded()).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+      });
+    });
+  });
+});

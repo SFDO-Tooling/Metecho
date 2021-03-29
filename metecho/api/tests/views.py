@@ -27,6 +27,13 @@ class TestUserView:
         assert response.json()["username"].endswith("@example.com")
         assert response.json()["agreed_to_tos_at"] is not None
 
+    def test_complete_onboarding(self, client):
+        response = client.put(reverse("complete-onboarding"))
+
+        assert response.status_code == 200
+        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["onboarded_at"] is not None
+
 
 @pytest.mark.django_db
 def test_user_disconnect_view(client):
