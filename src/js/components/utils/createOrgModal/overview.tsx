@@ -1,8 +1,11 @@
+import Card from '@salesforce/design-system-react/components/card';
 import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import seesawSvg from '!raw-loader!~img/seesaw-lg.svg';
+import { Illustration } from '~js/components/utils';
 import { Epic } from '~js/store/epics/reducer';
 import { Project } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
@@ -19,8 +22,9 @@ const Overview = ({
 }) => {
   let type, name;
   let isProject = false;
+
   // @@@
-  /* istanbul ignore next */
+  /* istanbul ignore if */
   if (task) {
     type = i18n.t('Task');
     name = task.name;
@@ -34,49 +38,66 @@ const Overview = ({
   }
   const projectUrl = routes.project_detail(project.slug);
 
-  // @@@
-  /* istanbul ignore if */
-  if (isProject) {
-    return (
-      <div className="slds-p-around_large slds-text-align_center">
-        <Trans i18nKey="createProjectScratchOrgHelp">
-          <p>
-            <strong>
-              You are creating a Scratch Org for {{ type }} “{{ name }}”.
-            </strong>
-          </p>
-          <p>
-            Your new org will expire in 30 days.
-            <br />
-            You will be able to access your org from this {{ type }} page.
-          </p>
-        </Trans>
-      </div>
-    );
-  }
+  const help = (
+    <Trans i18nKey="createScratchOrgHelp">
+      <p>
+        <strong>
+          You are creating a Scratch Org for {{ type }} “{{ name }}”.
+        </strong>
+      </p>
+      <p>
+        Your new org will expire in 30 days.
+        <br />
+        You will be able to access your org from this {{ type }} page.
+      </p>
+      <br />
+      <p>
+        <strong>
+          You will not be able to retrieve any changes made in this Scratch Org.
+        </strong>
+      </p>
+    </Trans>
+  );
 
   return (
-    <div className="slds-p-around_large slds-text-align_center">
-      <Trans i18nKey="createScratchOrgHelp">
-        <p>
-          <strong>
-            You are creating a Scratch Org for {{ type }} “{{ name }}”.
-          </strong>
-        </p>
-        <p>
-          Your new org will expire in 30 days.
-          <br />
-          You will be able to access your org from this {{ type }} page and from
-          the <Link to={projectUrl}>project page</Link>.
-        </p>
+    <div className="slds-grid slds-wrap slds-p-around_medium">
+      <div
+        className="slds-p-around_small
+          slds-size_1-of-1
+          slds-small-size_2-of-5"
+      >
+        <Card
+          className="slds-card_boundary"
+          bodyClassName="slds-card__body_inner"
+          hasNoHeader
+        >
+          <Illustration svg={seesawSvg} />
+        </Card>
+      </div>
+      <div
+        className="slds-p-around_small
+          slds-size_1-of-1
+          slds-small-size_3-of-5"
+      >
+        {help}
         <br />
-        <p>
-          If you would like to create a scratch org for the entire project,
-          <br />
-          go to the <Link to={projectUrl}>project page</Link> and click “Create
-          Scratch Org” in the sidebar.
-        </p>
-      </Trans>
+        {isProject ? (
+          <Trans i18nKey="createProjectScratchOrgHelp">
+            <p>
+              Visit an Epic or Task to create a Scratch Org from a work in
+              progress.
+            </p>
+          </Trans>
+        ) : (
+          <Trans i18nKey="createEpicTaskScratchOrgHelp">
+            <p>
+              If you would like to create a Scratch Org for the entire Project,{' '}
+              <Link to={projectUrl}>go to the Project</Link> and click “Create
+              Scratch Org” in the sidebar.
+            </p>
+          </Trans>
+        )}
+      </div>
     </div>
   );
 };
