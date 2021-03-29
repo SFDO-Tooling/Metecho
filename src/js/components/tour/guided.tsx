@@ -48,7 +48,6 @@ const GuidedTour = ({ steps, run, onClose }: Props) => {
         last: i18n.t('Close'),
         next: i18n.t('Next'),
       }}
-      continuous
       showProgress
       disableScrolling
       getHelpers={setHelpers}

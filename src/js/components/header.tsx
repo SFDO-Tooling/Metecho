@@ -3,7 +3,7 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   Link,
@@ -121,6 +121,7 @@ const TourDropdown = () => {
 const Header = () => {
   const user = useSelector(selectUserState);
   const socket = useSelector(selectSocketState);
+  const [tourStatus, setTourStatus] = useState('off');
 
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
@@ -132,6 +133,7 @@ const Header = () => {
   return user ? (
     <>
       {socket ? null : <OfflineAlert />}
+      {/* {tourStatus === 'on' ? null : <TourAlert />} */}
       <Errors />
       <Toasts />
       <PageHeader
