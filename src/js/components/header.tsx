@@ -107,6 +107,10 @@ const TourDropdown = () => {
             iconPath: mapIcon,
             iconName: 'map-sm',
           },
+          {
+            label: i18n.t('Self-guided Tour'),
+            value: WALKTHROUGH_TYPES.SELF,
+          },
         ]}
         onSelect={handleSelect}
       />

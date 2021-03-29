@@ -9,8 +9,10 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import CreateEpicModal from '~js/components/epics/createForm';
 import EpicTable from '~js/components/epics/table';
 import ProjectNotFound from '~js/components/projects/project404';
+import GuidedTour from '~js/components/tour/guided';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
+import projectSteps from '~js/components/tour/projectSteps';
 import {
   DetailPageLayout,
   getProjectLoadingOrNotFound,
@@ -215,6 +217,11 @@ const ProjectDetail = (
           onRequestClose={closeTourLandingModal}
         />
         <PlanTour run={tourRunning === 'plan'} onClose={handleTourClose} />
+        <GuidedTour
+          run={tourRunning === 'self'}
+          onClose={handleTourClose}
+          steps={projectSteps}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );
