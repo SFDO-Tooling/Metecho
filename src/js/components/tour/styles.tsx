@@ -11,16 +11,16 @@ const tourStyles: Styles = {
   },
   buttonBack: {
     border: '1px solid #dddbda',
-    borderRadius: '.25rem',
+    borderRadius: '0.25rem',
     color: '#ecebea',
-    fontSize: '13px',
+    fontSize: '0.8125rem',
   },
   buttonNext: {
-    fontSize: '13px',
+    fontSize: '0.8125rem',
   },
   buttonSkip: {
     border: '1px solid #0070d2',
-    fontSize: '13px',
+    fontSize: '0.8125rem',
   },
   tooltip: {
     padding: '0',
@@ -29,7 +29,7 @@ const tourStyles: Styles = {
     textAlign: 'left',
   },
   tooltipContent: {
-    fontSize: '.8125rem',
+    fontSize: '0.8125rem',
     padding: '1rem',
   },
   tooltipTitle: {
