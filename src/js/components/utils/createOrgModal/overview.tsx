@@ -40,17 +40,14 @@ const Overview = ({
 
   const help = (
     <Trans i18nKey="createScratchOrgHelp">
-      <p>
-        <strong>
-          You are creating a Scratch Org for {{ type }} “{{ name }}”.
-        </strong>
-      </p>
+      <h3 className="slds-text-title_bold">
+        You are creating a Scratch Org for {{ type }} “{{ name }}”.
+      </h3>
       <p>
         Your new org will expire in 30 days.
         <br />
         You will be able to access your org from this {{ type }} page.
       </p>
-      <br />
       <p>
         <strong>
           You will not be able to retrieve any changes made in this Scratch Org.
@@ -77,10 +74,10 @@ const Overview = ({
       <div
         className="slds-p-around_small
           slds-size_1-of-1
-          slds-small-size_3-of-5"
+          slds-small-size_3-of-5
+          slds-text-longform"
       >
         {help}
-        <br />
         {isProject ? (
           <Trans i18nKey="createProjectScratchOrgHelp">
             <p>
