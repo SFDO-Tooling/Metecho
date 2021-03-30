@@ -113,6 +113,7 @@ const ConnectModal = ({
     <Modal
       isOpen={isOpen && !isConnected}
       heading={i18n.t('Connect to Salesforce')}
+      assistiveText={{ closeButton: i18n.t('Close') }}
       tagline={
         <Trans i18nKey="devHubInfo">
           Connection to a Salesforce org with Dev Hub enabled is required to

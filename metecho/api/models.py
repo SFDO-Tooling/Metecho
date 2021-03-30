@@ -80,6 +80,11 @@ class User(HashIdMixin, AbstractUser):
     devhub_username = StringField(blank=True, default="")
     allow_devhub_override = models.BooleanField(default=False)
     agreed_to_tos_at = models.DateTimeField(null=True, blank=True)
+    onboarded_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Date of the last time the user completed the interactive onboarding",
+    )
 
     def notify(self, subject, body):
         # Right now, the only way we notify is via email. In future, we

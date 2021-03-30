@@ -112,6 +112,7 @@ const SubmitReviewModal = ({
       heading={i18n.t('Submit Task Review')}
       size="small"
       disableClose={submittingReview}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       onRequestClose={doClose}
       footer={[
         <Button

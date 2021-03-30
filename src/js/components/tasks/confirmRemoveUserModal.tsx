@@ -46,6 +46,7 @@ const ConfirmRemoveUserModal = ({
       isOpen={Boolean(isOpen && waitingToRemoveUser)}
       heading={heading}
       prompt="warning"
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       onRequestClose={handleCancel}
       footer={[
         <Button key="cancel" label={i18n.t('Cancel')} onClick={handleCancel} />,

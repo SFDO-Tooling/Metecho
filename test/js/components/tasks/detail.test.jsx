@@ -334,7 +334,7 @@ describe('<TaskDetail/>', () => {
       });
 
       test('just opens modal', () => {
-        const { getByText, queryByText } = setup();
+        const { getByText, getByTitle, queryByText } = setup();
         fireEvent.click(getByText('Retrieve Changes from Dev Org'));
 
         expect(refetchOrg).not.toHaveBeenCalled();
@@ -342,7 +342,7 @@ describe('<TaskDetail/>', () => {
           getByText('Select the location to retrieve changes'),
         ).toBeVisible();
 
-        fireEvent.click(getByText('Close'));
+        fireEvent.click(getByTitle('Close'));
 
         expect(
           queryByText('Select the location to retrieve changes'),
@@ -514,30 +514,27 @@ describe('<TaskDetail/>', () => {
   });
 
   describe('edit task click', () => {
-    test('opens and closes modal', async () => {
-      const { getByText, queryByText } = setup();
-
-      expect.assertions(2);
-      await fireEvent.click(getByText('Task Options'));
-      await fireEvent.click(getByText('Edit Task'));
+    test('opens and closes modal', () => {
+      const { getByText, getByTitle, queryByText } = setup();
+      fireEvent.click(getByText('Task Options'));
+      fireEvent.click(getByText('Edit Task'));
 
       expect(getByText('Edit Task')).toBeVisible();
 
-      await fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Edit Task')).toBeNull();
     });
   });
 
-  test('opens/closed deleted modal', async () => {
-    const { getByText, queryByText } = setup();
-    expect.assertions(2);
-    await fireEvent.click(getByText('Task Options'));
-    await fireEvent.click(getByText('Delete Task'));
+  test('opens/closed deleted modal', () => {
+    const { getByText, getByTitle, queryByText } = setup();
+    fireEvent.click(getByText('Task Options'));
+    fireEvent.click(getByText('Delete Task'));
 
     expect(getByText('Confirm Deleting Task')).toBeVisible();
 
-    await fireEvent.click(getByText('Cancel'));
+    fireEvent.click(getByTitle('Cancel'));
 
     expect(queryByText('Confirm Deleting Task')).toBeNull();
   });
@@ -569,27 +566,25 @@ describe('<TaskDetail/>', () => {
       },
     };
 
-    test('opens submit review modal', async () => {
-      const { getByText, queryByText } = setup({
+    test('opens submit review modal', () => {
+      const { getByText, getByTitle, queryByText } = setup({
         initialState: {
           ...defaultState,
           tasks,
           orgs,
         },
       });
-
-      expect.assertions(2);
-      await fireEvent.click(getByText('Submit Review'));
+      fireEvent.click(getByText('Submit Review'));
 
       expect(getByText('Submit Task Review')).toBeVisible();
 
-      await fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Submit Task Review')).toBeNull();
     });
 
     describe('form submit', () => {
-      test('submits task review', async () => {
+      test('submits task review', () => {
         const { getByText, baseElement } = setup({
           initialState: {
             ...defaultState,
@@ -597,11 +592,9 @@ describe('<TaskDetail/>', () => {
             orgs,
           },
         });
-
-        expect.assertions(2);
-        await fireEvent.click(getByText('Submit Review'));
+        fireEvent.click(getByText('Submit Review'));
         const submit = baseElement.querySelector('.slds-button[type="submit"]');
-        await fireEvent.click(submit);
+        fireEvent.click(submit);
 
         expect(createObject).toHaveBeenCalledTimes(1);
         expect(createObject).toHaveBeenCalledWith({
@@ -617,7 +610,7 @@ describe('<TaskDetail/>', () => {
         });
       });
 
-      test('submits task review without org', async () => {
+      test('submits task review without org', () => {
         const { getByText, baseElement } = setup({
           initialState: {
             ...defaultState,
@@ -642,13 +635,11 @@ describe('<TaskDetail/>', () => {
             },
           },
         });
-
-        expect.assertions(2);
-        await fireEvent.click(getByText('Update Review'));
+        fireEvent.click(getByText('Update Review'));
         const submit = baseElement.querySelector(
           '.slds-modal__footer .slds-button[type="submit"]',
         );
-        await fireEvent.click(submit);
+        fireEvent.click(submit);
 
         expect(createObject).toHaveBeenCalledTimes(1);
         expect(createObject).toHaveBeenCalledWith({
@@ -856,12 +847,12 @@ describe('<TaskDetail/>', () => {
 
   describe('assign user click', () => {
     test('opens/closed modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Assign'));
 
       expect(getByText('Assign Tester')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Assign Tester')).toBeNull();
     });

@@ -162,6 +162,7 @@ const AssignUserModal = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={handleClose}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       heading={heading}
       directional
       size="small"
@@ -249,7 +250,10 @@ const AssignUserModal = ({
         )}
         <div>
           {userList.map((person, idx) => (
-            <div key={idx} className="slds-p-horizontal_medium slds-p-bottom_medium">
+            <div
+              key={idx}
+              className="slds-p-horizontal_medium slds-p-bottom_medium"
+            >
               <h3 className="slds-text-heading_medium slds-m-bottom_xx-small ">
                 {person.heading}
               </h3>

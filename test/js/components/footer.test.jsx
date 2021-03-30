@@ -34,14 +34,17 @@ describe('<Footer />', () => {
       });
 
       test('can open/close terms of service', () => {
-        const { getByText, queryByText } = renderWithRedux(<Footer />, {
-          user: {},
-        });
+        const { getByText, getByTitle, queryByText } = renderWithRedux(
+          <Footer />,
+          {
+            user: {},
+          },
+        );
         fireEvent.click(getByText('Terms of Service'));
 
         expect(queryByText('Metecho Terms of Service')).toBeVisible();
 
-        fireEvent.click(getByText('Close'));
+        fireEvent.click(getByTitle('Close'));
 
         expect(queryByText('Metecho Terms of Service')).toBeNull();
       });

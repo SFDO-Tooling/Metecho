@@ -225,6 +225,7 @@ const CreateEpicModal = ({
         project_name: project.name,
       })}
       onRequestClose={closeForm}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       footer={[
         <Button
           key="cancel"

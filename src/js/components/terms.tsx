@@ -41,6 +41,7 @@ export const TermsModal = ({
     disableClose={isRequired}
     heading={i18n.t('Metecho Terms of Service')}
     size="medium"
+    assistiveText={{ closeButton: i18n.t('Close') }}
     footer={
       isRequired
         ? [

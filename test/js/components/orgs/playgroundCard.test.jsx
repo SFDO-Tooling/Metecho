@@ -27,6 +27,16 @@ afterEach(() => {
   refetchOrg.mockClear();
 });
 
+const defaultProject = {
+  id: 'project1',
+  slug: 'project-1',
+  name: 'Project 1',
+  description: 'Project Description',
+  description_rendered: '<p>Project Description</p>',
+  github_users: [],
+  latest_sha: '617a512',
+  org_config_names: [{ key: 'dev' }, { key: 'qa' }],
+};
 const defaultEpic = {
   id: 'epic1',
   slug: 'epic-1',
@@ -60,66 +70,85 @@ const defaultOrg = {
   is_created: true,
 };
 
-describe('<PlaygroundOrgCard/>', () => {
-  const setup = (options) => {
-    const defaults = {
+const setup = (options, type) => {
+  let defaults;
+  if (type === 'project') {
+    defaults = {
+      org: { ...defaultOrg, project: 'project-1' },
+      project: defaultProject,
+      repoUrl: '/my-repo/',
+    };
+  } else {
+    defaults = {
       org: defaultOrg,
       epic: defaultEpic,
       repoUrl: '/my-repo/',
     };
-    const opts = Object.assign({}, defaults, options);
-    const ui = (
-      <MemoryRouter>
-        <PlaygroundOrgCard {...opts} />
-      </MemoryRouter>
-    );
-    return renderWithRedux(ui, {}, storeWithThunk);
-  };
+  }
+  const opts = Object.assign({}, defaults, options);
+  const ui = (
+    <MemoryRouter>
+      <PlaygroundOrgCard {...opts} />
+    </MemoryRouter>
+  );
+  return renderWithRedux(ui, {}, storeWithThunk);
+};
 
-  test('renders org card', () => {
-    const { getByText } = setup({ parentLink: '/foo' });
+describe('<PlaygroundOrgCard/>', () => {
+  describe('project org', () => {
+    test('renders org card', () => {
+      const { getByText } = setup({ parentLink: '/foo' }, 'project');
 
-    expect(getByText('Epic Scratch Org')).toBeVisible();
-    expect(getByText('1 unretrieved change', { exact: false })).toBeVisible();
-    expect(getByText('check again')).toBeVisible();
-    expect(getByText('This is an org.')).toBeVisible();
-    expect(getByText('Epic 1')).toBeVisible();
+      expect(getByText('Project Scratch Org')).toBeVisible();
+      expect(getByText('1 unretrieved change', { exact: false })).toBeVisible();
+      expect(getByText('check again')).toBeVisible();
+      expect(getByText('This is an org.')).toBeVisible();
+      expect(getByText('Project 1')).toBeVisible();
+    });
   });
 
-  describe('out of date', () => {
-    test('renders "Behind Latest"', () => {
-      const org = {
-        ...defaultOrg,
-        latest_commit: 'older',
-      };
-      const { getByText } = setup({ org });
+  describe('epic org', () => {
+    test('renders org card', () => {
+      const { getByText } = setup({ parentLink: '/foo' });
 
-      expect(getByText('Behind Latest', { exact: false })).toBeVisible();
-      expect(getByText('view changes')).toBeVisible();
+      expect(getByText('Epic Scratch Org')).toBeVisible();
+      expect(getByText('1 unretrieved change', { exact: false })).toBeVisible();
+      expect(getByText('check again')).toBeVisible();
+      expect(getByText('This is an org.')).toBeVisible();
+      expect(getByText('Epic 1')).toBeVisible();
     });
 
-    describe('Refresh Org click', () => {
-      test('calls refreshOrg action', async () => {
+    describe('out of date', () => {
+      test('renders "Behind Latest"', () => {
         const org = {
           ...defaultOrg,
           latest_commit: 'older',
         };
         const { getByText } = setup({ org });
 
-        expect.assertions(1);
-        await fireEvent.click(getByText('Refresh Org'));
+        expect(getByText('Behind Latest', { exact: false })).toBeVisible();
+        expect(getByText('view changes')).toBeVisible();
+      });
 
-        expect(refreshOrg).toHaveBeenCalledWith(org);
+      describe('Refresh Org click', () => {
+        test('calls refreshOrg action', () => {
+          const org = {
+            ...defaultOrg,
+            latest_commit: 'older',
+          };
+          const { getByText } = setup({ org });
+          fireEvent.click(getByText('Refresh Org'));
+
+          expect(refreshOrg).toHaveBeenCalledWith(org);
+        });
       });
     });
   });
 
   describe('refetch org click', () => {
-    test('refetches org', async () => {
+    test('refetches org', () => {
       const { getByText } = setup();
-
-      expect.assertions(1);
-      await fireEvent.click(getByText('check again'));
+      fireEvent.click(getByText('check again'));
 
       expect(refetchOrg).toHaveBeenCalledWith(defaultOrg);
     });
