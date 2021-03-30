@@ -315,6 +315,7 @@
   "markdownGuide": "For more options, view this <2>Markdown Guide</2>.",
   "noGitHubUsers": "We couldn’t find any GitHub users who have access to this project. Try re-syncing the list of available collaborators, or contact an admin for this project on GitHub.",
   "noProjectsHelper": "We couldn’t find any projects you have access to on GitHub. Confirm that you are logged into the correct account or contact an admin on GitHub.",
+  "noUsersFound": "No users found.",
   "notifyUser": "<0>Notify</0><1></1> <3><0><0>{{username}}</0></0> by email</3>",
   "orgNotYetCreated": "<0>Status:</0> not yet created",
   "orgOwnedByWrongUser": "<0>Status:</0> owned by user",

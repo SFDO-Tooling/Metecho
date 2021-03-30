@@ -95,17 +95,6 @@ const AssignUserModal = ({
 
   const handleFindTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFindText(e.target.value);
-    const searchList = userList.map(({ list }) => [...list]);
-    console.info(searchList[1]);
-
-    // const searchStringInArray = (str, strArray) => {
-    //   for (let j = 0; j < strArray.length; j++) {
-    //     if (strArray[j].match(str)) {
-    //       return j;
-    //     }
-    //   }
-    //   return -1;
-    // };
   };
   const usersWithoutAssignee = epicUsers.filter(
     (user) => user.id !== selectedUser?.id,
@@ -154,39 +143,42 @@ const AssignUserModal = ({
 
   const emptyCollaboratorsText = (
     <div className="slds-p-top_small">
-      <Trans i18nKey="noEpicCollaborators">
-        There are no Epic Collaborators. Select GitHub users to add as
-        Collaborators.
-      </Trans>
+      {findText ? (
+        <Trans i18nKey="noUsersFound">No users found.</Trans>
+      ) : (
+        <Trans i18nKey="noEpicCollaborators">
+          There are no Epic Collaborators. Select GitHub users to add as
+          Collaborators.
+        </Trans>
+      )}
     </div>
   );
-  /* @@@ todo
-    - filter users in second list that appear in the first
-    - flatten the list into one list
-  */
-
   useEffect(() => {
-    const testList = project.github_users.filter((
-      s, //for every object in heroes
-    ) =>
-      usersWithoutAssignee.every((t) => {
-        const key = Object.keys(t)[0];
-        const user s[key] == t[key];
-      }),
+    const epicCollaborators = usersWithoutAssignee.filter(
+      (user) =>
+        user.name.toLowerCase().includes(findText) ||
+        user.login.toLowerCase().includes(findText),
     );
-    console.info(testList);
     const users = [
       {
         heading: `${i18n.t('Epic Collaborators')}`,
-        list: usersWithoutAssignee,
+        list: epicCollaborators,
       },
       {
         heading: githubCollaboratorHeading,
-        list: project.github_users,
+        list: project.github_users
+          .filter((user) => epicCollaborators.every((u) => u.id !== user.id))
+          .filter((user) => user.id !== selectedUser?.id)
+          .filter(
+            (user) =>
+              user.name.toLowerCase().includes(findText) ||
+              user.login.toLowerCase().includes(findText),
+          ),
       },
     ];
     setUserList(users);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [findText]);
   return (
     <Modal
       isOpen={isOpen}
@@ -272,18 +264,20 @@ const AssignUserModal = ({
                 {person.heading}
               </div>
               <ul>
-                {person.list.length
-                  ? person.list.map((user, i) => (
-                      <li key={user.id}>
-                        <GitHubUserButton
-                          withName
-                          user={user}
-                          isSelected={selection === user}
-                          onClick={() => handleAssigneeSelection(user)}
-                        />
-                      </li>
-                    ))
-                  : emptyCollaboratorsText}
+                {person.list.length ? (
+                  person.list.map((user) => (
+                    <li key={user.id}>
+                      <GitHubUserButton
+                        withName
+                        user={user}
+                        isSelected={selection === user}
+                        onClick={() => handleAssigneeSelection(user)}
+                      />
+                    </li>
+                  ))
+                ) : (
+                  <li>{emptyCollaboratorsText}</li>
+                )}
               </ul>
             </div>
           ))}
