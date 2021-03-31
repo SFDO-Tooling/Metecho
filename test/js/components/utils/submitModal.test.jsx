@@ -45,12 +45,12 @@ describe('<SubmitModal/>', () => {
 
   describe('cancel button', () => {
     test('closes modal', () => {
-      const { getByText, toggleModal } = setup();
+      const { getByText, getByTitle, toggleModal } = setup();
 
       expect(getByText('Submit this task for testing')).toBeVisible();
-      expect(getByText('Cancel')).toBeVisible();
+      expect(getByTitle('Cancel')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(toggleModal).toHaveBeenCalledTimes(1);
     });

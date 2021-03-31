@@ -62,8 +62,7 @@ export default ({
           filters: { epic: epic.id },
         }),
       );
-    } /* istanbul ignore next */ else if (project && !projectOrgs) {
-      // @@@
+    } else if (project && !projectOrgs) {
       // Fetch orgs from API
       dispatch(
         fetchObjects({
@@ -78,8 +77,7 @@ export default ({
     return { orgs: taskOrgs };
   } else if (epic) {
     return { orgs: epicOrgs };
-  } /* istanbul ignore next */ else if (project) {
-    // @@@
+  } else if (project) {
     return { orgs: projectOrgs };
   }
   return { orgs: undefined };

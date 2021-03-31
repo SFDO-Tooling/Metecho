@@ -79,6 +79,7 @@ const DeleteModal = ({
     <Modal
       isOpen={isOpen}
       size="small"
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       disableClose={isSaving}
       heading={heading}
       onRequestClose={handleClose}

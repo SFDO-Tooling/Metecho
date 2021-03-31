@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
@@ -354,12 +354,12 @@ describe('<EpicDetail/>', () => {
 
   describe('<AssignUsersModal />', () => {
     test('opens and closes', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Add or Remove Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('GitHub Users')).toBeNull();
     });
@@ -500,8 +500,8 @@ describe('<EpicDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
-        fireEvent.click(getByText('Cancel'));
+        const { getByTitle, queryByText } = result;
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
       });
@@ -706,25 +706,25 @@ describe('<EpicDetail/>', () => {
 
   describe('epic options click', () => {
     test('opens and closes edit modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Epic Options'));
       fireEvent.click(getByText('Edit Epic'));
 
       expect(getByText('Edit Epic')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Edit Epic')).toBeNull();
     });
 
     test('opens and closes delete modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Epic Options'));
       fireEvent.click(getByText('Delete Epic'));
 
       expect(getByText('Confirm Deleting Epic')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Confirm Deleting Epic')).toBeNull();
     });
@@ -732,12 +732,12 @@ describe('<EpicDetail/>', () => {
 
   describe('<CreateTaskModal/>', () => {
     test('open/close modal', () => {
-      const { queryByText, getByText } = setup();
+      const { queryByText, getByText, getByTitle } = setup();
       fireEvent.click(getByText('Add a Task'));
 
       expect(getByText('Add a Task for Epic 1')).toBeVisible();
 
-      fireEvent.click(queryByText('Close'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Add a Task for Epic 1')).toBeNull();
     });
@@ -746,7 +746,7 @@ describe('<EpicDetail/>', () => {
   describe('<CreateOrgModal />', () => {
     let result;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       result = setup({
         initialState: {
           ...defaultState,
@@ -760,19 +760,22 @@ describe('<EpicDetail/>', () => {
           },
         },
       });
-      await fireEvent.click(result.getByText('Create Scratch Org'));
+      fireEvent.click(result.getByText('Create Scratch Org'));
     });
 
     describe('"cancel" click', () => {
-      test('closes modal', async () => {
+      test('closes modal', () => {
         const { getByText, queryByText } = result;
 
-        expect(getByText('Scratch Org Overview')).toBeVisible();
+        expect(
+          getByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeVisible();
 
-        expect.assertions(2);
-        await fireEvent.click(getByText('Cancel'));
+        fireEvent.click(getByText('Cancel'));
 
-        expect(queryByText('Scratch Org Overview')).toBeNull();
+        expect(
+          queryByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeNull();
       });
     });
 
@@ -781,15 +784,16 @@ describe('<EpicDetail/>', () => {
         const { getByText, getByLabelText, queryByText } = result;
 
         expect.assertions(5);
-        await fireEvent.click(getByText('Next'));
+        fireEvent.click(getByText('Next'));
 
-        expect(getByText('Scratch Org Details')).toBeVisible();
+        expect(getByText('Advanced Options')).toBeVisible();
 
-        await fireEvent.click(getByText('Advanced Options'));
-        await fireEvent.click(getByLabelText('qa'));
-        await fireEvent.click(getByText('Create Org'));
+        fireEvent.click(getByText('Advanced Options'));
+        fireEvent.click(getByLabelText('qa'));
+        fireEvent.click(getByText('Create Org'));
+        await waitForElementToBeRemoved(getByText('Advanced Options'));
 
-        expect(queryByText('Scratch Org Details')).toBeNull();
+        expect(queryByText('Advanced Options')).toBeNull();
         expect(createObject).toHaveBeenCalled();
         expect(createObject.mock.calls[0][0].data.epic).toEqual('epic1');
         expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(

@@ -331,6 +331,7 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
       disableClose={capturingChanges}
       heading={pages[pageIndex].heading}
       footer={pages[pageIndex].footer}
+      assistiveText={{ closeButton: i18n.t('Close') }}
       directional={pageIndex > 0}
       onRequestClose={handleClose}
     >

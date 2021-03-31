@@ -12,5 +12,6 @@ def env(request):
         "SITE": site_profile.data,
         "SENTRY_DSN": settings.SENTRY_DSN,
         "ORG_RECHECK_MINUTES": settings.ORG_RECHECK_MINUTES,
+        "ENABLE_WALKTHROUGHS": settings.ENABLE_WALKTHROUGHS,
     }
     return {"GLOBALS": GLOBALS}

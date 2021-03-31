@@ -69,7 +69,7 @@ describe('<CaptureModal/>', () => {
   };
 
   test('can navigate forward/back, close modal', () => {
-    const { getByText, closeModal } = setup();
+    const { getByText, getByTitle, closeModal } = setup();
 
     expect(getByText('Select the location to retrieve changes')).toBeVisible();
 
@@ -81,7 +81,7 @@ describe('<CaptureModal/>', () => {
 
     expect(getByText('Select the location to retrieve changes')).toBeVisible();
 
-    fireEvent.click(getByText('Close'));
+    fireEvent.click(getByTitle('Close'));
 
     expect(closeModal).toHaveBeenCalledTimes(1);
   });

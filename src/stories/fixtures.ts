@@ -12,6 +12,7 @@ export const api_urls = {
   user_refresh: () => '/api/user/refresh/',
   user_disconnect_sf: () => '/api/user/disconnect/',
   agree_to_tos: () => '/api/agree_to_tos/',
+  complete_onboarding: () => '/api/complete_onboarding/',
   project_list: () => '/api/projects/',
   project_detail: (slug: string) => `/api/projects/${slug}/`,
   project_refresh_github_users: (id: string) =>
@@ -364,6 +365,7 @@ export const sampleUser1 = {
   devhub_username: '',
   uses_global_devhub: false,
   agreed_to_tos_at: '2019-02-01T19:47:49Z',
+  onboarded_at: '2019-02-01T19:47:49Z',
 };
 
 export const sampleProject1 = {

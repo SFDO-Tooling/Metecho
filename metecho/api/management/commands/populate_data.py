@@ -21,7 +21,10 @@ class Command(BaseCommand):
                 "dictumst. Nulla facilisi etiam dignissim diam."
             ),
         )
-        project = Project.objects.create(name=name, description=description, **kwargs)
+        branch_name = kwargs.pop("branch_name", "")
+        project = Project.objects.create(
+            name=name, description=description, branch_name=branch_name, **kwargs
+        )
         return project
 
     def create_epic(self, **kwargs):
@@ -74,29 +77,6 @@ class Command(BaseCommand):
                 "This is a description of the project. "
                 "It might contain [links](https://install.salesforce.org)."
             ),
-        )
-        self.create_project(
-            name="Metecho", repo_owner="SFDO-Tooling", repo_name="Metecho"
-        )
-        self.create_project(
-            name="MetaDeploy", repo_owner="SFDO-Tooling", repo_name="MetaDeploy"
-        )
-        self.create_project(
-            name="CumulusCI", repo_owner="SFDO-Tooling", repo_name="CumulusCI"
-        )
-        self.create_project(
-            name="MetaCI", repo_owner="SFDO-Tooling", repo_name="MetaCI"
-        )
-        self.create_project(
-            name="Mister Belvedere", repo_owner="SFDO-Tooling", repo_name="mrbelvedere"
-        )
-        self.create_project(
-            name="SFDO Template", repo_owner="SFDO-Tooling", repo_name="sfdo-template"
-        )
-        self.create_project(
-            name="SFDO Template Helpers",
-            repo_owner="SFDO-Tooling",
-            repo_name="sfdo-template-helpers",
         )
         self.create_project(name="OddSite", repo_owner="oddbird", repo_name="oddsite")
         self.create_project(name="Books", repo_owner="oddbird", repo_name="books")

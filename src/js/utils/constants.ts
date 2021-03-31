@@ -65,3 +65,12 @@ export const EPIC_STATUSES = {
 export const LIST_CHANNEL_ID = 'list';
 
 export type OrgParentType = 'TASK' | 'EPIC' | 'PROJECT';
+
+export type WalkthroughType = 'play' | 'help' | 'plan';
+export const WALKTHROUGH_TYPES = {
+  PLAY: 'play' as const,
+  HELP: 'help' as const,
+  PLAN: 'plan' as const,
+};
+
+export const SHOW_WALKTHROUGH = 'show_walkthrough';

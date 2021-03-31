@@ -168,6 +168,7 @@ const SubmitModal = ({
       isOpen={isOpen}
       size="medium"
       disableClose={submittingReview}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       heading={heading}
       directional
       footer={[
