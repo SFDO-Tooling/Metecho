@@ -367,5 +367,6 @@
   "up to date": "up to date",
   "view changes": "view changes",
   "viewOutdatedOrg": "You may proceed with the outdated org, but be aware that you will not be testing the latest changes.",
-  "welcomeMessage": "<0>To get started</0> log in with your GitHub account."
+  "welcomeMessage": "<0>To get started</0> log in with your GitHub account.",
+  "Re-Sync Github Collaborators": "Re-Sync Github Collaborators"
 }

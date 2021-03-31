@@ -18,7 +18,7 @@ const ReSyncGithubUserButton = ({ isRefreshing, refreshUsers }: Props) => (
       />
     ) : (
       <Button
-        label={i18n.t('Re-Sync Collaborators')}
+        label={i18n.t('Re-Sync Github Collaborators')}
         variant="outline-brand"
         iconCategory="utility"
         iconName="refresh"
