@@ -42,9 +42,9 @@ EpicTable.args = {
 EpicTable.argTypes = {
   epics: {
     defaultValue: Object.keys(sampleEpics),
+    options: Object.keys(sampleEpics),
     control: {
       type: 'multi-select',
-      options: Object.keys(sampleEpics),
     },
   },
 };

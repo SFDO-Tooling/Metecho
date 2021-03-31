@@ -65,7 +65,7 @@ coloredlogs==15.0
     # via cumulusci
 constantly==15.1.0
     # via twisted
-croniter==1.0.9
+croniter==1.0.10
     # via rq-scheduler
 cryptography==3.4.6
     # via
@@ -104,7 +104,7 @@ django-parler==2.2
     # via -r requirements/prod.in
 django-redis==4.12.1
     # via -r requirements/prod.in
-django-rq==2.4.0
+django-rq==2.4.1
     # via -r requirements/prod.in
 django==3.1.7
     # via
@@ -121,7 +121,7 @@ django==3.1.7
     #   django-rq
     #   djangorestframework
     #   sfdo-template-helpers
-djangorestframework==3.12.2
+djangorestframework==3.12.4
     # via
     #   -r requirements/prod.in
     #   sfdo-template-helpers
@@ -143,7 +143,7 @@ gvgen==1.0
     # via snowfakery
 hashids==1.3.1
     # via django-hashid-field
-hiredis==1.1.0
+hiredis==2.0.0
     # via aioredis
 honcho==1.0.1
     # via -r requirements/prod.in
@@ -160,7 +160,7 @@ idna==2.10
     #   hyperlink
     #   requests
     #   twisted
-importlib-metadata==3.7.3
+importlib-metadata==3.10.0
     # via keyring
 incremental==21.3.0
     # via twisted
@@ -195,8 +195,6 @@ markupsafe==1.1.1
     #   jinja2
 msgpack==1.0.2
     # via channels-redis
-natsort==7.1.1
-    # via croniter
 oauthlib==3.1.0
     # via requests-oauthlib
 orderedmultidict==1.0.1
@@ -285,7 +283,7 @@ robotframework==3.2.2
     #   robotframework-seleniumlibrary
 rq-scheduler==0.11.0
     # via -r requirements/prod.in
-rq==1.7.0
+rq==1.8.0
     # via
     #   django-rq
     #   rq-scheduler
