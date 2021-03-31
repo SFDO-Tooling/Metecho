@@ -104,7 +104,7 @@ packaging==20.8
     #   pytest
     #   pytest-sugar
     #   sphinx
-parso==0.8.1
+parso==0.8.2
     # via jedi
 pathspec==0.8.1
     # via black
