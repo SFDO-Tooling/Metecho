@@ -53,9 +53,9 @@ TasksTable.args = {
 TasksTable.argTypes = {
   tasks: {
     defaultValue: Object.keys(sampleTasks),
+    options: Object.keys(sampleTasks),
     control: {
       type: 'multi-select',
-      options: Object.keys(sampleTasks),
     },
   },
   epicUsers: { control: { disable: true } },
