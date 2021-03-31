@@ -80,7 +80,7 @@ iniconfig==1.1.1
     # via pytest
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.21.0
+ipython==7.22.0
     # via -r requirements/dev.in
 isort==5.8.0
     # via -r requirements/dev.in
@@ -104,7 +104,7 @@ packaging==20.9
     #   pytest
     #   pytest-sugar
     #   sphinx
-parso==0.8.1
+parso==0.8.2
     # via jedi
 pathspec==0.8.1
     # via black
@@ -124,7 +124,7 @@ py==1.10.0
     # via pytest
 pycodestyle==2.7.0
     # via flake8
-pyflakes==2.3.0
+pyflakes==2.3.1
     # via flake8
 pygments==2.8.1
     # via

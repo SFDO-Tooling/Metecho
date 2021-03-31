@@ -41,9 +41,9 @@ export const TaskPath: Story<TaskStoryProps> = TaskTemplate.bind({});
 TaskPath.argTypes = {
   status: {
     defaultValue: 'Planned',
+    options: Object.keys(sampleTaskStatuses),
     control: {
       type: 'select',
-      options: Object.keys(sampleTaskStatuses),
     },
   },
 };
@@ -73,9 +73,9 @@ export const EpicPath: Story<EpicStoryProps> = EpicTemplate.bind({});
 EpicPath.argTypes = {
   status: {
     defaultValue: 'Planned',
+    options: Object.keys(sampleEpicStatuses),
     control: {
       type: 'select',
-      options: Object.keys(sampleEpicStatuses),
     },
   },
 };

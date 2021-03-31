@@ -45,9 +45,9 @@ EpicSteps.args = {
 EpicSteps.argTypes = {
   steps: {
     defaultValue: 'Initial steps',
+    options: Object.keys(epicSteps),
     control: {
       type: 'select',
-      options: Object.keys(epicSteps),
     },
   },
 };
@@ -64,9 +64,9 @@ TaskSteps.args = {
 TaskSteps.argTypes = {
   steps: {
     defaultValue: 'Initial steps',
+    options: Object.keys(taskSteps),
     control: {
       type: 'select',
-      options: Object.keys(taskSteps),
     },
   },
 };
