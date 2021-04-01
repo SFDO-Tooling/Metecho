@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import AssignUserModal from '~js/components/user/github/assignUserModal';
+import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 
 import { renderWithRedux, storeWithThunk } from '../../../utils';
 
@@ -54,7 +54,7 @@ describe('AssignUserModal', () => {
 
   const setup = () => ({
     ...renderWithRedux(
-      <AssignUserModal
+      <AssignTaskRoleModal
         epicUsers={epicUsers}
         selectedUser={null}
         orgType="Dev"

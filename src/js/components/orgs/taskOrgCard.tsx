@@ -2,9 +2,9 @@ import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { Project } from 'src/js/store/projects/reducer';
 
+import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
+import { UserCard } from '~js/components/githubUsers/cards';
 import Footer from '~js/components/orgs/cards/footer';
 import OrgActions from '~js/components/orgs/cards/orgActions';
 import OrgIcon from '~js/components/orgs/cards/orgIcon';
@@ -13,8 +13,6 @@ import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
 import RefreshOrgModal from '~js/components/orgs/cards/refresh';
 import UserActions from '~js/components/orgs/cards/userActions';
 import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
-import AssignUserModal from '~js/components/user/github/assignUserModal';
-import { UserCard } from '~js/components/user/githubUser';
 import { Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
@@ -27,13 +25,15 @@ interface TaskOrgCardProps {
   type: OrgTypes;
   user: User;
   task: Task;
-  project: Project;
+  projectId: string;
   epicUsers: GitHubUser[];
+  githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
   epicUrl: string;
   repoUrl: string;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
+  isRefreshingUsers: boolean;
   assignUserModalOpen: OrgTypes | null;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
@@ -57,12 +57,14 @@ const TaskOrgCard = ({
   type,
   user,
   task,
-  project,
+  projectId,
   epicUsers,
+  githubUsers,
   epicCreatingBranch,
   repoUrl,
   isCreatingOrg,
   isDeletingOrg,
+  isRefreshingUsers,
   assignUserModalOpen,
   openAssignUserModal,
   closeAssignUserModal,
@@ -75,7 +77,7 @@ const TaskOrgCard = ({
   openSubmitReviewModal,
   testOrgReadyForReview,
   testOrgSubmittingReview,
-}: TaskOrgCardProps & RouteComponentProps) => {
+}: TaskOrgCardProps) => {
   let assignedUser: GitHubUser | null = null;
   let heading = i18n.t('Developer');
   let orgHeading = i18n.t('Dev Org');
@@ -267,14 +269,16 @@ const TaskOrgCard = ({
           </>
         )}
       </Card>
-      <AssignUserModal
+      <AssignTaskRoleModal
+        projectId={projectId}
         epicUsers={epicUsers}
+        githubUsers={githubUsers}
         selectedUser={assignedUser}
         orgType={type}
         isOpen={assignUserModalOpen === type}
+        isRefreshingUsers={isRefreshingUsers}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
-        project={project}
       />
       {testOrgOutOfDate && (
         <RefreshOrgModal
@@ -289,4 +293,4 @@ const TaskOrgCard = ({
   );
 };
 
-export default withRouter(TaskOrgCard);
+export default TaskOrgCard;

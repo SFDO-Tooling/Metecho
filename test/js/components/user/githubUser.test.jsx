@@ -1,14 +1,12 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import {
-  AssignUserModal,
-  AssignUsersModal,
-} from '~js/components/user/githubUser';
+import AssignEpicCollaboratorsModal from '~js/components/githubUsers/assignEpicCollaborators';
+import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 
 import { render, renderWithRedux, storeWithThunk } from '../../utils';
 
-describe('AssignUsersModal', () => {
+describe('AssignEpicCollaboratorsModal', () => {
   test('responds to checkbox clicks', () => {
     const setUsers = jest.fn();
     const allUsers = [
@@ -19,7 +17,7 @@ describe('AssignUsersModal', () => {
       },
     ];
     const { getByText, getAllByLabelText } = render(
-      <AssignUsersModal
+      <AssignEpicCollaboratorsModal
         allUsers={allUsers}
         selectedUsers={[]}
         isOpen
@@ -37,7 +35,7 @@ describe('AssignUsersModal', () => {
   describe('is re-syncing collaborators', () => {
     test('displays loading spinner', () => {
       const { getByText } = render(
-        <AssignUsersModal
+        <AssignEpicCollaboratorsModal
           allUsers={[]}
           selectedUsers={[]}
           isOpen
@@ -73,7 +71,7 @@ describe('AssignUserModal', () => {
 
   const setup = () => ({
     ...renderWithRedux(
-      <AssignUserModal
+      <AssignTaskRoleModal
         allUsers={allUsers}
         selectedUser={null}
         orgType="Dev"

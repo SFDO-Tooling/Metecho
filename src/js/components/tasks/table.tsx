@@ -9,9 +9,8 @@ import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import AssignUserModal from '~js/components/user/github/assignUserModal';
-import { GitHubUserAvatar } from '~js/components/user/githubUser';
-import { Project } from '~js/store/projects/reducer';
+import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
+import GitHubUserAvatar from '~js/components/githubUsers/avatar';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
 import {
@@ -42,12 +41,13 @@ interface TableCellProps {
 }
 
 interface Props {
+  projectId: string;
   projectSlug: string;
-  project: Project;
   epicSlug: string;
   tasks: Task[];
   epicUsers: GitHubUser[];
-  openAssignEpicUsersModal: () => void;
+  githubUsers: GitHubUser[];
+  isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
 }
 
@@ -126,21 +126,23 @@ StatusTableCell.displayName = DataTableCell.displayName;
 
 const AssigneeTableCell = ({
   type,
+  projectId,
   epicUsers,
-  openAssignEpicUsersModal,
+  githubUsers,
+  isRefreshingUsers,
   assignUserAction,
   item,
   className,
   children,
-  project,
   ...props
 }: TableCellProps & {
   type: OrgTypes;
+  projectId: string;
   epicUsers: GitHubUser[];
-  openAssignEpicUsersModal: () => void;
+  githubUsers: GitHubUser[];
+  isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
   children?: GitHubUser | null;
-  project: Project;
 }) => {
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
 
@@ -148,17 +150,12 @@ const AssigneeTableCell = ({
     setAssignUserModalOpen(true);
   };
   const closeAssignUserModal = () => {
-    // setAssigneeSelection(null);
     setAssignUserModalOpen(false);
   };
-  const handleEmptyMessageClick = useCallback(() => {
-    closeAssignUserModal();
-    openAssignEpicUsersModal();
-  }, [openAssignEpicUsersModal]);
 
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
-      // /* istanbul ignore if */
+      /* istanbul ignore if */
       if (!item || !type) {
         return;
       }
@@ -199,14 +196,16 @@ const AssigneeTableCell = ({
           title={title}
           onClick={openAssignUserModal}
         />
-        <AssignUserModal
+        <AssignTaskRoleModal
+          projectId={projectId}
           epicUsers={epicUsers}
+          githubUsers={githubUsers}
           selectedUser={assignedUser || null}
           orgType={type}
           isOpen={assignUserModalOpen}
+          isRefreshingUsers={isRefreshingUsers}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
-          project={project}
         />
       </>
     );
@@ -224,13 +223,14 @@ const AssigneeTableCell = ({
 AssigneeTableCell.displayName = DataTableCell.displayName;
 
 const TaskTable = ({
+  projectId,
   projectSlug,
   epicSlug,
   tasks,
   epicUsers,
-  openAssignEpicUsersModal,
+  githubUsers,
+  isRefreshingUsers,
   assignUserAction,
-  project,
 }: Props) => {
   const statusOrder = {
     [TASK_STATUSES.IN_PROGRESS]: 1,
@@ -268,10 +268,11 @@ const TaskTable = ({
       >
         <AssigneeTableCell
           type={ORG_TYPES.DEV}
+          projectId={projectId}
           epicUsers={epicUsers}
-          openAssignEpicUsersModal={openAssignEpicUsersModal}
+          githubUsers={githubUsers}
+          isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
-          project={project}
         />
       </DataTableColumn>
       <DataTableColumn
@@ -282,10 +283,11 @@ const TaskTable = ({
       >
         <AssigneeTableCell
           type={ORG_TYPES.QA}
+          projectId={projectId}
           epicUsers={epicUsers}
-          openAssignEpicUsersModal={openAssignEpicUsersModal}
+          githubUsers={githubUsers}
+          isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
-          project={project}
         />
       </DataTableColumn>
     </DataTable>

@@ -1,138 +1,23 @@
-import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
-import Card from '@salesforce/design-system-react/components/card';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Modal from '@salesforce/design-system-react/components/modal';
-import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { EmptyIllustration } from '~js/components/404';
-import ReSyncGithubUserButton from '~js/components/user/github/reSyncButton';
+import GitHubUserButton from '~js/components/githubUsers/button';
+import RefreshGitHubUsersButton from '~js/components/githubUsers/refreshUsersButton';
 import { SpinnerWrapper } from '~js/components/utils';
 import { GitHubUser } from '~js/store/user/reducer';
 
-export interface TableCellProps {
+interface TableCellProps {
   [key: string]: any;
   item?: GitHubUser;
   handleUserClick: (user: GitHubUser) => void;
 }
-
-export const GitHubUserAvatar = ({
-  user,
-  size,
-}: {
-  user: GitHubUser;
-  size?: string;
-}) => (
-  <Avatar
-    imgAlt={i18n.t('avatar for user {{username}}', { username: user.login })}
-    imgSrc={user.avatar_url}
-    title={user.login}
-    size={size || 'small'}
-  />
-);
-// includes avatar and name (todo change to username && fullname)
-export const GitHubUserButton = ({
-  user,
-  isAssigned,
-  isSelected,
-  withName,
-  ...props
-}: {
-  user: GitHubUser;
-  isAssigned?: boolean;
-  isSelected?: boolean;
-  withName?: boolean;
-  [key: string]: any;
-}) => (
-  <Button
-    className={classNames(
-      'slds-size_full',
-      'slds-p-around_xx-small',
-      'collaborator-button',
-      {
-        'is-assigned': isAssigned,
-        'is-selected': isSelected,
-      },
-    )}
-    title={user.login}
-    label={
-      <>
-        <GitHubUserAvatar user={user} />
-        <span className="collaborator-username">{user.login}</span>
-        {withName && (
-          <span className="collaborator-username">({user.name})</span>
-        )}
-      </>
-    }
-    variant="base"
-    disabled={isSelected || isAssigned}
-    {...props}
-  />
-);
-
-export const UserCard = ({
-  user,
-  removeUser,
-  className,
-}: {
-  user: GitHubUser;
-  removeUser?: () => void;
-  className?: string;
-}) => (
-  <Card
-    className={classNames(className, 'collaborator-card')}
-    icon={<GitHubUserAvatar user={user} />}
-    heading={user.login}
-    headerActions={
-      removeUser && (
-        <Button
-          assistiveText={{ icon: i18n.t('Remove') }}
-          iconCategory="utility"
-          iconName="close"
-          iconSize="small"
-          iconVariant="border-filled"
-          variant="icon"
-          title={i18n.t('Remove')}
-          onClick={removeUser}
-        />
-      )
-    }
-  />
-);
-
-export const UserCards = ({
-  users,
-  removeUser,
-}: {
-  users: GitHubUser[];
-  removeUser: (user: GitHubUser) => void;
-}) => (
-  <div
-    className="slds-grid
-      slds-wrap
-      slds-grid_pull-padded-xx-small
-      slds-m-top_large"
-  >
-    {users.map((user) => {
-      const doRemoveUser = () => removeUser(user);
-      return (
-        <div
-          key={user.id}
-          className="slds-size_1-of-1
-            slds-large-size_1-of-2
-            slds-p-around_xx-small"
-        >
-          <UserCard user={user} removeUser={doRemoveUser} />
-        </div>
-      );
-    })}
-  </div>
-);
 
 const UserTableCell = ({ item, handleUserClick, ...props }: TableCellProps) => {
   /* istanbul ignore if */
@@ -152,7 +37,7 @@ const UserTableCell = ({ item, handleUserClick, ...props }: TableCellProps) => {
 UserTableCell.displayName = DataTableCell.displayName;
 
 // has allUsers with avatar, login, & login
-export const AssignUsersModal = ({
+const AssignEpicCollaboratorsModal = ({
   allUsers,
   selectedUsers,
   heading,
@@ -241,7 +126,7 @@ export const AssignUsersModal = ({
         <div className="slds-grid slds-wrap slds-shrink slds-p-right_medium">
           <p>
             <Trans i18nKey="epicCollaborators">
-              Only users who have access to the GitHub repository for this epic
+              Only users who have access to the GitHub repository for this Epic
               will appear in the list below. Visit GitHub to invite additional
               collaborators.
             </Trans>
@@ -253,7 +138,7 @@ export const AssignUsersModal = ({
             slds-shrink-none
             slds-grid_align-end"
         >
-          <ReSyncGithubUserButton
+          <RefreshGitHubUsersButton
             isRefreshing={isRefreshing}
             refreshUsers={refreshUsers}
           />
@@ -295,3 +180,5 @@ export const AssignUsersModal = ({
     </Modal>
   );
 };
+
+export default AssignEpicCollaboratorsModal;

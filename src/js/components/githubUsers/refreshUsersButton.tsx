@@ -8,17 +8,19 @@ interface Props {
   isRefreshing: boolean;
   refreshUsers: () => void;
 }
-const ReSyncGithubUserButton = ({ isRefreshing, refreshUsers }: Props) => (
+const RefreshGitHubUsersButton = ({ isRefreshing, refreshUsers }: Props) => (
   <>
     {isRefreshing ? (
       <Button
-        label={<LabelWithSpinner label={i18n.t('Syncing Collaborators…')} />}
+        label={
+          <LabelWithSpinner label={i18n.t('Syncing GitHub Collaborators…')} />
+        }
         variant="outline-brand"
         disabled
       />
     ) : (
       <Button
-        label={i18n.t('Re-Sync Github Collaborators')}
+        label={i18n.t('Re-Sync GitHub Collaborators')}
         variant="outline-brand"
         iconCategory="utility"
         iconName="refresh"
@@ -29,4 +31,4 @@ const ReSyncGithubUserButton = ({ isRefreshing, refreshUsers }: Props) => (
   </>
 );
 
-export default ReSyncGithubUserButton;
+export default RefreshGitHubUsersButton;

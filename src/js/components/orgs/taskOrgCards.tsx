@@ -12,7 +12,6 @@ import { ThunkDispatch } from '~js/store';
 import { deleteObject, updateObject } from '~js/store/actions';
 import { refetchOrg } from '~js/store/orgs/actions';
 import { Org, OrgsByParent } from '~js/store/orgs/reducer';
-import { Project } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -38,13 +37,15 @@ export const ORG_TYPE_TRACKER_DEFAULT = {
 const TaskOrgCards = ({
   orgs,
   task,
-  project,
+  projectId,
   epicUsers,
+  githubUsers,
   epicCreatingBranch,
   epicUrl,
   repoUrl,
   assignUserModalOpen,
   isCreatingOrg,
+  isRefreshingUsers,
   testOrgReadyForReview,
   testOrgSubmittingReview,
   openCaptureModal,
@@ -56,13 +57,15 @@ const TaskOrgCards = ({
 }: {
   orgs: OrgsByParent;
   task: Task;
-  project: Project;
+  projectId: string;
   epicUsers: GitHubUser[];
+  githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
   epicUrl: string;
   repoUrl: string;
   assignUserModalOpen: OrgTypes | null;
   isCreatingOrg: OrgTypeTracker;
+  isRefreshingUsers: boolean;
   testOrgReadyForReview: boolean;
   testOrgSubmittingReview: boolean;
   openCaptureModal: () => void;
@@ -265,13 +268,15 @@ const TaskOrgCards = ({
           type={ORG_TYPES.DEV}
           user={user}
           task={task}
-          project={project}
+          projectId={projectId}
           epicUsers={epicUsers}
+          githubUsers={githubUsers}
           epicCreatingBranch={epicCreatingBranch}
           epicUrl={epicUrl}
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
+          isRefreshingUsers={isRefreshingUsers}
           assignUserModalOpen={assignUserModalOpen}
           openAssignUserModal={openAssignDevModal}
           closeAssignUserModal={closeAssignUserModal}
@@ -286,13 +291,15 @@ const TaskOrgCards = ({
           type={ORG_TYPES.QA}
           user={user}
           task={task}
-          project={project}
+          projectId={projectId}
           epicUsers={epicUsers}
+          githubUsers={githubUsers}
           epicCreatingBranch={epicCreatingBranch}
           epicUrl={epicUrl}
           repoUrl={repoUrl}
           isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
+          isRefreshingUsers={isRefreshingUsers}
           assignUserModalOpen={assignUserModalOpen}
           openAssignUserModal={openAssignTesterModal}
           closeAssignUserModal={closeAssignUserModal}
