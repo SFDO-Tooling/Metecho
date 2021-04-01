@@ -36,7 +36,6 @@ const UserTableCell = ({ item, handleUserClick, ...props }: TableCellProps) => {
 };
 UserTableCell.displayName = DataTableCell.displayName;
 
-// has allUsers with avatar, login, & login
 const AssignEpicCollaboratorsModal = ({
   allUsers,
   selectedUsers,

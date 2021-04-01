@@ -5,7 +5,6 @@ import React from 'react';
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
 import { GitHubUser } from '~js/store/user/reducer';
 
-// includes avatar, username and full name
 const GitHubUserButton = ({
   user,
   isAssigned,
