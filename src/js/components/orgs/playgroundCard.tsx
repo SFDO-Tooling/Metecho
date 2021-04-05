@@ -46,8 +46,9 @@ const PlaygroundOrgCard = ({
     parentName: string;
   let missingCommits = -1;
   let orgOutOfDate = false;
+
   // @@@
-  /* istanbul ignore next */
+  /* istanbul ignore if */
   if (task) {
     heading = i18n.t('Task Scratch Org');
     const taskCommits = getTaskCommits(task);
@@ -102,73 +103,67 @@ const PlaygroundOrgCard = ({
   }
 
   return (
-    <div
-      className="slds-size_1-of-1
-        slds-large-size_1-of-2
-        slds-p-around_x-small"
-    >
-      <Card
-        bodyClassName="slds-card__body_inner"
-        heading={heading}
-        icon={
-          org &&
-          !isCreating && (
-            <OrgIcon
-              orgId={org.id}
-              ownedByCurrentUser
-              isDeleting={isDeleting}
-              isRefreshingOrg={isRefreshingOrg}
-            />
-          )
-        }
-        headerActions={
-          <OrgActions
-            org={org}
-            type={org.org_type}
-            disableCreation
+    <Card
+      bodyClassName="slds-card__body_inner"
+      heading={heading}
+      icon={
+        org &&
+        !isCreating && (
+          <OrgIcon
+            orgId={org.id}
             ownedByCurrentUser
-            orgOutOfDate={orgOutOfDate}
-            isCreating={isCreating}
             isDeleting={isDeleting}
             isRefreshingOrg={isRefreshingOrg}
-            doDeleteOrg={doDeleteOrg}
-            doRefreshOrg={doRefreshOrg}
           />
-        }
-        footer={
-          <Footer
-            org={org}
-            ownedByCurrentUser
-            isCreating={isCreating}
-            isDeleting={isDeleting}
-            isRefreshingChanges={isRefreshingChanges}
-            isRefreshingOrg={isRefreshingOrg}
-          />
-        }
-      >
-        <OrgInfo
+        )
+      }
+      headerActions={
+        <OrgActions
           org={org}
           type={org.org_type}
-          baseCommit={baseCommit}
-          repoUrl={repoUrl}
+          disableCreation
           ownedByCurrentUser
-          typeHeading={typeHeading}
-          parentLink={parentLink}
-          parentName={parentName}
-          isCreating={isCreating}
-          isRefreshingOrg={isRefreshingOrg}
           orgOutOfDate={orgOutOfDate}
-          missingCommits={-1}
-          doCheckForOrgChanges={doCheckForOrgChanges}
+          isCreating={isCreating}
+          isDeleting={isDeleting}
+          isRefreshingOrg={isRefreshingOrg}
+          doDeleteOrg={doDeleteOrg}
+          doRefreshOrg={doRefreshOrg}
         />
-        <OrgSpinner
+      }
+      footer={
+        <Footer
           org={org}
           ownedByCurrentUser
+          isCreating={isCreating}
           isDeleting={isDeleting}
           isRefreshingChanges={isRefreshingChanges}
+          isRefreshingOrg={isRefreshingOrg}
         />
-      </Card>
-    </div>
+      }
+    >
+      <OrgInfo
+        org={org}
+        type={org.org_type}
+        baseCommit={baseCommit}
+        repoUrl={repoUrl}
+        ownedByCurrentUser
+        typeHeading={typeHeading}
+        parentLink={parentLink}
+        parentName={parentName}
+        isCreating={isCreating}
+        isRefreshingOrg={isRefreshingOrg}
+        orgOutOfDate={orgOutOfDate}
+        missingCommits={-1}
+        doCheckForOrgChanges={doCheckForOrgChanges}
+      />
+      <OrgSpinner
+        org={org}
+        ownedByCurrentUser
+        isDeleting={isDeleting}
+        isRefreshingChanges={isRefreshingChanges}
+      />
+    </Card>
   );
 };
 

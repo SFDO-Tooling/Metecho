@@ -487,32 +487,49 @@ const EpicDetail = (props: RouteComponentProps) => {
       >
         <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
         {submitButton}
-        {orgs ? (
-          <div className="slds-m-bottom_large">
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {i18n.t('My Epic Scratch Org')}
-            </h2>
-            {playgroundOrg ? (
-              <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
-                <PlaygroundOrgCard
-                  org={playgroundOrg}
-                  epic={epic}
-                  repoUrl={project.repo_url}
+        <div className="slds-m-bottom_large">
+          <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+            {i18n.t('My Epic Scratch Org')}
+          </h2>
+          {orgs ? (
+            <>
+              {playgroundOrg ? (
+                <div
+                  className="slds-grid
+                    slds-wrap
+                    slds-grid_pull-padded-x-small"
+                >
+                  <div
+                    className="slds-size_1-of-1
+                    slds-large-size_1-of-2
+                    slds-p-around_x-small"
+                  >
+                    <PlaygroundOrgCard
+                      org={playgroundOrg}
+                      epic={epic}
+                      repoUrl={project.repo_url}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  label={i18n.t('Create Scratch Org')}
+                  variant="outline-brand"
+                  onClick={openCreateOrgModal}
+                  disabled={epic.currently_creating_branch}
                 />
-              </div>
-            ) : (
-              <Button
-                label={i18n.t('Create Scratch Org')}
-                variant="outline-brand"
-                onClick={openCreateOrgModal}
-                disabled={epic.currently_creating_branch}
-              />
-            )}
-          </div>
-        ) : (
-          // Fetching scratch orgs from API
-          <SpinnerWrapper />
-        )}
+              )}
+            </>
+          ) : (
+            // Fetching scratch orgs from API
+            <Button
+              label={
+                <LabelWithSpinner label={i18n.t('Loading Scratch Orgs…')} />
+              }
+              disabled
+            />
+          )}
+        </div>
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">

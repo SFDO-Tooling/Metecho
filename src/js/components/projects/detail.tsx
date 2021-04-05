@@ -8,17 +8,20 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import CreateEpicModal from '~js/components/epics/createForm';
 import EpicTable from '~js/components/epics/table';
+import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import ProjectNotFound from '~js/components/projects/project404';
 import GuidedTour from '~js/components/tour/guided';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
 import { selfSteps } from '~js/components/tour/projectSteps';
 import {
+  CreateOrgModal,
   DetailPageLayout,
   getProjectLoadingOrNotFound,
   LabelWithSpinner,
   SpinnerWrapper,
   useFetchEpicsIfMissing,
+  useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useIsMounted,
 } from '~js/components/utils';
@@ -45,6 +48,7 @@ const ProjectDetail = (
   const user = useSelector(selectUserState) as User;
   const [fetchingEpics, setFetchingEpics] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
     Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
@@ -53,6 +57,9 @@ const ProjectDetail = (
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
+  const { orgs } = useFetchOrgsIfMissing({ project, props });
+
+  const playgroundOrg = (orgs || [])[0];
 
   // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param
   const {
@@ -97,9 +104,23 @@ const ProjectDetail = (
     }
   }, [dispatch, epics?.next, isMounted, project?.id]);
 
-  // create modal related
-  const openCreateModal = useCallback(() => setCreateModalOpen(true), []);
-  const closeCreateModal = useCallback(() => setCreateModalOpen(false), []);
+  // "create epic" modal related
+  const openCreateModal = useCallback(() => {
+    setCreateModalOpen(true);
+    setCreateOrgModalOpen(false);
+  }, []);
+  const closeCreateModal = useCallback(() => {
+    setCreateModalOpen(false);
+  }, []);
+
+  // "create scratch org" modal related
+  const openCreateOrgModal = useCallback(() => {
+    setCreateOrgModalOpen(true);
+    setCreateModalOpen(false);
+  }, []);
+  const closeCreateOrgModal = useCallback(() => {
+    setCreateOrgModalOpen(false);
+  }, []);
 
   // guided tour related
   const closeTourLandingModal = useCallback(() => {
@@ -151,6 +172,50 @@ const ProjectDetail = (
         headerUrlText={`${project.repo_owner}/${project.repo_name}`}
         breadcrumb={[{ name: project.name }]}
         image={project.repo_image_url}
+        sidebar={
+          <div
+            className="slds-m-bottom_x-large
+              metecho-secondary-block
+              slds-m-left_medium"
+          >
+            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+              {i18n.t('My Project Scratch Org')}
+            </h2>
+            {orgs ? (
+              <>
+                {playgroundOrg ? (
+                  <div
+                    className="slds-grid
+                      slds-wrap
+                      slds-grid_pull-padded-x-small"
+                  >
+                    <div className="slds-size_1-of-1 slds-p-around_x-small">
+                      <PlaygroundOrgCard
+                        org={playgroundOrg}
+                        project={project}
+                        repoUrl={project.repo_url}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    label={i18n.t('Create Scratch Org')}
+                    variant="outline-brand"
+                    onClick={openCreateOrgModal}
+                  />
+                )}
+              </>
+            ) : (
+              // Fetching scratch orgs from API
+              <Button
+                label={
+                  <LabelWithSpinner label={i18n.t('Loading Scratch Orgs…')} />
+                }
+                disabled
+              />
+            )}
+          </div>
+        }
       >
         {!epics || !epics.fetched ? (
           // Fetching epics from API
@@ -221,6 +286,11 @@ const ProjectDetail = (
           run={tourRunning === 'self'}
           onClose={handleTourClose}
           steps={selfSteps}
+        />
+        <CreateOrgModal
+          project={project}
+          isOpen={createOrgModalOpen}
+          closeModal={closeCreateOrgModal}
         />
       </DetailPageLayout>
     </DocumentTitle>

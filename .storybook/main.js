@@ -1,3 +1,4 @@
+const postcss = require('postcss');
 const merge = require('webpack-merge').merge;
 
 const webpackConfig = require('../webpack.common.js');
@@ -35,8 +36,17 @@ const minimalWebpackConfig = {
 };
 
 module.exports = {
+  core: { builder: 'webpack5' },
   stories: ['../src/stories/**/*.stories.@(js|jsx|ts|tsx|mdx)'],
   addons: [
+    {
+      name: '@storybook/addon-postcss',
+      options: {
+        postcssLoaderOptions: {
+          implementation: postcss,
+        },
+      },
+    },
     '@storybook/addon-links',
     {
       name: '@storybook/addon-essentials',

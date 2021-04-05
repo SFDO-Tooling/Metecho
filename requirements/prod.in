@@ -14,8 +14,8 @@ django-log-request-id==1.6.0
 django-model-utils==4.1.1
 django-parler==2.2
 django-redis==4.12.1
-django-rq==2.4.0
-djangorestframework==3.12.2
+django-rq==2.4.1
+djangorestframework==3.12.4
 furl==2.1.0
 github3-py==2.0.0
 honcho==1.0.1

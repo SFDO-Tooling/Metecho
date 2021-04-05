@@ -1,9 +1,9 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '~js/components/projects/detail';
-import { fetchObject, fetchObjects } from '~js/store/actions';
+import { createObject, fetchObject, fetchObjects } from '~js/store/actions';
 import { onboarded } from '~js/store/user/actions';
 import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
@@ -16,18 +16,46 @@ jest.mock('~js/store/user/actions');
 onboarded.mockReturnValue(() => Promise.resolve({ type: 'TEST', payload: {} }));
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
   onboarded.mockClear();
+  createObject.mockClear();
 });
+
+const defaultOrg = {
+  id: 'org-id',
+  project: 'p1',
+  org_type: 'Playground',
+  owner: 'my-user',
+  owner_gh_username: 'currentUser',
+  expires_at: '2019-09-16T12:58:53.721Z',
+  latest_commit: '617a51',
+  latest_commit_url: '/test/commit/url/',
+  latest_commit_at: '2019-08-16T12:58:53.721Z',
+  last_checked_unsaved_changes_at: new Date().toISOString(),
+  url: '/test/org/url/',
+  is_created: true,
+  unsaved_changes: { Foo: ['Bar'] },
+  has_unsaved_changes: true,
+  total_unsaved_changes: 1,
+  ignored_changes: {},
+  has_ignored_changes: false,
+  total_ignored_changes: 0,
+  valid_target_directories: {
+    source: ['src'],
+    post: ['foo/bar', 'buz/baz'],
+  },
+  has_been_visited: true,
+};
 
 const defaultState = {
   projects: {
     projects: [
       {
-        id: 'r1',
+        id: 'p1',
         name: 'Project 1',
         slug: 'project-1',
         old_slugs: ['old-slug'],
@@ -36,19 +64,20 @@ const defaultState = {
         repo_url: 'https://github.com/test/test-repo',
         github_users: [],
         repo_image_url: 'https://github.com/repo-image',
+        org_config_names: [{ key: 'dev' }, { key: 'qa' }],
       },
     ],
     notFound: ['yet-another-project'],
     next: null,
   },
   epics: {
-    r1: {
+    p1: {
       epics: [
         {
           id: 'epic1',
           slug: 'epic-1',
           name: 'Epic 1',
-          project: 'r1',
+          project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           github_users: [],
@@ -58,7 +87,7 @@ const defaultState = {
           id: 'epic2',
           slug: 'epic-2',
           name: 'Epic 2',
-          project: 'r1',
+          project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           github_users: [],
@@ -68,7 +97,7 @@ const defaultState = {
           id: 'epic3',
           slug: 'epic-3',
           name: 'Epic 3',
-          project: 'r1',
+          project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           github_users: [],
@@ -78,7 +107,7 @@ const defaultState = {
           id: 'epic4',
           slug: 'epic-4',
           name: 'Epic 4',
-          project: 'r1',
+          project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
           github_users: [],
@@ -88,6 +117,16 @@ const defaultState = {
       next: 'next-url',
       notFound: [],
       fetched: true,
+    },
+  },
+  orgs: {
+    orgs: {
+      [defaultOrg.id]: defaultOrg,
+    },
+    fetched: {
+      projects: ['p1'],
+      epics: [],
+      tasks: [],
     },
   },
   user: {
@@ -139,7 +178,7 @@ describe('<ProjectDetail />', () => {
       initialState: {
         ...defaultState,
         epics: {
-          r1: {
+          p1: {
             epics: [],
             next: null,
             notFound: [],
@@ -194,13 +233,37 @@ describe('<ProjectDetail />', () => {
     });
   });
 
+  describe('orgs have not been fetched', () => {
+    test('fetches orgs from API', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            orgs: {},
+            fetched: {
+              projects: [],
+              epics: [],
+              tasks: [],
+            },
+          },
+        },
+      });
+
+      expect(queryByText('Project Scratch Org')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { project: 'p1' },
+        objectType: 'scratch_org',
+      });
+    });
+  });
+
   describe('epics have not been fetched', () => {
     test('fetches epics from API', () => {
       const { queryByText } = setup({
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
+            p1: {
               epics: [],
               next: null,
               notFound: [],
@@ -212,7 +275,7 @@ describe('<ProjectDetail />', () => {
 
       expect(queryByText('Epics for Project 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { project: 'r1' },
+        filters: { project: 'p1' },
         objectType: 'epic',
         reset: true,
       });
@@ -225,7 +288,7 @@ describe('<ProjectDetail />', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
+            p1: {
               epics: [
                 {
                   branch_url: 'branch-url',
@@ -234,7 +297,7 @@ describe('<ProjectDetail />', () => {
                   id: 'epic1',
                   name: 'Epic 1',
                   old_slugs: [],
-                  project: 'r1',
+                  project: 'p1',
                   slug: 'epic-1',
                 },
               ],
@@ -253,7 +316,7 @@ describe('<ProjectDetail />', () => {
       fireEvent.click(btn);
 
       expect(fetchObjects).toHaveBeenCalledWith({
-        filters: { project: 'r1' },
+        filters: { project: 'p1' },
         objectType: 'epic',
         url: 'next-url',
       });
@@ -267,7 +330,7 @@ describe('<ProjectDetail />', () => {
         initialState: {
           ...defaultState,
           epics: {
-            r1: {
+            p1: {
               epics: [
                 {
                   branch_url: 'branch-url',
@@ -276,7 +339,7 @@ describe('<ProjectDetail />', () => {
                   id: 'epic1',
                   name: 'Epic 1',
                   old_slugs: [],
-                  project: 'r1',
+                  project: 'p1',
                   slug: 'epic-1',
                 },
               ],
@@ -381,6 +444,66 @@ describe('<ProjectDetail />', () => {
 
         expect(dialog).toBeVisible();
         expect(history.replace).toHaveBeenCalledWith({ state: {} });
+      });
+    });
+  });
+
+  describe('<CreateOrgModal />', () => {
+    let result;
+
+    beforeEach(() => {
+      result = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            orgs: {},
+            fetched: {
+              projects: ['p1'],
+              epics: [],
+              tasks: [],
+            },
+          },
+        },
+      });
+      fireEvent.click(result.getByText('Create Scratch Org'));
+    });
+
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText } = result;
+
+        expect(
+          getByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeVisible();
+
+        fireEvent.click(getByText('Cancel'));
+
+        expect(
+          queryByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeNull();
+      });
+    });
+
+    describe('"Create Org" click', () => {
+      test('creates scratch org', async () => {
+        const { getByText, getByLabelText, queryByText } = result;
+
+        expect.assertions(5);
+        fireEvent.click(getByText('Next'));
+
+        expect(getByText('Advanced Options')).toBeVisible();
+
+        fireEvent.click(getByText('Advanced Options'));
+        fireEvent.click(getByLabelText('qa'));
+        fireEvent.click(getByText('Create Org'));
+        await waitForElementToBeRemoved(getByText('Advanced Options'));
+
+        expect(queryByText('Advanced Options')).toBeNull();
+        expect(createObject).toHaveBeenCalled();
+        expect(createObject.mock.calls[0][0].data.project).toEqual('p1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
+          'qa',
+        );
       });
     });
   });

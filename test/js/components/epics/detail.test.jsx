@@ -767,11 +767,15 @@ describe('<EpicDetail/>', () => {
       test('closes modal', () => {
         const { getByText, queryByText } = result;
 
-        expect(getByText('Scratch Org Overview')).toBeVisible();
+        expect(
+          getByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeVisible();
 
         fireEvent.click(getByText('Cancel'));
 
-        expect(queryByText('Scratch Org Overview')).toBeNull();
+        expect(
+          queryByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeNull();
       });
     });
 
@@ -782,14 +786,14 @@ describe('<EpicDetail/>', () => {
         expect.assertions(5);
         fireEvent.click(getByText('Next'));
 
-        expect(getByText('Scratch Org Details')).toBeVisible();
+        expect(getByText('Advanced Options')).toBeVisible();
 
         fireEvent.click(getByText('Advanced Options'));
         fireEvent.click(getByLabelText('qa'));
         fireEvent.click(getByText('Create Org'));
-        await waitForElementToBeRemoved(getByText('Scratch Org Details'));
+        await waitForElementToBeRemoved(getByText('Advanced Options'));
 
-        expect(queryByText('Scratch Org Details')).toBeNull();
+        expect(queryByText('Advanced Options')).toBeNull();
         expect(createObject).toHaveBeenCalled();
         expect(createObject.mock.calls[0][0].data.epic).toEqual('epic1');
         expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
