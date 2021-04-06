@@ -134,6 +134,7 @@ const AssignTaskRoleModal = ({
       heading={heading}
       directional
       size="small"
+      className="modal-set-height"
       footer={[
         <Checkbox
           key="alert"
