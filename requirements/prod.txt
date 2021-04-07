@@ -63,7 +63,7 @@ coloredlogs==15.0
     # via cumulusci
 constantly==15.1.0
     # via twisted
-croniter==1.0.2
+croniter==1.0.10
     # via rq-scheduler
 cryptography==3.3.1
     # via
@@ -189,8 +189,6 @@ markupsafe==1.1.1
     #   jinja2
 msgpack==1.0.2
     # via channels-redis
-natsort==7.1.1
-    # via croniter
 oauthlib==3.1.0
     # via requests-oauthlib
 orderedmultidict==1.0.1
