@@ -62,7 +62,7 @@ faker==5.6.3
     # via
     #   -c requirements/prod.txt
     #   factory-boy
-flake8-bugbear==20.11.1
+flake8-bugbear==21.4.3
     # via -r requirements/dev.in
 flake8==3.8.4
     # via
