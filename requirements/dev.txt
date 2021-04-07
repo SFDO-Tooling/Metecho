@@ -10,6 +10,10 @@ appdirs==1.4.4
     # via
     #   -c requirements/prod.txt
     #   black
+asgiref==3.3.1
+    # via
+    #   -c requirements/prod.txt
+    #   django
 attrs==20.3.0
     # via
     #   -c requirements/prod.txt
@@ -42,8 +46,12 @@ coveralls==3.0.0
     # via -r requirements/dev.in
 decorator==4.4.2
     # via ipython
-django-extensions==3.1.0
+django-extensions==3.1.2
     # via -r requirements/dev.in
+django==3.1.5
+    # via
+    #   -c requirements/prod.txt
+    #   django-extensions
 doc8==0.8.1
     # via -r requirements/dev.in
 docopt==0.6.2
@@ -164,6 +172,7 @@ pytz==2020.5
     # via
     #   -c requirements/prod.txt
     #   babel
+    #   django
 regex==2020.11.13
     # via black
 remote-pdb==2.1.0
@@ -201,6 +210,10 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.4
     # via sphinx
+sqlparse==0.4.1
+    # via
+    #   -c requirements/prod.txt
+    #   django
 stevedore==3.3.0
     # via doc8
 termcolor==1.1.0
