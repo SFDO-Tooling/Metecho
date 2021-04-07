@@ -13,6 +13,7 @@ import ProjectNotFound from '~js/components/projects/project404';
 import GuidedTour from '~js/components/tour/guided';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
+import TourPopover from '~js/components/tour/popover';
 import { selfSteps } from '~js/components/tour/projectSteps';
 import {
   CreateOrgModal,
@@ -198,11 +199,18 @@ const ProjectDetail = (
                     </div>
                   </div>
                 ) : (
-                  <Button
-                    label={i18n.t('Create Scratch Org')}
-                    variant="outline-brand"
-                    onClick={openCreateOrgModal}
-                  />
+                  <div>
+                    <Button
+                      label={i18n.t('Create Scratch Org')}
+                      variant="outline-brand"
+                      onClick={openCreateOrgModal}
+                    />
+                    <TourPopover
+                      align={'bottom'}
+                      heading={'some heading'}
+                      body={'some body text'}
+                    />
+                  </div>
                 )}
               </>
             ) : (

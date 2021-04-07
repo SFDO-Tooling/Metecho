@@ -1,6 +1,8 @@
 import i18n from 'i18next';
 import React from 'react';
 
+import TourPopover from '~js/components/tour/popover';
+
 const PageDescription = ({
   title,
   description,
@@ -25,6 +27,11 @@ const PageDescription = ({
           {renderedTitle}
         </h2>
       )}
+      <TourPopover
+        align={'left'}
+        heading={'this is the project description'}
+        body={'some body text'}
+      />
       <div
         className="markdown slds-text-longform"
         // This description is pre-cleaned by the API
