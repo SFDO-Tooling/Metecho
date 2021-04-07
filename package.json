@@ -55,7 +55,7 @@
     "@sentry/browser": "^6.0.2",
     "classnames": "^2.2.6",
     "date-fns": "^2.16.1",
-    "i18next": "^19.8.4",
+    "i18next": "^20.2.1",
     "i18next-browser-languagedetector": "^6.0.1",
     "i18next-xhr-backend": "^3.2.2",
     "js-cookie": "^2.2.1",
