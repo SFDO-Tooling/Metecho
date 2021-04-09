@@ -61,7 +61,7 @@ This is related to the user, but not part of it:
 
 .. sourcecode:: http
 
-   PUT /api/agree_to_tos/ HTTP/1.1
+   PUT /api/user/agree_to_tos/ HTTP/1.1
 
 .. sourcecode:: http
 
@@ -95,7 +95,7 @@ Allows updating the date of the last time the user completed the interactive onb
 
 .. sourcecode:: http
 
-   PUT /api/complete_onboarding/ HTTP/1.1
+   PUT /api/user/complete_onboarding/ HTTP/1.1
 
 .. sourcecode:: http
 
