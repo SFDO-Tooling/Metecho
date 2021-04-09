@@ -31,6 +31,24 @@ class TestCurrentUserViewSet:
         assert response.json()["username"] == client.user.username
         assert response.json()["onboarded_at"] is not None
 
+    @pytest.mark.parametrize(
+        "data, enabled, state",
+        (
+            ({"enabled": False}, False, None),  # Only enabled
+            ({"state": [1, 2, 3]}, True, [1, 2, 3]),  # Only state
+            # Enabled + state
+            ({"enabled": True, "state": {"a": "b"}}, True, {"a": "b"}),
+        ),
+    )
+    def test_guided_tour(self, client, data, enabled, state):
+        response = client.post(
+            reverse("current-user-guided-tour"), data=data, format="json"
+        )
+        assert response.status_code == 200
+        assert response.json()["username"] == client.user.username
+        assert response.json()["self_guided_tour_enabled"] == enabled
+        assert response.json()["self_guided_tour_state"] == state
+
     def test_disconnect(self, client):
         response = client.post(reverse("current-user-disconnect"))
         assert not client.user.socialaccount_set.filter(provider="salesforce").exists()

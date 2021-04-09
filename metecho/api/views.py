@@ -108,6 +108,19 @@ class CurrentUserViewSet(GenericViewSet):
         return self.retrieve(request)
 
     @action(methods=["POST"], detail=False)
+    def guided_tour(self, request):
+        enabled = request.data.get("enabled")
+        if enabled is not None:
+            request.user.self_guided_tour_enabled = enabled
+
+        state = request.data.get("state")
+        if state is not None:
+            request.user.self_guided_tour_state = state
+
+        request.user.save()
+        return self.retrieve(request)
+
+    @action(methods=["POST"], detail=False)
     def disconnect(self, request):
         request.user.invalidate_salesforce_credentials()
         return self.retrieve(request)
