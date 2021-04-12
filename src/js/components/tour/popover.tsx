@@ -16,6 +16,7 @@ const TourPopover = ({
     align={align}
     heading={heading}
     body={<p>{body}</p>}
+    // @@@ This should pull from Redux state: `user.self_guided_tour_enabled`
     // isEnabled={user.self_guided_tour_enabled}
     variant="walkthrough"
   >

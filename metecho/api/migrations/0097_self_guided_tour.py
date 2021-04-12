@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0096_merge_20210224_1518'),
+        ("api", "0096_merge_20210224_1518"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='self_guided_tour_enabled',
+            model_name="user",
+            name="self_guided_tour_enabled",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='user',
-            name='self_guided_tour_state',
+            model_name="user",
+            name="self_guided_tour_state",
             field=models.JSONField(blank=True, null=True),
         ),
     ]

@@ -366,6 +366,8 @@ export const sampleUser1 = {
   uses_global_devhub: false,
   agreed_to_tos_at: '2019-02-01T19:47:49Z',
   onboarded_at: '2019-02-01T19:47:49Z',
+  self_guided_tour_enabled: false,
+  self_guided_tour_state: null,
 };
 
 export const sampleProject1 = {

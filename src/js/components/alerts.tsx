@@ -31,7 +31,7 @@ const OfflineAlert = () => {
 };
 
 const TourAlert = () => {
-  // @@@
+  // @@@ This should pull from Redux state: `user.self_guided_tour_enabled`
   const tourIsOn = true;
   const [showTour, setShowTour] = useState(true);
 

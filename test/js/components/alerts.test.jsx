@@ -3,12 +3,12 @@ import React from 'react';
 
 import Alerts from '~js/components/alerts';
 
-import { render } from './../utils';
+import { renderWithRedux } from './../utils';
 
 describe('<Alerts />', () => {
   let location;
   const setup = () => {
-    const { getByText } = render(<Alerts />);
+    const { getByText } = renderWithRedux(<Alerts />);
     return { getByText };
   };
 
