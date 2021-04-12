@@ -1,14 +1,14 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import OfflineAlert from '~js/components/offlineAlert';
+import Alerts from '~js/components/alerts';
 
 import { render } from './../utils';
 
-describe('<OfflineAlert />', () => {
+describe('<Alerts />', () => {
   let location;
   const setup = () => {
-    const { getByText } = render(<OfflineAlert />);
+    const { getByText } = render(<Alerts />);
     return { getByText };
   };
 

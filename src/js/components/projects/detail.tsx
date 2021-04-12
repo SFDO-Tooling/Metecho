@@ -10,11 +10,9 @@ import CreateEpicModal from '~js/components/epics/createForm';
 import EpicTable from '~js/components/epics/table';
 import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import ProjectNotFound from '~js/components/projects/project404';
-import GuidedTour from '~js/components/tour/guided';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
 import TourPopover from '~js/components/tour/popover';
-import { selfSteps } from '~js/components/tour/projectSteps';
 import {
   CreateOrgModal,
   DetailPageLayout,
@@ -289,11 +287,9 @@ const ProjectDetail = (
           runTour={doRunTour}
           onRequestClose={closeTourLandingModal}
         />
-        <PlanTour run={tourRunning === 'plan'} onClose={handleTourClose} />
-        <GuidedTour
-          run={tourRunning === 'self'}
+        <PlanTour
+          run={tourRunning === WALKTHROUGH_TYPES.PLAN}
           onClose={handleTourClose}
-          steps={selfSteps}
         />
         <CreateOrgModal
           project={project}
