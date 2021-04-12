@@ -23,6 +23,8 @@ export interface User {
   uses_global_devhub: boolean;
   agreed_to_tos_at: string | null;
   onboarded_at: string | null;
+  self_guided_tour_enabled: true;
+  self_guided_tour_state: null;
 }
 
 const reducer = (
