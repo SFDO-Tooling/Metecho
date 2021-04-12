@@ -101,6 +101,7 @@ const AssignTaskRoleModal = ({
     setFindText('');
   };
   const handleSave = () => {
+    /* istanbul ignore else */
     if (selection) {
       setUser(selection, shouldAlertAssignee);
     }

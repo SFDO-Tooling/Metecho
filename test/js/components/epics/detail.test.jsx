@@ -107,6 +107,7 @@ const defaultState = {
             {
               id: '123456',
               login: 'TestGitHubUser',
+              name: 'Test GitHub User',
             },
             {
               id: '234567',
@@ -327,7 +328,22 @@ describe('<EpicDetail/>', () => {
 
   describe('<AssignEpicCollaboratorsModal />', () => {
     test('opens and closes', () => {
-      const { getByText, getByTitle, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          epics: {
+            r1: {
+              ...defaultState.epics.r1,
+              epics: [
+                {
+                  ...defaultState.epics.r1.epics[0],
+                  github_users: [],
+                },
+              ],
+            },
+          },
+        },
+      });
       fireEvent.click(getByText('Add or Remove Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
@@ -372,7 +388,7 @@ describe('<EpicDetail/>', () => {
       test('updates users', () => {
         const { getByText } = setup();
         fireEvent.click(getByText('Add or Remove Collaborators'));
-        fireEvent.click(getByText('Re-Sync Collaborators'));
+        fireEvent.click(getByText('Re-Sync GitHub Collaborators'));
 
         expect(refreshGitHubUsers).toHaveBeenCalledWith('r1');
       });
@@ -509,29 +525,6 @@ describe('<EpicDetail/>', () => {
 
       expect(data.assigned_qa.login).toEqual('currentUser');
       expect(data.should_alert_qa).toBe(false);
-    });
-
-    test('closes modal if no users to assign', () => {
-      const { getByText, getAllByText } = setup({
-        initialState: {
-          ...defaultState,
-          epics: {
-            r1: {
-              ...defaultState.epics.r1,
-              epics: [
-                {
-                  ...defaultState.epics.r1.epics[0],
-                  github_users: [],
-                },
-              ],
-            },
-          },
-        },
-      });
-      fireEvent.click(getAllByText('Assign Tester')[0]);
-      fireEvent.click(getByText('Add Epic Collaborators'));
-
-      expect(getByText('GitHub Users')).toBeVisible();
     });
 
     describe('alerts assigned user', () => {

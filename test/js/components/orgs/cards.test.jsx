@@ -87,6 +87,7 @@ describe('<TaskOrgCards/>', () => {
       orgs: defaultOrgs,
       task: defaultTask,
       epicUsers: defaultEpicUsers,
+      githubUsers: defaultEpicUsers,
       assignUserModalOpen: null,
       isCreatingOrg: ORG_TYPE_TRACKER_DEFAULT,
       testOrgReadyForReview: false,
@@ -101,6 +102,7 @@ describe('<TaskOrgCards/>', () => {
           orgs={opts.orgs}
           task={opts.task}
           epicUsers={opts.epicUsers}
+          githubUsers={opts.githubUsers}
           epicUrl="epic-url"
           assignUserModalOpen={opts.assignUserModalOpen}
           isCreatingOrg={opts.isCreatingOrg}

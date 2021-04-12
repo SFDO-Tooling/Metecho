@@ -38,12 +38,14 @@ export const api_urls = {
 export const sampleGitHubUser1 = {
   id: '123456',
   login: 'TestGitHubUser',
+  name: 'Test GitHub User',
   avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
 };
 
 export const sampleGitHubUser2 = {
   id: '234567',
   login: 'OtherUser',
+  name: 'Other User',
   avatar_url: 'https://randomuser.me/api/portraits/women/1.jpg',
 };
 
