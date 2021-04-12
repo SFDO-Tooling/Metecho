@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { TourDropdown } from '~js/components/header';
-import TourPopover from '~js/components/tour/popover';
 
 const TourAlert = ({
   handleTourStatus,
@@ -17,11 +16,7 @@ const TourAlert = ({
       You are in self-guided tour mode. Click help{' '}
       <TourDropdown show handleTourStatus={handleTourStatus} /> to turn it off.
     </div>
-    <TourPopover
-      align={'bottom'}
-      heading={'some heading'}
-      body={'some body text'}
-    />
+
     <div className="slds-notify__close">
       <button
         className="slds-button slds-button_icon slds-button_icon-small slds-button_icon-inverse"

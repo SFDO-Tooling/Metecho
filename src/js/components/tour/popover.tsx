@@ -4,14 +4,20 @@ import IconSettings from '@salesforce/design-system-react/components/icon-settin
 import Popover from '@salesforce/design-system-react/components/popover';
 import React from 'react';
 
+import { User } from '~js/store/user/reducer';
+
 const TourPopover = ({
   align,
   heading,
   body,
+  isEnabled,
+  user,
 }: {
   align: string;
   heading: string;
   body: string;
+  isEnabled?: boolean;
+  user: User;
 }) => (
   <IconSettings iconPath="static/images">
     <Popover
@@ -19,10 +25,10 @@ const TourPopover = ({
       body={<p>{body}</p>}
       footerWalkthroughActions={<Button variant="brand">Next</Button>}
       heading={heading}
+      // isEnabled={user.self_guided_tour_enabled}
       id="popover-walkthrough"
       stepText="Step 2 of 4"
       variant="walkthrough"
-      /* {...this.props} */
     >
       <button className="slds-button slds-button_icon slds-button_icon-small ">
         <svg
