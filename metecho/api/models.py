@@ -86,6 +86,9 @@ class User(HashIdMixin, AbstractUser):
         help_text="Date of the last time the user completed the interactive onboarding",
     )
 
+    self_guided_tour_enabled = models.BooleanField(default=True)
+    self_guided_tour_state = models.JSONField(null=True, blank=True)
+
     def notify(self, subject, body):
         # Right now, the only way we notify is via email. In future, we
         # may add in-app notifications.
