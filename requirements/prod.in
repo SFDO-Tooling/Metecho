@@ -1,10 +1,10 @@
-Django==3.1.7
+Django==3.2
 autobahn==21.3.1
 beautifulsoup4==4.9.3
 bleach==3.3.0
 channels-redis==3.2.0
 channels==3.0.3
-cumulusci==3.31.0
+cumulusci==3.32.1
 dj-database-url==0.5.0
 django-allauth==0.44.0
 django-anymail[mailgun]==8.2
@@ -16,7 +16,7 @@ django-parler==2.2
 django-redis==4.12.1
 django-rq==2.4.1
 djangorestframework==3.12.4
-furl==2.1.0
+furl==2.1.2
 github3-py==2.0.0
 honcho==1.0.1
 logfmt==0.4
