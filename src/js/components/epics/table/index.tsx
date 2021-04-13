@@ -7,6 +7,7 @@ import React from 'react';
 import CollaboratorTableCell from '~js/components/epics/table/collaboratorCell';
 import DetailTableCell from '~js/components/epics/table/detailCell';
 import StatusTableCell from '~js/components/epics/table/statusCell';
+import TourPopover from '~js/components/tour/popover';
 import { Epic } from '~js/store/epics/reducer';
 
 export interface TableCellProps {
@@ -31,7 +32,16 @@ const EpicTable = ({
     <DataTable items={items} id="project-epics-table" noRowHover>
       <DataTableColumn
         key="details"
-        label={i18n.t('Epic')}
+        label={
+          <>
+            {i18n.t('Epic')}
+            <TourPopover
+              align={'bottom'}
+              heading={'some heading'}
+              body={'some body text'}
+            />
+          </>
+        }
         property="name"
         width="100%"
         primaryColumn

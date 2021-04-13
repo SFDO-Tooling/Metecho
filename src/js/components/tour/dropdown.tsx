@@ -20,6 +20,7 @@ import {
 import routes, { routePatterns } from '~js/utils/routes';
 
 const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
+  const dispatch = useDispatch<ThunkDispatch>();
   const history = useHistory();
   const match =
     useRouteMatch<{
@@ -40,6 +41,16 @@ const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
       }
     },
     [projectUrl], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const handleToggle = useCallback(
+    (
+      event: React.ChangeEvent<HTMLInputElement>,
+      { checked }: { checked: boolean },
+    ) => {
+      dispatch(updateTour({ enabled: checked }));
+    },
+    [dispatch],
   );
 
   return project ? (
@@ -96,6 +107,8 @@ const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
             <Checkbox
               labels={{ label: 'Self-guided Tour' }}
               className="slds-p-horizontal_small"
+              checked={user?.self_guided_tour_enabled}
+              onChange={handleToggle}
             />
           </>
         }

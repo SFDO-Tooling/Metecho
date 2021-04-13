@@ -210,3 +210,30 @@ export const onboarded = (): ThunkResult<
     throw err;
   }
 };
+
+export const updateTour = (data: {
+  enabled?: boolean;
+  state?: string[] | null;
+}): ThunkResult<Promise<OnboardingSucceeded>> => async (dispatch) => {
+  dispatch({ type: 'TOUR_TOGGLE_REQUESTED' });
+  try {
+    const payload: User = await apiFetch({
+      url: window.api_urls.current_user_guided_tour(),
+      dispatch,
+      opts: {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    });
+    return dispatch({
+      type: 'TOUR_SUCCEEDED' as const,
+      payload,
+    });
+  } catch (err) {
+    dispatch({ type: 'TOUR_UPDATE_FAILED' });
+    throw err;
+  }
+};
