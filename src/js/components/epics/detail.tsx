@@ -11,11 +11,12 @@ import ConfirmRemoveUserModal from '~js/components/epics/confirmRemoveUserModal'
 import EpicStatusPath from '~js/components/epics/path';
 import EpicProgress from '~js/components/epics/progress';
 import EpicStatusSteps from '~js/components/epics/steps';
+import AssignEpicCollaboratorsModal from '~js/components/githubUsers/assignEpicCollaborators';
+import UserCards from '~js/components/githubUsers/cards';
 import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import { Step } from '~js/components/steps/stepsItem';
 import CreateTaskModal from '~js/components/tasks/createForm';
 import TaskTable from '~js/components/tasks/table';
-import { AssignUsersModal, UserCards } from '~js/components/user/githubUser';
 import {
   CreateOrgModal,
   DeleteModal,
@@ -38,13 +39,11 @@ import { updateObject } from '~js/store/actions';
 import { refreshGitHubUsers } from '~js/store/projects/actions';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
-import { getUrlParam, removeUrlParam } from '~js/utils/api';
 import {
   EPIC_STATUSES,
   OBJECT_TYPES,
   ORG_TYPES,
   OrgTypes,
-  SHOW_EPIC_COLLABORATORS,
 } from '~js/utils/constants';
 import { getBranchLink, getCompletedTasks } from '~js/utils/helpers';
 import routes from '~js/utils/routes';
@@ -87,18 +86,6 @@ const EpicDetail = (props: RouteComponentProps) => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);
   }, []);
-
-  // Auto-open the assign-users modal if `SHOW_EPIC_COLLABORATORS` param
-  const { history } = props;
-  useEffect(() => {
-    const showCollaborators = getUrlParam(SHOW_EPIC_COLLABORATORS);
-    if (showCollaborators === 'true') {
-      // Remove query-string from URL
-      history.replace({ search: removeUrlParam(SHOW_EPIC_COLLABORATORS) });
-      // Show collaborators modal
-      openAssignUsersModal();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // If the epic slug changes, make sure EditEpic modal is closed
   useEffect(() => {
@@ -447,7 +434,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 variant="outline-brand"
                 onClick={openAssignUsersModal}
               />
-              <AssignUsersModal
+              <AssignEpicCollaboratorsModal
                 allUsers={project.github_users}
                 selectedUsers={epic.github_users}
                 heading={i18n.t(
@@ -551,11 +538,15 @@ const EpicDetail = (props: RouteComponentProps) => {
               <>
                 <EpicProgress range={epicProgress} />
                 <TaskTable
+                  projectId={project.id}
                   projectSlug={project.slug}
                   epicSlug={epic.slug}
                   tasks={tasks}
                   epicUsers={epic.github_users}
-                  openAssignEpicUsersModal={openAssignUsersModal}
+                  githubUsers={project.github_users}
+                  isRefreshingUsers={Boolean(
+                    project.currently_refreshing_gh_users,
+                  )}
                   assignUserAction={assignUser}
                 />
               </>

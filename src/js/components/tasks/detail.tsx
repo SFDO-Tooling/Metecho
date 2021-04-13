@@ -632,13 +632,16 @@ const TaskDetail = (props: RouteComponentProps) => {
           <TaskOrgCards
             orgs={taskOrgs}
             task={task}
+            projectId={project.id}
             epicUsers={epic.github_users}
+            githubUsers={project.github_users}
             epicCreatingBranch={epic.currently_creating_branch}
             epicUrl={epicUrl}
             repoUrl={project.repo_url}
             openCaptureModal={openCaptureModal}
             assignUserModalOpen={assignUserModalOpen}
             isCreatingOrg={isCreatingOrg}
+            isRefreshingUsers={Boolean(project.currently_refreshing_gh_users)}
             openAssignUserModal={openAssignUserModal}
             closeAssignUserModal={closeAssignUserModal}
             openSubmitReviewModal={openSubmitReviewModal}
