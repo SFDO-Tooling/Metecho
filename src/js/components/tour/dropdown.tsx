@@ -4,7 +4,7 @@ import Popover from '@salesforce/design-system-react/components/popover';
 import classnames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
 
 import backpackIcon from '~img/backpack-sm.svg';
@@ -12,6 +12,7 @@ import mapIcon from '~img/map-sm.svg';
 import seesawIcon from '~img/seesaw-sm.svg';
 import { AppState } from '~js/store';
 import { selectProject } from '~js/store/projects/selectors';
+import { User } from '~js/store/user/reducer';
 import {
   SHOW_WALKTHROUGH,
   WALKTHROUGH_TYPES,
@@ -19,7 +20,7 @@ import {
 } from '~js/utils/constants';
 import routes, { routePatterns } from '~js/utils/routes';
 
-const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
+const TourDropdown = ({ isAlert, user }: { user: User; isAlert?: boolean }) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const history = useHistory();
   const match =
