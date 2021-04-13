@@ -36,9 +36,9 @@ const EpicTable = ({
           <>
             {i18n.t('Epic')}
             <TourPopover
-              align={'right'}
-              heading={'some heading'}
-              body={'some body text'}
+              align="right"
+              heading={i18n.t('some heading')}
+              body={i18n.t('some body text')}
             />
           </>
         }
@@ -54,9 +54,9 @@ const EpicTable = ({
           <>
             {i18n.t('Status')}
             <TourPopover
-              align={'right'}
-              heading={'some heading'}
-              body={'some body text'}
+              align="right"
+              heading={i18n.t('some heading')}
+              body={i18n.t('some body text')}
             />
           </>
         }
@@ -71,9 +71,9 @@ const EpicTable = ({
           <>
             <div>
               <TourPopover
-                align={'right'}
+                align="right"
                 heading={i18n.t('some heading')}
-                body={'some body text'}
+                body={i18n.t('some body')}
               />
               <Icon
                 category="utility"

@@ -204,9 +204,9 @@ const ProjectDetail = (
                       onClick={openCreateOrgModal}
                     />
                     <TourPopover
-                      align={'bottom'}
-                      heading={'some heading'}
-                      body={'some body text'}
+                      align="bottom"
+                      heading={i18n.t('some heading')}
+                      body={i18n.t('some body text')}
                     />
                   </div>
                 )}
@@ -256,9 +256,9 @@ const ProjectDetail = (
               className="slds-m-bottom_large tour-create-epic"
             />
             <TourPopover
-              align={'right'}
-              body={'body text for this popover'}
-              heading={'heading for this popover'}
+              align="right"
+              body={i18n.t('some body text')}
+              heading={i18n.t('some heading')}
             />
             {hasEpics && (
               <>

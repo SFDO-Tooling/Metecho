@@ -28,9 +28,9 @@ const PageDescription = ({
         </h2>
       )}
       <TourPopover
-        align={'left'}
-        heading={'this is the project description'}
-        body={'some body text'}
+        align="left"
+        heading={i18n.t('Heading for page description')}
+        body={i18n.t('Body text')}
       />
       <div
         className="markdown slds-text-longform"
