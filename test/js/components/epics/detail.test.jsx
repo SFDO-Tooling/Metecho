@@ -10,22 +10,18 @@ import {
   updateObject,
 } from '~js/store/actions';
 import { refreshGitHubUsers } from '~js/store/projects/actions';
-import { getUrlParam, removeUrlParam } from '~js/utils/api';
 import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('~js/store/actions');
 jest.mock('~js/store/projects/actions');
-jest.mock('~js/utils/api');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-getUrlParam.mockReturnValue(null);
-removeUrlParam.mockReturnValue('');
 
 afterEach(() => {
   fetchObject.mockClear();
@@ -33,8 +29,6 @@ afterEach(() => {
   updateObject.mockClear();
   createObject.mockClear();
   refreshGitHubUsers.mockClear();
-  getUrlParam.mockClear();
-  removeUrlParam.mockClear();
 });
 
 const defaultOrg = {
@@ -113,6 +107,7 @@ const defaultState = {
             {
               id: '123456',
               login: 'TestGitHubUser',
+              name: 'Test GitHub User',
             },
             {
               id: '234567',
@@ -213,18 +208,14 @@ describe('<EpicDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, projectSlug, epicSlug } = opts;
     const context = {};
-    const history = { replace: jest.fn() };
     const response = renderWithRedux(
       <StaticRouter context={context}>
-        <EpicDetail
-          match={{ params: { projectSlug, epicSlug } }}
-          history={history}
-        />
+        <EpicDetail match={{ params: { projectSlug, epicSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { ...response, context, history };
+    return { ...response, context };
   };
 
   test('renders epic detail, scratch org, and tasks list', () => {
@@ -249,23 +240,6 @@ describe('<EpicDetail/>', () => {
 
     expect(getByText('Add a Task for Epic 1')).toBeVisible();
     expect(queryByText('Tasks for Epic 1')).toBeNull();
-  });
-
-  describe('`SHOW_EPIC_COLLABORATORS` param is truthy', () => {
-    beforeAll(() => {
-      getUrlParam.mockReturnValue('true');
-    });
-
-    afterAll(() => {
-      getUrlParam.mockReturnValue(null);
-    });
-
-    test('opens assign-users modal', () => {
-      const { history, getByText } = setup();
-
-      expect(history.replace).toHaveBeenCalledWith({ search: '' });
-      expect(getByText('GitHub Users')).toBeVisible();
-    });
   });
 
   describe('epic not found', () => {
@@ -352,9 +326,24 @@ describe('<EpicDetail/>', () => {
     });
   });
 
-  describe('<AssignUsersModal />', () => {
+  describe('<AssignEpicCollaboratorsModal />', () => {
     test('opens and closes', () => {
-      const { getByText, getByTitle, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          epics: {
+            r1: {
+              ...defaultState.epics.r1,
+              epics: [
+                {
+                  ...defaultState.epics.r1.epics[0],
+                  github_users: [],
+                },
+              ],
+            },
+          },
+        },
+      });
       fireEvent.click(getByText('Add or Remove Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
@@ -399,7 +388,7 @@ describe('<EpicDetail/>', () => {
       test('updates users', () => {
         const { getByText } = setup();
         fireEvent.click(getByText('Add or Remove Collaborators'));
-        fireEvent.click(getByText('Re-Sync Collaborators'));
+        fireEvent.click(getByText('Re-Sync GitHub Collaborators'));
 
         expect(refreshGitHubUsers).toHaveBeenCalledWith('r1');
       });
@@ -536,29 +525,6 @@ describe('<EpicDetail/>', () => {
 
       expect(data.assigned_qa.login).toEqual('currentUser');
       expect(data.should_alert_qa).toBe(false);
-    });
-
-    test('closes modal if no users to assign', () => {
-      const { getByText, getAllByText } = setup({
-        initialState: {
-          ...defaultState,
-          epics: {
-            r1: {
-              ...defaultState.epics.r1,
-              epics: [
-                {
-                  ...defaultState.epics.r1.epics[0],
-                  github_users: [],
-                },
-              ],
-            },
-          },
-        },
-      });
-      fireEvent.click(getAllByText('Assign Tester')[0]);
-      fireEvent.click(getByText('Add Epic Collaborators'));
-
-      expect(getByText('GitHub Users')).toBeVisible();
     });
 
     describe('alerts assigned user', () => {

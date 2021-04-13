@@ -21,7 +21,7 @@ import {
 export default {
   title: 'Tasks/Table/Example',
   component: TasksTableComponent,
-  decorators: [withRedux()],
+  decorators: [withRedux({ user: sampleGitHubUser2 })],
 };
 
 const sampleTasks: { [key: string]: Task } = {
@@ -44,10 +44,12 @@ const Template = ({ tasks, ...rest }: StoryProps) => (
 
 export const TasksTable: Story<StoryProps> = Template.bind({});
 TasksTable.args = {
+  projectId: 'w19nV90',
   projectSlug: 'my-project',
   epicSlug: sampleEpic1.slug,
-  epicUsers: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
-  openAssignEpicUsersModal: action('openAssignEpicUsersModal'),
+  epicUsers: [sampleGitHubUser1],
+  githubUsers: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
+  isRefreshingUsers: false,
   assignUserAction: action('assignUserAction'),
 };
 TasksTable.argTypes = {

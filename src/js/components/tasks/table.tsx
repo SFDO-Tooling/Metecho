@@ -9,10 +9,8 @@ import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import {
-  AssignUserModal,
-  GitHubUserAvatar,
-} from '~js/components/user/githubUser';
+import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
+import GitHubUserAvatar from '~js/components/githubUsers/avatar';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
 import {
@@ -43,11 +41,13 @@ interface TableCellProps {
 }
 
 interface Props {
+  projectId: string;
   projectSlug: string;
   epicSlug: string;
   tasks: Task[];
   epicUsers: GitHubUser[];
-  openAssignEpicUsersModal: () => void;
+  githubUsers: GitHubUser[];
+  isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
 }
 
@@ -126,8 +126,10 @@ StatusTableCell.displayName = DataTableCell.displayName;
 
 const AssigneeTableCell = ({
   type,
+  projectId,
   epicUsers,
-  openAssignEpicUsersModal,
+  githubUsers,
+  isRefreshingUsers,
   assignUserAction,
   item,
   className,
@@ -135,8 +137,10 @@ const AssigneeTableCell = ({
   ...props
 }: TableCellProps & {
   type: OrgTypes;
+  projectId: string;
   epicUsers: GitHubUser[];
-  openAssignEpicUsersModal: () => void;
+  githubUsers: GitHubUser[];
+  isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
   children?: GitHubUser | null;
 }) => {
@@ -146,13 +150,8 @@ const AssigneeTableCell = ({
     setAssignUserModalOpen(true);
   };
   const closeAssignUserModal = () => {
-    // setAssigneeSelection(null);
     setAssignUserModalOpen(false);
   };
-  const handleEmptyMessageClick = useCallback(() => {
-    closeAssignUserModal();
-    openAssignEpicUsersModal();
-  }, [openAssignEpicUsersModal]);
 
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
@@ -197,13 +196,14 @@ const AssigneeTableCell = ({
           title={title}
           onClick={openAssignUserModal}
         />
-        <AssignUserModal
-          allUsers={epicUsers}
+        <AssignTaskRoleModal
+          projectId={projectId}
+          epicUsers={epicUsers}
+          githubUsers={githubUsers}
           selectedUser={assignedUser || null}
           orgType={type}
           isOpen={assignUserModalOpen}
-          emptyMessageText={i18n.t('Add Epic Collaborators')}
-          emptyMessageAction={handleEmptyMessageClick}
+          isRefreshingUsers={isRefreshingUsers}
           onRequestClose={closeAssignUserModal}
           setUser={doAssignUserAction}
         />
@@ -223,11 +223,13 @@ const AssigneeTableCell = ({
 AssigneeTableCell.displayName = DataTableCell.displayName;
 
 const TaskTable = ({
+  projectId,
   projectSlug,
   epicSlug,
   tasks,
   epicUsers,
-  openAssignEpicUsersModal,
+  githubUsers,
+  isRefreshingUsers,
   assignUserAction,
 }: Props) => {
   const statusOrder = {
@@ -266,8 +268,10 @@ const TaskTable = ({
       >
         <AssigneeTableCell
           type={ORG_TYPES.DEV}
+          projectId={projectId}
           epicUsers={epicUsers}
-          openAssignEpicUsersModal={openAssignEpicUsersModal}
+          githubUsers={githubUsers}
+          isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
         />
       </DataTableColumn>
@@ -279,8 +283,10 @@ const TaskTable = ({
       >
         <AssigneeTableCell
           type={ORG_TYPES.QA}
+          projectId={projectId}
           epicUsers={epicUsers}
-          openAssignEpicUsersModal={openAssignEpicUsersModal}
+          githubUsers={githubUsers}
+          isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
         />
       </DataTableColumn>

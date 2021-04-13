@@ -30,3 +30,11 @@
 .content-fill-height {
   min-height: 100%;
 }
+
+// Set Modal height so changing content doesn't shift modal size
+// As seen in Task Assign Modal
+.modal-set-height {
+  .slds-modal__content {
+    height: 100%;
+  }
+}
