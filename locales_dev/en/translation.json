@@ -353,6 +353,7 @@
   "screenshots of Metecho app interface": "screenshots of Metecho app interface",
   "selfGuidedTourAlert": "You are in self-guided tour mode. Click help <2></2> to turn if off.",
   "social image for {{title}}": "social image for {{title}}",
+  "some heading": "some heading",
   "targetDirectoryConfigInfo": "Optional Configuration Directories are for additional sets of metadata components that will only be deployed on demand.",
   "targetDirectoryPostInfo": "Post-Install Directories are for unmanaged metadata components that should always be deployed after deploying or installing the package.",
   "targetDirectoryPreInfo": "Pre-Install Directories are for unmanaged metadata components that should always be deployed prior to deploying or installing the package.",

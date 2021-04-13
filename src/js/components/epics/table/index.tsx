@@ -36,7 +36,7 @@ const EpicTable = ({
           <>
             {i18n.t('Epic')}
             <TourPopover
-              align={'bottom'}
+              align={'right'}
               heading={'some heading'}
               body={'some body text'}
             />
@@ -50,7 +50,16 @@ const EpicTable = ({
       </DataTableColumn>
       <DataTableColumn
         key="status"
-        label={i18n.t('Status')}
+        label={
+          <>
+            {i18n.t('Status')}
+            <TourPopover
+              align={'right'}
+              heading={'some heading'}
+              body={'some body text'}
+            />
+          </>
+        }
         property="status"
         width="0"
       >
@@ -59,14 +68,23 @@ const EpicTable = ({
       <DataTableColumn
         key="numCollaborators"
         label={
-          <Icon
-            category="utility"
-            name="user"
-            size="xx-small"
-            className="slds-m-bottom_xx-small"
-            containerClassName="slds-current-color"
-            title={i18n.t('Collaborators')}
-          />
+          <>
+            <div>
+              <TourPopover
+                align={'right'}
+                heading={i18n.t('some heading')}
+                body={'some body text'}
+              />
+              <Icon
+                category="utility"
+                name="user"
+                size="xx-small"
+                className="slds-m-bottom_xx-small"
+                containerClassName="slds-current-color"
+                title={i18n.t('Collaborators')}
+              />
+            </div>
+          </>
         }
         property="numCollaborators"
         width="0"
