@@ -118,7 +118,10 @@ class User(HashIdMixin, AbstractUser):
                 GitHubRepository.objects.bulk_create(
                     [
                         GitHubRepository(
-                            user=self, repo_id=repo.id, repo_url=repo.html_url
+                            user=self,
+                            repo_id=repo.id,
+                            repo_url=repo.html_url,
+                            permissions=repo.permissions,
                         )
                         for repo in repos
                     ]
@@ -422,6 +425,7 @@ class GitHubRepository(HashIdMixin, models.Model):
     )
     repo_id = models.IntegerField()
     repo_url = models.URLField()
+    permissions = models.JSONField(null=True)
 
     class Meta:
         verbose_name_plural = "GitHub repositories"
@@ -658,6 +662,10 @@ class Task(
             self.epic.save()
             self.epic.notify_changed(originating_user_id=None)
         return ret
+
+    @property
+    def project(self):
+        return self.epic.project
 
     def subscribable_by(self, user):  # pragma: nocover
         return True

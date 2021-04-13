@@ -22,7 +22,15 @@ from .hook_serializers import (
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from .models import EPIC_STATUSES, SCRATCH_ORG_TYPES, Epic, Project, ScratchOrg, Task
+from .models import (
+    EPIC_STATUSES,
+    SCRATCH_ORG_TYPES,
+    Epic,
+    GitHubRepository,
+    Project,
+    ScratchOrg,
+    Task,
+)
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
@@ -38,6 +46,37 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+class ProjectPushPermissionMixin:
+    """
+    Require repository Push permission for all operations other than list/read.
+    Assumes the related model has a foreign key to Project.
+    """
+
+    def check_push_permission(self, instance):
+        repos_with_perms = GitHubRepository.objects.filter(
+            permissions__push=True,
+            user=self.request.user,
+            repo_id=instance.project.repo_id,
+        )
+        if not repos_with_perms.exists():
+            raise PermissionDenied(
+                'You do not have "Push" permissions in the related repository'
+            )
+
+    def perform_create(self, serializer):
+        instance = serializer.Meta.model(**serializer.validated_data)
+        self.check_push_permission(instance)
+        return super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        self.check_push_permission(serializer.instance)
+        return super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        self.check_push_permission(instance)
+        return super().perform_destroy(instance)
 
 
 class CurrentUserObjectMixin:
@@ -62,7 +101,7 @@ class CreatePrMixin:
         instance.queue_create_pr(
             request.user,
             **serializer.validated_data,
-            originating_user_id=str(request.user.id)
+            originating_user_id=str(request.user.id),
         )
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
@@ -208,7 +247,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         return Response(data)
 
 
-class EpicViewSet(CreatePrMixin, ModelViewSet):
+class EpicViewSet(ProjectPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = EpicSerializer
     pagination_class = CustomPaginator
@@ -230,7 +269,7 @@ class EpicViewSet(CreatePrMixin, ModelViewSet):
         )
 
 
-class TaskViewSet(CreatePrMixin, ModelViewSet):
+class TaskViewSet(ProjectPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
     queryset = Task.objects.active()
