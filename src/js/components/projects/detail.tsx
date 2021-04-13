@@ -255,6 +255,11 @@ const ProjectDetail = (
               onClick={openCreateModal}
               className="slds-m-bottom_large tour-create-epic"
             />
+            <TourPopover
+              align={'right'}
+              body={'body text for this popover'}
+              heading={'heading for this popover'}
+            />
             {hasEpics && (
               <>
                 <EpicTable epics={epics.epics} projectSlug={project.slug} />
