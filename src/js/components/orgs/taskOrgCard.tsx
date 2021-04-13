@@ -2,8 +2,9 @@ import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
+import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
+import { UserCard } from '~js/components/githubUsers/cards';
 import Footer from '~js/components/orgs/cards/footer';
 import OrgActions from '~js/components/orgs/cards/orgActions';
 import OrgIcon from '~js/components/orgs/cards/orgIcon';
@@ -12,16 +13,10 @@ import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
 import RefreshOrgModal from '~js/components/orgs/cards/refresh';
 import UserActions from '~js/components/orgs/cards/userActions';
 import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
-import { AssignUserModal, UserCard } from '~js/components/user/githubUser';
 import { Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
-import { addUrlParams } from '~js/utils/api';
-import {
-  ORG_TYPES,
-  OrgTypes,
-  SHOW_EPIC_COLLABORATORS,
-} from '~js/utils/constants';
+import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
 import { getTaskCommits } from '~js/utils/helpers';
 import { logError } from '~js/utils/logging';
 
@@ -30,12 +25,15 @@ interface TaskOrgCardProps {
   type: OrgTypes;
   user: User;
   task: Task;
+  projectId: string;
   epicUsers: GitHubUser[];
+  githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
   epicUrl: string;
   repoUrl: string;
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
+  isRefreshingUsers: boolean;
   assignUserModalOpen: OrgTypes | null;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
@@ -59,12 +57,14 @@ const TaskOrgCard = ({
   type,
   user,
   task,
+  projectId,
   epicUsers,
+  githubUsers,
   epicCreatingBranch,
-  epicUrl,
   repoUrl,
   isCreatingOrg,
   isDeletingOrg,
+  isRefreshingUsers,
   assignUserModalOpen,
   openAssignUserModal,
   closeAssignUserModal,
@@ -77,8 +77,7 @@ const TaskOrgCard = ({
   openSubmitReviewModal,
   testOrgReadyForReview,
   testOrgSubmittingReview,
-  history,
-}: TaskOrgCardProps & RouteComponentProps) => {
+}: TaskOrgCardProps) => {
   let assignedUser: GitHubUser | null = null;
   let heading = i18n.t('Developer');
   let orgHeading = i18n.t('Dev Org');
@@ -156,10 +155,6 @@ const TaskOrgCard = ({
       handleCheckForOrgChanges(org);
     }
   }, [handleCheckForOrgChanges, org]);
-
-  const handleEmptyMessageClick = useCallback(() => {
-    history.push(addUrlParams(epicUrl, { [SHOW_EPIC_COLLABORATORS]: true }));
-  }, [epicUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const taskCommits = getTaskCommits(task);
   const orgCommitIdx = org ? taskCommits.indexOf(org.latest_commit) : -1;
@@ -274,13 +269,14 @@ const TaskOrgCard = ({
           </>
         )}
       </Card>
-      <AssignUserModal
-        allUsers={epicUsers}
+      <AssignTaskRoleModal
+        projectId={projectId}
+        epicUsers={epicUsers}
+        githubUsers={githubUsers}
         selectedUser={assignedUser}
         orgType={type}
         isOpen={assignUserModalOpen === type}
-        emptyMessageText={i18n.t('View Epic to Add Collaborators')}
-        emptyMessageAction={handleEmptyMessageClick}
+        isRefreshingUsers={isRefreshingUsers}
         onRequestClose={closeAssignUserModal}
         setUser={doAssignUser}
       />
@@ -297,4 +293,4 @@ const TaskOrgCard = ({
   );
 };
 
-export default withRouter(TaskOrgCard);
+export default TaskOrgCard;

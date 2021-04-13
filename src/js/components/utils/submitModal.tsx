@@ -7,7 +7,7 @@ import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { GitHubUserAvatar } from '~js/components/user/githubUser';
+import GitHubUserAvatar from '~js/components/githubUsers/avatar';
 import {
   ExternalLink,
   LabelWithSpinner,

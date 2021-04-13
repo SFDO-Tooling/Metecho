@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import React from 'react';
 
-import { GitHubUserAvatar } from '~js/components/user/githubUser';
+import GitHubUserAvatar from '~js/components/githubUsers/avatar';
 import { ExternalLink } from '~js/components/utils';
 import { GitHubUser } from '~js/store/user/reducer';
 
