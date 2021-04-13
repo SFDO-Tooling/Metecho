@@ -16,9 +16,11 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler, job
 from github3.exceptions import NotFoundError
+from github3.github import GitHub
 
 from .email_utils import get_user_facing_url
 from .gh import (
+    get_cached_user,
     get_cumulus_prefix,
     get_project_config,
     get_repo_info,
@@ -632,6 +634,20 @@ def populate_github_users(project, *, originating_user_id):
                 key=lambda x: x["login"].lower(),
             )
         )
+
+        # Retrieve additional information for each user by querying GitHub
+        gh = GitHub(repo)
+        expanded_users = []
+        for user in project.github_users:
+            try:
+                full_user = get_cached_user(gh, user["login"])
+                expanded = {**user, "name": full_user.name}
+            except Exception:
+                logger.exception(f"Failed to expand GitHub user {user['login']}")
+                expanded = user
+            expanded_users.append(expanded)
+        project.github_users = expanded_users
+
     except Exception as e:
         project.finalize_populate_github_users(
             error=e, originating_user_id=originating_user_id

@@ -19,8 +19,6 @@ export const OBJECT_TYPES = {
   EPIC_PR: 'epic_pr' as const,
 };
 
-export const SHOW_EPIC_COLLABORATORS = 'show_collaborators';
-
 export const DEFAULT_ORG_CONFIG_NAME = 'dev';
 
 export type OrgTypes = 'Dev' | 'QA' | 'Playground';

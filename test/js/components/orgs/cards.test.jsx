@@ -8,8 +8,6 @@ import TaskOrgCards, {
 } from '~js/components/orgs/taskOrgCards';
 import { deleteObject, updateObject } from '~js/store/actions';
 import { refetchOrg } from '~js/store/orgs/actions';
-import { addUrlParams } from '~js/utils/api';
-import { SHOW_EPIC_COLLABORATORS } from '~js/utils/constants';
 
 import {
   renderWithRedux,
@@ -89,6 +87,7 @@ describe('<TaskOrgCards/>', () => {
       orgs: defaultOrgs,
       task: defaultTask,
       epicUsers: defaultEpicUsers,
+      githubUsers: defaultEpicUsers,
       assignUserModalOpen: null,
       isCreatingOrg: ORG_TYPE_TRACKER_DEFAULT,
       testOrgReadyForReview: false,
@@ -103,6 +102,7 @@ describe('<TaskOrgCards/>', () => {
           orgs={opts.orgs}
           task={opts.task}
           epicUsers={opts.epicUsers}
+          githubUsers={opts.githubUsers}
           epicUrl="epic-url"
           assignUserModalOpen={opts.assignUserModalOpen}
           isCreatingOrg={opts.isCreatingOrg}
@@ -245,25 +245,6 @@ describe('<TaskOrgCards/>', () => {
 
       expect(data.assigned_dev.login).toEqual('user-name');
       expect(data.should_alert_dev).toBe(true);
-    });
-
-    test('redirects to epic-detail if no users to assign', () => {
-      const task = {
-        ...defaultTask,
-        assigned_dev: null,
-      };
-      const epicUsers = [];
-      const { getByText, context } = setup({
-        task,
-        epicUsers,
-        assignUserModalOpen: 'Dev',
-      });
-      fireEvent.click(getByText('View Epic to Add Collaborators'));
-
-      expect(context.action).toEqual('PUSH');
-      expect(context.url).toEqual(
-        addUrlParams('epic-url', { [SHOW_EPIC_COLLABORATORS]: true }),
-      );
     });
   });
 
