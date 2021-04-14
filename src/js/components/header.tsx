@@ -17,7 +17,7 @@ const Header = () => {
 
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
-      {window.GLOBALS.ENABLE_WALKTHROUGHS ? <TourDropdown /> : null}
+      {/* {window.GLOBALS.ENABLE_WALKTHROUGHS ? <TourDropdown /> : null} */}
       <UserInfo />
     </PageHeaderControl>
   );
