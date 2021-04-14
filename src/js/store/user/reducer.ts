@@ -6,6 +6,11 @@ export interface GitHubUser {
   login: string;
   avatar_url: string;
   name?: string;
+  permissions?: {
+    pull: boolean;
+    push: boolean;
+    admin: boolean;
+  };
 }
 
 export interface User {
