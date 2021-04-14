@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="githubrepository",
             name="permissions",
-            field=models.JSONField(null=True),
+            field=models.JSONField(null=True, default={"push": True}),
+            preserve_default=False,
         ),
     ]
