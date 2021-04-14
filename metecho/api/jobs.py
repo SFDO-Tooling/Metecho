@@ -628,6 +628,7 @@ def populate_github_users(project, *, originating_user_id):
                         "id": str(collaborator.id),
                         "login": collaborator.login,
                         "avatar_url": collaborator.avatar_url,
+                        "permissions": collaborator.permissions,
                     }
                     for collaborator in repo.collaborators()
                 ],
