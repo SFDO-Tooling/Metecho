@@ -51,9 +51,10 @@ interface OnboardingSucceeded {
 
 interface UpdateTourAction {
   type: 'TOUR_SUCCEEDED' | 'TOUR_UPDATE_FAILED';
+  payload: User;
 }
 
-interface UpdateTour {
+interface UpdateTourSucceeded {
   type: 'TOUR_SUCCEEDED';
   payload: User;
 }
@@ -70,6 +71,7 @@ export type UserAction =
   | AgreeToTermsSucceeded
   | OnboardingAction
   | UpdateTourAction
+  | UpdateTourSucceeded
   | OnboardingSucceeded;
 
 export const login = (payload: User): LoginAction => {
@@ -224,7 +226,7 @@ export const onboarded = (): ThunkResult<
 export const updateTour = (data: {
   enabled?: boolean;
   state?: string[] | null;
-}): ThunkResult<Promise<UpdateTour>> => async (dispatch) => {
+}): ThunkResult<Promise<UpdateTourSucceeded>> => async (dispatch) => {
   dispatch({ type: 'TOUR_TOGGLE_REQUESTED' });
   try {
     const payload: User = await apiFetch({
