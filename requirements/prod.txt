@@ -78,7 +78,7 @@ cryptography==3.3.1
     #   sfdo-template-helpers
 cumulusci==3.27.0
     # via -r requirements/prod.in
-daphne==3.0.1
+daphne==3.0.2
     # via channels
 defusedxml==0.6.0
     # via python3-openid
