@@ -529,6 +529,9 @@ class Epic(
 
     # end CreatePrMixin configuration
 
+    def has_push_permission(self, user):
+        return self.project.has_push_permission(user)
+
     def create_gh_branch(self, user):
         from .jobs import create_gh_branch_for_new_epic_job
 
@@ -670,10 +673,6 @@ class Task(
             self.epic.notify_changed(originating_user_id=None)
         return ret
 
-    @property
-    def project(self):
-        return self.epic.project
-
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
@@ -748,6 +747,9 @@ class Task(
             user.notify(subject, body)
 
     # end CreatePrMixin configuration
+
+    def has_push_permission(self, user):
+        return self.epic.has_push_permission(user)
 
     def update_review_valid(self):
         review_valid = bool(

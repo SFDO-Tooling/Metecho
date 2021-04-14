@@ -40,14 +40,14 @@ from .serializers import (
 User = get_user_model()
 
 
-class ProjectPushPermissionMixin:
+class RepoPushPermissionMixin:
     """
     Require repository Push permission for all operations other than list/read.
-    Assumes the related model has a foreign key to Project.
+    Assumes the related model implements a `has_push_permission(user)` method.
     """
 
     def check_push_permission(self, instance):
-        if not instance.project.has_push_permission(self.request.user):
+        if not instance.has_push_permission(self.request.user):
             raise PermissionDenied(
                 'You do not have "Push" permissions in the related repository'
             )
@@ -234,7 +234,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         return Response(data)
 
 
-class EpicViewSet(ProjectPushPermissionMixin, CreatePrMixin, ModelViewSet):
+class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = EpicSerializer
     pagination_class = CustomPaginator
@@ -256,7 +256,7 @@ class EpicViewSet(ProjectPushPermissionMixin, CreatePrMixin, ModelViewSet):
         )
 
 
-class TaskViewSet(ProjectPushPermissionMixin, CreatePrMixin, ModelViewSet):
+class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
     queryset = Task.objects.active()
