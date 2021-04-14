@@ -91,6 +91,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     description_rendered = MarkdownField(source="description", read_only=True)
     repo_url = serializers.SerializerMethodField()
     repo_image_url = serializers.SerializerMethodField()
+    has_push_permission = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -100,6 +101,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "repo_url",
             "repo_owner",
             "repo_name",
+            "has_push_permission",
             "description",
             "description_rendered",
             "is_managed",
@@ -123,6 +125,9 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_repo_image_url(self, obj) -> Optional[str]:
         return obj.repo_image_url if obj.include_repo_image_url else ""
+
+    def get_has_push_permission(self, obj) -> bool:
+        return obj.has_push_permission(self.context["request"].user)
 
 
 class EpicSerializer(serializers.ModelSerializer):

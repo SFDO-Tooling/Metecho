@@ -418,6 +418,13 @@ class Project(
         for task in matching_tasks:
             task.add_commits(commits, sender)
 
+    def has_push_permission(self, user):
+        return GitHubRepository.objects.filter(
+            user=user,
+            repo_id=self.repo_id,
+            permissions__push=True,
+        ).exists()
+
 
 class GitHubRepository(HashIdMixin, models.Model):
     user = models.ForeignKey(

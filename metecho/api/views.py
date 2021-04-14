@@ -22,15 +22,7 @@ from .hook_serializers import (
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from .models import (
-    EPIC_STATUSES,
-    SCRATCH_ORG_TYPES,
-    Epic,
-    GitHubRepository,
-    Project,
-    ScratchOrg,
-    Task,
-)
+from .models import EPIC_STATUSES, SCRATCH_ORG_TYPES, Epic, Project, ScratchOrg, Task
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
@@ -55,12 +47,7 @@ class ProjectPushPermissionMixin:
     """
 
     def check_push_permission(self, instance):
-        repos_with_perms = GitHubRepository.objects.filter(
-            permissions__push=True,
-            user=self.request.user,
-            repo_id=instance.project.repo_id,
-        )
-        if not repos_with_perms.exists():
+        if not instance.project.has_push_permission(self.request.user):
             raise PermissionDenied(
                 'You do not have "Push" permissions in the related repository'
             )
