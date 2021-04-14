@@ -28,7 +28,6 @@ export interface Project {
   org_config_names: OrgConfig[];
   currently_fetching_org_config_names: boolean;
   latest_sha: string;
-  // @@@ temp placeholder...
   has_push_permission: boolean;
 }
 export interface ProjectsState {

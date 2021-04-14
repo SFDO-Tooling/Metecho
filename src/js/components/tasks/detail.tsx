@@ -519,7 +519,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   let captureButton: React.ReactNode = null;
-  if (project.has_push_permission && (readyToCaptureChanges || orgHasBeenVisited)) {
+  if (
+    project.has_push_permission &&
+    (readyToCaptureChanges || orgHasBeenVisited)
+  ) {
     let captureButtonText: JSX.Element = i18n.t(
       'Check for Unretrieved Changes',
     );
