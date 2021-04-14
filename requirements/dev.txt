@@ -40,7 +40,7 @@ coverage==5.4
     #   pytest-cov
 coveralls==3.0.0
     # via -r requirements/dev.in
-decorator==4.4.2
+decorator==5.0.7
     # via ipython
 django-extensions==3.1.0
     # via -r requirements/dev.in
