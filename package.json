@@ -109,7 +109,7 @@
     "autoprefixer": "^10.2.3",
     "babel-jest": "^26.6.3",
     "babel-loader": "^8.2.2",
-    "core-js": "^3.8.3",
+    "core-js": "^3.10.1",
     "coveralls": "^3.1.0",
     "css-loader": "^5.0.1",
     "css-minimizer-webpack-plugin": "^1.2.0",
