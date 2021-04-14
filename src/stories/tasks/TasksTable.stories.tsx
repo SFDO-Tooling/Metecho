@@ -49,6 +49,7 @@ TasksTable.args = {
   epicSlug: sampleEpic1.slug,
   epicUsers: [sampleGitHubUser1],
   githubUsers: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
+  canAssign: true,
   isRefreshingUsers: false,
   assignUserAction: action('assignUserAction'),
 };

@@ -38,6 +38,7 @@ const TaskOrgCards = ({
   orgs,
   task,
   projectId,
+  userHasPermissions,
   epicUsers,
   githubUsers,
   epicCreatingBranch,
@@ -58,6 +59,7 @@ const TaskOrgCards = ({
   orgs: OrgsByParent;
   task: Task;
   projectId: string;
+  userHasPermissions: boolean;
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
@@ -269,6 +271,7 @@ const TaskOrgCards = ({
           user={user}
           task={task}
           projectId={projectId}
+          userHasPermissions={userHasPermissions}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
           epicCreatingBranch={epicCreatingBranch}
@@ -292,6 +295,7 @@ const TaskOrgCards = ({
           user={user}
           task={task}
           projectId={projectId}
+          userHasPermissions={userHasPermissions}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
           epicCreatingBranch={epicCreatingBranch}

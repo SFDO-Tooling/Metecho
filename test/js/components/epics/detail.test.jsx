@@ -85,6 +85,7 @@ const defaultState = {
           },
         ],
         org_config_names: [{ key: 'dev' }, { key: 'qa' }],
+        has_push_access: true,
       },
     ],
     notFound: ['different-project'],
@@ -230,7 +231,55 @@ describe('<EpicDetail/>', () => {
     expect(getByText('Changes Requested')).toBeVisible();
   });
 
-  test('renders with form expanded if no tasks', () => {
+  describe('readonly', () => {
+    const projects = {
+      ...defaultState.projects,
+      projects: [
+        {
+          ...defaultState.projects.projects[0],
+          has_push_access: false,
+        },
+      ],
+    };
+
+    test('renders epic detail', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects,
+        },
+      });
+
+      expect(getByText('Tasks for Epic 1')).toBeVisible();
+      expect(getByText('Collaborators')).toBeVisible();
+    });
+
+    test('renders with no tasks/collaborators', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects,
+          tasks: { epic1: [] },
+          epics: {
+            r1: {
+              ...defaultState.epics.r1,
+              epics: [
+                {
+                  ...defaultState.epics.r1.epics[0],
+                  github_users: [],
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('No Tasks for Epic 1')).toBeVisible();
+      expect(getByText('No Collaborators')).toBeVisible();
+    });
+  });
+
+  test('renders different header if no tasks', () => {
     const { getByText, queryByText } = setup({
       initialState: {
         ...defaultState,

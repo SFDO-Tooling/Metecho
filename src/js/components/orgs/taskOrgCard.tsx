@@ -26,6 +26,7 @@ interface TaskOrgCardProps {
   user: User;
   task: Task;
   projectId: string;
+  userHasPermissions: boolean;
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
@@ -58,6 +59,7 @@ const TaskOrgCard = ({
   user,
   task,
   projectId,
+  userHasPermissions,
   epicUsers,
   githubUsers,
   epicCreatingBranch,
@@ -79,16 +81,23 @@ const TaskOrgCard = ({
   testOrgSubmittingReview,
 }: TaskOrgCardProps) => {
   let assignedUser: GitHubUser | null = null;
-  let heading = i18n.t('Developer');
-  let orgHeading = i18n.t('Dev Org');
+  let heading, orgHeading;
   switch (type) {
     case ORG_TYPES.QA:
       assignedUser = task.assigned_qa;
-      heading = i18n.t('Tester');
+      heading =
+        !userHasPermissions && !assignedUser
+          ? i18n.t('No Tester')
+          : i18n.t('Tester');
       orgHeading = i18n.t('Test Org');
       break;
     case ORG_TYPES.DEV:
       assignedUser = task.assigned_dev;
+      heading =
+        !userHasPermissions && !assignedUser
+          ? i18n.t('No Developer')
+          : i18n.t('Developer');
+      orgHeading = i18n.t('Dev Org');
       break;
   }
   const assignedToCurrentUser = user.username === assignedUser?.login;
@@ -174,12 +183,14 @@ const TaskOrgCard = ({
         bodyClassName="slds-card__body_inner"
         heading={heading}
         headerActions={
-          <UserActions
-            type={type}
-            assignedUser={assignedUser}
-            openAssignUserModal={openAssignUserModal}
-            setUser={doAssignUser}
-          />
+          userHasPermissions ? (
+            <UserActions
+              type={type}
+              assignedUser={assignedUser}
+              openAssignUserModal={openAssignUserModal}
+              setUser={doAssignUser}
+            />
+          ) : null
         }
         footer={
           <Footer
@@ -231,6 +242,7 @@ const TaskOrgCard = ({
                   ownedByWrongUser={ownedByWrongUser}
                   orgOutOfDate={testOrgOutOfDate}
                   readyForReview={testOrgReadyForReview}
+                  userHasPermissions={userHasPermissions}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
                   isRefreshingOrg={isRefreshingOrg}
@@ -250,6 +262,7 @@ const TaskOrgCard = ({
                 repoUrl={repoUrl}
                 ownedByCurrentUser={ownedByCurrentUser}
                 ownedByWrongUser={ownedByWrongUser}
+                userHasPermissions={userHasPermissions}
                 isCreating={isCreating}
                 isRefreshingOrg={isRefreshingOrg}
                 isSubmittingReview={testOrgSubmittingReview}

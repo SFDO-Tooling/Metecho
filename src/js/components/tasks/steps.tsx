@@ -15,6 +15,7 @@ interface TaskStatusStepsProps {
   orgs: OrgsByParent;
   user: User;
   isCreatingOrg: OrgTypeTracker;
+  hasPermissions: boolean;
   handleAction: (step: Step) => void;
 }
 
@@ -23,6 +24,7 @@ const TaskStatusSteps = ({
   orgs,
   user,
   isCreatingOrg,
+  hasPermissions,
   handleAction,
 }: TaskStatusStepsProps) => {
   const hasDev = Boolean(task.assigned_dev);
@@ -96,7 +98,7 @@ const TaskStatusSteps = ({
       // consider this complete if there are commits and no rejected review
       complete: hasDev || hasValidCommits,
       assignee: null,
-      action: 'assign-dev',
+      action: hasPermissions ? 'assign-dev' : undefined,
     },
     {
       label: devOrgIsCreating
@@ -131,7 +133,7 @@ const TaskStatusSteps = ({
       // Complete if we have commits (without rejected review)
       complete: hasValidCommits,
       assignee: task.assigned_dev,
-      action: devOrgLoading ? undefined : 'retrieve-changes',
+      action: devOrgLoading || !hasPermissions ? undefined : 'retrieve-changes',
     },
     {
       label: taskIsSubmitting
@@ -140,14 +142,15 @@ const TaskStatusSteps = ({
       active: task.has_unmerged_commits && !task.pr_is_open,
       complete: task.pr_is_open,
       assignee: null,
-      action: taskIsSubmitting ? undefined : 'submit-changes',
+      action:
+        taskIsSubmitting || !hasPermissions ? undefined : 'submit-changes',
     },
     {
       label: i18n.t('Assign a Tester'),
       active: readyForReview && !hasTester,
       complete: hasTester || task.review_valid,
       assignee: null,
-      action: 'assign-qa',
+      action: hasPermissions ? 'assign-qa' : undefined,
     },
     {
       label: testOrgIsCreating
@@ -196,7 +199,7 @@ const TaskStatusSteps = ({
       complete: task.review_valid,
       assignee: task.assigned_qa,
       action:
-        userIsAssignedTester && !testOrgIsSubmittingReview
+        userIsAssignedTester && !testOrgIsSubmittingReview && hasPermissions
           ? 'submit-review'
           : undefined,
     },

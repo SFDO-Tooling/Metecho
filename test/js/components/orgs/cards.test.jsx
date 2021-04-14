@@ -86,6 +86,7 @@ describe('<TaskOrgCards/>', () => {
       initialState: defaultState,
       orgs: defaultOrgs,
       task: defaultTask,
+      userHasPermissions: true,
       epicUsers: defaultEpicUsers,
       githubUsers: defaultEpicUsers,
       assignUserModalOpen: null,
@@ -101,6 +102,7 @@ describe('<TaskOrgCards/>', () => {
         <TaskOrgCards
           orgs={opts.orgs}
           task={opts.task}
+          userHasPermissions={opts.userHasPermissions}
           epicUsers={opts.epicUsers}
           githubUsers={opts.githubUsers}
           epicUrl="epic-url"

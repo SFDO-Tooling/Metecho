@@ -47,6 +47,7 @@ interface Props {
   tasks: Task[];
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
+  canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
 }
@@ -129,6 +130,7 @@ const AssigneeTableCell = ({
   projectId,
   epicUsers,
   githubUsers,
+  canAssign,
   isRefreshingUsers,
   assignUserAction,
   item,
@@ -140,6 +142,7 @@ const AssigneeTableCell = ({
   projectId: string;
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
+  canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
   children?: GitHubUser | null;
@@ -171,7 +174,7 @@ const AssigneeTableCell = ({
   if (children) {
     contents = <GitHubUserAvatar user={children} />;
     title = children.login;
-  } else {
+  } else if (canAssign) {
     let assignedUser;
     switch (type) {
       case ORG_TYPES.DEV:
@@ -229,6 +232,7 @@ const TaskTable = ({
   tasks,
   epicUsers,
   githubUsers,
+  canAssign,
   isRefreshingUsers,
   assignUserAction,
 }: Props) => {
@@ -271,6 +275,7 @@ const TaskTable = ({
           projectId={projectId}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
+          canAssign={canAssign}
           isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
         />
@@ -286,6 +291,7 @@ const TaskTable = ({
           projectId={projectId}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
+          canAssign={canAssign}
           isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
         />

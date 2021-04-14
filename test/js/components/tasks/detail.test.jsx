@@ -85,6 +85,7 @@ const defaultState = {
             login: 'user-name',
           },
         ],
+        has_push_access: true,
       },
     ],
     notFound: ['different-project'],
@@ -186,6 +187,67 @@ describe('<TaskDetail/>', () => {
     expect(queryByText('View Branch')).toBeVisible();
     expect(getByTitle('View Org')).toBeVisible();
     expect(getByText('Task Team & Orgs')).toBeVisible();
+  });
+
+  test('renders readonly task detail with dev org', () => {
+    const { getByText, getByTitle } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_access: false,
+            },
+          ],
+        },
+      },
+    });
+
+    expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByTitle('View Org')).toBeVisible();
+    expect(getByText('No Tester')).toBeVisible();
+  });
+
+  test('renders readonly task detail with test org', () => {
+    const { getByText, getByTitle } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_access: false,
+            },
+          ],
+        },
+        tasks: {
+          ...defaultState.tasks,
+          epic1: [
+            {
+              ...defaultState.tasks.epic1[0],
+              assigned_dev: null,
+              assigned_qa: { id: 'user-id', login: 'user-name' },
+            },
+          ],
+        },
+        orgs: {
+          ...defaultState.orgs,
+          orgs: {
+            [defaultOrg.id]: {
+              ...defaultOrg,
+              org_type: 'QA',
+            },
+          },
+        },
+      },
+    });
+
+    expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByTitle('View Org')).toBeVisible();
+    expect(getByText('No Developer')).toBeVisible();
   });
 
   test('renders view changes if has_unmerged_commits, branch_diff_url', () => {

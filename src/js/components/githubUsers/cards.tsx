@@ -23,7 +23,7 @@ export const UserCard = ({
       icon={<GitHubUserAvatar user={user} />}
       heading={name}
       headerActions={
-        removeUser && (
+        removeUser ? (
           <Button
             assistiveText={{ icon: i18n.t('Remove') }}
             iconCategory="utility"
@@ -34,7 +34,7 @@ export const UserCard = ({
             title={i18n.t('Remove')}
             onClick={removeUser}
           />
-        )
+        ) : null
       }
     />
   );
@@ -42,9 +42,11 @@ export const UserCard = ({
 
 export const UserCards = ({
   users,
+  canRemoveUser,
   removeUser,
 }: {
   users: GitHubUser[];
+  canRemoveUser: boolean;
   removeUser: (user: GitHubUser) => void;
 }) => (
   <div
@@ -54,7 +56,7 @@ export const UserCards = ({
       slds-m-top_large"
   >
     {users.map((user) => {
-      const doRemoveUser = () => removeUser(user);
+      const doRemoveUser = canRemoveUser ? () => removeUser(user) : undefined;
       return (
         <div
           key={user.id}

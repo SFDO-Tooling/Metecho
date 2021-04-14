@@ -78,6 +78,7 @@ describe('<EpicStatusSteps />', () => {
         epic={epic}
         tasks={tasks}
         readyToSubmit={readyToSubmit}
+        canSubmit
         handleAction={jest.fn()}
       />,
     );

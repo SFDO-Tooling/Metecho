@@ -18,6 +18,7 @@ const OrgActions = ({
   ownedByWrongUser,
   orgOutOfDate,
   readyForReview,
+  userHasPermissions,
   isCreating,
   isDeleting,
   isRefreshingOrg,
@@ -36,6 +37,7 @@ const OrgActions = ({
   ownedByWrongUser?: Org | null;
   orgOutOfDate?: boolean;
   readyForReview?: boolean;
+  userHasPermissions?: boolean;
   isCreating: boolean;
   isDeleting: boolean;
   isRefreshingOrg?: boolean;
@@ -78,7 +80,7 @@ const OrgActions = ({
 
   let submitReviewBtn = null;
 
-  if (readyForReview) {
+  if (readyForReview && userHasPermissions) {
     if (task?.review_valid) {
       submitReviewBtn = (
         <Button
