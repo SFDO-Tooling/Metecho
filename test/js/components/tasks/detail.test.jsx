@@ -85,7 +85,7 @@ const defaultState = {
             login: 'user-name',
           },
         ],
-        has_push_access: true,
+        has_push_permission: true,
       },
     ],
     notFound: ['different-project'],
@@ -198,7 +198,7 @@ describe('<TaskDetail/>', () => {
           projects: [
             {
               ...defaultState.projects.projects[0],
-              has_push_access: false,
+              has_push_permission: false,
             },
           ],
         },
@@ -219,7 +219,7 @@ describe('<TaskDetail/>', () => {
           projects: [
             {
               ...defaultState.projects.projects[0],
-              has_push_access: false,
+              has_push_permission: false,
             },
           ],
         },

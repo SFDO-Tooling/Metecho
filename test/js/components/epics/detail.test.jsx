@@ -85,7 +85,7 @@ const defaultState = {
           },
         ],
         org_config_names: [{ key: 'dev' }, { key: 'qa' }],
-        has_push_access: true,
+        has_push_permission: true,
       },
     ],
     notFound: ['different-project'],
@@ -237,7 +237,7 @@ describe('<EpicDetail/>', () => {
       projects: [
         {
           ...defaultState.projects.projects[0],
-          has_push_access: false,
+          has_push_permission: false,
         },
       ],
     };

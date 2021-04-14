@@ -65,7 +65,7 @@ const defaultState = {
         github_users: [],
         repo_image_url: 'https://github.com/repo-image',
         org_config_names: [{ key: 'dev' }, { key: 'qa' }],
-        has_push_access: true,
+        has_push_permission: true,
       },
     ],
     notFound: ['yet-another-project'],
@@ -183,7 +183,7 @@ describe('<ProjectDetail />', () => {
           projects: [
             {
               ...defaultState.projects.projects[0],
-              has_push_access: false,
+              has_push_permission: false,
             },
           ],
         },

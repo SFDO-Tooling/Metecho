@@ -343,7 +343,7 @@ const EpicDetail = (props: RouteComponentProps) => {
 
   // "Submit Epic for Review on GitHub" button:
   let submitButton: React.ReactNode = null;
-  if (readyToSubmit && project.has_push_access) {
+  if (readyToSubmit && project.has_push_permission) {
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
         label={i18n.t('Submitting Epic for Review on GitHub…')}
@@ -376,7 +376,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(epic);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      {project.has_push_access && (
+      {project.has_push_permission && (
         <PageOptions
           modelType={OBJECT_TYPES.EPIC}
           handleOptionSelect={handlePageOptionSelect}
@@ -409,7 +409,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   const epicHasTasks = Boolean(tasks && tasks.length > 0);
   let taskHeader = i18n.t('Tasks for {{epic_name}}', { epic_name: epic.name });
   if (!epicHasTasks && !epicIsMerged) {
-    taskHeader = project.has_push_access
+    taskHeader = project.has_push_permission
       ? i18n.t('Add a Task for {{epic_name}}', {
           epic_name: epic.name,
         })
@@ -437,11 +437,11 @@ const EpicDetail = (props: RouteComponentProps) => {
           <>
             <div className="slds-m-bottom_x-large metecho-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
-                {project.has_push_access || epic.github_users.length
+                {project.has_push_permission || epic.github_users.length
                   ? i18n.t('Collaborators')
                   : i18n.t('No Collaborators')}
               </h2>
-              {project.has_push_access && (
+              {project.has_push_permission && (
                 <>
                   <Button
                     label={i18n.t('Add or Remove Collaborators')}
@@ -474,7 +474,7 @@ const EpicDetail = (props: RouteComponentProps) => {
               {epic.github_users.length ? (
                 <UserCards
                   users={epic.github_users}
-                  canRemoveUser={project.has_push_access}
+                  canRemoveUser={project.has_push_permission}
                   removeUser={removeEpicUser}
                 />
               ) : null}
@@ -485,7 +485,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 tasks={tasks || []}
                 readyToSubmit={readyToSubmit}
                 currentlySubmitting={currentlySubmitting}
-                canSubmit={project.has_push_access}
+                canSubmit={project.has_push_permission}
                 handleAction={handleStepAction}
               />
             </div>
@@ -542,7 +542,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
               {taskHeader}
             </h2>
-            {project.has_push_access && !epicIsMerged ? (
+            {project.has_push_permission && !epicIsMerged ? (
               <Button
                 label={i18n.t('Add a Task')}
                 variant="brand"
@@ -560,7 +560,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   tasks={tasks}
                   epicUsers={epic.github_users}
                   githubUsers={project.github_users}
-                  canAssign={project.has_push_access}
+                  canAssign={project.has_push_permission}
                   isRefreshingUsers={Boolean(
                     project.currently_refreshing_gh_users,
                   )}
@@ -573,7 +573,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           // Fetching tasks from API
           <SpinnerWrapper />
         )}
-        {project.has_push_access && (
+        {project.has_push_permission && (
           <>
             {readyToSubmit && (
               <SubmitModal

@@ -29,7 +29,7 @@ export interface Project {
   currently_fetching_org_config_names: boolean;
   latest_sha: string;
   // @@@ temp placeholder...
-  has_push_access: boolean;
+  has_push_permission: boolean;
 }
 export interface ProjectsState {
   projects: Project[];

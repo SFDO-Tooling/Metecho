@@ -221,7 +221,7 @@ const ProjectDetail = (
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {hasEpics || !project.has_push_access
+              {hasEpics || !project.has_push_permission
                 ? i18n.t('Epics for {{project_name}}', {
                     project_name: project.name,
                   })
@@ -231,7 +231,7 @@ const ProjectDetail = (
             </h2>
             {!hasEpics && (
               <p className="slds-m-bottom_large">
-                {project.has_push_access ? (
+                {project.has_push_permission ? (
                   <Trans i18nKey="createEpicHelpText">
                     Epics in Metecho are the high-level features that can be
                     broken down into smaller parts by creating Tasks. You can
@@ -249,7 +249,7 @@ const ProjectDetail = (
                 )}
               </p>
             )}
-            {project.has_push_access && (
+            {project.has_push_permission && (
               <Button
                 label={i18n.t('Create an Epic')}
                 variant="brand"

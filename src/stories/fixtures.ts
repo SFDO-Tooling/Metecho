@@ -389,7 +389,7 @@ export const sampleProject1 = {
   currently_fetching_org_config_names: false,
   org_config_names: [],
   latest_sha: 'abc123',
-  has_push_access: true,
+  has_push_permission: true,
 };
 
 export const sampleEpicSteps = [

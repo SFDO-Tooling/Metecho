@@ -478,7 +478,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      {project.has_push_access && (
+      {project.has_push_permission && (
         <PageOptions
           modelType={OBJECT_TYPES.TASK}
           handleOptionSelect={handlePageOptionSelect}
@@ -497,7 +497,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
 
   let submitButton: React.ReactNode = null;
-  if (readyToSubmit && project.has_push_access) {
+  if (readyToSubmit && project.has_push_permission) {
     const isPrimary = !readyToCaptureChanges;
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
@@ -519,7 +519,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   let captureButton: React.ReactNode = null;
-  if (project.has_push_access && (readyToCaptureChanges || orgHasBeenVisited)) {
+  if (project.has_push_permission && (readyToCaptureChanges || orgHasBeenVisited)) {
     let captureButtonText: JSX.Element = i18n.t(
       'Check for Unretrieved Changes',
     );
@@ -620,7 +620,7 @@ const TaskDetail = (props: RouteComponentProps) => {
                   orgs={taskOrgs}
                   user={user}
                   isCreatingOrg={isCreatingOrg}
-                  hasPermissions={project.has_push_access}
+                  hasPermissions={project.has_push_permission}
                   handleAction={handleStepAction}
                 />
               </div>
@@ -636,7 +636,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             orgs={taskOrgs}
             task={task}
             projectId={project.id}
-            userHasPermissions={project.has_push_access}
+            userHasPermissions={project.has_push_permission}
             epicUsers={epic.github_users}
             githubUsers={project.github_users}
             epicCreatingBranch={epic.currently_creating_branch}
@@ -657,7 +657,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         ) : (
           <SpinnerWrapper />
         )}
-        {project.has_push_access && (
+        {project.has_push_permission && (
           <>
             {devOrg &&
               userIsDevOwner &&
