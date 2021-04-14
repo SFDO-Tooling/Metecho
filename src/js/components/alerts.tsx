@@ -45,7 +45,7 @@ const TourAlert = () => {
         heading: (
           <Trans i18nKey="selfGuidedTourAlert">
             You are in self-guided tour mode. Click help{' '}
-            {/*   <TourDropdown isAlert /> */} to turn if off.
+            <TourDropdown isAlert /> to turn if off.
           </Trans>
         ),
       }}

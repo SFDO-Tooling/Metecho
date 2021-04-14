@@ -48,14 +48,11 @@ interface OnboardingSucceeded {
   type: 'ONBOARDING_SUCCEEDED';
   payload: User;
 }
-
 interface UpdateTourAction {
-  type: 'TOUR_SUCCEEDED' | 'TOUR_UPDATE_FAILED';
-  payload: User;
+  type: 'TOUR_UPDATE_REQUESTED' | 'TOUR_UPDATE_FAILED';
 }
-
 interface UpdateTourSucceeded {
-  type: 'TOUR_SUCCEEDED';
+  type: 'TOUR_UPDATE_SUCCEEDED';
   payload: User;
 }
 
@@ -227,7 +224,7 @@ export const updateTour = (data: {
   enabled?: boolean;
   state?: string[] | null;
 }): ThunkResult<Promise<UpdateTourSucceeded>> => async (dispatch) => {
-  dispatch({ type: 'TOUR_TOGGLE_REQUESTED' });
+  dispatch({ type: 'TOUR_UPDATE_REQUESTED' });
   try {
     const payload: User = await apiFetch({
       url: window.api_urls.current_user_guided_tour(),
@@ -241,7 +238,7 @@ export const updateTour = (data: {
       },
     });
     return dispatch({
-      type: 'TOUR_SUCCEEDED' as const,
+      type: 'TOUR_UPDATE_SUCCEEDED' as const,
       payload,
     });
   } catch (err) {

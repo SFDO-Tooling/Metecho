@@ -3,17 +3,17 @@ import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Popover from '@salesforce/design-system-react/components/popover';
 import classnames from 'classnames';
 import i18n from 'i18next';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
-import { updateTour } from 'src/js/store/user/actions';
 
 import backpackIcon from '~img/backpack-sm.svg';
 import mapIcon from '~img/map-sm.svg';
 import seesawIcon from '~img/seesaw-sm.svg';
 import { AppState, ThunkDispatch } from '~js/store';
 import { selectProject } from '~js/store/projects/selectors';
-import { User } from '~js/store/user/reducer';
+import { updateTour } from '~js/store/user/actions';
+import { selectUserState } from '~js/store/user/selectors';
 import {
   SHOW_WALKTHROUGH,
   WALKTHROUGH_TYPES,
@@ -21,7 +21,7 @@ import {
 } from '~js/utils/constants';
 import routes, { routePatterns } from '~js/utils/routes';
 
-const TourDropdown = ({ isAlert, user }: { user: User; isAlert?: boolean }) => {
+const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const history = useHistory();
   const match =
@@ -34,6 +34,8 @@ const TourDropdown = ({ isAlert, user }: { user: User; isAlert?: boolean }) => {
     selectProjectWithProps(state, { match }),
   );
   const projectUrl = project ? routes.project_detail(project.slug) : null;
+  const user = useSelector(selectUserState);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSelect = useCallback(
     (type: WalkthroughType) => {
@@ -50,7 +52,10 @@ const TourDropdown = ({ isAlert, user }: { user: User; isAlert?: boolean }) => {
       event: React.ChangeEvent<HTMLInputElement>,
       { checked }: { checked: boolean },
     ) => {
-      dispatch(updateTour({ enabled: checked }));
+      setIsSaving(true);
+      dispatch(updateTour({ enabled: checked })).finally(() => {
+        setIsSaving(false);
+      });
     },
     [dispatch],
   );
@@ -110,6 +115,7 @@ const TourDropdown = ({ isAlert, user }: { user: User; isAlert?: boolean }) => {
               labels={{ label: 'Self-guided Tour' }}
               className="slds-p-horizontal_small"
               checked={user?.self_guided_tour_enabled}
+              disabled={isSaving}
               onChange={handleToggle}
             />
           </>

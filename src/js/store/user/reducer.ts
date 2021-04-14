@@ -38,7 +38,7 @@ const reducer = (
     case 'DEV_HUB_STATUS_SUCCEEDED':
     case 'AGREE_TO_TERMS_SUCCEEDED':
     case 'ONBOARDING_SUCCEEDED':
-    case 'TOUR_SUCCEEDED':
+    case 'TOUR_UPDATE_SUCCEEDED':
       return action.payload;
     case 'USER_LOGGED_OUT':
       return null;

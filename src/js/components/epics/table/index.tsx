@@ -69,21 +69,19 @@ const EpicTable = ({
         key="numCollaborators"
         label={
           <>
-            <div>
-              <TourPopover
-                align="right"
-                heading={i18n.t('some heading')}
-                body={i18n.t('some body')}
-              />
-              <Icon
-                category="utility"
-                name="user"
-                size="xx-small"
-                className="slds-m-bottom_xx-small"
-                containerClassName="slds-current-color"
-                title={i18n.t('Collaborators')}
-              />
-            </div>
+            <Icon
+              category="utility"
+              name="user"
+              size="xx-small"
+              className="slds-m-bottom_xx-small"
+              containerClassName="slds-current-color"
+              title={i18n.t('Collaborators')}
+            />
+            <TourPopover
+              align="right"
+              heading={i18n.t('some heading')}
+              body={i18n.t('some body')}
+            />
           </>
         }
         property="numCollaborators"
