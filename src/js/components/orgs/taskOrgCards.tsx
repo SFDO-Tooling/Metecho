@@ -325,11 +325,11 @@ const TaskOrgCards = ({
         onDisconnect={openConnectModal}
       />
       <ConfirmDeleteModal
-        orgs={orgs}
+        org={devOrg}
         isOpen={confirmDeleteModalOpen}
         handleClose={closeConfirmDeleteModal}
         handleCancel={cancelConfirmDeleteModal}
-        handleDelete={deleteOrg}
+        handleAction={deleteOrg}
       />
       <ConfirmRemoveUserModal
         isOpen={confirmRemoveUserModalOpen}
