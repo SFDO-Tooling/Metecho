@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -68,6 +68,7 @@ const defaultOrg = {
   total_ignored_changes: 0,
   has_ignored_changes: false,
   is_created: true,
+  currently_refreshing_changes: false,
 };
 
 const setup = (options, type) => {
@@ -131,15 +132,78 @@ describe('<PlaygroundOrgCard/>', () => {
       });
 
       describe('Refresh Org click', () => {
-        test('calls refreshOrg action', () => {
+        test('checks for changes and then refreshes org', async () => {
           const org = {
             ...defaultOrg,
             latest_commit: 'older',
+            unsaved_changes: {},
+            total_unsaved_changes: 0,
+            has_unsaved_changes: false,
           };
           const { getByText } = setup({ org });
           fireEvent.click(getByText('Refresh Org'));
 
+          expect.assertions(2);
+
+          await waitFor(() => expect(refreshOrg).toHaveBeenCalledTimes(1));
           expect(refreshOrg).toHaveBeenCalledWith(org);
+        });
+
+        describe('org has changes', () => {
+          const org = {
+            ...defaultOrg,
+            latest_commit: 'older',
+          };
+
+          test('opens confirm modal', () => {
+            const { getByText } = setup({ org });
+            fireEvent.click(getByText('Refresh Org'));
+
+            expect(refreshOrg).not.toHaveBeenCalled();
+            expect(
+              getByText('Confirm Refreshing Org With Unretrieved Changes'),
+            ).toBeVisible();
+          });
+
+          describe('<ConfirmDeleteModal />', () => {
+            let result;
+
+            beforeEach(() => {
+              result = setup({ org });
+              fireEvent.click(result.getByText('Refresh Org'));
+            });
+
+            describe('"cancel" click', () => {
+              test('closes modal', () => {
+                const { getByTitle, queryByText } = result;
+                fireEvent.click(getByTitle('Cancel'));
+
+                expect(
+                  queryByText(
+                    'Confirm Refreshing Org With Unretrieved Changes',
+                  ),
+                ).toBeNull();
+              });
+            });
+
+            describe('"refresh org" click', () => {
+              test('refreshes org', async () => {
+                const { getAllByText, queryByText } = result;
+                fireEvent.click(getAllByText('Refresh Org')[1]);
+
+                expect.assertions(2);
+
+                await waitFor(() =>
+                  expect(refreshOrg).toHaveBeenCalledTimes(1),
+                );
+                expect(
+                  queryByText(
+                    'Confirm Refreshing Org With Unretrieved Changes',
+                  ),
+                ).toBeNull();
+              });
+            });
+          });
         });
       });
     });
@@ -155,8 +219,14 @@ describe('<PlaygroundOrgCard/>', () => {
   });
 
   describe('delete org click', () => {
-    test('deletes org', async () => {
-      const { findByText, getByText } = setup();
+    test('checks for changes and then deletes org', async () => {
+      const org = {
+        ...defaultOrg,
+        unsaved_changes: {},
+        total_unsaved_changes: 0,
+        has_unsaved_changes: false,
+      };
+      const { getByText, findByText } = setup({ org });
       fireEvent.click(getByText('Org Actions'));
       fireEvent.click(getByText('Delete Org'));
 

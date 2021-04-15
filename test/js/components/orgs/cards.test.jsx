@@ -878,7 +878,7 @@ describe('<TaskOrgCards/>', () => {
           describe('"delete" click', () => {
             test('deletes org', async () => {
               const { findByText, getByText, queryByText } = result;
-              fireEvent.click(getByText('Delete'));
+              fireEvent.click(getByText('Delete Org'));
 
               expect.assertions(4);
               await findByText('Deleting Org…');
