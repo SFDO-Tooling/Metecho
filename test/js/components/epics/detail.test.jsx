@@ -9,7 +9,10 @@ import {
   fetchObjects,
   updateObject,
 } from '~js/store/actions';
-import { refreshGitHubUsers } from '~js/store/projects/actions';
+import {
+  refreshGitHubUsers,
+  refreshOrgConfigs,
+} from '~js/store/projects/actions';
 import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -22,6 +25,7 @@ fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
@@ -29,6 +33,7 @@ afterEach(() => {
   updateObject.mockClear();
   createObject.mockClear();
   refreshGitHubUsers.mockClear();
+  refreshOrgConfigs.mockClear();
 });
 
 const defaultOrg = {
@@ -84,7 +89,6 @@ const defaultState = {
             login: 'ThirdUser',
           },
         ],
-        org_config_names: [{ key: 'dev' }, { key: 'qa' }],
       },
     ],
     notFound: ['different-project'],
@@ -238,7 +242,7 @@ describe('<EpicDetail/>', () => {
     expect(getByText('Changes Requested')).toBeVisible();
   });
 
-  test('renders with form expanded if no tasks', () => {
+  test('renders different title if no tasks', () => {
     const { getByText, queryByText } = setup({
       initialState: {
         ...defaultState,
@@ -755,15 +759,13 @@ describe('<EpicDetail/>', () => {
 
     describe('"Create Org" click', () => {
       test('creates scratch org', async () => {
-        const { getByText, getByLabelText, queryByText } = result;
+        const { getByText, queryByText } = result;
 
         expect.assertions(5);
         fireEvent.click(getByText('Next'));
 
         expect(getByText('Advanced Options')).toBeVisible();
 
-        fireEvent.click(getByText('Advanced Options'));
-        fireEvent.click(getByLabelText('qa'));
         fireEvent.click(getByText('Create Org'));
         await waitForElementToBeRemoved(getByText('Advanced Options'));
 
@@ -771,7 +773,7 @@ describe('<EpicDetail/>', () => {
         expect(createObject).toHaveBeenCalled();
         expect(createObject.mock.calls[0][0].data.epic).toEqual('epic1');
         expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
-          'qa',
+          'dev',
         );
       });
     });
