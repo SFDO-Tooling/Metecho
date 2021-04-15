@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr" class="slds-theme_default">
@@ -149,13 +149,18 @@
             <h3 class="slds-illustration__header slds-text-heading_medium">
               ¯\_(ツ)_/¯
             </h3>
-            <p class="slds-text-body_regular">That page cannot be found. Try the <a href="/">home page</a>?</p>
+            <p class="slds-text-body_regular">
+              {% translate 'That page cannot be found. Try the <a href="/">home page</a>?' %}
+            </p>
           </div>
         </div>
         <footer class="slds-grid slds-grid--align-spread slds-grid_vertical-align-center slds-wrap slds-p-horizontal_x-large slds-p-vertical_medium slds-text-body_small site-contentinfo">
           <div class="footer-logo footer-item slds-m-right_medium slds-grow"></div>
           <div class="footer-item slds-grid">
-            <p>Copyright 2019–{% now "Y" %} Salesforce.org. All rights reserved.</p>
+            <p>
+              {% now "Y" as current_year %}
+              {% blocktranslate %}Copyright 2019–{{ current_year }} Salesforce.org. All rights reserved.{% endblocktranslate %}
+            </p>
           </div>
         </footer>
       </div>
