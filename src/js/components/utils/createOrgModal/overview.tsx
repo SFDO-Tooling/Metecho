@@ -23,8 +23,6 @@ const Overview = ({
   let type, name;
   let isProject = false;
 
-  // @@@
-  /* istanbul ignore if */
   if (task) {
     type = i18n.t('Task');
     name = task.name;
