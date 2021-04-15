@@ -72,3 +72,10 @@ export const WALKTHROUGH_TYPES = {
 };
 
 export const SHOW_WALKTHROUGH = 'show_walkthrough';
+
+export type ConfirmOrgTracker = 'delete' | 'refresh' | null;
+
+export const CONFIRM_ORG_TRACKER = {
+  DELETE: 'delete' as const,
+  REFRESH: 'refresh' as const,
+};
