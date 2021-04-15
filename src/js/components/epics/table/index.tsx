@@ -83,8 +83,10 @@ const EpicTable = ({
             />
             <TourPopover
               align="right"
-              heading={i18n.t('some heading')}
-              body={i18n.t('some body')}
+              heading={i18n.t('Collaborators column')}
+              body={i18n.t(
+                'The Collaborators column shows the number of people working on the Epic. Anyone with permission to contribute to the Project on GitHub can be assigned as an Epic Collaborator.',
+              )}
             />
           </>
         }
