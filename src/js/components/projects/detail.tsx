@@ -205,8 +205,10 @@ const ProjectDetail = (
                     />
                     <TourPopover
                       align="bottom"
-                      heading={i18n.t('some heading')}
-                      body={i18n.t('some body text')}
+                      heading={i18n.t('View & play with project')}
+                      body={i18n.t(
+                        'Scratch Orgs are a temporary place for you to view the work on this Project. You can use Scratch Orgs to play with changes to the Project without affecting the Project.',
+                      )}
                     />
                   </div>
                 )}
