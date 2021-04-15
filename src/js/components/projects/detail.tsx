@@ -257,8 +257,10 @@ const ProjectDetail = (
             />
             <TourPopover
               align="right"
-              body={i18n.t('some body text')}
-              heading={i18n.t('some heading')}
+              body={i18n.t(
+                'Create an Epic to make a group of related Tasks. Invite multiple Collaborators to your Epic and assign people as Developers & Testers for each Task. Epics are equivalent to GitHub branches, just like Tasks.',
+              )}
+              heading={i18n.t('Create epics to group tasks')}
             />
             {hasEpics && (
               <>

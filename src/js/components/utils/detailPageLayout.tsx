@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import { ExternalLink, PageDescription } from '~js/components/utils';
 import routes from '~js/utils/routes';
 
+import TourPopover from '../tour/popover';
+
 interface Crumb {
   name: string;
   url?: string;
@@ -41,9 +43,18 @@ const DetailPageLayout = ({
         className="page-header slds-p-around_x-large"
         title={title}
         info={
-          <ExternalLink url={headerUrl} showGitHubIcon>
-            /{headerUrlText}
-          </ExternalLink>
+          <>
+            <ExternalLink url={headerUrl} showGitHubIcon>
+              /{headerUrlText}
+            </ExternalLink>
+            <TourPopover
+              align="bottom"
+              heading={i18n.t('Project name & GitHub link')}
+              body={i18n.t(
+                'View, test, and contribute to Salesforce Projects using Metecho! Click the link below the Project name to leave Metecho and access the Repository on GitHub. To contribute to a Project, you must be given permission on GitHub.',
+              )}
+            />
+          </>
         }
         onRenderControls={onRenderHeaderActions}
         icon={

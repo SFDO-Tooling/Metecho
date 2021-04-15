@@ -19,6 +19,8 @@ import { Task } from '~js/store/tasks/reducer';
 import { OBJECT_TYPES } from '~js/utils/constants';
 import { getTaskCommits } from '~js/utils/helpers';
 
+import TourPopover from '../tour/popover';
+
 interface PlaygroundCardProps {
   org: Org;
   project?: Project;
@@ -103,67 +105,76 @@ const PlaygroundOrgCard = ({
   }
 
   return (
-    <Card
-      bodyClassName="slds-card__body_inner"
-      heading={heading}
-      icon={
-        org &&
-        !isCreating && (
-          <OrgIcon
-            orgId={org.id}
+    <>
+      <TourPopover
+        align="bottom"
+        heading={i18n.t('Scratch Org management')}
+        body={i18n.t(
+          'All your Scratch Orgs for the Project will appear in this column. Create a Scratch Org for the entire Project or visit an Epic or Task to create a Scratch Org for specific work in progress. To contribute work from a Scratch Org you must first have permission to contribute and then create a Task for the Scratch Org.',
+        )}
+      />
+      <Card
+        bodyClassName="slds-card__body_inner"
+        heading={heading}
+        icon={
+          org &&
+          !isCreating && (
+            <OrgIcon
+              orgId={org.id}
+              ownedByCurrentUser
+              isDeleting={isDeleting}
+              isRefreshingOrg={isRefreshingOrg}
+            />
+          )
+        }
+        headerActions={
+          <OrgActions
+            org={org}
+            type={org.org_type}
+            disableCreation
             ownedByCurrentUser
+            orgOutOfDate={orgOutOfDate}
+            isCreating={isCreating}
             isDeleting={isDeleting}
             isRefreshingOrg={isRefreshingOrg}
+            doDeleteOrg={doDeleteOrg}
+            doRefreshOrg={doRefreshOrg}
           />
-        )
-      }
-      headerActions={
-        <OrgActions
+        }
+        footer={
+          <Footer
+            org={org}
+            ownedByCurrentUser
+            isCreating={isCreating}
+            isDeleting={isDeleting}
+            isRefreshingChanges={isRefreshingChanges}
+            isRefreshingOrg={isRefreshingOrg}
+          />
+        }
+      >
+        <OrgInfo
           org={org}
           type={org.org_type}
-          disableCreation
+          baseCommit={baseCommit}
+          repoUrl={repoUrl}
           ownedByCurrentUser
-          orgOutOfDate={orgOutOfDate}
+          typeHeading={typeHeading}
+          parentLink={parentLink}
+          parentName={parentName}
           isCreating={isCreating}
-          isDeleting={isDeleting}
           isRefreshingOrg={isRefreshingOrg}
-          doDeleteOrg={doDeleteOrg}
-          doRefreshOrg={doRefreshOrg}
+          orgOutOfDate={orgOutOfDate}
+          missingCommits={-1}
+          doCheckForOrgChanges={doCheckForOrgChanges}
         />
-      }
-      footer={
-        <Footer
+        <OrgSpinner
           org={org}
           ownedByCurrentUser
-          isCreating={isCreating}
           isDeleting={isDeleting}
           isRefreshingChanges={isRefreshingChanges}
-          isRefreshingOrg={isRefreshingOrg}
         />
-      }
-    >
-      <OrgInfo
-        org={org}
-        type={org.org_type}
-        baseCommit={baseCommit}
-        repoUrl={repoUrl}
-        ownedByCurrentUser
-        typeHeading={typeHeading}
-        parentLink={parentLink}
-        parentName={parentName}
-        isCreating={isCreating}
-        isRefreshingOrg={isRefreshingOrg}
-        orgOutOfDate={orgOutOfDate}
-        missingCommits={-1}
-        doCheckForOrgChanges={doCheckForOrgChanges}
-      />
-      <OrgSpinner
-        org={org}
-        ownedByCurrentUser
-        isDeleting={isDeleting}
-        isRefreshingChanges={isRefreshingChanges}
-      />
-    </Card>
+      </Card>
+    </>
   );
 };
 

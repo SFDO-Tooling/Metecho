@@ -37,8 +37,10 @@ const EpicTable = ({
             {i18n.t('Epic')}
             <TourPopover
               align="right"
-              heading={i18n.t('some heading')}
-              body={i18n.t('some body text')}
+              heading={i18n.t('Epic name column')}
+              body={i18n.t(
+                'Epic Name describes a group of related Tasks. Select an Epic’s name to see the list of Tasks and Collaborators. To see the Epic on GitHub, select the branch link. A “branch” in Git is a way to create a new feature or make a modification to existing software, but not affect the main “trunk” of the Project.',
+              )}
             />
           </>
         }
@@ -55,8 +57,10 @@ const EpicTable = ({
             {i18n.t('Status')}
             <TourPopover
               align="right"
-              heading={i18n.t('some heading')}
-              body={i18n.t('some body text')}
+              heading={i18n.t('Epic status column')}
+              body={i18n.t(
+                'An Epic begins with a status of Planned. The status changes to In Progress when a Developer creates a Dev Org for any Task in the Epic. When all the Epic’s Tasks are Complete — meaning all the Tasks have been Merged on GitHub — the Epic status changes to Review. The Epic status changes to Merged when the Epic has been added to the Project on GitHub.',
+              )}
             />
           </>
         }

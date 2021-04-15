@@ -29,8 +29,10 @@ const PageDescription = ({
       )}
       <TourPopover
         align="left"
-        heading={i18n.t('Heading for page description')}
-        body={i18n.t('Body text')}
+        heading={i18n.t('Metecho Project')}
+        body={i18n.t(
+          'This is the image, name, and description of the Project. Metecho Projects are equivalent to Repositories on GitHub.',
+        )}
       />
       <div
         className="markdown slds-text-longform"
