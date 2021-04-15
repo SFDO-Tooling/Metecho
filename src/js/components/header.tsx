@@ -9,11 +9,10 @@ import Alerts from '~js/components/alerts';
 import Errors from '~js/components/apiErrors';
 import Toasts from '~js/components/toasts';
 import TourDropdown from '~js/components/tour/dropdown';
+import TourPopover from '~js/components/tour/popover';
 import UserInfo from '~js/components/user/info';
 import { selectUserState } from '~js/store/user/selectors';
 import routes from '~js/utils/routes';
-
-import TourPopover from './tour/popover';
 
 const Header = () => {
   const user = useSelector(selectUserState);

@@ -4,10 +4,9 @@ import i18n from 'i18next';
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
+import TourPopover from '~js/components/tour/popover';
 import { ExternalLink, PageDescription } from '~js/components/utils';
 import routes from '~js/utils/routes';
-
-import TourPopover from '../tour/popover';
 
 interface Crumb {
   name: string;

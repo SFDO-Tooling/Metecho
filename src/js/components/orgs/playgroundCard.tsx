@@ -8,6 +8,7 @@ import OrgActions from '~js/components/orgs/cards/orgActions';
 import OrgIcon from '~js/components/orgs/cards/orgIcon';
 import OrgInfo from '~js/components/orgs/cards/orgInfo';
 import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
+import TourPopover from '~js/components/tour/popover';
 import { useIsMounted } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { deleteObject } from '~js/store/actions';
@@ -18,8 +19,6 @@ import { Project } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { OBJECT_TYPES } from '~js/utils/constants';
 import { getTaskCommits } from '~js/utils/helpers';
-
-import TourPopover from '../tour/popover';
 
 interface PlaygroundCardProps {
   org: Org;
