@@ -63,8 +63,6 @@ const CreateOrgModal = ({ project, epic, task, isOpen, closeModal }: Props) => {
     org_type: ORG_TYPES.PLAYGROUND,
   };
 
-  // @@@
-  /* istanbul ignore if */
   if (task) {
     additionalData.task = task.id;
   } else if (epic) {

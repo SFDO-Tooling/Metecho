@@ -60,8 +60,6 @@ const PlaygroundOrgCard = ({
   let missingCommits = -1;
   let orgOutOfDate = false;
 
-  // @@@
-  /* istanbul ignore if */
   if (task) {
     heading = i18n.t('Task Scratch Org');
     const taskCommits = getTaskCommits(task);

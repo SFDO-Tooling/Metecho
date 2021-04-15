@@ -15,6 +15,7 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import FourOhFour from '~js/components/404';
 import CommitList from '~js/components/commits/list';
 import SubmitReviewModal from '~js/components/orgs/cards/submitReview';
+import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import TaskOrgCards, {
   ORG_TYPE_TRACKER_DEFAULT,
   OrgTypeTracker,
@@ -24,6 +25,7 @@ import CaptureModal from '~js/components/tasks/capture';
 import TaskStatusPath from '~js/components/tasks/path';
 import TaskStatusSteps from '~js/components/tasks/steps';
 import {
+  CreateOrgModal,
   DeleteModal,
   DetailPageLayout,
   EditModal,
@@ -65,6 +67,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [
     assignUserModalOpen,
     setAssignUserModalOpen,
@@ -112,6 +115,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   let userIsTestOwner = false;
   let devOrg: Org | null | undefined,
     testOrg: Org | null | undefined,
+    playgroundOrg: Org | null | undefined,
     taskOrgs: OrgsByParent | undefined;
   let hasOrgs = false;
   let testOrgSubmittingReview = false;
@@ -130,6 +134,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     };
     devOrg = taskOrgs[ORG_TYPES.DEV];
     testOrg = taskOrgs[ORG_TYPES.QA];
+    playgroundOrg = taskOrgs[ORG_TYPES.PLAYGROUND];
     orgHasChanges =
       (devOrg?.total_unsaved_changes || 0) -
         (devOrg?.total_ignored_changes || 0) >
@@ -188,6 +193,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const closeSubmitReviewModal = () => {
     setSubmitReviewModalOpen(false);
@@ -198,6 +204,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const closeCaptureModal = () => {
     setCaptureModalOpen(false);
@@ -208,6 +215,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     setCaptureModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   // edit modal related...
   const openEditModal = () => {
@@ -216,6 +224,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     setSubmitModalOpen(false);
     setCaptureModalOpen(false);
     setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -227,6 +236,7 @@ const TaskDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setCaptureModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -240,9 +250,23 @@ const TaskDetail = (props: RouteComponentProps) => {
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(null);
+  };
+
+  // create playground org modal related...
+  const openCreateOrgModal = () => {
+    setCreateOrgModalOpen(true);
+    setEditModalOpen(false);
+    setSubmitReviewModalOpen(false);
+    setSubmitModalOpen(false);
+    setCaptureModalOpen(false);
+    setDeleteModalOpen(false);
+  };
+  const closeCreateOrgModal = () => {
+    setCreateOrgModalOpen(false);
   };
 
   const doRefetchOrg = useCallback(
@@ -653,6 +677,49 @@ const TaskDetail = (props: RouteComponentProps) => {
         ) : (
           <SpinnerWrapper />
         )}
+        <div className="slds-m-vertical_large">
+          <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+            {i18n.t('My Task Scratch Org')}
+          </h2>
+          {taskOrgs ? (
+            <>
+              {playgroundOrg ? (
+                <div
+                  className="slds-grid
+                    slds-wrap
+                    slds-grid_pull-padded-x-small"
+                >
+                  <div
+                    className="slds-size_1-of-1
+                      slds-large-size_1-of-2
+                      slds-p-around_x-small"
+                  >
+                    <PlaygroundOrgCard
+                      org={playgroundOrg}
+                      task={task}
+                      repoUrl={project.repo_url}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  label={i18n.t('Create Scratch Org')}
+                  variant="outline-brand"
+                  onClick={openCreateOrgModal}
+                  disabled={epic.currently_creating_branch}
+                />
+              )}
+            </>
+          ) : (
+            // Fetching scratch orgs from API
+            <Button
+              label={
+                <LabelWithSpinner label={i18n.t('Loading Scratch Orgs…')} />
+              }
+              disabled
+            />
+          )}
+        </div>
         {devOrg &&
           userIsDevOwner &&
           (orgHasChanges || devOrg.has_ignored_changes) && (
@@ -699,6 +766,12 @@ const TaskDetail = (props: RouteComponentProps) => {
           isOpen={deleteModalOpen}
           redirect={epicUrl}
           handleClose={closeDeleteModal}
+        />
+        <CreateOrgModal
+          project={project}
+          task={task}
+          isOpen={createOrgModalOpen}
+          closeModal={closeCreateOrgModal}
         />
         <CommitList commits={task.commits} />
       </DetailPageLayout>

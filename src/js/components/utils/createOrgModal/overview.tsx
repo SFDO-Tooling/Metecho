@@ -2,14 +2,12 @@ import Card from '@salesforce/design-system-react/components/card';
 import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
 import seesawSvg from '!raw-loader!~img/seesaw-lg.svg';
 import { Illustration } from '~js/components/utils';
 import { Epic } from '~js/store/epics/reducer';
 import { Project } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
-import routes from '~js/utils/routes';
 
 const Overview = ({
   project,
@@ -23,8 +21,6 @@ const Overview = ({
   let type, name;
   let isProject = false;
 
-  // @@@
-  /* istanbul ignore if */
   if (task) {
     type = i18n.t('Task');
     name = task.name;
@@ -36,7 +32,6 @@ const Overview = ({
     name = project.name;
     isProject = true;
   }
-  const projectUrl = routes.project_detail(project.slug);
 
   const help = (
     <Trans i18nKey="createScratchOrgHelp">
@@ -78,19 +73,11 @@ const Overview = ({
           slds-text-longform"
       >
         {help}
-        {isProject ? (
+        {isProject && (
           <Trans i18nKey="createProjectScratchOrgHelp">
             <p>
               Visit an Epic or Task to create a Scratch Org from a work in
               progress.
-            </p>
-          </Trans>
-        ) : (
-          <Trans i18nKey="createEpicTaskScratchOrgHelp">
-            <p>
-              If you would like to create a Scratch Org for the entire Project,{' '}
-              <Link to={projectUrl}>go to the Project</Link> and click “Create
-              Scratch Org” in the sidebar.
             </p>
           </Trans>
         )}
