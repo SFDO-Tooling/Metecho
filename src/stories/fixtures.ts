@@ -352,6 +352,37 @@ export const sampleTask5 = {
   org_config_name: 'dev',
 };
 
+export const sampleTask6 = {
+  id: 't6',
+  name: 'Add the Widgets',
+  slug: 'add-widgets',
+  old_slugs: [],
+  epic: 'e1',
+  description: '',
+  description_rendered: '',
+  has_unmerged_commits: false,
+  currently_creating_branch: false,
+  currently_creating_pr: false,
+  branch_name: 'feature/my-epic__add-widgets',
+  branch_url:
+    'https://github.com/test/test-repo/tree/feature/my-epic__add-widgets',
+  branch_diff_url:
+    'https://github.com/test/test-repo/compare/feature/my-epic...feature/my-epic__add-widgets',
+  pr_url: 'https://github.com/test/test-repo/pull/8888',
+  pr_is_open: true,
+  commits: [sampleCommit2],
+  origin_sha: '723b342',
+  assigned_dev: sampleGitHubUser2,
+  assigned_qa: sampleGitHubUser3,
+  status: TASK_STATUSES.IN_PROGRESS,
+  currently_submitting_review: false,
+  review_submitted_at: null,
+  review_valid: false,
+  review_status: '' as const,
+  review_sha: '',
+  org_config_name: 'dev',
+};
+
 export const sampleUser1 = {
   id: 'U1',
   username: 'someuser1',

@@ -87,7 +87,7 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     form = ProjectForm
-    list_display = ("name", "repo_owner", "repo_name")
+    list_display = ("name", "repo_owner", "repo_name", "created_at")
 
 
 @admin.register(ProjectSlug)
@@ -102,7 +102,7 @@ class GitHubRepositoryAdmin(admin.ModelAdmin):
 
 @admin.register(Epic)
 class EpicAdmin(admin.ModelAdmin):
-    list_display = ("name", "project", "deleted_at")
+    list_display = ("name", "project", "created_at", "deleted_at")
     list_filter = (SoftDeletedListFilter,)
 
 
@@ -113,7 +113,7 @@ class EpicSlugAdmin(admin.ModelAdmin):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("name", "epic", "deleted_at")
+    list_display = ("name", "epic", "created_at", "deleted_at")
     list_filter = (SoftDeletedListFilter,)
     fields = (
         ("name", "epic"),
@@ -143,7 +143,15 @@ class TaskSlugAdmin(admin.ModelAdmin):
 
 @admin.register(ScratchOrg)
 class ScratchOrgAdmin(admin.ModelAdmin):
-    list_display = ("owner", "org_type", "project", "epic", "task", "deleted_at")
+    list_display = (
+        "owner",
+        "org_type",
+        "project",
+        "epic",
+        "task",
+        "created_at",
+        "deleted_at",
+    )
     list_filter = (SoftDeletedListFilter,)
     formfield_overrides = {JSONField: {"widget": JSONWidget}}
 

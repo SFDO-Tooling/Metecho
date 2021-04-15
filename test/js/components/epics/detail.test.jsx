@@ -179,6 +179,14 @@ const defaultState = {
         review_valid: true,
         review_status: 'Approved',
       },
+      {
+        id: 'task7',
+        name: 'Task 7',
+        slug: 'task-7',
+        epic: 'epic1',
+        status: 'In progress',
+        pr_is_open: true,
+      },
     ],
   },
   orgs: {

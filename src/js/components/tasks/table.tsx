@@ -92,8 +92,13 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
       icon = <ProgressRing value={0} />;
       break;
     case TASK_STATUSES.IN_PROGRESS:
-      displayStatus = i18n.t('In Progress');
-      icon = <ProgressRing value={40} flowDirection="fill" theme="active" />;
+      if (item.pr_is_open) {
+        displayStatus = i18n.t('Test');
+        icon = <ProgressRing value={60} flowDirection="fill" theme="active" />;
+      } else {
+        displayStatus = i18n.t('In Progress');
+        icon = <ProgressRing value={40} flowDirection="fill" theme="active" />;
+      }
       break;
     case TASK_STATUSES.COMPLETED:
       displayStatus = i18n.t('Complete');
