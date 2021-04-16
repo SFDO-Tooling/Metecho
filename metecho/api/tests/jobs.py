@@ -95,15 +95,24 @@ class TestCreateBranchesOnGitHub:
 
     def test_create_branches_on_github__missing(self, user_factory, epic_factory):
         user = user_factory()
+
+        class Repo(MagicMock):
+            """Repo with only the default branch available"""
+
+            default_branch = "main"
+
+            def branch(self, name):
+                if name != self.default_branch:
+                    raise NotFoundError(MagicMock())
+                return MagicMock(**{"latest_sha.return_value": "abc123"})
+
         with ExitStack() as stack:
             try_to_make_branch = stack.enter_context(
                 patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
             try_to_make_branch.return_value = "bleep", "bloop"
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            get_repo_info.return_value = MagicMock(
-                **{"branch.side_effect": NotFoundError(MagicMock())}
-            )
+            get_repo_info.return_value = Repo()
             epic = epic_factory(branch_name="placeholder")
             create_gh_branch_for_new_epic(epic, user=user)
             assert try_to_make_branch.called

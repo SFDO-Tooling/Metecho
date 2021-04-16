@@ -180,47 +180,30 @@ class TestLocalGitHubCheckout:
 
 
 class TestTryCreateBranch:
-    def test_try_to_make_branch__duplicate_name(self, user_factory, task_factory):
+    def test_try_to_make_branch__duplicate_name(self):
         repository = MagicMock()
         resp = MagicMock(status_code=400)
         resp.json.return_value = {"message": "Reference already exists"}
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
-        result, latest_sha = try_to_make_branch(
-            repository, new_branch="new-branch", base_branch="base-branch"
-        )
+        result = try_to_make_branch(repository, new_branch="new-branch", base_sha="123")
 
         assert result == "new-branch-1"
-        assert latest_sha == "1234abc"
 
-    def test_try_to_make_branch__long_duplicate_name(self, user_factory, task_factory):
+    def test_try_to_make_branch__long_duplicate_name(self):
         repository = MagicMock()
         resp = MagicMock(status_code=400)
         resp.json.return_value = {"message": "Reference already exists"}
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
-        result, latest_sha = try_to_make_branch(
-            repository, new_branch="a" * 100, base_branch="base-branch"
-        )
+        result = try_to_make_branch(repository, new_branch="a" * 100, base_sha="123")
 
         assert result == "a" * 98 + "-1"
-        assert latest_sha == "1234abc"
 
-    def test_try_to_make_branch__unknown_error(self, user_factory, task_factory):
+    def test_try_to_make_branch__unknown_error(self):
         repository = MagicMock()
         resp = MagicMock(status_code=400, msg="Test message")
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
         with pytest.raises(UnprocessableEntity):
-            try_to_make_branch(
-                repository, new_branch="new-branch", base_branch="base-branch"
-            )
+            try_to_make_branch(repository, new_branch="new-branch", base_sha="123")
 
 
 def test_get_source_format():
