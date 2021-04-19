@@ -13,6 +13,13 @@ describe('AssignEpicCollaboratorsModal', () => {
         id: '123456',
         login: 'test user',
         avatar_url: 'https://example.com/avatar.png',
+        permissions: { push: true },
+      },
+      {
+        id: 'readonly',
+        login: 'readonly-user',
+        avatar_url: 'https://example.com/avatar.png',
+        permissions: { push: false },
       },
     ];
     const { getByText, getAllByLabelText } = render(
@@ -25,7 +32,8 @@ describe('AssignEpicCollaboratorsModal', () => {
         refreshUsers={() => {}}
       />,
     );
-    fireEvent.click(getAllByLabelText('Select all rows')[1]);
+
+    fireEvent.click(getAllByLabelText('Select all rows')[0]);
     fireEvent.click(getByText('Save'));
 
     expect(setUsers).toHaveBeenCalledWith(allUsers);

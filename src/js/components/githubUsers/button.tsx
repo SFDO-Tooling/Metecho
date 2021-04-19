@@ -9,14 +9,19 @@ const GitHubUserButton = ({
   user,
   isAssigned,
   isSelected,
+  showPermissions,
   ...props
 }: {
   user: GitHubUser;
   isAssigned?: boolean;
   isSelected?: boolean;
+  showPermissions?: boolean;
   [key: string]: any;
 }) => {
-  const name = user.name ? `${user.login} (${user.name})` : user.login;
+  let name = user.name ? `${user.login} (${user.name})` : user.login;
+  if (showPermissions && !user.permissions?.push) {
+    name = `${name} [read-only]`;
+  }
   return (
     <Button
       className={classNames(

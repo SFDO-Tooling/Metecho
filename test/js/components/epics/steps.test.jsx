@@ -8,10 +8,12 @@ import { render } from './../../utils';
 const jonny = {
   id: 'jonny',
   login: 'jonny',
+  permissions: { push: true },
 };
 const stacy = {
   id: 'stacy',
   login: 'stacy',
+  permissions: { push: true },
 };
 const defaultEpic = {
   id: 'epic1',

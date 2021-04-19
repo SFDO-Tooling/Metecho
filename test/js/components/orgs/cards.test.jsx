@@ -66,16 +66,24 @@ const defaultState = {
 };
 const defaultTask = {
   id: 'task-id',
-  assigned_dev: { id: 'user-id', login: 'user-name' },
-  assigned_qa: { id: 'user-id', login: 'user-name' },
+  assigned_dev: {
+    id: 'user-id',
+    login: 'user-name',
+    permissions: { push: true },
+  },
+  assigned_qa: {
+    id: 'user-id',
+    login: 'user-name',
+    permissions: { push: true },
+  },
   commits: [{ id: '617a512-longlong' }, { id: 'other' }],
   origin_sha: 'parent',
   review_submitted_at: '2019-10-16T12:58:53.721Z',
   has_unmerged_commits: true,
 };
 const defaultEpicUsers = [
-  { id: 'user-id', login: 'user-name' },
-  { id: 'other-user', login: 'other-user' },
+  { id: 'user-id', login: 'user-name', permissions: { push: true } },
+  { id: 'other-user', login: 'other-user', permissions: { push: true } },
 ];
 const createOrg = jest.fn();
 const refreshOrg = jest.fn();

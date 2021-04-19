@@ -45,10 +45,12 @@ const testOrgVisited = {
 const jonny = {
   id: 'jonny',
   login: 'jonny',
+  permissions: { push: true },
 };
 const stacy = {
   id: 'stacy',
   login: 'stacy',
+  permissions: { push: true },
 };
 const taskWithDev = {
   assigned_dev: jonny,

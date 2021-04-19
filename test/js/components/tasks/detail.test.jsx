@@ -83,6 +83,7 @@ const defaultState = {
           {
             id: 'user-1',
             login: 'user-name',
+            permissions: { push: true },
           },
         ],
         has_push_permission: true,
@@ -108,6 +109,7 @@ const defaultState = {
             {
               id: 'user-1',
               login: 'user-name',
+              permissions: { push: true },
             },
           ],
         },
@@ -779,6 +781,7 @@ describe('<TaskDetail/>', () => {
     const jonny = {
       id: 'user-id',
       login: 'user-name',
+      permissions: { push: true },
     };
     const taskWithDev = {
       assigned_dev: jonny,

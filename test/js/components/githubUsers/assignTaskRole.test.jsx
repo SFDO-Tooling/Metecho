@@ -30,12 +30,14 @@ describe('AssignTaskRole', () => {
       login: 'user-name',
       name: 'User Name',
       avatar_url: 'https://example.com/avatar.png',
+      permissions: { push: true },
     },
     {
       id: '123456',
       login: 'test user',
       name: 'Test User',
       avatar_url: 'https://example.com/avatar.png',
+      permissions: { push: true },
     },
   ];
   const epicUsers = githubUsers.slice(1);
@@ -63,7 +65,7 @@ describe('AssignTaskRole', () => {
 
   test('responds to epic user click', () => {
     const { getByText, getAllByTitle } = setup();
-    const userBtn = getAllByTitle('test user')[0];
+    const userBtn = getAllByTitle('test user (Test User)')[0];
     fireEvent.click(userBtn);
     fireEvent.click(getByText('Save'));
 

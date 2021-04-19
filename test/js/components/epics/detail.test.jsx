@@ -79,14 +79,23 @@ const defaultState = {
           {
             id: '123456',
             login: 'TestGitHubUser',
+            permissions: {
+              push: true,
+            },
           },
           {
             id: '234567',
             login: 'OtherUser',
+            permissions: {
+              push: true,
+            },
           },
           {
             id: '345678',
             login: 'ThirdUser',
+            permissions: {
+              push: true,
+            },
           },
         ],
         has_push_permission: true,
@@ -113,12 +122,18 @@ const defaultState = {
               id: '123456',
               login: 'TestGitHubUser',
               name: 'Test GitHub User',
+              permissions: { push: true },
             },
             {
               id: '234567',
               login: 'OtherUser',
+              permissions: { push: true },
             },
-            { id: 'user-id', login: 'currentUser' },
+            {
+              id: 'user-id',
+              login: 'currentUser',
+              permissions: { push: true },
+            },
           ],
         },
       ],
@@ -472,6 +487,7 @@ describe('<EpicDetail/>', () => {
                       id: '234567',
                       login: 'OtherUser',
                       avatar_url: 'https://example.com/avatar.png',
+                      permissions: { push: true },
                     },
                   ],
                 },
@@ -501,6 +517,7 @@ describe('<EpicDetail/>', () => {
                       id: '123456',
                       login: 'TestGitHubUser',
                       avatar_url: 'https://example.com/avatar.png',
+                      permissions: { push: true },
                     },
                   ],
                 },
@@ -565,7 +582,7 @@ describe('<EpicDetail/>', () => {
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
         expect(updateObject).toHaveBeenCalled();
         expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
-          { id: 'user-id', login: 'currentUser' },
+          { id: 'user-id', login: 'currentUser', permissions: { push: true } },
         ]);
       });
     });

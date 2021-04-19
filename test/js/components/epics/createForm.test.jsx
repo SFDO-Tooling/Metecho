@@ -92,7 +92,11 @@ describe('<CreateEpicModal/>', () => {
     });
 
     test('adds current user to github_users', async () => {
-      const ghUser = { id: '1', login: 'test-user' };
+      const ghUser = {
+        id: '1',
+        login: 'test-user',
+        permissions: { push: true },
+      };
       const project = {
         ...defaultProject,
         github_users: [ghUser, { id: '2', login: 'other-username' }],
