@@ -22,7 +22,7 @@ const Header = () => {
       {window.GLOBALS.ENABLE_WALKTHROUGHS ? <TourDropdown /> : null}
       <UserInfo />
       <TourPopover
-        align="left"
+        align="bottom right"
         heading={i18n.t('Login & connection info')}
         body={i18n.t(
           'Here you can check which GitHub account is logged in, and log out as needed. Connect and disconnect from Salesforce. Enable a Dev Hub on your Salesforce account to contribute to Projects in Metecho.',

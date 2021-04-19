@@ -61,77 +61,73 @@ const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
   );
 
   return project ? (
-    <>
-      <Popover
-        align="bottom right"
-        className={classnames('slds-popover_small', {
-          'slds-text-align_left': isAlert,
-          'slds-text-color_default': isAlert,
-        })}
-        hasNoCloseButton
-        heading={i18n.t('Learn More')}
-        style={isAlert ? { fontWeight: 'normal' } : {}}
-        classNameBody="slds-p-horizontal_none"
-        body={
-          <>
-            <ul className="slds-border_bottom slds-p-bottom_x-small slds-m-bottom_x-small">
-              <li className="slds-p-horizontal_small">
-                <Button
-                  label={i18n.t('Play Walkthrough')}
-                  variant="base"
-                  iconPosition="left"
-                  iconSize="large"
-                  iconPath={`${seesawIcon}#seesaw-sm`}
-                  style={{ width: '100%' }}
-                  onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAY)}
-                  disabled
-                />
-              </li>
-              <li className="slds-p-horizontal_small">
-                <Button
-                  label={i18n.t('Help Walkthrough')}
-                  variant="base"
-                  iconPosition="left"
-                  iconSize="large"
-                  iconPath={`${backpackIcon}#backpack-sm`}
-                  style={{ width: '100%' }}
-                  onClick={() => handleSelect(WALKTHROUGH_TYPES.HELP)}
-                  disabled
-                />
-              </li>
-              <li className="slds-p-horizontal_small">
-                <Button
-                  label={i18n.t('Plan Walkthrough')}
-                  variant="base"
-                  iconPosition="left"
-                  iconSize="large"
-                  iconPath={`${mapIcon}#map-sm`}
-                  style={{ width: '100%' }}
-                  onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAN)}
-                />
-              </li>
-            </ul>
-            <Checkbox
-              labels={{ label: 'Self-guided Tour' }}
-              className="slds-p-horizontal_small"
-              checked={user?.self_guided_tour_enabled}
-              disabled={isSaving}
-              onChange={handleToggle}
-            />
-          </>
-        }
-      >
-        <Button
-          variant="icon"
-          assistiveText={{ icon: i18n.t('Get Help') }}
-          className={classnames({ 'tour-walkthroughs': !isAlert })}
-          iconCategory="utility"
-          iconName="question"
-          iconSize="large"
-          iconVariant="more"
-        />
-      </Popover>
-    </>
+    <Popover
+      align="bottom right"
+      className={classnames({
+        'slds-text-color_default': isAlert,
+      })}
+      hasNoCloseButton
+      heading={i18n.t('Learn More')}
+      classNameBody="slds-p-horizontal_none"
+      body={
+        <>
+          <ul className="slds-border_bottom slds-p-bottom_x-small slds-m-bottom_x-small">
+            <li className="slds-p-horizontal_small">
+              <Button
+                label={i18n.t('Play Walkthrough')}
+                variant="base"
+                iconPosition="left"
+                iconSize="large"
+                iconPath={`${seesawIcon}#seesaw-sm`}
+                style={{ width: '100%' }}
+                onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAY)}
+                disabled
+              />
+            </li>
+            <li className="slds-p-horizontal_small">
+              <Button
+                label={i18n.t('Help Walkthrough')}
+                variant="base"
+                iconPosition="left"
+                iconSize="large"
+                iconPath={`${backpackIcon}#backpack-sm`}
+                style={{ width: '100%' }}
+                onClick={() => handleSelect(WALKTHROUGH_TYPES.HELP)}
+                disabled
+              />
+            </li>
+            <li className="slds-p-horizontal_small">
+              <Button
+                label={i18n.t('Plan Walkthrough')}
+                variant="base"
+                iconPosition="left"
+                iconSize="large"
+                iconPath={`${mapIcon}#map-sm`}
+                style={{ width: '100%' }}
+                onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAN)}
+              />
+            </li>
+          </ul>
+          <Checkbox
+            labels={{ label: 'Self-guided Tour' }}
+            className="slds-p-horizontal_small"
+            checked={user?.self_guided_tour_enabled}
+            disabled={isSaving}
+            onChange={handleToggle}
+          />
+        </>
+      }
+    >
+      <Button
+        variant="icon"
+        assistiveText={{ icon: i18n.t('Get Help') }}
+        className={classnames({ 'tour-walkthroughs': !isAlert })}
+        iconCategory="utility"
+        iconName="question"
+        iconSize="large"
+        iconVariant="more"
+      />
+    </Popover>
   ) : null;
 };
 
