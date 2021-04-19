@@ -181,7 +181,7 @@ const CreateTaskModal = ({
           onChange={handleInputChange}
         />
         <SelectFlowType
-          orgConfigs={project.org_config_names}
+          orgConfigs={project.org_config_names || []}
           projectId={project.id}
           value={inputs.org_config_name}
           errors={errors.org_config_name}

@@ -508,8 +508,8 @@ const EpicDetail = (props: RouteComponentProps) => {
                 >
                   <div
                     className="slds-size_1-of-1
-                    slds-large-size_1-of-2
-                    slds-p-around_x-small"
+                      slds-large-size_1-of-2
+                      slds-p-around_x-small"
                   >
                     <PlaygroundOrgCard
                       org={playgroundOrg}
