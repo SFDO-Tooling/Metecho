@@ -34,3 +34,10 @@
 .slds-popover_walkthrough .slds-popover__header {
   background-image: url('~img/popover-header.png');
 }
+
+// Keep text from being truncated in table and page header
+.slds-popover {
+  font-weight: normal;
+  text-align: left;
+  white-space: initial;
+}
