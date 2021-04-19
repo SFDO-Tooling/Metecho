@@ -188,6 +188,25 @@ describe('<TaskDetail/>', () => {
     expect(getByText('Task Team & Orgs')).toBeVisible();
   });
 
+  test('renders task detail with playground scratch org', () => {
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        orgs: {
+          ...defaultState.orgs,
+          orgs: {
+            [defaultOrg.id]: {
+              ...defaultOrg,
+              org_type: 'Playground',
+            },
+          },
+        },
+      },
+    });
+
+    expect(getByText('Task Scratch Org')).toBeVisible();
+  });
+
   test('renders view changes if has_unmerged_commits, branch_diff_url', () => {
     const { getByText, getByTitle } = setup({
       initialState: {
@@ -855,6 +874,52 @@ describe('<TaskDetail/>', () => {
       fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Assign Tester')).toBeNull();
+    });
+  });
+
+  describe('<CreateOrgModal />', () => {
+    let result;
+
+    beforeEach(() => {
+      result = setup();
+      fireEvent.click(result.getByText('Create Scratch Org'));
+    });
+
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText } = result;
+
+        expect(
+          getByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeVisible();
+
+        fireEvent.click(getByText('Cancel'));
+
+        expect(
+          queryByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeNull();
+      });
+    });
+
+    describe('"Create Org" click', () => {
+      test('creates scratch org', async () => {
+        const { getByText, queryByText } = result;
+
+        expect.assertions(5);
+        fireEvent.click(getByText('Next'));
+
+        expect(getByText('Advanced Options')).toBeVisible();
+
+        fireEvent.click(getByText('Create Org'));
+        await waitForElementToBeRemoved(getByText('Advanced Options'));
+
+        expect(queryByText('Advanced Options')).toBeNull();
+        expect(createObject).toHaveBeenCalled();
+        expect(createObject.mock.calls[0][0].data.task).toEqual('task1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
+          'dev',
+        );
+      });
     });
   });
 });

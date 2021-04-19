@@ -54,7 +54,7 @@ const CreateOrgForm = ({
           }
         >
           <SelectFlowType
-            orgConfigs={project.org_config_names}
+            orgConfigs={project.org_config_names || []}
             orgConfigHelp={i18n.t(
               'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this org?',
             )}

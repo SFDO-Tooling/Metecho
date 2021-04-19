@@ -16,6 +16,7 @@ import {
   sampleTask3,
   sampleTask4,
   sampleTask5,
+  sampleTask6,
 } from '../fixtures';
 
 export default {
@@ -30,6 +31,7 @@ const sampleTasks: { [key: string]: Task } = {
   Complete: sampleTask3,
   'Changes Requested': sampleTask4,
   'In Progress': sampleTask5,
+  Test: sampleTask6,
 };
 
 type Props = ComponentProps<typeof TasksTableComponent>;
