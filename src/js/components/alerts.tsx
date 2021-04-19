@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 
 import TourDropdown from '~js/components/tour/dropdown';
 import { selectSocketState } from '~js/store/socket/selectors';
+import { selectUserState } from '~js/store/user/selectors';
 
 const reloadPage = () => {
   window.location.reload();
@@ -32,7 +33,8 @@ const OfflineAlert = () => {
 
 const TourAlert = () => {
   // @@@ This should pull from Redux state: `user.self_guided_tour_enabled`
-  const tourIsOn = true;
+  const user = useSelector(selectUserState);
+  const tourIsOn = user?.self_guided_tour_enabled;
   const [showTour, setShowTour] = useState(true);
 
   const hideAlert = useCallback(() => {
