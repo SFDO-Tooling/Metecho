@@ -61,7 +61,7 @@ const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
   );
 
   return project ? (
-    <div className="slds-col_padded">
+    <>
       <Popover
         align="bottom right"
         className={classnames('slds-popover_small', {
@@ -131,7 +131,7 @@ const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
           iconVariant="more"
         />
       </Popover>
-    </div>
+    </>
   ) : null;
 };
 
