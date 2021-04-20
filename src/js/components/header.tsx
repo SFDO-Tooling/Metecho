@@ -2,6 +2,7 @@ import PageHeader from '@salesforce/design-system-react/components/page-header';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
 import React from 'react';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -51,10 +52,16 @@ const Header = () => {
             </Link>
             <TourPopover
               align="bottom"
-              heading={i18n.t('Login & connection info')}
-              body={i18n.t(
-                'Here you can check which GitHub account is logged in, and log out as needed. Connect and disconnect from Salesforce. Enable a Dev Hub on your Salesforce account to contribute to Projects in Metecho.',
-              )}
+              heading={i18n.t('What’s in a name?')}
+              body={
+                <Trans i18nKey="metechomeaning">
+                  Metecho makes it easier for you to view, test, and contribute
+                  to Salesforce Projects without learning GitHub.{' '}
+                  <b>Pronunciation</b>: “Met” rhymes with “Bet.” “Echo” as in
+                  the reflection of sound waves. <b>Definition</b>: Share or
+                  participate in.
+                </Trans>
+              }
             />
           </>
         }
