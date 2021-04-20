@@ -19,6 +19,7 @@ const Footer = ({ logoSrc }: { logoSrc: string }) => {
     setTermsModalOpen(false);
   };
   const showTermsModal = Boolean(window.GLOBALS?.SITE?.clickthrough_agreement);
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer
@@ -38,7 +39,10 @@ const Footer = ({ logoSrc }: { logoSrc: string }) => {
       />
       <div className="footer-item slds-grid">
         <p>
-          {i18n.t('Copyright 2019–2020 Salesforce.org. All rights reserved.')}
+          {i18n.t(
+            'Copyright 2019–{{current_year}} Salesforce.org. All rights reserved.',
+            { current_year: currentYear },
+          )}
         </p>
         {showTermsModal && (
           <>
