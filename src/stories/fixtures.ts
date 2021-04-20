@@ -42,7 +42,9 @@ export const sampleGitHubUser1 = {
   avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
   permissions: {
     push: true,
-  }
+    pull: true,
+    admin: false,
+  },
 };
 
 export const sampleGitHubUser2 = {
@@ -52,7 +54,9 @@ export const sampleGitHubUser2 = {
   avatar_url: 'https://randomuser.me/api/portraits/women/1.jpg',
   permissions: {
     push: true,
-  }
+    pull: true,
+    admin: false,
+  },
 };
 
 export const sampleGitHubUser3 = {
@@ -61,7 +65,9 @@ export const sampleGitHubUser3 = {
   avatar_url: 'https://randomuser.me/api/portraits/men/2.jpg',
   permissions: {
     push: true,
-  }
+    pull: true,
+    admin: false,
+  },
 };
 
 export const sampleCommitAuthor = {
@@ -71,7 +77,9 @@ export const sampleCommitAuthor = {
   avatar_url: 'https://randomuser.me/api/portraits/men/83.jpg',
   permissions: {
     push: true,
-  }
+    pull: true,
+    admin: false,
+  },
 };
 
 export const sampleCommit1 = {
