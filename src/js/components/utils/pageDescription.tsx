@@ -20,20 +20,23 @@ const PageDescription = ({
   const renderedDescription = (
     <>
       {!descriptionHasTitle && (
-        <h2
-          className="slds-truncate slds-text-heading_small slds-m-bottom_small"
-          title={renderedTitle}
-        >
-          {renderedTitle}
-        </h2>
+        <>
+          <h2
+            className="slds-truncate slds-text-heading_small slds-m-bottom_small"
+            title={renderedTitle}
+          >
+            {renderedTitle}
+            <TourPopover
+              align="left"
+              heading={i18n.t('Metecho Project')}
+              body={i18n.t(
+                'This is the image, name, and description of the Project. Metecho Projects are equivalent to Repositories on GitHub.',
+              )}
+            />
+          </h2>
+        </>
       )}
-      <TourPopover
-        align="left"
-        heading={i18n.t('Metecho Project')}
-        body={i18n.t(
-          'This is the image, name, and description of the Project. Metecho Projects are equivalent to Repositories on GitHub.',
-        )}
-      />
+
       <div
         className="markdown slds-text-longform"
         // This description is pre-cleaned by the API
