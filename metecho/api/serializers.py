@@ -280,6 +280,12 @@ class TaskSerializer(serializers.ModelSerializer):
 
     should_alert_dev = serializers.BooleanField(write_only=True, required=False)
     should_alert_qa = serializers.BooleanField(write_only=True, required=False)
+    dev_org = serializers.PrimaryKeyRelatedField(
+        queryset=ScratchOrg.objects.active(),
+        pk_field=serializers.CharField(),
+        write_only=True,
+        required=False,
+    )
 
     class Meta:
         model = Task
@@ -310,6 +316,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "assigned_qa",
             "should_alert_dev",
             "should_alert_qa",
+            "dev_org",
             "currently_submitting_review",
             "org_config_name",
         )
@@ -377,7 +384,30 @@ class TaskSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop("should_alert_dev", None)
         validated_data.pop("should_alert_qa", None)
-        return super().create(validated_data)
+        dev_org = validated_data.pop("dev_org", None)
+        user = self.context["request"].user
+        originating_user_id = str(user.id)
+
+        if dev_org and not validated_data.get("assigned_dev"):
+            # Assign the current user as the Dev for the Task scratch org
+            matches = [
+                collaborator
+                for collaborator in validated_data["epic"].project.github_users
+                if collaborator["login"] == user.username
+            ]
+            try:
+                validated_data["assigned_dev"] = matches[0]
+            except IndexError:
+                pass
+
+        task = super().create(validated_data)
+
+        if dev_org:
+            dev_org.queue_convert_to_dev_org(
+                task, originating_user_id=originating_user_id
+            )
+
+        return task
 
     def update(self, instance, validated_data):
         user = getattr(self.context.get("request"), "user", None)
@@ -388,6 +418,7 @@ class TaskSerializer(serializers.ModelSerializer):
         self._handle_reassign("qa", instance, validated_data, user, originating_user_id)
         validated_data.pop("should_alert_dev", None)
         validated_data.pop("should_alert_qa", None)
+        validated_data.pop("dev_org", None)
         return super().update(instance, validated_data)
 
     def _handle_reassign(

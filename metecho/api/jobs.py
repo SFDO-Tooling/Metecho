@@ -99,7 +99,7 @@ def epic_create_branch(
 
 
 def _create_branches_on_github(
-    *, user, repo_id, epic, sha=None, task=None, originating_user_id=None
+    *, user, repo_id, epic, task=None, task_sha=None, originating_user_id=None
 ):
     repository = get_repo_info(user, repo_id=repo_id)
 
@@ -115,12 +115,12 @@ def _create_branches_on_github(
     if not task:
         return epic_branch_name
 
-    # Make task branch, with latest from task:
+    # Make task branch, with custom commit or falling back to latest from epic:
     task.refresh_from_db()
     if task.branch_name:
         return task.branch_name
 
-    latest_sha = sha or repository.branch(epic_branch_name).latest_sha()
+    latest_sha = task_sha or repository.branch(epic_branch_name).latest_sha()
     with creating_gh_branch(task):
         task_branch_name = try_to_make_branch(
             repository,
@@ -313,6 +313,26 @@ def create_branches_on_github_then_create_scratch_org(
 create_branches_on_github_then_create_scratch_org_job = job(
     create_branches_on_github_then_create_scratch_org
 )
+
+
+def convert_to_dev_org(scratch_org, *, task, originating_user_id=None):
+    """
+    Convert an Epic playground org into a Task Dev org
+    """
+    _create_branches_on_github(
+        user=scratch_org.owner,
+        repo_id=task.get_repo_id(),
+        epic=task.epic,
+        task=task,
+        task_sha=scratch_org.latest_commit,
+        originating_user_id=originating_user_id,
+    )
+    scratch_org.finalize_convert_to_dev_org(
+        task, originating_user_id=originating_user_id
+    )
+
+
+convert_to_dev_org_job = job(convert_to_dev_org)
 
 
 def refresh_scratch_org(scratch_org, *, originating_user_id):
