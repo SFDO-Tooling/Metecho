@@ -36,12 +36,12 @@
 }
 
 .popover-trigger {
-  color: #dc72d1;
+  color: $palette-violet-65;
 }
 
 // Keep text from being truncated in table and page header
 .slds-popover {
-  font-size: 0.8125rem;
+  font-size: $font-size-3;
   font-weight: normal;
   text-align: left;
   white-space: initial;
