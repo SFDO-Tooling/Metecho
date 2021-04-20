@@ -251,19 +251,21 @@ const ProjectDetail = (
                 </Trans>
               </p>
             )}
-            <Button
-              label={i18n.t('Create an Epic')}
-              variant="brand"
-              onClick={openCreateModal}
-              className="slds-m-bottom_large tour-create-epic"
-            />
-            <TourPopover
-              align="right"
-              body={i18n.t(
-                'Create an Epic to make a group of related Tasks. Invite multiple Collaborators to your Epic and assign people as Developers & Testers for each Task. Epics are equivalent to GitHub branches, just like Tasks.',
-              )}
-              heading={i18n.t('Create epics to group tasks')}
-            />
+            <div className="slds-m-bottom_large">
+              <Button
+                label={i18n.t('Create an Epic')}
+                variant="brand"
+                onClick={openCreateModal}
+                className="tour-create-epic"
+              />
+              <TourPopover
+                align="right"
+                body={i18n.t(
+                  'Create an Epic to make a group of related Tasks. Invite multiple Collaborators to your Epic and assign people as Developers & Testers for each Task. Epics are equivalent to GitHub branches, just like Tasks.',
+                )}
+                heading={i18n.t('Create epics to group tasks')}
+              />
+            </div>
             {hasEpics && (
               <>
                 <EpicTable epics={epics.epics} projectSlug={project.slug} />
