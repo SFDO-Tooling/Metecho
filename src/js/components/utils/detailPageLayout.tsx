@@ -39,9 +39,9 @@ const DetailPageLayout = ({
   return (
     <>
       <PageHeader
-        className="page-header slds-p-around_x-large popover-reference"
+        className="page-header slds-p-around_x-large slds-is-relative"
         title={
-          <>
+          <div className="slds-is-relative">
             {title}{' '}
             <TourPopover
               align="right"
@@ -50,7 +50,7 @@ const DetailPageLayout = ({
                 'View, test, and contribute to Salesforce Projects using Metecho! Click the link below the Project name to leave Metecho and access the Repository on GitHub. To contribute to a Project, you must be given permission on GitHub.',
               )}
             />
-          </>
+          </div>
         }
         info={
           <ExternalLink url={headerUrl} showGitHubIcon>

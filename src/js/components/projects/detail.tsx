@@ -177,7 +177,7 @@ const ProjectDetail = (
               metecho-secondary-block
               slds-m-left_medium"
           >
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium popover-reference">
+            <h2 className="slds-text-heading_medium slds-p-bottom_medium slds-is-relative">
               {i18n.t('My Project Scratch Org')}
               <TourPopover
                 align="left"
@@ -204,7 +204,7 @@ const ProjectDetail = (
                     </div>
                   </div>
                 ) : (
-                  <div className="popover-reference">
+                  <div className="slds-is-relative">
                     <Button
                       label={i18n.t('Create Scratch Org')}
                       variant="outline-brand"
@@ -258,7 +258,7 @@ const ProjectDetail = (
                 </Trans>
               </p>
             )}
-            <div className="slds-m-bottom_large popover-reference">
+            <div className="slds-m-bottom_large slds-is-relative">
               <Button
                 label={i18n.t('Create an Epic')}
                 variant="brand"

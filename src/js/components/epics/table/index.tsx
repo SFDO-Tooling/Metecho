@@ -33,7 +33,7 @@ const EpicTable = ({
       items={items}
       id="project-epics-table"
       noRowHover
-      className="popover-reference"
+      className="slds-is-relative"
     >
       <DataTableColumn
         key="details"

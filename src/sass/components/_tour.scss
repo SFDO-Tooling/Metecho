@@ -35,10 +35,6 @@
   background-image: url('~img/popover-header.png');
 }
 
-.popover-reference {
-  position: relative;
-}
-
 .popover-wrapper {
   position: absolute;
   top: -10px;
@@ -46,6 +42,12 @@
 
 .popover-trigger {
   color: $palette-violet-65;
+}
+
+.slds-page-header__title {
+  > .popover-wrapper {
+    top: unset;
+  }
 }
 
 // Keep text from being truncated in table and page header
