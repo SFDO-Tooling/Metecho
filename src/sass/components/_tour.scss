@@ -40,13 +40,19 @@
   top: -10px;
 }
 
-.popover-trigger {
+.popover-button {
   color: $palette-violet-65;
 }
 
 .slds-page-header__title {
-  > .popover-wrapper {
+  & .popover-wrapper {
     top: unset;
+  }
+}
+
+.project-reference {
+  & .popover-wrapper {
+    top: 25px;
   }
 }
 

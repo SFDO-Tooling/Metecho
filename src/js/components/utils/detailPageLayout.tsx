@@ -41,7 +41,7 @@ const DetailPageLayout = ({
       <PageHeader
         className="page-header slds-p-around_x-large slds-is-relative"
         title={
-          <div className="slds-is-relative">
+          <div className="project-reference">
             {title}{' '}
             <TourPopover
               align="right"
