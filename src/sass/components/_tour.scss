@@ -42,6 +42,10 @@
 
 .popover-button {
   color: $palette-violet-65;
+
+  .tour-alert & {
+    fill: currentColor;
+  }
 }
 
 .slds-page-header__title {

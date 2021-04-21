@@ -3,6 +3,7 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
 import React from 'react';
+import { Trans } from 'react-i18next';
 
 import CollaboratorTableCell from '~js/components/epics/table/collaboratorCell';
 import DetailTableCell from '~js/components/epics/table/detailCell';
@@ -42,10 +43,16 @@ const EpicTable = ({
             {i18n.t('Epic')}
             <TourPopover
               align="right"
-              heading={i18n.t('Epic name column')}
-              body={i18n.t(
-                'Epic Name describes a group of related Tasks. Select an Epic’s name to see the list of Tasks and Collaborators. To see the Epic on GitHub, select the branch link. A “branch” in Git is a way to create a new feature or make a modification to existing software, but not affect the main “trunk” of the Project.',
-              )}
+              heading={i18n.t('Epic names')}
+              body={
+                <Trans i18nKey="tourEpicNameColumn">
+                  An Epic’s name describes a group of related Tasks. Select an
+                  Epic to see its Tasks and Collaborators. To view the Epic on
+                  GitHub, select the branch link. A “branch” is a way to create
+                  a new feature or make a modification to existing software,
+                  without impacting the main “trunk” of the Project.
+                </Trans>
+              }
             />
           </>
         }
@@ -62,10 +69,18 @@ const EpicTable = ({
             {i18n.t('Status')}
             <TourPopover
               align="right"
-              heading={i18n.t('Epic status column')}
-              body={i18n.t(
-                'An Epic begins with a status of Planned. The status changes to In Progress when a Developer creates a Dev Org for any Task in the Epic. When all the Epic’s Tasks are Complete — meaning all the Tasks have been Merged on GitHub — the Epic status changes to Review. The Epic status changes to Merged when the Epic has been added to the Project on GitHub.',
-              )}
+              heading={i18n.t('Epic statuses')}
+              body={
+                <Trans i18nKey="tourEpicStatusColumn">
+                  An Epic begins with a <b>Planned</b> status. The status
+                  changes to <b>In Progress</b> when a Developer creates a Dev
+                  Org for any Task in the Epic. When all the Epic’s Tasks are
+                  complete — meaning all the Task branches have been merged on
+                  GitHub — the Epic status changes to <b>Review</b>. The Epic
+                  status changes to <b>Merged</b> when the Epic branch has been
+                  merged into the Project on GitHub.
+                </Trans>
+              }
             />
           </>
         }
@@ -88,10 +103,14 @@ const EpicTable = ({
             />
             <TourPopover
               align="right"
-              heading={i18n.t('Collaborators column')}
-              body={i18n.t(
-                'The Collaborators column shows the number of people working on the Epic. Anyone with permission to contribute to the Project on GitHub can be assigned as an Epic Collaborator.',
-              )}
+              heading={i18n.t('Epic Collaborators')}
+              body={
+                <Trans i18nKey="tourEpicCollaboratorsColumn">
+                  The Collaborators column shows the number of people working on
+                  the Epic. Anyone with permission to view the Project on GitHub
+                  can be assigned as an Epic Collaborator.
+                </Trans>
+              }
             />
           </>
         }

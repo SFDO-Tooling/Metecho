@@ -2,6 +2,7 @@ import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
 import React, { ReactNode } from 'react';
+import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import TourPopover from '~js/components/tour/popover';
@@ -42,13 +43,19 @@ const DetailPageLayout = ({
         className="page-header slds-p-around_x-large slds-is-relative"
         title={
           <div className="project-reference">
-            {title}{' '}
+            <span className="slds-m-right_xxx-small">{title}</span>
             <TourPopover
               align="right"
               heading={i18n.t('Project name & GitHub link')}
-              body={i18n.t(
-                'View, test, and contribute to Salesforce Projects using Metecho! Click the link below the Project name to leave Metecho and access the Repository on GitHub. To contribute to a Project, you must be given permission on GitHub.',
-              )}
+              body={
+                <Trans i18nKey="tourProjectName">
+                  View, test, and contribute to Salesforce Projects using
+                  Metecho! Metecho Projects are equivalent to repositories on
+                  GitHub. Click the link below the Project name to leave Metecho
+                  and access the repository on GitHub. To contribute to a
+                  Project, you must be given permission on GitHub.
+                </Trans>
+              }
             />
           </div>
         }
