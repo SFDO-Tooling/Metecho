@@ -50,7 +50,10 @@ const TourAlert = () => {
           </Trans>
         ),
       }}
-      icon={<Icon category="utility" name="info_alt" />}
+      icon={
+        <Icon category="utility" name="info_alt" className="popover-trigger" />
+      }
+      className="slds-current-color"
       dismissible
       onRequestClose={hideAlert}
     />
