@@ -319,6 +319,8 @@ def convert_to_dev_org(scratch_org, *, task, originating_user_id=None):
     """
     Convert an Epic playground org into a Task Dev org
     """
+    task.refresh_from_db()
+    scratch_org.refresh_from_db()
     _create_branches_on_github(
         user=scratch_org.owner,
         repo_id=task.get_repo_id(),

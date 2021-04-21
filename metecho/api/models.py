@@ -1079,7 +1079,6 @@ class ScratchOrg(
         self.task = task
         self.epic = None
         self.save()
-        task.notify_changed(originating_user_id=originating_user_id)
         self.notify_changed(originating_user_id=originating_user_id)
 
     def queue_get_unsaved_changes(self, *, force_get=False, originating_user_id):
