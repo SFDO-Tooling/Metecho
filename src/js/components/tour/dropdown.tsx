@@ -1,7 +1,6 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Popover from '@salesforce/design-system-react/components/popover';
-import classnames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,7 +20,13 @@ import {
 } from '~js/utils/constants';
 import routes, { routePatterns } from '~js/utils/routes';
 
-const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
+const TourDropdown = ({
+  className,
+  triggerClassName,
+}: {
+  className?: string;
+  triggerClassName?: string;
+}) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const history = useHistory();
   const match =
@@ -63,9 +68,7 @@ const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
   return project ? (
     <Popover
       align="bottom right"
-      className={classnames({
-        'slds-text-color_default': isAlert,
-      })}
+      className={className}
       hasNoCloseButton
       heading={i18n.t('Learn More')}
       classNameBody="slds-p-horizontal_none"
@@ -121,7 +124,7 @@ const TourDropdown = ({ isAlert }: { isAlert?: boolean }) => {
       <Button
         variant="icon"
         assistiveText={{ icon: i18n.t('Get Help') }}
-        className={classnames({ 'tour-walkthroughs': !isAlert })}
+        className={triggerClassName}
         iconCategory="utility"
         iconName="question"
         iconSize="large"

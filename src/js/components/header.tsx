@@ -20,7 +20,9 @@ const Header = () => {
 
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
-      {window.GLOBALS.ENABLE_WALKTHROUGHS ? <TourDropdown /> : null}
+      {window.GLOBALS.ENABLE_WALKTHROUGHS ? (
+        <TourDropdown triggerClassName="tour-walkthroughs slds-m-right_x-small" />
+      ) : null}
       <UserInfo />
       <TourPopover
         align="bottom right"
