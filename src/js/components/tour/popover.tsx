@@ -30,7 +30,7 @@ const TourPopover = ({
         variant="icon"
         assistiveText={{ icon: i18n.t('Learn More') }}
         iconCategory="utility"
-        iconName="info_alt"
+        iconName="info"
         className="popover-trigger"
       />
     </Popover>
