@@ -6,7 +6,7 @@ django-extensions==3.1.0
 doc8==0.8.1
 factory_boy==3.2.0
 flake8-bugbear==20.11.1
-flake8==3.8.4
+flake8==3.9.1
 ipython==7.19.0
 isort==5.7.0
 pytest-asyncio==0.14.0
