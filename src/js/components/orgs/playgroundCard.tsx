@@ -9,7 +9,6 @@ import OrgIcon from '~js/components/orgs/cards/orgIcon';
 import OrgInfo from '~js/components/orgs/cards/orgInfo';
 import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
-import TourPopover from '~js/components/tour/popover';
 import { useIsMounted } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { deleteObject } from '~js/store/actions';
