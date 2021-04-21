@@ -182,9 +182,14 @@ const ProjectDetail = (
               <TourPopover
                 align="top"
                 heading={i18n.t('Scratch Org management')}
-                body={i18n.t(
-                  'All your Scratch Orgs for the Project will appear in this column. Create a Scratch Org for the entire Project or visit an Epic or Task to create a Scratch Org for specific work in progress. To contribute work from a Scratch Org you must first have permission to contribute and then create a Task for the Scratch Org.',
-                )}
+                body={
+                  <Trans i18nKey="tourProjectScratchOrg">
+                    Your Scratch Org for a Project will appear in this column.
+                    Create a Scratch Org for the entire Project or visit an Epic
+                    or Task to create a Scratch Org for specific work
+                    in-progress.
+                  </Trans>
+                }
               />
             </h2>
             {orgs ? (
@@ -212,10 +217,15 @@ const ProjectDetail = (
                     />
                     <TourPopover
                       align="bottom"
-                      heading={i18n.t('View & play with project')}
-                      body={i18n.t(
-                        'Scratch Orgs are a temporary place for you to view the work on this Project. You can use Scratch Orgs to play with changes to the Project without affecting the Project.',
-                      )}
+                      heading={i18n.t('View & play with a Project')}
+                      body={
+                        <Trans i18nKey="tourProjectCreateScratchOrg">
+                          Scratch Orgs are a temporary place for you to view the
+                          work on this Project. You can use Scratch Orgs to play
+                          with changes to the Project without affecting the
+                          Project.
+                        </Trans>
+                      }
                     />
                   </div>
                 )}
@@ -267,10 +277,15 @@ const ProjectDetail = (
               />
               <TourPopover
                 align="right"
-                body={i18n.t(
-                  'Create an Epic to make a group of related Tasks. Invite multiple Collaborators to your Epic and assign people as Developers & Testers for each Task. Epics are equivalent to GitHub branches, just like Tasks.',
-                )}
-                heading={i18n.t('Create epics to group tasks')}
+                body={
+                  <Trans i18nKey="tourCreateEpic">
+                    Create an Epic to make a group of related Tasks. Invite
+                    multiple Collaborators to your Epic and assign people as
+                    Developers & Testers for each Task. Epics are equivalent to
+                    GitHub branches, just like Tasks.
+                  </Trans>
+                }
+                heading={i18n.t('Create Epics to group Tasks')}
               />
             </div>
             {hasEpics && (

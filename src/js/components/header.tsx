@@ -12,6 +12,7 @@ import Toasts from '~js/components/toasts';
 import TourDropdown from '~js/components/tour/dropdown';
 import TourPopover from '~js/components/tour/popover';
 import UserInfo from '~js/components/user/info';
+import { ExternalLink } from '~js/components/utils';
 import { selectUserState } from '~js/store/user/selectors';
 import routes from '~js/utils/routes';
 
@@ -27,10 +28,17 @@ const Header = () => {
         <UserInfo />
         <TourPopover
           align="bottom right"
-          heading={i18n.t('Login & connection info')}
-          body={i18n.t(
-            'Here you can check which GitHub account is logged in, and log out as needed. Connect and disconnect from Salesforce. Enable a Dev Hub on your Salesforce account to contribute to Projects in Metecho.',
-          )}
+          heading={i18n.t('Account & connection info')}
+          body={
+            <Trans i18nKey="tourUser">
+              Here you can check which GitHub account is logged in, connect and
+              disconnect from Salesforce, or log out as needed.{' '}
+              <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
+                Enable Dev Hub
+              </ExternalLink>{' '}
+              on your Salesforce account to contribute to Projects in Metecho.
+            </Trans>
+          }
         />
       </div>
     </PageHeaderControl>
@@ -52,18 +60,18 @@ const Header = () => {
               className="slds-text-heading_large slds-text-link_reset"
             >
               <span data-logo-bit="start">met</span>
-              <span data-logo-bit="end">échō </span>
+              <span data-logo-bit="end">échō</span>
             </Link>
             <TourPopover
-              align="bottom"
+              align="bottom left"
               heading={i18n.t('What’s in a name?')}
               body={
-                <Trans i18nKey="metechoname">
+                <Trans i18nKey="tourMetechoName">
                   Metecho makes it easier for you to view, test, and contribute
                   to Salesforce Projects without learning GitHub.{' '}
                   <b>Pronunciation</b>: “Met” rhymes with “Bet.” “Echo” as in
-                  the reflection of sound waves. <b>Definition</b>: Share or
-                  participate in
+                  the reflection of sound waves. <b>Definition</b>: “Share or
+                  participate in.”
                 </Trans>
               }
             />

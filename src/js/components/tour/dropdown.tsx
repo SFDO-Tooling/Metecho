@@ -9,6 +9,7 @@ import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
 import backpackIcon from '~img/backpack-sm.svg';
 import mapIcon from '~img/map-sm.svg';
 import seesawIcon from '~img/seesaw-sm.svg';
+import { useIsMounted } from '~js/components/utils';
 import { AppState, ThunkDispatch } from '~js/store';
 import { selectProject } from '~js/store/projects/selectors';
 import { updateTour } from '~js/store/user/actions';
@@ -41,6 +42,7 @@ const TourDropdown = ({
   const projectUrl = project ? routes.project_detail(project.slug) : null;
   const user = useSelector(selectUserState);
   const [isSaving, setIsSaving] = useState(false);
+  const isMounted = useIsMounted();
 
   const handleSelect = useCallback(
     (type: WalkthroughType) => {
@@ -59,13 +61,16 @@ const TourDropdown = ({
     ) => {
       setIsSaving(true);
       dispatch(updateTour({ enabled: checked })).finally(() => {
-        setIsSaving(false);
+        /* istanbul ignore else */
+        if (isMounted.current) {
+          setIsSaving(false);
+        }
       });
     },
-    [dispatch],
+    [dispatch, isMounted],
   );
 
-  return project ? (
+  return (
     <Popover
       align="bottom right"
       className={className}
@@ -74,43 +79,45 @@ const TourDropdown = ({
       classNameBody="slds-p-horizontal_none"
       body={
         <>
-          <ul className="slds-border_bottom slds-p-bottom_x-small slds-m-bottom_x-small">
-            <li className="slds-p-horizontal_small">
-              <Button
-                label={i18n.t('Play Walkthrough')}
-                variant="base"
-                iconPosition="left"
-                iconSize="large"
-                iconPath={`${seesawIcon}#seesaw-sm`}
-                style={{ width: '100%' }}
-                onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAY)}
-                disabled
-              />
-            </li>
-            <li className="slds-p-horizontal_small">
-              <Button
-                label={i18n.t('Help Walkthrough')}
-                variant="base"
-                iconPosition="left"
-                iconSize="large"
-                iconPath={`${backpackIcon}#backpack-sm`}
-                style={{ width: '100%' }}
-                onClick={() => handleSelect(WALKTHROUGH_TYPES.HELP)}
-                disabled
-              />
-            </li>
-            <li className="slds-p-horizontal_small">
-              <Button
-                label={i18n.t('Plan Walkthrough')}
-                variant="base"
-                iconPosition="left"
-                iconSize="large"
-                iconPath={`${mapIcon}#map-sm`}
-                style={{ width: '100%' }}
-                onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAN)}
-              />
-            </li>
-          </ul>
+          {project && (
+            <ul className="slds-border_bottom slds-p-bottom_x-small slds-m-bottom_x-small">
+              <li className="slds-p-horizontal_small">
+                <Button
+                  label={i18n.t('Play Walkthrough')}
+                  variant="base"
+                  iconPosition="left"
+                  iconSize="large"
+                  iconPath={`${seesawIcon}#seesaw-sm`}
+                  style={{ width: '100%' }}
+                  onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAY)}
+                  disabled
+                />
+              </li>
+              <li className="slds-p-horizontal_small">
+                <Button
+                  label={i18n.t('Help Walkthrough')}
+                  variant="base"
+                  iconPosition="left"
+                  iconSize="large"
+                  iconPath={`${backpackIcon}#backpack-sm`}
+                  style={{ width: '100%' }}
+                  onClick={() => handleSelect(WALKTHROUGH_TYPES.HELP)}
+                  disabled
+                />
+              </li>
+              <li className="slds-p-horizontal_small">
+                <Button
+                  label={i18n.t('Plan Walkthrough')}
+                  variant="base"
+                  iconPosition="left"
+                  iconSize="large"
+                  iconPath={`${mapIcon}#map-sm`}
+                  style={{ width: '100%' }}
+                  onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAN)}
+                />
+              </li>
+            </ul>
+          )}
           <Checkbox
             labels={{ label: 'Self-guided Tour' }}
             className="slds-p-horizontal_small"
@@ -131,7 +138,7 @@ const TourDropdown = ({
         iconVariant="more"
       />
     </Popover>
-  ) : null;
+  );
 };
 
 export default TourDropdown;
