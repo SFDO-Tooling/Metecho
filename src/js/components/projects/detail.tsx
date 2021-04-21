@@ -180,7 +180,7 @@ const ProjectDetail = (
             <h2 className="slds-text-heading_medium slds-p-bottom_medium slds-is-relative">
               {i18n.t('My Project Scratch Org')}
               <TourPopover
-                align="left"
+                align="top"
                 heading={i18n.t('Scratch Org management')}
                 body={i18n.t(
                   'All your Scratch Orgs for the Project will appear in this column. Create a Scratch Org for the entire Project or visit an Epic or Task to create a Scratch Org for specific work in progress. To contribute work from a Scratch Org you must first have permission to contribute and then create a Task for the Scratch Org.',
