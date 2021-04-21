@@ -80,7 +80,7 @@ cryptography==3.4.7
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.32.1
+cumulusci==3.33.1
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -94,7 +94,7 @@ django-anymail[mailgun]==8.2
     # via -r requirements/prod.in
 django-filter==2.4.0
     # via sfdo-template-helpers
-django-hashid-field==3.2.0
+django-hashid-field==3.2.1
     # via -r requirements/prod.in
 django-js-reverse==0.9.1
     # via -r requirements/prod.in
@@ -129,7 +129,7 @@ djangorestframework==3.12.4
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
-faker==7.0.1
+faker==8.1.0
     # via
     #   cumulusci
     #   snowfakery
@@ -165,7 +165,7 @@ idna==2.10
     #   hyperlink
     #   requests
     #   twisted
-importlib-metadata==3.10.0
+importlib-metadata==3.10.1
     # via
     #   cumulusci
     #   keyring
@@ -333,7 +333,7 @@ six==1.15.0
     #   pyopenssl
     #   python-dateutil
     #   salesforce-bulk
-snowfakery==1.8.1
+snowfakery==1.9
     # via cumulusci
 soupsieve==2.2.1
     # via beautifulsoup4
@@ -382,7 +382,7 @@ zipp==3.4.1
     # via
     #   cumulusci
     #   importlib-metadata
-zope.interface==5.3.0
+zope.interface==5.4.0
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
