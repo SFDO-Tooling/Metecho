@@ -3,11 +3,11 @@ import { StaticRouter } from 'react-router-dom';
 
 import { DetailPageLayout } from '~js/components/utils';
 
-import { render } from './../../utils';
+import { renderWithRedux } from './../../utils';
 
 describe('<DetailPageLayout />', () => {
   test('shows social img if no description', () => {
-    const { getByAltText } = render(
+    const { getByAltText } = renderWithRedux(
       <StaticRouter context={{}}>
         <DetailPageLayout
           title="project-1"
@@ -17,6 +17,9 @@ describe('<DetailPageLayout />', () => {
           repoUrl="repo-url"
         />
       </StaticRouter>,
+      {
+        user: {},
+      },
     );
 
     expect(getByAltText('social image for project-1')).toBeDefined();
