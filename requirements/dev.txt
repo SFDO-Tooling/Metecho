@@ -135,7 +135,7 @@ pyparsing==2.4.7
     # via
     #   -c requirements/prod.txt
     #   packaging
-pytest-asyncio==0.14.0
+pytest-asyncio==0.15.0
     # via -r requirements/dev.in
 pytest-cov==2.11.1
     # via -r requirements/dev.in
