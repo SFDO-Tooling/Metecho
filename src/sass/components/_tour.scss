@@ -35,6 +35,15 @@
   background-image: url('~img/popover-header.png');
 }
 
+.popover-reference {
+  position: relative;
+}
+
+.popover-wrapper {
+  position: absolute;
+  top: -10px;
+}
+
 .popover-trigger {
   color: $palette-violet-65;
 }

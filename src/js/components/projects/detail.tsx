@@ -177,8 +177,15 @@ const ProjectDetail = (
               metecho-secondary-block
               slds-m-left_medium"
           >
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+            <h2 className="slds-text-heading_medium slds-p-bottom_medium popover-reference">
               {i18n.t('My Project Scratch Org')}
+              <TourPopover
+                align="left"
+                heading={i18n.t('Scratch Org management')}
+                body={i18n.t(
+                  'All your Scratch Orgs for the Project will appear in this column. Create a Scratch Org for the entire Project or visit an Epic or Task to create a Scratch Org for specific work in progress. To contribute work from a Scratch Org you must first have permission to contribute and then create a Task for the Scratch Org.',
+                )}
+              />
             </h2>
             {orgs ? (
               <>
@@ -197,7 +204,7 @@ const ProjectDetail = (
                     </div>
                   </div>
                 ) : (
-                  <div>
+                  <div className="popover-reference">
                     <Button
                       label={i18n.t('Create Scratch Org')}
                       variant="outline-brand"
@@ -251,7 +258,7 @@ const ProjectDetail = (
                 </Trans>
               </p>
             )}
-            <div className="slds-m-bottom_large">
+            <div className="slds-m-bottom_large popover-reference">
               <Button
                 label={i18n.t('Create an Epic')}
                 variant="brand"

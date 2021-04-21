@@ -29,7 +29,12 @@ const EpicTable = ({
   }));
 
   return (
-    <DataTable items={items} id="project-epics-table" noRowHover>
+    <DataTable
+      items={items}
+      id="project-epics-table"
+      noRowHover
+      className="popover-reference"
+    >
       <DataTableColumn
         key="details"
         label={

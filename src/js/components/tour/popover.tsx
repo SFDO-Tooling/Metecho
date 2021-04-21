@@ -24,6 +24,7 @@ const TourPopover = ({
       heading={heading}
       body={<p>{body}</p>}
       variant="walkthrough"
+      triggerClassName="popover-wrapper"
     >
       <Button
         variant="icon"

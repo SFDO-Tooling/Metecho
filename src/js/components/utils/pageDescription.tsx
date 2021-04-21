@@ -20,7 +20,7 @@ const PageDescription = ({
   const renderedDescription = (
     <>
       {!descriptionHasTitle && (
-        <>
+        <div className="popover-reference">
           <h2
             className="slds-truncate slds-text-heading_small slds-m-bottom_small"
             title={renderedTitle}
@@ -34,7 +34,7 @@ const PageDescription = ({
               )}
             />
           </h2>
-        </>
+        </div>
       )}
 
       <div

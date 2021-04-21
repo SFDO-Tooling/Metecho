@@ -39,13 +39,10 @@ const DetailPageLayout = ({
   return (
     <>
       <PageHeader
-        className="page-header slds-p-around_x-large"
-        title={title}
-        info={
+        className="page-header slds-p-around_x-large popover-reference"
+        title={
           <>
-            <ExternalLink url={headerUrl} showGitHubIcon>
-              /{headerUrlText}
-            </ExternalLink>
+            {title}{' '}
             <TourPopover
               align="right"
               heading={i18n.t('Project name & GitHub link')}
@@ -54,6 +51,11 @@ const DetailPageLayout = ({
               )}
             />
           </>
+        }
+        info={
+          <ExternalLink url={headerUrl} showGitHubIcon>
+            /{headerUrlText}
+          </ExternalLink>
         }
         onRenderControls={onRenderHeaderActions}
         icon={

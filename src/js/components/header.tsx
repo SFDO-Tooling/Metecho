@@ -20,17 +20,17 @@ const Header = () => {
 
   const controls = () => (
     <PageHeaderControl className="slds-grid slds-grid_vertical-align-center">
-      {window.GLOBALS.ENABLE_WALKTHROUGHS ? (
-        <TourDropdown triggerClassName="tour-walkthroughs slds-m-right_x-small" />
-      ) : null}
-      <UserInfo />
-      <TourPopover
-        align="bottom right"
-        heading={i18n.t('Login & connection info')}
-        body={i18n.t(
-          'Here you can check which GitHub account is logged in, and log out as needed. Connect and disconnect from Salesforce. Enable a Dev Hub on your Salesforce account to contribute to Projects in Metecho.',
-        )}
-      />
+      {window.GLOBALS.ENABLE_WALKTHROUGHS ? <TourDropdown /> : null}
+      <div className="popover-reference">
+        <UserInfo />
+        <TourPopover
+          align="bottom right"
+          heading={i18n.t('Login & connection info')}
+          body={i18n.t(
+            'Here you can check which GitHub account is logged in, and log out as needed. Connect and disconnect from Salesforce. Enable a Dev Hub on your Salesforce account to contribute to Projects in Metecho.',
+          )}
+        />
+      </div>
     </PageHeaderControl>
   );
 
@@ -50,18 +50,18 @@ const Header = () => {
               className="slds-text-heading_large slds-text-link_reset"
             >
               <span data-logo-bit="start">met</span>
-              <span data-logo-bit="end">échō</span>
+              <span data-logo-bit="end">échō </span>
             </Link>
             <TourPopover
               align="bottom"
               heading={i18n.t('What’s in a name?')}
               body={
-                <Trans i18nKey="metechomeaning">
+                <Trans i18nKey="metechoname">
                   Metecho makes it easier for you to view, test, and contribute
                   to Salesforce Projects without learning GitHub.{' '}
                   <b>Pronunciation</b>: “Met” rhymes with “Bet.” “Echo” as in
                   the reflection of sound waves. <b>Definition</b>: Share or
-                  participate in.
+                  participate in
                 </Trans>
               }
             />
