@@ -47,7 +47,7 @@ import { AppState, ThunkDispatch } from '~js/store';
 import { createObject } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
 import { Org, OrgsByParent } from '~js/store/orgs/reducer';
-import { selectProjectCollaborators } from '~js/store/projects/selectors';
+import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { selectTask, selectTaskSlug } from '~js/store/tasks/selectors';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -97,7 +97,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const { orgs } = useFetchOrgsIfMissing({ task, props });
   const user = useSelector(selectUserState) as User;
   const qaUser = useSelector((state: AppState) =>
-    selectProjectCollaborators(state, project?.id, task?.assigned_qa),
+    selectProjectCollaborator(state, project?.id, task?.assigned_qa),
   );
 
   const readyToSubmit = Boolean(

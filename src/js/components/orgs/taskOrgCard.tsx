@@ -16,7 +16,7 @@ import UserActions from '~js/components/orgs/cards/userActions';
 import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
 import { AppState } from '~js/store';
 import { Org } from '~js/store/orgs/reducer';
-import { selectProjectCollaborators } from '~js/store/projects/selectors';
+import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
@@ -103,10 +103,9 @@ const TaskOrgCard = ({
       orgHeading = i18n.t('Dev Org');
       break;
   }
-  const assignedUser =
-    useSelector((state: AppState) =>
-      selectProjectCollaborators(state, projectId, assignedUserId),
-    ) || null;
+  const assignedUser = useSelector((state: AppState) =>
+    selectProjectCollaborator(state, projectId, assignedUserId),
+  );
   const assignedToCurrentUser = user.github_id === assignedUserId;
   const ownedByCurrentUser = Boolean(org?.is_created && user.id === org?.owner);
   const ownedByWrongUser =

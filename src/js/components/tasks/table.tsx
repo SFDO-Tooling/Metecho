@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom';
 import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
 import { AppState } from '~js/store';
-import { selectProjectCollaborators } from '~js/store/projects/selectors';
+import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
 import {
@@ -164,7 +164,7 @@ const AssigneeTableCell = ({
   };
 
   const assignedUser = useSelector((state: AppState) =>
-    selectProjectCollaborators(state, projectId, children),
+    selectProjectCollaborator(state, projectId, children),
   );
 
   const doAssignUserAction = useCallback(

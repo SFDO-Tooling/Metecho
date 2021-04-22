@@ -59,25 +59,11 @@ export const selectProjectById = (
     .flat()
     .find((p) => p.id === id);
 
-/* eslint-disable func-style */
-export function selectProjectCollaborators( // Returns array
+export const selectProjectCollaborator = (
   appState: AppState,
-  id?: string,
-): GitHubUser[] | undefined;
-export function selectProjectCollaborators( // Returns single object
-  appState: AppState,
-  id?: string,
+  projectId?: string,
   userId?: string | null,
-): GitHubUser | undefined;
-export function selectProjectCollaborators( // Actual implementation
-  appState: AppState,
-  id?: string,
-  userId?: string | null,
-): GitHubUser | GitHubUser[] | undefined {
-  const project = selectProjectById(appState, id);
-  if (userId === undefined) {
-    return project?.github_users;
-  }
-  return project?.github_users.filter((user) => user.id === userId)[0];
-}
-/* estlint-enable func-style */
+): GitHubUser | null => {
+  const project = selectProjectById(appState, projectId);
+  return project?.github_users.filter((user) => user.id === userId)[0] || null;
+};

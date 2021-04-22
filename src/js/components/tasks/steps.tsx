@@ -8,7 +8,7 @@ import { Step } from '~js/components/steps/stepsItem';
 import { AppState } from '~js/store';
 import { OrgsByParent } from '~js/store/orgs/reducer';
 import { Project } from '~js/store/projects/reducer';
-import { selectProjectCollaborators } from '~js/store/projects/selectors';
+import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { User } from '~js/store/user/reducer';
 import { ORG_TYPES, REVIEW_STATUSES } from '~js/utils/constants';
@@ -32,10 +32,10 @@ const TaskStatusSteps = ({
   handleAction,
 }: TaskStatusStepsProps) => {
   const devUser = useSelector((state: AppState) =>
-    selectProjectCollaborators(state, project.id, task.assigned_dev),
+    selectProjectCollaborator(state, project.id, task.assigned_dev),
   );
   const qaUser = useSelector((state: AppState) =>
-    selectProjectCollaborators(state, project.id, task.assigned_qa),
+    selectProjectCollaborator(state, project.id, task.assigned_qa),
   );
   const hasDev = Boolean(task.assigned_dev);
   const hasTester = Boolean(task.assigned_qa);
