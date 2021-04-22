@@ -275,8 +275,8 @@ class TestTaskSerializer:
             "name": "Test Task",
             "description": "Description.",
             "epic": str(epic.id),
-            "assigned_dev": {"test": "id"},
-            "assigned_qa": {"test": "id"},
+            "assigned_dev": "id",
+            "assigned_qa": "id",
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
@@ -297,8 +297,8 @@ class TestTaskSerializer:
             "name": task.name,
             "description": task.description,
             "epic": str(task.epic.id),
-            "assigned_dev": {"id": 1},
-            "assigned_qa": {"id": 2},
+            "assigned_dev": 1,
+            "assigned_qa": 2,
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
@@ -326,8 +326,8 @@ class TestTaskSerializer:
             "name": task.name,
             "description": task.description,
             "epic": str(task.epic.id),
-            "assigned_dev": {},
-            "assigned_qa": {},
+            "assigned_dev": "",
+            "assigned_qa": "",
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
@@ -350,19 +350,19 @@ class TestTaskSerializer:
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
-            "assigned_dev": {"id": "dev_id"},
-            "assigned_qa": {"id": "qa_id"},
+            "assigned_dev": "dev_id",
+            "assigned_qa": "qa_id",
         }
         serializer = TaskSerializer(task, data=data)
         assert serializer.is_valid(), serializer.errors
 
         serializer.update(task, serializer.validated_data)
         task.epic.refresh_from_db()
-        assert task.epic.github_users == [{"id": "dev_id"}, {"id": "qa_id"}]
+        assert task.epic.github_users == ["dev_id", "qa_id"]
 
     def test_update__existing_collaborator(self, task_factory, epic_factory):
         # Existing collaborators should not be re-added when assigned to a task
-        epic = epic_factory(github_users=[{"id": "existing_user"}])
+        epic = epic_factory(github_users=["existing_user"])
         task = task_factory(commits=["abc123"], epic=epic)
         data = {
             "name": task.name,
@@ -371,7 +371,7 @@ class TestTaskSerializer:
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
-            "assigned_dev": {"id": "existing_user"},
+            "assigned_dev": "existing_user",
             "assigned_qa": None,
         }
         serializer = TaskSerializer(task, data=data)
@@ -379,7 +379,7 @@ class TestTaskSerializer:
 
         serializer.update(task, serializer.validated_data)
         task.epic.refresh_from_db()
-        assert task.epic.github_users == [{"id": "existing_user"}]
+        assert task.epic.github_users == ["existing_user"]
 
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
@@ -441,9 +441,7 @@ class TestTaskSerializer:
         new_user = user_factory(devhub_username="test")
         id_ = user.github_account.uid
         new_id = new_user.github_account.uid
-        task = task_factory(
-            assigned_dev={"id": id_}, assigned_qa={"id": id_}, commits=["abc123"]
-        )
+        task = task_factory(assigned_dev=id_, assigned_qa=id_, commits=["abc123"])
         scratch_org_factory(
             owner_sf_username="test",
             task=task,
@@ -463,8 +461,8 @@ class TestTaskSerializer:
             "name": task.name,
             "description": task.description,
             "epic": str(task.epic.id),
-            "assigned_dev": {"id": new_id},
-            "assigned_qa": {"id": new_id},
+            "assigned_dev": new_id,
+            "assigned_qa": new_id,
             "org_config_name": "dev",
         }
         serializer = TaskSerializer(instance=task, data=data)
@@ -486,8 +484,8 @@ class TestTaskSerializer:
         serializer = TaskSerializer(
             task,
             data={
-                "assigned_dev": {"id": user.github_account.uid},
-                "assigned_qa": {"id": user.github_account.uid},
+                "assigned_dev": user.github_account.uid,
+                "assigned_qa": user.github_account.uid,
                 "should_alert_dev": True,
                 "should_alert_qa": True,
                 "name": task.name,

@@ -650,14 +650,9 @@ class Task(
         choices=TASK_STATUSES, default=TASK_STATUSES.Planned, max_length=16
     )
 
-    # Assignee user data is shaped like this:
-    #   {
-    #     "id": str,
-    #     "login": str,
-    #     "avatar_url": str,
-    #   }
-    assigned_dev = models.JSONField(null=True, blank=True)
-    assigned_qa = models.JSONField(null=True, blank=True)
+    # GitHub IDs of task assignees
+    assigned_dev = models.CharField(max_length=50, null=True, blank=True)
+    assigned_qa = models.CharField(max_length=50, null=True, blank=True)
 
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])
@@ -722,8 +717,7 @@ class Task(
     def try_to_notify_assigned_user(self):
         # This takes the tester (a.k.a. assigned_qa) and sends them an
         # email when a PR has been made.
-        assigned = self.assigned_qa
-        id_ = assigned.get("id") if assigned else None
+        id_ = getattr(self, "assigned_qa", None)
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         user = getattr(sa, "user", None)
         if user:

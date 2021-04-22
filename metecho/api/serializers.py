@@ -405,8 +405,8 @@ class TaskSerializer(serializers.ModelSerializer):
         org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
 
         if assigned_user_has_changed and has_assigned_user:
-            collaborators = [c["id"] for c in instance.epic.github_users]
-            if new_assignee["id"] not in collaborators:
+            collaborators = instance.epic.github_users
+            if new_assignee not in collaborators:
                 instance.epic.github_users.append(new_assignee)
                 instance.epic.save()
                 instance.epic.notify_changed(originating_user_id=None)
@@ -481,8 +481,7 @@ class TaskSerializer(serializers.ModelSerializer):
             assigned_user.notify(subject, body)
 
     def get_matching_assigned_user(self, type_, validated_data):
-        assigned = validated_data.get(f"assigned_{type_}", {})
-        id_ = assigned.get("id") if assigned else None
+        id_ = validated_data.get(f"assigned_{type_}")
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         return getattr(sa, "user", None)  # Optional[User]
 
