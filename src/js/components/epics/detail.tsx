@@ -51,7 +51,10 @@ import routes from '~js/utils/routes';
 const EpicDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
-  const { epic, epicSlug } = useFetchEpicIfMissing(project, props);
+  const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
+    project,
+    props,
+  );
   const { tasks } = useFetchTasksIfMissing(epic, props);
   const { orgs } = useFetchOrgsIfMissing({ epic, props });
 
@@ -98,10 +101,10 @@ const EpicDetail = (props: RouteComponentProps) => {
     const users = new Set<string>();
     (tasks || []).forEach((task) => {
       if (task.assigned_dev) {
-        users.add(task.assigned_dev.id);
+        users.add(task.assigned_dev);
       }
       if (task.assigned_qa) {
-        users.add(task.assigned_qa.id);
+        users.add(task.assigned_qa);
       }
     });
     return users;
@@ -113,13 +116,13 @@ const EpicDetail = (props: RouteComponentProps) => {
       if (!epic) {
         return [];
       }
-      return epic.github_users.filter(
+      return epicCollaborators.filter(
         (oldUser) =>
           usersAssignedToTasks.has(oldUser.id) &&
           !users.find((user) => user.id === oldUser.id),
       );
     },
-    [epic, usersAssignedToTasks],
+    [epic, epicCollaborators, usersAssignedToTasks],
   );
   const updateEpicUsers = useCallback(
     (users: GitHubUser[]) => {
@@ -167,7 +170,7 @@ const EpicDetail = (props: RouteComponentProps) => {
       if (!epic) {
         return;
       }
-      const users = epic.github_users.filter(
+      const users = epicCollaborators.filter(
         (possibleUser) => user.id !== possibleUser.id,
       );
       const removedUsers = getRemovedUsers(users);
@@ -182,7 +185,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         updateEpicUsers(users);
       }
     },
-    [epic, updateEpicUsers, getRemovedUsers],
+    [epic, epicCollaborators, updateEpicUsers, getRemovedUsers],
   );
   const doRefreshGitHubUsers = useCallback(() => {
     /* istanbul ignore if */
@@ -439,7 +442,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           <>
             <div className="slds-m-bottom_x-large metecho-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
-                {project.has_push_permission || epic.github_users.length
+                {project.has_push_permission || epicCollaborators.length
                   ? i18n.t('Collaborators')
                   : i18n.t('No Collaborators')}
               </h2>
@@ -452,7 +455,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   />
                   <AssignEpicCollaboratorsModal
                     allUsers={project.github_users}
-                    selectedUsers={epic.github_users}
+                    selectedUsers={epicCollaborators}
                     heading={i18n.t(
                       'Add or Remove Collaborators for {{epic_name}}',
                       { epic_name: epic.name },
@@ -473,9 +476,9 @@ const EpicDetail = (props: RouteComponentProps) => {
                   />
                 </>
               )}
-              {epic.github_users.length ? (
+              {epicCollaborators.length ? (
                 <UserCards
-                  users={epic.github_users}
+                  users={epicCollaborators}
                   canRemoveUser={project.has_push_permission}
                   removeUser={removeEpicUser}
                 />
@@ -560,7 +563,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   projectSlug={project.slug}
                   epicSlug={epic.slug}
                   tasks={tasks}
-                  epicUsers={epic.github_users}
+                  epicUsers={epicCollaborators}
                   githubUsers={project.github_users}
                   canAssign={project.has_push_permission}
                   isRefreshingUsers={Boolean(

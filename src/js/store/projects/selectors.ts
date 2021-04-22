@@ -4,6 +4,8 @@ import { createSelector } from 'reselect';
 import { AppState } from '~js/store';
 import { Project, ProjectsState } from '~js/store/projects/reducer';
 
+import { GitHubUser } from '../user/reducer';
+
 export const selectProjectsState = (appState: AppState): ProjectsState =>
   appState.projects;
 
@@ -56,3 +58,26 @@ export const selectProjectById = (
   Object.values(appState.projects.projects)
     .flat()
     .find((p) => p.id === id);
+
+/* eslint-disable func-style */
+export function selectProjectCollaborators( // Returns array
+  appState: AppState,
+  id?: string,
+): GitHubUser[] | undefined;
+export function selectProjectCollaborators( // Returns single object
+  appState: AppState,
+  id?: string,
+  userId?: string | null,
+): GitHubUser | undefined;
+export function selectProjectCollaborators( // Actual implementation
+  appState: AppState,
+  id?: string,
+  userId?: string | null,
+): GitHubUser | GitHubUser[] | undefined {
+  const project = selectProjectById(appState, id);
+  if (userId === undefined) {
+    return project?.github_users;
+  }
+  return project?.github_users.filter((user) => user.id === userId)[0];
+}
+/* estlint-enable func-style */

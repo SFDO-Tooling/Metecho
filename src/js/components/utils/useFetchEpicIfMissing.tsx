@@ -21,6 +21,9 @@ export default (
   const epicSlug = useSelector((state: AppState) =>
     selectEpicSlugWithProps(state, routeProps),
   );
+  const epicCollaborators = (project?.github_users || []).filter((user) =>
+    epic?.github_users.includes(user.id),
+  );
 
   useEffect(() => {
     if (project && epicSlug && epic === undefined) {
@@ -34,5 +37,5 @@ export default (
     }
   }, [dispatch, project, epic, epicSlug]);
 
-  return { epic, epicSlug };
+  return { epic, epicSlug, epicCollaborators };
 };

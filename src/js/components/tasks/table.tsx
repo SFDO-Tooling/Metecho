@@ -7,10 +7,13 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
+import { AppState } from '~js/store';
+import { selectProjectCollaborators } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
 import {
@@ -150,16 +153,19 @@ const AssigneeTableCell = ({
   canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
-  children?: GitHubUser | null;
+  children?: string | null;
 }) => {
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
-
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);
   };
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(false);
   };
+
+  const assignedUser = useSelector((state: AppState) =>
+    selectProjectCollaborators(state, projectId, children),
+  );
 
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
@@ -176,19 +182,16 @@ const AssigneeTableCell = ({
     return null;
   }
   let contents, title;
-  if (children) {
-    contents = <GitHubUserAvatar user={children} />;
-    title = children.login;
+  if (assignedUser) {
+    contents = <GitHubUserAvatar user={assignedUser} />;
+    title = assignedUser.login;
   } else if (canAssign) {
-    let assignedUser;
     switch (type) {
       case ORG_TYPES.DEV:
         title = i18n.t('Assign Developer');
-        assignedUser = item.assigned_dev;
         break;
       case ORG_TYPES.QA:
         title = i18n.t('Assign Tester');
-        assignedUser = item.assigned_qa;
         break;
     }
 

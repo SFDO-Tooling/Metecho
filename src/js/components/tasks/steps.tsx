@@ -1,32 +1,42 @@
 import i18n from 'i18next';
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import { OrgTypeTracker } from '~js/components/orgs/taskOrgCards';
 import Steps from '~js/components/steps';
 import { Step } from '~js/components/steps/stepsItem';
+import { AppState } from '~js/store';
 import { OrgsByParent } from '~js/store/orgs/reducer';
+import { Project } from '~js/store/projects/reducer';
+import { selectProjectCollaborators } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { User } from '~js/store/user/reducer';
 import { ORG_TYPES, REVIEW_STATUSES } from '~js/utils/constants';
 import { getTaskCommits } from '~js/utils/helpers';
 
 interface TaskStatusStepsProps {
+  project: Project;
   task: Task;
   orgs: OrgsByParent;
   user: User;
   isCreatingOrg: OrgTypeTracker;
-  hasPermissions: boolean;
   handleAction: (step: Step) => void;
 }
 
 const TaskStatusSteps = ({
+  project,
   task,
   orgs,
   user,
   isCreatingOrg,
-  hasPermissions,
   handleAction,
 }: TaskStatusStepsProps) => {
+  const devUser = useSelector((state: AppState) =>
+    selectProjectCollaborators(state, project.id, task.assigned_dev),
+  );
+  const qaUser = useSelector((state: AppState) =>
+    selectProjectCollaborators(state, project.id, task.assigned_qa),
+  );
   const hasDev = Boolean(task.assigned_dev);
   const hasTester = Boolean(task.assigned_qa);
   const hasReviewApproved =
@@ -40,10 +50,8 @@ const TaskStatusSteps = ({
   const testOrg = orgs[ORG_TYPES.QA];
   const hasDevOrg = Boolean(devOrg?.is_created);
   const hasTestOrg = Boolean(testOrg?.is_created);
-  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev?.id);
-  const userIsAssignedTester = Boolean(
-    user.github_id === task?.assigned_qa?.id,
-  );
+  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev);
+  const userIsAssignedTester = Boolean(user.github_id === task?.assigned_qa);
   const userIsDevOrgOwner = Boolean(
     userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,
   );
@@ -96,7 +104,7 @@ const TaskStatusSteps = ({
       // consider this complete if there are commits and no rejected review
       complete: hasDev || hasValidCommits,
       assignee: null,
-      action: hasPermissions ? 'assign-dev' : undefined,
+      action: project.has_push_permission ? 'assign-dev' : undefined,
     },
     {
       label: devOrgIsCreating
@@ -106,7 +114,7 @@ const TaskStatusSteps = ({
       // Even if no dev is currently assigned and there's no Dev Org,
       // consider this complete if there are commits and no rejected review
       complete: (hasDev && hasDevOrg) || hasValidCommits,
-      assignee: task.assigned_dev,
+      assignee: devUser,
       action:
         userIsAssignedDev && !devOrgLoading ? 'create-dev-org' : undefined,
     },
@@ -118,7 +126,7 @@ const TaskStatusSteps = ({
       // Complete if the Dev Org has unsaved changes or we have commits
       // (without rejected review)
       complete: Boolean(devOrg?.has_unsaved_changes || hasValidCommits),
-      assignee: task.assigned_dev,
+      assignee: devUser,
       link:
         devOrg && userIsDevOrgOwner && !devOrgLoading
           ? window.api_urls.scratch_org_redirect(devOrg.id)
@@ -130,8 +138,11 @@ const TaskStatusSteps = ({
       active: hasDev && hasDevOrg && Boolean(devOrg?.has_unsaved_changes),
       // Complete if we have commits (without rejected review)
       complete: hasValidCommits,
-      assignee: task.assigned_dev,
-      action: devOrgLoading || !hasPermissions ? undefined : 'retrieve-changes',
+      assignee: devUser,
+      action:
+        devOrgLoading || !project.has_push_permission
+          ? undefined
+          : 'retrieve-changes',
     },
     {
       label: taskIsSubmitting
@@ -141,14 +152,16 @@ const TaskStatusSteps = ({
       complete: task.pr_is_open,
       assignee: null,
       action:
-        taskIsSubmitting || !hasPermissions ? undefined : 'submit-changes',
+        taskIsSubmitting || !project.has_push_permission
+          ? undefined
+          : 'submit-changes',
     },
     {
       label: i18n.t('Assign a Tester'),
       active: readyForReview && !hasTester,
       complete: hasTester || task.review_valid,
       assignee: null,
-      action: hasPermissions ? 'assign-qa' : undefined,
+      action: project.has_push_permission ? 'assign-qa' : undefined,
     },
     {
       label: testOrgIsCreating
@@ -157,7 +170,7 @@ const TaskStatusSteps = ({
       active: readyForReview && hasTester && !hasTestOrg,
       complete: (hasTester && hasTestOrg) || task.review_valid,
       hidden: testOrgOutOfDate,
-      assignee: task.assigned_qa,
+      assignee: qaUser,
       action:
         userIsAssignedTester && !testOrgLoading ? 'create-qa-org' : undefined,
     },
@@ -168,7 +181,7 @@ const TaskStatusSteps = ({
       active: testOrgOutOfDate,
       complete: false,
       hidden: !testOrgOutOfDate,
-      assignee: task.assigned_qa,
+      assignee: qaUser,
       action:
         userIsTestOrgOwner && !testOrgLoading ? 'refresh-test-org' : undefined,
     },
@@ -177,7 +190,7 @@ const TaskStatusSteps = ({
       active: readyForReview && hasTestOrg && !testOrg?.has_been_visited,
       complete:
         Boolean(hasTestOrg && testOrg?.has_been_visited) || task.review_valid,
-      assignee: task.assigned_qa,
+      assignee: qaUser,
       link:
         testOrg && userIsTestOrgOwner && !testOrgLoading
           ? window.api_urls.scratch_org_redirect(testOrg.id)
@@ -195,9 +208,11 @@ const TaskStatusSteps = ({
         !testOrgOutOfDate &&
         !task.review_valid,
       complete: task.review_valid,
-      assignee: task.assigned_qa,
+      assignee: qaUser,
       action:
-        userIsAssignedTester && !testOrgIsSubmittingReview && hasPermissions
+        userIsAssignedTester &&
+        !testOrgIsSubmittingReview &&
+        project.has_push_permission
           ? 'submit-review'
           : undefined,
     },

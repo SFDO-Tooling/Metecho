@@ -1,7 +1,6 @@
 import { ObjectsAction, PaginatedObjectResponse } from '~js/store/actions';
 import { EpicAction } from '~js/store/epics/actions';
 import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
-import { GitHubUser } from '~js/store/user/reducer';
 import { EpicStatuses, OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
 
 export interface Epic {
@@ -21,7 +20,7 @@ export interface Epic {
   has_unmerged_commits: boolean;
   currently_creating_branch: boolean;
   currently_creating_pr: boolean;
-  github_users: GitHubUser[];
+  github_users: string[];
   status: EpicStatuses;
   latest_sha: string;
 }

@@ -2,6 +2,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 import { UserCard } from '~js/components/githubUsers/cards';
@@ -13,7 +14,9 @@ import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
 import RefreshOrgModal from '~js/components/orgs/cards/refresh';
 import UserActions from '~js/components/orgs/cards/userActions';
 import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
+import { AppState } from '~js/store';
 import { Org } from '~js/store/orgs/reducer';
+import { selectProjectCollaborators } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
@@ -80,32 +83,36 @@ const TaskOrgCard = ({
   testOrgReadyForReview,
   testOrgSubmittingReview,
 }: TaskOrgCardProps) => {
-  let assignedUser: GitHubUser | null = null;
+  let assignedUserId: string | null = null;
   let heading, orgHeading;
   switch (type) {
     case ORG_TYPES.QA:
-      assignedUser = task.assigned_qa;
+      assignedUserId = task.assigned_qa;
       heading =
-        !userHasPermissions && !assignedUser
+        !userHasPermissions && !assignedUserId
           ? i18n.t('No Tester')
           : i18n.t('Tester');
       orgHeading = i18n.t('Test Org');
       break;
     case ORG_TYPES.DEV:
-      assignedUser = task.assigned_dev;
+      assignedUserId = task.assigned_dev;
       heading =
-        !userHasPermissions && !assignedUser
+        !userHasPermissions && !assignedUserId
           ? i18n.t('No Developer')
           : i18n.t('Developer');
       orgHeading = i18n.t('Dev Org');
       break;
   }
-  const assignedToCurrentUser = user.github_id === assignedUser?.id;
+  const assignedUser =
+    useSelector((state: AppState) =>
+      selectProjectCollaborators(state, projectId, assignedUserId),
+    ) || null;
+  const assignedToCurrentUser = user.github_id === assignedUserId;
   const ownedByCurrentUser = Boolean(org?.is_created && user.id === org?.owner);
   const ownedByWrongUser =
     type !== ORG_TYPES.PLAYGROUND &&
     org?.is_created &&
-    org.owner_gh_id !== assignedUser?.id
+    org.owner_gh_id !== assignedUserId
       ? org
       : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.is_created));

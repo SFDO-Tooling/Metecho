@@ -47,6 +47,7 @@ import { AppState, ThunkDispatch } from '~js/store';
 import { createObject } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
 import { Org, OrgsByParent } from '~js/store/orgs/reducer';
+import { selectProjectCollaborators } from '~js/store/projects/selectors';
 import { selectTask, selectTaskSlug } from '~js/store/tasks/selectors';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -79,7 +80,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   const isMounted = useIsMounted();
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
-  const { epic, epicSlug } = useFetchEpicIfMissing(project, props);
+  const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
+    project,
+    props,
+  );
   const dispatch = useDispatch<ThunkDispatch>();
   useFetchTasksIfMissing(epic, props);
   const selectTaskWithProps = useCallback(selectTask, []);
@@ -92,15 +96,16 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
   const { orgs } = useFetchOrgsIfMissing({ task, props });
   const user = useSelector(selectUserState) as User;
+  const qaUser = useSelector((state: AppState) =>
+    selectProjectCollaborators(state, project?.id, task?.assigned_qa),
+  );
 
   const readyToSubmit = Boolean(
     task?.has_unmerged_commits && !task?.pr_is_open,
   );
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
-  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev?.id);
-  const userIsAssignedTester = Boolean(
-    user.github_id === task?.assigned_qa?.id,
-  );
+  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev);
+  const userIsAssignedTester = Boolean(user.github_id === task?.assigned_qa);
   const hasReviewRejected = Boolean(
     task?.review_valid &&
       task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED,
@@ -641,11 +646,11 @@ const TaskDetail = (props: RouteComponentProps) => {
             {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large metecho-secondary-block">
                 <TaskStatusSteps
+                  project={project}
                   task={task}
                   orgs={taskOrgs}
                   user={user}
                   isCreatingOrg={isCreatingOrg}
-                  hasPermissions={project.has_push_permission}
                   handleAction={handleStepAction}
                 />
               </div>
@@ -662,7 +667,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             task={task}
             projectId={project.id}
             userHasPermissions={project.has_push_permission}
-            epicUsers={epic.github_users}
+            epicUsers={epicCollaborators}
             githubUsers={project.github_users}
             epicCreatingBranch={epic.currently_creating_branch}
             epicUrl={epicUrl}
@@ -744,7 +749,7 @@ const TaskDetail = (props: RouteComponentProps) => {
                 instanceType="task"
                 isOpen={submitModalOpen}
                 toggleModal={setSubmitModalOpen}
-                assignee={task.assigned_qa}
+                assignee={qaUser}
                 originatingUser={user.github_id}
               />
             )}
