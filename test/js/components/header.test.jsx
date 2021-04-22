@@ -90,7 +90,7 @@ describe('<Header />', () => {
       expect(context.url).toEqual(url);
     });
 
-    test('does not render dropdown if no project', () => {
+    test('only renders self-guided tour in the dropdown if no project', () => {
       const initialState = {
         user: {},
         projects: {
@@ -108,7 +108,7 @@ describe('<Header />', () => {
       };
       const { queryByText } = setup(initialState);
 
-      expect(queryByText('Get Help')).toBeNull();
+      expect(queryByText('Plan Walkthrough')).toBeNull();
     });
   });
 });
