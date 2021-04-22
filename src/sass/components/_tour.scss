@@ -38,6 +38,14 @@
 .popover-wrapper {
   position: absolute;
   top: -10px;
+
+  .slds-page-header__title & {
+    top: unset;
+  }
+
+  .page-title & {
+    top: 25px;
+  }
 }
 
 .popover-button {
@@ -45,18 +53,6 @@
 
   .tour-alert & {
     fill: currentColor;
-  }
-}
-
-.slds-page-header__title {
-  & .popover-wrapper {
-    top: unset;
-  }
-}
-
-.project-reference {
-  & .popover-wrapper {
-    top: 25px;
   }
 }
 

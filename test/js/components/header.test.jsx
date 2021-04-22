@@ -80,11 +80,11 @@ describe('<Header />', () => {
         },
       };
       const url = routes.project_detail('project-1');
-      const { getByText, getByTitle, context } = setup(initialState, {
+      const { getByText, context } = setup(initialState, {
         location: url,
       });
       fireEvent.click(getByText('Get Help'));
-      fireEvent.click(getByTitle('Plan Walkthrough'));
+      fireEvent.click(getByText('Plan Walkthrough'));
 
       expect(context.action).toEqual('PUSH');
       expect(context.url).toEqual(url);

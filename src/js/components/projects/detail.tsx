@@ -166,6 +166,21 @@ const ProjectDetail = (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
         title={project.name}
+        titlePopover={
+          <TourPopover
+            align="right"
+            heading={i18n.t('Project name & GitHub link')}
+            body={
+              <Trans i18nKey="tourProjectName">
+                View, test, and contribute to Salesforce Projects using Metecho!
+                Metecho Projects are equivalent to repositories on GitHub. Click
+                the link below the Project name to leave Metecho and access the
+                repository on GitHub. To contribute to a Project, you must be
+                given permission on GitHub.
+              </Trans>
+            }
+          />
+        }
         description={project.description_rendered}
         headerUrl={project.repo_url}
         headerUrlText={`${project.repo_owner}/${project.repo_name}`}
