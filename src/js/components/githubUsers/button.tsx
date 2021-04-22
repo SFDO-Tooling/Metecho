@@ -1,5 +1,7 @@
+import Badge from '@salesforce/design-system-react/components/badge';
 import Button from '@salesforce/design-system-react/components/button';
 import classNames from 'classnames';
+import i18n from 'i18next';
 import React from 'react';
 
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
@@ -18,10 +20,7 @@ const GitHubUserButton = ({
   showPermissions?: boolean;
   [key: string]: any;
 }) => {
-  let name = user.name ? `${user.login} (${user.name})` : user.login;
-  if (showPermissions && !user.permissions?.push) {
-    name = `${name} [read-only]`;
-  }
+  const name = user.name ? `${user.login} (${user.name})` : user.login;
   return (
     <Button
       className={classNames(
@@ -38,6 +37,13 @@ const GitHubUserButton = ({
         <>
           <GitHubUserAvatar user={user} />
           <span className="collaborator-username">{name}</span>
+          {showPermissions && !user.permissions?.push && (
+            <Badge
+              content={i18n.t('read-only')}
+              color="light"
+              className="slds-m-left_xx-small"
+            />
+          )}
         </>
       }
       variant="base"
