@@ -4,7 +4,7 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import { UserCard } from '~js/components/user/githubUser';
+import { UserCard } from '~js/components/githubUsers/cards';
 import { GitHubUser } from '~js/store/user/reducer';
 
 const ConfirmRemoveUserModal = ({
@@ -44,6 +44,7 @@ const ConfirmRemoveUserModal = ({
       )}
       prompt="warning"
       onRequestClose={handleClose}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       footer={[
         <Button key="cancel" label={i18n.t('Cancel')} onClick={handleClose} />,
         <Button

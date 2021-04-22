@@ -95,7 +95,7 @@ jobs:
           SFDX_CLIENT_ID: circle_test
           SFDX_CLIENT_SECRET: circle_test
           SFDX_HUB_KEY: circle_test
-      - image: circleci/redis:5.0
+      - image: circleci/redis:6.0
       - image: circleci/postgres:12.5
         environment:
           POSTGRES_DB: circle_test

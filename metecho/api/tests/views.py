@@ -27,6 +27,13 @@ class TestUserView:
         assert response.json()["username"].endswith("@example.com")
         assert response.json()["agreed_to_tos_at"] is not None
 
+    def test_complete_onboarding(self, client):
+        response = client.put(reverse("complete-onboarding"))
+
+        assert response.status_code == 200
+        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["onboarded_at"] is not None
+
 
 @pytest.mark.django_db
 def test_user_disconnect_view(client):
@@ -53,6 +60,24 @@ def test_user_refresh_view(client):
 
 @pytest.mark.django_db
 class TestProjectView:
+    def test_refresh_org_config_names(
+        self, client, project_factory, git_hub_repository_factory
+    ):
+        with ExitStack() as stack:
+            git_hub_repository_factory(user=client.user, repo_id=123)
+            project = project_factory(repo_id=123)
+            available_org_config_names_job = stack.enter_context(
+                patch("metecho.api.jobs.available_org_config_names_job")
+            )
+            response = client.post(
+                reverse(
+                    "project-refresh-org-config-names", kwargs={"pk": str(project.id)}
+                )
+            )
+
+            assert response.status_code == 202, response.json()
+            assert available_org_config_names_job.delay.called
+
     def test_refresh_github_users(
         self, client, project_factory, git_hub_repository_factory
     ):
@@ -87,7 +112,7 @@ class TestProjectView:
             response = client.get(
                 reverse("project-feature-branches", kwargs={"pk": str(project.id)})
             )
-            assert response.json() == ["include_me"]
+            assert response.json() == ["include_me"], response.json()
 
     def test_get_queryset(self, client, project_factory, git_hub_repository_factory):
         git_hub_repository_factory(
@@ -122,9 +147,12 @@ class TestProjectView:
                     "branch_prefix": "",
                     "github_users": [],
                     "repo_image_url": "",
+                    "org_config_names": [],
+                    "currently_fetching_org_config_names": False,
+                    "latest_sha": "abcd1234",
                 }
             ],
-        }
+        }, response.json()
 
     def test_get_queryset__bad(
         self, client, project_factory, git_hub_repository_factory
@@ -161,14 +189,17 @@ class TestProjectView:
                     "branch_prefix": "",
                     "github_users": [],
                     "repo_image_url": "",
+                    "org_config_names": [],
+                    "currently_fetching_org_config_names": False,
+                    "latest_sha": "abcd1234",
                 }
             ],
-        }
+        }, response.json()
 
 
 @pytest.mark.django_db
 class TestHookView:
-    def test_202__push_not_forced(
+    def test_202__push_task_commits(
         self,
         settings,
         client,
@@ -239,6 +270,112 @@ class TestHookView:
             assert not refresh_commits_job.delay.called
             task.refresh_from_db()
             assert len(task.commits) == 1
+
+    def test_202__push_epic_commits(
+        self,
+        settings,
+        client,
+        project_factory,
+        git_hub_repository_factory,
+        epic_factory,
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        with ExitStack() as stack:
+            project = project_factory(repo_id=123)
+            git_hub_repository_factory(repo_id=123)
+            epic = epic_factory(project=project, branch_name="test-epic")
+
+            refresh_commits_job = stack.enter_context(
+                patch("metecho.api.jobs.refresh_commits_job")
+            )
+            response = client.post(
+                reverse("hook"),
+                json.dumps(
+                    {
+                        "ref": "refs/heads/test-epic",
+                        "forced": False,
+                        "repository": {"id": 123},
+                        "commits": [
+                            {
+                                "id": "123",
+                                "author": {
+                                    "name": "Test",
+                                    "email": "test@example.com",
+                                    "username": "test123",
+                                },
+                                "timestamp": "2019-11-20 21:32:53.668260+00:00",
+                                "message": "Message",
+                                "url": "https://github.com/test/user/foo",
+                            }
+                        ],
+                        "sender": {
+                            "login": "test123",
+                            "avatar_url": "https://avatar_url/",
+                        },
+                    }
+                ),
+                content_type="application/json",
+                # The sha1 hexdigest of the request body x the secret
+                # key above:
+                HTTP_X_HUB_SIGNATURE="sha1=211e9ad524fda925bf573d380386cf995efe6829",
+                HTTP_X_GITHUB_EVENT="push",
+            )
+            assert response.status_code == 202, response.content
+            assert not refresh_commits_job.delay.called
+            epic.refresh_from_db()
+            assert epic.latest_sha == "123"
+
+    def test_202__push_project_commits(
+        self,
+        settings,
+        client,
+        project_factory,
+        git_hub_repository_factory,
+    ):
+        settings.GITHUB_HOOK_SECRET = b""
+        with ExitStack() as stack:
+            project = project_factory(repo_id=123, branch_name="test-project")
+            git_hub_repository_factory(repo_id=123)
+
+            refresh_commits_job = stack.enter_context(
+                patch("metecho.api.jobs.refresh_commits_job")
+            )
+            response = client.post(
+                reverse("hook"),
+                json.dumps(
+                    {
+                        "ref": "refs/heads/test-project",
+                        "forced": False,
+                        "repository": {"id": 123},
+                        "commits": [
+                            {
+                                "id": "123",
+                                "author": {
+                                    "name": "Test",
+                                    "email": "test@example.com",
+                                    "username": "test123",
+                                },
+                                "timestamp": "2019-11-20 21:32:53.668260+00:00",
+                                "message": "Message",
+                                "url": "https://github.com/test/user/foo",
+                            }
+                        ],
+                        "sender": {
+                            "login": "test123",
+                            "avatar_url": "https://avatar_url/",
+                        },
+                    }
+                ),
+                content_type="application/json",
+                # The sha1 hexdigest of the request body x the secret
+                # key above:
+                HTTP_X_HUB_SIGNATURE="sha1=dd348e0a076589952d3d8f2b19b8d8e8592127ed",
+                HTTP_X_GITHUB_EVENT="push",
+            )
+            assert response.status_code == 202, response.content
+            assert not refresh_commits_job.delay.called
+            project.refresh_from_db()
+            assert project.latest_sha == "123"
 
     def test_400__no_handler(
         self,
@@ -429,6 +566,45 @@ class TestScratchOrgView:
             assert response.status_code == 403
             assert not commit_changes_from_org_job.delay.called
 
+    def test_list__not_playground_owner(
+        self, client, user_factory, scratch_org_factory
+    ):
+        other_user = user_factory()
+        scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Playground,
+            url="https://example.com",
+            is_created=True,
+            delete_queued_at=None,
+            currently_capturing_changes=False,
+            currently_refreshing_changes=False,
+            owner=other_user,
+        )
+
+        url = reverse("scratch-org-list")
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert not response.json(), response.json()
+
+    def test_retrieve__not_playground_owner(
+        self, client, user_factory, scratch_org_factory
+    ):
+        other_user = user_factory()
+        scratch_org = scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Playground,
+            url="https://example.com",
+            is_created=True,
+            delete_queued_at=None,
+            currently_capturing_changes=False,
+            currently_refreshing_changes=False,
+            owner=other_user,
+        )
+
+        url = reverse("scratch-org-detail", kwargs={"pk": str(scratch_org.id)})
+        response = client.get(url)
+
+        assert response.status_code == 403
+
     def test_list_fetch_changes(self, client, scratch_org_factory):
         with ExitStack() as stack:
             scratch_org_factory(
@@ -490,7 +666,9 @@ class TestScratchOrgView:
             sf_client.restful.return_value = resp
             get_devhub_api.return_value = sf_client
 
-            response = client.post(url, {"task": str(task.id), "org_type": "Dev"})
+            response = client.post(
+                url, {"task": str(task.id), "org_type": "Dev", "org_config_name": "dev"}
+            )
 
         assert response.status_code == 201, response.content
 
@@ -512,7 +690,9 @@ class TestScratchOrgView:
             sf_client.restful.return_value = None
             get_devhub_api.return_value = sf_client
 
-            response = client.post(url, {"task": str(task.id), "org_type": "Dev"})
+            response = client.post(
+                url, {"task": str(task.id), "org_type": "Dev", "org_config_name": "dev"}
+            )
 
         assert response.status_code == 403, response.content
 
@@ -737,16 +917,11 @@ class TestTaskView:
 
 @pytest.mark.django_db
 class TestEpicView:
-    def test_refresh_org_config_names(self, client, epic_factory):
-        with ExitStack() as stack:
-            epic = epic_factory()
+    def test_get(self, client, epic_factory):
+        epic_factory()
+        url = reverse("epic-list")
 
-            available_task_org_config_names_job = stack.enter_context(
-                patch("metecho.api.jobs.available_task_org_config_names_job")
-            )
-            response = client.post(
-                reverse("epic-refresh-org-config-names", kwargs={"pk": str(epic.id)})
-            )
+        response = client.get(url)
 
-            assert response.status_code == 202, response.json()
-            assert available_task_org_config_names_job.delay.called
+        assert response.status_code == 200, response.content
+        assert len(response.json()["results"]) == 1, response.json()

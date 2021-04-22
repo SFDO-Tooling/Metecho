@@ -14,8 +14,9 @@ from glob import glob
 
 from cumulusci.utils import temporary_dir
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from github3 import GitHub, login
+from github3 import GitHub, login, users
 from github3.exceptions import NotFoundError, UnprocessableEntity
 
 from .custom_cci_configs import MetechoUniversalConfig, ProjectConfig
@@ -77,6 +78,20 @@ def get_repo_info(user, repo_id=None, repo_owner=None, repo_name=None):
     if repo_id is None:
         return gh.repository(repo_owner, repo_name)
     return gh.repository_with_id(repo_id)
+
+
+def get_cached_user(gh: GitHub, username: str) -> users.User:
+    """
+    Get a GitHub user by username. Results are cached to stay under API limits.
+    """
+    key = f"gh_user_{username}"
+    user_dict = cache.get(key)
+    if user_dict is not None:
+        return users.User.from_dict(user_dict, gh.session)
+
+    user = gh.user(username)
+    cache.set(key, user.as_dict(), timeout=60 * 60 * 24)  # 1 day
+    return user
 
 
 def get_zip_file(repo, commit_ish):
@@ -169,7 +184,7 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
         try:
             latest_sha = repository.branch(base_branch).latest_sha()
             repository.create_branch_ref(branch_name, latest_sha)
-            return branch_name
+            return branch_name, latest_sha
         except UnprocessableEntity as err:
             if err.msg == "Reference already exists":
                 counter += 1

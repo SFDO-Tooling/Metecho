@@ -49,4 +49,4 @@ services:
 
   # Runs the queue process:
   redis:
-    image: redis:5.0
+    image: redis:6.0

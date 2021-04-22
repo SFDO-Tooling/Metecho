@@ -10,6 +10,10 @@ appdirs==1.4.4
     # via
     #   -c requirements/prod.txt
     #   black
+asgiref==3.3.4
+    # via
+    #   -c requirements/prod.txt
+    #   django
 attrs==20.3.0
     # via
     #   -c requirements/prod.txt
@@ -34,16 +38,20 @@ click==7.1.2
     # via
     #   -c requirements/prod.txt
     #   black
-coverage==5.4
+coverage==5.5
     # via
     #   coveralls
     #   pytest-cov
-coveralls==3.0.0
+coveralls==3.0.1
     # via -r requirements/dev.in
-decorator==4.4.2
+decorator==5.0.7
     # via ipython
-django-extensions==3.1.0
+django-extensions==3.1.3
     # via -r requirements/dev.in
+django==3.2
+    # via
+    #   -c requirements/prod.txt
+    #   django-extensions
 doc8==0.8.1
     # via -r requirements/dev.in
 docopt==0.6.2
@@ -58,13 +66,13 @@ factory-boy==3.2.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==5.6.3
+faker==8.1.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
-flake8-bugbear==20.11.1
+flake8-bugbear==21.4.3
     # via -r requirements/dev.in
-flake8==3.8.4
+flake8==3.9.1
     # via
     #   -r requirements/dev.in
     #   flake8-bugbear
@@ -80,13 +88,13 @@ iniconfig==1.1.1
     # via pytest
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.19.0
+ipython==7.22.0
     # via -r requirements/dev.in
-isort==5.7.0
+isort==5.8.0
     # via -r requirements/dev.in
 jedi==0.18.0
     # via ipython
-jinja2==2.11.2
+jinja2==2.11.3
     # via
     #   -c requirements/prod.txt
     #   sphinx
@@ -98,13 +106,13 @@ mccabe==0.6.1
     # via flake8
 mypy-extensions==0.4.3
     # via black
-packaging==20.8
+packaging==20.9
     # via
     #   -c requirements/prod.txt
     #   pytest
     #   pytest-sugar
     #   sphinx
-parso==0.8.1
+parso==0.8.2
     # via jedi
 pathspec==0.8.1
     # via black
@@ -116,17 +124,17 @@ pickleshare==0.7.5
     # via ipython
 pluggy==0.13.1
     # via pytest
-prompt-toolkit==3.0.14
+prompt-toolkit==3.0.18
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
 py==1.10.0
     # via pytest
-pycodestyle==2.6.0
+pycodestyle==2.7.0
     # via flake8
-pyflakes==2.2.0
+pyflakes==2.3.1
     # via flake8
-pygments==2.7.4
+pygments==2.8.1
     # via
     #   doc8
     #   ipython
@@ -135,11 +143,11 @@ pyparsing==2.4.7
     # via
     #   -c requirements/prod.txt
     #   packaging
-pytest-asyncio==0.14.0
+pytest-asyncio==0.15.0
     # via -r requirements/dev.in
 pytest-cov==2.11.1
     # via -r requirements/dev.in
-pytest-django==4.1.0
+pytest-django==4.2.0
     # via -r requirements/dev.in
 pytest-factoryboy==2.1.0
     # via -r requirements/dev.in
@@ -147,7 +155,7 @@ pytest-mock==3.5.1
     # via -r requirements/dev.in
 pytest-sugar==0.9.4
     # via -r requirements/dev.in
-pytest==6.2.2
+pytest==6.2.3
     # via
     #   -r requirements/dev.in
     #   pytest-asyncio
@@ -160,11 +168,12 @@ python-dateutil==2.8.1
     # via
     #   -c requirements/prod.txt
     #   faker
-pytz==2020.5
+pytz==2021.1
     # via
     #   -c requirements/prod.txt
     #   babel
-regex==2020.11.13
+    #   django
+regex==2021.4.4
     # via black
 remote-pdb==2.1.0
     # via -r requirements/dev.in
@@ -183,7 +192,7 @@ six==1.15.0
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.1.0
     # via sphinx
-sphinx==3.4.3
+sphinx==3.5.4
     # via
     #   -r requirements/dev.in
     #   sphinxcontrib-httpdomain
@@ -201,6 +210,10 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.4
     # via sphinx
+sqlparse==0.4.1
+    # via
+    #   -c requirements/prod.txt
+    #   django
 stevedore==3.3.0
     # via doc8
 termcolor==1.1.0
@@ -215,13 +228,13 @@ toml==0.10.2
     #   pytest
 traitlets==5.0.5
     # via ipython
-typed-ast==1.4.2
+typed-ast==1.4.3
     # via black
 typing-extensions==3.7.4.3
     # via
     #   -c requirements/prod.txt
     #   black
-urllib3==1.26.2
+urllib3==1.26.4
     # via
     #   -c requirements/prod.txt
     #   requests

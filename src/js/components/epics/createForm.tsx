@@ -8,6 +8,7 @@ import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
@@ -202,17 +203,15 @@ const CreateEpicModal = ({
         {noFeatureBranches
           ? i18n.t("There aren't any available branches at this time.")
           : i18n.t('No matching branches found.')}{' '}
-        <Button
-          label={i18n.t('Check again')}
-          variant="link"
-          onClick={doGetBranches}
-        />{' '}
-        {i18n.t('to refresh this list or')}{' '}
-        <Button
-          label={i18n.t('start from a new branch.')}
-          variant="link"
-          onClick={closeBranchForm}
-        />
+        <Trans i18nKey="refreshProjectBranches">
+          <Button variant="link" onClick={doGetBranches}>
+            Check again
+          </Button>{' '}
+          to refresh this list or{' '}
+          <Button variant="link" onClick={closeBranchForm}>
+            start from a new branch.
+          </Button>
+        </Trans>
       </>
     );
   }
@@ -222,8 +221,11 @@ const CreateEpicModal = ({
       isOpen={isOpen}
       size="small"
       disableClose={isSaving}
-      heading={`${i18n.t('Create an Epic for')} ${project.name}`}
+      heading={i18n.t('Create an Epic for {{project_name}}', {
+        project_name: project.name,
+      })}
       onRequestClose={closeForm}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       footer={[
         <Button
           key="cancel"
@@ -321,6 +323,7 @@ const CreateEpicModal = ({
           id="epic-description"
           label={i18n.t('Description')}
           classNameContainer="slds-form-element_stacked slds-p-left_none"
+          className="metecho-textarea"
           name="description"
           value={inputs.description}
           errorText={errors.description}

@@ -39,6 +39,25 @@ class TestHashidPrimaryKeyRelatedField:
 
 @pytest.mark.django_db
 class TestEpicSerializer:
+    def test_create(self, rf, user_factory, project_factory):
+        project = project_factory()
+        data = {
+            "name": "Test epic",
+            "description": "Test `epic`",
+            "project": str(project.id),
+            "github_users": [],
+        }
+        r = rf.get("/")
+        r.user = user_factory()
+        with ExitStack() as stack:
+            available_org_config_names_job = stack.enter_context(
+                patch("metecho.api.jobs.available_org_config_names_job")
+            )
+            serializer = EpicSerializer(data=data, context={"request": r})
+            assert serializer.is_valid(), serializer.errors
+            serializer.save()
+            assert available_org_config_names_job.delay.called
+
     def test_markdown_fields_input(self, rf, user_factory, project_factory):
         request = rf.post("/")
         request.user = user_factory()
@@ -53,7 +72,7 @@ class TestEpicSerializer:
             },
             context={"request": request},
         )
-        assert serializer.is_valid()
+        assert serializer.is_valid(), serializer.errors
 
         with ExitStack() as stack:
             gh_given_user = stack.enter_context(patch("metecho.api.gh.gh_given_user"))
@@ -278,8 +297,8 @@ class TestTaskSerializer:
             "name": task.name,
             "description": task.description,
             "epic": str(task.epic.id),
-            "assigned_dev": {"test": "id"},
-            "assigned_qa": {"test": "id"},
+            "assigned_dev": {"id": 1},
+            "assigned_qa": {"id": 2},
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
@@ -320,6 +339,47 @@ class TestTaskSerializer:
         so2.refresh_from_db()
         assert so1.deleted_at is not None
         assert so2.deleted_at is not None
+
+    def test_update__collaborators(self, task_factory):
+        # Task assigness should be added as epic collaborators as well
+        task = task_factory(commits=["abc123"])
+        data = {
+            "name": task.name,
+            "description": task.description,
+            "epic": str(task.epic.id),
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
+            "assigned_dev": {"id": "dev_id"},
+            "assigned_qa": {"id": "qa_id"},
+        }
+        serializer = TaskSerializer(task, data=data)
+        assert serializer.is_valid(), serializer.errors
+
+        serializer.update(task, serializer.validated_data)
+        task.epic.refresh_from_db()
+        assert task.epic.github_users == [{"id": "dev_id"}, {"id": "qa_id"}]
+
+    def test_update__existing_collaborator(self, task_factory, epic_factory):
+        # Existing collaborators should not be re-added when assigned to a task
+        epic = epic_factory(github_users=[{"id": "existing_user"}])
+        task = task_factory(commits=["abc123"], epic=epic)
+        data = {
+            "name": task.name,
+            "description": task.description,
+            "epic": str(epic.id),
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
+            "assigned_dev": {"id": "existing_user"},
+            "assigned_qa": None,
+        }
+        serializer = TaskSerializer(task, data=data)
+        assert serializer.is_valid(), serializer.errors
+
+        serializer.update(task, serializer.validated_data)
+        task.epic.refresh_from_db()
+        assert task.epic.github_users == [{"id": "existing_user"}]
 
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
@@ -415,7 +475,7 @@ class TestTaskSerializer:
             OrgConfig = stack.enter_context(patch("metecho.api.sf_run_flow.OrgConfig"))
             org_config = MagicMock(config={"access_token": None})
             OrgConfig.return_value = org_config
-            assert serializer.is_valid()
+            assert serializer.is_valid(), serializer.errors
             serializer.save()
             assert user_reassign_job.delay.called
 
@@ -443,17 +503,23 @@ class TestTaskSerializer:
 
 @pytest.mark.django_db
 class TestScratchOrgSerializer:
-    def test_valid(self, rf, user_factory, task_factory):
+    def test_valid(self, rf, user_factory, task_factory, scratch_org_factory):
         user = user_factory()
         task = task_factory()
+        scratch_org_factory(task=task, org_type="Playground")
 
         r = rf.get("/")
         r.user = user
 
         serializer = ScratchOrgSerializer(
-            data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
+            data={
+                "task": str(task.id),
+                "org_type": "Playground",
+                "org_config_name": "dev",
+            },
+            context={"request": r},
         )
-        assert serializer.is_valid()
+        assert serializer.is_valid(), serializer.errors
         create_branches_on_github_then_create_scratch_org_job = (
             "metecho.api.jobs.create_branches_on_github_then_create_scratch_org_job"
         )
@@ -462,7 +528,49 @@ class TestScratchOrgSerializer:
 
         assert instance.owner == user
 
-    def test_invalid(self, rf, user_factory, task_factory, scratch_org_factory):
+    def test_invalid__existing_org_for_project(
+        self, rf, user_factory, project_factory, scratch_org_factory
+    ):
+        user = user_factory()
+        project = project_factory()
+        scratch_org_factory(project=project, org_type="Dev")
+
+        r = rf.get("/")
+        r.user = user
+
+        serializer = ScratchOrgSerializer(
+            data={
+                "project": str(project.id),
+                "org_type": "Dev",
+                "org_config_name": "dev",
+            },
+            context={"request": r},
+        )
+        assert not serializer.is_valid()
+
+    def test_invalid__existing_org_for_epic(
+        self, rf, user_factory, epic_factory, scratch_org_factory
+    ):
+        user = user_factory()
+        epic = epic_factory()
+        scratch_org_factory(epic=epic, org_type="Playground", owner=user)
+
+        r = rf.get("/")
+        r.user = user
+
+        serializer = ScratchOrgSerializer(
+            data={
+                "epic": str(epic.id),
+                "org_type": "Playground",
+                "org_config_name": "dev",
+            },
+            context={"request": r},
+        )
+        assert not serializer.is_valid()
+
+    def test_invalid__existing_org_for_task(
+        self, rf, user_factory, task_factory, scratch_org_factory
+    ):
         user = user_factory()
         task = task_factory()
         scratch_org_factory(task=task, org_type="Dev")
@@ -471,7 +579,8 @@ class TestScratchOrgSerializer:
         r.user = user
 
         serializer = ScratchOrgSerializer(
-            data={"task": str(task.id), "org_type": "Dev"}, context={"request": r}
+            data={"task": str(task.id), "org_type": "Dev", "org_config_name": "dev"},
+            context={"request": r},
         )
         assert not serializer.is_valid()
 

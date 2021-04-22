@@ -3,7 +3,7 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React from 'react';
 
-import { AssignedUserTracker } from '~js/components/tasks/cards';
+import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
 
 const ConfirmRemoveUserModal = ({
   isOpen,
@@ -46,6 +46,7 @@ const ConfirmRemoveUserModal = ({
       isOpen={Boolean(isOpen && waitingToRemoveUser)}
       heading={heading}
       prompt="warning"
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       onRequestClose={handleCancel}
       footer={[
         <Button key="cancel" label={i18n.t('Cancel')} onClick={handleCancel} />,

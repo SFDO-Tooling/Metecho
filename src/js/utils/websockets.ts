@@ -13,6 +13,7 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgProvisioning,
   orgReassigned,
   orgReassignFailed,
   orgRefreshed,
@@ -143,6 +144,13 @@ interface TaskSubmitReviewFailedEvent {
     originating_user_id: string | null;
   };
 }
+interface OrgProvisioningEvent {
+  type: 'SCRATCH_ORG_PROVISIONING';
+  payload: {
+    model: Org;
+    originating_user_id: string | null;
+  };
+}
 interface OrgProvisionedEvent {
   type: 'SCRATCH_ORG_PROVISION';
   payload: {
@@ -266,6 +274,7 @@ type ModelEvent =
   | TaskCreatePRFailedEvent
   | TaskSubmitReviewEvent
   | TaskSubmitReviewFailedEvent
+  | OrgProvisioningEvent
   | OrgProvisionedEvent
   | OrgProvisionFailedEvent
   | OrgUpdatedEvent
@@ -319,6 +328,8 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && submitReview(event.payload);
     case 'TASK_SUBMIT_REVIEW_FAILED':
       return hasModel(event) && submitReviewFailed(event.payload);
+    case 'SCRATCH_ORG_PROVISIONING':
+      return hasModel(event) && orgProvisioning(event.payload.model);
     case 'SCRATCH_ORG_PROVISION':
       return hasModel(event) && provisionOrg(event.payload);
     case 'SCRATCH_ORG_PROVISION_FAILED':

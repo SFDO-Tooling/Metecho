@@ -11,11 +11,14 @@ import ConfirmRemoveUserModal from '~js/components/epics/confirmRemoveUserModal'
 import EpicStatusPath from '~js/components/epics/path';
 import EpicProgress from '~js/components/epics/progress';
 import EpicStatusSteps from '~js/components/epics/steps';
+import AssignEpicCollaboratorsModal from '~js/components/githubUsers/assignEpicCollaborators';
+import UserCards from '~js/components/githubUsers/cards';
+import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import { Step } from '~js/components/steps/stepsItem';
 import CreateTaskModal from '~js/components/tasks/createForm';
 import TaskTable from '~js/components/tasks/table';
-import { AssignUsersModal, UserCards } from '~js/components/user/githubUser';
 import {
+  CreateOrgModal,
   DeleteModal,
   DetailPageLayout,
   EditModal,
@@ -27,6 +30,7 @@ import {
   SpinnerWrapper,
   SubmitModal,
   useFetchEpicIfMissing,
+  useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
 } from '~js/components/utils';
@@ -35,13 +39,11 @@ import { updateObject } from '~js/store/actions';
 import { refreshGitHubUsers } from '~js/store/projects/actions';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
-import { getUrlParam, removeUrlParam } from '~js/utils/api';
 import {
   EPIC_STATUSES,
   OBJECT_TYPES,
   ORG_TYPES,
   OrgTypes,
-  SHOW_EPIC_COLLABORATORS,
 } from '~js/utils/constants';
 import { getBranchLink, getCompletedTasks } from '~js/utils/helpers';
 import routes from '~js/utils/routes';
@@ -51,12 +53,16 @@ const EpicDetail = (props: RouteComponentProps) => {
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epic, epicSlug } = useFetchEpicIfMissing(project, props);
   const { tasks } = useFetchTasksIfMissing(epic, props);
+  const { orgs } = useFetchOrgsIfMissing({ epic, props });
 
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
+
+  const playgroundOrg = (orgs || [])[0];
 
   // "Assign users to epic" modal related:
   const openAssignUsersModal = useCallback(() => {
@@ -80,18 +86,6 @@ const EpicDetail = (props: RouteComponentProps) => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);
   }, []);
-
-  // Auto-open the assign-users modal if `SHOW_EPIC_COLLABORATORS` param
-  const { history } = props;
-  useEffect(() => {
-    const showCollaborators = getUrlParam(SHOW_EPIC_COLLABORATORS);
-    if (showCollaborators === 'true') {
-      // Remove query-string from URL
-      history.replace({ search: removeUrlParam(SHOW_EPIC_COLLABORATORS) });
-      // Show collaborators modal
-      openAssignUsersModal();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // If the epic slug changes, make sure EditEpic modal is closed
   useEffect(() => {
@@ -233,6 +227,8 @@ const EpicDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setAssignUsersModalOpen(false);
+    setCreateModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const currentlySubmitting = Boolean(epic?.currently_creating_pr);
   const readyToSubmit = Boolean(
@@ -247,25 +243,50 @@ const EpicDetail = (props: RouteComponentProps) => {
     setDeleteModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
+    setCreateModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
   };
+
   // "delete" modal related:
   const openDeleteModal = () => {
     setDeleteModalOpen(true);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
+    setCreateModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
+
+  // "create task" modal related:
   const openCreateModal = () => {
     setCreateModalOpen(true);
+    setDeleteModalOpen(false);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
+    setCreateOrgModalOpen(false);
   };
   const closeCreateModal = () => {
     setCreateModalOpen(false);
+  };
+
+  // "create scratch org" modal related:
+  const openCreateOrgModal = () => {
+    setCreateOrgModalOpen(true);
+    setCreateModalOpen(false);
+    setDeleteModalOpen(false);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
+  };
+  const closeCreateOrgModal = () => {
+    setCreateOrgModalOpen(false);
   };
 
   // "Next Steps" action handler
@@ -413,12 +434,13 @@ const EpicDetail = (props: RouteComponentProps) => {
                 variant="outline-brand"
                 onClick={openAssignUsersModal}
               />
-              <AssignUsersModal
+              <AssignEpicCollaboratorsModal
                 allUsers={project.github_users}
                 selectedUsers={epic.github_users}
-                heading={`${i18n.t('Add or Remove Collaborators for')} ${
-                  epic.name
-                }`}
+                heading={i18n.t(
+                  'Add or Remove Collaborators for {{epic_name}}',
+                  { epic_name: epic.name },
+                )}
                 isOpen={assignUsersModalOpen}
                 onRequestClose={closeAssignUsersModal}
                 setUsers={setEpicUsers}
@@ -452,12 +474,57 @@ const EpicDetail = (props: RouteComponentProps) => {
       >
         <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
         {submitButton}
+        <div className="slds-m-bottom_large">
+          <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+            {i18n.t('My Epic Scratch Org')}
+          </h2>
+          {orgs ? (
+            <>
+              {playgroundOrg ? (
+                <div
+                  className="slds-grid
+                    slds-wrap
+                    slds-grid_pull-padded-x-small"
+                >
+                  <div
+                    className="slds-size_1-of-1
+                      slds-large-size_1-of-2
+                      slds-p-around_x-small"
+                  >
+                    <PlaygroundOrgCard
+                      org={playgroundOrg}
+                      epic={epic}
+                      repoUrl={project.repo_url}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  label={i18n.t('Create Scratch Org')}
+                  variant="outline-brand"
+                  onClick={openCreateOrgModal}
+                  disabled={epic.currently_creating_branch}
+                />
+              )}
+            </>
+          ) : (
+            // Fetching scratch orgs from API
+            <Button
+              label={
+                <LabelWithSpinner label={i18n.t('Loading Scratch Orgs…')} />
+              }
+              disabled
+            />
+          )}
+        </div>
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
               {epicHasTasks || epicIsMerged
-                ? `${i18n.t('Tasks for')} ${epic.name}`
-                : `${i18n.t('Add a Task for')} ${epic.name}`}
+                ? i18n.t('Tasks for {{epic_name}}', { epic_name: epic.name })
+                : i18n.t('Add a Task for {{epic_name}}', {
+                    epic_name: epic.name,
+                  })}
             </h2>
             {!epicIsMerged && (
               <Button
@@ -471,11 +538,15 @@ const EpicDetail = (props: RouteComponentProps) => {
               <>
                 <EpicProgress range={epicProgress} />
                 <TaskTable
+                  projectId={project.id}
                   projectSlug={project.slug}
                   epicSlug={epic.slug}
                   tasks={tasks}
                   epicUsers={epic.github_users}
-                  openAssignEpicUsersModal={openAssignUsersModal}
+                  githubUsers={project.github_users}
+                  isRefreshingUsers={Boolean(
+                    project.currently_refreshing_gh_users,
+                  )}
                   assignUserAction={assignUser}
                 />
               </>
@@ -510,11 +581,18 @@ const EpicDetail = (props: RouteComponentProps) => {
         />
         {!epicIsMerged && (
           <CreateTaskModal
+            project={project}
             epic={epic}
             isOpen={createModalOpen}
             closeCreateModal={closeCreateModal}
           />
         )}
+        <CreateOrgModal
+          project={project}
+          epic={epic}
+          isOpen={createOrgModalOpen}
+          closeModal={closeCreateOrgModal}
+        />
       </DetailPageLayout>
     </DocumentTitle>
   );

@@ -1,0 +1,26 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import LinkTo from '@storybook/addon-links/react';
+
+<Meta title="Epics/CreateForm/Docs" />
+
+# CreateForm
+
+**Initializes details of a new Epic.**
+
+## Overview
+
+The **CreateForm** component is a form used for entering inital options when
+creating a new **Epic**.
+
+In addition to a mandatory field for the **Epic** `name`, there is also an
+optional `description` field. Radio buttons allow for making a selection between
+creating a new GitHub branch or using an existing one for the new **Epic**. If
+the "Use existing GitHub branch" radio is selected, a
+[combobox](https://react.lightningdesignsystem.com/components/comboboxes/) is
+rendered to allow the user to search for and select an existing branch.
+
+Pressing the "Create" button creates the **Epic** and closes the modal.
+
+<LinkTo kind="Epics/CreateForm" story="Example">
+  View Example
+</LinkTo>

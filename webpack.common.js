@@ -78,7 +78,7 @@ module.exports = {
             options: {
               url: (url) => !url.startsWith('/'),
               sourceMap: true,
-              importLoaders: 2,
+              importLoaders: 1,
             },
           },
           {
@@ -92,11 +92,22 @@ module.exports = {
         ],
       },
       {
-        test: /\.(svg|gif|jpe?g|png)$/,
+        test: /\.(gif|jpe?g|png)$/,
         use: [
           {
             loader: 'url-loader',
             options: { limit: 10000 },
+          },
+        ],
+      },
+      {
+        test: /\.svg$/i,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: false,
+            },
           },
         ],
       },

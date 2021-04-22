@@ -1,34 +1,66 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import EpicDetail from '~js/components/epics/detail';
-import { fetchObject, fetchObjects, updateObject } from '~js/store/actions';
-import { refreshGitHubUsers } from '~js/store/projects/actions';
-import { getUrlParam, removeUrlParam } from '~js/utils/api';
+import {
+  createObject,
+  fetchObject,
+  fetchObjects,
+  updateObject,
+} from '~js/store/actions';
+import {
+  refreshGitHubUsers,
+  refreshOrgConfigs,
+} from '~js/store/projects/actions';
 import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('~js/store/actions');
 jest.mock('~js/store/projects/actions');
-jest.mock('~js/utils/api');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
-getUrlParam.mockReturnValue(null);
-removeUrlParam.mockReturnValue('');
+refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {
   fetchObject.mockClear();
   fetchObjects.mockClear();
   updateObject.mockClear();
+  createObject.mockClear();
   refreshGitHubUsers.mockClear();
-  getUrlParam.mockClear();
-  removeUrlParam.mockClear();
+  refreshOrgConfigs.mockClear();
 });
+
+const defaultOrg = {
+  id: 'org-id',
+  epic: 'epic1',
+  org_type: 'Playground',
+  owner: 'user-id',
+  owner_gh_username: 'currentUser',
+  expires_at: '2019-09-16T12:58:53.721Z',
+  latest_commit: '617a51',
+  latest_commit_url: '/test/commit/url/',
+  latest_commit_at: '2019-08-16T12:58:53.721Z',
+  last_checked_unsaved_changes_at: new Date().toISOString(),
+  url: '/test/org/url/',
+  is_created: true,
+  unsaved_changes: { Foo: ['Bar'] },
+  has_unsaved_changes: true,
+  total_unsaved_changes: 1,
+  ignored_changes: {},
+  has_ignored_changes: false,
+  total_ignored_changes: 0,
+  valid_target_directories: {
+    source: ['src'],
+    post: ['foo/bar', 'buz/baz'],
+  },
+  has_been_visited: true,
+};
 
 const defaultState = {
   projects: {
@@ -79,6 +111,7 @@ const defaultState = {
             {
               id: '123456',
               login: 'TestGitHubUser',
+              name: 'Test GitHub User',
             },
             {
               id: '234567',
@@ -86,7 +119,6 @@ const defaultState = {
             },
             { id: 'user-id', login: 'currentUser' },
           ],
-          available_task_org_config_names: [],
         },
       ],
       next: null,
@@ -150,7 +182,25 @@ const defaultState = {
         review_valid: true,
         review_status: 'Approved',
       },
+      {
+        id: 'task7',
+        name: 'Task 7',
+        slug: 'task-7',
+        epic: 'epic1',
+        status: 'In progress',
+        pr_is_open: true,
+      },
     ],
+  },
+  orgs: {
+    orgs: {
+      [defaultOrg.id]: defaultOrg,
+    },
+    fetched: {
+      projects: [],
+      epics: ['epic1'],
+      tasks: [],
+    },
   },
   user: {
     id: 'user-id',
@@ -170,24 +220,21 @@ describe('<EpicDetail/>', () => {
     const opts = Object.assign({}, defaults, options);
     const { initialState, projectSlug, epicSlug } = opts;
     const context = {};
-    const history = { replace: jest.fn() };
     const response = renderWithRedux(
       <StaticRouter context={context}>
-        <EpicDetail
-          match={{ params: { projectSlug, epicSlug } }}
-          history={history}
-        />
+        <EpicDetail match={{ params: { projectSlug, epicSlug } }} />
       </StaticRouter>,
       initialState,
       storeWithThunk,
     );
-    return { ...response, context, history };
+    return { ...response, context };
   };
 
-  test('renders epic detail and tasks list', () => {
+  test('renders epic detail, scratch org, and tasks list', () => {
     const { getByText, getByTitle } = setup();
 
     expect(getByTitle('Epic 1')).toBeVisible();
+    expect(getByText('Epic Scratch Org')).toBeVisible();
     expect(getByText('Epic Description')).toBeVisible();
     expect(getByText('Tasks for Epic 1')).toBeVisible();
     expect(getByText('Task 1')).toBeVisible();
@@ -195,7 +242,7 @@ describe('<EpicDetail/>', () => {
     expect(getByText('Changes Requested')).toBeVisible();
   });
 
-  test('renders with form expanded if no tasks', () => {
+  test('renders different title if no tasks', () => {
     const { getByText, queryByText } = setup({
       initialState: {
         ...defaultState,
@@ -205,23 +252,6 @@ describe('<EpicDetail/>', () => {
 
     expect(getByText('Add a Task for Epic 1')).toBeVisible();
     expect(queryByText('Tasks for Epic 1')).toBeNull();
-  });
-
-  describe('`SHOW_EPIC_COLLABORATORS` param is truthy', () => {
-    beforeAll(() => {
-      getUrlParam.mockReturnValue('true');
-    });
-
-    afterAll(() => {
-      getUrlParam.mockReturnValue(null);
-    });
-
-    test('opens assign-users modal', () => {
-      const { history, getByText } = setup();
-
-      expect(history.replace).toHaveBeenCalledWith({ search: '' });
-      expect(getByText('GitHub Users')).toBeVisible();
-    });
   });
 
   describe('epic not found', () => {
@@ -267,6 +297,30 @@ describe('<EpicDetail/>', () => {
     });
   });
 
+  describe('orgs have not been fetched', () => {
+    test('fetches orgs from API', () => {
+      const { queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            orgs: {},
+            fetched: {
+              projects: [],
+              epics: [],
+              tasks: [],
+            },
+          },
+        },
+      });
+
+      expect(queryByText('Epic Scratch Org')).toBeNull();
+      expect(fetchObjects).toHaveBeenCalledWith({
+        filters: { epic: 'epic1' },
+        objectType: 'scratch_org',
+      });
+    });
+  });
+
   describe('tasks have not been fetched', () => {
     test('fetches tasks from API', () => {
       const { queryByText } = setup({
@@ -284,14 +338,29 @@ describe('<EpicDetail/>', () => {
     });
   });
 
-  describe('<AssignUsersModal />', () => {
+  describe('<AssignEpicCollaboratorsModal />', () => {
     test('opens and closes', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          epics: {
+            r1: {
+              ...defaultState.epics.r1,
+              epics: [
+                {
+                  ...defaultState.epics.r1.epics[0],
+                  github_users: [],
+                },
+              ],
+            },
+          },
+        },
+      });
       fireEvent.click(getByText('Add or Remove Collaborators'));
 
       expect(getByText('GitHub Users')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('GitHub Users')).toBeNull();
     });
@@ -331,7 +400,7 @@ describe('<EpicDetail/>', () => {
       test('updates users', () => {
         const { getByText } = setup();
         fireEvent.click(getByText('Add or Remove Collaborators'));
-        fireEvent.click(getByText('Re-Sync Collaborators'));
+        fireEvent.click(getByText('Re-Sync GitHub Collaborators'));
 
         expect(refreshGitHubUsers).toHaveBeenCalledWith('r1');
       });
@@ -432,8 +501,8 @@ describe('<EpicDetail/>', () => {
 
     describe('"cancel" click', () => {
       test('closes modal', () => {
-        const { getByText, queryByText } = result;
-        fireEvent.click(getByText('Cancel'));
+        const { getByTitle, queryByText } = result;
+        fireEvent.click(getByTitle('Cancel'));
 
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
       });
@@ -468,29 +537,6 @@ describe('<EpicDetail/>', () => {
 
       expect(data.assigned_qa.login).toEqual('currentUser');
       expect(data.should_alert_qa).toBe(false);
-    });
-
-    test('closes modal if no users to assign', () => {
-      const { getByText, getAllByText } = setup({
-        initialState: {
-          ...defaultState,
-          epics: {
-            r1: {
-              ...defaultState.epics.r1,
-              epics: [
-                {
-                  ...defaultState.epics.r1.epics[0],
-                  github_users: [],
-                },
-              ],
-            },
-          },
-        },
-      });
-      fireEvent.click(getAllByText('Assign Tester')[0]);
-      fireEvent.click(getByText('Add Epic Collaborators'));
-
-      expect(getByText('GitHub Users')).toBeVisible();
     });
 
     describe('alerts assigned user', () => {
@@ -638,25 +684,25 @@ describe('<EpicDetail/>', () => {
 
   describe('epic options click', () => {
     test('opens and closes edit modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Epic Options'));
       fireEvent.click(getByText('Edit Epic'));
 
       expect(getByText('Edit Epic')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Edit Epic')).toBeNull();
     });
 
     test('opens and closes delete modal', () => {
-      const { getByText, queryByText } = setup();
+      const { getByText, getByTitle, queryByText } = setup();
       fireEvent.click(getByText('Epic Options'));
       fireEvent.click(getByText('Delete Epic'));
 
       expect(getByText('Confirm Deleting Epic')).toBeVisible();
 
-      fireEvent.click(getByText('Cancel'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Confirm Deleting Epic')).toBeNull();
     });
@@ -664,14 +710,72 @@ describe('<EpicDetail/>', () => {
 
   describe('<CreateTaskModal/>', () => {
     test('open/close modal', () => {
-      const { queryByText, getByText } = setup();
+      const { queryByText, getByText, getByTitle } = setup();
       fireEvent.click(getByText('Add a Task'));
 
       expect(getByText('Add a Task for Epic 1')).toBeVisible();
 
-      fireEvent.click(queryByText('Close'));
+      fireEvent.click(getByTitle('Cancel'));
 
       expect(queryByText('Add a Task for Epic 1')).toBeNull();
+    });
+  });
+
+  describe('<CreateOrgModal />', () => {
+    let result;
+
+    beforeEach(() => {
+      result = setup({
+        initialState: {
+          ...defaultState,
+          orgs: {
+            orgs: {},
+            fetched: {
+              projects: [],
+              epics: ['epic1'],
+              tasks: [],
+            },
+          },
+        },
+      });
+      fireEvent.click(result.getByText('Create Scratch Org'));
+    });
+
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText } = result;
+
+        expect(
+          getByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeVisible();
+
+        fireEvent.click(getByText('Cancel'));
+
+        expect(
+          queryByText('You are creating a Scratch Org', { exact: false }),
+        ).toBeNull();
+      });
+    });
+
+    describe('"Create Org" click', () => {
+      test('creates scratch org', async () => {
+        const { getByText, queryByText } = result;
+
+        expect.assertions(5);
+        fireEvent.click(getByText('Next'));
+
+        expect(getByText('Advanced Options')).toBeVisible();
+
+        fireEvent.click(getByText('Create Org'));
+        await waitForElementToBeRemoved(getByText('Advanced Options'));
+
+        expect(queryByText('Advanced Options')).toBeNull();
+        expect(createObject).toHaveBeenCalled();
+        expect(createObject.mock.calls[0][0].data.epic).toEqual('epic1');
+        expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
+          'dev',
+        );
+      });
     });
   });
 });

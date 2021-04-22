@@ -49,7 +49,10 @@ const DetailPageLayout = ({
         icon={
           showHeaderImage ? (
             <div className="metecho-repo-image-header">
-              <img src={image} alt={`${i18n.t('social image for')} ${title}`} />
+              <img
+                src={image}
+                alt={i18n.t('social image for {{title}}', { title })}
+              />
             </div>
           ) : null
         }

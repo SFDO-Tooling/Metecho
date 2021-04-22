@@ -7,7 +7,7 @@ import i18n from 'i18next';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { GitHubUserAvatar } from '~js/components/user/githubUser';
+import GitHubUserAvatar from '~js/components/githubUsers/avatar';
 import {
   ExternalLink,
   LabelWithSpinner,
@@ -136,15 +136,17 @@ const SubmitModal = ({
     setInputs({ ...inputs, alert_assigned_qa: !inputs.alert_assigned_qa });
   };
   const alertLabelText = assignee
-    ? `${i18n.t('Notify')} ${assignee.login} ${i18n.t('by email')}`
+    ? i18n.t('Notify {{username}} by email', { username: assignee.login })
     : '';
   const alertLabel = assignee ? (
     <div className="metecho-avatar-container" onClick={toggleAlertAssignee}>
-      <span className="slds-m-right_xx-small">{i18n.t('Notify')}</span>
-      <GitHubUserAvatar user={assignee} />{' '}
-      <span className="slds-m-left_xx-small">
-        <b>{assignee.login}</b> {i18n.t('by email')}
-      </span>
+      <Trans i18nKey="notifyUser">
+        <span className="slds-m-right_xx-small">Notify</span>
+        <GitHubUserAvatar user={assignee} />{' '}
+        <span className="slds-m-left_xx-small">
+          <b>{{ username: assignee.login }}</b> by email
+        </span>
+      </Trans>
     </div>
   ) : null;
 
@@ -166,6 +168,7 @@ const SubmitModal = ({
       isOpen={isOpen}
       size="medium"
       disableClose={submittingReview}
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       heading={heading}
       directional
       footer={[

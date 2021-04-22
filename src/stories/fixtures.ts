@@ -12,6 +12,7 @@ export const api_urls = {
   user_refresh: () => '/api/user/refresh/',
   user_disconnect_sf: () => '/api/user/disconnect/',
   agree_to_tos: () => '/api/agree_to_tos/',
+  complete_onboarding: () => '/api/complete_onboarding/',
   project_list: () => '/api/projects/',
   project_detail: (slug: string) => `/api/projects/${slug}/`,
   project_refresh_github_users: (id: string) =>
@@ -28,8 +29,8 @@ export const api_urls = {
   task_can_reassign: (id: string) => `/api/tasks/${id}/can_reassign/`,
   epic_detail: (id: string) => `/api/epics/${id}/`,
   epic_create_pr: (id: string) => `/api/epics/${id}/create_pr/`,
-  epic_refresh_org_config_names: (id: string) =>
-    `/api/epics/${id}/refresh_org_config_names/`,
+  project_refresh_org_config_names: (id: string) =>
+    `/api/projects/${id}/refresh_org_config_names/`,
   project_feature_branches: (id: string) =>
     `/api/projects/${id}/feature_branches/`,
 };
@@ -37,12 +38,14 @@ export const api_urls = {
 export const sampleGitHubUser1 = {
   id: '123456',
   login: 'TestGitHubUser',
+  name: 'Test GitHub User',
   avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
 };
 
 export const sampleGitHubUser2 = {
   id: '234567',
   login: 'OtherUser',
+  name: 'Other User',
   avatar_url: 'https://randomuser.me/api/portraits/women/1.jpg',
 };
 
@@ -91,11 +94,11 @@ export const sampleEpic1 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
-  github_users: [],
+  github_users: [sampleGitHubUser2],
   status: EPIC_STATUSES.PLANNED,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic2 = {
@@ -117,11 +120,11 @@ export const sampleEpic2 = {
   pr_is_open: true,
   pr_is_merged: false,
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   status: EPIC_STATUSES.IN_PROGRESS,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic3 = {
@@ -139,11 +142,11 @@ export const sampleEpic3 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [],
   status: EPIC_STATUSES.PLANNED,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic4 = {
@@ -162,11 +165,11 @@ export const sampleEpic4 = {
   pr_is_open: false,
   pr_is_merged: false,
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [],
   status: EPIC_STATUSES.MERGED,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleEpic5 = {
@@ -185,11 +188,11 @@ export const sampleEpic5 = {
   pr_is_open: true,
   pr_is_merged: false,
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
-  currently_fetching_org_config_names: false,
   github_users: [sampleGitHubUser1, sampleGitHubUser2],
   status: EPIC_STATUSES.REVIEW,
-  available_task_org_config_names: [],
+  latest_sha: 'abc123',
 };
 
 export const sampleTask1 = {
@@ -201,6 +204,7 @@ export const sampleTask1 = {
   description: 'This is a description',
   description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
   has_unmerged_commits: true,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__data-mapping',
   branch_url:
@@ -233,6 +237,7 @@ export const sampleTask2 = {
   description_rendered:
     '<p>Add panel for controls toggles allowing for accessible interaction.</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: '',
   branch_url: null,
@@ -262,6 +267,7 @@ export const sampleTask3 = {
   description_rendered:
     '<p>Include options set by **operating system preferences**</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__dark-mode',
   branch_url:
@@ -293,6 +299,7 @@ export const sampleTask4 = {
   description_rendered:
     '<p>Internationalization and Localization built in options</p>',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__universal-language',
   branch_url:
@@ -323,6 +330,7 @@ export const sampleTask5 = {
   description: '',
   description_rendered: '',
   has_unmerged_commits: false,
+  currently_creating_branch: false,
   currently_creating_pr: false,
   branch_name: 'feature/my-epic__user-roles',
   branch_url:
@@ -335,6 +343,37 @@ export const sampleTask5 = {
   origin_sha: '723b342',
   assigned_dev: sampleGitHubUser1,
   assigned_qa: null,
+  status: TASK_STATUSES.IN_PROGRESS,
+  currently_submitting_review: false,
+  review_submitted_at: null,
+  review_valid: false,
+  review_status: '' as const,
+  review_sha: '',
+  org_config_name: 'dev',
+};
+
+export const sampleTask6 = {
+  id: 't6',
+  name: 'Add the Widgets',
+  slug: 'add-widgets',
+  old_slugs: [],
+  epic: 'e1',
+  description: '',
+  description_rendered: '',
+  has_unmerged_commits: false,
+  currently_creating_branch: false,
+  currently_creating_pr: false,
+  branch_name: 'feature/my-epic__add-widgets',
+  branch_url:
+    'https://github.com/test/test-repo/tree/feature/my-epic__add-widgets',
+  branch_diff_url:
+    'https://github.com/test/test-repo/compare/feature/my-epic...feature/my-epic__add-widgets',
+  pr_url: 'https://github.com/test/test-repo/pull/8888',
+  pr_is_open: true,
+  commits: [sampleCommit2],
+  origin_sha: '723b342',
+  assigned_dev: sampleGitHubUser2,
+  assigned_qa: sampleGitHubUser3,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
   review_submitted_at: null,
@@ -359,6 +398,7 @@ export const sampleUser1 = {
   devhub_username: '',
   uses_global_devhub: false,
   agreed_to_tos_at: '2019-02-01T19:47:49Z',
+  onboarded_at: '2019-02-01T19:47:49Z',
 };
 
 export const sampleProject1 = {
@@ -377,4 +417,208 @@ export const sampleProject1 = {
   currently_refreshing_gh_users: false,
   repo_image_url:
     'https://repository-images.githubusercontent.com/123456/123-456',
+  currently_fetching_org_config_names: false,
+  org_config_names: [],
+  latest_sha: 'abc123',
 };
+
+export const sampleEpicSteps = [
+  {
+    label: 'Add a task',
+    active: true,
+    complete: false,
+  },
+  {
+    label: 'Assign a Developer to a task',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Submit this epic for review on GitHub',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Merge pull request on GitHub',
+    active: false,
+    complete: false,
+    hidden: false,
+  },
+];
+
+export const sampleEpicStepsWithAction = [
+  {
+    label: 'Add a task',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Assign a Developer to a task',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Submit this epic for review on GitHub',
+    active: true,
+    complete: false,
+    action: 'submit',
+  },
+  {
+    label: 'Merge pull request on GitHub',
+    active: false,
+    complete: false,
+    link: '#',
+  },
+];
+
+export const sampleEpicStepsWithLink = [
+  {
+    label: 'Add a task',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Assign a Developer to a task',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Submit this epic for review on GitHub',
+    active: false,
+    complete: true,
+    action: 'submit',
+  },
+  {
+    label: 'Merge pull request on GitHub',
+    active: true,
+    complete: false,
+    link: '#',
+  },
+];
+
+export const sampleTaskSteps = [
+  {
+    label: 'Assign a Developer',
+    active: true,
+    complete: false,
+    action: 'assign-dev',
+  },
+  {
+    label: 'Create a Scratch Org for development',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Make changes in Dev Org',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Retrieve changes from Dev Org',
+    active: false,
+    complete: false,
+    action: 'retrieve-changes',
+  },
+  {
+    label: 'Submit changes for testing',
+    active: false,
+    complete: false,
+    action: 'submit-changes',
+  },
+  {
+    label: 'Assign a Tester',
+    active: false,
+    complete: false,
+    action: 'assign-qa',
+  },
+  {
+    label: 'Create a Scratch Org for testing',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Refresh Test Org',
+    active: false,
+    complete: false,
+    hidden: true,
+  },
+  {
+    label: 'Test changes in Test Org',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Submit a review',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Merge pull request on GitHub',
+    active: false,
+    complete: false,
+  },
+];
+
+export const sampleTaskStepsWithAssignee = [
+  {
+    label: 'Assign a Developer',
+    active: false,
+    complete: true,
+    action: 'assign-dev',
+  },
+  {
+    label: 'Create a Scratch Org for development',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Make changes in Dev Org',
+    active: false,
+    complete: true,
+  },
+  {
+    label: 'Retrieve changes from Dev Org',
+    active: true,
+    complete: false,
+    assignee: sampleGitHubUser2,
+    action: 'retrieve-changes',
+  },
+  {
+    label: 'Submit changes for testing',
+    active: false,
+    complete: false,
+    action: 'submit-changes',
+  },
+  {
+    label: 'Assign a Tester',
+    active: false,
+    complete: false,
+    action: 'assign-qa',
+  },
+  {
+    label: 'Create a Scratch Org for testing',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Refresh Test Org',
+    active: false,
+    complete: false,
+    hidden: true,
+  },
+  {
+    label: 'Test changes in Test Org',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Submit a review',
+    active: false,
+    complete: false,
+  },
+  {
+    label: 'Merge pull request on GitHub',
+    active: false,
+    complete: false,
+  },
+];

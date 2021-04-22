@@ -2,6 +2,7 @@ from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.core.cache import cache
 from github3.exceptions import NotFoundError, UnprocessableEntity
 
 from ..gh import (
@@ -9,6 +10,7 @@ from ..gh import (
     UnsafeZipfileError,
     extract_zip_file,
     get_all_org_repos,
+    get_cached_user,
     get_repo_info,
     get_source_format,
     get_zip_file,
@@ -93,6 +95,25 @@ class TestGetRepoInfo:
             gh.repository.assert_called_with("owner", "name")
 
 
+@pytest.mark.django_db
+def test_get_cached_user(mocker):
+    User = mocker.patch("metecho.api.gh.users.User")
+    User.as_dict.return_value = {"name": "Foo Bar"}
+    User.from_dict.return_value.name = "Foo Bar"
+    gh = MagicMock()
+    gh.user.return_value = User
+    cache.delete("gh_user_test")
+
+    user = get_cached_user(gh, "test")
+    assert user == User
+    assert cache.get("gh_user_test") == {"name": "Foo Bar"}
+    assert gh.user.call_count == 1
+
+    user = get_cached_user(gh, "test")
+    assert user.name == "Foo Bar"
+    assert gh.user.call_count == 1  # No new calls
+
+
 def test_get_zip_file():
     repo = MagicMock()
     with patch(f"{PATCH_ROOT}.zipfile") as zipfile:
@@ -167,11 +188,12 @@ class TestTryCreateBranch:
         branch = MagicMock()
         branch.latest_sha.return_value = "1234abc"
         repository.branch.return_value = branch
-        result = try_to_make_branch(
+        result, latest_sha = try_to_make_branch(
             repository, new_branch="new-branch", base_branch="base-branch"
         )
 
         assert result == "new-branch-1"
+        assert latest_sha == "1234abc"
 
     def test_try_to_make_branch__long_duplicate_name(self, user_factory, task_factory):
         repository = MagicMock()
@@ -181,11 +203,12 @@ class TestTryCreateBranch:
         branch = MagicMock()
         branch.latest_sha.return_value = "1234abc"
         repository.branch.return_value = branch
-        result = try_to_make_branch(
+        result, latest_sha = try_to_make_branch(
             repository, new_branch="a" * 100, base_branch="base-branch"
         )
 
         assert result == "a" * 98 + "-1"
+        assert latest_sha == "1234abc"
 
     def test_try_to_make_branch__unknown_error(self, user_factory, task_factory):
         repository = MagicMock()

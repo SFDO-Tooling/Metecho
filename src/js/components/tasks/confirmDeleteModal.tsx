@@ -3,52 +3,65 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React from 'react';
 
-import { Org, OrgsByTask } from '~js/store/orgs/reducer';
-import { ORG_TYPES } from '~js/utils/constants';
+import { Org } from '~js/store/orgs/reducer';
+import { CONFIRM_ORG_TRACKER, ConfirmOrgTracker } from '~js/utils/constants';
 
 const ConfirmDeleteModal = ({
-  orgs,
+  org,
   isOpen,
+  actionType,
   handleClose,
   handleCancel,
-  handleDelete,
+  handleAction,
 }: {
-  orgs: OrgsByTask;
+  org: Org | null;
   isOpen: boolean;
+  actionType?: ConfirmOrgTracker;
   handleClose: () => void;
   handleCancel: () => void;
-  handleDelete: (org: Org) => void;
+  handleAction: (o: Org) => void;
 }) => {
   const handleSubmit = () => {
     handleClose();
-    const org = orgs[ORG_TYPES.DEV];
     /* istanbul ignore else */
     if (org) {
-      handleDelete(org);
+      handleAction(org);
     }
   };
+
+  let heading, warning, label;
+  if (actionType === CONFIRM_ORG_TRACKER.REFRESH) {
+    heading = i18n.t('Confirm Refreshing Org With Unretrieved Changes');
+    warning = i18n.t(
+      'This scratch org has unretrieved changes which will be lost. Are you sure you want to refresh this org?',
+    );
+    label = i18n.t('Refresh Org');
+  } else {
+    heading = i18n.t('Confirm Deleting Org With Unretrieved Changes');
+    warning = i18n.t(
+      'This scratch org has unretrieved changes which will be lost. Are you sure you want to delete this org?',
+    );
+    label = i18n.t('Delete Org');
+  }
 
   return (
     <Modal
       isOpen={isOpen}
-      heading={i18n.t('Confirm Deleting Org With Unretrieved Changes')}
+      heading={heading}
       prompt="warning"
+      assistiveText={{ closeButton: i18n.t('Cancel') }}
       onRequestClose={handleCancel}
       footer={[
         <Button key="cancel" label={i18n.t('Cancel')} onClick={handleCancel} />,
         <Button
           key="submit"
-          label={i18n.t('Delete')}
+          label={label}
           variant="brand"
           onClick={handleSubmit}
         />,
       ]}
     >
-      <div className="slds-p-vertical_medium">
-        {i18n.t(
-          'This scratch org has unretrieved changes which will be lost. Are you sure you want to delete this org?',
-        )}
-      </div>
+      <div className="slds-p-vertical_medium">{warning}</div>
     </Modal>
   );
 };
