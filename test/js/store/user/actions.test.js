@@ -365,3 +365,28 @@ describe('onboarded', () => {
     });
   });
 });
+
+describe('tourupddate', () => {
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.current_user_guided_tour();
+  });
+
+  describe('updateTour', () => {
+    test('sets self_guided_tour_enabled', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'testuser', self_guided_tour_enabled: true };
+      fetchMock.postOnce(url, user);
+      const started = { type: 'TOUR_UPDATE_REQUESTED' };
+      const succeeded = {
+        type: 'TOUR_UPDATE_SUCCEEDED',
+        payload: user,
+      };
+      expect.assertions(1);
+      return store.dispatch(actions.updateTour()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+});
