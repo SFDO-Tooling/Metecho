@@ -1,6 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Popover from '@salesforce/design-system-react/components/popover';
+import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -73,9 +74,9 @@ const TourDropdown = ({
   return (
     <Popover
       align="bottom right"
-      className={className}
+      className={classNames(className, 'slds-popover_small')}
       hasNoCloseButton
-      heading={i18n.t('Learn More')}
+      heading={i18n.t('How to Use Metecho')}
       classNameBody="slds-p-horizontal_none"
       body={
         <>

@@ -59,7 +59,7 @@ const TourAlert = () => {
 };
 
 const Alerts = () => (
-  <AlertContainer className="alerts">
+  <AlertContainer className="slds-is-relative">
     <OfflineAlert />
     <TourAlert />
   </AlertContainer>
