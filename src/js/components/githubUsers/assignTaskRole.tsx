@@ -50,7 +50,7 @@ const AssignTaskRoleModal = ({
   const sort = (arr: GitHubUser[]) =>
     orderBy(
       arr,
-      [(u) => u.login === currentUser.username, (u) => u.login.toLowerCase()],
+      [(u) => u.id === currentUser.github_id, (u) => u.login.toLowerCase()],
       ['desc', 'asc'],
     );
   const validEpicUsers = sort(
@@ -90,7 +90,7 @@ const AssignTaskRoleModal = ({
     setAutoToggle(false);
   };
   const handleAssigneeSelection = (user: GitHubUser) => {
-    const currentUserSelected = user.login === currentUser.username;
+    const currentUserSelected = user.id === currentUser.github_id;
     setSelection(user);
     if (autoToggle) {
       setShouldAlertAssignee(!currentUserSelected);

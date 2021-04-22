@@ -18,6 +18,7 @@ describe('AssignTaskRole', () => {
   const defaultState = {
     user: {
       id: 'user-id',
+      github_id: 'user-id',
       username: 'user-name',
       name: 'User Name',
       valid_token_for: 'sf-org',

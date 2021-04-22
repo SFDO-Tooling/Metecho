@@ -97,11 +97,9 @@ const TaskDetail = (props: RouteComponentProps) => {
     task?.has_unmerged_commits && !task?.pr_is_open,
   );
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
-  const userIsAssignedDev = Boolean(
-    user.username === task?.assigned_dev?.login,
-  );
+  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev?.id);
   const userIsAssignedTester = Boolean(
-    user.username === task?.assigned_qa?.login,
+    user.github_id === task?.assigned_qa?.id,
   );
   const hasReviewRejected = Boolean(
     task?.review_valid &&
@@ -747,7 +745,7 @@ const TaskDetail = (props: RouteComponentProps) => {
                 isOpen={submitModalOpen}
                 toggleModal={setSubmitModalOpen}
                 assignee={task.assigned_qa}
-                originatingUser={user.username}
+                originatingUser={user.github_id}
               />
             )}
             {testOrgReadyForReview && (

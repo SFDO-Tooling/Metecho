@@ -220,6 +220,7 @@ def _create_org_and_run_flow(
     scratch_org.config = scratch_org_config.config
     scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
+    scratch_org.owner_gh_id = user.github_id
     scratch_org.save()
 
     cases = {

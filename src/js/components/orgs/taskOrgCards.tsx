@@ -149,7 +149,7 @@ const TaskOrgCards = ({
           objectType: OBJECT_TYPES.TASK,
           data: {
             ...task,
-            [userType]: assignee,
+            [userType]: assignee?.id || null,
             [alertType]: shouldAlertAssignee,
           },
         }),

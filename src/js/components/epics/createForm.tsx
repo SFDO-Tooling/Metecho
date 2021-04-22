@@ -78,9 +78,6 @@ const CreateEpicModal = ({
     }
   };
 
-  const githubUser = project.github_users.find(
-    (ghUser) => ghUser.login === user.username,
-  );
   const {
     inputs,
     errors,
@@ -93,7 +90,7 @@ const CreateEpicModal = ({
     objectType: OBJECT_TYPES.EPIC,
     additionalData: {
       project: project.id,
-      github_users: githubUser ? [githubUser] : [],
+      github_users: user.github_id ? [user.github_id] : [],
     },
     onSuccess,
     onError,

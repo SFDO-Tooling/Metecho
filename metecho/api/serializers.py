@@ -59,6 +59,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "username",
             "email",
             "avatar_url",
+            "github_id",
             "is_staff",
             "valid_token_for",
             "org_name",
@@ -575,6 +576,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "is_created",
             "delete_queued_at",
             "owner_gh_username",
+            "owner_gh_id",
             "has_been_visited",
             "valid_target_directories",
             "org_config_name",
@@ -594,6 +596,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "is_created": {"read_only": True},
             "delete_queued_at": {"read_only": True},
             "owner_gh_username": {"read_only": True},
+            "owner_gh_id": {"read_only": True},
             "has_been_visited": {"read_only": True},
         }
 

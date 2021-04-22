@@ -98,10 +98,10 @@ const EpicDetail = (props: RouteComponentProps) => {
     const users = new Set<string>();
     (tasks || []).forEach((task) => {
       if (task.assigned_dev) {
-        users.add(task.assigned_dev.login);
+        users.add(task.assigned_dev.id);
       }
       if (task.assigned_qa) {
-        users.add(task.assigned_qa.login);
+        users.add(task.assigned_qa.id);
       }
     });
     return users;
@@ -115,7 +115,7 @@ const EpicDetail = (props: RouteComponentProps) => {
       }
       return epic.github_users.filter(
         (oldUser) =>
-          usersAssignedToTasks.has(oldUser.login) &&
+          usersAssignedToTasks.has(oldUser.id) &&
           !users.find((user) => user.id === oldUser.id),
       );
     },
@@ -132,10 +132,12 @@ const EpicDetail = (props: RouteComponentProps) => {
           objectType: OBJECT_TYPES.EPIC,
           data: {
             ...epic,
-            github_users: users.sort((a, b) =>
-              /* istanbul ignore next */
-              a.login.toLowerCase() > b.login.toLowerCase() ? 1 : -1,
-            ),
+            github_users: users
+              .sort((a, b) =>
+                /* istanbul ignore next */
+                a.login.toLowerCase() > b.login.toLowerCase() ? 1 : -1,
+              )
+              .map((user) => user.id),
           },
         }),
       );
@@ -212,7 +214,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           objectType: OBJECT_TYPES.TASK,
           data: {
             ...task,
-            [userType]: assignee,
+            [userType]: assignee?.id || /* istanbul ignore next */ null,
             [alertType]: shouldAlertAssignee,
           },
         }),

@@ -100,12 +100,12 @@ const TaskOrgCard = ({
       orgHeading = i18n.t('Dev Org');
       break;
   }
-  const assignedToCurrentUser = user.username === assignedUser?.login;
+  const assignedToCurrentUser = user.github_id === assignedUser?.id;
   const ownedByCurrentUser = Boolean(org?.is_created && user.id === org?.owner);
   const ownedByWrongUser =
     type !== ORG_TYPES.PLAYGROUND &&
     org?.is_created &&
-    org.owner_gh_username !== assignedUser?.login
+    org.owner_gh_id !== assignedUser?.id
       ? org
       : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.is_created));

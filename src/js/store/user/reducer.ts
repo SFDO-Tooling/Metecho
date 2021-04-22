@@ -18,6 +18,7 @@ export interface User {
   username: string;
   email: string;
   avatar_url: string | null;
+  github_id: string | null;
   valid_token_for: string | null;
   sf_username: string | null;
   org_name: string | null;

@@ -40,11 +40,9 @@ const TaskStatusSteps = ({
   const testOrg = orgs[ORG_TYPES.QA];
   const hasDevOrg = Boolean(devOrg?.is_created);
   const hasTestOrg = Boolean(testOrg?.is_created);
-  const userIsAssignedDev = Boolean(
-    user.username === task?.assigned_dev?.login,
-  );
+  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev?.id);
   const userIsAssignedTester = Boolean(
-    user.username === task?.assigned_qa?.login,
+    user.github_id === task?.assigned_qa?.id,
   );
   const userIsDevOrgOwner = Boolean(
     userIsAssignedDev && devOrg?.is_created && devOrg?.owner === user.id,

@@ -42,6 +42,7 @@ const defaultOrg = {
   org_type: 'Playground',
   owner: 'user-id',
   owner_gh_username: 'currentUser',
+  owner_gh_id: 'user-id',
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',
@@ -221,6 +222,7 @@ const defaultState = {
   user: {
     id: 'user-id',
     username: 'currentUser',
+    github_id: 'user-id',
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -441,9 +443,11 @@ describe('<EpicDetail/>', () => {
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(
-        updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
-      ).toEqual(['currentUser', 'TestGitHubUser', 'ThirdUser']);
+      expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
+        'user-id',
+        '123456',
+        '345678',
+      ]);
     });
 
     test('opens confirm modal if removing assigned user', () => {
@@ -582,7 +586,7 @@ describe('<EpicDetail/>', () => {
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
         expect(updateObject).toHaveBeenCalled();
         expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
-          { id: 'user-id', login: 'currentUser', permissions: { push: true } },
+          'user-id',
         ]);
       });
     });
@@ -601,7 +605,7 @@ describe('<EpicDetail/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa.login).toEqual('currentUser');
+      expect(data.assigned_qa).toEqual('user-id');
       expect(data.should_alert_qa).toBe(false);
     });
 

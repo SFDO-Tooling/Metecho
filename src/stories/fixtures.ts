@@ -35,6 +35,25 @@ export const api_urls = {
     `/api/projects/${id}/feature_branches/`,
 };
 
+export const sampleUser1 = {
+  id: 'U1',
+  username: 'someuser1',
+  email: 'developer@web.com',
+  avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+  github_id: '999999',
+  valid_token_for: '00Dxxxxxxxxxxxxxxx',
+  sf_username: 'developer@web.com',
+  org_name: 'OddBird',
+  org_type: 'Developer Edition',
+  is_devhub_enabled: true,
+  is_staff: false,
+  currently_fetching_repos: false,
+  devhub_username: '',
+  uses_global_devhub: false,
+  agreed_to_tos_at: '2019-02-01T19:47:49Z',
+  onboarded_at: '2019-02-01T19:47:49Z',
+};
+
 export const sampleGitHubUser1 = {
   id: '123456',
   login: 'TestGitHubUser',
@@ -401,24 +420,6 @@ export const sampleTask6 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
-};
-
-export const sampleUser1 = {
-  id: 'U1',
-  username: 'someuser1',
-  email: 'developer@web.com',
-  avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
-  valid_token_for: '00Dxxxxxxxxxxxxxxx',
-  sf_username: 'developer@web.com',
-  org_name: 'OddBird',
-  org_type: 'Developer Edition',
-  is_devhub_enabled: true,
-  is_staff: false,
-  currently_fetching_repos: false,
-  devhub_username: '',
-  uses_global_devhub: false,
-  agreed_to_tos_at: '2019-02-01T19:47:49Z',
-  onboarded_at: '2019-02-01T19:47:49Z',
 };
 
 export const sampleProject1 = {

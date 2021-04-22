@@ -149,6 +149,13 @@ class User(HashIdMixin, AbstractUser):
             return None
 
     @property
+    def github_id(self):
+        try:
+            return self.github_account.uid
+        except (AttributeError, KeyError, TypeError):
+            return None
+
+    @property
     def avatar_url(self):
         try:
             return self.github_account.get_avatar_url()
@@ -302,7 +309,13 @@ class Project(
     #   {
     #     "id": str,
     #     "login": str,
+    #     "name": str,
     #     "avatar_url": str,
+    #     "permissions": {
+    #       "push": bool,
+    #       "pull": bool,
+    #       "admin": bool,
+    #     },
     #   }
     github_users = models.JSONField(default=list, blank=True)
     # List of {
@@ -472,13 +485,6 @@ class Epic(
     latest_sha = StringField(blank=True)
 
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="epics")
-
-    # User data is shaped like this:
-    #   {
-    #     "id": str,
-    #     "login": str,
-    #     "avatar_url": str,
-    #   }
     github_users = models.JSONField(default=list, blank=True)
 
     slug_class = EpicSlug
@@ -926,6 +932,7 @@ class ScratchOrg(
     expiry_job_id = StringField(blank=True, default="")
     owner_sf_username = StringField(blank=True)
     owner_gh_username = StringField(blank=True)
+    owner_gh_id = StringField(null=True, blank=True)
     has_been_visited = models.BooleanField(default=False)
     valid_target_directories = models.JSONField(
         default=dict, encoder=DjangoJSONEncoder, blank=True

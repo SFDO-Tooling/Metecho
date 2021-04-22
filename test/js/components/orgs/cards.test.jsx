@@ -41,6 +41,7 @@ const defaultOrgs = {
     org_type: 'Dev',
     owner: 'user-id',
     owner_gh_username: 'user-name',
+    owner_gh_id: 'user-id',
     expires_at: '2019-09-16T12:58:53.721Z',
     latest_commit: '617a512-longlong',
     latest_commit_url: '/test/commit/url/',
@@ -59,6 +60,7 @@ const defaultOrgs = {
 const defaultState = {
   user: {
     id: 'user-id',
+    github_id: 'user-id',
     username: 'user-name',
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
@@ -192,6 +194,7 @@ describe('<TaskOrgCards/>', () => {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
           owner_gh_username: 'other-user',
+          owner_gh_id: 'other-user-id',
           unsaved_changes: {},
           total_unsaved_changes: 0,
           has_unsaved_changes: false,
@@ -201,9 +204,11 @@ describe('<TaskOrgCards/>', () => {
         ...defaultTask,
         assigned_dev: {
           login: 'other-user',
+          id: 'other-user-id',
         },
         assigned_qa: {
           login: 'other-user',
+          id: 'other-user-id',
         },
       };
       const { queryByText, getByText } = setup({ orgs, task });
@@ -223,6 +228,7 @@ describe('<TaskOrgCards/>', () => {
           ...defaultOrgs.Dev,
           owner: 'other-user',
           owner_gh_username: 'other-user',
+          owner_gh_id: 'other-user-id',
         },
       };
       const { queryByText, getByText } = setup({ orgs });
@@ -253,7 +259,7 @@ describe('<TaskOrgCards/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_dev.login).toEqual('user-name');
+      expect(data.assigned_dev).toEqual('user-id');
       expect(data.should_alert_dev).toBe(true);
     });
   });
@@ -273,7 +279,7 @@ describe('<TaskOrgCards/>', () => {
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
+      expect(updateObject.mock.calls[0][0].data.assigned_qa).toEqual(
         'other-user',
       );
     });
@@ -310,7 +316,7 @@ describe('<TaskOrgCards/>', () => {
           fireEvent.click(getByText('Confirm'));
 
           expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
+          expect(updateObject.mock.calls[0][0].data.assigned_dev).toEqual(
             'other-user',
           );
         });
@@ -334,7 +340,7 @@ describe('<TaskOrgCards/>', () => {
 
           expect(refetchOrg).not.toHaveBeenCalled();
           expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
+          expect(updateObject.mock.calls[0][0].data.assigned_dev).toEqual(
             'other-user',
           );
         });

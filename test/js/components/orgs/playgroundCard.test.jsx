@@ -56,6 +56,7 @@ const defaultOrg = {
   description_rendered: '<p>This is an org.</p>',
   owner: 'user-id',
   owner_gh_username: 'user-name',
+  owner_gh_id: 'user-gh-id',
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a512',
   latest_commit_url: '/test/commit/url/',

@@ -439,8 +439,8 @@ class TestTaskSerializer:
     def test_queues_reassign(self, task_factory, scratch_org_factory, user_factory):
         user = user_factory()
         new_user = user_factory(devhub_username="test")
-        id_ = user.github_account.uid
-        new_id = new_user.github_account.uid
+        id_ = user.github_id
+        new_id = new_user.github_id
         task = task_factory(assigned_dev=id_, assigned_qa=id_, commits=["abc123"])
         scratch_org_factory(
             owner_sf_username="test",
@@ -484,8 +484,8 @@ class TestTaskSerializer:
         serializer = TaskSerializer(
             task,
             data={
-                "assigned_dev": user.github_account.uid,
-                "assigned_qa": user.github_account.uid,
+                "assigned_dev": user.github_id,
+                "assigned_qa": user.github_id,
                 "should_alert_dev": True,
                 "should_alert_qa": True,
                 "name": task.name,

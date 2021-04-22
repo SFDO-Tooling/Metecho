@@ -59,7 +59,7 @@ class GitHubUserValidator:
     def __call__(self, cleaned_data):
         parent = cleaned_data.get(self.parent)
         parent_github_users = [user.get("id") for user in parent.github_users]
-        github_users = [user.get("id") for user in cleaned_data.get("github_users", [])]
+        github_users = cleaned_data.get("github_users", [])
         for id in github_users:
             if not id or id not in parent_github_users:
                 raise ValidationError(_(f"Invalid github_users id value: {id}"))
