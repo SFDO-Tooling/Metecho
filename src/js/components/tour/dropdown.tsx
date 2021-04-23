@@ -90,7 +90,10 @@ const TourDropdown = ({
                   iconSize="large"
                   iconPath={`${seesawIcon}#seesaw-sm`}
                   style={{ width: '100%' }}
-                  onClick={() => handleSelect(WALKTHROUGH_TYPES.PLAY)}
+                  onClick={
+                    /* istanbul ignore next */ () =>
+                      handleSelect(WALKTHROUGH_TYPES.PLAY)
+                  }
                   disabled
                 />
               </li>
@@ -102,7 +105,10 @@ const TourDropdown = ({
                   iconSize="large"
                   iconPath={`${backpackIcon}#backpack-sm`}
                   style={{ width: '100%' }}
-                  onClick={() => handleSelect(WALKTHROUGH_TYPES.HELP)}
+                  onClick={
+                    /* istanbul ignore next */ () =>
+                      handleSelect(WALKTHROUGH_TYPES.HELP)
+                  }
                   disabled
                 />
               </li>
