@@ -39,20 +39,30 @@
   position: absolute;
   top: -10px;
 
-  .slds-page-header__title & {
+  .global-header & {
     top: unset;
   }
 
-  .page-title & {
+  .page-header & {
     top: 25px;
   }
 }
 
 .popover-button {
   color: $palette-violet-65;
+  background: $color-background-light;
+  border: 1px solid $palette-violet-90;
+  border-radius: 100%;
+  box-shadow: 0 0 0 1px $palette-violet-65;
 
   .tour-alert & {
     fill: currentColor;
+  }
+
+  &:hover,
+  &:focus {
+    box-shadow: var(--sds-c-button-shadow-focus, 0 0 3px $color-brand-dark),
+      0 0 0 1px $color-text-link-focus;
   }
 }
 
