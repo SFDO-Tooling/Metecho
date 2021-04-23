@@ -366,49 +366,46 @@ describe('onboarded', () => {
   });
 });
 
-describe('tourupddate', () => {
+describe('updateTour', () => {
   let url;
 
   beforeAll(() => {
     url = window.api_urls.current_user_guided_tour();
   });
 
-  describe('updateTour', () => {
-    describe('success', () => {
-      test('sets self_guided_tour_enabled', () => {
-        const store = storeWithThunk({});
-        const user = { id: 'testuser', self_guided_tour_enabled: true };
-        fetchMock.postOnce(url, user);
-        const started = { type: 'TOUR_UPDATE_REQUESTED' };
-        const succeeded = {
-          type: 'TOUR_UPDATE_SUCCEEDED',
-          payload: user,
-        };
-        expect.assertions(1);
-        return store.dispatch(actions.updateTour()).then(() => {
-          expect(store.getActions()).toEqual([started, succeeded]);
-        });
+  describe('success', () => {
+    test('sets self_guided_tour_enabled', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'testuser', self_guided_tour_enabled: true };
+      fetchMock.postOnce(url, user);
+      const started = { type: 'TOUR_UPDATE_REQUESTED' };
+      const succeeded = {
+        type: 'TOUR_UPDATE_SUCCEEDED',
+        payload: user,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.updateTour()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
+  });
 
-    describe('error', () => {
-      test('dispatches TOUR_UPDATE_FAILED action', () => {
-        const store = storeWithThunk({});
-        fetchMock.postOnce(url, 500);
-        const started = { type: 'TOUR_UPDATE_REQUESTED' };
-        const failed = { type: 'TOUR_UPDATE_FAILED' };
+  describe('error', () => {
+    test('dispatches TOUR_UPDATE_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, 500);
+      const started = { type: 'TOUR_UPDATE_REQUESTED' };
+      const failed = { type: 'TOUR_UPDATE_FAILED' };
 
-        expect.assertions(4);
-        return store.dispatch(actions.updateTour()).catch(() => {
-          const allActions = store.getActions();
+      expect.assertions(4);
+      return store.dispatch(actions.updateTour()).catch(() => {
+        const allActions = store.getActions();
 
-          expect(allActions[0]).toEqual(started);
-          expect(allActions[1].type).toEqual('ERROR_ADDED');
-          expect(allActions[1].payload.message).toEqual(
-            'Internal Server Error',
-          );
-          expect(allActions[2]).toEqual(failed);
-        });
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
       });
     });
   });
