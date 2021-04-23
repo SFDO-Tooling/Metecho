@@ -4,7 +4,7 @@ import { ORG_TYPE_TRACKER_DEFAULT } from '~js/components/orgs/taskOrgCards';
 import TaskStatusSteps from '~js/components/tasks/steps';
 import { REVIEW_STATUSES, TASK_STATUSES } from '~js/utils/constants';
 
-import { render } from './../../utils';
+import { renderWithRedux } from './../../utils';
 
 const defaultTask = {
   id: 'task',
@@ -54,8 +54,12 @@ const stacy = {
   login: 'stacy',
   permissions: { push: true },
 };
+const defaultProject = {
+  id: 'p1',
+  github_users: [jonny, stacy],
+};
 const taskWithDev = {
-  assigned_dev: jonny,
+  assigned_dev: jonny.id,
   status: TASK_STATUSES.IN_PROGRESS,
 };
 const taskWithChanges = {
@@ -69,7 +73,7 @@ const taskWithPR = {
 };
 const taskWithTester = {
   ...taskWithPR,
-  assigned_qa: stacy,
+  assigned_qa: stacy.id,
 };
 const taskSubmittingReview = {
   ...taskWithTester,
@@ -94,7 +98,7 @@ const taskWithReviewInvalid = {
 describe('<TaskStatusSteps />', () => {
   test.each([
     ['planned, no orgs', {}, null, null],
-    ['dev assigned, no orgs', { assigned_dev: jonny }, null, null],
+    ['dev assigned, no orgs', { assigned_dev: jonny.id }, null, null],
     ['dev org creating', taskWithDev, { is_created: false }, null],
     ['dev org', taskWithDev, {}, null],
     [
@@ -143,13 +147,16 @@ describe('<TaskStatusSteps />', () => {
       Dev: devOrg,
       QA: testOrg,
     };
-    const { container } = render(
+    const { container } = renderWithRedux(
       <TaskStatusSteps
         task={task}
         orgs={orgs}
         user={jonny}
+        projectId={defaultProject.id}
+        hasPermissions
         isCreatingOrg={ORG_TYPE_TRACKER_DEFAULT}
       />,
+      { projects: { projects: [defaultProject] } },
     );
 
     expect(container).toMatchSnapshot();

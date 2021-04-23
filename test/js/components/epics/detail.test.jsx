@@ -98,6 +98,11 @@ const defaultState = {
               push: true,
             },
           },
+          {
+            id: 'user-id',
+            login: 'currentUser',
+            permissions: { push: true },
+          },
         ],
         has_push_permission: true,
       },
@@ -118,24 +123,7 @@ const defaultState = {
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
           branch_name: 'branch-name',
           old_slugs: ['old-slug'],
-          github_users: [
-            {
-              id: '123456',
-              login: 'TestGitHubUser',
-              name: 'Test GitHub User',
-              permissions: { push: true },
-            },
-            {
-              id: '234567',
-              login: 'OtherUser',
-              permissions: { push: true },
-            },
-            {
-              id: 'user-id',
-              login: 'currentUser',
-              permissions: { push: true },
-            },
-          ],
+          github_users: ['123456', '234567', 'user-id'],
         },
       ],
       next: null,
@@ -164,11 +152,7 @@ const defaultState = {
         slug: 'task-2',
         epic: 'epic1',
         status: 'In progress',
-        assigned_dev: {
-          id: '123456',
-          login: 'TestGitHubUser',
-          avatar_url: 'https://example.com/avatar.png',
-        },
+        assigned_dev: '123456',
       },
       {
         id: 'task3',
@@ -486,14 +470,7 @@ describe('<EpicDetail/>', () => {
               epics: [
                 {
                   ...defaultState.epics.r1.epics[0],
-                  github_users: [
-                    {
-                      id: '234567',
-                      login: 'OtherUser',
-                      avatar_url: 'https://example.com/avatar.png',
-                      permissions: { push: true },
-                    },
-                  ],
+                  github_users: ['234567'],
                 },
               ],
             },
@@ -516,14 +493,7 @@ describe('<EpicDetail/>', () => {
               epics: [
                 {
                   ...defaultState.epics.r1.epics[0],
-                  github_users: [
-                    {
-                      id: '123456',
-                      login: 'TestGitHubUser',
-                      avatar_url: 'https://example.com/avatar.png',
-                      permissions: { push: true },
-                    },
-                  ],
+                  github_users: ['123456'],
                 },
               ],
             },
@@ -543,11 +513,7 @@ describe('<EpicDetail/>', () => {
     beforeEach(() => {
       const task = {
         ...defaultState.tasks.epic1[0],
-        assigned_qa: {
-          id: '234567',
-          login: 'OtherUser',
-          avatar_url: 'https://example.com/avatar.png',
-        },
+        assigned_qa: '234567',
       };
       result = setup({
         initialState: {

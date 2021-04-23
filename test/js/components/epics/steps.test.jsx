@@ -19,10 +19,10 @@ const defaultEpic = {
   id: 'epic1',
   slug: 'epic-1',
   name: 'Epic 1',
-  project: 'r1',
+  project: 'p1',
   branch_url: 'https://github.com/test/test-repo/tree/branch-name',
   branch_name: 'branch-name',
-  github_users: [jonny, stacy],
+  github_users: [jonny.id, stacy.id],
   has_unmerged_commits: false,
   status: EPIC_STATUSES.PLANNED,
 };
@@ -57,7 +57,7 @@ const defaultTask = {
   origin_sha: 'parent_sha',
 };
 const taskWithDev = {
-  assigned_dev: jonny,
+  assigned_dev: jonny.id,
   status: TASK_STATUSES.IN_PROGRESS,
 };
 

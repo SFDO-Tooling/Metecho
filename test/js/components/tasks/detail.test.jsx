@@ -87,6 +87,11 @@ const defaultState = {
             login: 'user-name',
             permissions: { push: true },
           },
+          {
+            id: 'user-id',
+            login: 'user-name',
+            permissions: { push: true },
+          },
         ],
         has_push_permission: true,
       },
@@ -107,13 +112,7 @@ const defaultState = {
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
           branch_name: 'branch-name',
           old_slugs: [],
-          github_users: [
-            {
-              id: 'user-1',
-              login: 'user-name',
-              permissions: { push: true },
-            },
-          ],
+          github_users: ['user-1'],
         },
       ],
       next: null,
@@ -135,10 +134,7 @@ const defaultState = {
         description_rendered: '<p>Task Description</p>',
         has_unmerged_commits: false,
         commits: [],
-        assigned_dev: {
-          id: 'user-id',
-          login: 'user-name',
-        },
+        assigned_dev: 'user-id',
         assigned_qa: null,
       },
     ],
@@ -234,7 +230,7 @@ describe('<TaskDetail/>', () => {
             {
               ...defaultState.tasks.epic1[0],
               assigned_dev: null,
-              assigned_qa: { id: 'user-id', login: 'user-name' },
+              assigned_qa: 'user-id',
             },
           ],
         },
@@ -632,7 +628,7 @@ describe('<TaskDetail/>', () => {
         {
           ...defaultState.tasks.epic1[0],
           pr_is_open: true,
-          assigned_qa: { id: 'user-id', login: 'user-name' },
+          assigned_qa: 'user-id',
           commits: [],
           origin_sha: 'parent',
           review_submitted_at: '2019-10-16T12:58:53.721Z',
@@ -706,7 +702,7 @@ describe('<TaskDetail/>', () => {
                 {
                   ...defaultState.tasks.epic1[0],
                   pr_is_open: true,
-                  assigned_qa: { id: 'user-id', login: 'user-name' },
+                  assigned_qa: 'user-id',
                   commits: [],
                   origin_sha: 'parent',
                   review_submitted_at: '2019-10-16T12:58:53.721Z',
@@ -789,7 +785,7 @@ describe('<TaskDetail/>', () => {
       permissions: { push: true },
     };
     const taskWithDev = {
-      assigned_dev: jonny,
+      assigned_dev: jonny.id,
       status: TASK_STATUSES.IN_PROGRESS,
     };
     const taskWithChanges = {
@@ -805,7 +801,7 @@ describe('<TaskDetail/>', () => {
     };
     const taskWithTester = {
       ...taskWithPR,
-      assigned_qa: jonny,
+      assigned_qa: jonny.id,
     };
 
     test.each([
