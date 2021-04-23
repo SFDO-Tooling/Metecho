@@ -13,7 +13,9 @@ def normalize_project_collaborators(apps, schema_editor):
     Task = apps.get_model("api", "Task")
 
     for epic in Epic.objects.filter(github_users__isnull=False):
-        epic.github_users = [user["id"] for user in epic.github_users if user.get("id")]
+        epic.github_users = tuple(
+            set(user["id"] for user in epic.github_users if user.get("id"))
+        )
         epic.save()
 
     for task in Task.objects.all():

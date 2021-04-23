@@ -237,15 +237,25 @@ class TestEpicSerializer:
         )
         assert serializer.is_valid(), serializer.errors
 
-    def test_invalid_github_user_value(self, project_factory, epic_factory):
-        project = project_factory()
-        epic = epic_factory(project=project, name="Duplicate me")
+    @pytest.mark.parametrize(
+        "epic_users",
+        (
+            ["567890"],  # User not in project
+            [{"id": "123456"}],  # Invalid format
+            ["123456", "123456"],  # Duplicate
+        ),
+    )
+    def test_invalid_github_user_value(self, project_factory, epic_factory, epic_users):
+        project = project_factory(github_users=[{"id": "123456"}])
+        epic = epic_factory(
+            project=project, name="Duplicate me", github_users=["123456"]
+        )
         serializer = EpicSerializer(
             instance=epic,
             data={
                 "project": str(project.id),
                 "description": "Blorp",
-                "github_users": [{"id": "value"}],
+                "github_users": epic_users,
             },
             partial=True,
         )
