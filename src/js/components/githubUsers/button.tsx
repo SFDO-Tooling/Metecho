@@ -41,7 +41,7 @@ const GitHubUserButton = ({
             <Badge
               content={i18n.t('read-only')}
               color="light"
-              className="slds-m-left_xx-small"
+              className="slds-m-left_x-small"
             />
           )}
         </>
