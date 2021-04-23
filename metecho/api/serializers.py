@@ -19,7 +19,10 @@ from .models import (
     Task,
 )
 from .sf_run_flow import is_org_good
-from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
+from .validators import (
+    CaseInsensitiveUniqueTogetherValidator,
+    ProjectCollaboratorValidator,
+)
 
 User = get_user_model()
 
@@ -186,7 +189,10 @@ class EpicSerializer(serializers.ModelSerializer):
                     "name", _("An epic with this name already exists.")
                 ),
             ),
-            GitHubUserValidator(parent="project"),
+            ProjectCollaboratorValidator(
+                field="github_users",
+                parent="project",
+            ),
         )
 
     def create(self, validated_data):
@@ -346,6 +352,16 @@ class TaskSerializer(serializers.ModelSerializer):
                     "name", _("A task with this name already exists.")
                 ),
             ),
+            ProjectCollaboratorValidator(
+                field="assigned_qa",
+                parent=lambda data: data["epic"].project,
+                enforce_push_permission=True,
+            ),
+            ProjectCollaboratorValidator(
+                field="assigned_dev",
+                parent=lambda data: data["epic"].project,
+                enforce_push_permission=True,
+            ),
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
@@ -399,7 +415,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def _handle_reassign(
         self, type_, instance, validated_data, user, originating_user_id
     ):
-        new_assignee = validated_data[f"assigned_{type_}"]
+        new_assignee = validated_data.get(f"assigned_{type_}")
         existing_assignee = getattr(instance, f"assigned_{type_}")
         assigned_user_has_changed = new_assignee != existing_assignee
         has_assigned_user = bool(new_assignee)
