@@ -42,7 +42,7 @@ const DetailPageLayout = ({
       <PageHeader
         className="page-header slds-p-around_x-large slds-is-relative"
         title={
-          <div className="page-header">
+          <div className="page-title">
             <span className="slds-m-right_xxx-small" title={title}>
               {title}
             </span>

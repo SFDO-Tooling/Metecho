@@ -54,7 +54,7 @@ const Header = () => {
           slds-p-horizontal_x-large
           slds-p-vertical_medium"
         title={
-          <>
+          <div className="logo-popover">
             <Link
               to={routes.home()}
               className="slds-text-heading_large slds-text-link_reset"
@@ -75,7 +75,7 @@ const Header = () => {
                 </Trans>
               }
             />
-          </>
+          </div>
         }
         onRenderControls={controls}
       />

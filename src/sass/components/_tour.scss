@@ -39,11 +39,11 @@
   position: absolute;
   top: -10px;
 
-  .global-header & {
+  .logo-popover & {
     top: unset;
   }
 
-  .page-header & {
+  .page-title & {
     top: 25px;
   }
 }
@@ -51,7 +51,7 @@
 .popover-button {
   color: $palette-violet-65;
   background: $color-background-light;
-  border: 0.5px solid $palette-violet-90;
+  border: 0.25px solid $palette-violet-90;
   border-radius: 100%;
   box-shadow: 0 0 2px $palette-violet-65;
 
