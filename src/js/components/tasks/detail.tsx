@@ -646,10 +646,11 @@ const TaskDetail = (props: RouteComponentProps) => {
             {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large metecho-secondary-block">
                 <TaskStatusSteps
-                  project={project}
                   task={task}
                   orgs={taskOrgs}
                   user={user}
+                  projectId={project.id}
+                  hasPermissions={project.has_push_permission}
                   isCreatingOrg={isCreatingOrg}
                   handleAction={handleStepAction}
                 />

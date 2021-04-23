@@ -7,7 +7,6 @@ import Steps from '~js/components/steps';
 import { Step } from '~js/components/steps/stepsItem';
 import { AppState } from '~js/store';
 import { OrgsByParent } from '~js/store/orgs/reducer';
-import { Project } from '~js/store/projects/reducer';
 import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { User } from '~js/store/user/reducer';
@@ -15,27 +14,29 @@ import { ORG_TYPES, REVIEW_STATUSES } from '~js/utils/constants';
 import { getTaskCommits } from '~js/utils/helpers';
 
 interface TaskStatusStepsProps {
-  project: Project;
   task: Task;
   orgs: OrgsByParent;
   user: User;
+  projectId: string;
+  hasPermissions: boolean;
   isCreatingOrg: OrgTypeTracker;
   handleAction: (step: Step) => void;
 }
 
 const TaskStatusSteps = ({
-  project,
   task,
   orgs,
   user,
+  projectId,
+  hasPermissions,
   isCreatingOrg,
   handleAction,
 }: TaskStatusStepsProps) => {
   const devUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, project.id, task.assigned_dev),
+    selectProjectCollaborator(state, projectId, task.assigned_dev),
   );
   const qaUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, project.id, task.assigned_qa),
+    selectProjectCollaborator(state, projectId, task.assigned_qa),
   );
   const hasDev = Boolean(task.assigned_dev);
   const hasTester = Boolean(task.assigned_qa);
@@ -104,7 +105,7 @@ const TaskStatusSteps = ({
       // consider this complete if there are commits and no rejected review
       complete: hasDev || hasValidCommits,
       assignee: null,
-      action: project.has_push_permission ? 'assign-dev' : undefined,
+      action: hasPermissions ? 'assign-dev' : undefined,
     },
     {
       label: devOrgIsCreating
@@ -139,10 +140,7 @@ const TaskStatusSteps = ({
       // Complete if we have commits (without rejected review)
       complete: hasValidCommits,
       assignee: devUser,
-      action:
-        devOrgLoading || !project.has_push_permission
-          ? undefined
-          : 'retrieve-changes',
+      action: devOrgLoading || !hasPermissions ? undefined : 'retrieve-changes',
     },
     {
       label: taskIsSubmitting
@@ -152,16 +150,14 @@ const TaskStatusSteps = ({
       complete: task.pr_is_open,
       assignee: null,
       action:
-        taskIsSubmitting || !project.has_push_permission
-          ? undefined
-          : 'submit-changes',
+        taskIsSubmitting || !hasPermissions ? undefined : 'submit-changes',
     },
     {
       label: i18n.t('Assign a Tester'),
       active: readyForReview && !hasTester,
       complete: hasTester || task.review_valid,
       assignee: null,
-      action: project.has_push_permission ? 'assign-qa' : undefined,
+      action: hasPermissions ? 'assign-qa' : undefined,
     },
     {
       label: testOrgIsCreating
@@ -210,9 +206,7 @@ const TaskStatusSteps = ({
       complete: task.review_valid,
       assignee: qaUser,
       action:
-        userIsAssignedTester &&
-        !testOrgIsSubmittingReview &&
-        project.has_push_permission
+        userIsAssignedTester && !testOrgIsSubmittingReview && hasPermissions
           ? 'submit-review'
           : undefined,
     },

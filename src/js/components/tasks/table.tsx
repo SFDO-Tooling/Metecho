@@ -155,17 +155,17 @@ const AssigneeTableCell = ({
   assignUserAction: AssignUserAction;
   children?: string | null;
 }) => {
+  const assignedUser = useSelector((state: AppState) =>
+    selectProjectCollaborator(state, projectId, children),
+  );
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
+
   const openAssignUserModal = () => {
     setAssignUserModalOpen(true);
   };
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(false);
   };
-
-  const assignedUser = useSelector((state: AppState) =>
-    selectProjectCollaborator(state, projectId, children),
-  );
 
   const doAssignUserAction = useCallback(
     (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
