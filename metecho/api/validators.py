@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from operator import itemgetter
 from typing import Callable, Union
 
