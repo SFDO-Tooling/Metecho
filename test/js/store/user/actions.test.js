@@ -373,7 +373,8 @@ describe('tourupddate', () => {
     url = window.api_urls.current_user_guided_tour();
   });
 
-  describe('success', () => {
+  describe('updateTour', () => {
+    describe('success', () => {
     test('sets self_guided_tour_enabled', () => {
       const store = storeWithThunk({});
       const user = { id: 'testuser', self_guided_tour_enabled: true };
