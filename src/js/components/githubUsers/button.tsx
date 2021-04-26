@@ -36,12 +36,12 @@ const GitHubUserButton = ({
       label={
         <>
           <GitHubUserAvatar user={user} />
-          <span className="collaborator-username">{name}</span>
+          <span className="collaborator-username slds-m-right_x-small">{name}</span>
           {showPermissions && !user.permissions?.push && (
             <Badge
               content={i18n.t('read-only')}
               color="light"
-              className="slds-m-left_x-small"
+              className="slds-col_bump-left slds-m-right_x-small"
             />
           )}
         </>
