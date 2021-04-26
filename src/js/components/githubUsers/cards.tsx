@@ -1,3 +1,4 @@
+import Badge from '@salesforce/design-system-react/components/badge';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
@@ -16,7 +17,17 @@ export const UserCard = ({
   removeUser?: () => void;
   className?: string;
 }) => {
-  const name = user.name ? `${user.login} (${user.name})` : user.login;
+  let name: string | JSX.Element = user.name
+    ? `${user.name} (${user.login})`
+    : user.login;
+  if (!user.permissions?.push) {
+    name = (
+      <>
+        <span title={name}>{name}</span>
+        <Badge content={i18n.t('read-only')} className="slds-m-left_x-small" />
+      </>
+    );
+  }
   return (
     <Card
       className={classNames(className, 'collaborator-card')}
@@ -58,12 +69,7 @@ export const UserCards = ({
     {users.map((user) => {
       const doRemoveUser = canRemoveUser ? () => removeUser(user) : undefined;
       return (
-        <div
-          key={user.id}
-          className="slds-size_1-of-1
-            slds-large-size_1-of-2
-            slds-p-around_xx-small"
-        >
+        <div key={user.id} className="slds-size_1-of-1 slds-p-around_xx-small">
           <UserCard user={user} removeUser={doRemoveUser} />
         </div>
       );

@@ -20,7 +20,7 @@ const GitHubUserButton = ({
   showPermissions?: boolean;
   [key: string]: any;
 }) => {
-  const name = user.name ? `${user.login} (${user.name})` : user.login;
+  const name = user.name ? `${user.name} (${user.login})` : user.login;
   return (
     <Button
       className={classNames(
