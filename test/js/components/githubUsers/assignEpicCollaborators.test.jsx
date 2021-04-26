@@ -2,8 +2,17 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import AssignEpicCollaboratorsModal from '~js/components/githubUsers/assignEpicCollaborators';
+import { refreshGitHubUsers } from '~js/store/projects/actions';
 
-import { render } from '../../utils';
+import { renderWithRedux } from '../../utils';
+
+jest.mock('~js/store/projects/actions');
+
+refreshGitHubUsers.mockReturnValue({ type: 'TEST' });
+
+afterEach(() => {
+  refreshGitHubUsers.mockClear();
+});
 
 describe('AssignEpicCollaboratorsModal', () => {
   test('responds to checkbox clicks', () => {
@@ -22,14 +31,14 @@ describe('AssignEpicCollaboratorsModal', () => {
         permissions: { push: false },
       },
     ];
-    const { getByText, getAllByLabelText } = render(
+    const { getByText, getAllByLabelText } = renderWithRedux(
       <AssignEpicCollaboratorsModal
         allUsers={allUsers}
         selectedUsers={[]}
         isOpen
         setUsers={setUsers}
         isRefreshing={false}
-        refreshUsers={() => {}}
+        projectId="p1"
       />,
     );
 
@@ -41,14 +50,14 @@ describe('AssignEpicCollaboratorsModal', () => {
 
   describe('is re-syncing collaborators', () => {
     test('displays loading spinner', () => {
-      const { getByText } = render(
+      const { getByText } = renderWithRedux(
         <AssignEpicCollaboratorsModal
           allUsers={[]}
           selectedUsers={[]}
           isOpen
           setUsers={() => {}}
           isRefreshing
-          refreshUsers={() => {}}
+          projectId="p1"
         />,
       );
 

@@ -44,7 +44,7 @@ const AssignEpicCollaboratorsModal = ({
   onRequestClose,
   setUsers,
   isRefreshing,
-  refreshUsers,
+  projectId,
 }: {
   allUsers: GitHubUser[];
   selectedUsers: GitHubUser[];
@@ -53,7 +53,7 @@ const AssignEpicCollaboratorsModal = ({
   onRequestClose: () => void;
   setUsers: (users: GitHubUser[]) => void;
   isRefreshing: boolean;
-  refreshUsers: () => void;
+  projectId: string;
 }) => {
   const [selection, setSelection] = useState(selectedUsers);
   const reset = useCallback(() => setSelection(selectedUsers), [selectedUsers]);
@@ -139,7 +139,8 @@ const AssignEpicCollaboratorsModal = ({
         >
           <RefreshGitHubUsersButton
             isRefreshing={isRefreshing}
-            refreshUsers={refreshUsers}
+            projectId={projectId}
+            githubUsers={allUsers}
           />
         </div>
       </div>

@@ -36,7 +36,6 @@ import {
 } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { updateObject } from '~js/store/actions';
-import { refreshGitHubUsers } from '~js/store/projects/actions';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
 import {
@@ -187,13 +186,6 @@ const EpicDetail = (props: RouteComponentProps) => {
     },
     [epic, epicCollaborators, updateEpicUsers, getRemovedUsers],
   );
-  const doRefreshGitHubUsers = useCallback(() => {
-    /* istanbul ignore if */
-    if (!project) {
-      return;
-    }
-    dispatch(refreshGitHubUsers(project.id));
-  }, [project, dispatch]);
 
   // "Assign user to task" modal related:
   const assignUser = useCallback(
@@ -466,7 +458,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                     isRefreshing={Boolean(
                       project.currently_refreshing_gh_users,
                     )}
-                    refreshUsers={doRefreshGitHubUsers}
+                    projectId={project.id}
                   />
                   <ConfirmRemoveUserModal
                     confirmRemoveUsers={confirmRemoveUsers}

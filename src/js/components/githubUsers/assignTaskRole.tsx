@@ -5,16 +5,13 @@ import Input from '@salesforce/design-system-react/components/input';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import { orderBy } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
 
 import GitHubUserButton from '~js/components/githubUsers/button';
 import RefreshGitHubUsersButton from '~js/components/githubUsers/refreshUsersButton';
 import { SpinnerWrapper } from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { refreshGitHubUsers } from '~js/store/projects/actions';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
 import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
@@ -41,7 +38,6 @@ const AssignTaskRoleModal = ({
   setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
 }) => {
   const currentUser = useSelector(selectUserState) as User;
-  const dispatch = useDispatch<ThunkDispatch>();
   const [selection, setSelection] = useState<GitHubUser | null>(null);
   const [shouldAlertAssignee, setShouldAlertAssignee] = useState(true);
   const [autoToggle, setAutoToggle] = useState(true);
@@ -110,10 +106,6 @@ const AssignTaskRoleModal = ({
     }
     handleClose();
   };
-
-  const doRefreshGitHubUsers = useCallback(() => {
-    dispatch(refreshGitHubUsers(projectId));
-  }, [dispatch, projectId]);
 
   const handleFindTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFindText(e.target.value);
@@ -190,7 +182,8 @@ const AssignTaskRoleModal = ({
         >
           <RefreshGitHubUsersButton
             isRefreshing={isRefreshingUsers}
-            refreshUsers={doRefreshGitHubUsers}
+            projectId={projectId}
+            githubUsers={githubUsers}
           />
         </div>
       </div>
