@@ -3,11 +3,11 @@ import i18n from 'i18next';
 import { some } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { GitHubUser } from 'src/js/store/user/reducer';
 
 import { LabelWithSpinner } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { refreshGitHubUsers } from '~js/store/projects/actions';
+import { GitHubUser } from '~js/store/user/reducer';
 
 interface Props {
   isRefreshing: boolean;
