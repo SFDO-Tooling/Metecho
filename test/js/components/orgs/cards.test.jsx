@@ -250,7 +250,7 @@ describe('<TaskOrgCards/>', () => {
       });
       fireEvent.click(
         baseElement.querySelector(
-          '.collaborator-button[title="user-name (Full User Name)"]',
+          '.collaborator-button[title="Full User Name (user-name)"]',
         ),
       );
       fireEvent.click(getByText('Notify Assigned Developer by Email'));

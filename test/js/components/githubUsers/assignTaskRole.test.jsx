@@ -66,7 +66,7 @@ describe('AssignTaskRole', () => {
 
   test('responds to epic user click', () => {
     const { getByText, getAllByTitle } = setup();
-    const userBtn = getAllByTitle('test user (Test User)')[0];
+    const userBtn = getAllByTitle('Test User (test user)')[0];
     fireEvent.click(userBtn);
     fireEvent.click(getByText('Save'));
 
@@ -75,7 +75,7 @@ describe('AssignTaskRole', () => {
 
   test('responds to github user click', () => {
     const { getByText, getAllByTitle } = setup();
-    const userBtn = getAllByTitle('user-name (User Name)')[0];
+    const userBtn = getAllByTitle('User Name (user-name)')[0];
     fireEvent.click(userBtn);
     fireEvent.click(getByText('Save'));
 

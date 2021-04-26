@@ -103,6 +103,13 @@ const defaultState = {
             login: 'currentUser',
             permissions: { push: true },
           },
+          {
+            id: 'readonly',
+            login: 'readonly-user',
+            permissions: {
+              push: false,
+            },
+          },
         ],
         has_push_permission: true,
       },
@@ -123,7 +130,7 @@ const defaultState = {
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
           branch_name: 'branch-name',
           old_slugs: ['old-slug'],
-          github_users: ['123456', '234567', 'user-id'],
+          github_users: ['123456', '234567', 'user-id', 'readonly'],
         },
       ],
       next: null,
@@ -429,6 +436,7 @@ describe('<EpicDetail/>', () => {
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
         'user-id',
+        'readonly',
         '123456',
         '345678',
       ]);
@@ -553,6 +561,7 @@ describe('<EpicDetail/>', () => {
         expect(updateObject).toHaveBeenCalled();
         expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
           'user-id',
+          'readonly',
         ]);
       });
     });
