@@ -40,6 +40,32 @@ from .serializers import (
 User = get_user_model()
 
 
+class RepoPushPermissionMixin:
+    """
+    Require repository Push permission for all operations other than list/read.
+    Assumes the related model implements a `has_push_permission(user)` method.
+    """
+
+    def check_push_permission(self, instance):
+        if not instance.has_push_permission(self.request.user):
+            raise PermissionDenied(
+                'You do not have "Push" permissions in the related repository'
+            )
+
+    def perform_create(self, serializer):
+        instance = serializer.Meta.model(**serializer.validated_data)
+        self.check_push_permission(instance)
+        return super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        self.check_push_permission(serializer.instance)
+        return super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        self.check_push_permission(instance)
+        return super().perform_destroy(instance)
+
+
 class CreatePrMixin:
     error_pr_exists = ""  # Implement this
 
@@ -54,7 +80,7 @@ class CreatePrMixin:
         instance.queue_create_pr(
             request.user,
             **serializer.validated_data,
-            originating_user_id=str(request.user.id)
+            originating_user_id=str(request.user.id),
         )
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
@@ -194,7 +220,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         return Response(data)
 
 
-class EpicViewSet(CreatePrMixin, ModelViewSet):
+class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = EpicSerializer
     pagination_class = CustomPaginator
@@ -216,7 +242,7 @@ class EpicViewSet(CreatePrMixin, ModelViewSet):
         )
 
 
-class TaskViewSet(CreatePrMixin, ModelViewSet):
+class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
     queryset = Task.objects.active()

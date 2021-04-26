@@ -263,7 +263,7 @@ const ProjectDetail = (
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {hasEpics
+              {hasEpics || !project.has_push_permission
                 ? i18n.t('Epics for {{project_name}}', {
                     project_name: project.name,
                   })
@@ -273,36 +273,46 @@ const ProjectDetail = (
             </h2>
             {!hasEpics && (
               <p className="slds-m-bottom_large">
-                <Trans i18nKey="createEpicHelpText">
-                  Epics in Metecho are the high-level features that can be
-                  broken down into smaller parts by creating Tasks. You can
-                  create a new epic or create an epic based on an existing
-                  GitHub branch. Every epic requires a unique epic name, which
-                  becomes the branch name in GitHub unless you choose to use an
-                  existing branch.
-                </Trans>
+                {project.has_push_permission ? (
+                  <Trans i18nKey="createEpicHelpText">
+                    Epics in Metecho are the high-level features that can be
+                    broken down into smaller parts by creating Tasks. You can
+                    create a new epic or create an epic based on an existing
+                    GitHub branch. Every epic requires a unique epic name, which
+                    becomes the branch name in GitHub unless you choose to use
+                    an existing branch.
+                  </Trans>
+                ) : (
+                  <Trans i18nKey="noEpics">
+                    Epics in Metecho are the high-level features that can be
+                    broken down into smaller parts by creating Tasks. There are
+                    no Epics for this Project.
+                  </Trans>
+                )}
               </p>
             )}
-            <div className="slds-m-bottom_large slds-is-relative">
-              <Button
-                label={i18n.t('Create an Epic')}
-                variant="brand"
-                onClick={openCreateModal}
-                className="tour-create-epic"
-              />
-              <TourPopover
-                align="right"
-                body={
-                  <Trans i18nKey="tourCreateEpic">
-                    Create an Epic to make a group of related Tasks. Invite
-                    multiple Collaborators to your Epic and assign people as
-                    Developers & Testers for each Task. Epics are equivalent to
-                    GitHub branches, just like Tasks.
-                  </Trans>
-                }
-                heading={i18n.t('Create Epics to group Tasks')}
-              />
-            </div>
+            {project.has_push_permission && (
+              <div className="slds-m-bottom_large slds-is-relative">
+                <Button
+                  label={i18n.t('Create an Epic')}
+                  variant="brand"
+                  onClick={openCreateModal}
+                  className="tour-create-epic"
+                />
+                <TourPopover
+                  align="right"
+                  body={
+                    <Trans i18nKey="tourCreateEpic">
+                      Create an Epic to make a group of related Tasks. Invite
+                      multiple Collaborators to your Epic and assign people as
+                      Developers & Testers for each Task. Epics are equivalent
+                      to GitHub branches, just like Tasks.
+                    </Trans>
+                  }
+                  heading={i18n.t('Create Epics to group Tasks')}
+                />
+              </div>
+            )}
             {hasEpics && (
               <>
                 <EpicTable epics={epics.epics} projectSlug={project.slug} />

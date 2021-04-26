@@ -13,3 +13,10 @@
     display: none;
   }
 }
+
+// Used when slds-truncate can't be applied
+// Only appears when not hovered/focused
+.overflow-shadow {
+  box-shadow: 0 0 $var-spacing-x-small $var-spacing-x-small
+    $color-background-light;
+}

@@ -40,6 +40,7 @@ const defaultOrg = {
   org_type: 'Dev',
   owner: 'user-id',
   owner_gh_username: 'user-name',
+  owner_gh_id: 'user-id',
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',
@@ -64,6 +65,7 @@ const defaultState = {
   user: {
     id: 'user-id',
     username: 'user-name',
+    github_id: 'user-id',
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -83,8 +85,15 @@ const defaultState = {
           {
             id: 'user-1',
             login: 'user-name',
+            permissions: { push: true },
+          },
+          {
+            id: 'user-id',
+            login: 'user-name',
+            permissions: { push: true },
           },
         ],
+        has_push_permission: true,
       },
     ],
     notFound: ['different-project'],
@@ -103,12 +112,7 @@ const defaultState = {
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
           branch_name: 'branch-name',
           old_slugs: [],
-          github_users: [
-            {
-              id: 'user-1',
-              login: 'user-name',
-            },
-          ],
+          github_users: ['user-1'],
         },
       ],
       next: null,
@@ -130,9 +134,7 @@ const defaultState = {
         description_rendered: '<p>Task Description</p>',
         has_unmerged_commits: false,
         commits: [],
-        assigned_dev: {
-          login: 'user-name',
-        },
+        assigned_dev: 'user-id',
         assigned_qa: null,
       },
     ],
@@ -186,6 +188,67 @@ describe('<TaskDetail/>', () => {
     expect(queryByText('View Branch')).toBeVisible();
     expect(getByTitle('View Org')).toBeVisible();
     expect(getByText('Task Team & Orgs')).toBeVisible();
+  });
+
+  test('renders readonly task detail with dev org', () => {
+    const { getByText, getByTitle } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_permission: false,
+            },
+          ],
+        },
+      },
+    });
+
+    expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByTitle('View Org')).toBeVisible();
+    expect(getByText('No Tester')).toBeVisible();
+  });
+
+  test('renders readonly task detail with test org', () => {
+    const { getByText, getByTitle } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_permission: false,
+            },
+          ],
+        },
+        tasks: {
+          ...defaultState.tasks,
+          epic1: [
+            {
+              ...defaultState.tasks.epic1[0],
+              assigned_dev: null,
+              assigned_qa: 'user-id',
+            },
+          ],
+        },
+        orgs: {
+          ...defaultState.orgs,
+          orgs: {
+            [defaultOrg.id]: {
+              ...defaultOrg,
+              org_type: 'QA',
+            },
+          },
+        },
+      },
+    });
+
+    expect(getByTitle('Task 1')).toBeVisible();
+    expect(getByTitle('View Org')).toBeVisible();
+    expect(getByText('No Developer')).toBeVisible();
   });
 
   test('renders task detail with playground scratch org', () => {
@@ -565,7 +628,7 @@ describe('<TaskDetail/>', () => {
         {
           ...defaultState.tasks.epic1[0],
           pr_is_open: true,
-          assigned_qa: { id: 'user-id', login: 'user-name' },
+          assigned_qa: 'user-id',
           commits: [],
           origin_sha: 'parent',
           review_submitted_at: '2019-10-16T12:58:53.721Z',
@@ -639,7 +702,7 @@ describe('<TaskDetail/>', () => {
                 {
                   ...defaultState.tasks.epic1[0],
                   pr_is_open: true,
-                  assigned_qa: { id: 'user-id', login: 'user-name' },
+                  assigned_qa: 'user-id',
                   commits: [],
                   origin_sha: 'parent',
                   review_submitted_at: '2019-10-16T12:58:53.721Z',
@@ -695,6 +758,7 @@ describe('<TaskDetail/>', () => {
       org_type: 'Dev',
       owner: 'user-id',
       owner_gh_username: 'user-name',
+      owner_gh_id: 'user-id',
       url: '/foo/',
       is_created: true,
       has_unsaved_changes: false,
@@ -706,6 +770,7 @@ describe('<TaskDetail/>', () => {
       org_type: 'QA',
       owner: 'user-id',
       owner_gh_username: 'user-name',
+      owner_gh_id: 'user-id',
       url: '/bar/',
       is_created: true,
       has_been_visited: false,
@@ -717,9 +782,10 @@ describe('<TaskDetail/>', () => {
     const jonny = {
       id: 'user-id',
       login: 'user-name',
+      permissions: { push: true },
     };
     const taskWithDev = {
-      assigned_dev: jonny,
+      assigned_dev: jonny.id,
       status: TASK_STATUSES.IN_PROGRESS,
     };
     const taskWithChanges = {
@@ -735,7 +801,7 @@ describe('<TaskDetail/>', () => {
     };
     const taskWithTester = {
       ...taskWithPR,
-      assigned_qa: jonny,
+      assigned_qa: jonny.id,
     };
 
     test.each([

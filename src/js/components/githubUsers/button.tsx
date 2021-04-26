@@ -1,5 +1,7 @@
+import Badge from '@salesforce/design-system-react/components/badge';
 import Button from '@salesforce/design-system-react/components/button';
 import classNames from 'classnames';
+import i18n from 'i18next';
 import React from 'react';
 
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
@@ -9,14 +11,16 @@ const GitHubUserButton = ({
   user,
   isAssigned,
   isSelected,
+  showPermissions,
   ...props
 }: {
   user: GitHubUser;
   isAssigned?: boolean;
   isSelected?: boolean;
+  showPermissions?: boolean;
   [key: string]: any;
 }) => {
-  const name = user.name ? `${user.login} (${user.name})` : user.login;
+  const name = user.name ? `${user.name} (${user.login})` : user.login;
   return (
     <Button
       className={classNames(
@@ -32,7 +36,16 @@ const GitHubUserButton = ({
       label={
         <>
           <GitHubUserAvatar user={user} />
-          <span className="collaborator-username">{name}</span>
+          <span className="collaborator-username slds-m-right_x-small">
+            {name}
+          </span>
+          {showPermissions && !user.permissions?.push && (
+            <Badge
+              content={i18n.t('read-only')}
+              color="light"
+              className="slds-col_bump-left slds-m-right_x-small"
+            />
+          )}
         </>
       }
       variant="base"

@@ -20,6 +20,7 @@ const OrgInfo = ({
   baseCommit,
   ownedByCurrentUser,
   ownedByWrongUser,
+  userHasPermissions,
   typeHeading,
   parentLink,
   parentName,
@@ -38,6 +39,7 @@ const OrgInfo = ({
   baseCommit?: string;
   ownedByCurrentUser: boolean;
   ownedByWrongUser?: Org | null;
+  userHasPermissions?: boolean;
   typeHeading?: string;
   parentLink?: string;
   parentName?: string;
@@ -157,7 +159,11 @@ const OrgInfo = ({
       /* istanbul ignore else */
       if (org) {
         let ignoredChangesMsg = null;
-        if (ownedByCurrentUser && org.has_ignored_changes) {
+        if (
+          ownedByCurrentUser &&
+          org.has_ignored_changes &&
+          userHasPermissions
+        ) {
           ignoredChangesMsg = (
             <>
               {' ('}

@@ -36,11 +36,37 @@ export const api_urls = {
     `/api/projects/${id}/feature_branches/`,
 };
 
+export const sampleUser1 = {
+  id: 'U1',
+  username: 'someuser1',
+  email: 'developer@web.com',
+  avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+  github_id: '999999',
+  valid_token_for: '00Dxxxxxxxxxxxxxxx',
+  sf_username: 'developer@web.com',
+  org_name: 'OddBird',
+  org_type: 'Developer Edition',
+  is_devhub_enabled: true,
+  is_staff: false,
+  currently_fetching_repos: false,
+  devhub_username: '',
+  uses_global_devhub: false,
+  agreed_to_tos_at: '2019-02-01T19:47:49Z',
+  onboarded_at: '2019-02-01T19:47:49Z',
+  self_guided_tour_enabled: false,
+  self_guided_tour_state: null,
+};
+
 export const sampleGitHubUser1 = {
   id: '123456',
   login: 'TestGitHubUser',
   name: 'Test GitHub User',
   avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
+  permissions: {
+    push: true,
+    pull: true,
+    admin: false,
+  },
 };
 
 export const sampleGitHubUser2 = {
@@ -48,12 +74,22 @@ export const sampleGitHubUser2 = {
   login: 'OtherUser',
   name: 'Other User',
   avatar_url: 'https://randomuser.me/api/portraits/women/1.jpg',
+  permissions: {
+    push: true,
+    pull: true,
+    admin: false,
+  },
 };
 
 export const sampleGitHubUser3 = {
   id: '345678',
   login: 'ThirdUser',
   avatar_url: 'https://randomuser.me/api/portraits/men/2.jpg',
+  permissions: {
+    push: true,
+    pull: true,
+    admin: false,
+  },
 };
 
 export const sampleCommitAuthor = {
@@ -61,6 +97,11 @@ export const sampleCommitAuthor = {
   email: 'developer@web.com',
   username: 'adeveloper',
   avatar_url: 'https://randomuser.me/api/portraits/men/83.jpg',
+  permissions: {
+    push: true,
+    pull: true,
+    admin: false,
+  },
 };
 
 export const sampleCommit1 = {
@@ -97,7 +138,7 @@ export const sampleEpic1 = {
   has_unmerged_commits: false,
   currently_creating_branch: false,
   currently_creating_pr: false,
-  github_users: [sampleGitHubUser2],
+  github_users: [sampleGitHubUser2.id],
   status: EPIC_STATUSES.PLANNED,
   latest_sha: 'abc123',
 };
@@ -123,7 +164,11 @@ export const sampleEpic2 = {
   has_unmerged_commits: true,
   currently_creating_branch: false,
   currently_creating_pr: false,
-  github_users: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
+  github_users: [
+    sampleGitHubUser1.id,
+    sampleGitHubUser2.id,
+    sampleGitHubUser3.id,
+  ],
   status: EPIC_STATUSES.IN_PROGRESS,
   latest_sha: 'abc123',
 };
@@ -191,7 +236,7 @@ export const sampleEpic5 = {
   has_unmerged_commits: true,
   currently_creating_branch: false,
   currently_creating_pr: false,
-  github_users: [sampleGitHubUser1, sampleGitHubUser2],
+  github_users: [sampleGitHubUser1.id, sampleGitHubUser2.id],
   status: EPIC_STATUSES.REVIEW,
   latest_sha: 'abc123',
 };
@@ -216,7 +261,7 @@ export const sampleTask1 = {
   pr_is_open: true,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser1,
+  assigned_dev: sampleGitHubUser1.id,
   assigned_qa: null,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
@@ -279,8 +324,8 @@ export const sampleTask3 = {
   pr_is_open: false,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser3,
-  assigned_qa: sampleGitHubUser1,
+  assigned_dev: sampleGitHubUser3.id,
+  assigned_qa: sampleGitHubUser1.id,
   status: TASK_STATUSES.COMPLETED,
   currently_submitting_review: false,
   review_submitted_at: '2019-03-01T19:47:49Z',
@@ -311,8 +356,8 @@ export const sampleTask4 = {
   pr_is_open: true,
   commits: [sampleCommit1],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser2,
-  assigned_qa: sampleGitHubUser3,
+  assigned_dev: sampleGitHubUser2.id,
+  assigned_qa: sampleGitHubUser3.id,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
   review_submitted_at: '2019-03-01T19:47:49Z',
@@ -342,7 +387,7 @@ export const sampleTask5 = {
   pr_is_open: false,
   commits: [sampleCommit2],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser1,
+  assigned_dev: sampleGitHubUser1.id,
   assigned_qa: null,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
@@ -373,8 +418,8 @@ export const sampleTask6 = {
   pr_is_open: true,
   commits: [sampleCommit2],
   origin_sha: '723b342',
-  assigned_dev: sampleGitHubUser2,
-  assigned_qa: sampleGitHubUser3,
+  assigned_dev: sampleGitHubUser2.id,
+  assigned_qa: sampleGitHubUser3.id,
   status: TASK_STATUSES.IN_PROGRESS,
   currently_submitting_review: false,
   review_submitted_at: null,
@@ -382,26 +427,6 @@ export const sampleTask6 = {
   review_status: '' as const,
   review_sha: '',
   org_config_name: 'dev',
-};
-
-export const sampleUser1 = {
-  id: 'U1',
-  username: 'someuser1',
-  email: 'developer@web.com',
-  avatar_url: 'https://randomuser.me/api/portraits/men/1.jpg',
-  valid_token_for: '00Dxxxxxxxxxxxxxxx',
-  sf_username: 'developer@web.com',
-  org_name: 'OddBird',
-  org_type: 'Developer Edition',
-  is_devhub_enabled: true,
-  is_staff: false,
-  currently_fetching_repos: false,
-  devhub_username: '',
-  uses_global_devhub: false,
-  agreed_to_tos_at: '2019-02-01T19:47:49Z',
-  onboarded_at: '2019-02-01T19:47:49Z',
-  self_guided_tour_enabled: false,
-  self_guided_tour_state: null,
 };
 
 export const sampleProject1 = {
@@ -423,6 +448,7 @@ export const sampleProject1 = {
   currently_fetching_org_config_names: false,
   org_config_names: [],
   latest_sha: 'abc123',
+  has_push_permission: true,
 };
 
 export const sampleEpicSteps = [

@@ -6,6 +6,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.urls import reverse
 from github3.exceptions import ResponseError
+from rest_framework import status
+
+from metecho.api.serializers import EpicSerializer, TaskSerializer
 
 from ..models import SCRATCH_ORG_TYPES
 
@@ -154,6 +157,7 @@ class TestProjectView:
                     ),
                     "repo_owner": str(project.repo_owner),
                     "repo_name": str(project.repo_name),
+                    "has_push_permission": False,
                     "branch_prefix": "",
                     "github_users": [],
                     "repo_image_url": "",
@@ -196,6 +200,7 @@ class TestProjectView:
                     ),
                     "repo_owner": str(project.repo_owner),
                     "repo_name": str(project.repo_name),
+                    "has_push_permission": False,
                     "branch_prefix": "",
                     "github_users": [],
                     "repo_image_url": "",
@@ -790,7 +795,7 @@ class TestScratchOrgView:
 
 
 @pytest.mark.django_db
-class TestTaskView:
+class TestTaskViewSet:
     def test_create_pr(self, client, task_factory):
         with ExitStack() as stack:
             task = task_factory()
@@ -924,9 +929,42 @@ class TestTaskView:
 
         assert response.status_code == 400
 
+    @pytest.mark.parametrize(
+        "repo_perms, check",
+        (
+            ({}, status.is_client_error),
+            (None, status.is_client_error),
+            ({"push": False}, status.is_client_error),
+            ({"push": True}, status.is_success),
+        ),
+    )
+    @pytest.mark.parametrize("method", ("post", "put", "patch", "delete"))
+    def test_repo_permissions(
+        self,
+        client,
+        task_factory,
+        git_hub_repository_factory,
+        repo_perms,
+        check,
+        method,
+    ):
+        task = task_factory()
+        git_hub_repository_factory(
+            repo_id=task.epic.project.repo_id, user=client.user, permissions=repo_perms
+        )
+        data = TaskSerializer(task).data
+        url = reverse("task-detail", args=[task.pk])
+        if method == "post":
+            url = reverse("task-list")
+            data["name"] = data["name"] + " 2"
+
+        response = getattr(client, method)(url, data=data, format="json")
+
+        assert check(response.status_code)
+
 
 @pytest.mark.django_db
-class TestEpicView:
+class TestEpicViewSet:
     def test_get(self, client, epic_factory):
         epic_factory()
         url = reverse("epic-list")
@@ -935,3 +973,36 @@ class TestEpicView:
 
         assert response.status_code == 200, response.content
         assert len(response.json()["results"]) == 1, response.json()
+
+    @pytest.mark.parametrize(
+        "repo_perms, check",
+        (
+            ({}, status.is_client_error),
+            (None, status.is_client_error),
+            ({"push": False}, status.is_client_error),
+            ({"push": True}, status.is_success),
+        ),
+    )
+    @pytest.mark.parametrize("method", ("post", "put", "patch", "delete"))
+    def test_repo_permissions(
+        self,
+        client,
+        epic_factory,
+        git_hub_repository_factory,
+        repo_perms,
+        check,
+        method,
+    ):
+        epic = epic_factory()
+        git_hub_repository_factory(
+            repo_id=epic.project.repo_id, user=client.user, permissions=repo_perms
+        )
+        data = EpicSerializer(epic).data
+        url = reverse("epic-detail", args=[epic.pk])
+        if method == "post":
+            url = reverse("epic-list")
+            data["name"] = data["name"] + " 2"
+
+        response = getattr(client, method)(url, data=data, format="json")
+
+        assert check(response.status_code)
