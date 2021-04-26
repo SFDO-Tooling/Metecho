@@ -42,6 +42,7 @@ export const UserCard = ({
         removeUser ? (
           <Button
             assistiveText={{ icon: i18n.t('Remove') }}
+            className="overflow-shadow"
             iconCategory="utility"
             iconName="close"
             iconSize="small"
