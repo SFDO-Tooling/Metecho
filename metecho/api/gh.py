@@ -57,10 +57,7 @@ def gh_as_app(repo_owner, repo_name):
 
 def get_all_org_repos(user):
     gh = gh_given_user(user)
-    repos = set(
-        [repo for repo in gh.repositories() if repo.permissions.get("push", False)]
-    )
-    return repos
+    return set(gh.repositories())
 
 
 def is_safe_path(path):

@@ -31,6 +31,7 @@ const defaultOrg = {
   org_type: 'Playground',
   owner: 'my-user',
   owner_gh_username: 'currentUser',
+  owner_gh_id: 'my-user-id',
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',
@@ -65,6 +66,7 @@ const defaultState = {
         github_users: [],
         repo_image_url: 'https://github.com/repo-image',
         org_config_names: [{ key: 'dev' }, { key: 'qa' }],
+        has_push_permission: true,
       },
     ],
     notFound: ['yet-another-project'],
@@ -173,7 +175,37 @@ describe('<ProjectDetail />', () => {
     expect(getByText('Epics for Project 1')).toBeVisible();
   });
 
-  test('renders with form expanded if no epics', () => {
+  test('renders readonly project detail', () => {
+    const { getByText } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_permission: false,
+            },
+          ],
+        },
+        epics: {
+          p1: {
+            epics: [],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+      },
+    });
+
+    expect(getByText('Epics for Project 1')).toBeVisible();
+    expect(
+      getByText('There are no Epics for this Project.', { exact: false }),
+    ).toBeVisible();
+  });
+
+  test('renders different title if no epics', () => {
     const { getByText, queryByText } = setup({
       initialState: {
         ...defaultState,

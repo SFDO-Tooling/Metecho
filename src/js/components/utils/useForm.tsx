@@ -70,6 +70,7 @@ export default ({
     // Non-400 errors are displayed in a global error message.
     /* istanbul ignore if */
     if (err.response?.status !== 400) {
+      onError(err, {});
       throw err;
     }
     const allErrors = typeof err?.body === 'object' ? err.body : {};

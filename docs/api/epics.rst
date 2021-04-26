@@ -41,7 +41,13 @@ Retrieve
             {
               "id": "12345",
               "login": "username",
-              "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4"
+              "name": "Full Name",
+              "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4",
+              "permissions": {
+                "push": true,
+                "pull": true,
+                "admin": false
+              }
             }
           ],
           "status": "In progress",

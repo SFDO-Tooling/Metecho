@@ -19,6 +19,8 @@ Retrieve
      "id": "3Lw7OwK",
      "username": "user123",
      "email": "user@domain.com",
+     "avatar_url": "https://avatars0.githubusercontent.com/u/123456?v=4",
+     "github_id": "123456",
      "is_staff": false,
      "valid_token_for": "00Dxxxxxxxxxxxxxxx",
      "org_name": "OddBird",

@@ -3,6 +3,7 @@ import { createSelector } from 'reselect';
 
 import { AppState } from '~js/store';
 import { Project, ProjectsState } from '~js/store/projects/reducer';
+import { GitHubUser } from '~js/store/user/reducer';
 
 export const selectProjectsState = (appState: AppState): ProjectsState =>
   appState.projects;
@@ -56,3 +57,12 @@ export const selectProjectById = (
   Object.values(appState.projects.projects)
     .flat()
     .find((p) => p.id === id);
+
+export const selectProjectCollaborator = (
+  appState: AppState,
+  projectId?: string,
+  userId?: string | null,
+): GitHubUser | null => {
+  const project = selectProjectById(appState, projectId);
+  return project?.github_users.find((user) => user.id === userId) || null;
+};
