@@ -19,7 +19,10 @@ from .models import (
     Task,
 )
 from .sf_run_flow import is_org_good
-from .validators import CaseInsensitiveUniqueTogetherValidator, GitHubUserValidator
+from .validators import (
+    CaseInsensitiveUniqueTogetherValidator,
+    ProjectCollaboratorValidator,
+)
 
 User = get_user_model()
 
@@ -59,6 +62,7 @@ class FullUserSerializer(serializers.ModelSerializer):
             "username",
             "email",
             "avatar_url",
+            "github_id",
             "is_staff",
             "valid_token_for",
             "org_name",
@@ -91,6 +95,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     description_rendered = MarkdownField(source="description", read_only=True)
     repo_url = serializers.SerializerMethodField()
     repo_image_url = serializers.SerializerMethodField()
+    has_push_permission = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -100,6 +105,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "repo_url",
             "repo_owner",
             "repo_name",
+            "has_push_permission",
             "description",
             "description_rendered",
             "is_managed",
@@ -123,6 +129,9 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_repo_image_url(self, obj) -> Optional[str]:
         return obj.repo_image_url if obj.include_repo_image_url else ""
+
+    def get_has_push_permission(self, obj) -> bool:
+        return obj.has_push_permission(self.context["request"].user)
 
 
 class EpicSerializer(serializers.ModelSerializer):
@@ -180,7 +189,10 @@ class EpicSerializer(serializers.ModelSerializer):
                     "name", _("An epic with this name already exists.")
                 ),
             ),
-            GitHubUserValidator(parent="project"),
+            ProjectCollaboratorValidator(
+                field="github_users",
+                parent="project",
+            ),
         )
 
     def create(self, validated_data):
@@ -340,6 +352,16 @@ class TaskSerializer(serializers.ModelSerializer):
                     "name", _("A task with this name already exists.")
                 ),
             ),
+            ProjectCollaboratorValidator(
+                field="assigned_qa",
+                parent=lambda data: data["epic"].project,
+                enforce_push_permission=True,
+            ),
+            ProjectCollaboratorValidator(
+                field="assigned_dev",
+                parent=lambda data: data["epic"].project,
+                enforce_push_permission=True,
+            ),
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
@@ -393,15 +415,15 @@ class TaskSerializer(serializers.ModelSerializer):
     def _handle_reassign(
         self, type_, instance, validated_data, user, originating_user_id
     ):
-        new_assignee = validated_data[f"assigned_{type_}"]
+        new_assignee = validated_data.get(f"assigned_{type_}")
         existing_assignee = getattr(instance, f"assigned_{type_}")
         assigned_user_has_changed = new_assignee != existing_assignee
         has_assigned_user = bool(new_assignee)
         org_type = {"dev": SCRATCH_ORG_TYPES.Dev, "qa": SCRATCH_ORG_TYPES.QA}[type_]
 
         if assigned_user_has_changed and has_assigned_user:
-            collaborators = [c["id"] for c in instance.epic.github_users]
-            if new_assignee["id"] not in collaborators:
+            collaborators = instance.epic.github_users
+            if new_assignee not in collaborators:
                 instance.epic.github_users.append(new_assignee)
                 instance.epic.save()
                 instance.epic.notify_changed(originating_user_id=None)
@@ -476,8 +498,7 @@ class TaskSerializer(serializers.ModelSerializer):
             assigned_user.notify(subject, body)
 
     def get_matching_assigned_user(self, type_, validated_data):
-        assigned = validated_data.get(f"assigned_{type_}", {})
-        id_ = assigned.get("id") if assigned else None
+        id_ = validated_data.get(f"assigned_{type_}")
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         return getattr(sa, "user", None)  # Optional[User]
 
@@ -571,6 +592,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "is_created",
             "delete_queued_at",
             "owner_gh_username",
+            "owner_gh_id",
             "has_been_visited",
             "valid_target_directories",
             "org_config_name",
@@ -590,6 +612,7 @@ class ScratchOrgSerializer(serializers.ModelSerializer):
             "is_created": {"read_only": True},
             "delete_queued_at": {"read_only": True},
             "owner_gh_username": {"read_only": True},
+            "owner_gh_id": {"read_only": True},
             "has_been_visited": {"read_only": True},
         }
 

@@ -452,34 +452,28 @@ class TestTask:
 
 @pytest.mark.django_db
 class TestUser:
-    def test_refresh_repositories(self, user_factory, project_factory):
+    def test_refresh_repositories(self, mocker, user_factory, project_factory):
         user = user_factory()
         project_factory(repo_id=8558)
-        with ExitStack() as stack:
-            gh = stack.enter_context(patch("metecho.api.models.gh"))
-            async_to_sync = stack.enter_context(
-                patch("metecho.api.models.async_to_sync")
-            )
-            gh.get_all_org_repos.return_value = [
-                MagicMock(id=8558, html_url="https://example.com/")
-            ]
-            user.refresh_repositories()
+        gh = mocker.patch("metecho.api.models.gh")
+        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        gh.get_all_org_repos.return_value = [
+            MagicMock(id=8558, html_url="https://example.com/", permissions={})
+        ]
+        user.refresh_repositories()
 
-            assert async_to_sync.called
+        assert async_to_sync.called
 
-    def test_refresh_repositories__error(self, user_factory):
+    def test_refresh_repositories__error(self, mocker, user_factory):
         user = user_factory()
-        with ExitStack() as stack:
-            gh = stack.enter_context(patch("metecho.api.models.gh"))
-            async_to_sync = stack.enter_context(
-                patch("metecho.api.models.async_to_sync")
-            )
-            gh.get_all_org_repos.return_value = [
-                MagicMock(id=1, html_url="https://example.com/")
-            ]
-            user.refresh_repositories()
+        gh = mocker.patch("metecho.api.models.gh")
+        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        gh.get_all_org_repos.return_value = [
+            MagicMock(id=1, html_url="https://example.com/", permissions={})
+        ]
+        user.refresh_repositories()
 
-            assert async_to_sync.called
+        assert async_to_sync.called
 
     def test_org_id(self, user_factory, social_account_factory):
         user = user_factory()
@@ -543,6 +537,14 @@ class TestUser:
 
         user.socialaccount_set.all().delete()
         assert user.salesforce_account is None
+
+    def test_github_id(self, user_factory, social_account_factory):
+        user = user_factory()
+        user.socialaccount_set.all().delete()
+        assert not user.github_id
+
+        social_account_factory(user=user, provider="github", uid="test-uid")
+        assert user.github_id == "test-uid"
 
     def test_avatar_url(self, user_factory, social_account_factory):
         user = user_factory()

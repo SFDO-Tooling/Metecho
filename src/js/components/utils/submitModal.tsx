@@ -26,7 +26,7 @@ interface Props {
   isOpen: boolean;
   toggleModal: React.Dispatch<React.SetStateAction<boolean>>;
   assignee?: GitHubUser | null;
-  originatingUser?: string;
+  originatingUser?: string | null;
 }
 
 const SubmitModal = ({
@@ -81,7 +81,7 @@ const SubmitModal = ({
   }
 
   const defaultChecked = Boolean(
-    originatingUser && assignee && assignee.login !== originatingUser,
+    originatingUser && assignee && assignee.id !== originatingUser,
   );
 
   const {

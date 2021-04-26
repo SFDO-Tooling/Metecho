@@ -47,6 +47,7 @@ import { AppState, ThunkDispatch } from '~js/store';
 import { createObject } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
 import { Org, OrgsByParent } from '~js/store/orgs/reducer';
+import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { selectTask, selectTaskSlug } from '~js/store/tasks/selectors';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -79,7 +80,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   const isMounted = useIsMounted();
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
-  const { epic, epicSlug } = useFetchEpicIfMissing(project, props);
+  const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
+    project,
+    props,
+  );
   const dispatch = useDispatch<ThunkDispatch>();
   useFetchTasksIfMissing(epic, props);
   const selectTaskWithProps = useCallback(selectTask, []);
@@ -92,17 +96,16 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
   const { orgs } = useFetchOrgsIfMissing({ task, props });
   const user = useSelector(selectUserState) as User;
+  const qaUser = useSelector((state: AppState) =>
+    selectProjectCollaborator(state, project?.id, task?.assigned_qa),
+  );
 
   const readyToSubmit = Boolean(
     task?.has_unmerged_commits && !task?.pr_is_open,
   );
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
-  const userIsAssignedDev = Boolean(
-    user.username === task?.assigned_dev?.login,
-  );
-  const userIsAssignedTester = Boolean(
-    user.username === task?.assigned_qa?.login,
-  );
+  const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev);
+  const userIsAssignedTester = Boolean(user.github_id === task?.assigned_qa);
   const hasReviewRejected = Boolean(
     task?.review_valid &&
       task?.review_status === REVIEW_STATUSES.CHANGES_REQUESTED,
@@ -162,7 +165,7 @@ const TaskDetail = (props: RouteComponentProps) => {
       hasOrgs = true;
     }
   }
-  const readyToCaptureChanges: boolean = userIsDevOwner && orgHasChanges;
+  const readyToCaptureChanges = userIsDevOwner && orgHasChanges;
   const orgHasBeenVisited = Boolean(userIsDevOwner && devOrg?.has_been_visited);
   const taskCommits = task ? getTaskCommits(task) : [];
   const testOrgOutOfDate = Boolean(
@@ -502,10 +505,12 @@ const TaskDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <PageOptions
-        modelType={OBJECT_TYPES.TASK}
-        handleOptionSelect={handlePageOptionSelect}
-      />
+      {project.has_push_permission && (
+        <PageOptions
+          modelType={OBJECT_TYPES.TASK}
+          handleOptionSelect={handlePageOptionSelect}
+        />
+      )}
       {branchLink && (
         <ExternalLink
           url={branchLink}
@@ -519,7 +524,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
 
   let submitButton: React.ReactNode = null;
-  if (readyToSubmit) {
+  if (readyToSubmit && project.has_push_permission) {
     const isPrimary = !readyToCaptureChanges;
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
@@ -541,7 +546,10 @@ const TaskDetail = (props: RouteComponentProps) => {
   }
 
   let captureButton: React.ReactNode = null;
-  if (readyToCaptureChanges || orgHasBeenVisited) {
+  if (
+    project.has_push_permission &&
+    (readyToCaptureChanges || orgHasBeenVisited)
+  ) {
     let captureButtonText: JSX.Element = i18n.t(
       'Check for Unretrieved Changes',
     );
@@ -641,6 +649,8 @@ const TaskDetail = (props: RouteComponentProps) => {
                   task={task}
                   orgs={taskOrgs}
                   user={user}
+                  projectId={project.id}
+                  hasPermissions={project.has_push_permission}
                   isCreatingOrg={isCreatingOrg}
                   handleAction={handleStepAction}
                 />
@@ -657,7 +667,8 @@ const TaskDetail = (props: RouteComponentProps) => {
             orgs={taskOrgs}
             task={task}
             projectId={project.id}
-            epicUsers={epic.github_users}
+            userHasPermissions={project.has_push_permission}
+            epicUsers={epicCollaborators}
             githubUsers={project.github_users}
             epicCreatingBranch={epic.currently_creating_branch}
             epicUrl={epicUrl}
@@ -720,53 +731,57 @@ const TaskDetail = (props: RouteComponentProps) => {
             />
           )}
         </div>
-        {devOrg &&
-          userIsDevOwner &&
-          (orgHasChanges || devOrg.has_ignored_changes) && (
-            <CaptureModal
-              org={devOrg}
-              isOpen={captureModalOpen}
-              closeModal={closeCaptureModal}
+        {project.has_push_permission && (
+          <>
+            {devOrg &&
+              userIsDevOwner &&
+              (orgHasChanges || devOrg.has_ignored_changes) && (
+                <CaptureModal
+                  org={devOrg}
+                  isOpen={captureModalOpen}
+                  closeModal={closeCaptureModal}
+                />
+              )}
+            {readyToSubmit && (
+              <SubmitModal
+                instanceId={task.id}
+                instanceName={task.name}
+                instanceDiffUrl={task.branch_diff_url}
+                instanceType="task"
+                isOpen={submitModalOpen}
+                toggleModal={setSubmitModalOpen}
+                assignee={qaUser}
+                originatingUser={user.github_id}
+              />
+            )}
+            {testOrgReadyForReview && (
+              <SubmitReviewModal
+                orgId={testOrg?.id}
+                url={window.api_urls.task_review(task.id)}
+                reviewStatus={task.review_valid ? task.review_status : null}
+                isOpen={submitReviewModalOpen && !testOrgSubmittingReview}
+                handleClose={closeSubmitReviewModal}
+              />
+            )}
+            <EditModal
+              model={task}
+              modelType={OBJECT_TYPES.TASK}
+              hasOrgs={hasOrgs}
+              projectId={project.id}
+              orgConfigsLoading={project.currently_fetching_org_config_names}
+              orgConfigs={project.org_config_names}
+              isOpen={editModalOpen}
+              handleClose={closeEditModal}
             />
-          )}
-        {readyToSubmit && (
-          <SubmitModal
-            instanceId={task.id}
-            instanceName={task.name}
-            instanceDiffUrl={task.branch_diff_url}
-            instanceType="task"
-            isOpen={submitModalOpen}
-            toggleModal={setSubmitModalOpen}
-            assignee={task.assigned_qa}
-            originatingUser={user.username}
-          />
+            <DeleteModal
+              model={task}
+              modelType={OBJECT_TYPES.TASK}
+              isOpen={deleteModalOpen}
+              redirect={epicUrl}
+              handleClose={closeDeleteModal}
+            />
+          </>
         )}
-        {testOrgReadyForReview && (
-          <SubmitReviewModal
-            orgId={testOrg?.id}
-            url={window.api_urls.task_review(task.id)}
-            reviewStatus={task.review_valid ? task.review_status : null}
-            isOpen={submitReviewModalOpen && !testOrgSubmittingReview}
-            handleClose={closeSubmitReviewModal}
-          />
-        )}
-        <EditModal
-          model={task}
-          modelType={OBJECT_TYPES.TASK}
-          hasOrgs={hasOrgs}
-          projectId={project.id}
-          orgConfigsLoading={project.currently_fetching_org_config_names}
-          orgConfigs={project.org_config_names}
-          isOpen={editModalOpen}
-          handleClose={closeEditModal}
-        />
-        <DeleteModal
-          model={task}
-          modelType={OBJECT_TYPES.TASK}
-          isOpen={deleteModalOpen}
-          redirect={epicUrl}
-          handleClose={closeDeleteModal}
-        />
         <CreateOrgModal
           project={project}
           task={task}

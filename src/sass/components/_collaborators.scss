@@ -48,7 +48,10 @@
 // ---------------------------
 .collaborator-card {
   h2 {
+    align-items: center;
+    display: inline-flex;
     font-size: $font-size-3;
+    width: 100%;
   }
 }
 

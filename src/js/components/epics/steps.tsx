@@ -12,6 +12,7 @@ interface EpicStatusStepsProps {
   tasks: Task[];
   readyToSubmit: boolean;
   currentlySubmitting: boolean;
+  canSubmit: boolean;
   handleAction: (step: Step) => void;
 }
 
@@ -20,6 +21,7 @@ const EpicStatusSteps = ({
   tasks,
   readyToSubmit,
   currentlySubmitting,
+  canSubmit,
   handleAction,
 }: EpicStatusStepsProps) => {
   const hasTasks = Boolean(tasks.length);
@@ -48,7 +50,7 @@ const EpicStatusSteps = ({
         : i18n.t('Submit this epic for review on GitHub'),
       active: readyToSubmit,
       complete: epic.pr_is_open || isMerged,
-      action: currentlySubmitting ? undefined : 'submit',
+      action: canSubmit && !currentlySubmitting ? 'submit' : undefined,
     },
     {
       label: i18n.t('Merge pull request on GitHub'),

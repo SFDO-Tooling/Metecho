@@ -7,10 +7,13 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
+import { AppState } from '~js/store';
+import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser } from '~js/store/user/reducer';
 import {
@@ -47,6 +50,7 @@ interface Props {
   tasks: Task[];
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
+  canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
 }
@@ -134,6 +138,7 @@ const AssigneeTableCell = ({
   projectId,
   epicUsers,
   githubUsers,
+  canAssign,
   isRefreshingUsers,
   assignUserAction,
   item,
@@ -145,10 +150,14 @@ const AssigneeTableCell = ({
   projectId: string;
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
+  canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
-  children?: GitHubUser | null;
+  children?: string | null;
 }) => {
+  const assignedUser = useSelector((state: AppState) =>
+    selectProjectCollaborator(state, projectId, children),
+  );
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
 
   const openAssignUserModal = () => {
@@ -173,19 +182,16 @@ const AssigneeTableCell = ({
     return null;
   }
   let contents, title;
-  if (children) {
-    contents = <GitHubUserAvatar user={children} />;
-    title = children.login;
-  } else {
-    let assignedUser;
+  if (assignedUser) {
+    contents = <GitHubUserAvatar user={assignedUser} />;
+    title = assignedUser.login;
+  } else if (canAssign) {
     switch (type) {
       case ORG_TYPES.DEV:
         title = i18n.t('Assign Developer');
-        assignedUser = item.assigned_dev;
         break;
       case ORG_TYPES.QA:
         title = i18n.t('Assign Tester');
-        assignedUser = item.assigned_qa;
         break;
     }
 
@@ -234,6 +240,7 @@ const TaskTable = ({
   tasks,
   epicUsers,
   githubUsers,
+  canAssign,
   isRefreshingUsers,
   assignUserAction,
 }: Props) => {
@@ -276,6 +283,7 @@ const TaskTable = ({
           projectId={projectId}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
+          canAssign={canAssign}
           isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
         />
@@ -291,6 +299,7 @@ const TaskTable = ({
           projectId={projectId}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
+          canAssign={canAssign}
           isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
         />

@@ -39,13 +39,23 @@ class TestHashidPrimaryKeyRelatedField:
 
 @pytest.mark.django_db
 class TestEpicSerializer:
-    def test_create(self, rf, user_factory, project_factory):
-        project = project_factory()
+    @pytest.mark.parametrize(
+        "user_perms",
+        (
+            {},  # Empty permissions
+            {"push": False},  # Read-only
+            {"push": True},  # Read-write
+        ),
+    )
+    def test_create(self, rf, user_factory, project_factory, user_perms):
+        project = project_factory(
+            github_users=[{"id": "123456", "permissions": user_perms}]
+        )
         data = {
             "name": "Test epic",
             "description": "Test `epic`",
             "project": str(project.id),
-            "github_users": [],
+            "github_users": [project.github_users[0]["id"]],
         }
         r = rf.get("/")
         r.user = user_factory()
@@ -237,20 +247,30 @@ class TestEpicSerializer:
         )
         assert serializer.is_valid(), serializer.errors
 
-    def test_invalid_github_user_value(self, project_factory, epic_factory):
-        project = project_factory()
-        epic = epic_factory(project=project, name="Duplicate me")
+    @pytest.mark.parametrize(
+        "epic_users",
+        (
+            ["567890"],  # User not in project
+            [{"id": "123456"}],  # Invalid format
+            ["123456", "123456"],  # Duplicate
+        ),
+    )
+    def test_invalid_github_user_value(self, project_factory, epic_factory, epic_users):
+        project = project_factory(github_users=[{"id": "123456"}])
+        epic = epic_factory(
+            project=project, name="Duplicate me", github_users=["123456"]
+        )
         serializer = EpicSerializer(
             instance=epic,
             data={
                 "project": str(project.id),
                 "description": "Blorp",
-                "github_users": [{"id": "value"}],
+                "github_users": epic_users,
             },
             partial=True,
         )
         assert not serializer.is_valid()
-        assert "non_field_errors" in serializer.errors
+        assert "github_users" in serializer.errors
 
     def test_pr_url__present(self, epic_factory):
         epic = epic_factory(name="Test epic", pr_number=123)
@@ -275,8 +295,6 @@ class TestTaskSerializer:
             "name": "Test Task",
             "description": "Description.",
             "epic": str(epic.id),
-            "assigned_dev": {"test": "id"},
-            "assigned_qa": {"test": "id"},
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
@@ -290,15 +308,21 @@ class TestTaskSerializer:
 
     def test_update(self, rf, user_factory, task_factory, scratch_org_factory):
         user = user_factory()
-        task = task_factory(commits=["abc123"])
+        task = task_factory(
+            commits=["abc123"],
+            epic__project__github_users=[
+                {"id": "123456", "permissions": {"push": True}},
+                {"id": "456789", "permissions": {"push": True}},
+            ],
+        )
         so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
         so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
         data = {
             "name": task.name,
             "description": task.description,
             "epic": str(task.epic.id),
-            "assigned_dev": {"id": 1},
-            "assigned_qa": {"id": 2},
+            "assigned_dev": "123456",
+            "assigned_qa": "456789",
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
@@ -326,8 +350,6 @@ class TestTaskSerializer:
             "name": task.name,
             "description": task.description,
             "epic": str(task.epic.id),
-            "assigned_dev": {},
-            "assigned_qa": {},
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
@@ -340,9 +362,15 @@ class TestTaskSerializer:
         assert so1.deleted_at is not None
         assert so2.deleted_at is not None
 
-    def test_update__collaborators(self, task_factory):
+    def test_update__assignees(self, task_factory):
         # Task assigness should be added as epic collaborators as well
-        task = task_factory(commits=["abc123"])
+        task = task_factory(
+            commits=["abc123"],
+            epic__project__github_users=[
+                {"id": "dev_id", "permissions": {"push": True}},
+                {"id": "qa_id", "permissions": {"push": True}},
+            ],
+        )
         data = {
             "name": task.name,
             "description": task.description,
@@ -350,28 +378,33 @@ class TestTaskSerializer:
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
-            "assigned_dev": {"id": "dev_id"},
-            "assigned_qa": {"id": "qa_id"},
+            "assigned_dev": "dev_id",
+            "assigned_qa": "qa_id",
         }
         serializer = TaskSerializer(task, data=data)
         assert serializer.is_valid(), serializer.errors
 
         serializer.update(task, serializer.validated_data)
         task.epic.refresh_from_db()
-        assert task.epic.github_users == [{"id": "dev_id"}, {"id": "qa_id"}]
+        assert task.epic.github_users == ["dev_id", "qa_id"]
 
-    def test_update__existing_collaborator(self, task_factory, epic_factory):
-        # Existing collaborators should not be re-added when assigned to a task
-        epic = epic_factory(github_users=[{"id": "existing_user"}])
-        task = task_factory(commits=["abc123"], epic=epic)
+    def test_update__existing_assignees(self, task_factory):
+        # Existing assignees should not be re-added when assigned to a task
+        task = task_factory(
+            commits=["abc123"],
+            epic__project__github_users=[
+                {"id": "existing_user", "permissions": {"push": True}},
+            ],
+            epic__github_users=["existing_user"],
+        )
         data = {
             "name": task.name,
             "description": task.description,
-            "epic": str(epic.id),
+            "epic": str(task.epic.id),
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
-            "assigned_dev": {"id": "existing_user"},
+            "assigned_dev": "existing_user",
             "assigned_qa": None,
         }
         serializer = TaskSerializer(task, data=data)
@@ -379,7 +412,28 @@ class TestTaskSerializer:
 
         serializer.update(task, serializer.validated_data)
         task.epic.refresh_from_db()
-        assert task.epic.github_users == [{"id": "existing_user"}]
+        assert task.epic.github_users == ["existing_user"]
+
+    @pytest.mark.parametrize("perms", ({}, {"push": False}))
+    @pytest.mark.parametrize("assignee", ("assigned_dev", "assigned_qa"))
+    def test_update__read_only_assignees(self, task_factory, perms, assignee):
+        # Task assigness should not be added if they have read-only permissions
+        task = task_factory(
+            commits=["abc123"],
+            epic__project__github_users=[{"id": "123456", "permissions": perms}],
+        )
+        data = {
+            "name": task.name,
+            "description": task.description,
+            "epic": str(task.epic.id),
+            "should_alert_dev": False,
+            "should_alert_qa": False,
+            "org_config_name": "dev",
+            assignee: "123456",
+        }
+        serializer = TaskSerializer(task, data=data)
+        assert not serializer.is_valid()
+        assert assignee in serializer.errors
 
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
@@ -439,10 +493,16 @@ class TestTaskSerializer:
     def test_queues_reassign(self, task_factory, scratch_org_factory, user_factory):
         user = user_factory()
         new_user = user_factory(devhub_username="test")
-        id_ = user.github_account.uid
-        new_id = new_user.github_account.uid
+        id_ = user.github_id
+        new_id = new_user.github_id
         task = task_factory(
-            assigned_dev={"id": id_}, assigned_qa={"id": id_}, commits=["abc123"]
+            assigned_dev=id_,
+            assigned_qa=id_,
+            commits=["abc123"],
+            epic__project__github_users=[
+                {"id": id_, "permissions": {"push": True}},
+                {"id": new_id, "permissions": {"push": True}},
+            ],
         )
         scratch_org_factory(
             owner_sf_username="test",
@@ -463,8 +523,8 @@ class TestTaskSerializer:
             "name": task.name,
             "description": task.description,
             "epic": str(task.epic.id),
-            "assigned_dev": {"id": new_id},
-            "assigned_qa": {"id": new_id},
+            "assigned_dev": new_id,
+            "assigned_qa": new_id,
             "org_config_name": "dev",
         }
         serializer = TaskSerializer(instance=task, data=data)
@@ -481,13 +541,16 @@ class TestTaskSerializer:
 
     def test_try_send_assignment_emails(self, mailoutbox, user_factory, task_factory):
         user = user_factory()
-        task = task_factory()
+        id_ = user.github_id
+        task = task_factory(
+            epic__project__github_users=[{"id": id_, "permissions": {"push": True}}],
+        )
 
         serializer = TaskSerializer(
             task,
             data={
-                "assigned_dev": {"id": user.github_account.uid},
-                "assigned_qa": {"id": user.github_account.uid},
+                "assigned_dev": id_,
+                "assigned_qa": id_,
                 "should_alert_dev": True,
                 "should_alert_qa": True,
                 "name": task.name,
