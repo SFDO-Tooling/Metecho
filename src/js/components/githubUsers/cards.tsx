@@ -23,8 +23,13 @@ export const UserCard = ({
   if (!user.permissions?.push) {
     name = (
       <>
-        <span title={name} className="slds-m-right_x-small">{name}</span>
-        <Badge content={i18n.t('read-only')} className="slds-col_bump-left slds-m-right_x-small" />
+        <span title={name} className="slds-m-right_x-small">
+          {name}
+        </span>
+        <Badge
+          content={i18n.t('read-only')}
+          className="slds-col_bump-left slds-m-right_x-small"
+        />
       </>
     );
   }
