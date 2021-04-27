@@ -49,18 +49,20 @@
 }
 
 .popover-button {
-  color: $palette-violet-65;
   background: $color-background-light;
-  border: 0.25px solid $palette-violet-90;
   border-radius: 100%;
+  border: 1px solid $palette-violet-90;
   box-shadow: 0 0 2px $palette-violet-65;
+  color: $palette-violet-65;
+  transform: scale(1); // needed to prevent subpixel rounding in Safari
 
   .tour-alert & {
     fill: currentColor;
   }
 
-  &:hover,
-  &:focus {
+  // Hover/Focus styles should only apply if on interactive element
+  &[aria-haspopup]:hover,
+  &[aria-haspopup]:focus {
     box-shadow: var(--sds-c-button-shadow-focus, 0 0 2px $color-brand-dark),
       0 0 2px $color-text-link-focus;
   }
