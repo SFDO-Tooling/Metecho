@@ -23,7 +23,7 @@ babel==2.9.0
     # via sphinx
 backcall==0.2.0
     # via ipython
-black==20.8b1
+black==21.4b1
     # via -r requirements/dev.in
 certifi==2020.12.5
     # via
@@ -116,7 +116,7 @@ parso==0.8.2
     # via jedi
 pathspec==0.8.1
     # via black
-pbr==5.5.1
+pbr==5.6.0
     # via stevedore
 pexpect==4.8.0
     # via ipython
@@ -143,7 +143,7 @@ pyparsing==2.4.7
     # via
     #   -c requirements/prod.txt
     #   packaging
-pytest-asyncio==0.15.0
+pytest-asyncio==0.15.1
     # via -r requirements/dev.in
 pytest-cov==2.11.1
     # via -r requirements/dev.in
@@ -151,7 +151,7 @@ pytest-django==4.2.0
     # via -r requirements/dev.in
 pytest-factoryboy==2.1.0
     # via -r requirements/dev.in
-pytest-mock==3.5.1
+pytest-mock==3.6.0
     # via -r requirements/dev.in
 pytest-sugar==0.9.4
     # via -r requirements/dev.in
@@ -228,12 +228,6 @@ toml==0.10.2
     #   pytest
 traitlets==5.0.5
     # via ipython
-typed-ast==1.4.3
-    # via black
-typing-extensions==3.7.4.3
-    # via
-    #   -c requirements/prod.txt
-    #   black
 urllib3==1.26.4
     # via
     #   -c requirements/prod.txt

@@ -176,21 +176,25 @@ describe('refetchAllData', () => {
   });
 
   describe('error', () => {
-    test('dispatches REFETCH_DATA_FAILED action', () => {
+    test('dispatches REFETCH_DATA_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.getOnce(window.api_urls.current_user_detail(), 500);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const failed = { type: 'REFETCH_DATA_FAILED' };
 
       expect.assertions(4);
-      return store.dispatch(actions.refetchAllData()).catch(() => {
+      try {
+        await store.dispatch(actions.refetchAllData());
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -218,21 +222,25 @@ describe('disconnect', () => {
   });
 
   describe('error', () => {
-    test('dispatches USER_DISCONNECT_FAILED action', () => {
+    test('dispatches USER_DISCONNECT_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.postOnce(url, 500);
       const started = { type: 'USER_DISCONNECT_REQUESTED' };
       const failed = { type: 'USER_DISCONNECT_FAILED' };
 
       expect.assertions(4);
-      return store.dispatch(actions.disconnect()).catch(() => {
+      try {
+        await store.dispatch(actions.disconnect());
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -260,21 +268,25 @@ describe('refreshDevHubStatus', () => {
   });
 
   describe('error', () => {
-    test('dispatches DEV_HUB_STATUS_FAILED action', () => {
+    test('dispatches DEV_HUB_STATUS_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.getOnce(url, 500);
       const started = { type: 'DEV_HUB_STATUS_REQUESTED' };
       const failed = { type: 'DEV_HUB_STATUS_FAILED' };
 
       expect.assertions(4);
-      return store.dispatch(actions.refreshDevHubStatus()).catch(() => {
+      try {
+        await store.dispatch(actions.refreshDevHubStatus());
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -302,21 +314,25 @@ describe('agreeToTerms', () => {
   });
 
   describe('error', () => {
-    test('dispatches AGREE_TO_TERMS_FAILED action', () => {
+    test('dispatches AGREE_TO_TERMS_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.putOnce(url, 500);
       const started = { type: 'AGREE_TO_TERMS_REQUESTED' };
       const failed = { type: 'AGREE_TO_TERMS_FAILED' };
 
       expect.assertions(4);
-      return store.dispatch(actions.agreeToTerms()).catch(() => {
+      try {
+        await store.dispatch(actions.agreeToTerms());
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -347,21 +363,25 @@ describe('onboarded', () => {
   });
 
   describe('error', () => {
-    test('dispatches ONBOARDING_FAILED action', () => {
+    test('dispatches ONBOARDING_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.putOnce(url, 500);
       const started = { type: 'ONBOARDING_REQUESTED' };
       const failed = { type: 'ONBOARDING_FAILED' };
 
       expect.assertions(4);
-      return store.dispatch(actions.onboarded()).catch(() => {
+      try {
+        await store.dispatch(actions.onboarded());
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -392,21 +412,25 @@ describe('updateTour', () => {
   });
 
   describe('error', () => {
-    test('dispatches TOUR_UPDATE_FAILED action', () => {
+    test('dispatches TOUR_UPDATE_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.postOnce(url, 500);
       const started = { type: 'TOUR_UPDATE_REQUESTED' };
       const failed = { type: 'TOUR_UPDATE_FAILED' };
 
       expect.assertions(4);
-      return store.dispatch(actions.updateTour()).catch(() => {
+      try {
+        await store.dispatch(actions.updateTour());
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
