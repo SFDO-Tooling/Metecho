@@ -61,7 +61,7 @@
     "js-cookie": "^2.2.1",
     "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
-    "react": "^16.14.0",
+    "react": "^17.0.2",
     "react-document-title": "^2.0.3",
     "react-dom": "^16.14.0",
     "react-fns": "^1.4.0",
