@@ -8,11 +8,12 @@ export const api_urls = {
   account_logout: () => '/accounts/logout/',
   github_login: () => '/accounts/github/login/',
   salesforce_login: () => '/accounts/salesforce/login/',
-  user: () => '/api/user/',
-  user_refresh: () => '/api/user/refresh/',
-  user_disconnect_sf: () => '/api/user/disconnect/',
-  agree_to_tos: () => '/api/agree_to_tos/',
-  complete_onboarding: () => '/api/complete_onboarding/',
+  current_user_detail: () => '/api/user/',
+  current_user_refresh: () => '/api/user/refresh/',
+  current_user_disconnect: () => '/api/user/disconnect/',
+  current_user_agree_to_tos: () => '/api/user/agree_to_tos/',
+  current_user_complete_onboarding: () => '/api/user/complete_onboarding/',
+  current_user_guided_tour: () => '/api/user/guided_tour/',
   project_list: () => '/api/projects/',
   project_detail: (slug: string) => `/api/projects/${slug}/`,
   project_refresh_github_users: (id: string) =>
@@ -52,6 +53,8 @@ export const sampleUser1 = {
   uses_global_devhub: false,
   agreed_to_tos_at: '2019-02-01T19:47:49Z',
   onboarded_at: '2019-02-01T19:47:49Z',
+  self_guided_tour_enabled: false,
+  self_guided_tour_state: null,
 };
 
 export const sampleGitHubUser1 = {

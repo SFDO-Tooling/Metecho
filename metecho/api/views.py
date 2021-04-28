@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ConnectionError, ResponseError
-from rest_framework import generics, mixins, status
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -66,14 +66,6 @@ class RepoPushPermissionMixin:
         return super().perform_destroy(instance)
 
 
-class CurrentUserObjectMixin:
-    def get_queryset(self):
-        return self.model.objects.filter(id=self.request.user.id)
-
-    def get_object(self):
-        return self.get_queryset().get()
-
-
 class CreatePrMixin:
     error_pr_exists = ""  # Implement this
 
@@ -116,59 +108,53 @@ class HookView(APIView):
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
-class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
+class CurrentUserViewSet(GenericViewSet):
     """
-    Shows the current user.
+    Actions related to the current user
     """
 
     model = User
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
 
+    def retrieve(self, request, pk=None):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
-class AgreeToTosView(CurrentUserObjectMixin, generics.UpdateAPIView):
-    model = User
-    serializer_class = FullUserSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def update(self, request, pk=None):
+    @action(methods=["PUT"], detail=False)
+    def agree_to_tos(self, request):
         request.user.agreed_to_tos_at = timezone.now()
         request.user.save()
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+        return self.retrieve(request)
 
-
-class CompleteOnboardingView(CurrentUserObjectMixin, generics.UpdateAPIView):
-    model = User
-    serializer_class = FullUserSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def update(self, request, pk=None):
+    @action(methods=["PUT"], detail=False)
+    def complete_onboarding(self, request):
         request.user.onboarded_at = timezone.now()
         request.user.save()
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+        return self.retrieve(request)
 
+    @action(methods=["POST"], detail=False)
+    def guided_tour(self, request):
+        enabled = request.data.get("enabled")
+        if enabled is not None:
+            request.user.self_guided_tour_enabled = enabled
 
-class UserRefreshView(CurrentUserObjectMixin, APIView):
-    model = User
-    permission_classes = (IsAuthenticated,)
+        state = request.data.get("state")
+        if state is not None:
+            request.user.self_guided_tour_state = state
 
-    def post(self, request):
-        user = self.get_object()
-        user.queue_refresh_repositories()
+        request.user.save()
+        return self.retrieve(request)
+
+    @action(methods=["POST"], detail=False)
+    def disconnect(self, request):
+        request.user.invalidate_salesforce_credentials()
+        return self.retrieve(request)
+
+    @action(methods=["POST"], detail=False)
+    def refresh(self, request):
+        request.user.queue_refresh_repositories()
         return Response(status=status.HTTP_202_ACCEPTED)
-
-
-class UserDisconnectSFView(CurrentUserObjectMixin, APIView):
-    model = User
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request):
-        user = self.get_object()
-        user.invalidate_salesforce_credentials()
-        serializer = FullUserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):

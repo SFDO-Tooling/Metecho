@@ -23,7 +23,7 @@ describe('refreshProjects', () => {
       next: null,
       results: [],
     });
-    fetchMock.postOnce(window.api_urls.user_refresh(), {
+    fetchMock.postOnce(window.api_urls.current_user_refresh(), {
       status: 204,
       body: {},
     });
@@ -46,7 +46,7 @@ describe('refreshProjects', () => {
   describe('error', () => {
     test('dispatches REFRESH_PROJECTS_REJECTED action', () => {
       const store = storeWithThunk({});
-      fetchMock.postOnce(window.api_urls.user_refresh(), {
+      fetchMock.postOnce(window.api_urls.current_user_refresh(), {
         status: 500,
         body: { non_field_errors: ['Foobar'] },
       });

@@ -70,7 +70,7 @@ export const refreshProjects = (): ThunkResult<
   dispatch({ type: 'REFRESH_PROJECTS_REQUESTED' });
   try {
     await apiFetch({
-      url: window.api_urls.user_refresh(),
+      url: window.api_urls.current_user_refresh(),
       dispatch,
       opts: {
         method: 'POST',
