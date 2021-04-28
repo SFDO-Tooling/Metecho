@@ -48,6 +48,13 @@ interface OnboardingSucceeded {
   type: 'ONBOARDING_SUCCEEDED';
   payload: User;
 }
+interface UpdateTourAction {
+  type: 'TOUR_UPDATE_REQUESTED' | 'TOUR_UPDATE_FAILED';
+}
+interface UpdateTourSucceeded {
+  type: 'TOUR_UPDATE_SUCCEEDED';
+  payload: User;
+}
 
 export type UserAction =
   | LoginAction
@@ -60,6 +67,8 @@ export type UserAction =
   | AgreeToTermsAction
   | AgreeToTermsSucceeded
   | OnboardingAction
+  | UpdateTourAction
+  | UpdateTourSucceeded
   | OnboardingSucceeded;
 
 export const login = (payload: User): LoginAction => {
@@ -107,7 +116,7 @@ export const refetchAllData = (): ThunkResult<
   dispatch({ type: 'REFETCH_DATA_STARTED' });
   try {
     const payload = await apiFetch({
-      url: window.api_urls.user(),
+      url: window.api_urls.current_user_detail(),
       dispatch,
       suppressErrorsOn: [401, 403, 404],
     });
@@ -132,7 +141,7 @@ export const disconnect = (): ThunkResult<
   dispatch({ type: 'USER_DISCONNECT_REQUESTED' });
   try {
     const payload = await apiFetch({
-      url: window.api_urls.user_disconnect_sf(),
+      url: window.api_urls.current_user_disconnect(),
       dispatch,
       opts: {
         method: 'POST',
@@ -153,7 +162,10 @@ export const refreshDevHubStatus = (): ThunkResult<
 > => async (dispatch) => {
   dispatch({ type: 'DEV_HUB_STATUS_REQUESTED' });
   try {
-    const payload = await apiFetch({ url: window.api_urls.user(), dispatch });
+    const payload = await apiFetch({
+      url: window.api_urls.current_user_detail(),
+      dispatch,
+    });
     return dispatch({
       type: 'DEV_HUB_STATUS_SUCCEEDED' as const,
       payload,
@@ -170,7 +182,7 @@ export const agreeToTerms = (): ThunkResult<
   dispatch({ type: 'AGREE_TO_TERMS_REQUESTED' });
   try {
     const payload = await apiFetch({
-      url: window.api_urls.agree_to_tos(),
+      url: window.api_urls.current_user_agree_to_tos(),
       dispatch,
       opts: {
         method: 'PUT',
@@ -192,7 +204,7 @@ export const onboarded = (): ThunkResult<
   dispatch({ type: 'ONBOARDING_REQUESTED' });
   try {
     const payload = await apiFetch({
-      url: window.api_urls.complete_onboarding(),
+      url: window.api_urls.current_user_complete_onboarding(),
       dispatch,
       opts: {
         method: 'PUT',
@@ -204,6 +216,33 @@ export const onboarded = (): ThunkResult<
     });
   } catch (err) {
     dispatch({ type: 'ONBOARDING_FAILED' });
+    throw err;
+  }
+};
+
+export const updateTour = (data: {
+  enabled?: boolean;
+  state?: string[] | null;
+}): ThunkResult<Promise<UpdateTourSucceeded>> => async (dispatch) => {
+  dispatch({ type: 'TOUR_UPDATE_REQUESTED' });
+  try {
+    const payload: User = await apiFetch({
+      url: window.api_urls.current_user_guided_tour(),
+      dispatch,
+      opts: {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    });
+    return dispatch({
+      type: 'TOUR_UPDATE_SUCCEEDED' as const,
+      payload,
+    });
+  } catch (err) {
+    dispatch({ type: 'TOUR_UPDATE_FAILED' });
     throw err;
   }
 };

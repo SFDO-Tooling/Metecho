@@ -14,6 +14,7 @@ interface Crumb {
 
 const DetailPageLayout = ({
   title,
+  titlePopover,
   description,
   headerUrl,
   headerUrlText,
@@ -24,6 +25,7 @@ const DetailPageLayout = ({
   image,
 }: {
   title: string;
+  titlePopover?: JSX.Element;
   description?: string;
   headerUrl: string;
   headerUrlText?: string;
@@ -38,8 +40,15 @@ const DetailPageLayout = ({
   return (
     <>
       <PageHeader
-        className="page-header slds-p-around_x-large"
-        title={title}
+        className="page-header slds-p-around_x-large slds-is-relative"
+        title={
+          <div className="page-title">
+            <span className="slds-m-right_xxx-small" title={title}>
+              {title}
+            </span>
+            {titlePopover}
+          </div>
+        }
         info={
           <ExternalLink url={headerUrl} showGitHubIcon>
             /{headerUrlText}

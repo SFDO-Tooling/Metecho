@@ -16,49 +16,59 @@ Branch = namedtuple("Branch", ["name"])
 
 
 @pytest.mark.django_db
-class TestUserView:
+class TestCurrentUserViewSet:
     def test_get(self, client):
-        response = client.get(reverse("user"))
-
+        response = client.get(reverse("current-user-detail"))
         assert response.status_code == 200
-        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["username"] == client.user.username
 
     def test_agree_to_tos(self, client):
-        response = client.put(reverse("agree-to-tos"))
-
+        response = client.put(reverse("current-user-agree-to-tos"))
         assert response.status_code == 200
-        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["username"] == client.user.username
         assert response.json()["agreed_to_tos_at"] is not None
 
     def test_complete_onboarding(self, client):
-        response = client.put(reverse("complete-onboarding"))
-
+        response = client.put(reverse("current-user-complete-onboarding"))
         assert response.status_code == 200
-        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["username"] == client.user.username
         assert response.json()["onboarded_at"] is not None
 
+    @pytest.mark.parametrize(
+        "data, enabled, state",
+        (
+            ({"enabled": False}, False, None),  # Only enabled
+            ({"state": [1, 2, 3]}, True, [1, 2, 3]),  # Only state
+            # Enabled + state
+            ({"enabled": True, "state": {"a": "b"}}, True, {"a": "b"}),
+        ),
+    )
+    def test_guided_tour(self, client, data, enabled, state):
+        response = client.post(
+            reverse("current-user-guided-tour"), data=data, format="json"
+        )
+        assert response.status_code == 200
+        assert response.json()["username"] == client.user.username
+        assert response.json()["self_guided_tour_enabled"] == enabled
+        assert response.json()["self_guided_tour_state"] == state
 
-@pytest.mark.django_db
-def test_user_disconnect_view(client):
-    response = client.post(reverse("user-disconnect-sf"))
+    def test_disconnect(self, client):
+        response = client.post(reverse("current-user-disconnect"))
+        assert not client.user.socialaccount_set.filter(provider="salesforce").exists()
+        assert response.status_code == 200
+        assert response.json()["username"] == client.user.username
 
-    assert not client.user.socialaccount_set.filter(provider="salesforce").exists()
-    assert response.status_code == 200
-    assert response.json()["username"].endswith("@example.com")
-
-
-@pytest.mark.django_db
-def test_user_refresh_view(client):
-    with patch("metecho.api.gh.gh_given_user") as gh_given_user:
+    def test_refresh(self, client, mocker):
+        gh_given_user = mocker.patch("metecho.api.gh.gh_given_user")
         repo = MagicMock()
         repo.url = "test"
         gh = MagicMock()
         gh.repositories.return_value = [repo]
         gh_given_user.return_value = gh
 
-        response = client.post(reverse("user-refresh"))
+        response = client.post(reverse("current-user-refresh"))
 
-    assert response.status_code == 202
+        assert response.status_code == 202
 
 
 @pytest.mark.django_db

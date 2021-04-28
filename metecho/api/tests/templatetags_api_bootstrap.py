@@ -31,6 +31,8 @@ def test_serialize(user_factory):
                 "uses_global_devhub": False,
                 "agreed_to_tos_at": None,
                 "onboarded_at": None,
+                "self_guided_tour_enabled": True,
+                "self_guided_tour_state": None,
             }
         )
     )

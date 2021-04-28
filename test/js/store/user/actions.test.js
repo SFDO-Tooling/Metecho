@@ -128,7 +128,7 @@ describe('refetchAllData', () => {
     test('GETs user from api, re-fetches projects', () => {
       const store = storeWithThunk({});
       const user = { id: 'me' };
-      fetchMock.getOnce(window.api_urls.user(), user);
+      fetchMock.getOnce(window.api_urls.current_user_detail(), user);
       fetchMock.getOnce(window.api_urls.project_list(), []);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const succeeded = { type: 'REFETCH_DATA_SUCCEEDED' };
@@ -164,7 +164,7 @@ describe('refetchAllData', () => {
 
     test('handles missing user', () => {
       const store = storeWithThunk({});
-      fetchMock.getOnce(window.api_urls.user(), 401);
+      fetchMock.getOnce(window.api_urls.current_user_detail(), 401);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const loggedOut = { type: 'USER_LOGGED_OUT' };
 
@@ -178,7 +178,7 @@ describe('refetchAllData', () => {
   describe('error', () => {
     test('dispatches REFETCH_DATA_FAILED action', () => {
       const store = storeWithThunk({});
-      fetchMock.getOnce(window.api_urls.user(), 500);
+      fetchMock.getOnce(window.api_urls.current_user_detail(), 500);
       const started = { type: 'REFETCH_DATA_STARTED' };
       const failed = { type: 'REFETCH_DATA_FAILED' };
 
@@ -199,7 +199,7 @@ describe('disconnect', () => {
   let url;
 
   beforeAll(() => {
-    url = window.api_urls.user_disconnect_sf();
+    url = window.api_urls.current_user_disconnect();
   });
 
   describe('success', () => {
@@ -241,7 +241,7 @@ describe('refreshDevHubStatus', () => {
   let url;
 
   beforeAll(() => {
-    url = window.api_urls.user();
+    url = window.api_urls.current_user_detail();
   });
 
   describe('success', () => {
@@ -283,7 +283,7 @@ describe('agreeToTerms', () => {
   let url;
 
   beforeAll(() => {
-    url = window.api_urls.agree_to_tos();
+    url = window.api_urls.current_user_agree_to_tos();
   });
 
   describe('success', () => {
@@ -325,7 +325,7 @@ describe('onboarded', () => {
   let url;
 
   beforeAll(() => {
-    url = window.api_urls.complete_onboarding();
+    url = window.api_urls.current_user_complete_onboarding();
   });
 
   describe('success', () => {
@@ -355,6 +355,51 @@ describe('onboarded', () => {
 
       expect.assertions(4);
       return store.dispatch(actions.onboarded()).catch(() => {
+        const allActions = store.getActions();
+
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Internal Server Error');
+        expect(allActions[2]).toEqual(failed);
+      });
+    });
+  });
+});
+
+describe('updateTour', () => {
+  let url;
+
+  beforeAll(() => {
+    url = window.api_urls.current_user_guided_tour();
+  });
+
+  describe('success', () => {
+    test('sets self_guided_tour_enabled', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'testuser', self_guided_tour_enabled: true };
+      fetchMock.postOnce(url, user);
+      const started = { type: 'TOUR_UPDATE_REQUESTED' };
+      const succeeded = {
+        type: 'TOUR_UPDATE_SUCCEEDED',
+        payload: user,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.updateTour()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
+  });
+
+  describe('error', () => {
+    test('dispatches TOUR_UPDATE_FAILED action', () => {
+      const store = storeWithThunk({});
+      fetchMock.postOnce(url, 500);
+      const started = { type: 'TOUR_UPDATE_REQUESTED' };
+      const failed = { type: 'TOUR_UPDATE_FAILED' };
+
+      expect.assertions(4);
+      return store.dispatch(actions.updateTour()).catch(() => {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
