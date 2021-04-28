@@ -4,17 +4,20 @@ import React, { ComponentProps } from 'react';
 import EpicTableComponent from '~js/components/epics/table';
 import { Epic } from '~js/store/epics/reducer';
 
+import { withRedux } from '../../decorators';
 import {
   sampleEpic1,
   sampleEpic2,
   sampleEpic3,
   sampleEpic4,
   sampleEpic5,
+  sampleUser1,
 } from '../../fixtures';
 
 export default {
   title: 'Epics/Table/Example',
   component: EpicTableComponent,
+  decorators: [withRedux({ user: sampleUser1 })],
 };
 
 const sampleEpics: { [key: string]: Epic } = {

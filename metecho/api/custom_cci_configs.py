@@ -25,7 +25,7 @@ class ProjectConfig(BaseProjectConfig):
 
     @property
     def config_project_local_path(self):
-        """ Metecho never uses the local path """
+        """Metecho never uses the local path"""
         return
 
     @property
@@ -58,5 +58,5 @@ class MetechoUniversalConfig(UniversalConfig):
 
     @property
     def config_global_path(self):
-        """ Metecho never uses the global path """
+        """Metecho never uses the global path"""
         return

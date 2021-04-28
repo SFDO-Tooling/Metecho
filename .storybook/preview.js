@@ -44,6 +44,7 @@ i18n.use(initReactI18next).init({
 
 // Mock in Django-provided API URLs
 window.api_urls = api_urls;
+window.GLOBALS = {};
 
 // Make all API requests return a `404`
 fetchMock.mock('*', 404);

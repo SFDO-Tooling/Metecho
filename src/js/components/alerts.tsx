@@ -2,7 +2,7 @@ import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
 import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -39,6 +39,13 @@ const TourAlert = () => {
   const hideAlert = useCallback(() => {
     setShowTour(false);
   }, []);
+
+  // When tour is turned on, show alert
+  useEffect(() => {
+    if (tourIsOn) {
+      setShowTour(true);
+    }
+  }, [tourIsOn]);
 
   return window.GLOBALS.ENABLE_WALKTHROUGHS && tourIsOn && showTour ? (
     <Alert

@@ -918,12 +918,15 @@ describe('<TaskDetail/>', () => {
         });
         fireEvent.click(getByText(trigger));
 
+        expect.assertions(1);
         if (typeof expected === 'string') {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect(getByText(expected)).toBeVisible();
           if (waitForRemoval) {
             await waitForElementToBeRemoved(getByText(expected));
           }
         } else {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect(expected).toHaveBeenCalledTimes(1);
         }
       },
