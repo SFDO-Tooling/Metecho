@@ -65,7 +65,7 @@
     "react-document-title": "^2.0.3",
     "react-dom": "^16.14.0",
     "react-fns": "^1.4.0",
-    "react-i18next": "^11.8.13",
+    "react-i18next": "^11.8.14",
     "react-joyride": "^2.3.0",
     "react-redux": "^7.2.3",
     "react-router-dom": "^5.2.0",
