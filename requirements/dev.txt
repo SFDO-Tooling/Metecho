@@ -23,7 +23,7 @@ babel==2.9.0
     # via sphinx
 backcall==0.2.0
     # via ipython
-black==21.4b1
+black==21.4b2
     # via -r requirements/dev.in
 certifi==2020.12.5
     # via
