@@ -441,7 +441,7 @@ export const sampleProject1 = {
   description_rendered: '<p>This is <em>safely</em> rendered Markdown.</p>',
   is_managed: false,
   branch_prefix: '',
-  github_users: [sampleGitHubUser1],
+  github_users: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
   currently_refreshing_gh_users: false,
   repo_image_url:
     'https://repository-images.githubusercontent.com/123456/123-456',
