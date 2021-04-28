@@ -116,7 +116,7 @@ parso==0.8.2
     # via jedi
 pathspec==0.8.1
     # via black
-pbr==5.5.1
+pbr==5.6.0
     # via stevedore
 pexpect==4.8.0
     # via ipython
