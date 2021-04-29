@@ -1,10 +1,9 @@
-import Badge from '@salesforce/design-system-react/components/badge';
 import Button from '@salesforce/design-system-react/components/button';
 import classNames from 'classnames';
-import i18n from 'i18next';
 import React from 'react';
 
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
+import ReadonlyBadge from '~js/components/githubUsers/readonlyBadge';
 import { GitHubUser } from '~js/store/user/reducer';
 
 const GitHubUserButton = ({
@@ -39,12 +38,8 @@ const GitHubUserButton = ({
           <span className="collaborator-username slds-m-right_x-small">
             {name}
           </span>
-          {showPermissions && !user.permissions?.push && (
-            <Badge
-              content={i18n.t('read-only')}
-              color="light"
-              className="slds-col_bump-left slds-m-right_x-small"
-            />
+          {showPermissions && user.permissions && !user.permissions.push && (
+            <ReadonlyBadge color="light" />
           )}
         </>
       }
