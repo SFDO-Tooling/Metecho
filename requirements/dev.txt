@@ -155,7 +155,7 @@ pytest-mock==3.5.1
     # via -r requirements/dev.in
 pytest-sugar==0.9.4
     # via -r requirements/dev.in
-pytest==6.2.3
+pytest==6.2.4
     # via
     #   -r requirements/dev.in
     #   pytest-asyncio
