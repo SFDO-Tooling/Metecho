@@ -80,7 +80,7 @@ cryptography==3.4.7
     #   secretstorage
     #   service-identity
     #   sfdo-template-helpers
-cumulusci==3.33.1
+cumulusci==3.34.1
     # via -r requirements/prod.in
 daphne==3.0.2
     # via channels
@@ -129,7 +129,7 @@ djangorestframework==3.12.4
     #   sfdo-template-helpers
 docutils==0.16
     # via cumulusci
-faker==8.1.0
+faker==8.1.1
     # via
     #   cumulusci
     #   snowfakery
@@ -141,6 +141,10 @@ github3-py==2.0.0
     # via -r requirements/prod.in
 github3.py==2.0.0
     # via cumulusci
+greenlet==1.0.0
+    # via
+    #   cumulusci
+    #   sqlalchemy
 gvgen==1.0
     # via
     #   cumulusci
@@ -165,7 +169,7 @@ idna==2.10
     #   hyperlink
     #   requests
     #   twisted
-importlib-metadata==3.10.1
+importlib-metadata==4.0.1
     # via
     #   cumulusci
     #   keyring
@@ -224,7 +228,7 @@ pydantic==1.8.1
     # via
     #   cumulusci
     #   snowfakery
-pyjwt[crypto]==2.0.1
+pyjwt[crypto]==2.1.0
     # via
     #   cumulusci
     #   django-allauth
@@ -275,13 +279,13 @@ requests==2.25.1
     #   simple-salesforce
 robotframework-lint==1.1
     # via cumulusci
-robotframework-pabot==1.11
+robotframework-pabot==1.13
     # via cumulusci
 robotframework-pythonlibcore==2.2.1
     # via
     #   cumulusci
     #   robotframework-seleniumlibrary
-robotframework-requests==0.8.2
+robotframework-requests==0.9.1
     # via cumulusci
 robotframework-seleniumlibrary==4.5.0
     # via cumulusci
@@ -333,11 +337,11 @@ six==1.15.0
     #   pyopenssl
     #   python-dateutil
     #   salesforce-bulk
-snowfakery==1.9
+snowfakery==1.10
     # via cumulusci
 soupsieve==2.2.1
     # via beautifulsoup4
-sqlalchemy==1.3.24
+sqlalchemy==1.4.11
     # via
     #   cumulusci
     #   snowfakery
@@ -357,6 +361,7 @@ typing-extensions==3.7.4.3
     # via
     #   cumulusci
     #   pydantic
+    #   snowfakery
 unicodecsv==0.14.1
     # via
     #   cumulusci
