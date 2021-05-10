@@ -83,12 +83,8 @@ describe('AssignTaskRole', () => {
   });
 
   test('can filter by name/username', () => {
-    const {
-      getAllByText,
-      getByPlaceholderText,
-      getByText,
-      queryByText,
-    } = setup();
+    const { getAllByText, getByPlaceholderText, getByText, queryByText } =
+      setup();
     const input = getByPlaceholderText('Search for user');
 
     expect(queryByText('No users found.')).toBeNull();

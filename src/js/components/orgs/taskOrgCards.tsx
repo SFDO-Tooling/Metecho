@@ -82,14 +82,11 @@ const TaskOrgCards = ({
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
-  const [confirmRemoveUserModalOpen, setConfirmRemoveUserModalOpen] = useState(
-    false,
-  );
+  const [confirmRemoveUserModalOpen, setConfirmRemoveUserModalOpen] =
+    useState(false);
   const [isWaitingToDeleteDevOrg, setIsWaitingToDeleteDevOrg] = useState(false);
-  const [
-    isWaitingToRemoveUser,
-    setIsWaitingToRemoveUser,
-  ] = useState<AssignedUserTracker | null>(null);
+  const [isWaitingToRemoveUser, setIsWaitingToRemoveUser] =
+    useState<AssignedUserTracker | null>(null);
   const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
     ORG_TYPE_TRACKER_DEFAULT,
   );
