@@ -30,10 +30,8 @@ const CreateTaskModal = ({
   closeCreateModal,
 }: Props) => {
   const isMounted = useIsMounted();
-  const {
-    showTransientMessage,
-    isShowingTransientMessage,
-  } = useTransientMessage();
+  const { showTransientMessage, isShowingTransientMessage } =
+    useTransientMessage();
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingBatch, setIsSavingBatch] = useState(false);
 
@@ -47,24 +45,19 @@ const CreateTaskModal = ({
     }
   };
 
-  const {
-    inputs,
-    errors,
-    handleInputChange,
-    handleSubmit,
-    resetForm,
-  } = useForm({
-    fields: {
-      name: '',
-      description: '',
-      org_config_name: DEFAULT_ORG_CONFIG_NAME,
-    },
-    objectType: OBJECT_TYPES.TASK,
-    additionalData: {
-      epic: epic.id,
-    },
-    onError,
-  });
+  const { inputs, errors, handleInputChange, handleSubmit, resetForm } =
+    useForm({
+      fields: {
+        name: '',
+        description: '',
+        org_config_name: DEFAULT_ORG_CONFIG_NAME,
+      },
+      objectType: OBJECT_TYPES.TASK,
+      additionalData: {
+        epic: epic.id,
+      },
+      onError,
+    });
 
   const closeModal = () => {
     closeCreateModal();
