@@ -169,14 +169,29 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                   disabled
                 />
               ) : (
-                <Button
-                  label={i18n.t('Re-Sync Projects')}
-                  variant="outline-brand"
-                  iconCategory="utility"
-                  iconName="refresh"
-                  iconPosition="left"
-                  onClick={doRefreshProjects}
-                />
+                <div className="slds-is-relative">
+                  <Button
+                    label={i18n.t('Re-Sync Projects')}
+                    variant="outline-brand"
+                    iconCategory="utility"
+                    iconName="refresh"
+                    iconPosition="left"
+                    onClick={doRefreshProjects}
+                  />
+                  <TourPopover
+                    align="right"
+                    heading={i18n.t('View an updated Project list')}
+                    body={
+                      <Trans i18nKey="tourUpdateProject">
+                        If you have recently been added as a collaborator on
+                        GitHub, you may not yet see your new Project in this
+                        list. First, make sure you are logged into the correct
+                        account. Next, use the resync button to get the most
+                        updated list of Projects.
+                      </Trans>
+                    }
+                  />
+                </div>
               )}
             </div>
           </div>
