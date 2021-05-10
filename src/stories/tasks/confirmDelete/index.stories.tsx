@@ -3,7 +3,6 @@ import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
-import { Org } from '~js/store/orgs/reducer';
 
 export default {
   title: 'Tasks/ConfirmDelete/Example',
