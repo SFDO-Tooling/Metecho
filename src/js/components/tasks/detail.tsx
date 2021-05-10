@@ -69,10 +69,8 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
-  const [
-    assignUserModalOpen,
-    setAssignUserModalOpen,
-  ] = useState<OrgTypes | null>(null);
+  const [assignUserModalOpen, setAssignUserModalOpen] =
+    useState<OrgTypes | null>(null);
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
     ORG_TYPE_TRACKER_DEFAULT,
   );

@@ -78,12 +78,10 @@ const EpicDetail = (props: RouteComponentProps) => {
   }, []);
 
   // "Confirm remove user from epic" modal related:
-  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
-    GitHubUser[] | null
-  >(null);
-  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
-    GitHubUser[] | null
-  >(null);
+  const [waitingToUpdateUsers, setWaitingToUpdateUsers] =
+    useState<GitHubUser[] | null>(null);
+  const [confirmRemoveUsers, setConfirmRemoveUsers] =
+    useState<GitHubUser[] | null>(null);
   const closeConfirmRemoveUsersModal = useCallback(() => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);

@@ -82,10 +82,8 @@ const reducer = (
       return tasks;
     }
     case 'CREATE_OBJECT_SUCCEEDED': {
-      const {
-        object,
-        objectType,
-      }: { object: Task; objectType?: ObjectTypes } = action.payload;
+      const { object, objectType }: { object: Task; objectType?: ObjectTypes } =
+        action.payload;
       switch (objectType) {
         case OBJECT_TYPES.TASK: {
           if (object) {
