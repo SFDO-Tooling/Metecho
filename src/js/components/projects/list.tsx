@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '~js/components/404';
 import ProjectListItem from '~js/components/projects/listItem';
+import TourPopover from '~js/components/tour/popover';
 import {
   LabelWithSpinner,
   SpinnerWrapper,
@@ -109,9 +110,26 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     <DocumentTitle title={`${i18n.t('Projects')} | ${i18n.t('Metecho')}`}>
       <>
         <PageHeader
-          className="page-header slds-p-around_x-large"
-          title={i18n.t('Select a Project')}
+          className="page-header slds-is-relative slds-p-around_x-large"
+          title={
+            <>
+              {i18n.t('Select a Project')}
+              <TourPopover
+                align="right"
+                heading={i18n.t('Begin exploring projects')}
+                body={
+                  <Trans i18nKey="tourSelectProject">
+                    Select a Salesforce Project from the list to begin viewing
+                    or contributing to the project. Projects are equivalent to
+                    Repositories in GitHub. They have Orgs, Tasks, and Epics. To
+                    learn more, continue the self-guided tour on a Project page.
+                  </Trans>
+                }
+              />
+            </>
+          }
         />
+
         <div className="slds-p-around_x-large">
           <div className="slds-grid slds-grid_vertical-align-start">
             <div
