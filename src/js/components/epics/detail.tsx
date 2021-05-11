@@ -3,6 +3,7 @@ import PageHeaderControl from '@salesforce/design-system-react/components/page-h
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -17,6 +18,7 @@ import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import { Step } from '~js/components/steps/stepsItem';
 import CreateTaskModal from '~js/components/tasks/createForm';
 import TaskTable from '~js/components/tasks/table';
+import TourPopover from '~js/components/tour/popover';
 import {
   CreateOrgModal,
   DeleteModal,
@@ -372,19 +374,47 @@ const EpicDetail = (props: RouteComponentProps) => {
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <PageOptions
-          modelType={OBJECT_TYPES.EPIC}
-          handleOptionSelect={handlePageOptionSelect}
-        />
+        <div className="slds-is-relative inline-container">
+          <PageOptions
+            modelType={OBJECT_TYPES.EPIC}
+            handleOptionSelect={handlePageOptionSelect}
+          />
+          <TourPopover
+            align="top"
+            heading={i18n.t('Edit & delete the Epic')}
+            body={
+              <Trans i18nKey="tourEditEpic">
+                Here you can change the name and description of this Epic. You
+                can also delete the Epic. Deleting an Epic deletes all the Tasks
+                and Orgs in the Epic as well.
+              </Trans>
+            }
+          />
+        </div>
       )}
       {branchLink && (
-        <ExternalLink
-          url={branchLink}
-          showButtonIcon
-          className="slds-button slds-button_outline-brand"
-        >
-          {branchLinkText}
-        </ExternalLink>
+        <div className="slds-is-relative inline-container">
+          <ExternalLink
+            url={branchLink}
+            showButtonIcon
+            className="slds-button slds-button_outline-brand"
+          >
+            {branchLinkText}
+          </ExternalLink>
+          <TourPopover
+            align="top"
+            heading={i18n.t('View GitHub branch for Epic')}
+            body={
+              <Trans i18nKey="tourViewBranch">
+                Select this button to leave Metecho and access the Epic’s branch
+                on GitHub. A “branch” in Git is a way to create a new feature or
+                make a modification to existing software but not affect the main
+                “trunk” of the Project. A branch is created in GitHub when a new
+                Epic or Task is created in Metecho.
+              </Trans>
+            }
+          />
+        </div>
       )}
     </PageHeaderControl>
   );
@@ -417,6 +447,20 @@ const EpicDetail = (props: RouteComponentProps) => {
     >
       <DetailPageLayout
         title={epic.name}
+        titlePopover={
+          <TourPopover
+            align="right"
+            heading={i18n.t('Epic name & GitHub link')}
+            body={
+              <Trans i18nKey="tourEpicName">
+                This is the name of the Epic you are viewing. Select the link
+                below the Epic name to leave Metecho and access the Project’s
+                branch on GitHub. To edit this name, click the gear icon. Epics
+                & Tasks are equivalent to GitHub branches.
+              </Trans>
+            }
+          />
+        }
         description={epic.description_rendered}
         headerUrl={headerUrl}
         headerUrlText={headerUrlText}
@@ -487,7 +531,24 @@ const EpicDetail = (props: RouteComponentProps) => {
           </>
         }
       >
-        <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
+        <div className="slds-is-relative">
+          <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
+          <TourPopover
+            align="right"
+            heading={i18n.t('Epic progress path')}
+            body={
+              <Trans i18nKey="tourEpicProgress">
+                An Epic starts its journey as Planned. The Epic progresses to In
+                Progress when a Developer creates a Dev Org for any Task in the
+                Epic. When all the Epic’s Tasks are complete, and the Epic is
+                ready to be submitted for review on GitHub, the Epic progresses
+                to Review. The Epic moves to Merged - Active when the Epic is
+                submitted for review on GitHub, and Merged - Complete when the
+                Epic has been added to the Project on GitHub.
+              </Trans>
+            }
+          />
+        </div>
         {submitButton}
         <div className="slds-m-bottom_large">
           <h2 className="slds-text-heading_medium slds-p-bottom_medium">
