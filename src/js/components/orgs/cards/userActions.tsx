@@ -68,7 +68,10 @@ const UserActions = ({
 
   if (userHasPermissions) {
     return <Button label={i18n.t('Assign')} onClick={openAssignUserModal} />;
-  } else if (type === ORG_TYPES.QA && currentUserId) {
+  } /* istanbul ignore else */ else if (
+    type === ORG_TYPES.QA &&
+    currentUserId
+  ) {
     return (
       <Button
         label={i18n.t('Self-Assign')}
@@ -76,6 +79,7 @@ const UserActions = ({
       />
     );
   }
+  /* istanbul ignore next */
   return null;
 };
 

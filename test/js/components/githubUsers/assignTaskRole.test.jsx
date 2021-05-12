@@ -70,7 +70,7 @@ describe('AssignTaskRole', () => {
     fireEvent.click(userBtn);
     fireEvent.click(getByText('Save'));
 
-    expect(setUser).toHaveBeenCalledWith(epicUsers[0], true);
+    expect(setUser).toHaveBeenCalledWith(epicUsers[0].id, true);
   });
 
   test('responds to github user click', () => {
@@ -79,7 +79,7 @@ describe('AssignTaskRole', () => {
     fireEvent.click(userBtn);
     fireEvent.click(getByText('Save'));
 
-    expect(setUser).toHaveBeenCalledWith(githubUsers[0], false);
+    expect(setUser).toHaveBeenCalledWith(githubUsers[0].id, false);
   });
 
   test('can filter by name/username', () => {
