@@ -67,7 +67,7 @@ coloredlogs==15.0
     # via cumulusci
 constantly==15.1.0
     # via twisted
-croniter==1.0.12
+croniter==1.0.13
     # via rq-scheduler
 cryptography==3.4.7
     # via
