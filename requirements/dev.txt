@@ -151,7 +151,7 @@ pytest-django==4.2.0
     # via -r requirements/dev.in
 pytest-factoryboy==2.1.0
     # via -r requirements/dev.in
-pytest-mock==3.5.1
+pytest-mock==3.6.1
     # via -r requirements/dev.in
 pytest-sugar==0.9.4
     # via -r requirements/dev.in
