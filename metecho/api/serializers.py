@@ -357,7 +357,6 @@ class TaskSerializer(serializers.ModelSerializer):
             ProjectCollaboratorValidator(
                 field="assigned_qa",
                 parent=lambda data: data["epic"].project,
-                enforce_push_permission=True,
             ),
             ProjectCollaboratorValidator(
                 field="assigned_dev",

@@ -35,7 +35,7 @@ const AssignTaskRoleModal = ({
   isOpen: boolean;
   isRefreshingUsers: boolean;
   onRequestClose: () => void;
-  setUser: (user: GitHubUser | null, shouldAlertAssignee: boolean) => void;
+  setUser: (user: string | null, shouldAlertAssignee: boolean) => void;
 }) => {
   const currentUser = useSelector(selectUserState) as User;
   const [selection, setSelection] = useState<GitHubUser | null>(null);
@@ -50,13 +50,17 @@ const AssignTaskRoleModal = ({
       ['desc', 'asc'],
     );
   const validEpicUsers = sort(
-    epicUsers.filter((u) => u.permissions?.push && u.id !== selectedUser?.id),
+    epicUsers.filter(
+      (u) =>
+        (u.permissions?.push || orgType === ORG_TYPES.QA) &&
+        u.id !== selectedUser?.id,
+    ),
   );
   const epicUserIds = validEpicUsers.map((u) => u.id);
   const validGitHubUsers = sort(
     githubUsers.filter(
       (u) =>
-        u.permissions?.push &&
+        (u.permissions?.push || orgType === ORG_TYPES.QA) &&
         u.id !== selectedUser?.id &&
         !epicUserIds.includes(u.id),
     ),
@@ -102,7 +106,7 @@ const AssignTaskRoleModal = ({
   const handleSave = () => {
     /* istanbul ignore else */
     if (selection) {
-      setUser(selection, shouldAlertAssignee);
+      setUser(selection.id, shouldAlertAssignee);
     }
     handleClose();
   };

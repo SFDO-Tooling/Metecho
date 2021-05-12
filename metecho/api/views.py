@@ -58,6 +58,8 @@ class RepoPushPermissionMixin:
         return super().perform_create(serializer)
 
     def perform_update(self, serializer):
+        # TODO: readonly users can assign/unassign themselves as `task.assigned_qa`
+        # TODO: readonly users can remove themselves from `epic.github_users` list
         self.check_push_permission(serializer.instance)
         return super().perform_update(serializer)
 

@@ -709,6 +709,7 @@ def submit_review(*, user, task, data, originating_user_id):
         # GitHub has with emoji in status descriptions
         printable = set(string.printable)
         filtered_notes = "".join(filter(lambda c: c in printable, notes))
+        # TODO: readonly users should be able to take this action
         repository.create_status(
             review_sha,
             state_for_status,
