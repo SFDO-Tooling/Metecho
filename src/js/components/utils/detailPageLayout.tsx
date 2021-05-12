@@ -2,8 +2,10 @@ import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
 import React, { ReactNode } from 'react';
+import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import TourPopover from '~js/components/tour/popover';
 import { ExternalLink, PageDescription } from '~js/components/utils';
 import routes from '~js/utils/routes';
 
@@ -66,34 +68,49 @@ const DetailPageLayout = ({
           ) : null
         }
       />
-      <div
-        className="slds-p-horizontal_x-large
+      <div className="slds-is-relative">
+        <div
+          className="slds-p-horizontal_x-large
           slds-p-top_x-small
           metecho-breadcrumb
           slds-truncate"
-      >
-        <BreadCrumb
-          trail={[
-            <Link to={routes.home()} key="home">
-              {i18n.t('Home')}
-            </Link>,
-          ].concat(
-            breadcrumb.map((crumb, idx) => {
-              if (crumb.url) {
+        >
+          <BreadCrumb
+            trail={[
+              <Link to={routes.home()} key="home">
+                {i18n.t('Home')}
+              </Link>,
+            ].concat(
+              breadcrumb.map((crumb, idx) => {
+                if (crumb.url) {
+                  return (
+                    <Link to={crumb.url} key={idx}>
+                      {crumb.name}
+                    </Link>
+                  );
+                }
                 return (
-                  <Link to={crumb.url} key={idx}>
+                  <div className="slds-p-horizontal_x-small" key={idx}>
                     {crumb.name}
-                  </Link>
+                  </div>
                 );
-              }
-              return (
-                <div className="slds-p-horizontal_x-small" key={idx}>
-                  {crumb.name}
-                </div>
-              );
-            }),
-          )}
-        />
+              }),
+            )}
+          />
+          <TourPopover
+            align="right"
+            heading={i18n.t('Navigation breadcrumb')}
+            body={
+              <Trans i18nKey="tourEpicBreadcrumb">
+                This “breadcrumb” list shows the hierarchy of objects in
+                Metecho. Projects contain Epics and Tasks. Epics contain Tasks.
+                You are currently viewing an Epic. Click the Project name to
+                jump back to that view. Click Home to see the list of all
+                Projects.
+              </Trans>
+            }
+          />
+        </div>
       </div>
       <div
         className="slds-p-around_x-large

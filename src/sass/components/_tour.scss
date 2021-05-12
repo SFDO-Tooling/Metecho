@@ -39,6 +39,11 @@
   position: absolute;
   top: -10px;
 
+  .epic-process & {
+    right: -10px;
+    top: -16px;
+  }
+
   .logo-popover & {
     top: unset;
   }
