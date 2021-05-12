@@ -415,8 +415,7 @@ class TestTaskSerializer:
         assert task.epic.github_users == ["existing_user"]
 
     @pytest.mark.parametrize("perms", ({}, {"push": False}))
-    @pytest.mark.parametrize("assignee", ("assigned_dev", "assigned_qa"))
-    def test_update__read_only_assignees(self, task_factory, perms, assignee):
+    def test_update__read_only_assignees(self, task_factory, perms):
         # Task assigness should not be added if they have read-only permissions
         task = task_factory(
             commits=["abc123"],
@@ -429,11 +428,11 @@ class TestTaskSerializer:
             "should_alert_dev": False,
             "should_alert_qa": False,
             "org_config_name": "dev",
-            assignee: "123456",
+            "assigned_dev": "123456",
         }
         serializer = TaskSerializer(task, data=data)
         assert not serializer.is_valid()
-        assert assignee in serializer.errors
+        assert "assigned_dev" in serializer.errors
 
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")

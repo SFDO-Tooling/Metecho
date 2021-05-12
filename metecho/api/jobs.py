@@ -682,8 +682,15 @@ def submit_review(*, user, task, data, originating_user_id):
             raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
 
         repo_id = task.get_repo_id()
-        repository = get_repo_info(user, repo_id=repo_id)
-        pr = repository.pull_request(task.pr_number)
+        project = task.epic.project
+        repo_as_user = get_repo_info(user, repo_id=repo_id)
+        repo_as_app = get_repo_info(
+            None,
+            repo_owner=project.repo_owner,
+            repo_name=project.repo_name,
+            repo_id=repo_id,
+        )
+        pr = repo_as_user.pull_request(task.pr_number)
 
         # The values in this dict are the valid values for the
         # `state` arg to repository.create_status. We are not
@@ -709,8 +716,7 @@ def submit_review(*, user, task, data, originating_user_id):
         # GitHub has with emoji in status descriptions
         printable = set(string.printable)
         filtered_notes = "".join(filter(lambda c: c in printable, notes))
-        # TODO: readonly users should be able to take this action
-        repository.create_status(
+        repo_as_app.create_status(
             review_sha,
             state_for_status,
             target_url=target_url,
