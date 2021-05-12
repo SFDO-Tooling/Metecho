@@ -312,7 +312,7 @@ selenium==3.141.0
     #   robotframework-seleniumlibrary
 sentry-sdk==1.0.0
     # via -r requirements/prod.in
-service-identity==18.1.0
+service-identity==21.1.0
     # via
     #   -r requirements/prod.in
     #   twisted
@@ -333,6 +333,7 @@ six==1.15.0
     #   pyopenssl
     #   python-dateutil
     #   salesforce-bulk
+    #   service-identity
 snowfakery==1.9
     # via cumulusci
 soupsieve==2.2.1
