@@ -703,7 +703,7 @@ const TaskDetail = (props: RouteComponentProps) => {
               />
             </div>
             {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
-              <div className="slds-m-bottom_x-large metecho-secondary-block">
+              <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative">
                 <TaskStatusSteps
                   task={task}
                   orgs={taskOrgs}
@@ -712,6 +712,21 @@ const TaskDetail = (props: RouteComponentProps) => {
                   hasPermissions={project.has_push_permission}
                   isCreatingOrg={isCreatingOrg}
                   handleAction={handleStepAction}
+                />
+                <TourPopover
+                  align="left"
+                  heading={i18n.t('Wondering what to do next?')}
+                  body={
+                    <Trans i18nKey="tourTaskNextSteps">
+                      The Next Steps section is designed as a quick reference to
+                      guide you through the process from assigning a Developer
+                      to getting your work added to the Project on GitHub. The
+                      next step is indicated with a blue ring, and completed
+                      steps are checked. You can assign a Tester at any time.
+                      Many steps become a link when they are active, giving you
+                      a shortcut to take the next action.
+                    </Trans>
+                  }
                 />
               </div>
             ) : null}
@@ -772,12 +787,26 @@ const TaskDetail = (props: RouteComponentProps) => {
                   </div>
                 </div>
               ) : (
-                <Button
-                  label={i18n.t('Create Scratch Org')}
-                  variant="outline-brand"
-                  onClick={openCreateOrgModal}
-                  disabled={epic.currently_creating_branch}
-                />
+                <div className="slds-is-relative">
+                  <Button
+                    label={i18n.t('Create Scratch Org')}
+                    variant="outline-brand"
+                    onClick={openCreateOrgModal}
+                    disabled={epic.currently_creating_branch}
+                  />
+                  <TourPopover
+                    align="right"
+                    heading={i18n.t('View & play with Task')}
+                    body={
+                      <Trans i18nKey="tourTaskCreateStratchOrg">
+                        Your Scratch Org is a temporary place for you to view
+                        the work on this Task. You can also use a Scratch Org to
+                        play with changes to the Task without affecting the
+                        Task.
+                      </Trans>
+                    }
+                  />
+                </div>
               )}
             </>
           ) : (
