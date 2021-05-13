@@ -9,6 +9,7 @@ import { addMinutes, isPast, parseISO } from 'date-fns';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -24,6 +25,7 @@ import { Step } from '~js/components/steps/stepsItem';
 import CaptureModal from '~js/components/tasks/capture';
 import TaskStatusPath from '~js/components/tasks/path';
 import TaskStatusSteps from '~js/components/tasks/steps';
+import TourPopover from '~js/components/tour/popover';
 import {
   CreateOrgModal,
   DeleteModal,
@@ -621,6 +623,20 @@ const TaskDetail = (props: RouteComponentProps) => {
     >
       <DetailPageLayout
         title={task.name}
+        titlePopover={
+          <TourPopover
+            align="right"
+            heading={i18n.t('Task name & GitHub link')}
+            body={
+              <Trans i18nKey="tourTaskName">
+                This is the name of the Task you are viewing. Select the link
+                below to leave Metecho and access this branch on GitHub. To edit
+                this name, click the gear icon. Epics & Tasks are equivalent to
+                GitHub branches.
+              </Trans>
+            }
+          />
+        }
         description={task.description_rendered}
         headerUrl={headerUrl}
         headerUrlText={headerUrlText}
