@@ -682,8 +682,25 @@ const TaskDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_x-large metecho-secondary-block">
+            <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative">
               <TaskStatusPath task={task} />
+              <TourPopover
+                align="top"
+                heading={i18n.t('Task progress path')}
+                body={
+                  <Trans i18nKey="tourTaskProgress">
+                    A Task starts its journey as <b>Planned</b>. When a Dev Org
+                    is created, the Task progresses to <b>In Progress</b>, and
+                    the Developer begins work. When the Developer submits
+                    changes for testing, the Task progress to <b>Test</b>. If
+                    the Developer retrieves new changes, the Task moves back to{' '}
+                    <b>In Progress</b>. The Task progresses to{' '}
+                    <b>Merged - Active</b> after the Tester approves the work,
+                    and <b>Merged - Complete</b> when the Task is added to the
+                    Project on GitHub.
+                  </Trans>
+                }
+              />
             </div>
             {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large metecho-secondary-block">
