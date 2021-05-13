@@ -567,13 +567,14 @@ const EpicDetail = (props: RouteComponentProps) => {
             heading={i18n.t('Epic progress path')}
             body={
               <Trans i18nKey="tourEpicProgress">
-                An Epic starts its journey as Planned. The Epic progresses to In
-                Progress when a Developer creates a Dev Org for any Task in the
-                Epic. When all the Epic’s Tasks are complete, and the Epic is
-                ready to be submitted for review on GitHub, the Epic progresses
-                to Review. The Epic moves to Merged - Active when the Epic is
-                submitted for review on GitHub, and Merged - Complete when the
-                Epic has been added to the Project on GitHub.
+                An Epic starts its journey as <b>Planned</b>. The Epic
+                progresses to <b>In Progress</b> when a Developer creates a Dev
+                Org for any Task in the Epic. When all the Epic’s Tasks are
+                complete, and the Epic is ready to be submitted for review on
+                GitHub, the Epic progresses to <b>Review</b>. The Epic moves to{' '}
+                <b>Merged - Active</b> when the Epic is submitted for review on
+                GitHub, and <b>Merged - Complete</b> when the Epic has been
+                added to the Project on GitHub.
               </Trans>
             }
           />

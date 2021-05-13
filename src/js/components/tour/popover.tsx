@@ -12,7 +12,7 @@ const TourPopover = ({
   body,
 }: {
   align: string;
-  heading: string;
+  heading: string | undefined;
   body: string | JSX.Element;
 }) => {
   const user = useSelector(selectUserState);
