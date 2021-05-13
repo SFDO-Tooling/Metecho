@@ -7,8 +7,9 @@ import PageHeaderControl from '@salesforce/design-system-react/components/page-h
 import classNames from 'classnames';
 import { addMinutes, isPast, parseISO } from 'date-fns';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -61,6 +62,25 @@ import {
 } from '~js/utils/constants';
 import { getBranchLink, getTaskCommits } from '~js/utils/helpers';
 import routes from '~js/utils/routes';
+
+const ResubmitButton = ({
+  canSubmit,
+  onClick,
+  children,
+}: {
+  canSubmit: boolean;
+  onClick: any;
+  children: ReactNode;
+}) => {
+  if (canSubmit) {
+    return (
+      <Button variant="link" onClick={onClick}>
+        {children}
+      </Button>
+    );
+  }
+  return <>{children}</>;
+};
 
 const TaskDetail = (props: RouteComponentProps) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
@@ -643,15 +663,41 @@ const TaskDetail = (props: RouteComponentProps) => {
             </div>
             {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large metecho-secondary-block">
-                <TaskStatusSteps
-                  task={task}
-                  orgs={taskOrgs}
-                  user={user}
-                  projectId={project.id}
-                  hasPermissions={project.has_push_permission}
-                  isCreatingOrg={isCreatingOrg}
-                  handleAction={handleStepAction}
-                />
+                {task.status === TASK_STATUSES.CANCELLED ? (
+                  <>
+                    <h3 className="slds-text-heading_medium slds-m-bottom_small">
+                      {i18n.t('Next Steps for this Task')}
+                    </h3>
+                    <p>
+                      <Trans i18nKey="taskCancelledHelp">
+                        This task was cancelled on GitHub before completion.
+                        Progress on this task has not been lost, but the task
+                        must be{' '}
+                        <ResubmitButton
+                          canSubmit={
+                            readyToSubmit &&
+                            project.has_push_permission &&
+                            !currentlySubmitting
+                          }
+                          onClick={openSubmitModal}
+                        >
+                          re-submitted for testing
+                        </ResubmitButton>{' '}
+                        before continuing work.
+                      </Trans>
+                    </p>
+                  </>
+                ) : (
+                  <TaskStatusSteps
+                    task={task}
+                    orgs={taskOrgs}
+                    user={user}
+                    projectId={project.id}
+                    hasPermissions={project.has_push_permission}
+                    isCreatingOrg={isCreatingOrg}
+                    handleAction={handleStepAction}
+                  />
+                )}
               </div>
             ) : null}
           </>

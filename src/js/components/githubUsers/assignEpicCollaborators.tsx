@@ -75,7 +75,7 @@ const AssignEpicCollaboratorsModal = ({
     [selection],
   );
 
-  // When modal is canceled, reset row selection
+  // When modal is cancelled, reset row selection
   const handleClose = () => {
     reset();
     onRequestClose();

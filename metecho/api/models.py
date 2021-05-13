@@ -49,7 +49,10 @@ ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA", "Playground")
 EPIC_STATUSES = Choices("Planned", "In progress", "Review", "Merged")
 TASK_STATUSES = Choices(
-    ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed")
+    ("Planned", "Planned"),
+    ("In progress", "In progress"),
+    ("Completed", "Completed"),
+    ("Cancelled", "Cancelled"),
 )
 TASK_REVIEW_STATUS = Choices(
     ("Approved", "Approved"), ("Changes requested", "Changes requested")
@@ -554,8 +557,13 @@ class Epic(
 
     def should_update_review(self):
         task_statuses = self.tasks.values_list("status", flat=True)
-        return task_statuses and all(
-            status == TASK_STATUSES.Completed for status in task_statuses
+        return (
+            task_statuses
+            and all(
+                status in [TASK_STATUSES.Completed, TASK_STATUSES.Cancelled]
+                for status in task_statuses
+            )
+            and any(status == TASK_STATUSES.Completed for status in task_statuses)
         )
 
     def should_update_merged(self):
@@ -792,12 +800,15 @@ class Task(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_closed(self, pr_number, *, originating_user_id):
+        self.status = TASK_STATUSES.Cancelled
         self.pr_number = pr_number
         self.pr_is_open = False
+        self.review_valid = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_opened(self, pr_number, *, originating_user_id):
+        self.status = TASK_STATUSES["In progress"]
         self.pr_number = pr_number
         self.pr_is_open = True
         self.pr_is_merged = False

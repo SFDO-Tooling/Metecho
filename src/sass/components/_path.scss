@@ -20,7 +20,7 @@ $color-background-path-complete-hover: $color-gray-6;
 .slds-path__nav {
   flex: auto;
 
-  .slds-is-active:not(.slds-is-won) {
+  .slds-is-active:not(.slds-is-won, .slds-is-lost) {
     background: $color-background-path-active;
 
     &:before,
@@ -50,7 +50,7 @@ $color-background-path-complete-hover: $color-gray-6;
     }
   }
 
-  .slds-is-complete:not(.slds-is-won) {
+  .slds-is-complete:not(.slds-is-won, .slds-is-lost) {
     background: $color-background-path-complete;
     flex-grow: 0.5;
 
@@ -74,7 +74,8 @@ $color-background-path-complete-hover: $color-gray-6;
     }
   }
 
-  .slds-is-won {
+  .slds-is-won,
+  .slds-is-lost {
     .slds-path__link {
       color: $color-text-brand-primary;
     }
