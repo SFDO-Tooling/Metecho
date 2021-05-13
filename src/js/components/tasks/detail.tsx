@@ -506,19 +506,47 @@ const TaskDetail = (props: RouteComponentProps) => {
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <PageOptions
-          modelType={OBJECT_TYPES.TASK}
-          handleOptionSelect={handlePageOptionSelect}
-        />
+        <div className="slds-is-relative inline-container">
+          <PageOptions
+            modelType={OBJECT_TYPES.TASK}
+            handleOptionSelect={handlePageOptionSelect}
+          />
+          <TourPopover
+            align="left"
+            heading={i18n.t('Edit & delete the Task')}
+            body={
+              <Trans i18nKey="tourEditTask">
+                Here you can change the name and description of this Task. You
+                can also delete the Task. Deleting a Task deletes all the Orgs
+                in the Task as well.
+              </Trans>
+            }
+          />
+        </div>
       )}
       {branchLink && (
-        <ExternalLink
-          url={branchLink}
-          showButtonIcon
-          className="slds-button slds-button_outline-brand"
-        >
-          {branchLinkText}
-        </ExternalLink>
+        <div className="slds-is-relative inline-container">
+          <ExternalLink
+            url={branchLink}
+            showButtonIcon
+            className="slds-button slds-button_outline-brand"
+          >
+            {branchLinkText}
+          </ExternalLink>
+          <TourPopover
+            align="left"
+            heading={i18n.t('View GitHub pull request')}
+            body={
+              <Trans i18nKey="tourViewTaskPullRequest">
+                Select this button to leave Metecho and access the Task’s pull
+                request on GitHub. A pull request in GitHub is a way to ask the
+                maintainers of the Project to pull in some code. A pull request
+                is created for a Task branch in GitHub when the Developer
+                submits changes for testing in Metecho.
+              </Trans>
+            }
+          />
+        </div>
       )}
     </PageHeaderControl>
   );

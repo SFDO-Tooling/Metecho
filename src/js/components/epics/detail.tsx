@@ -405,7 +405,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             align="top"
             heading={i18n.t('View GitHub branch for Epic')}
             body={
-              <Trans i18nKey="tourViewBranch">
+              <Trans i18nKey="tourViewEpicBranch">
                 Select this button to leave Metecho and access the Epic’s branch
                 on GitHub. A “branch” in Git is a way to create a new feature or
                 make a modification to existing software but not affect the main
