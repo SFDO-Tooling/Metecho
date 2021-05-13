@@ -37,7 +37,8 @@
 
 .popover-wrapper {
   position: absolute;
-  top: -10px;
+  top: -12px;
+  z-index: 1;
 
   .epic-process & {
     right: -10px;
@@ -46,6 +47,19 @@
 
   .logo-popover & {
     top: unset;
+  }
+
+  .project-placeholder & {
+    top: 15px;
+  }
+
+  .project-list & {
+    right: 10px;
+  }
+
+  .vertical-right & {
+    right: 2px;
+    top: -20px;
   }
 
   .page-title & {

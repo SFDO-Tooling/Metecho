@@ -374,13 +374,13 @@ const EpicDetail = (props: RouteComponentProps) => {
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <div className="slds-is-relative inline-container">
+        <div className="slds-is-relative inline-container vertical-right">
           <PageOptions
             modelType={OBJECT_TYPES.EPIC}
             handleOptionSelect={handlePageOptionSelect}
           />
           <TourPopover
-            align="top"
+            align="left"
             heading={i18n.t('Edit & delete the Epic')}
             body={
               <Trans i18nKey="tourEditEpic">
@@ -393,7 +393,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         </div>
       )}
       {branchLink && (
-        <div className="slds-is-relative inline-container">
+        <div className="slds-is-relative inline-container vertical-right">
           <ExternalLink
             url={branchLink}
             showButtonIcon
@@ -402,7 +402,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             {branchLinkText}
           </ExternalLink>
           <TourPopover
-            align="top"
+            align="bottom right"
             heading={i18n.t('View GitHub branch for Epic')}
             body={
               <Trans i18nKey="tourViewEpicBranch">

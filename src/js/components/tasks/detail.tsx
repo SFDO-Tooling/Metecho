@@ -506,7 +506,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <div className="slds-is-relative inline-container">
+        <div className="slds-is-relative inline-container vertical-right">
           <PageOptions
             modelType={OBJECT_TYPES.TASK}
             handleOptionSelect={handlePageOptionSelect}
@@ -525,7 +525,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         </div>
       )}
       {branchLink && (
-        <div className="slds-is-relative inline-container">
+        <div className="slds-is-relative inline-container vertical-right">
           <ExternalLink
             url={branchLink}
             showButtonIcon
@@ -534,7 +534,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             {branchLinkText}
           </ExternalLink>
           <TourPopover
-            align="left"
+            align="bottom right"
             heading={i18n.t('View GitHub pull request')}
             body={
               <Trans i18nKey="tourViewTaskPullRequest">

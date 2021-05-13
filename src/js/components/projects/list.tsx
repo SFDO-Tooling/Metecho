@@ -96,7 +96,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     }
     default: {
       contents = (
-        <div className="slds-grid slds-wrap slds-grid_pull-padded-small slds-is-relative">
+        <div className="slds-grid slds-wrap slds-grid_pull-padded-small slds-is-relative project-list">
           <TourPopover
             align="right"
             heading={i18n.t('Metecho Project')}
@@ -122,7 +122,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     <DocumentTitle title={`${i18n.t('Projects')} | ${i18n.t('Metecho')}`}>
       <>
         <PageHeader
-          className="page-header slds-is-relative slds-p-around_x-large"
+          className="page-header slds-is-relative slds-p-around_x-large project-placeholder"
           title={
             <>
               {i18n.t('Select a Project')}
@@ -181,7 +181,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                   disabled
                 />
               ) : (
-                <div className="slds-is-relative">
+                <div className="slds-is-relative vertical-right">
                   <Button
                     label={i18n.t('Re-Sync Projects')}
                     variant="outline-brand"
