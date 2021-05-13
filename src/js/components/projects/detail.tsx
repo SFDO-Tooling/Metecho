@@ -302,7 +302,7 @@ const ProjectDetail = (
                 <TourPopover
                   align="right"
                   body={
-                    <Trans i18nKey="tourCreateEpic">
+                    <Trans i18nKey="tourCreateEpicPopover">
                       Create an Epic to make a group of related Tasks. Invite
                       multiple Collaborators to your Epic and assign people as
                       Developers & Testers for each Task. Epics are equivalent
