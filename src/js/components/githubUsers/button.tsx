@@ -10,11 +10,13 @@ const GitHubUserButton = ({
   user,
   isAssigned,
   isSelected,
+  badgeColor,
   ...props
 }: {
   user: GitHubUser;
   isAssigned?: boolean;
   isSelected?: boolean;
+  badgeColor?: string;
   [key: string]: any;
 }) => {
   const name = user.name ? `${user.name} (${user.login})` : user.login;
@@ -23,7 +25,7 @@ const GitHubUserButton = ({
       <GitHubUserAvatar user={user} />
       <span className="collaborator-username slds-m-right_x-small">{name}</span>
       {user.permissions && !user.permissions.push && (
-        <ReadonlyBadge color="light" />
+        <ReadonlyBadge color={badgeColor || 'default'} />
       )}
     </>
   );

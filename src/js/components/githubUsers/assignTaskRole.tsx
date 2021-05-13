@@ -160,7 +160,11 @@ const AssignTaskRoleModal = ({
             <h3 className="slds-text-heading_small slds-m-bottom_x-small">
               {i18n.t('Currently Assigned')}
             </h3>
-            <GitHubUserButton user={selectedUser} isAssigned />
+            <GitHubUserButton
+              user={selectedUser}
+              isAssigned
+              badgeColor="light"
+            />
           </div>
           <hr className="slds-m-vertical_none slds-m-horizontal_medium" />
         </>
