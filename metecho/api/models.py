@@ -556,6 +556,11 @@ class Epic(
         )
 
     def should_update_review(self):
+        """
+        Returns truthy if:
+            - there is at least one completed task
+            - all tasks are completed or canceled
+        """
         task_statuses = self.tasks.values_list("status", flat=True)
         return (
             task_statuses
