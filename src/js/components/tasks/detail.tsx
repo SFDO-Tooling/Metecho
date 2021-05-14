@@ -682,10 +682,10 @@ const TaskDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative">
+            <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative right-edge">
               <TaskStatusPath task={task} />
               <TourPopover
-                align="top"
+                align="left"
                 heading={i18n.t('Task progress path')}
                 body={
                   <Trans i18nKey="tourTaskProgress">
@@ -703,7 +703,7 @@ const TaskDetail = (props: RouteComponentProps) => {
               />
             </div>
             {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
-              <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative">
+              <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative next-steps">
                 <TaskStatusSteps
                   task={task}
                   orgs={taskOrgs}
@@ -714,7 +714,7 @@ const TaskDetail = (props: RouteComponentProps) => {
                   handleAction={handleStepAction}
                 />
                 <TourPopover
-                  align="left"
+                  align="top"
                   heading={i18n.t('Wondering what to do next?')}
                   body={
                     <Trans i18nKey="tourTaskNextSteps">

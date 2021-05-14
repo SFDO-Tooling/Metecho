@@ -534,7 +534,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 />
               ) : null}
             </div>
-            <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative">
+            <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative next-steps">
               <EpicStatusSteps
                 epic={epic}
                 tasks={tasks || []}
@@ -544,7 +544,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 handleAction={handleStepAction}
               />
               <TourPopover
-                align="left"
+                align="top"
                 heading={i18n.t('Wondering what to do next?')}
                 body={
                   <Trans i18nKey="tourEpicNextSteps">
@@ -560,7 +560,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           </>
         }
       >
-        <div className="slds-is-relative">
+        <div className="slds-is-relative right-edge">
           <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
           <TourPopover
             align="right"

@@ -39,6 +39,10 @@
   position: absolute;
   top: -12px;
 
+  .metecho-breadcrumb & {
+    left: 35px;
+  }
+
   .epic-process & {
     right: -10px;
     top: -16px;
@@ -48,12 +52,16 @@
     top: unset;
   }
 
+  .next-steps & {
+    left: 200px;
+  }
+
   .project-placeholder & {
     top: 15px;
   }
 
   .project-list & {
-    right: 10px;
+    left: 5%;
   }
 
   .right-edge & {

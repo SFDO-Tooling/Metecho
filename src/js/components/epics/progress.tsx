@@ -28,7 +28,7 @@ const EpicProgress = ({ range }: Props) => {
         color={value === 100 ? 'success' : undefined}
       />
       <TourPopover
-        align="bottom right"
+        align="right"
         heading={i18n.t('Task progress bar')}
         body={
           <Trans i18nKey="tourTaskProgress">
