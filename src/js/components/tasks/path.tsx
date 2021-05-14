@@ -12,8 +12,8 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
   const steps = [
     i18n.t('Planned'),
     i18n.t('In progress'),
-    task.status === TASK_STATUSES.CANCELLED
-      ? i18n.t('Cancelled')
+    task.status === TASK_STATUSES.CANCELED
+      ? i18n.t('Canceled')
       : i18n.t('Test'),
     i18n.t('Merged'),
   ];
@@ -36,7 +36,7 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
       activeIdx = 3;
       isCompleted = true;
       break;
-    case TASK_STATUSES.CANCELLED:
+    case TASK_STATUSES.CANCELED:
       activeIdx = 2;
       isLost = true;
       break;

@@ -5,18 +5,18 @@ from django.db import migrations, models
 from metecho.api.models import TASK_STATUSES
 
 
-def set_task_cancelled_statuses(apps, schema_editor):
+def set_task_canceled_statuses(apps, schema_editor):
     Task = apps.get_model("api", "Task")
     for instance in Task.objects.filter(
         status=TASK_STATUSES["In progress"], pr_is_open=False, pr_number__isnull=False
     ):
-        instance.status = TASK_STATUSES.Cancelled
+        instance.status = TASK_STATUSES.Canceled
         instance.save()
 
 
-def unset_task_cancelled_statuses(apps, schema_editor):
+def unset_task_canceled_statuses(apps, schema_editor):
     Task = apps.get_model("api", "Task")
-    for instance in Task.objects.filter(status=TASK_STATUSES.Cancelled):
+    for instance in Task.objects.filter(status=TASK_STATUSES.Canceled):
         instance.status = TASK_STATUSES["In progress"]
         instance.save()
 
@@ -36,13 +36,11 @@ class Migration(migrations.Migration):
                     ("Planned", "Planned"),
                     ("In progress", "In progress"),
                     ("Completed", "Completed"),
-                    ("Cancelled", "Cancelled"),
+                    ("Canceled", "Canceled"),
                 ],
                 default="Planned",
                 max_length=16,
             ),
         ),
-        migrations.RunPython(
-            set_task_cancelled_statuses, unset_task_cancelled_statuses
-        ),
+        migrations.RunPython(set_task_canceled_statuses, unset_task_canceled_statuses),
     ]

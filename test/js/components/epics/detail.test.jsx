@@ -205,7 +205,7 @@ const defaultState = {
         name: 'Task 8',
         slug: 'task-8',
         epic: 'epic1',
-        status: 'Cancelled',
+        status: 'Canceled',
         pr_is_open: false,
       },
     ],

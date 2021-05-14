@@ -29,7 +29,7 @@ describe('getBranchLink', () => {
       {
         pr_url: 'pr',
         pr_is_open: false,
-        status: TASK_STATUSES.CANCELLED,
+        status: TASK_STATUSES.CANCELED,
         has_unmerged_commits: true,
         branch_diff_url: 'diff',
       },

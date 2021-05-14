@@ -108,8 +108,8 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
       displayStatus = i18n.t('Complete');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
       break;
-    case TASK_STATUSES.CANCELLED:
-      displayStatus = i18n.t('Cancelled');
+    case TASK_STATUSES.CANCELED:
+      displayStatus = i18n.t('Canceled');
       icon = (
         <ProgressRing
           value={0}
@@ -259,7 +259,7 @@ const TaskTable = ({
     [TASK_STATUSES.IN_PROGRESS]: 1,
     [TASK_STATUSES.PLANNED]: 2,
     [TASK_STATUSES.COMPLETED]: 3,
-    [TASK_STATUSES.CANCELLED]: 4,
+    [TASK_STATUSES.CANCELED]: 4,
   };
   const taskDefaultSort = sortBy(tasks, [
     (item) => statusOrder[item.status],

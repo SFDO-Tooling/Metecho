@@ -663,14 +663,14 @@ const TaskDetail = (props: RouteComponentProps) => {
             </div>
             {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
               <div className="slds-m-bottom_x-large metecho-secondary-block">
-                {task.status === TASK_STATUSES.CANCELLED ? (
+                {task.status === TASK_STATUSES.CANCELED ? (
                   <>
                     <h3 className="slds-text-heading_medium slds-m-bottom_small">
                       {i18n.t('Next Steps for this Task')}
                     </h3>
                     <p>
-                      <Trans i18nKey="taskCancelledHelp">
-                        This task was cancelled on GitHub before completion.
+                      <Trans i18nKey="taskCanceledHelp">
+                        This task was canceled on GitHub before completion.
                         Progress on this task has not been lost, but the task
                         must be{' '}
                         <ResubmitButton

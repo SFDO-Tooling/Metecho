@@ -489,7 +489,7 @@ describe('<TaskDetail/>', () => {
                 has_unmerged_commits: true,
                 pr_url: 'my-pr-url',
                 pr_is_open: false,
-                status: TASK_STATUSES.CANCELLED,
+                status: TASK_STATUSES.CANCELED,
               },
             ],
           },
@@ -521,7 +521,7 @@ describe('<TaskDetail/>', () => {
                 has_unmerged_commits: true,
                 pr_url: 'my-pr-url',
                 pr_is_open: false,
-                status: TASK_STATUSES.CANCELLED,
+                status: TASK_STATUSES.CANCELED,
               },
             ],
           },
@@ -529,7 +529,7 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('re-submitted for testing')).toBeNull();
-      expect(getByText('Cancelled')).toBeVisible();
+      expect(getByText('Canceled')).toBeVisible();
     });
   });
 

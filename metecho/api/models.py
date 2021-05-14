@@ -52,7 +52,7 @@ TASK_STATUSES = Choices(
     ("Planned", "Planned"),
     ("In progress", "In progress"),
     ("Completed", "Completed"),
-    ("Cancelled", "Cancelled"),
+    ("Canceled", "Canceled"),
 )
 TASK_REVIEW_STATUS = Choices(
     ("Approved", "Approved"), ("Changes requested", "Changes requested")
@@ -560,7 +560,7 @@ class Epic(
         return (
             task_statuses
             and all(
-                status in [TASK_STATUSES.Completed, TASK_STATUSES.Cancelled]
+                status in [TASK_STATUSES.Completed, TASK_STATUSES.Canceled]
                 for status in task_statuses
             )
             and any(status == TASK_STATUSES.Completed for status in task_statuses)
@@ -800,7 +800,7 @@ class Task(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_closed(self, pr_number, *, originating_user_id):
-        self.status = TASK_STATUSES.Cancelled
+        self.status = TASK_STATUSES.Canceled
         self.pr_number = pr_number
         self.pr_is_open = False
         self.review_valid = False
