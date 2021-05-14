@@ -2,7 +2,6 @@ import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
@@ -15,7 +14,6 @@ import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
 import RefreshOrgModal from '~js/components/orgs/cards/refresh';
 import UserActions from '~js/components/orgs/cards/userActions';
 import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
-import TourPopover from '~js/components/tour/popover';
 import { AppState } from '~js/store';
 import { Org } from '~js/store/orgs/reducer';
 import { selectProjectCollaborator } from '~js/store/projects/selectors';
@@ -181,23 +179,7 @@ const TaskOrgCard = ({
   );
 
   return (
-    <div
-      className="slds-size_1-of-1
-        slds-large-size_1-of-2
-        slds-p-around_x-small slds-is-relative"
-    >
-      <TourPopover
-        align="right"
-        heading={i18n.t('Developer & Dev Org')}
-        body={
-          <Trans i18nKey="tourTaskDevOrg">
-            A Developer is the person assigned to do the work of a Task.
-            Developers create Dev Orgs for their work, retrieve their changes,
-            and then submit their work for someone to test. Use the drop down
-            menu to change or remove the Developer.
-          </Trans>
-        }
-      />
+    <div>
       <Card
         className={classNames({ 'has-nested-card': assignedUser })}
         bodyClassName="slds-card__body_inner"

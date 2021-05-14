@@ -38,7 +38,6 @@
 .popover-wrapper {
   position: absolute;
   top: -12px;
-  z-index: 1;
 
   .epic-process & {
     right: -10px;
@@ -55,6 +54,10 @@
 
   .project-list & {
     right: 10px;
+  }
+
+  .right-edge & {
+    right: 0;
   }
 
   .vertical-right & {

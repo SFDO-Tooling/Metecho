@@ -1,10 +1,12 @@
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import TaskOrgCard from '~js/components/orgs/taskOrgCard';
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
 import ConfirmRemoveUserModal from '~js/components/tasks/confirmRemoveUserModal';
+import TourPopover from '~js/components/tour/popover';
 import ConnectModal from '~js/components/user/connect';
 import { ConnectionInfoModal } from '~js/components/user/info';
 import { useIsMounted } from '~js/components/utils';
@@ -262,57 +264,94 @@ const TaskOrgCards = ({
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Team & Orgs')}</h2>
       <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
-        <TaskOrgCard
-          org={orgs[ORG_TYPES.DEV]}
-          type={ORG_TYPES.DEV}
-          user={user}
-          task={task}
-          projectId={projectId}
-          userHasPermissions={userHasPermissions}
-          epicUsers={epicUsers}
-          githubUsers={githubUsers}
-          epicCreatingBranch={epicCreatingBranch}
-          epicUrl={epicUrl}
-          repoUrl={repoUrl}
-          isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
-          isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
-          isRefreshingUsers={isRefreshingUsers}
-          assignUserModalOpen={assignUserModalOpen}
-          openAssignUserModal={openAssignDevModal}
-          closeAssignUserModal={closeAssignUserModal}
-          handleAssignUser={handleAssignUser}
-          handleCreate={handleCreate}
-          handleDelete={handleDelete}
-          handleCheckForOrgChanges={checkForOrgChanges}
-          openCaptureModal={openCaptureModal}
-        />
-        <TaskOrgCard
-          org={orgs[ORG_TYPES.QA]}
-          type={ORG_TYPES.QA}
-          user={user}
-          task={task}
-          projectId={projectId}
-          userHasPermissions={userHasPermissions}
-          epicUsers={epicUsers}
-          githubUsers={githubUsers}
-          epicCreatingBranch={epicCreatingBranch}
-          epicUrl={epicUrl}
-          repoUrl={repoUrl}
-          isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
-          isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
-          isRefreshingUsers={isRefreshingUsers}
-          assignUserModalOpen={assignUserModalOpen}
-          openAssignUserModal={openAssignTesterModal}
-          closeAssignUserModal={closeAssignUserModal}
-          handleAssignUser={handleAssignUser}
-          handleCreate={handleCreate}
-          handleDelete={handleDelete}
-          handleCheckForOrgChanges={checkForOrgChanges}
-          handleRefresh={doRefreshOrg}
-          openSubmitReviewModal={openSubmitReviewModal}
-          testOrgReadyForReview={testOrgReadyForReview}
-          testOrgSubmittingReview={testOrgSubmittingReview}
-        />
+        <div
+          className="slds-size_1-of-1
+        slds-large-size_1-of-2
+        slds-p-around_x-small slds-is-relative right-edge"
+        >
+          <TaskOrgCard
+            org={orgs[ORG_TYPES.DEV]}
+            type={ORG_TYPES.DEV}
+            user={user}
+            task={task}
+            projectId={projectId}
+            userHasPermissions={userHasPermissions}
+            epicUsers={epicUsers}
+            githubUsers={githubUsers}
+            epicCreatingBranch={epicCreatingBranch}
+            epicUrl={epicUrl}
+            repoUrl={repoUrl}
+            isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
+            isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
+            isRefreshingUsers={isRefreshingUsers}
+            assignUserModalOpen={assignUserModalOpen}
+            openAssignUserModal={openAssignDevModal}
+            closeAssignUserModal={closeAssignUserModal}
+            handleAssignUser={handleAssignUser}
+            handleCreate={handleCreate}
+            handleDelete={handleDelete}
+            handleCheckForOrgChanges={checkForOrgChanges}
+            openCaptureModal={openCaptureModal}
+          />
+          <TourPopover
+            align="right"
+            heading={i18n.t('Developer & Dev Org')}
+            body={
+              <Trans i18nKey="tourTaskDevOrg">
+                A Developer is the person assigned to do the work of a Task.
+                Developers create Dev Orgs for their work, retrieve their
+                changes, and then submit their work for someone to test. Use the
+                drop down menu to change or remove the Developer.
+              </Trans>
+            }
+          />
+        </div>
+        <div
+          className="slds-size_1-of-1
+        slds-large-size_1-of-2
+        slds-p-around_x-small slds-is-relative right-edge"
+        >
+          <TaskOrgCard
+            org={orgs[ORG_TYPES.QA]}
+            type={ORG_TYPES.QA}
+            user={user}
+            task={task}
+            projectId={projectId}
+            userHasPermissions={userHasPermissions}
+            epicUsers={epicUsers}
+            githubUsers={githubUsers}
+            epicCreatingBranch={epicCreatingBranch}
+            epicUrl={epicUrl}
+            repoUrl={repoUrl}
+            isCreatingOrg={isCreatingOrg[ORG_TYPES.QA]}
+            isDeletingOrg={isDeletingOrg[ORG_TYPES.QA]}
+            isRefreshingUsers={isRefreshingUsers}
+            assignUserModalOpen={assignUserModalOpen}
+            openAssignUserModal={openAssignTesterModal}
+            closeAssignUserModal={closeAssignUserModal}
+            handleAssignUser={handleAssignUser}
+            handleCreate={handleCreate}
+            handleDelete={handleDelete}
+            handleCheckForOrgChanges={checkForOrgChanges}
+            handleRefresh={doRefreshOrg}
+            openSubmitReviewModal={openSubmitReviewModal}
+            testOrgReadyForReview={testOrgReadyForReview}
+            testOrgSubmittingReview={testOrgSubmittingReview}
+          />
+          <TourPopover
+            align="right"
+            heading={i18n.t('Tester & Test Org')}
+            body={
+              <Trans i18nKey="tourTaskTestOrg">
+                Assign yourself or someone else as Tester on this Task. Testers
+                create a Test Org to view the Developer’s work, and then approve
+                the work or request changes that must be addressed before the
+                Task can be completed. Use the drop down menu to delete or
+                reassign.
+              </Trans>
+            }
+          />
+        </div>
       </div>
       <ConnectModal
         user={user}
