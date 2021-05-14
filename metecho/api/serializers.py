@@ -432,11 +432,11 @@ class TaskAssigneeSerializer(serializers.Serializer):
         user = self.context["request"].user
         user_id = str(user.id)
         if "assigned_dev" in data:
-            task.assigned_dev = data["assigned_dev"]
             self._handle_reassign("dev", task, data, user, originating_user_id=user_id)
+            task.assigned_dev = data["assigned_dev"]
         if "assigned_qa" in data:
-            task.assigned_qa = data["assigned_qa"]
             self._handle_reassign("qa", task, data, user, originating_user_id=user_id)
+            task.assigned_qa = data["assigned_qa"]
         task.save()
         return task
 
