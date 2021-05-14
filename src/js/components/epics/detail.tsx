@@ -207,8 +207,8 @@ const EpicDetail = (props: RouteComponentProps) => {
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
+          url: window.api_urls.task_assignees(task.id),
           data: {
-            ...task,
             [userType]: assignee,
             [alertType]: shouldAlertAssignee,
           },

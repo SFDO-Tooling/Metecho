@@ -292,9 +292,6 @@ class TaskSerializer(serializers.ModelSerializer):
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
 
-    should_alert_dev = serializers.BooleanField(write_only=True, required=False)
-    should_alert_qa = serializers.BooleanField(write_only=True, required=False)
-
     class Meta:
         model = Task
         fields = (
@@ -322,30 +319,30 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_is_open",
             "assigned_dev",
             "assigned_qa",
-            "should_alert_dev",
-            "should_alert_qa",
             "currently_submitting_review",
             "org_config_name",
         )
-        extra_kwargs = {
-            "slug": {"read_only": True},
-            "old_slugs": {"read_only": True},
-            "has_unmerged_commits": {"read_only": True},
-            "currently_creating_branch": {"read_only": True},
-            "currently_creating_pr": {"read_only": True},
-            "branch_url": {"read_only": True},
-            "commits": {"read_only": True},
-            "origin_sha": {"read_only": True},
-            "branch_diff_url": {"read_only": True},
-            "pr_url": {"read_only": True},
-            "review_submitted_at": {"read_only": True},
-            "review_valid": {"read_only": True},
-            "review_status": {"read_only": True},
-            "review_sha": {"read_only": True},
-            "status": {"read_only": True},
-            "pr_is_open": {"read_only": True},
-            "currently_submitting_review": {"read_only": True},
-        }
+        read_only_fields = (
+            "slug",
+            "old_slugs",
+            "has_unmerged_commits",
+            "currently_creating_branch",
+            "currently_creating_pr",
+            "branch_url",
+            "commits",
+            "origin_sha",
+            "branch_diff_url",
+            "pr_url",
+            "review_submitted_at",
+            "review_valid",
+            "review_status",
+            "review_sha",
+            "status",
+            "pr_is_open",
+            "currently_submitting_review",
+            "assigned_dev",
+            "assigned_qa",
+        )
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Task.objects.all(),
@@ -353,15 +350,6 @@ class TaskSerializer(serializers.ModelSerializer):
                 message=FormattableDict(
                     "name", _("A task with this name already exists.")
                 ),
-            ),
-            ProjectCollaboratorValidator(
-                field="assigned_qa",
-                parent=lambda data: data["epic"].project,
-            ),
-            ProjectCollaboratorValidator(
-                field="assigned_dev",
-                parent=lambda data: data["epic"].project,
-                enforce_push_permission=True,
             ),
         )
 
@@ -397,21 +385,60 @@ class TaskSerializer(serializers.ModelSerializer):
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
 
-    def create(self, validated_data):
-        validated_data.pop("should_alert_dev", None)
-        validated_data.pop("should_alert_qa", None)
-        return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        user = getattr(self.context.get("request"), "user", None)
-        originating_user_id = str(user.id) if user else None
-        self._handle_reassign(
-            "dev", instance, validated_data, user, originating_user_id
-        )
-        self._handle_reassign("qa", instance, validated_data, user, originating_user_id)
-        validated_data.pop("should_alert_dev", None)
-        validated_data.pop("should_alert_qa", None)
-        return super().update(instance, validated_data)
+class TaskAssigneeSerializer(serializers.Serializer):
+    assigned_dev = serializers.CharField(allow_null=True, required=False)
+    assigned_qa = serializers.CharField(allow_null=True, required=False)
+    should_alert_dev = serializers.BooleanField(required=False)
+    should_alert_qa = serializers.BooleanField(required=False)
+
+    def validate(self, data):
+        if "assigned_qa" not in data and "assigned_dev" not in data:
+            raise serializers.ValidationError(
+                "You must assign a developer, tester, or both"
+            )
+        return super().validate(data)
+
+    def validate_assigned_dev(self, new_dev):
+        user = self.context["request"].user
+        task: Task = self.instance
+        if not task.has_push_permission(user):
+            raise serializers.ValidationError(
+                "You don't have permissions to change the assigned developer"
+            )
+        if new_dev and not task.epic.project.is_collaborator(new_dev):
+            raise serializers.ValidationError(
+                f"User is not a valid GitHub collaborator: {new_dev}"
+            )
+        return new_dev
+
+    def validate_assigned_qa(self, new_qa):
+        user = self.context["request"].user
+        task: Task = self.instance
+        if not task.has_push_permission(user):
+            is_removing_self = new_qa is None and task.assigned_qa == user.github_id
+            is_assigning_self = new_qa == user.github_id and task.assigned_qa is None
+            if not (is_removing_self or is_assigning_self):
+                raise serializers.ValidationError(
+                    "You can only assign/remove yourself as a tester"
+                )
+        if new_qa and not task.epic.project.is_collaborator(new_qa):
+            raise serializers.ValidationError(
+                f"User is not valid GitHub collaborator: {new_qa}"
+            )
+        return new_qa
+
+    def update(self, task, data):
+        user = self.context["request"].user
+        user_id = str(user.id)
+        if "assigned_dev" in data:
+            task.assigned_dev = data["assigned_dev"]
+            self._handle_reassign("dev", task, data, user, originating_user_id=user_id)
+        if "assigned_qa" in data:
+            task.assigned_qa = data["assigned_qa"]
+            self._handle_reassign("qa", task, data, user, originating_user_id=user_id)
+        task.save()
+        return task
 
     def _handle_reassign(
         self, type_, instance, validated_data, user, originating_user_id

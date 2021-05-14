@@ -441,6 +441,9 @@ class Project(
             permissions__push=True,
         ).exists()
 
+    def is_collaborator(self, gh_uid: str) -> bool:
+        return gh_uid in (u["id"] for u in self.github_users)
+
 
 class GitHubRepository(HashIdMixin, models.Model):
     user = models.ForeignKey(

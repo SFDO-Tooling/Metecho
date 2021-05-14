@@ -34,6 +34,7 @@ from .serializers import (
     ProjectSerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
+    TaskAssigneeSerializer,
     TaskSerializer,
 )
 
@@ -303,6 +304,20 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
                 )
             }
         )
+
+    @action(detail=True, methods=["POST", "PUT"])
+    def assignees(self, request, pk=None):
+        """
+        Edit the assigned developer and tester on a Task. Exposed as a separate endpoint
+        for users without write access to Tasks.
+        """
+        task = self.get_object()
+        serializer = TaskAssigneeSerializer(
+            task, request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.update(task, serializer.validated_data)
+        return Response(self.get_serializer(task).data)
 
 
 class ScratchOrgViewSet(
