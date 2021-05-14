@@ -948,6 +948,7 @@ class TestTaskViewSet:
         check,
         method,
     ):
+        # Write operations on the task detail endpoint should depend on repo push permissions
         task = task_factory()
         git_hub_repository_factory(
             repo_id=task.epic.project.repo_id, user=client.user, permissions=repo_perms
@@ -961,6 +962,21 @@ class TestTaskViewSet:
         response = getattr(client, method)(url, data=data, format="json")
 
         assert check(response.status_code)
+
+    def test_assignees(self, client, git_hub_repository_factory, task_factory):
+        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[
+                {"id": "123456", "permissions": {"push": True}}
+            ],
+        )
+        data = {"assigned_dev": "123456", "assigned_qa": "123456"}
+        client.post(reverse("task-assignees", args=[task.id]), data=data)
+
+        task.refresh_from_db()
+        assert task.assigned_dev == "123456"
+        assert task.assigned_qa == "123456"
 
 
 @pytest.mark.django_db

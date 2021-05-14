@@ -1,6 +1,7 @@
 import html
 import logging
 from datetime import timedelta
+from typing import Dict, Optional
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -441,8 +442,11 @@ class Project(
             permissions__push=True,
         ).exists()
 
-    def is_collaborator(self, gh_uid: str) -> bool:
-        return gh_uid in (u["id"] for u in self.github_users)
+    def get_collaborator(self, gh_uid: str) -> Optional[Dict[str, object]]:
+        try:
+            return [u for u in self.github_users if u["id"] == gh_uid][0]
+        except IndexError:
+            return None
 
 
 class GitHubRepository(HashIdMixin, models.Model):

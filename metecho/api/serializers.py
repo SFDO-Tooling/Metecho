@@ -406,9 +406,14 @@ class TaskAssigneeSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "You don't have permissions to change the assigned developer"
             )
-        if new_dev and not task.epic.project.is_collaborator(new_dev):
+        collaborator = task.epic.project.get_collaborator(new_dev)
+        if new_dev and not collaborator:
             raise serializers.ValidationError(
                 f"User is not a valid GitHub collaborator: {new_dev}"
+            )
+        if new_dev and not collaborator.get("permissions", {}).get("push"):
+            raise serializers.ValidationError(
+                f"User does not have push permissions: {new_dev}"
             )
         return new_dev
 
@@ -422,7 +427,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     "You can only assign/remove yourself as a tester"
                 )
-        if new_qa and not task.epic.project.is_collaborator(new_qa):
+        if new_qa and not task.epic.project.get_collaborator(new_qa):
             raise serializers.ValidationError(
                 f"User is not valid GitHub collaborator: {new_qa}"
             )
