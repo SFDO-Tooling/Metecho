@@ -1,9 +1,5 @@
-from operator import itemgetter
-from typing import Callable, Union
-
 from django.core.validators import RegexValidator, _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
-from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator, qs_filter
 
 
