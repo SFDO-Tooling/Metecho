@@ -28,6 +28,7 @@ from .serializers import (
     CanReassignSerializer,
     CommitSerializer,
     CreatePrSerializer,
+    EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
@@ -59,8 +60,6 @@ class RepoPushPermissionMixin:
         return super().perform_create(serializer)
 
     def perform_update(self, serializer):
-        # TODO: readonly users can assign/unassign themselves as `task.assigned_qa`
-        # TODO: readonly users can remove themselves from `epic.github_users` list
         self.check_push_permission(serializer.instance)
         return super().perform_update(serializer)
 
@@ -243,6 +242,20 @@ class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
         return qs.annotate(ordering=Case(*whens, output_field=IntegerField())).order_by(
             "ordering", "-created_at", "name"
         )
+
+    @action(detail=True, methods=["POST", "PUT"])
+    def collaborators(self, request, pk=None):
+        """
+        Edit the Epic collaborators. Exposed as a separate endpoint for users without
+        write access to Epics.
+        """
+        epic = self.get_object()
+        serializer = EpicCollaboratorsSerializer(
+            epic, request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.update(epic, serializer.validated_data)
+        return Response(self.get_serializer(epic).data)
 
 
 class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):

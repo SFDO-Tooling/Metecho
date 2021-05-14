@@ -132,8 +132,8 @@ const EpicDetail = (props: RouteComponentProps) => {
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.EPIC,
+          url: window.api_urls.epic_collaborators(epic.id),
           data: {
-            ...epic,
             github_users: users
               .sort((a, b) =>
                 /* istanbul ignore next */

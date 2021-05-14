@@ -1022,3 +1022,17 @@ class TestEpicViewSet:
         response = getattr(client, method)(url, data=data, format="json")
 
         assert check(response.status_code)
+
+    def test_collaborators(self, client, git_hub_repository_factory, epic_factory):
+        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
+        epic = epic_factory(
+            project__repo_id=repo.repo_id,
+            project__github_users=[{"id": "123"}, {"id": "456"}],
+        )
+        data = {"github_users": ["123", "456"]}
+        client.post(
+            reverse("epic-collaborators", args=[epic.id]), data=data, format="json"
+        )
+
+        epic.refresh_from_db()
+        assert epic.github_users == ["123", "456"]

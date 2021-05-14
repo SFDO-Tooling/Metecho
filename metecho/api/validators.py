@@ -53,35 +53,3 @@ validate_unicode_branch = RegexValidator(
     ),
     "invalid",
 )
-
-
-class ProjectCollaboratorValidator:
-    def __init__(
-        self,
-        *,
-        field: str,
-        parent: Union[str, Callable],
-    ):
-        """
-        Checks a list or single GitHub user IDs to ensure they are collaborators in the parent
-        """
-        self.field = field
-        self.parent = parent if callable(parent) else itemgetter(parent)
-
-    def __call__(self, cleaned_data):
-        github_users = cleaned_data.get(self.field)
-        if github_users is None:
-            return  # None-values will be handled by standard validation (if at all)
-
-        seen_github_users = []
-        parent = self.parent(cleaned_data)
-        parent_github_users = [user.get("id") for user in parent.github_users]
-
-        for id in github_users:
-            if not id or id not in parent_github_users:
-                raise ValidationError({self.field: _(f"Invalid GitHub user: {id}")})
-
-            if id in seen_github_users:
-                raise ValidationError({self.field: _(f"Duplicate GitHub user: {id}")})
-            else:
-                seen_github_users.append(id)

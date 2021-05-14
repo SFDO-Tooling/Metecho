@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from ..models import SCRATCH_ORG_TYPES, Task
 from ..serializers import (
+    EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
     HashidPrimaryKeyRelatedField,
@@ -248,31 +249,6 @@ class TestEpicSerializer:
         )
         assert serializer.is_valid(), serializer.errors
 
-    @pytest.mark.parametrize(
-        "epic_users",
-        (
-            ["567890"],  # User not in project
-            [{"id": "123456"}],  # Invalid format
-            ["123456", "123456"],  # Duplicate
-        ),
-    )
-    def test_invalid_github_user_value(self, project_factory, epic_factory, epic_users):
-        project = project_factory(github_users=[{"id": "123456"}])
-        epic = epic_factory(
-            project=project, name="Duplicate me", github_users=["123456"]
-        )
-        serializer = EpicSerializer(
-            instance=epic,
-            data={
-                "project": str(project.id),
-                "description": "Blorp",
-                "github_users": epic_users,
-            },
-            partial=True,
-        )
-        assert not serializer.is_valid()
-        assert "github_users" in serializer.errors
-
     def test_pr_url__present(self, epic_factory):
         epic = epic_factory(name="Test epic", pr_number=123)
         serializer = EpicSerializer(epic)
@@ -285,6 +261,66 @@ class TestEpicSerializer:
         epic = epic_factory(name="Test epic")
         serializer = EpicSerializer(epic)
         assert serializer.data["pr_url"] is None
+
+
+@pytest.mark.django_db
+class TestEpicCollaboratorsSerializer:
+    @pytest.mark.parametrize(
+        "value, success",
+        (
+            pytest.param(["123", "456"], True, id="Valid input"),
+            pytest.param(["567890"], False, id="User not in project"),
+            pytest.param([{"id": "123456"}], False, id="Invalid format"),
+            pytest.param(["123", "123"], False, id="Duplicate"),
+        ),
+    )
+    def test_value(self, rf, git_hub_repository_factory, epic_factory, value, success):
+        repo = git_hub_repository_factory(permissions={"push": True})
+        epic = epic_factory(
+            project__repo_id=repo.repo_id,
+            project__github_users=[{"id": "123"}, {"id": "456"}],
+            github_users=["123"],
+        )
+        r = rf.get("/")
+        r.user = repo.user
+        serializer = EpicCollaboratorsSerializer(
+            epic, data={"github_users": value}, context={"request": r}
+        )
+        assert serializer.is_valid() == success, serializer.errors
+        if not success:
+            assert "github_users" in serializer.errors
+
+    @pytest.mark.parametrize(
+        "github_users, value, success",
+        (
+            pytest.param(["123"], ["123"], True, id="No change"),
+            pytest.param(["123"], ["123", "self"], True, id="Add self"),
+            pytest.param(["123"], ["123", "456"], False, id="Add other"),
+            pytest.param(["123"], [], False, id="Remove other"),
+            pytest.param(["123", "self"], ["123"], True, id="Remove self"),
+        ),
+    )
+    def test_readonly_user(
+        self, rf, user_factory, epic_factory, github_users, value, success
+    ):
+        # We don't associate `user` with any GitHubRepository instances, which means
+        # they are read-only
+        user = user_factory()
+        account = user.github_account
+        account.uid = "self"
+        account.save()
+        epic = epic_factory(
+            github_users=github_users,
+            project__github_users=[{"id": "123"}, {"id": "456"}, {"id": "self"}],
+        )
+        r = rf.get("/")
+        r.user = user
+        serializer = EpicCollaboratorsSerializer(
+            epic, data={"github_users": value}, context={"request": r}
+        )
+        assert serializer.is_valid() == success, serializer.errors
+        if not success:
+            assert "github_users" in serializer.errors
 
 
 @pytest.mark.django_db

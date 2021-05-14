@@ -19,10 +19,7 @@ from .models import (
     Task,
 )
 from .sf_run_flow import is_org_good
-from .validators import (
-    CaseInsensitiveUniqueTogetherValidator,
-    ProjectCollaboratorValidator,
-)
+from .validators import CaseInsensitiveUniqueTogetherValidator
 
 User = get_user_model()
 
@@ -181,6 +178,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "pr_is_open": {"read_only": True},
             "pr_is_merged": {"read_only": True},
             "status": {"read_only": True},
+            "github_users": {"read_only": True},
             "latest_sha": {"read_only": True},
         }
         validators = (
@@ -190,10 +188,6 @@ class EpicSerializer(serializers.ModelSerializer):
                 message=FormattableDict(
                     "name", _("An epic with this name already exists.")
                 ),
-            ),
-            ProjectCollaboratorValidator(
-                field="github_users",
-                parent="project",
             ),
         )
 
@@ -282,6 +276,44 @@ class EpicSerializer(serializers.ModelSerializer):
         return None
 
 
+class EpicCollaboratorsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Epic
+        fields = ("github_users",)
+
+    def validate_github_users(self, github_users):
+        user = self.context["request"].user
+        epic: Epic = self.instance
+
+        if not epic.has_push_permission(user):
+            collaborators = set(epic.github_users)
+            new_collaborators = set(github_users)
+            added = new_collaborators.difference(collaborators)
+            removed = collaborators.difference(new_collaborators)
+            if added and any(u != user.github_id for u in added):
+                raise serializers.ValidationError(
+                    _("You can only add yourself as a collaborator")
+                )
+            if removed and any(u != user.github_id for u in removed):
+                raise serializers.ValidationError(
+                    _("You can only remove yourself as a collaborator")
+                )
+
+        seen_github_users = []
+        for gh_uid in github_users:
+            if not self.instance.project.get_collaborator(gh_uid):
+                raise serializers.ValidationError(
+                    _(f"User is not a valid GitHub collaborator: {gh_uid}")
+                )
+
+            if gh_uid in seen_github_users:
+                raise serializers.ValidationError(_(f"Duplicate GitHub user: {gh_uid}"))
+            else:
+                seen_github_users.append(gh_uid)
+
+        return github_users
+
+
 class TaskSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
@@ -322,27 +354,27 @@ class TaskSerializer(serializers.ModelSerializer):
             "currently_submitting_review",
             "org_config_name",
         )
-        read_only_fields = (
-            "slug",
-            "old_slugs",
-            "has_unmerged_commits",
-            "currently_creating_branch",
-            "currently_creating_pr",
-            "branch_url",
-            "commits",
-            "origin_sha",
-            "branch_diff_url",
-            "pr_url",
-            "review_submitted_at",
-            "review_valid",
-            "review_status",
-            "review_sha",
-            "status",
-            "pr_is_open",
-            "currently_submitting_review",
-            "assigned_dev",
-            "assigned_qa",
-        )
+        extra_kwargs = {
+            "slug": {"read_only": True},
+            "old_slugs": {"read_only": True},
+            "has_unmerged_commits": {"read_only": True},
+            "currently_creating_branch": {"read_only": True},
+            "currently_creating_pr": {"read_only": True},
+            "branch_url": {"read_only": True},
+            "commits": {"read_only": True},
+            "origin_sha": {"read_only": True},
+            "branch_diff_url": {"read_only": True},
+            "pr_url": {"read_only": True},
+            "review_submitted_at": {"read_only": True},
+            "review_valid": {"read_only": True},
+            "review_status": {"read_only": True},
+            "review_sha": {"read_only": True},
+            "status": {"read_only": True},
+            "pr_is_open": {"read_only": True},
+            "assigned_dev": {"read_only": True},
+            "assigned_qa": {"read_only": True},
+            "currently_submitting_review": {"read_only": True},
+        }
         validators = (
             CaseInsensitiveUniqueTogetherValidator(
                 queryset=Task.objects.all(),
@@ -395,7 +427,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
     def validate(self, data):
         if "assigned_qa" not in data and "assigned_dev" not in data:
             raise serializers.ValidationError(
-                "You must assign a developer, tester, or both"
+                _("You must assign a developer, tester, or both")
             )
         return super().validate(data)
 
@@ -404,16 +436,16 @@ class TaskAssigneeSerializer(serializers.Serializer):
         task: Task = self.instance
         if not task.has_push_permission(user):
             raise serializers.ValidationError(
-                "You don't have permissions to change the assigned developer"
+                _("You don't have permissions to change the assigned developer")
             )
         collaborator = task.epic.project.get_collaborator(new_dev)
         if new_dev and not collaborator:
             raise serializers.ValidationError(
-                f"User is not a valid GitHub collaborator: {new_dev}"
+                _(f"User is not a valid GitHub collaborator: {new_dev}")
             )
         if new_dev and not collaborator.get("permissions", {}).get("push"):
             raise serializers.ValidationError(
-                f"User does not have push permissions: {new_dev}"
+                _(f"User does not have push permissions: {new_dev}")
             )
         return new_dev
 
@@ -425,11 +457,11 @@ class TaskAssigneeSerializer(serializers.Serializer):
             is_assigning_self = new_qa == user.github_id and task.assigned_qa is None
             if not (is_removing_self or is_assigning_self):
                 raise serializers.ValidationError(
-                    "You can only assign/remove yourself as a tester"
+                    _("You can only assign/remove yourself as a tester")
                 )
         if new_qa and not task.epic.project.get_collaborator(new_qa):
             raise serializers.ValidationError(
-                f"User is not valid GitHub collaborator: {new_qa}"
+                _(f"User is not valid GitHub collaborator: {new_qa}")
             )
         return new_qa
 
