@@ -120,8 +120,8 @@ def _create_branches_on_github(
     if task.branch_name:
         return task.branch_name
 
-    latest_sha = task_sha or repository.branch(epic_branch_name).latest_sha()
     with creating_gh_branch(task):
+        latest_sha = task_sha or repository.branch(epic_branch_name).latest_sha()
         task_branch_name = try_to_make_branch(
             repository,
             new_branch=f"{epic_branch_name}__{slugify(task.name)}",
@@ -320,18 +320,25 @@ def convert_to_dev_org(scratch_org, *, task, originating_user_id=None):
     """
     Convert an Epic playground org into a Task Dev org
     """
+    error = None
     task.refresh_from_db()
     scratch_org.refresh_from_db()
-    _create_branches_on_github(
-        user=scratch_org.owner,
-        repo_id=task.get_repo_id(),
-        epic=task.epic,
-        task=task,
-        task_sha=scratch_org.latest_commit,
-        originating_user_id=originating_user_id,
-    )
+    try:
+        _create_branches_on_github(
+            user=scratch_org.owner,
+            repo_id=task.get_repo_id(),
+            epic=task.epic,
+            task=task,
+            task_sha=scratch_org.latest_commit,
+            originating_user_id=originating_user_id,
+        )
+    except Exception as exc:
+        error = exc
+        logger.exception("Failed to convert ScratchOrg")
+
+    scratch_org.refresh_from_db()
     scratch_org.finalize_convert_to_dev_org(
-        task, originating_user_id=originating_user_id
+        task, error=error, originating_user_id=originating_user_id
     )
 
 

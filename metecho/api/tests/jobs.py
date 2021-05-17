@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 from contextlib import ExitStack
 from datetime import datetime
@@ -15,6 +16,7 @@ from ..jobs import (
     alert_user_about_expiring_org,
     available_org_config_names,
     commit_changes_from_org,
+    convert_to_dev_org,
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_epic,
     create_pr,
@@ -421,6 +423,52 @@ class TestRefreshScratchOrg:
 
             assert async_to_sync.called
             assert logger.error.called
+
+
+@pytest.mark.django_db
+class TestConvertScratchOrg:
+    def test_convert_to_dev_org(self, mocker, scratch_org_factory, task_factory):
+        task = task_factory(epic__project__repo_id=123)
+        scratch_org = scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
+        )
+        _create_branches_on_github = mocker.patch(
+            f"{PATCH_ROOT}._create_branches_on_github"
+        )
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+
+        convert_to_dev_org(scratch_org, task=task, originating_user_id=None)
+
+        assert _create_branches_on_github.called
+        assert async_to_sync.called
+
+        scratch_org.refresh_from_db()
+        assert scratch_org.epic is None
+        assert scratch_org.task == task
+        assert scratch_org.org_type == SCRATCH_ORG_TYPES.Dev
+
+    def test_convert_to_dev_org__error(
+        self, mocker, caplog, scratch_org_factory, task_factory
+    ):
+        task = task_factory(epic__project__repo_id=123)
+        scratch_org = scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
+        )
+        mocker.patch(
+            f"{PATCH_ROOT}._create_branches_on_github", side_effect=Exception("Oh no!")
+        )
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+
+        convert_to_dev_org(scratch_org, task=task, originating_user_id=None)
+
+        assert async_to_sync.called
+        assert caplog.records[0].levelno == logging.ERROR
+        assert "Oh no!" in caplog.text
+
+        scratch_org.refresh_from_db()
+        assert scratch_org.epic == task.epic
+        assert scratch_org.task is None
+        assert scratch_org.org_type == SCRATCH_ORG_TYPES.Playground
 
 
 @pytest.mark.django_db
