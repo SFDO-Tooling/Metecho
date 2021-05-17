@@ -28,8 +28,10 @@ export const api_urls = {
   task_create_pr: (id: string) => `/api/tasks/${id}/create_pr/`,
   task_review: (id: string) => `/api/tasks/${id}/review/`,
   task_can_reassign: (id: string) => `/api/tasks/${id}/can_reassign/`,
+  task_assignees: (id: string) => `/api/tasks/${id}/assignees/`,
   epic_detail: (id: string) => `/api/epics/${id}/`,
   epic_create_pr: (id: string) => `/api/epics/${id}/create_pr/`,
+  epic_collaborators: (id: string) => `/api/epics/${id}/collaborators/`,
   project_refresh_org_config_names: (id: string) =>
     `/api/projects/${id}/refresh_org_config_names/`,
   project_feature_branches: (id: string) =>

@@ -208,7 +208,7 @@ describe('<TaskDetail/>', () => {
 
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByTitle('View Org')).toBeVisible();
-    expect(getByText('No Tester')).toBeVisible();
+    expect(getByText('Self-Assign')).toBeVisible();
   });
 
   test('renders readonly task detail with test org', () => {

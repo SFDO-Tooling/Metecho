@@ -20,7 +20,7 @@ import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '~js/utils/constants';
 
 export interface AssignedUserTracker {
   type: OrgTypes;
-  assignee: GitHubUser | null;
+  assignee: string | null;
   shouldAlertAssignee: boolean;
 }
 
@@ -99,7 +99,7 @@ const TaskOrgCards = ({
     [dispatch],
   );
 
-  const checkIfTaskCanBeReassigned = async (assignee: GitHubUser) => {
+  const checkIfTaskCanBeReassigned = async (assignee: string) => {
     const { can_reassign } = await apiFetch({
       url: `${window.api_urls.task_can_reassign(task.id)}`,
       dispatch,
@@ -107,7 +107,7 @@ const TaskOrgCards = ({
         method: 'POST',
         body: JSON.stringify({
           role: 'assigned_dev',
-          gh_uid: assignee.id,
+          gh_uid: assignee,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -144,9 +144,9 @@ const TaskOrgCards = ({
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
+          url: window.api_urls.task_assignees(task.id),
           data: {
-            ...task,
-            [userType]: assignee?.id || null,
+            [userType]: assignee,
             [alertType]: shouldAlertAssignee,
           },
         }),

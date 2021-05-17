@@ -30,7 +30,7 @@ const UserTableCell = ({ item, handleUserClick, ...props }: TableCellProps) => {
   };
   return (
     <DataTableCell {...props} title={login} className="slds-p-around_none">
-      <GitHubUserButton user={item} showPermissions onClick={handleClick} />
+      <GitHubUserButton user={item} badgeColor="light" onClick={handleClick} />
     </DataTableCell>
   );
 };

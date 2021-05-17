@@ -88,10 +88,7 @@ const TaskOrgCard = ({
   switch (type) {
     case ORG_TYPES.QA:
       assignedUserId = task.assigned_qa;
-      heading =
-        !userHasPermissions && !assignedUserId
-          ? i18n.t('No Tester')
-          : i18n.t('Tester');
+      heading = i18n.t('Tester');
       orgHeading = i18n.t('Test Org');
       break;
     case ORG_TYPES.DEV:
@@ -143,7 +140,7 @@ const TaskOrgCard = ({
   };
 
   const doAssignUser = useCallback(
-    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
+    (assignee: string | null, shouldAlertAssignee: boolean) => {
       handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
     [handleAssignUser, type],
@@ -189,10 +186,14 @@ const TaskOrgCard = ({
         bodyClassName="slds-card__body_inner"
         heading={heading}
         headerActions={
-          userHasPermissions ? (
+          userHasPermissions ||
+          type === ORG_TYPES.QA ||
+          (assignedUserId && assignedUserId === user.github_id) ? (
             <UserActions
               type={type}
-              assignedUser={assignedUser}
+              assignedUserId={assignedUserId}
+              currentUserId={user.github_id}
+              userHasPermissions={userHasPermissions}
               openAssignUserModal={openAssignUserModal}
               setUser={doAssignUser}
             />
@@ -248,7 +249,6 @@ const TaskOrgCard = ({
                   ownedByWrongUser={ownedByWrongUser}
                   orgOutOfDate={testOrgOutOfDate}
                   readyForReview={testOrgReadyForReview}
-                  userHasPermissions={userHasPermissions}
                   isCreating={isCreating}
                   isDeleting={isDeleting}
                   isRefreshingOrg={isRefreshingOrg}

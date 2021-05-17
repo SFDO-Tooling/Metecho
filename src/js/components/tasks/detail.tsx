@@ -798,15 +798,6 @@ const TaskDetail = (props: RouteComponentProps) => {
                 originatingUser={user.github_id}
               />
             )}
-            {testOrgReadyForReview && (
-              <SubmitReviewModal
-                orgId={testOrg?.id}
-                url={window.api_urls.task_review(task.id)}
-                reviewStatus={task.review_valid ? task.review_status : null}
-                isOpen={submitReviewModalOpen && !testOrgSubmittingReview}
-                handleClose={closeSubmitReviewModal}
-              />
-            )}
             <EditModal
               model={task}
               modelType={OBJECT_TYPES.TASK}
@@ -825,6 +816,15 @@ const TaskDetail = (props: RouteComponentProps) => {
               handleClose={closeDeleteModal}
             />
           </>
+        )}
+        {testOrgReadyForReview && (
+          <SubmitReviewModal
+            orgId={testOrg?.id}
+            url={window.api_urls.task_review(task.id)}
+            reviewStatus={task.review_valid ? task.review_status : null}
+            isOpen={submitReviewModalOpen && !testOrgSubmittingReview}
+            handleClose={closeSubmitReviewModal}
+          />
         )}
         <CreateOrgModal
           project={project}
