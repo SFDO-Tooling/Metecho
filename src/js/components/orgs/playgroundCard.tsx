@@ -43,14 +43,10 @@ const PlaygroundOrgCard = ({
 }: PlaygroundCardProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const [isDeletingOrg, setIsDeletingOrg] = useState(false);
-  const [
-    confirmDeleteModalOpen,
-    setConfirmDeleteModalOpen,
-  ] = useState<ConfirmOrgTracker>(null);
-  const [
-    isWaitingToDeleteOrg,
-    setIsWaitingToDeleteOrg,
-  ] = useState<ConfirmOrgTracker>(null);
+  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] =
+    useState<ConfirmOrgTracker>(null);
+  const [isWaitingToDeleteOrg, setIsWaitingToDeleteOrg] =
+    useState<ConfirmOrgTracker>(null);
   const isMounted = useIsMounted();
 
   let heading: string,

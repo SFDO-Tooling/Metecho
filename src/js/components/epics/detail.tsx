@@ -3,7 +3,7 @@ import PageHeaderControl from '@salesforce/design-system-react/components/page-h
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '~js/components/404';
@@ -37,7 +37,8 @@ import {
 import { ThunkDispatch } from '~js/store';
 import { updateObject } from '~js/store/actions';
 import { Task } from '~js/store/tasks/reducer';
-import { GitHubUser } from '~js/store/user/reducer';
+import { GitHubUser, User } from '~js/store/user/reducer';
+import { selectUserState } from '~js/store/user/selectors';
 import {
   EPIC_STATUSES,
   OBJECT_TYPES,
@@ -56,6 +57,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   );
   const { tasks } = useFetchTasksIfMissing(epic, props);
   const { orgs } = useFetchOrgsIfMissing({ epic, props });
+  const currentUser = useSelector(selectUserState) as User;
 
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -78,12 +80,10 @@ const EpicDetail = (props: RouteComponentProps) => {
   }, []);
 
   // "Confirm remove user from epic" modal related:
-  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
-    GitHubUser[] | null
-  >(null);
-  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
-    GitHubUser[] | null
-  >(null);
+  const [waitingToUpdateUsers, setWaitingToUpdateUsers] =
+    useState<GitHubUser[] | null>(null);
+  const [confirmRemoveUsers, setConfirmRemoveUsers] =
+    useState<GitHubUser[] | null>(null);
   const closeConfirmRemoveUsersModal = useCallback(() => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);
@@ -132,8 +132,8 @@ const EpicDetail = (props: RouteComponentProps) => {
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.EPIC,
+          url: window.api_urls.epic_collaborators(epic.id),
           data: {
-            ...epic,
             github_users: users
               .sort((a, b) =>
                 /* istanbul ignore next */
@@ -197,7 +197,7 @@ const EpicDetail = (props: RouteComponentProps) => {
     }: {
       task: Task;
       type: OrgTypes;
-      assignee: GitHubUser | null;
+      assignee: string | null;
       shouldAlertAssignee: boolean;
     }) => {
       /* istanbul ignore next */
@@ -207,9 +207,9 @@ const EpicDetail = (props: RouteComponentProps) => {
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
+          url: window.api_urls.task_assignees(task.id),
           data: {
-            ...task,
-            [userType]: assignee?.id || /* istanbul ignore next */ null,
+            [userType]: assignee,
             [alertType]: shouldAlertAssignee,
           },
         }),
@@ -460,17 +460,18 @@ const EpicDetail = (props: RouteComponentProps) => {
                     )}
                     projectId={project.id}
                   />
-                  <ConfirmRemoveUserModal
-                    confirmRemoveUsers={confirmRemoveUsers}
-                    waitingToUpdateUsers={waitingToUpdateUsers}
-                    handleClose={closeConfirmRemoveUsersModal}
-                    handleUpdateUsers={updateEpicUsers}
-                  />
                 </>
               )}
+              <ConfirmRemoveUserModal
+                confirmRemoveUsers={confirmRemoveUsers}
+                waitingToUpdateUsers={waitingToUpdateUsers}
+                handleClose={closeConfirmRemoveUsersModal}
+                handleUpdateUsers={updateEpicUsers}
+              />
               {epicCollaborators.length ? (
                 <UserCards
                   users={epicCollaborators}
+                  userId={currentUser.github_id}
                   canRemoveUser={project.has_push_permission}
                   removeUser={removeEpicUser}
                 />

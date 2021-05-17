@@ -69,10 +69,8 @@ const TaskDetail = (props: RouteComponentProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
-  const [
-    assignUserModalOpen,
-    setAssignUserModalOpen,
-  ] = useState<OrgTypes | null>(null);
+  const [assignUserModalOpen, setAssignUserModalOpen] =
+    useState<OrgTypes | null>(null);
   const [isCreatingOrg, setIsCreatingOrg] = useState<OrgTypeTracker>(
     ORG_TYPE_TRACKER_DEFAULT,
   );
@@ -754,15 +752,6 @@ const TaskDetail = (props: RouteComponentProps) => {
                 originatingUser={user.github_id}
               />
             )}
-            {testOrgReadyForReview && (
-              <SubmitReviewModal
-                orgId={testOrg?.id}
-                url={window.api_urls.task_review(task.id)}
-                reviewStatus={task.review_valid ? task.review_status : null}
-                isOpen={submitReviewModalOpen && !testOrgSubmittingReview}
-                handleClose={closeSubmitReviewModal}
-              />
-            )}
             <EditModal
               model={task}
               modelType={OBJECT_TYPES.TASK}
@@ -781,6 +770,15 @@ const TaskDetail = (props: RouteComponentProps) => {
               handleClose={closeDeleteModal}
             />
           </>
+        )}
+        {testOrgReadyForReview && (
+          <SubmitReviewModal
+            orgId={testOrg?.id}
+            url={window.api_urls.task_review(task.id)}
+            reviewStatus={task.review_valid ? task.review_status : null}
+            isOpen={submitReviewModalOpen && !testOrgSubmittingReview}
+            handleClose={closeSubmitReviewModal}
+          />
         )}
         <CreateOrgModal
           project={project}

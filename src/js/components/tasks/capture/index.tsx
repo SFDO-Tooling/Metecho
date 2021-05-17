@@ -72,10 +72,8 @@ const CaptureModal = ({ org, isOpen, closeModal }: Props) => {
   const [capturingChanges, setCapturingChanges] = useState(false);
   const [ignoringChanges, setIgnoringChanges] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
-  const {
-    showTransientMessage,
-    isShowingTransientMessage,
-  } = useTransientMessage();
+  const { showTransientMessage, isShowingTransientMessage } =
+    useTransientMessage();
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
 
