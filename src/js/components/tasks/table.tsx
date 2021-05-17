@@ -293,11 +293,13 @@ const TaskTable = ({
                 <Trans i18nKey="tourTaskStatusColumn">
                   A Task begins with a status of <b>Planned</b>. When a Dev Org
                   is created, the status changes to <b>In Progress</b>, and the
-                  Developer begins work. After Testing, the status becomes
-                  either <b>Changes Requested</b> or <b>Approved</b> based on
-                  the Tester’s review. If the Developer retrieves new changes,
-                  the status moves back to <b>In Progress</b>. Once the Task is
-                  added to the Project on GitHub, the status is <b>Complete</b>.
+                  Developer begins work. When the Developer is ready for the
+                  work to be tested, the status becomes <b>Test</b>. After
+                  Testing, the status becomes either <b>Changes Requested</b> or{' '}
+                  <b>Approved</b> based on the Tester’s review. If the Developer
+                  retrieves new changes, the status moves back to{' '}
+                  <b>In Progress</b>. Once the Task is added to the Project on
+                  GitHub, the status is <b>Complete</b>.
                 </Trans>
               }
             />

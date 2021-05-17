@@ -300,8 +300,9 @@ const TaskOrgCards = ({
               <Trans i18nKey="tourTaskDevOrg">
                 A Developer is the person assigned to do the work of a Task.
                 Developers create Dev Orgs for their work, retrieve their
-                changes, and then submit their work for someone to test. Use the
-                drop down menu to change or remove the Developer.
+                changes, and then submit their work for someone to test. Assign
+                yourself or another Collaborator as the Developer on this Task.
+                Use the drop down menu to change or remove the Developer.
               </Trans>
             }
           />
@@ -347,7 +348,7 @@ const TaskOrgCards = ({
                 create a Test Org to view the Developer’s work, and then approve
                 the work or request changes that must be addressed before the
                 Task can be completed. Use the drop down menu to delete or
-                reassign.
+                reassign Tester.
               </Trans>
             }
           />
