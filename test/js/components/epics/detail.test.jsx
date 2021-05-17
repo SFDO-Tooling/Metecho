@@ -297,6 +297,23 @@ describe('<EpicDetail/>', () => {
       expect(getByText('No Tasks for Epic 1')).toBeVisible();
       expect(getByText('No Collaborators')).toBeVisible();
     });
+
+    test('can self-assign readonly user to task', () => {
+      const { getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects,
+        },
+      });
+      fireEvent.click(getAllByText('Self-Assign as Tester')[0]);
+
+      expect(updateObject).toHaveBeenCalled();
+
+      const data = updateObject.mock.calls[0][0].data;
+
+      expect(data.assigned_qa).toEqual('user-id');
+      expect(data.should_alert_qa).toBe(false);
+    });
   });
 
   test('renders different title if no tasks', () => {

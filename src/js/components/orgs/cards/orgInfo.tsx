@@ -68,7 +68,7 @@ const OrgInfo = ({
     return null;
   }
 
-  if (!(org || task?.review_status)) {
+  if (!(org || (type === ORG_TYPES.QA && task?.review_status))) {
     return (
       <ul>
         <li>
@@ -242,6 +242,7 @@ const OrgInfo = ({
     }
   }
 
+  /* istanbul ignore next */
   return org || orgStatus ? (
     <ul>
       {org?.description_rendered ? (

@@ -206,7 +206,7 @@ const TaskStatusSteps = ({
       complete: task.review_valid,
       assignee: qaUser,
       action:
-        userIsAssignedTester && !testOrgIsSubmittingReview && hasPermissions
+        userIsAssignedTester && !testOrgIsSubmittingReview
           ? 'submit-review'
           : undefined,
     },
