@@ -17,7 +17,8 @@ import TourPopover from '~js/components/tour/popover';
 import { AppState } from '~js/store';
 import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
-import { GitHubUser } from '~js/store/user/reducer';
+import { GitHubUser, User } from '~js/store/user/reducer';
+import { selectUserState } from '~js/store/user/selectors';
 import {
   ORG_TYPES,
   OrgTypes,
@@ -34,7 +35,7 @@ type AssignUserAction = ({
 }: {
   task: Task;
   type: OrgTypes;
-  assignee: GitHubUser | null;
+  assignee: string | null;
   shouldAlertAssignee: boolean;
 }) => void;
 
@@ -140,6 +141,7 @@ const AssigneeTableCell = ({
   projectId,
   epicUsers,
   githubUsers,
+  currentUser,
   canAssign,
   isRefreshingUsers,
   assignUserAction,
@@ -152,6 +154,7 @@ const AssigneeTableCell = ({
   projectId: string;
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
+  currentUser?: User;
   canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
@@ -170,7 +173,7 @@ const AssigneeTableCell = ({
   };
 
   const doAssignUserAction = useCallback(
-    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
+    (assignee: string | null, shouldAlertAssignee: boolean) => {
       /* istanbul ignore if */
       if (!item || !type) {
         return;
@@ -179,6 +182,20 @@ const AssigneeTableCell = ({
     },
     [assignUserAction, item, type],
   );
+
+  const doSelfAssignUserAction = useCallback(() => {
+    /* istanbul ignore if */
+    if (!item || !type || !currentUser?.github_id) {
+      return;
+    }
+    assignUserAction({
+      task: item,
+      type,
+      assignee: currentUser.github_id,
+      shouldAlertAssignee: false,
+    });
+  }, [assignUserAction, currentUser?.github_id, item, type]);
+
   /* istanbul ignore if */
   if (!item) {
     return null;
@@ -222,6 +239,20 @@ const AssigneeTableCell = ({
         />
       </>
     );
+  } else if (type === ORG_TYPES.QA && currentUser?.github_id) {
+    title = i18n.t('Self-Assign as Tester');
+    contents = (
+      <Button
+        className="slds-m-left_xx-small"
+        assistiveText={{ icon: title }}
+        iconCategory="utility"
+        iconName="adduser"
+        iconSize="medium"
+        variant="icon"
+        title={title}
+        onClick={doSelfAssignUserAction}
+      />
+    );
   }
   return (
     <DataTableCell
@@ -246,6 +277,7 @@ const TaskTable = ({
   isRefreshingUsers,
   assignUserAction,
 }: Props) => {
+  const currentUser = useSelector(selectUserState) as User;
   const statusOrder = {
     [TASK_STATUSES.IN_PROGRESS]: 1,
     [TASK_STATUSES.PLANNED]: 2,
@@ -371,6 +403,7 @@ const TaskTable = ({
           projectId={projectId}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
+          currentUser={currentUser}
           canAssign={canAssign}
           isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}

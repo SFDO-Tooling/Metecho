@@ -58,10 +58,12 @@ export const UserCard = ({
 
 export const UserCards = ({
   users,
+  userId,
   canRemoveUser,
   removeUser,
 }: {
   users: GitHubUser[];
+  userId: string | null;
   canRemoveUser: boolean;
   removeUser: (user: GitHubUser) => void;
 }) => (
@@ -72,7 +74,10 @@ export const UserCards = ({
       slds-m-top_large"
   >
     {users.map((user) => {
-      const doRemoveUser = canRemoveUser ? () => removeUser(user) : undefined;
+      const doRemoveUser =
+        canRemoveUser || userId === user.id
+          ? () => removeUser(user)
+          : undefined;
       return (
         <div key={user.id} className="slds-size_1-of-1 slds-p-around_xx-small">
           <UserCard user={user} removeUser={doRemoveUser} showPermissions />

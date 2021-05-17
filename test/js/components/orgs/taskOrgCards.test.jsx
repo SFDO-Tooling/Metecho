@@ -263,6 +263,40 @@ describe('<TaskOrgCards/>', () => {
       expect(data.assigned_dev).toEqual('user-id');
       expect(data.should_alert_dev).toBe(true);
     });
+
+    test('self-assigns readonly user as tester', () => {
+      const task = {
+        ...defaultTask,
+        assigned_qa: null,
+      };
+      const { getByText } = setup({
+        task,
+        orgs: {},
+        userHasPermissions: false,
+      });
+      fireEvent.click(getByText('Self-Assign'));
+
+      expect(updateObject).toHaveBeenCalled();
+
+      const data = updateObject.mock.calls[0][0].data;
+
+      expect(data.assigned_qa).toEqual('user-id');
+      expect(data.should_alert_qa).toBe(false);
+    });
+
+    test('readonly user cannot assign dev role', () => {
+      const task = {
+        ...defaultTask,
+        assigned_dev: null,
+      };
+      const { queryByText } = setup({
+        task,
+        orgs: {},
+        userHasPermissions: false,
+      });
+
+      expect(queryByText('Self-Assign')).toBeNull();
+    });
   });
 
   describe('Change Tester click', () => {
@@ -361,6 +395,38 @@ describe('<TaskOrgCards/>', () => {
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_qa).toBeNull();
+    });
+
+    test('readonly user can remove self', () => {
+      const task = {
+        ...defaultTask,
+        assigned_dev: null,
+      };
+      const { getByText } = setup({
+        task,
+        orgs: {},
+        userHasPermissions: false,
+      });
+      fireEvent.click(getByText('User Actions'));
+      fireEvent.click(getByText('Remove Tester'));
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.assigned_qa).toBeNull();
+    });
+
+    test('readonly user cannot remove other user', () => {
+      const task = {
+        ...defaultTask,
+        assigned_dev: null,
+        assigned_qa: 'other-user',
+      };
+      const { queryByText } = setup({
+        task,
+        orgs: {},
+        userHasPermissions: false,
+      });
+
+      expect(queryByText('User Actions')).toBeNull();
     });
   });
 
