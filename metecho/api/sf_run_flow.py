@@ -93,13 +93,17 @@ def capitalize(s):
 
 
 def is_org_good(org):
+    """Check whether we can still get a valid access token for the org.
+
+    (Most likely reason for not being able to is that the org was deleted.)
+    """
     config = org.config
     org_name = org.org_config_name
     try:
         org_config = OrgConfig(config, org_name)
         org_config.refresh_oauth_token(None)
         return "access_token" in org_config.config
-    except HTTPError:
+    except Exception:
         return False
 
 
