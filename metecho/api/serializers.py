@@ -379,7 +379,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "review_sha": {"read_only": True},
             "status": {"read_only": True},
             "pr_is_open": {"read_only": True},
-            "assigned_dev": {"read_only": True},
             "assigned_qa": {"read_only": True},
             "currently_submitting_review": {"read_only": True},
         }
@@ -428,26 +427,14 @@ class TaskSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         dev_org = validated_data.pop("dev_org", None)
         user = self.context["request"].user
-        originating_user_id = str(user.id)
 
         if dev_org and not validated_data.get("assigned_dev"):
-            # Assign the current user as the Dev for the Task scratch org
-            matches = [
-                collaborator
-                for collaborator in validated_data["epic"].project.github_users
-                if collaborator["login"] == user.username
-            ]
-            try:
-                validated_data["assigned_dev"] = matches[0]
-            except IndexError:
-                pass
+            validated_data["assigned_dev"] = user.github_id
 
         task = super().create(validated_data)
 
         if dev_org:
-            dev_org.queue_convert_to_dev_org(
-                task, originating_user_id=originating_user_id
-            )
+            dev_org.queue_convert_to_dev_org(task, originating_user_id=str(user.id))
 
         return task
 
