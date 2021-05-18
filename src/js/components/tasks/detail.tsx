@@ -794,8 +794,20 @@ const TaskDetail = (props: RouteComponentProps) => {
                   <div
                     className="slds-size_1-of-1
                       slds-large-size_1-of-2
-                      slds-p-around_x-small"
+                      slds-p-around_x-small slds-is-relative right-edge"
                   >
+                    <TourPopover
+                      align="top"
+                      heading={i18n.t('View & play with Task')}
+                      body={
+                        <Trans i18nKey="tourTaskScratchOrg">
+                          Your Scratch Org is a temporary place for you to view
+                          the work on this Task. You can also use a Scratch Org
+                          to play with changes to the Task without affecting the
+                          Task.
+                        </Trans>
+                      }
+                    />
                     <PlaygroundOrgCard
                       org={playgroundOrg}
                       task={task}
