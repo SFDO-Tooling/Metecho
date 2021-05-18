@@ -51,7 +51,7 @@ class RepoPushPermissionMixin:
     def check_push_permission(self, instance):
         if not instance.has_push_permission(self.request.user):
             raise PermissionDenied(
-                'You do not have "Push" permissions in the related repository'
+                _('You do not have "Push" permissions in the related repository')
             )
 
     def perform_create(self, serializer):
