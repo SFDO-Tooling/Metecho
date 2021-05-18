@@ -386,7 +386,8 @@ const EpicDetail = (props: RouteComponentProps) => {
         break;
     }
   };
-  const { branchLink, branchLinkText } = getBranchLink(epic);
+  const { branchLink, branchLinkText, popoverHeading, popoverBody } =
+    getBranchLink(epic);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
@@ -419,16 +420,8 @@ const EpicDetail = (props: RouteComponentProps) => {
           </ExternalLink>
           <TourPopover
             align="bottom right"
-            heading={i18n.t('View GitHub branch for Epic')}
-            body={
-              <Trans i18nKey="tourViewEpicBranch">
-                Select this button to leave Metecho and access the Epic’s branch
-                on GitHub. A “branch” in Git is a way to create a new feature or
-                make a modification to existing software but not affect the main
-                “trunk” of the Project. A branch is created in GitHub when a new
-                Epic or Task is created in Metecho.
-              </Trans>
-            }
+            heading={popoverHeading}
+            body={<Trans i18nKey="tourViewEpicBranch">{{ popoverBody }}</Trans>}
           />
         </div>
       )}

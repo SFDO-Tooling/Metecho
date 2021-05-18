@@ -502,7 +502,13 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   };
 
-  const { branchLink, branchLinkText } = getBranchLink(task);
+  const {
+    branchLink,
+    branchLinkText,
+    popoverHeading,
+    popoverBody,
+    popoverKey,
+  } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
@@ -535,15 +541,9 @@ const TaskDetail = (props: RouteComponentProps) => {
           </ExternalLink>
           <TourPopover
             align="bottom right"
-            heading={i18n.t('View GitHub pull request')}
+            heading={popoverHeading}
             body={
-              <Trans i18nKey="tourViewTaskPullRequest">
-                Select this button to leave Metecho and access the Task’s pull
-                request on GitHub. A pull request in GitHub is a way to ask the
-                maintainers of the Project to pull in some code. A pull request
-                is created for a Task branch in GitHub when the Developer
-                submits changes for testing in Metecho.
-              </Trans>
+              <Trans i18nKey="tourViewTaskPullRequest">{{ popoverBody }}</Trans>
             }
           />
         </div>
