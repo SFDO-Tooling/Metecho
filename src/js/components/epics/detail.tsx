@@ -352,13 +352,27 @@ const EpicDetail = (props: RouteComponentProps) => {
       i18n.t('Submit Epic for Review on GitHub')
     );
     submitButton = (
-      <Button
-        label={submitButtonText}
-        className="slds-m-bottom_large"
-        variant="brand"
-        onClick={openSubmitModal}
-        disabled={currentlySubmitting}
-      />
+      <div className="slds-is-relative">
+        <Button
+          label={submitButtonText}
+          className="slds-m-bottom_large"
+          variant="brand"
+          onClick={openSubmitModal}
+          disabled={currentlySubmitting}
+        />
+        <TourPopover
+          align="right"
+          heading={i18n.t('Submit this Epic for review')}
+          body={
+            <Trans i18nKey="tourEpicSubmitReview">
+              When all of an Epic’s Tasks are Complete — meaning all the Tasks
+              have been added to the project on GitHub — the Epic is ready to be
+              submitted for review. The GitHub Project maintainers will approve
+              the Epic or ask for changes.
+            </Trans>
+          }
+        />
+      </div>
     );
   }
 
