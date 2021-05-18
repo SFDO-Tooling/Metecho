@@ -171,7 +171,7 @@ const OrgActions = ({
             <TourPopover
               align="right"
               heading={popoverHeading}
-              body={<Trans i18nKey={popoverKey}>{popoverBody}</Trans>}
+              body={<Trans i18nKey={popoverKey}>{{ popoverBody }}</Trans>}
             />
           </div>
         )}
