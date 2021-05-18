@@ -305,10 +305,7 @@ class TestEpicCollaboratorsSerializer:
     ):
         # We don't associate `user` with any GitHubRepository instances, which means
         # they are read-only
-        user = user_factory()
-        account = user.github_account
-        account.uid = "self"
-        account.save()
+        user = user_factory(socialaccount_set__uid="self")
         epic = epic_factory(
             github_users=github_users,
             project__github_users=[{"id": "123"}, {"id": "456"}, {"id": "self"}],
@@ -374,7 +371,7 @@ class TestTaskSerializer:
         assigned_dev,
     ):
         convert_to_dev_org_job = mocker.patch("metecho.api.jobs.convert_to_dev_org_job")
-        user = user_factory(socialaccount_set__uid="123")  # Set github_id
+        user = user_factory(socialaccount_set__uid="123")
         epic = epic_factory()
         scratch_org = scratch_org_factory(epic=epic, task=None)
         data = {
@@ -685,15 +682,14 @@ class TestTaskAssigneeSerializer:
         self,
         rf,
         git_hub_repository_factory,
+        user_factory,
         task_factory,
         repo_perms,
         data,
         success,
     ):
-        repo = git_hub_repository_factory(permissions=repo_perms)
-        account = repo.user.github_account
-        account.uid = "123"
-        account.save()
+        user = user_factory(socialaccount_set__uid="123")
+        repo = git_hub_repository_factory(permissions=repo_perms, user=user)
         task = task_factory(
             epic__project__repo_id=repo.repo_id,
             epic__project__github_users=[
@@ -702,7 +698,7 @@ class TestTaskAssigneeSerializer:
             ],
         )
         r = rf.get("/")
-        r.user = repo.user
+        r.user = user
         serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
         assert serializer.is_valid() == success, serializer.errors
         if not success:
