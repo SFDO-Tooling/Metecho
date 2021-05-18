@@ -2,16 +2,15 @@ import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
 import React, { ReactNode } from 'react';
-import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import TourPopover from '~js/components/tour/popover';
 import { ExternalLink, PageDescription } from '~js/components/utils';
 import routes from '~js/utils/routes';
 
 interface Crumb {
   name: string;
   url?: string;
+  tourPopover?: JSX.Element;
 }
 
 const DetailPageLayout = ({
@@ -68,12 +67,12 @@ const DetailPageLayout = ({
           ) : null
         }
       />
-      <div className="slds-is-relative">
+      <div>
         <div
           className="slds-p-horizontal_x-large
           slds-p-top_x-small
           metecho-breadcrumb
-          slds-truncate"
+         slds-is-relative"
         >
           <BreadCrumb
             trail={[
@@ -89,6 +88,14 @@ const DetailPageLayout = ({
                     </Link>
                   );
                 }
+                if (crumb.tourPopover) {
+                  return (
+                    <div className="slds-p-horizontal_x-small" key={idx}>
+                      {crumb.name}
+                      {crumb.tourPopover}
+                    </div>
+                  );
+                }
                 return (
                   <div className="slds-p-horizontal_x-small" key={idx}>
                     {crumb.name}
@@ -96,19 +103,6 @@ const DetailPageLayout = ({
                 );
               }),
             )}
-          />
-          <TourPopover
-            align="right"
-            heading={i18n.t('Navigation breadcrumb')}
-            body={
-              <Trans i18nKey="tourEpicBreadcrumb">
-                This “breadcrumb” list shows the hierarchy of objects in
-                Metecho. Projects contain Epics and Tasks. Epics contain Tasks.
-                You are currently viewing an Epic. Click the Project name to
-                jump back to that view. Click Home to see the list of all
-                Projects.
-              </Trans>
-            }
           />
         </div>
       </div>
