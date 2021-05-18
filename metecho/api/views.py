@@ -55,7 +55,14 @@ class RepoPushPermissionMixin:
             )
 
     def perform_create(self, serializer):
-        instance = serializer.Meta.model(**serializer.validated_data)
+        # instance = serializer.Meta.model(**serializer.validated_data)
+        # The for-loop could be replaced with the line above but that raises TypeError
+        # if the serializer has extra fields not contained in the model. `setattr()`
+        # works around this while still creating a valid instance.
+        instance = serializer.Meta.model()
+        for k, v in serializer.validated_data.items():
+            setattr(instance, k, v)
+
         self.check_push_permission(instance)
         return super().perform_create(serializer)
 

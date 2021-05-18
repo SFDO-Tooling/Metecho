@@ -796,6 +796,25 @@ class TestScratchOrgView:
 
 @pytest.mark.django_db
 class TestTaskViewSet:
+    def test_create__dev_org(
+        self, client, git_hub_repository_factory, scratch_org_factory, epic_factory
+    ):
+        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
+        epic = epic_factory(project__repo_id=repo.repo_id)
+        scratch_org = scratch_org_factory(epic=epic, task=None)
+        data = {
+            "name": "Test Task with Org",
+            "description": "Description",
+            "epic": str(epic.id),
+            "org_config_name": "dev",
+            "dev_org": str(scratch_org.id),
+        }
+
+        response = client.post(reverse("task-list"), data=data)
+        task_data = response.json()
+
+        assert task_data["assigned_dev"] == client.user.github_id, task_data
+
     def test_create_pr(self, client, task_factory):
         with ExitStack() as stack:
             task = task_factory()
