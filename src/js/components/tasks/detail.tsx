@@ -502,13 +502,8 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   };
 
-  const {
-    branchLink,
-    branchLinkText,
-    popoverHeading,
-    popoverBody,
-    popoverKey,
-  } = getBranchLink(task);
+  const { branchLink, branchLinkText, popoverHeading, popoverBody } =
+    getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
@@ -563,13 +558,27 @@ const TaskDetail = (props: RouteComponentProps) => {
       i18n.t('Submit Task for Testing')
     );
     submitButton = (
-      <Button
-        label={submitButtonText}
-        className="slds-m-bottom_x-large slds-m-left_none"
-        variant={isPrimary ? 'brand' : 'outline-brand'}
-        onClick={openSubmitModal}
-        disabled={currentlySubmitting}
-      />
+      <div className="slds-is-relative">
+        <Button
+          label={submitButtonText}
+          className="slds-m-bottom_x-large slds-m-left_none"
+          variant={isPrimary ? 'brand' : 'outline-brand'}
+          onClick={openSubmitModal}
+          disabled={currentlySubmitting}
+        />
+        <TourPopover
+          align="right"
+          heading={i18n.t('Submit changes for testing')}
+          body={
+            <Trans i18nKey="tourTaskSubmit">
+              When the work is complete, it’s time to submit the changes so that
+              the person assigned as the Tester can access them for testing.
+              Developers can retrieve new changes as many times as needed before
+              submitting changes for testing.
+            </Trans>
+          }
+        />
+      </div>
     );
   }
 
@@ -612,20 +621,34 @@ const TaskDetail = (props: RouteComponentProps) => {
       captureButtonText = i18n.t('Retrieve Changes from Dev Org');
     }
     captureButton = (
-      <Button
-        label={captureButtonText}
-        className={classNames('slds-m-bottom_x-large', {
-          'slds-m-right_medium': readyToSubmit,
-        })}
-        variant={isPrimary ? 'brand' : 'outline-brand'}
-        onClick={doCaptureChanges}
-        disabled={
-          fetchingChanges ||
-          currentlyFetching ||
-          currentlyCommitting ||
-          currentlyReassigning
-        }
-      />
+      <div className="slds-is-relative">
+        <Button
+          label={captureButtonText}
+          className={classNames('slds-m-bottom_x-large', {
+            'slds-m-right_medium': readyToSubmit,
+          })}
+          variant={isPrimary ? 'brand' : 'outline-brand'}
+          onClick={doCaptureChanges}
+          disabled={
+            fetchingChanges ||
+            currentlyFetching ||
+            currentlyCommitting ||
+            currentlyReassigning
+          }
+        />
+        <TourPopover
+          align="right"
+          heading={i18n.t('Retrieve changes')}
+          body={
+            <Trans i18nKey="tourTaskRetrieve">
+              After you’ve made changes, come back to Metecho to save or
+              “retrieve” your changes. You will be asked to select changes to
+              retrieve or ignore. You will create a “commit” message summarizing
+              your changes, so other Collaborators know what you did.
+            </Trans>
+          }
+        />
+      </div>
     );
   }
 
