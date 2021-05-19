@@ -386,8 +386,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         break;
     }
   };
-  const { branchLink, branchLinkText, popoverHeading, popoverBody } =
-    getBranchLink(epic);
+  const { branchLink, branchLinkText, popoverHeading } = getBranchLink(epic);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
@@ -421,7 +420,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           <TourPopover
             align="bottom right"
             heading={popoverHeading}
-            body={<Trans i18nKey="tourViewEpicBranch">{{ popoverBody }}</Trans>}
+            body={<Trans i18nKey="tourViewEpicBranch">test</Trans>}
           />
         </div>
       )}

@@ -502,8 +502,13 @@ const TaskDetail = (props: RouteComponentProps) => {
     }
   };
 
-  const { branchLink, branchLinkText, popoverHeading, popoverBody } =
-    getBranchLink(task);
+  const {
+    branchLink,
+    branchLinkText,
+    popoverHeading,
+    taskPopoverBody,
+    taskPopoverHeading,
+  } = getBranchLink(task);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
@@ -536,9 +541,11 @@ const TaskDetail = (props: RouteComponentProps) => {
           </ExternalLink>
           <TourPopover
             align="bottom right"
-            heading={popoverHeading}
+            heading={taskPopoverHeading}
             body={
-              <Trans i18nKey="tourViewTaskPullRequest">{{ popoverBody }}</Trans>
+              <Trans i18nKey="tourViewTaskPullRequest">
+                {{ taskPopoverBody }}
+              </Trans>
             }
           />
         </div>

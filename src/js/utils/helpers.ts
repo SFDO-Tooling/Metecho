@@ -43,50 +43,36 @@ export const getOrgBehindLatestMsg = (
 export const getBranchLink = (object: Task | Epic) => {
   let branchLink,
     branchLinkText,
+    taskPopoverHeading,
+    epicPopoverBody,
     popoverHeading,
-    popoverBody,
-    popoverKey,
-    projectType;
+    taskPopoverBody;
 
-  if (OBJECT_TYPES.TASK) {
-    projectType = 'Task';
-  } else {
-    projectType = 'Epic';
-  }
   if (object.pr_url) {
     branchLink = object.pr_url;
     branchLinkText = i18n.t('View Pull Request');
-    popoverHeading = i18n.t('View GitHub Pull Request');
-    popoverBody = i18n.t(
-      'Select this button to leave Metecho and access the {{type}}’s pull request on GitHub. A pull request in GitHub is a way to ask the maintainer of the repository to pull in some code. A pull request is created for an Epic branch in GitHub when the Developer submits an Epic for review in Metecho.',
-      {
-        type: projectType,
-      },
+    taskPopoverHeading = 'View GitHub Pull Request';
+    taskPopoverBody = i18n.t(
+      'Select this button to leave Metecho and access the Task’s pull request on GitHub. A pull request in GitHub is a way to ask the maintainers of the Project to pull in some code. A pull request is created for a Task branch in GitHub when the Developer submits changes for testing in Metecho.',
     );
   } else if (object.has_unmerged_commits && object.branch_diff_url) {
     branchLink = object.branch_diff_url;
     branchLinkText = i18n.t('View Changes');
-    popoverHeading = i18n.t('View Changes');
+    taskPopoverHeading = i18n.t('View Changes');
   } else if (object.branch_url) {
     branchLink = object.branch_url;
     branchLinkText = i18n.t('View Branch');
-    popoverHeading = i18n.t('View GitHub Branch for {{type}}', {
-      type: projectType,
-    });
-    popoverBody = i18n.t(
-      'Select this button to leave Metecho and access the {{type}}’s branch on GitHub. A “branch” in Git is a way to create a new feature or make a modification to existing software but not affect the main “trunk” of the Project. A branch is created in GitHub when a new Epic or Task is created in Metecho.',
-      {
-        type: projectType,
-      },
+    taskPopoverHeading = i18n.t('View GitHub Branch for Task');
+    taskPopoverBody = i18n.t(
+      'Select this button to leave Metecho and access the Task’s branch on GitHub. A “branch” in Git is a way to create a new feature or make a modification to existing software but not affect the main “trunk” of the Project. A branch is created in GitHub when a new Epic or Task is created in Metecho.',
     );
   }
   return {
     branchLink,
     branchLinkText,
     popoverHeading,
-    popoverBody,
-    popoverKey,
-    projectType,
+    taskPopoverBody,
+    taskPopoverHeading,
   };
 };
 
