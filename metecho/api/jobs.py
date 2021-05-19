@@ -86,8 +86,8 @@ def epic_create_branch(
                     ).latest_sha(),
                 )
         epic_branch_name = f"{prefix}{slugify(epic.name)}"
-        latest_sha = repository.branch(repository.default_branch).latest_sha()
         with creating_gh_branch(epic):
+            latest_sha = repository.branch(repository.default_branch).latest_sha()
             epic_branch_name = try_to_make_branch(
                 repository, new_branch=epic_branch_name, base_sha=latest_sha
             )
