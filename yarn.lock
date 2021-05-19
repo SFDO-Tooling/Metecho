@@ -1506,10 +1506,10 @@
     prop-types "^15.6.1"
     react-lifecycles-compat "^3.0.4"
 
-"@salesforce-ux/design-system@2.14.3":
-  version "2.14.3"
-  resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.14.3.tgz#26f41b0f97a4c22a062570b0dc14447673475f19"
-  integrity sha512-sdbU3INwZ3j40pCZ7l2qk+Wsv44r8/gr4zzPmwEvFzOG+mz6PmC2ix46Y2zY8PG/qCpXqm39VLdrg/vvAZEHvw==
+"@salesforce-ux/design-system@2.15.7":
+  version "2.15.7"
+  resolved "https://registry.yarnpkg.com/@salesforce-ux/design-system/-/design-system-2.15.7.tgz#a7caf25968bc540e955fa1d14b9aca38fa5aea83"
+  integrity sha512-ofH6Kyqc4soWEtD4zIa1vVd6cbMCLYwh2DKOSf+WGN6BVRyHH+ezIDsy1BYL6nFrkqZ7sZU57Nu0O9lK8XT1JQ==
 
 "@salesforce/babel-preset-design-system-react@^3.0.0":
   version "3.0.0"
