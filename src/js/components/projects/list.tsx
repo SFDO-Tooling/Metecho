@@ -96,21 +96,27 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     }
     default: {
       contents = (
-        <div className="slds-grid slds-wrap slds-grid_pull-padded-small slds-is-relative project-list">
-          <TourPopover
-            align="right"
-            heading={i18n.t('Metecho Project')}
-            body={
-              <Trans i18nKey="tourMetechoProject">
-                This is a Metecho Project. Projects are equivalent to
-                Repositories in GitHub. Select a Project to view the work being
-                done. If you would like to contribute, please make sure you have
-                permission in GitHub.
-              </Trans>
-            }
-          />
-          {projects.map((project) => (
-            <ProjectListItem project={project} key={project.id} />
+        <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
+          {projects.map((project, index) => (
+            <>
+              <ProjectListItem project={project} key={project.id} />
+              {index === 0 && (
+                <div className="slds-is-relative right-edge">
+                  <TourPopover
+                    align="top"
+                    heading={i18n.t('Metecho Project')}
+                    body={
+                      <Trans i18nKey="tourMetechoProject">
+                        This is a Metecho Project. Projects are equivalent to
+                        Repositories in GitHub. Select a Project to view the
+                        work being done. If you would like to contribute, please
+                        make sure you have permission in GitHub.
+                      </Trans>
+                    }
+                  />
+                </div>
+              )}
+            </>
           ))}
         </div>
       );
