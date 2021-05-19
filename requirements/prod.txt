@@ -294,7 +294,7 @@ robotframework==3.2.2
     #   robotframework-seleniumlibrary
 rq-scheduler==0.11.0
     # via -r requirements/prod.in
-rq==1.8.0
+rq==1.8.1
     # via
     #   django-rq
     #   rq-scheduler
