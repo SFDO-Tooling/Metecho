@@ -172,10 +172,12 @@ def test_mutate_scratch_org():
 
 
 def test_get_access_token():
-    with patch(f"{PATCH_ROOT}.SalesforceOAuth2") as SalesforceOAuth2:
+    with ExitStack() as stack:
+        OAuth2Client = stack.enter_context(patch(f"{PATCH_ROOT}.OAuth2Client"))
+        stack.enter_context(patch(f"{PATCH_ROOT}.OAuth2ClientConfig"))
         get_access_token(org_result=MagicMock(), scratch_org_config=MagicMock())
 
-        assert SalesforceOAuth2.called
+        assert OAuth2Client.called
 
 
 class TestDeployOrgSettings:
