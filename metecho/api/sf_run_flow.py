@@ -233,6 +233,7 @@ def get_access_token(*, org_result, scratch_org_config):
         redirect_uri=SF_CALLBACK_URL,
         auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
         token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+        scope="web full refresh_token",
     )
     oauth = OAuth2Client(oauth_config)
     auth_result = oauth.auth_code_grant(org_result["AuthCode"]).json()
