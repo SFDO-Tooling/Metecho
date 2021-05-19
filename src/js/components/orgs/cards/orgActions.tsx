@@ -140,22 +140,46 @@ const OrgActions = ({
     const needsReview =
       task.has_unmerged_commits && task.pr_is_open && !task.review_valid;
     let isActive = false;
-    let popoverHeading, popoverBody, popoverKey;
+    let popover = null;
 
     switch (type) {
       case ORG_TYPES.DEV:
         isActive = hasReviewRejected || !task.has_unmerged_commits;
-        popoverHeading = i18n.t('Create a Dev Org');
-        popoverKey = 'tourTaskCreateDevOrg';
-        popoverBody =
-          'A Dev Org is a temporary Salesforce org where you can make changes that you would like to contribute to the Project. To create an Org, make sure you are connected to your Salesforce account with a Dev Hub enabled. Use the drop down menu to delete the Org when you no longer need it.';
+        popover = (
+          <TourPopover
+            align="right"
+            heading={i18n.t('Create a Dev Org')}
+            body={
+              <Trans i18nKey="tourTaskCreateDevOrg">
+                A Dev Org is a temporary Salesforce org where you can make
+                changes that you would like to contribute to the Project. To
+                create an Org, make sure you are connected to your Salesforce
+                account with a Dev Hub enabled. Use the drop down menu to delete
+                the Org when you no longer need it.
+              </Trans>
+            }
+          />
+        );
+
         break;
       case ORG_TYPES.QA:
         isActive = needsReview;
-        popoverHeading = i18n.t('Create a Test Org');
-        popoverKey = 'tourTaskCreateTestOrg';
-        popoverBody =
-          'A Test Org is a temporary Salesforce org where you can view the changes the Developer retrieved. Make sure you are connected to your Salesforce account with a Dev Hub enabled. Read the Developer’s Commit History to see what changes they made. Use the drop down menu to delete the Test Org when you no longer need it.';
+        popover = (
+          <TourPopover
+            align="right"
+            heading={i18n.t('Create a Test Org')}
+            body={
+              <Trans i18nKey="tourTaskCreateTestOrg">
+                A Test Org is a temporary Salesforce org where you can view the
+                changes the Developer retrieved. Make sure you are connected to
+                your Salesforce account with a Dev Hub enabled. Read the
+                Developer’s Commit History to see what changes they made. Use
+                the drop down menu to delete the Test Org when you no longer
+                need it.
+              </Trans>
+            }
+          />
+        );
         break;
     }
     return (
@@ -168,11 +192,7 @@ const OrgActions = ({
               variant={isActive ? 'brand' : 'neutral'}
               onClick={doCreateOrg}
             />
-            <TourPopover
-              align="right"
-              heading={popoverHeading}
-              body={<Trans i18nKey={popoverKey}>{{ popoverBody }}</Trans>}
-            />
+            {popover}
           </div>
         )}
       </>
