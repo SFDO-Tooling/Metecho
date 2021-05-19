@@ -547,7 +547,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   );
 
   let submitButton: React.ReactNode = null;
-  /* if (readyToSubmit && project.has_push_permission) */ {
+  if (readyToSubmit && project.has_push_permission) {
     const isPrimary = !readyToCaptureChanges;
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
