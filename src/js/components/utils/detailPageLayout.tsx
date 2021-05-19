@@ -85,20 +85,14 @@ const DetailPageLayout = ({
                   return (
                     <Link to={crumb.url} key={idx}>
                       {crumb.name}
-                    </Link>
-                  );
-                }
-                if (crumb.tourPopover) {
-                  return (
-                    <div className="slds-p-horizontal_x-small" key={idx}>
-                      {crumb.name}
                       {crumb.tourPopover}
-                    </div>
+                    </Link>
                   );
                 }
                 return (
                   <div className="slds-p-horizontal_x-small" key={idx}>
                     {crumb.name}
+                    {crumb.tourPopover}
                   </div>
                 );
               }),
