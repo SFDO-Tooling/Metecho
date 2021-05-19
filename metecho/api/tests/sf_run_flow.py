@@ -171,13 +171,15 @@ def test_mutate_scratch_org():
     assert scratch_org_config.config.update.called
 
 
-def test_get_access_token():
-    with ExitStack() as stack:
-        OAuth2Client = stack.enter_context(patch(f"{PATCH_ROOT}.OAuth2Client"))
-        stack.enter_context(patch(f"{PATCH_ROOT}.OAuth2ClientConfig"))
-        get_access_token(org_result=MagicMock(), scratch_org_config=MagicMock())
+def test_get_access_token(mocker):
+    OAuth2Client = mocker.patch(f"{PATCH_ROOT}.OAuth2Client")
+    mocker.patch(f"{PATCH_ROOT}.OAuth2ClientConfig")
+    get_access_token(
+        org_result=mocker.MagicMock(),
+        scratch_org_config=mocker.MagicMock(),
+    )
 
-        assert OAuth2Client.called
+    assert OAuth2Client.called
 
 
 class TestDeployOrgSettings:
