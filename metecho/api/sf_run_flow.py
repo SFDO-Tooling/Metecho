@@ -13,7 +13,6 @@ from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler
-from requests.exceptions import HTTPError
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
