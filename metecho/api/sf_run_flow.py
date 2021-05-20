@@ -13,7 +13,6 @@ from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler
-from requests.exceptions import HTTPError
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
@@ -56,7 +55,7 @@ class ScratchOrgError(Exception):
 def delete_org_on_error(scratch_org=None, originating_user_id=None):
     try:
         yield
-    except HTTPError as err:
+    except Exception as err:
         if not scratch_org:
             raise err
         if get_current_job():
