@@ -103,7 +103,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
               {index === 0 && (
                 <div className="slds-is-relative right-edge">
                   <TourPopover
-                    align="top"
+                    align="right"
                     heading={i18n.t('Metecho Project')}
                     body={
                       <Trans i18nKey="tourMetechoProject">

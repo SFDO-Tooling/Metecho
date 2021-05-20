@@ -48,6 +48,11 @@
     top: unset;
   }
 
+  .metecho-breadcrumb & {
+    left: 0;
+    top: -15px;
+  }
+
   .next-steps & {
     left: 200px;
   }
