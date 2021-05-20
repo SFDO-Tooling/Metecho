@@ -41,12 +41,16 @@ export const getOrgBehindLatestMsg = (
 };
 
 export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
-  let branchLink, branchLinkText, popoverHeading, popoverBody;
+  let branchLink, branchLinkText, popoverHeading, popoverBody, popoverKey;
 
   if (object.pr_url) {
     branchLink = object.pr_url;
     branchLinkText = i18n.t('View Pull Request');
-    popoverHeading = 'View GitHub Pull Request';
+    popoverKey =
+      type === OBJECT_TYPES.EPIC
+        ? i18n.t('tourViewEpicPullRequest')
+        : i18n.t('tourViewTaskPullRequest');
+    popoverHeading = i18n.t('View GitHub Pull Request');
     popoverBody =
       type === OBJECT_TYPES.EPIC
         ? i18n.t(
@@ -62,6 +66,10 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
   } else if (object.branch_url) {
     branchLink = object.branch_url;
     branchLinkText = i18n.t('View Branch');
+    popoverKey =
+      type === OBJECT_TYPES.EPIC
+        ? i18n.t('tourViewEpicBranch')
+        : i18n.t('tourViewTaskBranch');
     popoverHeading =
       type === OBJECT_TYPES.EPIC
         ? i18n.t('View GitHub Branch for Epic')
@@ -80,6 +88,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
     branchLinkText,
     popoverHeading,
     popoverBody,
+    popoverKey,
   };
 };
 
