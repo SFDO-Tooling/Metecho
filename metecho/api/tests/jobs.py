@@ -454,16 +454,14 @@ class TestConvertScratchOrg:
         scratch_org = scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
         )
-        mocker.patch(
-            f"{PATCH_ROOT}._create_branches_on_github", side_effect=Exception("Oh no!")
-        )
+        mocker.patch(f"{PATCH_ROOT}._create_branches_on_github", side_effect=Exception)
         async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
 
-        convert_to_dev_org(scratch_org, task=task, originating_user_id=None)
+        with pytest.raises(Exception):
+            convert_to_dev_org(scratch_org, task=task, originating_user_id=None)
 
         assert async_to_sync.called
         assert caplog.records[0].levelno == logging.ERROR
-        assert "Oh no!" in caplog.text
 
         scratch_org.refresh_from_db()
         assert scratch_org.epic == task.epic

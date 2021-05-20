@@ -320,10 +320,9 @@ def convert_to_dev_org(scratch_org, *, task, originating_user_id=None):
     """
     Convert an Epic playground org into a Task Dev org
     """
-    error = None
-    task.refresh_from_db()
-    scratch_org.refresh_from_db()
     try:
+        task.refresh_from_db()
+        scratch_org.refresh_from_db()
         _create_branches_on_github(
             user=scratch_org.owner,
             repo_id=task.get_repo_id(),
@@ -332,14 +331,19 @@ def convert_to_dev_org(scratch_org, *, task, originating_user_id=None):
             task_sha=scratch_org.latest_commit,
             originating_user_id=originating_user_id,
         )
-    except Exception as exc:
-        error = exc
-        logger.exception("Failed to convert ScratchOrg")
-
-    scratch_org.refresh_from_db()
-    scratch_org.finalize_convert_to_dev_org(
-        task, error=error, originating_user_id=originating_user_id
-    )
+    except Exception as e:
+        task.refresh_from_db()
+        scratch_org.refresh_from_db()
+        scratch_org.finalize_convert_to_dev_org(
+            task, error=e, originating_user_id=originating_user_id
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        scratch_org.finalize_convert_to_dev_org(
+            task, originating_user_id=originating_user_id
+        )
 
 
 convert_to_dev_org_job = job(convert_to_dev_org)
