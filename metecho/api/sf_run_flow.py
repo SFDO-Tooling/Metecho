@@ -56,7 +56,7 @@ class ScratchOrgError(Exception):
 def delete_org_on_error(scratch_org=None, originating_user_id=None):
     try:
         yield
-    except HTTPError as err:
+    except Exception as err:
         if not scratch_org:
             raise err
         if get_current_job():
