@@ -7,6 +7,7 @@ $color-background-path-active: $brand-background-primary;
 $color-background-path-active-hover: $color-brand-darker;
 $color-background-path-complete: $color-background-path-incomplete-hover;
 $color-background-path-complete-hover: $color-gray-6;
+$color-background-path-current: $brand-background-primary;
 
 .slds-path__item {
   min-width: 3rem;
@@ -20,12 +21,79 @@ $color-background-path-complete-hover: $color-gray-6;
 .slds-path__nav {
   flex: auto;
 
-  .slds-is-active:not(.slds-is-won) {
+  .slds-is-complete {
+    background: $color-background-path-complete;
+    flex-grow: 0.5;
+
+    &:before,
+    &:after {
+      background: $color-background-path-complete;
+    }
+
+    &:hover {
+      background: $color-background-path-complete-hover;
+      flex-grow: 1.5;
+
+      &:before,
+      &:after {
+        background: $color-background-path-complete-hover;
+      }
+    }
+
+    .slds-path__link {
+      color: $color-text-default;
+    }
+  }
+
+  .slds-is-current {
+    background-color: $color-background-path-current;
+
+    &:first-child {
+      border-color: $color-background-path-current;
+
+      &:before,
+      &:after {
+        background-image: linear-gradient(
+          90deg,
+          $color-background-path-current,
+          $color-background-path-current 0.125rem,
+          transparent 0.125rem
+        );
+      }
+
+      &:hover {
+        border-color: $color-background-path-current;
+
+        &:before,
+        &:after {
+          background-image: linear-gradient(
+            90deg,
+            $color-background-path-active-hover,
+            $color-background-path-active-hover 0.125rem,
+            transparent 0.125rem
+          );
+        }
+      }
+    }
+
+    .slds-path__link {
+      color: $color-text-brand-primary;
+    }
+  }
+
+  .slds-is-active {
     background: $color-background-path-active;
 
     &:before,
     &:after {
       background: $color-background-path-active;
+    }
+
+    &:first-child {
+      &:before,
+      &:after {
+        background: $color-background-path-active;
+      }
     }
 
     &:hover {
@@ -50,33 +118,37 @@ $color-background-path-complete-hover: $color-gray-6;
     }
   }
 
-  .slds-is-complete:not(.slds-is-won) {
-    background: $color-background-path-complete;
-    flex-grow: 0.5;
-
-    &:before,
-    &:after {
-      background: $color-background-path-complete;
-    }
-
-    &:hover {
-      background: $color-background-path-complete-hover;
-      flex-grow: 1.5;
-
-      &:before,
-      &:after {
-        background: $color-background-path-complete-hover;
-      }
-    }
+  .slds-path.slds-is-won .slds-path__item.slds-is-current,
+  .slds-is-won {
+    background: $color-background-path-won;
 
     .slds-path__link {
-      color: $color-text-default;
+      color: $color-text-brand-primary;
+    }
+
+    &:before,
+    &:after,
+    &:hover,
+    &:hover:before,
+    &:hover:after {
+      background: $color-background-path-won;
     }
   }
 
-  .slds-is-won {
+  .slds-is-lost,
+  .slds-path.slds-is-lost .slds-path__item.slds-is-current {
+    background: $color-background-path-lost;
+
     .slds-path__link {
       color: $color-text-brand-primary;
+    }
+
+    &:before,
+    &:after,
+    &:hover,
+    &:hover:before,
+    &:hover:after {
+      background: $color-background-path-lost;
     }
   }
 }

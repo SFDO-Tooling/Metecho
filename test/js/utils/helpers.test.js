@@ -1,3 +1,4 @@
+import { TASK_STATUSES } from '~js/utils/constants';
 import * as helpers from '~js/utils/helpers';
 
 describe('pluralize', () => {
@@ -13,8 +14,26 @@ describe('pluralize', () => {
 describe('getBranchLink', () => {
   test.each([
     [
-      { pr_url: 'pr' },
+      { pr_url: 'pr', pr_is_open: true },
       { branchLink: 'pr', branchLinkText: 'View Pull Request' },
+    ],
+    [
+      {
+        pr_url: 'pr',
+        pr_is_open: false,
+        status: TASK_STATUSES.COMPLETED,
+      },
+      { branchLink: 'pr', branchLinkText: 'View Pull Request' },
+    ],
+    [
+      {
+        pr_url: 'pr',
+        pr_is_open: false,
+        status: TASK_STATUSES.CANCELED,
+        has_unmerged_commits: true,
+        branch_diff_url: 'diff',
+      },
+      { branchLink: 'diff', branchLinkText: 'View Changes' },
     ],
     [
       { has_unmerged_commits: true, branch_diff_url: 'diff' },
