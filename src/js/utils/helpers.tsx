@@ -1,6 +1,9 @@
 import i18n from 'i18next';
 import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
+import React from 'react';
+import { Trans } from 'react-i18next';
 
+import TourPopover from '~js/components/tour/popover';
 import { Epic } from '~js/store/epics/reducer';
 import { Changeset, Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
@@ -41,54 +44,99 @@ export const getOrgBehindLatestMsg = (
 };
 
 export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
-  let branchLink, branchLinkText, popoverHeading, popoverBody, popoverKey;
+  let branchLink, branchLinkText;
+  let popover = null;
 
   if (object.pr_url) {
     branchLink = object.pr_url;
     branchLinkText = i18n.t('View Pull Request');
-    popoverKey =
-      type === OBJECT_TYPES.EPIC
-        ? i18n.t('tourViewEpicPullRequest')
-        : i18n.t('tourViewTaskPullRequest');
-    popoverHeading = i18n.t('View GitHub Pull Request');
-    popoverBody =
-      type === OBJECT_TYPES.EPIC
-        ? i18n.t(
-            'Select this button to leave Metecho and access the Epic’s branch on GitHub. A “branch” in Git is a way to create a new feature or make a modification to existing software but not affect the main “trunk” of the Project. A branch is created in GitHub when a new Epic or Task is created in Metecho.',
-          )
-        : i18n.t(
-            'Select this button to leave Metecho and access the Task’s pull request on GitHub. A pull request in GitHub is a way to ask the maintainers of the Project to pull in some code. A pull request is created for a Task branch in GitHub when the Developer submits changes for testing in Metecho.',
-          );
+    const heading = i18n.t('View GitHub Pull Request');
+    popover =
+      type === OBJECT_TYPES.EPIC ? (
+        <TourPopover
+          align="bottom right"
+          heading={heading}
+          body={
+            <Trans i18nKey="tourViewEpicPullRequest">
+              Select this button to leave Metecho and access the Epic’s branch
+              on GitHub. A “branch” in Git is a way to create a new feature or
+              make a modification to existing software but not affect the main
+              “trunk” of the Project. A branch is created in GitHub when a new
+              Epic or Task is created in Metecho.
+            </Trans>
+          }
+        />
+      ) : (
+        <TourPopover
+          align="bottom right"
+          heading={heading}
+          body={
+            <Trans i18nKey="tourViewTaskPullRequest">
+              Select this button to leave Metecho and access the Task’s pull
+              request on GitHub. A pull request in GitHub is a way to ask the
+              maintainers of the Project to pull in some code. A pull request is
+              created for a Task branch in GitHub when the Developer submits
+              changes for testing in Metecho.
+            </Trans>
+          }
+        />
+      );
   } else if (object.has_unmerged_commits && object.branch_diff_url) {
     branchLink = object.branch_diff_url;
     branchLinkText = i18n.t('View Changes');
-    popoverHeading = i18n.t('View Changes');
+    const heading = i18n.t('View Changes on GitHub');
+    popover =
+      type === OBJECT_TYPES.EPIC ? (
+        <TourPopover
+          align="bottom right"
+          heading={heading}
+          body={<Trans i18nKey="tourViewEpicChanges">@@@</Trans>}
+        />
+      ) : (
+        <TourPopover
+          align="bottom right"
+          heading={heading}
+          body={<Trans i18nKey="tourViewTaskChanges">@@@</Trans>}
+        />
+      );
   } else if (object.branch_url) {
     branchLink = object.branch_url;
     branchLinkText = i18n.t('View Branch');
-    popoverKey =
-      type === OBJECT_TYPES.EPIC
-        ? i18n.t('tourViewEpicBranch')
-        : i18n.t('tourViewTaskBranch');
-    popoverHeading =
-      type === OBJECT_TYPES.EPIC
-        ? i18n.t('View GitHub Branch for Epic')
-        : i18n.t('View GitHub Branch for Task');
-    popoverBody =
-      type === OBJECT_TYPES.EPIC
-        ? i18n.t(
-            'Select this button to leave Metecho and access the Epic’s branch on GitHub. A “branch” in Git is a way to create a new feature or make a modification to existing software but not affect the main “trunk” of the Project. A branch is created in GitHub when a new Epic or Task is created in Metecho.',
-          )
-        : i18n.t(
-            'Select this button to leave Metecho and access the Task’s branch on GitHub. A “branch” in Git is a way to create a new feature or make a modification to existing software but not affect the main “trunk” of the Project. A branch is created in GitHub when a new Epic or Task is created in Metecho.',
-          );
+    popover =
+      type === OBJECT_TYPES.EPIC ? (
+        <TourPopover
+          align="bottom right"
+          heading={i18n.t('View GitHub Branch for Epic')}
+          body={
+            <Trans i18nKey="tourViewEpicBranch">
+              Select this button to leave Metecho and access the Epic’s branch
+              on GitHub. A “branch” in Git is a way to create a new feature or
+              make a modification to existing software but not affect the main
+              “trunk” of the Project. A branch is created in GitHub when a new
+              Epic or Task is created in Metecho.
+            </Trans>
+          }
+        />
+      ) : (
+        <TourPopover
+          align="bottom right"
+          heading={i18n.t('View GitHub Branch for Task')}
+          body={
+            <Trans i18nKey="tourViewTaskBranch">
+              Select this button to leave Metecho and access the Task’s branch
+              on GitHub. A “branch” in Git is a way to create a new feature or
+              make a modification to existing software but not affect the main
+              “trunk” of the Project. A branch is created in GitHub when a new
+              Epic or Task is created in Metecho.
+            </Trans>
+          }
+        />
+      );
   }
   return {
     branchLink,
     branchLinkText,
-    popoverHeading,
-    popoverBody,
-    popoverKey,
+    popover,
   };
 };
 
