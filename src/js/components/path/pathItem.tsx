@@ -8,9 +8,16 @@ interface PathItemProps {
   idx: number;
   activeIdx?: number;
   isCompleted?: boolean;
+  isLost?: boolean;
 }
 
-const PathItem = ({ steps, idx, activeIdx, isCompleted }: PathItemProps) => {
+const PathItem = ({
+  steps,
+  idx,
+  activeIdx,
+  isCompleted,
+  isLost,
+}: PathItemProps) => {
   const title = steps[idx];
   let isActive = false;
   let isComplete = false;
@@ -31,6 +38,7 @@ const PathItem = ({ steps, idx, activeIdx, isCompleted }: PathItemProps) => {
         'slds-is-incomplete': isIncomplete,
         'slds-is-complete': isComplete,
         'slds-is-won': isWon,
+        'slds-is-lost': isLost && isActive && !isCompleted,
       })}
       role="presentation"
     >
