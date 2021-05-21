@@ -2,6 +2,7 @@ import Button from '@salesforce/design-system-react/components/button';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import Icon from '@salesforce/design-system-react/components/icon';
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import classNames from 'classnames';
 import i18n from 'i18next';
@@ -88,7 +89,7 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     return null;
   }
   const status =
-    item.review_valid && item.status !== TASK_STATUSES.COMPLETED
+    item.review_valid && item.status === TASK_STATUSES.IN_PROGRESS
       ? item.review_status
       : item.status;
   let displayStatus, icon;
@@ -109,6 +110,16 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     case TASK_STATUSES.COMPLETED:
       displayStatus = i18n.t('Complete');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
+      break;
+    case TASK_STATUSES.CANCELED:
+      displayStatus = i18n.t('Canceled');
+      icon = (
+        <ProgressRing
+          value={0}
+          hasIcon
+          icon={<Icon category="utility" name="close" />}
+        />
+      );
       break;
     case REVIEW_STATUSES.CHANGES_REQUESTED:
       displayStatus = i18n.t('Changes Requested');
@@ -282,6 +293,7 @@ const TaskTable = ({
     [TASK_STATUSES.IN_PROGRESS]: 1,
     [TASK_STATUSES.PLANNED]: 2,
     [TASK_STATUSES.COMPLETED]: 3,
+    [TASK_STATUSES.CANCELED]: 4,
   };
   const taskDefaultSort = sortBy(tasks, [
     (item) => statusOrder[item.status],

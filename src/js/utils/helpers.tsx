@@ -7,7 +7,11 @@ import TourPopover from '~js/components/tour/popover';
 import { Epic } from '~js/store/epics/reducer';
 import { Changeset, Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
-import { OBJECT_TYPES, TASK_STATUSES } from '~js/utils/constants';
+import {
+  EPIC_STATUSES,
+  OBJECT_TYPES,
+  TASK_STATUSES,
+} from '~js/utils/constants';
 
 export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
@@ -47,7 +51,13 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
   let branchLink, branchLinkText;
   let popover = null;
 
-  if (object.pr_url) {
+  if (
+    object.pr_url &&
+    (object.pr_is_open ||
+      [TASK_STATUSES.COMPLETED, EPIC_STATUSES.MERGED].includes(
+        object.status as any,
+      ))
+  ) {
     branchLink = object.pr_url;
     branchLinkText = i18n.t('View Pull Request');
     const heading = i18n.t('View GitHub Pull Request');
