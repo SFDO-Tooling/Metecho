@@ -301,6 +301,7 @@ describe('<TaskDetail/>', () => {
             {
               ...defaultState.tasks.epic1[0],
               pr_url: 'my-pr-url',
+              pr_is_open: true,
             },
           ],
         },
@@ -488,6 +489,7 @@ describe('<TaskDetail/>', () => {
                 has_unmerged_commits: true,
                 pr_url: 'my-pr-url',
                 pr_is_open: false,
+                status: TASK_STATUSES.CANCELED,
               },
             ],
           },
@@ -495,6 +497,39 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(getByText('Submit Task for Testing')).toBeVisible();
+      expect(getByText('re-submitted for testing')).toBeVisible();
+    });
+
+    test('does not render "Submit Task" button for readonly user', () => {
+      const { getByText, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            ...defaultState.projects,
+            projects: [
+              {
+                ...defaultState.projects.projects[0],
+                has_push_permission: false,
+              },
+            ],
+          },
+          tasks: {
+            ...defaultState.tasks,
+            epic1: [
+              {
+                ...defaultState.tasks.epic1[0],
+                has_unmerged_commits: true,
+                pr_url: 'my-pr-url',
+                pr_is_open: false,
+                status: TASK_STATUSES.CANCELED,
+              },
+            ],
+          },
+        },
+      });
+
+      expect(queryByText('re-submitted for testing')).toBeNull();
+      expect(getByText('Canceled')).toBeVisible();
     });
   });
 
