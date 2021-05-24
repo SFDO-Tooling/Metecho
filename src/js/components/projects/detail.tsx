@@ -191,7 +191,7 @@ const ProjectDetail = (
           <div
             className="slds-m-bottom_x-large
               metecho-secondary-block
-              slds-m-left_medium"
+              slds-m-left_medium tour-scratch-org-location"
           >
             <h2 className="slds-text-heading_medium slds-p-bottom_medium slds-is-relative">
               {i18n.t('My Project Scratch Org')}

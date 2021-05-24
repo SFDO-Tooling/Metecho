@@ -35,6 +35,19 @@ const PlayTour = ({ run, onClose }: Props) => {
           for specific work in progress.
         </Trans>
       ),
+      placement: 'top',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-walkthroughs',
+      title: i18n.t('Review walkthroughs any time'),
+      content: (
+        <Trans i18nKey="tourPlayWalkthroughs">
+          If you would like to review this or any other walkthrough, simply
+          click the question mark. There is also a self-guided tour option with
+          many more definitions & explanations.
+        </Trans>
+      ),
       placement: 'left',
       disableBeacon: true,
     },
