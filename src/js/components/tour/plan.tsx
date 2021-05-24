@@ -3,7 +3,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { Step } from 'react-joyride';
 
-import GuidedTour from '~js/components/tour/guided';
+import GuidedTour, { getFinalStep } from '~js/components/tour/guided';
 
 interface Props {
   run: boolean;
@@ -25,19 +25,7 @@ const PlanTour = ({ run, onClose }: Props) => {
       placement: 'right',
       disableBeacon: true,
     },
-    {
-      target: '.tour-walkthroughs',
-      title: i18n.t('Review walkthroughs any time'),
-      content: (
-        <Trans i18nKey="tourWalkthroughs">
-          If you would like to review this or any other walkthrough again,
-          simply click the question mark. There is also a self-guided tour with
-          more object and action explanations.
-        </Trans>
-      ),
-      placement: 'right',
-      disableBeacon: true,
-    },
+    getFinalStep(),
   ];
 
   return <GuidedTour steps={steps} run={run} onClose={onClose} />;

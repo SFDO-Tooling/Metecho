@@ -12,6 +12,7 @@ import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import ProjectNotFound from '~js/components/projects/project404';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
+import PlayTour from '~js/components/tour/play';
 import TourPopover from '~js/components/tour/popover';
 import {
   CreateOrgModal,
@@ -220,7 +221,11 @@ const ProjectDetail = (
                       slds-wrap
                       slds-grid_pull-padded-x-small"
                   >
-                    <div className="slds-size_1-of-1 slds-p-around_x-small">
+                    <div
+                      className="slds-size_1-of-1
+                        slds-p-around_x-small
+                        tour-scratch-org"
+                    >
                       <PlaygroundOrgCard
                         org={playgroundOrg}
                         project={project}
@@ -230,6 +235,7 @@ const ProjectDetail = (
                   </div>
                 ) : (
                   <Button
+                    className="tour-scratch-org"
                     label={i18n.t('Create Scratch Org')}
                     variant="outline-brand"
                     onClick={openCreateOrgModal}
@@ -349,6 +355,10 @@ const ProjectDetail = (
           isOpen={tourLandingModalOpen}
           runTour={doRunTour}
           onRequestClose={closeTourLandingModal}
+        />
+        <PlayTour
+          run={tourRunning === WALKTHROUGH_TYPES.PLAY}
+          onClose={handleTourClose}
         />
         <PlanTour
           run={tourRunning === WALKTHROUGH_TYPES.PLAN}
