@@ -193,7 +193,11 @@ const ProjectDetail = (
               metecho-secondary-block
               slds-m-left_medium"
           >
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium slds-is-relative">
+            <h2
+              className="slds-text-heading_medium
+                slds-p-bottom_medium
+                slds-is-relative"
+            >
               {i18n.t('My Project Scratch Org')}
               <TourPopover
                 align="top"
@@ -216,7 +220,11 @@ const ProjectDetail = (
                       slds-wrap
                       slds-grid_pull-padded-x-small"
                   >
-                    <div className="slds-size_1-of-1 slds-p-around_x-small tour-scratch-org">
+                    <div
+                      className="slds-size_1-of-1
+                        slds-p-around_x-small
+                        tour-scratch-org"
+                    >
                       <PlaygroundOrgCard
                         org={playgroundOrg}
                         project={project}
