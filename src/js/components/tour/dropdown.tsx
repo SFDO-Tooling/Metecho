@@ -94,7 +94,6 @@ const TourDropdown = ({
                     /* istanbul ignore next */ () =>
                       handleSelect(WALKTHROUGH_TYPES.PLAY)
                   }
-                  disabled
                 />
               </li>
               <li className="slds-p-horizontal_small">
