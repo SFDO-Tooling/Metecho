@@ -3,7 +3,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { Step } from 'react-joyride';
 
-import GuidedTour from '~js/components/tour/guided';
+import GuidedTour, { getFinalStep } from '~js/components/tour/guided';
 
 interface Props {
   run: boolean;
@@ -13,44 +13,21 @@ interface Props {
 const PlayTour = ({ run, onClose }: Props) => {
   const steps: Step[] = [
     {
-      target: '.tour-create-scratch-org',
+      target: '.tour-scratch-org',
       title: i18n.t('View & play with project'),
       content: (
-        <Trans i18nKey="tourPlayScratchOrg">
+        <Trans i18nKey="walkthroughScratchOrg">
           Scratch Orgs are a temporary place for you to view the work on this
           Project. You can use Scratch Orgs to play with changes to the Project
-          without affecting the Project.
+          without affecting the Project. Create a Scratch Org for the entire
+          Project, or visit an Epic or Task to create a Scratch Org for specific
+          work in progress.
         </Trans>
       ),
       placement: 'left',
       disableBeacon: true,
     },
-    {
-      target: '.tour-scratch-org-location',
-      title: i18n.t('Scratch Org appears here'),
-      content: (
-        <Trans i18nKey="tourPlayScratchOrgLocation">
-          Your Project Scratch Org will appear here. Create a Scratch Org for
-          the entire Project, or visit an Epic or Task to create a Scratch Org
-          for specific work in progress.
-        </Trans>
-      ),
-      placement: 'top',
-      disableBeacon: true,
-    },
-    {
-      target: '.tour-walkthroughs',
-      title: i18n.t('Review walkthroughs any time'),
-      content: (
-        <Trans i18nKey="tourPlayWalkthroughs">
-          If you would like to review this or any other walkthrough, simply
-          click the question mark. There is also a self-guided tour option with
-          many more definitions & explanations.
-        </Trans>
-      ),
-      placement: 'left',
-      disableBeacon: true,
-    },
+    getFinalStep(),
   ];
 
   return <GuidedTour steps={steps} run={run} onClose={onClose} />;

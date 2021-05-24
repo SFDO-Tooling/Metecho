@@ -191,7 +191,7 @@ const ProjectDetail = (
           <div
             className="slds-m-bottom_x-large
               metecho-secondary-block
-              slds-m-left_medium tour-scratch-org-location"
+              slds-m-left_medium"
           >
             <h2 className="slds-text-heading_medium slds-p-bottom_medium slds-is-relative">
               {i18n.t('My Project Scratch Org')}
@@ -216,7 +216,7 @@ const ProjectDetail = (
                       slds-wrap
                       slds-grid_pull-padded-x-small"
                   >
-                    <div className="slds-size_1-of-1 slds-p-around_x-small">
+                    <div className="slds-size_1-of-1 slds-p-around_x-small tour-scratch-org">
                       <PlaygroundOrgCard
                         org={playgroundOrg}
                         project={project}
@@ -227,7 +227,7 @@ const ProjectDetail = (
                 ) : (
                   <div className="slds-is-relative">
                     <Button
-                      className="tour-create-scratch-org"
+                      className="tour-scratch-org"
                       label={i18n.t('Create Scratch Org')}
                       variant="outline-brand"
                       onClick={openCreateOrgModal}

@@ -5,7 +5,7 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import backpackSvg from '!raw-loader!~img/backpack-lg.svg';
+// import backpackSvg from '!raw-loader!~img/backpack-lg.svg';
 import mapSvg from '!raw-loader!~img/map-lg.svg';
 import seesawSvg from '!raw-loader!~img/seesaw-lg.svg';
 import { Illustration } from '~js/components/utils';
@@ -32,20 +32,19 @@ const LandingModal = ({
   const tours: Tour[] = [
     {
       header: i18n.t('I want to Play'),
-      tag: i18n.t('Make a Scratch Org to view Project & play.'),
+      tag: i18n.t('Make a Scratch Org to view the Project & play.'),
       linkText: i18n.t('Start Play Walkthrough'),
       type: WALKTHROUGH_TYPES.PLAY,
       icon: seesawSvg,
-      disabled: true,
     },
-    {
-      header: i18n.t('I want to Help'),
-      tag: i18n.t('Browse available Tasks; give your input.'),
-      linkText: i18n.t('Start Help Walkthrough'),
-      type: WALKTHROUGH_TYPES.HELP,
-      icon: backpackSvg,
-      disabled: true,
-    },
+    // {
+    //   header: i18n.t('I want to Help'),
+    //   tag: i18n.t('Browse available Tasks; give your input.'),
+    //   linkText: i18n.t('Start Help Walkthrough'),
+    //   type: WALKTHROUGH_TYPES.HELP,
+    //   icon: backpackSvg,
+    //   disabled: true,
+    // },
     {
       header: i18n.t('I want to Plan'),
       tag: i18n.t('Create a Task or an Epic; add your work.'),
@@ -60,7 +59,7 @@ const LandingModal = ({
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       assistiveText={{ closeButton: i18n.t('Close') }}
-      size="large"
+      size="medium"
       className="metecho-transition-in"
     >
       <div className="slds-p-around_x-large">
@@ -77,7 +76,7 @@ const LandingModal = ({
             <div
               className="slds-p-around_small
                 slds-small-size_1-of-1
-                slds-medium-size_1-of-3"
+                slds-medium-size_1-of-2"
               key={idx}
             >
               <Card
@@ -105,7 +104,7 @@ const LandingModal = ({
           ))}
         </div>
         <div className="slds-align_absolute-center">
-          <p className="slds-small-size_2-of-5 slds-text-align_center">
+          <p className="slds-small-size_3-of-5 slds-text-align_center">
             <Trans i18nKey="tourHelp">
               Review these walkthroughs anytime you need them, or turn on the
               self-guided tour when you have specific questions.
