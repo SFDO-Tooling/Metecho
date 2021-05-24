@@ -100,13 +100,25 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
         <TourPopover
           align="bottom right"
           heading={heading}
-          body={<Trans i18nKey="tourViewEpicChanges">@@@</Trans>}
+          body={
+            <Trans i18nKey="tourViewEpicChanges">
+              Select this button to leave Metecho and view the retrieved changes
+              for this Epic that have not yet been added to the Project. Compare
+              the changes to the current state of the Project.
+            </Trans>
+          }
         />
       ) : (
         <TourPopover
           align="bottom right"
           heading={heading}
-          body={<Trans i18nKey="tourViewTaskChanges">@@@</Trans>}
+          body={
+            <Trans i18nKey="tourViewTaskChanges">
+              Select this button to leave Metecho and view the retrieved changes
+              or “commits” for this Task that have not yet been added to the
+              Project. Compare the changes to the current state of the Project.
+            </Trans>
+          }
         />
       );
   } else if (object.branch_url) {
