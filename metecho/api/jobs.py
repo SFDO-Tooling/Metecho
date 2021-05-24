@@ -599,9 +599,12 @@ def get_social_image(*, project):
         logger.error(tb)
         raise
     else:
-        project.refresh_from_db()
-        project.repo_image_url = og_image
-        project.finalize_get_social_image()
+        # Save the image only if it was manually set by the repository owner. GitHub
+        # seems to store only manually-set images under this domain:
+        if og_image.startswith("https://repository-images.githubusercontent.com/"):
+            project.refresh_from_db()
+            project.repo_image_url = og_image
+            project.finalize_get_social_image()
 
 
 get_social_image_job = job(get_social_image)
