@@ -69,7 +69,7 @@ const ProjectDetail = (
   useEffect(() => {
     const tours = Object.values(WALKTHROUGH_TYPES);
     const showTour = state?.[SHOW_WALKTHROUGH];
-    if (epics?.fetched && showTour && tours.includes(showTour)) {
+    if (orgs && epics?.fetched && showTour && tours.includes(showTour)) {
       // Remove location state
       history.replace({ state: {} });
       /* istanbul ignore else */
@@ -79,7 +79,7 @@ const ProjectDetail = (
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, tourLandingModalOpen, epics?.fetched]);
+  }, [state, tourLandingModalOpen, orgs, epics?.fetched]);
 
   const fetchMoreEpics = useCallback(() => {
     /* istanbul ignore else */
