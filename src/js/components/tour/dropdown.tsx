@@ -7,7 +7,7 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
 
-import backpackIcon from '~img/backpack-sm.svg';
+// import backpackIcon from '~img/backpack-sm.svg';
 import mapIcon from '~img/map-sm.svg';
 import seesawIcon from '~img/seesaw-sm.svg';
 import { useIsMounted } from '~js/components/utils';
@@ -81,7 +81,11 @@ const TourDropdown = ({
       body={
         <>
           {project && (
-            <ul className="slds-border_bottom slds-p-bottom_x-small slds-m-bottom_x-small">
+            <ul
+              className="slds-border_bottom
+                slds-p-bottom_x-small
+                slds-m-bottom_x-small"
+            >
               <li className="slds-p-horizontal_small">
                 <Button
                   label={i18n.t('Play Walkthrough')}
@@ -94,10 +98,9 @@ const TourDropdown = ({
                     /* istanbul ignore next */ () =>
                       handleSelect(WALKTHROUGH_TYPES.PLAY)
                   }
-                  disabled
                 />
               </li>
-              <li className="slds-p-horizontal_small">
+              {/* <li className="slds-p-horizontal_small">
                 <Button
                   label={i18n.t('Help Walkthrough')}
                   variant="base"
@@ -105,13 +108,9 @@ const TourDropdown = ({
                   iconSize="large"
                   iconPath={`${backpackIcon}#backpack-sm`}
                   style={{ width: '100%' }}
-                  onClick={
-                    /* istanbul ignore next */ () =>
-                      handleSelect(WALKTHROUGH_TYPES.HELP)
-                  }
-                  disabled
+                  onClick={() => handleSelect(WALKTHROUGH_TYPES.HELP)}
                 />
-              </li>
+              </li> */}
               <li className="slds-p-horizontal_small">
                 <Button
                   label={i18n.t('Plan Walkthrough')}
