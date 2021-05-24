@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
+import { Trans } from 'react-i18next';
 import Joyride, {
   ACTIONS,
   CallBackProps,
@@ -16,6 +17,20 @@ interface Props {
   run: boolean;
   onClose: () => void;
 }
+
+export const getFinalStep = (): Step => ({
+  target: '.tour-walkthroughs',
+  title: i18n.t('Review walkthroughs any time'),
+  content: (
+    <Trans i18nKey="walkthroughHelp">
+      If you would like to review this or any other walkthrough, simply click
+      the question mark. There is also a self-guided tour with more definitions
+      and explanations.
+    </Trans>
+  ),
+  placement: 'right',
+  disableBeacon: true,
+});
 
 const GuidedTour = ({ steps, run, onClose }: Props) => {
   const [helpers, setHelpers] = useState<StoreHelpers | null>(null);
