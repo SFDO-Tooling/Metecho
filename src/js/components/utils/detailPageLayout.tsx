@@ -70,9 +70,9 @@ const DetailPageLayout = ({
       <div>
         <div
           className="slds-p-horizontal_x-large
-          slds-p-top_x-small
-          metecho-breadcrumb
-         slds-is-relative"
+            slds-p-top_x-small
+            metecho-breadcrumb
+            slds-is-relative"
         >
           <BreadCrumb
             trail={[

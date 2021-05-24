@@ -365,10 +365,9 @@ const EpicDetail = (props: RouteComponentProps) => {
           heading={i18n.t('Submit this Epic for review')}
           body={
             <Trans i18nKey="tourEpicSubmitReview">
-              When all of an Epic’s Tasks are Complete — meaning all the Tasks
-              have been added to the project on GitHub — the Epic is ready to be
-              submitted for review. The GitHub Project maintainers will approve
-              the Epic or ask for changes.
+              When an Epic has completed Tasks, it can be submitted for review.
+              The GitHub Project maintainers will approve the Epic or ask for
+              changes.
             </Trans>
           }
         />
@@ -397,7 +396,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           />
           <TourPopover
             align="left"
-            heading={i18n.t('Edit & delete the Epic')}
+            heading={i18n.t('Edit or delete this Epic')}
             body={
               <Trans i18nKey="tourEditEpic">
                 Here you can change the name and description of this Epic. You
@@ -460,7 +459,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 This is the name of the Epic you are viewing. Select the link
                 below the Epic name to leave Metecho and access the Project’s
                 branch on GitHub. To edit this name, click the gear icon. Epics
-                & Tasks are equivalent to GitHub branches.
+                and Tasks are equivalent to GitHub branches.
               </Trans>
             }
           />
@@ -484,8 +483,8 @@ const EpicDetail = (props: RouteComponentProps) => {
                     This “breadcrumb” list shows the hierarchy of objects in
                     Metecho. Projects contain Epics and Tasks. Epics contain
                     Tasks. You are currently viewing an Epic. Click the Project
-                    name to jump back to that view. Click Home to see the list
-                    of all Projects.
+                    name to return to that view. Click “Home” to see the list of
+                    all Projects.
                   </Trans>
                 }
               />
@@ -556,7 +555,12 @@ const EpicDetail = (props: RouteComponentProps) => {
                 />
               ) : null}
             </div>
-            <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative next-steps">
+            <div
+              className="slds-m-bottom_x-large
+                metecho-secondary-block
+                slds-is-relative
+                next-steps"
+            >
               <EpicStatusSteps
                 epic={epic}
                 tasks={tasks || []}
@@ -572,7 +576,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   <Trans i18nKey="tourEpicNextSteps">
                     The Next Steps section is designed as a quick reference to
                     guide you through the process from adding your first Task to
-                    getting your Epic Merged into the Project on GitHub. The
+                    getting your Epic merged into the Project on GitHub. The
                     next step is indicated with a blue ring, and completed steps
                     are checked.
                   </Trans>
@@ -589,22 +593,36 @@ const EpicDetail = (props: RouteComponentProps) => {
             heading={i18n.t('Epic progress path')}
             body={
               <Trans i18nKey="tourEpicProgress">
-                An Epic starts its journey as <b>Planned</b>. The Epic
-                progresses to <b>In Progress</b> when a Developer creates a Dev
-                Org for any Task in the Epic. When all the Epic’s Tasks are
-                complete, and the Epic is ready to be submitted for review on
-                GitHub, the Epic progresses to <b>Review</b>. The Epic moves to{' '}
-                <b>Merged - Active</b> when the Epic is submitted for review on
-                GitHub, and <b>Merged - Complete</b> when the Epic has been
-                added to the Project on GitHub.
+                An Epic starts its journey as <b>Planned</b>. The Epic is{' '}
+                <b>In Progress</b> when a Developer creates a Dev Org for any
+                Task in the Epic. When all the Epic’s Tasks are complete, and
+                the Epic is ready to be submitted for review on GitHub, the Epic
+                moves to <b>Review</b>. The Epic is ready to be <b>Merged</b>{' '}
+                once it is submitted for review, and is <b>Complete</b> when the
+                Epic has been added to the Project on GitHub.
               </Trans>
             }
           />
         </div>
         {submitButton}
         <div className="slds-m-bottom_large">
-          <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+          <h2
+            className="slds-text-heading_medium
+              slds-p-bottom_medium
+              slds-is-relative"
+          >
             {i18n.t('My Epic Scratch Org')}
+            <TourPopover
+              align="right"
+              heading={i18n.t('View & play with an Epic')}
+              body={
+                <Trans i18nKey="tourEpicScratchOrg">
+                  Your Scratch Org is a temporary place for you to view the work
+                  on this Epic. You can also use a Scratch Org to play with
+                  changes to the Epic without affecting the Epic.
+                </Trans>
+              }
+            />
           </h2>
           {orgs ? (
             <>
@@ -627,26 +645,12 @@ const EpicDetail = (props: RouteComponentProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="slds-is-relative">
-                  <Button
-                    label={i18n.t('Create Scratch Org')}
-                    variant="outline-brand"
-                    onClick={openCreateOrgModal}
-                    disabled={epic.currently_creating_branch}
-                  />
-                  <TourPopover
-                    align="right"
-                    heading={i18n.t('View & play with Epic')}
-                    body={
-                      <Trans i18nKey="tourViewScratchOrg">
-                        Your Scratch Org is a temporary place for you to view
-                        the work on this Epic. You can also use a Scratch Org to
-                        play with changes to the Epic without affecting the
-                        Epic.
-                      </Trans>
-                    }
-                  />
-                </div>
+                <Button
+                  label={i18n.t('Create Scratch Org')}
+                  variant="outline-brand"
+                  onClick={openCreateOrgModal}
+                  disabled={epic.currently_creating_branch}
+                />
               )}
             </>
           ) : (
@@ -678,10 +682,10 @@ const EpicDetail = (props: RouteComponentProps) => {
                   body={
                     <Trans i18nKey="tourAddTask">
                       To get started contributing to this Epic, add a Task. You
-                      will be asked for a name & optional description. You can
-                      chose an org type, but dev is recommended. Tasks represent
-                      small changes to this Epic; each one has a Developer and a
-                      Tester.
+                      will be asked for a name and optional description. You can
+                      chose an org type, but “dev” is recommended. Tasks
+                      represent small changes to this Epic; each one has a
+                      Developer and a Tester.
                     </Trans>
                   }
                 />

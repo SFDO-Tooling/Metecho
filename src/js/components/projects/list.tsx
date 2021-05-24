@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { ScrollProps, withScroll } from 'react-fns';
 import { Trans } from 'react-i18next';
@@ -98,8 +98,8 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
       contents = (
         <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
           {projects.map((project, index) => (
-            <>
-              <ProjectListItem project={project} key={project.id} />
+            <Fragment key={project.id}>
+              <ProjectListItem project={project} />
               {index === 0 && (
                 <div className="slds-is-relative right-edge">
                   <TourPopover
@@ -107,16 +107,17 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                     heading={i18n.t('Metecho Project')}
                     body={
                       <Trans i18nKey="tourMetechoProject">
-                        This is a Metecho Project. Projects are equivalent to
-                        Repositories in GitHub. Select a Project to view the
-                        work being done. If you would like to contribute, please
-                        make sure you have permission in GitHub.
+                        This is a Metecho <b>Project</b>. Projects are
+                        equivalent to Repositories in GitHub. Select a Project
+                        to view the work being done. If you would like to
+                        contribute, please make sure you have “push” permissions
+                        in GitHub.
                       </Trans>
                     }
                   />
                 </div>
               )}
-            </>
+            </Fragment>
           ))}
         </div>
       );
@@ -128,7 +129,10 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     <DocumentTitle title={`${i18n.t('Projects')} | ${i18n.t('Metecho')}`}>
       <>
         <PageHeader
-          className="page-header slds-is-relative slds-p-around_x-large project-placeholder"
+          className="page-header
+            slds-is-relative
+            slds-p-around_x-large
+            project-placeholder"
           title={
             <>
               {i18n.t('Select a Project')}
@@ -137,8 +141,8 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                 heading={i18n.t('Begin exploring projects')}
                 body={
                   <Trans i18nKey="tourSelectProject">
-                    Select a Salesforce Project from the list to begin viewing
-                    or contributing to the project. Projects are equivalent to
+                    Select a Metecho Project from the list to begin viewing or
+                    contributing to the project. Projects are equivalent to
                     Repositories in GitHub. They have Orgs, Tasks, and Epics. To
                     learn more, continue the self-guided tour on a Project page.
                   </Trans>
@@ -203,9 +207,9 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                       <Trans i18nKey="tourUpdateProject">
                         If you have recently been added as a collaborator on
                         GitHub, you may not yet see your new Project in this
-                        list. First, make sure you are logged into the correct
-                        account. Next, use the resync button to get the most
-                        updated list of Projects.
+                        list. First, make sure you are logged in with the
+                        correct GitHub account. Next, use the re-sync button to
+                        get an updated list of Projects.
                       </Trans>
                     }
                   />

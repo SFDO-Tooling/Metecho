@@ -153,9 +153,9 @@ const OrgActions = ({
               <Trans i18nKey="tourTaskCreateDevOrg">
                 A Dev Org is a temporary Salesforce org where you can make
                 changes that you would like to contribute to the Project. To
-                create an Org, make sure you are connected to your Salesforce
-                account with a Dev Hub enabled. Use the drop down menu to delete
-                the Org when you no longer need it.
+                create an Org, make sure you are connected to a Salesforce
+                account with Dev Hub enabled. Use the drop down menu to delete
+                the Dev Org when you no longer need it.
               </Trans>
             }
           />
@@ -171,10 +171,10 @@ const OrgActions = ({
             body={
               <Trans i18nKey="tourTaskCreateTestOrg">
                 A Test Org is a temporary Salesforce org where you can view the
-                changes the Developer retrieved. Make sure you are connected to
-                your Salesforce account with a Dev Hub enabled. Read the
-                Developer’s Commit History to see what changes they made. Use
-                the drop down menu to delete the Test Org when you no longer
+                changes the Developer retrieved. To create an Org, make sure you
+                are connected to a Salesforce account with Dev Hub enabled. Read
+                the Developer’s Commit History to see what changes they made.
+                Use the drop down menu to delete the Test Org when you no longer
                 need it.
               </Trans>
             }
@@ -184,16 +184,32 @@ const OrgActions = ({
     }
     return (
       <>
-        {submitReviewBtn}
+        {submitReviewBtn ? (
+          <span className="slds-is-relative">
+            {submitReviewBtn}
+            <TourPopover
+              align="right"
+              heading={i18n.t('Submit a review')}
+              body={
+                <Trans i18nKey="tourTaskSubmitReview">
+                  When you’re finished viewing and testing all the changes, come
+                  back to Metecho to leave your review. You will have the option
+                  to approve the work or request changes. Clearly describe any
+                  further changes you’d like the Developer to make.
+                </Trans>
+              }
+            />
+          </span>
+        ) : null}
         {!(preventNewTestOrg || disableCreation) && (
-          <div className="slds-is-relative">
+          <span className="slds-is-relative">
             <Button
               label={i18n.t('Create Org')}
               variant={isActive ? 'brand' : 'neutral'}
               onClick={doCreateOrg}
             />
             {popover}
-          </div>
+          </span>
         )}
       </>
     );

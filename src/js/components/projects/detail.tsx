@@ -192,17 +192,22 @@ const ProjectDetail = (
               metecho-secondary-block
               slds-m-left_medium"
           >
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium slds-is-relative">
+            <h2
+              className="slds-text-heading_medium
+                slds-p-bottom_medium
+                slds-is-relative"
+            >
               {i18n.t('My Project Scratch Org')}
               <TourPopover
                 align="top"
-                heading={i18n.t('Scratch Org management')}
+                heading={i18n.t('View & play with a Project')}
                 body={
                   <Trans i18nKey="tourProjectScratchOrg">
-                    Your Scratch Org for a Project will appear in this column.
-                    Create a Scratch Org for the entire Project or visit an Epic
-                    or Task to create a Scratch Org for specific work
-                    in-progress.
+                    Scratch Orgs are a temporary place for you to view the work
+                    on this Project. You can use Scratch Orgs to play with
+                    changes to the Project without affecting the Project. Create
+                    a Scratch Org for the entire Project or visit an Epic or
+                    Task to create a Scratch Org for specific work in-progress.
                   </Trans>
                 }
               />
@@ -224,25 +229,11 @@ const ProjectDetail = (
                     </div>
                   </div>
                 ) : (
-                  <div className="slds-is-relative">
-                    <Button
-                      label={i18n.t('Create Scratch Org')}
-                      variant="outline-brand"
-                      onClick={openCreateOrgModal}
-                    />
-                    <TourPopover
-                      align="bottom"
-                      heading={i18n.t('View & play with a Project')}
-                      body={
-                        <Trans i18nKey="tourProjectCreateScratchOrg">
-                          Scratch Orgs are a temporary place for you to view the
-                          work on this Project. You can use Scratch Orgs to play
-                          with changes to the Project without affecting the
-                          Project.
-                        </Trans>
-                      }
-                    />
-                  </div>
+                  <Button
+                    label={i18n.t('Create Scratch Org')}
+                    variant="outline-brand"
+                    onClick={openCreateOrgModal}
+                  />
                 )}
               </>
             ) : (
@@ -262,7 +253,11 @@ const ProjectDetail = (
           <SpinnerWrapper />
         ) : (
           <>
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+            <h2
+              className="slds-text-heading_medium
+                slds-p-bottom_medium
+                slds-is-relative"
+            >
               {hasEpics || !project.has_push_permission
                 ? i18n.t('Epics for {{project_name}}', {
                     project_name: project.name,
@@ -270,6 +265,16 @@ const ProjectDetail = (
                 : i18n.t('Create an Epic for {{project_name}}', {
                     project_name: project.name,
                   })}
+              <TourPopover
+                align="right"
+                heading={i18n.t('List of Epics')}
+                body={
+                  <Trans i18nKey="tourEpicsList">
+                    This is the list of all Epics for this Project. Each Epic is
+                    a group of related Tasks.
+                  </Trans>
+                }
+              />
             </h2>
             {!hasEpics && (
               <p className="slds-m-bottom_large">
@@ -302,10 +307,10 @@ const ProjectDetail = (
                 <TourPopover
                   align="right"
                   body={
-                    <Trans i18nKey="tourCreateEpicPopover">
+                    <Trans i18nKey="tourCreateEpic">
                       Create an Epic to make a group of related Tasks. Invite
                       multiple Collaborators to your Epic and assign people as
-                      Developers & Testers for each Task. Epics are equivalent
+                      Developers and Testers for each Task. Epics are equivalent
                       to GitHub branches, just like Tasks.
                     </Trans>
                   }

@@ -264,11 +264,7 @@ const TaskOrgCards = ({
     <>
       <h2 className="slds-text-heading_medium">{i18n.t('Task Team & Orgs')}</h2>
       <div className="slds-grid slds-wrap slds-grid_pull-padded-x-small">
-        <div
-          className="slds-size_1-of-1
-        slds-large-size_1-of-2
-        slds-p-around_x-small slds-is-relative right-edge"
-        >
+        <>
           <TaskOrgCard
             org={orgs[ORG_TYPES.DEV]}
             type={ORG_TYPES.DEV}
@@ -306,12 +302,8 @@ const TaskOrgCards = ({
               </Trans>
             }
           />
-        </div>
-        <div
-          className="slds-size_1-of-1
-        slds-large-size_1-of-2
-        slds-p-around_x-small slds-is-relative right-edge"
-        >
+        </>
+        <>
           <TaskOrgCard
             org={orgs[ORG_TYPES.QA]}
             type={ORG_TYPES.QA}
@@ -347,12 +339,12 @@ const TaskOrgCards = ({
                 Assign yourself or someone else as Tester on this Task. Testers
                 create a Test Org to view the Developer’s work, and then approve
                 the work or request changes that must be addressed before the
-                Task can be completed. Use the drop down menu to delete or
-                reassign Tester.
+                Task can be completed. Use the drop down menu to change or
+                remove the Tester.
               </Trans>
             }
           />
-        </div>
+        </>
       </div>
       <ConnectModal
         user={user}

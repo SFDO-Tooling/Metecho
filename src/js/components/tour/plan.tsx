@@ -16,7 +16,7 @@ const PlanTour = ({ run, onClose }: Props) => {
       target: '.tour-create-epic',
       title: i18n.t('Create Epics to group Tasks'),
       content: (
-        <Trans i18nKey="tourCreateEpic">
+        <Trans i18nKey="walkthroughCreateEpic">
           Epics are groups of related Tasks, representing larger changes to the
           Project. You can invite multiple Collaborators to your Epic and assign
           different people as Developers and Testers for each Task.

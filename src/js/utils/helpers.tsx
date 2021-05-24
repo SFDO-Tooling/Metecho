@@ -60,7 +60,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
   ) {
     branchLink = object.pr_url;
     branchLinkText = i18n.t('View Pull Request');
-    const heading = i18n.t('View GitHub Pull Request');
+    const heading = i18n.t('View GitHub pull request');
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
@@ -68,11 +68,11 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
           heading={heading}
           body={
             <Trans i18nKey="tourViewEpicPullRequest">
-              Select this button to leave Metecho and access the Epic’s branch
-              on GitHub. A “branch” in Git is a way to create a new feature or
-              make a modification to existing software but not affect the main
-              “trunk” of the Project. A branch is created in GitHub when a new
-              Epic or Task is created in Metecho.
+              Select this button to leave Metecho and access the Epic’s pull
+              request on GitHub. A “pull request” is a way to ask the
+              maintainers of the Project to incorporate some changes. A pull
+              request is created for an Epic branch in GitHub when the Developer
+              submits an Epic for review in Metecho.
             </Trans>
           }
         />
@@ -83,10 +83,10 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
           body={
             <Trans i18nKey="tourViewTaskPullRequest">
               Select this button to leave Metecho and access the Task’s pull
-              request on GitHub. A pull request in GitHub is a way to ask the
-              maintainers of the Project to pull in some code. A pull request is
-              created for a Task branch in GitHub when the Developer submits
-              changes for testing in Metecho.
+              request on GitHub. A “pull request” is a way to ask the
+              maintainers of the Project to incorporate some changes. A pull
+              request is created for a Task branch in GitHub when the Developer
+              submits changes for testing in Metecho.
             </Trans>
           }
         />
@@ -94,7 +94,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
   } else if (object.has_unmerged_commits && object.branch_diff_url) {
     branchLink = object.branch_diff_url;
     branchLinkText = i18n.t('View Changes');
-    const heading = i18n.t('View Changes on GitHub');
+    const heading = i18n.t('View changes on GitHub');
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
@@ -116,12 +116,12 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
           align="bottom right"
-          heading={i18n.t('View GitHub Branch for Epic')}
+          heading={i18n.t('View GitHub branch for this Epic')}
           body={
             <Trans i18nKey="tourViewEpicBranch">
               Select this button to leave Metecho and access the Epic’s branch
-              on GitHub. A “branch” in Git is a way to create a new feature or
-              make a modification to existing software but not affect the main
+              on GitHub. A “branch” is a way to create a new feature or make a
+              modification to existing software without affecting the main
               “trunk” of the Project. A branch is created in GitHub when a new
               Epic or Task is created in Metecho.
             </Trans>
@@ -130,12 +130,12 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
       ) : (
         <TourPopover
           align="bottom right"
-          heading={i18n.t('View GitHub Branch for Task')}
+          heading={i18n.t('View GitHub branch for this Task')}
           body={
             <Trans i18nKey="tourViewTaskBranch">
               Select this button to leave Metecho and access the Task’s branch
-              on GitHub. A “branch” in Git is a way to create a new feature or
-              make a modification to existing software but not affect the main
+              on GitHub. A “branch” is a way to create a new feature or make a
+              modification to existing software without affecting the main
               “trunk” of the Project. A branch is created in GitHub when a new
               Epic or Task is created in Metecho.
             </Trans>

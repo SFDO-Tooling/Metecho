@@ -532,7 +532,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           />
           <TourPopover
             align="left"
-            heading={i18n.t('Edit & delete the Task')}
+            heading={i18n.t('Edit or delete this Task')}
             body={
               <Trans i18nKey="tourEditTask">
                 Here you can change the name and description of this Task. You
@@ -654,9 +654,10 @@ const TaskDetail = (props: RouteComponentProps) => {
           body={
             <Trans i18nKey="tourTaskRetrieve">
               After you’ve made changes, come back to Metecho to save or
-              “retrieve” your changes. You will be asked to select changes to
-              retrieve or ignore. You will create a “commit” message summarizing
-              your changes, so other Collaborators know what you did.
+              “retrieve” your changes. You will be asked to select which changes
+              to retrieve (or ignore). You will create a “commit” message
+              summarizing your changes, so other Collaborators know what was
+              changed.
             </Trans>
           }
         />
@@ -694,8 +695,8 @@ const TaskDetail = (props: RouteComponentProps) => {
               <Trans i18nKey="tourTaskName">
                 This is the name of the Task you are viewing. Select the link
                 below to leave Metecho and access this branch on GitHub. To edit
-                this name, click the gear icon. Epics & Tasks are equivalent to
-                GitHub branches.
+                this name, click the gear icon. Epics and Tasks are equivalent
+                to GitHub branches.
               </Trans>
             }
           />
@@ -723,8 +724,8 @@ const TaskDetail = (props: RouteComponentProps) => {
                     This “breadcrumb” list shows the hierarchy of objects in
                     Metecho. Projects contain Epics and Tasks. Epics contain
                     Tasks. You are currently viewing a Task. Click the Project
-                    or Epic name to jump back to that view. Click Home to see
-                    the list of all Projects.
+                    or Epic name to return to that view. Click “Home” to see the
+                    list of all Projects.
                   </Trans>
                 }
               />
@@ -734,7 +735,12 @@ const TaskDetail = (props: RouteComponentProps) => {
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
           <>
-            <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative right-edge">
+            <div
+              className="slds-m-bottom_x-large
+                metecho-secondary-block
+                slds-is-relative
+                right-edge"
+            >
               <TaskStatusPath task={task} />
               <TourPopover
                 align="left"
@@ -742,20 +748,24 @@ const TaskDetail = (props: RouteComponentProps) => {
                 body={
                   <Trans i18nKey="tourTaskProgress">
                     A Task starts its journey as <b>Planned</b>. When a Dev Org
-                    is created, the Task progresses to <b>In Progress</b>, and
-                    the Developer begins work. When the Developer submits
-                    changes for testing, the Task progress to <b>Test</b>. If
-                    the Developer retrieves new changes, the Task moves back to{' '}
-                    <b>In Progress</b>. The Task progresses to{' '}
-                    <b>Merged - Active</b> after the Tester approves the work,
-                    and <b>Merged - Complete</b> when the Task is added to the
-                    Project on GitHub.
+                    is created, the Task is <b>In Progress</b>, and the
+                    Developer begins work. When the Developer submits changes
+                    for testing, the Task moves to <b>Test</b>. If the Developer
+                    retrieves new changes, the Task is again <b>In Progress</b>.
+                    The Task is ready to be <b>Merged</b> after the Tester
+                    approves the work, and is <b>Complete</b> when the Task has
+                    been added to the Project on GitHub.
                   </Trans>
                 }
               />
             </div>
             {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
-              <div className="slds-m-bottom_x-large metecho-secondary-block slds-is-relative next-steps">
+              <div
+                className="slds-m-bottom_x-large
+                  metecho-secondary-block
+                  slds-is-relative
+                  next-steps"
+              >
                 {task.status === TASK_STATUSES.CANCELED ? (
                   <>
                     <h3 className="slds-text-heading_medium slds-m-bottom_small">
@@ -844,8 +854,23 @@ const TaskDetail = (props: RouteComponentProps) => {
           <SpinnerWrapper />
         )}
         <div className="slds-m-vertical_large">
-          <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+          <h2
+            className="slds-text-heading_medium
+              slds-p-bottom_medium
+              slds-is-relative"
+          >
             {i18n.t('My Task Scratch Org')}
+            <TourPopover
+              align="right"
+              heading={i18n.t('View & play with a Task')}
+              body={
+                <Trans i18nKey="tourTaskStratchOrg">
+                  Your Scratch Org is a temporary place for you to view the work
+                  on this Task. You can also use a Scratch Org to play with
+                  changes to the Task without affecting the Task.
+                </Trans>
+              }
+            />
           </h2>
           {taskOrgs ? (
             <>
@@ -858,20 +883,8 @@ const TaskDetail = (props: RouteComponentProps) => {
                   <div
                     className="slds-size_1-of-1
                       slds-large-size_1-of-2
-                      slds-p-around_x-small slds-is-relative right-edge"
+                      slds-p-around_x-small"
                   >
-                    <TourPopover
-                      align="top"
-                      heading={i18n.t('View & play with Task')}
-                      body={
-                        <Trans i18nKey="tourTaskScratchOrg">
-                          Your Scratch Org is a temporary place for you to view
-                          the work on this Task. You can also use a Scratch Org
-                          to play with changes to the Task without affecting the
-                          Task.
-                        </Trans>
-                      }
-                    />
                     <PlaygroundOrgCard
                       org={playgroundOrg}
                       task={task}
@@ -880,26 +893,12 @@ const TaskDetail = (props: RouteComponentProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="slds-is-relative">
-                  <Button
-                    label={i18n.t('Create Scratch Org')}
-                    variant="outline-brand"
-                    onClick={openCreateOrgModal}
-                    disabled={epic.currently_creating_branch}
-                  />
-                  <TourPopover
-                    align="right"
-                    heading={i18n.t('View & play with Task')}
-                    body={
-                      <Trans i18nKey="tourTaskCreateStratchOrg">
-                        Your Scratch Org is a temporary place for you to view
-                        the work on this Task. You can also use a Scratch Org to
-                        play with changes to the Task without affecting the
-                        Task.
-                      </Trans>
-                    }
-                  />
-                </div>
+                <Button
+                  label={i18n.t('Create Scratch Org')}
+                  variant="outline-brand"
+                  onClick={openCreateOrgModal}
+                  disabled={epic.currently_creating_branch}
+                />
               )}
             </>
           ) : (

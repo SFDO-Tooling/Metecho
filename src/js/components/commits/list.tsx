@@ -102,18 +102,19 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
       <h2
         className="slds-text-heading_medium
           slds-m-top_large
-          slds-m-bottom_x-small slds-is-relative"
+          slds-m-bottom_x-small
+          slds-is-relative"
       >
         Commit History
         <TourPopover
           align="right"
           heading={i18n.t('List of retrieved Task changes')}
           body={
-            <Trans i18nKey="tourTaskCommit">
-              “Commit” is a GitHub term and is equivalent to retrieving your
-              changes. A commit saves all your changes to a Task, so that others
-              can view them. Add a commit message to let collaborators know what
-              changes you saved. Select the link to see the commit in GitHub.
+            <Trans i18nKey="tourTaskCommits">
+              A “commit” represents changes retrieved from the Dev Org. This
+              saves all your changes to a Task, so that others can view them.
+              Add a commit message to let collaborators know what changes you
+              saved. Select the link to see the commit in GitHub.
             </Trans>
           }
         />

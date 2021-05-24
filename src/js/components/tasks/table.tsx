@@ -308,11 +308,11 @@ const TaskTable = ({
             {i18n.t('Task')}
             <TourPopover
               align="right"
-              heading={i18n.t('Task name column')}
+              heading={i18n.t('Task names')}
               body={
                 <Trans i18nKey="tourTaskNameColumn">
-                  Task Name describes the work being done. Select a Task’s name
-                  to access the Dev and Tester Orgs for the Task as well as
+                  A Task’s name describes the work being done. Select a name to
+                  access the Dev and Tester Orgs for the Task, as well as
                   specific details about the work that has been done.
                 </Trans>
               }
@@ -332,7 +332,7 @@ const TaskTable = ({
             {i18n.t('Status')}
             <TourPopover
               align="right"
-              heading={i18n.t('Task status column')}
+              heading={i18n.t('Task statuses')}
               body={
                 <Trans i18nKey="tourTaskStatusColumn">
                   A Task begins with a status of <b>Planned</b>. When a Dev Org
@@ -361,12 +361,12 @@ const TaskTable = ({
             {i18n.t('Developer')}
             <TourPopover
               align="right"
-              heading={i18n.t('Developer column')}
+              heading={i18n.t('Task Developers')}
               body={
                 <Trans i18nKey="tourTaskDeveloperColumn">
-                  A Developer is the person assigned to do the work of a Task.
-                  Developers create Dev Orgs for their work, retrieve their
-                  changes, and then submit their work for someone to test.
+                  A <b>Developer</b> is the person assigned to do the work of a
+                  Task. Developers create Dev Orgs for their work, retrieve
+                  their changes, and then submit their work for someone to test.
                   Anyone with permission to contribute to the project on GitHub
                   can be assigned as a Developer on a Task.
                 </Trans>
@@ -394,12 +394,12 @@ const TaskTable = ({
             {i18n.t('Tester')}
             <TourPopover
               align="right"
-              heading={i18n.t('Tester column')}
+              heading={i18n.t('Task Testers')}
               body={
                 <Trans i18nKey="tourTaskTesterColumn">
-                  Assign yourself or someone else as a Tester to help on a Task
-                  for this Project. When a Task has a status of Test, it is
-                  ready to Test. Testers create a Test Org to view the
+                  Assign yourself or someone else as a <b>Tester</b> to help on
+                  a Task for this Project. When a Task has a status of “Test,”
+                  it is ready for testing. Testers create a Test Org to view the
                   Developer’s work, and approve the work or request changes
                   before the Task can be Completed.
                 </Trans>
