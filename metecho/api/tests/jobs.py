@@ -1034,7 +1034,17 @@ class TestAvailableTaskOrgConfigNames:
 
 
 @pytest.mark.django_db
-def test_get_social_image(project_factory):
+@pytest.mark.parametrize(
+    "img_url, expected",
+    (
+        (
+            "https://repository-images.githubusercontent.com/repo.png",
+            "https://repository-images.githubusercontent.com/repo.png",
+        ),
+        ("https://example.com/repo.png", ""),
+    ),
+)
+def test_get_social_image(project_factory, img_url, expected):
     project = project_factory()
     with ExitStack() as stack:
         stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
@@ -1043,16 +1053,18 @@ def test_get_social_image(project_factory):
             content="""
             <html>
                 <head>
-                <meta property="og:image" content="https://example.com/">
+                <meta property="og:image" content="{}">
                 </head>
                 <body></body>
             </html>
-            """
+            """.format(
+                img_url
+            )
         )
         get_social_image(project=project)
 
         project.refresh_from_db()
-        assert project.repo_image_url == "https://example.com/"
+        assert project.repo_image_url == expected
 
 
 @pytest.mark.django_db
