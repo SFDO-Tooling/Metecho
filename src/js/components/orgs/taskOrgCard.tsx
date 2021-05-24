@@ -180,7 +180,8 @@ const TaskOrgCard = ({
       className="slds-size_1-of-1
         slds-large-size_1-of-2
         slds-p-around_x-small
-        slds-is-relative vertical-right"
+        slds-is-relative
+        vertical-right"
     >
       <Card
         className={classNames({ 'has-nested-card': assignedUser })}
