@@ -22,7 +22,20 @@ const PlayTour = ({ run, onClose }: Props) => {
           without affecting the Project.
         </Trans>
       ),
-      placement: 'right',
+      placement: 'left',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-scratch-org-location',
+      title: i18n.t('Scratch Org appears here'),
+      content: (
+        <Trans i18nKey="tourPlayScratchOrgLocation">
+          Your Project Scratch Org will appear here. Create a Scratch Org for
+          the entire Project, or visit an Epic or Task to create a Scratch Org
+          for specific work in progress.
+        </Trans>
+      ),
+      placement: 'left',
       disableBeacon: true,
     },
   ];
