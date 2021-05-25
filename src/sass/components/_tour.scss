@@ -67,12 +67,12 @@
 
   .vertical-right & {
     right: -($spacing-x-small);
-    top: -20px;
+    top: -($spacing-medium);
   }
 
   .submit-btn & {
-    right: -2px;
-    top: -25px;
+    right: -($spacing-xxx-small);
+    top: -($spacing-large);
   }
 
   .task-create-btn & {
@@ -80,7 +80,12 @@
   }
 
   .page-title & {
-    top: $var-spacing-large;
+    left: $spacing-large;
+    top: $var-spacing-medium;
+
+    @media (min-width: $mq-medium) {
+      left: unset;
+    }
   }
 }
 
