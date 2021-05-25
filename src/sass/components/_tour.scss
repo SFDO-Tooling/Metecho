@@ -83,6 +83,7 @@
   box-shadow: 0 0 2px $palette-violet-65;
   color: $palette-violet-65;
   transform: scale(1); // needed to prevent subpixel rounding in Safari
+  z-index: 1;
 
   .tour-alert & {
     fill: currentColor;
