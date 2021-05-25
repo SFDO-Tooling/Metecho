@@ -67,8 +67,17 @@
   }
 
   .vertical-right & {
-    right: -6px;
+    right: -8px;
     top: -20px;
+  }
+
+  .submit-btn & {
+    right: -2px;
+    top: -25px;
+  }
+
+  .task-create-btn & {
+    top: -25px;
   }
 
   .page-title & {
