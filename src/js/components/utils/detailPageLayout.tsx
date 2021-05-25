@@ -2,15 +2,17 @@ import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
 import React, { ReactNode } from 'react';
+import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import TourPopover from '~js/components/tour/popover';
 import { ExternalLink, PageDescription } from '~js/components/utils';
+import { OBJECT_TYPES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
 interface Crumb {
   name: string;
   url?: string;
-  tourPopover?: JSX.Element;
 }
 
 const DetailPageLayout = ({
@@ -24,6 +26,7 @@ const DetailPageLayout = ({
   sidebar,
   children,
   image,
+  type,
 }: {
   title: string;
   titlePopover?: JSX.Element;
@@ -35,8 +38,40 @@ const DetailPageLayout = ({
   sidebar?: ReactNode;
   children?: ReactNode;
   image?: string;
+  type?: 'epic' | 'task';
 }) => {
   const showHeaderImage = Boolean(image && !description);
+  let popover = null;
+  const heading = i18n.t('Navigation breadcrumb');
+
+  popover =
+    type === OBJECT_TYPES.EPIC ? (
+      <TourPopover
+        align="bottom right"
+        heading={heading}
+        body={
+          <Trans i18nKey="tourEpicBreadcrumb">
+            This “breadcrumb” list shows the hierarchy of objects in Metecho.
+            Projects contain Epics and Tasks. Epics contain Tasks. You are
+            currently viewing an Epic. Click the Project name to return to that
+            view. Click “Home” to see the list of all Projects.
+          </Trans>
+        }
+      />
+    ) : (
+      <TourPopover
+        align="right"
+        heading={heading}
+        body={
+          <Trans i18nKey="tourTaskBreadcrumb">
+            This “breadcrumb” list shows the hierarchy of objects in Metecho.
+            Projects contain Epics and Tasks. Epics contain Tasks. You are
+            currently viewing a Task. Click the Project or Epic name to return
+            to that view. Click “Home” to see the list of all Projects.
+          </Trans>
+        }
+      />
+    );
 
   return (
     <>
@@ -74,6 +109,7 @@ const DetailPageLayout = ({
             metecho-breadcrumb
             slds-is-relative"
         >
+          {popover}
           <BreadCrumb
             trail={[
               <Link to={routes.home()} key="home">
@@ -85,14 +121,12 @@ const DetailPageLayout = ({
                   return (
                     <Link to={crumb.url} key={idx}>
                       {crumb.name}
-                      {crumb.tourPopover}
                     </Link>
                   );
                 }
                 return (
                   <div className="slds-p-horizontal_x-small" key={idx}>
                     {crumb.name}
-                    {crumb.tourPopover}
                   </div>
                 );
               }),

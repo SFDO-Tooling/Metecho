@@ -14,7 +14,7 @@ const EpicProgress = ({ range }: Props) => {
   const [complete, total] = range;
   const value = getPercentage(complete, total);
   return (
-    <div className="epic-process slds-is-relative">
+    <div className="epic-progress slds-is-relative">
       <div className="slds-clearfix slds-m-bottom_xx-small">
         <strong className="slds-float_right">
           <Trans i18nKey="tasksComplete">

@@ -474,21 +474,6 @@ const EpicDetail = (props: RouteComponentProps) => {
           },
           {
             name: epic.name,
-            tourPopover: (
-              <TourPopover
-                align="right"
-                heading={i18n.t('Navigation breadcrumb')}
-                body={
-                  <Trans i18nKey="tourEpicBreadcrumb">
-                    This “breadcrumb” list shows the hierarchy of objects in
-                    Metecho. Projects contain Epics and Tasks. Epics contain
-                    Tasks. You are currently viewing an Epic. Click the Project
-                    name to return to that view. Click “Home” to see the list of
-                    all Projects.
-                  </Trans>
-                }
-              />
-            ),
           },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}

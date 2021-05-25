@@ -37,11 +37,11 @@
 
 .popover-wrapper {
   position: absolute;
-  top: -12px;
+  top: -($spacing-small);
 
-  .epic-process & {
-    right: -10px;
-    top: -16px;
+  .epic-progress & {
+    right: -($spacing-small);
+    top: -($spacing-medium);
   }
 
   .logo-popover & {
@@ -49,25 +49,24 @@
   }
 
   .metecho-breadcrumb & {
-    left: 0;
-    top: -15px;
+    top: -($var-spacing-x-small);
   }
 
   .next-steps & {
-    left: 200px;
+    left: 15.5em;
   }
 
   .project-placeholder & {
-    top: 15px;
+    top: $spacing-medium;
   }
 
   .right-edge & {
     right: 0;
-    top: -8px;
+    top: -($var-spacing-x-small);
   }
 
   .vertical-right & {
-    right: -8px;
+    right: -($spacing-x-small);
     top: -20px;
   }
 
@@ -77,12 +76,19 @@
   }
 
   .task-create-btn & {
-    top: -25px;
+    top: -($var-spacing-large);
   }
 
   .page-title & {
-    top: 25px;
+    top: $var-spacing-large;
   }
+}
+
+.metecho-breadcrumb li {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .popover-button {
@@ -92,7 +98,7 @@
   box-shadow: 0 0 2px $palette-violet-65;
   color: $palette-violet-65;
   transform: scale(1); // needed to prevent subpixel rounding in Safari
-  z-index: 1;
+  z-index: $z-index-default;
 
   .tour-alert & {
     fill: currentColor;
