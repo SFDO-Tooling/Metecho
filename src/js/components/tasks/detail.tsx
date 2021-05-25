@@ -686,6 +686,7 @@ const TaskDetail = (props: RouteComponentProps) => {
       )}`}
     >
       <DetailPageLayout
+        type={OBJECT_TYPES.TASK}
         title={task.name}
         titlePopover={
           <TourPopover

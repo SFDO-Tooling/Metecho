@@ -449,6 +449,7 @@ const EpicDetail = (props: RouteComponentProps) => {
       title={`${epic.name} | ${project.name} | ${i18n.t('Metecho')}`}
     >
       <DetailPageLayout
+        type={OBJECT_TYPES.EPIC}
         title={epic.name}
         titlePopover={
           <TourPopover

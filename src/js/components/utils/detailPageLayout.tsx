@@ -16,6 +16,7 @@ interface Crumb {
 }
 
 const DetailPageLayout = ({
+  type,
   title,
   titlePopover,
   description,
@@ -26,8 +27,8 @@ const DetailPageLayout = ({
   sidebar,
   children,
   image,
-  type,
 }: {
+  type: 'project' | 'epic' | 'task';
   title: string;
   titlePopover?: JSX.Element;
   description?: string;
@@ -38,40 +39,45 @@ const DetailPageLayout = ({
   sidebar?: ReactNode;
   children?: ReactNode;
   image?: string;
-  type?: 'epic' | 'task';
 }) => {
   const showHeaderImage = Boolean(image && !description);
   let popover = null;
-  const heading = i18n.t('Navigation breadcrumb');
+  const popoverHeading = i18n.t('Navigation breadcrumb');
 
-  popover =
-    type === OBJECT_TYPES.EPIC ? (
-      <TourPopover
-        align="bottom right"
-        heading={heading}
-        body={
-          <Trans i18nKey="tourEpicBreadcrumb">
-            This “breadcrumb” list shows the hierarchy of objects in Metecho.
-            Projects contain Epics and Tasks. Epics contain Tasks. You are
-            currently viewing an Epic. Click the Project name to return to that
-            view. Click “Home” to see the list of all Projects.
-          </Trans>
-        }
-      />
-    ) : (
-      <TourPopover
-        align="right"
-        heading={heading}
-        body={
-          <Trans i18nKey="tourTaskBreadcrumb">
-            This “breadcrumb” list shows the hierarchy of objects in Metecho.
-            Projects contain Epics and Tasks. Epics contain Tasks. You are
-            currently viewing a Task. Click the Project or Epic name to return
-            to that view. Click “Home” to see the list of all Projects.
-          </Trans>
-        }
-      />
-    );
+  switch (type) {
+    case OBJECT_TYPES.EPIC:
+      popover = (
+        <TourPopover
+          align="bottom right"
+          heading={popoverHeading}
+          body={
+            <Trans i18nKey="tourEpicBreadcrumb">
+              This “breadcrumb” list shows the hierarchy of objects in Metecho.
+              Projects contain Epics and Tasks. Epics contain Tasks. You are
+              currently viewing an Epic. Click the Project name to return to
+              that view. Click “Home” to see the list of all Projects.
+            </Trans>
+          }
+        />
+      );
+      break;
+    case OBJECT_TYPES.TASK:
+      popover = (
+        <TourPopover
+          align="right"
+          heading={popoverHeading}
+          body={
+            <Trans i18nKey="tourTaskBreadcrumb">
+              This “breadcrumb” list shows the hierarchy of objects in Metecho.
+              Projects contain Epics and Tasks. Epics contain Tasks. You are
+              currently viewing a Task. Click the Project or Epic name to return
+              to that view. Click “Home” to see the list of all Projects.
+            </Trans>
+          }
+        />
+      );
+      break;
+  }
 
   return (
     <>

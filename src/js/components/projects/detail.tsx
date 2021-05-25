@@ -166,6 +166,7 @@ const ProjectDetail = (
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
+        type={OBJECT_TYPES.PROJECT}
         title={project.name}
         titlePopover={
           <TourPopover
