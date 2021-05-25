@@ -31,7 +31,7 @@ const EpicProgress = ({ range }: Props) => {
         align="right"
         heading={i18n.t('Task progress bar')}
         body={
-          <Trans i18nKey="tourTaskProgress">
+          <Trans i18nKey="tourTaskProgressBar">
             A quick reference to show what percentage of an Epic is complete
             based on the number of Tasks that are complete.
           </Trans>

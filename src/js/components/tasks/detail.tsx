@@ -746,7 +746,7 @@ const TaskDetail = (props: RouteComponentProps) => {
                 align="left"
                 heading={i18n.t('Task progress path')}
                 body={
-                  <Trans i18nKey="tourTaskProgress">
+                  <Trans i18nKey="tourTaskPath">
                     A Task starts its journey as <b>Planned</b>. When a Dev Org
                     is created, the Task is <b>In Progress</b>, and the
                     Developer begins work. When the Developer submits changes
