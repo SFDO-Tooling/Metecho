@@ -5,24 +5,30 @@ import React, { ComponentProps } from 'react';
 import TasksTableComponent from '~js/components/tasks/table';
 import { Task } from '~js/store/tasks/reducer';
 
-import { withRedux } from '../decorators';
+import { withRedux } from '../../decorators';
 import {
   sampleEpic1,
   sampleGitHubUser1,
   sampleGitHubUser2,
   sampleGitHubUser3,
+  sampleProject1,
   sampleTask1,
   sampleTask2,
   sampleTask3,
   sampleTask4,
   sampleTask5,
   sampleTask6,
-} from '../fixtures';
+} from '../../fixtures';
 
 export default {
   title: 'Tasks/Table/Example',
   component: TasksTableComponent,
-  decorators: [withRedux({ user: sampleGitHubUser2 })],
+  decorators: [
+    withRedux({
+      user: { github_id: sampleGitHubUser2.id },
+      projects: { projects: [sampleProject1] },
+    }),
+  ],
 };
 
 const sampleTasks: { [key: string]: Task } = {
@@ -46,11 +52,12 @@ const Template = ({ tasks, ...rest }: StoryProps) => (
 
 export const TasksTable: Story<StoryProps> = Template.bind({});
 TasksTable.args = {
-  projectId: 'w19nV90',
-  projectSlug: 'my-project',
+  projectId: sampleProject1.id,
+  projectSlug: sampleProject1.slug,
   epicSlug: sampleEpic1.slug,
   epicUsers: [sampleGitHubUser1],
   githubUsers: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
+  canAssign: true,
   isRefreshingUsers: false,
   assignUserAction: action('assignUserAction'),
 };

@@ -64,113 +64,113 @@ export type ProjectsAction =
   | RefreshGitHubUsersRejected
   | RefreshOrgConfigsAction;
 
-export const refreshProjects = (): ThunkResult<
-  Promise<RefreshProjectsAccepted>
-> => async (dispatch) => {
-  dispatch({ type: 'REFRESH_PROJECTS_REQUESTED' });
-  try {
-    await apiFetch({
-      url: window.api_urls.user_refresh(),
-      dispatch,
-      opts: {
-        method: 'POST',
-      },
-    });
-    return dispatch({
-      type: 'REFRESH_PROJECTS_ACCEPTED' as const,
-    });
-  } catch (err) {
-    dispatch({ type: 'REFRESH_PROJECTS_REJECTED' });
-    throw err;
-  }
-};
+export const refreshProjects =
+  (): ThunkResult<Promise<RefreshProjectsAccepted>> => async (dispatch) => {
+    dispatch({ type: 'REFRESH_PROJECTS_REQUESTED' });
+    try {
+      await apiFetch({
+        url: window.api_urls.current_user_refresh(),
+        dispatch,
+        opts: {
+          method: 'POST',
+        },
+      });
+      return dispatch({
+        type: 'REFRESH_PROJECTS_ACCEPTED' as const,
+      });
+    } catch (err) {
+      dispatch({ type: 'REFRESH_PROJECTS_REJECTED' });
+      throw err;
+    }
+  };
 
 export const projectsRefreshing = (): ProjectsRefreshing => ({
   type: 'REFRESHING_PROJECTS',
 });
 
-export const projectsRefreshed = (): ThunkResult<
-  Promise<FetchObjectsSucceeded>
-> => (dispatch) => {
-  dispatch({ type: 'PROJECTS_REFRESHED' });
-  return dispatch(
-    fetchObjects({
-      objectType: OBJECT_TYPES.PROJECT,
-      reset: true,
-    }),
-  );
-};
+export const projectsRefreshed =
+  (): ThunkResult<Promise<FetchObjectsSucceeded>> => (dispatch) => {
+    dispatch({ type: 'PROJECTS_REFRESHED' });
+    return dispatch(
+      fetchObjects({
+        objectType: OBJECT_TYPES.PROJECT,
+        reset: true,
+      }),
+    );
+  };
 
-export const refreshGitHubUsers = (
-  projectId: string,
-): ThunkResult<Promise<RefreshGitHubUsersAccepted>> => async (dispatch) => {
-  dispatch({ type: 'REFRESH_GH_USERS_REQUESTED', payload: projectId });
-  try {
-    await apiFetch({
-      url: window.api_urls.project_refresh_github_users(projectId),
-      dispatch,
-      opts: {
-        method: 'POST',
-      },
-    });
-    return dispatch({
-      type: 'REFRESH_GH_USERS_ACCEPTED' as const,
-      payload: projectId,
-    });
-  } catch (err) {
-    dispatch({ type: 'REFRESH_GH_USERS_REJECTED', payload: projectId });
-    throw err;
-  }
-};
+export const refreshGitHubUsers =
+  (projectId: string): ThunkResult<Promise<RefreshGitHubUsersAccepted>> =>
+  async (dispatch) => {
+    dispatch({ type: 'REFRESH_GH_USERS_REQUESTED', payload: projectId });
+    try {
+      await apiFetch({
+        url: window.api_urls.project_refresh_github_users(projectId),
+        dispatch,
+        opts: {
+          method: 'POST',
+        },
+      });
+      return dispatch({
+        type: 'REFRESH_GH_USERS_ACCEPTED' as const,
+        payload: projectId,
+      });
+    } catch (err) {
+      dispatch({ type: 'REFRESH_GH_USERS_REJECTED', payload: projectId });
+      throw err;
+    }
+  };
 
 export const updateProject = (payload: Project): ProjectUpdated => ({
   type: 'PROJECT_UPDATE',
   payload,
 });
 
-export const projectError = ({
-  model,
-  message,
-  originating_user_id,
-}: {
-  model: Project;
-  message?: string;
-  originating_user_id: string | null;
-}): ThunkResult<ProjectUpdated> => (dispatch, getState) => {
-  if (isCurrentUser(originating_user_id, getState())) {
-    dispatch(
-      addToast({
-        heading: i18n.t(
-          'Uh oh. There was an error re-syncing GitHub users for this project: “{{project_name}}”.',
-          { project_name: model.name },
-        ),
-        details: message,
-        variant: 'error',
-      }),
-    );
-  }
+export const projectError =
+  ({
+    model,
+    message,
+    originating_user_id,
+  }: {
+    model: Project;
+    message?: string;
+    originating_user_id: string | null;
+  }): ThunkResult<ProjectUpdated> =>
+  (dispatch, getState) => {
+    if (isCurrentUser(originating_user_id, getState())) {
+      dispatch(
+        addToast({
+          heading: i18n.t(
+            'Uh oh. There was an error re-syncing GitHub users for this project: “{{project_name}}”.',
+            { project_name: model.name },
+          ),
+          details: message,
+          variant: 'error',
+        }),
+      );
+    }
 
-  return dispatch(updateProject(model));
-};
+    return dispatch(updateProject(model));
+  };
 
-export const refreshOrgConfigs = (
-  id: string,
-): ThunkResult<Promise<RefreshOrgConfigsAction>> => async (dispatch) => {
-  dispatch({ type: 'REFRESH_ORG_CONFIGS_REQUESTED', payload: id });
-  try {
-    await apiFetch({
-      url: window.api_urls.project_refresh_org_config_names(id),
-      dispatch,
-      opts: {
-        method: 'POST',
-      },
-    });
-    return dispatch({
-      type: 'REFRESH_ORG_CONFIGS_ACCEPTED' as const,
-      payload: id,
-    });
-  } catch (err) {
-    dispatch({ type: 'REFRESH_ORG_CONFIGS_REJECTED', payload: id });
-    throw err;
-  }
-};
+export const refreshOrgConfigs =
+  (id: string): ThunkResult<Promise<RefreshOrgConfigsAction>> =>
+  async (dispatch) => {
+    dispatch({ type: 'REFRESH_ORG_CONFIGS_REQUESTED', payload: id });
+    try {
+      await apiFetch({
+        url: window.api_urls.project_refresh_org_config_names(id),
+        dispatch,
+        opts: {
+          method: 'POST',
+        },
+      });
+      return dispatch({
+        type: 'REFRESH_ORG_CONFIGS_ACCEPTED' as const,
+        payload: id,
+      });
+    } catch (err) {
+      dispatch({ type: 'REFRESH_ORG_CONFIGS_REJECTED', payload: id });
+      throw err;
+    }
+  };

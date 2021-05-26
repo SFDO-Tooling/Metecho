@@ -310,7 +310,7 @@ describe('refetchOrg', () => {
   });
 
   describe('error', () => {
-    test('dispatches REFETCH_ORG_FAILED action', () => {
+    test('dispatches REFETCH_ORG_FAILED action', async () => {
       const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
       fetchMock.getOnce(url, 500);
       const started = {
@@ -323,13 +323,17 @@ describe('refetchOrg', () => {
       };
 
       expect.assertions(3);
-      return store.dispatch(actions.refetchOrg(payload.org)).catch(() => {
+      try {
+        await store.dispatch(actions.refetchOrg(payload.org));
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -661,7 +665,7 @@ describe('refreshOrg', () => {
   });
 
   describe('error', () => {
-    test('dispatches SCRATCH_ORG_REFRESH_REJECTED action', () => {
+    test('dispatches SCRATCH_ORG_REFRESH_REJECTED action', async () => {
       const store = storeWithThunk({ ...defaultState, user: null, tasks: {} });
       fetchMock.postOnce(url, {
         status: 500,
@@ -677,14 +681,18 @@ describe('refreshOrg', () => {
       };
 
       expect.assertions(4);
-      return store.dispatch(actions.refreshOrg(org)).catch(() => {
+      try {
+        await store.dispatch(actions.refreshOrg(org));
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });

@@ -2,17 +2,22 @@ import Button from '@salesforce/design-system-react/components/button';
 import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableCell from '@salesforce/design-system-react/components/data-table/cell';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
+import Icon from '@salesforce/design-system-react/components/icon';
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
+import { AppState } from '~js/store';
+import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
-import { GitHubUser } from '~js/store/user/reducer';
+import { GitHubUser, User } from '~js/store/user/reducer';
+import { selectUserState } from '~js/store/user/selectors';
 import {
   ORG_TYPES,
   OrgTypes,
@@ -29,7 +34,7 @@ type AssignUserAction = ({
 }: {
   task: Task;
   type: OrgTypes;
-  assignee: GitHubUser | null;
+  assignee: string | null;
   shouldAlertAssignee: boolean;
 }) => void;
 
@@ -47,6 +52,7 @@ interface Props {
   tasks: Task[];
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
+  canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
 }
@@ -81,7 +87,7 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     return null;
   }
   const status =
-    item.review_valid && item.status !== TASK_STATUSES.COMPLETED
+    item.review_valid && item.status === TASK_STATUSES.IN_PROGRESS
       ? item.review_status
       : item.status;
   let displayStatus, icon;
@@ -102,6 +108,16 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     case TASK_STATUSES.COMPLETED:
       displayStatus = i18n.t('Complete');
       icon = <ProgressRing value={100} theme="complete" hasIcon />;
+      break;
+    case TASK_STATUSES.CANCELED:
+      displayStatus = i18n.t('Canceled');
+      icon = (
+        <ProgressRing
+          value={0}
+          hasIcon
+          icon={<Icon category="utility" name="close" />}
+        />
+      );
       break;
     case REVIEW_STATUSES.CHANGES_REQUESTED:
       displayStatus = i18n.t('Changes Requested');
@@ -134,6 +150,8 @@ const AssigneeTableCell = ({
   projectId,
   epicUsers,
   githubUsers,
+  currentUser,
+  canAssign,
   isRefreshingUsers,
   assignUserAction,
   item,
@@ -145,10 +163,15 @@ const AssigneeTableCell = ({
   projectId: string;
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
+  currentUser?: User;
+  canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
-  children?: GitHubUser | null;
+  children?: string | null;
 }) => {
+  const assignedUser = useSelector((state: AppState) =>
+    selectProjectCollaborator(state, projectId, children),
+  );
   const [assignUserModalOpen, setAssignUserModalOpen] = useState(false);
 
   const openAssignUserModal = () => {
@@ -159,7 +182,7 @@ const AssigneeTableCell = ({
   };
 
   const doAssignUserAction = useCallback(
-    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
+    (assignee: string | null, shouldAlertAssignee: boolean) => {
       /* istanbul ignore if */
       if (!item || !type) {
         return;
@@ -168,24 +191,35 @@ const AssigneeTableCell = ({
     },
     [assignUserAction, item, type],
   );
+
+  const doSelfAssignUserAction = useCallback(() => {
+    /* istanbul ignore if */
+    if (!item || !type || !currentUser?.github_id) {
+      return;
+    }
+    assignUserAction({
+      task: item,
+      type,
+      assignee: currentUser.github_id,
+      shouldAlertAssignee: false,
+    });
+  }, [assignUserAction, currentUser?.github_id, item, type]);
+
   /* istanbul ignore if */
   if (!item) {
     return null;
   }
   let contents, title;
-  if (children) {
-    contents = <GitHubUserAvatar user={children} />;
-    title = children.login;
-  } else {
-    let assignedUser;
+  if (assignedUser) {
+    contents = <GitHubUserAvatar user={assignedUser} />;
+    title = assignedUser.login;
+  } else if (canAssign) {
     switch (type) {
       case ORG_TYPES.DEV:
         title = i18n.t('Assign Developer');
-        assignedUser = item.assigned_dev;
         break;
       case ORG_TYPES.QA:
         title = i18n.t('Assign Tester');
-        assignedUser = item.assigned_qa;
         break;
     }
 
@@ -214,6 +248,20 @@ const AssigneeTableCell = ({
         />
       </>
     );
+  } else if (type === ORG_TYPES.QA && currentUser?.github_id) {
+    title = i18n.t('Self-Assign as Tester');
+    contents = (
+      <Button
+        className="slds-m-left_xx-small"
+        assistiveText={{ icon: title }}
+        iconCategory="utility"
+        iconName="adduser"
+        iconSize="medium"
+        variant="icon"
+        title={title}
+        onClick={doSelfAssignUserAction}
+      />
+    );
   }
   return (
     <DataTableCell
@@ -234,13 +282,16 @@ const TaskTable = ({
   tasks,
   epicUsers,
   githubUsers,
+  canAssign,
   isRefreshingUsers,
   assignUserAction,
 }: Props) => {
+  const currentUser = useSelector(selectUserState) as User;
   const statusOrder = {
     [TASK_STATUSES.IN_PROGRESS]: 1,
     [TASK_STATUSES.PLANNED]: 2,
     [TASK_STATUSES.COMPLETED]: 3,
+    [TASK_STATUSES.CANCELED]: 4,
   };
   const taskDefaultSort = sortBy(tasks, [
     (item) => statusOrder[item.status],
@@ -276,6 +327,7 @@ const TaskTable = ({
           projectId={projectId}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
+          canAssign={canAssign}
           isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
         />
@@ -291,6 +343,8 @@ const TaskTable = ({
           projectId={projectId}
           epicUsers={epicUsers}
           githubUsers={githubUsers}
+          currentUser={currentUser}
+          canAssign={canAssign}
           isRefreshingUsers={isRefreshingUsers}
           assignUserAction={assignUserAction}
         />

@@ -18,6 +18,7 @@ describe('AssignTaskRole', () => {
   const defaultState = {
     user: {
       id: 'user-id',
+      github_id: 'user-id',
       username: 'user-name',
       name: 'User Name',
       valid_token_for: 'sf-org',
@@ -30,12 +31,14 @@ describe('AssignTaskRole', () => {
       login: 'user-name',
       name: 'User Name',
       avatar_url: 'https://example.com/avatar.png',
+      permissions: { push: true },
     },
     {
       id: '123456',
       login: 'test user',
       name: 'Test User',
       avatar_url: 'https://example.com/avatar.png',
+      permissions: { push: true },
     },
   ];
   const epicUsers = githubUsers.slice(1);
@@ -63,29 +66,25 @@ describe('AssignTaskRole', () => {
 
   test('responds to epic user click', () => {
     const { getByText, getAllByTitle } = setup();
-    const userBtn = getAllByTitle('test user')[0];
+    const userBtn = getAllByTitle('Test User (test user)')[0];
     fireEvent.click(userBtn);
     fireEvent.click(getByText('Save'));
 
-    expect(setUser).toHaveBeenCalledWith(epicUsers[0], true);
+    expect(setUser).toHaveBeenCalledWith(epicUsers[0].id, true);
   });
 
   test('responds to github user click', () => {
     const { getByText, getAllByTitle } = setup();
-    const userBtn = getAllByTitle('user-name (User Name)')[0];
+    const userBtn = getAllByTitle('User Name (user-name)')[0];
     fireEvent.click(userBtn);
     fireEvent.click(getByText('Save'));
 
-    expect(setUser).toHaveBeenCalledWith(githubUsers[0], false);
+    expect(setUser).toHaveBeenCalledWith(githubUsers[0].id, false);
   });
 
   test('can filter by name/username', () => {
-    const {
-      getAllByText,
-      getByPlaceholderText,
-      getByText,
-      queryByText,
-    } = setup();
+    const { getAllByText, getByPlaceholderText, getByText, queryByText } =
+      setup();
     const input = getByPlaceholderText('Search for user');
 
     expect(queryByText('No users found.')).toBeNull();

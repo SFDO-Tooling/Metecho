@@ -220,6 +220,7 @@ def _create_org_and_run_flow(
     scratch_org.config = scratch_org_config.config
     scratch_org.owner_sf_username = sf_username or user.sf_username
     scratch_org.owner_gh_username = user.username
+    scratch_org.owner_gh_id = user.github_id
     scratch_org.save()
 
     cases = {
@@ -565,9 +566,12 @@ def get_social_image(*, project):
         logger.error(tb)
         raise
     else:
-        project.refresh_from_db()
-        project.repo_image_url = og_image
-        project.finalize_get_social_image()
+        # Save the image only if it was manually set by the repository owner. GitHub
+        # seems to store only manually-set images under this domain:
+        if og_image.startswith("https://repository-images.githubusercontent.com/"):
+            project.refresh_from_db()
+            project.repo_image_url = og_image
+            project.finalize_get_social_image()
 
 
 get_social_image_job = job(get_social_image)
@@ -628,6 +632,7 @@ def populate_github_users(project, *, originating_user_id):
                         "id": str(collaborator.id),
                         "login": collaborator.login,
                         "avatar_url": collaborator.avatar_url,
+                        "permissions": collaborator.permissions,
                     }
                     for collaborator in repo.collaborators()
                 ],
@@ -680,8 +685,15 @@ def submit_review(*, user, task, data, originating_user_id):
             raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
 
         repo_id = task.get_repo_id()
-        repository = get_repo_info(user, repo_id=repo_id)
-        pr = repository.pull_request(task.pr_number)
+        project = task.epic.project
+        repo_as_user = get_repo_info(user, repo_id=repo_id)
+        repo_as_app = get_repo_info(
+            None,
+            repo_owner=project.repo_owner,
+            repo_name=project.repo_name,
+            repo_id=repo_id,
+        )
+        pr = repo_as_user.pull_request(task.pr_number)
 
         # The values in this dict are the valid values for the
         # `state` arg to repository.create_status. We are not
@@ -707,7 +719,7 @@ def submit_review(*, user, task, data, originating_user_id):
         # GitHub has with emoji in status descriptions
         printable = set(string.printable)
         filtered_notes = "".join(filter(lambda c: c in printable, notes))
-        repository.create_status(
+        repo_as_app.create_status(
             review_sha,
             state_for_status,
             target_url=target_url,

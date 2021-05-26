@@ -1,7 +1,6 @@
 import { ObjectsAction } from '~js/store/actions';
 import { TaskAction } from '~js/store/tasks/actions';
 import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
-import { GitHubUser } from '~js/store/user/reducer';
 import {
   OBJECT_TYPES,
   ObjectTypes,
@@ -40,8 +39,8 @@ export interface Task {
   pr_is_open: boolean;
   commits: Commit[];
   origin_sha: string;
-  assigned_dev: GitHubUser | null;
-  assigned_qa: GitHubUser | null;
+  assigned_dev: string | null;
+  assigned_qa: string | null;
   status: TaskStatuses;
   currently_submitting_review: boolean;
   review_submitted_at: string | null;
@@ -83,10 +82,8 @@ const reducer = (
       return tasks;
     }
     case 'CREATE_OBJECT_SUCCEEDED': {
-      const {
-        object,
-        objectType,
-      }: { object: Task; objectType?: ObjectTypes } = action.payload;
+      const { object, objectType }: { object: Task; objectType?: ObjectTypes } =
+        action.payload;
       switch (objectType) {
         case OBJECT_TYPES.TASK: {
           if (object) {

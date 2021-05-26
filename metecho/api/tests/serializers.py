@@ -6,10 +6,12 @@ from django.utils import timezone
 
 from ..models import SCRATCH_ORG_TYPES, Task
 from ..serializers import (
+    EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
     HashidPrimaryKeyRelatedField,
     ScratchOrgSerializer,
+    TaskAssigneeSerializer,
     TaskSerializer,
 )
 
@@ -39,13 +41,23 @@ class TestHashidPrimaryKeyRelatedField:
 
 @pytest.mark.django_db
 class TestEpicSerializer:
-    def test_create(self, rf, user_factory, project_factory):
-        project = project_factory()
+    @pytest.mark.parametrize(
+        "user_perms",
+        (
+            {},  # Empty permissions
+            {"push": False},  # Read-only
+            {"push": True},  # Read-write
+        ),
+    )
+    def test_create(self, rf, user_factory, project_factory, user_perms):
+        project = project_factory(
+            github_users=[{"id": "123456", "permissions": user_perms}]
+        )
         data = {
             "name": "Test epic",
             "description": "Test `epic`",
             "project": str(project.id),
-            "github_users": [],
+            "github_users": [project.github_users[0]["id"]],
         }
         r = rf.get("/")
         r.user = user_factory()
@@ -237,21 +249,6 @@ class TestEpicSerializer:
         )
         assert serializer.is_valid(), serializer.errors
 
-    def test_invalid_github_user_value(self, project_factory, epic_factory):
-        project = project_factory()
-        epic = epic_factory(project=project, name="Duplicate me")
-        serializer = EpicSerializer(
-            instance=epic,
-            data={
-                "project": str(project.id),
-                "description": "Blorp",
-                "github_users": [{"id": "value"}],
-            },
-            partial=True,
-        )
-        assert not serializer.is_valid()
-        assert "non_field_errors" in serializer.errors
-
     def test_pr_url__present(self, epic_factory):
         epic = epic_factory(name="Test epic", pr_number=123)
         serializer = EpicSerializer(epic)
@@ -267,6 +264,66 @@ class TestEpicSerializer:
 
 
 @pytest.mark.django_db
+class TestEpicCollaboratorsSerializer:
+    @pytest.mark.parametrize(
+        "value, success",
+        (
+            pytest.param(["123", "456"], True, id="Valid input"),
+            pytest.param(["567890"], False, id="User not in project"),
+            pytest.param([{"id": "123456"}], False, id="Invalid format"),
+            pytest.param(["123", "123"], False, id="Duplicate"),
+        ),
+    )
+    def test_value(self, rf, git_hub_repository_factory, epic_factory, value, success):
+        repo = git_hub_repository_factory(permissions={"push": True})
+        epic = epic_factory(
+            project__repo_id=repo.repo_id,
+            project__github_users=[{"id": "123"}, {"id": "456"}],
+            github_users=["123"],
+        )
+        r = rf.get("/")
+        r.user = repo.user
+        serializer = EpicCollaboratorsSerializer(
+            epic, data={"github_users": value}, context={"request": r}
+        )
+        assert serializer.is_valid() == success, serializer.errors
+        if not success:
+            assert "github_users" in serializer.errors
+
+    @pytest.mark.parametrize(
+        "github_users, value, success",
+        (
+            pytest.param(["123"], ["123"], True, id="No change"),
+            pytest.param(["123"], ["123", "self"], True, id="Add self"),
+            pytest.param(["123"], ["123", "456"], False, id="Add other"),
+            pytest.param(["123"], [], False, id="Remove other"),
+            pytest.param(["123", "self"], ["123"], True, id="Remove self"),
+        ),
+    )
+    def test_readonly_user(
+        self, rf, user_factory, epic_factory, github_users, value, success
+    ):
+        # We don't associate `user` with any GitHubRepository instances, which means
+        # they are read-only
+        user = user_factory()
+        account = user.github_account
+        account.uid = "self"
+        account.save()
+        epic = epic_factory(
+            github_users=github_users,
+            project__github_users=[{"id": "123"}, {"id": "456"}, {"id": "self"}],
+        )
+        r = rf.get("/")
+        r.user = user
+        serializer = EpicCollaboratorsSerializer(
+            epic, data={"github_users": value}, context={"request": r}
+        )
+        assert serializer.is_valid() == success, serializer.errors
+        if not success:
+            assert "github_users" in serializer.errors
+
+
+@pytest.mark.django_db
 class TestTaskSerializer:
     def test_create(self, rf, user_factory, epic_factory):
         user = user_factory()
@@ -275,10 +332,6 @@ class TestTaskSerializer:
             "name": "Test Task",
             "description": "Description.",
             "epic": str(epic.id),
-            "assigned_dev": {"test": "id"},
-            "assigned_qa": {"test": "id"},
-            "should_alert_dev": False,
-            "should_alert_qa": False,
             "org_config_name": "dev",
         }
         r = rf.get("/")
@@ -288,98 +341,20 @@ class TestTaskSerializer:
         serializer.save()
         assert Task.objects.count() == 1
 
-    def test_update(self, rf, user_factory, task_factory, scratch_org_factory):
+    def test_create__duplicate_name(self, rf, user_factory, task_factory):
         user = user_factory()
-        task = task_factory(commits=["abc123"])
-        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        task = task_factory(name="Task abc")
         data = {
-            "name": task.name,
-            "description": task.description,
+            "name": "Task ABC",  # Same name as existing task
+            "description": "Description.",
             "epic": str(task.epic.id),
-            "assigned_dev": {"id": 1},
-            "assigned_qa": {"id": 2},
-            "should_alert_dev": False,
-            "should_alert_qa": False,
             "org_config_name": "dev",
         }
         r = rf.get("/")
         r.user = user
-        serializer = TaskSerializer(task, data=data, context={"request": r})
-        assert serializer.is_valid(), serializer.errors
-
-        with ExitStack() as stack:
-            OrgConfig = stack.enter_context(patch("metecho.api.sf_run_flow.OrgConfig"))
-            org_config = MagicMock(config={"access_token": None})
-            OrgConfig.return_value = org_config
-            serializer.update(task, serializer.validated_data)
-        so1.refresh_from_db()
-        so2.refresh_from_db()
-        assert so1.deleted_at is not None
-        assert so2.deleted_at is not None
-
-    def test_update__no_user(self, task_factory, scratch_org_factory):
-        task = task_factory(commits=["abc123"])
-        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
-        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
-        data = {
-            "name": task.name,
-            "description": task.description,
-            "epic": str(task.epic.id),
-            "assigned_dev": {},
-            "assigned_qa": {},
-            "should_alert_dev": False,
-            "should_alert_qa": False,
-            "org_config_name": "dev",
-        }
-        serializer = TaskSerializer(task, data=data)
-        assert serializer.is_valid(), serializer.errors
-        serializer.update(task, serializer.validated_data)
-        so1.refresh_from_db()
-        so2.refresh_from_db()
-        assert so1.deleted_at is not None
-        assert so2.deleted_at is not None
-
-    def test_update__collaborators(self, task_factory):
-        # Task assigness should be added as epic collaborators as well
-        task = task_factory(commits=["abc123"])
-        data = {
-            "name": task.name,
-            "description": task.description,
-            "epic": str(task.epic.id),
-            "should_alert_dev": False,
-            "should_alert_qa": False,
-            "org_config_name": "dev",
-            "assigned_dev": {"id": "dev_id"},
-            "assigned_qa": {"id": "qa_id"},
-        }
-        serializer = TaskSerializer(task, data=data)
-        assert serializer.is_valid(), serializer.errors
-
-        serializer.update(task, serializer.validated_data)
-        task.epic.refresh_from_db()
-        assert task.epic.github_users == [{"id": "dev_id"}, {"id": "qa_id"}]
-
-    def test_update__existing_collaborator(self, task_factory, epic_factory):
-        # Existing collaborators should not be re-added when assigned to a task
-        epic = epic_factory(github_users=[{"id": "existing_user"}])
-        task = task_factory(commits=["abc123"], epic=epic)
-        data = {
-            "name": task.name,
-            "description": task.description,
-            "epic": str(epic.id),
-            "should_alert_dev": False,
-            "should_alert_qa": False,
-            "org_config_name": "dev",
-            "assigned_dev": {"id": "existing_user"},
-            "assigned_qa": None,
-        }
-        serializer = TaskSerializer(task, data=data)
-        assert serializer.is_valid(), serializer.errors
-
-        serializer.update(task, serializer.validated_data)
-        task.epic.refresh_from_db()
-        assert task.epic.github_users == [{"id": "existing_user"}]
+        serializer = TaskSerializer(data=data, context={"request": r})
+        assert not serializer.is_valid()
+        assert "name" in serializer.errors, serializer.errors
 
     def test_branch_url__present(self, task_factory):
         task = task_factory(name="Test task", branch_name="test-task")
@@ -436,13 +411,283 @@ class TestTaskSerializer:
         serializer = TaskSerializer(task)
         assert serializer.data["pr_url"] is None
 
-    def test_queues_reassign(self, task_factory, scratch_org_factory, user_factory):
+
+@pytest.mark.django_db
+class TestTaskAssigneeSerializer:
+    def test_missing_assigness(self, task_factory):
+        task = task_factory()
+        serializer = TaskAssigneeSerializer(task, data={})
+        assert not serializer.is_valid()
+        assert "non_field_errors" in serializer.errors
+
+    def test_assign(
+        self, rf, git_hub_repository_factory, task_factory, scratch_org_factory
+    ):
+        repo = git_hub_repository_factory(permissions={"push": True})
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[
+                {"id": "123456", "permissions": {"push": True}},
+                {"id": "456789", "permissions": {"push": True}},
+            ],
+        )
+        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
+        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+
+        data = {"assigned_dev": "123456", "assigned_qa": "456789"}
+        r = rf.get("/")
+        r.user = repo.user
+        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        assert serializer.is_valid(), serializer.errors
+
+        with ExitStack() as stack:
+            OrgConfig = stack.enter_context(patch("metecho.api.sf_run_flow.OrgConfig"))
+            org_config = MagicMock(config={"access_token": None})
+            OrgConfig.return_value = org_config
+            serializer.update(task, serializer.validated_data)
+        so1.refresh_from_db()
+        so2.refresh_from_db()
+        assert so1.deleted_at is not None
+        assert so2.deleted_at is not None
+
+    def test_unassign(
+        self, rf, git_hub_repository_factory, task_factory, scratch_org_factory
+    ):
+        repo = git_hub_repository_factory(permissions={"push": True})
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            assigned_dev="123",
+            assigned_qa="123",
+        )
+        so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
+        so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
+        data = {
+            "assigned_dev": None,
+            "assigned_qa": None,
+        }
+        r = rf.get("/")
+        r.user = repo.user
+        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        assert serializer.is_valid(), serializer.errors
+        serializer.update(task, serializer.validated_data)
+        so1.refresh_from_db()
+        so2.refresh_from_db()
+        assert so1.deleted_at is not None
+        assert so2.deleted_at is not None
+
+    @pytest.mark.parametrize(
+        "epic_collaborators",
+        (
+            [],  # No collaborators
+            ["dev_id", "qa_id", "123"],  # Assigness already present
+            ["123", "456"],  # Other users present
+        ),
+    )
+    def test_assign__add_epic_collaborators(
+        self, rf, git_hub_repository_factory, task_factory, epic_collaborators
+    ):
+        # Task assigness should be added as epic collaborators as well
+        repo = git_hub_repository_factory(permissions={"push": True})
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[
+                {"id": "dev_id", "permissions": {"push": True}},
+                {"id": "qa_id", "permissions": {"push": True}},
+            ],
+            epic__github_users=epic_collaborators,
+        )
+        data = {
+            "assigned_dev": "dev_id",
+            "assigned_qa": "qa_id",
+        }
+        r = rf.get("/")
+        r.user = repo.user
+        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        assert serializer.is_valid(), serializer.errors
+
+        serializer.update(task, serializer.validated_data)
+        task.epic.refresh_from_db()
+        collaborators = task.epic.github_users
+        assert len(set(collaborators)) == len(
+            collaborators
+        ), "Duplicate Epic collaborators detected"
+        assert "dev_id" in collaborators
+        assert "qa_id" in collaborators
+
+    @pytest.mark.parametrize(
+        "collaborator, data, success",
+        (
+            pytest.param(
+                {"id": "123", "permissions": {"push": True}},
+                {"assigned_dev": "456"},
+                False,
+                id="Dev ID not in collaborator list",
+            ),
+            pytest.param(
+                {"id": "123"},
+                {"assigned_dev": "123"},
+                False,
+                id="Dev has unknown permissions",
+            ),
+            pytest.param(
+                {"id": "123", "permissions": {"push": False}},
+                {"assigned_dev": "123"},
+                False,
+                id="Dev can't push",
+            ),
+            pytest.param(
+                {"id": "123", "permissions": {"push": True}},
+                {"assigned_dev": "123"},
+                True,
+                id="Dev can push",
+            ),
+            pytest.param(
+                {"id": "123", "permissions": {"push": True}},
+                {"assigned_qa": "456"},
+                False,
+                id="Tester ID not in collaborator list",
+            ),
+            pytest.param(
+                {"id": "123"},
+                {"assigned_qa": "123"},
+                True,
+                id="Tester has unknown permissions",
+            ),
+            pytest.param(
+                {"id": "123", "permissions": {"push": False}},
+                {"assigned_qa": "123"},
+                True,
+                id="Tester can't push",
+            ),
+            pytest.param(
+                {"id": "123", "permissions": {"push": True}},
+                {"assigned_qa": "123"},
+                True,
+                id="Tester can push",
+            ),
+        ),
+    )
+    def test_assign__assignee_permissions(
+        self, rf, git_hub_repository_factory, task_factory, collaborator, data, success
+    ):
+        repo = git_hub_repository_factory(permissions={"push": True})
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[collaborator],
+        )
+        r = rf.get("/")
+        r.user = repo.user
+        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        assert serializer.is_valid() == success, serializer.errors
+        if not success:
+            assert data.keys() == serializer.errors.keys()
+
+    @pytest.mark.parametrize(
+        "repo_perms, data, success",
+        (
+            pytest.param(
+                {},
+                {"assigned_dev": "123"},
+                False,
+                id="Dev assigner has unknown permissions",
+            ),
+            pytest.param(
+                {"push": False},
+                {"assigned_dev": "123"},
+                False,
+                id="Dev assigner can't push",
+            ),
+            pytest.param(
+                {"push": True},
+                {"assigned_dev": "123"},
+                True,
+                id="Dev assigner can push",
+            ),
+            pytest.param(
+                {},
+                {"assigned_qa": "123"},
+                True,
+                id="Tester assigner has unknown permissions, assigns self",
+            ),
+            pytest.param(
+                {"push": False},
+                {"assigned_qa": "123"},
+                True,
+                id="Tester assigner can't push, assigns self",
+            ),
+            pytest.param(
+                {"push": True},
+                {"assigned_qa": "123"},
+                True,
+                id="Tester can push, assigns self",
+            ),
+            pytest.param(
+                {},
+                {"assigned_qa": "456"},
+                False,
+                id="Tester assigner has unknown permissions, assigns other",
+            ),
+            pytest.param(
+                {"push": False},
+                {"assigned_qa": "456"},
+                False,
+                id="Tester assigner can't push, assigns other",
+            ),
+            pytest.param(
+                {"push": True},
+                {"assigned_qa": "456"},
+                True,
+                id="Tester assigner can push, assigns other",
+            ),
+        ),
+    )
+    def test_assign__assigner_permissions(
+        self,
+        rf,
+        git_hub_repository_factory,
+        task_factory,
+        repo_perms,
+        data,
+        success,
+    ):
+        repo = git_hub_repository_factory(permissions=repo_perms)
+        account = repo.user.github_account
+        account.uid = "123"
+        account.save()
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[
+                {"id": "123", "permissions": {"push": True}},
+                {"id": "456", "permissions": {"push": True}},
+            ],
+        )
+        r = rf.get("/")
+        r.user = repo.user
+        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
+        assert serializer.is_valid() == success, serializer.errors
+        if not success:
+            assert data.keys() == serializer.errors.keys()
+
+    def test_queues_reassign(
+        self,
+        rf,
+        git_hub_repository_factory,
+        user_factory,
+        task_factory,
+        scratch_org_factory,
+    ):
         user = user_factory()
         new_user = user_factory(devhub_username="test")
-        id_ = user.github_account.uid
-        new_id = new_user.github_account.uid
+        repo = git_hub_repository_factory(permissions={"push": True}, user=new_user)
         task = task_factory(
-            assigned_dev={"id": id_}, assigned_qa={"id": id_}, commits=["abc123"]
+            assigned_dev=user.github_id,
+            assigned_qa=user.github_id,
+            commits=["abc123"],
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[
+                {"id": user.github_id, "permissions": {"push": True}},
+                {"id": new_user.github_id, "permissions": {"push": True}},
+            ],
         )
         scratch_org_factory(
             owner_sf_username="test",
@@ -459,15 +704,10 @@ class TestTaskSerializer:
             deleted_at=timezone.now(),
         )
 
-        data = {
-            "name": task.name,
-            "description": task.description,
-            "epic": str(task.epic.id),
-            "assigned_dev": {"id": new_id},
-            "assigned_qa": {"id": new_id},
-            "org_config_name": "dev",
-        }
-        serializer = TaskSerializer(instance=task, data=data)
+        data = {"assigned_dev": new_user.github_id, "assigned_qa": new_user.github_id}
+        r = rf.get("/")
+        r.user = new_user
+        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
         with ExitStack() as stack:
             user_reassign_job = stack.enter_context(
                 patch("metecho.api.jobs.user_reassign_job")
@@ -479,22 +719,26 @@ class TestTaskSerializer:
             serializer.save()
             assert user_reassign_job.delay.called
 
-    def test_try_send_assignment_emails(self, mailoutbox, user_factory, task_factory):
-        user = user_factory()
-        task = task_factory()
-
-        serializer = TaskSerializer(
-            task,
-            data={
-                "assigned_dev": {"id": user.github_account.uid},
-                "assigned_qa": {"id": user.github_account.uid},
-                "should_alert_dev": True,
-                "should_alert_qa": True,
-                "name": task.name,
-                "epic": str(task.epic.id),
-                "org_config_name": task.org_config_name,
-            },
+    def test_try_send_assignment_emails(
+        self, rf, mailoutbox, git_hub_repository_factory, task_factory
+    ):
+        repo = git_hub_repository_factory(permissions={"push": True})
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[
+                {"id": repo.user.github_id, "permissions": {"push": True}}
+            ],
         )
+
+        data = {
+            "assigned_dev": repo.user.github_id,
+            "assigned_qa": repo.user.github_id,
+            "should_alert_dev": True,
+            "should_alert_qa": True,
+        }
+        r = rf.get("/")
+        r.user = repo.user
+        serializer = TaskAssigneeSerializer(task, data=data, context={"request": r})
         assert serializer.is_valid(), serializer.errors
         serializer.save()
 

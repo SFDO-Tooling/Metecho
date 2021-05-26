@@ -21,6 +21,7 @@ export interface MinimalOrg {
 export interface Org extends MinimalOrg {
   owner: string;
   owner_gh_username: string;
+  owner_gh_id: string | null;
   description: string;
   description_rendered: string;
   org_config_name: string;
@@ -206,10 +207,8 @@ const reducer = (
       };
     }
     case 'DELETE_OBJECT_SUCCEEDED': {
-      const {
-        objectType,
-        object,
-      }: { objectType?: ObjectTypes; object: Org } = action.payload;
+      const { objectType, object }: { objectType?: ObjectTypes; object: Org } =
+        action.payload;
       if (objectType === OBJECT_TYPES.ORG && object) {
         return {
           ...orgs,

@@ -1,7 +1,6 @@
 import { ObjectsAction, PaginatedObjectResponse } from '~js/store/actions';
 import { EpicAction } from '~js/store/epics/actions';
 import { LogoutAction, RefetchDataAction } from '~js/store/user/actions';
-import { GitHubUser } from '~js/store/user/reducer';
 import { EpicStatuses, OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
 
 export interface Epic {
@@ -21,7 +20,7 @@ export interface Epic {
   has_unmerged_commits: boolean;
   currently_creating_branch: boolean;
   currently_creating_pr: boolean;
-  github_users: GitHubUser[];
+  github_users: string[];
   status: EpicStatuses;
   latest_sha: string;
 }
@@ -94,10 +93,8 @@ const reducer = (
       return epics;
     }
     case 'CREATE_OBJECT_SUCCEEDED': {
-      const {
-        object,
-        objectType,
-      }: { object: Epic; objectType?: ObjectTypes } = action.payload;
+      const { object, objectType }: { object: Epic; objectType?: ObjectTypes } =
+        action.payload;
       if (objectType === OBJECT_TYPES.EPIC && object) {
         const project = epics[object.project] || { ...defaultState };
         // Do not store if (somehow) we already know about this epic

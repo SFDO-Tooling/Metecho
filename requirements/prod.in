@@ -1,10 +1,10 @@
-Django==3.2
+Django==3.2.3
 autobahn==21.3.1
 beautifulsoup4==4.9.3
 bleach==3.3.0
 channels-redis==3.2.0
 channels==3.0.3
-cumulusci==3.33.1
+cumulusci==3.35.0
 dj-database-url==0.5.0
 django-allauth==0.44.0
 django-anymail[mailgun]==8.2
@@ -30,7 +30,7 @@ markdown==3.3.4
 psycopg2-binary==2.8.6
 
 rq-scheduler==0.11.0
-sentry-sdk==1.0.0
-service_identity==18.1.0
+sentry-sdk==1.1.0
+service_identity==21.1.0
 https://github.com/SFDO-Tooling/sfdo-template-helpers/archive/v0.18.0.tar.gz
 whitenoise==5.2.0

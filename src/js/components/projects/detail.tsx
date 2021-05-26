@@ -12,6 +12,8 @@ import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import ProjectNotFound from '~js/components/projects/project404';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
+import PlayTour from '~js/components/tour/play';
+import TourPopover from '~js/components/tour/popover';
 import {
   CreateOrgModal,
   DetailPageLayout,
@@ -165,6 +167,21 @@ const ProjectDetail = (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
         title={project.name}
+        titlePopover={
+          <TourPopover
+            align="right"
+            heading={i18n.t('Project name & GitHub link')}
+            body={
+              <Trans i18nKey="tourProjectName">
+                View, test, and contribute to Salesforce Projects using Metecho!
+                Metecho Projects are equivalent to repositories on GitHub. Click
+                the link below the Project name to leave Metecho and access the
+                repository on GitHub. To contribute to a Project, you must be
+                given permission on GitHub.
+              </Trans>
+            }
+          />
+        }
         description={project.description_rendered}
         headerUrl={project.repo_url}
         headerUrlText={`${project.repo_owner}/${project.repo_name}`}
@@ -176,8 +193,24 @@ const ProjectDetail = (
               metecho-secondary-block
               slds-m-left_medium"
           >
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+            <h2
+              className="slds-text-heading_medium
+                slds-p-bottom_medium
+                slds-is-relative"
+            >
               {i18n.t('My Project Scratch Org')}
+              <TourPopover
+                align="top"
+                heading={i18n.t('Scratch Org management')}
+                body={
+                  <Trans i18nKey="tourProjectScratchOrg">
+                    Your Scratch Org for a Project will appear in this column.
+                    Create a Scratch Org for the entire Project or visit an Epic
+                    or Task to create a Scratch Org for specific work
+                    in-progress.
+                  </Trans>
+                }
+              />
             </h2>
             {orgs ? (
               <>
@@ -187,7 +220,11 @@ const ProjectDetail = (
                       slds-wrap
                       slds-grid_pull-padded-x-small"
                   >
-                    <div className="slds-size_1-of-1 slds-p-around_x-small">
+                    <div
+                      className="slds-size_1-of-1
+                        slds-p-around_x-small
+                        tour-scratch-org"
+                    >
                       <PlaygroundOrgCard
                         org={playgroundOrg}
                         project={project}
@@ -196,11 +233,26 @@ const ProjectDetail = (
                     </div>
                   </div>
                 ) : (
-                  <Button
-                    label={i18n.t('Create Scratch Org')}
-                    variant="outline-brand"
-                    onClick={openCreateOrgModal}
-                  />
+                  <div className="slds-is-relative">
+                    <Button
+                      className="tour-scratch-org"
+                      label={i18n.t('Create Scratch Org')}
+                      variant="outline-brand"
+                      onClick={openCreateOrgModal}
+                    />
+                    <TourPopover
+                      align="bottom"
+                      heading={i18n.t('View & play with a Project')}
+                      body={
+                        <Trans i18nKey="tourProjectCreateScratchOrg">
+                          Scratch Orgs are a temporary place for you to view the
+                          work on this Project. You can use Scratch Orgs to play
+                          with changes to the Project without affecting the
+                          Project.
+                        </Trans>
+                      }
+                    />
+                  </div>
                 )}
               </>
             ) : (
@@ -221,7 +273,7 @@ const ProjectDetail = (
         ) : (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {hasEpics
+              {hasEpics || !project.has_push_permission
                 ? i18n.t('Epics for {{project_name}}', {
                     project_name: project.name,
                   })
@@ -231,22 +283,46 @@ const ProjectDetail = (
             </h2>
             {!hasEpics && (
               <p className="slds-m-bottom_large">
-                <Trans i18nKey="createEpicHelpText">
-                  Epics in Metecho are the high-level features that can be
-                  broken down into smaller parts by creating Tasks. You can
-                  create a new epic or create an epic based on an existing
-                  GitHub branch. Every epic requires a unique epic name, which
-                  becomes the branch name in GitHub unless you choose to use an
-                  existing branch.
-                </Trans>
+                {project.has_push_permission ? (
+                  <Trans i18nKey="createEpicHelpText">
+                    Epics in Metecho are the high-level features that can be
+                    broken down into smaller parts by creating Tasks. You can
+                    create a new epic or create an epic based on an existing
+                    GitHub branch. Every epic requires a unique epic name, which
+                    becomes the branch name in GitHub unless you choose to use
+                    an existing branch.
+                  </Trans>
+                ) : (
+                  <Trans i18nKey="noEpics">
+                    Epics in Metecho are the high-level features that can be
+                    broken down into smaller parts by creating Tasks. There are
+                    no Epics for this Project.
+                  </Trans>
+                )}
               </p>
             )}
-            <Button
-              label={i18n.t('Create an Epic')}
-              variant="brand"
-              onClick={openCreateModal}
-              className="slds-m-bottom_large tour-create-epic"
-            />
+            {project.has_push_permission && (
+              <div className="slds-m-bottom_large slds-is-relative">
+                <Button
+                  label={i18n.t('Create an Epic')}
+                  variant="brand"
+                  onClick={openCreateModal}
+                  className="tour-create-epic"
+                />
+                <TourPopover
+                  align="right"
+                  body={
+                    <Trans i18nKey="tourCreateEpicPopover">
+                      Create an Epic to make a group of related Tasks. Invite
+                      multiple Collaborators to your Epic and assign people as
+                      Developers & Testers for each Task. Epics are equivalent
+                      to GitHub branches, just like Tasks.
+                    </Trans>
+                  }
+                  heading={i18n.t('Create Epics to group Tasks')}
+                />
+              </div>
+            )}
             {hasEpics && (
               <>
                 <EpicTable epics={epics.epics} projectSlug={project.slug} />
@@ -279,7 +355,14 @@ const ProjectDetail = (
           runTour={doRunTour}
           onRequestClose={closeTourLandingModal}
         />
-        <PlanTour run={tourRunning === 'plan'} onClose={handleTourClose} />
+        <PlayTour
+          run={tourRunning === WALKTHROUGH_TYPES.PLAY}
+          onClose={handleTourClose}
+        />
+        <PlanTour
+          run={tourRunning === WALKTHROUGH_TYPES.PLAN}
+          onClose={handleTourClose}
+        />
         <CreateOrgModal
           project={project}
           isOpen={createOrgModalOpen}

@@ -23,7 +23,7 @@ describe('refreshProjects', () => {
       next: null,
       results: [],
     });
-    fetchMock.postOnce(window.api_urls.user_refresh(), {
+    fetchMock.postOnce(window.api_urls.current_user_refresh(), {
       status: 204,
       body: {},
     });
@@ -44,9 +44,9 @@ describe('refreshProjects', () => {
   });
 
   describe('error', () => {
-    test('dispatches REFRESH_PROJECTS_REJECTED action', () => {
+    test('dispatches REFRESH_PROJECTS_REJECTED action', async () => {
       const store = storeWithThunk({});
-      fetchMock.postOnce(window.api_urls.user_refresh(), {
+      fetchMock.postOnce(window.api_urls.current_user_refresh(), {
         status: 500,
         body: { non_field_errors: ['Foobar'] },
       });
@@ -58,14 +58,18 @@ describe('refreshProjects', () => {
       };
 
       expect.assertions(4);
-      return store.dispatch(actions.refreshProjects()).catch(() => {
+      try {
+        await store.dispatch(actions.refreshProjects());
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -124,7 +128,7 @@ describe('refreshGitHubUsers', () => {
   });
 
   describe('error', () => {
-    test('dispatches REFRESH_GH_USERS_REJECTED action', () => {
+    test('dispatches REFRESH_GH_USERS_REJECTED action', async () => {
       const store = storeWithThunk({});
       fetchMock.postOnce(url, {
         status: 500,
@@ -140,14 +144,18 @@ describe('refreshGitHubUsers', () => {
       };
 
       expect.assertions(4);
-      return store.dispatch(actions.refreshGitHubUsers(projectId)).catch(() => {
+      try {
+        await store.dispatch(actions.refreshGitHubUsers(projectId));
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -242,7 +250,7 @@ describe('refreshOrgConfigs', () => {
   });
 
   describe('error', () => {
-    test('dispatches REFRESH_ORG_CONFIGS_REJECTED action', () => {
+    test('dispatches REFRESH_ORG_CONFIGS_REJECTED action', async () => {
       const store = storeWithThunk({});
       fetchMock.postOnce(url, {
         status: 500,
@@ -258,14 +266,18 @@ describe('refreshOrgConfigs', () => {
       };
 
       expect.assertions(4);
-      return store.dispatch(actions.refreshOrgConfigs(id)).catch(() => {
+      try {
+        await store.dispatch(actions.refreshOrgConfigs(id));
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual(['Foobar']);
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });

@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ConnectionError, ResponseError
-from rest_framework import generics, mixins, status
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -28,24 +28,44 @@ from .serializers import (
     CanReassignSerializer,
     CommitSerializer,
     CreatePrSerializer,
+    EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
+    TaskAssigneeSerializer,
     TaskSerializer,
 )
 
 User = get_user_model()
 
 
-class CurrentUserObjectMixin:
-    def get_queryset(self):
-        return self.model.objects.filter(id=self.request.user.id)
+class RepoPushPermissionMixin:
+    """
+    Require repository Push permission for all operations other than list/read.
+    Assumes the related model implements a `has_push_permission(user)` method.
+    """
 
-    def get_object(self):
-        return self.get_queryset().get()
+    def check_push_permission(self, instance):
+        if not instance.has_push_permission(self.request.user):
+            raise PermissionDenied(
+                'You do not have "Push" permissions in the related repository'
+            )
+
+    def perform_create(self, serializer):
+        instance = serializer.Meta.model(**serializer.validated_data)
+        self.check_push_permission(instance)
+        return super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        self.check_push_permission(serializer.instance)
+        return super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        self.check_push_permission(instance)
+        return super().perform_destroy(instance)
 
 
 class CreatePrMixin:
@@ -62,7 +82,7 @@ class CreatePrMixin:
         instance.queue_create_pr(
             request.user,
             **serializer.validated_data,
-            originating_user_id=str(request.user.id)
+            originating_user_id=str(request.user.id),
         )
         return Response(
             self.get_serializer(instance).data, status=status.HTTP_202_ACCEPTED
@@ -90,59 +110,53 @@ class HookView(APIView):
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
-class UserView(CurrentUserObjectMixin, generics.RetrieveAPIView):
+class CurrentUserViewSet(GenericViewSet):
     """
-    Shows the current user.
+    Actions related to the current user
     """
 
     model = User
     serializer_class = FullUserSerializer
     permission_classes = (IsAuthenticated,)
 
+    def retrieve(self, request, pk=None):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
-class AgreeToTosView(CurrentUserObjectMixin, generics.UpdateAPIView):
-    model = User
-    serializer_class = FullUserSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def update(self, request, pk=None):
+    @action(methods=["PUT"], detail=False)
+    def agree_to_tos(self, request):
         request.user.agreed_to_tos_at = timezone.now()
         request.user.save()
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+        return self.retrieve(request)
 
-
-class CompleteOnboardingView(CurrentUserObjectMixin, generics.UpdateAPIView):
-    model = User
-    serializer_class = FullUserSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def update(self, request, pk=None):
+    @action(methods=["PUT"], detail=False)
+    def complete_onboarding(self, request):
         request.user.onboarded_at = timezone.now()
         request.user.save()
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+        return self.retrieve(request)
 
+    @action(methods=["POST"], detail=False)
+    def guided_tour(self, request):
+        enabled = request.data.get("enabled")
+        if enabled is not None:
+            request.user.self_guided_tour_enabled = enabled
 
-class UserRefreshView(CurrentUserObjectMixin, APIView):
-    model = User
-    permission_classes = (IsAuthenticated,)
+        state = request.data.get("state")
+        if state is not None:
+            request.user.self_guided_tour_state = state
 
-    def post(self, request):
-        user = self.get_object()
-        user.queue_refresh_repositories()
+        request.user.save()
+        return self.retrieve(request)
+
+    @action(methods=["POST"], detail=False)
+    def disconnect(self, request):
+        request.user.invalidate_salesforce_credentials()
+        return self.retrieve(request)
+
+    @action(methods=["POST"], detail=False)
+    def refresh(self, request):
+        request.user.queue_refresh_repositories()
         return Response(status=status.HTTP_202_ACCEPTED)
-
-
-class UserDisconnectSFView(CurrentUserObjectMixin, APIView):
-    model = User
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request):
-        user = self.get_object()
-        user.invalidate_salesforce_credentials()
-        serializer = FullUserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -208,7 +222,7 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
         return Response(data)
 
 
-class EpicViewSet(CreatePrMixin, ModelViewSet):
+class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = EpicSerializer
     pagination_class = CustomPaginator
@@ -229,8 +243,22 @@ class EpicViewSet(CreatePrMixin, ModelViewSet):
             "ordering", "-created_at", "name"
         )
 
+    @action(detail=True, methods=["POST", "PUT"])
+    def collaborators(self, request, pk=None):
+        """
+        Edit the Epic collaborators. Exposed as a separate endpoint for users without
+        write access to Epics.
+        """
+        epic = self.get_object()
+        serializer = EpicCollaboratorsSerializer(
+            epic, request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.update(epic, serializer.validated_data)
+        return Response(self.get_serializer(epic).data)
 
-class TaskViewSet(CreatePrMixin, ModelViewSet):
+
+class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
     queryset = Task.objects.active()
@@ -289,6 +317,20 @@ class TaskViewSet(CreatePrMixin, ModelViewSet):
                 )
             }
         )
+
+    @action(detail=True, methods=["POST", "PUT"])
+    def assignees(self, request, pk=None):
+        """
+        Edit the assigned developer and tester on a Task. Exposed as a separate endpoint
+        for users without write access to Tasks.
+        """
+        task = self.get_object()
+        serializer = TaskAssigneeSerializer(
+            task, request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.update(task, serializer.validated_data)
+        return Response(self.get_serializer(task).data)
 
 
 class ScratchOrgViewSet(

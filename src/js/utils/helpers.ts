@@ -4,7 +4,7 @@ import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
 import { Epic } from '~js/store/epics/reducer';
 import { Changeset, Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
-import { TASK_STATUSES } from '~js/utils/constants';
+import { EPIC_STATUSES, TASK_STATUSES } from '~js/utils/constants';
 
 export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
@@ -42,7 +42,13 @@ export const getOrgBehindLatestMsg = (
 
 export const getBranchLink = (object: Task | Epic) => {
   let branchLink, branchLinkText;
-  if (object.pr_url) {
+  if (
+    object.pr_url &&
+    (object.pr_is_open ||
+      [TASK_STATUSES.COMPLETED, EPIC_STATUSES.MERGED].includes(
+        object.status as any,
+      ))
+  ) {
     branchLink = object.pr_url;
     branchLinkText = i18n.t('View Pull Request');
   } else if (object.has_unmerged_commits && object.branch_diff_url) {

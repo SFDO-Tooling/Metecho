@@ -45,6 +45,7 @@ Retrieve
         "is_created": true,
         "delete_queued_at": null,
         "owner_gh_username": "user123",
+        "owner_gh_id": "123456",
         "has_been_visited": true,
         "valid_target_directories": {
           "source": ["src"]

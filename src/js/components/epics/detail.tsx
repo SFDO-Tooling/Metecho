@@ -3,7 +3,7 @@ import PageHeaderControl from '@salesforce/design-system-react/components/page-h
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import FourOhFour from '~js/components/404';
@@ -36,9 +36,9 @@ import {
 } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { updateObject } from '~js/store/actions';
-import { refreshGitHubUsers } from '~js/store/projects/actions';
 import { Task } from '~js/store/tasks/reducer';
-import { GitHubUser } from '~js/store/user/reducer';
+import { GitHubUser, User } from '~js/store/user/reducer';
+import { selectUserState } from '~js/store/user/selectors';
 import {
   EPIC_STATUSES,
   OBJECT_TYPES,
@@ -51,9 +51,13 @@ import routes from '~js/utils/routes';
 const EpicDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
-  const { epic, epicSlug } = useFetchEpicIfMissing(project, props);
+  const { epic, epicSlug, epicCollaborators } = useFetchEpicIfMissing(
+    project,
+    props,
+  );
   const { tasks } = useFetchTasksIfMissing(epic, props);
   const { orgs } = useFetchOrgsIfMissing({ epic, props });
+  const currentUser = useSelector(selectUserState) as User;
 
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -76,12 +80,10 @@ const EpicDetail = (props: RouteComponentProps) => {
   }, []);
 
   // "Confirm remove user from epic" modal related:
-  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
-    GitHubUser[] | null
-  >(null);
-  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
-    GitHubUser[] | null
-  >(null);
+  const [waitingToUpdateUsers, setWaitingToUpdateUsers] =
+    useState<GitHubUser[] | null>(null);
+  const [confirmRemoveUsers, setConfirmRemoveUsers] =
+    useState<GitHubUser[] | null>(null);
   const closeConfirmRemoveUsersModal = useCallback(() => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);
@@ -98,10 +100,10 @@ const EpicDetail = (props: RouteComponentProps) => {
     const users = new Set<string>();
     (tasks || []).forEach((task) => {
       if (task.assigned_dev) {
-        users.add(task.assigned_dev.login);
+        users.add(task.assigned_dev);
       }
       if (task.assigned_qa) {
-        users.add(task.assigned_qa.login);
+        users.add(task.assigned_qa);
       }
     });
     return users;
@@ -113,13 +115,13 @@ const EpicDetail = (props: RouteComponentProps) => {
       if (!epic) {
         return [];
       }
-      return epic.github_users.filter(
+      return epicCollaborators.filter(
         (oldUser) =>
-          usersAssignedToTasks.has(oldUser.login) &&
+          usersAssignedToTasks.has(oldUser.id) &&
           !users.find((user) => user.id === oldUser.id),
       );
     },
-    [epic, usersAssignedToTasks],
+    [epic, epicCollaborators, usersAssignedToTasks],
   );
   const updateEpicUsers = useCallback(
     (users: GitHubUser[]) => {
@@ -130,12 +132,14 @@ const EpicDetail = (props: RouteComponentProps) => {
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.EPIC,
+          url: window.api_urls.epic_collaborators(epic.id),
           data: {
-            ...epic,
-            github_users: users.sort((a, b) =>
-              /* istanbul ignore next */
-              a.login.toLowerCase() > b.login.toLowerCase() ? 1 : -1,
-            ),
+            github_users: users
+              .sort((a, b) =>
+                /* istanbul ignore next */
+                a.login.toLowerCase() > b.login.toLowerCase() ? 1 : -1,
+              )
+              .map((user) => user.id),
           },
         }),
       );
@@ -165,7 +169,7 @@ const EpicDetail = (props: RouteComponentProps) => {
       if (!epic) {
         return;
       }
-      const users = epic.github_users.filter(
+      const users = epicCollaborators.filter(
         (possibleUser) => user.id !== possibleUser.id,
       );
       const removedUsers = getRemovedUsers(users);
@@ -180,15 +184,8 @@ const EpicDetail = (props: RouteComponentProps) => {
         updateEpicUsers(users);
       }
     },
-    [epic, updateEpicUsers, getRemovedUsers],
+    [epic, epicCollaborators, updateEpicUsers, getRemovedUsers],
   );
-  const doRefreshGitHubUsers = useCallback(() => {
-    /* istanbul ignore if */
-    if (!project) {
-      return;
-    }
-    dispatch(refreshGitHubUsers(project.id));
-  }, [project, dispatch]);
 
   // "Assign user to task" modal related:
   const assignUser = useCallback(
@@ -200,7 +197,7 @@ const EpicDetail = (props: RouteComponentProps) => {
     }: {
       task: Task;
       type: OrgTypes;
-      assignee: GitHubUser | null;
+      assignee: string | null;
       shouldAlertAssignee: boolean;
     }) => {
       /* istanbul ignore next */
@@ -210,8 +207,8 @@ const EpicDetail = (props: RouteComponentProps) => {
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
+          url: window.api_urls.task_assignees(task.id),
           data: {
-            ...task,
             [userType]: assignee,
             [alertType]: shouldAlertAssignee,
           },
@@ -343,7 +340,7 @@ const EpicDetail = (props: RouteComponentProps) => {
 
   // "Submit Epic for Review on GitHub" button:
   let submitButton: React.ReactNode = null;
-  if (readyToSubmit) {
+  if (readyToSubmit && project.has_push_permission) {
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
         label={i18n.t('Submitting Epic for Review on GitHub…')}
@@ -376,10 +373,12 @@ const EpicDetail = (props: RouteComponentProps) => {
   const { branchLink, branchLinkText } = getBranchLink(epic);
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
-      <PageOptions
-        modelType={OBJECT_TYPES.EPIC}
-        handleOptionSelect={handlePageOptionSelect}
-      />
+      {project.has_push_permission && (
+        <PageOptions
+          modelType={OBJECT_TYPES.EPIC}
+          handleOptionSelect={handlePageOptionSelect}
+        />
+      )}
       {branchLink && (
         <ExternalLink
           url={branchLink}
@@ -405,6 +404,14 @@ const EpicDetail = (props: RouteComponentProps) => {
 
   const epicIsMerged = epic.status === EPIC_STATUSES.MERGED;
   const epicHasTasks = Boolean(tasks && tasks.length > 0);
+  let taskHeader = i18n.t('Tasks for {{epic_name}}', { epic_name: epic.name });
+  if (!epicHasTasks && !epicIsMerged) {
+    taskHeader = project.has_push_permission
+      ? i18n.t('Add a Task for {{epic_name}}', {
+          epic_name: epic.name,
+        })
+      : i18n.t('No Tasks for {{epic_name}}', { epic_name: epic.name });
+  }
 
   return (
     <DocumentTitle
@@ -427,35 +434,45 @@ const EpicDetail = (props: RouteComponentProps) => {
           <>
             <div className="slds-m-bottom_x-large metecho-secondary-block">
               <h2 className="slds-text-heading_medium slds-p-bottom_small">
-                {i18n.t('Collaborators')}
+                {project.has_push_permission || epicCollaborators.length
+                  ? i18n.t('Collaborators')
+                  : i18n.t('No Collaborators')}
               </h2>
-              <Button
-                label={i18n.t('Add or Remove Collaborators')}
-                variant="outline-brand"
-                onClick={openAssignUsersModal}
-              />
-              <AssignEpicCollaboratorsModal
-                allUsers={project.github_users}
-                selectedUsers={epic.github_users}
-                heading={i18n.t(
-                  'Add or Remove Collaborators for {{epic_name}}',
-                  { epic_name: epic.name },
-                )}
-                isOpen={assignUsersModalOpen}
-                onRequestClose={closeAssignUsersModal}
-                setUsers={setEpicUsers}
-                isRefreshing={Boolean(project.currently_refreshing_gh_users)}
-                refreshUsers={doRefreshGitHubUsers}
-              />
+              {project.has_push_permission && (
+                <>
+                  <Button
+                    label={i18n.t('Add or Remove Collaborators')}
+                    variant="outline-brand"
+                    onClick={openAssignUsersModal}
+                  />
+                  <AssignEpicCollaboratorsModal
+                    allUsers={project.github_users}
+                    selectedUsers={epicCollaborators}
+                    heading={i18n.t(
+                      'Add or Remove Collaborators for {{epic_name}}',
+                      { epic_name: epic.name },
+                    )}
+                    isOpen={assignUsersModalOpen}
+                    onRequestClose={closeAssignUsersModal}
+                    setUsers={setEpicUsers}
+                    isRefreshing={Boolean(
+                      project.currently_refreshing_gh_users,
+                    )}
+                    projectId={project.id}
+                  />
+                </>
+              )}
               <ConfirmRemoveUserModal
                 confirmRemoveUsers={confirmRemoveUsers}
                 waitingToUpdateUsers={waitingToUpdateUsers}
                 handleClose={closeConfirmRemoveUsersModal}
                 handleUpdateUsers={updateEpicUsers}
               />
-              {epic.github_users.length ? (
+              {epicCollaborators.length ? (
                 <UserCards
-                  users={epic.github_users}
+                  users={epicCollaborators}
+                  userId={currentUser.github_id}
+                  canRemoveUser={project.has_push_permission}
                   removeUser={removeEpicUser}
                 />
               ) : null}
@@ -466,6 +483,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 tasks={tasks || []}
                 readyToSubmit={readyToSubmit}
                 currentlySubmitting={currentlySubmitting}
+                canSubmit={project.has_push_permission}
                 handleAction={handleStepAction}
               />
             </div>
@@ -520,20 +538,16 @@ const EpicDetail = (props: RouteComponentProps) => {
         {tasks ? (
           <>
             <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {epicHasTasks || epicIsMerged
-                ? i18n.t('Tasks for {{epic_name}}', { epic_name: epic.name })
-                : i18n.t('Add a Task for {{epic_name}}', {
-                    epic_name: epic.name,
-                  })}
+              {taskHeader}
             </h2>
-            {!epicIsMerged && (
+            {project.has_push_permission && !epicIsMerged ? (
               <Button
                 label={i18n.t('Add a Task')}
                 variant="brand"
                 onClick={openCreateModal}
                 className="slds-m-bottom_large"
               />
-            )}
+            ) : null}
             {epicHasTasks && (
               <>
                 <EpicProgress range={epicProgress} />
@@ -542,8 +556,9 @@ const EpicDetail = (props: RouteComponentProps) => {
                   projectSlug={project.slug}
                   epicSlug={epic.slug}
                   tasks={tasks}
-                  epicUsers={epic.github_users}
+                  epicUsers={epicCollaborators}
                   githubUsers={project.github_users}
+                  canAssign={project.has_push_permission}
                   isRefreshingUsers={Boolean(
                     project.currently_refreshing_gh_users,
                   )}
@@ -556,36 +571,40 @@ const EpicDetail = (props: RouteComponentProps) => {
           // Fetching tasks from API
           <SpinnerWrapper />
         )}
-        {readyToSubmit && (
-          <SubmitModal
-            instanceId={epic.id}
-            instanceName={epic.name}
-            instanceDiffUrl={epic.branch_diff_url}
-            instanceType={OBJECT_TYPES.EPIC}
-            isOpen={submitModalOpen}
-            toggleModal={setSubmitModalOpen}
-          />
-        )}
-        <EditModal
-          model={epic}
-          modelType={OBJECT_TYPES.EPIC}
-          isOpen={editModalOpen}
-          handleClose={closeEditModal}
-        />
-        <DeleteModal
-          model={epic}
-          modelType={OBJECT_TYPES.EPIC}
-          isOpen={deleteModalOpen}
-          redirect={projectUrl}
-          handleClose={closeDeleteModal}
-        />
-        {!epicIsMerged && (
-          <CreateTaskModal
-            project={project}
-            epic={epic}
-            isOpen={createModalOpen}
-            closeCreateModal={closeCreateModal}
-          />
+        {project.has_push_permission && (
+          <>
+            {readyToSubmit && (
+              <SubmitModal
+                instanceId={epic.id}
+                instanceName={epic.name}
+                instanceDiffUrl={epic.branch_diff_url}
+                instanceType={OBJECT_TYPES.EPIC}
+                isOpen={submitModalOpen}
+                toggleModal={setSubmitModalOpen}
+              />
+            )}
+            <EditModal
+              model={epic}
+              modelType={OBJECT_TYPES.EPIC}
+              isOpen={editModalOpen}
+              handleClose={closeEditModal}
+            />
+            <DeleteModal
+              model={epic}
+              modelType={OBJECT_TYPES.EPIC}
+              isOpen={deleteModalOpen}
+              redirect={projectUrl}
+              handleClose={closeDeleteModal}
+            />
+            {!epicIsMerged && (
+              <CreateTaskModal
+                project={project}
+                epic={epic}
+                isOpen={createModalOpen}
+                closeCreateModal={closeCreateModal}
+              />
+            )}
+          </>
         )}
         <CreateOrgModal
           project={project}

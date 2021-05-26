@@ -5,7 +5,7 @@
 $color-text-path-current: $color-text-default;
 $color-background-path-active: $brand-background-primary;
 $color-background-path-active-hover: $color-brand-darker;
-$color-background-path-complete: $color-background-path-incomplete-hover;
+$color-background-path-complete: $color-gray-5;
 $color-background-path-complete-hover: $color-gray-6;
 
 .slds-path__item {
@@ -20,12 +20,55 @@ $color-background-path-complete-hover: $color-gray-6;
 .slds-path__nav {
   flex: auto;
 
-  .slds-is-active:not(.slds-is-won) {
+  .slds-is-complete {
+    background: $color-background-path-complete;
+    flex-grow: 0.5;
+
+    &:before,
+    &:after {
+      background: inherit;
+    }
+
+    &:hover {
+      background: $color-background-path-complete-hover;
+      flex-grow: 1.5;
+
+      &:before,
+      &:after {
+        background: inherit;
+      }
+    }
+
+    .slds-path__link {
+      color: $color-text-default;
+    }
+  }
+
+  .slds-is-active {
     background: $color-background-path-active;
 
     &:before,
     &:after {
-      background: $color-background-path-active;
+      background: inherit;
+    }
+
+    &:first-child {
+      &:before,
+      &:after {
+        background: inherit;
+      }
+
+      &:hover {
+        &:before,
+        &:after {
+          background-image: linear-gradient(
+            90deg,
+            $color-background-path-active-hover,
+            $color-background-path-active-hover 0.125rem,
+            transparent 0.125rem
+          );
+        }
+      }
     }
 
     &:hover {
@@ -33,7 +76,7 @@ $color-background-path-complete-hover: $color-gray-6;
 
       &:before,
       &:after {
-        background: $color-background-path-active-hover;
+        background: inherit;
       }
 
       .slds-path__link {
@@ -43,40 +86,38 @@ $color-background-path-complete-hover: $color-gray-6;
 
     .slds-path__link {
       color: $color-text-path-current;
-
-      &:hover {
-        color: $color-text-brand-primary;
-      }
-    }
-  }
-
-  .slds-is-complete:not(.slds-is-won) {
-    background: $color-background-path-complete;
-    flex-grow: 0.5;
-
-    &:before,
-    &:after {
-      background: $color-background-path-complete;
-    }
-
-    &:hover {
-      background: $color-background-path-complete-hover;
-      flex-grow: 1.5;
-
-      &:before,
-      &:after {
-        background: $color-background-path-complete-hover;
-      }
-    }
-
-    .slds-path__link {
-      color: $color-text-default;
     }
   }
 
   .slds-is-won {
+    background: $color-background-path-won;
+
     .slds-path__link {
       color: $color-text-brand-primary;
+    }
+
+    &:before,
+    &:after,
+    &:hover,
+    &:hover:before,
+    &:hover:after {
+      background: $color-background-path-won;
+    }
+  }
+
+  .slds-is-lost {
+    background: $color-background-path-lost;
+
+    .slds-path__link {
+      color: $color-text-brand-primary;
+    }
+
+    &:before,
+    &:after,
+    &:hover,
+    &:hover:before,
+    &:hover:after {
+      background: $color-background-path-lost;
     }
   }
 }

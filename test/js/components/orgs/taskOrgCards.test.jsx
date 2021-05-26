@@ -41,6 +41,7 @@ const defaultOrgs = {
     org_type: 'Dev',
     owner: 'user-id',
     owner_gh_username: 'user-name',
+    owner_gh_id: 'user-id',
     expires_at: '2019-09-16T12:58:53.721Z',
     latest_commit: '617a512-longlong',
     latest_commit_url: '/test/commit/url/',
@@ -56,27 +57,40 @@ const defaultOrgs = {
   },
   QA: null,
 };
+const defaultEpicUsers = [
+  {
+    id: 'user-id',
+    login: 'user-name',
+    name: 'Full User Name',
+    permissions: { push: true },
+  },
+  { id: 'other-user-id', login: 'other-user', permissions: { push: true } },
+];
+const defaultProject = {
+  id: 'p1',
+  github_users: [...defaultEpicUsers],
+};
 const defaultState = {
   user: {
     id: 'user-id',
+    github_id: 'user-id',
     username: 'user-name',
     valid_token_for: 'sf-org',
     is_devhub_enabled: true,
   },
+  projects: {
+    projects: [defaultProject],
+  },
 };
 const defaultTask = {
   id: 'task-id',
-  assigned_dev: { id: 'user-id', login: 'user-name' },
-  assigned_qa: { id: 'user-id', login: 'user-name' },
+  assigned_dev: 'user-id',
+  assigned_qa: 'user-id',
   commits: [{ id: '617a512-longlong' }, { id: 'other' }],
   origin_sha: 'parent',
   review_submitted_at: '2019-10-16T12:58:53.721Z',
   has_unmerged_commits: true,
 };
-const defaultEpicUsers = [
-  { id: 'user-id', login: 'user-name' },
-  { id: 'other-user', login: 'other-user' },
-];
 const createOrg = jest.fn();
 const refreshOrg = jest.fn();
 
@@ -86,6 +100,7 @@ describe('<TaskOrgCards/>', () => {
       initialState: defaultState,
       orgs: defaultOrgs,
       task: defaultTask,
+      userHasPermissions: true,
       epicUsers: defaultEpicUsers,
       githubUsers: defaultEpicUsers,
       assignUserModalOpen: null,
@@ -101,6 +116,8 @@ describe('<TaskOrgCards/>', () => {
         <TaskOrgCards
           orgs={opts.orgs}
           task={opts.task}
+          projectId={defaultProject.id}
+          userHasPermissions={opts.userHasPermissions}
           epicUsers={opts.epicUsers}
           githubUsers={opts.githubUsers}
           epicUrl="epic-url"
@@ -182,6 +199,7 @@ describe('<TaskOrgCards/>', () => {
           ...defaultOrgs.Dev,
           owner: 'other-user-id',
           owner_gh_username: 'other-user',
+          owner_gh_id: 'other-user-id',
           unsaved_changes: {},
           total_unsaved_changes: 0,
           has_unsaved_changes: false,
@@ -189,12 +207,8 @@ describe('<TaskOrgCards/>', () => {
       };
       const task = {
         ...defaultTask,
-        assigned_dev: {
-          login: 'other-user',
-        },
-        assigned_qa: {
-          login: 'other-user',
-        },
+        assigned_dev: 'other-user-id',
+        assigned_qa: 'other-user-id',
       };
       const { queryByText, getByText } = setup({ orgs, task });
 
@@ -211,8 +225,9 @@ describe('<TaskOrgCards/>', () => {
         ...defaultOrgs,
         Dev: {
           ...defaultOrgs.Dev,
-          owner: 'other-user',
+          owner: 'other-user-id',
           owner_gh_username: 'other-user',
+          owner_gh_id: 'other-user-id',
         },
       };
       const { queryByText, getByText } = setup({ orgs });
@@ -234,7 +249,9 @@ describe('<TaskOrgCards/>', () => {
         assignUserModalOpen: 'Dev',
       });
       fireEvent.click(
-        baseElement.querySelector('.collaborator-button[title="user-name"]'),
+        baseElement.querySelector(
+          '.collaborator-button[title="Full User Name (user-name)"]',
+        ),
       );
       fireEvent.click(getByText('Notify Assigned Developer by Email'));
       fireEvent.click(getByText('Save'));
@@ -243,8 +260,42 @@ describe('<TaskOrgCards/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_dev.login).toEqual('user-name');
+      expect(data.assigned_dev).toEqual('user-id');
       expect(data.should_alert_dev).toBe(true);
+    });
+
+    test('self-assigns readonly user as tester', () => {
+      const task = {
+        ...defaultTask,
+        assigned_qa: null,
+      };
+      const { getByText } = setup({
+        task,
+        orgs: {},
+        userHasPermissions: false,
+      });
+      fireEvent.click(getByText('Self-Assign'));
+
+      expect(updateObject).toHaveBeenCalled();
+
+      const data = updateObject.mock.calls[0][0].data;
+
+      expect(data.assigned_qa).toEqual('user-id');
+      expect(data.should_alert_qa).toBe(false);
+    });
+
+    test('readonly user cannot assign dev role', () => {
+      const task = {
+        ...defaultTask,
+        assigned_dev: null,
+      };
+      const { queryByText } = setup({
+        task,
+        orgs: {},
+        userHasPermissions: false,
+      });
+
+      expect(queryByText('Self-Assign')).toBeNull();
     });
   });
 
@@ -263,8 +314,8 @@ describe('<TaskOrgCards/>', () => {
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(updateObject.mock.calls[0][0].data.assigned_qa.login).toEqual(
-        'other-user',
+      expect(updateObject.mock.calls[0][0].data.assigned_qa).toEqual(
+        'other-user-id',
       );
     });
   });
@@ -300,8 +351,8 @@ describe('<TaskOrgCards/>', () => {
           fireEvent.click(getByText('Confirm'));
 
           expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
-            'other-user',
+          expect(updateObject.mock.calls[0][0].data.assigned_dev).toEqual(
+            'other-user-id',
           );
         });
       });
@@ -324,8 +375,8 @@ describe('<TaskOrgCards/>', () => {
 
           expect(refetchOrg).not.toHaveBeenCalled();
           expect(updateObject).toHaveBeenCalledTimes(1);
-          expect(updateObject.mock.calls[0][0].data.assigned_dev.login).toEqual(
-            'other-user',
+          expect(updateObject.mock.calls[0][0].data.assigned_dev).toEqual(
+            'other-user-id',
           );
         });
       });
@@ -344,6 +395,38 @@ describe('<TaskOrgCards/>', () => {
 
       expect(updateObject).toHaveBeenCalled();
       expect(updateObject.mock.calls[0][0].data.assigned_qa).toBeNull();
+    });
+
+    test('readonly user can remove self', () => {
+      const task = {
+        ...defaultTask,
+        assigned_dev: null,
+      };
+      const { getByText } = setup({
+        task,
+        orgs: {},
+        userHasPermissions: false,
+      });
+      fireEvent.click(getByText('User Actions'));
+      fireEvent.click(getByText('Remove Tester'));
+
+      expect(updateObject).toHaveBeenCalled();
+      expect(updateObject.mock.calls[0][0].data.assigned_qa).toBeNull();
+    });
+
+    test('readonly user cannot remove other user', () => {
+      const task = {
+        ...defaultTask,
+        assigned_dev: null,
+        assigned_qa: 'other-user',
+      };
+      const { queryByText } = setup({
+        task,
+        orgs: {},
+        userHasPermissions: false,
+      });
+
+      expect(queryByText('User Actions')).toBeNull();
     });
   });
 
@@ -690,6 +773,7 @@ describe('<TaskOrgCards/>', () => {
       test('creates a new org', () => {
         const { getByText } = setup({
           initialState: {
+            ...defaultState,
             user: {
               ...defaultState.user,
               valid_token_for: null,
@@ -707,6 +791,7 @@ describe('<TaskOrgCards/>', () => {
       test('opens connect modal', () => {
         const { getByText } = setup({
           initialState: {
+            ...defaultState,
             user: { ...defaultState.user, valid_token_for: null },
           },
         });
@@ -721,6 +806,7 @@ describe('<TaskOrgCards/>', () => {
       test('opens warning modal', () => {
         const { getByText } = setup({
           initialState: {
+            ...defaultState,
             user: { ...defaultState.user, is_devhub_enabled: false },
           },
         });
@@ -779,9 +865,7 @@ describe('<TaskOrgCards/>', () => {
       test('deletes org', async () => {
         const task = {
           ...defaultTask,
-          assigned_qa: {
-            login: 'other-user',
-          },
+          assigned_qa: 'other-user-id',
         };
         const orgs = {
           Dev: null,

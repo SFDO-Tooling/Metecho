@@ -20,6 +20,7 @@ const OrgInfo = ({
   baseCommit,
   ownedByCurrentUser,
   ownedByWrongUser,
+  userHasPermissions,
   typeHeading,
   parentLink,
   parentName,
@@ -38,6 +39,7 @@ const OrgInfo = ({
   baseCommit?: string;
   ownedByCurrentUser: boolean;
   ownedByWrongUser?: Org | null;
+  userHasPermissions?: boolean;
   typeHeading?: string;
   parentLink?: string;
   parentName?: string;
@@ -66,7 +68,7 @@ const OrgInfo = ({
     return null;
   }
 
-  if (!(org || task?.review_status)) {
+  if (!(org || (type === ORG_TYPES.QA && task?.review_status))) {
     return (
       <ul>
         <li>
@@ -157,7 +159,11 @@ const OrgInfo = ({
       /* istanbul ignore else */
       if (org) {
         let ignoredChangesMsg = null;
-        if (ownedByCurrentUser && org.has_ignored_changes) {
+        if (
+          ownedByCurrentUser &&
+          org.has_ignored_changes &&
+          userHasPermissions
+        ) {
           ignoredChangesMsg = (
             <>
               {' ('}
@@ -236,6 +242,7 @@ const OrgInfo = ({
     }
   }
 
+  /* istanbul ignore next */
   return org || orgStatus ? (
     <ul>
       {org?.description_rendered ? (

@@ -8,14 +8,17 @@ import { REVIEW_STATUSES, TASK_STATUSES } from '~js/utils/constants';
 const TaskStatusPath = ({ task }: { task: Task }) => {
   let activeIdx;
   let isCompleted = false;
+  let isLost = false;
   const steps = [
     i18n.t('Planned'),
     i18n.t('In progress'),
-    i18n.t('Test'),
+    task.status === TASK_STATUSES.CANCELED
+      ? i18n.t('Canceled')
+      : i18n.t('Test'),
     i18n.t('Merged'),
   ];
   const status =
-    task.review_valid && task.status !== TASK_STATUSES.COMPLETED
+    task.review_valid && task.status === TASK_STATUSES.IN_PROGRESS
       ? task.review_status
       : task.status;
   switch (status) {
@@ -33,6 +36,10 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
       activeIdx = 3;
       isCompleted = true;
       break;
+    case TASK_STATUSES.CANCELED:
+      activeIdx = 2;
+      isLost = true;
+      break;
     case REVIEW_STATUSES.CHANGES_REQUESTED:
       activeIdx = 1;
       break;
@@ -41,7 +48,14 @@ const TaskStatusPath = ({ task }: { task: Task }) => {
       break;
   }
 
-  return <Path steps={steps} activeIdx={activeIdx} isCompleted={isCompleted} />;
+  return (
+    <Path
+      steps={steps}
+      activeIdx={activeIdx}
+      isCompleted={isCompleted}
+      isLost={isLost}
+    />
+  );
 };
 
 export default TaskStatusPath;

@@ -4,9 +4,8 @@ import { useIsMounted } from '~js/components/utils';
 
 export default ({ timeout }: { timeout: number } = { timeout: 3000 }) => {
   const isMounted = useIsMounted();
-  const [isShowingTransientMessage, setIsShowingTransientMessage] = useState(
-    false,
-  );
+  const [isShowingTransientMessage, setIsShowingTransientMessage] =
+    useState(false);
   const successTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const clearSuccessTimeout = () => {

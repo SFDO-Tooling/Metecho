@@ -42,6 +42,7 @@ const defaultOrg = {
   org_type: 'Playground',
   owner: 'user-id',
   owner_gh_username: 'currentUser',
+  owner_gh_id: 'user-id',
   expires_at: '2019-09-16T12:58:53.721Z',
   latest_commit: '617a51',
   latest_commit_url: '/test/commit/url/',
@@ -79,16 +80,38 @@ const defaultState = {
           {
             id: '123456',
             login: 'TestGitHubUser',
+            permissions: {
+              push: true,
+            },
           },
           {
             id: '234567',
             login: 'OtherUser',
+            permissions: {
+              push: true,
+            },
           },
           {
             id: '345678',
             login: 'ThirdUser',
+            permissions: {
+              push: true,
+            },
+          },
+          {
+            id: 'user-id',
+            login: 'currentUser',
+            permissions: { push: true },
+          },
+          {
+            id: 'readonly',
+            login: 'readonly-user',
+            permissions: {
+              push: false,
+            },
           },
         ],
+        has_push_permission: true,
       },
     ],
     notFound: ['different-project'],
@@ -107,18 +130,7 @@ const defaultState = {
           branch_url: 'https://github.com/test/test-repo/tree/branch-name',
           branch_name: 'branch-name',
           old_slugs: ['old-slug'],
-          github_users: [
-            {
-              id: '123456',
-              login: 'TestGitHubUser',
-              name: 'Test GitHub User',
-            },
-            {
-              id: '234567',
-              login: 'OtherUser',
-            },
-            { id: 'user-id', login: 'currentUser' },
-          ],
+          github_users: ['123456', '234567', 'user-id', 'readonly'],
         },
       ],
       next: null,
@@ -147,11 +159,7 @@ const defaultState = {
         slug: 'task-2',
         epic: 'epic1',
         status: 'In progress',
-        assigned_dev: {
-          id: '123456',
-          login: 'TestGitHubUser',
-          avatar_url: 'https://example.com/avatar.png',
-        },
+        assigned_dev: '123456',
       },
       {
         id: 'task3',
@@ -171,6 +179,7 @@ const defaultState = {
         name: 'Task 5',
         slug: 'task-5',
         epic: 'epic1',
+        status: 'In progress',
         review_valid: true,
         review_status: 'Changes requested',
       },
@@ -179,6 +188,7 @@ const defaultState = {
         name: 'Task 6',
         slug: 'task-6',
         epic: 'epic1',
+        status: 'In progress',
         review_valid: true,
         review_status: 'Approved',
       },
@@ -189,6 +199,14 @@ const defaultState = {
         epic: 'epic1',
         status: 'In progress',
         pr_is_open: true,
+      },
+      {
+        id: 'task8',
+        name: 'Task 8',
+        slug: 'task-8',
+        epic: 'epic1',
+        status: 'Canceled',
+        pr_is_open: false,
       },
     ],
   },
@@ -205,6 +223,7 @@ const defaultState = {
   user: {
     id: 'user-id',
     username: 'currentUser',
+    github_id: 'user-id',
     valid_token_for: 'my-org',
     is_devhub_enabled: true,
   },
@@ -240,6 +259,71 @@ describe('<EpicDetail/>', () => {
     expect(getByText('Task 1')).toBeVisible();
     expect(getByText('Approved')).toBeVisible();
     expect(getByText('Changes Requested')).toBeVisible();
+  });
+
+  describe('readonly', () => {
+    const projects = {
+      ...defaultState.projects,
+      projects: [
+        {
+          ...defaultState.projects.projects[0],
+          has_push_permission: false,
+        },
+      ],
+    };
+
+    test('renders epic detail', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects,
+        },
+      });
+
+      expect(getByText('Tasks for Epic 1')).toBeVisible();
+      expect(getByText('Collaborators')).toBeVisible();
+    });
+
+    test('renders with no tasks/collaborators', () => {
+      const { getByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects,
+          tasks: { epic1: [] },
+          epics: {
+            r1: {
+              ...defaultState.epics.r1,
+              epics: [
+                {
+                  ...defaultState.epics.r1.epics[0],
+                  github_users: [],
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(getByText('No Tasks for Epic 1')).toBeVisible();
+      expect(getByText('No Collaborators')).toBeVisible();
+    });
+
+    test('can self-assign readonly user to task', () => {
+      const { getAllByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects,
+        },
+      });
+      fireEvent.click(getAllByText('Self-Assign as Tester')[0]);
+
+      expect(updateObject).toHaveBeenCalled();
+
+      const data = updateObject.mock.calls[0][0].data;
+
+      expect(data.assigned_qa).toEqual('user-id');
+      expect(data.should_alert_qa).toBe(false);
+    });
   });
 
   test('renders different title if no tasks', () => {
@@ -377,9 +461,12 @@ describe('<EpicDetail/>', () => {
       fireEvent.click(getByText('Save'));
 
       expect(updateObject).toHaveBeenCalled();
-      expect(
-        updateObject.mock.calls[0][0].data.github_users.map((u) => u.login),
-      ).toEqual(['currentUser', 'TestGitHubUser', 'ThirdUser']);
+      expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
+        'user-id',
+        'readonly',
+        '123456',
+        '345678',
+      ]);
     });
 
     test('opens confirm modal if removing assigned user', () => {
@@ -418,13 +505,7 @@ describe('<EpicDetail/>', () => {
               epics: [
                 {
                   ...defaultState.epics.r1.epics[0],
-                  github_users: [
-                    {
-                      id: '234567',
-                      login: 'OtherUser',
-                      avatar_url: 'https://example.com/avatar.png',
-                    },
-                  ],
+                  github_users: ['234567'],
                 },
               ],
             },
@@ -447,13 +528,7 @@ describe('<EpicDetail/>', () => {
               epics: [
                 {
                   ...defaultState.epics.r1.epics[0],
-                  github_users: [
-                    {
-                      id: '123456',
-                      login: 'TestGitHubUser',
-                      avatar_url: 'https://example.com/avatar.png',
-                    },
-                  ],
+                  github_users: ['123456'],
                 },
               ],
             },
@@ -473,11 +548,7 @@ describe('<EpicDetail/>', () => {
     beforeEach(() => {
       const task = {
         ...defaultState.tasks.epic1[0],
-        assigned_qa: {
-          id: '234567',
-          login: 'OtherUser',
-          avatar_url: 'https://example.com/avatar.png',
-        },
+        assigned_qa: '234567',
       };
       result = setup({
         initialState: {
@@ -516,7 +587,8 @@ describe('<EpicDetail/>', () => {
         expect(queryByText('Confirm Removing Collaborators')).toBeNull();
         expect(updateObject).toHaveBeenCalled();
         expect(updateObject.mock.calls[0][0].data.github_users).toEqual([
-          { id: 'user-id', login: 'currentUser' },
+          'user-id',
+          'readonly',
         ]);
       });
     });
@@ -535,7 +607,7 @@ describe('<EpicDetail/>', () => {
 
       const data = updateObject.mock.calls[0][0].data;
 
-      expect(data.assigned_qa.login).toEqual('currentUser');
+      expect(data.assigned_qa).toEqual('user-id');
       expect(data.should_alert_qa).toBe(false);
     });
 
@@ -650,6 +722,7 @@ describe('<EpicDetail/>', () => {
                 {
                   ...defaultState.epics.r1.epics[0],
                   pr_url: 'https://example.com/',
+                  pr_is_open: true,
                 },
               ],
             },

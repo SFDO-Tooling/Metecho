@@ -29,3 +29,49 @@
   }
 }
 /* stylelint-enable declaration-no-important */
+
+// Override background image
+.slds-popover_walkthrough .slds-popover__header {
+  background-image: url('~img/popover-header.png');
+}
+
+.popover-wrapper {
+  position: absolute;
+  top: -10px;
+
+  .logo-popover & {
+    top: unset;
+  }
+
+  .page-title & {
+    top: 25px;
+  }
+}
+
+.popover-button {
+  background: $color-background-light;
+  border-radius: 100%;
+  border: 1px solid $palette-violet-90;
+  box-shadow: 0 0 2px $palette-violet-65;
+  color: $palette-violet-65;
+  transform: scale(1); // needed to prevent subpixel rounding in Safari
+
+  .tour-alert & {
+    fill: currentColor;
+  }
+
+  // Hover/Focus styles should only apply if on interactive element
+  &[aria-haspopup]:hover,
+  &[aria-haspopup]:focus {
+    box-shadow: var(--sds-c-button-shadow-focus, 0 0 2px $color-brand-dark),
+      0 0 2px $color-text-link-focus;
+  }
+}
+
+// Keep text from being truncated in table and page header
+.slds-popover {
+  font-size: $font-size-3;
+  font-weight: normal;
+  text-align: left;
+  white-space: initial;
+}

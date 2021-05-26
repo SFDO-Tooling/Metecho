@@ -131,7 +131,7 @@ GitHub Webhooks in Development
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To test GitHub webhooks in development, you will need to use the tool
-``ngrok``, which sets up a tunnel from the internet-at-large to your
+`ngrok`_, which sets up a tunnel from the internet-at-large to your
 computer. Run it like so::
 
    $ ngrok http --host-header=localhost:8080 8080
@@ -145,6 +145,8 @@ a solution.
 
 As an OddBird, you can access the app at
 `<https://github.com/organizations/oddbird/settings/apps/metecho-local-dev>`_.
+
+.. _ngrok: https://ngrok.com/
 
 Setting up the database
 -----------------------

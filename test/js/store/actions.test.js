@@ -109,7 +109,7 @@ describe('fetchObjects with `reset: true`', () => {
     });
   });
 
-  test('throws error if no url', () => {
+  test('throws error if no url', async () => {
     const store = storeWithThunk({});
     const payload = { ...objectPayload, objectType: 'foo', url: undefined };
     const started = {
@@ -122,15 +122,19 @@ describe('fetchObjects with `reset: true`', () => {
     };
 
     expect.assertions(1);
-    return store
-      .dispatch(actions.fetchObjects({ objectType: 'foo', reset: true }))
-      .catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
-      });
+    try {
+      await store.dispatch(
+        actions.fetchObjects({ objectType: 'foo', reset: true }),
+      );
+    } catch (e) {
+      // ignore errors
+    } finally {
+      expect(store.getActions()).toEqual([started, failed]);
+    }
   });
 
   describe('error', () => {
-    test('dispatches FETCH_OBJECTS_FAILED action', () => {
+    test('dispatches FETCH_OBJECTS_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.getOnce(url, {
         status: 500,
@@ -146,18 +150,22 @@ describe('fetchObjects with `reset: true`', () => {
       };
 
       expect.assertions(4);
-      return store
-        .dispatch(actions.fetchObjects({ objectType: 'project', reset: true }))
-        .catch(() => {
-          const allActions = store.getActions();
+      try {
+        await store.dispatch(
+          actions.fetchObjects({ objectType: 'project', reset: true }),
+        );
+      } catch (e) {
+        // ignore errors
+      } finally {
+        const allActions = store.getActions();
 
-          expect(allActions[0]).toEqual(started);
-          expect(allActions[1].type).toEqual('ERROR_ADDED');
-          expect(allActions[1].payload.message).toEqual(
-            'Internal Server Error: {}',
-          );
-          expect(allActions[2]).toEqual(failed);
-        });
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual(
+          'Internal Server Error: {}',
+        );
+        expect(allActions[2]).toEqual(failed);
+      }
     });
   });
 });
@@ -205,7 +213,7 @@ describe('fetchObjects with `reset: false`', () => {
   });
 
   describe('error', () => {
-    test('dispatches FETCH_OBJECTS_FAILED action', () => {
+    test('dispatches FETCH_OBJECTS_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.getOnce(url, { status: 500, body: 'Oops.' });
       const started = {
@@ -218,18 +226,22 @@ describe('fetchObjects with `reset: false`', () => {
       };
 
       expect.assertions(4);
-      return store
-        .dispatch(actions.fetchObjects({ url, objectType: 'project' }))
-        .catch(() => {
-          const allActions = store.getActions();
+      try {
+        await store.dispatch(
+          actions.fetchObjects({ url, objectType: 'project' }),
+        );
+      } catch (error) {
+        // ignore errors
+      } finally {
+        const allActions = store.getActions();
 
-          expect(allActions[0]).toEqual(started);
-          expect(allActions[1].type).toEqual('ERROR_ADDED');
-          expect(allActions[1].payload.message).toEqual(
-            'Internal Server Error: Oops.',
-          );
-          expect(allActions[2]).toEqual(failed);
-        });
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual(
+          'Internal Server Error: Oops.',
+        );
+        expect(allActions[2]).toEqual(failed);
+      }
     });
   });
 });
@@ -355,7 +367,7 @@ describe('fetchObject', () => {
     });
   });
 
-  test('throws error if no url', () => {
+  test('throws error if no url', async () => {
     const store = storeWithThunk({});
     const payload = {
       ...objectPayload,
@@ -373,15 +385,17 @@ describe('fetchObject', () => {
     };
 
     expect.assertions(1);
-    return store
-      .dispatch(actions.fetchObject({ objectType: 'foo' }))
-      .catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
-      });
+    try {
+      await store.dispatch(actions.fetchObject({ objectType: 'foo' }));
+    } catch (errors) {
+      // ignore errors
+    } finally {
+      expect(store.getActions()).toEqual([started, failed]);
+    }
   });
 
   describe('error', () => {
-    test('dispatches FETCH_OBJECT_FAILED action', () => {
+    test('dispatches FETCH_OBJECT_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.getOnce(url, {
         status: 500,
@@ -397,16 +411,18 @@ describe('fetchObject', () => {
       };
 
       expect.assertions(4);
-      return store
-        .dispatch(actions.fetchObject({ objectType: 'project' }))
-        .catch(() => {
-          const allActions = store.getActions();
+      try {
+        await store.dispatch(actions.fetchObject({ objectType: 'project' }));
+      } catch (error) {
+        // ignore errors
+      } finally {
+        const allActions = store.getActions();
 
-          expect(allActions[0]).toEqual(started);
-          expect(allActions[1].type).toEqual('ERROR_ADDED');
-          expect(allActions[1].payload.message).toEqual('Nope.');
-          expect(allActions[2]).toEqual(failed);
-        });
+        expect(allActions[0]).toEqual(started);
+        expect(allActions[1].type).toEqual('ERROR_ADDED');
+        expect(allActions[1].payload.message).toEqual('Nope.');
+        expect(allActions[2]).toEqual(failed);
+      }
     });
   });
 });
@@ -499,7 +515,7 @@ describe('createObject', () => {
     });
   });
 
-  test('throws error if no url', () => {
+  test('throws error if no url', async () => {
     const store = storeWithThunk({});
     const payload = {
       ...objectPayload,
@@ -517,15 +533,17 @@ describe('createObject', () => {
     };
 
     expect.assertions(1);
-    return store
-      .dispatch(actions.createObject({ objectType: 'foo' }))
-      .catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
-      });
+    try {
+      await store.dispatch(actions.createObject({ objectType: 'foo' }));
+    } catch (error) {
+      // ignore errors
+    } finally {
+      expect(store.getActions()).toEqual([started, failed]);
+    }
   });
 
   describe('error', () => {
-    test('dispatches CREATE_OBJECT_FAILED action', () => {
+    test('dispatches CREATE_OBJECT_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.postOnce(url, 500);
       const started = {
@@ -538,14 +556,18 @@ describe('createObject', () => {
       };
 
       expect.assertions(4);
-      return store.dispatch(actions.createObject(objectPayload)).catch(() => {
+      try {
+        await store.dispatch(actions.createObject(objectPayload));
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -635,7 +657,7 @@ describe('deleteObject', () => {
     });
   });
 
-  test('throws error if no url', () => {
+  test('throws error if no url', async () => {
     const store = storeWithThunk({});
     const payload = {
       objectType: 'foo',
@@ -652,15 +674,19 @@ describe('deleteObject', () => {
     };
 
     expect.assertions(1);
-    return store
-      .dispatch(actions.deleteObject({ objectType: 'foo', object: {} }))
-      .catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
-      });
+    try {
+      await store.dispatch(
+        actions.deleteObject({ objectType: 'foo', object: {} }),
+      );
+    } catch (error) {
+      // ignore errors
+    } finally {
+      expect(store.getActions()).toEqual([started, failed]);
+    }
   });
 
   describe('error', () => {
-    test('dispatches DELETE_OBJECT_FAILED action', () => {
+    test('dispatches DELETE_OBJECT_FAILED action', async () => {
       const store = storeWithThunk({});
       fetchMock.deleteOnce(url, 500);
       const started = {
@@ -673,14 +699,18 @@ describe('deleteObject', () => {
       };
 
       expect.assertions(4);
-      return store.dispatch(actions.deleteObject(objectPayload)).catch(() => {
+      try {
+        await store.dispatch(actions.deleteObject(objectPayload));
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });
@@ -738,7 +768,7 @@ describe('updateObject', () => {
       });
   });
 
-  test('throws error if no url', () => {
+  test('throws error if no url', async () => {
     const store = storeWithThunk({});
     const payload = {
       objectType: 'foo',
@@ -755,15 +785,19 @@ describe('updateObject', () => {
     };
 
     expect.assertions(1);
-    return store
-      .dispatch(actions.updateObject({ objectType: 'foo', data: {} }))
-      .catch(() => {
-        expect(store.getActions()).toEqual([started, failed]);
-      });
+    try {
+      await store.dispatch(
+        actions.updateObject({ objectType: 'foo', data: {} }),
+      );
+    } catch (error) {
+      // ignore errors
+    } finally {
+      expect(store.getActions()).toEqual([started, failed]);
+    }
   });
 
   describe('error', () => {
-    test('dispatches UPDATE_OBJECT_FAILED action', () => {
+    test('dispatches UPDATE_OBJECT_FAILED action', async () => {
       const payload = { ...objectPayload, url: undefined };
       const store = storeWithThunk({});
       fetchMock.putOnce(url, 500);
@@ -777,14 +811,18 @@ describe('updateObject', () => {
       };
 
       expect.assertions(4);
-      return store.dispatch(actions.updateObject(payload)).catch(() => {
+      try {
+        await store.dispatch(actions.updateObject(payload));
+      } catch (error) {
+        // ignore errors
+      } finally {
         const allActions = store.getActions();
 
         expect(allActions[0]).toEqual(started);
         expect(allActions[1].type).toEqual('ERROR_ADDED');
         expect(allActions[1].payload.message).toEqual('Internal Server Error');
         expect(allActions[2]).toEqual(failed);
-      });
+      }
     });
   });
 });

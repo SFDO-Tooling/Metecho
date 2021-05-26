@@ -6,9 +6,10 @@ interface PathProps {
   steps: string[];
   activeIdx?: number;
   isCompleted?: boolean;
+  isLost?: boolean;
 }
 
-const Path = ({ steps, activeIdx, isCompleted }: PathProps) => (
+const Path = ({ steps, activeIdx, isCompleted, isLost }: PathProps) => (
   <div className="slds-region_small">
     <div className="slds-path">
       <div className="slds-grid slds-path__track">
@@ -24,6 +25,7 @@ const Path = ({ steps, activeIdx, isCompleted }: PathProps) => (
               idx={idx}
               activeIdx={activeIdx}
               isCompleted={isCompleted}
+              isLost={isLost}
             />
           ))}
         </ul>

@@ -124,10 +124,10 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
             >
               <p className="slds-p-bottom_small">
                 <Trans i18nKey="projectListHelper">
-                  Contributor access on GitHub is required to view projects. If
-                  you do not see the project you’re looking for below, confirm
-                  that you are logged into the correct account or contact an
-                  admin on GitHub.
+                  Access on GitHub is required to view projects. If you do not
+                  see the project you’re looking for below, confirm that you are
+                  logged into the correct account or contact an admin for the
+                  repository on GitHub.
                 </Trans>
               </p>
               {/* <Button

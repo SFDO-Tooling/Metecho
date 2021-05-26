@@ -2,6 +2,7 @@ import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 import { UserCard } from '~js/components/githubUsers/cards';
@@ -13,7 +14,9 @@ import OrgSpinner from '~js/components/orgs/cards/orgSpinner';
 import RefreshOrgModal from '~js/components/orgs/cards/refresh';
 import UserActions from '~js/components/orgs/cards/userActions';
 import { AssignedUserTracker } from '~js/components/orgs/taskOrgCards';
+import { AppState } from '~js/store';
 import { Org } from '~js/store/orgs/reducer';
+import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { ORG_TYPES, OrgTypes } from '~js/utils/constants';
@@ -26,6 +29,7 @@ interface TaskOrgCardProps {
   user: User;
   task: Task;
   projectId: string;
+  userHasPermissions: boolean;
   epicUsers: GitHubUser[];
   githubUsers: GitHubUser[];
   epicCreatingBranch: boolean;
@@ -58,6 +62,7 @@ const TaskOrgCard = ({
   user,
   task,
   projectId,
+  userHasPermissions,
   epicUsers,
   githubUsers,
   epicCreatingBranch,
@@ -78,25 +83,32 @@ const TaskOrgCard = ({
   testOrgReadyForReview,
   testOrgSubmittingReview,
 }: TaskOrgCardProps) => {
-  let assignedUser: GitHubUser | null = null;
-  let heading = i18n.t('Developer');
-  let orgHeading = i18n.t('Dev Org');
+  let assignedUserId: string | null = null;
+  let heading, orgHeading;
   switch (type) {
     case ORG_TYPES.QA:
-      assignedUser = task.assigned_qa;
+      assignedUserId = task.assigned_qa;
       heading = i18n.t('Tester');
       orgHeading = i18n.t('Test Org');
       break;
     case ORG_TYPES.DEV:
-      assignedUser = task.assigned_dev;
+      assignedUserId = task.assigned_dev;
+      heading =
+        !userHasPermissions && !assignedUserId
+          ? i18n.t('No Developer')
+          : i18n.t('Developer');
+      orgHeading = i18n.t('Dev Org');
       break;
   }
-  const assignedToCurrentUser = user.username === assignedUser?.login;
+  const assignedUser = useSelector((state: AppState) =>
+    selectProjectCollaborator(state, projectId, assignedUserId),
+  );
+  const assignedToCurrentUser = user.github_id === assignedUserId;
   const ownedByCurrentUser = Boolean(org?.is_created && user.id === org?.owner);
   const ownedByWrongUser =
     type !== ORG_TYPES.PLAYGROUND &&
     org?.is_created &&
-    org.owner_gh_username !== assignedUser?.login
+    org.owner_gh_id !== assignedUserId
       ? org
       : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.is_created));
@@ -128,7 +140,7 @@ const TaskOrgCard = ({
   };
 
   const doAssignUser = useCallback(
-    (assignee: GitHubUser | null, shouldAlertAssignee: boolean) => {
+    (assignee: string | null, shouldAlertAssignee: boolean) => {
       handleAssignUser({ type, assignee, shouldAlertAssignee });
     },
     [handleAssignUser, type],
@@ -174,12 +186,18 @@ const TaskOrgCard = ({
         bodyClassName="slds-card__body_inner"
         heading={heading}
         headerActions={
-          <UserActions
-            type={type}
-            assignedUser={assignedUser}
-            openAssignUserModal={openAssignUserModal}
-            setUser={doAssignUser}
-          />
+          userHasPermissions ||
+          type === ORG_TYPES.QA ||
+          (assignedUserId && assignedUserId === user.github_id) ? (
+            <UserActions
+              type={type}
+              assignedUserId={assignedUserId}
+              currentUserId={user.github_id}
+              userHasPermissions={userHasPermissions}
+              openAssignUserModal={openAssignUserModal}
+              setUser={doAssignUser}
+            />
+          ) : null
         }
         footer={
           <Footer
@@ -250,6 +268,7 @@ const TaskOrgCard = ({
                 repoUrl={repoUrl}
                 ownedByCurrentUser={ownedByCurrentUser}
                 ownedByWrongUser={ownedByWrongUser}
+                userHasPermissions={userHasPermissions}
                 isCreating={isCreating}
                 isRefreshingOrg={isRefreshingOrg}
                 isSubmittingReview={testOrgSubmittingReview}

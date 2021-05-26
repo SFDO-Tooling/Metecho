@@ -33,7 +33,7 @@ const defaultProject = {
   github_users: [],
 };
 
-const defaultUser = { username: 'test-user' };
+const defaultUser = { username: 'test-user', github_id: null };
 
 describe('<CreateEpicModal/>', () => {
   const setup = (options) => {
@@ -92,12 +92,11 @@ describe('<CreateEpicModal/>', () => {
     });
 
     test('adds current user to github_users', async () => {
-      const ghUser = { id: '1', login: 'test-user' };
-      const project = {
-        ...defaultProject,
-        github_users: [ghUser, { id: '2', login: 'other-username' }],
+      const user = {
+        ...defaultUser,
+        github_id: '1',
       };
-      const { findByText, getByText, getByLabelText } = setup({ project });
+      const { findByText, getByText, getByLabelText } = setup({ user });
       const submit = getByText('Create');
       const nameInput = getByLabelText('*Epic Name');
       fireEvent.change(nameInput, { target: { value: 'Name of Epic' } });
@@ -114,7 +113,7 @@ describe('<CreateEpicModal/>', () => {
           description: '',
           project: 'r1',
           branch_name: '',
-          github_users: [ghUser],
+          github_users: [user.github_id],
         },
         hasForm: true,
         shouldSubscribeToObject: true,

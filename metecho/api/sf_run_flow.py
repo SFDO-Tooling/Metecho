@@ -8,7 +8,8 @@ from datetime import datetime
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
+from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
+from cumulusci.oauth.salesforce import jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -229,10 +230,16 @@ def get_access_token(*, org_result, scratch_org_config):
     the scratch org is created. This must be completed once in order for future
     access tokens to be obtained using the JWT token flow.
     """
-    oauth = SalesforceOAuth2(
-        SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, scratch_org_config.instance_url
+    oauth_config = OAuth2ClientConfig(
+        client_id=SF_CLIENT_ID,
+        client_secret=SF_CLIENT_SECRET,
+        redirect_uri=SF_CALLBACK_URL,
+        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
+        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+        scope="web full refresh_token",
     )
-    auth_result = oauth.get_token(org_result["AuthCode"]).json()
+    oauth = OAuth2Client(oauth_config)
+    auth_result = oauth.auth_code_grant(org_result["AuthCode"]).json()
     scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
         "access_token"
     ] = auth_result["access_token"]

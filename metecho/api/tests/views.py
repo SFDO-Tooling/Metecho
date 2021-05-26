@@ -6,6 +6,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.urls import reverse
 from github3.exceptions import ResponseError
+from rest_framework import status
+
+from metecho.api.serializers import EpicSerializer, TaskSerializer
 
 from ..models import SCRATCH_ORG_TYPES
 
@@ -13,49 +16,59 @@ Branch = namedtuple("Branch", ["name"])
 
 
 @pytest.mark.django_db
-class TestUserView:
+class TestCurrentUserViewSet:
     def test_get(self, client):
-        response = client.get(reverse("user"))
-
+        response = client.get(reverse("current-user-detail"))
         assert response.status_code == 200
-        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["username"] == client.user.username
 
     def test_agree_to_tos(self, client):
-        response = client.put(reverse("agree-to-tos"))
-
+        response = client.put(reverse("current-user-agree-to-tos"))
         assert response.status_code == 200
-        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["username"] == client.user.username
         assert response.json()["agreed_to_tos_at"] is not None
 
     def test_complete_onboarding(self, client):
-        response = client.put(reverse("complete-onboarding"))
-
+        response = client.put(reverse("current-user-complete-onboarding"))
         assert response.status_code == 200
-        assert response.json()["username"].endswith("@example.com")
+        assert response.json()["username"] == client.user.username
         assert response.json()["onboarded_at"] is not None
 
+    @pytest.mark.parametrize(
+        "data, enabled, state",
+        (
+            ({"enabled": False}, False, None),  # Only enabled
+            ({"state": [1, 2, 3]}, True, [1, 2, 3]),  # Only state
+            # Enabled + state
+            ({"enabled": True, "state": {"a": "b"}}, True, {"a": "b"}),
+        ),
+    )
+    def test_guided_tour(self, client, data, enabled, state):
+        response = client.post(
+            reverse("current-user-guided-tour"), data=data, format="json"
+        )
+        assert response.status_code == 200
+        assert response.json()["username"] == client.user.username
+        assert response.json()["self_guided_tour_enabled"] == enabled
+        assert response.json()["self_guided_tour_state"] == state
 
-@pytest.mark.django_db
-def test_user_disconnect_view(client):
-    response = client.post(reverse("user-disconnect-sf"))
+    def test_disconnect(self, client):
+        response = client.post(reverse("current-user-disconnect"))
+        assert not client.user.socialaccount_set.filter(provider="salesforce").exists()
+        assert response.status_code == 200
+        assert response.json()["username"] == client.user.username
 
-    assert not client.user.socialaccount_set.filter(provider="salesforce").exists()
-    assert response.status_code == 200
-    assert response.json()["username"].endswith("@example.com")
-
-
-@pytest.mark.django_db
-def test_user_refresh_view(client):
-    with patch("metecho.api.gh.gh_given_user") as gh_given_user:
+    def test_refresh(self, client, mocker):
+        gh_given_user = mocker.patch("metecho.api.gh.gh_given_user")
         repo = MagicMock()
         repo.url = "test"
         gh = MagicMock()
         gh.repositories.return_value = [repo]
         gh_given_user.return_value = gh
 
-        response = client.post(reverse("user-refresh"))
+        response = client.post(reverse("current-user-refresh"))
 
-    assert response.status_code == 202
+        assert response.status_code == 202
 
 
 @pytest.mark.django_db
@@ -144,6 +157,7 @@ class TestProjectView:
                     ),
                     "repo_owner": str(project.repo_owner),
                     "repo_name": str(project.repo_name),
+                    "has_push_permission": False,
                     "branch_prefix": "",
                     "github_users": [],
                     "repo_image_url": "",
@@ -186,6 +200,7 @@ class TestProjectView:
                     ),
                     "repo_owner": str(project.repo_owner),
                     "repo_name": str(project.repo_name),
+                    "has_push_permission": False,
                     "branch_prefix": "",
                     "github_users": [],
                     "repo_image_url": "",
@@ -780,7 +795,7 @@ class TestScratchOrgView:
 
 
 @pytest.mark.django_db
-class TestTaskView:
+class TestTaskViewSet:
     def test_create_pr(self, client, task_factory):
         with ExitStack() as stack:
             task = task_factory()
@@ -914,9 +929,58 @@ class TestTaskView:
 
         assert response.status_code == 400
 
+    @pytest.mark.parametrize(
+        "repo_perms, check",
+        (
+            ({}, status.is_client_error),
+            (None, status.is_client_error),
+            ({"push": False}, status.is_client_error),
+            ({"push": True}, status.is_success),
+        ),
+    )
+    @pytest.mark.parametrize("method", ("post", "put", "patch", "delete"))
+    def test_repo_permissions(
+        self,
+        client,
+        task_factory,
+        git_hub_repository_factory,
+        repo_perms,
+        check,
+        method,
+    ):
+        # Write operations on the task detail endpoint should depend on repo push permissions
+        task = task_factory()
+        git_hub_repository_factory(
+            repo_id=task.epic.project.repo_id, user=client.user, permissions=repo_perms
+        )
+        data = TaskSerializer(task).data
+        url = reverse("task-detail", args=[task.pk])
+        if method == "post":
+            url = reverse("task-list")
+            data["name"] = data["name"] + " 2"
+
+        response = getattr(client, method)(url, data=data, format="json")
+
+        assert check(response.status_code)
+
+    def test_assignees(self, client, git_hub_repository_factory, task_factory):
+        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[
+                {"id": "123456", "permissions": {"push": True}}
+            ],
+        )
+        data = {"assigned_dev": "123456", "assigned_qa": "123456"}
+        client.post(reverse("task-assignees", args=[task.id]), data=data)
+
+        task.refresh_from_db()
+        assert task.assigned_dev == "123456"
+        assert task.assigned_qa == "123456"
+
 
 @pytest.mark.django_db
-class TestEpicView:
+class TestEpicViewSet:
     def test_get(self, client, epic_factory):
         epic_factory()
         url = reverse("epic-list")
@@ -925,3 +989,50 @@ class TestEpicView:
 
         assert response.status_code == 200, response.content
         assert len(response.json()["results"]) == 1, response.json()
+
+    @pytest.mark.parametrize(
+        "repo_perms, check",
+        (
+            ({}, status.is_client_error),
+            (None, status.is_client_error),
+            ({"push": False}, status.is_client_error),
+            ({"push": True}, status.is_success),
+        ),
+    )
+    @pytest.mark.parametrize("method", ("post", "put", "patch", "delete"))
+    def test_repo_permissions(
+        self,
+        client,
+        epic_factory,
+        git_hub_repository_factory,
+        repo_perms,
+        check,
+        method,
+    ):
+        epic = epic_factory()
+        git_hub_repository_factory(
+            repo_id=epic.project.repo_id, user=client.user, permissions=repo_perms
+        )
+        data = EpicSerializer(epic).data
+        url = reverse("epic-detail", args=[epic.pk])
+        if method == "post":
+            url = reverse("epic-list")
+            data["name"] = data["name"] + " 2"
+
+        response = getattr(client, method)(url, data=data, format="json")
+
+        assert check(response.status_code)
+
+    def test_collaborators(self, client, git_hub_repository_factory, epic_factory):
+        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
+        epic = epic_factory(
+            project__repo_id=repo.repo_id,
+            project__github_users=[{"id": "123"}, {"id": "456"}],
+        )
+        data = {"github_users": ["123", "456"]}
+        client.post(
+            reverse("epic-collaborators", args=[epic.id]), data=data, format="json"
+        )
+
+        epic.refresh_from_db()
+        assert epic.github_users == ["123", "456"]
