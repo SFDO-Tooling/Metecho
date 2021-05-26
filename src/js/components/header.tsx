@@ -24,7 +24,7 @@ const Header = () => {
       {window.GLOBALS.ENABLE_WALKTHROUGHS ? (
         <TourDropdown triggerClassName="tour-walkthroughs slds-m-right_x-small" />
       ) : null}
-      <div className="slds-is-relative">
+      <div className="slds-is-relative user-info">
         <UserInfo />
         <TourPopover
           align="bottom right"
@@ -49,7 +49,7 @@ const Header = () => {
       <Alerts />
       <Errors />
       <Toasts />
-      <div className="slds-is-relative">
+      <div className="slds-is-relative logo-popover">
         <TourPopover
           align="bottom left"
           heading={i18n.t('What’s in a name?')}

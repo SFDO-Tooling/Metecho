@@ -525,7 +525,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <div className="slds-is-relative inline-container vertical-right">
+        <div className="slds-is-relative inline-container page-options">
           <PageOptions
             modelType={OBJECT_TYPES.TASK}
             handleOptionSelect={handlePageOptionSelect}
@@ -544,7 +544,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         </div>
       )}
       {branchLink && (
-        <div className="slds-is-relative inline-container vertical-right">
+        <div className="slds-is-relative inline-container page-options">
           <ExternalLink
             url={branchLink}
             showButtonIcon
@@ -749,7 +749,7 @@ const TaskDetail = (props: RouteComponentProps) => {
               <div
                 className="slds-m-bottom_x-large
                   metecho-secondary-block
-                  slds-is-relative"
+                  slds-is-relative heading"
               >
                 {task.status === TASK_STATUSES.CANCELED ? (
                   <>
@@ -838,7 +838,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         ) : (
           <SpinnerWrapper />
         )}
-        <div className="slds-m-vertical_large  slds-is-relative">
+        <div className="slds-m-vertical_large  slds-is-relative heading">
           <TourPopover
             align="right"
             heading={i18n.t('View & play with a Task')}

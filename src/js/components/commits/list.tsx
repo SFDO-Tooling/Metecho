@@ -99,7 +99,7 @@ TimestampTableCell.displayName = DataTableCell.displayName;
 const CommitList = ({ commits }: { commits: Commit[] }) =>
   commits.length ? (
     <>
-      <div className="slds-is-relative">
+      <div className="slds-is-relative heading">
         <TourPopover
           align="top left"
           heading={i18n.t('List of retrieved Task changes')}

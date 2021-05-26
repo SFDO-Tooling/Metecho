@@ -194,7 +194,7 @@ const ProjectDetail = (
               metecho-secondary-block
               slds-m-left_medium"
           >
-            <div className="slds-is-relative">
+            <div className="slds-is-relative heading">
               <h2
                 className="slds-text-heading_medium
                 slds-p-bottom_medium"
@@ -261,7 +261,7 @@ const ProjectDetail = (
           <SpinnerWrapper />
         ) : (
           <>
-            <div className="slds-is-relative">
+            <div className="slds-is-relative heading">
               <h2
                 className="slds-text-heading_medium
                 slds-p-bottom_medium

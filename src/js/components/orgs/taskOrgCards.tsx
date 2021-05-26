@@ -1,12 +1,10 @@
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import TaskOrgCard from '~js/components/orgs/taskOrgCard';
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
 import ConfirmRemoveUserModal from '~js/components/tasks/confirmRemoveUserModal';
-import TourPopover from '~js/components/tour/popover';
 import ConnectModal from '~js/components/user/connect';
 import { ConnectionInfoModal } from '~js/components/user/info';
 import { useIsMounted } from '~js/components/utils';
@@ -289,19 +287,6 @@ const TaskOrgCards = ({
             handleCheckForOrgChanges={checkForOrgChanges}
             openCaptureModal={openCaptureModal}
           />
-          <TourPopover
-            align="right"
-            heading={i18n.t('Developer & Dev Org')}
-            body={
-              <Trans i18nKey="tourTaskDevOrg">
-                A Developer is the person assigned to do the work of a Task.
-                Developers create Dev Orgs for their work, retrieve their
-                changes, and then submit their work for someone to test. Assign
-                yourself or another Collaborator as the Developer on this Task.
-                Use the drop down menu to change or remove the Developer.
-              </Trans>
-            }
-          />
         </>
         <>
           <TaskOrgCard
@@ -330,19 +315,6 @@ const TaskOrgCards = ({
             openSubmitReviewModal={openSubmitReviewModal}
             testOrgReadyForReview={testOrgReadyForReview}
             testOrgSubmittingReview={testOrgSubmittingReview}
-          />
-          <TourPopover
-            align="right"
-            heading={i18n.t('Tester & Test Org')}
-            body={
-              <Trans i18nKey="tourTaskTestOrg">
-                Assign yourself or someone else as Tester on this Task. Testers
-                create a Test Org to view the Developer’s work, and then approve
-                the work or request changes that must be addressed before the
-                Task can be completed. Use the drop down menu to change or
-                remove the Tester.
-              </Trans>
-            }
           />
         </>
       </div>

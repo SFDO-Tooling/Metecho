@@ -389,7 +389,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <div className="slds-is-relative inline-container vertical-right">
+        <div className="slds-is-relative inline-container page-options">
           <PageOptions
             modelType={OBJECT_TYPES.EPIC}
             handleOptionSelect={handlePageOptionSelect}
@@ -408,7 +408,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         </div>
       )}
       {branchLink && (
-        <div className="slds-is-relative inline-container vertical-right">
+        <div className="slds-is-relative inline-container page-options">
           <ExternalLink
             url={branchLink}
             showButtonIcon
@@ -453,7 +453,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         title={epic.name}
         titlePopover={
           <TourPopover
-            align="right"
+            align="bottom left"
             heading={i18n.t('Epic name & GitHub link')}
             body={
               <Trans i18nKey="tourEpicName">
@@ -544,7 +544,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             <div
               className="slds-m-bottom_x-large
                 metecho-secondary-block
-                slds-is-relative"
+                slds-is-relative heading"
             >
               <EpicStatusSteps
                 epic={epic}
@@ -591,7 +591,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         </div>
         {submitButton}
         <div className="slds-m-bottom_large">
-          <div className="slds-is-relative">
+          <div className="slds-is-relative heading">
             <h2
               className="slds-text-heading_medium
               slds-p-bottom_medium"
