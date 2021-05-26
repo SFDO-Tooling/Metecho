@@ -48,7 +48,7 @@ const DetailPageLayout = ({
     case OBJECT_TYPES.EPIC:
       popover = (
         <TourPopover
-          align="top left"
+          align="right"
           heading={popoverHeading}
           body={
             <Trans i18nKey="tourEpicBreadcrumb">
@@ -112,7 +112,7 @@ const DetailPageLayout = ({
         <div
           className="slds-p-horizontal_x-large
             slds-p-top_x-small
-            metecho-breadcrumb
+
             slds-is-relative"
         >
           {popover}

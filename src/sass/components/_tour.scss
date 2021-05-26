@@ -92,16 +92,9 @@
   }
 
   .heading & {
-    top: -1rem;
-    left: -4px;
+    top: -($spacing-medium);
+    left: -($spacing-xx-small);
   }
-}
-
-.metecho-breadcrumb ol {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .popover-button {

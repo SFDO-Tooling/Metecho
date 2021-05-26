@@ -128,29 +128,27 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
   return (
     <DocumentTitle title={`${i18n.t('Projects')} | ${i18n.t('Metecho')}`}>
       <>
-        <PageHeader
-          className="page-header
+        <div className="slds-is-relative">
+          <TourPopover
+            align="right"
+            heading={i18n.t('Begin exploring projects')}
+            body={
+              <Trans i18nKey="tourSelectProject">
+                Select a Metecho Project from the list to begin viewing or
+                contributing to the project. Projects are equivalent to
+                Repositories in GitHub. They have Orgs, Tasks, and Epics. To
+                learn more, continue the self-guided tour on a Project page.
+              </Trans>
+            }
+          />
+          <PageHeader
+            className="page-header
             slds-is-relative
             slds-p-around_x-large
             project-placeholder"
-          title={
-            <>
-              {i18n.t('Select a Project')}
-              <TourPopover
-                align="right"
-                heading={i18n.t('Begin exploring projects')}
-                body={
-                  <Trans i18nKey="tourSelectProject">
-                    Select a Metecho Project from the list to begin viewing or
-                    contributing to the project. Projects are equivalent to
-                    Repositories in GitHub. They have Orgs, Tasks, and Epics. To
-                    learn more, continue the self-guided tour on a Project page.
-                  </Trans>
-                }
-              />
-            </>
-          }
-        />
+            title={i18n.t('Select a Project')}
+          />
+        </div>
 
         <div className="slds-p-around_x-large">
           <div className="slds-grid slds-grid_vertical-align-start">
