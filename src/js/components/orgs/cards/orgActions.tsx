@@ -147,7 +147,7 @@ const OrgActions = ({
         isActive = hasReviewRejected || !task.has_unmerged_commits;
         popover = (
           <TourPopover
-            align="right"
+            align="top"
             heading={i18n.t('Create a Dev Org')}
             body={
               <Trans i18nKey="tourTaskCreateDevOrg">
@@ -166,7 +166,7 @@ const OrgActions = ({
         isActive = needsReview;
         popover = (
           <TourPopover
-            align="right"
+            align="top"
             heading={i18n.t('Create a Test Org')}
             body={
               <Trans i18nKey="tourTaskCreateTestOrg">

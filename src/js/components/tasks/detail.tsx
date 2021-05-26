@@ -579,7 +579,7 @@ const TaskDetail = (props: RouteComponentProps) => {
           disabled={currentlySubmitting}
         />
         <TourPopover
-          align="right"
+          align="top left"
           heading={i18n.t('Submit changes for testing')}
           body={
             <Trans i18nKey="tourTaskSubmit">
@@ -840,7 +840,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         )}
         <div className="slds-m-vertical_large  slds-is-relative heading">
           <TourPopover
-            align="right"
+            align="top left"
             heading={i18n.t('View & play with a Task')}
             body={
               <Trans i18nKey="tourTaskStratchOrg">

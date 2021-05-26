@@ -307,7 +307,7 @@ const TaskTable = ({
           <>
             {i18n.t('Task')}
             <TourPopover
-              align="right"
+              align="top left"
               heading={i18n.t('Task names')}
               body={
                 <Trans i18nKey="tourTaskNameColumn">
@@ -331,7 +331,7 @@ const TaskTable = ({
           <>
             {i18n.t('Status')}
             <TourPopover
-              align="right"
+              align="top"
               heading={i18n.t('Task statuses')}
               body={
                 <Trans i18nKey="tourTaskStatusColumn">
@@ -360,7 +360,7 @@ const TaskTable = ({
           <>
             {i18n.t('Developer')}
             <TourPopover
-              align="right"
+              align="top"
               heading={i18n.t('Task Developers')}
               body={
                 <Trans i18nKey="tourTaskDeveloperColumn">
@@ -393,7 +393,7 @@ const TaskTable = ({
           <>
             {i18n.t('Tester')}
             <TourPopover
-              align="right"
+              align="top"
               heading={i18n.t('Task Testers')}
               body={
                 <Trans i18nKey="tourTaskTesterColumn">

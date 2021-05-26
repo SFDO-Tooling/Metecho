@@ -37,6 +37,7 @@
 
 .popover-wrapper {
   position: absolute;
+  left: -($spacing-xx-small);
   top: -($spacing-small);
 
   .epic-progress & {
@@ -50,6 +51,7 @@
   }
 
   .metecho-breadcrumb & {
+    left: $spacing-large;
     top: -($var-spacing-x-small);
   }
 
@@ -57,9 +59,9 @@
     top: $spacing-medium;
   }
 
-  .right-edge & {
-    right: 0;
-    top: -($var-spacing-x-small);
+  .project-list & {
+    left: 0;
+    top: $spacing-xxx-small;
   }
 
   .page-title & {
@@ -68,12 +70,12 @@
   }
 
   .user-info & {
+    left: -($spacing-xx-small);
     top: -($spacing-small);
   }
 
   .page-options & {
-    left: unset;
-    right: -($spacing-x-small);
+    left: -($spacing-xx-small);
     top: -($spacing-medium);
   }
 
@@ -94,6 +96,10 @@
   .heading & {
     top: -($spacing-medium);
     left: -($spacing-xx-small);
+  }
+
+  th:first-child & {
+    left: $var-spacing-medium;
   }
 }
 

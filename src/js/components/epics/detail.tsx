@@ -599,7 +599,7 @@ const EpicDetail = (props: RouteComponentProps) => {
               {i18n.t('My Epic Scratch Org')}
             </h2>
             <TourPopover
-              align="right"
+              align="top left"
               heading={i18n.t('View & play with an Epic')}
               body={
                 <Trans i18nKey="tourEpicScratchOrg">
@@ -663,7 +663,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   className="slds-m-bottom_large"
                 />
                 <TourPopover
-                  align="right"
+                  align="top left"
                   heading={i18n.t('Add a Task to contribute')}
                   body={
                     <Trans i18nKey="tourAddTask">
