@@ -102,7 +102,6 @@ markupsafe==1.1.1
     # via
     #   -c requirements/prod.txt
     #   jinja2
-    #   sphinx
 matplotlib-inline==0.1.2
     # via ipython
 mccabe==0.6.1
@@ -195,7 +194,7 @@ six==1.16.0
     #   sphinxcontrib-httpdomain
 snowballstemmer==2.1.0
     # via sphinx
-sphinx==4.0.1
+sphinx==4.0.2
     # via
     #   -r requirements/dev.in
     #   sphinxcontrib-httpdomain
