@@ -48,7 +48,7 @@ const DetailPageLayout = ({
     case OBJECT_TYPES.EPIC:
       popover = (
         <TourPopover
-          align="bottom right"
+          align="top left"
           heading={popoverHeading}
           body={
             <Trans i18nKey="tourEpicBreadcrumb">
@@ -81,33 +81,33 @@ const DetailPageLayout = ({
 
   return (
     <>
-      <PageHeader
-        className="page-header slds-p-around_x-large slds-is-relative"
-        title={
-          <div className="page-title">
+      <div className="slds-is-relative page-title">
+        {titlePopover}
+        <PageHeader
+          className="page-header slds-p-around_x-large"
+          title={
             <span className="slds-m-right_xxx-small" title={title}>
               {title}
             </span>
-            {titlePopover}
-          </div>
-        }
-        info={
-          <ExternalLink url={headerUrl} showGitHubIcon>
-            /{headerUrlText}
-          </ExternalLink>
-        }
-        onRenderControls={onRenderHeaderActions}
-        icon={
-          showHeaderImage ? (
-            <div className="metecho-repo-image-header">
-              <img
-                src={image}
-                alt={i18n.t('social image for {{title}}', { title })}
-              />
-            </div>
-          ) : null
-        }
-      />
+          }
+          info={
+            <ExternalLink url={headerUrl} showGitHubIcon>
+              /{headerUrlText}
+            </ExternalLink>
+          }
+          onRenderControls={onRenderHeaderActions}
+          icon={
+            showHeaderImage ? (
+              <div className="metecho-repo-image-header">
+                <img
+                  src={image}
+                  alt={i18n.t('social image for {{title}}', { title })}
+                />
+              </div>
+            ) : null
+          }
+        />
+      </div>
       <div>
         <div
           className="slds-p-horizontal_x-large

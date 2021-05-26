@@ -194,12 +194,13 @@ const ProjectDetail = (
               metecho-secondary-block
               slds-m-left_medium"
           >
-            <h2
-              className="slds-text-heading_medium
-                slds-p-bottom_medium
-                slds-is-relative"
-            >
-              {i18n.t('My Project Scratch Org')}
+            <div className="slds-is-relative">
+              <h2
+                className="slds-text-heading_medium
+                slds-p-bottom_medium"
+              >
+                {i18n.t('My Project Scratch Org')}
+              </h2>
               <TourPopover
                 align="top"
                 heading={i18n.t('View & play with a Project')}
@@ -213,7 +214,7 @@ const ProjectDetail = (
                   </Trans>
                 }
               />
-            </h2>
+            </div>
             {orgs ? (
               <>
                 {playgroundOrg ? (
@@ -260,20 +261,22 @@ const ProjectDetail = (
           <SpinnerWrapper />
         ) : (
           <>
-            <h2
-              className="slds-text-heading_medium
+            <div className="slds-is-relative">
+              <h2
+                className="slds-text-heading_medium
                 slds-p-bottom_medium
-                slds-is-relative"
-            >
-              {hasEpics || !project.has_push_permission
-                ? i18n.t('Epics for {{project_name}}', {
-                    project_name: project.name,
-                  })
-                : i18n.t('Create an Epic for {{project_name}}', {
-                    project_name: project.name,
-                  })}
+                "
+              >
+                {hasEpics || !project.has_push_permission
+                  ? i18n.t('Epics for {{project_name}}', {
+                      project_name: project.name,
+                    })
+                  : i18n.t('Create an Epic for {{project_name}}', {
+                      project_name: project.name,
+                    })}
+              </h2>
               <TourPopover
-                align="right"
+                align="top left"
                 heading={i18n.t('List of Epics')}
                 body={
                   <Trans i18nKey="tourEpicsList">
@@ -282,7 +285,7 @@ const ProjectDetail = (
                   </Trans>
                 }
               />
-            </h2>
+            </div>
             {!hasEpics && (
               <p className="slds-m-bottom_large">
                 {project.has_push_permission ? (

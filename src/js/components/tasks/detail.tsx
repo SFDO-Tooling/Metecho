@@ -749,8 +749,7 @@ const TaskDetail = (props: RouteComponentProps) => {
               <div
                 className="slds-m-bottom_x-large
                   metecho-secondary-block
-                  slds-is-relative
-                  next-steps"
+                  slds-is-relative"
               >
                 {task.status === TASK_STATUSES.CANCELED ? (
                   <>
@@ -839,24 +838,23 @@ const TaskDetail = (props: RouteComponentProps) => {
         ) : (
           <SpinnerWrapper />
         )}
-        <div className="slds-m-vertical_large">
+        <div className="slds-m-vertical_large  slds-is-relative">
+          <TourPopover
+            align="right"
+            heading={i18n.t('View & play with a Task')}
+            body={
+              <Trans i18nKey="tourTaskStratchOrg">
+                Your Scratch Org is a temporary place for you to view the work
+                on this Task. You can also use a Scratch Org to play with
+                changes to the Task without affecting the Task.
+              </Trans>
+            }
+          />
           <h2
             className="slds-text-heading_medium
-              slds-p-bottom_medium
-              slds-is-relative"
+              slds-p-bottom_medium"
           >
             {i18n.t('My Task Scratch Org')}
-            <TourPopover
-              align="right"
-              heading={i18n.t('View & play with a Task')}
-              body={
-                <Trans i18nKey="tourTaskStratchOrg">
-                  Your Scratch Org is a temporary place for you to view the work
-                  on this Task. You can also use a Scratch Org to play with
-                  changes to the Task without affecting the Task.
-                </Trans>
-              }
-            />
           </h2>
           {taskOrgs ? (
             <>

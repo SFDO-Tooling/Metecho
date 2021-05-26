@@ -544,8 +544,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             <div
               className="slds-m-bottom_x-large
                 metecho-secondary-block
-                slds-is-relative
-                next-steps"
+                slds-is-relative"
             >
               <EpicStatusSteps
                 epic={epic}
@@ -592,12 +591,13 @@ const EpicDetail = (props: RouteComponentProps) => {
         </div>
         {submitButton}
         <div className="slds-m-bottom_large">
-          <h2
-            className="slds-text-heading_medium
-              slds-p-bottom_medium
-              slds-is-relative"
-          >
-            {i18n.t('My Epic Scratch Org')}
+          <div className="slds-is-relative">
+            <h2
+              className="slds-text-heading_medium
+              slds-p-bottom_medium"
+            >
+              {i18n.t('My Epic Scratch Org')}
+            </h2>
             <TourPopover
               align="right"
               heading={i18n.t('View & play with an Epic')}
@@ -609,7 +609,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 </Trans>
               }
             />
-          </h2>
+          </div>
           {orgs ? (
             <>
               {playgroundOrg ? (

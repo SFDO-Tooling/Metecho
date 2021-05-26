@@ -99,15 +99,9 @@ TimestampTableCell.displayName = DataTableCell.displayName;
 const CommitList = ({ commits }: { commits: Commit[] }) =>
   commits.length ? (
     <>
-      <h2
-        className="slds-text-heading_medium
-          slds-m-top_large
-          slds-m-bottom_x-small
-          slds-is-relative"
-      >
-        Commit History
+      <div className="slds-is-relative">
         <TourPopover
-          align="right"
+          align="top left"
           heading={i18n.t('List of retrieved Task changes')}
           body={
             <Trans i18nKey="tourTaskCommits">
@@ -118,7 +112,15 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
             </Trans>
           }
         />
-      </h2>
+        <h2
+          className="slds-text-heading_medium
+          slds-m-top_large
+          slds-m-bottom_x-small
+          "
+        >
+          Commit History
+        </h2>
+      </div>
       <DataTable
         items={commits}
         id="task-commits-table"
