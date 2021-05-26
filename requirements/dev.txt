@@ -42,7 +42,7 @@ coverage[toml]==5.5
     # via
     #   coveralls
     #   pytest-cov
-coveralls==3.0.1
+coveralls==3.1.0
     # via -r requirements/dev.in
 decorator==5.0.9
     # via ipython
