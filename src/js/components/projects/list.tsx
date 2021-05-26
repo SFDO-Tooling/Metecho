@@ -128,7 +128,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
   return (
     <DocumentTitle title={`${i18n.t('Projects')} | ${i18n.t('Metecho')}`}>
       <>
-        <div className="slds-is-relative">
+        <div className="slds-is-relative page-title">
           <TourPopover
             align="right"
             heading={i18n.t('Begin exploring projects')}
