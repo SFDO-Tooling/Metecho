@@ -337,6 +337,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         "CUMULUSCI_ORG_dev": json.dumps(
             {
                 "org_id": org_config.org_id,
+                "id": org_config.id,
                 "instance_url": org_config.instance_url,
                 "access_token": org_config.access_token,
                 "scratch": True,
