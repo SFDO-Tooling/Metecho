@@ -113,6 +113,7 @@ const CreateTaskModal = ({
           type,
           payload: { object, objectType },
         } = action;
+        /* istanbul ignore else */
         if (
           type === 'CREATE_OBJECT_SUCCEEDED' &&
           objectType === OBJECT_TYPES.TASK &&

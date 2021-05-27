@@ -47,9 +47,9 @@ const ContributeWorkModal = ({
         </p>
       </Trans>
     );
-  } else if (task) {
+  } /* istanbul ignore next */ else if (task) {
     // @@@
-  } else if (epic) {
+  } /* istanbul ignore else */ else if (epic) {
     contents = (
       <Trans i18nKey="contributeWorkFromEpic">
         <p>
@@ -61,7 +61,7 @@ const ContributeWorkModal = ({
         </p>
       </Trans>
     );
-  } else if (project) {
+  } /* istanbul ignore next */ else if (project) {
     // @@@
   }
 

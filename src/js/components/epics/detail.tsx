@@ -318,7 +318,7 @@ const EpicDetail = (props: RouteComponentProps) => {
     setContributeModalOpen(false);
   };
   const createAndContribute = () => {
-    setCreateModalOpen(playgroundOrg?.id || true);
+    setCreateModalOpen(playgroundOrg?.id || /* istanbul ignore next */ true);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
