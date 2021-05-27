@@ -714,9 +714,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             name: epic.name,
             url: epicUrl,
           },
-          {
-            name: task.name,
-          },
+          { name: task.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={

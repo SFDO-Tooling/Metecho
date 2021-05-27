@@ -473,9 +473,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             name: project.name,
             url: projectUrl,
           },
-          {
-            name: epic.name,
-          },
+          { name: epic.name },
         ]}
         onRenderHeaderActions={onRenderHeaderActions}
         sidebar={
