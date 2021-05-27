@@ -217,6 +217,7 @@ class TestRunFlow:
         user = user_factory()
         org_config = MagicMock(
             org_id="org_id",
+            id="https://test.salesforce.com/id/ORGID/USERID",
             instance_url="instance_url",
             access_token="access_token",
         )
