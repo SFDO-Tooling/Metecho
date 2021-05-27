@@ -111,7 +111,9 @@ const DetailPageLayout = ({
       <div>
         <div
           className="slds-p-horizontal_x-large
-            slds-p-top_x-small slds-is-relative metecho-breadcrumb"
+            slds-p-top_x-small
+            slds-is-relative
+            metecho-breadcrumb"
         >
           {popover}
           <BreadCrumb

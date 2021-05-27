@@ -749,7 +749,8 @@ const TaskDetail = (props: RouteComponentProps) => {
               <div
                 className="slds-m-bottom_x-large
                   metecho-secondary-block
-                  slds-is-relative heading"
+                  slds-is-relative
+                  heading"
               >
                 {task.status === TASK_STATUSES.CANCELED ? (
                   <>
@@ -838,7 +839,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         ) : (
           <SpinnerWrapper />
         )}
-        <div className="slds-m-vertical_large  slds-is-relative heading">
+        <div className="slds-m-vertical_large slds-is-relative heading">
           <TourPopover
             align="top left"
             heading={i18n.t('View & play with a Task')}
@@ -850,10 +851,7 @@ const TaskDetail = (props: RouteComponentProps) => {
               </Trans>
             }
           />
-          <h2
-            className="slds-text-heading_medium
-              slds-p-bottom_medium"
-          >
+          <h2 className="slds-text-heading_medium slds-p-bottom_medium">
             {i18n.t('My Task Scratch Org')}
           </h2>
           {taskOrgs ? (

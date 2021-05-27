@@ -188,7 +188,7 @@ const OrgActions = ({
           <span className="slds-is-relative submit-btn">
             {submitReviewBtn}
             <TourPopover
-              align="right"
+              align="top"
               heading={i18n.t('Submit a review')}
               body={
                 <Trans i18nKey="tourTaskSubmitReview">

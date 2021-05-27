@@ -84,8 +84,7 @@
   }
 
   .submit-btn & {
-    right: -($spacing-xxx-small);
-    top: -($spacing-large);
+    top: -($var-spacing-large);
   }
 
   .task-create-btn & {

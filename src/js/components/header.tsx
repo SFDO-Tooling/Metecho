@@ -64,8 +64,8 @@ const Header = () => {
         />
         <PageHeader
           className="global-header
-          slds-p-horizontal_x-large
-          slds-p-vertical_medium"
+            slds-p-horizontal_x-large
+            slds-p-vertical_medium"
           title={
             <Link
               to={routes.home()}

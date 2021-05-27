@@ -1,7 +1,7 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { ScrollProps, withScroll } from 'react-fns';
 import { Trans } from 'react-i18next';
@@ -96,7 +96,13 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     }
     default: {
       contents = (
-        <div className="slds-grid slds-wrap slds-grid_pull-padded-small slds-is-relative project-list">
+        <div
+          className="slds-grid
+            slds-wrap
+            slds-grid_pull-padded-small
+            slds-is-relative
+            project-list"
+        >
           <TourPopover
             align="top left"
             heading={i18n.t('Metecho Project')}
@@ -110,9 +116,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
             }
           />
           {projects.map((project) => (
-            <Fragment key={project.id}>
-              <ProjectListItem project={project} />
-            </Fragment>
+            <ProjectListItem project={project} key={project.id} />
           ))}
         </div>
       );
@@ -125,7 +129,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
       <>
         <div className="slds-is-relative page-title">
           <TourPopover
-            align="right"
+            align="bottom left"
             heading={i18n.t('Begin exploring projects')}
             body={
               <Trans i18nKey="tourSelectProject">
@@ -138,9 +142,9 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
           />
           <PageHeader
             className="page-header
-            slds-is-relative
-            slds-p-around_x-large
-            project-placeholder"
+              slds-is-relative
+              slds-p-around_x-large
+              project-placeholder"
             title={i18n.t('Select a Project')}
           />
         </div>
@@ -163,11 +167,6 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                   repository on GitHub.
                 </Trans>
               </p>
-              {/* <Button
-                label={i18n.t('Create Project')}
-                variant="brand"
-                disabled
-              /> */}
             </div>
             <div
               className="slds-grid

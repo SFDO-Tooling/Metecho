@@ -195,12 +195,6 @@ const ProjectDetail = (
               slds-m-left_medium"
           >
             <div className="slds-is-relative heading">
-              <h2
-                className="slds-text-heading_medium
-                slds-p-bottom_medium"
-              >
-                {i18n.t('My Project Scratch Org')}
-              </h2>
               <TourPopover
                 align="top"
                 heading={i18n.t('View & play with a Project')}
@@ -214,6 +208,9 @@ const ProjectDetail = (
                   </Trans>
                 }
               />
+              <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+                {i18n.t('My Project Scratch Org')}
+              </h2>
             </div>
             {orgs ? (
               <>
@@ -262,19 +259,6 @@ const ProjectDetail = (
         ) : (
           <>
             <div className="slds-is-relative heading">
-              <h2
-                className="slds-text-heading_medium
-                slds-p-bottom_medium
-                "
-              >
-                {hasEpics || !project.has_push_permission
-                  ? i18n.t('Epics for {{project_name}}', {
-                      project_name: project.name,
-                    })
-                  : i18n.t('Create an Epic for {{project_name}}', {
-                      project_name: project.name,
-                    })}
-              </h2>
               <TourPopover
                 align="top left"
                 heading={i18n.t('List of Epics')}
@@ -285,6 +269,15 @@ const ProjectDetail = (
                   </Trans>
                 }
               />
+              <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+                {hasEpics || !project.has_push_permission
+                  ? i18n.t('Epics for {{project_name}}', {
+                      project_name: project.name,
+                    })
+                  : i18n.t('Create an Epic for {{project_name}}', {
+                      project_name: project.name,
+                    })}
+              </h2>
             </div>
             {!hasEpics && (
               <p className="slds-m-bottom_large">

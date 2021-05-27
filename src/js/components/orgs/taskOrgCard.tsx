@@ -1,7 +1,7 @@
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
@@ -27,7 +27,7 @@ import { logError } from '~js/utils/logging';
 
 interface TaskOrgCardProps {
   org: Org | null;
-  type: OrgTypes;
+  type: 'Dev' | 'QA';
   user: User;
   task: Task;
   projectId: string;
@@ -87,11 +87,27 @@ const TaskOrgCard = ({
 }: TaskOrgCardProps) => {
   let assignedUserId: string | null = null;
   let heading, orgHeading;
+  let popover: ReactNode = null;
   switch (type) {
     case ORG_TYPES.QA:
       assignedUserId = task.assigned_qa;
       heading = i18n.t('Tester');
       orgHeading = i18n.t('Test Org');
+      popover = (
+        <TourPopover
+          align="top left"
+          heading={i18n.t('Tester & Test Org')}
+          body={
+            <Trans i18nKey="tourTaskTestOrg">
+              Assign yourself or someone else as Tester on this Task. Testers
+              create a Test Org to view the Developer’s work, and then approve
+              the work or request changes that must be addressed before the Task
+              can be completed. Use the drop down menu to change or remove the
+              Tester.
+            </Trans>
+          }
+        />
+      );
       break;
     case ORG_TYPES.DEV:
       assignedUserId = task.assigned_dev;
@@ -100,6 +116,21 @@ const TaskOrgCard = ({
           ? i18n.t('No Developer')
           : i18n.t('Developer');
       orgHeading = i18n.t('Dev Org');
+      popover = (
+        <TourPopover
+          align="top left"
+          heading={i18n.t('Developer & Dev Org')}
+          body={
+            <Trans i18nKey="tourTaskDevOrg">
+              A Developer is the person assigned to do the work of a Task.
+              Developers create Dev Orgs for their work, retrieve their changes,
+              and then submit their work for someone to test. Assign yourself or
+              another Collaborator as the Developer on this Task. Use the drop
+              down menu to change or remove the Developer.
+            </Trans>
+          }
+        />
+      );
       break;
   }
   const assignedUser = useSelector((state: AppState) =>
@@ -108,11 +139,7 @@ const TaskOrgCard = ({
   const assignedToCurrentUser = user.github_id === assignedUserId;
   const ownedByCurrentUser = Boolean(org?.is_created && user.id === org?.owner);
   const ownedByWrongUser =
-    type !== ORG_TYPES.PLAYGROUND &&
-    org?.is_created &&
-    org.owner_gh_id !== assignedUserId
-      ? org
-      : null;
+    org?.is_created && org.owner_gh_id !== assignedUserId ? org : null;
   const isCreating = Boolean(isCreatingOrg || (org && !org.is_created));
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
   const isRefreshingChanges = Boolean(org?.currently_refreshing_changes);
@@ -177,51 +204,13 @@ const TaskOrgCard = ({
     type === ORG_TYPES.QA && org && orgCommitIdx !== 0,
   );
 
-  let popover = null;
-
-  switch (type) {
-    case ORG_TYPES.QA:
-      popover = (
-        <TourPopover
-          align="top left"
-          heading={i18n.t('Tester & Test Org')}
-          body={
-            <Trans i18nKey="tourTaskTestOrg">
-              Assign yourself or someone else as Tester on this Task. Testers
-              create a Test Org to view the Developer’s work, and then approve
-              the work or request changes that must be addressed before the Task
-              can be completed. Use the drop down menu to change or remove the
-              Tester.
-            </Trans>
-          }
-        />
-      );
-      break;
-    case ORG_TYPES.DEV:
-      popover = (
-        <TourPopover
-          align="top left"
-          heading={i18n.t('Developer & Dev Org')}
-          body={
-            <Trans i18nKey="tourTaskDevOrg">
-              A Developer is the person assigned to do the work of a Task.
-              Developers create Dev Orgs for their work, retrieve their changes,
-              and then submit their work for someone to test. Assign yourself or
-              another Collaborator as the Developer on this Task. Use the drop
-              down menu to change or remove the Developer.
-            </Trans>
-          }
-        />
-      );
-      break;
-  }
-
   return (
     <div
       className="slds-size_1-of-1
         slds-large-size_1-of-2
         slds-p-around_x-small
-        slds-is-relative right-edge"
+        slds-is-relative
+        right-edge"
     >
       {popover}
       <Card
