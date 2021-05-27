@@ -61,7 +61,7 @@ const ProjectDetail = (
 
   const playgroundOrg = (orgs || [])[0];
 
-  // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param
+  // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param is truthy
   const {
     history,
     location: { state },

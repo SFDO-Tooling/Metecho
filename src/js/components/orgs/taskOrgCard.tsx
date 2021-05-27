@@ -38,6 +38,7 @@ interface TaskOrgCardProps {
   isCreatingOrg: boolean;
   isDeletingOrg: boolean;
   isRefreshingUsers: boolean;
+  isConvertingOrg?: boolean;
   assignUserModalOpen: OrgTypes | null;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
@@ -70,6 +71,7 @@ const TaskOrgCard = ({
   isCreatingOrg,
   isDeletingOrg,
   isRefreshingUsers,
+  isConvertingOrg,
   assignUserModalOpen,
   openAssignUserModal,
   closeAssignUserModal,
@@ -283,6 +285,7 @@ const TaskOrgCard = ({
                 isDeleting={isDeleting}
                 isRefreshingChanges={isRefreshingChanges}
                 isReassigningOrg={isReassigningOrg}
+                isConvertingOrg={isConvertingOrg}
               />
             </Card>
           </>

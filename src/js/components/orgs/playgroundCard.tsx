@@ -30,7 +30,7 @@ interface PlaygroundCardProps {
   epic?: Epic;
   task?: Task;
   repoUrl: string;
-  parentLink?: string;
+  openContributeModal?: () => void;
 }
 
 const PlaygroundOrgCard = ({
@@ -39,7 +39,7 @@ const PlaygroundOrgCard = ({
   epic,
   task,
   repoUrl,
-  parentLink,
+  openContributeModal,
 }: PlaygroundCardProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const [isDeletingOrg, setIsDeletingOrg] = useState(false);
@@ -49,10 +49,7 @@ const PlaygroundOrgCard = ({
     useState<ConfirmOrgTracker>(null);
   const isMounted = useIsMounted();
 
-  let heading: string,
-    baseCommit: string,
-    typeHeading: string,
-    parentName: string;
+  let heading: string, baseCommit: string;
   let missingCommits = -1;
   let orgOutOfDate = false;
 
@@ -63,20 +60,14 @@ const PlaygroundOrgCard = ({
     // We consider an org out-of-date if it is not based on the first commit.
     orgOutOfDate = missingCommits !== 0;
     baseCommit = taskCommits[0];
-    typeHeading = i18n.t('Task:');
-    parentName = task.name;
   } else if (epic) {
     heading = i18n.t('Epic Scratch Org');
     baseCommit = epic.latest_sha;
     orgOutOfDate = Boolean(baseCommit && org.latest_commit !== baseCommit);
-    typeHeading = i18n.t('Epic:');
-    parentName = epic.name;
   } else {
     heading = i18n.t('Project Scratch Org');
     baseCommit = (project as Project).latest_sha;
     orgOutOfDate = Boolean(baseCommit && org.latest_commit !== baseCommit);
-    typeHeading = i18n.t('Project:');
-    parentName = (project as Project).name;
   }
   const isCreating = Boolean(org && !org.is_created);
   const isDeleting = Boolean(isDeletingOrg || org?.delete_queued_at);
@@ -175,6 +166,7 @@ const PlaygroundOrgCard = ({
             isRefreshingOrg={isRefreshingOrg}
             doDeleteOrg={handleDelete}
             doRefreshOrg={handleRefresh}
+            openContributeModal={openContributeModal}
           />
         }
         footer={
@@ -194,9 +186,6 @@ const PlaygroundOrgCard = ({
           baseCommit={baseCommit}
           repoUrl={repoUrl}
           ownedByCurrentUser
-          typeHeading={typeHeading}
-          parentLink={parentLink}
-          parentName={parentName}
           isCreating={isCreating}
           isRefreshingOrg={isRefreshingOrg}
           orgOutOfDate={orgOutOfDate}

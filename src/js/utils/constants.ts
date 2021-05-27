@@ -80,3 +80,5 @@ export const CONFIRM_ORG_TRACKER = {
   DELETE: 'delete' as const,
   REFRESH: 'refresh' as const,
 };
+
+export const RETRIEVE_CHANGES = 'retrieve_changes';

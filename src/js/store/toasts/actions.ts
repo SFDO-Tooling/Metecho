@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 
 import { ToastType } from '~js/store/toasts/reducer';
 
-interface AddToastAction {
+export interface AddToastAction {
   type: 'TOAST_ADDED';
   payload: ToastType;
 }

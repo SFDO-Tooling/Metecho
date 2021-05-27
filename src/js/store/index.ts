@@ -1,4 +1,5 @@
-import { AnyAction, combineReducers, Reducer } from 'redux';
+import { History } from 'history';
+import { AnyAction, combineReducers } from 'redux';
 import { ThunkAction, ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 import epicsReducer, { EpicsState } from '~js/store/epics/reducer';
@@ -24,12 +25,12 @@ export interface AppState {
 export type ThunkResult<A = AnyAction | Promise<AnyAction>> = ThunkAction<
   A,
   AppState,
-  void,
+  History,
   AnyAction
 >;
-export type ThunkDispatch = ReduxThunkDispatch<AppState, void, AnyAction>;
+export type ThunkDispatch = ReduxThunkDispatch<AppState, History, AnyAction>;
 
-const reducer: Reducer<AppState> = combineReducers({
+const reducer = combineReducers({
   toasts: toastsReducer,
   errors: errorsReducer,
   orgs: orgReducer,

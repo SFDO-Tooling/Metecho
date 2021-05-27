@@ -57,6 +57,7 @@ import {
   OBJECT_TYPES,
   ORG_TYPES,
   OrgTypes,
+  RETRIEVE_CHANGES,
   REVIEW_STATUSES,
   TASK_STATUSES,
 } from '~js/utils/constants';
@@ -82,7 +83,9 @@ const ResubmitButton = ({
   return <>{children}</>;
 };
 
-const TaskDetail = (props: RouteComponentProps) => {
+const TaskDetail = (
+  props: RouteComponentProps<any, any, { [RETRIEVE_CHANGES]?: boolean }>,
+) => {
   const [fetchingChanges, setFetchingChanges] = useState(false);
   const [captureModalOpen, setCaptureModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -440,6 +443,30 @@ const TaskDetail = (props: RouteComponentProps) => {
     ],
   );
 
+  // Auto-open the retrieve-changes modal if `RETRIEVE_CHANGES` param is truthy
+  const {
+    history,
+    location: { state },
+  } = props;
+  const shouldRetrieve = state?.[RETRIEVE_CHANGES];
+  useEffect(() => {
+    if (
+      shouldRetrieve &&
+      readyToCaptureChanges &&
+      project?.has_push_permission
+    ) {
+      // Remove location state
+      history.replace({ state: {} });
+      doCaptureChanges();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    doCaptureChanges,
+    project?.has_push_permission,
+    readyToCaptureChanges,
+    shouldRetrieve,
+  ]);
+
   // When capture changes has been triggered, wait until org has been refreshed
   useEffect(() => {
     const changesFetched =
@@ -726,6 +753,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             openSubmitReviewModal={openSubmitReviewModal}
             testOrgReadyForReview={testOrgReadyForReview}
             testOrgSubmittingReview={testOrgSubmittingReview}
+            convertingOrg={Boolean(shouldRetrieve)}
             doCreateOrg={doCreateOrg}
             doRefreshOrg={doRefreshOrg}
           />

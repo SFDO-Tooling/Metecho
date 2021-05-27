@@ -26,6 +26,7 @@ const OrgActions = ({
   doCreateOrg,
   doDeleteOrg,
   doRefreshOrg,
+  openContributeModal,
 }: {
   org: Org | null;
   type: OrgTypes;
@@ -44,6 +45,7 @@ const OrgActions = ({
   doCreateOrg?: () => void;
   doDeleteOrg: () => void;
   doRefreshOrg?: () => void;
+  openContributeModal?: () => void;
 }) => {
   if (isCreating) {
     return (
@@ -100,6 +102,26 @@ const OrgActions = ({
     }
   }
 
+  let contributeBtn = null;
+  const orgHasChanges =
+    (org?.total_unsaved_changes || 0) - (org?.total_ignored_changes || 0) > 0;
+  if (
+    org &&
+    ownedByCurrentUser &&
+    orgHasChanges &&
+    type === ORG_TYPES.PLAYGROUND &&
+    openContributeModal
+  ) {
+    contributeBtn = (
+      <Button
+        label={i18n.t('Contribute Work')}
+        variant="outline-brand"
+        className="slds-m-right_x-small"
+        onClick={openContributeModal}
+      />
+    );
+  }
+
   if (ownedByCurrentUser && (org || ownedByWrongUser)) {
     return (
       <>
@@ -112,6 +134,7 @@ const OrgActions = ({
           />
         ) : null}
         {submitReviewBtn}
+        {contributeBtn}
         <Dropdown
           align="right"
           assistiveText={{ icon: i18n.t('Org Actions') }}
