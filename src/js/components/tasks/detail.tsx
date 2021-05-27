@@ -690,7 +690,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         title={task.name}
         titlePopover={
           <TourPopover
-            align="right"
+            align="bottom left"
             heading={i18n.t('Task name & GitHub link')}
             body={
               <Trans i18nKey="tourTaskName">

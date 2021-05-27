@@ -16,26 +16,26 @@ const EpicProgress = ({ range }: Props) => {
   return (
     <div className="epic-progress slds-is-relative">
       <div className="slds-clearfix slds-m-bottom_xx-small">
-        <strong className="slds-float_right">
+        <strong className="slds-float_right slds-is-relative">
           <Trans i18nKey="tasksComplete">
             {{ complete }} of {{ total }} Complete
           </Trans>
+          <TourPopover
+            align="top"
+            heading={i18n.t('Task progress bar')}
+            body={
+              <Trans i18nKey="tourTaskProgressBar">
+                A quick reference to show what percentage of an Epic is complete
+                based on the number of Tasks that are complete.
+              </Trans>
+            }
+          />
         </strong>
       </div>
       <ProgressBar
         value={value}
         thickness="small"
         color={value === 100 ? 'success' : undefined}
-      />
-      <TourPopover
-        align="right"
-        heading={i18n.t('Task progress bar')}
-        body={
-          <Trans i18nKey="tourTaskProgressBar">
-            A quick reference to show what percentage of an Epic is complete
-            based on the number of Tasks that are complete.
-          </Trans>
-        }
       />
     </div>
   );

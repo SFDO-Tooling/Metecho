@@ -170,7 +170,7 @@ const ProjectDetail = (
         title={project.name}
         titlePopover={
           <TourPopover
-            align="right"
+            align="bottom left"
             heading={i18n.t('Project name & GitHub link')}
             body={
               <Trans i18nKey="tourProjectName">
@@ -315,7 +315,7 @@ const ProjectDetail = (
                   className="tour-create-epic"
                 />
                 <TourPopover
-                  align="right"
+                  align="top left"
                   body={
                     <Trans i18nKey="tourCreateEpic">
                       Create an Epic to make a group of related Tasks. Invite

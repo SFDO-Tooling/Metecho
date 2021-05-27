@@ -41,7 +41,6 @@
   top: -($spacing-small);
 
   .epic-progress & {
-    right: -($spacing-small);
     top: -($spacing-medium);
   }
 
@@ -60,7 +59,7 @@
   }
 
   .project-list & {
-    left: 0;
+    left: $spacing-none;
     top: $spacing-xxx-small;
   }
 
@@ -98,8 +97,13 @@
     left: -($spacing-xx-small);
   }
 
+  th & {
+    left: -($spacing-x-small);
+    top: -($spacing-xx-small);
+  }
+
   th:first-child & {
-    left: $var-spacing-medium;
+    left: $var-spacing-x-small;
   }
 }
 

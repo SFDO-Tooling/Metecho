@@ -574,7 +574,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         <div className="slds-is-relative right-edge">
           <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
           <TourPopover
-            align="right"
+            align="bottom left"
             heading={i18n.t('Epic progress path')}
             body={
               <Trans i18nKey="tourEpicProgress">

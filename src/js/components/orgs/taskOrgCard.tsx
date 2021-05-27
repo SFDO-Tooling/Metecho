@@ -183,7 +183,7 @@ const TaskOrgCard = ({
     case ORG_TYPES.QA:
       popover = (
         <TourPopover
-          align="top"
+          align="top left"
           heading={i18n.t('Tester & Test Org')}
           body={
             <Trans i18nKey="tourTaskTestOrg">
