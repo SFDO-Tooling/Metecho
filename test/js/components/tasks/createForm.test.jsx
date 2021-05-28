@@ -137,8 +137,7 @@ describe('<TaskForm/>', () => {
 
   describe('add and create another task', () => {
     describe('success', () => {
-      test('displays success message for 3 seconds', async () => {
-        jest.useFakeTimers();
+      test('displays success message', async () => {
         createObject.mockReturnValueOnce(() =>
           Promise.resolve({
             type: 'CREATE_OBJECT_SUCCEEDED',
@@ -154,7 +153,7 @@ describe('<TaskForm/>', () => {
             },
           }),
         );
-        const { findByText, getByText, getByLabelText, queryByText } = setup();
+        const { findByText, getByText, getByLabelText } = setup();
         const submit = getByText('Add & New');
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
@@ -163,12 +162,7 @@ describe('<TaskForm/>', () => {
         expect.assertions(1);
         await findByText('A task was successfully added.');
 
-        await waitFor(() => {
-          jest.runAllTimers();
-          return expect(
-            queryByText('A task was successfully added.'),
-          ).toBeNull();
-        });
+        expect(getByText('A task was successfully added.')).toBeVisible();
       });
     });
   });
