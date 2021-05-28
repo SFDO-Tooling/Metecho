@@ -24,7 +24,7 @@ const Header = () => {
       {window.GLOBALS.ENABLE_WALKTHROUGHS ? (
         <TourDropdown triggerClassName="tour-walkthroughs slds-m-right_x-small" />
       ) : null}
-      <div className="slds-is-relative user-info">
+      <div className="slds-is-relative">
         <UserInfo />
         <TourPopover
           align="bottom right"

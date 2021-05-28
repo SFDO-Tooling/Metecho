@@ -183,7 +183,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                   disabled
                 />
               ) : (
-                <div className="slds-is-relative vertical-right">
+                <div className="slds-is-relative">
                   <Button
                     label={i18n.t('Re-Sync Projects')}
                     variant="outline-brand"

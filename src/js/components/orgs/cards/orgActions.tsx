@@ -185,7 +185,7 @@ const OrgActions = ({
     return (
       <>
         {submitReviewBtn ? (
-          <span className="slds-is-relative submit-btn">
+          <span className="slds-is-relative inline-container">
             {submitReviewBtn}
             <TourPopover
               align="top"
@@ -202,7 +202,7 @@ const OrgActions = ({
           </span>
         ) : null}
         {!(preventNewTestOrg || disableCreation) && (
-          <span className="slds-is-relative task-create-btn">
+          <span className="slds-is-relative inline-container">
             <Button
               label={i18n.t('Create Org')}
               variant={isActive ? 'brand' : 'neutral'}

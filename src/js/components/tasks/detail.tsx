@@ -525,7 +525,7 @@ const TaskDetail = (props: RouteComponentProps) => {
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <div className="slds-is-relative inline-container page-options">
+        <div className="slds-is-relative inline-container">
           <PageOptions
             modelType={OBJECT_TYPES.TASK}
             handleOptionSelect={handlePageOptionSelect}
@@ -544,7 +544,7 @@ const TaskDetail = (props: RouteComponentProps) => {
         </div>
       )}
       {branchLink && (
-        <div className="slds-is-relative inline-container page-options">
+        <div className="slds-is-relative inline-container">
           <ExternalLink
             url={branchLink}
             showButtonIcon
@@ -722,8 +722,7 @@ const TaskDetail = (props: RouteComponentProps) => {
             <div
               className="slds-m-bottom_x-large
                 metecho-secondary-block
-                slds-is-relative
-                right-edge"
+                slds-is-relative"
             >
               <TaskStatusPath task={task} />
               <TourPopover

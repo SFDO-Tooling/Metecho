@@ -389,7 +389,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <div className="slds-is-relative inline-container page-options">
+        <div className="slds-is-relative inline-container">
           <PageOptions
             modelType={OBJECT_TYPES.EPIC}
             handleOptionSelect={handlePageOptionSelect}
@@ -408,7 +408,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         </div>
       )}
       {branchLink && (
-        <div className="slds-is-relative inline-container page-options">
+        <div className="slds-is-relative inline-container">
           <ExternalLink
             url={branchLink}
             showButtonIcon
@@ -570,7 +570,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           </>
         }
       >
-        <div className="slds-is-relative right-edge">
+        <div className="slds-is-relative">
           <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
           <TourPopover
             align="bottom left"

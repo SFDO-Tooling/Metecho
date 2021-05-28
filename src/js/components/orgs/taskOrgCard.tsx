@@ -209,8 +209,7 @@ const TaskOrgCard = ({
       className="slds-size_1-of-1
         slds-large-size_1-of-2
         slds-p-around_x-small
-        slds-is-relative
-        right-edge"
+        slds-is-relative org-card"
     >
       {popover}
       <Card

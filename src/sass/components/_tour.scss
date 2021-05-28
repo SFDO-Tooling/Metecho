@@ -36,17 +36,17 @@
 }
 
 .popover-wrapper {
-  position: absolute;
   left: -($spacing-xx-small);
+  position: absolute;
   top: -($spacing-small);
 
   .epic-progress & {
     top: -($spacing-medium);
   }
 
-  .logo-popover & {
-    top: $spacing-small;
+  .logo-popover > & {
     left: $spacing-large;
+    top: $spacing-small;
   }
 
   .metecho-breadcrumb & {
@@ -63,37 +63,18 @@
     top: $spacing-xxx-small;
   }
 
-  .page-title & {
+  .page-title > & {
     left: $spacing-large;
     top: $var-spacing-medium;
   }
 
-  .user-info & {
-    left: -($spacing-xx-small);
-    top: -($spacing-small);
-  }
-
-  .page-options & {
-    left: -($spacing-xx-small);
-    top: -($spacing-medium);
-  }
-
-  .vertical-right & {
-    right: -($spacing-x-small);
-    top: -($spacing-medium);
-  }
-
-  .submit-btn & {
-    top: -($var-spacing-large);
-  }
-
-  .task-create-btn & {
-    top: -($var-spacing-large);
-  }
-
   .heading & {
     top: -($spacing-medium);
-    left: -($spacing-xx-small);
+  }
+
+  .org-card > & {
+    left: $spacing-xx-small;
+    top: -($spacing-xx-small);
   }
 
   th & {
