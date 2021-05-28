@@ -455,7 +455,7 @@ export const createSocket = ({
       log('[WebSocket] closed');
       if (open) {
         open = false;
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (!open) {
             dispatch(disconnectSocket());
           }
@@ -489,11 +489,11 @@ export const createSocket = ({
     }
   };
 
-  let reconnecting: NodeJS.Timeout | undefined;
+  let reconnecting: number | undefined;
   const clearReconnect = () => {
     /* istanbul ignore else */
     if (reconnecting) {
-      clearInterval(reconnecting);
+      window.clearInterval(reconnecting);
       reconnecting = undefined;
     }
   };
@@ -502,7 +502,7 @@ export const createSocket = ({
     socket.close(1000, 'user logged out');
     // Without polling, the `onopen` callback after reconnect could fire before
     // the `onclose` callback...
-    reconnecting = setInterval(() => {
+    reconnecting = window.setInterval(() => {
       if (!open) {
         socket.open();
         clearReconnect();

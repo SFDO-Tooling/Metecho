@@ -270,6 +270,14 @@ describe('createSocket', () => {
     });
 
     describe('onclose', () => {
+      beforeEach(() => {
+        jest.useFakeTimers('legacy');
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
       test('logs', () => {
         socketInstance.onclose();
 
@@ -277,25 +285,27 @@ describe('createSocket', () => {
       });
 
       test('dispatches disconnectSocket action after 5 seconds', () => {
-        jest.useFakeTimers();
+        jest.spyOn(window, 'setTimeout');
         socketInstance.onopen();
         socketInstance.onclose();
 
-        expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
+        expect(window.setTimeout).toHaveBeenCalledWith(
+          expect.any(Function),
+          5000,
+        );
 
         jest.runAllTimers();
         const expected = disconnectSocket();
 
         expect(dispatch).toHaveBeenCalledWith(expected);
 
-        setTimeout.mockClear();
+        window.setTimeout.mockClear();
         socketInstance.onclose();
 
-        expect(setTimeout).not.toHaveBeenCalled();
+        expect(window.setTimeout).not.toHaveBeenCalled();
       });
 
       test('does not dispatch disconnectSocket action if reconnected', () => {
-        jest.useFakeTimers();
         socketInstance.onopen();
         socketInstance.onclose();
         socketInstance.onopen();
@@ -361,8 +371,12 @@ describe('createSocket', () => {
     let socket;
 
     beforeEach(() => {
+      jest.useFakeTimers('legacy');
       socket = sockets.createSocket(opts);
-      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     test('closes and reopens ws connection', () => {
