@@ -31,6 +31,10 @@
   min-height: 100%;
 }
 
+.inline-container {
+  display: inline-block;
+}
+
 // Set Modal height so changing content doesn't shift modal size
 // As seen in Task Assign Modal
 .modal-set-height {
