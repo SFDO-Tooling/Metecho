@@ -32,7 +32,7 @@ const LandingModal = ({
   const tours: Tour[] = [
     {
       header: i18n.t('I want to Play'),
-      tag: i18n.t('Make a Scratch Org to view the Project & play.'),
+      tag: i18n.t('Make a Scratch Org to view the Project and play.'),
       linkText: i18n.t('Start Play Walkthrough'),
       type: WALKTHROUGH_TYPES.PLAY,
       icon: seesawSvg,
@@ -105,7 +105,7 @@ const LandingModal = ({
         </div>
         <div className="slds-align_absolute-center">
           <p className="slds-small-size_3-of-5 slds-text-align_center">
-            <Trans i18nKey="tourHelp">
+            <Trans i18nKey="walkthroughHelp">
               Review these walkthroughs anytime you need them, or turn on the
               self-guided tour when you have specific questions.
             </Trans>

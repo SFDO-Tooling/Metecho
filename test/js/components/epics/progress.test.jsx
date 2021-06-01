@@ -2,7 +2,7 @@ import React from 'react';
 
 import EpicProgress from '~js/components/epics/progress';
 
-import { render } from './../../utils';
+import { renderWithRedux } from './../../utils';
 
 describe('<EpicProgress />', () => {
   test.each([
@@ -11,7 +11,7 @@ describe('<EpicProgress />', () => {
     ['1 of 2 Complete', [1, 2]],
     ['2 of 2 Complete', [2, 2]],
   ])('renders steps from epic status: %s', (name, range) => {
-    const { getByText } = render(<EpicProgress range={range} />);
+    const { getByText } = renderWithRedux(<EpicProgress range={range} />);
 
     expect(getByText(name)).toBeVisible();
   });

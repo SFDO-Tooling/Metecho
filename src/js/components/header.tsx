@@ -49,12 +49,24 @@ const Header = () => {
       <Alerts />
       <Errors />
       <Toasts />
-      <PageHeader
-        className="global-header
-          slds-p-horizontal_x-large
-          slds-p-vertical_medium"
-        title={
-          <div className="logo-popover">
+      <div className="slds-is-relative logo-popover">
+        <TourPopover
+          align="bottom left"
+          heading={i18n.t('What’s in a name?')}
+          body={
+            <Trans i18nKey="tourMetechoName">
+              Metecho makes it easier for you to view, test, and contribute to
+              Salesforce Projects without learning GitHub. <b>Pronunciation</b>:
+              “Met” rhymes with “Bet.” “Echo” as in the reflection of sound
+              waves. <b>Definition</b>: “Share or participate in.”
+            </Trans>
+          }
+        />
+        <PageHeader
+          className="global-header
+            slds-p-horizontal_x-large
+            slds-p-vertical_medium"
+          title={
             <Link
               to={routes.home()}
               className="slds-text-heading_large slds-text-link_reset"
@@ -62,23 +74,10 @@ const Header = () => {
               <span data-logo-bit="start">met</span>
               <span data-logo-bit="end">échō</span>
             </Link>
-            <TourPopover
-              align="bottom left"
-              heading={i18n.t('What’s in a name?')}
-              body={
-                <Trans i18nKey="tourMetechoName">
-                  Metecho makes it easier for you to view, test, and contribute
-                  to Salesforce Projects without learning GitHub.{' '}
-                  <b>Pronunciation</b>: “Met” rhymes with “Bet.” “Echo” as in
-                  the reflection of sound waves. <b>Definition</b>: “Share or
-                  participate in.”
-                </Trans>
-              }
-            />
-          </div>
-        }
-        onRenderControls={controls}
-      />
+          }
+          onRenderControls={controls}
+        />
+      </div>
     </>
   ) : null;
 };

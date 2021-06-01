@@ -36,15 +36,54 @@
 }
 
 .popover-wrapper {
+  left: -($spacing-xx-small);
   position: absolute;
-  top: -10px;
+  top: -($spacing-small);
 
-  .logo-popover & {
-    top: unset;
+  .epic-progress & {
+    top: -($spacing-medium);
   }
 
-  .page-title & {
-    top: 25px;
+  .logo-popover > & {
+    left: $spacing-large;
+    top: $spacing-small;
+  }
+
+  .metecho-breadcrumb & {
+    left: $spacing-large;
+    top: -($var-spacing-x-small);
+  }
+
+  .project-placeholder & {
+    top: $spacing-medium;
+  }
+
+  .project-list & {
+    left: $spacing-none;
+    top: $spacing-xxx-small;
+  }
+
+  .page-title > & {
+    left: $spacing-large;
+    top: $var-spacing-medium;
+  }
+
+  .heading & {
+    top: -($spacing-medium);
+  }
+
+  .org-card > & {
+    left: $spacing-xx-small;
+    top: -($spacing-xx-small);
+  }
+
+  th & {
+    left: -($spacing-x-small);
+    top: -($spacing-xx-small);
+  }
+
+  th:first-child & {
+    left: $var-spacing-x-small;
   }
 }
 
@@ -55,6 +94,7 @@
   box-shadow: 0 0 2px $palette-violet-65;
   color: $palette-violet-65;
   transform: scale(1); // needed to prevent subpixel rounding in Safari
+  z-index: $z-index-default;
 
   .tour-alert & {
     fill: currentColor;

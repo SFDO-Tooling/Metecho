@@ -2,7 +2,7 @@ import React from 'react';
 
 import CommitList from '~js/components/commits/list';
 
-import { render } from './../../utils';
+import { renderWithRedux } from './../../utils';
 
 describe('<CommitList/>', () => {
   test('renders a table of commits', () => {
@@ -20,7 +20,7 @@ describe('<CommitList/>', () => {
         url: 'https://example.com/commit/abc123def456',
       },
     ];
-    const { getByText, getAllByTitle } = render(
+    const { getByText, getAllByTitle } = renderWithRedux(
       <CommitList commits={commits} />,
     );
 
@@ -43,13 +43,13 @@ describe('<CommitList/>', () => {
         url: 'https://example.com/commit/abc123def456',
       },
     ];
-    const { getByTitle } = render(<CommitList commits={commits} />);
+    const { getByTitle } = renderWithRedux(<CommitList commits={commits} />);
 
     expect(getByTitle('author123')).toBeVisible();
   });
 
   test('does not render if list is empty', () => {
-    const { container } = render(<CommitList commits={[]} />);
+    const { container } = renderWithRedux(<CommitList commits={[]} />);
 
     expect(container).toBeEmptyDOMElement();
   });
