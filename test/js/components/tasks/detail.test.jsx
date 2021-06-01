@@ -7,7 +7,7 @@ import { createObject, fetchObjects } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
 import { defaultState as defaultOrgsState } from '~js/store/orgs/reducer';
 import { refreshOrgConfigs } from '~js/store/projects/actions';
-import { TASK_STATUSES } from '~js/utils/constants';
+import { RETRIEVE_CHANGES, TASK_STATUSES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
 import {
@@ -158,25 +158,33 @@ describe('<TaskDetail/>', () => {
       projectSlug: 'project-1',
       epicSlug: 'epic-1',
       taskSlug: 'task-1',
+      location: {},
       rerender: false,
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, projectSlug, epicSlug, taskSlug } = opts;
+    const { initialState, projectSlug, epicSlug, taskSlug, location } = opts;
     const context = {};
+    const history = { replace: jest.fn() };
     const ui = (
       <StaticRouter context={context}>
-        <TaskDetail match={{ params: { projectSlug, epicSlug, taskSlug } }} />
+        <TaskDetail
+          match={{ params: { projectSlug, epicSlug, taskSlug } }}
+          location={location}
+          history={history}
+        />
       </StaticRouter>
     );
     if (opts.rerender) {
       return {
         ...reRenderWithRedux(ui, opts.store, opts.rerender),
         context,
+        history,
       };
     }
     return {
       ...renderWithRedux(ui, initialState, storeWithThunk),
       context,
+      history,
     };
   };
 
@@ -452,6 +460,20 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(getAllByText('Retrieving Selected Changes…')).toHaveLength(2);
+    });
+  });
+
+  describe('converting org and retrieving changes', () => {
+    test('opens retrieve changes modal', async () => {
+      const { findByText, history } = setup({
+        location: { state: { [RETRIEVE_CHANGES]: true } },
+      });
+
+      expect.assertions(2);
+      const modal = await findByText('Select the location to retrieve changes');
+
+      expect(modal).toBeVisible();
+      expect(history.replace).toHaveBeenCalledWith({ state: {} });
     });
   });
 

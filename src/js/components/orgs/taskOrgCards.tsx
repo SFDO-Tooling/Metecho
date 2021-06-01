@@ -49,6 +49,7 @@ const TaskOrgCards = ({
   isRefreshingUsers,
   testOrgReadyForReview,
   testOrgSubmittingReview,
+  convertingOrg,
   openCaptureModal,
   openAssignUserModal,
   closeAssignUserModal,
@@ -70,6 +71,7 @@ const TaskOrgCards = ({
   isRefreshingUsers: boolean;
   testOrgReadyForReview: boolean;
   testOrgSubmittingReview: boolean;
+  convertingOrg?: boolean;
   openCaptureModal: () => void;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
@@ -277,6 +279,7 @@ const TaskOrgCards = ({
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
           isRefreshingUsers={isRefreshingUsers}
+          isConvertingOrg={convertingOrg}
           assignUserModalOpen={assignUserModalOpen}
           openAssignUserModal={openAssignDevModal}
           closeAssignUserModal={closeAssignUserModal}

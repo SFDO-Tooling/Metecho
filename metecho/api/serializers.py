@@ -324,6 +324,13 @@ class TaskSerializer(serializers.ModelSerializer):
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
 
+    dev_org = serializers.PrimaryKeyRelatedField(
+        queryset=ScratchOrg.objects.active(),
+        pk_field=serializers.CharField(),
+        write_only=True,
+        required=False,
+    )
+
     class Meta:
         model = Task
         fields = (
@@ -351,6 +358,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "pr_is_open",
             "assigned_dev",
             "assigned_qa",
+            "dev_org",
             "currently_submitting_review",
             "org_config_name",
         )
@@ -371,7 +379,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "review_sha": {"read_only": True},
             "status": {"read_only": True},
             "pr_is_open": {"read_only": True},
-            "assigned_dev": {"read_only": True},
             "assigned_qa": {"read_only": True},
             "currently_submitting_review": {"read_only": True},
         }
@@ -416,6 +423,24 @@ class TaskSerializer(serializers.ModelSerializer):
         if repo_owner and repo_name and pr_number:
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
+
+    def create(self, validated_data):
+        dev_org = validated_data.pop("dev_org", None)
+        user = self.context["request"].user
+
+        if dev_org and not validated_data.get("assigned_dev"):
+            validated_data["assigned_dev"] = user.github_id
+
+        task = super().create(validated_data)
+
+        if dev_org:
+            dev_org.queue_convert_to_dev_org(task, originating_user_id=str(user.id))
+
+        return task
+
+    def update(self, instance, validated_data):
+        validated_data.pop("dev_org", None)
+        return super().update(instance, validated_data)
 
 
 class TaskAssigneeSerializer(serializers.Serializer):

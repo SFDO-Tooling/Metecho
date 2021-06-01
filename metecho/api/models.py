@@ -1111,6 +1111,28 @@ class ScratchOrg(
             else:
                 self.delete(originating_user_id=originating_user_id)
 
+    def queue_convert_to_dev_org(self, task, *, originating_user_id=None):
+        from .jobs import convert_to_dev_org_job
+
+        convert_to_dev_org_job.delay(
+            scratch_org=self, task=task, originating_user_id=originating_user_id
+        )
+
+    def finalize_convert_to_dev_org(self, task, *, error=None, originating_user_id):
+        if error:
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_CONVERT_FAILED",
+                originating_user_id=originating_user_id,
+            )
+            return
+
+        self.org_type = SCRATCH_ORG_TYPES.Dev
+        self.task = task
+        self.epic = None
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
+
     def queue_get_unsaved_changes(self, *, force_get=False, originating_user_id):
         from .jobs import get_unsaved_changes_job
 

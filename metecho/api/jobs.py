@@ -87,10 +87,9 @@ def epic_create_branch(
                 )
         epic_branch_name = f"{prefix}{slugify(epic.name)}"
         with creating_gh_branch(epic):
-            epic_branch_name, latest_sha = try_to_make_branch(
-                repository,
-                new_branch=epic_branch_name,
-                base_branch=repository.default_branch,
+            latest_sha = repository.branch(repository.default_branch).latest_sha()
+            epic_branch_name = try_to_make_branch(
+                repository, new_branch=epic_branch_name, base_sha=latest_sha
             )
         epic.branch_name = epic_branch_name
         epic.latest_sha = latest_sha
@@ -100,7 +99,7 @@ def epic_create_branch(
 
 
 def _create_branches_on_github(
-    *, user, repo_id, epic, task=None, originating_user_id=None
+    *, user, repo_id, epic, task=None, task_sha=None, originating_user_id=None
 ):
     repository = get_repo_info(user, repo_id=repo_id)
 
@@ -116,19 +115,20 @@ def _create_branches_on_github(
     if not task:
         return epic_branch_name
 
-    # Make task branch, with latest from task:
+    # Make task branch, with custom commit or falling back to latest from epic:
     task.refresh_from_db()
     if task.branch_name:
         return task.branch_name
 
     with creating_gh_branch(task):
-        task_branch_name, latest_sha = try_to_make_branch(
+        latest_sha = task_sha or repository.branch(epic_branch_name).latest_sha()
+        task_branch_name = try_to_make_branch(
             repository,
             new_branch=f"{epic_branch_name}__{slugify(task.name)}",
-            base_branch=epic_branch_name,
+            base_sha=latest_sha,
         )
     task.branch_name = task_branch_name
-    task.origin_sha = repository.branch(epic_branch_name).latest_sha()
+    task.origin_sha = latest_sha
     task.finalize_task_update(originating_user_id=originating_user_id)
 
     return task_branch_name
@@ -314,6 +314,39 @@ def create_branches_on_github_then_create_scratch_org(
 create_branches_on_github_then_create_scratch_org_job = job(
     create_branches_on_github_then_create_scratch_org
 )
+
+
+def convert_to_dev_org(scratch_org, *, task, originating_user_id=None):
+    """
+    Convert an Epic playground org into a Task Dev org
+    """
+    try:
+        task.refresh_from_db()
+        scratch_org.refresh_from_db()
+        _create_branches_on_github(
+            user=scratch_org.owner,
+            repo_id=task.get_repo_id(),
+            epic=task.epic,
+            task=task,
+            task_sha=scratch_org.latest_commit,
+            originating_user_id=originating_user_id,
+        )
+    except Exception as e:
+        task.refresh_from_db()
+        scratch_org.refresh_from_db()
+        scratch_org.finalize_convert_to_dev_org(
+            task, error=e, originating_user_id=originating_user_id
+        )
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        scratch_org.finalize_convert_to_dev_org(
+            task, originating_user_id=originating_user_id
+        )
+
+
+convert_to_dev_org_job = job(convert_to_dev_org)
 
 
 def refresh_scratch_org(scratch_org, *, originating_user_id):
@@ -762,11 +795,10 @@ def create_gh_branch_for_new_epic(epic, *, user):
             try:
                 head = repository.branch(epic.branch_name).commit.sha
             except NotFoundError:
+                latest_sha = repository.branch(repository.default_branch).latest_sha()
                 with creating_gh_branch(epic):
-                    branch_name, latest_sha = try_to_make_branch(
-                        repository,
-                        new_branch=epic.branch_name,
-                        base_branch=repository.default_branch,
+                    try_to_make_branch(
+                        repository, new_branch=epic.branch_name, base_sha=latest_sha
                     )
                     epic.latest_sha = latest_sha
             else:

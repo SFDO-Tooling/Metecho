@@ -13,6 +13,7 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgConvertFailed,
   orgProvisioning,
   orgReassigned,
   orgReassignFailed,
@@ -256,6 +257,14 @@ interface CommitFailedEvent {
     originating_user_id: string | null;
   };
 }
+interface OrgConvertFailedEvent {
+  type: 'SCRATCH_ORG_CONVERT_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+    originating_user_id: string | null;
+  };
+}
 interface SoftDeletedEvent {
   type: 'SOFT_DELETE';
   payload: {
@@ -289,6 +298,7 @@ type ModelEvent =
   | OrgReassignFailedEvent
   | CommitSucceededEvent
   | CommitFailedEvent
+  | OrgConvertFailedEvent
   | SoftDeletedEvent;
 type EventType =
   | SubscriptionEvent
@@ -358,6 +368,8 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && orgReassigned(event.payload.model);
     case 'SCRATCH_ORG_REASSIGN_FAILED':
       return hasModel(event) && orgReassignFailed(event.payload);
+    case 'SCRATCH_ORG_CONVERT_FAILED':
+      return hasModel(event) && orgConvertFailed(event.payload);
     case 'SOFT_DELETE':
       return hasModel(event) && removeObject(event.payload.model);
   }

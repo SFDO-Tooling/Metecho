@@ -11,6 +11,7 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgConvertFailed,
   orgProvisioning,
   orgReassigned,
   orgReassignFailed,
@@ -52,6 +53,7 @@ const actions = {
   createTaskPRFailed,
   deleteFailed,
   deleteOrg,
+  orgConvertFailed,
   orgProvisioning,
   orgReassigned,
   orgReassignFailed,
@@ -127,6 +129,7 @@ describe('getAction', () => {
     ['SCRATCH_ORG_REASSIGN_FAILED', 'orgReassignFailed', false],
     ['SCRATCH_ORG_COMMIT_CHANGES', 'commitSucceeded', false],
     ['SCRATCH_ORG_COMMIT_CHANGES_FAILED', 'commitFailed', false],
+    ['SCRATCH_ORG_CONVERT_FAILED', 'orgConvertFailed', false],
     ['SOFT_DELETE', 'removeObject', true],
   ])('handles %s event', (type, action, modelOnly) => {
     const payload = { model: 'bar' };

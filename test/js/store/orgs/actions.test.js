@@ -3,7 +3,7 @@ import fetchMock from 'fetch-mock';
 import * as actions from '~js/store/orgs/actions';
 import { addUrlParams } from '~js/utils/api';
 
-import { storeWithThunk } from './../../utils';
+import { getStoreWithHistory, storeWithThunk } from './../../utils';
 
 const defaultState = {
   user: { id: 'user-id' },
@@ -948,5 +948,65 @@ describe('orgProvisioning', () => {
       model: 'scratch_org',
       id: 'org-id',
     });
+  });
+});
+
+describe('orgConvertFailed', () => {
+  let replace;
+
+  beforeEach(() => {
+    replace = jest.fn();
+  });
+
+  test('adds error message', () => {
+    const store = getStoreWithHistory({ replace })(defaultState);
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+      owner: 'user-id',
+    };
+    store.dispatch(
+      actions.orgConvertFailed({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toMatch(
+      'Uh oh. There was an error contributing work from your Scratch Org on Task “My Task”.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
+    expect(replace).toHaveBeenCalledWith({ state: {} });
+  });
+
+  test('adds error message [no known task]', () => {
+    const store = getStoreWithHistory({ replace })({
+      ...defaultState,
+      tasks: {},
+    });
+    const org = {
+      id: 'org-id',
+      task: 'task-id',
+      owner: 'user-id',
+    };
+    store.dispatch(
+      actions.orgConvertFailed({
+        model: org,
+        message: 'error msg',
+        originating_user_id: 'user-id',
+      }),
+    );
+    const allActions = store.getActions();
+
+    expect(allActions[0].type).toEqual('TOAST_ADDED');
+    expect(allActions[0].payload.heading).toEqual(
+      'Uh oh. There was an error contributing work from your Scratch Org.',
+    );
+    expect(allActions[0].payload.details).toEqual('error msg');
+    expect(allActions[0].payload.variant).toEqual('error');
   });
 });

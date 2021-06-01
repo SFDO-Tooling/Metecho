@@ -581,3 +581,39 @@ export const orgProvisioning = (model: Org): OrgProvisioning => {
     payload: model,
   };
 };
+
+export const orgConvertFailed =
+  ({
+    model,
+    message,
+    originating_user_id,
+  }: {
+    model: Org | MinimalOrg;
+    message?: string;
+    originating_user_id: string | null;
+  }): ThunkResult<void> =>
+  (dispatch, getState, history) => {
+    const state = getState();
+    /* istanbul ignore else */
+    if (isCurrentUser(originating_user_id, state)) {
+      let msg = i18n.t(
+        'Uh oh. There was an error contributing work from your Scratch Org.',
+      );
+      const { name, parent } = getOrgParent(model, state);
+      /* istanbul ignore else */
+      if (name && parent) {
+        msg = i18n.t(
+          'Uh oh. There was an error contributing work from your Scratch Org on {{parent}} “{{name}}”.',
+          { parent, name },
+        );
+      }
+      dispatch(
+        addToast({
+          heading: msg,
+          details: message,
+          variant: 'error',
+        }),
+      );
+    }
+    history.replace({ state: {} });
+  };

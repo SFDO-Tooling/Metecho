@@ -5,23 +5,24 @@ import customSprite from '@salesforce-ux/design-system/assets/icons/custom-sprit
 import doctypeSprite from '@salesforce-ux/design-system/assets/icons/doctype-sprite/svg/symbols.svg';
 import standardSprite from '@salesforce-ux/design-system/assets/icons/standard-sprite/svg/symbols.svg';
 import utilitySprite from '@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg';
+import { createBrowserHistory } from 'history';
 import i18n from 'i18next';
 import React, { useEffect } from 'react';
 import DocumentTitle from 'react-document-title';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import {
-  BrowserRouter,
   Redirect,
   Route,
   RouteComponentProps,
+  Router,
   Switch,
   withRouter,
 } from 'react-router-dom';
-import { AnyAction, applyMiddleware, createStore, Dispatch } from 'redux';
+import { applyMiddleware, createStore, Dispatch } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
-import thunk, { ThunkDispatch } from 'redux-thunk';
+import thunk from 'redux-thunk';
 
 import SFLogo from '~img/salesforce-logo.png';
 import FourOhFour from '~js/components/404';
@@ -37,7 +38,7 @@ import AuthError from '~js/components/user/authError';
 import Login from '~js/components/user/login';
 import { PrivateRoute } from '~js/components/utils';
 import initializeI18n from '~js/i18n';
-import reducer from '~js/store';
+import reducer, { ThunkDispatch } from '~js/store';
 import { fetchObjects } from '~js/store/actions';
 import { clearErrors } from '~js/store/errors/actions';
 import { projectsRefreshing } from '~js/store/projects/actions';
@@ -50,6 +51,8 @@ import { OBJECT_TYPES } from '~js/utils/constants';
 import { log, logError } from '~js/utils/logging';
 import routes, { routePatterns } from '~js/utils/routes';
 import { createSocket } from '~js/utils/websockets';
+
+const history = createBrowserHistory();
 
 const App = withRouter(
   ({
@@ -125,7 +128,9 @@ initializeI18n((i18nError?: string) => {
     const appStore = createStore(
       reducer,
       undefined,
-      composeWithDevTools(applyMiddleware(thunk, logger)),
+      composeWithDevTools(
+        applyMiddleware(thunk.withExtraArgument(history), logger),
+      ),
     );
 
     // Connect to WebSocket server
@@ -136,9 +141,7 @@ initializeI18n((i18nError?: string) => {
       dispatch: appStore.dispatch,
       options: {
         onreconnect: () => {
-          (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
-            refetchAllData(),
-          );
+          (appStore.dispatch as ThunkDispatch)(refetchAllData());
         },
       },
     });
@@ -177,7 +180,7 @@ initializeI18n((i18nError?: string) => {
     const renderApp = () => {
       render(
         <Provider store={appStore}>
-          <BrowserRouter>
+          <Router history={history}>
             <IconSettings
               actionSprite={actionSprite}
               customSprite={customSprite}
@@ -187,7 +190,7 @@ initializeI18n((i18nError?: string) => {
             >
               <App dispatch={appStore.dispatch} />
             </IconSettings>
-          </BrowserRouter>
+          </Router>
         </Provider>,
         el,
       );
@@ -195,7 +198,7 @@ initializeI18n((i18nError?: string) => {
 
     if (userData) {
       // If logged in, fetch projects before rendering App
-      (appStore.dispatch as ThunkDispatch<any, void, AnyAction>)(
+      (appStore.dispatch as ThunkDispatch)(
         fetchObjects({ objectType: OBJECT_TYPES.PROJECT, reset: true }),
       ).finally(() => {
         const state = appStore.getState();

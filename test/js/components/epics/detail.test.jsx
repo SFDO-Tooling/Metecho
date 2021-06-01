@@ -13,6 +13,7 @@ import {
   refreshGitHubUsers,
   refreshOrgConfigs,
 } from '~js/store/projects/actions';
+import { EPIC_STATUSES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
@@ -848,6 +849,82 @@ describe('<EpicDetail/>', () => {
         expect(createObject.mock.calls[0][0].data.org_config_name).toEqual(
           'dev',
         );
+      });
+    });
+  });
+
+  describe('<ContributeWorkModal />', () => {
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, queryByText } = setup();
+        fireEvent.click(getByText('Contribute Work'));
+
+        expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
+
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
+      });
+    });
+
+    describe('"Contribute" click', () => {
+      test('opens Create Task modal', () => {
+        const { getByText } = setup();
+        fireEvent.click(getByText('Contribute Work'));
+        fireEvent.click(getByText('Contribute'));
+
+        expect(
+          getByText('Add a Task to Contribute Work from Scratch Org'),
+        ).toBeVisible();
+      });
+    });
+
+    describe('Epic is already merged', () => {
+      test('does not allow contributing', () => {
+        const { queryByText } = setup({
+          initialState: {
+            ...defaultState,
+            epics: {
+              r1: {
+                ...defaultState.epics.r1,
+                epics: [
+                  {
+                    ...defaultState.epics.r1.epics[0],
+                    status: EPIC_STATUSES.MERGED,
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        expect(queryByText('Contribute Work')).toBeNull();
+      });
+    });
+
+    describe('User does not have permissions', () => {
+      test('does not allow contributing', () => {
+        const projects = {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_permission: false,
+            },
+          ],
+        };
+        const { getByText } = setup({
+          initialState: {
+            ...defaultState,
+            projects,
+          },
+        });
+        fireEvent.click(getByText('Contribute Work'));
+
+        expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
+        expect(
+          getByText('You do not have “push” access', { exact: false }),
+        ).toBeVisible();
       });
     });
   });

@@ -20,6 +20,7 @@ import CreateTaskModal from '~js/components/tasks/createForm';
 import TaskTable from '~js/components/tasks/table';
 import TourPopover from '~js/components/tour/popover';
 import {
+  ContributeWorkModal,
   CreateOrgModal,
   DeleteModal,
   DetailPageLayout,
@@ -38,6 +39,7 @@ import {
 } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
 import { updateObject } from '~js/store/actions';
+import { Org } from '~js/store/orgs/reducer';
 import { Task } from '~js/store/tasks/reducer';
 import { GitHubUser, User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -65,17 +67,22 @@ const EpicDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] =
+    useState<boolean | string>(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
 
-  const playgroundOrg = (orgs || [])[0];
+  const playgroundOrg = (orgs || [])[0] as Org | undefined;
 
   // "Assign users to epic" modal related:
   const openAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(true);
+    setContributeModalOpen(false);
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
+    setCreateOrgModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
     setAssignUsersModalOpen(false);
@@ -158,6 +165,9 @@ const EpicDetail = (props: RouteComponentProps) => {
         setSubmitModalOpen(false);
         setEditModalOpen(false);
         setDeleteModalOpen(false);
+        setContributeModalOpen(false);
+        setCreateModalOrgIdOrOpen(false);
+        setCreateOrgModalOpen(false);
       } else {
         updateEpicUsers(users);
       }
@@ -182,6 +192,9 @@ const EpicDetail = (props: RouteComponentProps) => {
         setSubmitModalOpen(false);
         setEditModalOpen(false);
         setDeleteModalOpen(false);
+        setContributeModalOpen(false);
+        setCreateModalOrgIdOrOpen(false);
+        setCreateOrgModalOpen(false);
       } else {
         updateEpicUsers(users);
       }
@@ -226,8 +239,9 @@ const EpicDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
   };
   const currentlySubmitting = Boolean(epic?.currently_creating_pr);
   const readyToSubmit = Boolean(
@@ -242,8 +256,9 @@ const EpicDetail = (props: RouteComponentProps) => {
     setDeleteModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -255,8 +270,9 @@ const EpicDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -264,28 +280,55 @@ const EpicDetail = (props: RouteComponentProps) => {
 
   // "create task" modal related:
   const openCreateModal = () => {
-    setCreateModalOpen(true);
+    setCreateModalOrgIdOrOpen(true);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
   };
   const closeCreateModal = () => {
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
   };
 
   // "create scratch org" modal related:
   const openCreateOrgModal = () => {
     setCreateOrgModalOpen(true);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
+    setContributeModalOpen(false);
   };
   const closeCreateOrgModal = () => {
     setCreateOrgModalOpen(false);
+  };
+
+  // "contribute work" modal related:
+  const openContributeModal = () => {
+    setContributeModalOpen(true);
+    setCreateModalOrgIdOrOpen(false);
+    setDeleteModalOpen(false);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
+    setCreateOrgModalOpen(false);
+  };
+  const closeContributeModal = () => {
+    setContributeModalOpen(false);
+  };
+  const createAndContribute = () => {
+    setCreateModalOrgIdOrOpen(
+      playgroundOrg?.id || /* istanbul ignore next */ true,
+    );
+    setDeleteModalOpen(false);
+    setEditModalOpen(false);
+    setSubmitModalOpen(false);
+    setAssignUsersModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
   };
 
   // "Next Steps" action handler
@@ -623,6 +666,9 @@ const EpicDetail = (props: RouteComponentProps) => {
                       org={playgroundOrg}
                       epic={epic}
                       repoUrl={project.repo_url}
+                      openContributeModal={
+                        epicIsMerged ? undefined : openContributeModal
+                      }
                     />
                   </div>
                 </div>
@@ -725,12 +771,22 @@ const EpicDetail = (props: RouteComponentProps) => {
               <CreateTaskModal
                 project={project}
                 epic={epic}
-                isOpen={createModalOpen}
+                isOpenOrOrgId={createModalOrgIdOrOpen}
+                playgroundOrg={playgroundOrg}
                 closeCreateModal={closeCreateModal}
               />
             )}
           </>
         )}
+        {playgroundOrg && !epicIsMerged ? (
+          <ContributeWorkModal
+            epic={epic}
+            isOpen={contributeModalOpen}
+            hasPermissions={project.has_push_permission}
+            closeModal={closeContributeModal}
+            doContribute={createAndContribute}
+          />
+        ) : null}
         <CreateOrgModal
           project={project}
           epic={epic}
