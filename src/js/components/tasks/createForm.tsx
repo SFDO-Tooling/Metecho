@@ -29,7 +29,7 @@ import routes from '~js/utils/routes';
 interface Props {
   project: Project;
   epic: Epic;
-  isOpen: boolean | string;
+  isOpenOrOrgId: boolean | string;
   playgroundOrg?: Org;
   closeCreateModal: () => void;
 }
@@ -37,7 +37,7 @@ interface Props {
 const CreateTaskModal = ({
   project,
   epic,
-  isOpen,
+  isOpenOrOrgId,
   playgroundOrg,
   closeCreateModal,
 }: Props) => {
@@ -49,7 +49,7 @@ const CreateTaskModal = ({
   const [isSavingBatch, setIsSavingBatch] = useState(false);
 
   const submitButton = useRef<HTMLButtonElement | null>(null);
-  const isContributingFromOrg = isString(isOpen);
+  const isContributingFromOrg = isString(isOpenOrOrgId);
   const useExistingOrgConfig = Boolean(isContributingFromOrg && playgroundOrg);
   const defaultOrgConfig = useExistingOrgConfig
     ? playgroundOrg?.org_config_name || DEFAULT_ORG_CONFIG_NAME
@@ -68,7 +68,7 @@ const CreateTaskModal = ({
   };
 
   if (isContributingFromOrg) {
-    additionalData.dev_org = isOpen;
+    additionalData.dev_org = isOpenOrOrgId;
   }
 
   const {
@@ -159,7 +159,7 @@ const CreateTaskModal = ({
 
   return (
     <Modal
-      isOpen={Boolean(isOpen)}
+      isOpen={Boolean(isOpenOrOrgId)}
       size="small"
       disableClose={isSaving || isSavingBatch}
       heading={heading}

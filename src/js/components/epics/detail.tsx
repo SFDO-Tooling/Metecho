@@ -65,7 +65,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [createModalOpen, setCreateModalOpen] =
+  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] =
     useState<boolean | string>(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
@@ -79,7 +79,7 @@ const EpicDetail = (props: RouteComponentProps) => {
     setSubmitModalOpen(false);
     setEditModalOpen(false);
     setDeleteModalOpen(false);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setCreateOrgModalOpen(false);
   }, []);
   const closeAssignUsersModal = useCallback(() => {
@@ -164,7 +164,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         setEditModalOpen(false);
         setDeleteModalOpen(false);
         setContributeModalOpen(false);
-        setCreateModalOpen(false);
+        setCreateModalOrgIdOrOpen(false);
         setCreateOrgModalOpen(false);
       } else {
         updateEpicUsers(users);
@@ -191,7 +191,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         setEditModalOpen(false);
         setDeleteModalOpen(false);
         setContributeModalOpen(false);
-        setCreateModalOpen(false);
+        setCreateModalOrgIdOrOpen(false);
         setCreateOrgModalOpen(false);
       } else {
         updateEpicUsers(users);
@@ -237,7 +237,7 @@ const EpicDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
   };
@@ -254,7 +254,7 @@ const EpicDetail = (props: RouteComponentProps) => {
     setDeleteModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
   };
@@ -268,7 +268,7 @@ const EpicDetail = (props: RouteComponentProps) => {
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
   };
@@ -278,7 +278,7 @@ const EpicDetail = (props: RouteComponentProps) => {
 
   // "create task" modal related:
   const openCreateModal = () => {
-    setCreateModalOpen(true);
+    setCreateModalOrgIdOrOpen(true);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
@@ -287,13 +287,13 @@ const EpicDetail = (props: RouteComponentProps) => {
     setContributeModalOpen(false);
   };
   const closeCreateModal = () => {
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
   };
 
   // "create scratch org" modal related:
   const openCreateOrgModal = () => {
     setCreateOrgModalOpen(true);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
@@ -307,7 +307,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   // "contribute work" modal related:
   const openContributeModal = () => {
     setContributeModalOpen(true);
-    setCreateModalOpen(false);
+    setCreateModalOrgIdOrOpen(false);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
@@ -318,7 +318,9 @@ const EpicDetail = (props: RouteComponentProps) => {
     setContributeModalOpen(false);
   };
   const createAndContribute = () => {
-    setCreateModalOpen(playgroundOrg?.id || /* istanbul ignore next */ true);
+    setCreateModalOrgIdOrOpen(
+      playgroundOrg?.id || /* istanbul ignore next */ true,
+    );
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
@@ -644,7 +646,7 @@ const EpicDetail = (props: RouteComponentProps) => {
               <CreateTaskModal
                 project={project}
                 epic={epic}
-                isOpen={createModalOpen}
+                isOpenOrOrgId={createModalOrgIdOrOpen}
                 playgroundOrg={playgroundOrg}
                 closeCreateModal={closeCreateModal}
               />

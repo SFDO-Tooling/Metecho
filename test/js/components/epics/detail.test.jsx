@@ -879,7 +879,7 @@ describe('<EpicDetail/>', () => {
       });
     });
 
-    describe('User does not have permissions', () => {
+    describe('Epic is already merged', () => {
       test('does not allow contributing', () => {
         const { queryByText } = setup({
           initialState: {
@@ -902,7 +902,7 @@ describe('<EpicDetail/>', () => {
       });
     });
 
-    describe('Epic is already merged', () => {
+    describe('User does not have permissions', () => {
       test('does not allow contributing', () => {
         const projects = {
           ...defaultState.projects,
