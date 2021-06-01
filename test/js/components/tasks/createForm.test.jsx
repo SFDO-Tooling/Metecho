@@ -53,7 +53,7 @@ describe('<TaskForm/>', () => {
     const defaults = {
       project: defaultProject,
       epic: defaultEpic,
-      isOpen: true,
+      isOpenOrOrgId: true,
       closeCreateModal: jest.fn(),
     };
     const opts = Object.assign({}, defaults, options);
@@ -180,7 +180,7 @@ describe('<TaskForm/>', () => {
           org_config_name: 'qa',
         };
         const { getByText, getByLabelText, context } = setup({
-          isOpen: org.id,
+          isOpenOrOrgId: org.id,
           playgroundOrg: org,
         });
         const submit = getByText('Add');
