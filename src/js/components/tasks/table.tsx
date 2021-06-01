@@ -8,11 +8,13 @@ import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
 import React, { ReactNode, useCallback, useState } from 'react';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import AssignTaskRoleModal from '~js/components/githubUsers/assignTaskRole';
 import GitHubUserAvatar from '~js/components/githubUsers/avatar';
+import TourPopover from '~js/components/tour/popover';
 import { AppState } from '~js/store';
 import { selectProjectCollaborator } from '~js/store/projects/selectors';
 import { Task } from '~js/store/tasks/reducer';
@@ -301,7 +303,22 @@ const TaskTable = ({
     <DataTable items={taskDefaultSort} id="epic-tasks-table" noRowHover>
       <DataTableColumn
         key="name"
-        label={i18n.t('Task')}
+        label={
+          <>
+            {i18n.t('Task')}
+            <TourPopover
+              align="top left"
+              heading={i18n.t('Task names')}
+              body={
+                <Trans i18nKey="tourTaskNameColumn">
+                  A Task’s name describes the work being done. Select a name to
+                  access the Dev and Tester Orgs for the Task, as well as
+                  specific details about the work that has been done.
+                </Trans>
+              }
+            />
+          </>
+        }
         property="name"
         width="65%"
         primaryColumn
@@ -310,7 +327,28 @@ const TaskTable = ({
       </DataTableColumn>
       <DataTableColumn
         key="status"
-        label={i18n.t('Status')}
+        label={
+          <>
+            {i18n.t('Status')}
+            <TourPopover
+              align="top"
+              heading={i18n.t('Task statuses')}
+              body={
+                <Trans i18nKey="tourTaskStatusColumn">
+                  A Task begins with a status of <b>Planned</b>. When a Dev Org
+                  is created, the status changes to <b>In Progress</b>, and the
+                  Developer begins work. When the Developer is ready for the
+                  work to be tested, the status becomes <b>Test</b>. After
+                  Testing, the status becomes either <b>Changes Requested</b> or{' '}
+                  <b>Approved</b> based on the Tester’s review. If the Developer
+                  retrieves new changes, the status moves back to{' '}
+                  <b>In Progress</b>. Once the Task is added to the Project on
+                  GitHub, the status is <b>Complete</b>.
+                </Trans>
+              }
+            />
+          </>
+        }
         property="status"
         width="20%"
       >
@@ -318,7 +356,24 @@ const TaskTable = ({
       </DataTableColumn>
       <DataTableColumn
         key="assigned_dev"
-        label={i18n.t('Developer')}
+        label={
+          <>
+            {i18n.t('Developer')}
+            <TourPopover
+              align="top"
+              heading={i18n.t('Task Developers')}
+              body={
+                <Trans i18nKey="tourTaskDeveloperColumn">
+                  A <b>Developer</b> is the person assigned to do the work of a
+                  Task. Developers create Dev Orgs for their work, retrieve
+                  their changes, and then submit their work for someone to test.
+                  Anyone with permission to contribute to the project on GitHub
+                  can be assigned as a Developer on a Task.
+                </Trans>
+              }
+            />
+          </>
+        }
         property="assigned_dev"
         width="15%"
       >
@@ -334,7 +389,24 @@ const TaskTable = ({
       </DataTableColumn>
       <DataTableColumn
         key="assigned_qa"
-        label={i18n.t('Tester')}
+        label={
+          <>
+            {i18n.t('Tester')}
+            <TourPopover
+              align="top"
+              heading={i18n.t('Task Testers')}
+              body={
+                <Trans i18nKey="tourTaskTesterColumn">
+                  Assign yourself or someone else as a <b>Tester</b> to help on
+                  a Task for this Project. When a Task has a status of “Test,”
+                  it is ready for testing. Testers create a Test Org to view the
+                  Developer’s work, and approve the work or request changes
+                  before the Task can be Completed.
+                </Trans>
+              }
+            />
+          </>
+        }
         property="assigned_qa"
         width="15%"
       >

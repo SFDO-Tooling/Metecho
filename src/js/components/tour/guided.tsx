@@ -22,7 +22,7 @@ export const getFinalStep = (): Step => ({
   target: '.tour-walkthroughs',
   title: i18n.t('Review walkthroughs any time'),
   content: (
-    <Trans i18nKey="walkthroughHelp">
+    <Trans i18nKey="walkthroughDropdown">
       If you would like to review this or any other walkthrough, simply click
       the question mark. There is also a self-guided tour with more definitions
       and explanations.

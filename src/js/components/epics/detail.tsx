@@ -3,6 +3,7 @@ import PageHeaderControl from '@salesforce/design-system-react/components/page-h
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -17,6 +18,7 @@ import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import { Step } from '~js/components/steps/stepsItem';
 import CreateTaskModal from '~js/components/tasks/createForm';
 import TaskTable from '~js/components/tasks/table';
+import TourPopover from '~js/components/tour/popover';
 import {
   CreateOrgModal,
   DeleteModal,
@@ -350,13 +352,26 @@ const EpicDetail = (props: RouteComponentProps) => {
       i18n.t('Submit Epic for Review on GitHub')
     );
     submitButton = (
-      <Button
-        label={submitButtonText}
-        className="slds-m-bottom_large"
-        variant="brand"
-        onClick={openSubmitModal}
-        disabled={currentlySubmitting}
-      />
+      <div className="slds-is-relative">
+        <Button
+          label={submitButtonText}
+          className="slds-m-bottom_large"
+          variant="brand"
+          onClick={openSubmitModal}
+          disabled={currentlySubmitting}
+        />
+        <TourPopover
+          align="right"
+          heading={i18n.t('Submit this Epic for review')}
+          body={
+            <Trans i18nKey="tourEpicSubmitReview">
+              When an Epic has completed Tasks, it can be submitted for review.
+              The GitHub Project maintainers will approve the Epic or ask for
+              changes.
+            </Trans>
+          }
+        />
+      </div>
     );
   }
 
@@ -370,23 +385,39 @@ const EpicDetail = (props: RouteComponentProps) => {
         break;
     }
   };
-  const { branchLink, branchLinkText } = getBranchLink(epic);
+  const { branchLink, branchLinkText, popover } = getBranchLink(epic, 'epic');
   const onRenderHeaderActions = () => (
     <PageHeaderControl>
       {project.has_push_permission && (
-        <PageOptions
-          modelType={OBJECT_TYPES.EPIC}
-          handleOptionSelect={handlePageOptionSelect}
-        />
+        <div className="slds-is-relative inline-container">
+          <PageOptions
+            modelType={OBJECT_TYPES.EPIC}
+            handleOptionSelect={handlePageOptionSelect}
+          />
+          <TourPopover
+            align="left"
+            heading={i18n.t('Edit or delete this Epic')}
+            body={
+              <Trans i18nKey="tourEditEpic">
+                Here you can change the name and description of this Epic. You
+                can also delete the Epic. Deleting an Epic deletes all the Tasks
+                and Orgs in the Epic as well.
+              </Trans>
+            }
+          />
+        </div>
       )}
       {branchLink && (
-        <ExternalLink
-          url={branchLink}
-          showButtonIcon
-          className="slds-button slds-button_outline-brand"
-        >
-          {branchLinkText}
-        </ExternalLink>
+        <div className="slds-is-relative inline-container">
+          <ExternalLink
+            url={branchLink}
+            showButtonIcon
+            className="slds-button slds-button_outline-brand"
+          >
+            {branchLinkText}
+          </ExternalLink>
+          {popover}
+        </div>
       )}
     </PageHeaderControl>
   );
@@ -418,7 +449,22 @@ const EpicDetail = (props: RouteComponentProps) => {
       title={`${epic.name} | ${project.name} | ${i18n.t('Metecho')}`}
     >
       <DetailPageLayout
+        type={OBJECT_TYPES.EPIC}
         title={epic.name}
+        titlePopover={
+          <TourPopover
+            align="bottom left"
+            heading={i18n.t('Epic name & GitHub link')}
+            body={
+              <Trans i18nKey="tourEpicName">
+                This is the name of the Epic you are viewing. Select the link
+                below the Epic name to leave Metecho and access the Project’s
+                branch on GitHub. To edit this name, click the gear icon. Epics
+                and Tasks are equivalent to GitHub branches.
+              </Trans>
+            }
+          />
+        }
         description={epic.description_rendered}
         headerUrl={headerUrl}
         headerUrlText={headerUrlText}
@@ -440,11 +486,27 @@ const EpicDetail = (props: RouteComponentProps) => {
               </h2>
               {project.has_push_permission && (
                 <>
-                  <Button
-                    label={i18n.t('Add or Remove Collaborators')}
-                    variant="outline-brand"
-                    onClick={openAssignUsersModal}
-                  />
+                  <div className="slds-is-relative">
+                    <Button
+                      label={i18n.t('Add or Remove Collaborators')}
+                      variant="outline-brand"
+                      onClick={openAssignUsersModal}
+                    />
+                    <TourPopover
+                      align="top"
+                      heading={i18n.t('Epic Collaborators')}
+                      body={
+                        <Trans i18nKey="tourEpicCollaborators">
+                          Add Collaborators to help develop and test the Tasks
+                          in this Epic. Anyone with a GitHub account can be
+                          added as an Epic Collaborator. If you assign someone
+                          as a Task Developer or Tester that isn’t a
+                          Collaborator, they will automatically be added to this
+                          list.
+                        </Trans>
+                      }
+                    />
+                  </div>
                   <AssignEpicCollaboratorsModal
                     allUsers={project.github_users}
                     selectedUsers={epicCollaborators}
@@ -477,7 +539,12 @@ const EpicDetail = (props: RouteComponentProps) => {
                 />
               ) : null}
             </div>
-            <div className="slds-m-bottom_x-large metecho-secondary-block">
+            <div
+              className="slds-m-bottom_x-large
+                metecho-secondary-block
+                slds-is-relative
+                heading"
+            >
               <EpicStatusSteps
                 epic={epic}
                 tasks={tasks || []}
@@ -486,16 +553,59 @@ const EpicDetail = (props: RouteComponentProps) => {
                 canSubmit={project.has_push_permission}
                 handleAction={handleStepAction}
               />
+              <TourPopover
+                align="top"
+                heading={i18n.t('Wondering what to do next?')}
+                body={
+                  <Trans i18nKey="tourEpicNextSteps">
+                    The Next Steps section is designed as a quick reference to
+                    guide you through the process from adding your first Task to
+                    getting your Epic merged into the Project on GitHub. The
+                    next step is indicated with a blue ring, and completed steps
+                    are checked.
+                  </Trans>
+                }
+              />
             </div>
           </>
         }
       >
-        <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
+        <div className="slds-is-relative">
+          <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
+          <TourPopover
+            align="bottom left"
+            heading={i18n.t('Epic progress path')}
+            body={
+              <Trans i18nKey="tourEpicProgress">
+                An Epic starts its journey as <b>Planned</b>. The Epic is{' '}
+                <b>In Progress</b> when a Developer creates a Dev Org for any
+                Task in the Epic. When all the Epic’s Tasks are complete, and
+                the Epic is ready to be submitted for review on GitHub, the Epic
+                moves to <b>Review</b>. The Epic is ready to be <b>Merged</b>{' '}
+                once it is submitted for review, and is <b>Complete</b> when the
+                Epic has been added to the Project on GitHub.
+              </Trans>
+            }
+          />
+        </div>
         {submitButton}
         <div className="slds-m-bottom_large">
-          <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-            {i18n.t('My Epic Scratch Org')}
-          </h2>
+          <div className="slds-is-relative heading">
+            <TourPopover
+              align="top left"
+              heading={i18n.t('View & play with an Epic')}
+              body={
+                <Trans i18nKey="tourEpicScratchOrg">
+                  Your Scratch Org is a temporary place for you to view the work
+                  on this Epic. You can also use a Scratch Org to play with
+                  changes to the Epic without affecting the Epic.
+                </Trans>
+              }
+            />
+            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+              {i18n.t('My Epic Scratch Org')}
+            </h2>
+          </div>
           {orgs ? (
             <>
               {playgroundOrg ? (
@@ -541,12 +651,27 @@ const EpicDetail = (props: RouteComponentProps) => {
               {taskHeader}
             </h2>
             {project.has_push_permission && !epicIsMerged ? (
-              <Button
-                label={i18n.t('Add a Task')}
-                variant="brand"
-                onClick={openCreateModal}
-                className="slds-m-bottom_large"
-              />
+              <div className="slds-is-relative">
+                <Button
+                  label={i18n.t('Add a Task')}
+                  variant="brand"
+                  onClick={openCreateModal}
+                  className="slds-m-bottom_large"
+                />
+                <TourPopover
+                  align="top left"
+                  heading={i18n.t('Add a Task to contribute')}
+                  body={
+                    <Trans i18nKey="tourAddTask">
+                      To get started contributing to this Epic, add a Task. You
+                      will be asked for a name and optional description. You can
+                      chose an org type, but “dev” is recommended. Tasks
+                      represent small changes to this Epic; each one has a
+                      Developer and a Tester.
+                    </Trans>
+                  }
+                />
+              </div>
             ) : null}
             {epicHasTasks && (
               <>
