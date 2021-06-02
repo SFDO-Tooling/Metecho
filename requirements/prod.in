@@ -1,4 +1,4 @@
-Django==3.2.3
+Django==3.2.4
 autobahn==21.3.1
 beautifulsoup4==4.9.3
 bleach==3.3.0
@@ -13,7 +13,7 @@ django-js-reverse==0.9.1
 django-log-request-id==1.6.0
 django-model-utils==4.1.1
 django-parler==2.2
-django-redis==4.12.1
+django-redis==5.0.0
 django-rq==2.4.1
 djangorestframework==3.12.4
 furl==2.1.2
