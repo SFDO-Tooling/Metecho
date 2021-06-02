@@ -99,25 +99,23 @@ const setup = (options, type) => {
 describe('<PlaygroundOrgCard/>', () => {
   describe('project org', () => {
     test('renders org card', () => {
-      const { getByText } = setup({ parentLink: '/foo' }, 'project');
+      const { getByText } = setup({}, 'project');
 
       expect(getByText('Project Scratch Org')).toBeVisible();
       expect(getByText('1 unretrieved change', { exact: false })).toBeVisible();
       expect(getByText('check again')).toBeVisible();
       expect(getByText('This is an org.')).toBeVisible();
-      expect(getByText('Project 1')).toBeVisible();
     });
   });
 
   describe('epic org', () => {
     test('renders org card', () => {
-      const { getByText } = setup({ parentLink: '/foo' });
+      const { getByText } = setup();
 
       expect(getByText('Epic Scratch Org')).toBeVisible();
       expect(getByText('1 unretrieved change', { exact: false })).toBeVisible();
       expect(getByText('check again')).toBeVisible();
       expect(getByText('This is an org.')).toBeVisible();
-      expect(getByText('Epic 1')).toBeVisible();
     });
 
     describe('out of date', () => {

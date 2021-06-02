@@ -5,8 +5,8 @@ import i18n from 'i18next';
 import React, { ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { StaticContext, withRouter } from 'react-router';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { StaticContext } from 'react-router';
+import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 
 import welcomeMatBG from '~img/welcome-mat-bg.png';
 import welcomeMatFG from '~img/welcome-mat-fg.png';

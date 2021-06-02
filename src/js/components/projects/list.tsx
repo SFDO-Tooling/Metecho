@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { EmptyIllustration } from '~js/components/404';
 import ProjectListItem from '~js/components/projects/listItem';
+import TourPopover from '~js/components/tour/popover';
 import {
   LabelWithSpinner,
   SpinnerWrapper,
@@ -95,7 +96,25 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
     }
     default: {
       contents = (
-        <div className="slds-grid slds-wrap slds-grid_pull-padded-small">
+        <div
+          className="slds-grid
+            slds-wrap
+            slds-grid_pull-padded-small
+            slds-is-relative
+            project-list"
+        >
+          <TourPopover
+            align="top left"
+            heading={i18n.t('Metecho Project')}
+            body={
+              <Trans i18nKey="tourMetechoProject">
+                This is a Metecho <b>Project</b>. Projects are equivalent to
+                Repositories in GitHub. Select a Project to view the work being
+                done. If you would like to contribute, please make sure you have
+                “push” permissions in GitHub.
+              </Trans>
+            }
+          />
           {projects.map((project) => (
             <ProjectListItem project={project} key={project.id} />
           ))}
@@ -108,10 +127,28 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
   return (
     <DocumentTitle title={`${i18n.t('Projects')} | ${i18n.t('Metecho')}`}>
       <>
-        <PageHeader
-          className="page-header slds-p-around_x-large"
-          title={i18n.t('Select a Project')}
-        />
+        <div className="slds-is-relative page-title">
+          <TourPopover
+            align="bottom left"
+            heading={i18n.t('Begin exploring projects')}
+            body={
+              <Trans i18nKey="tourSelectProject">
+                Select a Metecho Project from the list to begin viewing or
+                contributing to the project. Projects are equivalent to
+                Repositories in GitHub. They have Orgs, Tasks, and Epics. To
+                learn more, continue the self-guided tour on a Project page.
+              </Trans>
+            }
+          />
+          <PageHeader
+            className="page-header
+              slds-is-relative
+              slds-p-around_x-large
+              project-placeholder"
+            title={i18n.t('Select a Project')}
+          />
+        </div>
+
         <div className="slds-p-around_x-large">
           <div className="slds-grid slds-grid_vertical-align-start">
             <div
@@ -130,11 +167,6 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                   repository on GitHub.
                 </Trans>
               </p>
-              {/* <Button
-                label={i18n.t('Create Project')}
-                variant="brand"
-                disabled
-              /> */}
             </div>
             <div
               className="slds-grid
@@ -151,14 +183,29 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                   disabled
                 />
               ) : (
-                <Button
-                  label={i18n.t('Re-Sync Projects')}
-                  variant="outline-brand"
-                  iconCategory="utility"
-                  iconName="refresh"
-                  iconPosition="left"
-                  onClick={doRefreshProjects}
-                />
+                <div className="slds-is-relative">
+                  <Button
+                    label={i18n.t('Re-Sync Projects')}
+                    variant="outline-brand"
+                    iconCategory="utility"
+                    iconName="refresh"
+                    iconPosition="left"
+                    onClick={doRefreshProjects}
+                  />
+                  <TourPopover
+                    align="left"
+                    heading={i18n.t('View an updated Project list')}
+                    body={
+                      <Trans i18nKey="tourUpdateProject">
+                        If you have recently been added as a collaborator on
+                        GitHub, you may not yet see your new Project in this
+                        list. First, make sure you are logged in with the
+                        correct GitHub account. Next, use the re-sync button to
+                        get an updated list of Projects.
+                      </Trans>
+                    }
+                  />
+                </div>
               )}
             </div>
           </div>

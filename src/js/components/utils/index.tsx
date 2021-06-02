@@ -10,6 +10,7 @@ export { default as PrivateRoute } from './privateRoute';
 export { default as SpinnerWrapper } from './spinnerWrapper';
 export { default as SubmitModal } from './submitModal';
 export { default as CreateOrgModal } from './createOrgModal';
+export { default as ContributeWorkModal } from './contributeWorkModal';
 
 export { default as getEpicLoadingOrNotFound } from './getEpicLoadingOrNotFound';
 export { default as getProjectLoadingOrNotFound } from './getProjectLoadingOrNotFound';

@@ -170,8 +170,12 @@ describe('<CaptureModal/>', () => {
     });
 
     describe('success', () => {
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
       test('displays success class for 3 seconds', async () => {
-        jest.useFakeTimers();
+        jest.useFakeTimers('legacy');
         updateObject.mockReturnValueOnce(() => Promise.resolve({}));
         const { findByText, getByText, getByLabelText, baseElement } = setup();
 
@@ -204,14 +208,14 @@ describe('<CaptureModal/>', () => {
           ).toBe(true),
         );
 
-        await waitFor(() => {
-          jest.runAllTimers();
-          return expect(
+        jest.runAllTimers();
+        await waitFor(() =>
+          expect(
             baseElement
               .querySelector('.accordion-no-padding')
               .classList.contains('success-highlight'),
-          ).toBe(false);
-        });
+          ).toBe(false),
+        );
       });
     });
   });

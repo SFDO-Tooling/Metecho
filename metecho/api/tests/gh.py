@@ -1,4 +1,5 @@
 from contextlib import ExitStack
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,7 +21,6 @@ from ..gh import (
     log_unsafe_zipfile_error,
     normalize_commit,
     try_to_make_branch,
-    validate_cumulusci_yml_unchanged,
     zip_file_is_safe,
 )
 
@@ -138,7 +138,7 @@ def test_extract_zip_file():
 
 
 class TestLocalGitHubCheckout:
-    def test_safe(self):
+    def test_zipfile_safe(self):
         user = MagicMock()
         repo = 123
         with ExitStack() as stack:
@@ -148,17 +148,18 @@ class TestLocalGitHubCheckout:
             shutil = stack.enter_context(patch(f"{PATCH_ROOT}.shutil"))
             glob = stack.enter_context(patch(f"{PATCH_ROOT}.glob"))
             repository = MagicMock(default_branch="main")
-            repository.file_contents.side_effect = NotFoundError(MagicMock())
+            repository.file_contents.return_value.decoded.decode.return_value = "Hello"
             gh = MagicMock()
             gh.repository_with_id.return_value = repository
             gh_given_user.return_value = gh
             glob.return_value = ["owner-repo_name-"]
 
-            with local_github_checkout(user, repo):
+            with local_github_checkout(user, repo) as repo_root:
+                assert (Path(repo_root) / "cumulusci.yml").read_text() == "Hello"
                 assert shutil.rmtree.called
                 assert os.remove.called
 
-    def test_unsafe(self):
+    def test_zipfile_unsafe(self):
         user = MagicMock()
         repo = 123
         with ExitStack() as stack:
@@ -178,63 +179,57 @@ class TestLocalGitHubCheckout:
                 with local_github_checkout(user, repo, "commit-ish"):  # pragma: nocover
                     pass
 
+    def test_cumulusci_yml_error(self, mocker):
+        user = MagicMock()
+        repo_id = 123
+        mocker.patch(f"{PATCH_ROOT}.zipfile")
+        mocker.patch(f"{PATCH_ROOT}.os")
+        gh_given_user = mocker.patch(f"{PATCH_ROOT}.gh_given_user")
+        mocker.patch(f"{PATCH_ROOT}.shutil")
+        glob = mocker.patch(f"{PATCH_ROOT}.glob")
+        repository = MagicMock(default_branch="main")
+        repository.file_contents.side_effect = NotFoundError(MagicMock())
+        gh = MagicMock()
+        gh.repository_with_id.return_value = repository
+        gh_given_user.return_value = gh
+        glob.return_value = ["owner-repo_name-"]
+
+        with pytest.raises(Exception):
+            with local_github_checkout(user, repo_id):
+                pass
+
 
 class TestTryCreateBranch:
-    def test_try_to_make_branch__duplicate_name(self, user_factory, task_factory):
+    def test_try_to_make_branch__duplicate_name(self):
         repository = MagicMock()
         resp = MagicMock(status_code=400)
         resp.json.return_value = {"message": "Reference already exists"}
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
-        result, latest_sha = try_to_make_branch(
-            repository, new_branch="new-branch", base_branch="base-branch"
-        )
+        result = try_to_make_branch(repository, new_branch="new-branch", base_sha="123")
 
         assert result == "new-branch-1"
-        assert latest_sha == "1234abc"
 
-    def test_try_to_make_branch__long_duplicate_name(self, user_factory, task_factory):
+    def test_try_to_make_branch__long_duplicate_name(self):
         repository = MagicMock()
         resp = MagicMock(status_code=400)
         resp.json.return_value = {"message": "Reference already exists"}
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
-        result, latest_sha = try_to_make_branch(
-            repository, new_branch="a" * 100, base_branch="base-branch"
-        )
+        result = try_to_make_branch(repository, new_branch="a" * 100, base_sha="123")
 
         assert result == "a" * 98 + "-1"
-        assert latest_sha == "1234abc"
 
-    def test_try_to_make_branch__unknown_error(self, user_factory, task_factory):
+    def test_try_to_make_branch__unknown_error(self):
         repository = MagicMock()
         resp = MagicMock(status_code=400, msg="Test message")
         repository.create_branch_ref.side_effect = [UnprocessableEntity(resp), None]
-        branch = MagicMock()
-        branch.latest_sha.return_value = "1234abc"
-        repository.branch.return_value = branch
         with pytest.raises(UnprocessableEntity):
-            try_to_make_branch(
-                repository, new_branch="new-branch", base_branch="base-branch"
-            )
+            try_to_make_branch(repository, new_branch="new-branch", base_sha="123")
 
 
 def test_get_source_format():
     with patch(f"{PATCH_ROOT}.get_project_config") as get_project_config:
         get_project_config.return_value = MagicMock(project__source_format="sentinel")
         assert get_source_format() == "sentinel"
-
-
-def test_validate_cumulusci_yml_unchanged():
-    repo = MagicMock()
-    repo.file_contents.return_value.decoded.decode.return_value = "1"
-
-    with pytest.raises(Exception):
-        validate_cumulusci_yml_unchanged(repo)
 
 
 class TestNormalizeCommit:

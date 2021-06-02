@@ -6,7 +6,9 @@ import classNames from 'classnames';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React, { ReactNode } from 'react';
+import { Trans } from 'react-i18next';
 
+import TourPopover from '~js/components/tour/popover';
 import { ExternalLink } from '~js/components/utils';
 import { Commit } from '~js/store/tasks/reducer';
 
@@ -97,13 +99,27 @@ TimestampTableCell.displayName = DataTableCell.displayName;
 const CommitList = ({ commits }: { commits: Commit[] }) =>
   commits.length ? (
     <>
-      <h2
-        className="slds-text-heading_medium
-          slds-m-top_large
-          slds-m-bottom_x-small"
-      >
-        Commit History
-      </h2>
+      <div className="slds-is-relative heading">
+        <TourPopover
+          align="top left"
+          heading={i18n.t('List of retrieved Task changes')}
+          body={
+            <Trans i18nKey="tourTaskCommits">
+              A “commit” represents changes retrieved from the Dev Org. This
+              saves all your changes to a Task, so that others can view them.
+              Add a commit message to let collaborators know what changes you
+              saved. Select the link to see the commit in GitHub.
+            </Trans>
+          }
+        />
+        <h2
+          className="slds-text-heading_medium
+            slds-m-top_large
+            slds-m-bottom_x-small"
+        >
+          {i18n.t('Commit History')}
+        </h2>
+      </div>
       <DataTable
         items={commits}
         id="task-commits-table"

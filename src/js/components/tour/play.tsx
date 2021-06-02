@@ -14,7 +14,7 @@ const PlayTour = ({ run, onClose }: Props) => {
   const steps: Step[] = [
     {
       target: '.tour-scratch-org',
-      title: i18n.t('View & play with project'),
+      title: i18n.t('View & play with a Project'),
       content: (
         <Trans i18nKey="walkthroughScratchOrg">
           Scratch Orgs are a temporary place for you to view the work on this
