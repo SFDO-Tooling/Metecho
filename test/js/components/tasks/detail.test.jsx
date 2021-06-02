@@ -7,7 +7,7 @@ import { createObject, fetchObjects } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
 import { defaultState as defaultOrgsState } from '~js/store/orgs/reducer';
 import { refreshOrgConfigs } from '~js/store/projects/actions';
-import { TASK_STATUSES } from '~js/utils/constants';
+import { RETRIEVE_CHANGES, TASK_STATUSES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
 import {
@@ -158,25 +158,33 @@ describe('<TaskDetail/>', () => {
       projectSlug: 'project-1',
       epicSlug: 'epic-1',
       taskSlug: 'task-1',
+      location: {},
       rerender: false,
     };
     const opts = Object.assign({}, defaults, options);
-    const { initialState, projectSlug, epicSlug, taskSlug } = opts;
+    const { initialState, projectSlug, epicSlug, taskSlug, location } = opts;
     const context = {};
+    const history = { replace: jest.fn() };
     const ui = (
       <StaticRouter context={context}>
-        <TaskDetail match={{ params: { projectSlug, epicSlug, taskSlug } }} />
+        <TaskDetail
+          match={{ params: { projectSlug, epicSlug, taskSlug } }}
+          location={location}
+          history={history}
+        />
       </StaticRouter>
     );
     if (opts.rerender) {
       return {
         ...reRenderWithRedux(ui, opts.store, opts.rerender),
         context,
+        history,
       };
     }
     return {
       ...renderWithRedux(ui, initialState, storeWithThunk),
       context,
+      history,
     };
   };
 
@@ -208,7 +216,7 @@ describe('<TaskDetail/>', () => {
 
     expect(getByTitle('Task 1')).toBeVisible();
     expect(getByTitle('View Org')).toBeVisible();
-    expect(getByText('No Tester')).toBeVisible();
+    expect(getByText('Self-Assign')).toBeVisible();
   });
 
   test('renders readonly task detail with test org', () => {
@@ -301,6 +309,7 @@ describe('<TaskDetail/>', () => {
             {
               ...defaultState.tasks.epic1[0],
               pr_url: 'my-pr-url',
+              pr_is_open: true,
             },
           ],
         },
@@ -454,6 +463,20 @@ describe('<TaskDetail/>', () => {
     });
   });
 
+  describe('converting org and retrieving changes', () => {
+    test('opens retrieve changes modal', async () => {
+      const { findByText, history } = setup({
+        location: { state: { [RETRIEVE_CHANGES]: true } },
+      });
+
+      expect.assertions(2);
+      const modal = await findByText('Select the location to retrieve changes');
+
+      expect(modal).toBeVisible();
+      expect(history.replace).toHaveBeenCalledWith({ state: {} });
+    });
+  });
+
   describe('reassigning org', () => {
     test('renders loading button', () => {
       const { getAllByText } = setup({
@@ -488,6 +511,7 @@ describe('<TaskDetail/>', () => {
                 has_unmerged_commits: true,
                 pr_url: 'my-pr-url',
                 pr_is_open: false,
+                status: TASK_STATUSES.CANCELED,
               },
             ],
           },
@@ -495,6 +519,39 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(getByText('Submit Task for Testing')).toBeVisible();
+      expect(getByText('re-submitted for testing')).toBeVisible();
+    });
+
+    test('does not render "Submit Task" button for readonly user', () => {
+      const { getByText, queryByText } = setup({
+        initialState: {
+          ...defaultState,
+          projects: {
+            ...defaultState.projects,
+            projects: [
+              {
+                ...defaultState.projects.projects[0],
+                has_push_permission: false,
+              },
+            ],
+          },
+          tasks: {
+            ...defaultState.tasks,
+            epic1: [
+              {
+                ...defaultState.tasks.epic1[0],
+                has_unmerged_commits: true,
+                pr_url: 'my-pr-url',
+                pr_is_open: false,
+                status: TASK_STATUSES.CANCELED,
+              },
+            ],
+          },
+        },
+      });
+
+      expect(queryByText('re-submitted for testing')).toBeNull();
+      expect(getByText('Canceled')).toBeVisible();
     });
   });
 

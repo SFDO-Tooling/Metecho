@@ -4,7 +4,6 @@ import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
 import { ExternalLink } from '~js/components/utils';
 import { Org } from '~js/store/orgs/reducer';
@@ -21,9 +20,6 @@ const OrgInfo = ({
   ownedByCurrentUser,
   ownedByWrongUser,
   userHasPermissions,
-  typeHeading,
-  parentLink,
-  parentName,
   isCreating,
   isRefreshingOrg,
   isSubmittingReview,
@@ -40,9 +36,6 @@ const OrgInfo = ({
   ownedByCurrentUser: boolean;
   ownedByWrongUser?: Org | null;
   userHasPermissions?: boolean;
-  typeHeading?: string;
-  parentLink?: string;
-  parentName?: string;
   isCreating: boolean;
   isRefreshingOrg?: boolean;
   isSubmittingReview?: boolean;
@@ -68,7 +61,7 @@ const OrgInfo = ({
     return null;
   }
 
-  if (!(org || task?.review_status)) {
+  if (!(org || (type === ORG_TYPES.QA && task?.review_status))) {
     return (
       <ul>
         <li>
@@ -242,6 +235,7 @@ const OrgInfo = ({
     }
   }
 
+  /* istanbul ignore next */
   return org || orgStatus ? (
     <ul>
       {org?.description_rendered ? (
@@ -256,12 +250,6 @@ const OrgInfo = ({
         </li>
       ) : null}
       {commitStatus}
-      {parentLink && typeHeading && parentName ? (
-        <li>
-          <strong>{typeHeading}</strong>{' '}
-          <Link to={parentLink}>{parentName}</Link>
-        </li>
-      ) : null}
       {/* expiration date for each org */}
       {expiresAt && (
         <li>

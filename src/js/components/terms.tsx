@@ -4,8 +4,8 @@ import { Location } from 'history';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { StaticContext, withRouter } from 'react-router';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { StaticContext } from 'react-router';
+import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 
 import Logout from '~js/components/user/logout';
 import { LabelWithSpinner, useIsMounted } from '~js/components/utils';

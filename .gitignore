@@ -73,6 +73,9 @@ jscache/
 # Sphinx documentation
 docs/_build/
 
+# pyenv
+.python-version
+
 # celery beat schedule file
 celerybeat-schedule
 

@@ -130,7 +130,7 @@ class TestPrHookSerializer:
         serializer.process_hook()
 
         task.refresh_from_db()
-        assert task.status == TASK_STATUSES["In progress"]
+        assert task.status == TASK_STATUSES.Canceled
         assert not task.pr_is_open
 
     def test_process_hook__reopened(self, project_factory, task_factory):

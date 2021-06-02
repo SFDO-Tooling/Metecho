@@ -10,12 +10,14 @@ const storyMiddleware = () => (next: (act: any) => any) => (act: any) => {
   return next(act);
 };
 
-// eslint-disable-next-line react/display-name
-export const withRedux = (state = {}) => (Story: React.ComponentClass) => {
-  const store = configureStore([thunk, storyMiddleware])(state);
-  return (
-    <Provider store={store}>
-      <Story />
-    </Provider>
-  );
-};
+export const withRedux =
+  (state = {}) =>
+  // eslint-disable-next-line react/display-name
+  (Story: React.ComponentClass) => {
+    const store = configureStore([thunk, storyMiddleware])(state);
+    return (
+      <Provider store={store}>
+        <Story />
+      </Provider>
+    );
+  };

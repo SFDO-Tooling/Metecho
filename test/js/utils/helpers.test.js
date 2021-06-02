@@ -1,3 +1,4 @@
+import { TASK_STATUSES } from '~js/utils/constants';
 import * as helpers from '~js/utils/helpers';
 
 describe('pluralize', () => {
@@ -13,22 +14,45 @@ describe('pluralize', () => {
 describe('getBranchLink', () => {
   test.each([
     [
-      { pr_url: 'pr' },
+      { pr_url: 'pr', pr_is_open: true },
+      'epic',
       { branchLink: 'pr', branchLinkText: 'View Pull Request' },
     ],
     [
+      {
+        pr_url: 'pr',
+        pr_is_open: false,
+        status: TASK_STATUSES.COMPLETED,
+      },
+      'epic',
+      { branchLink: 'pr', branchLinkText: 'View Pull Request' },
+    ],
+    [
+      {
+        pr_url: 'pr',
+        pr_is_open: false,
+        status: TASK_STATUSES.CANCELED,
+        has_unmerged_commits: true,
+        branch_diff_url: 'diff',
+      },
+      'epic',
+      { branchLink: 'diff', branchLinkText: 'View Changes' },
+    ],
+    [
       { has_unmerged_commits: true, branch_diff_url: 'diff' },
+      'task',
       { branchLink: 'diff', branchLinkText: 'View Changes' },
     ],
     [
       { branch_url: 'branch' },
+      'task',
       { branchLink: 'branch', branchLinkText: 'View Branch' },
     ],
-    [{}, { branchLink: undefined, branchLinkText: undefined }],
+    [{}, 'task', { branchLink: undefined, branchLinkText: undefined }],
   ])(
     'returns branchLink and branchLinkText for input: %o',
-    (input, expected) => {
-      expect(helpers.getBranchLink(input)).toEqual(expected);
+    (object, type, expected) => {
+      expect(helpers.getBranchLink(object, type)).toMatchObject(expected);
     },
   );
 });

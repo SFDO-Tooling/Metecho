@@ -93,10 +93,8 @@ const reducer = (
       return epics;
     }
     case 'CREATE_OBJECT_SUCCEEDED': {
-      const {
-        object,
-        objectType,
-      }: { object: Epic; objectType?: ObjectTypes } = action.payload;
+      const { object, objectType }: { object: Epic; objectType?: ObjectTypes } =
+        action.payload;
       if (objectType === OBJECT_TYPES.EPIC && object) {
         const project = epics[object.project] || { ...defaultState };
         // Do not store if (somehow) we already know about this epic
