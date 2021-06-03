@@ -8,7 +8,7 @@ import { selectProjectById } from '~js/store/projects/selectors';
 import { selectTaskById } from '~js/store/tasks/selectors';
 import { addToast } from '~js/store/toasts/actions';
 import apiFetch, { addUrlParams } from '~js/utils/api';
-import { OBJECT_TYPES } from '~js/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '~js/utils/constants';
 
 interface OrgProvisioning {
   type: 'SCRATCH_ORG_PROVISIONING';
@@ -81,16 +81,27 @@ export type OrgsAction =
 const getOrgParent = (
   org: Org | MinimalOrg,
   state: AppState,
-): { name?: string; parent?: string } => {
+  type: OrgTypes,
+): { name?: string; parent?: string; title?: string } => {
   const task = selectTaskById(state, org.task);
   const epic = selectEpicById(state, org.epic);
   const project = selectProjectById(state, org.project);
+  let typeTitle;
+
+  if (type === ORG_TYPES.QA) {
+    typeTitle = 'Test Org';
+  } else if (type === ORG_TYPES.DEV) {
+    typeTitle = 'Dev Org';
+  } else {
+    typeTitle = 'Scratch Org';
+  }
+
   if (task) {
-    return { name: task.name, parent: i18n.t('Task') };
+    return { name: task.name, parent: i18n.t('Task'), title: typeTitle };
   } else if (epic) {
-    return { name: epic.name, parent: i18n.t('Epic') };
+    return { name: epic.name, parent: i18n.t('Epic'), title: typeTitle };
   } else if (project) {
-    return { name: project.name, parent: i18n.t('Project') };
+    return { name: project.name, parent: i18n.t('Project'), title: typeTitle };
   }
   return {};
 };
@@ -99,21 +110,23 @@ export const provisionOrg =
   ({
     model,
     originating_user_id,
+    type,
   }: {
     model: Org;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<OrgProvisioned> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t('Successfully created scratch org.');
-      const { name, parent } = getOrgParent(model, state);
+      const { name, parent, title } = getOrgParent(model, state, type);
       /* istanbul ignore else */
-      if (name && parent) {
+      if (name && parent && title) {
         msg = i18n.t(
-          'Successfully created scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Successfully created {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(
@@ -253,10 +266,12 @@ export const deleteOrg =
     model,
     message,
     originating_user_id,
+    type,
   }: {
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<OrgDeleted> =>
   (dispatch, getState) => {
     /* istanbul ignore else */
@@ -289,12 +304,12 @@ export const deleteOrg =
         );
       } else {
         let msg = i18n.t('Successfully deleted scratch org.');
-        const { name, parent } = getOrgParent(model, state);
+        const { name, parent, title } = getOrgParent(model, state, type);
         /* istanbul ignore else */
         if (name && parent) {
           msg = i18n.t(
-            'Successfully deleted scratch org for {{parent}} “{{name}}”.',
-            { parent, name },
+            'Successfully deleted {{title}} for {{parent}} “{{name}}”.',
+            { parent, name, title },
           );
         }
         dispatch(addToast({ heading: msg }));
