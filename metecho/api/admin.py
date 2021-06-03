@@ -81,40 +81,55 @@ class SoftDeletedListFilter(admin.SimpleListFilter):
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("username", "is_active", "is_staff", "is_superuser", "date_joined")
-    search_fields = ("username",)
+    list_filter = ("is_active", "is_staff", "is_superuser")
+    search_fields = ("username", "email")
+    filter_horizontal = ("groups", "user_permissions")
 
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     form = ProjectForm
     list_display = ("name", "repo_owner", "repo_name", "created_at")
+    search_fields = ("name", "repo_owner", "repo_name")
 
 
 @admin.register(ProjectSlug)
 class ProjectSlugAdmin(admin.ModelAdmin):
-    list_display = ("slug", "parent")
+    list_display = ("slug", "parent", "is_active")
+    list_filter = ("is_active",)
+    list_select_related = ("parent",)
+    search_fields = ("slug",)
 
 
 @admin.register(GitHubRepository)
 class GitHubRepositoryAdmin(admin.ModelAdmin):
     list_display = ("repo_url", "user")
+    list_filter = ("user",)
+    list_select_related = ("user",)
+    search_fields = ("repo_url", "repo_id")
 
 
 @admin.register(Epic)
 class EpicAdmin(admin.ModelAdmin):
-    list_display = ("name", "project", "created_at", "deleted_at")
-    list_filter = (SoftDeletedListFilter,)
+    list_display = ("name", "status", "project", "created_at", "deleted_at")
+    list_filter = (SoftDeletedListFilter, "status", "project")
+    list_select_related = ("project",)
+    search_fields = ("name", "branch_name")
 
 
 @admin.register(EpicSlug)
 class EpicSlugAdmin(admin.ModelAdmin):
-    list_display = ("slug", "parent")
+    list_display = ("slug", "parent", "is_active")
+    list_filter = ("is_active",)
+    list_select_related = ("parent",)
+    search_fields = ("slug",)
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("name", "epic", "created_at", "deleted_at")
-    list_filter = (SoftDeletedListFilter,)
+    list_display = ("name", "status", "epic", "created_at", "deleted_at")
+    list_filter = (SoftDeletedListFilter, "status", "epic__project")
+    search_fields = ("name", "epic__name")
     fields = (
         ("name", "epic"),
         "description",
@@ -138,7 +153,10 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(TaskSlug)
 class TaskSlugAdmin(admin.ModelAdmin):
-    list_display = ("slug", "parent")
+    list_display = ("slug", "parent", "is_active")
+    list_filter = ("is_active",)
+    list_select_related = ("parent",)
+    search_fields = ("slug",)
 
 
 @admin.register(ScratchOrg)
@@ -152,7 +170,8 @@ class ScratchOrgAdmin(admin.ModelAdmin):
         "created_at",
         "deleted_at",
     )
-    list_filter = (SoftDeletedListFilter,)
+    list_filter = (SoftDeletedListFilter, "owner", "org_type")
+    search_fields = ("project__name", "epic__name", "task__name")
     formfield_overrides = {JSONField: {"widget": JSONWidget}}
 
 
