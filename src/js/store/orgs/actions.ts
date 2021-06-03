@@ -8,7 +8,7 @@ import { selectProjectById } from '~js/store/projects/selectors';
 import { selectTaskById } from '~js/store/tasks/selectors';
 import { addToast } from '~js/store/toasts/actions';
 import apiFetch, { addUrlParams } from '~js/utils/api';
-import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '~js/utils/constants';
+import { OBJECT_TYPES, OrgTypes } from '~js/utils/constants';
 
 interface OrgProvisioning {
   type: 'SCRATCH_ORG_PROVISIONING';
@@ -118,8 +118,13 @@ export const provisionOrg =
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
-      let msg = i18n.t('Successfully created scratch org.');
+      let msg = i18n.t('Successfully created Scratch Org.');
       const { name, parent, title } = getOrgParent(model, state);
+
+      if (title) {
+        msg = i18n.t('Successfully created {{title}}”.', { title });
+      }
+
       /* istanbul ignore else */
       if (name && parent && title) {
         msg = i18n.t(
@@ -153,19 +158,27 @@ export const provisionFailed =
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<OrgProvisionFailed> =>
   (dispatch, getState) => {
     const state = getState();
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t(
-        'Uh oh. There was an error creating your new scratch org.',
+        'Uh oh. There was an error creating your new Scratch Org.',
       );
-      const { name, parent } = getOrgParent(model, state);
+
+      const { name, parent, title } = getOrgParent(model, state);
+
+      if (title) {
+        msg = i18n.t('Uh oh. There was an error creating your new {{title}}.', {
+          title,
+        });
+      }
       /* istanbul ignore else */
-      if (name && parent) {
+      if (name && parent && title) {
         msg = i18n.t(
-          'Uh oh. There was an error creating your new scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Uh oh. There was an error creating your new {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(
@@ -232,20 +245,28 @@ export const updateFailed =
     model: Org;
     message?: string;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<OrgUpdated> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t(
-        'Uh oh. There was an error checking for changes on your scratch org.',
+        'Uh oh. There was an error checking for changes on your Scratch Org.',
       );
-      const { name, parent } = getOrgParent(model, state);
-      /* istanbul ignore else */
-      if (name && parent) {
+      const { name, parent, title } = getOrgParent(model, state);
+
+      if (title) {
         msg = i18n.t(
-          'Uh oh. There was an error checking for changes on your scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Uh oh. There was an error checking for changes on your {{title}}.',
+          { title },
+        );
+      }
+      /* istanbul ignore else */
+      if (name && parent && title) {
+        msg = i18n.t(
+          'Uh oh. There was an error checking for changes on your {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(
@@ -264,7 +285,6 @@ export const deleteOrg =
     model,
     message,
     originating_user_id,
-    type,
   }: {
     model: Org | MinimalOrg;
     message?: string;
@@ -330,18 +350,25 @@ export const deleteFailed =
     model: Org;
     message?: string;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<OrgDeleteFailed> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
-      let msg = i18n.t('Uh oh. There was an error deleting your scratch org.');
-      const { name, parent } = getOrgParent(model, state);
+      let msg = i18n.t('Uh oh. There was an error deleting your Scratch Org.');
+      const { name, parent, title } = getOrgParent(model, state);
+
+      if (title) {
+        msg = i18n.t('Uh oh. There was an error deleting your {{title}}.', {
+          title,
+        });
+      }
       /* istanbul ignore else */
-      if (name && parent) {
+      if (name && parent && title) {
         msg = i18n.t(
-          'Uh oh. There was an error deleting your scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Uh oh. There was an error deleting your {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(
@@ -365,18 +392,25 @@ export const commitSucceeded =
   }: {
     model: Org;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<CommitEvent> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
-      let msg = i18n.t('Successfully retrieved changes from your scratch org.');
-      const { name, parent } = getOrgParent(model, state);
+      let msg = i18n.t('Successfully retrieved changes from your Scratch Org.');
+      const { name, parent, title } = getOrgParent(model, state);
+
+      if (title) {
+        msg = i18n.t('Successfully retrieved changes from your {{title}}.', {
+          title,
+        });
+      }
       /* istanbul ignore else */
-      if (name && parent) {
+      if (name && parent && title) {
         msg = i18n.t(
-          'Successfully retrieved changes from your scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Successfully retrieved changes from your {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(

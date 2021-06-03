@@ -118,7 +118,7 @@ describe('provisionOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Successfully created scratch org.',
+        'Successfully created Scratch Org.',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
       expect(allActions[0].payload.linkUrl).toEqual(
@@ -175,7 +175,7 @@ describe('provisionOrg', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully created scratch org.',
+      'Successfully created Scratch Org.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
     expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -221,7 +221,7 @@ describe('provisionFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Uh oh. There was an error creating your new scratch org for Task “My Task”.',
+        'Uh oh. There was an error creating your new Dev Org for Task “My Task”.',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');
@@ -352,6 +352,7 @@ describe('updateFailed', () => {
     const store = storeWithThunk(defaultState);
     const org = {
       id: 'org-id',
+      org_type: 'QA',
       task: 'task-id',
       owner: 'user-id',
     };
@@ -370,7 +371,7 @@ describe('updateFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error checking for changes on your scratch org for Task “My Task”.',
+      'Uh oh. There was an error checking for changes on your Test Org for Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -398,7 +399,7 @@ describe('updateFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error checking for changes on your scratch org.',
+      'Uh oh. There was an error checking for changes on your Scratch Org.',
     );
     expect(allActions[0].payload.details).toBeUndefined();
     expect(allActions[0].payload.variant).toEqual('error');
@@ -510,7 +511,7 @@ describe('deleteFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Uh oh. There was an error deleting your scratch org for Task “My Task”.',
+        'Uh oh. There was an error deleting your Dev Org for Task “My Task”.',
       );
       expect(allActions[0].payload.details).toEqual('error msg');
       expect(allActions[0].payload.variant).toEqual('error');
@@ -524,6 +525,7 @@ describe('commitSucceeded', () => {
     const store = storeWithThunk(defaultState);
     const org = {
       id: 'org-id',
+      org_type: 'QA',
       task: 'task-id',
       owner: 'user-id',
     };
@@ -538,7 +540,7 @@ describe('commitSucceeded', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Successfully retrieved changes from your scratch org for Task “My Task”.',
+      'Successfully retrieved changes from your Test Org for Task “My Task”.',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -564,7 +566,7 @@ describe('commitSucceeded', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully retrieved changes from your scratch org.',
+      'Successfully retrieved changes from your Scratch Org.',
     );
     expect(allActions[1]).toEqual(action);
   });
