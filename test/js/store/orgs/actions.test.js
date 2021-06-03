@@ -61,7 +61,7 @@ describe('provisionOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Successfully created scratch org for Task “My Task”.',
+        'Successfully created Dev Org for Task “My Task”.',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
       expect(allActions[0].payload.linkUrl).toEqual(
@@ -74,7 +74,7 @@ describe('provisionOrg', () => {
       const store = storeWithThunk(defaultState);
       const thisOrg = {
         ...org,
-        org_type: 'Playground',
+        org_type: 'QA',
         task: undefined,
         epic: 'epic-id',
       };
@@ -88,7 +88,7 @@ describe('provisionOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Successfully created scratch org for Epic “My Epic”.',
+        'Successfully created Test Org for Epic “My Epic”.',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
       expect(allActions[0].payload.linkUrl).toEqual(
@@ -148,7 +148,7 @@ describe('provisionOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Successfully created scratch org for Project “My Project”.',
+        'Successfully created Scratch Org for Project “My Project”.',
       );
       expect(allActions[0].payload.linkText).toEqual('View your new org.');
       expect(allActions[0].payload.linkUrl).toEqual(
@@ -451,7 +451,7 @@ describe('deleteOrg', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toMatch(
-        'Successfully deleted scratch org for Task “My Task”.',
+        'Successfully deleted Dev Org for Task “My Task”.',
       );
       expect(allActions[1]).toEqual(orgAction);
     });

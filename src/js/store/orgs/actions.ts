@@ -81,7 +81,6 @@ export type OrgsAction =
 const getOrgParent = (
   org: Org | MinimalOrg,
   state: AppState,
-  type: OrgTypes,
 ): { name?: string; parent?: string; title?: string } => {
   const task = selectTaskById(state, org.task);
   const epic = selectEpicById(state, org.epic);
@@ -110,7 +109,6 @@ export const provisionOrg =
   ({
     model,
     originating_user_id,
-    type,
   }: {
     model: Org;
     originating_user_id: string | null;
@@ -121,7 +119,7 @@ export const provisionOrg =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t('Successfully created scratch org.');
-      const { name, parent, title } = getOrgParent(model, state, type);
+      const { name, parent, title } = getOrgParent(model, state);
       /* istanbul ignore else */
       if (name && parent && title) {
         msg = i18n.t(
@@ -303,8 +301,10 @@ export const deleteOrg =
           }),
         );
       } else {
-        let msg = i18n.t('Successfully deleted scratch org.');
-        const { name, parent, title } = getOrgParent(model, state, type);
+        const { name, parent, title } = getOrgParent(model, state);
+
+        let msg = i18n.t('Successfully deleted {{title}}.', { title });
+
         /* istanbul ignore else */
         if (name && parent) {
           msg = i18n.t(
