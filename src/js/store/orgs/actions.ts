@@ -88,9 +88,9 @@ const getOrgParent = (
   const project = selectProjectById(state, org.project);
   let typeTitle;
 
-  if (type === ORG_TYPES.QA) {
+  if (org.org_type === 'QA') {
     typeTitle = 'Test Org';
-  } else if (type === ORG_TYPES.DEV) {
+  } else if (org.org_type === 'Dev') {
     typeTitle = 'Dev Org';
   } else {
     typeTitle = 'Scratch Org';
