@@ -23,10 +23,12 @@ import TaskOrgCards, {
 } from '~js/components/orgs/taskOrgCards';
 import { Step } from '~js/components/steps/stepsItem';
 import CaptureModal from '~js/components/tasks/capture';
+import CreateTaskModal from '~js/components/tasks/createForm';
 import TaskStatusPath from '~js/components/tasks/path';
 import TaskStatusSteps from '~js/components/tasks/steps';
 import TourPopover from '~js/components/tour/popover';
 import {
+  ContributeWorkModal,
   CreateOrgModal,
   DeleteModal,
   DetailPageLayout,
@@ -46,7 +48,7 @@ import {
   useIsMounted,
 } from '~js/components/utils';
 import { AppState, ThunkDispatch } from '~js/store';
-import { createObject } from '~js/store/actions';
+import { createObject, updateObject } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
 import { Org, OrgsByParent } from '~js/store/orgs/reducer';
 import { selectProjectCollaborator } from '~js/store/projects/selectors';
@@ -99,6 +101,8 @@ const TaskDetail = (
     ORG_TYPE_TRACKER_DEFAULT,
   );
   const [submitReviewModalOpen, setSubmitReviewModalOpen] = useState(false);
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
+  const [createModalOrgId, setCreateModalOrgId] = useState<string | null>(null);
   const isMounted = useIsMounted();
 
   const { project, projectSlug } = useFetchProjectIfMissing(props);
@@ -121,10 +125,15 @@ const TaskDetail = (
   const qaUser = useSelector((state: AppState) =>
     selectProjectCollaborator(state, project?.id, task?.assigned_qa),
   );
+  const {
+    history,
+    location: { state },
+  } = props;
 
   const readyToSubmit = Boolean(
     task?.has_unmerged_commits && !task?.pr_is_open,
   );
+  const taskIsMerged = task?.status === TASK_STATUSES.COMPLETED;
   const currentlySubmitting = Boolean(task?.currently_creating_pr);
   const userIsAssignedDev = Boolean(user.github_id === task?.assigned_dev);
   const userIsAssignedTester = Boolean(user.github_id === task?.assigned_qa);
@@ -219,6 +228,9 @@ const TaskDetail = (
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setCreateModalOrgId(null);
   };
   const closeSubmitReviewModal = () => {
     setSubmitReviewModalOpen(false);
@@ -230,6 +242,9 @@ const TaskDetail = (
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setCreateModalOrgId(null);
   };
   const closeCaptureModal = () => {
     setCaptureModalOpen(false);
@@ -241,6 +256,9 @@ const TaskDetail = (
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setCreateModalOrgId(null);
   };
   // edit modal related...
   const openEditModal = () => {
@@ -250,6 +268,9 @@ const TaskDetail = (
     setCaptureModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setCreateModalOrgId(null);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
@@ -262,6 +283,9 @@ const TaskDetail = (
     setSubmitModalOpen(false);
     setCaptureModalOpen(false);
     setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setCreateModalOrgId(null);
   };
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
@@ -276,6 +300,8 @@ const TaskDetail = (
     setEditModalOpen(false);
     setDeleteModalOpen(false);
     setCreateOrgModalOpen(false);
+    setContributeModalOpen(false);
+    setCreateModalOrgId(null);
   };
   const closeAssignUserModal = () => {
     setAssignUserModalOpen(null);
@@ -289,9 +315,44 @@ const TaskDetail = (
     setSubmitModalOpen(false);
     setCaptureModalOpen(false);
     setDeleteModalOpen(false);
+    setAssignUserModalOpen(null);
+    setContributeModalOpen(false);
+    setCreateModalOrgId(null);
   };
   const closeCreateOrgModal = () => {
     setCreateOrgModalOpen(false);
+  };
+
+  // "contribute work" modal related:
+  const openContributeModal = () => {
+    setContributeModalOpen(true);
+    setSubmitReviewModalOpen(false);
+    setCaptureModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+    setCreateModalOrgId(null);
+  };
+  const closeContributeModal = useCallback(() => {
+    setContributeModalOpen(false);
+  }, []);
+
+  // "create task" modal related:
+  const openCreateModal = useCallback((orgId: string) => {
+    setCreateModalOrgId(orgId);
+    setContributeModalOpen(false);
+    setSubmitReviewModalOpen(false);
+    setCaptureModalOpen(false);
+    setSubmitModalOpen(false);
+    setEditModalOpen(false);
+    setDeleteModalOpen(false);
+    setCreateOrgModalOpen(false);
+    setAssignUserModalOpen(null);
+  }, []);
+  const closeCreateModal = () => {
+    setCreateModalOrgId(null);
   };
 
   const doRefetchOrg = useCallback(
@@ -363,6 +424,47 @@ const TaskDetail = (
       }
     }
   }, [devOrg, doRefetchOrg, orgHasChanges]);
+
+  const doContributeFromScratchOrg = useCallback(
+    ({ id, useExistingTask }: { id: string; useExistingTask: boolean }) => {
+      closeContributeModal();
+      if (!useExistingTask) {
+        openCreateModal(id);
+      } else if (!devOrg) {
+        if (!userIsAssignedDev) {
+          // Assign current user as Dev
+          dispatch(
+            updateObject({
+              objectType: OBJECT_TYPES.TASK,
+              url: window.api_urls.task_assignees(task?.id),
+              data: {
+                assigned_dev: user.github_id,
+              },
+            }),
+          );
+        }
+        // Convert Scratch Org to Dev Org
+        dispatch(
+          updateObject({
+            objectType: OBJECT_TYPES.ORG,
+            url: window.api_urls.scratch_org_detail(id),
+            data: { org_type: ORG_TYPES.DEV },
+            patch: true,
+          }),
+        );
+        history.replace({ state: { [RETRIEVE_CHANGES]: true } });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      closeContributeModal,
+      openCreateModal,
+      devOrg,
+      task?.id,
+      user.github_id,
+      userIsAssignedDev,
+    ],
+  );
 
   const handleStepAction = useCallback(
     (step: Step) => {
@@ -445,10 +547,6 @@ const TaskDetail = (
   );
 
   // Auto-open the retrieve-changes modal if `RETRIEVE_CHANGES` param is truthy
-  const {
-    history,
-    location: { state },
-  } = props;
   const shouldRetrieve = state?.[RETRIEVE_CHANGES];
   useEffect(() => {
     if (
@@ -586,7 +684,7 @@ const TaskDetail = (
   );
 
   let submitButton: React.ReactNode = null;
-  if (readyToSubmit && project.has_push_permission) {
+  if (readyToSubmit && project.has_push_permission && !taskIsMerged) {
     const isPrimary = !readyToCaptureChanges;
     const submitButtonText = currentlySubmitting ? (
       <LabelWithSpinner
@@ -624,6 +722,7 @@ const TaskDetail = (
   let captureButton: React.ReactNode = null;
   if (
     project.has_push_permission &&
+    !taskIsMerged &&
     (readyToCaptureChanges || orgHasBeenVisited)
   ) {
     let captureButtonText: JSX.Element = i18n.t(
@@ -769,7 +868,7 @@ const TaskDetail = (
                 }
               />
             </div>
-            {taskOrgs && task.status !== TASK_STATUSES.COMPLETED ? (
+            {taskOrgs && !taskIsMerged ? (
               <div
                 className="slds-m-bottom_x-large
                   metecho-secondary-block
@@ -896,6 +995,9 @@ const TaskDetail = (
                       org={playgroundOrg}
                       task={task}
                       repoUrl={project.repo_url}
+                      openContributeModal={
+                        taskIsMerged ? undefined : openContributeModal
+                      }
                     />
                   </div>
                 </div>
@@ -975,6 +1077,26 @@ const TaskDetail = (
           isOpen={createOrgModalOpen}
           closeModal={closeCreateOrgModal}
         />
+        {playgroundOrg && !taskIsMerged ? (
+          <>
+            <ContributeWorkModal
+              task={task}
+              isOpen={contributeModalOpen}
+              hasPermissions={project.has_push_permission}
+              orgId={playgroundOrg.id}
+              hasDevOrg={Boolean(devOrg)}
+              closeModal={closeContributeModal}
+              doContribute={doContributeFromScratchOrg}
+            />
+            <CreateTaskModal
+              project={project}
+              epic={epic}
+              isOpenOrOrgId={createModalOrgId}
+              playgroundOrg={playgroundOrg}
+              closeCreateModal={closeCreateModal}
+            />
+          </>
+        ) : null}
         <CommitList commits={task.commits} />
       </DetailPageLayout>
     </DocumentTitle>

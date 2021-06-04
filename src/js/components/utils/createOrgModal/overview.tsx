@@ -88,7 +88,7 @@ const Overview = ({
             </p>
           </Trans>
         )}
-        {!isEpic || !project.has_push_permission
+        {isProject || !project.has_push_permission
           ? cannotContributeWarning
           : null}
       </div>
