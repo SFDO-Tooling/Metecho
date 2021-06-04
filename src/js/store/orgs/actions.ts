@@ -314,7 +314,7 @@ export const deleteOrg =
         dispatch(
           addToast({
             heading: i18n.t(
-              'Uh oh. There was an error communicating with your scratch org.',
+              'Uh oh. There was an error communicating with your Scratch Org.',
             ),
             details: message,
             variant: 'error',
@@ -326,7 +326,7 @@ export const deleteOrg =
         let msg = i18n.t('Successfully deleted {{title}}.', { title });
 
         /* istanbul ignore else */
-        if (name && parent) {
+        if (name && parent && title) {
           msg = i18n.t(
             'Successfully deleted {{title}} for {{parent}} “{{name}}”.',
             { parent, name, title },
@@ -434,20 +434,22 @@ export const commitFailed =
     model: Org;
     message?: string;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<CommitEvent> =>
   (dispatch, getState) => {
     const state = getState();
+
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t(
-        'Uh oh. There was an error retrieving changes from your scratch org.',
+        'Uh oh. There was an error retrieving changes from your Scratch Org.',
       );
-      const { name, parent } = getOrgParent(model, state);
+      const { name, parent, title } = getOrgParent(model, state);
       /* istanbul ignore else */
-      if (name && parent) {
+      if (name && parent && title) {
         msg = i18n.t(
-          'Uh oh. There was an error retrieving changes from your scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Uh oh. There was an error retrieving changes from your {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(
@@ -496,18 +498,23 @@ export const orgRefreshed =
   }: {
     model: Org;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<OrgUpdated> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
-      let msg = i18n.t('Successfully refreshed your scratch org.');
-      const { name, parent } = getOrgParent(model, state);
+      let msg = i18n.t('Successfully refreshed your Scratch Org.');
+      const { name, parent, title } = getOrgParent(model, state);
+
+      if (title) {
+        msg = i18n.t('Successfully refreshed your {{title}}.', { title });
+      }
       /* istanbul ignore else */
-      if (name && parent) {
+      if (name && parent && title) {
         msg = i18n.t(
-          'Successfully refreshed your scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Successfully refreshed your {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(addToast({ heading: msg }));
@@ -524,20 +531,28 @@ export const refreshError =
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<OrgUpdated | OrgRefreshRejected> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t(
-        'Uh oh. There was an error refreshing your scratch org.',
+        'Uh oh. There was an error refreshing your Scratch Org.',
       );
-      const { name, parent } = getOrgParent(model, state);
+      const { name, parent, title } = getOrgParent(model, state);
+
       /* istanbul ignore else */
-      if (name && parent) {
+      if (title) {
+        msg = i18n.t('Uh oh. There was an error refreshing your {{title}}.', {
+          title,
+        });
+      }
+      /* istanbul ignore else */
+      if (name && parent && title) {
         msg = i18n.t(
-          'Uh oh. There was an error refreshing your scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Uh oh. There was an error refreshing your {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(
@@ -587,20 +602,28 @@ export const orgReassignFailed =
     model: Org;
     message?: string;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<OrgReassignFailed> =>
   (dispatch, getState) => {
     const state = getState();
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t(
-        'Uh oh. There was an error reassigning this scratch org.',
+        'Uh oh. There was an error reassigning this Scratch Org.',
       );
-      const { name, parent } = getOrgParent(model, state);
+      const { name, parent, title } = getOrgParent(model, state);
+
       /* istanbul ignore else */
-      if (name && parent) {
+      if (title) {
+        msg = i18n.t('Uh oh. There was an error reassigning this {{title}}.', {
+          title,
+        });
+      }
+      /* istanbul ignore else */
+      if (name && parent && title) {
         msg = i18n.t(
-          'Uh oh. There was an error reassigning the scratch org for {{parent}} “{{name}}”.',
-          { parent, name },
+          'Uh oh. There was an error reassigning the {{title}} for {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(
@@ -640,6 +663,7 @@ export const orgConvertFailed =
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
+    type: OrgTypes;
   }): ThunkResult<void> =>
   (dispatch, getState, history) => {
     const state = getState();
@@ -648,12 +672,20 @@ export const orgConvertFailed =
       let msg = i18n.t(
         'Uh oh. There was an error contributing work from your Scratch Org.',
       );
-      const { name, parent } = getOrgParent(model, state);
+      const { name, parent, title } = getOrgParent(model, state);
+
       /* istanbul ignore else */
-      if (name && parent) {
+      if (title) {
         msg = i18n.t(
-          'Uh oh. There was an error contributing work from your Scratch Org on {{parent}} “{{name}}”.',
-          { parent, name },
+          'Uh oh. There was an error contributing work from your {{title}}.',
+          { title },
+        );
+      }
+      /* istanbul ignore else */
+      if (name && parent && title) {
+        msg = i18n.t(
+          'Uh oh. There was an error contributing work from your {{title}} on {{parent}} “{{name}}”.',
+          { parent, name, title },
         );
       }
       dispatch(

@@ -251,7 +251,7 @@ describe('provisionFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error creating your new scratch org.',
+        'Uh oh. There was an error creating your new Scratch Org.',
       );
       expect(allActions[0].payload.linkText).toBeUndefined();
       expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -595,7 +595,7 @@ describe('commitFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error retrieving changes from your scratch org for Task “My Task”.',
+      'Uh oh. There was an error retrieving changes from your Scratch Org for Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -627,7 +627,7 @@ describe('commitFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error retrieving changes from your scratch org.',
+      'Uh oh. There was an error retrieving changes from your Scratch Org.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -704,6 +704,7 @@ describe('orgRefreshed', () => {
     const store = storeWithThunk(defaultState);
     const org = {
       id: 'org-id',
+      org_type: 'QA',
       task: 'task-id',
       owner: 'user-id',
     };
@@ -718,7 +719,7 @@ describe('orgRefreshed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Successfully refreshed your scratch org for Task “My Task”.',
+      'Successfully refreshed your Test Org for Task “My Task”.',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -744,7 +745,7 @@ describe('orgRefreshed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully refreshed your scratch org.',
+      'Successfully refreshed your Scratch Org.',
     );
     expect(allActions[1]).toEqual(action);
   });
@@ -755,6 +756,7 @@ describe('refreshError', () => {
     const store = storeWithThunk(defaultState);
     const org = {
       id: 'commit-id',
+      org_type: 'QA',
       task: 'task-id',
       owner: 'user-id',
     };
@@ -773,7 +775,7 @@ describe('refreshError', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error refreshing your scratch org for Task “My Task”.',
+      'Uh oh. There was an error refreshing your Test Org for Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -805,7 +807,7 @@ describe('refreshError', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error refreshing your scratch org.',
+      'Uh oh. There was an error refreshing your Scratch Org.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -873,6 +875,7 @@ describe('orgReassignFailed', () => {
     const store = storeWithThunk(defaultState);
     const org = {
       id: 'org-id',
+      org_type: 'Dev',
       task: 'task-id',
       owner: 'user-id',
     };
@@ -891,7 +894,7 @@ describe('orgReassignFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error reassigning the scratch org for Task “My Task”.',
+      'Uh oh. There was an error reassigning the Dev Org for Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -923,7 +926,7 @@ describe('orgReassignFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error reassigning this scratch org.',
+      'Uh oh. There was an error reassigning this Scratch Org.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
@@ -964,6 +967,7 @@ describe('orgConvertFailed', () => {
     const store = getStoreWithHistory({ replace })(defaultState);
     const org = {
       id: 'org-id',
+      org_type: 'Dev',
       task: 'task-id',
       owner: 'user-id',
     };
@@ -978,7 +982,7 @@ describe('orgConvertFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toMatch(
-      'Uh oh. There was an error contributing work from your Scratch Org on Task “My Task”.',
+      'Uh oh. There was an error contributing work from your Dev Org on Task “My Task”.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
