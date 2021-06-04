@@ -1,7 +1,3 @@
-// For some reason Eslint is getting confused about `useCallback` being used
-// after conditional variable declarations (e.g. `"foo" || "bar"`)...
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import classNames from 'classnames';
@@ -430,7 +426,8 @@ const TaskDetail = (
       closeContributeModal();
       if (!useExistingTask) {
         openCreateModal(id);
-      } else if (!devOrg) {
+      } /* istanbul ignore else */ else if (!devOrg) {
+        /* istanbul ignore else */
         if (!userIsAssignedDev) {
           // Assign current user as Dev
           dispatch(
