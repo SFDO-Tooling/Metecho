@@ -34,6 +34,7 @@ const ConfirmDeleteModal = ({
   };
 
   let heading, warning, label, type;
+  /* istanbul ignore if */
   if (org?.org_type === ORG_TYPES.QA) {
     type = i18n.t('Test Org');
   } else if (org?.org_type === 'Dev') {
