@@ -1,8 +1,10 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
+import RadioGroup from '@salesforce/design-system-react/components/radio-group';
+import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import i18n from 'i18next';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import mapSvg from '!raw-loader!~img/map-lg.svg';
@@ -11,14 +13,24 @@ import { Epic } from '~js/store/epics/reducer';
 import { Project } from '~js/store/projects/reducer';
 import { Task } from '~js/store/tasks/reducer';
 
+type ContributeCallback = ({
+  id,
+  useExistingTask,
+}: {
+  id: string;
+  useExistingTask: boolean;
+}) => void;
+
 interface Props {
   project?: Project;
   epic?: Epic;
   task?: Task;
   isOpen: boolean;
   hasPermissions: boolean;
+  orgId: string;
+  hasDevOrg?: boolean;
   closeModal: () => void;
-  doContribute: () => void;
+  doContribute: ContributeCallback;
 }
 
 const ContributeWorkModal = ({
@@ -27,9 +39,23 @@ const ContributeWorkModal = ({
   task,
   isOpen,
   hasPermissions,
+  orgId,
+  hasDevOrg,
   closeModal,
   doContribute,
 }: Props) => {
+  const [useExistingTask, setUseExistingTask] = useState(!hasDevOrg);
+
+  const doClose = useCallback(() => {
+    setUseExistingTask(!hasDevOrg);
+    closeModal();
+  }, [closeModal, hasDevOrg]);
+
+  const handleSubmit = useCallback(
+    () => doContribute({ id: orgId, useExistingTask }),
+    [doContribute, orgId, useExistingTask],
+  );
+
   let contents = null;
   if (!hasPermissions) {
     contents = (
@@ -47,8 +73,71 @@ const ContributeWorkModal = ({
         </p>
       </Trans>
     );
-  } /* istanbul ignore next */ else if (task) {
-    // @@@
+  } else if (task) {
+    const handleTaskSelectChange = (
+      event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+      if (event.target.value === 'true') {
+        setUseExistingTask(true);
+      } else {
+        setUseExistingTask(false);
+      }
+    };
+
+    contents = (
+      <>
+        {hasDevOrg ? (
+          <Trans i18nKey="contributeWorkFromTaskWithDevOrg">
+            <p>
+              <b>To contribute the work you’ve done in your scratch org,</b>{' '}
+              you’ll start by creating a new task.
+            </p>
+            <p>
+              You cannot convert your scratch org into the Dev Org for this Task
+              because there is already an existing Dev Org.
+            </p>
+          </Trans>
+        ) : (
+          <p>
+            <Trans i18nKey="contributeWorkFromTask">
+              <b>To contribute the work you’ve done in your scratch org,</b>{' '}
+              you’ll start by making this org the Dev Org for <em>this</em> task
+              or a <em>new</em> task.
+            </Trans>
+          </p>
+        )}
+        <RadioGroup
+          assistiveText={{
+            label: i18n.t('Select Task Type'),
+            required: i18n.t('Required'),
+          }}
+          className="slds-p-left_none"
+          name="task-contribute-work"
+          required
+          onChange={handleTaskSelectChange}
+          disabled={hasDevOrg}
+        >
+          <Radio
+            id="org-current-task"
+            labels={{
+              label: i18n.t('Convert Scratch Org into Dev Org for this Task'),
+            }}
+            checked={useExistingTask}
+            name="task-contribute-work"
+            value="true"
+          />
+          <Radio
+            id="org-new-task"
+            labels={{
+              label: i18n.t('Convert Scratch Org into Dev Org on a new Task'),
+            }}
+            checked={!useExistingTask}
+            name="task-contribute-work"
+            value="false"
+          />
+        </RadioGroup>
+      </>
+    );
   } /* istanbul ignore else */ else if (epic) {
     contents = (
       <Trans i18nKey="contributeWorkFromEpic">
@@ -71,18 +160,18 @@ const ContributeWorkModal = ({
       size="small"
       heading={i18n.t('Contribute Work from Scratch Org')}
       footer={[
-        <Button key="cancel" label={i18n.t('Cancel')} onClick={closeModal} />,
+        <Button key="cancel" label={i18n.t('Cancel')} onClick={doClose} />,
         hasPermissions ? (
           <Button
             key="submit"
             label={i18n.t('Contribute')}
             variant="brand"
-            onClick={doContribute}
+            onClick={handleSubmit}
           />
         ) : null,
       ]}
       prompt={hasPermissions ? null : 'warning'}
-      onRequestClose={closeModal}
+      onRequestClose={doClose}
     >
       <div className="slds-grid slds-wrap slds-p-around_medium">
         <div
