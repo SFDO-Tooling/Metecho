@@ -8,7 +8,7 @@ import { selectProjectById } from '~js/store/projects/selectors';
 import { selectTaskById } from '~js/store/tasks/selectors';
 import { addToast } from '~js/store/toasts/actions';
 import apiFetch, { addUrlParams } from '~js/utils/api';
-import { OBJECT_TYPES, OrgTypes } from '~js/utils/constants';
+import { OBJECT_TYPES } from '~js/utils/constants';
 
 interface OrgProvisioning {
   type: 'SCRATCH_ORG_PROVISIONING';
@@ -116,7 +116,6 @@ export const provisionOrg =
   }: {
     model: Org;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<OrgProvisioned> =>
   (dispatch, getState) => {
     const state = getState();
@@ -126,13 +125,13 @@ export const provisionOrg =
       const { name, parent, orgType } = getOrgParent(model, state);
 
       if (orgType) {
-        msg = i18n.t('Successfully created {{orgType}}”.', { orgType });
+        msg = i18n.t('Successfully created {{orgType}}.', { orgType });
       }
 
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Successfully created {{orgType}} for {{parent}} “{{name}}”.',
+          'Successfully created {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -162,7 +161,6 @@ export const provisionFailed =
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<OrgProvisionFailed> =>
   (dispatch, getState) => {
     const state = getState();
@@ -173,6 +171,7 @@ export const provisionFailed =
 
       const { name, parent, orgType } = getOrgParent(model, state);
 
+      /* istanbul ignore else */
       if (orgType) {
         msg = i18n.t(
           'Uh oh. There was an error creating your new {{orgType}}.',
@@ -184,7 +183,7 @@ export const provisionFailed =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error creating your new {{orgType}} for {{parent}} “{{name}}”.',
+          'Uh oh. There was an error creating your new {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -252,7 +251,6 @@ export const updateFailed =
     model: Org;
     message?: string;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<OrgUpdated> =>
   (dispatch, getState) => {
     const state = getState();
@@ -272,7 +270,7 @@ export const updateFailed =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error checking for changes on your {{orgType}} for {{parent}} “{{name}}”.',
+          'Uh oh. There was an error checking for changes on your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -296,7 +294,6 @@ export const deleteOrg =
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<OrgDeleted> =>
   (dispatch, getState) => {
     /* istanbul ignore else */
@@ -357,7 +354,6 @@ export const deleteFailed =
     model: Org;
     message?: string;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<OrgDeleteFailed> =>
   (dispatch, getState) => {
     const state = getState();
@@ -366,6 +362,7 @@ export const deleteFailed =
       let msg = i18n.t('Uh oh. There was an error deleting your Scratch Org.');
       const { name, parent, orgType } = getOrgParent(model, state);
 
+      /* istanbul ignore else */
       if (orgType) {
         msg = i18n.t('Uh oh. There was an error deleting your {{orgType}}.', {
           orgType,
@@ -374,7 +371,7 @@ export const deleteFailed =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error deleting your {{orgType}} for {{parent}} “{{name}}”.',
+          'Uh oh. There was an error deleting your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -399,7 +396,6 @@ export const commitSucceeded =
   }: {
     model: Org;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<CommitEvent> =>
   (dispatch, getState) => {
     const state = getState();
@@ -416,7 +412,7 @@ export const commitSucceeded =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Successfully retrieved changes from your {{orgType}} for {{parent}} “{{name}}”.',
+          'Successfully retrieved changes from your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -441,7 +437,6 @@ export const commitFailed =
     model: Org;
     message?: string;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<CommitEvent> =>
   (dispatch, getState) => {
     const state = getState();
@@ -455,7 +450,7 @@ export const commitFailed =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error retrieving changes from your {{orgType}} for {{parent}} “{{name}}”.',
+          'Uh oh. There was an error retrieving changes from your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -505,7 +500,6 @@ export const orgRefreshed =
   }: {
     model: Org;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<OrgUpdated> =>
   (dispatch, getState) => {
     const state = getState();
@@ -520,7 +514,7 @@ export const orgRefreshed =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Successfully refreshed your {{orgType}} for {{parent}} “{{name}}”.',
+          'Successfully refreshed your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -538,7 +532,6 @@ export const refreshError =
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<OrgUpdated | OrgRefreshRejected> =>
   (dispatch, getState) => {
     const state = getState();
@@ -558,7 +551,7 @@ export const refreshError =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error refreshing your {{orgType}} for {{parent}} “{{name}}”.',
+          'Uh oh. There was an error refreshing your {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -609,7 +602,6 @@ export const orgReassignFailed =
     model: Org;
     message?: string;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<OrgReassignFailed> =>
   (dispatch, getState) => {
     const state = getState();
@@ -632,7 +624,7 @@ export const orgReassignFailed =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error reassigning the {{orgType}} for {{parent}} “{{name}}”.',
+          'Uh oh. There was an error reassigning the {{orgType}} for {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
@@ -673,7 +665,6 @@ export const orgConvertFailed =
     model: Org | MinimalOrg;
     message?: string;
     originating_user_id: string | null;
-    type: OrgTypes;
   }): ThunkResult<void> =>
   (dispatch, getState, history) => {
     const state = getState();
@@ -694,7 +685,7 @@ export const orgConvertFailed =
       /* istanbul ignore else */
       if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error contributing work from your {{orgType}} on {{parent}} “{{name}}”.',
+          'Uh oh. There was an error contributing work from your {{orgType}} on {{parent}} “{{name}}.”',
           { parent, name, orgType },
         );
       }
