@@ -81,7 +81,7 @@ export type OrgsAction =
 const getOrgParent = (
   org: Org | MinimalOrg,
   state: AppState,
-): { name?: string; parent?: string; title?: string } => {
+): { name?: string; parent?: string; orgType?: string } => {
   const task = selectTaskById(state, org.task);
   const epic = selectEpicById(state, org.epic);
   const project = selectProjectById(state, org.project);
@@ -96,11 +96,15 @@ const getOrgParent = (
   }
 
   if (task) {
-    return { name: task.name, parent: i18n.t('Task'), title: typeTitle };
+    return { name: task.name, parent: i18n.t('Task'), orgType: typeTitle };
   } else if (epic) {
-    return { name: epic.name, parent: i18n.t('Epic'), title: typeTitle };
+    return { name: epic.name, parent: i18n.t('Epic'), orgType: typeTitle };
   } else if (project) {
-    return { name: project.name, parent: i18n.t('Project'), title: typeTitle };
+    return {
+      name: project.name,
+      parent: i18n.t('Project'),
+      orgType: typeTitle,
+    };
   }
   return {};
 };
@@ -119,17 +123,17 @@ export const provisionOrg =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t('Successfully created Scratch Org.');
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
-      if (title) {
-        msg = i18n.t('Successfully created {{title}}”.', { title });
+      if (orgType) {
+        msg = i18n.t('Successfully created {{orgType}}”.', { orgType });
       }
 
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Successfully created {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Successfully created {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
@@ -167,18 +171,21 @@ export const provisionFailed =
         'Uh oh. There was an error creating your new Scratch Org.',
       );
 
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
-      if (title) {
-        msg = i18n.t('Uh oh. There was an error creating your new {{title}}.', {
-          title,
-        });
+      if (orgType) {
+        msg = i18n.t(
+          'Uh oh. There was an error creating your new {{orgType}}.',
+          {
+            orgType,
+          },
+        );
       }
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error creating your new {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Uh oh. There was an error creating your new {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
@@ -254,19 +261,19 @@ export const updateFailed =
       let msg = i18n.t(
         'Uh oh. There was an error checking for changes on your Scratch Org.',
       );
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
-      if (title) {
+      if (orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error checking for changes on your {{title}}.',
-          { title },
+          'Uh oh. There was an error checking for changes on your {{orgType}}.',
+          { orgType },
         );
       }
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error checking for changes on your {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Uh oh. There was an error checking for changes on your {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
@@ -321,15 +328,15 @@ export const deleteOrg =
           }),
         );
       } else {
-        const { name, parent, title } = getOrgParent(model, state);
+        const { name, parent, orgType } = getOrgParent(model, state);
 
-        let msg = i18n.t('Successfully deleted {{title}}.', { title });
+        let msg = i18n.t('Successfully deleted {{orgType}}.', { orgType });
 
         /* istanbul ignore else */
-        if (name && parent && title) {
+        if (name && parent && orgType) {
           msg = i18n.t(
-            'Successfully deleted {{title}} for {{parent}} “{{name}}”.',
-            { parent, name, title },
+            'Successfully deleted {{orgType}} for {{parent}} “{{name}}.”',
+            { parent, name, orgType },
           );
         }
         dispatch(addToast({ heading: msg }));
@@ -357,18 +364,18 @@ export const deleteFailed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t('Uh oh. There was an error deleting your Scratch Org.');
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
-      if (title) {
-        msg = i18n.t('Uh oh. There was an error deleting your {{title}}.', {
-          title,
+      if (orgType) {
+        msg = i18n.t('Uh oh. There was an error deleting your {{orgType}}.', {
+          orgType,
         });
       }
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error deleting your {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Uh oh. There was an error deleting your {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
@@ -399,18 +406,18 @@ export const commitSucceeded =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t('Successfully retrieved changes from your Scratch Org.');
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
-      if (title) {
-        msg = i18n.t('Successfully retrieved changes from your {{title}}.', {
-          title,
+      if (orgType) {
+        msg = i18n.t('Successfully retrieved changes from your {{orgType}}.', {
+          orgType,
         });
       }
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Successfully retrieved changes from your {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Successfully retrieved changes from your {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
@@ -444,12 +451,12 @@ export const commitFailed =
       let msg = i18n.t(
         'Uh oh. There was an error retrieving changes from your Scratch Org.',
       );
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error retrieving changes from your {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Uh oh. There was an error retrieving changes from your {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
@@ -505,16 +512,16 @@ export const orgRefreshed =
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t('Successfully refreshed your Scratch Org.');
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
-      if (title) {
-        msg = i18n.t('Successfully refreshed your {{title}}.', { title });
+      if (orgType) {
+        msg = i18n.t('Successfully refreshed your {{orgType}}.', { orgType });
       }
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Successfully refreshed your {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Successfully refreshed your {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(addToast({ heading: msg }));
@@ -540,19 +547,19 @@ export const refreshError =
       let msg = i18n.t(
         'Uh oh. There was an error refreshing your Scratch Org.',
       );
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
       /* istanbul ignore else */
-      if (title) {
-        msg = i18n.t('Uh oh. There was an error refreshing your {{title}}.', {
-          title,
+      if (orgType) {
+        msg = i18n.t('Uh oh. There was an error refreshing your {{orgType}}.', {
+          orgType,
         });
       }
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error refreshing your {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Uh oh. There was an error refreshing your {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
@@ -611,19 +618,22 @@ export const orgReassignFailed =
       let msg = i18n.t(
         'Uh oh. There was an error reassigning this Scratch Org.',
       );
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
       /* istanbul ignore else */
-      if (title) {
-        msg = i18n.t('Uh oh. There was an error reassigning this {{title}}.', {
-          title,
-        });
+      if (orgType) {
+        msg = i18n.t(
+          'Uh oh. There was an error reassigning this {{orgType}}.',
+          {
+            orgType,
+          },
+        );
       }
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error reassigning the {{title}} for {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Uh oh. There was an error reassigning the {{orgType}} for {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
@@ -672,20 +682,20 @@ export const orgConvertFailed =
       let msg = i18n.t(
         'Uh oh. There was an error contributing work from your Scratch Org.',
       );
-      const { name, parent, title } = getOrgParent(model, state);
+      const { name, parent, orgType } = getOrgParent(model, state);
 
       /* istanbul ignore else */
-      if (title) {
+      if (orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error contributing work from your {{title}}.',
-          { title },
+          'Uh oh. There was an error contributing work from your {{orgType}}.',
+          { orgType },
         );
       }
       /* istanbul ignore else */
-      if (name && parent && title) {
+      if (name && parent && orgType) {
         msg = i18n.t(
-          'Uh oh. There was an error contributing work from your {{title}} on {{parent}} “{{name}}”.',
-          { parent, name, title },
+          'Uh oh. There was an error contributing work from your {{orgType}} on {{parent}} “{{name}}”.',
+          { parent, name, orgType },
         );
       }
       dispatch(
