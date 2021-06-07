@@ -1,9 +1,9 @@
 {% load i18n %}{% trans "Expiry Alert from Metecho" %}
 
 {% blocktrans trimmed count counter=days %}
-Your development scratch org for "{{ task_name }}" on {{ project_name }} epic "{{ epic_name }}" is set to expire in one day on {{ expiry_date }} You have uncommitted changes on your org that will be deleted. If you do not want to lose these changes, please log into Metecho as user "{{ user_name }}", navigate to the task, and click the "Retrieve Changes from Dev Org" button. We appreciate your contribution to the Salesforce community. Thanks!
+Your Dev Org for "{{ task_name }}" on {{ project_name }} epic "{{ epic_name }}" is set to expire in one day on {{ expiry_date }} You have uncommitted changes on your org that will be deleted. If you do not want to lose these changes, please log into Metecho as user "{{ user_name }}", navigate to the task, and click the "Retrieve Changes from Dev Org" button. We appreciate your contribution to the Salesforce community. Thanks!
 {% plural %}
-Your development scratch org for "{{ task_name }}" on {{ project_name }} epic "{{ epic_name }}" is set to expire in {{ days }} days on {{ expiry_date }} You have uncommitted changes on your org that will be deleted. If you do not want to lose these changes, please log into Metecho as user "{{ user_name }}", navigate to the task, and click the "Retrieve Changes from Dev Org" button. We appreciate your contribution to the Salesforce community. Thanks!
+Your Dev Org for "{{ task_name }}" on {{ project_name }} epic "{{ epic_name }}" is set to expire in {{ days }} days on {{ expiry_date }} You have uncommitted changes on your org that will be deleted. If you do not want to lose these changes, please log into Metecho as user "{{ user_name }}", navigate to the task, and click the "Retrieve Changes from Dev Org" button. We appreciate your contribution to the Salesforce community. Thanks!
 {% endblocktrans %}
 
 {{ metecho_link }}
