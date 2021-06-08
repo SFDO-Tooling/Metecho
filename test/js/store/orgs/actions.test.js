@@ -175,7 +175,7 @@ describe('provisionOrg', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Successfully created Scratch Org.',
+      'Successfully created Dev Org.',
     );
     expect(allActions[0].payload.linkText).toBeUndefined();
     expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -251,7 +251,7 @@ describe('provisionFailed', () => {
 
       expect(allActions[0].type).toEqual('TOAST_ADDED');
       expect(allActions[0].payload.heading).toEqual(
-        'Uh oh. There was an error creating your new Scratch Org.',
+        'Uh oh. There was an error creating your new Dev Org.',
       );
       expect(allActions[0].payload.linkText).toBeUndefined();
       expect(allActions[0].payload.linkUrl).toBeUndefined();
@@ -464,7 +464,7 @@ describe('deleteOrg', () => {
         owner: 'user-id',
         url: '/test/url/',
         is_created: true,
-        org_type: 'Dev',
+        org_type: 'Playground',
         task: 'task-id',
       };
       const orgAction = { type: 'SCRATCH_ORG_DELETE', payload: org };
@@ -996,6 +996,7 @@ describe('orgConvertFailed', () => {
     });
     const org = {
       id: 'org-id',
+      org_type: 'QA',
       task: 'task-id',
       owner: 'user-id',
     };
@@ -1010,7 +1011,7 @@ describe('orgConvertFailed', () => {
 
     expect(allActions[0].type).toEqual('TOAST_ADDED');
     expect(allActions[0].payload.heading).toEqual(
-      'Uh oh. There was an error contributing work from your Scratch Org.',
+      'Uh oh. There was an error contributing work from your Test Org.',
     );
     expect(allActions[0].payload.details).toEqual('error msg');
     expect(allActions[0].payload.variant).toEqual('error');
