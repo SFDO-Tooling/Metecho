@@ -19,7 +19,6 @@ const Overview = ({
   task?: Task;
 }) => {
   let type, name;
-  let isEpic = false;
   let isProject = false;
 
   if (task) {
@@ -28,7 +27,6 @@ const Overview = ({
   } else if (epic) {
     type = i18n.t('Epic');
     name = epic.name;
-    isEpic = true;
   } else {
     type = i18n.t('Project');
     name = project.name;
@@ -88,7 +86,7 @@ const Overview = ({
             </p>
           </Trans>
         )}
-        {!isEpic || !project.has_push_permission
+        {isProject || !project.has_push_permission
           ? cannotContributeWarning
           : null}
       </div>
