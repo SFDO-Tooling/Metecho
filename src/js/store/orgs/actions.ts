@@ -159,6 +159,7 @@ export const provisionFailed =
   (dispatch, getState) => {
     const state = getState();
     const { name, parent, orgType } = getOrgParent(model, state);
+    /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t(
         'Uh oh. There was an error creating your new {{orgType}}.',
@@ -415,7 +416,6 @@ export const commitFailed =
   (dispatch, getState) => {
     const state = getState();
     const { name, parent, orgType } = getOrgParent(model, state);
-
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t(
@@ -480,7 +480,6 @@ export const orgRefreshed =
   (dispatch, getState) => {
     const state = getState();
     const { name, parent, orgType } = getOrgParent(model, state);
-
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
       let msg = i18n.t('Successfully refreshed your {{orgType}}.', { orgType });
