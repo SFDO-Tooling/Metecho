@@ -196,7 +196,7 @@ const EditModal = ({
           errorText={errors.description}
           onChange={handleInputChange}
         />
-        {/* display for tasks, disable if task has a scratch org */}
+        {/* display for tasks, disable if task has a Dev or Test Org */}
         {isTask(model, modelType) ? (
           <SelectFlowType
             orgConfigs={orgConfigs || []}
