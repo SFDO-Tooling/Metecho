@@ -20,6 +20,7 @@ const SelectFlowType = ({
   errors,
   isDisabled,
   isLoading,
+  className,
   handleSelect,
 }: {
   orgConfigs: OrgConfig[];
@@ -29,6 +30,7 @@ const SelectFlowType = ({
   errors?: string;
   isDisabled?: boolean;
   isLoading?: boolean;
+  className?: string;
   handleSelect: UseFormProps['handleInputChange'];
 }) => {
   const dispatch = useDispatch<ThunkDispatch>();
@@ -54,7 +56,7 @@ const SelectFlowType = ({
 
   return (
     <fieldset
-      className={classNames('slds-form-element', {
+      className={classNames(className, 'slds-form-element', {
         'slds-has-error': hasErrors,
       })}
     >

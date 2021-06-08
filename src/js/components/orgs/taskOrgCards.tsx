@@ -20,7 +20,7 @@ import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '~js/utils/constants';
 
 export interface AssignedUserTracker {
   type: OrgTypes;
-  assignee: GitHubUser | null;
+  assignee: string | null;
   shouldAlertAssignee: boolean;
 }
 
@@ -49,6 +49,7 @@ const TaskOrgCards = ({
   isRefreshingUsers,
   testOrgReadyForReview,
   testOrgSubmittingReview,
+  convertingOrg,
   openCaptureModal,
   openAssignUserModal,
   closeAssignUserModal,
@@ -70,6 +71,7 @@ const TaskOrgCards = ({
   isRefreshingUsers: boolean;
   testOrgReadyForReview: boolean;
   testOrgSubmittingReview: boolean;
+  convertingOrg?: boolean;
   openCaptureModal: () => void;
   openAssignUserModal: (type: OrgTypes) => void;
   closeAssignUserModal: () => void;
@@ -82,14 +84,11 @@ const TaskOrgCards = ({
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
-  const [confirmRemoveUserModalOpen, setConfirmRemoveUserModalOpen] = useState(
-    false,
-  );
+  const [confirmRemoveUserModalOpen, setConfirmRemoveUserModalOpen] =
+    useState(false);
   const [isWaitingToDeleteDevOrg, setIsWaitingToDeleteDevOrg] = useState(false);
-  const [
-    isWaitingToRemoveUser,
-    setIsWaitingToRemoveUser,
-  ] = useState<AssignedUserTracker | null>(null);
+  const [isWaitingToRemoveUser, setIsWaitingToRemoveUser] =
+    useState<AssignedUserTracker | null>(null);
   const [isDeletingOrg, setIsDeletingOrg] = useState<OrgTypeTracker>(
     ORG_TYPE_TRACKER_DEFAULT,
   );
@@ -102,7 +101,7 @@ const TaskOrgCards = ({
     [dispatch],
   );
 
-  const checkIfTaskCanBeReassigned = async (assignee: GitHubUser) => {
+  const checkIfTaskCanBeReassigned = async (assignee: string) => {
     const { can_reassign } = await apiFetch({
       url: `${window.api_urls.task_can_reassign(task.id)}`,
       dispatch,
@@ -110,7 +109,7 @@ const TaskOrgCards = ({
         method: 'POST',
         body: JSON.stringify({
           role: 'assigned_dev',
-          gh_uid: assignee.id,
+          gh_uid: assignee,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -147,9 +146,9 @@ const TaskOrgCards = ({
       dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
+          url: window.api_urls.task_assignees(task.id),
           data: {
-            ...task,
-            [userType]: assignee?.id || null,
+            [userType]: assignee,
             [alertType]: shouldAlertAssignee,
           },
         }),
@@ -280,6 +279,7 @@ const TaskOrgCards = ({
           isCreatingOrg={isCreatingOrg[ORG_TYPES.DEV]}
           isDeletingOrg={isDeletingOrg[ORG_TYPES.DEV]}
           isRefreshingUsers={isRefreshingUsers}
+          isConvertingOrg={convertingOrg}
           assignUserModalOpen={assignUserModalOpen}
           openAssignUserModal={openAssignDevModal}
           closeAssignUserModal={closeAssignUserModal}

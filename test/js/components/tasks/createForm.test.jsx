@@ -1,11 +1,12 @@
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom';
 
 import TaskForm from '~js/components/tasks/createForm';
 import { createObject } from '~js/store/actions';
 import { addError } from '~js/store/errors/actions';
 import { refreshOrgConfigs } from '~js/store/projects/actions';
+import routes from '~js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
@@ -52,17 +53,21 @@ describe('<TaskForm/>', () => {
     const defaults = {
       project: defaultProject,
       epic: defaultEpic,
-      isOpen: true,
+      isOpenOrOrgId: true,
       closeCreateModal: jest.fn(),
     };
     const opts = Object.assign({}, defaults, options);
-    return renderWithRedux(
-      <MemoryRouter>
-        <TaskForm {...opts} />
-      </MemoryRouter>,
-      {},
-      storeWithThunk,
-    );
+    const context = {};
+    return {
+      ...renderWithRedux(
+        <StaticRouter context={context}>
+          <TaskForm {...opts} />
+        </StaticRouter>,
+        {},
+        storeWithThunk,
+      ),
+      context,
+    };
   };
 
   describe('refresh org types button click', () => {
@@ -137,8 +142,7 @@ describe('<TaskForm/>', () => {
 
   describe('add and create another task', () => {
     describe('success', () => {
-      test('displays success message for 3 seconds', async () => {
-        jest.useFakeTimers();
+      test('displays success message', async () => {
         createObject.mockReturnValueOnce(() =>
           Promise.resolve({
             type: 'CREATE_OBJECT_SUCCEEDED',
@@ -154,7 +158,7 @@ describe('<TaskForm/>', () => {
             },
           }),
         );
-        const { findByText, getByText, getByLabelText, queryByText } = setup();
+        const { findByText, getByText, getByLabelText } = setup();
         const submit = getByText('Add & New');
         const nameInput = getByLabelText('*Task Name');
         fireEvent.change(nameInput, { target: { value: 'Name of Task' } });
@@ -163,12 +167,64 @@ describe('<TaskForm/>', () => {
         expect.assertions(1);
         await findByText('A task was successfully added.');
 
-        await waitFor(() => {
-          jest.runAllTimers();
-          return expect(
-            queryByText('A task was successfully added.'),
-          ).toBeNull();
+        expect(getByText('A task was successfully added.')).toBeVisible();
+      });
+    });
+  });
+
+  describe('add and contribute from scratch org', () => {
+    describe('success', () => {
+      test('redirects to new task page', async () => {
+        const org = {
+          id: 'org-id',
+          org_config_name: 'qa',
+        };
+        const { getByText, getByLabelText, context } = setup({
+          isOpenOrOrgId: org.id,
+          playgroundOrg: org,
         });
+        const submit = getByText('Add');
+        const nameInput = getByLabelText('*Task Name');
+        createObject.mockReturnValueOnce(() =>
+          Promise.resolve({
+            type: 'CREATE_OBJECT_SUCCEEDED',
+            payload: {
+              objectType: 'task',
+              object: {
+                id: 'task1',
+                slug: 'name-of-task',
+                name: 'Name of Task',
+                description: '',
+                epic: 'e1',
+              },
+            },
+          }),
+        );
+        fireEvent.change(nameInput, { target: { value: 'Name of Org Task' } });
+        fireEvent.click(submit);
+        const url = routes.task_detail(
+          defaultProject.slug,
+          defaultEpic.slug,
+          'name-of-task',
+        );
+
+        expect.assertions(3);
+        await waitFor(() =>
+          expect(createObject).toHaveBeenCalledWith({
+            objectType: 'task',
+            data: {
+              dev_org: org.id,
+              name: 'Name of Org Task',
+              description: '',
+              epic: 'e1',
+              org_config_name: 'qa',
+            },
+            hasForm: true,
+            shouldSubscribeToObject: true,
+          }),
+        );
+        expect(context.action).toEqual('PUSH');
+        expect(context.url).toEqual(url);
       });
     });
   });

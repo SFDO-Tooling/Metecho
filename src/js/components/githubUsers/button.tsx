@@ -10,41 +10,51 @@ const GitHubUserButton = ({
   user,
   isAssigned,
   isSelected,
-  showPermissions,
+  badgeColor,
   ...props
 }: {
   user: GitHubUser;
   isAssigned?: boolean;
   isSelected?: boolean;
-  showPermissions?: boolean;
+  badgeColor?: string;
   [key: string]: any;
 }) => {
   const name = user.name ? `${user.name} (${user.login})` : user.login;
-  return (
+  const contents = (
+    <>
+      <GitHubUserAvatar user={user} />
+      <span className="collaborator-username slds-m-right_x-small">{name}</span>
+      {user.permissions && !user.permissions.push && (
+        <ReadonlyBadge color={badgeColor || 'default'} />
+      )}
+    </>
+  );
+
+  return isAssigned ? (
+    <div
+      className="slds-button
+        slds-size_full
+        slds-p-around_xx-small
+        collaborator-button
+        is-assigned"
+      title={name}
+      {...props}
+    >
+      {contents}
+    </div>
+  ) : (
     <Button
       className={classNames(
         'slds-size_full',
         'slds-p-around_xx-small',
         'collaborator-button',
         {
-          'is-assigned': isAssigned,
           'is-selected': isSelected,
         },
       )}
       title={name}
-      label={
-        <>
-          <GitHubUserAvatar user={user} />
-          <span className="collaborator-username slds-m-right_x-small">
-            {name}
-          </span>
-          {showPermissions && user.permissions && !user.permissions.push && (
-            <ReadonlyBadge color="light" />
-          )}
-        </>
-      }
+      label={contents}
       variant="base"
-      disabled={isSelected || isAssigned}
       {...props}
     />
   );

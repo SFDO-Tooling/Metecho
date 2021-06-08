@@ -28,12 +28,14 @@ from .serializers import (
     CanReassignSerializer,
     CommitSerializer,
     CreatePrSerializer,
+    EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
     ReviewSerializer,
     ScratchOrgSerializer,
+    TaskAssigneeSerializer,
     TaskSerializer,
 )
 
@@ -49,11 +51,18 @@ class RepoPushPermissionMixin:
     def check_push_permission(self, instance):
         if not instance.has_push_permission(self.request.user):
             raise PermissionDenied(
-                'You do not have "Push" permissions in the related repository'
+                _('You do not have "Push" permissions in the related repository')
             )
 
     def perform_create(self, serializer):
-        instance = serializer.Meta.model(**serializer.validated_data)
+        # instance = serializer.Meta.model(**serializer.validated_data)
+        # The for-loop could be replaced with the line above but that raises TypeError
+        # if the serializer has extra fields not contained in the model. `setattr()`
+        # works around this while still creating a valid instance.
+        instance = serializer.Meta.model()
+        for k, v in serializer.validated_data.items():
+            setattr(instance, k, v)
+
         self.check_push_permission(instance)
         return super().perform_create(serializer)
 
@@ -241,6 +250,20 @@ class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
             "ordering", "-created_at", "name"
         )
 
+    @action(detail=True, methods=["POST", "PUT"])
+    def collaborators(self, request, pk=None):
+        """
+        Edit the Epic collaborators. Exposed as a separate endpoint for users without
+        write access to Epics.
+        """
+        epic = self.get_object()
+        serializer = EpicCollaboratorsSerializer(
+            epic, request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.update(epic, serializer.validated_data)
+        return Response(self.get_serializer(epic).data)
+
 
 class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -301,6 +324,20 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
                 )
             }
         )
+
+    @action(detail=True, methods=["POST", "PUT"])
+    def assignees(self, request, pk=None):
+        """
+        Edit the assigned developer and tester on a Task. Exposed as a separate endpoint
+        for users without write access to Tasks.
+        """
+        task = self.get_object()
+        serializer = TaskAssigneeSerializer(
+            task, request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.update(task, serializer.validated_data)
+        return Response(self.get_serializer(task).data)
 
 
 class ScratchOrgViewSet(

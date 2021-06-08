@@ -8,12 +8,12 @@ from datetime import datetime
 
 from cumulusci.core.config import OrgConfig, TaskConfig
 from cumulusci.core.runtime import BaseCumulusCI
-from cumulusci.oauth.salesforce import SalesforceOAuth2, jwt_session
+from cumulusci.oauth.client import OAuth2Client, OAuth2ClientConfig
+from cumulusci.oauth.salesforce import jwt_session
 from cumulusci.tasks.salesforce.org_settings import DeployOrgSettings
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django_rq import get_scheduler
-from requests.exceptions import HTTPError
 from rq import get_current_job
 from simple_salesforce import Salesforce as SimpleSalesforce
 
@@ -56,7 +56,7 @@ class ScratchOrgError(Exception):
 def delete_org_on_error(scratch_org=None, originating_user_id=None):
     try:
         yield
-    except HTTPError as err:
+    except Exception as err:
         if not scratch_org:
             raise err
         if get_current_job():
@@ -93,13 +93,17 @@ def capitalize(s):
 
 
 def is_org_good(org):
+    """Check whether we can still get a valid access token for the org.
+
+    (Most likely reason for not being able to is that the org was deleted.)
+    """
     config = org.config
     org_name = org.org_config_name
     try:
         org_config = OrgConfig(config, org_name)
         org_config.refresh_oauth_token(None)
         return "access_token" in org_config.config
-    except HTTPError:
+    except Exception:
         return False
 
 
@@ -226,10 +230,16 @@ def get_access_token(*, org_result, scratch_org_config):
     the scratch org is created. This must be completed once in order for future
     access tokens to be obtained using the JWT token flow.
     """
-    oauth = SalesforceOAuth2(
-        SF_CLIENT_ID, SF_CLIENT_SECRET, SF_CALLBACK_URL, scratch_org_config.instance_url
+    oauth_config = OAuth2ClientConfig(
+        client_id=SF_CLIENT_ID,
+        client_secret=SF_CLIENT_SECRET,
+        redirect_uri=SF_CALLBACK_URL,
+        auth_uri=f"{scratch_org_config.instance_url}/services/oauth2/authorize",
+        token_uri=f"{scratch_org_config.instance_url}/services/oauth2/token",
+        scope="web full refresh_token",
     )
-    auth_result = oauth.get_token(org_result["AuthCode"]).json()
+    oauth = OAuth2Client(oauth_config)
+    auth_result = oauth.auth_code_grant(org_result["AuthCode"]).json()
     scratch_org_config.config["access_token"] = scratch_org_config._scratch_info[
         "access_token"
     ] = auth_result["access_token"]
@@ -327,6 +337,7 @@ def run_flow(*, cci, org_config, flow_name, project_path, user):
         "CUMULUSCI_ORG_dev": json.dumps(
             {
                 "org_id": org_config.org_id,
+                "id": org_config.id,
                 "instance_url": org_config.instance_url,
                 "access_token": org_config.access_token,
                 "scratch": True,

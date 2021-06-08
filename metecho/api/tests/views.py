@@ -796,6 +796,25 @@ class TestScratchOrgView:
 
 @pytest.mark.django_db
 class TestTaskViewSet:
+    def test_create__dev_org(
+        self, client, git_hub_repository_factory, scratch_org_factory, epic_factory
+    ):
+        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
+        epic = epic_factory(project__repo_id=repo.repo_id)
+        scratch_org = scratch_org_factory(epic=epic, task=None)
+        data = {
+            "name": "Test Task with Org",
+            "description": "Description",
+            "epic": str(epic.id),
+            "org_config_name": "dev",
+            "dev_org": str(scratch_org.id),
+        }
+
+        response = client.post(reverse("task-list"), data=data)
+        task_data = response.json()
+
+        assert task_data["assigned_dev"] == client.user.github_id, task_data
+
     def test_create_pr(self, client, task_factory):
         with ExitStack() as stack:
             task = task_factory()
@@ -948,6 +967,7 @@ class TestTaskViewSet:
         check,
         method,
     ):
+        # Write operations on the task detail endpoint should depend on repo push permissions
         task = task_factory()
         git_hub_repository_factory(
             repo_id=task.epic.project.repo_id, user=client.user, permissions=repo_perms
@@ -961,6 +981,21 @@ class TestTaskViewSet:
         response = getattr(client, method)(url, data=data, format="json")
 
         assert check(response.status_code)
+
+    def test_assignees(self, client, git_hub_repository_factory, task_factory):
+        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
+        task = task_factory(
+            epic__project__repo_id=repo.repo_id,
+            epic__project__github_users=[
+                {"id": "123456", "permissions": {"push": True}}
+            ],
+        )
+        data = {"assigned_dev": "123456", "assigned_qa": "123456"}
+        client.post(reverse("task-assignees", args=[task.id]), data=data)
+
+        task.refresh_from_db()
+        assert task.assigned_dev == "123456"
+        assert task.assigned_qa == "123456"
 
 
 @pytest.mark.django_db
@@ -1006,3 +1041,17 @@ class TestEpicViewSet:
         response = getattr(client, method)(url, data=data, format="json")
 
         assert check(response.status_code)
+
+    def test_collaborators(self, client, git_hub_repository_factory, epic_factory):
+        repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
+        epic = epic_factory(
+            project__repo_id=repo.repo_id,
+            project__github_users=[{"id": "123"}, {"id": "456"}],
+        )
+        data = {"github_users": ["123", "456"]}
+        client.post(
+            reverse("epic-collaborators", args=[epic.id]), data=data, format="json"
+        )
+
+        epic.refresh_from_db()
+        assert epic.github_users == ["123", "456"]

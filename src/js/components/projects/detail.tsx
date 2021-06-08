@@ -12,6 +12,7 @@ import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import ProjectNotFound from '~js/components/projects/project404';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
+import PlayTour from '~js/components/tour/play';
 import TourPopover from '~js/components/tour/popover';
 import {
   CreateOrgModal,
@@ -60,7 +61,7 @@ const ProjectDetail = (
 
   const playgroundOrg = (orgs || [])[0];
 
-  // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param
+  // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param is truthy
   const {
     history,
     location: { state },
@@ -68,7 +69,7 @@ const ProjectDetail = (
   useEffect(() => {
     const tours = Object.values(WALKTHROUGH_TYPES);
     const showTour = state?.[SHOW_WALKTHROUGH];
-    if (epics?.fetched && showTour && tours.includes(showTour)) {
+    if (orgs && epics?.fetched && showTour && tours.includes(showTour)) {
       // Remove location state
       history.replace({ state: {} });
       /* istanbul ignore else */
@@ -78,7 +79,7 @@ const ProjectDetail = (
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, tourLandingModalOpen, epics?.fetched]);
+  }, [state, tourLandingModalOpen, orgs, epics?.fetched]);
 
   const fetchMoreEpics = useCallback(() => {
     /* istanbul ignore else */
@@ -165,10 +166,11 @@ const ProjectDetail = (
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
+        type={OBJECT_TYPES.PROJECT}
         title={project.name}
         titlePopover={
           <TourPopover
-            align="right"
+            align="bottom left"
             heading={i18n.t('Project name & GitHub link')}
             body={
               <Trans i18nKey="tourProjectName">
@@ -192,21 +194,24 @@ const ProjectDetail = (
               metecho-secondary-block
               slds-m-left_medium"
           >
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium slds-is-relative">
-              {i18n.t('My Project Scratch Org')}
+            <div className="slds-is-relative heading">
               <TourPopover
                 align="top"
-                heading={i18n.t('Scratch Org management')}
+                heading={i18n.t('View & play with a Project')}
                 body={
                   <Trans i18nKey="tourProjectScratchOrg">
-                    Your Scratch Org for a Project will appear in this column.
-                    Create a Scratch Org for the entire Project or visit an Epic
-                    or Task to create a Scratch Org for specific work
-                    in-progress.
+                    Scratch Orgs are a temporary place for you to view the work
+                    on this Project. You can use Scratch Orgs to play with
+                    changes to the Project without affecting the Project. Create
+                    a Scratch Org for the entire Project or visit an Epic or
+                    Task to create a Scratch Org for specific work in-progress.
                   </Trans>
                 }
               />
-            </h2>
+              <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+                {i18n.t('My Project Scratch Org')}
+              </h2>
+            </div>
             {orgs ? (
               <>
                 {playgroundOrg ? (
@@ -215,7 +220,11 @@ const ProjectDetail = (
                       slds-wrap
                       slds-grid_pull-padded-x-small"
                   >
-                    <div className="slds-size_1-of-1 slds-p-around_x-small">
+                    <div
+                      className="slds-size_1-of-1
+                        slds-p-around_x-small
+                        tour-scratch-org"
+                    >
                       <PlaygroundOrgCard
                         org={playgroundOrg}
                         project={project}
@@ -224,25 +233,12 @@ const ProjectDetail = (
                     </div>
                   </div>
                 ) : (
-                  <div className="slds-is-relative">
-                    <Button
-                      label={i18n.t('Create Scratch Org')}
-                      variant="outline-brand"
-                      onClick={openCreateOrgModal}
-                    />
-                    <TourPopover
-                      align="bottom"
-                      heading={i18n.t('View & play with a Project')}
-                      body={
-                        <Trans i18nKey="tourProjectCreateScratchOrg">
-                          Scratch Orgs are a temporary place for you to view the
-                          work on this Project. You can use Scratch Orgs to play
-                          with changes to the Project without affecting the
-                          Project.
-                        </Trans>
-                      }
-                    />
-                  </div>
+                  <Button
+                    className="tour-scratch-org"
+                    label={i18n.t('Create Scratch Org')}
+                    variant="outline-brand"
+                    onClick={openCreateOrgModal}
+                  />
                 )}
               </>
             ) : (
@@ -262,15 +258,27 @@ const ProjectDetail = (
           <SpinnerWrapper />
         ) : (
           <>
-            <h2 className="slds-text-heading_medium slds-p-bottom_medium">
-              {hasEpics || !project.has_push_permission
-                ? i18n.t('Epics for {{project_name}}', {
-                    project_name: project.name,
-                  })
-                : i18n.t('Create an Epic for {{project_name}}', {
-                    project_name: project.name,
-                  })}
-            </h2>
+            <div className="slds-is-relative heading">
+              <TourPopover
+                align="top left"
+                heading={i18n.t('List of Epics')}
+                body={
+                  <Trans i18nKey="tourEpicsList">
+                    This is the list of all Epics for this Project. Each Epic is
+                    a group of related Tasks.
+                  </Trans>
+                }
+              />
+              <h2 className="slds-text-heading_medium slds-p-bottom_medium">
+                {hasEpics || !project.has_push_permission
+                  ? i18n.t('Epics for {{project_name}}', {
+                      project_name: project.name,
+                    })
+                  : i18n.t('Create an Epic for {{project_name}}', {
+                      project_name: project.name,
+                    })}
+              </h2>
+            </div>
             {!hasEpics && (
               <p className="slds-m-bottom_large">
                 {project.has_push_permission ? (
@@ -300,12 +308,12 @@ const ProjectDetail = (
                   className="tour-create-epic"
                 />
                 <TourPopover
-                  align="right"
+                  align="top left"
                   body={
                     <Trans i18nKey="tourCreateEpic">
                       Create an Epic to make a group of related Tasks. Invite
                       multiple Collaborators to your Epic and assign people as
-                      Developers & Testers for each Task. Epics are equivalent
+                      Developers and Testers for each Task. Epics are equivalent
                       to GitHub branches, just like Tasks.
                     </Trans>
                   }
@@ -344,6 +352,10 @@ const ProjectDetail = (
           isOpen={tourLandingModalOpen}
           runTour={doRunTour}
           onRequestClose={closeTourLandingModal}
+        />
+        <PlayTour
+          run={tourRunning === WALKTHROUGH_TYPES.PLAY}
+          onClose={handleTourClose}
         />
         <PlanTour
           run={tourRunning === WALKTHROUGH_TYPES.PLAN}

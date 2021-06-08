@@ -1,6 +1,7 @@
 import html
 import logging
 from datetime import timedelta
+from typing import Dict, Optional
 
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.models import SocialAccount
@@ -49,7 +50,10 @@ ORG_TYPES = Choices("Production", "Scratch", "Sandbox", "Developer")
 SCRATCH_ORG_TYPES = Choices("Dev", "QA", "Playground")
 EPIC_STATUSES = Choices("Planned", "In progress", "Review", "Merged")
 TASK_STATUSES = Choices(
-    ("Planned", "Planned"), ("In progress", "In progress"), ("Completed", "Completed")
+    ("Planned", "Planned"),
+    ("In progress", "In progress"),
+    ("Completed", "Completed"),
+    ("Canceled", "Canceled"),
 )
 TASK_REVIEW_STATUS = Choices(
     ("Approved", "Approved"), ("Changes requested", "Changes requested")
@@ -441,6 +445,12 @@ class Project(
             permissions__push=True,
         ).exists()
 
+    def get_collaborator(self, gh_uid: str) -> Optional[Dict[str, object]]:
+        try:
+            return [u for u in self.github_users if u["id"] == gh_uid][0]
+        except IndexError:
+            return None
+
 
 class GitHubRepository(HashIdMixin, models.Model):
     user = models.ForeignKey(
@@ -553,9 +563,19 @@ class Epic(
         )
 
     def should_update_review(self):
+        """
+        Returns truthy if:
+            - there is at least one completed task
+            - all tasks are completed or canceled
+        """
         task_statuses = self.tasks.values_list("status", flat=True)
-        return task_statuses and all(
-            status == TASK_STATUSES.Completed for status in task_statuses
+        return (
+            task_statuses
+            and all(
+                status in [TASK_STATUSES.Completed, TASK_STATUSES.Canceled]
+                for status in task_statuses
+            )
+            and any(status == TASK_STATUSES.Completed for status in task_statuses)
         )
 
     def should_update_merged(self):
@@ -792,12 +812,15 @@ class Task(
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_closed(self, pr_number, *, originating_user_id):
+        self.status = TASK_STATUSES.Canceled
         self.pr_number = pr_number
         self.pr_is_open = False
+        self.review_valid = False
         self.save()
         self.notify_changed(originating_user_id=originating_user_id)
 
     def finalize_pr_opened(self, pr_number, *, originating_user_id):
+        self.status = TASK_STATUSES["In progress"]
         self.pr_number = pr_number
         self.pr_is_open = True
         self.pr_is_merged = False
@@ -1087,6 +1110,28 @@ class ScratchOrg(
                 self.queue_delete(originating_user_id=originating_user_id)
             else:
                 self.delete(originating_user_id=originating_user_id)
+
+    def queue_convert_to_dev_org(self, task, *, originating_user_id=None):
+        from .jobs import convert_to_dev_org_job
+
+        convert_to_dev_org_job.delay(
+            scratch_org=self, task=task, originating_user_id=originating_user_id
+        )
+
+    def finalize_convert_to_dev_org(self, task, *, error=None, originating_user_id):
+        if error:
+            self.notify_scratch_org_error(
+                error=error,
+                type_="SCRATCH_ORG_CONVERT_FAILED",
+                originating_user_id=originating_user_id,
+            )
+            return
+
+        self.org_type = SCRATCH_ORG_TYPES.Dev
+        self.task = task
+        self.epic = None
+        self.save()
+        self.notify_changed(originating_user_id=originating_user_id)
 
     def queue_get_unsaved_changes(self, *, force_get=False, originating_user_id):
         from .jobs import get_unsaved_changes_job

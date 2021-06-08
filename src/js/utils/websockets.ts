@@ -13,6 +13,7 @@ import {
   commitSucceeded,
   deleteFailed,
   deleteOrg,
+  orgConvertFailed,
   orgProvisioning,
   orgReassigned,
   orgReassignFailed,
@@ -256,6 +257,14 @@ interface CommitFailedEvent {
     originating_user_id: string | null;
   };
 }
+interface OrgConvertFailedEvent {
+  type: 'SCRATCH_ORG_CONVERT_FAILED';
+  payload: {
+    message?: string;
+    model: Org;
+    originating_user_id: string | null;
+  };
+}
 interface SoftDeletedEvent {
   type: 'SOFT_DELETE';
   payload: {
@@ -289,6 +298,7 @@ type ModelEvent =
   | OrgReassignFailedEvent
   | CommitSucceededEvent
   | CommitFailedEvent
+  | OrgConvertFailedEvent
   | SoftDeletedEvent;
 type EventType =
   | SubscriptionEvent
@@ -358,6 +368,8 @@ export const getAction = (event: EventType) => {
       return hasModel(event) && orgReassigned(event.payload.model);
     case 'SCRATCH_ORG_REASSIGN_FAILED':
       return hasModel(event) && orgReassignFailed(event.payload);
+    case 'SCRATCH_ORG_CONVERT_FAILED':
+      return hasModel(event) && orgConvertFailed(event.payload);
     case 'SOFT_DELETE':
       return hasModel(event) && removeObject(event.payload.model);
   }
@@ -443,7 +455,7 @@ export const createSocket = ({
       log('[WebSocket] closed');
       if (open) {
         open = false;
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (!open) {
             dispatch(disconnectSocket());
           }
@@ -477,11 +489,11 @@ export const createSocket = ({
     }
   };
 
-  let reconnecting: NodeJS.Timeout | undefined;
+  let reconnecting: number | undefined;
   const clearReconnect = () => {
     /* istanbul ignore else */
     if (reconnecting) {
-      clearInterval(reconnecting);
+      window.clearInterval(reconnecting);
       reconnecting = undefined;
     }
   };
@@ -490,7 +502,7 @@ export const createSocket = ({
     socket.close(1000, 'user logged out');
     // Without polling, the `onopen` callback after reconnect could fire before
     // the `onclose` callback...
-    reconnecting = setInterval(() => {
+    reconnecting = window.setInterval(() => {
       if (!open) {
         socket.open();
         clearReconnect();

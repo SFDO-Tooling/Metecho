@@ -141,8 +141,17 @@ def local_github_checkout(user, repo_id, commit_ish=None):
             # repo (we hope):
             extract_zip_file(zip_file, repo.owner.login, repo.name)
 
-            # validate that cumulusci.yml is the same as default_branch
-            validate_cumulusci_yml_unchanged(repo)
+            # Ensure the CumulusCI config is always up to date with the default branch
+            # (even if the current branch has an old version)
+            try:
+                text = repo.file_contents(
+                    "cumulusci.yml", ref=repo.default_branch
+                ).decoded.decode("utf-8")
+                pathlib.Path("cumulusci.yml").write_text(text)
+            except (NotFoundError, IOError) as error:
+                raise Exception(
+                    "Failed to copy cumulusci.yml from default branch"
+                ) from error
 
             yield repo_root
 
@@ -171,7 +180,7 @@ def get_source_format(**kwargs):
     return project_config.project__source_format
 
 
-def try_to_make_branch(repository, *, new_branch, base_branch):
+def try_to_make_branch(repository, *, new_branch, base_sha):
     branch_name = new_branch
     counter = 0
     max_length = 100  # From models.Epic.branch_name
@@ -179,9 +188,8 @@ def try_to_make_branch(repository, *, new_branch, base_branch):
         suffix = f"-{counter}" if counter else ""
         branch_name = f"{new_branch[:max_length-len(suffix)]}{suffix}"
         try:
-            latest_sha = repository.branch(base_branch).latest_sha()
-            repository.create_branch_ref(branch_name, latest_sha)
-            return branch_name, latest_sha
+            repository.create_branch_ref(branch_name, base_sha)
+            return branch_name
         except UnprocessableEntity as err:
             if err.msg == "Reference already exists":
                 counter += 1
@@ -237,19 +245,3 @@ def normalize_commit(commit, **kwargs):
             "message": commit.message,
             "url": commit.html_url,
         }
-
-
-def validate_cumulusci_yml_unchanged(repo):
-    """Confirm cumulusci.yml is unchanged between default_branch and the cwd."""
-    try:
-        cci_config_default_branch = repo.file_contents(
-            "cumulusci.yml", ref=repo.default_branch
-        ).decoded.decode("utf-8")
-    except NotFoundError:
-        cci_config_default_branch = ""
-    try:
-        cci_config_branch = pathlib.Path("cumulusci.yml").read_text()
-    except IOError:
-        cci_config_branch = ""
-    if cci_config_default_branch != cci_config_branch:
-        raise Exception("cumulusci.yml contains unreviewed changes.")

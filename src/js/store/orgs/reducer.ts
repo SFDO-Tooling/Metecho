@@ -207,10 +207,8 @@ const reducer = (
       };
     }
     case 'DELETE_OBJECT_SUCCEEDED': {
-      const {
-        objectType,
-        object,
-      }: { objectType?: ObjectTypes; object: Org } = action.payload;
+      const { objectType, object }: { objectType?: ObjectTypes; object: Org } =
+        action.payload;
       if (objectType === OBJECT_TYPES.ORG && object) {
         return {
           ...orgs,

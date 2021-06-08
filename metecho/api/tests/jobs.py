@@ -1,3 +1,4 @@
+import logging
 from collections import namedtuple
 from contextlib import ExitStack
 from datetime import datetime
@@ -15,6 +16,7 @@ from ..jobs import (
     alert_user_about_expiring_org,
     available_org_config_names,
     commit_changes_from_org,
+    convert_to_dev_org,
     create_branches_on_github_then_create_scratch_org,
     create_gh_branch_for_new_epic,
     create_pr,
@@ -95,15 +97,24 @@ class TestCreateBranchesOnGitHub:
 
     def test_create_branches_on_github__missing(self, user_factory, epic_factory):
         user = user_factory()
+
+        class Repo(MagicMock):
+            """Repo with only the default branch available"""
+
+            default_branch = "main"
+
+            def branch(self, name):
+                if name != self.default_branch:
+                    raise NotFoundError(MagicMock())
+                return MagicMock(**{"latest_sha.return_value": "abc123"})
+
         with ExitStack() as stack:
             try_to_make_branch = stack.enter_context(
                 patch(f"{PATCH_ROOT}.try_to_make_branch")
             )
             try_to_make_branch.return_value = "bleep", "bloop"
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            get_repo_info.return_value = MagicMock(
-                **{"branch.side_effect": NotFoundError(MagicMock())}
-            )
+            get_repo_info.return_value = Repo()
             epic = epic_factory(branch_name="placeholder")
             create_gh_branch_for_new_epic(epic, user=user)
             assert try_to_make_branch.called
@@ -412,6 +423,50 @@ class TestRefreshScratchOrg:
 
             assert async_to_sync.called
             assert logger.error.called
+
+
+@pytest.mark.django_db
+class TestConvertScratchOrg:
+    def test_convert_to_dev_org(self, mocker, scratch_org_factory, task_factory):
+        task = task_factory(epic__project__repo_id=123)
+        scratch_org = scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
+        )
+        _create_branches_on_github = mocker.patch(
+            f"{PATCH_ROOT}._create_branches_on_github"
+        )
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+
+        convert_to_dev_org(scratch_org, task=task, originating_user_id=None)
+
+        assert _create_branches_on_github.called
+        assert async_to_sync.called
+
+        scratch_org.refresh_from_db()
+        assert scratch_org.epic is None
+        assert scratch_org.task == task
+        assert scratch_org.org_type == SCRATCH_ORG_TYPES.Dev
+
+    def test_convert_to_dev_org__error(
+        self, mocker, caplog, scratch_org_factory, task_factory
+    ):
+        task = task_factory(epic__project__repo_id=123)
+        scratch_org = scratch_org_factory(
+            org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
+        )
+        mocker.patch(f"{PATCH_ROOT}._create_branches_on_github", side_effect=Exception)
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
+
+        with pytest.raises(Exception):
+            convert_to_dev_org(scratch_org, task=task, originating_user_id=None)
+
+        assert async_to_sync.called
+        assert caplog.records[0].levelno == logging.ERROR
+
+        scratch_org.refresh_from_db()
+        assert scratch_org.epic == task.epic
+        assert scratch_org.task is None
+        assert scratch_org.org_type == SCRATCH_ORG_TYPES.Playground
 
 
 @pytest.mark.django_db
@@ -1034,7 +1089,17 @@ class TestAvailableTaskOrgConfigNames:
 
 
 @pytest.mark.django_db
-def test_get_social_image(project_factory):
+@pytest.mark.parametrize(
+    "img_url, expected",
+    (
+        (
+            "https://repository-images.githubusercontent.com/repo.png",
+            "https://repository-images.githubusercontent.com/repo.png",
+        ),
+        ("https://example.com/repo.png", ""),
+    ),
+)
+def test_get_social_image(project_factory, img_url, expected):
     project = project_factory()
     with ExitStack() as stack:
         stack.enter_context(patch("metecho.api.jobs.get_repo_info"))
@@ -1043,16 +1108,18 @@ def test_get_social_image(project_factory):
             content="""
             <html>
                 <head>
-                <meta property="og:image" content="https://example.com/">
+                <meta property="og:image" content="{}">
                 </head>
                 <body></body>
             </html>
-            """
+            """.format(
+                img_url
+            )
         )
         get_social_image(project=project)
 
         project.refresh_from_db()
-        assert project.repo_image_url == "https://example.com/"
+        assert project.repo_image_url == expected
 
 
 @pytest.mark.django_db

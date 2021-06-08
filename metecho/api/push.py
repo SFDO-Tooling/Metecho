@@ -40,6 +40,7 @@ Websocket notifications you can subscribe to:
         SCRATCH_ORG_REFRESH_FAILED
         SCRATCH_ORG_REASSIGN
         SCRATCH_ORG_REASSIGN_FAILED
+        SCRATCH_ORG_CONVERT_FAILED
 
     scratchorg.list
         SCRATCH_ORG_RECREATE
