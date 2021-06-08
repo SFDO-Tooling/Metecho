@@ -3,11 +3,16 @@ import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import TaskDetail from '~js/components/tasks/detail';
-import { createObject, fetchObjects } from '~js/store/actions';
+import { createObject, fetchObjects, updateObject } from '~js/store/actions';
 import { refetchOrg, refreshOrg } from '~js/store/orgs/actions';
 import { defaultState as defaultOrgsState } from '~js/store/orgs/reducer';
 import { refreshOrgConfigs } from '~js/store/projects/actions';
-import { RETRIEVE_CHANGES, TASK_STATUSES } from '~js/utils/constants';
+import {
+  OBJECT_TYPES,
+  ORG_TYPES,
+  RETRIEVE_CHANGES,
+  TASK_STATUSES,
+} from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
 import {
@@ -22,6 +27,7 @@ jest.mock('~js/store/projects/actions');
 
 createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
+updateObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refetchOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshOrg.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
@@ -29,6 +35,7 @@ refreshOrgConfigs.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 afterEach(() => {
   createObject.mockClear();
   fetchObjects.mockClear();
+  updateObject.mockClear();
   refetchOrg.mockClear();
   refreshOrg.mockClear();
   refreshOrgConfigs.mockClear();
@@ -495,6 +502,169 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(getAllByText('Reassigning Org Ownership…')).toHaveLength(2);
+    });
+  });
+
+  describe('<ContributeWorkModal />', () => {
+    const orgs = {
+      ...defaultState.orgs,
+      orgs: {
+        [defaultOrg.id]: {
+          ...defaultOrg,
+          org_type: 'Playground',
+        },
+      },
+    };
+
+    describe('"cancel" click', () => {
+      test('closes modal', () => {
+        const { getByText, getByLabelText, queryByText } = setup({
+          initialState: {
+            ...defaultState,
+            orgs,
+          },
+        });
+        fireEvent.click(getByText('Contribute Work'));
+
+        expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
+
+        fireEvent.click(
+          getByLabelText('Convert Scratch Org into Dev Org on a new Task'),
+        );
+        fireEvent.click(
+          getByLabelText('Convert Scratch Org into Dev Org for this Task'),
+        );
+        fireEvent.click(getByText('Cancel'));
+
+        expect(queryByText('Contribute Work from Scratch Org')).toBeNull();
+      });
+    });
+
+    describe('"Contribute" click with new task', () => {
+      test('opens Add Task modal', () => {
+        const { getByText, getByTitle, getByLabelText, queryByText } = setup({
+          initialState: {
+            ...defaultState,
+            orgs: {
+              ...defaultState.orgs,
+              orgs: {
+                ...defaultState.orgs.orgs,
+                'new-org': {
+                  ...defaultOrg,
+                  id: 'new-org',
+                  org_type: 'Playground',
+                },
+              },
+            },
+          },
+        });
+        fireEvent.click(getByText('Contribute Work'));
+        fireEvent.click(
+          getByLabelText('Convert Scratch Org into Dev Org on a new Task'),
+        );
+        fireEvent.click(getByText('Contribute'));
+
+        expect(
+          getByText('Add a Task to Contribute Work from Scratch Org'),
+        ).toBeVisible();
+
+        fireEvent.click(getByTitle('Cancel'));
+
+        expect(
+          queryByText('Add a Task to Contribute Work from Scratch Org'),
+        ).toBeNull();
+      });
+    });
+
+    describe('"Contribute" click with existing task', () => {
+      test('opens retrieve changes modal', () => {
+        const { getByText, history } = setup({
+          initialState: {
+            ...defaultState,
+            orgs,
+            tasks: {
+              ...defaultState.tasks,
+              epic1: [
+                {
+                  ...defaultState.tasks.epic1[0],
+                  assigned_dev: null,
+                },
+              ],
+            },
+          },
+        });
+        fireEvent.click(getByText('Contribute Work'));
+        fireEvent.click(getByText('Contribute'));
+
+        expect(updateObject).toHaveBeenCalledTimes(2);
+        expect(updateObject).toHaveBeenCalledWith({
+          objectType: OBJECT_TYPES.TASK,
+          url: window.api_urls.task_assignees('task1'),
+          data: {
+            assigned_dev: 'user-id',
+          },
+        });
+        expect(updateObject).toHaveBeenCalledWith({
+          objectType: OBJECT_TYPES.ORG,
+          url: window.api_urls.scratch_org_detail(defaultOrg.id),
+          data: { org_type: ORG_TYPES.DEV },
+          patch: true,
+        });
+        expect(history.replace).toHaveBeenCalledWith({
+          state: { [RETRIEVE_CHANGES]: true },
+        });
+      });
+    });
+
+    describe('Task is already merged', () => {
+      test('does not allow contributing', () => {
+        const { queryByText } = setup({
+          initialState: {
+            ...defaultState,
+            orgs,
+            tasks: {
+              ...defaultState.tasks,
+              epic1: [
+                {
+                  ...defaultState.tasks.epic1[0],
+                  has_unmerged_commits: false,
+                  pr_url: 'my-pr-url',
+                  pr_is_open: false,
+                  status: TASK_STATUSES.COMPLETED,
+                },
+              ],
+            },
+          },
+        });
+
+        expect(queryByText('Contribute Work')).toBeNull();
+      });
+    });
+
+    describe('User does not have permissions', () => {
+      test('does not allow contributing', () => {
+        const { getByText } = setup({
+          initialState: {
+            ...defaultState,
+            orgs,
+            projects: {
+              ...defaultState.projects,
+              projects: [
+                {
+                  ...defaultState.projects.projects[0],
+                  has_push_permission: false,
+                },
+              ],
+            },
+          },
+        });
+        fireEvent.click(getByText('Contribute Work'));
+
+        expect(getByText('Contribute Work from Scratch Org')).toBeVisible();
+        expect(
+          getByText('You do not have “push” access', { exact: false }),
+        ).toBeVisible();
+      });
     });
   });
 

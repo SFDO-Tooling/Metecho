@@ -372,7 +372,7 @@ class ScratchOrgViewSet(
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         return super().destroy(request, *args, **kwargs)
@@ -420,7 +420,7 @@ class ScratchOrgViewSet(
             and not request.user == instance.owner
         ):
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         force_get = request.query_params.get("get_unsaved_changes", False)
@@ -448,7 +448,7 @@ class ScratchOrgViewSet(
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         commit_message = serializer.validated_data["commit_message"]
@@ -477,7 +477,7 @@ class ScratchOrgViewSet(
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         scratch_org.mark_visited(originating_user_id=str(request.user.id))
@@ -489,7 +489,7 @@ class ScratchOrgViewSet(
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         scratch_org.queue_refresh_org(originating_user_id=str(request.user.id))

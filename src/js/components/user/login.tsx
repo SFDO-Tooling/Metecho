@@ -131,7 +131,7 @@ const Login = () => {
                 size="x-small"
                 className="slds-m-right_x-small"
               />
-              {i18n.t('Easily create a scratch org with the existing epic.')}
+              {i18n.t('Easily create a Dev Org for an existing epic.')}
             </li>
             <li className="slds-p-bottom_small slds-grid">
               <Icon

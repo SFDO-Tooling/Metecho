@@ -121,7 +121,7 @@ const SelectFlowType = ({
         >
           {isDisabled &&
             i18n.t(
-              'Org Type cannot be changed while a scratch org exists for this task.',
+              'Org Type cannot be changed while an org exists for this task.',
             )}
           {errors}
         </div>

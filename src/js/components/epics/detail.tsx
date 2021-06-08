@@ -316,20 +316,18 @@ const EpicDetail = (props: RouteComponentProps) => {
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
   };
-  const closeContributeModal = () => {
+  const closeContributeModal = useCallback(() => {
     setContributeModalOpen(false);
-  };
-  const createAndContribute = () => {
-    setCreateModalOrgIdOrOpen(
-      playgroundOrg?.id || /* istanbul ignore next */ true,
-    );
+  }, []);
+  const createAndContribute = useCallback(({ id }: { id: string }) => {
+    setCreateModalOrgIdOrOpen(id);
     setDeleteModalOpen(false);
     setEditModalOpen(false);
     setSubmitModalOpen(false);
     setAssignUsersModalOpen(false);
     setCreateOrgModalOpen(false);
     setContributeModalOpen(false);
-  };
+  }, []);
 
   // "Next Steps" action handler
   const handleStepAction = useCallback(
@@ -783,6 +781,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             epic={epic}
             isOpen={contributeModalOpen}
             hasPermissions={project.has_push_permission}
+            orgId={playgroundOrg.id}
             closeModal={closeContributeModal}
             doContribute={createAndContribute}
           />

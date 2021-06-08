@@ -60,7 +60,7 @@ const DeleteModal = ({
       message = (
         <Trans i18nKey="confirmDeleteEpic">
           Are you sure you want to delete epic “{{ name: model.name }}”? This
-          will also delete any tasks and scratch orgs in this epic.
+          will also delete any tasks and orgs in this epic.
         </Trans>
       );
       break;
@@ -69,7 +69,7 @@ const DeleteModal = ({
       message = (
         <Trans i18nKey="confirmDeleteTask">
           Are you sure you want to delete task “{{ name: model.name }}”? This
-          will also delete any scratch orgs in this task.
+          will also delete any orgs in this task.
         </Trans>
       );
       break;

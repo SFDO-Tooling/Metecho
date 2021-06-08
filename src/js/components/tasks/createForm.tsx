@@ -29,7 +29,7 @@ import routes from '~js/utils/routes';
 interface Props {
   project: Project;
   epic: Epic;
-  isOpenOrOrgId: boolean | string;
+  isOpenOrOrgId: boolean | string | null;
   playgroundOrg?: Org;
   closeCreateModal: () => void;
 }
@@ -68,7 +68,7 @@ const CreateTaskModal = ({
   };
 
   if (isContributingFromOrg) {
-    additionalData.dev_org = isOpenOrOrgId;
+    additionalData.dev_org = isOpenOrOrgId as string;
   }
 
   const {
