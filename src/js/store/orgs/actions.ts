@@ -81,7 +81,7 @@ export type OrgsAction =
 const getOrgParent = (
   org: Org | MinimalOrg,
   state: AppState,
-): { name?: string; parent?: string; orgType?: string } => {
+): { name?: string; parent?: string; orgType: string } => {
   const task = selectTaskById(state, org.task);
   const epic = selectEpicById(state, org.epic);
   const project = selectProjectById(state, org.project);
@@ -117,9 +117,9 @@ export const provisionOrg =
   }): ThunkResult<OrgProvisioned> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t('Successfully created {{orgType}}.', { orgType });
 
       /* istanbul ignore else */
@@ -158,9 +158,9 @@ export const provisionFailed =
   }): ThunkResult<OrgProvisionFailed> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t(
         'Uh oh. There was an error creating your new {{orgType}}.',
         { orgType },
@@ -240,9 +240,9 @@ export const updateFailed =
   }): ThunkResult<OrgUpdated> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t(
         'Uh oh. There was an error checking for changes on your {{orgType}}.',
         { orgType },
@@ -294,8 +294,8 @@ export const deleteOrg =
       });
     }
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       if (message) {
         dispatch(
           addToast({
@@ -338,9 +338,9 @@ export const deleteFailed =
   }): ThunkResult<OrgDeleteFailed> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t('Uh oh. There was an error deleting your {{orgType}}.', {
         orgType,
       });
@@ -376,9 +376,9 @@ export const commitSucceeded =
   }): ThunkResult<CommitEvent> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t(
         'Successfully retrieved changes from your {{orgType}}.',
         { orgType },
@@ -415,9 +415,9 @@ export const commitFailed =
   }): ThunkResult<CommitEvent> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t(
         'Uh oh. There was an error retrieving changes from your {{orgType}}.',
         { orgType },
@@ -479,9 +479,9 @@ export const orgRefreshed =
   }): ThunkResult<OrgUpdated> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t('Successfully refreshed your {{orgType}}.', { orgType });
 
       /* istanbul ignore else */
@@ -508,9 +508,9 @@ export const refreshError =
   }): ThunkResult<OrgUpdated | OrgRefreshRejected> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t(
         'Uh oh. There was an error refreshing your {{orgType}}.',
         {
@@ -575,9 +575,9 @@ export const orgReassignFailed =
   }): ThunkResult<OrgReassignFailed> =>
   (dispatch, getState) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t(
         'Uh oh. There was an error reassigning this {{orgType}}.',
         {
@@ -632,9 +632,9 @@ export const orgConvertFailed =
   }): ThunkResult<void> =>
   (dispatch, getState, history) => {
     const state = getState();
-    const { name, parent, orgType } = getOrgParent(model, state);
     /* istanbul ignore else */
     if (isCurrentUser(originating_user_id, state)) {
+      const { name, parent, orgType } = getOrgParent(model, state);
       let msg = i18n.t(
         'Uh oh. There was an error contributing work from your {{orgType}}.',
         { orgType },
