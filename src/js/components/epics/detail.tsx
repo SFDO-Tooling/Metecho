@@ -67,8 +67,9 @@ const EpicDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] =
-    useState<boolean | string>(false);
+  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] = useState<
+    boolean | string
+  >(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
 
@@ -89,10 +90,12 @@ const EpicDetail = (props: RouteComponentProps) => {
   }, []);
 
   // "Confirm remove user from epic" modal related:
-  const [waitingToUpdateUsers, setWaitingToUpdateUsers] =
-    useState<GitHubUser[] | null>(null);
-  const [confirmRemoveUsers, setConfirmRemoveUsers] =
-    useState<GitHubUser[] | null>(null);
+  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
+    GitHubUser[] | null
+  >(null);
+  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
+    GitHubUser[] | null
+  >(null);
   const closeConfirmRemoveUsersModal = useCallback(() => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);
