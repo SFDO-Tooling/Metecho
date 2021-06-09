@@ -11,7 +11,7 @@ ipython==7.24.0
 isort==5.8.0
 pytest-asyncio==0.15.1
 pytest-cov==2.12.1
-pytest-django==4.3.0
+pytest-django==4.4.0
 pytest-factoryboy==2.1.0
 pytest-mock==3.6.1
 pytest-sugar==0.9.4
