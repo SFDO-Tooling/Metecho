@@ -25,7 +25,7 @@ export const ConfirmDelete = Template.bind({});
 ConfirmDelete.args = {
   org: null,
   isOpen: true,
-  actionType: 'delete',
+  actionType: 'refresh',
   handleClose: action('handleClose'),
   handleCancel: action('handleCancel'),
 };
