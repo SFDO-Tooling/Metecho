@@ -2,9 +2,8 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
- import {  ConfirmOrgTracker,CONFIRM_ORG_TRACKER, ORG_TYPES } from '~js/utils/constants';
-
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
+import { ConfirmOrgTracker } from '~js/utils/constants';
 
 export default {
   title: 'Tasks/ConfirmDelete/Example',
@@ -12,9 +11,9 @@ export default {
 };
 
 const actionTypes: { [key: string]: ConfirmOrgTracker } = {
-  'Delete': 'delete',
-  'Refresh': 'refresh',
-}
+  Delete: 'delete',
+  Refresh: 'refresh',
+};
 
 const Template: Story<ComponentProps<typeof ConfirmDeleteModal>> = (args) => (
   <ConfirmDeleteModal {...args} />
@@ -36,9 +35,8 @@ ConfirmDelete.argTypes = {
     options: Object.keys(actionTypes),
     control: {
       type: 'select',
-    }
-  }
-
+    },
+  },
 };
 
 ConfirmDelete.storyName = 'Example';
