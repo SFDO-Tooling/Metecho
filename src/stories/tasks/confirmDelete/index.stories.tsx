@@ -3,7 +3,7 @@ import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
-import { ConfirmOrgTracker } from '~js/utils/constants';
+import { ConfirmOrgTracker, CONFIRM_ORG_TRACKER } from '~js/utils/constants';
 
 export default {
   title: 'Tasks/ConfirmDelete/Example',
@@ -11,8 +11,8 @@ export default {
 };
 
 const actionTypes: { [key: string]: ConfirmOrgTracker } = {
-  Delete: 'delete',
-  Refresh: 'refresh',
+  Delete: CONFIRM_ORG_TRACKER.DELETE,
+  Refresh: CONFIRM_ORG_TRACKER.REFRESH,
 };
 
 const Template: Story<ComponentProps<typeof ConfirmDeleteModal>> = (args) => (
