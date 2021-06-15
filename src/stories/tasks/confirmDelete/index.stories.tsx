@@ -3,16 +3,11 @@ import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
 import ConfirmDeleteModal from '~js/components/tasks/confirmDeleteModal';
-import { ConfirmOrgTracker, CONFIRM_ORG_TRACKER } from '~js/utils/constants';
+import { CONFIRM_ORG_TRACKER } from '~js/utils/constants';
 
 export default {
-  title: 'Tasks/ConfirmDelete/Example',
+  title: 'Tasks/ConfirmDelete/Examples',
   component: ConfirmDeleteModal,
-};
-
-const actionTypes: { [key: string]: ConfirmOrgTracker } = {
-  Delete: CONFIRM_ORG_TRACKER.DELETE,
-  Refresh: CONFIRM_ORG_TRACKER.REFRESH,
 };
 
 const Template: Story<ComponentProps<typeof ConfirmDeleteModal>> = (args) => (
@@ -24,19 +19,29 @@ export const ConfirmDelete = Template.bind({});
 ConfirmDelete.args = {
   org: null,
   isOpen: true,
-  actionType: 'refresh',
+  actionType: CONFIRM_ORG_TRACKER.DELETE,
   handleClose: action('handleClose'),
   handleCancel: action('handleCancel'),
 };
 ConfirmDelete.argTypes = {
   org: { control: { disable: true } },
   isOpen: { control: { disable: true } },
-  actiontype: {
-    options: Object.keys(actionTypes),
-    control: {
-      type: 'select',
-    },
-  },
+  actiontype: { control: { disable: true } },
 };
 
-ConfirmDelete.storyName = 'Example';
+ConfirmDelete.storyName = 'Delete';
+
+export const ConfirmRefresh = Template.bind({});
+
+ConfirmRefresh.args = {
+  org: null,
+  isOpen: true,
+  actionType: CONFIRM_ORG_TRACKER.REFRESH,
+  handleClose: action('handleClose'),
+  handleCancel: action('handleCancel'),
+};
+ConfirmRefresh.argTypes = {
+  org: { control: { disable: true } },
+  isOpen: { control: { disable: true } },
+};
+ConfirmRefresh.storyName = 'Refresh';
