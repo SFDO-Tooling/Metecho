@@ -185,7 +185,9 @@ class EpicSerializer(serializers.ModelSerializer):
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
-    issue = HashidPrimaryKeyRelatedField(queryset=GitHubIssue.objects.all())
+    issue = HashidPrimaryKeyRelatedField(
+        queryset=GitHubIssue.objects.all(), required=False, allow_null=True
+    )
 
     class Meta:
         model = Epic
@@ -366,7 +368,9 @@ class TaskSerializer(serializers.ModelSerializer):
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
-    issue = HashidPrimaryKeyRelatedField(queryset=GitHubIssue.objects.all())
+    issue = HashidPrimaryKeyRelatedField(
+        queryset=GitHubIssue.objects.all(), required=False, allow_null=True
+    )
 
     dev_org = serializers.PrimaryKeyRelatedField(
         queryset=ScratchOrg.objects.active(),

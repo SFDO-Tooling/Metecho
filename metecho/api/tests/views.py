@@ -164,6 +164,7 @@ class TestProjectView:
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
                     "latest_sha": "abcd1234",
+                    "currently_fetching_issues": False,
                 }
             ],
         }, response.json()
@@ -207,6 +208,7 @@ class TestProjectView:
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
                     "latest_sha": "abcd1234",
+                    "currently_fetching_issues": False,
                 }
             ],
         }, response.json()
