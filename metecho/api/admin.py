@@ -11,6 +11,7 @@ from . import gh
 from .models import (
     Epic,
     EpicSlug,
+    GitHubIssue,
     GitHubRepository,
     Project,
     ProjectSlug,
@@ -107,6 +108,15 @@ class GitHubRepositoryAdmin(admin.ModelAdmin):
     list_filter = ("user",)
     list_select_related = ("user",)
     search_fields = ("repo_url", "repo_id")
+
+
+@admin.register(GitHubIssue)
+class GitHubIssueAdmin(admin.ModelAdmin):
+    date_hierarchy = "created_at"
+    list_display = ("title", "number", "state", "project", "created_at")
+    list_filter = ("project", "state")
+    list_select_related = ("project",)
+    search_fields = ("number", "title")
 
 
 @admin.register(Epic)

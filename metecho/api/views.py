@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from github3.exceptions import ConnectionError, ResponseError
-from rest_framework import mixins, status
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -16,13 +16,27 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from . import gh
 from .authentication import GitHubHookAuthentication
-from .filters import EpicFilter, ProjectFilter, ScratchOrgFilter, TaskFilter
+from .filters import (
+    EpicFilter,
+    GitHubIssueFilter,
+    ProjectFilter,
+    ScratchOrgFilter,
+    TaskFilter,
+)
 from .hook_serializers import (
     PrHookSerializer,
     PrReviewHookSerializer,
     PushHookSerializer,
 )
-from .models import EPIC_STATUSES, SCRATCH_ORG_TYPES, Epic, Project, ScratchOrg, Task
+from .models import (
+    EPIC_STATUSES,
+    SCRATCH_ORG_TYPES,
+    Epic,
+    GitHubIssue,
+    Project,
+    ScratchOrg,
+    Task,
+)
 from .paginators import CustomPaginator
 from .serializers import (
     CanReassignSerializer,
@@ -31,6 +45,7 @@ from .serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubIssueSerializer,
     MinimalUserSerializer,
     ProjectSerializer,
     ReviewSerializer,
@@ -173,6 +188,15 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     queryset = User.objects.all()
 
 
+class GitHubIssueViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GitHubIssueSerializer
+    pagination_class = CustomPaginator
+    queryset = GitHubIssue.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = GitHubIssueFilter
+
+
 class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProjectSerializer
@@ -196,6 +220,12 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
     def refresh_github_users(self, request, pk=None):
         instance = self.get_object()
         instance.queue_populate_github_users(originating_user_id=str(request.user.id))
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=True, methods=["POST"])
+    def refresh_github_issues(self, request, pk=None):
+        instance = self.get_object()
+        instance.queue_refresh_github_issues(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @action(detail=True, methods=["POST"])

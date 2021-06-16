@@ -1,10 +1,30 @@
+from django.db.models.query_utils import Q
 from django_filters import rest_framework as filters
 
-from .models import Epic, Project, ScratchOrg, Task
+from .models import Epic, GitHubIssue, Project, ScratchOrg, Task
 
 
 def slug_is_active(queryset, name, value):
     return queryset.filter(**{f"{name}__slug": value, f"{name}__is_active": True})
+
+
+class GitHubIssueFilter(filters.FilterSet):
+    search = filters.CharFilter(label="Search", method="do_search")
+    is_attached = filters.BooleanFilter(
+        label="Is attached", method="filter_by_is_attached"
+    )
+
+    class Meta:
+        model = GitHubIssue
+        fields = ("project",)
+
+    def do_search(self, queryset, name, query):
+        return queryset.filter(Q(title__icontains=query) | Q(number__icontains=query))
+
+    def filter_by_is_attached(self, queryset, name, is_attached):
+        if is_attached:
+            return queryset.filter(Q(epic__isnull=False) | Q(task__isnull=False))
+        return queryset.filter(epic__isnull=True, task__isnull=True)
 
 
 class ProjectFilter(filters.FilterSet):

@@ -13,6 +13,7 @@ from .models import (
     SCRATCH_ORG_TYPES,
     TASK_REVIEW_STATUS,
     Epic,
+    GitHubIssue,
     Project,
     ScratchOrg,
     SiteProfile,
@@ -46,6 +47,48 @@ class HashidPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         if self.pk_field is not None:
             return self.pk_field.to_representation(value.pk)
         return str(value.pk)
+
+
+class GitHubIssueSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    project = HashidPrimaryKeyRelatedField(queryset=Project.objects.all())
+    epic = serializers.SerializerMethodField()
+    task = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GitHubIssue
+        read_only_fields = (
+            "id",
+            "number",
+            "title",
+            "created_at",
+            "html_url",
+            "project",
+            "epic",
+            "task",
+        )
+        fields = read_only_fields
+
+    def get_epic(self, issue):
+        try:
+            return {
+                "id": str(issue.epic.id),
+                "name": issue.epic.name,
+                "status": issue.epic.status,
+            }
+        except Epic.DoesNotExist:
+            return None
+
+    def get_task(self, issue):
+        try:
+            return {
+                "id": str(issue.task.id),
+                "name": issue.task.name,
+                "status": issue.task.status,
+                "review_status": issue.task.review_status,
+            }
+        except Task.DoesNotExist:
+            return None
 
 
 class FullUserSerializer(serializers.ModelSerializer):
@@ -116,11 +159,13 @@ class ProjectSerializer(serializers.ModelSerializer):
             "org_config_names",
             "currently_fetching_org_config_names",
             "latest_sha",
+            "currently_fetching_github_issues",
         )
         extra_kwargs = {
             "org_config_names": {"read_only": True},
             "currently_fetching_org_config_names": {"read_only": True},
             "latest_sha": {"read_only": True},
+            "currently_fetching_github_issues": {"read_only": True},
         }
 
     def get_repo_url(self, obj) -> Optional[str]:
@@ -136,12 +181,11 @@ class ProjectSerializer(serializers.ModelSerializer):
 class EpicSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
-    project = serializers.PrimaryKeyRelatedField(
-        queryset=Project.objects.all(), pk_field=serializers.CharField()
-    )
+    project = HashidPrimaryKeyRelatedField(queryset=Project.objects.all())
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
+    issue = HashidPrimaryKeyRelatedField(queryset=GitHubIssue.objects.all())
 
     class Meta:
         model = Epic
@@ -165,6 +209,7 @@ class EpicSerializer(serializers.ModelSerializer):
             "status",
             "github_users",
             "latest_sha",
+            "issue",
         )
         extra_kwargs = {
             "slug": {"read_only": True},
@@ -317,12 +362,11 @@ class EpicCollaboratorsSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     description_rendered = MarkdownField(source="description", read_only=True)
-    epic = serializers.PrimaryKeyRelatedField(
-        queryset=Epic.objects.all(), pk_field=serializers.CharField()
-    )
+    epic = HashidPrimaryKeyRelatedField(queryset=Epic.objects.all())
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
     pr_url = serializers.SerializerMethodField()
+    issue = HashidPrimaryKeyRelatedField(queryset=GitHubIssue.objects.all())
 
     dev_org = serializers.PrimaryKeyRelatedField(
         queryset=ScratchOrg.objects.active(),
@@ -350,6 +394,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "origin_sha",
             "branch_diff_url",
             "pr_url",
+            "issue",
             "review_submitted_at",
             "review_valid",
             "review_status",
