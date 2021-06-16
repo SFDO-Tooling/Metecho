@@ -159,13 +159,13 @@ class ProjectSerializer(serializers.ModelSerializer):
             "org_config_names",
             "currently_fetching_org_config_names",
             "latest_sha",
-            "currently_fetching_github_issues",
+            "currently_fetching_issues",
         )
         extra_kwargs = {
             "org_config_names": {"read_only": True},
             "currently_fetching_org_config_names": {"read_only": True},
             "latest_sha": {"read_only": True},
-            "currently_fetching_github_issues": {"read_only": True},
+            "currently_fetching_issues": {"read_only": True},
         }
 
     def get_repo_url(self, obj) -> Optional[str]:
