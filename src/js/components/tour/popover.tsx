@@ -11,11 +11,13 @@ const TourPopover = ({
   heading,
   body,
   id,
+  isOpen,
 }: {
   align: string;
   heading: string;
   body: string | JSX.Element;
   id: string;
+  isOpen: boolean;
 }) => {
   const user = useSelector(selectUserState);
 
@@ -28,6 +30,7 @@ const TourPopover = ({
       variant="walkthrough"
       triggerClassName="popover-wrapper"
       id={id}
+      /*   isOpen={isOpen} */
       /* onOpen={ function from helper} */
     >
       <Button
