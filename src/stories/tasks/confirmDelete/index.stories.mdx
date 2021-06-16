@@ -5,17 +5,16 @@ import LinkTo from '@storybook/addon-links/react';
 
 # ConfirmDelete
 
-**Confirms deletion or refreshing of an org with unretrieved changes.**
+**Confirms before deleting or refreshing an org that has unretrieved changes.**
 
 ## Overview
 
 The **ConfirmDelete** component is an
-[SLDS Modal](http://design-system-react-components.herokuapp.com/?path=/story/sldsmodal--modal-with-custom-parent-node)
-used to confirm the deletion of a **Scratch**, **Dev**, or **Test Org** with
-unretrieved changes.
+[SLDS Modal](https://react.lightningdesignsystem.com/components/modals/) used to
+confirm the deletion of a **Dev Org** that has unretrieved changes.
 
-For `Project` **Scratch Orgs**, the modal is also triggered when attempting to
-refresh an org with unretrieved changes.
+The modal is also triggered when attempting to refresh a **Scratch Org** that
+has unretrieved changes.
 
 <LinkTo kind="Tasks/ConfirmDelete/Examples" story="Delete">
   View Examples
