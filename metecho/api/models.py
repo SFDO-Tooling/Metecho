@@ -408,6 +408,7 @@ class Project(
         if not self.currently_fetching_issues:
             self.currently_fetching_issues = True
             self.save()
+            self.notify_changed(originating_user_id=originating_user_id)
             refresh_github_issues_job.delay(
                 self, originating_user_id=originating_user_id
             )

@@ -75,6 +75,7 @@ class GitHubIssueSerializer(serializers.ModelSerializer):
                 "id": str(issue.epic.id),
                 "name": issue.epic.name,
                 "status": issue.epic.status,
+                "slug": issue.epic.slug,
             }
         except Epic.DoesNotExist:
             return None
@@ -86,6 +87,8 @@ class GitHubIssueSerializer(serializers.ModelSerializer):
                 "name": issue.task.name,
                 "status": issue.task.status,
                 "review_status": issue.task.review_status,
+                "slug": issue.task.slug,
+                "epic_slug": issue.task.epic.slug,
             }
         except Task.DoesNotExist:
             return None

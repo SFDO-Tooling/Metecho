@@ -142,6 +142,7 @@ class TaskAdmin(admin.ModelAdmin):
     search_fields = ("name", "epic__name")
     fields = (
         ("name", "epic"),
+        "issue",
         "description",
         ("branch_name", "org_config_name"),
         "commits",
@@ -159,6 +160,7 @@ class TaskAdmin(admin.ModelAdmin):
         "reviewers",
         "get_all_users_in_commits",
     )
+    raw_id_fields = ("issue", "epic")
 
 
 @admin.register(TaskSlug)

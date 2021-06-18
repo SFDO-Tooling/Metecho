@@ -192,7 +192,7 @@ class GitHubIssueViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = GitHubIssueSerializer
     pagination_class = CustomPaginator
-    queryset = GitHubIssue.objects.all()
+    queryset = GitHubIssue.objects.select_related("epic", "task", "task__epic")
     filter_backends = (DjangoFilterBackend,)
     filterset_class = GitHubIssueFilter
 
