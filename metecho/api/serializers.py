@@ -20,7 +20,7 @@ from .models import (
     Task,
 )
 from .sf_run_flow import is_org_good
-from .validators import CaseInsensitiveUniqueTogetherValidator
+from .validators import CaseInsensitiveUniqueTogetherValidator, UnattachedIssueValidator
 
 User = get_user_model()
 
@@ -239,6 +239,7 @@ class EpicSerializer(serializers.ModelSerializer):
                     "name", _("An epic with this name already exists.")
                 ),
             ),
+            UnattachedIssueValidator(),
         )
 
     def create(self, validated_data):
@@ -442,6 +443,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     "name", _("A task with this name already exists.")
                 ),
             ),
+            UnattachedIssueValidator(),
         )
 
     def get_branch_url(self, obj) -> Optional[str]:

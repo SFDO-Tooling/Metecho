@@ -125,6 +125,7 @@ class EpicAdmin(admin.ModelAdmin):
     list_filter = (SoftDeletedListFilter, "status", "project")
     list_select_related = ("project",)
     search_fields = ("name", "branch_name")
+    raw_id_fields = ("issue",)
 
 
 @admin.register(EpicSlug)

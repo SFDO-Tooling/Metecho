@@ -1,6 +1,34 @@
+from contextlib import suppress
+
 from django.core.validators import RegexValidator, _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, qs_filter
+
+
+class UnattachedIssueValidator:
+    """
+    Check a GitHubIssue doesn't have an Epic nor a Task attached
+    """
+
+    requires_context = True
+
+    def __call__(self, data, serializer):
+        from .models import Epic, Task
+
+        issue = data.get("issue")
+        if issue is not None:
+            with suppress(Task.DoesNotExist):
+                if issue.task != serializer.instance:
+                    raise serializers.ValidationError(
+                        {"issue": _("This issue is already attached to a task")}
+                    )
+            with suppress(Epic.DoesNotExist):
+                if issue.epic != serializer.instance:
+                    raise serializers.ValidationError(
+                        {"issue": _("This issue is already attached to an epic")}
+                    )
+        return issue
 
 
 class CaseInsensitiveUniqueTogetherValidator(UniqueTogetherValidator):
