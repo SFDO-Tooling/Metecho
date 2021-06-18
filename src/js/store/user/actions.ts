@@ -1,4 +1,7 @@
+import { string } from 'prop-types';
+
 import { ThunkResult } from '~js/store';
+import { hasViewedStep } from '~js/store/helpers';
 import {
   projectsRefreshed,
   projectsRefreshing,
@@ -6,7 +9,6 @@ import {
 import { User } from '~js/store/user/reducer';
 import apiFetch from '~js/utils/api';
 import { LIST_CHANNEL_ID, OBJECT_TYPES } from '~js/utils/constants';
-
 interface LoginAction {
   type: 'USER_LOGGED_IN';
   payload: User;
@@ -219,9 +221,11 @@ export const onboarded =
 export const updateTour =
   (data: {
     enabled?: boolean;
-    state?: string[] | null;
+    tour_state?: string[] | null;
   }): ThunkResult<Promise<UpdateTourSucceeded>> =>
-  async (dispatch) => {
+  async (dispatch, getState) => {
+    /*     if (hasViewedStep(id, getState())) {
+    } */
     dispatch({ type: 'TOUR_UPDATE_REQUESTED' });
     try {
       const payload: User = await apiFetch({
