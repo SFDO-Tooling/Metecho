@@ -11,25 +11,23 @@ const TourPopover = ({
   heading,
   body,
   id,
-  isOpen,
 }: {
   align: string;
   heading: string;
   body: string | JSX.Element;
   id: string;
-  isOpen: boolean;
 }) => {
   const user = useSelector(selectUserState);
 
   return window.GLOBALS.ENABLE_WALKTHROUGHS &&
     user?.self_guided_tour_enabled ? (
     <Popover
+      id={id}
       align={align}
       heading={heading}
       body={<p>{body}</p>}
       variant="walkthrough"
       triggerClassName="popover-wrapper"
-      id={id}
       /*   isOpen={isOpen} */
       /* onOpen={ function from helper} */
     >

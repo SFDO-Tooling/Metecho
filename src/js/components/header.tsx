@@ -27,6 +27,7 @@ const Header = () => {
       <div className="slds-is-relative">
         <UserInfo />
         <TourPopover
+          id="tour-user"
           align="bottom right"
           heading={i18n.t('Account & connection info')}
           body={
@@ -51,6 +52,7 @@ const Header = () => {
       <Toasts />
       <div className="slds-is-relative logo-popover">
         <TourPopover
+          id="tour-metecho-name"
           align="bottom left"
           heading={i18n.t('What’s in a name?')}
           body={

@@ -653,6 +653,7 @@ const TaskDetail = (
             handleOptionSelect={handlePageOptionSelect}
           />
           <TourPopover
+            id="tour-edit-task"
             align="left"
             heading={i18n.t('Edit or delete this Task')}
             body={
@@ -701,6 +702,7 @@ const TaskDetail = (
           disabled={currentlySubmitting}
         />
         <TourPopover
+          id="tour-task-submit"
           align="top left"
           heading={i18n.t('Submit changes for testing')}
           body={
@@ -772,6 +774,7 @@ const TaskDetail = (
           }
         />
         <TourPopover
+          id="tour-task-retrieve"
           align="right"
           heading={i18n.t('Retrieve changes')}
           body={
@@ -813,6 +816,7 @@ const TaskDetail = (
         title={task.name}
         titlePopover={
           <TourPopover
+            id="tour-task-name"
             align="bottom left"
             heading={i18n.t('Task name & GitHub link')}
             body={
@@ -849,6 +853,7 @@ const TaskDetail = (
             >
               <TaskStatusPath task={task} />
               <TourPopover
+                id="tour-task-path"
                 align="left"
                 heading={i18n.t('Task progress path')}
                 body={
@@ -908,6 +913,7 @@ const TaskDetail = (
                       handleAction={handleStepAction}
                     />
                     <TourPopover
+                      id="tour-task-next-steps"
                       align="top"
                       heading={i18n.t('Wondering what to do next?')}
                       body={
@@ -962,6 +968,7 @@ const TaskDetail = (
         )}
         <div className="slds-m-vertical_large slds-is-relative heading">
           <TourPopover
+            id="tour-task-scratch-org"
             align="top left"
             heading={i18n.t('View & play with a Task')}
             body={

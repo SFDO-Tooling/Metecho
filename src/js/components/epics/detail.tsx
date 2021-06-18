@@ -402,6 +402,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           disabled={currentlySubmitting}
         />
         <TourPopover
+          id="tour-epic-submit-review"
           align="right"
           heading={i18n.t('Submit this Epic for review')}
           body={
@@ -436,6 +437,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             handleOptionSelect={handlePageOptionSelect}
           />
           <TourPopover
+            id="tour-edit-epic"
             align="left"
             heading={i18n.t('Edit or delete this Epic')}
             body={
@@ -494,6 +496,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         title={epic.name}
         titlePopover={
           <TourPopover
+            id="tour-epic-name"
             align="bottom left"
             heading={i18n.t('Epic name & GitHub link')}
             body={
@@ -534,6 +537,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                       onClick={openAssignUsersModal}
                     />
                     <TourPopover
+                      id="tour-epic-collaborators"
                       align="top"
                       heading={i18n.t('Epic Collaborators')}
                       body={
@@ -595,6 +599,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 handleAction={handleStepAction}
               />
               <TourPopover
+                id="tour-epic-next-steps"
                 align="top"
                 heading={i18n.t('Wondering what to do next?')}
                 body={
@@ -614,6 +619,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         <div className="slds-is-relative">
           <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
           <TourPopover
+            id="tour-epic-progress"
             align="bottom left"
             heading={i18n.t('Epic progress path')}
             body={
@@ -633,6 +639,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         <div className="slds-m-bottom_large">
           <div className="slds-is-relative heading">
             <TourPopover
+              id="tour-epic-scratch-org"
               align="top left"
               heading={i18n.t('View & play with an Epic')}
               body={
@@ -703,6 +710,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   className="slds-m-bottom_large"
                 />
                 <TourPopover
+                  id="tour-add-task"
                   align="top left"
                   heading={i18n.t('Add a Task to contribute')}
                   body={
