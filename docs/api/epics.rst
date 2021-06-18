@@ -38,21 +38,30 @@ Retrieve
           "pr_is_open": true,
           "pr_is_merged": false,
           "github_users": [
-            {
-              "id": "12345",
-              "login": "username",
-              "name": "Full Name",
-              "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4",
-              "permissions": {
-                "push": true,
-                "pull": true,
-                "admin": false
-              }
-            }
+            "123456",
+            "987654"
           ],
           "status": "In progress",
-          "latest_sha": "12345abc"
+          "latest_sha": "12345abc",
+          "issue": "M13MnQO"
         }
         ...
       ]
     }
+
+Collaborators
+-------------
+
+Add/remove Epic collaborators
+
+.. sourcecode:: http
+
+   POST /api/epics/:id/collaborators/ HTTP/1.1
+
+   {
+     "github_users": ["123456", "345678"]
+   }
+
+.. sourcecode:: http
+
+   HTTP/1.1 200 OK

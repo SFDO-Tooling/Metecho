@@ -57,7 +57,8 @@ Retrieve
             }
           ],
           "currently_fetching_org_config_names": false,
-          "latest_sha": "12345abc"
+          "latest_sha": "12345abc",
+          "currently_fetching_issues": false
         }
         ...
       ]
@@ -69,6 +70,17 @@ Refresh GitHub Users
 .. sourcecode:: http
 
    POST /api/projects/:id/refresh_github_users/ HTTP/1.1
+
+.. sourcecode:: http
+
+   HTTP/1.1 202 ACCEPTED
+
+Refresh GitHub Issues
+---------------------
+
+.. sourcecode:: http
+
+   POST /api/projects/:id/refresh_github_issues/ HTTP/1.1
 
 .. sourcecode:: http
 

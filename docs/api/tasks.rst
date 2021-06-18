@@ -22,17 +22,7 @@ Retrieve
         "description": "This is *safely* rendered Markdown.",
         "description_rendered": "<p>This is <em>safely</em> rendered Markdown.</p>",
         "epic": "3Lw7OwK",
-        "assigned_dev": {
-          "id": "12345",
-          "login": "username",
-          "name": "Full Name",
-          "avatar_url": "https://avatars0.githubusercontent.com/u/someId?v=4",
-          "permissions": {
-            "push": true,
-            "pull": true,
-            "admin": false
-          }
-        },
+        "assigned_dev": "123456",
         "assigned_qa": null,
         "slug": "test-task",
         "old_slugs": [],
@@ -66,7 +56,8 @@ Retrieve
         "review_valid": true,
         "review_status": "Approved",
         "review_sha": "617a512",
-        "org_config_name": "dev"
+        "org_config_name": "dev",
+        "issue": "W15MnQA"
       }
       ...
     ]
@@ -88,3 +79,23 @@ Review
 .. sourcecode:: http
 
    HTTP/1.1 202 ACCEPTED
+
+Assignees
+---------
+
+Modify the assigned developer/tester
+
+.. sourcecode:: http
+
+   POST /api/tasks/:id/assignees/ HTTP/1.1
+
+   {
+     "assigned_dev": "123456",
+     "assigned_qa": null,
+     "should_alert_dev": true,
+     "should_alert_qa": false,
+   }
+
+.. sourcecode:: http
+
+   HTTP/1.1 200 OK
