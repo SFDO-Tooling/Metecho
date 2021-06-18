@@ -19,6 +19,8 @@ const TourPopover = ({
 }) => {
   const user = useSelector(selectUserState);
 
+  const checkViewedStep = useSelector(selectUserState);
+
   return window.GLOBALS.ENABLE_WALKTHROUGHS &&
     user?.self_guided_tour_enabled ? (
     <Popover
