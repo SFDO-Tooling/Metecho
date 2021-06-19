@@ -22,9 +22,8 @@ class GitHubIssueFilter(filters.FilterSet):
         return queryset.filter(Q(title__icontains=query) | Q(number__icontains=query))
 
     def filter_by_is_attached(self, queryset, name, is_attached):
-        if is_attached:
-            return queryset.filter(Q(epic__isnull=False) | Q(task__isnull=False))
-        return queryset.filter(epic__isnull=True, task__isnull=True)
+        lookup = queryset.exclude if is_attached else queryset.filter
+        return lookup(epic__isnull=True, task__isnull=True)
 
 
 class ProjectFilter(filters.FilterSet):

@@ -72,6 +72,101 @@ class TestCurrentUserViewSet:
 
 
 @pytest.mark.django_db
+class TestGitHubIssueViewset:
+    @pytest.mark.parametrize(
+        "method, check",
+        (
+            ("get", status.is_success),
+            ("post", status.is_client_error),
+            ("put", status.is_client_error),
+            ("patch", status.is_client_error),
+            ("delete", status.is_client_error),
+        ),
+    )
+    def test_list_access(self, client, method, check):
+        response = getattr(client, method)(reverse("issue-list"))
+        assert check(response.status_code)
+
+    @pytest.mark.parametrize(
+        "method, check",
+        (
+            ("get", status.is_success),
+            ("post", status.is_client_error),
+            ("put", status.is_client_error),
+            ("patch", status.is_client_error),
+            ("delete", status.is_client_error),
+        ),
+    )
+    def test_detail_access(self, client, git_hub_issue_factory, method, check):
+        issue = git_hub_issue_factory()
+        response = getattr(client, method)(
+            reverse("issue-detail", args=[str(issue.id)])
+        )
+        assert check(response.status_code)
+
+    def test_response(self, client, git_hub_issue_factory):
+        issue = git_hub_issue_factory()
+        response = client.get(reverse("issue-detail", args=[str(issue.id)]))
+        assert tuple(response.json().keys()) == (
+            "id",
+            "number",
+            "title",
+            "created_at",
+            "html_url",
+            "project",
+            "epic",
+            "task",
+        )
+
+    def test_filters__project(self, client, git_hub_issue_factory):
+        project1 = str(git_hub_issue_factory().project_id)
+        project2 = str(git_hub_issue_factory().project_id)
+
+        response = client.get(reverse("issue-list"), data={"project": project1})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["project"] == project1, results
+
+        response = client.get(reverse("issue-list"), data={"project": project2})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["project"] == project2, results
+
+    def test_filters__search(self, client, git_hub_issue_factory):
+        python = str(git_hub_issue_factory(title="Python", number=1).id)
+        js = str(git_hub_issue_factory(title="JavaScript", number=42).id)
+
+        response = client.get(reverse("issue-list"), data={"search": "py"})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == python, results
+
+        response = client.get(reverse("issue-list"), data={"search": "42"})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == js, results
+
+    def test_filters__is_attached(
+        self, client, git_hub_issue_factory, task_factory, epic_factory
+    ):
+        task = task_factory()
+        with_task = str(task.issue_id)
+        with_epic = str(task.epic.issue_id)
+        unattached = str(git_hub_issue_factory().id)
+
+        response = client.get(reverse("issue-list"), data={"is_attached": "true"})
+        results = response.json()["results"]
+        assert len(results) == 2
+        assert results[0]["id"] == with_task, results
+        assert results[1]["id"] == with_epic, results
+
+        response = client.get(reverse("issue-list"), data={"is_attached": "false"})
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == unattached, results
+
+
+@pytest.mark.django_db
 class TestProjectView:
     def test_refresh_org_config_names(
         self, client, project_factory, git_hub_repository_factory
@@ -970,7 +1065,7 @@ class TestTaskViewSet:
         method,
     ):
         # Write operations on the task detail endpoint should depend on repo push permissions
-        task = task_factory()
+        task = task_factory(issue=None)
         git_hub_repository_factory(
             repo_id=task.epic.project.repo_id, user=client.user, permissions=repo_perms
         )
@@ -982,7 +1077,7 @@ class TestTaskViewSet:
 
         response = getattr(client, method)(url, data=data, format="json")
 
-        assert check(response.status_code)
+        assert check(response.status_code), response.content
 
     def test_assignees(self, client, git_hub_repository_factory, task_factory):
         repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)
@@ -1030,7 +1125,7 @@ class TestEpicViewSet:
         check,
         method,
     ):
-        epic = epic_factory()
+        epic = epic_factory(issue=None)
         git_hub_repository_factory(
             repo_id=epic.project.repo_id, user=client.user, permissions=repo_perms
         )
@@ -1042,7 +1137,7 @@ class TestEpicViewSet:
 
         response = getattr(client, method)(url, data=data, format="json")
 
-        assert check(response.status_code)
+        assert check(response.status_code), response.content
 
     def test_collaborators(self, client, git_hub_repository_factory, epic_factory):
         repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)

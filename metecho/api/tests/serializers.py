@@ -9,6 +9,7 @@ from ..serializers import (
     EpicCollaboratorsSerializer,
     EpicSerializer,
     FullUserSerializer,
+    GitHubIssueSerializer,
     HashidPrimaryKeyRelatedField,
     ScratchOrgSerializer,
     TaskAssigneeSerializer,
@@ -37,6 +38,31 @@ class TestHashidPrimaryKeyRelatedField:
         field = HashidPrimaryKeyRelatedField(read_only=True)
         val = MagicMock(pk=1)
         assert field.to_representation(val) == "1"
+
+
+@pytest.mark.django_db
+class TestGitHubIssueSerializer:
+    def test_epic(self, epic_factory):
+        epic = epic_factory()
+        serializer = GitHubIssueSerializer(epic.issue)
+        assert tuple(serializer.data["epic"]) == (
+            "id",
+            "name",
+            "status",
+            "slug",
+        )
+
+    def test_task(self, task_factory):
+        task = task_factory()
+        serializer = GitHubIssueSerializer(task.issue)
+        assert tuple(serializer.data["task"]) == (
+            "id",
+            "name",
+            "status",
+            "review_status",
+            "slug",
+            "epic_slug",
+        )
 
 
 @pytest.mark.django_db
