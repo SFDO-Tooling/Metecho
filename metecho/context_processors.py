@@ -10,6 +10,7 @@ def env(request):
     )
     GLOBALS = {
         "SITE": site_profile.data,
+        "GITHUB_ISSUE_LIMIT": settings.GITHUB_ISSUE_LIMIT,
         "SENTRY_DSN": settings.SENTRY_DSN,
         "ORG_RECHECK_MINUTES": settings.ORG_RECHECK_MINUTES,
         "ENABLE_WALKTHROUGHS": settings.ENABLE_WALKTHROUGHS,
