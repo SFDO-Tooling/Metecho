@@ -17,18 +17,19 @@ class UnattachedIssueValidator:
         from .models import Epic, Task
 
         issue = data.get("issue")
-        if issue is not None:
-            with suppress(Task.DoesNotExist):
-                if issue.task != serializer.instance:
-                    raise serializers.ValidationError(
-                        {"issue": _("This issue is already attached to a task")}
-                    )
-            with suppress(Epic.DoesNotExist):
-                if issue.epic != serializer.instance:
-                    raise serializers.ValidationError(
-                        {"issue": _("This issue is already attached to an epic")}
-                    )
-        return issue
+        if issue is None:
+            return
+
+        with suppress(Task.DoesNotExist):
+            if issue.task != serializer.instance:
+                raise serializers.ValidationError(
+                    {"issue": _("This issue is already attached to a task")}
+                )
+        with suppress(Epic.DoesNotExist):
+            if issue.epic != serializer.instance:
+                raise serializers.ValidationError(
+                    {"issue": _("This issue is already attached to an epic")}
+                )
 
 
 class CaseInsensitiveUniqueTogetherValidator(UniqueTogetherValidator):
