@@ -50,8 +50,8 @@ const TourPopover = ({
         variant="icon"
         assistiveText={{ icon: i18n.t('Learn More') }}
         iconCategory="utility"
-        iconName="info"
-        className="popover-button"
+        iconName={isViewed ? 'success' : 'info'}
+        className={isViewed ? 'success' : 'popover-button'}
       />
     </Popover>
   ) : null;

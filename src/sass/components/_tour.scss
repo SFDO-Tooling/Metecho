@@ -108,6 +108,11 @@
   }
 }
 
+.success {
+  background: $color-background-light;
+  color: $palette-green-60;
+}
+
 // Keep text from being truncated in table and page header
 .slds-popover {
   font-size: $font-size-3;
