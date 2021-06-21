@@ -167,7 +167,7 @@ class TestGitHubIssueViewset:
 
 
 @pytest.mark.django_db
-class TestProjectView:
+class TestProjectViewset:
     def test_refresh_org_config_names(
         self, client, project_factory, git_hub_repository_factory
     ):
@@ -200,6 +200,23 @@ class TestProjectView:
 
             assert response.status_code == 202
             assert populate_github_users_job.delay.called
+
+    def test_refresh_github_issues(
+        self, mocker, client, project_factory, git_hub_repository_factory
+    ):
+        git_hub_repository_factory(user=client.user, repo_id=123)
+        project = project_factory(repo_id=123)
+        populate_github_issues_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_issues_job"
+        )
+        response = client.post(
+            reverse("project-refresh-github-issues", args=[str(project.pk)])
+        )
+
+        project.refresh_from_db()
+        assert response.status_code == 202
+        assert populate_github_issues_job.delay.called
+        assert project.currently_fetching_issues
 
     def test_feature_branches(
         self, client, project_factory, git_hub_repository_factory

@@ -712,7 +712,7 @@ def refresh_github_issues(project, *, originating_user_id):
         # pull requests until we have enough issues.
         issues = repo.issues()
         count = 0
-        while count < 1000:
+        while count < settings.GITHUB_ISSUE_LIMIT:
             try:
                 issue = next(issues)
             except StopIteration:

@@ -132,6 +132,22 @@ class ScratchOrgFactory(factory.django.DjangoModelFactory):
     valid_target_directories = {"source": []}
 
 
+@register
+class ShortIssueFactory(factory.StubFactory):
+    """
+    Stub for github3.issues.issue.ShortIssue
+    """
+
+    id = factory.Sequence(lambda n: n)
+    title = factory.Faker("sentence")
+    number = factory.Sequence(lambda n: 100 + n)
+    state = "open"
+    html_url = factory.Faker("url")
+    created_at = factory.Faker("date_time_this_year")
+    updated_at = factory.Faker("date_time_this_year")
+    pull_request_urls = ["http://a.com", "http://b.com"]
+
+
 @pytest.fixture
 def client(user_factory):
     user = user_factory()
