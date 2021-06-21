@@ -1,8 +1,10 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Popover from '@salesforce/design-system-react/components/popover';
 import i18n from 'i18next';
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { ThunkDispatch } from 'src/js/store';
+import { updateTour } from 'src/js/store/user/actions';
 
 import { selectUserState } from '~js/store/user/selectors';
 
@@ -19,6 +21,18 @@ const TourPopover = ({
 }) => {
   const user = useSelector(selectUserState);
 
+  const dispatch = useDispatch<ThunkDispatch>();
+
+  const handleClick = useCallback(() => {
+    if (user?.self_guided_tour_state?.includes(id)) {
+      return id;
+    } else {
+  dispatch(/* updateTour({ tour_state: tour_state.push(id) }) user?.self_guided_tour_state?.push(id);
+    }
+
+  }
+}, [dispatch], */ )
+
   return window.GLOBALS.ENABLE_WALKTHROUGHS &&
     user?.self_guided_tour_enabled ? (
     <Popover
@@ -29,7 +43,6 @@ const TourPopover = ({
       variant="walkthrough"
       triggerClassName="popover-wrapper"
       /*   isOpen={isOpen} */
-      /* onOpen={ function from helper} */
     >
       <Button
         variant="icon"
@@ -37,6 +50,7 @@ const TourPopover = ({
         iconCategory="utility"
         iconName="info"
         className="popover-button"
+        onClick={handleClick}
       />
     </Popover>
   ) : null;
