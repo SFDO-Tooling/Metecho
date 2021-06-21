@@ -221,11 +221,9 @@ export const onboarded =
 export const updateTour =
   (data: {
     enabled?: boolean;
-    tour_state?: string[] | null;
-    /* id: string: */
+    state?: string[] | null;
   }): ThunkResult<Promise<UpdateTourSucceeded>> =>
-  async (dispatch, getState) => {
-    /*  if (hasViewedStep(id, getState())) */
+  async (dispatch) => {
     dispatch({ type: 'TOUR_UPDATE_REQUESTED' });
     try {
       const payload: User = await apiFetch({

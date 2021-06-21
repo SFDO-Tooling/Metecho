@@ -4,8 +4,8 @@ import i18n from 'i18next';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThunkDispatch } from 'src/js/store';
-import { updateTour } from 'src/js/store/user/actions';
 
+import { updateTour } from '~js/store/user/actions';
 import { selectUserState } from '~js/store/user/selectors';
 
 const TourPopover = ({
@@ -23,15 +23,17 @@ const TourPopover = ({
 
   const dispatch = useDispatch<ThunkDispatch>();
 
-  const handleClick = useCallback(() => {
-    if (user?.self_guided_tour_state?.includes(id)) {
-      return id;
-    } else {
-  dispatch(/* updateTour({ tour_state: tour_state.push(id) }) user?.self_guided_tour_state?.push(id);
-    }
+  const isViewed = user?.self_guided_tour_state?.includes(id);
 
-  }
-}, [dispatch], */ )
+  const handleOpen = useCallback(() => {
+    if (user && !isViewed) {
+      const state = user.self_guided_tour_state
+        ? [...user.self_guided_tour_state]
+        : [];
+      state.push(id);
+      dispatch(updateTour({ state }));
+    }
+  }, [dispatch, id, isViewed, user]);
 
   return window.GLOBALS.ENABLE_WALKTHROUGHS &&
     user?.self_guided_tour_enabled ? (
@@ -42,7 +44,7 @@ const TourPopover = ({
       body={<p>{body}</p>}
       variant="walkthrough"
       triggerClassName="popover-wrapper"
-      /*   isOpen={isOpen} */
+      onOpen={handleOpen}
     >
       <Button
         variant="icon"
@@ -50,7 +52,6 @@ const TourPopover = ({
         iconCategory="utility"
         iconName="info"
         className="popover-button"
-        onClick={handleClick}
       />
     </Popover>
   ) : null;
