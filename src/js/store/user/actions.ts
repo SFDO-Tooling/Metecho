@@ -1,7 +1,4 @@
-import { string } from 'prop-types';
-
 import { ThunkResult } from '~js/store';
-import { hasViewedStep } from '~js/store/helpers';
 import {
   projectsRefreshed,
   projectsRefreshing,
