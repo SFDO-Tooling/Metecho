@@ -409,6 +409,22 @@ describe('updateTour', () => {
         expect(store.getActions()).toEqual([started, succeeded]);
       });
     });
+
+    test('sets self_guided_tour_state', () => {
+      const store = storeWithThunk({});
+      const user = { id: 'testuser', self_guided_tour_state: ['123'] };
+      fetchMock.postOnce(url, user);
+      const started = { type: 'TOUR_UPDATE_REQUESTED' };
+      const succeeded = {
+        type: 'TOUR_UPDATE_SUCCEEDED',
+        payload: user,
+      };
+
+      expect.assertions(1);
+      return store.dispatch(actions.updateTour()).then(() => {
+        expect(store.getActions()).toEqual([started, succeeded]);
+      });
+    });
   });
 
   describe('error', () => {

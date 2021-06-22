@@ -27,6 +27,7 @@ const TourPopover = ({
   const isViewed = user?.self_guided_tour_state?.includes(id);
 
   const handleOpen = useCallback(() => {
+    /* istanbul ignore else */
     if (user && !isViewed) {
       const state = user.self_guided_tour_state
         ? [...user.self_guided_tour_state]
