@@ -212,7 +212,7 @@ orderedmultidict==1.0.1
     # via furl
 packaging==20.9
     # via bleach
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.1
     # via -r requirements/prod.in
 pyasn1-modules==0.2.8
     # via service-identity
