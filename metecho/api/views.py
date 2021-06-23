@@ -179,18 +179,20 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
     pagination_class = CustomPaginator
-    model = Project
+    queryset = Project.objects.filter(repo_id__isnull=False)
 
     def get_queryset(self):
-        repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
-
         for project in Project.objects.filter(repo_id__isnull=True):
             try:
                 project.get_repo_id()
             except (ResponseError, ConnectionError):
                 pass
 
-        return Project.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
+        if self.request.user.is_superuser:
+            return self.queryset
+
+        repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
+        return self.queryset.filter(repo_id__in=repo_ids)
 
     @action(detail=True, methods=["POST"])
     def refresh_github_users(self, request, pk=None):
