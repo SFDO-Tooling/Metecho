@@ -100,11 +100,15 @@
     fill: currentColor;
   }
 
-  &.success {
-    background: $color-background-light;
+  &.is-viewed {
     border: 1px solid $palette-green-90;
     box-shadow: 0 0 2px $palette-green-70;
     color: $palette-green-70;
+
+    &:hover,
+    &:focus {
+      color: $brand-background-dark;
+    }
   }
 
   // Hover/Focus styles should only apply if on interactive element

@@ -54,7 +54,7 @@ const TourPopover = ({
         iconCategory="utility"
         iconName={isViewed ? 'success' : 'info'}
         className={classNames('popover-button', {
-          success: isViewed,
+          'is-viewed': isViewed,
         })}
       />
     </Popover>
