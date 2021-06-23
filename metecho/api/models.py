@@ -340,6 +340,10 @@ class Project(
     def subscribable_by(self, user):  # pragma: nocover
         return True
 
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/projects/{self.slug}"
+
     # begin PushMixin configuration:
     push_update_type = "PROJECT_UPDATE"
     push_error_type = "PROJECT_UPDATE_ERROR"
@@ -512,6 +516,10 @@ class Epic(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/projects/{self.project.slug}/{self.slug}"
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):
@@ -699,6 +707,10 @@ class Task(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/projects/{self.epic.project.slug}/{self.epic.slug}/{self.slug}"
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):
