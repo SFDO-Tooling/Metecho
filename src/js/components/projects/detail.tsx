@@ -1,10 +1,13 @@
 import Button from '@salesforce/design-system-react/components/button';
+import Tabs from '@salesforce/design-system-react/components/tabs'; 
+import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import TasksTableComponent from '~js/components/tasks/table';
 
 import CreateEpicModal from '~js/components/epics/createForm';
 import EpicTable from '~js/components/epics/table';
@@ -25,6 +28,7 @@ import {
   useFetchProjectIfMissing,
   useIsMounted,
 } from '~js/components/utils';
+import useFetchTasksByProject from '~js/components/utils/useFetchTasksByProject';
 import { ThunkDispatch } from '~js/store';
 import { fetchObjects } from '~js/store/actions';
 import { onboarded } from '~js/store/user/actions';
@@ -58,7 +62,8 @@ const ProjectDetail = (
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
   const { orgs } = useFetchOrgsIfMissing({ project, props });
-
+  let tasks = useFetchTasksByProject(project);
+console.log(tasks);
   const playgroundOrg = (orgs || [])[0];
 
   // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param is truthy
@@ -162,6 +167,7 @@ const ProjectDetail = (
   }
 
   const hasEpics = epics && epics.epics.length > 0;
+  const hasTasks = tasks && tasks.length > 0
 
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
@@ -321,27 +327,46 @@ const ProjectDetail = (
                 />
               </div>
             )}
-            {hasEpics && (
-              <>
-                <EpicTable epics={epics.epics} projectSlug={project.slug} />
-                {epics.next ? (
-                  <div className="slds-m-top_large">
-                    <Button
-                      label={
-                        fetchingEpics ? (
-                          <LabelWithSpinner />
-                        ) : (
-                          i18n.t('Load More')
-                        )
-                      }
-                      onClick={fetchMoreEpics}
+            <Tabs variant="scoped" id="tabs-example-scoped">
+              <TabsPanel label="Epics">
+                {hasEpics && (
+                  <>
+                    <EpicTable epics={epics.epics} projectSlug={project.slug} />
+                      {epics.next ? (
+                        <div className="slds-m-top_large">
+                          <Button
+                            label={
+                              fetchingEpics ? (
+                                <LabelWithSpinner />
+                              ) : (
+                                i18n.t('Load More')
+                              )
+                            }
+                            onClick={fetchMoreEpics}
+                          />
+                        </div>
+                    ) : null}
+                  </>
+                )}
+                </TabsPanel>
+                  <TabsPanel label="Tasks">
+                    {hasTasks && (
+                    <TasksTableComponent 
+                      projectId={project.id} 
+                      projectSlug={project.slug} 
+                      tasks={tasks}
+                      epicUsers={epicCollaborators}
+                      githubUsers={project.github_users}
+                      canAssign={project.has_push_permissions}
+                      isREfreshingUsers={Boolean(project.currently_refreshing_gh_users)}
+                      assignUserAction={assignUser}
                     />
-                  </div>
-                ) : null}
+                    )}
+                  </TabsPanel>
+                </Tabs>
               </>
             )}
-          </>
-        )}
+        )
         <CreateEpicModal
           user={user}
           project={project}
