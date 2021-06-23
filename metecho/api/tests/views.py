@@ -325,6 +325,19 @@ class TestProjectViewset:
             ],
         }, response.json()
 
+    def test_get_queryset__superuser(self, admin_client, project_factory):
+        """
+        Superuser should be able to access all projects even if they don't have a
+        matching GitHubRepository on record
+        """
+        project_factory(repo_name="repo", repo_id=123)
+        project_factory(repo_name="repo2", repo_id=456)
+        project_factory(repo_name="repo3", repo_id=789)
+        response = admin_client.get(reverse("project-list"))
+
+        data = response.json()
+        assert data["count"] == 3, data
+
 
 @pytest.mark.django_db
 class TestHookView:

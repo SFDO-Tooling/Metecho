@@ -271,7 +271,7 @@ describe('createSocket', () => {
 
     describe('onclose', () => {
       beforeEach(() => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers();
       });
 
       afterEach(() => {
@@ -371,7 +371,7 @@ describe('createSocket', () => {
     let socket;
 
     beforeEach(() => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers();
       socket = sockets.createSocket(opts);
     });
 

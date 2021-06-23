@@ -36,6 +36,10 @@ class TestProject:
         project = project_factory(name="Test Project")
         assert str(project) == "Test Project"
 
+    def test_get_absolute_url(self, project_factory):
+        url = project_factory().get_absolute_url()
+        assert url.startswith("/")
+
     def test_get_repo_id(self, project_factory):
         with patch("metecho.api.model_mixins.get_repo_info") as get_repo_info:
             get_repo_info.return_value = MagicMock(id=123)
@@ -151,6 +155,10 @@ class TestEpic:
         epic = Epic(name="Test Epic", project=project)
         assert str(epic) == "Test Epic"
 
+    def test_get_absolute_url(self, epic_factory):
+        url = epic_factory().get_absolute_url()
+        assert url.startswith("/")
+
     def test_get_repo_id(self, project_factory, epic_factory):
         project = project_factory(repo_id=123)
         epic = epic_factory(project=project)
@@ -235,6 +243,10 @@ class TestTask:
     def test_str(self):
         task = Task(name="Test Task")
         assert str(task) == "Test Task"
+
+    def test_get_absolute_url(self, task_factory):
+        url = task_factory().get_absolute_url()
+        assert url.startswith("/")
 
     def test_notify_changed(self, task_factory):
         with ExitStack() as stack:
