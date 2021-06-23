@@ -20,6 +20,7 @@ from github3.github import GitHub
 
 from .email_utils import get_user_facing_url
 from .gh import (
+    get_all_org_repos,
     get_cached_user,
     get_cumulus_prefix,
     get_project_config,
@@ -581,7 +582,30 @@ delete_scratch_org_job = job(delete_scratch_org)
 
 
 def refresh_github_repositories_for_user(user):
-    user.refresh_repositories()
+    from .models import GitHubRepository
+
+    try:
+        repos = get_all_org_repos(user)
+        with transaction.atomic():
+            GitHubRepository.objects.filter(user=user).delete()
+            GitHubRepository.objects.bulk_create(
+                [
+                    GitHubRepository(
+                        user=user,
+                        repo_id=repo.id,
+                        repo_url=repo.html_url,
+                        permissions=repo.permissions,
+                    )
+                    for repo in repos
+                ]
+            )
+    except Exception as e:
+        user.finalize_refresh_repositories(error=e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        user.finalize_refresh_repositories()
 
 
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)

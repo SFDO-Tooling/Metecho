@@ -59,16 +59,14 @@ class TestCurrentUserViewSet:
         assert response.json()["username"] == client.user.username
 
     def test_refresh(self, client, mocker):
-        gh_given_user = mocker.patch("metecho.api.gh.gh_given_user")
-        repo = MagicMock()
-        repo.url = "test"
-        gh = MagicMock()
-        gh.repositories.return_value = [repo]
-        gh_given_user.return_value = gh
-
+        refresh_github_repositories_for_user_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_repositories_for_user_job"
+        )
         response = client.post(reverse("current-user-refresh"))
-
+        client.user.refresh_from_db()
         assert response.status_code == 202
+        assert refresh_github_repositories_for_user_job.delay.called
+        assert client.user.currently_fetching_repos
 
 
 @pytest.mark.django_db

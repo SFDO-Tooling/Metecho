@@ -464,29 +464,6 @@ class TestTask:
 
 @pytest.mark.django_db
 class TestUser:
-    def test_refresh_repositories(self, mocker, user_factory, project_factory):
-        user = user_factory()
-        project_factory(repo_id=8558)
-        gh = mocker.patch("metecho.api.models.gh")
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
-        gh.get_all_org_repos.return_value = [
-            MagicMock(id=8558, html_url="https://example.com/", permissions={})
-        ]
-        user.refresh_repositories()
-
-        assert async_to_sync.called
-
-    def test_refresh_repositories__error(self, mocker, user_factory):
-        user = user_factory()
-        gh = mocker.patch("metecho.api.models.gh")
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
-        gh.get_all_org_repos.return_value = [
-            MagicMock(id=1, html_url="https://example.com/", permissions={})
-        ]
-        user.refresh_repositories()
-
-        assert async_to_sync.called
-
     def test_org_id(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce")

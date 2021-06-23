@@ -109,7 +109,6 @@ class User(HashIdMixin, AbstractUser):
         )
 
     def queue_refresh_repositories(self):
-        """Queue a job to refresh repositories unless we're already doing so"""
         from .jobs import refresh_github_repositories_for_user_job
 
         if not self.currently_fetching_repos:
@@ -117,30 +116,11 @@ class User(HashIdMixin, AbstractUser):
             self.save()
             refresh_github_repositories_for_user_job.delay(self)
 
-    def refresh_repositories(self):
-        try:
-            repos = gh.get_all_org_repos(self)
-            with transaction.atomic():
-                GitHubRepository.objects.filter(user=self).delete()
-                GitHubRepository.objects.bulk_create(
-                    [
-                        GitHubRepository(
-                            user=self,
-                            repo_id=repo.id,
-                            repo_url=repo.html_url,
-                            permissions=repo.permissions,
-                        )
-                        for repo in repos
-                    ]
-                )
-        finally:
-            self.refresh_from_db()
-            self.currently_fetching_repos = False
-            self.save()
-            self.notify_repositories_updated()
-
-    def notify_repositories_updated(self):
-        message = {"type": "USER_REPOS_REFRESH"}
+    def finalize_refresh_repositories(self, error=None):
+        self.refresh_from_db()
+        self.currently_fetching_repos = False
+        self.save()
+        message = {"type": "USER_REPOS_REFRESH" if error is None else "USER_REPOS_ERROR"}
         async_to_sync(push.push_message_about_instance)(self, message)
 
     def invalidate_salesforce_credentials(self):

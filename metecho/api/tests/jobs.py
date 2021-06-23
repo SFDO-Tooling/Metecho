@@ -502,10 +502,42 @@ def test_delete_scratch_org__exception(scratch_org_factory):
         assert get_latest_revision_numbers.called
 
 
-def test_refresh_github_repositories_for_user(user_factory):
-    user = MagicMock()
-    refresh_github_repositories_for_user(user)
-    assert user.refresh_repositories.called
+@pytest.mark.django_db
+class TestRefreshGitHubRepositoriesForUser:
+    def test_success(self, mocker, user_factory):
+        user = user_factory(currently_fetching_repos=True)
+        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+        mocker.patch(
+            "metecho.api.jobs.get_all_org_repos",
+            return_value=[
+                MagicMock(id=123, html_url="https://example.com/", permissions={}),
+                MagicMock(id=456, html_url="https://example.com/", permissions={}),
+            ],
+        )
+
+        refresh_github_repositories_for_user(user)
+        user.refresh_from_db()
+
+        assert not user.currently_fetching_repos
+        assert user.repositories.count() == 2
+        assert async_to_sync.called
+
+    def test_error(self, mocker, caplog, user_factory, git_hub_repository_factory):
+        user = user_factory(currently_fetching_repos=True)
+        git_hub_repository_factory(user=user)
+        mocker.patch(
+            "metecho.api.jobs.get_all_org_repos", side_effect=Exception("Oh no!")
+        )
+        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
+
+        with pytest.raises(Exception):
+            refresh_github_repositories_for_user(user)
+        user.refresh_from_db()
+
+        assert not user.currently_fetching_repos
+        assert user.repositories.count() == 1
+        assert async_to_sync.called
+        assert "Oh no!" in caplog.text
 
 
 @pytest.mark.django_db
