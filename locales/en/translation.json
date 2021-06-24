@@ -329,6 +329,7 @@
   "Uh oh. There was an error deleting your {{orgType}} for {{parent}} “{{name}}.”": "Uh oh. There was an error deleting your {{orgType}} for {{parent}} “{{name}}.”",
   "Uh oh. There was an error deleting your {{orgType}}.": "Uh oh. There was an error deleting your {{orgType}}.",
   "Uh oh. There was an error re-syncing GitHub users for this project: “{{project_name}}”.": "Uh oh. There was an error re-syncing GitHub users for this project: “{{project_name}}”.",
+  "Uh oh. There was an error re-syncing Projects.": "Uh oh. There was an error re-syncing Projects.",
   "Uh oh. There was an error reassigning the {{orgType}} for {{parent}} “{{name}}.”": "Uh oh. There was an error reassigning the {{orgType}} for {{parent}} “{{name}}.”",
   "Uh oh. There was an error reassigning this {{orgType}}.": "Uh oh. There was an error reassigning this {{orgType}}.",
   "Uh oh. There was an error refreshing your {{orgType}} for {{parent}} “{{name}}.”": "Uh oh. There was an error refreshing your {{orgType}} for {{parent}} “{{name}}.”",

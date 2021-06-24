@@ -31,6 +31,9 @@ interface ProjectsRefreshing {
 export interface ProjectsRefreshed {
   type: 'PROJECTS_REFRESHED';
 }
+export interface ProjectsRefreshError {
+  type: 'REFRESH_PROJECTS_ERROR';
+}
 interface RefreshGitHubUsersRequested {
   type: 'REFRESH_GH_USERS_REQUESTED';
   payload: string;
@@ -59,6 +62,7 @@ export type ProjectsAction =
   | RefreshProjectsRejected
   | ProjectsRefreshing
   | ProjectsRefreshed
+  | ProjectsRefreshError
   | RefreshGitHubUsersRequested
   | RefreshGitHubUsersAccepted
   | RefreshGitHubUsersRejected
@@ -97,6 +101,19 @@ export const projectsRefreshed =
         reset: true,
       }),
     );
+  };
+
+export const projectsRefreshError =
+  (message?: string): ThunkResult<ProjectsRefreshError> =>
+  (dispatch) => {
+    dispatch(
+      addToast({
+        heading: i18n.t('Uh oh. There was an error re-syncing Projects.'),
+        details: message,
+        variant: 'error',
+      }),
+    );
+    return dispatch({ type: 'REFRESH_PROJECTS_ERROR' });
   };
 
 export const refreshGitHubUsers =

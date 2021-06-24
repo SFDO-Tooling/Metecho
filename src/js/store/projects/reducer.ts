@@ -53,10 +53,14 @@ const reducer = (
       return { ...defaultState };
     case 'REFRESH_PROJECTS_REQUESTED':
     case 'REFRESHING_PROJECTS':
-    case 'REFRESH_PROJECTS_REJECTED': {
+    case 'REFRESH_PROJECTS_REJECTED':
+    case 'REFRESH_PROJECTS_ERROR': {
       return {
         ...projects,
-        refreshing: action.type !== 'REFRESH_PROJECTS_REJECTED',
+        refreshing: [
+          'REFRESH_PROJECTS_REQUESTED',
+          'REFRESHING_PROJECTS',
+        ].includes(action.type),
       };
     }
     case 'FETCH_OBJECTS_SUCCEEDED': {
