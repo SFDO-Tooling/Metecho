@@ -262,7 +262,7 @@ const ProjectDetail = (
           <>
             <div className="slds-is-relative heading">
               <TourPopover
-                id="tour-epics-list"
+                id="tour-project-epics-list"
                 align="top left"
                 heading={i18n.t('List of Epics')}
                 body={
@@ -311,7 +311,7 @@ const ProjectDetail = (
                   className="tour-create-epic"
                 />
                 <TourPopover
-                  id="tour-create-epic"
+                  id="tour-project-create-epic"
                   align="top left"
                   body={
                     <Trans i18nKey="tourCreateEpic">

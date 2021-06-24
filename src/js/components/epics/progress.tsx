@@ -21,7 +21,7 @@ const EpicProgress = ({ range }: Props) => {
             {{ complete }} of {{ total }} Complete
           </Trans>
           <TourPopover
-            id="tour-task-progress-bar"
+            id="tour-epic-progress-bar"
             align="top"
             heading={i18n.t('Task progress bar')}
             body={

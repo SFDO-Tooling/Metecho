@@ -1,4 +1,4 @@
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -15,10 +15,10 @@ afterEach(() => {
 });
 
 describe('<TourPopover />', () => {
-  const setup = (state = {}) =>
+  const setup = (state = {}, props = {}) =>
     renderWithRedux(
       <MemoryRouter>
-        <TourPopover />
+        <TourPopover {...props} />
       </MemoryRouter>,
       state,
       storeWithThunk,
@@ -38,31 +38,72 @@ describe('<TourPopover />', () => {
   test('renders self-guided tour popover button', () => {
     const { getByRole } = setup({
       user: { self_guided_tour_enabled: true },
-      projects: {},
     });
+    const btn = getByRole('button', { name: 'Learn More' });
 
-    expect(getByRole('button', { name: 'Learn More' })).toBeVisible();
+    expect(btn).toBeVisible();
+    expect(btn).not.toHaveClass('is-viewed');
+  });
+
+  test('renders viewed self-guided tour popover button', () => {
+    const { getByRole } = setup(
+      {
+        user: {
+          self_guided_tour_enabled: true,
+          self_guided_tour_state: ['tour-popover-id'],
+        },
+      },
+      { id: 'tour-popover-id' },
+    );
+    const btn = getByRole('button', { name: 'Learn More' });
+
+    expect(btn).toBeVisible();
+    expect(btn).toHaveClass('is-viewed');
   });
 
   test('hides self-guided tour popover when tour is disabled', () => {
     const { queryByText } = setup({
       user: { self_guided_tour_enabled: false },
-      projects: {},
     });
 
     expect(queryByText('Learn More', { exact: false })).toBeNull();
   });
 
-  test('calls UpdateTour action', () => {
-    const { getByRole } = setup({
-      user: {
+  describe('on open', () => {
+    test('calls updateTour action', () => {
+      const user = {
         self_guided_tour_enabled: true,
-        self_guided_tour_state: [],
-      },
-      projects: {},
-    });
-    fireEvent.click(getByRole('button', { name: 'Learn More' }));
+        self_guided_tour_state: ['other-popover'],
+      };
+      const { getByRole } = setup({ user }, { id: 'tour-popover-id' });
+      fireEvent.click(getByRole('button', { name: 'Learn More' }));
 
-    expect(updateTour).toHaveBeenCalledTimes(1);
+      expect(updateTour).toHaveBeenCalledTimes(1);
+      expect(updateTour).toHaveBeenCalledWith({
+        state: ['other-popover', 'tour-popover-id'],
+      });
+    });
+
+    test('does not call updateTour action if already viewed', () => {
+      const user = {
+        self_guided_tour_enabled: true,
+        self_guided_tour_state: ['tour-popover-id'],
+      };
+      const { getByRole } = setup({ user }, { id: 'tour-popover-id' });
+      fireEvent.click(getByRole('button', { name: 'Learn More' }));
+
+      expect(updateTour).not.toHaveBeenCalled();
+    });
+
+    test('handles missing self_guided_tour_state', () => {
+      const user = { self_guided_tour_enabled: true };
+      const { getByRole } = setup({ user }, { id: 'tour-popover-id' });
+      fireEvent.click(getByRole('button', { name: 'Learn More' }));
+
+      expect(updateTour).toHaveBeenCalledTimes(1);
+      expect(updateTour).toHaveBeenCalledWith({
+        state: ['tour-popover-id'],
+      });
+    });
   });
 });

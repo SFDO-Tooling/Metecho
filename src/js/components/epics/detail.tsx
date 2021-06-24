@@ -67,8 +67,9 @@ const EpicDetail = (props: RouteComponentProps) => {
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] =
-    useState<boolean | string>(false);
+  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] = useState<
+    boolean | string
+  >(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
 
@@ -89,10 +90,12 @@ const EpicDetail = (props: RouteComponentProps) => {
   }, []);
 
   // "Confirm remove user from epic" modal related:
-  const [waitingToUpdateUsers, setWaitingToUpdateUsers] =
-    useState<GitHubUser[] | null>(null);
-  const [confirmRemoveUsers, setConfirmRemoveUsers] =
-    useState<GitHubUser[] | null>(null);
+  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
+    GitHubUser[] | null
+  >(null);
+  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
+    GitHubUser[] | null
+  >(null);
   const closeConfirmRemoveUsersModal = useCallback(() => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);
@@ -437,7 +440,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             handleOptionSelect={handlePageOptionSelect}
           />
           <TourPopover
-            id="tour-edit-epic"
+            id="tour-epic-edit"
             align="left"
             heading={i18n.t('Edit or delete this Epic')}
             body={
@@ -710,7 +713,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   className="slds-m-bottom_large"
                 />
                 <TourPopover
-                  id="tour-add-task"
+                  id="tour-epic-add-task"
                   align="top left"
                   heading={i18n.t('Add a Task to contribute')}
                   body={

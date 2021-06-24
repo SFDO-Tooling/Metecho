@@ -21,7 +21,6 @@ const TourPopover = ({
   id: string;
 }) => {
   const user = useSelector(selectUserState);
-
   const dispatch = useDispatch<ThunkDispatch>();
 
   const isViewed = user?.self_guided_tour_state?.includes(id);

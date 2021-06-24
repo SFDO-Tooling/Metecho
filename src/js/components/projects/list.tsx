@@ -104,7 +104,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
             project-list"
         >
           <TourPopover
-            id="tour-metecho-project"
+            id="tour-projects-list"
             align="top left"
             heading={i18n.t('Metecho Project')}
             body={
@@ -130,7 +130,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
       <>
         <div className="slds-is-relative page-title">
           <TourPopover
-            id="tour-select-project"
+            id="tour-projects-select-project"
             align="bottom left"
             heading={i18n.t('Begin exploring projects')}
             body={
@@ -195,7 +195,7 @@ const ProjectList = withScroll(({ y }: ScrollProps) => {
                     onClick={doRefreshProjects}
                   />
                   <TourPopover
-                    id="tour-update-project"
+                    id="tour-projects-resync-list"
                     align="left"
                     heading={i18n.t('View an updated Project list')}
                     body={

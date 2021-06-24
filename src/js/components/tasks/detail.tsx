@@ -653,7 +653,7 @@ const TaskDetail = (
             handleOptionSelect={handlePageOptionSelect}
           />
           <TourPopover
-            id="tour-edit-task"
+            id="tour-task-edit"
             align="left"
             heading={i18n.t('Edit or delete this Task')}
             body={

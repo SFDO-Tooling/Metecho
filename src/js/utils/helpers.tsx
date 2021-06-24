@@ -64,7 +64,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
-          id="tour-view-epic-pull-request"
+          id="tour-epic-pull-request"
           align="bottom right"
           heading={heading}
           body={
@@ -79,7 +79,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
         />
       ) : (
         <TourPopover
-          id="tour-view-task-pull-request"
+          id="tour-task-pull-request"
           align="bottom right"
           heading={heading}
           body={
@@ -100,7 +100,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
-          id="tour-view-epic-changes"
+          id="tour-epic-changes"
           align="bottom right"
           heading={heading}
           body={
@@ -113,7 +113,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
         />
       ) : (
         <TourPopover
-          id="tour-view-task-changes"
+          id="tour-task-changes"
           align="bottom right"
           heading={heading}
           body={
@@ -131,7 +131,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
     popover =
       type === OBJECT_TYPES.EPIC ? (
         <TourPopover
-          id="tour-view-epic-branch"
+          id="tour-epic-branch"
           align="bottom right"
           heading={i18n.t('View GitHub branch for this Epic')}
           body={
@@ -146,7 +146,7 @@ export const getBranchLink = (object: Task | Epic, type: 'epic' | 'task') => {
         />
       ) : (
         <TourPopover
-          id="tour-view-task-branch"
+          id="tour-task-branch"
           align="bottom right"
           heading={i18n.t('View GitHub branch for this Task')}
           body={
