@@ -16,9 +16,9 @@ const TaskNotFound = ({ project, epic }: Props) => (
   <FourOhFour
     message={
       <Trans i18nKey="taskNotFound">
-        We can’t find the task you’re looking for. Try{' '}
+        We can’t find the Task you’re looking for. Try{' '}
         <Link to={routes.epic_detail(project.slug, epic.slug)}>
-          another task
+          another Task
         </Link>{' '}
         from that epic?
       </Trans>

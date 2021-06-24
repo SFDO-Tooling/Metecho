@@ -879,8 +879,8 @@ const TaskDetail = (
                     </h3>
                     <p>
                       <Trans i18nKey="taskCanceledHelp">
-                        This task was canceled on GitHub before completion.
-                        Progress on this task has not been lost, but the task
+                        This Task was canceled on GitHub before completion.
+                        Progress on this Task has not been lost, but the Task
                         must be{' '}
                         <ResubmitButton
                           canSubmit={

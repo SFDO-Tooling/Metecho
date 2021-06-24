@@ -65,7 +65,7 @@ const SubmitModal = ({
         objectType: OBJECT_TYPES.TASK_PR,
         url: window.api_urls.task_create_pr(instanceId),
       };
-      heading = i18n.t('Submit this task for testing');
+      heading = i18n.t('Submit this Task for testing');
       submittingLabel = i18n.t('Submitting Task for Testing…');
       toSubmitLabel = i18n.t('Submit Task for Testing');
       break;
@@ -236,7 +236,7 @@ const SubmitModal = ({
             <Textarea
               id="pr-additional-changes"
               label={i18n.t(
-                'Describe additional changes including instructions for users for any post-upgrade tasks',
+                'Describe additional changes including instructions for users for any post-upgrade Tasks',
               )}
               className="metecho-textarea slds-p-bottom_small"
               name="additional_changes"

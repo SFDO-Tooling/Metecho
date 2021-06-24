@@ -175,7 +175,7 @@ const CreateTaskModal = ({
               slds-p-top_xx-small
               metecho-transition-out"
           >
-            {i18n.t('A task was successfully added.')}
+            {i18n.t('A Task was successfully added.')}
           </span>
         ),
         <Button

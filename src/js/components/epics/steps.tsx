@@ -30,17 +30,17 @@ const EpicStatusSteps = ({
 
   const steps: Step[] = [
     {
-      label: i18n.t('Add a task'),
+      label: i18n.t('Add a Task'),
       active: !hasTasks,
       complete: hasTasks || isMerged,
     },
     {
-      label: i18n.t('Assign a Developer to a task'),
+      label: i18n.t('Assign a Developer to a Task'),
       active: hasTasks && !hasDev,
       complete: epic.has_unmerged_commits || (hasTasks && hasDev) || isMerged,
     },
     {
-      label: i18n.t('Complete a task'),
+      label: i18n.t('Complete a Task'),
       active: hasTasks && hasDev,
       complete: epic.has_unmerged_commits || isMerged,
     },

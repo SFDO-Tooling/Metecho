@@ -370,7 +370,7 @@ describe('<TaskDetail/>', () => {
       });
 
       expect(queryByText('Task 1')).toBeNull();
-      expect(getByText('another task')).toBeVisible();
+      expect(getByText('another Task')).toBeVisible();
     });
   });
 
@@ -767,7 +767,7 @@ describe('<TaskDetail/>', () => {
       });
       fireEvent.click(getByText('Submit Task for Testing'));
 
-      expect(getByText('Submit this task for testing')).toBeVisible();
+      expect(getByText('Submit this Task for testing')).toBeVisible();
     });
   });
 

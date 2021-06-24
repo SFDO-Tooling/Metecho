@@ -165,9 +165,9 @@ describe('<TaskForm/>', () => {
         fireEvent.click(submit);
 
         expect.assertions(1);
-        await findByText('A task was successfully added.');
+        await findByText('A Task was successfully added.');
 
-        expect(getByText('A task was successfully added.')).toBeVisible();
+        expect(getByText('A Task was successfully added.')).toBeVisible();
       });
     });
   });

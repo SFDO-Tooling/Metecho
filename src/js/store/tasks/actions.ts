@@ -34,7 +34,7 @@ export const createTaskPR =
       dispatch(
         addToast({
           heading: i18n.t(
-            'Successfully submitted task for testing: “{{task_name}}”.',
+            'Successfully submitted Task for testing: “{{task_name}}.”',
             { task_name: model.name },
           ),
           linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
@@ -62,7 +62,7 @@ export const createTaskPRFailed =
       dispatch(
         addToast({
           heading: i18n.t(
-            'Uh oh. There was an error submitting task for testing: “{{task_name}}”.',
+            'Uh oh. There was an error submitting Task for testing: “{{task_name}}.”',
             { task_name: model.name },
           ),
           details: message,
@@ -90,7 +90,7 @@ export const submitReview =
       dispatch(
         addToast({
           heading: i18n.t(
-            'Successfully submitted review for task: “{{task_name}}”.',
+            'Successfully submitted review for Task: “{{task_name}}.”',
             { task_name: model.name },
           ),
           linkText: model.pr_url ? i18n.t('View pull request.') : undefined,
@@ -118,7 +118,7 @@ export const submitReviewFailed =
       dispatch(
         addToast({
           heading: i18n.t(
-            'Uh oh. There was an error submitting review for task: “{{task_name}}”.',
+            'Uh oh. There was an error submitting review for Task: “{{task_name}}.”',
             { task_name: model.name },
           ),
           details: message,

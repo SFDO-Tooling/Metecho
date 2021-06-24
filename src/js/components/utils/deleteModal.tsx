@@ -68,8 +68,8 @@ const DeleteModal = ({
       heading = i18n.t('Confirm Deleting Task');
       message = (
         <Trans i18nKey="confirmDeleteTask">
-          Are you sure you want to delete task “{{ name: model.name }}”? This
-          will also delete any orgs in this task.
+          Are you sure you want to delete Task “{{ name: model.name }}?” This
+          will also delete any orgs in this Task.
         </Trans>
       );
       break;

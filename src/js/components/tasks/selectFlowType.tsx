@@ -67,7 +67,7 @@ const SelectFlowType = ({
           content={
             orgConfigHelp ||
             i18n.t(
-              'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this task?',
+              'CumulusCI projects can set up different kinds of org environments. Which one would you like to work on for this Task?',
             )
           }
           position="overflowBoundaryElement"
@@ -121,7 +121,7 @@ const SelectFlowType = ({
         >
           {isDisabled &&
             i18n.t(
-              'Org Type cannot be changed while an org exists for this task.',
+              'Org Type cannot be changed while an org exists for this Task.',
             )}
           {errors}
         </div>
