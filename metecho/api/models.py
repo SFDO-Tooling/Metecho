@@ -120,7 +120,9 @@ class User(HashIdMixin, AbstractUser):
         self.refresh_from_db()
         self.currently_fetching_repos = False
         self.save()
-        message = {"type": "USER_REPOS_REFRESH" if error is None else "USER_REPOS_ERROR"}
+        message = {
+            "type": "USER_REPOS_REFRESH" if error is None else "USER_REPOS_ERROR"
+        }
         async_to_sync(push.push_message_about_instance)(self, message)
 
     def invalidate_salesforce_credentials(self):
