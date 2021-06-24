@@ -23,9 +23,9 @@ from ..jobs import (
     delete_scratch_org,
     get_social_image,
     get_unsaved_changes,
-    populate_github_users,
     refresh_commits,
     refresh_github_repositories_for_user,
+    refresh_github_users,
     refresh_scratch_org,
     submit_review,
     user_reassign,
@@ -784,8 +784,8 @@ def test_create_pr__error(user_factory, task_factory):
 
 
 @pytest.mark.django_db
-class TestPopulateGitHubUsers:
-    def test_populate_github_users(
+class TestRefreshGitHubUsers:
+    def test_success(
         self,
         mocker,
         user_factory,
@@ -793,9 +793,8 @@ class TestPopulateGitHubUsers:
         git_hub_repository_factory,
     ):
         user = user_factory()
-        project = project_factory(repo_id=123)
+        project = project_factory(repo_id=123, currently_fetching_github_users=True)
         git_hub_repository_factory(repo_id=123, user=user)
-
         collab1 = MagicMock(
             id=123,
             login="test-user-1",
@@ -810,11 +809,12 @@ class TestPopulateGitHubUsers:
         )
         repo = MagicMock(**{"collaborators.return_value": [collab1, collab2]})
         mocker.patch(f"{PATCH_ROOT}.get_repo_info", return_value=repo)
-
         get_cached_user = mocker.patch(f"{PATCH_ROOT}.get_cached_user")
         get_cached_user.return_value.name = "FULL NAME"
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
 
-        populate_github_users(project, originating_user_id=None)
+        refresh_github_users(project, originating_user_id=None)
+
         project.refresh_from_db()
         assert project.github_users == [
             {
@@ -832,8 +832,10 @@ class TestPopulateGitHubUsers:
                 "permissions": {"push": True},
             },
         ]
+        assert not project.currently_fetching_github_users
+        assert async_to_sync.called
 
-    def test_populate_github_users__expand_user_error(
+    def test_expand_user_error(
         self,
         caplog,
         mocker,
@@ -845,9 +847,8 @@ class TestPopulateGitHubUsers:
         Expect the "simple" representation of the user if expanding them fails
         """
         user = user_factory()
-        project = project_factory(repo_id=123)
+        project = project_factory(repo_id=123, currently_fetching_github_users=True)
         git_hub_repository_factory(repo_id=123, user=user)
-
         collab1 = MagicMock(
             id=123,
             login="test-user-1",
@@ -859,8 +860,10 @@ class TestPopulateGitHubUsers:
         mocker.patch(
             f"{PATCH_ROOT}.get_cached_user", side_effect=Exception("GITHUB ERROR")
         )
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
 
-        populate_github_users(project, originating_user_id=None)
+        refresh_github_users(project, originating_user_id=None)
+
         project.refresh_from_db()
         assert project.github_users == [
             {
@@ -870,25 +873,26 @@ class TestPopulateGitHubUsers:
                 "permissions": {},
             },
         ]
+        assert not project.currently_fetching_github_users
+        assert async_to_sync.called
         assert "GITHUB ERROR" in caplog.text
 
-    def test__error(self, user_factory, project_factory, git_hub_repository_factory):
+    def test_error(
+        self, mocker, caplog, user_factory, project_factory, git_hub_repository_factory
+    ):
         user = user_factory()
-        project = project_factory(repo_id=123)
+        project = project_factory(repo_id=123, currently_fetching_github_users=True)
         git_hub_repository_factory(repo_id=123, user=user)
-        with ExitStack() as stack:
-            get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
-            get_repo_info.side_effect = Exception
-            async_to_sync = stack.enter_context(
-                patch("metecho.api.model_mixins.async_to_sync")
-            )
-            logger = stack.enter_context(patch(f"{PATCH_ROOT}.logger"))
+        mocker.patch(f"{PATCH_ROOT}.get_repo_info", side_effect=Exception("Oh no!"))
+        async_to_sync = mocker.patch("metecho.api.model_mixins.async_to_sync")
 
-            with pytest.raises(Exception):
-                populate_github_users(project, originating_user_id=None)
+        with pytest.raises(Exception):
+            refresh_github_users(project, originating_user_id=None)
 
-            assert logger.error.called
-            assert async_to_sync.called
+        project.refresh_from_db()
+        assert not project.currently_fetching_github_users
+        assert async_to_sync.called
+        assert "Oh no!" in caplog.text
 
 
 @pytest.mark.django_db

@@ -676,12 +676,12 @@ def refresh_commits(*, project, branch_name, originating_user_id):
 refresh_commits_job = job(refresh_commits)
 
 
-def populate_github_users(project, *, originating_user_id):
+def refresh_github_users(project, *, originating_user_id):
     try:
+        project.refresh_from_db()
         repo = get_repo_info(
             None, repo_owner=project.repo_owner, repo_name=project.repo_name
         )
-        project.refresh_from_db()
         project.github_users = list(
             sorted(
                 [
@@ -711,17 +711,17 @@ def populate_github_users(project, *, originating_user_id):
         project.github_users = expanded_users
 
     except Exception as e:
-        project.finalize_populate_github_users(
+        project.finalize_refresh_github_users(
             error=e, originating_user_id=originating_user_id
         )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        project.finalize_populate_github_users(originating_user_id=originating_user_id)
+        project.finalize_refresh_github_users(originating_user_id=originating_user_id)
 
 
-populate_github_users_job = job(populate_github_users)
+refresh_github_users_job = job(refresh_github_users)
 
 
 def submit_review(*, user, task, data, originating_user_id):

@@ -51,14 +51,6 @@ class TestProject:
             assert get_repo_info.called
             assert project.repo_id == 123
 
-    def test_queue_populate_github_users(self, project_factory, user_factory):
-        project = project_factory()
-        with patch(
-            "metecho.api.jobs.populate_github_users_job"
-        ) as populate_github_users_job:
-            project.queue_populate_github_users(originating_user_id=None)
-            assert populate_github_users_job.delay.called
-
     def test_queue_refresh_commits(self, project_factory, user_factory):
         project = project_factory()
         with patch("metecho.api.jobs.refresh_commits_job") as refresh_commits_job:
@@ -106,20 +98,6 @@ class TestProject:
             project.refresh_from_db()
             assert project.branch_name == "main"
             assert project.latest_sha == "abcd1234"
-
-    def test_finalize_populate_github_users(self, project_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
-            project = project_factory()
-            project.finalize_populate_github_users(originating_user_id=None)
-
-            assert async_to_sync.called
-
-    def test_finalize_populate_github_users__error(self, project_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
-            project = project_factory()
-            project.finalize_populate_github_users(error=True, originating_user_id=None)
-
-            assert async_to_sync.called
 
     def test_queue_available_org_config_names(self, user_factory, project_factory):
         user = user_factory()

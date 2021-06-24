@@ -90,19 +90,22 @@ class TestProjectViewset:
             assert available_org_config_names_job.delay.called
 
     def test_refresh_github_users(
-        self, client, project_factory, git_hub_repository_factory
+        self, client, mocker, project_factory, git_hub_repository_factory
     ):
         git_hub_repository_factory(user=client.user, repo_id=123)
         project = project_factory(repo_id=123)
-        with patch(
-            "metecho.api.jobs.populate_github_users_job"
-        ) as populate_github_users_job:
-            response = client.post(
-                reverse("project-refresh-github-users", kwargs={"pk": str(project.pk)})
-            )
+        refresh_github_users_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_users_job"
+        )
 
-            assert response.status_code == 202
-            assert populate_github_users_job.delay.called
+        response = client.post(
+            reverse("project-refresh-github-users", kwargs={"pk": str(project.pk)})
+        )
+
+        project.refresh_from_db()
+        assert response.status_code == 202
+        assert project.currently_fetching_github_users
+        assert refresh_github_users_job.delay.called
 
     def test_feature_branches(
         self, client, project_factory, git_hub_repository_factory

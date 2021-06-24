@@ -318,6 +318,7 @@ class Project(
     # }
     org_config_names = models.JSONField(default=list, blank=True)
     currently_fetching_org_config_names = models.BooleanField(default=False)
+    currently_fetching_github_users = models.BooleanField(default=False)
     latest_sha = StringField(blank=True)
 
     slug_class = ProjectSlug
@@ -364,9 +365,6 @@ class Project(
             )
             self.latest_sha = repo.branch(self.branch_name).latest_sha()
 
-        if not self.github_users:
-            self.queue_populate_github_users(originating_user_id=None)
-
         if not self.repo_image_url:
             from .jobs import get_social_image_job
 
@@ -378,14 +376,20 @@ class Project(
         self.save()
         self.notify_changed(originating_user_id=None)
 
-    def queue_populate_github_users(self, *, originating_user_id):
-        from .jobs import populate_github_users_job
+    def queue_refresh_github_users(self, *, originating_user_id):
+        from .jobs import refresh_github_users_job
 
-        populate_github_users_job.delay(self, originating_user_id=originating_user_id)
-
-    def finalize_populate_github_users(self, *, error=None, originating_user_id):
-        if error is None:
+        if not self.currently_fetching_github_users:
+            self.currently_fetching_github_users = True
             self.save()
+            refresh_github_users_job.delay(
+                self, originating_user_id=originating_user_id
+            )
+
+    def finalize_refresh_github_users(self, *, error=None, originating_user_id):
+        self.currently_fetching_github_users = False
+        self.save()
+        if error is None:
             self.notify_changed(originating_user_id=originating_user_id)
         else:
             self.notify_error(error, originating_user_id=originating_user_id)
