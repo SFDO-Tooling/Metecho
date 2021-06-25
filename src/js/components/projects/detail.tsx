@@ -1,5 +1,5 @@
 import Button from '@salesforce/design-system-react/components/button';
-import Tabs from '@salesforce/design-system-react/components/tabs'; 
+import Tabs from '@salesforce/design-system-react/components/tabs';
 import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
 import i18n from 'i18next';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -28,6 +28,7 @@ import {
   useFetchProjectIfMissing,
   useIsMounted,
 } from '~js/components/utils';
+import assignUser from '~js/components/utils/useAssignUserToTask';
 import useFetchTasksByProject from '~js/components/utils/useFetchTasksByProject';
 import { ThunkDispatch } from '~js/store';
 import { fetchObjects } from '~js/store/actions';
@@ -62,8 +63,7 @@ const ProjectDetail = (
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
   const { orgs } = useFetchOrgsIfMissing({ project, props });
-  let tasks = useFetchTasksByProject(project);
-console.log(tasks);
+  let tasks = useFetchTasksByProject(project?.id);
   const playgroundOrg = (orgs || [])[0];
 
   // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param is truthy
@@ -167,7 +167,7 @@ console.log(tasks);
   }
 
   const hasEpics = epics && epics.epics.length > 0;
-  const hasTasks = tasks && tasks.length > 0
+  const hasTasks = tasks && tasks.length > 0;
 
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
@@ -328,44 +328,45 @@ console.log(tasks);
               </div>
             )}
             <Tabs variant="scoped" id="tabs-example-scoped">
-              <TabsPanel label="Epics">
+              <TabsPanel label={i18n.t('Epics')}>
                 {hasEpics && (
                   <>
                     <EpicTable epics={epics.epics} projectSlug={project.slug} />
-                      {epics.next ? (
-                        <div className="slds-m-top_large">
-                          <Button
-                            label={
-                              fetchingEpics ? (
-                                <LabelWithSpinner />
-                              ) : (
-                                i18n.t('Load More')
-                              )
-                            }
-                            onClick={fetchMoreEpics}
-                          />
-                        </div>
+                    {epics.next ? (
+                      <div className="slds-m-top_large">
+                        <Button
+                          label={
+                            fetchingEpics ? (
+                              <LabelWithSpinner />
+                            ) : (
+                              i18n.t('Load More')
+                            )
+                          }
+                          onClick={fetchMoreEpics}
+                        />
+                      </div>
                     ) : null}
                   </>
                 )}
-                </TabsPanel>
-                  <TabsPanel label="Tasks">
-                    {hasTasks && (
-                    <TasksTableComponent 
-                      projectId={project.id} 
-                      projectSlug={project.slug} 
-                      tasks={tasks}
-                      epicUsers={epicCollaborators}
-                      githubUsers={project.github_users}
-                      canAssign={project.has_push_permissions}
-                      isREfreshingUsers={Boolean(project.currently_refreshing_gh_users)}
-                      assignUserAction={assignUser}
-                    />
+              </TabsPanel>
+              <TabsPanel label={i18n.t('Tasks')}>
+                {hasTasks && (
+                  <TasksTableComponent
+                    projectId={project.id}
+                    projectSlug={project.slug}
+                    tasks={tasks}
+                    githubUsers={project.github_users}
+                    canAssign={project.has_push_permission}
+                    isRefreshingUsers={Boolean(
+                      project.currently_refreshing_gh_users,
                     )}
-                  </TabsPanel>
-                </Tabs>
-              </>
-            )}
+                    assignUserAction={assignUser}
+                  />
+                )}
+              </TabsPanel>
+            </Tabs>
+          </>
+        )}
         )
         <CreateEpicModal
           user={user}
