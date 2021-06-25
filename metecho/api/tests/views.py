@@ -164,6 +164,7 @@ class TestProjectViewset:
                     "repo_image_url": "",
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
+                    "currently_fetching_github_users": False,
                     "latest_sha": "abcd1234",
                 }
             ],
@@ -207,6 +208,7 @@ class TestProjectViewset:
                     "repo_image_url": "",
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
+                    "currently_fetching_github_users": False,
                     "latest_sha": "abcd1234",
                 }
             ],

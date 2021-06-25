@@ -445,10 +445,10 @@ export const sampleProject1 = {
   is_managed: false,
   branch_prefix: '',
   github_users: [sampleGitHubUser1, sampleGitHubUser2, sampleGitHubUser3],
-  currently_refreshing_gh_users: false,
   repo_image_url:
     'https://repository-images.githubusercontent.com/123456/123-456',
   currently_fetching_org_config_names: false,
+  currently_fetching_github_users: false,
   org_config_names: [],
   latest_sha: 'abc123',
   has_push_permission: true,
