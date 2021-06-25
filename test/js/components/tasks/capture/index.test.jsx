@@ -175,7 +175,7 @@ describe('<CaptureModal/>', () => {
       });
 
       test('displays success class for 3 seconds', async () => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers();
         updateObject.mockReturnValueOnce(() => Promise.resolve({}));
         const { findByText, getByText, getByLabelText, baseElement } = setup();
 

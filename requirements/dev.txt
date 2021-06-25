@@ -23,9 +23,9 @@ babel==2.9.1
     # via sphinx
 backcall==0.2.0
     # via ipython
-black==21.5b2
+black==21.6b0
     # via -r requirements/dev.in
-certifi==2020.12.5
+certifi==2021.5.30
     # via
     #   -c requirements/prod.txt
     #   requests
@@ -66,7 +66,7 @@ factory-boy==3.2.0
     # via
     #   -r requirements/dev.in
     #   pytest-factoryboy
-faker==8.2.1
+faker==8.6.0
     # via
     #   -c requirements/prod.txt
     #   factory-boy
@@ -88,9 +88,9 @@ iniconfig==1.1.1
     # via pytest
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.24.0
+ipython==7.24.1
     # via -r requirements/dev.in
-isort==5.8.0
+isort==5.9.1
     # via -r requirements/dev.in
 jedi==0.18.0
     # via ipython
@@ -126,7 +126,7 @@ pickleshare==0.7.5
     # via ipython
 pluggy==0.13.1
     # via pytest
-prompt-toolkit==3.0.18
+prompt-toolkit==3.0.19
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
@@ -149,7 +149,7 @@ pytest-asyncio==0.15.1
     # via -r requirements/dev.in
 pytest-cov==2.12.1
     # via -r requirements/dev.in
-pytest-django==4.3.0
+pytest-django==4.4.0
     # via -r requirements/dev.in
 pytest-factoryboy==2.1.0
     # via -r requirements/dev.in
@@ -233,7 +233,7 @@ traitlets==5.0.5
     # via
     #   ipython
     #   matplotlib-inline
-urllib3==1.26.4
+urllib3==1.26.5
     # via
     #   -c requirements/prod.txt
     #   requests

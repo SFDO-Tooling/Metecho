@@ -151,7 +151,7 @@ const TaskOrgCard = ({
   // If (somehow) there's an org owned by someone else, do not show org.
   if (ownedByWrongUser) {
     logError(
-      'A scratch org exists for this task, but is not owned by the assigned user.',
+      'An org exists for this task, but is not owned by the assigned user.',
       {
         org,
         assignedUser,
