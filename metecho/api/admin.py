@@ -92,6 +92,13 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ("name", "repo_owner", "repo_name", "created_at")
     search_fields = ("name", "repo_owner", "repo_name")
 
+    def save_model(self, request, obj, form, change):
+        if not obj.repo_image_url:
+            from .jobs import get_social_image_job
+
+            get_social_image_job.delay(project=obj)
+        return super().save_model(request, obj, form, change)
+
 
 @admin.register(ProjectSlug)
 class ProjectSlugAdmin(admin.ModelAdmin):

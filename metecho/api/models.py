@@ -364,11 +364,6 @@ class Project(
             )
             self.latest_sha = repo.branch(self.branch_name).latest_sha()
 
-        if not self.repo_image_url:
-            from .jobs import get_social_image_job
-
-            get_social_image_job.delay(project=self)
-
         super().save(*args, **kwargs)
 
     def finalize_get_social_image(self):
