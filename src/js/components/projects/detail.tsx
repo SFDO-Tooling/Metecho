@@ -7,12 +7,12 @@ import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import TasksTableComponent from '~js/components/tasks/table';
 
 import CreateEpicModal from '~js/components/epics/createForm';
 import EpicTable from '~js/components/epics/table';
 import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
 import ProjectNotFound from '~js/components/projects/project404';
+import TasksTableComponent from '~js/components/tasks/table';
 import LandingModal from '~js/components/tour/landing';
 import PlanTour from '~js/components/tour/plan';
 import PlayTour from '~js/components/tour/play';
@@ -32,6 +32,7 @@ import assignUser from '~js/components/utils/useAssignUserToTask';
 import useFetchTasksByProject from '~js/components/utils/useFetchTasksByProject';
 import { ThunkDispatch } from '~js/store';
 import { fetchObjects } from '~js/store/actions';
+import { Task } from '~js/store/tasks/reducer';
 import { onboarded } from '~js/store/user/actions';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -63,7 +64,7 @@ const ProjectDetail = (
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
   const { orgs } = useFetchOrgsIfMissing({ project, props });
-  let tasks = useFetchTasksByProject(project?.id);
+  const tasks = useFetchTasksByProject(project?.id);
   const playgroundOrg = (orgs || [])[0];
 
   // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param is truthy
@@ -354,7 +355,7 @@ const ProjectDetail = (
                   <TasksTableComponent
                     projectId={project.id}
                     projectSlug={project.slug}
-                    tasks={tasks}
+                    tasks={tasks as Task[]}
                     githubUsers={project.github_users}
                     canAssign={project.has_push_permission}
                     isRefreshingUsers={Boolean(
@@ -367,7 +368,6 @@ const ProjectDetail = (
             </Tabs>
           </>
         )}
-        )
         <CreateEpicModal
           user={user}
           project={project}

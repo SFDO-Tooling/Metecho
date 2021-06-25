@@ -50,9 +50,9 @@ interface TableCellProps {
 interface Props {
   projectId: string;
   projectSlug: string;
-  epicSlug: string;
+  epicSlug?: string;
   tasks: Task[];
-  epicUsers: GitHubUser[];
+  epicUsers?: GitHubUser[];
   githubUsers: GitHubUser[];
   canAssign: boolean;
   isRefreshingUsers: boolean;
@@ -68,7 +68,7 @@ const NameTableCell = ({
   ...props
 }: TableCellProps & {
   projectSlug: string;
-  epicSlug: string;
+  epicSlug?: string;
 }) => (
   <DataTableCell
     {...props}
@@ -163,7 +163,7 @@ const AssigneeTableCell = ({
 }: TableCellProps & {
   type: OrgTypes;
   projectId: string;
-  epicUsers: GitHubUser[];
+  epicUsers?: GitHubUser[];
   githubUsers: GitHubUser[];
   currentUser?: User;
   canAssign: boolean;
@@ -239,7 +239,7 @@ const AssigneeTableCell = ({
         />
         <AssignTaskRoleModal
           projectId={projectId}
-          epicUsers={epicUsers}
+          epicUsers={epicUsers || []}
           githubUsers={githubUsers}
           selectedUser={assignedUser || null}
           orgType={type}
