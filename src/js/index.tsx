@@ -206,8 +206,12 @@ initializeI18n((i18nError?: string) => {
         const user = selectUserState(state);
         // If user has no projects and is currently fetching projects, update state
         // to show spinner instead of empty projects-list.
-        if (user?.currently_fetching_repos && !projects.length) {
-          appStore.dispatch(projectsRefreshing());
+        if (user?.currently_fetching_repos) {
+          appStore.dispatch(
+            projects.length
+              ? { type: 'REFRESH_PROJECTS_REQUESTED' }
+              : projectsRefreshing(),
+          );
         }
         renderApp();
       });
