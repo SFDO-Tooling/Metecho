@@ -57,6 +57,7 @@ interface Props {
   canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
+  viewEpicsColumn: boolean;
 }
 
 const NameTableCell = ({

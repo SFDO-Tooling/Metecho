@@ -362,6 +362,7 @@ const ProjectDetail = (
                       project.currently_refreshing_gh_users,
                     )}
                     assignUserAction={assignUser}
+                    viewEpicsColumn
                   />
                 )}
               </TabsPanel>

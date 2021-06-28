@@ -26,6 +26,7 @@ export const api_urls = {
   scratch_org_redirect: (id: string) => `/api/scratch_orgs/${id}/redirect/`,
   scratch_org_refresh: (id: string) => `/api/scratch_orgs/${id}/refresh/`,
   task_detail: (id: string) => `/api/tasks/${id}/`,
+  task_list: (id: string) => `api/tasks/`,
   task_create_pr: (id: string) => `/api/tasks/${id}/create_pr/`,
   task_review: (id: string) => `/api/tasks/${id}/review/`,
   task_can_reassign: (id: string) => `/api/tasks/${id}/can_reassign/`,
