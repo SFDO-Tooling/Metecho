@@ -4,7 +4,6 @@
   "version": "0.1.0",
   "private": true,
   "license": "BSD-3-Clause",
-  "homepage": "http://oddbird.github.io/Metecho",
   "repository": {
     "type": "git",
     "url": "https://github.com/SFDO-Tooling/Metecho.git"
@@ -48,13 +47,16 @@
     "storybook": "start-storybook -p 6006 --ci",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
+    "deploy-storybook": "storybook-to-ghpages -d storybook-static",
+    "build-storybook": "build-storybook",
     "heroku-postbuild": "yarn prod",
-    "predeploy": "npm run build-storybook",    "deploy-storybook": "gh-pages -d storybook-static",    "build-storybook": "build-storybook"
+    "predeploy": "yarn build-storybook"
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.15.8",
     "@salesforce/design-system-react": "0.10.35",
     "@sentry/browser": "^6.7.2",
+    "@storybook/storybook-deployer": "^2.8.10",
     "classnames": "^2.3.1",
     "date-fns": "^2.22.1",
     "i18next": "^20.3.2",
@@ -133,7 +135,6 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "fetch-mock": "^9.11.0",
     "file-loader": "^6.2.0",
-    "gh-pages": "^3.2.3",
     "html-webpack-plugin": "^5.3.2",
     "i18next-scanner-webpack": "^0.8.1",
     "jest": "^27.0.5",
