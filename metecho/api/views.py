@@ -271,7 +271,6 @@ class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
     queryset = Task.objects.select_related("epic", "epic__project").active()
-    pagination_class = CustomPaginator
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for testing.")

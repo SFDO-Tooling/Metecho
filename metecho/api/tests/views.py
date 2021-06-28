@@ -815,7 +815,7 @@ class TestTaskViewSet:
 
         response = client.get(url)
 
-        results = response.json().get("results", [])
+        results = response.json()
         assert response.status_code == 200, response.content
         assert len(results) == 1, response.json()
         assert tuple(results[0]["epic"].keys()) == (
