@@ -170,6 +170,7 @@ const OrgActions = ({
         isActive = hasReviewRejected || !task.has_unmerged_commits;
         popover = (
           <TourPopover
+            id="tour-task-create-dev-org"
             align="top"
             heading={i18n.t('Create a Dev Org')}
             body={
@@ -189,6 +190,7 @@ const OrgActions = ({
         isActive = needsReview;
         popover = (
           <TourPopover
+            id="tour-task-create-test-org"
             align="top"
             heading={i18n.t('Create a Test Org')}
             body={
@@ -211,6 +213,7 @@ const OrgActions = ({
           <span className="slds-is-relative inline-container">
             {submitReviewBtn}
             <TourPopover
+              id="tour-task-submit-review"
               align="top"
               heading={i18n.t('Submit a review')}
               body={
