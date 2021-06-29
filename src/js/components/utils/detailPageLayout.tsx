@@ -48,6 +48,7 @@ const DetailPageLayout = ({
     case OBJECT_TYPES.EPIC:
       popover = (
         <TourPopover
+          id="tour-epic-breadcrumb"
           align="right"
           heading={popoverHeading}
           body={
@@ -64,6 +65,7 @@ const DetailPageLayout = ({
     case OBJECT_TYPES.TASK:
       popover = (
         <TourPopover
+          id="tour-task-breadcrumb"
           align="right"
           heading={popoverHeading}
           body={

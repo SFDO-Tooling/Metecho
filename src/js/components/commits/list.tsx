@@ -101,6 +101,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
     <>
       <div className="slds-is-relative heading">
         <TourPopover
+          id="tour-task-commits"
           align="top left"
           heading={i18n.t('List of retrieved Task changes')}
           body={
