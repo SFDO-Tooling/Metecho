@@ -104,11 +104,6 @@
     border: 1px solid $palette-green-90;
     box-shadow: 0 0 2px $palette-green-70;
     color: $palette-green-70;
-
-    &:hover,
-    &:focus {
-      color: $brand-background-dark;
-    }
   }
 
   // Hover/Focus styles should only apply if on interactive element
@@ -116,6 +111,7 @@
   &[aria-haspopup]:focus {
     box-shadow: var(--sds-c-button-shadow-focus, 0 0 2px $color-brand-dark),
       0 0 2px $color-text-link-focus;
+    color: $brand-background-dark;
   }
 }
 
