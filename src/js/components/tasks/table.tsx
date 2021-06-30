@@ -347,6 +347,31 @@ const TaskTable = ({
       >
         <NameTableCell projectSlug={projectSlug} epicSlug={epicSlug} />
       </DataTableColumn>
+      {viewEpicsColumn && (
+        <DataTableColumn
+          key="epic"
+          label={
+            <>
+              {i18n.t('Epic')}
+              <TourPopover
+                id="tour-task-epic-name-column"
+                align="top left"
+                heading={i18n.t('Epic names')}
+                body={
+                  <Trans i18nKey="tourTaskEpicNameColumn">
+                    Tasks can be grouped together in an Epic. Select the Epic
+                    name to view the Task in the context of its group.
+                  </Trans>
+                }
+              />
+            </>
+          }
+          property="epic"
+          width="20%"
+        >
+          <EpicTableCell projectSlug={projectSlug} />
+        </DataTableColumn>
+      )}
       <DataTableColumn
         key="status"
         label={
@@ -377,31 +402,6 @@ const TaskTable = ({
       >
         <StatusTableCell />
       </DataTableColumn>
-      {viewEpicsColumn && (
-        <DataTableColumn
-          key="epic"
-          label={
-            <>
-              {i18n.t('Epic')}
-              <TourPopover
-                id="tour-task-epic-name-column"
-                align="top left"
-                heading={i18n.t('Epic names')}
-                body={
-                  <Trans i18nKey="tourTaskEpicNameColumn">
-                    Tasks can be grouped together in an Epic. Select the Epic
-                    name to view the Task in the context of its group.
-                  </Trans>
-                }
-              />
-            </>
-          }
-          property="epic"
-          width="20%"
-        >
-          <EpicTableCell projectSlug={projectSlug} />
-        </DataTableColumn>
-      )}
       <DataTableColumn
         key="assigned_dev"
         label={

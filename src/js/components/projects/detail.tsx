@@ -167,9 +167,8 @@ const ProjectDetail = (
     return <Redirect to={routes.project_detail(project.slug)} />;
   }
 
-  const hasEpics = epics && epics.epics.length > 0;
-  const hasTasks = tasks && tasks.length > 0;
   let viewTaskTab = false;
+
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
@@ -262,135 +261,142 @@ const ProjectDetail = (
           </div>
         }
       >
-        {!epics || !epics.fetched ? (
-          // Fetching epics from API
-          <SpinnerWrapper />
-        ) : (
-          <Tabs variant="scoped" id="tabs-example-scoped">
-            <TabsPanel
-              label={
-                <>
-                  <TourPopover
-                    id="tour-project-epics-list"
-                    align="top left"
-                    heading={i18n.t('List of Epics')}
-                    body={
-                      <Trans i18nKey="tourEpicsList">
-                        Select the Epics tab to see a list of all Epics for this
-                        Project. Each Epic is a group of related Tasks.
-                      </Trans>
-                    }
-                  />
-                  {i18n.t('Epics')}
-                </>
-              }
-            >
-              {project.has_push_permission && (
-                <div className="slds-m-bottom_medium slds-is-relative">
-                  <Button
-                    label={i18n.t('Create an Epic')}
-                    variant="brand"
-                    onClick={openCreateModal}
-                    className="tour-create-epic"
-                  />
-                  <TourPopover
-                    id="tour-project-create-epic"
-                    align="top left"
-                    body={
-                      <Trans i18nKey="tourCreateEpic">
-                        Create an Epic to make a group of related Tasks. Invite
-                        multiple Collaborators to your Epic and assign people as
-                        Developers and Testers for each Task. Epics are
-                        equivalent to GitHub branches, just like Tasks.
-                      </Trans>
-                    }
-                    heading={i18n.t('Create Epics to group Tasks')}
-                  />
-                </div>
-              )}
-              {hasEpics ? (
-                <>
-                  <EpicTable epics={epics.epics} projectSlug={project.slug} />
-                  {epics.next ? (
-                    <div className="slds-m-top_large">
-                      <Button
-                        label={
-                          fetchingEpics ? (
-                            <LabelWithSpinner />
-                          ) : (
-                            i18n.t('Load More')
-                          )
-                        }
-                        onClick={fetchMoreEpics}
-                      />
-                    </div>
-                  ) : null}
-                </>
-              ) : (
-                <p>
-                  {project.has_push_permission ? (
-                    <Trans i18nKey="createEpicHelpText">
-                      Epics in Metecho are the high-level features that can be
-                      broken down into smaller parts by creating Tasks. You can
-                      create a new epic or create an epic based on an existing
-                      GitHub branch. Every epic requires a unique epic name,
-                      which becomes the branch name in GitHub unless you choose
-                      to use an existing branch.
+        <Tabs variant="scoped">
+          <TabsPanel
+            label={
+              <>
+                <TourPopover
+                  id="tour-project-epics-list"
+                  align="top left"
+                  heading={i18n.t('List of Epics')}
+                  body={
+                    <Trans i18nKey="tourEpicsList">
+                      Select the Epics tab to see a list of all Epics for this
+                      Project. Each Epic is a group of related Tasks.
                     </Trans>
-                  ) : (
-                    <Trans i18nKey="noEpics">
-                      Epics in Metecho are the high-level features that can be
-                      broken down into smaller parts by creating Tasks. There
-                      are no Epics for this Project.
-                    </Trans>
-                  )}
-                </p>
-              )}
-            </TabsPanel>
-            <TabsPanel
-              label={
-                <>
-                  <TourPopover
-                    id="tour-project-tasks-list"
-                    align="top left"
-                    heading={i18n.t('List of Tasks')}
-                    body={
-                      <Trans i18nKey="tourTasksList">
-                        Select the Tasks tab to see a list of all the work being
-                        done on this Project and who is working on it. Tasks
-                        represent small changes to the Project, and may be
-                        grouped with other Tasks in an Epic.
-                      </Trans>
-                    }
-                  />
-                  {i18n.t('Tasks')}
-                </>
-              }
-              onSelect={() => (viewTaskTab = true)}
-            >
-              {!tasks && (
-                <div className="slds-is-relative slds-p-vertical_x-large">
-                  <SpinnerWrapper />
-                </div>
-              )}
-              {viewTaskTab && tasks && !tasks.length ? (
-                <p>{i18n.t('There are no Tasks for this Project.')}</p>
-              ) : null}
-              {hasTasks && (
-                <TasksTableComponent
-                  projectId={project.id}
-                  projectSlug={project.slug}
-                  tasks={tasks as Task[]}
-                  githubUsers={project.github_users}
-                  canAssign={project.has_push_permission}
-                  isRefreshingUsers={project.currently_fetching_github_users}
-                  assignUserAction={assignUser}
-                  viewEpicsColumn={true}
+                  }
                 />
-              )}
-            </TabsPanel>
-          </Tabs>
-        )}
+                {i18n.t('Epics')}
+              </>
+            }
+          >
+            {epics?.fetched ? (
+              <>
+                {project.has_push_permission && (
+                  <div className="slds-m-bottom_medium slds-is-relative">
+                    <Button
+                      label={i18n.t('Create an Epic')}
+                      variant="brand"
+                      onClick={openCreateModal}
+                      className="tour-create-epic"
+                    />
+                    <TourPopover
+                      id="tour-project-create-epic"
+                      align="top left"
+                      body={
+                        <Trans i18nKey="tourCreateEpic">
+                          Create an Epic to make a group of related Tasks.
+                          Invite multiple Collaborators to your Epic and assign
+                          people as Developers and Testers for each Task. Epics
+                          are equivalent to GitHub branches, just like Tasks.
+                        </Trans>
+                      }
+                      heading={i18n.t('Create Epics to group Tasks')}
+                    />
+                  </div>
+                )}
+                {epics.epics.length > 0 ? (
+                  <>
+                    <EpicTable epics={epics.epics} projectSlug={project.slug} />
+                    {epics.next ? (
+                      <div className="slds-m-top_large">
+                        <Button
+                          label={
+                            fetchingEpics ? (
+                              <LabelWithSpinner />
+                            ) : (
+                              i18n.t('Load More')
+                            )
+                          }
+                          onClick={fetchMoreEpics}
+                        />
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <p>
+                    {project.has_push_permission ? (
+                      <Trans i18nKey="createEpicHelpText">
+                        Epics in Metecho are the high-level features that can be
+                        broken down into smaller parts by creating Tasks. You
+                        can create a new epic or create an epic based on an
+                        existing GitHub branch. Every epic requires a unique
+                        epic name, which becomes the branch name in GitHub
+                        unless you choose to use an existing branch.
+                      </Trans>
+                    ) : (
+                      <Trans i18nKey="noEpics">
+                        Epics in Metecho are the high-level features that can be
+                        broken down into smaller parts by creating Tasks. There
+                        are no Epics for this Project.
+                      </Trans>
+                    )}
+                  </p>
+                )}
+              </>
+            ) : (
+              // Fetching epics from API
+              <div className="slds-is-relative slds-p-vertical_x-large">
+                <SpinnerWrapper />
+              </div>
+            )}
+          </TabsPanel>
+          <TabsPanel
+            label={
+              <>
+                <TourPopover
+                  id="tour-project-tasks-list"
+                  align="top left"
+                  heading={i18n.t('List of Tasks')}
+                  body={
+                    <Trans i18nKey="tourTasksList">
+                      Select the Tasks tab to see a list of all the work being
+                      done on this Project and who is working on it. Tasks
+                      represent small changes to the Project, and may be grouped
+                      with other Tasks in an Epic.
+                    </Trans>
+                  }
+                />
+                {i18n.t('Tasks')}
+              </>
+            }
+            onSelect={() => (viewTaskTab = true)}
+          >
+            {tasks ? (
+              <>
+                {tasks.length > 0 ? (
+                  <TasksTableComponent
+                    projectId={project.id}
+                    projectSlug={project.slug}
+                    tasks={tasks as Task[]}
+                    githubUsers={project.github_users}
+                    canAssign={project.has_push_permission}
+                    isRefreshingUsers={project.currently_fetching_github_users}
+                    assignUserAction={assignUser}
+                    viewEpicsColumn={true}
+                  />
+                ) : (
+                  <p>{i18n.t('There are no Tasks for this Project.')}</p>
+                )}
+              </>
+            ) : (
+              // Fetching tasks from API
+              <div className="slds-is-relative slds-p-vertical_x-large">
+                <SpinnerWrapper />
+              </div>
+            )}
+          </TabsPanel>
+        </Tabs>
         <CreateEpicModal
           user={user}
           project={project}
