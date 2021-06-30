@@ -1,10 +1,10 @@
-import apiFetch from '~js/utils/api';
-import { addUrlParams } from '~js/utils/api';
-import { ThunkDispatch } from '~js/store';
-import { Task } from '~js/store/tasks/reducer';
-
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+
+import { ThunkDispatch } from '~js/store';
+import { Task } from '~js/store/tasks/reducer';
+import apiFetch from '~js/utils/api';
+import { addUrlParams } from '~js/utils/api';
 
 export default (projectId?: string) => {
   const dispatch = useDispatch<ThunkDispatch>();

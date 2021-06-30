@@ -307,6 +307,7 @@
   "Tester & Test Org": "Tester & Test Org",
   "The existing Dev Org for this task has unretrieved changes. Changing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?": "The existing Dev Org for this task has unretrieved changes. Changing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?",
   "The existing Dev Org for this task has unretrieved changes. Removing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?": "The existing Dev Org for this task has unretrieved changes. Removing the assigned developer will also delete the org, and any changes will be lost. Are you sure you want to do that?",
+  "There are no Tasks for this Project.": "There are no Tasks for this Project.",
   "There are no available Epic Collaborators.": "There are no available Epic Collaborators.",
   "There are no available GitHub Collaborators.": "There are no available GitHub Collaborators.",
   "There aren't any available branches at this time.": "There aren't any available branches at this time.",

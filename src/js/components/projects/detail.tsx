@@ -169,7 +169,7 @@ const ProjectDetail = (
 
   const hasEpics = epics && epics.epics.length > 0;
   const hasTasks = tasks && tasks.length > 0;
-
+  let viewTaskTab = false;
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
       <DetailPageLayout
@@ -350,7 +350,18 @@ const ProjectDetail = (
                   </>
                 )}
               </TabsPanel>
-              <TabsPanel label={i18n.t('Tasks')}>
+              <TabsPanel
+                label={i18n.t('Tasks')}
+                onSelect={() => (viewTaskTab = true)}
+              >
+                {!tasks && (
+                  <div className="slds-is-relative slds-p-vertical_x-large">
+                    <SpinnerWrapper />
+                  </div>
+                )}
+                {viewTaskTab && tasks && !tasks.length ? (
+                  <p>{i18n.t('There are no Tasks for this Project.')}</p>
+                ) : null}
                 {hasTasks && (
                   <TasksTableComponent
                     projectId={project.id}
@@ -362,7 +373,7 @@ const ProjectDetail = (
                       project.currently_refreshing_gh_users,
                     )}
                     assignUserAction={assignUser}
-                    viewEpicsColumn
+                    viewEpicsColumn={true}
                   />
                 )}
               </TabsPanel>

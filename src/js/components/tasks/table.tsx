@@ -57,7 +57,8 @@ interface Props {
   canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
-  viewEpicsColumn: boolean;
+  children?: any;
+  viewEpicsColumn?: boolean;
 }
 
 const NameTableCell = ({
@@ -69,7 +70,6 @@ const NameTableCell = ({
   ...props
 }: TableCellProps & {
   projectSlug: string;
-  epicSlug?: string;
 }) => (
   <DataTableCell
     {...props}
@@ -80,9 +80,34 @@ const NameTableCell = ({
         {children}
       </Link>
     )}
+    {!epicSlug && projectSlug && item && (
+      <Link to={routes.task_detail(projectSlug, item.epic.slug, item.slug)}>
+        {children}
+      </Link>
+    )}
   </DataTableCell>
 );
 NameTableCell.displayName = DataTableCell.displayName;
+
+const EpicTableCell = ({
+  item,
+  className,
+  projectSlug,
+  ...props
+}: TableCellProps & {
+  projectSlug: string;
+}) =>
+  item && projectSlug ? (
+    <DataTableCell
+      {...props}
+      className={classNames(className, 'epic-task-name', 'truncated-cell')}
+    >
+      <Link to={routes.epic_detail(projectSlug, item.epic.slug)}>
+        {item.epic.name}
+      </Link>
+    </DataTableCell>
+  ) : null;
+EpicTableCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */
@@ -288,6 +313,7 @@ const TaskTable = ({
   canAssign,
   isRefreshingUsers,
   assignUserAction,
+  viewEpicsColumn,
 }: Props) => {
   const currentUser = useSelector(selectUserState) as User;
   const statusOrder = {
@@ -355,6 +381,16 @@ const TaskTable = ({
       >
         <StatusTableCell />
       </DataTableColumn>
+      {viewEpicsColumn && (
+        <DataTableColumn
+          key="epic"
+          label={<>{i18n.t('Epic')}</>}
+          property="epic"
+          width="20%"
+        >
+          <EpicTableCell projectSlug={projectSlug} />
+        </DataTableColumn>
+      )}
       <DataTableColumn
         key="assigned_dev"
         label={
