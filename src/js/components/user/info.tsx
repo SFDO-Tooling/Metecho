@@ -18,7 +18,7 @@ import {
   useIsMounted,
 } from '~js/components/utils';
 import { ThunkDispatch } from '~js/store';
-import { disconnect, refreshDevHubStatus } from '~js/store/user/actions';
+import { disconnect, refreshUser } from '~js/store/user/actions';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
 
@@ -84,7 +84,7 @@ const UserInfo = ({
   }, [dispatch, isMounted, onDisconnect]);
   const doRefreshDevHubStatus = useCallback(() => {
     setIsRefreshing(true);
-    dispatch(refreshDevHubStatus()).finally(() => {
+    dispatch(refreshUser()).finally(() => {
       /* istanbul ignore else */
       if (isMounted.current) {
         setIsRefreshing(false);

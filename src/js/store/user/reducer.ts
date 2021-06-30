@@ -44,7 +44,7 @@ const reducer = (
   switch (action.type) {
     case 'USER_LOGGED_IN':
     case 'USER_DISCONNECT_SUCCEEDED':
-    case 'DEV_HUB_STATUS_SUCCEEDED':
+    case 'USER_REFRESH_SUCCEEDED':
     case 'AGREE_TO_TERMS_SUCCEEDED':
     case 'ONBOARDING_SUCCEEDED':
     case 'TOUR_UPDATE_SUCCEEDED':
