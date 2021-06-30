@@ -3,9 +3,12 @@ import React, { ComponentProps } from 'react';
 
 import EpicProgressComponent from '~js/components/epics/progress';
 
+import { withRedux } from '../../decorators';
+
 export default {
   title: 'Epics/Progress/Example',
   component: EpicProgressComponent,
+  decorators: [withRedux()]
 };
 
 const Template: Story<ComponentProps<typeof EpicProgressComponent>> = (
