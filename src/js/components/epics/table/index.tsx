@@ -42,6 +42,7 @@ const EpicTable = ({
           <>
             {i18n.t('Epic')}
             <TourPopover
+              id="tour-epic-name-column"
               align="top left"
               heading={i18n.t('Epic names')}
               body={
@@ -68,6 +69,7 @@ const EpicTable = ({
           <>
             {i18n.t('Status')}
             <TourPopover
+              id="tour-epic-status-column"
               align="top"
               heading={i18n.t('Epic statuses')}
               body={
@@ -102,6 +104,7 @@ const EpicTable = ({
               title={i18n.t('Collaborators')}
             />
             <TourPopover
+              id="tour-epic-collaborators-column"
               align="top"
               heading={i18n.t('Epic Collaborators')}
               body={

@@ -97,6 +97,7 @@ const TaskOrgCard = ({
       orgHeading = i18n.t('Test Org');
       popover = (
         <TourPopover
+          id="tour-task-test-org"
           align="top left"
           heading={i18n.t('Tester & Test Org')}
           body={
@@ -120,6 +121,7 @@ const TaskOrgCard = ({
       orgHeading = i18n.t('Dev Org');
       popover = (
         <TourPopover
+          id="tour-task-dev-org"
           align="top left"
           heading={i18n.t('Developer & Dev Org')}
           body={
