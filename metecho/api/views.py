@@ -220,8 +220,8 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
 
     @action(detail=True, methods=["POST"])
     def refresh_github_users(self, request, pk=None):
-        instance = self.get_object()
-        instance.queue_populate_github_users(originating_user_id=str(request.user.id))
+        project = self.get_object()
+        project.queue_refresh_github_users(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @action(detail=True, methods=["POST"])

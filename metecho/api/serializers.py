@@ -161,12 +161,14 @@ class ProjectSerializer(serializers.ModelSerializer):
             "repo_image_url",
             "org_config_names",
             "currently_fetching_org_config_names",
+            "currently_fetching_github_users",
             "latest_sha",
             "currently_fetching_issues",
         )
         extra_kwargs = {
             "org_config_names": {"read_only": True},
             "currently_fetching_org_config_names": {"read_only": True},
+            "currently_fetching_github_users": {"read_only": True},
             "latest_sha": {"read_only": True},
             "currently_fetching_issues": {"read_only": True},
         }

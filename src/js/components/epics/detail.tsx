@@ -565,9 +565,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                     isOpen={assignUsersModalOpen}
                     onRequestClose={closeAssignUsersModal}
                     setUsers={setEpicUsers}
-                    isRefreshing={Boolean(
-                      project.currently_refreshing_gh_users,
-                    )}
+                    isRefreshing={project.currently_fetching_github_users}
                     projectId={project.id}
                   />
                 </>
@@ -739,9 +737,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   epicUsers={epicCollaborators}
                   githubUsers={project.github_users}
                   canAssign={project.has_push_permission}
-                  isRefreshingUsers={Boolean(
-                    project.currently_refreshing_gh_users,
-                  )}
+                  isRefreshingUsers={project.currently_fetching_github_users}
                   assignUserAction={assignUser}
                 />
               </>
