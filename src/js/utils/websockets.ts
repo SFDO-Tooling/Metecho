@@ -29,6 +29,7 @@ import { MinimalOrg, Org } from '~js/store/orgs/reducer';
 import {
   projectError,
   projectsRefreshed,
+  projectsRefreshError,
   updateProject,
 } from '~js/store/projects/actions';
 import { Project } from '~js/store/projects/reducer';
@@ -70,6 +71,12 @@ interface ErrorEvent {
 }
 interface ReposRefreshedEvent {
   type: 'USER_REPOS_REFRESH';
+}
+interface ReposRefreshErrorEvent {
+  type: 'USER_REPOS_ERROR';
+  payload: {
+    message?: string;
+  };
 }
 interface ProjectUpdatedEvent {
   type: 'PROJECT_UPDATE';
@@ -304,7 +311,8 @@ type EventType =
   | SubscriptionEvent
   | ModelEvent
   | ErrorEvent
-  | ReposRefreshedEvent;
+  | ReposRefreshedEvent
+  | ReposRefreshErrorEvent;
 
 const isSubscriptionEvent = (event: EventType): event is SubscriptionEvent =>
   (event as ModelEvent).type === undefined;
@@ -318,6 +326,8 @@ export const getAction = (event: EventType) => {
   switch (event.type) {
     case 'USER_REPOS_REFRESH':
       return projectsRefreshed();
+    case 'USER_REPOS_ERROR':
+      return projectsRefreshError(event.payload.message);
     case 'PROJECT_UPDATE':
       return hasModel(event) && updateProject(event.payload.model);
     case 'PROJECT_UPDATE_ERROR':

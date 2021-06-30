@@ -57,6 +57,7 @@ Retrieve
             }
           ],
           "currently_fetching_org_config_names": false,
+          "currently_fetching_github_users": false,
           "latest_sha": "12345abc"
         }
         ...

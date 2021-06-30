@@ -59,16 +59,14 @@ class TestCurrentUserViewSet:
         assert response.json()["username"] == client.user.username
 
     def test_refresh(self, client, mocker):
-        gh_given_user = mocker.patch("metecho.api.gh.gh_given_user")
-        repo = MagicMock()
-        repo.url = "test"
-        gh = MagicMock()
-        gh.repositories.return_value = [repo]
-        gh_given_user.return_value = gh
-
+        refresh_github_repositories_for_user_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_repositories_for_user_job"
+        )
         response = client.post(reverse("current-user-refresh"))
-
+        client.user.refresh_from_db()
         assert response.status_code == 202
+        assert refresh_github_repositories_for_user_job.delay.called
+        assert client.user.currently_fetching_repos
 
 
 @pytest.mark.django_db
@@ -92,19 +90,22 @@ class TestProjectViewset:
             assert available_org_config_names_job.delay.called
 
     def test_refresh_github_users(
-        self, client, project_factory, git_hub_repository_factory
+        self, client, mocker, project_factory, git_hub_repository_factory
     ):
         git_hub_repository_factory(user=client.user, repo_id=123)
         project = project_factory(repo_id=123)
-        with patch(
-            "metecho.api.jobs.populate_github_users_job"
-        ) as populate_github_users_job:
-            response = client.post(
-                reverse("project-refresh-github-users", kwargs={"pk": str(project.pk)})
-            )
+        refresh_github_users_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_users_job"
+        )
 
-            assert response.status_code == 202
-            assert populate_github_users_job.delay.called
+        response = client.post(
+            reverse("project-refresh-github-users", kwargs={"pk": str(project.pk)})
+        )
+
+        project.refresh_from_db()
+        assert response.status_code == 202
+        assert project.currently_fetching_github_users
+        assert refresh_github_users_job.delay.called
 
     def test_feature_branches(
         self, client, project_factory, git_hub_repository_factory
@@ -163,6 +164,7 @@ class TestProjectViewset:
                     "repo_image_url": "",
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
+                    "currently_fetching_github_users": False,
                     "latest_sha": "abcd1234",
                 }
             ],
@@ -206,6 +208,7 @@ class TestProjectViewset:
                     "repo_image_url": "",
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
+                    "currently_fetching_github_users": False,
                     "latest_sha": "abcd1234",
                 }
             ],

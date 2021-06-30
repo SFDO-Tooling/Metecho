@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django import forms
+from django.urls import reverse
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from github3.exceptions import NotFoundError
@@ -86,6 +87,36 @@ class TestProjectForm:
                     "Does the Metecho app need to be installed for this repository?"
                 ],
             }
+
+
+@pytest.mark.django_db
+class TestProjectAdmin:
+    @pytest.mark.parametrize(
+        "repo_image_url, should_fetch",
+        (
+            ("", True),
+            ("https://example.com", False),
+        ),
+    )
+    def test_save(self, admin_client, mocker, repo_image_url, should_fetch):
+        mocker.patch("metecho.api.admin.gh")
+        get_social_image_job = mocker.patch("metecho.api.jobs.get_social_image_job")
+
+        admin_client.post(
+            reverse("admin:api_project_add"),
+            data={
+                "repo_image_url": repo_image_url,
+                "repo_owner": "gh-user",
+                "repo_name": "gh-repo",
+                "name": "Project 1",
+                "github_users": "[]",
+                "org_config_names": "[]",
+                "branch_name": "main",
+                "latest_sha": "abc123",
+            },
+        )
+
+        assert get_social_image_job.delay.called == should_fetch
 
 
 def test_json_widget():

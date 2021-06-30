@@ -84,6 +84,7 @@ const SelectFlowType = ({
           iconName="refresh"
           className="slds-m-left_xx-small"
           onClick={doRefreshOrgConfigs}
+          disabled={isLoading}
         />
       </legend>
       <div className="slds-form-element__control">

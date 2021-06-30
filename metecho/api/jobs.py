@@ -20,6 +20,7 @@ from github3.github import GitHub
 
 from .email_utils import get_user_facing_url
 from .gh import (
+    get_all_org_repos,
     get_cached_user,
     get_cumulus_prefix,
     get_project_config,
@@ -581,7 +582,30 @@ delete_scratch_org_job = job(delete_scratch_org)
 
 
 def refresh_github_repositories_for_user(user):
-    user.refresh_repositories()
+    from .models import GitHubRepository
+
+    try:
+        repos = get_all_org_repos(user)
+        with transaction.atomic():
+            GitHubRepository.objects.filter(user=user).delete()
+            GitHubRepository.objects.bulk_create(
+                [
+                    GitHubRepository(
+                        user=user,
+                        repo_id=repo.id,
+                        repo_url=repo.html_url,
+                        permissions=repo.permissions,
+                    )
+                    for repo in repos
+                ]
+            )
+    except Exception as e:
+        user.finalize_refresh_repositories(error=e)
+        tb = traceback.format_exc()
+        logger.error(tb)
+        raise
+    else:
+        user.finalize_refresh_repositories()
 
 
 refresh_github_repositories_for_user_job = job(refresh_github_repositories_for_user)
@@ -652,12 +676,12 @@ def refresh_commits(*, project, branch_name, originating_user_id):
 refresh_commits_job = job(refresh_commits)
 
 
-def populate_github_users(project, *, originating_user_id):
+def refresh_github_users(project, *, originating_user_id):
     try:
+        project.refresh_from_db()
         repo = get_repo_info(
             None, repo_owner=project.repo_owner, repo_name=project.repo_name
         )
-        project.refresh_from_db()
         project.github_users = list(
             sorted(
                 [
@@ -687,17 +711,17 @@ def populate_github_users(project, *, originating_user_id):
         project.github_users = expanded_users
 
     except Exception as e:
-        project.finalize_populate_github_users(
+        project.finalize_refresh_github_users(
             error=e, originating_user_id=originating_user_id
         )
         tb = traceback.format_exc()
         logger.error(tb)
         raise
     else:
-        project.finalize_populate_github_users(originating_user_id=originating_user_id)
+        project.finalize_refresh_github_users(originating_user_id=originating_user_id)
 
 
-populate_github_users_job = job(populate_github_users)
+refresh_github_users_job = job(refresh_github_users)
 
 
 def submit_review(*, user, task, data, originating_user_id):
