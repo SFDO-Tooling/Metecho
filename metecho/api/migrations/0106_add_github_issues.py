@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api", "0103_alter_task_status"),
+        ("api", "0105_alter_project_branch_name"),
     ]
 
     operations = [
