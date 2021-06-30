@@ -179,8 +179,6 @@ jobs:
           command: |
             yarn run deploy-storybook -- --ci --branch=main --out=./storybook-static
 
-
-
 workflows:
   version: 2
   build-and-test:
@@ -203,12 +201,10 @@ workflows:
             - test-client
             - test-python
 
-workflows:
-  version: 2
   deploy-storybook:
     jobs:
-     - build
-     - deploy-storybook:
+      - build
+      - deploy-storybook:
           requires:
             - build
           filters:
