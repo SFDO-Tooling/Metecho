@@ -177,6 +177,7 @@ const ProjectDetail = (
         title={project.name}
         titlePopover={
           <TourPopover
+            id="tour-project-name"
             align="bottom left"
             heading={i18n.t('Project name & GitHub link')}
             body={
@@ -203,6 +204,7 @@ const ProjectDetail = (
           >
             <div className="slds-is-relative heading">
               <TourPopover
+                id="tour-project-scratch-org"
                 align="top"
                 heading={i18n.t('View & play with a Project')}
                 body={
@@ -267,6 +269,7 @@ const ProjectDetail = (
           <>
             <div className="slds-is-relative heading">
               <TourPopover
+                id="tour-project-epics-list"
                 align="top left"
                 heading={i18n.t('List of Epics')}
                 body={
@@ -315,6 +318,7 @@ const ProjectDetail = (
                   className="tour-create-epic"
                 />
                 <TourPopover
+                  id="tour-project-create-epic"
                   align="top left"
                   body={
                     <Trans i18nKey="tourCreateEpic">
