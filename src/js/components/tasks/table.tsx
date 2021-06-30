@@ -57,7 +57,6 @@ interface Props {
   canAssign: boolean;
   isRefreshingUsers: boolean;
   assignUserAction: AssignUserAction;
-  children?: any;
   viewEpicsColumn?: boolean;
 }
 
@@ -70,18 +69,17 @@ const NameTableCell = ({
   ...props
 }: TableCellProps & {
   projectSlug: string;
+  epicSlug?: string;
 }) => (
-  <DataTableCell
-    {...props}
-    className={classNames(className, 'epic-task-name', 'truncated-cell')}
-  >
-    {projectSlug && epicSlug && item && (
-      <Link to={routes.task_detail(projectSlug, epicSlug, item.slug)}>
-        {children}
-      </Link>
-    )}
-    {!epicSlug && projectSlug && item && (
-      <Link to={routes.task_detail(projectSlug, item.epic.slug, item.slug)}>
+  <DataTableCell {...props} className={classNames(className, 'truncated-cell')}>
+    {projectSlug && item && (epicSlug || item.epic?.slug) && (
+      <Link
+        to={routes.task_detail(
+          projectSlug,
+          epicSlug || item.epic?.slug,
+          item.slug,
+        )}
+      >
         {children}
       </Link>
     )}
@@ -90,17 +88,17 @@ const NameTableCell = ({
 NameTableCell.displayName = DataTableCell.displayName;
 
 const EpicTableCell = ({
+  projectSlug,
   item,
   className,
-  projectSlug,
   ...props
 }: TableCellProps & {
   projectSlug: string;
 }) =>
-  item && projectSlug ? (
+  item?.epic?.slug && item?.epic?.name && projectSlug ? (
     <DataTableCell
       {...props}
-      className={classNames(className, 'epic-task-name', 'truncated-cell')}
+      className={classNames(className, 'truncated-cell')}
     >
       <Link to={routes.epic_detail(projectSlug, item.epic.slug)}>
         {item.epic.name}
@@ -162,7 +160,7 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     <DataTableCell
       {...props}
       title={displayStatus || status}
-      className={classNames(className, 'epic-task-status', 'status-cell')}
+      className={classNames(className, 'status-cell')}
     >
       {icon}
       <span className="slds-m-left_x-small status-cell-text">
@@ -292,11 +290,7 @@ const AssigneeTableCell = ({
     );
   }
   return (
-    <DataTableCell
-      {...props}
-      title={title}
-      className={classNames(className, 'epic-task-assignee')}
-    >
+    <DataTableCell {...props} title={title} className={className}>
       {contents}
     </DataTableCell>
   );
@@ -348,7 +342,7 @@ const TaskTable = ({
           </>
         }
         property="name"
-        width="65%"
+        width={viewEpicsColumn ? '40%' : '60%'}
         primaryColumn
       >
         <NameTableCell projectSlug={projectSlug} epicSlug={epicSlug} />
@@ -386,7 +380,22 @@ const TaskTable = ({
       {viewEpicsColumn && (
         <DataTableColumn
           key="epic"
-          label={<>{i18n.t('Epic')}</>}
+          label={
+            <>
+              {i18n.t('Epic')}
+              <TourPopover
+                id="tour-task-epic-name-column"
+                align="top left"
+                heading={i18n.t('Epic names')}
+                body={
+                  <Trans i18nKey="tourTaskEpicNameColumn">
+                    Tasks can be grouped together in an Epic. Select the Epic
+                    name to view the Task in the context of its group.
+                  </Trans>
+                }
+              />
+            </>
+          }
           property="epic"
           width="20%"
         >
@@ -415,7 +424,7 @@ const TaskTable = ({
           </>
         }
         property="assigned_dev"
-        width="15%"
+        width="10%"
       >
         <AssigneeTableCell
           type={ORG_TYPES.DEV}
@@ -449,7 +458,7 @@ const TaskTable = ({
           </>
         }
         property="assigned_qa"
-        width="15%"
+        width="10%"
       >
         <AssigneeTableCell
           type={ORG_TYPES.QA}
