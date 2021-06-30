@@ -98,6 +98,30 @@ describe('projectsRefreshed', () => {
   });
 });
 
+describe('projectsRefreshError', () => {
+  test('dispatches REFRESH_PROJECTS_ERROR action', async () => {
+    const store = storeWithThunk({});
+    const event = { type: 'REFRESH_PROJECTS_ERROR' };
+
+    expect.assertions(5);
+    try {
+      await store.dispatch(actions.projectsRefreshError('error msg'));
+    } catch (error) {
+      // ignore errors
+    } finally {
+      const allActions = store.getActions();
+
+      expect(allActions[0].type).toEqual('TOAST_ADDED');
+      expect(allActions[0].payload.heading).toMatch(
+        'Uh oh. There was an error re-syncing Projects.',
+      );
+      expect(allActions[0].payload.details).toEqual('error msg');
+      expect(allActions[0].payload.variant).toEqual('error');
+      expect(allActions[1]).toEqual(event);
+    }
+  });
+});
+
 describe('refreshGitHubUsers', () => {
   const projectId = 'project-id';
   let url;

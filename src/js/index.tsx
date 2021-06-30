@@ -41,12 +41,15 @@ import initializeI18n from '~js/i18n';
 import reducer, { ThunkDispatch } from '~js/store';
 import { fetchObjects } from '~js/store/actions';
 import { clearErrors } from '~js/store/errors/actions';
-import { projectsRefreshing } from '~js/store/projects/actions';
-import { selectProjects } from '~js/store/projects/selectors';
+import {
+  projectsRefreshed,
+  projectsRefreshing,
+} from '~js/store/projects/actions';
 import { clearToasts } from '~js/store/toasts/actions';
 import { login, refetchAllData } from '~js/store/user/actions';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
+import apiFetch from '~js/utils/api';
 import { OBJECT_TYPES } from '~js/utils/constants';
 import { log, logError } from '~js/utils/logging';
 import routes, { routePatterns } from '~js/utils/routes';
@@ -201,13 +204,45 @@ initializeI18n((i18nError?: string) => {
       (appStore.dispatch as ThunkDispatch)(
         fetchObjects({ objectType: OBJECT_TYPES.PROJECT, reset: true }),
       ).finally(() => {
-        const state = appStore.getState();
-        const projects = selectProjects(state);
-        const user = selectUserState(state);
-        // If user has no projects and is currently fetching projects, update state
-        // to show spinner instead of empty projects-list.
-        if (user?.currently_fetching_repos && !projects.length) {
+        let user = selectUserState(appStore.getState());
+        // If user is currently fetching projects,
+        // update state to show loading spinner.
+        if (user?.currently_fetching_repos) {
           appStore.dispatch(projectsRefreshing());
+          // Because the refetch-projects job may complete before the
+          // websocket channel subscription is finalized, poll every second
+          // to check if job has finished:
+          const POLLING_LIMIT = 10;
+          let count = 0;
+          const checkIfJobIsComplete = () => {
+            window.setTimeout(() => {
+              user = selectUserState(appStore.getState());
+              if (user?.currently_fetching_repos) {
+                // Stop polling after 10 seconds
+                if (count >= POLLING_LIMIT) {
+                  (appStore.dispatch as ThunkDispatch)(projectsRefreshed());
+                  return;
+                }
+                count = count + 1;
+                apiFetch({
+                  url: window.api_urls.current_user_detail(),
+                }).then((payload: User | null) => {
+                  user = selectUserState(appStore.getState());
+                  if (!user?.currently_fetching_repos) {
+                    // If the user is no longer fetching, the job has completed
+                    // and a websocket message was already received.
+                    return;
+                  }
+                  if (payload?.currently_fetching_repos) {
+                    checkIfJobIsComplete();
+                  } else {
+                    (appStore.dispatch as ThunkDispatch)(projectsRefreshed());
+                  }
+                });
+              }
+            }, 1000);
+          };
+          checkIfJobIsComplete();
         }
         renderApp();
       });

@@ -26,6 +26,7 @@ import {
 import {
   projectError,
   projectsRefreshed,
+  projectsRefreshError,
   updateProject,
 } from '~js/store/projects/actions';
 import { connectSocket, disconnectSocket } from '~js/store/socket/actions';
@@ -65,6 +66,7 @@ const actions = {
   removeObject,
   projectError,
   projectsRefreshed,
+  projectsRefreshError,
   submitReview,
   submitReviewFailed,
   updateFailed,
@@ -146,6 +148,15 @@ describe('getAction', () => {
       sockets.getAction(event);
 
       expect(projectsRefreshed).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('USER_REPOS_ERROR', () => {
+    test('calls projectsRefreshError', () => {
+      const event = { type: 'USER_REPOS_ERROR', payload: { message: 'foo' } };
+      sockets.getAction(event);
+
+      expect(projectsRefreshError).toHaveBeenCalledWith('foo');
     });
   });
 
