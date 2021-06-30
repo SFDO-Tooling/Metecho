@@ -212,10 +212,18 @@ initializeI18n((i18nError?: string) => {
           // Because the refetch-projects job may complete before the
           // websocket channel subscription is finalized, poll every second
           // to check if job has finished:
+          const POLLING_LIMIT = 10;
+          let count = 0;
           const checkIfJobIsComplete = () => {
             window.setTimeout(() => {
               user = selectUserState(appStore.getState());
               if (user?.currently_fetching_repos) {
+                // Stop polling after 10 seconds
+                if (count >= POLLING_LIMIT) {
+                  (appStore.dispatch as ThunkDispatch)(projectsRefreshed());
+                  return;
+                }
+                count = count + 1;
                 apiFetch({
                   url: window.api_urls.current_user_detail(),
                 }).then((payload: User | null) => {
