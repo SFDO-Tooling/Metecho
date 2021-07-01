@@ -176,7 +176,7 @@ jobs:
           at: .
       - add_ssh_keys:
           fingerprints:
-            - '${GH_TOKEN_FINGERPRINT}'
+            - ${GH_TOKEN_FINGERPRINT}
       - run:
           name: Deploy Storybook
           command: |
