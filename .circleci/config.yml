@@ -174,9 +174,15 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
+      - add_ssh_keys:
+          fingerprints:
+            - '${GH_TOKEN_FINGERPRINT}'
       - run:
           name: Deploy Storybook
-          command: yarn deploy-storybook --ci
+          command: |
+            if [ -n "${GH_TOKEN_FINGERPRINT}" ]; then
+              yarn deploy-storybook --ci
+            fi
 
 workflows:
   version: 2
@@ -200,7 +206,7 @@ workflows:
             - build
           filters:
             branches:
-              only: main
+              only: test-storybook-ci
       - report-test-coverage:
           requires:
             - test-client
