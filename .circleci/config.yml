@@ -174,9 +174,15 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
+      - add_ssh_keys:
+          fingerprints:
+            - 'd6:e7:86:ee:3d:de:12:95:d9:59:63:90:55:4f:da:79'
       - run:
           name: Deploy Storybook
-          command: yarn deploy-storybook --ci
+          command: |
+            if [ -n "${DEPLOY_STORYBOOK}" ]; then
+              yarn deploy-storybook --ci
+            fi
 
 workflows:
   version: 2
