@@ -8,7 +8,7 @@ import { withRedux } from '../../decorators';
 export default {
   title: 'Epics/Progress/Example',
   component: EpicProgressComponent,
-  decorators: [withRedux()]
+  decorators: [withRedux()],
 };
 
 const Template: Story<ComponentProps<typeof EpicProgressComponent>> = (
