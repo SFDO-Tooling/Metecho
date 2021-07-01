@@ -47,10 +47,8 @@
     "storybook": "start-storybook -p 6006 --ci",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
-    "deploy-storybook": "storybook-to-ghpages -d storybook-static",
-    "build-storybook": "build-storybook",
-    "heroku-postbuild": "yarn prod",
-    "predeploy": "yarn build-storybook"
+    "deploy-storybook": "storybook-to-ghpages --out=storybook-static --source-branch=main --branch=storybook",
+    "heroku-postbuild": "yarn prod"
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.15.8",

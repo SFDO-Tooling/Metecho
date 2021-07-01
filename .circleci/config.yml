@@ -176,8 +176,7 @@ jobs:
           at: .
       - run:
           name: Deploy Storybook
-          command: |
-            yarn run deploy-storybook -- --ci --branch=main --out=./storybook-static
+          command: yarn deploy-storybook --ci
 
 workflows:
   version: 2
@@ -196,18 +195,13 @@ workflows:
       - build-docs:
           requires:
             - build
-      - report-test-coverage:
-          requires:
-            - test-client
-            - test-python
-
-  deploy-storybook:
-    jobs:
-      - build
       - deploy-storybook:
           requires:
             - build
           filters:
             branches:
-              only:
-                - main
+              only: main
+      - report-test-coverage:
+          requires:
+            - test-client
+            - test-python
