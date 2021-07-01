@@ -47,11 +47,13 @@
     "storybook": "start-storybook -p 6006 --ci",
     "build": "webpack --config webpack.dev.js",
     "prod": "webpack --config webpack.prod.js",
+    "deploy-storybook": "storybook-to-ghpages --out=storybook-static --source-branch=main --branch=storybook",
     "heroku-postbuild": "yarn prod"
   },
   "dependencies": {
     "@salesforce-ux/design-system": "2.15.8",
     "@salesforce/design-system-react": "0.10.35",
+    "@storybook/storybook-deployer": "^2.8.10",
     "@sentry/browser": "^6.8.0",
     "classnames": "^2.3.1",
     "date-fns": "^2.22.1",
@@ -162,5 +164,10 @@
   },
   "resolutions": {
     "browserslist": "^4.16.5"
+  },
+  "storybook-deployer": {
+    "gitUsername": "Storybook Deployer Bot",
+    "gitEmail": "dev-ops@oddbird.net",
+    "commitMessage": "Deploy Storybook [skip ci]"
   }
 }
