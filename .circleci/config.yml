@@ -206,7 +206,7 @@ workflows:
             - build
           filters:
             branches:
-              only: test-storybook-ci
+              only: main
       - report-test-coverage:
           requires:
             - test-client
