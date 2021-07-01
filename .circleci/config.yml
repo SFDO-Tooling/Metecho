@@ -176,11 +176,11 @@ jobs:
           at: .
       - add_ssh_keys:
           fingerprints:
-            - ${GH_TOKEN_FINGERPRINT}
+            - 'd6:e7:86:ee:3d:de:12:95:d9:59:63:90:55:4f:da:79'
       - run:
           name: Deploy Storybook
           command: |
-            if [ -n "${GH_TOKEN_FINGERPRINT}" ]; then
+            if [ -n "${DEPLOY_STORYBOOK}" ]; then
               yarn deploy-storybook --ci
             fi
 
