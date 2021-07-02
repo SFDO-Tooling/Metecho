@@ -1,10 +1,12 @@
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
 import ProjectDetail from '~js/components/projects/detail';
 import { createObject, fetchObject, fetchObjects } from '~js/store/actions';
 import { onboarded } from '~js/store/user/actions';
+import { addUrlParams } from '~js/utils/api';
 import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
@@ -166,13 +168,22 @@ describe('<ProjectDetail />', () => {
     };
   };
 
+  beforeEach(() => {
+    // @@@ Once the API call to fetch tasks is deferred until the "Tasks" tab is
+    // selected, this can be removed and selectively mocked out for a group of
+    // tests that specifically trigger the "Tasks" tab.
+    const url = addUrlParams(window.api_urls.task_list(), {
+      project: 'p1',
+    });
+    fetchMock.getOnce(url, []);
+  });
+
   test('renders project detail and epics list', () => {
     const { getByText, getAllByTitle } = setup();
 
     expect(getAllByTitle('Project 1')[0]).toBeVisible();
     expect(getByText('This is a test project.')).toBeVisible();
     expect(getByText('Epic 1')).toBeVisible();
-    expect(getByText('Epics for Project 1')).toBeVisible();
   });
 
   test('renders readonly project detail', () => {
@@ -199,29 +210,9 @@ describe('<ProjectDetail />', () => {
       },
     });
 
-    expect(getByText('Epics for Project 1')).toBeVisible();
     expect(
       getByText('There are no Epics for this Project.', { exact: false }),
     ).toBeVisible();
-  });
-
-  test('renders different title if no epics', () => {
-    const { getByText, queryByText } = setup({
-      initialState: {
-        ...defaultState,
-        epics: {
-          p1: {
-            epics: [],
-            next: null,
-            notFound: [],
-            fetched: true,
-          },
-        },
-      },
-    });
-
-    expect(getByText('Create an Epic for Project 1')).toBeVisible();
-    expect(queryByText('Epics for Project 1')).toBeNull();
   });
 
   describe('project not found', () => {
@@ -291,7 +282,7 @@ describe('<ProjectDetail />', () => {
 
   describe('epics have not been fetched', () => {
     test('fetches epics from API', () => {
-      const { queryByText } = setup({
+      setup({
         initialState: {
           ...defaultState,
           epics: {
@@ -305,7 +296,6 @@ describe('<ProjectDetail />', () => {
         },
       });
 
-      expect(queryByText('Epics for Project 1')).toBeNull();
       expect(fetchObjects).toHaveBeenCalledWith({
         filters: { project: 'p1' },
         objectType: 'epic',
