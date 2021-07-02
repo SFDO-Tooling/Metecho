@@ -9,7 +9,8 @@ import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '~js/utils/constants';
 // "Assign user to task" modal related:
 export default () => {
   const dispatch = useDispatch<ThunkDispatch>();
-  useCallback(
+
+  return useCallback(
     ({
       task,
       type,
@@ -26,7 +27,7 @@ export default () => {
       const alertType =
         type === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
 
-      dispatch(
+      return dispatch(
         updateObject({
           objectType: OBJECT_TYPES.TASK,
           url: window.api_urls.task_assignees(task.id),

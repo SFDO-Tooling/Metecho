@@ -9,6 +9,7 @@ import { addUrlParams } from '~js/utils/api';
 export default (projectId?: string) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const [tasks, setTasks] = useState<Task[]>();
+
   useEffect(() => {
     const fetchTasks = async () => {
       if (projectId && !tasks) {
@@ -17,7 +18,6 @@ export default (projectId?: string) => {
           url: addUrlParams(window.api_urls.task_list(), {
             project: projectId,
           }),
-          // This isn't strictly needed, but allows any API errors to be displayed in a global message
           dispatch,
         });
         setTasks(response || []);
@@ -25,5 +25,19 @@ export default (projectId?: string) => {
     };
     fetchTasks();
   }, [dispatch, projectId, tasks]);
-  return tasks;
+
+  // Allow for manually updating Tasks in State...
+  // @@@ Ideally these should be moved to the Redux store?
+  const updateTask = (task: Task) => {
+    if (tasks) {
+      const existingTask = tasks.find((t) => t.id === task.id);
+      if (existingTask) {
+        setTasks(tasks.map((t) => (t.id === task.id ? task : t)));
+      } else {
+        setTasks([task, ...tasks]);
+      }
+    }
+  };
+
+  return { tasks, updateTask };
 };

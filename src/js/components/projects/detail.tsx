@@ -28,11 +28,10 @@ import {
   useFetchProjectIfMissing,
   useIsMounted,
 } from '~js/components/utils';
-import assignUser from '~js/components/utils/useAssignUserToTask';
+import useAssignUserToTask from '~js/components/utils/useAssignUserToTask';
 import useFetchTasksByProject from '~js/components/utils/useFetchTasksByProject';
 import { ThunkDispatch } from '~js/store';
 import { fetchObjects } from '~js/store/actions';
-import { Task } from '~js/store/tasks/reducer';
 import { onboarded } from '~js/store/user/actions';
 import { User } from '~js/store/user/reducer';
 import { selectUserState } from '~js/store/user/selectors';
@@ -64,7 +63,8 @@ const ProjectDetail = (
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
   const { orgs } = useFetchOrgsIfMissing({ project, props });
-  const tasks = useFetchTasksByProject(project?.id);
+  const { tasks, updateTask } = useFetchTasksByProject(project?.id);
+  const assignUser = useAssignUserToTask();
   const playgroundOrg = (orgs || [])[0];
 
   // Auto-start the tour/walkthrough if `SHOW_WALKTHROUGH` param is truthy
@@ -109,6 +109,20 @@ const ProjectDetail = (
       });
     }
   }, [dispatch, epics?.next, isMounted, project?.id]);
+
+  // Manually update the Task in State after it changes.
+  // @@@ Ideally this should be moved to the Redux store?
+  const doAssignUser = useCallback(
+    async (args: any) => {
+      const {
+        payload: { object, objectType },
+      } = await assignUser(args);
+      if (object && objectType === OBJECT_TYPES.TASK) {
+        updateTask(object);
+      }
+    },
+    [assignUser, updateTask],
+  );
 
   // "create epic" modal related
   const openCreateModal = useCallback(() => {
@@ -378,11 +392,11 @@ const ProjectDetail = (
                   <TasksTableComponent
                     projectId={project.id}
                     projectSlug={project.slug}
-                    tasks={tasks as Task[]}
+                    tasks={tasks}
                     githubUsers={project.github_users}
                     canAssign={project.has_push_permission}
                     isRefreshingUsers={project.currently_fetching_github_users}
-                    assignUserAction={assignUser}
+                    assignUserAction={doAssignUser}
                     viewEpicsColumn={true}
                   />
                 ) : (

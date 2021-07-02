@@ -37,7 +37,7 @@ import {
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
 } from '~js/components/utils';
-import assignUser from '~js/components/utils/useAssignUserToTask';
+import useAssignUserToTask from '~js/components/utils/useAssignUserToTask';
 import { ThunkDispatch } from '~js/store';
 import { updateObject } from '~js/store/actions';
 import { Org } from '~js/store/orgs/reducer';
@@ -56,6 +56,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   );
   const { tasks } = useFetchTasksIfMissing(epic, props);
   const { orgs } = useFetchOrgsIfMissing({ epic, props });
+  const assignUser = useAssignUserToTask();
   const currentUser = useSelector(selectUserState) as User;
 
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);

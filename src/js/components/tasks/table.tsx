@@ -318,7 +318,7 @@ const TaskTable = ({
   };
   const taskDefaultSort = sortBy(tasks, [
     (item) => statusOrder[item.status],
-    'name',
+    (item) => item.name.toLowerCase(),
   ]);
   return (
     <DataTable items={taskDefaultSort} id="epic-tasks-table" noRowHover>
