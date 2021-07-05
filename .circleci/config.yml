@@ -166,6 +166,24 @@ jobs:
             cd docs
             make html
 
+  deploy-storybook:
+    working_directory: ~/metecho
+    docker:
+      - image: oddbirds/pyjs:v0.4.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - add_ssh_keys:
+          fingerprints:
+            - 'd6:e7:86:ee:3d:de:12:95:d9:59:63:90:55:4f:da:79'
+      - run:
+          name: Deploy Storybook
+          command: |
+            if [ -n "${DEPLOY_STORYBOOK}" ]; then
+              yarn deploy-storybook --ci
+            fi
+
 workflows:
   version: 2
   build-and-test:
@@ -183,6 +201,12 @@ workflows:
       - build-docs:
           requires:
             - build
+      - deploy-storybook:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main
       - report-test-coverage:
           requires:
             - test-client
