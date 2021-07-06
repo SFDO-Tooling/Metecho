@@ -641,7 +641,12 @@ class Task(
     models.Model,
 ):
     name = StringField()
-    epic = models.ForeignKey(Epic, on_delete=models.PROTECT, related_name="tasks")
+    project = models.ForeignKey(
+        Project, on_delete=models.PROTECT, blank=True, null=True, related_name="tasks"
+    )
+    epic = models.ForeignKey(
+        Epic, on_delete=models.PROTECT, blank=True, null=True, related_name="tasks"
+    )
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
         max_length=100, blank=True, default="", validators=[validate_unicode_branch]
@@ -684,7 +689,7 @@ class Task(
     def save(self, *args, force_epic_save=False, **kwargs):
         ret = super().save(*args, **kwargs)
         # To update the epic's status:
-        if force_epic_save or self.epic.should_update_status():
+        if self.epic and (force_epic_save or self.epic.should_update_status()):
             self.epic.save()
             self.epic.notify_changed(originating_user_id=None)
         return ret

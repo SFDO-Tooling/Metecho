@@ -322,21 +322,40 @@ class TestEpicCollaboratorsSerializer:
 
 @pytest.mark.django_db
 class TestTaskSerializer:
-    def test_create(self, rf, user_factory, epic_factory):
+    @pytest.mark.parametrize(
+        "attach_epic, attach_project, success",
+        (
+            pytest.param(True, False, True, id="Epic only"),
+            pytest.param(False, True, True, id="Project only"),
+            pytest.param(True, True, False, id="Epic and project"),
+            pytest.param(False, False, False, id="Missing epic and project"),
+        ),
+    )
+    def test_create(
+        self,
+        attach_epic,
+        attach_project,
+        success,
+        rf,
+        user_factory,
+        epic_factory,
+        project_factory,
+    ):
         user = user_factory()
-        epic = epic_factory()
         data = {
             "name": "Test Task",
             "description": "Description.",
-            "epic": str(epic.id),
+            "epic": str(epic_factory().id) if attach_epic else None,
+            "project": str(project_factory().id) if attach_project else None,
             "org_config_name": "dev",
         }
         r = rf.get("/")
         r.user = user
         serializer = TaskSerializer(data=data, context={"request": r})
-        assert serializer.is_valid(), serializer.errors
-        serializer.save()
-        assert Task.objects.count() == 1
+        assert serializer.is_valid() == success, serializer.errors
+        if success:
+            serializer.save()
+            assert Task.objects.count() == 1
 
     def test_create__duplicate_name(self, rf, user_factory, task_factory):
         user = user_factory()

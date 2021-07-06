@@ -360,6 +360,14 @@ class TaskSerializer(serializers.ModelSerializer):
         queryset=Epic.objects.all(),
         pk_field=serializers.CharField(),
         serializer=EpicMinimalSerializer,
+        required=False,
+        allow_null=True,
+    )
+    project = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(),
+        pk_field=serializers.CharField(),
+        required=False,
+        allow_null=True,
     )
     branch_url = serializers.SerializerMethodField()
     branch_diff_url = serializers.SerializerMethodField()
@@ -380,6 +388,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "description",
             "description_rendered",
             "epic",
+            "project",
             "slug",
             "old_slugs",
             "has_unmerged_commits",
@@ -464,6 +473,19 @@ class TaskSerializer(serializers.ModelSerializer):
         if repo_owner and repo_name and pr_number:
             return f"https://github.com/{repo_owner}/{repo_name}/pull/{pr_number}"
         return None
+
+    def validate(self, data: dict) -> dict:
+        project = data.get("project", getattr(self.instance, "project", None))
+        epic = data.get("epic", getattr(self.instance, "epic", None))
+        if project and epic:
+            raise serializers.ValidationError(
+                _("Task can be attached to a Project or Epic, but not both")
+            )
+        if not (project or epic):
+            raise serializers.ValidationError(
+                _("Task must be attached to a Project or Epic")
+            )
+        return data
 
     def create(self, validated_data):
         dev_org = validated_data.pop("dev_org", None)
