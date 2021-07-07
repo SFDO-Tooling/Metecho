@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.core.management import call_command
 
-from ....models import Project
+from ....models import Epic, Project, Task
 
 
 @pytest.mark.django_db
@@ -25,3 +25,5 @@ def test_populate_data():
             call_command("populate_data")
 
     assert Project.objects.count() == 7
+    assert Epic.objects.exists()
+    assert Task.objects.exists()

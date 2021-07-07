@@ -100,3 +100,4 @@ class Command(BaseCommand):
 
         for i in range(5):
             self.create_task(name=f"Sample Task {i+1}", epic=epic)
+            self.create_task(name=f"Project-level Task {i +1}", project=metecho)
