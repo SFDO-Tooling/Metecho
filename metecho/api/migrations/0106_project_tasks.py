@@ -49,4 +49,23 @@ class Migration(migrations.Migration):
                 to="api.epic",
             ),
         ),
+        # 4. Add exclusive-or constraint
+        migrations.AddConstraint(
+            model_name="task",
+            constraint=models.CheckConstraint(
+                check=models.Q(
+                    models.Q(
+                        ("project__isnull", False),
+                        ("epic__isnull", False),
+                        _connector="OR",
+                    ),
+                    models.Q(
+                        ("epic__isnull", False),
+                        ("project__isnull", False),
+                        _negated=True,
+                    ),
+                ),
+                name="project_xor_epic",
+            ),
+        ),
     ]

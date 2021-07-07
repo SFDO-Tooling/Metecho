@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, transaction
+from django.db.models.query_utils import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
@@ -640,13 +641,16 @@ class Task(
     SoftDeleteMixin,
     models.Model,
 ):
-    name = StringField()
+    # Current assumption is that a Task will always be attached to at least one of
+    # Project or Epic, but never both
     project = models.ForeignKey(
         Project, on_delete=models.PROTECT, blank=True, null=True, related_name="tasks"
     )
     epic = models.ForeignKey(
         Epic, on_delete=models.PROTECT, blank=True, null=True, related_name="tasks"
     )
+
+    name = StringField()
     description = MarkdownField(blank=True, property_suffix="_markdown")
     branch_name = models.CharField(
         max_length=100, blank=True, default="", validators=[validate_unicode_branch]
@@ -682,6 +686,23 @@ class Task(
 
     slug_class = TaskSlug
     tracker = FieldTracker(fields=["name"])
+
+    class Meta:
+        ordering = ("-created_at", "name")
+
+        # We enforce this in business logic, not in the database, as we
+        # need to limit this constraint only to active Tasks, and
+        # make the name column case-insensitive:
+        # unique_together = (("name", "epic"),)
+
+        constraints = [
+            # Ensure we always have an Epic or Project attached, but not both
+            models.CheckConstraint(
+                check=(Q(project__isnull=False) | Q(epic__isnull=False))
+                & ~Q(project__isnull=False, epic__isnull=False),
+                name="project_xor_epic",
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -896,13 +917,6 @@ class Task(
             )
             if delete_org and deletable_org:
                 org.queue_delete(originating_user_id=originating_user_id)
-
-    class Meta:
-        ordering = ("-created_at", "name")
-        # We enforce this in business logic, not in the database, as we
-        # need to limit this constraint only to active Tasks, and
-        # make the name column case-insensitive:
-        # unique_together = (("name", "epic"),)
 
 
 class ScratchOrg(
