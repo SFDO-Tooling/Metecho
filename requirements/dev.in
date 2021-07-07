@@ -1,5 +1,5 @@
 -c prod.txt
-Sphinx==4.0.2
+Sphinx==4.0.3
 black==21.5b2
 coveralls==3.1.0
 django-extensions==3.1.3
