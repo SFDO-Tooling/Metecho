@@ -80,14 +80,22 @@ class TestPrHookSerializer:
         assert serializer.is_valid(), serializer.errors
         serializer.process_hook()
 
+    @pytest.mark.parametrize(
+        "task_data",
+        (
+            pytest.param(
+                {"epic": None, "project__repo_id": 123}, id="With Project"
+            ),
+            pytest.param(
+                {"epic__project__repo_id": 123, "project": None}, id="With Epic"
+            ),
+        ),
+    )
     def test_process_hook__mark_matching_tasks_as_completed(
-        self, project_factory, task_factory
+        self, task_factory, task_data
     ):
-        project = project_factory(repo_id=123)
         task = task_factory(
-            pr_number=456,
-            epic__project=project,
-            status=TASK_STATUSES["In progress"],
+            **task_data, pr_number=456, status=TASK_STATUSES["In progress"]
         )
         data = {
             "action": "closed",
@@ -107,11 +115,11 @@ class TestPrHookSerializer:
         task.refresh_from_db()
         assert task.status == TASK_STATUSES.Completed
 
-    def test_process_hook__closed_not_merged(self, project_factory, task_factory):
-        project = project_factory(repo_id=123)
+    def test_process_hook__closed_not_merged(self, task_factory):
         task = task_factory(
+            epic=None,
+            project__repo_id=123,
             pr_number=456,
-            epic__project=project,
             status=TASK_STATUSES["In progress"],
         )
         data = {
@@ -133,11 +141,11 @@ class TestPrHookSerializer:
         assert task.status == TASK_STATUSES.Canceled
         assert not task.pr_is_open
 
-    def test_process_hook__reopened(self, project_factory, task_factory):
-        project = project_factory(repo_id=123)
+    def test_process_hook__reopened(self, task_factory):
         task = task_factory(
+            epic=None,
+            project__repo_id=123,
             pr_number=456,
-            epic__project=project,
             status=TASK_STATUSES["In progress"],
         )
         data = {
@@ -268,8 +276,19 @@ class TestPrReviewHookSerializer:
         with pytest.raises(NotFound):
             serializer.process_hook()
 
-    def test_good(self, task_factory):
-        task = task_factory(epic__project__repo_id=123, pr_number=123)
+    @pytest.mark.parametrize(
+        "task_data",
+        (
+            pytest.param(
+                {"epic": None, "project__repo_id": 123}, id="With Project"
+            ),
+            pytest.param(
+                {"epic__project__repo_id": 123, "project": None}, id="With Epic"
+            ),
+        ),
+    )
+    def test_good(self, task_factory, task_data):
+        task = task_factory(**task_data, pr_number=123)
         data = {
             "sender": {"login": "login", "avatar_url": "https://example.com"},
             "repository": {"id": 123},

@@ -833,7 +833,8 @@ class Task(
         self.has_unmerged_commits = False
         self.pr_number = pr_number
         self.pr_is_open = False
-        self.epic.has_unmerged_commits = True
+        if self.epic:
+            self.epic.has_unmerged_commits = True
         # This will save the epic, too:
         self.save(force_epic_save=True)
         self.notify_changed(originating_user_id=originating_user_id)
