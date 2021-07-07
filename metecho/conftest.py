@@ -100,29 +100,9 @@ class TaskFactory(factory.django.DjangoModelFactory):
         model = Task
 
     name = factory.Sequence("Task {}".format)
+    project = factory.SubFactory(ProjectFactory)
+    epic = factory.SubFactory(EpicFactory)
     org_config_name = "dev"
-
-    @factory.post_generation
-    def epic(obj, create, extracted, **kwargs):
-        # Creates an optional Subfactory:
-        # - No epic: task_factory()
-        # - Epic with default factory values: task_factory(epic=True)
-        # - Epic with custom values: task_factory(epic__name="Foo")
-        # - Existing epic instance: task_factory(epic=Epic.objects.get(...))
-        if not (create and extracted or kwargs):
-            return
-        obj.epic = extracted if isinstance(extracted, Epic) else EpicFactory(**kwargs)
-        obj.save()
-
-    @factory.post_generation
-    def project(obj, create, extracted, **kwargs):
-        # Same as `epic()`, but for projects
-        if not (create and extracted or kwargs):
-            return
-        obj.project = (
-            extracted if isinstance(extracted, Project) else ProjectFactory(**kwargs)
-        )
-        obj.save()
 
 
 @register

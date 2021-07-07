@@ -720,7 +720,15 @@ class Task(
 
     def get_absolute_url(self):
         # See src/js/utils/routes.ts
-        return f"/projects/{self.epic.project.slug}/{self.epic.slug}/{self.slug}"
+        if self.epic:
+            return f"/projects/{self.epic.project.slug}/{self.epic.slug}/{self.slug}"
+        return f"/projects/{self.project.slug}/tasks/{self.slug}"
+
+    def get_full_name(self):
+        # Used in emails to fully identify a task by its parents
+        if self.epic:
+            return _('"{}" on {} epic {}').format(self, self.epic.project, self.epic)
+        return _('"{}" on {}').format(self, self.project)
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):
@@ -757,10 +765,14 @@ class Task(
             self.save()
 
     def get_repo_id(self):
-        return self.epic.project.get_repo_id()
+        if self.epic:
+            return self.epic.project.get_repo_id()
+        return self.project.get_repo_id()
 
     def get_base(self):
-        return self.epic.branch_name
+        if self.epic:
+            return self.epic.branch_name
+        return self.project.branch_name
 
     def get_head(self):
         return self.branch_name
@@ -772,19 +784,12 @@ class Task(
         sa = SocialAccount.objects.filter(provider="github", uid=id_).first()
         user = getattr(sa, "user", None)
         if user:
-            task = self
-            epic = task.epic
-            project = epic.project
-            metecho_link = get_user_facing_url(
-                path=["projects", project.slug, epic.slug, task.slug]
-            )
+            metecho_link = get_user_facing_url(path=self.get_absolute_url())
             subject = _("Metecho Task Submitted for Testing")
             body = render_to_string(
                 "pr_created_for_task.txt",
                 {
-                    "task_name": task.name,
-                    "epic_name": epic.name,
-                    "project_name": project.name,
+                    "task_name": self.get_full_name(),
                     "assigned_user_name": user.username,
                     "metecho_link": metecho_link,
                 },

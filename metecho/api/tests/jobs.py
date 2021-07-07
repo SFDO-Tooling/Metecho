@@ -237,14 +237,16 @@ class TestCreateBranchesOnGitHub:
 @pytest.mark.django_db
 class TestAlertUserAboutExpiringOrg:
     def test_soft_deleted_model(self, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(task__epic=None)
         scratch_org.delete()
         with patch("metecho.api.models.send_mail") as send_mail:
             assert alert_user_about_expiring_org(org=scratch_org, days=3) is None
             assert not send_mail.called
 
     def test_good(self, scratch_org_factory):
-        scratch_org = scratch_org_factory(unsaved_changes={"something": 1})
+        scratch_org = scratch_org_factory(
+            task__epic=None, unsaved_changes={"something": 1}
+        )
         with ExitStack() as stack:
             send_mail = stack.enter_context(patch("metecho.api.models.send_mail"))
             get_unsaved_changes = stack.enter_context(
@@ -334,7 +336,7 @@ def test_create_org_and_run_flow__fall_back_to_cases():
 @pytest.mark.django_db
 def test_get_unsaved_changes(scratch_org_factory):
     scratch_org = scratch_org_factory(
-        latest_revision_numbers={"TypeOne": {"NameOne": 10}}
+        latest_revision_numbers={"TypeOne": {"NameOne": 10}}, task__epic=None
     )
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
@@ -396,7 +398,7 @@ def test_create_branches_on_github_then_create_scratch_org():
 @pytest.mark.django_db
 class TestRefreshScratchOrg:
     def test_refresh_scratch_org(self, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(task__epic=None)
         with ExitStack() as stack:
             delete_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
             stack.enter_context(patch(f"{PATCH_ROOT}.local_github_checkout"))
@@ -409,7 +411,7 @@ class TestRefreshScratchOrg:
             assert _create_org_and_run_flow.called
 
     def test_refresh_scratch_org__error(self, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(task__epic=None)
         with ExitStack() as stack:
             delete_org = stack.enter_context(patch(f"{PATCH_ROOT}.delete_org"))
             delete_org.side_effect = Exception
@@ -428,7 +430,7 @@ class TestRefreshScratchOrg:
 @pytest.mark.django_db
 class TestConvertScratchOrg:
     def test_convert_to_dev_org(self, mocker, scratch_org_factory, task_factory):
-        task = task_factory(epic__project__repo_id=123)
+        task = task_factory(epic__project__repo_id=123, project=None)
         scratch_org = scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
         )
@@ -450,7 +452,7 @@ class TestConvertScratchOrg:
     def test_convert_to_dev_org__error(
         self, mocker, caplog, scratch_org_factory, task_factory
     ):
-        task = task_factory(epic__project__repo_id=123)
+        task = task_factory(epic__project__repo_id=123, project=None)
         scratch_org = scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
         )
@@ -471,7 +473,7 @@ class TestConvertScratchOrg:
 
 @pytest.mark.django_db
 def test_delete_scratch_org(scratch_org_factory):
-    scratch_org = scratch_org_factory()
+    scratch_org = scratch_org_factory(task__epic=None)
     with patch(f"{PATCH_ROOT}.delete_org") as sf_delete_scratch_org:
         delete_scratch_org(scratch_org, originating_user_id=None)
 
@@ -480,7 +482,7 @@ def test_delete_scratch_org(scratch_org_factory):
 
 @pytest.mark.django_db
 def test_delete_scratch_org__exception(scratch_org_factory):
-    scratch_org = scratch_org_factory()
+    scratch_org = scratch_org_factory(task__epic=None)
     with ExitStack() as stack:
         stack.enter_context(patch(f"{PATCH_ROOT}.async_to_sync"))
         get_latest_revision_numbers = stack.enter_context(
@@ -542,7 +544,7 @@ class TestRefreshGitHubRepositoriesForUser:
 
 @pytest.mark.django_db
 def test_commit_changes_from_org(scratch_org_factory, user_factory):
-    scratch_org = scratch_org_factory()
+    scratch_org = scratch_org_factory(task__epic=None)
     user = user_factory()
     with ExitStack() as stack:
         commit_changes_to_github = stack.enter_context(
@@ -588,7 +590,7 @@ class TestErrorHandling:
     def test_create_branches_on_github_then_create_scratch_org(
         self, scratch_org_factory
     ):
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(task__epic=None)
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
@@ -610,7 +612,7 @@ class TestErrorHandling:
             assert async_to_sync.called
 
     def test_get_unsaved_changes(self, scratch_org_factory):
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(task__epic=None)
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
@@ -627,7 +629,7 @@ class TestErrorHandling:
 
     def test_commit_changes_from_org(self, scratch_org_factory, user_factory):
         user = user_factory()
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(task__epic=None)
         with ExitStack() as stack:
             async_to_sync = stack.enter_context(
                 patch("metecho.api.model_mixins.async_to_sync")
@@ -664,7 +666,9 @@ class TestRefreshCommits:
         project = project_factory(repo_id=123, branch_name="project")
         git_hub_repository_factory(repo_id=123, user=user)
         epic = epic_factory(project=project, branch_name="epic")
-        task = task_factory(epic=epic, branch_name="task", origin_sha="1234abcd")
+        task = task_factory(
+            epic=epic, branch_name="task", origin_sha="1234abcd", project=None
+        )
         with ExitStack() as stack:
             commit1 = Commit(
                 **{
@@ -725,7 +729,7 @@ class TestRefreshCommits:
 @pytest.mark.django_db
 def test_create_pr(user_factory, task_factory):
     user = user_factory()
-    task = task_factory(assigned_qa=user.github_id)
+    task = task_factory(assigned_qa=user.github_id, epic=None)
     with ExitStack() as stack:
         pr = MagicMock(number=123)
         repository = MagicMock(**{"create_pull.return_value": pr})
@@ -754,7 +758,7 @@ def test_create_pr(user_factory, task_factory):
 @pytest.mark.django_db
 def test_create_pr__error(user_factory, task_factory):
     user = user_factory()
-    task = task_factory()
+    task = task_factory(epic=None)
     with ExitStack() as stack:
         repository = MagicMock()
         get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
@@ -903,7 +907,7 @@ class TestSubmitReview:
 
             user = user_factory()
             task = task_factory(
-                pr_is_open=True, review_valid=True, review_sha="test_sha"
+                pr_is_open=True, review_valid=True, review_sha="test_sha", epic=None
             )
             task.finalize_submit_review = MagicMock()
             pr = MagicMock()
@@ -940,10 +944,12 @@ class TestSubmitReview:
             )
 
             user = user_factory()
-            task = task_factory(pr_is_open=True, review_valid=True, review_sha="none")
+            task = task_factory(
+                pr_is_open=True, review_valid=True, review_sha="none", epic=None
+            )
             scratch_org = scratch_org_factory(task=task, latest_commit="test_sha")
             task.finalize_submit_review = MagicMock()
-            task.epic.project.get_repo_id = MagicMock()
+            task.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
@@ -978,10 +984,10 @@ class TestSubmitReview:
 
             user = user_factory()
             task = task_factory(
-                pr_is_open=True, review_valid=False, review_sha="test_sha"
+                pr_is_open=True, review_valid=False, review_sha="test_sha", epic=None
             )
             task.finalize_submit_review = MagicMock()
-            task.epic.project.get_repo_id = MagicMock()
+            task.get_repo_id = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})
             get_repo_info.return_value = repository
@@ -1161,7 +1167,7 @@ def test_get_social_image(project_factory, img_url, expected):
 @pytest.mark.django_db
 class TestUserReassign:
     def test_happy(self, scratch_org_factory, user_factory):
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(task__epic=None)
         user = user_factory()
 
         with ExitStack() as stack:
@@ -1176,7 +1182,7 @@ class TestUserReassign:
             assert async_to_sync.called
 
     def test_sad(self, scratch_org_factory, user_factory):
-        scratch_org = scratch_org_factory()
+        scratch_org = scratch_org_factory(task__epic=None)
         user = user_factory()
 
         with ExitStack() as stack:

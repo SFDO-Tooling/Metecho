@@ -155,20 +155,14 @@ def alert_user_about_expiring_org(*, org, days):
     get_unsaved_changes(org, originating_user_id=None)
     if org.unsaved_changes:
         task = org.task
-        epic = task.epic
-        project = epic.project
-        metecho_link = get_user_facing_url(
-            path=["projects", project.slug, epic.slug, task.slug]
-        )
+        metecho_link = get_user_facing_url(path=task.get_absolute_url())
 
         # email user
         subject = _("Metecho Scratch Org Expiring with Uncommitted Changes")
         body = render_to_string(
             "scratch_org_expiry_email.txt",
             {
-                "project_name": project.name,
-                "epic_name": epic.name,
-                "task_name": task.name,
+                "task_name": task.get_full_name(),
                 "days": days,
                 "expiry_date": org.expires_at,
                 "user_name": user.username,
@@ -742,7 +736,7 @@ def submit_review(*, user, task, data, originating_user_id):
             raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
 
         repo_id = task.get_repo_id()
-        project = task.epic.project
+        project = task.epic.project if task.epic else task.project
         repo_as_user = get_repo_info(user, repo_id=repo_id)
         repo_as_app = get_repo_info(
             None,
@@ -763,14 +757,7 @@ def submit_review(*, user, task, data, originating_user_id):
             TASK_REVIEW_STATUS["Changes requested"]: "failure",
         }.get(status)
 
-        target_url = get_user_facing_url(
-            path=[
-                "projects",
-                task.epic.project.slug,
-                task.epic.slug,
-                task.slug,
-            ]
-        )
+        target_url = get_user_facing_url(path=task.get_absolute_url())
 
         # We filter notes to string.printable to avoid problems
         # GitHub has with emoji in status descriptions

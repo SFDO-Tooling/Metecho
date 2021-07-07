@@ -630,19 +630,13 @@ class TaskAssigneeSerializer(serializers.Serializer):
         assigned_user = self.get_matching_assigned_user(type_, validated_data)
         if assigned_user:
             task = instance
-            epic = task.epic
-            project = epic.project
-            metecho_link = get_user_facing_url(
-                path=["projects", project.slug, epic.slug, task.slug]
-            )
+            metecho_link = get_user_facing_url(path=task.get_absolute_url())
             subject = _("Metecho Task Assigned to You")
             body = render_to_string(
                 "user_assigned_to_task.txt",
                 {
                     "role": "Tester" if type_ == "qa" else "Developer",
-                    "task_name": task.name,
-                    "epic_name": epic.name,
-                    "project_name": project.name,
+                    "task_name": task.get_full_name(),
                     "assigned_user_name": assigned_user.username,
                     "user_name": user.username if user else None,
                     "metecho_link": metecho_link,
