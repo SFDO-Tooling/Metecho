@@ -708,14 +708,14 @@ class Task(
         return self.name
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         # Used in emails to fully identify a task by its parents
         if self.epic:
             return _('"{}" on {} epic {}').format(self, self.epic.project, self.epic)
         return _('"{}" on {}').format(self, self.project)
 
     @property
-    def root_project(self):
+    def root_project(self) -> Project:
         if self.epic:
             return self.epic.project
         return self.project
