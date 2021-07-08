@@ -105,6 +105,15 @@ class TaskFactory(factory.django.DjangoModelFactory):
 
 
 @register
+class TaskWithProjectFactory(TaskFactory):
+    class Meta:
+        model = Task
+
+    epic = None
+    project = factory.SubFactory(ProjectFactory)
+
+
+@register
 class ScratchOrgFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ScratchOrg
