@@ -83,7 +83,7 @@ class TestPrHookSerializer:
         serializer.process_hook()
 
     @pytest.mark.parametrize(
-        "_factory, task_data",
+        "_task_factory, task_data",
         (
             pytest.param(
                 fixture("task_with_project_factory"),
@@ -97,8 +97,12 @@ class TestPrHookSerializer:
             ),
         ),
     )
-    def test_process_hook__mark_matching_tasks_as_completed(self, _factory, task_data):
-        task = _factory(**task_data, pr_number=456, status=TASK_STATUSES["In progress"])
+    def test_process_hook__mark_matching_tasks_as_completed(
+        self, _task_factory, task_data
+    ):
+        task = _task_factory(
+            **task_data, pr_number=456, status=TASK_STATUSES["In progress"]
+        )
         data = {
             "action": "closed",
             "number": 456,

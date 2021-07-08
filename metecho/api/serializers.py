@@ -443,7 +443,7 @@ class TaskSerializer(serializers.ModelSerializer):
         )
 
     def get_branch_url(self, obj) -> Optional[str]:
-        project = obj.epic.project
+        project = obj.root_project
         repo_owner = project.repo_owner
         repo_name = project.repo_name
         branch = obj.branch_name
@@ -452,21 +452,20 @@ class TaskSerializer(serializers.ModelSerializer):
         return None
 
     def get_branch_diff_url(self, obj) -> Optional[str]:
-        epic = obj.epic
-        epic_branch = epic.branch_name
-        project = epic.project
+        base_branch = obj.get_base()
+        project = obj.root_project
         repo_owner = project.repo_owner
         repo_name = project.repo_name
         branch = obj.branch_name
-        if repo_owner and repo_name and epic_branch and branch:
+        if repo_owner and repo_name and base_branch and branch:
             return (
                 f"https://github.com/{repo_owner}/{repo_name}/compare/"
-                f"{epic_branch}...{branch}"
+                f"{base_branch}...{branch}"
             )
         return None
 
     def get_pr_url(self, obj) -> Optional[str]:
-        project = obj.epic.project
+        project = obj.root_project
         repo_owner = project.repo_owner
         repo_name = project.repo_name
         pr_number = obj.pr_number

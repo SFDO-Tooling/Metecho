@@ -427,7 +427,24 @@ class TestTaskSerializer:
         serializer = TaskSerializer(task)
         assert serializer.data["branch_url"] is None
 
-    def test_branch_diff_url__present(self, epic_factory, task_factory):
+    @pytest.mark.parametrize(
+        "_task_factory, task_data, expected",
+        (
+            pytest.param(
+                fixture("task_factory"),
+                {"epic__branch_name": "test-epic"},
+                "test-epic",
+                id="Task with Epic",
+            ),
+            pytest.param(
+                fixture("task_with_project_factory"),
+                {"project__branch_name": "test-project"},
+                "test-project",
+                id="Task with Project",
+            ),
+        ),
+    )
+    def test_branch_diff_url__present(self, _task_factory, task_data, expected):
         with ExitStack() as stack:
             gh = stack.enter_context(patch("metecho.api.models.gh"))
             gh.get_repo_info.return_value = MagicMock(
@@ -443,13 +460,14 @@ class TestTaskSerializer:
                 }
             )
 
-            epic = epic_factory(branch_name="test-epic")
-            task = task_factory(epic=epic, branch_name="test-task")
+        task = _task_factory(**task_data, branch_name="test-task")
         serializer = TaskSerializer(task)
-        owner = task.epic.project.repo_owner
-        name = task.epic.project.repo_name
-        expected = f"https://github.com/{owner}/{name}/compare/test-epic...test-task"
-        assert serializer.data["branch_diff_url"] == expected
+        owner = task.root_project.repo_owner
+        name = task.root_project.repo_name
+        assert (
+            serializer.data["branch_diff_url"]
+            == f"https://github.com/{owner}/{name}/compare/{expected}...test-task"
+        )
 
     def test_branch_diff_url__missing(self, task_factory):
         task = task_factory(name="Test task")
@@ -479,23 +497,24 @@ class TestTaskAssigneeSerializer:
         assert "non_field_errors" in serializer.errors
 
     @pytest.mark.parametrize(
-        "_factory",
+        "_task_factory",
         (
             pytest.param(fixture("task_factory"), id="Task with Epic"),
             pytest.param(fixture("task_with_project_factory"), id="Task with Project"),
         ),
     )
     def test_assign(
-        self, rf, git_hub_repository_factory, scratch_org_factory, _factory
+        self, rf, git_hub_repository_factory, scratch_org_factory, _task_factory
     ):
-        task = _factory()
-        task.root_project.github_users = [
+        task = _task_factory()
+        project = task.root_project
+        project.github_users = [
             {"id": "123456", "permissions": {"push": True}},
             {"id": "456789", "permissions": {"push": True}},
         ]
-        task.root_project.save()
+        project.save()
         repo = git_hub_repository_factory(
-            repo_id=task.root_project.repo_id, permissions={"push": True}
+            repo_id=project.repo_id, permissions={"push": True}
         )
         so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
         so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
