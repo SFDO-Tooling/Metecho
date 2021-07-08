@@ -40,12 +40,21 @@ Commit = namedtuple(
 )
 PATCH_ROOT = "metecho.api.jobs"
 
+fixture = pytest.lazy_fixture
+
 
 @pytest.mark.django_db
 class TestCreateBranchesOnGitHub:
-    def test_create_branches_on_github(self, user_factory, task_factory):
+    @pytest.mark.parametrize(
+        "_factory",
+        (
+            pytest.param(fixture("task_factory"), id="With Epic"),
+            pytest.param(fixture("task_with_project_factory"), id="With Project"),
+        ),
+    )
+    def test_create_branches_on_github(self, user_factory, _factory):
         user = user_factory()
-        task = task_factory()
+        task = _factory()
         epic = task.epic
 
         with ExitStack() as stack:
@@ -427,8 +436,23 @@ class TestRefreshScratchOrg:
 
 @pytest.mark.django_db
 class TestConvertScratchOrg:
-    def test_convert_to_dev_org(self, mocker, scratch_org_factory, task_factory):
-        task = task_factory(epic__project__repo_id=123)
+    @pytest.mark.parametrize(
+        "_factory, task_data",
+        (
+            pytest.param(
+                fixture("task_factory"),
+                {"epic__project__repo_id": 123},
+                id="Task with Epic",
+            ),
+            pytest.param(
+                fixture("task_with_project_factory"),
+                {"project__repo_id": 123},
+                id="Task with Project",
+            ),
+        ),
+    )
+    def test_convert_to_dev_org(self, mocker, scratch_org_factory, _factory, task_data):
+        task = _factory(**task_data)
         scratch_org = scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
         )
@@ -897,14 +921,19 @@ class TestRefreshGitHubUsers:
 
 @pytest.mark.django_db
 class TestSubmitReview:
-    def test_good(self, task_factory, user_factory):
+    @pytest.mark.parametrize(
+        "_factory",
+        (
+            pytest.param(fixture("task_factory"), id="Task with Epic"),
+            pytest.param(fixture("task_with_project_factory"), id="Task with Project"),
+        ),
+    )
+    def test_good(self, _factory, user_factory):
         with ExitStack() as stack:
             get_repo_info = stack.enter_context(patch(f"{PATCH_ROOT}.get_repo_info"))
 
             user = user_factory()
-            task = task_factory(
-                pr_is_open=True, review_valid=True, review_sha="test_sha"
-            )
+            task = _factory(pr_is_open=True, review_valid=True, review_sha="test_sha")
             task.finalize_submit_review = MagicMock()
             pr = MagicMock()
             repository = MagicMock(**{"pull_request.return_value": pr})

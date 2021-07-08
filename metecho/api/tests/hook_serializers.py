@@ -10,6 +10,8 @@ from ..hook_serializers import (
 )
 from ..models import TASK_STATUSES
 
+fixture = pytest.lazy_fixture
+
 
 @pytest.mark.django_db
 class TestPushHookSerializer:
@@ -81,22 +83,22 @@ class TestPrHookSerializer:
         serializer.process_hook()
 
     @pytest.mark.parametrize(
-        "factory, task_data",
+        "_factory, task_data",
         (
             pytest.param(
-                pytest.lazy_fixture("task_with_project_factory"),
+                fixture("task_with_project_factory"),
                 {"project__repo_id": 123},
                 id="With Project",
             ),
             pytest.param(
-                pytest.lazy_fixture("task_factory"),
+                fixture("task_factory"),
                 {"epic__project__repo_id": 123},
                 id="With Epic",
             ),
         ),
     )
-    def test_process_hook__mark_matching_tasks_as_completed(self, factory, task_data):
-        task = factory(**task_data, pr_number=456, status=TASK_STATUSES["In progress"])
+    def test_process_hook__mark_matching_tasks_as_completed(self, _factory, task_data):
+        task = _factory(**task_data, pr_number=456, status=TASK_STATUSES["In progress"])
         data = {
             "action": "closed",
             "number": 456,
@@ -275,22 +277,22 @@ class TestPrReviewHookSerializer:
             serializer.process_hook()
 
     @pytest.mark.parametrize(
-        "factory, task_data",
+        "_factory, task_data",
         (
             pytest.param(
-                pytest.lazy_fixture("task_with_project_factory"),
+                fixture("task_with_project_factory"),
                 {"project__repo_id": 123},
                 id="With Project",
             ),
             pytest.param(
-                pytest.lazy_fixture("task_factory"),
+                fixture("task_factory"),
                 {"epic__project__repo_id": 123},
                 id="With Epic",
             ),
         ),
     )
-    def test_good(self, factory, task_data):
-        task = factory(**task_data, pr_number=123)
+    def test_good(self, _factory, task_data):
+        task = _factory(**task_data, pr_number=123)
         data = {
             "sender": {"login": "login", "avatar_url": "https://example.com"},
             "repository": {"id": 123},
