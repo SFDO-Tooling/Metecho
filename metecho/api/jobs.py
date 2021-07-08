@@ -739,12 +739,11 @@ def submit_review(*, user, task, data, originating_user_id):
             raise TaskReviewIntegrityError(_("Cannot submit review for this task."))
 
         repo_id = task.get_repo_id()
-        project = task.epic.project if task.epic else task.project
         repo_as_user = get_repo_info(user, repo_id=repo_id)
         repo_as_app = get_repo_info(
             None,
-            repo_owner=project.repo_owner,
-            repo_name=project.repo_name,
+            repo_owner=task.root_project.repo_owner,
+            repo_name=task.root_project.repo_name,
             repo_id=repo_id,
         )
         pr = repo_as_user.pull_request(task.pr_number)
