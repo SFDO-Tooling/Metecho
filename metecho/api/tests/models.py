@@ -226,8 +226,8 @@ class TestTask:
         task = task_factory()
         assert task.epic.slug in task.get_absolute_url()
 
-    def test_get_absolute_url__project(self, task_factory, project_factory):
-        task = task_factory(epic=None, project=project_factory())
+    def test_get_absolute_url__project(self, task_with_project_factory):
+        task = task_with_project_factory()
         assert task.project.slug in task.get_absolute_url()
 
     def test_notify_changed(self, task_factory):

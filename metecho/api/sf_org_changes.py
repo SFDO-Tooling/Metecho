@@ -87,7 +87,7 @@ def run_retrieve_task(
     target_directory,
     originating_user_id,
 ):
-    repo_id = scratch_org.task.epic.project.get_repo_id()
+    repo_id = scratch_org.task.get_repo_id()
     org_config = refresh_access_token(
         config=scratch_org.config,
         org_name="dev",

@@ -31,7 +31,7 @@ class Command(BaseCommand):
         for task in Task.objects.exclude(Q(branch_name="") | Q(origin_sha="")):
             try:
                 refresh_commits(
-                    project=task.epic.project,
+                    project=task.root_project,
                     branch_name=task.branch_name,
                     originating_user_id=None,
                 )

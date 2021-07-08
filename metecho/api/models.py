@@ -707,6 +707,19 @@ class Task(
     def __str__(self):
         return self.name
 
+    @property
+    def full_name(self):
+        # Used in emails to fully identify a task by its parents
+        if self.epic:
+            return _('"{}" on {} epic {}').format(self, self.epic.project, self.epic)
+        return _('"{}" on {}').format(self, self.project)
+
+    @property
+    def root_project(self):
+        if self.epic:
+            return self.epic.project
+        return self.project
+
     def save(self, *args, force_epic_save=False, **kwargs):
         ret = super().save(*args, **kwargs)
         # To update the epic's status:
@@ -723,12 +736,6 @@ class Task(
         if self.epic:
             return f"/projects/{self.epic.project.slug}/{self.epic.slug}/{self.slug}"
         return f"/projects/{self.project.slug}/tasks/{self.slug}"
-
-    def get_full_name(self):
-        # Used in emails to fully identify a task by its parents
-        if self.epic:
-            return _('"{}" on {} epic {}').format(self, self.epic.project, self.epic)
-        return _('"{}" on {}').format(self, self.project)
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):
@@ -765,9 +772,7 @@ class Task(
             self.save()
 
     def get_repo_id(self):
-        if self.epic:
-            return self.epic.project.get_repo_id()
-        return self.project.get_repo_id()
+        return self.root_project.get_repo_id()
 
     def get_base(self):
         if self.epic:
@@ -789,7 +794,7 @@ class Task(
             body = render_to_string(
                 "pr_created_for_task.txt",
                 {
-                    "task_name": self.get_full_name(),
+                    "task_name": self.full_name,
                     "assigned_user_name": user.username,
                     "metecho_link": metecho_link,
                 },
@@ -799,7 +804,7 @@ class Task(
     # end CreatePrMixin configuration
 
     def has_push_permission(self, user):
-        return self.epic.has_push_permission(user)
+        return self.root_project.has_push_permission(user)
 
     def update_review_valid(self):
         review_valid = bool(
@@ -815,8 +820,8 @@ class Task(
         if head and base:
             repo = gh.get_repo_info(
                 None,
-                repo_owner=self.epic.project.repo_owner,
-                repo_name=self.epic.project.repo_name,
+                repo_owner=self.root_project.repo_owner,
+                repo_name=self.root_project.repo_name,
             )
             base_sha = repo.branch(base).commit.sha
             head_sha = repo.branch(head).commit.sha
@@ -1010,10 +1015,8 @@ class ScratchOrg(
             return self.project
         if self.epic:
             return self.epic.project
-        if getattr(self.task, "epic", None):
-            return self.task.epic.project
-        if getattr(self.task, "project", None):
-            return self.task.project
+        if self.task:
+            return self.task.root_project
         return None
 
     def save(self, *args, **kwargs):

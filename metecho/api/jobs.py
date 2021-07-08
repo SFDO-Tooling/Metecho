@@ -102,6 +102,9 @@ def epic_create_branch(
 def _create_branches_on_github(
     *, user, repo_id, epic, task=None, task_sha=None, originating_user_id=None
 ):
+    """
+    TODO: Rethink this function to accept projects as well, not only epics
+    """
     repository = get_repo_info(user, repo_id=repo_id)
 
     # Make epic branch, with latest from epic:
@@ -162,7 +165,7 @@ def alert_user_about_expiring_org(*, org, days):
         body = render_to_string(
             "scratch_org_expiry_email.txt",
             {
-                "task_name": task.get_full_name(),
+                "task_name": task.full_name,
                 "days": days,
                 "expiry_date": org.expires_at,
                 "user_name": user.username,
