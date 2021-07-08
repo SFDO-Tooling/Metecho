@@ -15,6 +15,8 @@ from ..serializers import (
     TaskSerializer,
 )
 
+fixture = pytest.lazy_fixture
+
 
 @pytest.mark.django_db
 class TestFullUserSerializer:
@@ -476,16 +478,24 @@ class TestTaskAssigneeSerializer:
         assert not serializer.is_valid()
         assert "non_field_errors" in serializer.errors
 
+    @pytest.mark.parametrize(
+        "_factory",
+        (
+            pytest.param(fixture("task_factory"), id="Task with Epic"),
+            pytest.param(fixture("task_with_project_factory"), id="Task with Project"),
+        ),
+    )
     def test_assign(
-        self, rf, git_hub_repository_factory, task_factory, scratch_org_factory
+        self, rf, git_hub_repository_factory, scratch_org_factory, _factory
     ):
-        repo = git_hub_repository_factory(permissions={"push": True})
-        task = task_factory(
-            epic__project__repo_id=repo.repo_id,
-            epic__project__github_users=[
-                {"id": "123456", "permissions": {"push": True}},
-                {"id": "456789", "permissions": {"push": True}},
-            ],
+        task = _factory()
+        task.root_project.github_users = [
+            {"id": "123456", "permissions": {"push": True}},
+            {"id": "456789", "permissions": {"push": True}},
+        ]
+        task.root_project.save()
+        repo = git_hub_repository_factory(
+            repo_id=task.root_project.repo_id, permissions={"push": True}
         )
         so1 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.Dev)
         so2 = scratch_org_factory(task=task, org_type=SCRATCH_ORG_TYPES.QA)
