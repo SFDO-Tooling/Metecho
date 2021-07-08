@@ -1010,8 +1010,10 @@ class ScratchOrg(
             return self.project
         if self.epic:
             return self.epic.project
-        if self.task:
+        if getattr(self.task, "epic", None):
             return self.task.epic.project
+        if getattr(self.task, "project", None):
+            return self.task.project
         return None
 
     def save(self, *args, **kwargs):

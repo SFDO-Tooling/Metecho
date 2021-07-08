@@ -17,7 +17,6 @@ def test_resync_all_gh_commit_data(project_factory, epic_factory, task_factory):
             branch_name="task_branch",
             origin_sha="1234567sha",
             epic__project__repo_id=1234,
-            project=None,
         )
         call_command("resync_all_gh_commit_data")
 

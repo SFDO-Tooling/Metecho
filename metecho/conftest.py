@@ -100,7 +100,6 @@ class TaskFactory(factory.django.DjangoModelFactory):
         model = Task
 
     name = factory.Sequence("Task {}".format)
-    project = factory.SubFactory(ProjectFactory)
     epic = factory.SubFactory(EpicFactory)
     org_config_name = "dev"
 

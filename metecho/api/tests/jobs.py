@@ -430,7 +430,7 @@ class TestRefreshScratchOrg:
 @pytest.mark.django_db
 class TestConvertScratchOrg:
     def test_convert_to_dev_org(self, mocker, scratch_org_factory, task_factory):
-        task = task_factory(epic__project__repo_id=123, project=None)
+        task = task_factory(epic__project__repo_id=123)
         scratch_org = scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
         )
@@ -452,7 +452,7 @@ class TestConvertScratchOrg:
     def test_convert_to_dev_org__error(
         self, mocker, caplog, scratch_org_factory, task_factory
     ):
-        task = task_factory(epic__project__repo_id=123, project=None)
+        task = task_factory(epic__project__repo_id=123)
         scratch_org = scratch_org_factory(
             org_type=SCRATCH_ORG_TYPES.Playground, task=None, epic=task.epic
         )
@@ -666,9 +666,7 @@ class TestRefreshCommits:
         project = project_factory(repo_id=123, branch_name="project")
         git_hub_repository_factory(repo_id=123, user=user)
         epic = epic_factory(project=project, branch_name="epic")
-        task = task_factory(
-            epic=epic, branch_name="task", origin_sha="1234abcd", project=None
-        )
+        task = task_factory(epic=epic, branch_name="task", origin_sha="1234abcd")
         with ExitStack() as stack:
             commit1 = Commit(
                 **{
