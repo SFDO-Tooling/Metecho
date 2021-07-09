@@ -6,28 +6,30 @@ import { Task } from '~js/store/tasks/reducer';
 import apiFetch from '~js/utils/api';
 import { addUrlParams } from '~js/utils/api';
 
-export default (projectId?: string) => {
+export default (projectId?: string, tasksTabViewed?: boolean) => {
   const dispatch = useDispatch<ThunkDispatch>();
   const [tasks, setTasks] = useState<Task[]>();
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (projectId && !tasks) {
-        // Fetch tasks from API
-        const response: Task[] | null = await apiFetch({
-          url: addUrlParams(window.api_urls.task_list(), {
-            project: projectId,
-          }),
-          dispatch,
-        });
-        setTasks(response || []);
-      }
-    };
-    fetchTasks();
-  }, [dispatch, projectId, tasks]);
+    if (tasksTabViewed) {
+      const fetchTasks = async () => {
+        if (projectId && !tasks) {
+          // Fetch tasks from API
+          const response: Task[] | null = await apiFetch({
+            url: addUrlParams(window.api_urls.task_list(), {
+              project: projectId,
+            }),
+            dispatch,
+          });
+          setTasks(response || []);
+        }
+      };
+      fetchTasks();
+    }
+  }, [dispatch, projectId, tasks, tasksTabViewed]);
 
   // Allow for manually updating Tasks in State...
-  // @@@ Ideally these should be moved to the Redux store?
+  // Ideally these should be moved to the Redux store?
   const updateTask = (task: Task) => {
     if (tasks) {
       const existingTask = tasks.find((t) => t.id === task.id);

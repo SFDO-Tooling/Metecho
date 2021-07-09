@@ -57,13 +57,17 @@ const ProjectDetail = (
   const [tourLandingModalOpen, setTourLandingModalOpen] = useState(
     Boolean(window.GLOBALS.ENABLE_WALKTHROUGHS && !user.onboarded_at),
   );
+  const [tasksTabViewed, setTasksTabViewed] = useState(false);
   const [tourRunning, setTourRunning] = useState<WalkthroughType | null>(null);
   const isMounted = useIsMounted();
   const dispatch = useDispatch<ThunkDispatch>();
   const { project, projectSlug } = useFetchProjectIfMissing(props);
   const { epics } = useFetchEpicsIfMissing(project, props);
   const { orgs } = useFetchOrgsIfMissing({ project, props });
-  const { tasks, updateTask } = useFetchTasksByProject(project?.id);
+  const { tasks, updateTask } = useFetchTasksByProject(
+    project?.id,
+    tasksTabViewed,
+  );
   const assignUser = useAssignUserToTask();
   const playgroundOrg = (orgs || [])[0];
 
@@ -111,7 +115,7 @@ const ProjectDetail = (
   }, [dispatch, epics?.next, isMounted, project?.id]);
 
   // Manually update the Task in State after it changes.
-  // @@@ Ideally this should be moved to the Redux store?
+  // Ideally this should be moved to the Redux store?
   const doAssignUser = useCallback(
     async (args: any) => {
       const {
@@ -180,8 +184,6 @@ const ProjectDetail = (
     // Redirect to most recent project slug
     return <Redirect to={routes.project_detail(project.slug)} />;
   }
-
-  let viewTaskTab = false;
 
   return (
     <DocumentTitle title={`${project.name} | ${i18n.t('Metecho')}`}>
@@ -275,7 +277,7 @@ const ProjectDetail = (
           </div>
         }
       >
-        <Tabs variant="scoped">
+        <Tabs variant="scoped" onSelect={() => setTasksTabViewed(true)}>
           <TabsPanel
             label={
               <>
@@ -384,7 +386,6 @@ const ProjectDetail = (
                 {i18n.t('Tasks')}
               </>
             }
-            onSelect={() => (viewTaskTab = true)}
           >
             {tasks ? (
               <>
@@ -397,7 +398,7 @@ const ProjectDetail = (
                     canAssign={project.has_push_permission}
                     isRefreshingUsers={project.currently_fetching_github_users}
                     assignUserAction={doAssignUser}
-                    viewEpicsColumn={true}
+                    viewEpicsColumn
                   />
                 ) : (
                   <p>{i18n.t('There are no Tasks for this Project.')}</p>
