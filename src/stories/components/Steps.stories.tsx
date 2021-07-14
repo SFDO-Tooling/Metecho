@@ -39,12 +39,12 @@ const EpicTemplate = ({ steps, ...rest }: StoryProps) => (
 );
 export const EpicSteps: Story<StoryProps> = EpicTemplate.bind({});
 EpicSteps.args = {
+  steps: 'Initial steps',
   title: 'Next Steps for this Epic',
   handleAction: action('handleAction'),
 };
 EpicSteps.argTypes = {
   steps: {
-    defaultValue: 'Initial steps',
     options: Object.keys(epicSteps),
     control: {
       type: 'select',
@@ -58,12 +58,12 @@ const TaskTemplate = ({ steps, ...rest }: StoryProps) => (
 );
 export const TaskSteps: Story<StoryProps> = TaskTemplate.bind({});
 TaskSteps.args = {
+  steps: 'Initial steps',
   title: 'Next Steps for this Task',
   handleAction: action('handleAction'),
 };
 TaskSteps.argTypes = {
   steps: {
-    defaultValue: 'Initial steps',
     options: Object.keys(taskSteps),
     control: {
       type: 'select',
