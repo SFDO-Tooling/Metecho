@@ -5,22 +5,20 @@ import React, { ComponentProps } from 'react';
 import ConfirmRemoveUserModal from '~js/components/tasks/confirmRemoveUserModal';
 import { ORG_TYPES } from '~js/utils/constants';
 
-import { withRedux } from '../../decorators';
 import { sampleUser1 } from '../../fixtures';
 
 export default {
-  title: 'Tasks/ConfirmRemove/Examples',
+  title: 'Tasks/ConfirmRemoveUser/Examples',
   component: ConfirmRemoveUserModal,
-  decorators: [withRedux()],
 };
 
 const Template: Story<ComponentProps<typeof ConfirmRemoveUserModal>> = (
   args,
 ) => <ConfirmRemoveUserModal {...args} />;
 
-export const ConfirmRemove = Template.bind({});
+export const ConfirmRemoveUser = Template.bind({});
 
-ConfirmRemove.args = {
+ConfirmRemoveUser.args = {
   isOpen: true,
   waitingToRemoveUser: {
     type: ORG_TYPES.DEV,
@@ -31,16 +29,14 @@ ConfirmRemove.args = {
   handleCancel: action('handleCancel'),
   handleAssignUser: action('handleAssignUser'),
 };
-ConfirmRemove.argTypes = {
-  isOpen: { control: { disable: true } },
+ConfirmRemoveUser.argTypes = {
   waitingToRemoveUser: { control: { disable: true } },
 };
+ConfirmRemoveUser.storyName = 'Remove';
 
-ConfirmRemove.storyName = 'Remove';
+export const ConfirmChangeUser = Template.bind({});
 
-export const ConfirmChange = Template.bind({});
-
-ConfirmChange.args = {
+ConfirmChangeUser.args = {
   isOpen: true,
   waitingToRemoveUser: {
     type: ORG_TYPES.DEV,
@@ -51,8 +47,7 @@ ConfirmChange.args = {
   handleCancel: action('handleCancel'),
   handleAssignUser: action('handleAssignUser'),
 };
-ConfirmChange.argTypes = {
-  isOpen: { control: { disable: true } },
+ConfirmChangeUser.argTypes = {
   waitingToRemoveUser: { control: { disable: true } },
 };
-ConfirmChange.storyName = 'Change';
+ConfirmChangeUser.storyName = 'Change';
