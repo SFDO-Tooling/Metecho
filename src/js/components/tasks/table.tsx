@@ -249,6 +249,10 @@ const AssigneeTableCell = ({
         break;
     }
 
+    const epicCollaborators = (epicUsers || []).filter((user) =>
+      item.epic.github_users.includes(user.id),
+    );
+
     contents = (
       <>
         <Button
@@ -263,7 +267,7 @@ const AssigneeTableCell = ({
         />
         <AssignTaskRoleModal
           projectId={projectId}
-          epicUsers={epicUsers || []}
+          epicUsers={epicCollaborators}
           githubUsers={githubUsers}
           selectedUser={assignedUser || null}
           orgType={type}

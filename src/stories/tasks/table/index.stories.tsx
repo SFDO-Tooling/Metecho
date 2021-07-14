@@ -52,6 +52,7 @@ const Template = ({ tasks, ...rest }: StoryProps) => (
 
 export const TasksTable: Story<StoryProps> = Template.bind({});
 TasksTable.args = {
+  tasks: Object.keys(sampleTasks),
   projectId: sampleProject1.id,
   projectSlug: sampleProject1.slug,
   epicSlug: sampleEpic1.slug,
@@ -63,7 +64,6 @@ TasksTable.args = {
 };
 TasksTable.argTypes = {
   tasks: {
-    defaultValue: Object.keys(sampleTasks),
     options: Object.keys(sampleTasks),
     control: {
       type: 'multi-select',
