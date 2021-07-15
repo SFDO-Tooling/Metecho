@@ -40,11 +40,11 @@ const Template = ({ epics, ...rest }: StoryProps) => (
 
 export const EpicTable: Story<StoryProps> = Template.bind({});
 EpicTable.args = {
+  epics: Object.keys(sampleEpics),
   projectSlug: 'my-project',
 };
 EpicTable.argTypes = {
   epics: {
-    defaultValue: Object.keys(sampleEpics),
     options: Object.keys(sampleEpics),
     control: {
       type: 'multi-select',
