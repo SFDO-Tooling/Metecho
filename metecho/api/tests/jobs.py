@@ -45,6 +45,16 @@ fixture = pytest.lazy_fixture
 
 @pytest.mark.django_db
 class TestCreateBranchesOnGitHub:
+    def test_require_epic_or_task(self, user_factory):
+        with pytest.raises(ValueError):
+            _create_branches_on_github(
+                user=user_factory(),
+                repo_id=123,
+                epic=None,
+                task=None,
+                originating_user_id="123abc",
+            )
+
     @pytest.mark.parametrize(
         "_task_factory",
         (
