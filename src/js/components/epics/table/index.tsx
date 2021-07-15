@@ -34,7 +34,7 @@ const EpicTable = ({
       items={items}
       id="project-epics-table"
       noRowHover
-      className="slds-is-relative"
+      className="slds-is-relative outdented_medium"
     >
       <DataTableColumn
         key="details"

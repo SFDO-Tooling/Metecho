@@ -68,6 +68,10 @@
   }
 }
 
+.status-cell-icon {
+  flex: 0 0 auto;
+}
+
 // add a tiny top margin to create visual appearance of centered text
 .status-cell-text {
   margin-top: $spacing-xxx-small;
