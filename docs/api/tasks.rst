@@ -21,7 +21,13 @@ Retrieve
         "name": "Test Task",
         "description": "This is *safely* rendered Markdown.",
         "description_rendered": "<p>This is <em>safely</em> rendered Markdown.</p>",
-        "epic": "3Lw7OwK",
+        "epic": {
+          "id": "3Lw7OwK",
+          "name": "Example Epic",
+          "slug": "example-epic",
+          "github_users": ["123456", "456789"]
+        },
+        "project": null,
         "assigned_dev": {
           "id": "12345",
           "login": "username",
