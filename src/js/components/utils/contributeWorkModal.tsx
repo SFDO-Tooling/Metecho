@@ -151,7 +151,7 @@ const ContributeWorkModal = ({
       </Trans>
     );
   } /* istanbul ignore next */ else if (project) {
-    // @@@
+    // @@@ Add this when project Scratch Orgs can be converted...
   }
 
   return (
