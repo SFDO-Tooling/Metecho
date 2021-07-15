@@ -115,7 +115,8 @@ const ProjectDetail = (
   }, [dispatch, epics?.next, isMounted, project?.id]);
 
   // Manually update the Task in State after it changes.
-  // Ideally this should be moved to the Redux store?
+  // @@@ The list of tasks should be moved to the Redux store...
+  /* istanbul ignore next */
   const doAssignUser = useCallback(
     async (args: any) => {
       const {
@@ -163,6 +164,12 @@ const ProjectDetail = (
   );
   const handleTourClose = useCallback(() => {
     setTourRunning(null);
+  }, []);
+
+  const handleTabSelect = useCallback((idx: number) => {
+    if (idx === 1) {
+      setTasksTabViewed(true);
+    }
   }, []);
 
   const loadingOrNotFound = getProjectLoadingOrNotFound({
@@ -277,7 +284,7 @@ const ProjectDetail = (
           </div>
         }
       >
-        <Tabs variant="scoped" onSelect={() => setTasksTabViewed(true)}>
+        <Tabs variant="scoped" onSelect={handleTabSelect}>
           <TabsPanel
             label={
               <>

@@ -11,25 +11,25 @@ export default (projectId?: string, tasksTabViewed?: boolean) => {
   const [tasks, setTasks] = useState<Task[]>();
 
   useEffect(() => {
-    if (tasksTabViewed) {
-      const fetchTasks = async () => {
-        if (projectId && !tasks) {
-          // Fetch tasks from API
-          const response: Task[] | null = await apiFetch({
-            url: addUrlParams(window.api_urls.task_list(), {
-              project: projectId,
-            }),
-            dispatch,
-          });
-          setTasks(response || []);
-        }
-      };
-      fetchTasks();
-    }
+    const maybeFetchTasks = async () => {
+      if (projectId && !tasks && tasksTabViewed) {
+        // Fetch tasks from API
+        const response: Task[] | null = await apiFetch({
+          url: addUrlParams(window.api_urls.task_list(), {
+            project: projectId,
+          }),
+          dispatch,
+        });
+        setTasks(response || []);
+      }
+    };
+
+    maybeFetchTasks();
   }, [dispatch, projectId, tasks, tasksTabViewed]);
 
   // Allow for manually updating Tasks in State...
-  // Ideally these should be moved to the Redux store?
+  // @@@ This list of tasks should be moved to the Redux store...
+  /* istanbul ignore next */
   const updateTask = (task: Task) => {
     if (tasks) {
       const existingTask = tasks.find((t) => t.id === task.id);

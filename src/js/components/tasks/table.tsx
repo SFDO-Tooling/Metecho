@@ -249,9 +249,9 @@ const AssigneeTableCell = ({
         break;
     }
 
-    const epicCollaborators = (epicUsers || []).filter((user) =>
-      item.epic.github_users.includes(user.id),
-    );
+    const epicCollaborators =
+      epicUsers ||
+      githubUsers.filter((user) => item.epic.github_users.includes(user.id));
 
     contents = (
       <>
