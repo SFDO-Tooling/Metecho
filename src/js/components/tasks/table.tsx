@@ -328,7 +328,7 @@ const TaskTable = ({
     <DataTable
       items={taskDefaultSort}
       id="epic-tasks-table"
-      className={viewEpicsColumn ? 'outdented_medium' : 'todo-remove-me'}
+      className={viewEpicsColumn ? 'outdented_medium' : ''}
       noRowHover
     >
       <DataTableColumn
