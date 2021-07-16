@@ -63,12 +63,12 @@
 
 .status-cell {
   > div {
-    align-items: center;
     display: flex;
   }
 }
 
 .status-cell-icon {
+  display: flex;
   flex: 0 0 auto;
 }
 

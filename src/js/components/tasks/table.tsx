@@ -351,7 +351,7 @@ const TaskTable = ({
           </>
         }
         property="name"
-        width={viewEpicsColumn ? '40%' : '70%'}
+        width={viewEpicsColumn ? '40%' : '60%'}
         primaryColumn
       >
         <NameTableCell projectSlug={projectSlug} epicSlug={epicSlug} />
@@ -407,7 +407,7 @@ const TaskTable = ({
           </>
         }
         property="status"
-        width="20%"
+        width={viewEpicsColumn ? '20%' : '30%'}
       >
         <StatusTableCell />
       </DataTableColumn>
