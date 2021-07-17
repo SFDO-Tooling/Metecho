@@ -16,7 +16,7 @@ export default (projectId?: string, tasksTabViewed?: boolean) => {
         // Fetch tasks from API
         const response: Task[] | null = await apiFetch({
           url: addUrlParams(window.api_urls.task_list(), {
-            project: projectId,
+            epic__project: projectId,
           }),
           dispatch,
         });
