@@ -160,10 +160,10 @@ const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
     <DataTableCell
       {...props}
       title={displayStatus || status}
-      className={classNames(className, 'status-cell')}
+      className={classNames(className, 'status-cell truncated-cell')}
     >
-      {icon}
-      <span className="slds-m-left_x-small status-cell-text">
+      <span className="status-cell-icon">{icon}</span>
+      <span className="slds-m-left_x-small status-cell-text slds-truncate">
         {displayStatus || status}
       </span>
     </DataTableCell>
@@ -325,7 +325,12 @@ const TaskTable = ({
     (item) => item.name.toLowerCase(),
   ]);
   return (
-    <DataTable items={taskDefaultSort} id="epic-tasks-table" noRowHover>
+    <DataTable
+      items={taskDefaultSort}
+      id="epic-tasks-table"
+      className={viewEpicsColumn ? 'outdented_medium' : ''}
+      noRowHover
+    >
       <DataTableColumn
         key="name"
         label={
@@ -371,7 +376,7 @@ const TaskTable = ({
             </>
           }
           property="epic"
-          width="20%"
+          width="30%"
         >
           <EpicTableCell projectSlug={projectSlug} />
         </DataTableColumn>
@@ -402,7 +407,7 @@ const TaskTable = ({
           </>
         }
         property="status"
-        width="20%"
+        width={viewEpicsColumn ? '20%' : '30%'}
       >
         <StatusTableCell />
       </DataTableColumn>
@@ -410,7 +415,7 @@ const TaskTable = ({
         key="assigned_dev"
         label={
           <>
-            {i18n.t('Developer')}
+            {i18n.t('Dev')}
             <TourPopover
               id="tour-task-developer-column"
               align="top"
@@ -428,7 +433,7 @@ const TaskTable = ({
           </>
         }
         property="assigned_dev"
-        width="10%"
+        width="5%"
       >
         <AssigneeTableCell
           type={ORG_TYPES.DEV}
@@ -444,7 +449,7 @@ const TaskTable = ({
         key="assigned_qa"
         label={
           <>
-            {i18n.t('Tester')}
+            {i18n.t('Test')}
             <TourPopover
               id="tour-task-tester-column"
               align="top"
@@ -462,7 +467,7 @@ const TaskTable = ({
           </>
         }
         property="assigned_qa"
-        width="10%"
+        width="5%"
       >
         <AssigneeTableCell
           type={ORG_TYPES.QA}
