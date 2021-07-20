@@ -830,6 +830,21 @@ class TestTaskViewSet:
             "github_users",
         )
 
+    def test_get__project_filter(self, client, task_factory, project_factory):
+        url = reverse("task-list")
+        project = project_factory()
+        task_factory(epic__project=project)
+        task_factory(epic=None, project=project)
+        # Other tasks in other epics and projects
+        task_factory()
+        task_factory(epic=None, project=project_factory())
+
+        response = client.get(url)
+        assert len(response.json()) == 4
+
+        response = client.get(url, data={"project": str(project.pk)})
+        assert len(response.json()) == 2
+
     def test_create__dev_org(
         self, client, git_hub_repository_factory, scratch_org_factory, epic_factory
     ):

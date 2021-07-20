@@ -138,7 +138,8 @@ class TaskAdmin(admin.ModelAdmin):
     list_filter = (SoftDeletedListFilter, "status", "epic__project")
     search_fields = ("name", "epic__name")
     fields = (
-        ("name", "epic"),
+        "name",
+        ("project", "epic"),
         "description",
         ("branch_name", "org_config_name"),
         ("commits", "get_all_users_in_commits"),
