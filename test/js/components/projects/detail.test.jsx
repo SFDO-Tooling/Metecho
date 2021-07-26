@@ -221,66 +221,14 @@ describe('<ProjectDetail />', () => {
     fetchMock.getOnce(url, tasks);
   });
 
-  test('tasks tab exists', () => {
-    const { getAllByText, getByText } = setup({
-      initialState: {
-        ...defaultState,
-        projects: {
-          ...defaultState.projects,
-          projects: [
-            {
-              ...defaultState.projects.projects[0],
-              has_push_permission: false,
-            },
-          ],
-        },
-        epics: {
-          p1: {
-            epics: [],
-            next: null,
-            notFound: [],
-            fetched: true,
-          },
-        },
-      },
-    });
-    fireEvent.click(getAllByText('Tasks')[0]);
-    expect(getByText('Loading...')).toBeVisible();
-  });
-
   test('tasks tab renders tasks', async () => {
-    const { getAllByText, findByText } = setup({
-      initialState: {
-        ...defaultState,
-        projects: {
-          ...defaultState.projects,
-          projects: [
-            {
-              ...defaultState.projects.projects[0],
-              has_push_permission: false,
-            },
-          ],
-        },
-        epics: {
-          p1: {
-            epics: defaultState.epics,
-            next: null,
-            notFound: [],
-            fetched: true,
-          },
-        },
-        tasks,
-      },
-    });
+    const { getByText, findByText } = setup();
 
-    fireEvent.click(getAllByText('Tasks')[0]);
-    // const url = addUrlParams(window.api_urls.task_list(), {
-    //   epic__project: 'p1',
-    // });
-    // fetchMock.mock(url, tasks);
-    const thing = await findByText('Task 2');
-    console.log(thing, 'iuhgfadjhdsfauhg');
-    expect(thing).toBeVisible();
+    expect.assertions(1);
+    fireEvent.click(getByText('Tasks'));
+    const task = await findByText('Task 2');
+
+    expect(task).toBeVisible();
   });
 
   test('renders project detail and epics list', () => {

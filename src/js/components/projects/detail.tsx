@@ -167,6 +167,7 @@ const ProjectDetail = (
   }, []);
 
   const handleTabSelect = useCallback((idx: number) => {
+    /* istanbul ignore else */
     if (idx === 1) {
       setTasksTabViewed(true);
     }
