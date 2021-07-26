@@ -19,7 +19,7 @@ const minimalWebpackConfig = {
           {
             loader: 'css-loader',
             options: {
-              url: (url) => !url.startsWith('/'),
+              url: { filter: (url) => !url.startsWith('/') },
               importLoaders: 2,
             },
           },

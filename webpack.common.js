@@ -20,8 +20,8 @@ module.exports = {
     modules: ['src', 'static', 'node_modules'],
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
-      '~js': path.join(__dirname, 'src', 'js'),
-      '~img': path.join(__dirname, 'static', 'images'),
+      '#js': path.join(__dirname, 'src', 'js'),
+      '#img': path.join(__dirname, 'static', 'images'),
     },
   },
   output: {
@@ -76,7 +76,7 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              url: (url) => !url.startsWith('/'),
+              url: { filter: (url) => !url.startsWith('/') },
               sourceMap: true,
               importLoaders: 1,
             },
