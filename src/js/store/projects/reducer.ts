@@ -1,8 +1,8 @@
-import { ObjectsAction, PaginatedObjectResponse } from '~js/store/actions';
-import { ProjectsAction } from '~js/store/projects/actions';
-import { LogoutAction } from '~js/store/user/actions';
-import { GitHubUser } from '~js/store/user/reducer';
-import { OBJECT_TYPES } from '~js/utils/constants';
+import { ObjectsAction, PaginatedObjectResponse } from '#js/store/actions';
+import { ProjectsAction } from '#js/store/projects/actions';
+import { LogoutAction } from '#js/store/user/actions';
+import { GitHubUser } from '#js/store/user/reducer';
+import { OBJECT_TYPES } from '#js/utils/constants';
 
 export interface OrgConfig {
   key: string;

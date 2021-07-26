@@ -7,11 +7,11 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import mapSvg from '!raw-loader!~img/map-lg.svg';
-import { Illustration } from '~js/components/utils';
-import { Epic } from '~js/store/epics/reducer';
-import { Project } from '~js/store/projects/reducer';
-import { Task } from '~js/store/tasks/reducer';
+import mapSvg from '!raw-loader!#img/map-lg.svg';
+import { Illustration } from '#js/components/utils';
+import { Epic } from '#js/store/epics/reducer';
+import { Project } from '#js/store/projects/reducer';
+import { Task } from '#js/store/tasks/reducer';
 
 type ContributeCallback = ({
   id,
@@ -138,20 +138,24 @@ const ContributeWorkModal = ({
         </RadioGroup>
       </>
     );
-  } /* istanbul ignore else */ else if (epic) {
-    contents = (
-      <Trans i18nKey="contributeWorkFromEpic">
-        <p>
-          <b>To contribute the work you’ve done in your Scratch Org,</b> you’ll
-          start by creating a new task.
-        </p>
-        <p>
-          Your Scratch Org will become the Dev Org for the newly created task.
-        </p>
-      </Trans>
-    );
-  } /* istanbul ignore next */ else if (project) {
-    // @@@
+  } else {
+    /* istanbul ignore else */
+    // eslint-disable-next-line no-lonely-if
+    if (epic) {
+      contents = (
+        <Trans i18nKey="contributeWorkFromEpic">
+          <p>
+            <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
+            you’ll start by creating a new task.
+          </p>
+          <p>
+            Your Scratch Org will become the Dev Org for the newly created task.
+          </p>
+        </Trans>
+      );
+    } else if (project) {
+      // @@@
+    }
   }
 
   return (
