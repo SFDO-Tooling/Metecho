@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
@@ -145,14 +145,19 @@ const tasks = [
     name: 'Task 1',
     slug: 'task-1',
     old_slugs: ['old-slug'],
-    epic: 'epic1',
+    epic: {
+      id: 'epic1',
+      name: 'Epic 1',
+      slug: 'epic-1',
+      github_users: [],
+    },
     branch_url: 'https://github.com/test/test-repo/tree/epic__task',
-    branch_name: 'epic__task',
+    branch_name: 'feature/epic-1__task-1',
     description: 'Task Description',
     description_rendered: '<p>Task Description</p>',
     has_unmerged_commits: false,
     commits: [],
-    assigned_dev: 'user-id',
+    assigned_dev: 'my-user',
     assigned_qa: null,
   },
   {
@@ -160,15 +165,20 @@ const tasks = [
     name: 'Task 2',
     slug: 'task-2',
     old_slugs: ['old-slug'],
-    epic: 'epic2',
+    epic: {
+      id: 'epic2',
+      name: 'Epic 2',
+      slug: 'epic-2',
+      github_users: [],
+    },
     branch_url: 'https://github.com/test/test-repo/tree/epic__task',
-    branch_name: 'epic__task',
+    branch_name: 'feature/epic-2__task-2',
     description: 'Task Description',
     description_rendered: '<p>Task Description</p>',
     has_unmerged_commits: false,
     commits: [],
-    assigned_dev: 'user-id',
-    assigned_qa: null,
+    assigned_dev: null,
+    assigned_qa: 'my-user',
   },
 ];
 
@@ -208,7 +218,7 @@ describe('<ProjectDetail />', () => {
     const url = addUrlParams(window.api_urls.task_list(), {
       epic__project: 'p1',
     });
-    fetchMock.mock(url, tasks);
+    fetchMock.getOnce(url, tasks);
   });
 
   test('tasks tab exists', () => {
