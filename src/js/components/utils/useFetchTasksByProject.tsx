@@ -20,6 +20,7 @@ export default (projectId?: string, tasksTabViewed?: boolean) => {
           }),
           dispatch,
         });
+        /* istanbul ignore next */
         setTasks(response || []);
       }
     };

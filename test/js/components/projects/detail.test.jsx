@@ -10,6 +10,7 @@ import { addUrlParams } from '~js/utils/api';
 import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '~js/utils/constants';
 import routes from '~js/utils/routes';
 
+import { sampleEpic1, sampleEpic2 } from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('~js/store/actions');
@@ -84,7 +85,7 @@ const defaultState = {
           project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
-          github_users: [],
+          github_users: sampleEpic1.github_users,
           status: 'In progress',
         },
         {
@@ -94,7 +95,7 @@ const defaultState = {
           project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
-          github_users: [],
+          github_users: sampleEpic2.github_users,
           status: 'Planned',
         },
         {
@@ -211,24 +212,23 @@ describe('<ProjectDetail />', () => {
     };
   };
 
-  beforeEach(() => {
-    // @@@ Once the API call to fetch tasks is deferred until the "Tasks" tab is
-    // selected, this can be removed and selectively mocked out for a group of
-    // tests that specifically trigger the "Tasks" tab.
-    const url = addUrlParams(window.api_urls.task_list(), {
-      epic__project: 'p1',
+  describe('Tasks', () => {
+    beforeEach(() => {
+      const url = addUrlParams(window.api_urls.task_list(), {
+        epic__project: 'p1',
+      });
+      fetchMock.getOnce(url, tasks);
     });
-    fetchMock.getOnce(url, tasks);
-  });
 
-  test('tasks tab renders tasks', async () => {
-    const { getByText, findByText } = setup();
+    test('tasks tab renders tasks', async () => {
+      const { getByText, findByText } = setup();
 
-    expect.assertions(1);
-    fireEvent.click(getByText('Tasks'));
-    const task = await findByText('Task 2');
+      expect.assertions(1);
+      fireEvent.click(getByText('Tasks'));
+      const task = await findByText('Task 2');
 
-    expect(task).toBeVisible();
+      expect(task).toBeVisible();
+    });
   });
 
   test('renders project detail and epics list', () => {

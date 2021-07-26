@@ -345,7 +345,8 @@ const ProjectDetail = (
                           onClick={fetchMoreEpics}
                         />
                       </div>
-                    ) : null}
+                    ) : /* istanbul ignore next */
+                    null}
                   </>
                 ) : (
                   <p>
