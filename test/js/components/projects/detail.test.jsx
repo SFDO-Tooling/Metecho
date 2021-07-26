@@ -1,4 +1,4 @@
-import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
@@ -139,6 +139,39 @@ const defaultState = {
   },
 };
 
+const tasks = [
+  {
+    id: 'task1',
+    name: 'Task 1',
+    slug: 'task-1',
+    old_slugs: ['old-slug'],
+    epic: 'epic1',
+    branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+    branch_name: 'epic__task',
+    description: 'Task Description',
+    description_rendered: '<p>Task Description</p>',
+    has_unmerged_commits: false,
+    commits: [],
+    assigned_dev: 'user-id',
+    assigned_qa: null,
+  },
+  {
+    id: 'task2',
+    name: 'Task 2',
+    slug: 'task-2',
+    old_slugs: ['old-slug'],
+    epic: 'epic2',
+    branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+    branch_name: 'epic__task',
+    description: 'Task Description',
+    description_rendered: '<p>Task Description</p>',
+    has_unmerged_commits: false,
+    commits: [],
+    assigned_dev: 'user-id',
+    assigned_qa: null,
+  },
+];
+
 describe('<ProjectDetail />', () => {
   const setup = (options) => {
     const defaults = {
@@ -173,9 +206,71 @@ describe('<ProjectDetail />', () => {
     // selected, this can be removed and selectively mocked out for a group of
     // tests that specifically trigger the "Tasks" tab.
     const url = addUrlParams(window.api_urls.task_list(), {
-      project: 'p1',
+      epic__project: 'p1',
     });
-    fetchMock.getOnce(url, []);
+    fetchMock.mock(url, tasks);
+  });
+
+  test('tasks tab exists', () => {
+    const { getAllByText, getByText } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_permission: false,
+            },
+          ],
+        },
+        epics: {
+          p1: {
+            epics: [],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+      },
+    });
+    fireEvent.click(getAllByText('Tasks')[0]);
+    expect(getByText('Loading...')).toBeVisible();
+  });
+
+  test('tasks tab renders tasks', async () => {
+    const { getAllByText, findByText } = setup({
+      initialState: {
+        ...defaultState,
+        projects: {
+          ...defaultState.projects,
+          projects: [
+            {
+              ...defaultState.projects.projects[0],
+              has_push_permission: false,
+            },
+          ],
+        },
+        epics: {
+          p1: {
+            epics: defaultState.epics,
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+        tasks,
+      },
+    });
+
+    fireEvent.click(getAllByText('Tasks')[0]);
+    // const url = addUrlParams(window.api_urls.task_list(), {
+    //   epic__project: 'p1',
+    // });
+    // fetchMock.mock(url, tasks);
+    const thing = await findByText('Task 2');
+    console.log(thing, 'iuhgfadjhdsfauhg');
+    expect(thing).toBeVisible();
   });
 
   test('renders project detail and epics list', () => {
