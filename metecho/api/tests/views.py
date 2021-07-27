@@ -812,6 +812,22 @@ class TestScratchOrgView:
 
 @pytest.mark.django_db
 class TestTaskViewSet:
+    def test_get(self, client, task_factory):
+        task_factory()
+        url = reverse("task-list")
+
+        response = client.get(url)
+
+        results = response.json()
+        assert response.status_code == 200, response.content
+        assert len(results) == 1, response.json()
+        assert tuple(results[0]["epic"].keys()) == (
+            "id",
+            "name",
+            "slug",
+            "github_users",
+        )
+
     def test_create__dev_org(
         self, client, git_hub_repository_factory, scratch_org_factory, epic_factory
     ):
@@ -989,6 +1005,7 @@ class TestTaskViewSet:
             repo_id=task.epic.project.repo_id, user=client.user, permissions=repo_perms
         )
         data = TaskSerializer(task).data
+        data["epic"] = str(task.epic.pk)  # Convert the nested epic to just the PK
         url = reverse("task-detail", args=[task.pk])
         if method == "post":
             url = reverse("task-list")
@@ -996,7 +1013,7 @@ class TestTaskViewSet:
 
         response = getattr(client, method)(url, data=data, format="json")
 
-        assert check(response.status_code)
+        assert check(response.status_code), response.content
 
     def test_assignees(self, client, git_hub_repository_factory, task_factory):
         repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)

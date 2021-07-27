@@ -63,9 +63,12 @@
 
 .status-cell {
   > div {
-    align-items: center;
     display: flex;
   }
+}
+
+.status-cell-icon {
+  display: flex;
 }
 
 // add a tiny top margin to create visual appearance of centered text

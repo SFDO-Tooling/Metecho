@@ -151,7 +151,8 @@ const DetailPageLayout = ({
         <div
           className="slds-col
             slds-size_1-of-1
-            slds-medium-size_7-of-12
+            slds-medium-size_8-of-12
+            slds-large-size_7-of-12
             slds-p-bottom_x-large"
         >
           {children}
@@ -159,7 +160,8 @@ const DetailPageLayout = ({
         <div
           className="slds-col
             slds-size_1-of-1
-            slds-medium-size_5-of-12"
+            slds-medium-size_4-of-12
+            slds-large-size_5-of-12"
         >
           {description && (
             <PageDescription

@@ -37,18 +37,13 @@ import {
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
 } from '#js/components/utils';
+import useAssignUserToTask from '#js/components/utils/useAssignUserToTask';
 import { ThunkDispatch } from '#js/store';
 import { updateObject } from '#js/store/actions';
 import { Org } from '#js/store/orgs/reducer';
-import { Task } from '#js/store/tasks/reducer';
 import { GitHubUser, User } from '#js/store/user/reducer';
 import { selectUserState } from '#js/store/user/selectors';
-import {
-  EPIC_STATUSES,
-  OBJECT_TYPES,
-  ORG_TYPES,
-  OrgTypes,
-} from '#js/utils/constants';
+import { EPIC_STATUSES, OBJECT_TYPES } from '#js/utils/constants';
 import { getBranchLink, getCompletedTasks } from '#js/utils/helpers';
 import routes from '#js/utils/routes';
 
@@ -61,6 +56,7 @@ const EpicDetail = (props: RouteComponentProps) => {
   );
   const { tasks } = useFetchTasksIfMissing(epic, props);
   const { orgs } = useFetchOrgsIfMissing({ epic, props });
+  const assignUser = useAssignUserToTask();
   const currentUser = useSelector(selectUserState) as User;
 
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
@@ -203,37 +199,6 @@ const EpicDetail = (props: RouteComponentProps) => {
       }
     },
     [epic, epicCollaborators, updateEpicUsers, getRemovedUsers],
-  );
-
-  // "Assign user to task" modal related:
-  const assignUser = useCallback(
-    ({
-      task,
-      type,
-      assignee,
-      shouldAlertAssignee,
-    }: {
-      task: Task;
-      type: OrgTypes;
-      assignee: string | null;
-      shouldAlertAssignee: boolean;
-    }) => {
-      /* istanbul ignore next */
-      const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
-      const alertType =
-        type === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.TASK,
-          url: window.api_urls.task_assignees(task.id),
-          data: {
-            [userType]: assignee,
-            [alertType]: shouldAlertAssignee,
-          },
-        }),
-      );
-    },
-    [dispatch],
   );
 
   // "Submit" modal related:
