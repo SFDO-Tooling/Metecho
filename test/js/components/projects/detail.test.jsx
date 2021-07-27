@@ -3,18 +3,18 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import ProjectDetail from '~js/components/projects/detail';
-import { createObject, fetchObject, fetchObjects } from '~js/store/actions';
-import { onboarded } from '~js/store/user/actions';
-import { addUrlParams } from '~js/utils/api';
-import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '~js/utils/constants';
-import routes from '~js/utils/routes';
+import ProjectDetail from '#js/components/projects/detail';
+import { createObject, fetchObject, fetchObjects } from '#js/store/actions';
+import { onboarded } from '#js/store/user/actions';
+import { addUrlParams } from '#js/utils/api';
+import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '#js/utils/constants';
+import routes from '#js/utils/routes';
 
 import { sampleEpic1, sampleEpic2 } from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('~js/store/actions');
-jest.mock('~js/store/user/actions');
+jest.mock('#js/store/actions');
+jest.mock('#js/store/user/actions');
 
 onboarded.mockReturnValue(() => Promise.resolve({ type: 'TEST', payload: {} }));
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

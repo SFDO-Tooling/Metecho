@@ -10,17 +10,17 @@ import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
-import ConnectModal from '~js/components/user/connect';
-import Logout from '~js/components/user/logout';
+import ConnectModal from '#js/components/user/connect';
+import Logout from '#js/components/user/logout';
 import {
   ExternalLink,
   SpinnerWrapper,
   useIsMounted,
-} from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { disconnect, refreshUser } from '~js/store/user/actions';
-import { User } from '~js/store/user/reducer';
-import { selectUserState } from '~js/store/user/selectors';
+} from '#js/components/utils';
+import { ThunkDispatch } from '#js/store';
+import { disconnect, refreshUser } from '#js/store/user/actions';
+import { User } from '#js/store/user/reducer';
+import { selectUserState } from '#js/store/user/selectors';
 
 const ConnectToSalesforce = ({
   toggleModal,
