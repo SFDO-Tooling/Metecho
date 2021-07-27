@@ -10,7 +10,11 @@ import { addUrlParams } from '#js/utils/api';
 import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '#js/utils/constants';
 import routes from '#js/utils/routes';
 
-import { sampleEpic1, sampleEpic2 } from '../../../../src/stories/fixtures';
+import {
+  sampleEpic1,
+  sampleEpic2,
+  sampleProject1,
+} from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
 jest.mock('#js/store/actions');
@@ -66,7 +70,7 @@ const defaultState = {
         description: 'This is a test project.',
         description_rendered: '<p>This is a test project.</p>',
         repo_url: 'https://github.com/test/test-repo',
-        github_users: [],
+        github_users: sampleProject1.github_users,
         repo_image_url: 'https://github.com/repo-image',
         org_config_names: [{ key: 'dev' }, { key: 'qa' }],
         has_push_permission: true,
@@ -212,31 +216,34 @@ describe('<ProjectDetail />', () => {
     };
   };
 
-  describe('Tasks', () => {
-    beforeEach(() => {
-      const url = addUrlParams(window.api_urls.task_list(), {
-        epic__project: 'p1',
-      });
-      fetchMock.getOnce(url, tasks);
-    });
-
-    test('tasks tab renders tasks', async () => {
-      const { getByText, findByText } = setup();
-
-      expect.assertions(1);
-      fireEvent.click(getByText('Tasks'));
-      const task = await findByText('Task 2');
-
-      expect(task).toBeVisible();
-    });
-  });
-
   test('renders project detail and epics list', () => {
     const { getByText, getAllByTitle } = setup();
 
     expect(getAllByTitle('Project 1')[0]).toBeVisible();
     expect(getByText('This is a test project.')).toBeVisible();
     expect(getByText('Epic 1')).toBeVisible();
+  });
+
+  test('renders empty epics list', () => {
+    const { getByText, getAllByTitle } = setup({
+      initialState: {
+        ...defaultState,
+        epics: {
+          p1: {
+            epics: [],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+      },
+    });
+
+    expect(getAllByTitle('Project 1')[0]).toBeVisible();
+    expect(getByText('This is a test project.')).toBeVisible();
+    expect(
+      getByText('You can create a new epic', { exact: false }),
+    ).toBeVisible();
   });
 
   test('renders readonly project detail', () => {
@@ -427,6 +434,38 @@ describe('<ProjectDetail />', () => {
       });
 
       expect(queryByText('Load More')).toBeNull();
+    });
+  });
+
+  describe('Tasks tab', () => {
+    let url;
+
+    beforeEach(() => {
+      url = addUrlParams(window.api_urls.task_list(), {
+        epic__project: 'p1',
+      });
+      fetchMock.getOnce(url, tasks);
+    });
+
+    test('fetches and renders tasks list', async () => {
+      const { getByText, findByText } = setup();
+
+      expect.assertions(1);
+      fireEvent.click(getByText('Tasks'));
+      const task = await findByText('Task 2');
+
+      expect(task).toBeVisible();
+    });
+
+    test('renders empty tasks list', async () => {
+      fetchMock.getOnce(url, [], { overwriteRoutes: true });
+      const { getByText, findByText } = setup();
+
+      expect.assertions(1);
+      fireEvent.click(getByText('Tasks'));
+      const msg = await findByText('There are no Tasks for this Project.');
+
+      expect(msg).toBeVisible();
     });
   });
 

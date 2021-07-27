@@ -104,7 +104,7 @@ const EpicTableCell = ({
         {item.epic.name}
       </Link>
     </DataTableCell>
-  ) : null;
+  ) : /* istanbul ignore next */ null;
 EpicTableCell.displayName = DataTableCell.displayName;
 
 const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
