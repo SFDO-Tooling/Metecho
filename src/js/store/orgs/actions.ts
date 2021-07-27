@@ -8,7 +8,7 @@ import { selectProjectById } from '~js/store/projects/selectors';
 import { selectTaskById } from '~js/store/tasks/selectors';
 import { addToast } from '~js/store/toasts/actions';
 import apiFetch, { addUrlParams } from '~js/utils/api';
-import { OBJECT_TYPES } from '~js/utils/constants';
+import { OBJECT_TYPES, ORG_TYPES } from '~js/utils/constants';
 
 interface OrgProvisioning {
   type: 'SCRATCH_ORG_PROVISIONING';
@@ -568,19 +568,28 @@ export const orgReassignFailed =
     });
   };
 
-export const orgProvisioning = (model: Org): OrgProvisioning => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.subscribe({
-      model: OBJECT_TYPES.ORG,
-      id: model.id,
-    });
-  }
-  return {
-    type: 'SCRATCH_ORG_PROVISIONING',
-    payload: model,
+export const orgProvisioning =
+  (model: Org): ThunkResult<OrgProvisioning | null> =>
+  (dispatch, getState) => {
+    /* istanbul ignore else */
+    if (
+      model.org_type !== ORG_TYPES.PLAYGROUND ||
+      isCurrentUser(model.owner, getState())
+    ) {
+      /* istanbul ignore else */
+      if (window.socket) {
+        window.socket.subscribe({
+          model: OBJECT_TYPES.ORG,
+          id: model.id,
+        });
+      }
+      return dispatch({
+        type: 'SCRATCH_ORG_PROVISIONING' as const,
+        payload: model,
+      });
+    }
+    return null;
   };
-};
 
 export const orgConvertFailed =
   ({
