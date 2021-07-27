@@ -540,7 +540,7 @@ class TaskAssigneeSerializer(serializers.Serializer):
         if "assigned_qa" in data:
             self._handle_reassign("qa", task, data, user, originating_user_id=user_id)
             task.assigned_qa = data["assigned_qa"]
-        task.save()
+        task.finalize_task_update(originating_user_id=user_id)
         return task
 
     def _handle_reassign(
