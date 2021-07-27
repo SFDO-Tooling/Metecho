@@ -442,7 +442,7 @@ describe('<ProjectDetail />', () => {
 
     beforeEach(() => {
       url = addUrlParams(window.api_urls.task_list(), {
-        epic__project: 'p1',
+        project: 'p1',
       });
       fetchMock.getOnce(url, tasks);
     });
