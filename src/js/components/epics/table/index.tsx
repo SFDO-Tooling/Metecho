@@ -5,11 +5,11 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import CollaboratorTableCell from '~js/components/epics/table/collaboratorCell';
-import DetailTableCell from '~js/components/epics/table/detailCell';
-import StatusTableCell from '~js/components/epics/table/statusCell';
-import TourPopover from '~js/components/tour/popover';
-import { Epic } from '~js/store/epics/reducer';
+import CollaboratorTableCell from '#js/components/epics/table/collaboratorCell';
+import DetailTableCell from '#js/components/epics/table/detailCell';
+import StatusTableCell from '#js/components/epics/table/statusCell';
+import TourPopover from '#js/components/tour/popover';
+import { Epic } from '#js/store/epics/reducer';
 
 export interface TableCellProps {
   [key: string]: any;

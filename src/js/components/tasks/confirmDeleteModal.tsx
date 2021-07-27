@@ -3,12 +3,12 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React from 'react';
 
-import { Org } from '~js/store/orgs/reducer';
+import { Org } from '#js/store/orgs/reducer';
 import {
   CONFIRM_ORG_TRACKER,
   ConfirmOrgTracker,
   ORG_TYPES,
-} from '~js/utils/constants';
+} from '#js/utils/constants';
 
 const ConfirmDeleteModal = ({
   org,

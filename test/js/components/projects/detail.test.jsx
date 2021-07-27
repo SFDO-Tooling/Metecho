@@ -3,17 +3,22 @@ import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import ProjectDetail from '~js/components/projects/detail';
-import { createObject, fetchObject, fetchObjects } from '~js/store/actions';
-import { onboarded } from '~js/store/user/actions';
-import { addUrlParams } from '~js/utils/api';
-import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '~js/utils/constants';
-import routes from '~js/utils/routes';
+import ProjectDetail from '#js/components/projects/detail';
+import { createObject, fetchObject, fetchObjects } from '#js/store/actions';
+import { onboarded } from '#js/store/user/actions';
+import { addUrlParams } from '#js/utils/api';
+import { SHOW_WALKTHROUGH, WALKTHROUGH_TYPES } from '#js/utils/constants';
+import routes from '#js/utils/routes';
 
+import {
+  sampleEpic1,
+  sampleEpic2,
+  sampleProject1,
+} from '../../../../src/stories/fixtures';
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('~js/store/actions');
-jest.mock('~js/store/user/actions');
+jest.mock('#js/store/actions');
+jest.mock('#js/store/user/actions');
 
 onboarded.mockReturnValue(() => Promise.resolve({ type: 'TEST', payload: {} }));
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
@@ -65,7 +70,7 @@ const defaultState = {
         description: 'This is a test project.',
         description_rendered: '<p>This is a test project.</p>',
         repo_url: 'https://github.com/test/test-repo',
-        github_users: [],
+        github_users: sampleProject1.github_users,
         repo_image_url: 'https://github.com/repo-image',
         org_config_names: [{ key: 'dev' }, { key: 'qa' }],
         has_push_permission: true,
@@ -84,7 +89,7 @@ const defaultState = {
           project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
-          github_users: [],
+          github_users: sampleEpic1.github_users,
           status: 'In progress',
         },
         {
@@ -94,7 +99,7 @@ const defaultState = {
           project: 'p1',
           description: 'Epic Description',
           description_rendered: '<p>Epic Description</p>',
-          github_users: [],
+          github_users: sampleEpic2.github_users,
           status: 'Planned',
         },
         {
@@ -139,6 +144,49 @@ const defaultState = {
   },
 };
 
+const tasks = [
+  {
+    id: 'task1',
+    name: 'Task 1',
+    slug: 'task-1',
+    old_slugs: ['old-slug'],
+    epic: {
+      id: 'epic1',
+      name: 'Epic 1',
+      slug: 'epic-1',
+      github_users: [],
+    },
+    branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+    branch_name: 'feature/epic-1__task-1',
+    description: 'Task Description',
+    description_rendered: '<p>Task Description</p>',
+    has_unmerged_commits: false,
+    commits: [],
+    assigned_dev: 'my-user',
+    assigned_qa: null,
+  },
+  {
+    id: 'task2',
+    name: 'Task 2',
+    slug: 'task-2',
+    old_slugs: ['old-slug'],
+    epic: {
+      id: 'epic2',
+      name: 'Epic 2',
+      slug: 'epic-2',
+      github_users: [],
+    },
+    branch_url: 'https://github.com/test/test-repo/tree/epic__task',
+    branch_name: 'feature/epic-2__task-2',
+    description: 'Task Description',
+    description_rendered: '<p>Task Description</p>',
+    has_unmerged_commits: false,
+    commits: [],
+    assigned_dev: null,
+    assigned_qa: 'my-user',
+  },
+];
+
 describe('<ProjectDetail />', () => {
   const setup = (options) => {
     const defaults = {
@@ -168,22 +216,34 @@ describe('<ProjectDetail />', () => {
     };
   };
 
-  beforeEach(() => {
-    // @@@ Once the API call to fetch tasks is deferred until the "Tasks" tab is
-    // selected, this can be removed and selectively mocked out for a group of
-    // tests that specifically trigger the "Tasks" tab.
-    const url = addUrlParams(window.api_urls.task_list(), {
-      project: 'p1',
-    });
-    fetchMock.getOnce(url, []);
-  });
-
   test('renders project detail and epics list', () => {
     const { getByText, getAllByTitle } = setup();
 
     expect(getAllByTitle('Project 1')[0]).toBeVisible();
     expect(getByText('This is a test project.')).toBeVisible();
     expect(getByText('Epic 1')).toBeVisible();
+  });
+
+  test('renders empty epics list', () => {
+    const { getByText, getAllByTitle } = setup({
+      initialState: {
+        ...defaultState,
+        epics: {
+          p1: {
+            epics: [],
+            next: null,
+            notFound: [],
+            fetched: true,
+          },
+        },
+      },
+    });
+
+    expect(getAllByTitle('Project 1')[0]).toBeVisible();
+    expect(getByText('This is a test project.')).toBeVisible();
+    expect(
+      getByText('You can create a new epic', { exact: false }),
+    ).toBeVisible();
   });
 
   test('renders readonly project detail', () => {
@@ -374,6 +434,38 @@ describe('<ProjectDetail />', () => {
       });
 
       expect(queryByText('Load More')).toBeNull();
+    });
+  });
+
+  describe('Tasks tab', () => {
+    let url;
+
+    beforeEach(() => {
+      url = addUrlParams(window.api_urls.task_list(), {
+        epic__project: 'p1',
+      });
+      fetchMock.getOnce(url, tasks);
+    });
+
+    test('fetches and renders tasks list', async () => {
+      const { getByText, findByText } = setup();
+
+      expect.assertions(1);
+      fireEvent.click(getByText('Tasks'));
+      const task = await findByText('Task 2');
+
+      expect(task).toBeVisible();
+    });
+
+    test('renders empty tasks list', async () => {
+      fetchMock.getOnce(url, [], { overwriteRoutes: true });
+      const { getByText, findByText } = setup();
+
+      expect.assertions(1);
+      fireEvent.click(getByText('Tasks'));
+      const msg = await findByText('There are no Tasks for this Project.');
+
+      expect(msg).toBeVisible();
     });
   });
 

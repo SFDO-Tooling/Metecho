@@ -3,15 +3,15 @@ import { cloneDeep, intersection, mergeWith, union, without } from 'lodash';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import TourPopover from '~js/components/tour/popover';
-import { Epic } from '~js/store/epics/reducer';
-import { Changeset, Org } from '~js/store/orgs/reducer';
-import { Task } from '~js/store/tasks/reducer';
+import TourPopover from '#js/components/tour/popover';
+import { Epic } from '#js/store/epics/reducer';
+import { Changeset, Org } from '#js/store/orgs/reducer';
+import { Task } from '#js/store/tasks/reducer';
 import {
   EPIC_STATUSES,
   OBJECT_TYPES,
   TASK_STATUSES,
-} from '~js/utils/constants';
+} from '#js/utils/constants';
 
 export const pluralize = (count: number, str: string) =>
   count === 1 ? str : `${str}s`;
