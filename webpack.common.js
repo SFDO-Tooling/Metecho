@@ -13,8 +13,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module.exports = {
   context: path.join(__dirname, 'src', 'js'),
   entry: {
-    app: ['whatwg-fetch', 'js/index', 'sass/app.scss'],
     sentry: 'js/sentry',
+    app: ['whatwg-fetch', 'js/index', 'sass/app.scss'],
   },
   resolve: {
     modules: ['src', 'static', 'node_modules'],
@@ -39,7 +39,7 @@ module.exports = {
         },
         styles: {
           name: 'styles',
-          test: /\.css$/,
+          type: 'css/mini-extract',
           chunks: 'all',
           enforce: true,
         },
@@ -124,7 +124,6 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      inject: false,
       template: path.join(__dirname, 'src', 'index.html'),
     }),
   ],
