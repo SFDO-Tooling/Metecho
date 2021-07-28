@@ -37,7 +37,7 @@ export const TermsModal = ({
   handleSubmit?: () => void;
 }) => (
   <Modal
-    isOpen={isRequired || isOpen}
+    isOpen={isRequired || isOpen || false}
     disableClose={isRequired}
     heading={i18n.t('Metecho Terms of Service')}
     size="medium"

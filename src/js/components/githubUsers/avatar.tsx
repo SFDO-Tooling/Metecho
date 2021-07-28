@@ -9,9 +9,10 @@ const GitHubUserAvatar = ({
   size,
 }: {
   user: GitHubUser;
-  size?: string;
+  size?: 'small' | 'x-small' | 'medium' | 'large';
 }) => (
   <Avatar
+    variant="user"
     imgAlt={i18n.t('avatar for user {{username}}', { username: user.login })}
     imgSrc={user.avatar_url}
     title={user.login}

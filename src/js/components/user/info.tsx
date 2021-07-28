@@ -259,6 +259,7 @@ const UserDropdown = () => {
                 {user.avatar_url ? (
                   <div className="slds-is-absolute">
                     <Avatar
+                      variant="user"
                       imgSrc={user.avatar_url}
                       imgAlt={i18n.t('avatar for user {{username}}', {
                         username: user.username,
@@ -305,11 +306,13 @@ const UserDropdown = () => {
           variant="icon"
           label={
             <Avatar
-              imgSrc={user.avatar_url}
+              variant="user"
+              imgSrc={user.avatar_url || undefined}
               imgAlt={i18n.t('avatar for user {{username}}', {
                 username: user.username,
               })}
               title={user.username}
+              size="medium"
             />
           }
         />

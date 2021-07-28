@@ -3,7 +3,7 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import seesawSvg from '!raw-loader!#img/seesaw-lg.svg';
+import seesawSvg from '#img/seesaw-lg.svg?raw';
 import { Illustration } from '#js/components/utils';
 import { Epic } from '#js/store/epics/reducer';
 import { Project } from '#js/store/projects/reducer';

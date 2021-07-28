@@ -106,7 +106,7 @@ const DetailPageLayout = ({
                   alt={i18n.t('social image for {{title}}', { title })}
                 />
               </div>
-            ) : null
+            ) : undefined
           }
         />
       </div>

@@ -60,6 +60,7 @@ const TourAlert = () => {
       icon={<Icon category="utility" name="info" className="popover-button" />}
       className="tour-alert"
       dismissible
+      variant="info"
       onRequestClose={hideAlert}
     />
   ) : null;
