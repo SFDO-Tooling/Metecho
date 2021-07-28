@@ -5,15 +5,14 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import React, { useRef, useState } from 'react';
-
 import {
   LabelWithSpinner,
   useForm,
   useFormDefaults,
   useIsMounted,
-} from '#js/components/utils';
-import { REVIEW_STATUSES, ReviewStatuses } from '#js/utils/constants';
+} from '_js/components/utils';
+import { REVIEW_STATUSES, ReviewStatuses } from '_js/utils/constants';
+import React, { useRef, useState } from 'react';
 
 interface Props {
   orgId?: string;

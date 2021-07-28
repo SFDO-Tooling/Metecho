@@ -3,14 +3,13 @@ import Radio from '@salesforce/design-system-react/components/radio-group/radio'
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 import i18n from 'i18next';
+import { SpinnerWrapper, UseFormProps } from '_js/components/utils';
+import { ThunkDispatch } from '_js/store';
+import { refreshOrgConfigs } from '_js/store/projects/actions';
+import { OrgConfig } from '_js/store/projects/reducer';
+import { DEFAULT_ORG_CONFIG_NAME } from '_js/utils/constants';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-
-import { SpinnerWrapper, UseFormProps } from '#js/components/utils';
-import { ThunkDispatch } from '#js/store';
-import { refreshOrgConfigs } from '#js/store/projects/actions';
-import { OrgConfig } from '#js/store/projects/reducer';
-import { DEFAULT_ORG_CONFIG_NAME } from '#js/utils/constants';
 
 const SelectFlowType = ({
   orgConfigs,

@@ -1,11 +1,9 @@
-import Sockette from 'sockette';
-
-import { removeObject } from '#js/store/actions';
+import { removeObject } from '_js/store/actions';
 import {
   createEpicPR,
   createEpicPRFailed,
   updateEpic,
-} from '#js/store/epics/actions';
+} from '_js/store/epics/actions';
 import {
   commitFailed,
   commitSucceeded,
@@ -22,28 +20,29 @@ import {
   refreshError,
   updateFailed,
   updateOrg,
-} from '#js/store/orgs/actions';
+} from '_js/store/orgs/actions';
 import {
   projectError,
   projectsRefreshed,
   projectsRefreshError,
   updateProject,
-} from '#js/store/projects/actions';
-import { connectSocket, disconnectSocket } from '#js/store/socket/actions';
+} from '_js/store/projects/actions';
+import { connectSocket, disconnectSocket } from '_js/store/socket/actions';
 import {
   createTaskPR,
   createTaskPRFailed,
   submitReview,
   submitReviewFailed,
   updateTask,
-} from '#js/store/tasks/actions';
-import * as sockets from '#js/utils/websockets';
+} from '_js/store/tasks/actions';
+import * as sockets from '_js/utils/websockets';
+import Sockette from 'sockette';
 
-jest.mock('#js/store/actions');
-jest.mock('#js/store/orgs/actions');
-jest.mock('#js/store/epics/actions');
-jest.mock('#js/store/projects/actions');
-jest.mock('#js/store/tasks/actions');
+jest.mock('_js/store/actions');
+jest.mock('_js/store/orgs/actions');
+jest.mock('_js/store/epics/actions');
+jest.mock('_js/store/projects/actions');
+jest.mock('_js/store/tasks/actions');
 
 const actions = {
   commitFailed,

@@ -1,11 +1,10 @@
+import FourOhFour from '_js/components/404';
+import { Epic } from '_js/store/epics/reducer';
+import { Project } from '_js/store/projects/reducer';
+import routes from '_js/utils/routes';
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
-
-import FourOhFour from '#js/components/404';
-import { Epic } from '#js/store/epics/reducer';
-import { Project } from '#js/store/projects/reducer';
-import routes from '#js/utils/routes';
 
 interface Props {
   project: Project;

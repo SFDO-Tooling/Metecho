@@ -2,12 +2,11 @@ import Accordion from '@salesforce/design-system-react/components/accordion';
 import AccordionPanel from '@salesforce/design-system-react/components/accordion/panel';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
+import SelectFlowType from '_js/components/tasks/selectFlowType';
+import { UseFormProps } from '_js/components/utils';
+import { OrgData } from '_js/components/utils/createOrgModal';
+import { Project } from '_js/store/projects/reducer';
 import React, { useCallback, useState } from 'react';
-
-import SelectFlowType from '#js/components/tasks/selectFlowType';
-import { UseFormProps } from '#js/components/utils';
-import { OrgData } from '#js/components/utils/createOrgModal';
-import { Project } from '#js/store/projects/reducer';
 
 interface Props {
   project: Project;

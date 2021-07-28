@@ -1,15 +1,14 @@
+// import backpackSvg from '_img/backpack-lg.svg?raw';
+import mapSvg from '_img/map-lg.svg?raw';
+import seesawSvg from '_img/seesaw-lg.svg?raw';
+import { Illustration } from '_js/components/utils';
+import { WALKTHROUGH_TYPES, WalkthroughType } from '_js/utils/constants';
 import Button from '@salesforce/design-system-react/components/button';
 import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
-
-// import backpackSvg from '#img/backpack-lg.svg?raw';
-import mapSvg from '#img/map-lg.svg?raw';
-import seesawSvg from '#img/seesaw-lg.svg?raw';
-import { Illustration } from '#js/components/utils';
-import { WALKTHROUGH_TYPES, WalkthroughType } from '#js/utils/constants';
 
 export interface Tour {
   header: string;

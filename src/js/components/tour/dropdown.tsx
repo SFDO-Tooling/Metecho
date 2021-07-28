@@ -1,3 +1,17 @@
+// import backpackIcon from '_img/backpack-sm.svg';
+import mapIcon from '_img/map-sm.svg';
+import seesawIcon from '_img/seesaw-sm.svg';
+import { useIsMounted } from '_js/components/utils';
+import { AppState, ThunkDispatch } from '_js/store';
+import { selectProject } from '_js/store/projects/selectors';
+import { updateTour } from '_js/store/user/actions';
+import { selectUserState } from '_js/store/user/selectors';
+import {
+  SHOW_WALKTHROUGH,
+  WALKTHROUGH_TYPES,
+  WalkthroughType,
+} from '_js/utils/constants';
+import routes, { routePatterns } from '_js/utils/routes';
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Popover from '@salesforce/design-system-react/components/popover';
@@ -6,21 +20,6 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
-
-// import backpackIcon from '#img/backpack-sm.svg';
-import mapIcon from '#img/map-sm.svg';
-import seesawIcon from '#img/seesaw-sm.svg';
-import { useIsMounted } from '#js/components/utils';
-import { AppState, ThunkDispatch } from '#js/store';
-import { selectProject } from '#js/store/projects/selectors';
-import { updateTour } from '#js/store/user/actions';
-import { selectUserState } from '#js/store/user/selectors';
-import {
-  SHOW_WALKTHROUGH,
-  WALKTHROUGH_TYPES,
-  WalkthroughType,
-} from '#js/utils/constants';
-import routes, { routePatterns } from '#js/utils/routes';
 
 const TourDropdown = ({
   className,

@@ -1,10 +1,9 @@
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import i18n from 'i18next';
+import { Project } from '_js/store/projects/reducer';
+import routes from '_js/utils/routes';
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-import { Project } from '#js/store/projects/reducer';
-import routes from '#js/utils/routes';
 
 const ProjectListItem = ({ project }: { project: Project }) => (
   <div

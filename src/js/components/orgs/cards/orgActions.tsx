@@ -1,14 +1,13 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
+import TourPopover from '_js/components/tour/popover';
+import { LabelWithSpinner } from '_js/components/utils';
+import { Org } from '_js/store/orgs/reducer';
+import { Task } from '_js/store/tasks/reducer';
+import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '_js/utils/constants';
 import React from 'react';
 import { Trans } from 'react-i18next';
-
-import TourPopover from '#js/components/tour/popover';
-import { LabelWithSpinner } from '#js/components/utils';
-import { Org } from '#js/store/orgs/reducer';
-import { Task } from '#js/store/tasks/reducer';
-import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '#js/utils/constants';
 
 const OrgActions = ({
   org,

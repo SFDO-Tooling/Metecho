@@ -2,8 +2,8 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import TasksTableComponent from '#js/components/tasks/table';
-import { Task } from '#js/store/tasks/reducer';
+import TasksTableComponent from '_js/components/tasks/table';
+import { Task } from '_js/store/tasks/reducer';
 
 import { withRedux } from '../../decorators';
 import {

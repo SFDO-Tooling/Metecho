@@ -1,19 +1,18 @@
-import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import React from 'react';
-import { StaticRouter } from 'react-router-dom';
-
-import TaskDetail from '#js/components/tasks/detail';
-import { createObject, fetchObjects, updateObject } from '#js/store/actions';
-import { refetchOrg, refreshOrg } from '#js/store/orgs/actions';
-import { defaultState as defaultOrgsState } from '#js/store/orgs/reducer';
-import { refreshOrgConfigs } from '#js/store/projects/actions';
+import TaskDetail from '_js/components/tasks/detail';
+import { createObject, fetchObjects, updateObject } from '_js/store/actions';
+import { refetchOrg, refreshOrg } from '_js/store/orgs/actions';
+import { defaultState as defaultOrgsState } from '_js/store/orgs/reducer';
+import { refreshOrgConfigs } from '_js/store/projects/actions';
 import {
   OBJECT_TYPES,
   ORG_TYPES,
   RETRIEVE_CHANGES,
   TASK_STATUSES,
-} from '#js/utils/constants';
-import routes from '#js/utils/routes';
+} from '_js/utils/constants';
+import routes from '_js/utils/routes';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import React from 'react';
+import { StaticRouter } from 'react-router-dom';
 
 import {
   renderWithRedux,
@@ -21,9 +20,9 @@ import {
   storeWithThunk,
 } from './../../utils';
 
-jest.mock('#js/store/actions');
-jest.mock('#js/store/orgs/actions');
-jest.mock('#js/store/projects/actions');
+jest.mock('_js/store/actions');
+jest.mock('_js/store/orgs/actions');
+jest.mock('_js/store/projects/actions');
 
 createObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

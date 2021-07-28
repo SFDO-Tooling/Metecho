@@ -4,23 +4,22 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import { omit } from 'lodash';
-import React, { useRef, useState } from 'react';
-
-import SelectFlowType from '#js/components/tasks/selectFlowType';
+import SelectFlowType from '_js/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
   useForm,
   useFormDefaults,
   useIsMounted,
-} from '#js/components/utils';
-import { Epic } from '#js/store/epics/reducer';
-import { OrgConfig } from '#js/store/projects/reducer';
-import { Task } from '#js/store/tasks/reducer';
+} from '_js/components/utils';
+import { Epic } from '_js/store/epics/reducer';
+import { OrgConfig } from '_js/store/projects/reducer';
+import { Task } from '_js/store/tasks/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
   ObjectTypes,
-} from '#js/utils/constants';
+} from '_js/utils/constants';
+import React, { useRef, useState } from 'react';
 
 interface EditModalProps {
   model: Epic | Task;

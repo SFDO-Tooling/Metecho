@@ -2,14 +2,13 @@ import DataTable from '@salesforce/design-system-react/components/data-table';
 import DataTableColumn from '@salesforce/design-system-react/components/data-table/column';
 import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
+import CollaboratorTableCell from '_js/components/epics/table/collaboratorCell';
+import DetailTableCell from '_js/components/epics/table/detailCell';
+import StatusTableCell from '_js/components/epics/table/statusCell';
+import TourPopover from '_js/components/tour/popover';
+import { Epic } from '_js/store/epics/reducer';
 import React from 'react';
 import { Trans } from 'react-i18next';
-
-import CollaboratorTableCell from '#js/components/epics/table/collaboratorCell';
-import DetailTableCell from '#js/components/epics/table/detailCell';
-import StatusTableCell from '#js/components/epics/table/statusCell';
-import TourPopover from '#js/components/tour/popover';
-import { Epic } from '#js/store/epics/reducer';
 
 export interface TableCellProps {
   [key: string]: any;

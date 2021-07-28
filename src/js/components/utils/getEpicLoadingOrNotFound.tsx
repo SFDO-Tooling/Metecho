@@ -1,10 +1,9 @@
+import EpicNotFound from '_js/components/epics/epic404';
+import ProjectNotFound from '_js/components/projects/project404';
+import { SpinnerWrapper } from '_js/components/utils';
+import { Epic } from '_js/store/epics/reducer';
+import { Project } from '_js/store/projects/reducer';
 import React, { ReactElement } from 'react';
-
-import EpicNotFound from '#js/components/epics/epic404';
-import ProjectNotFound from '#js/components/projects/project404';
-import { SpinnerWrapper } from '#js/components/utils';
-import { Epic } from '#js/store/epics/reducer';
-import { Project } from '#js/store/projects/reducer';
 
 export default ({
   project,

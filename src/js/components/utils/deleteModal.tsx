@@ -1,17 +1,16 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
+import { LabelWithSpinner, useIsMounted } from '_js/components/utils';
+import { ThunkDispatch } from '_js/store';
+import { deleteObject } from '_js/store/actions';
+import { Epic } from '_js/store/epics/reducer';
+import { Task } from '_js/store/tasks/reducer';
+import { OBJECT_TYPES, ObjectTypes } from '_js/utils/constants';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-
-import { LabelWithSpinner, useIsMounted } from '#js/components/utils';
-import { ThunkDispatch } from '#js/store';
-import { deleteObject } from '#js/store/actions';
-import { Epic } from '#js/store/epics/reducer';
-import { Task } from '#js/store/tasks/reducer';
-import { OBJECT_TYPES, ObjectTypes } from '#js/utils/constants';
 
 interface Props extends RouteComponentProps {
   model: Epic | Task;

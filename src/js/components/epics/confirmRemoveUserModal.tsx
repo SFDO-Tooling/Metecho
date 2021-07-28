@@ -1,11 +1,10 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
+import { UserCard } from '_js/components/githubUsers/cards';
+import { GitHubUser } from '_js/store/user/reducer';
 import React from 'react';
 import { Trans } from 'react-i18next';
-
-import { UserCard } from '#js/components/githubUsers/cards';
-import { GitHubUser } from '#js/store/user/reducer';
 
 const ConfirmRemoveUserModal = ({
   confirmRemoveUsers,

@@ -1,12 +1,12 @@
-import { ObjectsAction } from '#js/store/actions';
-import { TaskAction } from '#js/store/tasks/actions';
-import { LogoutAction, RefetchDataAction } from '#js/store/user/actions';
+import { ObjectsAction } from '_js/store/actions';
+import { TaskAction } from '_js/store/tasks/actions';
+import { LogoutAction, RefetchDataAction } from '_js/store/user/actions';
 import {
   OBJECT_TYPES,
   ObjectTypes,
   ReviewStatuses,
   TaskStatuses,
-} from '#js/utils/constants';
+} from '_js/utils/constants';
 
 export interface Commit {
   id: string;

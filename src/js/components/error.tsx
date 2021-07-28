@@ -1,9 +1,8 @@
+import { EmptyIllustration } from '_js/components/404';
+import { logError } from '_js/utils/logging';
+import routes from '_js/utils/routes';
 import React, { Component, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
-
-import { EmptyIllustration } from '#js/components/404';
-import { logError } from '#js/utils/logging';
-import routes from '#js/utils/routes';
 
 interface Props {
   children: ReactNode;

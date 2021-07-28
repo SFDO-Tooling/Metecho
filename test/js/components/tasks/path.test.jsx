@@ -1,7 +1,6 @@
+import TaskStatusPath from '_js/components/tasks/path';
+import { REVIEW_STATUSES, TASK_STATUSES } from '_js/utils/constants';
 import React from 'react';
-
-import TaskStatusPath from '#js/components/tasks/path';
-import { REVIEW_STATUSES, TASK_STATUSES } from '#js/utils/constants';
 
 import { render } from './../../utils';
 

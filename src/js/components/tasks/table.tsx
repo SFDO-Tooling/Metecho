@@ -7,26 +7,25 @@ import ProgressRing from '@salesforce/design-system-react/components/progress-ri
 import classNames from 'classnames';
 import i18n from 'i18next';
 import { sortBy } from 'lodash';
-import React, { ReactNode, useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-
-import AssignTaskRoleModal from '#js/components/githubUsers/assignTaskRole';
-import GitHubUserAvatar from '#js/components/githubUsers/avatar';
-import TourPopover from '#js/components/tour/popover';
-import { AppState } from '#js/store';
-import { selectProjectCollaborator } from '#js/store/projects/selectors';
-import { Task } from '#js/store/tasks/reducer';
-import { GitHubUser, User } from '#js/store/user/reducer';
-import { selectUserState } from '#js/store/user/selectors';
+import AssignTaskRoleModal from '_js/components/githubUsers/assignTaskRole';
+import GitHubUserAvatar from '_js/components/githubUsers/avatar';
+import TourPopover from '_js/components/tour/popover';
+import { AppState } from '_js/store';
+import { selectProjectCollaborator } from '_js/store/projects/selectors';
+import { Task } from '_js/store/tasks/reducer';
+import { GitHubUser, User } from '_js/store/user/reducer';
+import { selectUserState } from '_js/store/user/selectors';
 import {
   ORG_TYPES,
   OrgTypes,
   REVIEW_STATUSES,
   TASK_STATUSES,
-} from '#js/utils/constants';
-import routes from '#js/utils/routes';
+} from '_js/utils/constants';
+import routes from '_js/utils/routes';
+import React, { ReactNode, useCallback, useState } from 'react';
+import { Trans } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 type AssignUserAction = ({
   task,

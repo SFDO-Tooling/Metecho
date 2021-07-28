@@ -2,12 +2,12 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import TourPopover from '#js/components/tour/popover';
-import { updateTour } from '#js/store/user/actions';
+import TourPopover from '_js/components/tour/popover';
+import { updateTour } from '_js/store/user/actions';
 
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
-jest.mock('#js/store/user/actions');
+jest.mock('_js/store/user/actions');
 updateTour.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 
 afterEach(() => {

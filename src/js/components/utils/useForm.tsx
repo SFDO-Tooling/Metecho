@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { AnyAction } from 'redux';
 
-import { useIsMounted } from '#js/components/utils';
-import { ThunkDispatch } from '#js/store';
-import { createObject, updateObject } from '#js/store/actions';
-import { addError } from '#js/store/errors/actions';
-import { ApiError } from '#js/utils/api';
-import { ObjectTypes } from '#js/utils/constants';
+import { useIsMounted } from '_js/components/utils';
+import { ThunkDispatch } from '_js/store';
+import { createObject, updateObject } from '_js/store/actions';
+import { addError } from '_js/store/errors/actions';
+import { ApiError } from '_js/utils/api';
+import { ObjectTypes } from '_js/utils/constants';
 
 export interface UseFormProps {
   inputs: { [key: string]: any };

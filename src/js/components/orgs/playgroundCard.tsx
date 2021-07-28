@@ -1,28 +1,27 @@
 import Card from '@salesforce/design-system-react/components/card';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-
-import Footer from '#js/components/orgs/cards/footer';
-import OrgActions from '#js/components/orgs/cards/orgActions';
-import OrgIcon from '#js/components/orgs/cards/orgIcon';
-import OrgInfo from '#js/components/orgs/cards/orgInfo';
-import OrgSpinner from '#js/components/orgs/cards/orgSpinner';
-import ConfirmDeleteModal from '#js/components/tasks/confirmDeleteModal';
-import { useIsMounted } from '#js/components/utils';
-import { ThunkDispatch } from '#js/store';
-import { deleteObject } from '#js/store/actions';
-import { Epic } from '#js/store/epics/reducer';
-import { refetchOrg, refreshOrg } from '#js/store/orgs/actions';
-import { Org } from '#js/store/orgs/reducer';
-import { Project } from '#js/store/projects/reducer';
-import { Task } from '#js/store/tasks/reducer';
+import Footer from '_js/components/orgs/cards/footer';
+import OrgActions from '_js/components/orgs/cards/orgActions';
+import OrgIcon from '_js/components/orgs/cards/orgIcon';
+import OrgInfo from '_js/components/orgs/cards/orgInfo';
+import OrgSpinner from '_js/components/orgs/cards/orgSpinner';
+import ConfirmDeleteModal from '_js/components/tasks/confirmDeleteModal';
+import { useIsMounted } from '_js/components/utils';
+import { ThunkDispatch } from '_js/store';
+import { deleteObject } from '_js/store/actions';
+import { Epic } from '_js/store/epics/reducer';
+import { refetchOrg, refreshOrg } from '_js/store/orgs/actions';
+import { Org } from '_js/store/orgs/reducer';
+import { Project } from '_js/store/projects/reducer';
+import { Task } from '_js/store/tasks/reducer';
 import {
   CONFIRM_ORG_TRACKER,
   ConfirmOrgTracker,
   OBJECT_TYPES,
-} from '#js/utils/constants';
-import { getTaskCommits } from '#js/utils/helpers';
+} from '_js/utils/constants';
+import { getTaskCommits } from '_js/utils/helpers';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 interface PlaygroundCardProps {
   org: Org;

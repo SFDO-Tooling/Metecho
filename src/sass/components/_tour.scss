@@ -32,7 +32,7 @@
 
 // Override background image
 .slds-popover_walkthrough .slds-popover__header {
-  background-image: url('./../../static/images/popover-header.png');
+  background-image: url('~_img/popover-header.png');
 }
 
 .popover-wrapper {
@@ -121,4 +121,6 @@
   font-weight: normal;
   text-align: left;
   white-space: initial;
+  line-height: $line-height-text;
+  cursor: auto;
 }

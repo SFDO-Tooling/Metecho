@@ -1,10 +1,9 @@
 import ProgressBar from '@salesforce/design-system-react/components/progress-bar';
 import i18n from 'i18next';
+import TourPopover from '_js/components/tour/popover';
+import { getPercentage } from '_js/utils/helpers';
 import React from 'react';
 import { Trans } from 'react-i18next';
-
-import TourPopover from '#js/components/tour/popover';
-import { getPercentage } from '#js/utils/helpers';
 
 interface Props {
   range: [number, number];

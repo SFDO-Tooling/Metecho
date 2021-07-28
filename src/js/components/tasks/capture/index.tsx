@@ -3,25 +3,24 @@ import Card from '@salesforce/design-system-react/components/card';
 import Modal from '@salesforce/design-system-react/components/modal';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import React, { ReactNode, useState } from 'react';
-import { useDispatch } from 'react-redux';
-
-import ChangesForm from '#js/components/tasks/capture/changes';
-import TargetDirectoriesForm from '#js/components/tasks/capture/directories';
-import CommitMessageForm from '#js/components/tasks/capture/message';
+import ChangesForm from '_js/components/tasks/capture/changes';
+import TargetDirectoriesForm from '_js/components/tasks/capture/directories';
+import CommitMessageForm from '_js/components/tasks/capture/message';
 import {
   LabelWithSpinner,
   useForm,
   useFormDefaults,
   useIsMounted,
   useTransientMessage,
-} from '#js/components/utils';
-import { ThunkDispatch } from '#js/store';
-import { updateObject } from '#js/store/actions';
-import { Changeset, Org } from '#js/store/orgs/reducer';
-import { ApiError } from '#js/utils/api';
-import { OBJECT_TYPES } from '#js/utils/constants';
-import { mergeChangesets, splitChangeset } from '#js/utils/helpers';
+} from '_js/components/utils';
+import { ThunkDispatch } from '_js/store';
+import { updateObject } from '_js/store/actions';
+import { Changeset, Org } from '_js/store/orgs/reducer';
+import { ApiError } from '_js/utils/api';
+import { OBJECT_TYPES } from '_js/utils/constants';
+import { mergeChangesets, splitChangeset } from '_js/utils/helpers';
+import React, { ReactNode, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 interface Props {
   org: Org;

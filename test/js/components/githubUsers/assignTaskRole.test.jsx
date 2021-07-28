@@ -1,12 +1,11 @@
+import AssignTaskRoleModal from '_js/components/githubUsers/assignTaskRole';
+import { refreshGitHubUsers } from '_js/store/projects/actions';
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import AssignTaskRoleModal from '#js/components/githubUsers/assignTaskRole';
-import { refreshGitHubUsers } from '#js/store/projects/actions';
-
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
-jest.mock('#js/store/projects/actions');
+jest.mock('_js/store/projects/actions');
 
 refreshGitHubUsers.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 

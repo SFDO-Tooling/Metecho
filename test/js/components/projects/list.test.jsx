@@ -1,10 +1,9 @@
+import ProjectList from '_js/components/projects/list';
+import { fetchObjects } from '_js/store/actions';
+import { refreshProjects } from '_js/store/projects/actions';
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-
-import ProjectList from '#js/components/projects/list';
-import { fetchObjects } from '#js/store/actions';
-import { refreshProjects } from '#js/store/projects/actions';
 
 import {
   renderWithRedux,
@@ -18,8 +17,8 @@ jest.mock('react-fns', () => ({
     return (props) => <Component x={0} y={0} {...props} />;
   },
 }));
-jest.mock('#js/store/actions');
-jest.mock('#js/store/projects/actions');
+jest.mock('_js/store/actions');
+jest.mock('_js/store/projects/actions');
 
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshProjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

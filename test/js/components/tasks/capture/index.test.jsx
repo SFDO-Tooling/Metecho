@@ -1,9 +1,8 @@
+import CaptureModal from '_js/components/tasks/capture';
+import { createObject, updateObject } from '_js/store/actions';
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-
-import CaptureModal from '#js/components/tasks/capture';
-import { createObject, updateObject } from '#js/store/actions';
 
 import {
   renderWithRedux,
@@ -11,7 +10,7 @@ import {
   storeWithThunk,
 } from '../../../utils';
 
-jest.mock('#js/store/actions');
+jest.mock('_js/store/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

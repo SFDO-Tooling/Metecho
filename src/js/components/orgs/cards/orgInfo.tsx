@@ -2,14 +2,13 @@ import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
+import { ExternalLink } from '_js/components/utils';
+import { Org } from '_js/store/orgs/reducer';
+import { Task } from '_js/store/tasks/reducer';
+import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '_js/utils/constants';
+import { getOrgBehindLatestMsg, getOrgStatusMsg } from '_js/utils/helpers';
 import React from 'react';
 import { Trans } from 'react-i18next';
-
-import { ExternalLink } from '#js/components/utils';
-import { Org } from '#js/store/orgs/reducer';
-import { Task } from '#js/store/tasks/reducer';
-import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '#js/utils/constants';
-import { getOrgBehindLatestMsg, getOrgStatusMsg } from '#js/utils/helpers';
 
 const OrgInfo = ({
   org,

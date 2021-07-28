@@ -2,12 +2,12 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import { DeleteModal } from '#js/components/utils';
-import { deleteObject } from '#js/store/actions';
+import { DeleteModal } from '_js/components/utils';
+import { deleteObject } from '_js/store/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('#js/store/actions');
+jest.mock('_js/store/actions');
 
 deleteObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

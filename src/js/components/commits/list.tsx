@@ -5,12 +5,11 @@ import DataTableColumn from '@salesforce/design-system-react/components/data-tab
 import classNames from 'classnames';
 import { format, formatDistanceToNow } from 'date-fns';
 import i18n from 'i18next';
+import TourPopover from '_js/components/tour/popover';
+import { ExternalLink } from '_js/components/utils';
+import { Commit } from '_js/store/tasks/reducer';
 import React, { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
-
-import TourPopover from '#js/components/tour/popover';
-import { ExternalLink } from '#js/components/utils';
-import { Commit } from '#js/store/tasks/reducer';
 
 interface TableCellProps {
   [key: string]: any;

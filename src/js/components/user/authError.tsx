@@ -1,15 +1,14 @@
+import { EmptyIllustration } from '_js/components/404';
+import { LoginButton } from '_js/components/user/login';
+import Logout from '_js/components/user/logout';
+import { selectUserState } from '_js/store/user/selectors';
+import routes from '_js/utils/routes';
 import i18n from 'i18next';
 import React from 'react';
 import DocumentTitle from 'react-document-title';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-
-import { EmptyIllustration } from '#js/components/404';
-import { LoginButton } from '#js/components/user/login';
-import Logout from '#js/components/user/logout';
-import { selectUserState } from '#js/store/user/selectors';
-import routes from '#js/utils/routes';
 
 const AuthError = () => {
   const user = useSelector(selectUserState);

@@ -1,9 +1,8 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
+import { ExternalLink } from '_js/components/utils';
+import { Org } from '_js/store/orgs/reducer';
 import React from 'react';
-
-import { ExternalLink } from '#js/components/utils';
-import { Org } from '#js/store/orgs/reducer';
 
 const Footer = ({
   org,

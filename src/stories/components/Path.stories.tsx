@@ -1,11 +1,11 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import EpicStatusPath from '#js/components/epics/path';
-import Path from '#js/components/path';
-import TaskStatusPath from '#js/components/tasks/path';
-import { Task } from '#js/store/tasks/reducer';
-import { EPIC_STATUSES } from '#js/utils/constants';
+import EpicStatusPath from '_js/components/epics/path';
+import Path from '_js/components/path';
+import TaskStatusPath from '_js/components/tasks/path';
+import { Task } from '_js/store/tasks/reducer';
+import { EPIC_STATUSES } from '_js/utils/constants';
 
 import {
   sampleTask1,

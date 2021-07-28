@@ -1,3 +1,14 @@
+import ConnectModal from '_js/components/user/connect';
+import Logout from '_js/components/user/logout';
+import {
+  ExternalLink,
+  SpinnerWrapper,
+  useIsMounted,
+} from '_js/components/utils';
+import { ThunkDispatch } from '_js/store';
+import { disconnect, refreshUser } from '_js/store/user/actions';
+import { User } from '_js/store/user/reducer';
+import { selectUserState } from '_js/store/user/selectors';
 import Avatar from '@salesforce/design-system-react/components/avatar';
 import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
@@ -9,18 +20,6 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-
-import ConnectModal from '#js/components/user/connect';
-import Logout from '#js/components/user/logout';
-import {
-  ExternalLink,
-  SpinnerWrapper,
-  useIsMounted,
-} from '#js/components/utils';
-import { ThunkDispatch } from '#js/store';
-import { disconnect, refreshUser } from '#js/store/user/actions';
-import { User } from '#js/store/user/reducer';
-import { selectUserState } from '#js/store/user/selectors';
 
 const ConnectToSalesforce = ({
   toggleModal,

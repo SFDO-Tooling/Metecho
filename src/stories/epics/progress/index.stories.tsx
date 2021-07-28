@@ -1,7 +1,7 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import EpicProgressComponent from '#js/components/epics/progress';
+import EpicProgressComponent from '_js/components/epics/progress';
 
 import { withRedux } from '../../decorators';
 

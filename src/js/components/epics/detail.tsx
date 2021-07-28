@@ -1,24 +1,18 @@
 import Button from '@salesforce/design-system-react/components/button';
 import PageHeaderControl from '@salesforce/design-system-react/components/page-header/control';
 import i18n from 'i18next';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
-
-import FourOhFour from '#js/components/404';
-import ConfirmRemoveUserModal from '#js/components/epics/confirmRemoveUserModal';
-import EpicStatusPath from '#js/components/epics/path';
-import EpicProgress from '#js/components/epics/progress';
-import EpicStatusSteps from '#js/components/epics/steps';
-import AssignEpicCollaboratorsModal from '#js/components/githubUsers/assignEpicCollaborators';
-import UserCards from '#js/components/githubUsers/cards';
-import PlaygroundOrgCard from '#js/components/orgs/playgroundCard';
-import { Step } from '#js/components/steps/stepsItem';
-import CreateTaskModal from '#js/components/tasks/createForm';
-import TaskTable from '#js/components/tasks/table';
-import TourPopover from '#js/components/tour/popover';
+import FourOhFour from '_js/components/404';
+import ConfirmRemoveUserModal from '_js/components/epics/confirmRemoveUserModal';
+import EpicStatusPath from '_js/components/epics/path';
+import EpicProgress from '_js/components/epics/progress';
+import EpicStatusSteps from '_js/components/epics/steps';
+import AssignEpicCollaboratorsModal from '_js/components/githubUsers/assignEpicCollaborators';
+import UserCards from '_js/components/githubUsers/cards';
+import PlaygroundOrgCard from '_js/components/orgs/playgroundCard';
+import { Step } from '_js/components/steps/stepsItem';
+import CreateTaskModal from '_js/components/tasks/createForm';
+import TaskTable from '_js/components/tasks/table';
+import TourPopover from '_js/components/tour/popover';
 import {
   ContributeWorkModal,
   CreateOrgModal,
@@ -36,16 +30,21 @@ import {
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
-} from '#js/components/utils';
-import useAssignUserToTask from '#js/components/utils/useAssignUserToTask';
-import { ThunkDispatch } from '#js/store';
-import { updateObject } from '#js/store/actions';
-import { Org } from '#js/store/orgs/reducer';
-import { GitHubUser, User } from '#js/store/user/reducer';
-import { selectUserState } from '#js/store/user/selectors';
-import { EPIC_STATUSES, OBJECT_TYPES } from '#js/utils/constants';
-import { getBranchLink, getCompletedTasks } from '#js/utils/helpers';
-import routes from '#js/utils/routes';
+} from '_js/components/utils';
+import useAssignUserToTask from '_js/components/utils/useAssignUserToTask';
+import { ThunkDispatch } from '_js/store';
+import { updateObject } from '_js/store/actions';
+import { Org } from '_js/store/orgs/reducer';
+import { GitHubUser, User } from '_js/store/user/reducer';
+import { selectUserState } from '_js/store/user/selectors';
+import { EPIC_STATUSES, OBJECT_TYPES } from '_js/utils/constants';
+import { getBranchLink, getCompletedTasks } from '_js/utils/helpers';
+import routes from '_js/utils/routes';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 const EpicDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();

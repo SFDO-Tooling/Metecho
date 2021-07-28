@@ -3,7 +3,7 @@ import Dropdown from '@salesforce/design-system-react/components/menu-dropdown';
 import i18n from 'i18next';
 import React from 'react';
 
-import { ORG_TYPES, OrgTypes } from '#js/utils/constants';
+import { ORG_TYPES, OrgTypes } from '_js/utils/constants';
 
 const UserActions = ({
   type,

@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { ThunkDispatch } from '#js/store';
-import { updateObject } from '#js/store/actions';
-import { Task } from '#js/store/tasks/reducer';
-import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '#js/utils/constants';
+import { ThunkDispatch } from '_js/store';
+import { updateObject } from '_js/store/actions';
+import { Task } from '_js/store/tasks/reducer';
+import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '_js/utils/constants';
 
 // "Assign user to task" modal related:
 export default () => {
