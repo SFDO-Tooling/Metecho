@@ -2,11 +2,12 @@ import Button from '@salesforce/design-system-react/components/button';
 import Popover from '@salesforce/design-system-react/components/popover';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import { updateTour } from '_js/store/user/actions';
-import { selectUserState } from '_js/store/user/selectors';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThunkDispatch } from 'src/js/store';
+
+import { updateTour } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
 
 const TourPopover = ({
   align,

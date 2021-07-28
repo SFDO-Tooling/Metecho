@@ -1,4 +1,4 @@
-import reducer from '_js/store/tasks/reducer';
+import reducer from '@/js/store/tasks/reducer';
 
 const epic = {
   id: 'epic-1',

@@ -3,7 +3,7 @@ import {
   ORG_TYPES,
   REVIEW_STATUSES,
   TASK_STATUSES,
-} from '_js/utils/constants';
+} from '@/js/utils/constants';
 
 export const api_urls = {
   account_logout: () => '/accounts/logout/',

@@ -2,8 +2,8 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import Steps from '_js/components/steps';
-import { Step } from '_js/components/steps/stepsItem';
+import Steps from '@/js/components/steps';
+import { Step } from '@/js/components/steps/stepsItem';
 
 import {
   sampleEpicSteps,

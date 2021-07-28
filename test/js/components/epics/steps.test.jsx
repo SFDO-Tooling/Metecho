@@ -1,6 +1,7 @@
-import EpicStatusSteps from '_js/components/epics/steps';
-import { EPIC_STATUSES, TASK_STATUSES } from '_js/utils/constants';
 import React from 'react';
+
+import EpicStatusSteps from '@/js/components/epics/steps';
+import { EPIC_STATUSES, TASK_STATUSES } from '@/js/utils/constants';
 
 import { render } from './../../utils';
 

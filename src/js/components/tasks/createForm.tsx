@@ -4,26 +4,27 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import { isString } from 'lodash';
-import SelectFlowType from '_js/components/tasks/selectFlowType';
+import React, { useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { AnyAction } from 'redux';
+
+import SelectFlowType from '@/js/components/tasks/selectFlowType';
 import {
   LabelWithSpinner,
   useForm,
   useFormDefaults,
   useIsMounted,
   useTransientMessage,
-} from '_js/components/utils';
-import { Epic } from '_js/store/epics/reducer';
-import { Org } from '_js/store/orgs/reducer';
-import { Project } from '_js/store/projects/reducer';
+} from '@/js/components/utils';
+import { Epic } from '@/js/store/epics/reducer';
+import { Org } from '@/js/store/orgs/reducer';
+import { Project } from '@/js/store/projects/reducer';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
   RETRIEVE_CHANGES,
-} from '_js/utils/constants';
-import routes from '_js/utils/routes';
-import React, { useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { AnyAction } from 'redux';
+} from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 interface Props {
   project: Project;

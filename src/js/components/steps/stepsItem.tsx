@@ -2,10 +2,11 @@ import Button from '@salesforce/design-system-react/components/button';
 import Icon from '@salesforce/design-system-react/components/icon';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import GitHubUserAvatar from '_js/components/githubUsers/avatar';
-import { ExternalLink } from '_js/components/utils';
-import { GitHubUser } from '_js/store/user/reducer';
 import React from 'react';
+
+import GitHubUserAvatar from '@/js/components/githubUsers/avatar';
+import { ExternalLink } from '@/js/components/utils';
+import { GitHubUser } from '@/js/store/user/reducer';
 
 export type Step = {
   label: string;

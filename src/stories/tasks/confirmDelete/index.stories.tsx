@@ -2,8 +2,8 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import ConfirmDeleteModal from '_js/components/tasks/confirmDeleteModal';
-import { CONFIRM_ORG_TRACKER } from '_js/utils/constants';
+import ConfirmDeleteModal from '@/js/components/tasks/confirmDeleteModal';
+import { CONFIRM_ORG_TRACKER } from '@/js/utils/constants';
 
 import { sampleDevOrg, sampleScratchOrg } from '../../fixtures';
 

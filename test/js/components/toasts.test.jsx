@@ -1,12 +1,13 @@
-import Toasts from '_js/components/toasts';
-import { removeToast } from '_js/store/toasts/actions';
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
+import Toasts from '@/js/components/toasts';
+import { removeToast } from '@/js/store/toasts/actions';
+
 import { renderWithRedux } from './../utils';
 
-jest.mock('_js/store/toasts/actions');
+jest.mock('@/js/store/toasts/actions');
 
 removeToast.mockReturnValue({ type: 'TEST' });
 

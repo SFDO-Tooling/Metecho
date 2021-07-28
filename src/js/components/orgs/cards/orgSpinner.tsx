@@ -1,6 +1,7 @@
-import { SpinnerWrapper } from '_js/components/utils';
-import { Org } from '_js/store/orgs/reducer';
 import React from 'react';
+
+import { SpinnerWrapper } from '@/js/components/utils';
+import { Org } from '@/js/store/orgs/reducer';
 
 const OrgSpinner = ({
   org,

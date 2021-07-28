@@ -1,13 +1,13 @@
 import { ThunkDispatch } from 'redux-thunk';
 import Sockette from 'sockette';
 
-import { removeObject } from '_js/store/actions';
+import { removeObject } from '@/js/store/actions';
 import {
   createEpicPR,
   createEpicPRFailed,
   updateEpic,
-} from '_js/store/epics/actions';
-import { Epic } from '_js/store/epics/reducer';
+} from '@/js/store/epics/actions';
+import { Epic } from '@/js/store/epics/reducer';
 import {
   commitFailed,
   commitSucceeded,
@@ -24,30 +24,30 @@ import {
   refreshError,
   updateFailed,
   updateOrg,
-} from '_js/store/orgs/actions';
-import { MinimalOrg, Org } from '_js/store/orgs/reducer';
+} from '@/js/store/orgs/actions';
+import { MinimalOrg, Org } from '@/js/store/orgs/reducer';
 import {
   projectError,
   projectsRefreshed,
   projectsRefreshError,
   updateProject,
-} from '_js/store/projects/actions';
-import { Project } from '_js/store/projects/reducer';
-import { connectSocket, disconnectSocket } from '_js/store/socket/actions';
+} from '@/js/store/projects/actions';
+import { Project } from '@/js/store/projects/reducer';
+import { connectSocket, disconnectSocket } from '@/js/store/socket/actions';
 import {
   createTaskPR,
   createTaskPRFailed,
   submitReview,
   submitReviewFailed,
   updateTask,
-} from '_js/store/tasks/actions';
-import { Task } from '_js/store/tasks/reducer';
+} from '@/js/store/tasks/actions';
+import { Task } from '@/js/store/tasks/reducer';
 import {
   ObjectTypes,
   WEBSOCKET_ACTIONS,
   WebsocketActions,
-} from '_js/utils/constants';
-import { log } from '_js/utils/logging';
+} from '@/js/utils/constants';
+import { log } from '@/js/utils/logging';
 
 export interface Socket {
   subscribe: (payload: Subscription) => void;

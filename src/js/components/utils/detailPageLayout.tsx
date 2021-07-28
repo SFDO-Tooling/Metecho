@@ -1,13 +1,14 @@
 import BreadCrumb from '@salesforce/design-system-react/components/breadcrumb';
 import PageHeader from '@salesforce/design-system-react/components/page-header';
 import i18n from 'i18next';
-import TourPopover from '_js/components/tour/popover';
-import { ExternalLink, PageDescription } from '_js/components/utils';
-import { OBJECT_TYPES } from '_js/utils/constants';
-import routes from '_js/utils/routes';
 import React, { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 import { Link } from 'react-router-dom';
+
+import TourPopover from '@/js/components/tour/popover';
+import { ExternalLink, PageDescription } from '@/js/components/utils';
+import { OBJECT_TYPES } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 interface Crumb {
   name: string;

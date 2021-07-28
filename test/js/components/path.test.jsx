@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Path from '_js/components/path';
+import Path from '@/js/components/path';
 
 import { render } from './../utils';
 

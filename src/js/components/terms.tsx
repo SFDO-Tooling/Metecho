@@ -1,9 +1,3 @@
-import Logout from '_js/components/user/logout';
-import { LabelWithSpinner, useIsMounted } from '_js/components/utils';
-import { ThunkDispatch } from '_js/store';
-import { agreeToTerms } from '_js/store/user/actions';
-import { selectUserState } from '_js/store/user/selectors';
-import routes from '_js/utils/routes';
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import { Location } from 'history';
@@ -12,6 +6,13 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { StaticContext } from 'react-router';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
+
+import Logout from '@/js/components/user/logout';
+import { LabelWithSpinner, useIsMounted } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { agreeToTerms } from '@/js/store/user/actions';
+import { selectUserState } from '@/js/store/user/selectors';
+import routes from '@/js/utils/routes';
 
 interface TermsProps
   extends RouteComponentProps<

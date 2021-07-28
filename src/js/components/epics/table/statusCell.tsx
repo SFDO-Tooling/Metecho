@@ -2,9 +2,10 @@ import DataTableCell from '@salesforce/design-system-react/components/data-table
 import ProgressRing from '@salesforce/design-system-react/components/progress-ring';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import { TableCellProps } from '_js/components/epics/table';
-import { EPIC_STATUSES } from '_js/utils/constants';
 import React from 'react';
+
+import { TableCellProps } from '@/js/components/epics/table';
+import { EPIC_STATUSES } from '@/js/utils/constants';
 
 const StatusTableCell = ({ item, className, ...props }: TableCellProps) => {
   /* istanbul ignore if */

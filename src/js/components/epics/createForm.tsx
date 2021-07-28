@@ -7,18 +7,19 @@ import Radio from '@salesforce/design-system-react/components/radio';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
-import { LabelWithSpinner, useForm, useIsMounted } from '_js/components/utils';
-import { ThunkDispatch } from '_js/store';
-import { Project } from '_js/store/projects/reducer';
-import { User } from '_js/store/user/reducer';
-import apiFetch from '_js/utils/api';
-import { OBJECT_TYPES } from '_js/utils/constants';
-import routes from '_js/utils/routes';
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AnyAction } from 'redux';
+
+import { LabelWithSpinner, useForm, useIsMounted } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { Project } from '@/js/store/projects/reducer';
+import { User } from '@/js/store/user/reducer';
+import apiFetch from '@/js/utils/api';
+import { OBJECT_TYPES } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 interface ComboboxOption {
   id: string;

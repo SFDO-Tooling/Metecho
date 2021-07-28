@@ -1,21 +1,22 @@
 import i18n from 'i18next';
-import TaskOrgCard from '_js/components/orgs/taskOrgCard';
-import ConfirmDeleteModal from '_js/components/tasks/confirmDeleteModal';
-import ConfirmRemoveUserModal from '_js/components/tasks/confirmRemoveUserModal';
-import ConnectModal from '_js/components/user/connect';
-import { ConnectionInfoModal } from '_js/components/user/info';
-import { useIsMounted } from '_js/components/utils';
-import { ThunkDispatch } from '_js/store';
-import { deleteObject, updateObject } from '_js/store/actions';
-import { refetchOrg } from '_js/store/orgs/actions';
-import { Org, OrgsByParent } from '_js/store/orgs/reducer';
-import { Task } from '_js/store/tasks/reducer';
-import { GitHubUser, User } from '_js/store/user/reducer';
-import { selectUserState } from '_js/store/user/selectors';
-import apiFetch from '_js/utils/api';
-import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '_js/utils/constants';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
+import TaskOrgCard from '@/js/components/orgs/taskOrgCard';
+import ConfirmDeleteModal from '@/js/components/tasks/confirmDeleteModal';
+import ConfirmRemoveUserModal from '@/js/components/tasks/confirmRemoveUserModal';
+import ConnectModal from '@/js/components/user/connect';
+import { ConnectionInfoModal } from '@/js/components/user/info';
+import { useIsMounted } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { deleteObject, updateObject } from '@/js/store/actions';
+import { refetchOrg } from '@/js/store/orgs/actions';
+import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
+import { Task } from '@/js/store/tasks/reducer';
+import { GitHubUser, User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
+import apiFetch from '@/js/utils/api';
+import { OBJECT_TYPES, ORG_TYPES, OrgTypes } from '@/js/utils/constants';
 
 export interface AssignedUserTracker {
   type: OrgTypes;

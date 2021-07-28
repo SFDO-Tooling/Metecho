@@ -24,36 +24,36 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import logger from 'redux-logger';
 import thunk from 'redux-thunk';
 
-import SFLogo from '_img/salesforce-logo.png';
-import FourOhFour from '_js/components/404';
-import EpicDetail from '_js/components/epics/detail';
-import ErrorBoundary from '_js/components/error';
-import Footer from '_js/components/footer';
-import Header from '_js/components/header';
-import ProjectDetail from '_js/components/projects/detail';
-import ProjectList from '_js/components/projects/list';
-import TaskDetail from '_js/components/tasks/detail';
-import Terms from '_js/components/terms';
-import AuthError from '_js/components/user/authError';
-import Login from '_js/components/user/login';
-import { PrivateRoute } from '_js/components/utils';
-import initializeI18n from '_js/i18n';
-import reducer, { ThunkDispatch } from '_js/store';
-import { fetchObjects } from '_js/store/actions';
-import { clearErrors } from '_js/store/errors/actions';
+import SFLogo from '@/img/salesforce-logo.png';
+import FourOhFour from '@/js/components/404';
+import EpicDetail from '@/js/components/epics/detail';
+import ErrorBoundary from '@/js/components/error';
+import Footer from '@/js/components/footer';
+import Header from '@/js/components/header';
+import ProjectDetail from '@/js/components/projects/detail';
+import ProjectList from '@/js/components/projects/list';
+import TaskDetail from '@/js/components/tasks/detail';
+import Terms from '@/js/components/terms';
+import AuthError from '@/js/components/user/authError';
+import Login from '@/js/components/user/login';
+import { PrivateRoute } from '@/js/components/utils';
+import initializeI18n from '@/js/i18n';
+import reducer, { ThunkDispatch } from '@/js/store';
+import { fetchObjects } from '@/js/store/actions';
+import { clearErrors } from '@/js/store/errors/actions';
 import {
   projectsRefreshed,
   projectsRefreshing,
-} from '_js/store/projects/actions';
-import { clearToasts } from '_js/store/toasts/actions';
-import { login, refetchAllData } from '_js/store/user/actions';
-import { User } from '_js/store/user/reducer';
-import { selectUserState } from '_js/store/user/selectors';
-import apiFetch from '_js/utils/api';
-import { OBJECT_TYPES } from '_js/utils/constants';
-import { log, logError } from '_js/utils/logging';
-import routes, { routePatterns } from '_js/utils/routes';
-import { createSocket } from '_js/utils/websockets';
+} from '@/js/store/projects/actions';
+import { clearToasts } from '@/js/store/toasts/actions';
+import { login, refetchAllData } from '@/js/store/user/actions';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
+import apiFetch from '@/js/utils/api';
+import { OBJECT_TYPES } from '@/js/utils/constants';
+import { log, logError } from '@/js/utils/logging';
+import routes, { routePatterns } from '@/js/utils/routes';
+import { createSocket } from '@/js/utils/websockets';
 
 const history = createBrowserHistory();
 

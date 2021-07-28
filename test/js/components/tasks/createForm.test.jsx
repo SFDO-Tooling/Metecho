@@ -1,17 +1,18 @@
-import TaskForm from '_js/components/tasks/createForm';
-import { createObject } from '_js/store/actions';
-import { addError } from '_js/store/errors/actions';
-import { refreshOrgConfigs } from '_js/store/projects/actions';
-import routes from '_js/utils/routes';
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
+import TaskForm from '@/js/components/tasks/createForm';
+import { createObject } from '@/js/store/actions';
+import { addError } from '@/js/store/errors/actions';
+import { refreshOrgConfigs } from '@/js/store/projects/actions';
+import routes from '@/js/utils/routes';
+
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('_js/store/actions');
-jest.mock('_js/store/errors/actions');
-jest.mock('_js/store/projects/actions');
+jest.mock('@/js/store/actions');
+jest.mock('@/js/store/errors/actions');
+jest.mock('@/js/store/projects/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

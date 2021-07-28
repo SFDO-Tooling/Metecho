@@ -1,13 +1,14 @@
-import Header from '_js/components/header';
-import { updateTour } from '_js/store/user/actions';
-import routes from '_js/utils/routes';
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
+import Header from '@/js/components/header';
+import { updateTour } from '@/js/store/user/actions';
+import routes from '@/js/utils/routes';
+
 import { renderWithRedux, storeWithThunk } from './../utils';
 
-jest.mock('_js/store/user/actions');
+jest.mock('@/js/store/user/actions');
 
 updateTour.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 

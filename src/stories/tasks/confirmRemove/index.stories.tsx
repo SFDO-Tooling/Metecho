@@ -2,8 +2,8 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import ConfirmRemoveUserModal from '_js/components/tasks/confirmRemoveUserModal';
-import { ORG_TYPES } from '_js/utils/constants';
+import ConfirmRemoveUserModal from '@/js/components/tasks/confirmRemoveUserModal';
+import { ORG_TYPES } from '@/js/utils/constants';
 
 import { sampleUser1 } from '../../fixtures';
 

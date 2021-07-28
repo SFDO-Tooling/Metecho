@@ -4,13 +4,14 @@ import Modal from '@salesforce/design-system-react/components/modal';
 import RadioGroup from '@salesforce/design-system-react/components/radio-group';
 import Radio from '@salesforce/design-system-react/components/radio-group/radio';
 import i18n from 'i18next';
-import mapSvg from '_img/map-lg.svg?raw';
-import { Illustration } from '_js/components/utils';
-import { Epic } from '_js/store/epics/reducer';
-import { Project } from '_js/store/projects/reducer';
-import { Task } from '_js/store/tasks/reducer';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
+
+import mapSvg from '@/img/map-lg.svg?raw';
+import { Illustration } from '@/js/components/utils';
+import { Epic } from '@/js/store/epics/reducer';
+import { Project } from '@/js/store/projects/reducer';
+import { Task } from '@/js/store/tasks/reducer';
 
 type ContributeCallback = ({
   id,

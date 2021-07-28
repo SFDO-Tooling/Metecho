@@ -1,24 +1,25 @@
-import EpicDetail from '_js/components/epics/detail';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import React from 'react';
+import { StaticRouter } from 'react-router-dom';
+
+import EpicDetail from '@/js/components/epics/detail';
 import {
   createObject,
   fetchObject,
   fetchObjects,
   updateObject,
-} from '_js/store/actions';
+} from '@/js/store/actions';
 import {
   refreshGitHubUsers,
   refreshOrgConfigs,
-} from '_js/store/projects/actions';
-import { EPIC_STATUSES } from '_js/utils/constants';
-import routes from '_js/utils/routes';
-import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import React from 'react';
-import { StaticRouter } from 'react-router-dom';
+} from '@/js/store/projects/actions';
+import { EPIC_STATUSES } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('_js/store/actions');
-jest.mock('_js/store/projects/actions');
+jest.mock('@/js/store/actions');
+jest.mock('@/js/store/projects/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

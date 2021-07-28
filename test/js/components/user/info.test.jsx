@@ -2,12 +2,12 @@ import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import UserDropdown, { ConnectionInfoModal } from '_js/components/user/info';
-import { disconnect, refreshUser } from '_js/store/user/actions';
+import UserDropdown, { ConnectionInfoModal } from '@/js/components/user/info';
+import { disconnect, refreshUser } from '@/js/store/user/actions';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('_js/store/user/actions');
+jest.mock('@/js/store/user/actions');
 
 disconnect.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 refreshUser.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

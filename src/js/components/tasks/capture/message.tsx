@@ -4,13 +4,14 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Textarea from '@salesforce/design-system-react/components/textarea';
 import classNames from 'classnames';
 import i18n from 'i18next';
+import React, { useState } from 'react';
+
 import {
   BooleanObject,
   CommitData,
   ModalCard,
-} from '_js/components/tasks/capture';
-import { UseFormProps } from '_js/components/utils';
-import React, { useState } from 'react';
+} from '@/js/components/tasks/capture';
+import { UseFormProps } from '@/js/components/utils';
 
 interface Props {
   inputs: CommitData;

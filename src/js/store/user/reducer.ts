@@ -1,8 +1,8 @@
 import {
   ProjectsRefreshed,
   ProjectsRefreshError,
-} from '_js/store/projects/actions';
-import { UserAction } from '_js/store/user/actions';
+} from '@/js/store/projects/actions';
+import { UserAction } from '@/js/store/user/actions';
 
 export interface GitHubUser {
   id: string;

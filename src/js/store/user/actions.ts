@@ -1,11 +1,11 @@
-import { ThunkResult } from '_js/store';
+import { ThunkResult } from '@/js/store';
 import {
   projectsRefreshed,
   projectsRefreshing,
-} from '_js/store/projects/actions';
-import { User } from '_js/store/user/reducer';
-import apiFetch from '_js/utils/api';
-import { LIST_CHANNEL_ID, OBJECT_TYPES } from '_js/utils/constants';
+} from '@/js/store/projects/actions';
+import { User } from '@/js/store/user/reducer';
+import apiFetch from '@/js/utils/api';
+import { LIST_CHANNEL_ID, OBJECT_TYPES } from '@/js/utils/constants';
 
 interface LoginAction {
   type: 'USER_LOGGED_IN';

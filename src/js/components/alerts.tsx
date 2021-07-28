@@ -2,12 +2,13 @@ import Alert from '@salesforce/design-system-react/components/alert';
 import AlertContainer from '@salesforce/design-system-react/components/alert/container';
 import Icon from '@salesforce/design-system-react/components/icon';
 import i18n from 'i18next';
-import TourDropdown from '_js/components/tour/dropdown';
-import { selectSocketState } from '_js/store/socket/selectors';
-import { selectUserState } from '_js/store/user/selectors';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
+
+import TourDropdown from '@/js/components/tour/dropdown';
+import { selectSocketState } from '@/js/store/socket/selectors';
+import { selectUserState } from '@/js/store/user/selectors';
 
 const reloadPage = () => {
   window.location.reload();

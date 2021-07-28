@@ -5,15 +5,16 @@ import Icon from '@salesforce/design-system-react/components/icon';
 import Tooltip from '@salesforce/design-system-react/components/tooltip';
 import classNames from 'classnames';
 import i18n from 'i18next';
+import React, { useState } from 'react';
+
 import {
   BooleanObject,
   CommitData,
   ModalCard,
-} from '_js/components/tasks/capture';
-import { UseFormProps } from '_js/components/utils';
-import { Changeset } from '_js/store/orgs/reducer';
-import { mergeChangesets, splitChangeset } from '_js/utils/helpers';
-import React, { useState } from 'react';
+} from '@/js/components/tasks/capture';
+import { UseFormProps } from '@/js/components/utils';
+import { Changeset } from '@/js/store/orgs/reducer';
+import { mergeChangesets, splitChangeset } from '@/js/utils/helpers';
 
 interface Props {
   changeset: Changeset;

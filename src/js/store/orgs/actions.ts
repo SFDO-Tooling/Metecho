@@ -1,14 +1,14 @@
 import i18n from 'i18next';
 
-import { AppState, ThunkResult } from '_js/store';
-import { selectEpicById } from '_js/store/epics/selectors';
-import { isCurrentUser } from '_js/store/helpers';
-import { MinimalOrg, Org } from '_js/store/orgs/reducer';
-import { selectProjectById } from '_js/store/projects/selectors';
-import { selectTaskById } from '_js/store/tasks/selectors';
-import { addToast } from '_js/store/toasts/actions';
-import apiFetch, { addUrlParams } from '_js/utils/api';
-import { OBJECT_TYPES, ORG_TYPES } from '_js/utils/constants';
+import { AppState, ThunkResult } from '@/js/store';
+import { selectEpicById } from '@/js/store/epics/selectors';
+import { isCurrentUser } from '@/js/store/helpers';
+import { MinimalOrg, Org } from '@/js/store/orgs/reducer';
+import { selectProjectById } from '@/js/store/projects/selectors';
+import { selectTaskById } from '@/js/store/tasks/selectors';
+import { addToast } from '@/js/store/toasts/actions';
+import apiFetch, { addUrlParams } from '@/js/utils/api';
+import { OBJECT_TYPES, ORG_TYPES } from '@/js/utils/constants';
 
 interface OrgProvisioning {
   type: 'SCRATCH_ORG_PROVISIONING';

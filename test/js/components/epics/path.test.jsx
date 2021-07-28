@@ -1,6 +1,7 @@
-import EpicStatusPath from '_js/components/epics/path';
-import { EPIC_STATUSES } from '_js/utils/constants';
 import React from 'react';
+
+import EpicStatusPath from '@/js/components/epics/path';
+import { EPIC_STATUSES } from '@/js/utils/constants';
 
 import { render } from './../../utils';
 

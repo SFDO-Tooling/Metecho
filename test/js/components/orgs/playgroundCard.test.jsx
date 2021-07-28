@@ -1,14 +1,15 @@
-import PlaygroundOrgCard from '_js/components/orgs/playgroundCard';
-import { deleteObject } from '_js/store/actions';
-import { refetchOrg, refreshOrg } from '_js/store/orgs/actions';
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
+import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
+import { deleteObject } from '@/js/store/actions';
+import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
+
 import { renderWithRedux, storeWithThunk } from '../../utils';
 
-jest.mock('_js/store/actions');
-jest.mock('_js/store/orgs/actions');
+jest.mock('@/js/store/actions');
+jest.mock('@/js/store/orgs/actions');
 
 deleteObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

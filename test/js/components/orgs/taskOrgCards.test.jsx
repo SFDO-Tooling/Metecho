@@ -1,12 +1,13 @@
-import TaskOrgCards, {
-  ORG_TYPE_TRACKER_DEFAULT,
-} from '_js/components/orgs/taskOrgCards';
-import { deleteObject, updateObject } from '_js/store/actions';
-import { refetchOrg } from '_js/store/orgs/actions';
 import { fireEvent, waitFor } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
+
+import TaskOrgCards, {
+  ORG_TYPE_TRACKER_DEFAULT,
+} from '@/js/components/orgs/taskOrgCards';
+import { deleteObject, updateObject } from '@/js/store/actions';
+import { refetchOrg } from '@/js/store/orgs/actions';
 
 import {
   renderWithRedux,
@@ -14,8 +15,8 @@ import {
   storeWithThunk,
 } from '../../utils';
 
-jest.mock('_js/store/actions');
-jest.mock('_js/store/orgs/actions');
+jest.mock('@/js/store/actions');
+jest.mock('@/js/store/orgs/actions');
 
 deleteObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),

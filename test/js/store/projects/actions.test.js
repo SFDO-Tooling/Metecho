@@ -1,11 +1,12 @@
-import { fetchObjects } from '_js/store/actions';
-import * as actions from '_js/store/projects/actions';
-import { OBJECT_TYPES } from '_js/utils/constants';
 import fetchMock from 'fetch-mock';
+
+import { fetchObjects } from '@/js/store/actions';
+import * as actions from '@/js/store/projects/actions';
+import { OBJECT_TYPES } from '@/js/utils/constants';
 
 import { storeWithThunk } from './../../utils';
 
-jest.mock('_js/store/actions');
+jest.mock('@/js/store/actions');
 
 fetchObjects.mockReturnValue({ type: 'TEST', payload: {} });
 

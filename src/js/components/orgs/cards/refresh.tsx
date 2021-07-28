@@ -1,10 +1,11 @@
 import Button from '@salesforce/design-system-react/components/button';
 import Modal from '@salesforce/design-system-react/components/modal';
 import i18n from 'i18next';
-import { ExternalLink } from '_js/components/utils';
-import { getOrgBehindLatestMsg } from '_js/utils/helpers';
 import React from 'react';
 import { Trans } from 'react-i18next';
+
+import { ExternalLink } from '@/js/components/utils';
+import { getOrgBehindLatestMsg } from '@/js/utils/helpers';
 
 const RefreshOrgModal = ({
   orgUrl,

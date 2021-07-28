@@ -1,11 +1,12 @@
 import Toast from '@salesforce/design-system-react/components/toast';
 import ToastContainer from '@salesforce/design-system-react/components/toast/container';
 import i18n from 'i18next';
-import { removeError } from '_js/store/errors/actions';
-import { ErrorType } from '_js/store/errors/reducer';
-import { selectErrors } from '_js/store/errors/selectors';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { removeError } from '@/js/store/errors/actions';
+import { ErrorType } from '@/js/store/errors/reducer';
+import { selectErrors } from '@/js/store/errors/selectors';
 
 const reloadPage = (): void => {
   window.location.reload();

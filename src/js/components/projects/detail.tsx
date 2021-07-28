@@ -1,12 +1,22 @@
-import CreateEpicModal from '_js/components/epics/createForm';
-import EpicTable from '_js/components/epics/table';
-import PlaygroundOrgCard from '_js/components/orgs/playgroundCard';
-import ProjectNotFound from '_js/components/projects/project404';
-import TasksTableComponent from '_js/components/tasks/table';
-import LandingModal from '_js/components/tour/landing';
-import PlanTour from '_js/components/tour/plan';
-import PlayTour from '_js/components/tour/play';
-import TourPopover from '_js/components/tour/popover';
+import Button from '@salesforce/design-system-react/components/button';
+import Tabs from '@salesforce/design-system-react/components/tabs';
+import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
+import i18n from 'i18next';
+import React, { useCallback, useEffect, useState } from 'react';
+import DocumentTitle from 'react-document-title';
+import { Trans } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
+
+import CreateEpicModal from '@/js/components/epics/createForm';
+import EpicTable from '@/js/components/epics/table';
+import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
+import ProjectNotFound from '@/js/components/projects/project404';
+import TasksTableComponent from '@/js/components/tasks/table';
+import LandingModal from '@/js/components/tour/landing';
+import PlanTour from '@/js/components/tour/plan';
+import PlayTour from '@/js/components/tour/play';
+import TourPopover from '@/js/components/tour/popover';
 import {
   CreateOrgModal,
   DetailPageLayout,
@@ -17,30 +27,21 @@ import {
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useIsMounted,
-} from '_js/components/utils';
-import useAssignUserToTask from '_js/components/utils/useAssignUserToTask';
-import useFetchTasksByProject from '_js/components/utils/useFetchTasksByProject';
-import { ThunkDispatch } from '_js/store';
-import { fetchObjects } from '_js/store/actions';
-import { onboarded } from '_js/store/user/actions';
-import { User } from '_js/store/user/reducer';
-import { selectUserState } from '_js/store/user/selectors';
+} from '@/js/components/utils';
+import useAssignUserToTask from '@/js/components/utils/useAssignUserToTask';
+import useFetchTasksByProject from '@/js/components/utils/useFetchTasksByProject';
+import { ThunkDispatch } from '@/js/store';
+import { fetchObjects } from '@/js/store/actions';
+import { onboarded } from '@/js/store/user/actions';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
 import {
   OBJECT_TYPES,
   SHOW_WALKTHROUGH,
   WALKTHROUGH_TYPES,
   WalkthroughType,
-} from '_js/utils/constants';
-import routes from '_js/utils/routes';
-import Button from '@salesforce/design-system-react/components/button';
-import Tabs from '@salesforce/design-system-react/components/tabs';
-import TabsPanel from '@salesforce/design-system-react/components/tabs/panel';
-import i18n from 'i18next';
-import React, { useCallback, useEffect, useState } from 'react';
-import DocumentTitle from 'react-document-title';
-import { Trans } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+} from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 const ProjectDetail = (
   props: RouteComponentProps<

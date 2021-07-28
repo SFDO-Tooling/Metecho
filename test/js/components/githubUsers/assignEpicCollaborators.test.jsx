@@ -1,11 +1,12 @@
-import AssignEpicCollaboratorsModal from '_js/components/githubUsers/assignEpicCollaborators';
-import { refreshGitHubUsers } from '_js/store/projects/actions';
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
+import AssignEpicCollaboratorsModal from '@/js/components/githubUsers/assignEpicCollaborators';
+import { refreshGitHubUsers } from '@/js/store/projects/actions';
+
 import { renderWithRedux } from '../../utils';
 
-jest.mock('_js/store/projects/actions');
+jest.mock('@/js/store/projects/actions');
 
 refreshGitHubUsers.mockReturnValue({ type: 'TEST' });
 

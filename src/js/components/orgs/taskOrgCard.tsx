@@ -1,28 +1,29 @@
 import Card from '@salesforce/design-system-react/components/card';
 import classNames from 'classnames';
 import i18n from 'i18next';
-import AssignTaskRoleModal from '_js/components/githubUsers/assignTaskRole';
-import { UserCard } from '_js/components/githubUsers/cards';
-import Footer from '_js/components/orgs/cards/footer';
-import OrgActions from '_js/components/orgs/cards/orgActions';
-import OrgIcon from '_js/components/orgs/cards/orgIcon';
-import OrgInfo from '_js/components/orgs/cards/orgInfo';
-import OrgSpinner from '_js/components/orgs/cards/orgSpinner';
-import RefreshOrgModal from '_js/components/orgs/cards/refresh';
-import UserActions from '_js/components/orgs/cards/userActions';
-import { AssignedUserTracker } from '_js/components/orgs/taskOrgCards';
-import TourPopover from '_js/components/tour/popover';
-import { AppState } from '_js/store';
-import { Org } from '_js/store/orgs/reducer';
-import { selectProjectCollaborator } from '_js/store/projects/selectors';
-import { Task } from '_js/store/tasks/reducer';
-import { GitHubUser, User } from '_js/store/user/reducer';
-import { ORG_TYPES, OrgTypes } from '_js/utils/constants';
-import { getTaskCommits } from '_js/utils/helpers';
-import { logError } from '_js/utils/logging';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
+
+import AssignTaskRoleModal from '@/js/components/githubUsers/assignTaskRole';
+import { UserCard } from '@/js/components/githubUsers/cards';
+import Footer from '@/js/components/orgs/cards/footer';
+import OrgActions from '@/js/components/orgs/cards/orgActions';
+import OrgIcon from '@/js/components/orgs/cards/orgIcon';
+import OrgInfo from '@/js/components/orgs/cards/orgInfo';
+import OrgSpinner from '@/js/components/orgs/cards/orgSpinner';
+import RefreshOrgModal from '@/js/components/orgs/cards/refresh';
+import UserActions from '@/js/components/orgs/cards/userActions';
+import { AssignedUserTracker } from '@/js/components/orgs/taskOrgCards';
+import TourPopover from '@/js/components/tour/popover';
+import { AppState } from '@/js/store';
+import { Org } from '@/js/store/orgs/reducer';
+import { selectProjectCollaborator } from '@/js/store/projects/selectors';
+import { Task } from '@/js/store/tasks/reducer';
+import { GitHubUser, User } from '@/js/store/user/reducer';
+import { ORG_TYPES, OrgTypes } from '@/js/utils/constants';
+import { getTaskCommits } from '@/js/utils/helpers';
+import { logError } from '@/js/utils/logging';
 
 interface TaskOrgCardProps {
   org: Org | null;

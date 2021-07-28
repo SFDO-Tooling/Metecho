@@ -1,12 +1,13 @@
 import Button from '@salesforce/design-system-react/components/button';
 import i18n from 'i18next';
 import { some } from 'lodash';
-import { LabelWithSpinner } from '_js/components/utils';
-import { ThunkDispatch } from '_js/store';
-import { refreshGitHubUsers } from '_js/store/projects/actions';
-import { GitHubUser } from '_js/store/user/reducer';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+
+import { LabelWithSpinner } from '@/js/components/utils';
+import { ThunkDispatch } from '@/js/store';
+import { refreshGitHubUsers } from '@/js/store/projects/actions';
+import { GitHubUser } from '@/js/store/user/reducer';
 
 interface Props {
   isRefreshing: boolean;
