@@ -606,19 +606,28 @@ export const orgReassignFailed =
     });
   };
 
-export const orgProvisioning = (model: Org): OrgProvisioning => {
-  /* istanbul ignore else */
-  if (window.socket) {
-    window.socket.subscribe({
-      model: OBJECT_TYPES.ORG,
-      id: model.id,
-    });
-  }
-  return {
-    type: 'SCRATCH_ORG_PROVISIONING',
-    payload: model,
+export const orgProvisioning =
+  (model: Org): ThunkResult<OrgProvisioning | null> =>
+  (dispatch, getState) => {
+    /* istanbul ignore else */
+    if (
+      model.org_type !== ORG_TYPES.PLAYGROUND ||
+      isCurrentUser(model.owner, getState())
+    ) {
+      /* istanbul ignore else */
+      if (window.socket) {
+        window.socket.subscribe({
+          model: OBJECT_TYPES.ORG,
+          id: model.id,
+        });
+      }
+      return dispatch({
+        type: 'SCRATCH_ORG_PROVISIONING' as const,
+        payload: model,
+      });
+    }
+    return null;
   };
-};
 
 export const orgConvertFailed =
   ({
