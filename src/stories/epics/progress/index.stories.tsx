@@ -19,3 +19,8 @@ export const EpicProgress = Template.bind({});
 EpicProgress.args = {
   range: [1, 10],
 };
+
+export const EpicProgressComplete = Template.bind({});
+EpicProgressComplete.args = {
+  range: [10, 10],
+};
