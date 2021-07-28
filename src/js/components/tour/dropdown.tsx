@@ -1,4 +1,3 @@
-// import backpackIcon from '@/img/backpack-sm.svg';
 import Button from '@salesforce/design-system-react/components/button';
 import Checkbox from '@salesforce/design-system-react/components/checkbox';
 import Popover from '@salesforce/design-system-react/components/popover';
@@ -8,6 +7,7 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { match as Match, useHistory, useRouteMatch } from 'react-router-dom';
 
+// import backpackIcon from '@/img/backpack-sm.svg';
 import mapIcon from '@/img/map-sm.svg';
 import seesawIcon from '@/img/seesaw-sm.svg';
 import { useIsMounted } from '@/js/components/utils';
