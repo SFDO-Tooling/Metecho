@@ -178,7 +178,7 @@ importlib-metadata==4.6.1
     #   keyring
 incremental==21.3.0
     # via twisted
-jeepney==0.7.0
+jeepney==0.7.1
     # via
     #   keyring
     #   secretstorage
