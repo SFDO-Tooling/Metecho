@@ -1,8 +1,8 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import EpicTableComponent from '#js/components/epics/table';
-import { Epic } from '#js/store/epics/reducer';
+import EpicTableComponent from '@/js/components/epics/table';
+import { Epic } from '@/js/store/epics/reducer';
 
 import { withRedux } from '../../decorators';
 import {

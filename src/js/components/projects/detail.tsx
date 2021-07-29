@@ -8,15 +8,15 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import CreateEpicModal from '#js/components/epics/createForm';
-import EpicTable from '#js/components/epics/table';
-import PlaygroundOrgCard from '#js/components/orgs/playgroundCard';
-import ProjectNotFound from '#js/components/projects/project404';
-import TasksTableComponent from '#js/components/tasks/table';
-import LandingModal from '#js/components/tour/landing';
-import PlanTour from '#js/components/tour/plan';
-import PlayTour from '#js/components/tour/play';
-import TourPopover from '#js/components/tour/popover';
+import CreateEpicModal from '@/js/components/epics/createForm';
+import EpicTable from '@/js/components/epics/table';
+import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
+import ProjectNotFound from '@/js/components/projects/project404';
+import TasksTableComponent from '@/js/components/tasks/table';
+import LandingModal from '@/js/components/tour/landing';
+import PlanTour from '@/js/components/tour/plan';
+import PlayTour from '@/js/components/tour/play';
+import TourPopover from '@/js/components/tour/popover';
 import {
   CreateOrgModal,
   DetailPageLayout,
@@ -27,21 +27,21 @@ import {
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useIsMounted,
-} from '#js/components/utils';
-import useAssignUserToTask from '#js/components/utils/useAssignUserToTask';
-import useFetchTasksByProject from '#js/components/utils/useFetchTasksByProject';
-import { ThunkDispatch } from '#js/store';
-import { fetchObjects } from '#js/store/actions';
-import { onboarded } from '#js/store/user/actions';
-import { User } from '#js/store/user/reducer';
-import { selectUserState } from '#js/store/user/selectors';
+} from '@/js/components/utils';
+import useAssignUserToTask from '@/js/components/utils/useAssignUserToTask';
+import useFetchTasksByProject from '@/js/components/utils/useFetchTasksByProject';
+import { ThunkDispatch } from '@/js/store';
+import { fetchObjects } from '@/js/store/actions';
+import { onboarded } from '@/js/store/user/actions';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
 import {
   OBJECT_TYPES,
   SHOW_WALKTHROUGH,
   WALKTHROUGH_TYPES,
   WalkthroughType,
-} from '#js/utils/constants';
-import routes from '#js/utils/routes';
+} from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 const ProjectDetail = (
   props: RouteComponentProps<

@@ -5,9 +5,9 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { ExternalLink } from '#js/components/utils';
-import { User } from '#js/store/user/reducer';
-import { addUrlParams } from '#js/utils/api';
+import { ExternalLink } from '@/js/components/utils';
+import { User } from '@/js/store/user/reducer';
+import { addUrlParams } from '@/js/utils/api';
 
 const CustomDomainForm = ({
   url,

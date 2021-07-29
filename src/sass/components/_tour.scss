@@ -32,7 +32,7 @@
 
 // Override background image
 .slds-popover_walkthrough .slds-popover__header {
-  background-image: url('#img/popover-header.png');
+  background-image: url('~@/img/popover-header.png');
 }
 
 .popover-wrapper {
@@ -117,8 +117,10 @@
 
 // Keep text from being truncated in table and page header
 .slds-popover {
+  cursor: auto;
   font-size: $font-size-3;
   font-weight: normal;
+  line-height: $line-height-text;
   text-align: left;
   white-space: initial;
 }
