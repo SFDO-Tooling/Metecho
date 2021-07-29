@@ -8,11 +8,11 @@ import { useSelector } from 'react-redux';
 import { StaticContext } from 'react-router';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import welcomeMatBG from '~img/welcome-mat-bg.png';
-import welcomeMatFG from '~img/welcome-mat-fg.png';
-import { selectUserState } from '~js/store/user/selectors';
-import { addUrlParams } from '~js/utils/api';
-import routes from '~js/utils/routes';
+import welcomeMatBG from '#img/welcome-mat-bg.png';
+import welcomeMatFG from '#img/welcome-mat-fg.png';
+import { selectUserState } from '#js/store/user/selectors';
+import { addUrlParams } from '#js/utils/api';
+import routes from '#js/utils/routes';
 
 interface Props
   extends RouteComponentProps<
@@ -131,7 +131,7 @@ const Login = () => {
                 size="x-small"
                 className="slds-m-right_x-small"
               />
-              {i18n.t('Easily create a scratch org with the existing epic.')}
+              {i18n.t('Easily create a Dev Org for an existing epic.')}
             </li>
             <li className="slds-p-bottom_small slds-grid">
               <Icon

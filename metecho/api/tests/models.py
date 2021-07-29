@@ -36,6 +36,10 @@ class TestProject:
         project = project_factory(name="Test Project")
         assert str(project) == "Test Project"
 
+    def test_get_absolute_url(self, project_factory):
+        url = project_factory().get_absolute_url()
+        assert url.startswith("/")
+
     def test_get_repo_id(self, project_factory):
         with patch("metecho.api.model_mixins.get_repo_info") as get_repo_info:
             get_repo_info.return_value = MagicMock(id=123)
@@ -46,14 +50,6 @@ class TestProject:
             project.refresh_from_db()
             assert get_repo_info.called
             assert project.repo_id == 123
-
-    def test_queue_populate_github_users(self, project_factory, user_factory):
-        project = project_factory()
-        with patch(
-            "metecho.api.jobs.populate_github_users_job"
-        ) as populate_github_users_job:
-            project.queue_populate_github_users(originating_user_id=None)
-            assert populate_github_users_job.delay.called
 
     def test_queue_refresh_commits(self, project_factory, user_factory):
         project = project_factory()
@@ -103,20 +99,6 @@ class TestProject:
             assert project.branch_name == "main"
             assert project.latest_sha == "abcd1234"
 
-    def test_finalize_populate_github_users(self, project_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
-            project = project_factory()
-            project.finalize_populate_github_users(originating_user_id=None)
-
-            assert async_to_sync.called
-
-    def test_finalize_populate_github_users__error(self, project_factory):
-        with patch("metecho.api.model_mixins.async_to_sync") as async_to_sync:
-            project = project_factory()
-            project.finalize_populate_github_users(error=True, originating_user_id=None)
-
-            assert async_to_sync.called
-
     def test_queue_available_org_config_names(self, user_factory, project_factory):
         user = user_factory()
         project = project_factory()
@@ -150,6 +132,10 @@ class TestEpic:
         project = project_factory()
         epic = Epic(name="Test Epic", project=project)
         assert str(epic) == "Test Epic"
+
+    def test_get_absolute_url(self, epic_factory):
+        url = epic_factory().get_absolute_url()
+        assert url.startswith("/")
 
     def test_get_repo_id(self, project_factory, epic_factory):
         project = project_factory(repo_id=123)
@@ -235,6 +221,10 @@ class TestTask:
     def test_str(self):
         task = Task(name="Test Task")
         assert str(task) == "Test Task"
+
+    def test_get_absolute_url(self, task_factory):
+        url = task_factory().get_absolute_url()
+        assert url.startswith("/")
 
     def test_notify_changed(self, task_factory):
         with ExitStack() as stack:
@@ -452,29 +442,6 @@ class TestTask:
 
 @pytest.mark.django_db
 class TestUser:
-    def test_refresh_repositories(self, mocker, user_factory, project_factory):
-        user = user_factory()
-        project_factory(repo_id=8558)
-        gh = mocker.patch("metecho.api.models.gh")
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
-        gh.get_all_org_repos.return_value = [
-            MagicMock(id=8558, html_url="https://example.com/", permissions={})
-        ]
-        user.refresh_repositories()
-
-        assert async_to_sync.called
-
-    def test_refresh_repositories__error(self, mocker, user_factory):
-        user = user_factory()
-        gh = mocker.patch("metecho.api.models.gh")
-        async_to_sync = mocker.patch("metecho.api.models.async_to_sync")
-        gh.get_all_org_repos.return_value = [
-            MagicMock(id=1, html_url="https://example.com/", permissions={})
-        ]
-        user.refresh_repositories()
-
-        assert async_to_sync.called
-
     def test_org_id(self, user_factory, social_account_factory):
         user = user_factory()
         social_account_factory(user=user, provider="salesforce")

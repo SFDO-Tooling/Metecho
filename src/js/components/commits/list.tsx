@@ -8,9 +8,9 @@ import i18n from 'i18next';
 import React, { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
-import TourPopover from '~js/components/tour/popover';
-import { ExternalLink } from '~js/components/utils';
-import { Commit } from '~js/store/tasks/reducer';
+import TourPopover from '#js/components/tour/popover';
+import { ExternalLink } from '#js/components/utils';
+import { Commit } from '#js/store/tasks/reducer';
 
 interface TableCellProps {
   [key: string]: any;
@@ -101,6 +101,7 @@ const CommitList = ({ commits }: { commits: Commit[] }) =>
     <>
       <div className="slds-is-relative heading">
         <TourPopover
+          id="tour-task-commits"
           align="top left"
           heading={i18n.t('List of retrieved Task changes')}
           body={

@@ -5,9 +5,9 @@ import i18n from 'i18next';
 import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { ExternalLink } from '~js/components/utils';
-import { User } from '~js/store/user/reducer';
-import { addUrlParams } from '~js/utils/api';
+import { ExternalLink } from '#js/components/utils';
+import { User } from '#js/store/user/reducer';
+import { addUrlParams } from '#js/utils/api';
 
 const CustomDomainForm = ({
   url,
@@ -117,7 +117,7 @@ const ConnectModal = ({
       tagline={
         <Trans i18nKey="devHubInfo">
           Connection to a Salesforce org with Dev Hub enabled is required to
-          create a Dev or Test scratch org. Learn how to{' '}
+          create a Dev, Test, or Scratch Org. Learn how to{' '}
           <ExternalLink url="https://developer.salesforce.com/signup">
             create a Developer Edition org
           </ExternalLink>{' '}

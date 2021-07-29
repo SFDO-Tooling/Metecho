@@ -179,23 +179,25 @@ class ProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericVi
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ProjectFilter
     pagination_class = CustomPaginator
-    model = Project
+    queryset = Project.objects.filter(repo_id__isnull=False)
 
     def get_queryset(self):
-        repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
-
         for project in Project.objects.filter(repo_id__isnull=True):
             try:
                 project.get_repo_id()
             except (ResponseError, ConnectionError):
                 pass
 
-        return Project.objects.filter(repo_id__isnull=False, repo_id__in=repo_ids)
+        if self.request.user.is_superuser:
+            return self.queryset
+
+        repo_ids = self.request.user.repositories.values_list("repo_id", flat=True)
+        return self.queryset.filter(repo_id__in=repo_ids)
 
     @action(detail=True, methods=["POST"])
     def refresh_github_users(self, request, pk=None):
-        instance = self.get_object()
-        instance.queue_populate_github_users(originating_user_id=str(request.user.id))
+        project = self.get_object()
+        project.queue_refresh_github_users(originating_user_id=str(request.user.id))
         return Response(status=status.HTTP_202_ACCEPTED)
 
     @action(detail=True, methods=["POST"])
@@ -268,7 +270,7 @@ class EpicViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
 class TaskViewSet(RepoPushPermissionMixin, CreatePrMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TaskSerializer
-    queryset = Task.objects.active()
+    queryset = Task.objects.select_related("epic", "epic__project").active()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TaskFilter
     error_pr_exists = _("Task has already been submitted for testing.")
@@ -372,7 +374,7 @@ class ScratchOrgViewSet(
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         return super().destroy(request, *args, **kwargs)
@@ -420,7 +422,7 @@ class ScratchOrgViewSet(
             and not request.user == instance.owner
         ):
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         force_get = request.query_params.get("get_unsaved_changes", False)
@@ -448,7 +450,7 @@ class ScratchOrgViewSet(
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         commit_message = serializer.validated_data["commit_message"]
@@ -477,7 +479,7 @@ class ScratchOrgViewSet(
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         scratch_org.mark_visited(originating_user_id=str(request.user.id))
@@ -489,7 +491,7 @@ class ScratchOrgViewSet(
         scratch_org = self.get_object()
         if not request.user == scratch_org.owner:
             return Response(
-                {"error": _("Requesting user did not create scratch org.")},
+                {"error": _("Requesting user did not create org.")},
                 status=status.HTTP_403_FORBIDDEN,
             )
         scratch_org.queue_refresh_org(originating_user_id=str(request.user.id))

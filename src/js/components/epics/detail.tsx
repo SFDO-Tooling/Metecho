@@ -7,18 +7,18 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import FourOhFour from '~js/components/404';
-import ConfirmRemoveUserModal from '~js/components/epics/confirmRemoveUserModal';
-import EpicStatusPath from '~js/components/epics/path';
-import EpicProgress from '~js/components/epics/progress';
-import EpicStatusSteps from '~js/components/epics/steps';
-import AssignEpicCollaboratorsModal from '~js/components/githubUsers/assignEpicCollaborators';
-import UserCards from '~js/components/githubUsers/cards';
-import PlaygroundOrgCard from '~js/components/orgs/playgroundCard';
-import { Step } from '~js/components/steps/stepsItem';
-import CreateTaskModal from '~js/components/tasks/createForm';
-import TaskTable from '~js/components/tasks/table';
-import TourPopover from '~js/components/tour/popover';
+import FourOhFour from '#js/components/404';
+import ConfirmRemoveUserModal from '#js/components/epics/confirmRemoveUserModal';
+import EpicStatusPath from '#js/components/epics/path';
+import EpicProgress from '#js/components/epics/progress';
+import EpicStatusSteps from '#js/components/epics/steps';
+import AssignEpicCollaboratorsModal from '#js/components/githubUsers/assignEpicCollaborators';
+import UserCards from '#js/components/githubUsers/cards';
+import PlaygroundOrgCard from '#js/components/orgs/playgroundCard';
+import { Step } from '#js/components/steps/stepsItem';
+import CreateTaskModal from '#js/components/tasks/createForm';
+import TaskTable from '#js/components/tasks/table';
+import TourPopover from '#js/components/tour/popover';
 import {
   ContributeWorkModal,
   CreateOrgModal,
@@ -36,21 +36,16 @@ import {
   useFetchOrgsIfMissing,
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
-} from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { updateObject } from '~js/store/actions';
-import { Org } from '~js/store/orgs/reducer';
-import { Task } from '~js/store/tasks/reducer';
-import { GitHubUser, User } from '~js/store/user/reducer';
-import { selectUserState } from '~js/store/user/selectors';
-import {
-  EPIC_STATUSES,
-  OBJECT_TYPES,
-  ORG_TYPES,
-  OrgTypes,
-} from '~js/utils/constants';
-import { getBranchLink, getCompletedTasks } from '~js/utils/helpers';
-import routes from '~js/utils/routes';
+} from '#js/components/utils';
+import useAssignUserToTask from '#js/components/utils/useAssignUserToTask';
+import { ThunkDispatch } from '#js/store';
+import { updateObject } from '#js/store/actions';
+import { Org } from '#js/store/orgs/reducer';
+import { GitHubUser, User } from '#js/store/user/reducer';
+import { selectUserState } from '#js/store/user/selectors';
+import { EPIC_STATUSES, OBJECT_TYPES } from '#js/utils/constants';
+import { getBranchLink, getCompletedTasks } from '#js/utils/helpers';
+import routes from '#js/utils/routes';
 
 const EpicDetail = (props: RouteComponentProps) => {
   const dispatch = useDispatch<ThunkDispatch>();
@@ -61,14 +56,16 @@ const EpicDetail = (props: RouteComponentProps) => {
   );
   const { tasks } = useFetchTasksIfMissing(epic, props);
   const { orgs } = useFetchOrgsIfMissing({ epic, props });
+  const assignUser = useAssignUserToTask();
   const currentUser = useSelector(selectUserState) as User;
 
   const [assignUsersModalOpen, setAssignUsersModalOpen] = useState(false);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] =
-    useState<boolean | string>(false);
+  const [createModalOrgIdOrOpen, setCreateModalOrgIdOrOpen] = useState<
+    boolean | string
+  >(false);
   const [createOrgModalOpen, setCreateOrgModalOpen] = useState(false);
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
 
@@ -89,10 +86,12 @@ const EpicDetail = (props: RouteComponentProps) => {
   }, []);
 
   // "Confirm remove user from epic" modal related:
-  const [waitingToUpdateUsers, setWaitingToUpdateUsers] =
-    useState<GitHubUser[] | null>(null);
-  const [confirmRemoveUsers, setConfirmRemoveUsers] =
-    useState<GitHubUser[] | null>(null);
+  const [waitingToUpdateUsers, setWaitingToUpdateUsers] = useState<
+    GitHubUser[] | null
+  >(null);
+  const [confirmRemoveUsers, setConfirmRemoveUsers] = useState<
+    GitHubUser[] | null
+  >(null);
   const closeConfirmRemoveUsersModal = useCallback(() => {
     setWaitingToUpdateUsers(null);
     setConfirmRemoveUsers(null);
@@ -200,37 +199,6 @@ const EpicDetail = (props: RouteComponentProps) => {
       }
     },
     [epic, epicCollaborators, updateEpicUsers, getRemovedUsers],
-  );
-
-  // "Assign user to task" modal related:
-  const assignUser = useCallback(
-    ({
-      task,
-      type,
-      assignee,
-      shouldAlertAssignee,
-    }: {
-      task: Task;
-      type: OrgTypes;
-      assignee: string | null;
-      shouldAlertAssignee: boolean;
-    }) => {
-      /* istanbul ignore next */
-      const userType = type === ORG_TYPES.DEV ? 'assigned_dev' : 'assigned_qa';
-      const alertType =
-        type === ORG_TYPES.DEV ? 'should_alert_dev' : 'should_alert_qa';
-      dispatch(
-        updateObject({
-          objectType: OBJECT_TYPES.TASK,
-          url: window.api_urls.task_assignees(task.id),
-          data: {
-            [userType]: assignee,
-            [alertType]: shouldAlertAssignee,
-          },
-        }),
-      );
-    },
-    [dispatch],
   );
 
   // "Submit" modal related:
@@ -402,6 +370,7 @@ const EpicDetail = (props: RouteComponentProps) => {
           disabled={currentlySubmitting}
         />
         <TourPopover
+          id="tour-epic-submit-review"
           align="right"
           heading={i18n.t('Submit this Epic for review')}
           body={
@@ -436,6 +405,7 @@ const EpicDetail = (props: RouteComponentProps) => {
             handleOptionSelect={handlePageOptionSelect}
           />
           <TourPopover
+            id="tour-epic-edit"
             align="left"
             heading={i18n.t('Edit or delete this Epic')}
             body={
@@ -494,6 +464,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         title={epic.name}
         titlePopover={
           <TourPopover
+            id="tour-epic-name"
             align="bottom left"
             heading={i18n.t('Epic name & GitHub link')}
             body={
@@ -534,6 +505,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                       onClick={openAssignUsersModal}
                     />
                     <TourPopover
+                      id="tour-epic-collaborators"
                       align="top"
                       heading={i18n.t('Epic Collaborators')}
                       body={
@@ -558,9 +530,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                     isOpen={assignUsersModalOpen}
                     onRequestClose={closeAssignUsersModal}
                     setUsers={setEpicUsers}
-                    isRefreshing={Boolean(
-                      project.currently_refreshing_gh_users,
-                    )}
+                    isRefreshing={project.currently_fetching_github_users}
                     projectId={project.id}
                   />
                 </>
@@ -595,6 +565,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                 handleAction={handleStepAction}
               />
               <TourPopover
+                id="tour-epic-next-steps"
                 align="top"
                 heading={i18n.t('Wondering what to do next?')}
                 body={
@@ -614,6 +585,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         <div className="slds-is-relative">
           <EpicStatusPath status={epic.status} prIsOpen={epic.pr_is_open} />
           <TourPopover
+            id="tour-epic-progress"
             align="bottom left"
             heading={i18n.t('Epic progress path')}
             body={
@@ -633,6 +605,7 @@ const EpicDetail = (props: RouteComponentProps) => {
         <div className="slds-m-bottom_large">
           <div className="slds-is-relative heading">
             <TourPopover
+              id="tour-epic-scratch-org"
               align="top left"
               heading={i18n.t('View & play with an Epic')}
               body={
@@ -703,6 +676,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   className="slds-m-bottom_large"
                 />
                 <TourPopover
+                  id="tour-epic-add-task"
                   align="top left"
                   heading={i18n.t('Add a Task to contribute')}
                   body={
@@ -728,9 +702,7 @@ const EpicDetail = (props: RouteComponentProps) => {
                   epicUsers={epicCollaborators}
                   githubUsers={project.github_users}
                   canAssign={project.has_push_permission}
-                  isRefreshingUsers={Boolean(
-                    project.currently_refreshing_gh_users,
-                  )}
+                  isRefreshingUsers={project.currently_fetching_github_users}
                   assignUserAction={assignUser}
                 />
               </>

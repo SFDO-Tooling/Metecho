@@ -1,0 +1,24 @@
+import { Meta } from '@storybook/addon-docs';
+import LinkTo from '@storybook/addon-links/react';
+
+<Meta title="Tasks/ConfirmRemoveUser/Docs" />
+
+# ConfirmRemoveUser
+
+**Confirms removal or changing of the developer for a Task with unretrieved
+changes in a Dev Org.**
+
+## Overview
+
+The **ConfirmRemoveUser** component is an
+[SLDS Modal](https://react.lightningdesignsystem.com/components/modals/) used to
+confirm the removal or changing of a developer for a **Task** (which will delete
+the Dev Org) when the **Dev Org** that has unretrieved changes.
+
+Pressing the `Confirm` button closes the modal, removes or reassigns the
+developer working on the **Task**, and deletes the **Dev Org**. Pressing
+`Cancel` closes the modal.
+
+<LinkTo kind="Tasks/ConfirmRemoveUser/Examples" story="Remove">
+  View Examples
+</LinkTo>

@@ -109,7 +109,6 @@ class User(HashIdMixin, AbstractUser):
         )
 
     def queue_refresh_repositories(self):
-        """Queue a job to refresh repositories unless we're already doing so"""
         from .jobs import refresh_github_repositories_for_user_job
 
         if not self.currently_fetching_repos:
@@ -117,30 +116,17 @@ class User(HashIdMixin, AbstractUser):
             self.save()
             refresh_github_repositories_for_user_job.delay(self)
 
-    def refresh_repositories(self):
-        try:
-            repos = gh.get_all_org_repos(self)
-            with transaction.atomic():
-                GitHubRepository.objects.filter(user=self).delete()
-                GitHubRepository.objects.bulk_create(
-                    [
-                        GitHubRepository(
-                            user=self,
-                            repo_id=repo.id,
-                            repo_url=repo.html_url,
-                            permissions=repo.permissions,
-                        )
-                        for repo in repos
-                    ]
-                )
-        finally:
-            self.refresh_from_db()
-            self.currently_fetching_repos = False
-            self.save()
-            self.notify_repositories_updated()
-
-    def notify_repositories_updated(self):
-        message = {"type": "USER_REPOS_REFRESH"}
+    def finalize_refresh_repositories(self, error=None):
+        self.refresh_from_db()
+        self.currently_fetching_repos = False
+        self.save()
+        if error is None:
+            message = {"type": "USER_REPOS_REFRESH"}
+        else:
+            message = {
+                "type": "USER_REPOS_ERROR",
+                "payload": {"message": str(error)},
+            }
         async_to_sync(push.push_message_about_instance)(self, message)
 
     def invalidate_salesforce_credentials(self):
@@ -309,7 +295,6 @@ class Project(
         max_length=100,
         blank=True,
         validators=[validate_unicode_branch],
-        default="master",
     )
     branch_prefix = StringField(blank=True)
     # User data is shaped like this:
@@ -332,6 +317,7 @@ class Project(
     # }
     org_config_names = models.JSONField(default=list, blank=True)
     currently_fetching_org_config_names = models.BooleanField(default=False)
+    currently_fetching_github_users = models.BooleanField(default=False)
     latest_sha = StringField(blank=True)
 
     slug_class = ProjectSlug
@@ -339,6 +325,10 @@ class Project(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/projects/{self.slug}"
 
     # begin PushMixin configuration:
     push_update_type = "PROJECT_UPDATE"
@@ -374,28 +364,26 @@ class Project(
             )
             self.latest_sha = repo.branch(self.branch_name).latest_sha()
 
-        if not self.github_users:
-            self.queue_populate_github_users(originating_user_id=None)
-
-        if not self.repo_image_url:
-            from .jobs import get_social_image_job
-
-            get_social_image_job.delay(project=self)
-
         super().save(*args, **kwargs)
 
     def finalize_get_social_image(self):
         self.save()
         self.notify_changed(originating_user_id=None)
 
-    def queue_populate_github_users(self, *, originating_user_id):
-        from .jobs import populate_github_users_job
+    def queue_refresh_github_users(self, *, originating_user_id):
+        from .jobs import refresh_github_users_job
 
-        populate_github_users_job.delay(self, originating_user_id=originating_user_id)
-
-    def finalize_populate_github_users(self, *, error=None, originating_user_id):
-        if error is None:
+        if not self.currently_fetching_github_users:
+            self.currently_fetching_github_users = True
             self.save()
+            refresh_github_users_job.delay(
+                self, originating_user_id=originating_user_id
+            )
+
+    def finalize_refresh_github_users(self, *, error=None, originating_user_id):
+        self.currently_fetching_github_users = False
+        self.save()
+        if error is None:
             self.notify_changed(originating_user_id=originating_user_id)
         else:
             self.notify_error(error, originating_user_id=originating_user_id)
@@ -512,6 +500,10 @@ class Epic(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/projects/{self.project.slug}/{self.slug}"
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):
@@ -699,6 +691,10 @@ class Task(
 
     def subscribable_by(self, user):  # pragma: nocover
         return True
+
+    def get_absolute_url(self):
+        # See src/js/utils/routes.ts
+        return f"/projects/{self.epic.project.slug}/{self.epic.slug}/{self.slug}"
 
     # begin SoftDeleteMixin configuration:
     def soft_delete_child_class(self):

@@ -59,20 +59,18 @@ class TestCurrentUserViewSet:
         assert response.json()["username"] == client.user.username
 
     def test_refresh(self, client, mocker):
-        gh_given_user = mocker.patch("metecho.api.gh.gh_given_user")
-        repo = MagicMock()
-        repo.url = "test"
-        gh = MagicMock()
-        gh.repositories.return_value = [repo]
-        gh_given_user.return_value = gh
-
+        refresh_github_repositories_for_user_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_repositories_for_user_job"
+        )
         response = client.post(reverse("current-user-refresh"))
-
+        client.user.refresh_from_db()
         assert response.status_code == 202
+        assert refresh_github_repositories_for_user_job.delay.called
+        assert client.user.currently_fetching_repos
 
 
 @pytest.mark.django_db
-class TestProjectView:
+class TestProjectViewset:
     def test_refresh_org_config_names(
         self, client, project_factory, git_hub_repository_factory
     ):
@@ -92,19 +90,22 @@ class TestProjectView:
             assert available_org_config_names_job.delay.called
 
     def test_refresh_github_users(
-        self, client, project_factory, git_hub_repository_factory
+        self, client, mocker, project_factory, git_hub_repository_factory
     ):
         git_hub_repository_factory(user=client.user, repo_id=123)
         project = project_factory(repo_id=123)
-        with patch(
-            "metecho.api.jobs.populate_github_users_job"
-        ) as populate_github_users_job:
-            response = client.post(
-                reverse("project-refresh-github-users", kwargs={"pk": str(project.pk)})
-            )
+        refresh_github_users_job = mocker.patch(
+            "metecho.api.jobs.refresh_github_users_job"
+        )
 
-            assert response.status_code == 202
-            assert populate_github_users_job.delay.called
+        response = client.post(
+            reverse("project-refresh-github-users", kwargs={"pk": str(project.pk)})
+        )
+
+        project.refresh_from_db()
+        assert response.status_code == 202
+        assert project.currently_fetching_github_users
+        assert refresh_github_users_job.delay.called
 
     def test_feature_branches(
         self, client, project_factory, git_hub_repository_factory
@@ -163,6 +164,7 @@ class TestProjectView:
                     "repo_image_url": "",
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
+                    "currently_fetching_github_users": False,
                     "latest_sha": "abcd1234",
                 }
             ],
@@ -206,10 +208,24 @@ class TestProjectView:
                     "repo_image_url": "",
                     "org_config_names": [],
                     "currently_fetching_org_config_names": False,
+                    "currently_fetching_github_users": False,
                     "latest_sha": "abcd1234",
                 }
             ],
         }, response.json()
+
+    def test_get_queryset__superuser(self, admin_client, project_factory):
+        """
+        Superuser should be able to access all projects even if they don't have a
+        matching GitHubRepository on record
+        """
+        project_factory(repo_name="repo", repo_id=123)
+        project_factory(repo_name="repo2", repo_id=456)
+        project_factory(repo_name="repo3", repo_id=789)
+        response = admin_client.get(reverse("project-list"))
+
+        data = response.json()
+        assert data["count"] == 3, data
 
 
 @pytest.mark.django_db
@@ -796,6 +812,22 @@ class TestScratchOrgView:
 
 @pytest.mark.django_db
 class TestTaskViewSet:
+    def test_get(self, client, task_factory):
+        task_factory()
+        url = reverse("task-list")
+
+        response = client.get(url)
+
+        results = response.json()
+        assert response.status_code == 200, response.content
+        assert len(results) == 1, response.json()
+        assert tuple(results[0]["epic"].keys()) == (
+            "id",
+            "name",
+            "slug",
+            "github_users",
+        )
+
     def test_create__dev_org(
         self, client, git_hub_repository_factory, scratch_org_factory, epic_factory
     ):
@@ -973,6 +1005,7 @@ class TestTaskViewSet:
             repo_id=task.epic.project.repo_id, user=client.user, permissions=repo_perms
         )
         data = TaskSerializer(task).data
+        data["epic"] = str(task.epic.pk)  # Convert the nested epic to just the PK
         url = reverse("task-detail", args=[task.pk])
         if method == "post":
             url = reverse("task-list")
@@ -980,7 +1013,7 @@ class TestTaskViewSet:
 
         response = getattr(client, method)(url, data=data, format="json")
 
-        assert check(response.status_code)
+        assert check(response.status_code), response.content
 
     def test_assignees(self, client, git_hub_repository_factory, task_factory):
         repo = git_hub_repository_factory(permissions={"push": True}, user=client.user)

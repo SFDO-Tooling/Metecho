@@ -10,17 +10,17 @@ import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
-import ConnectModal from '~js/components/user/connect';
-import Logout from '~js/components/user/logout';
+import ConnectModal from '#js/components/user/connect';
+import Logout from '#js/components/user/logout';
 import {
   ExternalLink,
   SpinnerWrapper,
   useIsMounted,
-} from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { disconnect, refreshDevHubStatus } from '~js/store/user/actions';
-import { User } from '~js/store/user/reducer';
-import { selectUserState } from '~js/store/user/selectors';
+} from '#js/components/utils';
+import { ThunkDispatch } from '#js/store';
+import { disconnect, refreshUser } from '#js/store/user/actions';
+import { User } from '#js/store/user/reducer';
+import { selectUserState } from '#js/store/user/selectors';
 
 const ConnectToSalesforce = ({
   toggleModal,
@@ -41,7 +41,7 @@ const ConnectToSalesforce = ({
       />
       <Tooltip
         content={i18n.t(
-          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev or Test scratch org.',
+          'Connection to a Salesforce org with Dev Hub enabled is required to create a Dev, Test, or Scratch Org.',
         )}
         position="overflowBoundaryElement"
         align="top right"
@@ -53,7 +53,7 @@ const ConnectToSalesforce = ({
 const ConnectionInfoWarning = () => (
   <Trans i18nKey="devHubNotEnabled">
     This Salesforce org does not have Dev Hub enabled or your user does not have
-    permission to create scratch orgs. Learn how to{' '}
+    permission to create Dev, Test, or Scratch Orgs. Learn how to{' '}
     <ExternalLink url="https://help.salesforce.com/articleView?id=sfdx_setup_enable_devhub.htm&type=0">
       enable Dev Hub
     </ExternalLink>
@@ -84,7 +84,7 @@ const UserInfo = ({
   }, [dispatch, isMounted, onDisconnect]);
   const doRefreshDevHubStatus = useCallback(() => {
     setIsRefreshing(true);
-    dispatch(refreshDevHubStatus()).finally(() => {
+    dispatch(refreshUser()).finally(() => {
       /* istanbul ignore else */
       if (isMounted.current) {
         setIsRefreshing(false);

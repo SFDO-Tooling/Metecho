@@ -2,8 +2,8 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import CaptureModal from '~js/components/tasks/capture';
-import { createObject, updateObject } from '~js/store/actions';
+import CaptureModal from '#js/components/tasks/capture';
+import { createObject, updateObject } from '#js/store/actions';
 
 import {
   renderWithRedux,
@@ -11,7 +11,7 @@ import {
   storeWithThunk,
 } from '../../../utils';
 
-jest.mock('~js/store/actions');
+jest.mock('#js/store/actions');
 
 createObject.mockReturnValue(() =>
   Promise.resolve({ type: 'TEST', payload: {} }),
@@ -175,7 +175,7 @@ describe('<CaptureModal/>', () => {
       });
 
       test('displays success class for 3 seconds', async () => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers();
         updateObject.mockReturnValueOnce(() => Promise.resolve({}));
         const { findByText, getByText, getByLabelText, baseElement } = setup();
 

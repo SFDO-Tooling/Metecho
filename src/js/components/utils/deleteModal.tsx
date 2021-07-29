@@ -6,12 +6,12 @@ import { Trans } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { LabelWithSpinner, useIsMounted } from '~js/components/utils';
-import { ThunkDispatch } from '~js/store';
-import { deleteObject } from '~js/store/actions';
-import { Epic } from '~js/store/epics/reducer';
-import { Task } from '~js/store/tasks/reducer';
-import { OBJECT_TYPES, ObjectTypes } from '~js/utils/constants';
+import { LabelWithSpinner, useIsMounted } from '#js/components/utils';
+import { ThunkDispatch } from '#js/store';
+import { deleteObject } from '#js/store/actions';
+import { Epic } from '#js/store/epics/reducer';
+import { Task } from '#js/store/tasks/reducer';
+import { OBJECT_TYPES, ObjectTypes } from '#js/utils/constants';
 
 interface Props extends RouteComponentProps {
   model: Epic | Task;
@@ -60,7 +60,7 @@ const DeleteModal = ({
       message = (
         <Trans i18nKey="confirmDeleteEpic">
           Are you sure you want to delete epic “{{ name: model.name }}”? This
-          will also delete any tasks and scratch orgs in this epic.
+          will also delete any tasks and orgs in this epic.
         </Trans>
       );
       break;
@@ -69,7 +69,7 @@ const DeleteModal = ({
       message = (
         <Trans i18nKey="confirmDeleteTask">
           Are you sure you want to delete task “{{ name: model.name }}”? This
-          will also delete any scratch orgs in this task.
+          will also delete any orgs in this task.
         </Trans>
       );
       break;

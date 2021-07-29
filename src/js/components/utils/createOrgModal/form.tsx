@@ -4,10 +4,10 @@ import Textarea from '@salesforce/design-system-react/components/textarea';
 import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 
-import SelectFlowType from '~js/components/tasks/selectFlowType';
-import { UseFormProps } from '~js/components/utils';
-import { OrgData } from '~js/components/utils/createOrgModal';
-import { Project } from '~js/store/projects/reducer';
+import SelectFlowType from '#js/components/tasks/selectFlowType';
+import { UseFormProps } from '#js/components/utils';
+import { OrgData } from '#js/components/utils/createOrgModal';
+import { Project } from '#js/store/projects/reducer';
 
 interface Props {
   project: Project;
@@ -34,7 +34,7 @@ const CreateOrgForm = ({
         id="create-org-description"
         label={i18n.t('Description')}
         classNameContainer="slds-form-element_stacked slds-p-left_none"
-        placeholder={i18n.t('Optional notes about this scratch org')}
+        placeholder={i18n.t('Optional notes about this Scratch Org')}
         className="metecho-textarea"
         name="description"
         value={inputs.description}

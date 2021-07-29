@@ -7,11 +7,11 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import mapSvg from '!raw-loader!~img/map-lg.svg';
-import { Illustration } from '~js/components/utils';
-import { Epic } from '~js/store/epics/reducer';
-import { Project } from '~js/store/projects/reducer';
-import { Task } from '~js/store/tasks/reducer';
+import mapSvg from '!raw-loader!#img/map-lg.svg';
+import { Illustration } from '#js/components/utils';
+import { Epic } from '#js/store/epics/reducer';
+import { Project } from '#js/store/projects/reducer';
+import { Task } from '#js/store/tasks/reducer';
 
 type ContributeCallback = ({
   id,
@@ -89,18 +89,18 @@ const ContributeWorkModal = ({
         {hasDevOrg ? (
           <Trans i18nKey="contributeWorkFromTaskWithDevOrg">
             <p>
-              <b>To contribute the work you’ve done in your scratch org,</b>{' '}
+              <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
               you’ll start by creating a new task.
             </p>
             <p>
-              You cannot convert your scratch org into the Dev Org for this Task
+              You cannot convert your Scratch Org into the Dev Org for this Task
               because there is already an existing Dev Org.
             </p>
           </Trans>
         ) : (
           <p>
             <Trans i18nKey="contributeWorkFromTask">
-              <b>To contribute the work you’ve done in your scratch org,</b>{' '}
+              <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
               you’ll start by making this org the Dev Org for <em>this</em> task
               or a <em>new</em> task.
             </Trans>
@@ -138,20 +138,24 @@ const ContributeWorkModal = ({
         </RadioGroup>
       </>
     );
-  } /* istanbul ignore else */ else if (epic) {
-    contents = (
-      <Trans i18nKey="contributeWorkFromEpic">
-        <p>
-          <b>To contribute the work you’ve done in your scratch org,</b> you’ll
-          start by creating a new task.
-        </p>
-        <p>
-          Your scratch org will become the Dev Org for the newly created task.
-        </p>
-      </Trans>
-    );
-  } /* istanbul ignore next */ else if (project) {
-    // @@@
+  } else {
+    /* istanbul ignore else */
+    // eslint-disable-next-line no-lonely-if
+    if (epic) {
+      contents = (
+        <Trans i18nKey="contributeWorkFromEpic">
+          <p>
+            <b>To contribute the work you’ve done in your Scratch Org,</b>{' '}
+            you’ll start by creating a new task.
+          </p>
+          <p>
+            Your Scratch Org will become the Dev Org for the newly created task.
+          </p>
+        </Trans>
+      );
+    } else if (project) {
+      // @@@ Add this when project Scratch Orgs can be converted...
+    }
   }
 
   return (
