@@ -2,24 +2,24 @@ import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
 
-import EpicDetail from '#js/components/epics/detail';
+import EpicDetail from '@/js/components/epics/detail';
 import {
   createObject,
   fetchObject,
   fetchObjects,
   updateObject,
-} from '#js/store/actions';
+} from '@/js/store/actions';
 import {
   refreshGitHubUsers,
   refreshOrgConfigs,
-} from '#js/store/projects/actions';
-import { EPIC_STATUSES } from '#js/utils/constants';
-import routes from '#js/utils/routes';
+} from '@/js/store/projects/actions';
+import { EPIC_STATUSES } from '@/js/utils/constants';
+import routes from '@/js/utils/routes';
 
 import { renderWithRedux, storeWithThunk } from './../../utils';
 
-jest.mock('#js/store/actions');
-jest.mock('#js/store/projects/actions');
+jest.mock('@/js/store/actions');
+jest.mock('@/js/store/projects/actions');
 
 fetchObject.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));
 fetchObjects.mockReturnValue(() => Promise.resolve({ type: 'TEST' }));

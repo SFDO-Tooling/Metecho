@@ -1,7 +1,7 @@
 import { Story } from '@storybook/react/types-6-0';
 import React, { ComponentProps } from 'react';
 
-import CommitListComponent from '#js/components/commits/list';
+import CommitListComponent from '@/js/components/commits/list';
 
 import { withRedux } from '../decorators';
 import { sampleCommit1, sampleCommit2 } from '../fixtures';

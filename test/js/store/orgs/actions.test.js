@@ -1,8 +1,8 @@
 import fetchMock from 'fetch-mock';
 
-import * as actions from '#js/store/orgs/actions';
-import { addUrlParams } from '#js/utils/api';
-import { ORG_TYPES } from '#js/utils/constants';
+import * as actions from '@/js/store/orgs/actions';
+import { addUrlParams } from '@/js/utils/api';
+import { ORG_TYPES } from '@/js/utils/constants';
 
 import { getStoreWithHistory, storeWithThunk } from './../../utils';
 

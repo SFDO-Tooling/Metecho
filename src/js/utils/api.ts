@@ -1,8 +1,8 @@
 import cookies from 'js-cookie';
 import { ThunkDispatch } from 'redux-thunk';
 
-import { addError } from '#js/store/errors/actions';
-import { logError } from '#js/utils/logging';
+import { addError } from '@/js/store/errors/actions';
+import { logError } from '@/js/utils/logging';
 
 export interface UrlParams {
   [key: string]: string | number | boolean;

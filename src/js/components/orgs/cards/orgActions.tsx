@@ -4,11 +4,11 @@ import i18n from 'i18next';
 import React from 'react';
 import { Trans } from 'react-i18next';
 
-import TourPopover from '#js/components/tour/popover';
-import { LabelWithSpinner } from '#js/components/utils';
-import { Org } from '#js/store/orgs/reducer';
-import { Task } from '#js/store/tasks/reducer';
-import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '#js/utils/constants';
+import TourPopover from '@/js/components/tour/popover';
+import { LabelWithSpinner } from '@/js/components/utils';
+import { Org } from '@/js/store/orgs/reducer';
+import { Task } from '@/js/store/tasks/reducer';
+import { ORG_TYPES, OrgTypes, REVIEW_STATUSES } from '@/js/utils/constants';
 
 const OrgActions = ({
   org,
