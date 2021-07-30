@@ -20,9 +20,20 @@
     <title>{% block title %}Metecho{% endblock %}</title>
     <meta name="description" content="{% block description %}Web-based tool for collaborating on Salesforce projects{% endblock description %}" />
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css.find((path) => path.startsWith('/static/vendors')) %>" type="text/css">
-    <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css.find((path) => path.startsWith('/static/app')) %>" type="text/css">
+    {% if GLOBALS.SENTRY_DSN %}
+      <!-- Insert Sentry setup -->
+      <script id="js-sentry-setup" type="application/json">
+        { "dsn": "{{ GLOBALS.SENTRY_DSN }}" }
+      </script>
+    {% endif %}
+    <!-- Insert config variables from Django -->
+    {{ GLOBALS|json_script:"js-globals" }}
+    <!-- Insert API URLs from Django -->
+    <script type="text/javascript">
+      {% js_reverse_inline %}
+    </script>
+
+    <!-- JavaScript and Styles are inserted here -->
   </head>
   <body>
     <main id="app" class="slds-grid slds-grid_vertical"{% if user.is_authenticated %} data-user="{{ user|serialize }}"{% endif %}>
@@ -32,23 +43,5 @@
         <div class="slds-spinner__dot-b"></div>
       </div>
     </main>
-
-    <!-- JavaScript -->
-    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js.find((path) => path.startsWith('/static/runtime')) %>"></script>
-    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js.find((path) => path.startsWith('/static/vendors')) %>"></script>
-    {% if GLOBALS.SENTRY_DSN %}
-      <!-- Insert Sentry JS -->
-      <script id="js-sentry-setup" type="application/json">
-        {
-          "dsn": "{{ GLOBALS.SENTRY_DSN }}"
-        }
-      </script>
-      <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js.find((path) => path.startsWith('/static/sentry')) %>"></script>
-    {% endif %}
-    {{ GLOBALS|json_script:"js-globals" }}
-    <script type="text/javascript" charset="utf-8">
-      {% js_reverse_inline %}
-    </script>
-    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js.find((path) => path.startsWith('/static/app')) %>"></script>
   </body>
 </html>

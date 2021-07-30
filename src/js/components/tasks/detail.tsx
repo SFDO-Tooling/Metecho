@@ -9,20 +9,20 @@ import { Trans } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import FourOhFour from '#js/components/404';
-import CommitList from '#js/components/commits/list';
-import SubmitReviewModal from '#js/components/orgs/cards/submitReview';
-import PlaygroundOrgCard from '#js/components/orgs/playgroundCard';
+import FourOhFour from '@/js/components/404';
+import CommitList from '@/js/components/commits/list';
+import SubmitReviewModal from '@/js/components/orgs/cards/submitReview';
+import PlaygroundOrgCard from '@/js/components/orgs/playgroundCard';
 import TaskOrgCards, {
   ORG_TYPE_TRACKER_DEFAULT,
   OrgTypeTracker,
-} from '#js/components/orgs/taskOrgCards';
-import { Step } from '#js/components/steps/stepsItem';
-import CaptureModal from '#js/components/tasks/capture';
-import CreateTaskModal from '#js/components/tasks/createForm';
-import TaskStatusPath from '#js/components/tasks/path';
-import TaskStatusSteps from '#js/components/tasks/steps';
-import TourPopover from '#js/components/tour/popover';
+} from '@/js/components/orgs/taskOrgCards';
+import { Step } from '@/js/components/steps/stepsItem';
+import CaptureModal from '@/js/components/tasks/capture';
+import CreateTaskModal from '@/js/components/tasks/createForm';
+import TaskStatusPath from '@/js/components/tasks/path';
+import TaskStatusSteps from '@/js/components/tasks/steps';
+import TourPopover from '@/js/components/tour/popover';
 import {
   ContributeWorkModal,
   CreateOrgModal,
@@ -42,15 +42,15 @@ import {
   useFetchProjectIfMissing,
   useFetchTasksIfMissing,
   useIsMounted,
-} from '#js/components/utils';
-import { AppState, ThunkDispatch } from '#js/store';
-import { createObject, updateObject } from '#js/store/actions';
-import { refetchOrg, refreshOrg } from '#js/store/orgs/actions';
-import { Org, OrgsByParent } from '#js/store/orgs/reducer';
-import { selectProjectCollaborator } from '#js/store/projects/selectors';
-import { selectTask, selectTaskSlug } from '#js/store/tasks/selectors';
-import { User } from '#js/store/user/reducer';
-import { selectUserState } from '#js/store/user/selectors';
+} from '@/js/components/utils';
+import { AppState, ThunkDispatch } from '@/js/store';
+import { createObject, updateObject } from '@/js/store/actions';
+import { refetchOrg, refreshOrg } from '@/js/store/orgs/actions';
+import { Org, OrgsByParent } from '@/js/store/orgs/reducer';
+import { selectProjectCollaborator } from '@/js/store/projects/selectors';
+import { selectTask, selectTaskSlug } from '@/js/store/tasks/selectors';
+import { User } from '@/js/store/user/reducer';
+import { selectUserState } from '@/js/store/user/selectors';
 import {
   DEFAULT_ORG_CONFIG_NAME,
   OBJECT_TYPES,
@@ -59,9 +59,9 @@ import {
   RETRIEVE_CHANGES,
   REVIEW_STATUSES,
   TASK_STATUSES,
-} from '#js/utils/constants';
-import { getBranchLink, getTaskCommits } from '#js/utils/helpers';
-import routes from '#js/utils/routes';
+} from '@/js/utils/constants';
+import { getBranchLink, getTaskCommits } from '@/js/utils/helpers';
+import routes from '@/js/utils/routes';
 
 const ResubmitButton = ({
   canSubmit,

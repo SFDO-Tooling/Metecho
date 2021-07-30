@@ -7,11 +7,11 @@ import i18n from 'i18next';
 import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import mapSvg from '!raw-loader!#img/map-lg.svg';
-import { Illustration } from '#js/components/utils';
-import { Epic } from '#js/store/epics/reducer';
-import { Project } from '#js/store/projects/reducer';
-import { Task } from '#js/store/tasks/reducer';
+import mapSvg from '@/img/map-lg.svg?raw';
+import { Illustration } from '@/js/components/utils';
+import { Epic } from '@/js/store/epics/reducer';
+import { Project } from '@/js/store/projects/reducer';
+import { Task } from '@/js/store/tasks/reducer';
 
 type ContributeCallback = ({
   id,
@@ -174,7 +174,7 @@ const ContributeWorkModal = ({
           />
         ) : null,
       ]}
-      prompt={hasPermissions ? null : 'warning'}
+      prompt={hasPermissions ? undefined : 'warning'}
       onRequestClose={doClose}
     >
       <div className="slds-grid slds-wrap slds-p-around_medium">
